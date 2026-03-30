@@ -10,6 +10,7 @@ import DashboardView from '../components/Admin/DashboardView';
 import { GrillQueue } from '../components/Admin/GrillQueue';
 import { OpeningHoursCard } from '../components/Admin/OpeningHoursCard';
 import { ProductManager } from '../components/Admin/ProductManager';
+import { InventoryManager } from '../components/Admin/InventoryManager';
 import { OrderTypeSettingsCard } from '../components/Admin/OrderTypeSettingsCard';
 import { StoreUsersPanel } from '../components/Admin/StoreUsersPanel';
 import { AdminMotoboys } from './AdminMotoboys';
@@ -1247,7 +1248,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [linkStats, setLinkStats] = useState<any>(null);
   const [subscriptionError, setSubscriptionError] = useState('');
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'avaliacoes' | 'produtos' | 'config' | 'fila' | 'pagamentos' | 'motoboys' | 'usuarios'>(() => {
+  const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'avaliacoes' | 'produtos' | 'estoque' | 'config' | 'fila' | 'pagamentos' | 'motoboys' | 'usuarios'>(() => {
     const requestedTab = String((location.state as any)?.activeTab || '').trim();
     if (requestedTab === 'pedidos') return 'fila';
     return (requestedTab as any) || 'fila';
@@ -1336,6 +1337,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             { id: 'pedidos', label: 'Pedidos', icon: ShoppingCart },
             { id: 'avaliacoes', label: 'Avaliações', icon: Star },
             { id: 'produtos', label: 'Produtos', icon: Package },
+            { id: 'estoque', label: 'Estoque', icon: Package },
             { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
             { id: 'usuarios', label: 'Usuários', icon: UsersThree, standalone: true },
@@ -1357,6 +1359,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       pedidos: { title: 'Pedidos', subtitle: 'Acompanhe status, filtros e histórico dos pedidos em tempo real.' },
       avaliacoes: { title: 'Avaliações', subtitle: 'Notas e comentários dos clientes por pedido.' },
       produtos: { title: 'Produtos', subtitle: 'Gerencie catálogo, preço, disponibilidade e destaque da vitrine.' },
+      estoque: { title: 'Estoque', subtitle: 'Monitore níveis, alertas e movimentações dos produtos.' },
       pagamentos: { title: 'Pagamentos', subtitle: 'Controle assinatura, ciclo e eventos de cobrança da loja.' },
       config: { title: 'Configurações', subtitle: 'Ajuste identidade, canais, tipos de pedido e horários da operação.' },
       fila: { title: 'Pedidos ao vivo', subtitle: 'Acompanhe pedidos em andamento e a fila da loja em tempo real.' },
@@ -1456,7 +1459,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
   useEffect(() => {
     if (!isOperatorUser) return;
-    const disallowed = new Set(['resumo', 'pedidos', 'pagamentos', 'avaliacoes', 'config', 'motoboys', 'usuarios']);
+    const disallowed = new Set(['resumo', 'pedidos', 'pagamentos', 'avaliacoes', 'config', 'motoboys', 'usuarios', 'estoque']);
     if (disallowed.has(activeTab)) {
       setActiveTab('fila');
     }
@@ -1574,7 +1577,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       openQueueMonitor({ replace: true });
       return;
     }
-    const allowedTabs = new Set(['resumo', 'avaliacoes', 'produtos', 'config', 'pagamentos', 'motoboys', 'usuarios']);
+    const allowedTabs = new Set(['resumo', 'avaliacoes', 'produtos', 'estoque', 'config', 'pagamentos', 'motoboys', 'usuarios']);
     if (!allowedTabs.has(nextTab)) return;
     if (nextTab !== activeTab) {
       setActiveTab(nextTab as typeof activeTab);
@@ -2615,6 +2618,12 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             products={products}
             onProductsChange={setProducts}
             storeSegment={auth?.store?.settings?.segment || 'outros'}
+          />
+        )}
+
+        {activeTab === 'estoque' && (
+          <InventoryManager
+            onProductsChange={setProducts}
           />
         )}
 

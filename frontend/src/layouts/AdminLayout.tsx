@@ -51,6 +51,7 @@ export function AdminLayout({
             { id: 'fila', label: 'Pedidos ao vivo', icon: CheckSquare },
             { id: 'vendas', label: 'Vendas', icon: ShoppingCart },
             { id: 'produtos', label: 'Produtos', icon: Package },
+            { id: 'estoque', label: 'Estoque', icon: Package },
             { id: 'cardapio', label: 'Catálogo', icon: ShoppingCart },
             { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },

@@ -17,6 +17,7 @@ import { StoreRepository } from '../repositories/StoreRepository';
 import { saveBase64Image } from '../utils/imageStorage';
 import { isProductAvailableToday, normalizeAvailabilityDays } from '../utils/productAvailability';
 import { AppError } from '../errors/AppError';
+import { AppDataSource } from '../config/database';
 /**
  * Provides ProductService functionality.
  *
@@ -186,6 +187,50 @@ export class ProductService
     }
   }
 
+  private resolveInventoryStatus(product: any) {
+    const manageStock = Boolean(product?.manageStock);
+    if (!manageStock) return 'not_managed';
+    const qty = Math.max(0, Number(product?.stockQuantity || 0));
+    const alert = Math.max(1, Number(product?.lowStockAlert || 3));
+    if (qty <= 0) return 'out';
+    if (qty <= alert) return 'low';
+    return 'ok';
+  }
+
+  private async appendInventoryMovement(payload: {
+    storeId: string;
+    productId: string;
+    movementType: string;
+    quantity: number;
+    beforeQuantity: number;
+    afterQuantity: number;
+    reason?: string | null;
+    actorUserId?: string | null;
+  }) {
+    try {
+      await AppDataSource.query(
+        `
+          INSERT INTO inventory_movements
+            (store_id, product_id, movement_type, quantity, before_quantity, after_quantity, reason, actor_user_id)
+          VALUES
+            ($1, $2, $3, $4, $5, $6, $7, $8)
+        `,
+        [
+          payload.storeId,
+          payload.productId,
+          payload.movementType,
+          payload.quantity,
+          payload.beforeQuantity,
+          payload.afterQuantity,
+          payload.reason || null,
+          payload.actorUserId || null,
+        ]
+      );
+    } catch (error) {
+      console.error('[inventory] failed to append movement', error);
+    }
+  }
+
 
 
 
@@ -259,6 +304,93 @@ export class ProductService
     this.ensureStoreAccess(store, authStoreId);
     const products = await this.productRepository.findByStoreId(store!.id);
     return this.attachCategoryPriority(store, products as any[]);
+  }
+
+  async listInventoryByStoreId(
+    storeId: string,
+    options?: { status?: string; query?: string; includeNotManaged?: boolean; limit?: number; offset?: number },
+    authStoreId?: string
+  ) {
+    const store = await this.storeRepository.findById(storeId);
+    this.ensureStoreAccess(store, authStoreId);
+    const products = await this.productRepository.findByStoreId(store!.id);
+    const normalizedQuery = String(options?.query || '').trim().toLowerCase();
+    const statusFilter = String(options?.status || 'all').toLowerCase();
+    const includeNotManaged = options?.includeNotManaged !== false;
+    const limit = Math.max(1, Math.min(500, Number(options?.limit || 250)));
+    const offset = Math.max(0, Number(options?.offset || 0));
+
+    const rows = (products || [])
+      .map((product: any) => {
+        const stockQuantity = Math.max(0, Number(product?.stockQuantity || 0));
+        const lowStockAlert = Math.max(1, Number(product?.lowStockAlert || 3));
+        const status = this.resolveInventoryStatus(product);
+        return {
+          id: product.id,
+          name: product.name,
+          category: product.category || '',
+          active: product.active !== false,
+          imageUrl: product.imageUrl || null,
+          manageStock: Boolean(product.manageStock),
+          stockQuantity,
+          lowStockAlert,
+          inventoryStatus: status,
+          updatedAt: product.updatedAt || product.createdAt || null,
+        };
+      })
+      .filter((item) => (includeNotManaged ? true : item.manageStock))
+      .filter((item) => {
+        if (!normalizedQuery) return true;
+        const haystack = `${item.name} ${item.category}`.toLowerCase();
+        return haystack.includes(normalizedQuery);
+      })
+      .filter((item) => (statusFilter === 'all' ? true : item.inventoryStatus === statusFilter))
+      .sort((a, b) => {
+        const rank = (status: string) => {
+          if (status === 'out') return 0;
+          if (status === 'low') return 1;
+          if (status === 'ok') return 2;
+          return 3;
+        };
+        const ra = rank(a.inventoryStatus);
+        const rb = rank(b.inventoryStatus);
+        if (ra !== rb) return ra - rb;
+        return String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR');
+      });
+
+    const paged = rows.slice(offset, offset + limit);
+    return {
+      items: paged,
+      total: rows.length,
+      offset,
+      limit,
+    };
+  }
+
+  async getInventoryAlertsByStoreId(storeId: string, authStoreId?: string) {
+    const store = await this.storeRepository.findById(storeId);
+    this.ensureStoreAccess(store, authStoreId);
+    const products = await this.productRepository.findByStoreId(store!.id);
+    const managed = (products || []).filter((p: any) => Boolean(p.manageStock));
+    const out = managed.filter((p: any) => Math.max(0, Number(p.stockQuantity || 0)) <= 0);
+    const low = managed.filter((p: any) => {
+      const qty = Math.max(0, Number(p.stockQuantity || 0));
+      const alert = Math.max(1, Number(p.lowStockAlert || 3));
+      return qty > 0 && qty <= alert;
+    });
+    return {
+      managedCount: managed.length,
+      lowCount: low.length,
+      outCount: out.length,
+      criticalCount: low.length + out.length,
+      lowItems: low
+        .map((p: any) => ({ id: p.id, name: p.name, stockQuantity: Number(p.stockQuantity || 0), lowStockAlert: Number(p.lowStockAlert || 3) }))
+        .sort((a: any, b: any) => a.stockQuantity - b.stockQuantity)
+        .slice(0, 10),
+      outItems: out
+        .map((p: any) => ({ id: p.id, name: p.name, stockQuantity: 0 }))
+        .slice(0, 10),
+    };
   }
 
 
@@ -456,6 +588,154 @@ export class ProductService
     product.bundlePromoActive = bundlePromo.active;
 
     return this.productRepository.save(product);
+  }
+
+  async adjustStock(
+    storeId: string,
+    productId: string,
+    input: { mode: 'in' | 'out' | 'set'; quantity: number; reason?: string; lowStockAlert?: number; manageStock?: boolean },
+    authStoreId?: string,
+    actorUserId?: string
+  ) {
+    const store = await this.storeRepository.findById(storeId);
+    this.ensureStoreAccess(store, authStoreId);
+    const mode = String(input?.mode || '').toLowerCase();
+    const qty = Math.max(0, Math.floor(Number(input?.quantity || 0)));
+    if (!['in', 'out', 'set'].includes(mode)) {
+      throw new AppError('PROD-002', 400, { message: 'Modo de ajuste inválido.' });
+    }
+    if (!Number.isFinite(qty)) {
+      throw new AppError('PROD-002', 400, { message: 'Quantidade inválida.' });
+    }
+
+    return AppDataSource.transaction(async (manager) => {
+      const rows = await manager.query(
+        `
+          SELECT id, name, store_id, manage_stock, stock_quantity, low_stock_alert, category, active, image_url
+          FROM products
+          WHERE id = $1
+          LIMIT 1
+          FOR UPDATE
+        `,
+        [productId]
+      );
+      const product = rows?.[0];
+      if (!product || String(product.store_id) !== String(store!.id)) {
+        throw new AppError('PROD-001', 404);
+      }
+
+      const beforeQuantity = Math.max(0, Number(product.stock_quantity || 0));
+      const nextManageStock = input?.manageStock !== undefined ? Boolean(input.manageStock) : Boolean(product.manage_stock);
+      const lowStockAlert = input?.lowStockAlert !== undefined
+        ? Math.max(1, Math.floor(Number(input.lowStockAlert)))
+        : Math.max(1, Number(product.low_stock_alert || 3));
+
+      let afterQuantity = beforeQuantity;
+      if (!nextManageStock) {
+        afterQuantity = 0;
+      } else if (mode === 'set') {
+        afterQuantity = qty;
+      } else if (mode === 'in') {
+        afterQuantity = beforeQuantity + qty;
+      } else if (mode === 'out') {
+        if (qty > beforeQuantity) {
+          throw new AppError('ORDER-005', 400, { message: `Estoque insuficiente para "${product.name}".` });
+        }
+        afterQuantity = beforeQuantity - qty;
+      }
+
+      await manager.query(
+        `
+          UPDATE products
+          SET manage_stock = $2,
+              stock_quantity = $3,
+              low_stock_alert = $4
+          WHERE id = $1
+        `,
+        [product.id, nextManageStock, Math.max(0, Math.floor(afterQuantity)), lowStockAlert]
+      );
+
+      const movementQty =
+        mode === 'set' ? Math.abs(afterQuantity - beforeQuantity) : qty;
+      const movementType =
+        mode === 'set'
+          ? afterQuantity >= beforeQuantity
+            ? 'manual_set_increase'
+            : 'manual_set_decrease'
+          : mode === 'in'
+          ? 'manual_in'
+          : 'manual_out';
+      if (nextManageStock && movementQty > 0) {
+        await this.appendInventoryMovement({
+          storeId: store!.id,
+          productId: product.id,
+          movementType,
+          quantity: movementQty,
+          beforeQuantity,
+          afterQuantity,
+          reason: input?.reason || null,
+          actorUserId: actorUserId || null,
+        });
+      }
+
+      return {
+        id: product.id,
+        name: product.name,
+        category: product.category || '',
+        active: product.active !== false,
+        imageUrl: product.image_url || null,
+        manageStock: nextManageStock,
+        stockQuantity: Math.max(0, Math.floor(afterQuantity)),
+        lowStockAlert,
+        inventoryStatus: this.resolveInventoryStatus({
+          manageStock: nextManageStock,
+          stockQuantity: afterQuantity,
+          lowStockAlert,
+        }),
+      };
+    });
+  }
+
+  async listInventoryMovementsByStoreId(
+    storeId: string,
+    options?: { productId?: string; limit?: number; offset?: number },
+    authStoreId?: string
+  ) {
+    const store = await this.storeRepository.findById(storeId);
+    this.ensureStoreAccess(store, authStoreId);
+    const limit = Math.max(1, Math.min(500, Number(options?.limit || 100)));
+    const offset = Math.max(0, Number(options?.offset || 0));
+    const productFilterRaw = String(options?.productId || '').trim();
+    const productFilter = /^[0-9a-fA-F-]{36}$/.test(productFilterRaw) ? productFilterRaw : '';
+
+    const rows = await AppDataSource.query(
+      `
+        SELECT
+          im.id,
+          im.product_id AS "productId",
+          p.name AS "productName",
+          im.movement_type AS "movementType",
+          im.quantity,
+          im.before_quantity AS "beforeQuantity",
+          im.after_quantity AS "afterQuantity",
+          im.reason,
+          im.actor_user_id AS "actorUserId",
+          im.created_at AS "createdAt"
+        FROM inventory_movements im
+        INNER JOIN products p ON p.id = im.product_id
+        WHERE im.store_id = $1
+          AND ($2::uuid IS NULL OR im.product_id = $2::uuid)
+        ORDER BY im.created_at DESC
+        LIMIT $3 OFFSET $4
+      `,
+      [store!.id, productFilter || null, limit, offset]
+    );
+
+    return {
+      items: rows || [],
+      limit,
+      offset,
+    };
   }
 
 

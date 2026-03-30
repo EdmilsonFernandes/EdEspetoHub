@@ -230,4 +230,70 @@ export class ProductController {
       return respondWithError(req, res, error, 400);
     }
   }
+
+  static async listInventory(req: Request, res: Response) {
+    try {
+      const payload = await productService.listInventoryByStoreId(
+        req.params.storeId,
+        {
+          status: String(req.query?.status || 'all'),
+          query: String(req.query?.query || ''),
+          includeNotManaged: String(req.query?.includeNotManaged || 'true') !== 'false',
+          limit: Number(req.query?.limit || 250),
+          offset: Number(req.query?.offset || 0),
+        },
+        req.auth?.storeId
+      );
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async getInventoryAlerts(req: Request, res: Response) {
+    try {
+      const payload = await productService.getInventoryAlertsByStoreId(req.params.storeId, req.auth?.storeId);
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async listInventoryMovements(req: Request, res: Response) {
+    try {
+      const payload = await productService.listInventoryMovementsByStoreId(
+        req.params.storeId,
+        {
+          productId: String(req.query?.productId || ''),
+          limit: Number(req.query?.limit || 100),
+          offset: Number(req.query?.offset || 0),
+        },
+        req.auth?.storeId
+      );
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async adjustStock(req: Request, res: Response) {
+    try {
+      const payload = await productService.adjustStock(
+        req.params.storeId,
+        req.params.productId,
+        {
+          mode: req.body?.mode,
+          quantity: req.body?.quantity,
+          reason: req.body?.reason,
+          lowStockAlert: req.body?.lowStockAlert,
+          manageStock: req.body?.manageStock,
+        },
+        req.auth?.storeId,
+        req.auth?.sub
+      );
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
 }

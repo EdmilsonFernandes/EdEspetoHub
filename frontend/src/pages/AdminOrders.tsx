@@ -83,6 +83,7 @@ export function AdminOrders() {
             { id: 'pedidos', label: 'Pedidos', icon: ShoppingCart },
             { id: 'avaliacoes', label: 'Avaliações', icon: Star },
             { id: 'produtos', label: 'Produtos', icon: Package },
+            { id: 'estoque', label: 'Estoque', icon: Package },
             { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
             { id: 'usuarios', label: 'Usuários', icon: UsersThree },

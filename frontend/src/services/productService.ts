@@ -154,6 +154,53 @@ export const productService = {
     return apiClient.patch(`/stores/${targetStore}/categories/priority`, { name, priority });
   },
 
+  async listInventory(
+    params?: { status?: string; query?: string; includeNotManaged?: boolean; limit?: number; offset?: number },
+    storeId?: string
+  ) {
+    const targetStore = resolveStoreIdentifier(storeId);
+    if (!targetStore || !isUuid(targetStore)) return Promise.reject(new Error('Sessão inválida'));
+    const query = new URLSearchParams();
+    if (params?.status) query.set('status', String(params.status));
+    if (params?.query) query.set('query', String(params.query));
+    if (params?.includeNotManaged !== undefined) query.set('includeNotManaged', String(Boolean(params.includeNotManaged)));
+    if (params?.limit !== undefined) query.set('limit', String(params.limit));
+    if (params?.offset !== undefined) query.set('offset', String(params.offset));
+    const suffix = query.toString() ? `?${query.toString()}` : '';
+    return apiClient.get(`/stores/${targetStore}/inventory${suffix}`);
+  },
+
+  async getInventoryAlerts(storeId?: string) {
+    const targetStore = resolveStoreIdentifier(storeId);
+    if (!targetStore || !isUuid(targetStore)) return Promise.reject(new Error('Sessão inválida'));
+    return apiClient.get(`/stores/${targetStore}/inventory/alerts`);
+  },
+
+  async listInventoryMovements(
+    params?: { productId?: string; limit?: number; offset?: number },
+    storeId?: string
+  ) {
+    const targetStore = resolveStoreIdentifier(storeId);
+    if (!targetStore || !isUuid(targetStore)) return Promise.reject(new Error('Sessão inválida'));
+    const query = new URLSearchParams();
+    if (params?.productId) query.set('productId', String(params.productId));
+    if (params?.limit !== undefined) query.set('limit', String(params.limit));
+    if (params?.offset !== undefined) query.set('offset', String(params.offset));
+    const suffix = query.toString() ? `?${query.toString()}` : '';
+    return apiClient.get(`/stores/${targetStore}/inventory/movements${suffix}`);
+  },
+
+  async adjustStock(
+    productId: string,
+    payload: { mode: 'in' | 'out' | 'set'; quantity: number; reason?: string; lowStockAlert?: number; manageStock?: boolean },
+    storeId?: string
+  ) {
+    const targetStore = resolveStoreIdentifier(storeId);
+    if (!targetStore || !isUuid(targetStore)) return Promise.reject(new Error('Sessão inválida'));
+    const data = await apiClient.patch(`/stores/${targetStore}/products/${productId}/stock`, payload);
+    return normalizeProduct(data);
+  },
+
   subscribe(callback: any, storeId?: string)
   {
     let cancelled = false;

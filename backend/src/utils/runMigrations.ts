@@ -383,6 +383,28 @@ export async function runMigrations() {
     WHERE low_stock_alert IS NULL OR low_stock_alert < 1;
   `);
   await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS inventory_movements (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+      product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+      movement_type TEXT NOT NULL,
+      quantity INT NOT NULL,
+      before_quantity INT NOT NULL,
+      after_quantity INT NOT NULL,
+      reason TEXT,
+      actor_user_id UUID,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_inventory_movements_store_created
+    ON inventory_movements(store_id, created_at DESC);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_inventory_movements_product_created
+    ON inventory_movements(product_id, created_at DESC);
+  `);
+  await AppDataSource.query(`
     ALTER TABLE IF EXISTS plans
     ADD COLUMN IF NOT EXISTS display_name TEXT;
   `);

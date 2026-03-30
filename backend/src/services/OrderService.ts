@@ -290,6 +290,106 @@ export class OrderService
     }
   }
 
+  private async appendInventoryMovementTx(
+    manager: EntityManager,
+    payload: {
+      storeId: string;
+      productId: string;
+      movementType: string;
+      quantity: number;
+      beforeQuantity: number;
+      afterQuantity: number;
+      reason?: string | null;
+      actorUserId?: string | null;
+    }
+  ) {
+    try {
+      await manager.query(
+        `
+          INSERT INTO inventory_movements
+            (store_id, product_id, movement_type, quantity, before_quantity, after_quantity, reason, actor_user_id)
+          VALUES
+            ($1, $2, $3, $4, $5, $6, $7, $8)
+        `,
+        [
+          payload.storeId,
+          payload.productId,
+          payload.movementType,
+          payload.quantity,
+          payload.beforeQuantity,
+          payload.afterQuantity,
+          payload.reason || null,
+          payload.actorUserId || null,
+        ]
+      );
+    } catch (error) {
+      console.error('[inventory] movement append failed', error);
+    }
+  }
+
+  private async adjustManagedStockTx(
+    manager: EntityManager,
+    payload: {
+      storeId: string;
+      productId: string;
+      delta: number; // positive consumes stock, negative restores stock
+      movementType: string;
+      reason?: string | null;
+      actorUserId?: string | null;
+    }
+  ) {
+    const delta = Math.trunc(Number(payload.delta || 0));
+    if (!Number.isFinite(delta) || delta === 0) return;
+    const rows = await manager.query(
+      `
+        SELECT id, store_id, name, manage_stock, stock_quantity
+        FROM products
+        WHERE id = $1
+        LIMIT 1
+        FOR UPDATE
+      `,
+      [payload.productId]
+    );
+    const product = rows?.[0];
+    if (!product || String(product.store_id) !== String(payload.storeId)) {
+      throw new AppError('PROD-002', 400);
+    }
+    if (!Boolean(product.manage_stock)) return;
+
+    const beforeQuantity = Math.max(0, Number(product.stock_quantity || 0));
+    let afterQuantity = beforeQuantity;
+    if (delta > 0) {
+      if (beforeQuantity < delta) {
+        throw new AppError('ORDER-005', 400, {
+          message: `Estoque insuficiente para "${product.name}".`,
+        });
+      }
+      afterQuantity = beforeQuantity - delta;
+    } else {
+      afterQuantity = beforeQuantity + Math.abs(delta);
+    }
+
+    await manager.query(
+      `
+        UPDATE products
+        SET stock_quantity = $2
+        WHERE id = $1
+      `,
+      [product.id, Math.max(0, Math.floor(afterQuantity))]
+    );
+
+    await this.appendInventoryMovementTx(manager, {
+      storeId: payload.storeId,
+      productId: payload.productId,
+      movementType: payload.movementType,
+      quantity: Math.abs(delta),
+      beforeQuantity,
+      afterQuantity,
+      reason: payload.reason || null,
+      actorUserId: payload.actorUserId || null,
+    });
+  }
+
 
 
 
@@ -420,6 +520,8 @@ export class OrderService
     const order = await this.orderRepository.findById(orderId);
     if (!order) throw new AppError('ORDER-001', 404);
     this.ensureStoreAccess(order.store, authStoreId);
+    const currentStatus = String(order.status || '').toLowerCase();
+    const nextStatus = String(status || '').toLowerCase();
 
     const deliveryStatuses = new Set([
       'ready_for_delivery',
@@ -428,10 +530,10 @@ export class OrderService
       'delivered',
       'finished',
     ]);
-    if (order.type !== 'delivery' && deliveryStatuses.has(status)) {
+    if (order.type !== 'delivery' && deliveryStatuses.has(nextStatus)) {
       throw new AppError('ORDER-004', 400);
     }
-    if (order.type === 'delivery' && deliveryStatuses.has(status)) {
+    if (order.type === 'delivery' && deliveryStatuses.has(nextStatus)) {
       const transitions: Record<string, string[]> = {
         pending: [ 'preparing' ],
         preparing: [ 'ready_for_delivery', 'waiting_for_motoboy' ],
@@ -441,17 +543,52 @@ export class OrderService
         delivered: [ 'finished' ],
       };
       const allowedNext = transitions[order.status] || [];
-      if (!allowedNext.includes(status)) {
+      if (!allowedNext.includes(nextStatus)) {
         throw new AppError('ORDER-004', 400);
       }
     }
 
-    order.status = status;
-    const saved = await this.orderRepository.save(order);
-    if (saved.type === 'delivery' && [ 'ready_for_delivery', 'waiting_for_motoboy' ].includes(status)) {
+    const shouldRestockOnCancel =
+      nextStatus === 'cancelled' &&
+      currentStatus !== 'cancelled' &&
+      [ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ].includes(currentStatus);
+
+    const saved = await AppDataSource.transaction(async (manager) => {
+      const repo = manager.getRepository(Order);
+      const lockedOrder = await repo.findOne({
+        where: { id: orderId },
+        relations: [ 'store', 'items', 'items.product' ],
+      });
+      if (!lockedOrder) throw new AppError('ORDER-001', 404);
+      this.ensureStoreAccess(lockedOrder.store as any, authStoreId);
+
+      if (shouldRestockOnCancel) {
+        const byProduct = new Map<string, number>();
+        (lockedOrder.items || []).forEach((item: any) => {
+          const productId = String(item?.product?.id || '').trim();
+          if (!productId) return;
+          byProduct.set(productId, (byProduct.get(productId) || 0) + Math.max(0, Number(item?.quantity || 0)));
+        });
+        for (const [ productId, qty ] of byProduct.entries()) {
+          if (qty <= 0) continue;
+          await this.adjustManagedStockTx(manager, {
+            storeId: lockedOrder.store.id,
+            productId,
+            delta: -qty,
+            movementType: 'order_cancel_restock',
+            reason: `Reposição automática por cancelamento do pedido ${lockedOrder.id}`,
+          });
+        }
+      }
+
+      lockedOrder.status = nextStatus;
+      return repo.save(lockedOrder);
+    });
+
+    if (saved.type === 'delivery' && [ 'ready_for_delivery', 'waiting_for_motoboy' ].includes(nextStatus)) {
       await deliveryService.ensureQueueDelivery(saved as any);
     }
-    if (order.type === 'delivery' && [ 'delivered', 'finished' ].includes(status)) {
+    if (saved.type === 'delivery' && [ 'delivered', 'finished' ].includes(nextStatus)) {
       await this.deliveryBillingService.recordDelivery(saved);
     }
     return saved;
@@ -514,63 +651,106 @@ export class OrderService
    */
   async updateItems(orderId: string, items: CreateOrderItemInput[], authStoreId?: string)
   {
-    const order = await this.orderRepository.findById(orderId);
-    if (!order) throw new AppError('ORDER-001', 404);
-    this.ensureStoreAccess(order.store, authStoreId);
+    return AppDataSource.transaction(async (manager) => {
+      const orderRepo = manager.getRepository(Order);
+      const order = await orderRepo.findOne({
+        where: { id: orderId },
+        relations: [ 'store', 'items', 'items.product' ],
+      });
+      if (!order) throw new AppError('ORDER-001', 404);
+      this.ensureStoreAccess(order.store as any, authStoreId);
 
-    await AppDataSource.createQueryBuilder()
-      .delete()
-      .from(OrderItem)
-      .where('order_id = :id', { id: order.id })
-      .execute();
+      const previousQtyByProduct = new Map<string, number>();
+      (order.items || []).forEach((item: any) => {
+        const productId = String(item?.product?.id || '').trim();
+        if (!productId) return;
+        previousQtyByProduct.set(productId, (previousQtyByProduct.get(productId) || 0) + Math.max(0, Number(item?.quantity || 0)));
+      });
 
-    const nextItems: OrderItem[] = [];
-    let total = 0;
+      const nextItems: OrderItem[] = [];
+      let total = 0;
+      const nextQtyByProduct = new Map<string, number>();
 
-    for (const item of items)
-    {
-      const productId = item.productId || (item as any).id;
-      if (!productId) continue;
-
-      const product = await this.productRepository.findById(productId);
-      if (!product || product.store.id !== order.store.id)
+      for (const item of items)
       {
-        throw new AppError('PROD-002', 400);
+        const productId = String(item.productId || (item as any).id || '').trim();
+        if (!productId) continue;
+        const quantity = Math.max(0, Math.floor(Number(item.quantity || 0)));
+        if (!quantity) continue;
+
+        const product = await manager.getRepository(Product).findOne({ where: { id: productId }, relations: [ 'store' ] });
+        if (!product || product.store.id !== order.store.id)
+        {
+          throw new AppError('PROD-002', 400);
+        }
+
+        nextQtyByProduct.set(productId, (nextQtyByProduct.get(productId) || 0) + quantity);
+
+        const orderItem = new OrderItem();
+        orderItem.product = product;
+        orderItem.order = order;
+        orderItem.quantity = quantity;
+        const unitPrice = this.resolveItemPrice(product);
+        const selectedModifiers = this.resolveSelectedModifiers(product, (item as any).selectedModifiers);
+        orderItem.selectedModifiers = selectedModifiers.items.length ? selectedModifiers.items : null;
+        const grossLine = (unitPrice + selectedModifiers.unitExtra) * quantity;
+        const bundleDiscount = this.resolveBundleDiscount(product, quantity);
+        orderItem.price = Math.max(0, grossLine - bundleDiscount);
+        orderItem.cookingPoint = item.cookingPoint;
+        orderItem.passSkewer = Boolean(item.passSkewer);
+        orderItem.isPrinted = Boolean((item as any).isPrinted);
+        nextItems.push(orderItem);
+        total += orderItem.price;
       }
 
-      const orderItem = new OrderItem();
-      orderItem.product = product;
-      orderItem.order = order;
-      orderItem.quantity = item.quantity;
-      const unitPrice = this.resolveItemPrice(product);
-      const selectedModifiers = this.resolveSelectedModifiers(product, (item as any).selectedModifiers);
-      orderItem.selectedModifiers = selectedModifiers.items.length ? selectedModifiers.items : null;
-      const grossLine = (unitPrice + selectedModifiers.unitExtra) * item.quantity;
-      const bundleDiscount = this.resolveBundleDiscount(product, item.quantity);
-      orderItem.price = Math.max(0, grossLine - bundleDiscount);
-      orderItem.cookingPoint = item.cookingPoint;
-      orderItem.passSkewer = Boolean(item.passSkewer);
-      orderItem.isPrinted = Boolean((item as any).isPrinted);
-      nextItems.push(orderItem);
-      total += orderItem.price;
-    }
+      const allProductIds = new Set<string>([...previousQtyByProduct.keys(), ...nextQtyByProduct.keys()]);
+      for (const productId of allProductIds.values()) {
+        const previousQty = previousQtyByProduct.get(productId) || 0;
+        const nextQty = nextQtyByProduct.get(productId) || 0;
+        const delta = nextQty - previousQty;
+        if (delta === 0) continue;
+        if (delta > 0) {
+          await this.adjustManagedStockTx(manager, {
+            storeId: order.store.id,
+            productId,
+            delta,
+            movementType: 'order_items_adjust_consume',
+            reason: `Ajuste de itens do pedido ${order.id} (+${delta})`,
+          });
+        } else {
+          await this.adjustManagedStockTx(manager, {
+            storeId: order.store.id,
+            productId,
+            delta,
+            movementType: 'order_items_adjust_restock',
+            reason: `Ajuste de itens do pedido ${order.id} (${delta})`,
+          });
+        }
+      }
 
-    const deliveryFee = order.deliveryFee ? Number(order.deliveryFee) : 0;
-    const deliveryFeeValue = Number.isNaN(deliveryFee) ? 0 : deliveryFee;
+      await manager.createQueryBuilder()
+        .delete()
+        .from(OrderItem)
+        .where('order_id = :id', { id: order.id })
+        .execute();
 
-    order.items = nextItems;
-    order.total = total + deliveryFeeValue;
-    // Prevent status regression (race with status updates like done/delivered).
-    const statusRow = await AppDataSource.query(
-      `SELECT status FROM orders WHERE id = $1 LIMIT 1`,
-      [ order.id ]
-    );
-    const latestStatus = String(statusRow?.[0]?.status || '').trim().toLowerCase();
-    if (latestStatus) {
-      order.status = latestStatus;
-    }
+      const deliveryFee = order.deliveryFee ? Number(order.deliveryFee) : 0;
+      const deliveryFeeValue = Number.isNaN(deliveryFee) ? 0 : deliveryFee;
 
-    return this.orderRepository.save(order);
+      order.items = nextItems;
+      order.total = total + deliveryFeeValue;
+
+      const statusRow = await manager.query(
+        `SELECT status FROM orders WHERE id = $1 LIMIT 1`,
+        [ order.id ]
+      );
+      const latestStatus = String(statusRow?.[0]?.status || '').trim().toLowerCase();
+      if (latestStatus) {
+        order.status = latestStatus;
+      }
+
+      return orderRepo.save(order);
+    });
   }
 
   async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authStoreId?: string) {
@@ -671,22 +851,14 @@ export class OrderService
 
       if (Boolean((product as any).manageStock)) {
         const qty = Math.max(1, Math.floor(Number(item.quantity || 0)));
-        const rows = await (manager || AppDataSource).query(
-          `
-            UPDATE products
-               SET stock_quantity = stock_quantity - $1
-             WHERE id = $2
-               AND manage_stock = TRUE
-               AND stock_quantity >= $1
-           RETURNING id
-          `,
-          [qty, product.id]
-        );
-        if (!Array.isArray(rows) || rows.length === 0) {
-          throw new AppError('ORDER-005', 400, {
-            message: `Estoque insuficiente para "${product.name}".`,
-          });
-        }
+        const txManager = manager || AppDataSource.manager;
+        await this.adjustManagedStockTx(txManager as EntityManager, {
+          storeId: store!.id,
+          productId: product.id,
+          delta: qty,
+          movementType: 'sale',
+          reason: `Pedido em criação (${String(input.type || 'order')})`,
+        });
       }
 
       const orderItem = new OrderItem();

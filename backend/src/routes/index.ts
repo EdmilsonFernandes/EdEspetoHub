@@ -121,6 +121,10 @@ routes.put('/stores/:storeId/products/:productId', requireAuth, requireRole('ADM
 routes.delete('/stores/:storeId/products/:productId', requireAuth, requireRole('ADMIN'), ProductController.remove);
 routes.get('/stores/:storeId/categories', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), ProductController.listCategories);
 routes.patch('/stores/:storeId/categories/priority', requireAuth, requireRole('ADMIN'), ProductController.setCategoryPriority);
+routes.get('/stores/:storeId/inventory', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), ProductController.listInventory);
+routes.get('/stores/:storeId/inventory/alerts', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), ProductController.getInventoryAlerts);
+routes.get('/stores/:storeId/inventory/movements', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), ProductController.listInventoryMovements);
+routes.patch('/stores/:storeId/products/:productId/stock', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), ProductController.adjustStock);
 
 // Orders - cliente cria (aqui sim assinatura com carência)
 routes.post('/stores/:storeId/orders', requireActiveSubscription, OrderController.create);
