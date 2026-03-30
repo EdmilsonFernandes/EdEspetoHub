@@ -608,11 +608,11 @@ export class ProductService
       throw new AppError('PROD-002', 400, { message: 'Quantidade inválida.' });
     }
 
-    try {
-      return await AppDataSource.transaction(async (manager) => {
-      await manager.query(`SET LOCAL lock_timeout = '3s'`);
-      await manager.query(`SET LOCAL statement_timeout = '12s'`);
-      const rows = await manager.query(
+    const runTx = async () =>
+      AppDataSource.transaction(async (manager) => {
+        await manager.query(`SET LOCAL lock_timeout = '3s'`);
+        await manager.query(`SET LOCAL statement_timeout = '12s'`);
+        const rows = await manager.query(
         `
           SELECT id, name, store_id, manage_stock, stock_quantity, low_stock_alert, category, active, image_url
           FROM products
@@ -697,14 +697,23 @@ export class ProductService
         }),
       };
     });
-    } catch (error: any) {
-      const code = String(error?.code || '').toUpperCase();
-      if (code === '55P03' || code === '57014') {
-        throw new AppError('PROD-002', 409, {
-          message: 'Produto em atualização no momento. Tente novamente em alguns segundos.',
-        });
+
+    const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      try {
+        return await runTx();
+      } catch (error: any) {
+        const code = String(error?.code || '').toUpperCase();
+        const isLockConflict = code === '55P03' || code === '57014';
+        if (!isLockConflict) throw error;
+        if (attempt >= maxAttempts) {
+          throw new AppError('PROD-002', 409, {
+            message: 'Produto em atualização no momento. Tente novamente em alguns segundos.',
+          });
+        }
+        await wait(120 * attempt);
       }
-      throw error;
     }
   }
 
