@@ -5,7 +5,7 @@ import { AdminHeader } from '../components/Admin/AdminHeader';
 import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { ChartBar, CheckSquare, CreditCard, Gear, Package, ShoppingCart, SignOut, Scooter, Star, X, UsersThree } from '@phosphor-icons/react';
+import { CaretDown, ChartBar, CheckSquare, CreditCard, Gear, Package, ShoppingCart, SignOut, Scooter, Star, X, UsersThree } from '@phosphor-icons/react';
 import { AppVersionBadge } from '../components/common/AppVersionBadge';
 
 interface AdminLayoutProps {
@@ -25,6 +25,7 @@ export function AdminLayout({
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [mobileOpenGroup, setMobileOpenGroup] = useState<string | null>(null);
   const userRole = String(auth?.user?.role || '').toUpperCase();
   const isOperatorUser = userRole === 'OPERATOR' || userRole === 'CHURRASQUEIRO';
   const storeSlug = String(auth?.store?.slug || '').trim();
@@ -61,6 +62,53 @@ export function AdminLayout({
           ]),
     [isOperatorUser, canUseMotoboys]
   );
+
+  const groupedMobileSections = useMemo(() => {
+    if (isOperatorUser) {
+      return [
+        { type: 'item', item: mobileNavItems.find((i) => i.id === 'fila') },
+        { type: 'item', item: mobileNavItems.find((i) => i.id === 'cardapio') },
+      ].filter((entry) => Boolean(entry?.item));
+    }
+    const byId = new Map((mobileNavItems || []).map((item) => [item.id, item]));
+    const consumeIds = new Set<string>();
+    const consume = (id: string) => {
+      if (byId.has(id)) consumeIds.add(id);
+      return byId.get(id);
+    };
+    const sections: any[] = [];
+    const principal = consume('resumo');
+    if (principal) sections.push({ type: 'item', item: principal });
+    const vendas = ['fila', 'vendas', 'avaliacoes'].map(consume).filter(Boolean);
+    if (vendas.length) sections.push({ type: 'group', id: 'vendas', label: 'Vendas', children: vendas });
+    const catalogo = ['produtos', 'estoque', 'cardapio'].map(consume).filter(Boolean);
+    if (catalogo.length) sections.push({ type: 'group', id: 'catalogo', label: 'Catálogo', children: catalogo });
+    const financeiro = ['pagamentos'].map(consume).filter(Boolean);
+    if (financeiro.length) sections.push({ type: 'group', id: 'financeiro', label: 'Financeiro', children: financeiro });
+    const gestao = ['motoboys', 'usuarios'].map(consume).filter(Boolean);
+    if (gestao.length) sections.push({ type: 'group', id: 'gestao', label: 'Gestão', children: gestao });
+    const sistema = consume('config');
+    if (sistema) sections.push({ type: 'item', item: sistema });
+    const leftovers = (mobileNavItems || []).filter((item) => !consumeIds.has(item.id));
+    leftovers.forEach((item) => sections.push({ type: 'item', item }));
+    return sections;
+  }, [mobileNavItems, isOperatorUser]);
+
+  const activeMobileId = useMemo(() => {
+    const path = String(location.pathname || '');
+    if (path.startsWith('/admin/queue')) return 'fila';
+    if (path.startsWith('/admin/orders')) return 'vendas';
+    if (path.startsWith('/admin/dashboard')) return String((location.state as any)?.activeTab || '');
+    return '';
+  }, [location.pathname, location.state]);
+
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const activeGroup = groupedMobileSections.find(
+      (section: any) => section.type === 'group' && section.children.some((child: any) => child.id === activeMobileId)
+    );
+    if (activeGroup?.id) setMobileOpenGroup(activeGroup.id);
+  }, [mobileNavOpen, groupedMobileSections, activeMobileId]);
 
   useEffect(() => {
     const open = () => setMobileNavOpen(true);
@@ -152,25 +200,76 @@ export function AdminLayout({
               </button>
             </div>
             <div className="pt-3 space-y-2 flex-1 overflow-y-auto">
-              {mobileNavItems.map((item) => {
-                const Icon = item.icon;
+              {groupedMobileSections.map((section: any) => {
+                if (section.type === 'item') {
+                  const item = section.item;
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => handleNavSelect(item.id)}
+                      className={`w-full min-h-12 px-3 py-3 rounded-xl border text-left text-sm font-semibold flex items-center justify-between ${
+                        item.disabled
+                          ? 'border-violet-200 bg-violet-50 text-violet-700'
+                          : activeMobileId === item.id
+                          ? 'border-slate-300 bg-slate-100 text-slate-900'
+                          : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="inline-flex items-center gap-2">
+                        <Icon size={16} weight="duotone" />
+                        {item.label}
+                      </span>
+                      {item.disabled && <span className="text-[10px] font-bold rounded-full bg-violet-100 text-violet-700 px-2 py-0.5">Pro</span>}
+                    </button>
+                  );
+                }
+                const isOpen = mobileOpenGroup === section.id;
+                const hasActiveChild = section.children.some((child: any) => child.id === activeMobileId);
                 return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => handleNavSelect(item.id)}
-                    className={`w-full min-h-12 px-3 py-3 rounded-xl border text-left text-sm font-semibold flex items-center justify-between ${
-                      item.disabled
-                        ? 'border-violet-200 bg-violet-50 text-violet-700'
-                        : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                    }`}
-                  >
-                    <span className="inline-flex items-center gap-2">
-                      <Icon size={16} weight="duotone" />
-                      {item.label}
-                    </span>
-                    {item.disabled && <span className="text-[10px] font-bold rounded-full bg-violet-100 text-violet-700 px-2 py-0.5">Pro</span>}
-                  </button>
+                  <div key={section.id} className="space-y-1">
+                    <button
+                      type="button"
+                      onClick={() => setMobileOpenGroup((prev) => (prev === section.id ? null : section.id))}
+                      className={`w-full min-h-12 px-3 py-3 rounded-xl border text-left text-sm font-semibold flex items-center justify-between ${
+                        hasActiveChild
+                          ? 'border-slate-300 bg-slate-100 text-slate-900'
+                          : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                      }`}
+                      aria-expanded={isOpen}
+                    >
+                      <span>{section.label}</span>
+                      <CaretDown size={16} weight="bold" className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    {isOpen && (
+                      <div className="space-y-1.5">
+                        {section.children.map((item: any) => {
+                          const Icon = item.icon;
+                          return (
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => handleNavSelect(item.id)}
+                              className={`w-full min-h-11 pl-7 pr-3 py-2.5 rounded-xl border text-left text-sm font-semibold flex items-center justify-between ${
+                                item.disabled
+                                  ? 'border-violet-200 bg-violet-50 text-violet-700'
+                                  : activeMobileId === item.id
+                                  ? 'border-slate-300 bg-slate-100 text-slate-900'
+                                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                              }`}
+                            >
+                              <span className="inline-flex items-center gap-2">
+                                <Icon size={15} weight="duotone" />
+                                {item.label}
+                              </span>
+                              {item.disabled && <span className="text-[10px] font-bold rounded-full bg-violet-100 text-violet-700 px-2 py-0.5">Pro</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>

@@ -1,6 +1,6 @@
 // @ts-nocheck
-import React from 'react';
-import { SignOut } from '@phosphor-icons/react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { CaretDown, SignOut } from '@phosphor-icons/react';
 
 interface SidebarItem {
   id: string;
@@ -27,6 +27,129 @@ export function AdminDesktopSidebar({
   onSelect,
   onLogout,
 }: AdminDesktopSidebarProps) {
+  const allItemIds = useMemo(() => new Set((items || []).map((item) => item.id)), [items]);
+  const isGroupedMode = useMemo(
+    () => ['resumo', 'pedidos', 'vendas', 'produtos', 'estoque', 'config', 'avaliacoes', 'fila'].some((id) => allItemIds.has(id)),
+    [allItemIds]
+  );
+
+  const groupedSections = useMemo(() => {
+    const byId = new Map((items || []).map((item) => [item.id, item]));
+    const pick = (id: string) => byId.get(id);
+    const consumeIds = new Set<string>();
+    const consume = (id: string) => {
+      if (byId.has(id)) consumeIds.add(id);
+      return byId.get(id);
+    };
+    const sections: any[] = [];
+
+    const principal = consume('resumo');
+    if (principal) sections.push({ type: 'item', item: principal });
+
+    const vendas = ['fila', 'pedidos', 'vendas', 'avaliacoes'].map(consume).filter(Boolean);
+    if (vendas.length) sections.push({ type: 'group', id: 'vendas', label: 'Vendas', children: vendas });
+
+    const catalogo = ['produtos', 'estoque', 'cardapio'].map(consume).filter(Boolean);
+    if (catalogo.length) sections.push({ type: 'group', id: 'catalogo', label: 'Catálogo', children: catalogo });
+
+    const financeiro = ['pagamentos'].map(consume).filter(Boolean);
+    if (financeiro.length) sections.push({ type: 'group', id: 'financeiro', label: 'Financeiro', children: financeiro });
+
+    const gestao = ['motoboys', 'usuarios'].map(consume).filter(Boolean);
+    if (gestao.length) sections.push({ type: 'group', id: 'gestao', label: 'Gestão', children: gestao });
+
+    const sistema = consume('config');
+    if (sistema) sections.push({ type: 'item', item: sistema });
+
+    const leftovers = (items || []).filter((item) => !consumeIds.has(item.id));
+    leftovers.forEach((item) => sections.push({ type: 'item', item }));
+    return sections;
+  }, [items]);
+
+  const activeGroupId = useMemo(() => {
+    const hit = groupedSections.find(
+      (section) => section.type === 'group' && section.children.some((child: SidebarItem) => child.id === activeId)
+    );
+    return hit?.id || '';
+  }, [groupedSections, activeId]);
+
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
+    if (typeof window === 'undefined') return {};
+    try {
+      const raw = localStorage.getItem('adminSidebar:openGroups');
+      const parsed = raw ? JSON.parse(raw) : {};
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    if (!activeGroupId) return;
+    setOpenGroups((prev) => ({ ...prev, [activeGroupId]: true }));
+  }, [activeGroupId]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('adminSidebar:openGroups', JSON.stringify(openGroups || {}));
+  }, [openGroups]);
+
+  const renderNavItem = (item: SidebarItem, nested = false) => {
+    const Icon = item.icon;
+    const isActive = activeId === item.id;
+    const isDisabled = Boolean(item.disabled);
+    const compactBadgeTone =
+      item.tone === 'violet'
+        ? 'bg-violet-600'
+        : item.tone === 'amber'
+        ? 'bg-amber-500'
+        : 'bg-slate-500';
+    const defaultBadgeTone =
+      item.tone === 'violet'
+        ? 'bg-violet-100 text-violet-700'
+        : item.tone === 'amber'
+        ? 'bg-amber-100 text-amber-700'
+        : 'bg-slate-100 text-slate-700';
+
+    return (
+      <button
+        key={item.id}
+        type="button"
+        onClick={() => onSelect(item.id)}
+        aria-label={item.label}
+        title={isDisabled ? 'Disponível no plano Pro · clique para upgrade' : undefined}
+        className={`group relative ds-admin-sidebar-item ds-focus-ring flex items-center ${
+          compact ? 'justify-center px-0' : 'justify-between gap-2'
+        } ${nested && !compact ? 'pl-8' : ''} ${isActive ? 'ds-admin-sidebar-item-active' : ''} ${
+          isDisabled ? 'opacity-80 cursor-pointer border border-violet-300/50 bg-violet-500/10 hover:bg-violet-500/20' : ''
+        }`}
+      >
+        <span className={`inline-flex items-center ${compact ? '' : 'gap-2'}`}>
+          <Icon size={16} weight={isActive ? 'fill' : 'duotone'} />
+          {!compact && item.label}
+        </span>
+
+        {!compact && item.badge !== undefined && item.badge !== null && String(item.badge) !== '' && (
+          <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${isActive ? 'bg-white/20 text-white' : defaultBadgeTone}`}>
+            {item.badge}
+          </span>
+        )}
+
+        {compact && item.badge !== undefined && item.badge !== null && String(item.badge) !== '' && (
+          <span className={`absolute -top-1 -right-1 rounded-full ${compactBadgeTone} text-white text-[9px] font-semibold px-1.5 py-0.5`}>
+            {item.badge}
+          </span>
+        )}
+
+        {compact && (
+          <span className="pointer-events-none absolute left-[calc(100%+10px)] top-1/2 -translate-y-1/2 whitespace-nowrap rounded-lg border border-slate-700 bg-slate-900 px-2 py-1 text-[11px] font-semibold text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+            {item.label}
+          </span>
+        )}
+      </button>
+    );
+  };
+
   return (
     <aside
       className={`hidden lg:block sticky top-0 self-start h-[100dvh] z-[50] transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
@@ -39,59 +162,39 @@ export function AdminDesktopSidebar({
         </div>
 
         <div className="space-y-1.5 min-h-0 flex-1 overflow-y-auto overflow-x-visible px-2 pb-2">
-          {items.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeId === item.id;
-            const isDisabled = Boolean(item.disabled);
-            const compactBadgeTone =
-              item.tone === 'violet'
-                ? 'bg-violet-600'
-                : item.tone === 'amber'
-                ? 'bg-amber-500'
-                : 'bg-slate-500';
-            const defaultBadgeTone =
-              item.tone === 'violet'
-                ? 'bg-violet-100 text-violet-700'
-                : item.tone === 'amber'
-                ? 'bg-amber-100 text-amber-700'
-                : 'bg-slate-100 text-slate-700';
+          {(!isGroupedMode || compact) &&
+            items.map((item) => renderNavItem(item))}
 
+          {isGroupedMode && !compact && groupedSections.map((section: any) => {
+            if (section.type === 'item') return renderNavItem(section.item);
+            const isOpen = Boolean(openGroups?.[section.id]);
+            const hasActiveChild = section.children.some((child: SidebarItem) => child.id === activeId);
             return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => onSelect(item.id)}
-                aria-label={item.label}
-                title={isDisabled ? 'Disponível no plano Pro · clique para upgrade' : undefined}
-                className={`group relative ds-admin-sidebar-item ds-focus-ring flex items-center ${
-                  compact ? 'justify-center px-0' : 'justify-between gap-2'
-                } ${isActive ? 'ds-admin-sidebar-item-active' : ''} ${
-                  isDisabled ? 'opacity-80 cursor-pointer border border-violet-300/50 bg-violet-500/10 hover:bg-violet-500/20' : ''
-                }`}
-              >
-                <span className={`inline-flex items-center ${compact ? '' : 'gap-2'}`}>
-                  <Icon size={16} weight={isActive ? 'fill' : 'duotone'} />
-                  {!compact && item.label}
-                </span>
-
-                {!compact && item.badge !== undefined && item.badge !== null && String(item.badge) !== '' && (
-                  <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${isActive ? 'bg-white/20 text-white' : defaultBadgeTone}`}>
-                    {item.badge}
-                  </span>
+              <div key={section.id} className="space-y-1">
+                <button
+                  type="button"
+                  onClick={() => setOpenGroups((prev) => ({ ...prev, [section.id]: !isOpen }))}
+                  className={`w-full min-h-11 rounded-xl border px-3 text-left text-[12px] font-semibold transition flex items-center justify-between ${
+                    hasActiveChild
+                      ? 'border-slate-500/40 bg-slate-800 text-slate-100'
+                      : 'border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800'
+                  }`}
+                  aria-expanded={isOpen}
+                  aria-controls={`sidebar-group-${section.id}`}
+                >
+                  <span>{section.label}</span>
+                  <CaretDown
+                    size={14}
+                    weight="bold"
+                    className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                {isOpen && (
+                  <div id={`sidebar-group-${section.id}`} className="space-y-1">
+                    {section.children.map((child: SidebarItem) => renderNavItem(child, true))}
+                  </div>
                 )}
-
-                {compact && item.badge !== undefined && item.badge !== null && String(item.badge) !== '' && (
-                  <span className={`absolute -top-1 -right-1 rounded-full ${compactBadgeTone} text-white text-[9px] font-semibold px-1.5 py-0.5`}>
-                    {item.badge}
-                  </span>
-                )}
-
-                {compact && (
-                  <span className="pointer-events-none absolute left-[calc(100%+10px)] top-1/2 -translate-y-1/2 whitespace-nowrap rounded-lg border border-slate-700 bg-slate-900 px-2 py-1 text-[11px] font-semibold text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
-                    {item.label}
-                  </span>
-                )}
-              </button>
+              </div>
             );
           })}
         </div>
