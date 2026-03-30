@@ -197,8 +197,19 @@ export const productService = {
   ) {
     const targetStore = resolveStoreIdentifier(storeId);
     if (!targetStore || !isUuid(targetStore)) return Promise.reject(new Error('Sessão inválida'));
-    const data = await apiClient.patch(`/stores/${targetStore}/products/${productId}/stock`, payload);
-    return normalizeProduct(data);
+    const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      try {
+        const data = await apiClient.patch(`/stores/${targetStore}/products/${productId}/stock`, payload);
+        return normalizeProduct(data);
+      } catch (error: any) {
+        const status = Number(error?.status || 0);
+        if (status !== 409 || attempt >= maxAttempts) throw error;
+        await wait(140 * attempt);
+      }
+    }
+    throw new Error('Não foi possível ajustar o estoque agora.');
   },
 
   subscribe(callback: any, storeId?: string)
