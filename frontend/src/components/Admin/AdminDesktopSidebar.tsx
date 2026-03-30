@@ -120,7 +120,9 @@ export function AdminDesktopSidebar({
         title={isDisabled ? 'Disponível no plano Pro · clique para upgrade' : undefined}
         className={`group relative ds-admin-sidebar-item ds-focus-ring flex items-center ${
           compact ? 'justify-center px-0' : 'justify-between gap-2'
-        } ${nested && !compact ? 'pl-8' : ''} ${isActive ? 'ds-admin-sidebar-item-active' : ''} ${
+        } ${nested && !compact ? 'pl-4 pr-2.5 py-2.5 rounded-lg text-[13px] font-normal text-slate-400 hover:text-white' : ''} ${
+          !nested && !compact ? 'text-slate-100 font-semibold' : ''
+        } ${isActive ? 'ds-admin-sidebar-item-active text-white font-medium' : ''} ${
           isDisabled ? 'opacity-80 cursor-pointer border border-violet-300/50 bg-violet-500/10 hover:bg-violet-500/20' : ''
         }`}
       >
@@ -156,7 +158,7 @@ export function AdminDesktopSidebar({
         compact ? 'w-[80px]' : 'w-[260px]'
       }`}
     >
-      <div className="h-full border-r border-slate-800 bg-slate-950 overflow-hidden flex flex-col rounded-none shadow-none">
+      <div className="ds-admin-sidebar h-full overflow-hidden flex flex-col rounded-none shadow-none">
         <div className={`px-3 pt-3 pb-2 flex items-center shrink-0 ${compact ? 'justify-center' : 'justify-start'}`}>
           {!compact && <p className="px-2 ds-admin-sidebar-title">Navegação</p>}
         </div>
@@ -176,8 +178,8 @@ export function AdminDesktopSidebar({
                   onClick={() => setOpenGroups((prev) => ({ ...prev, [section.id]: !isOpen }))}
                   className={`w-full min-h-11 rounded-xl border px-3 text-left text-[12px] font-semibold transition flex items-center justify-between ${
                     hasActiveChild
-                      ? 'border-slate-500/40 bg-slate-800 text-slate-100'
-                      : 'border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800'
+                      ? 'border-slate-700/80 bg-white/5 text-white'
+                      : 'border-transparent bg-transparent text-slate-200 hover:bg-white/5 hover:border-slate-700/70 hover:text-white'
                   }`}
                   aria-expanded={isOpen}
                   aria-controls={`sidebar-group-${section.id}`}
@@ -190,7 +192,7 @@ export function AdminDesktopSidebar({
                   />
                 </button>
                 {isOpen && (
-                  <div id={`sidebar-group-${section.id}`} className="space-y-1">
+                  <div id={`sidebar-group-${section.id}`} className="space-y-1 ml-2 pl-2.5 border-l border-slate-700/80">
                     {section.children.map((child: SidebarItem) => renderNavItem(child, true))}
                   </div>
                 )}

@@ -441,11 +441,11 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
         <button
           type="button"
           onClick={() => window.dispatchEvent(new CustomEvent('admin:open-global-nav'))}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 transition-colors"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors shadow-[0_2px_8px_-6px_rgba(15,23,42,0.8)]"
           title="Abrir menu"
           aria-label="Abrir menu"
         >
-          <Menu size={16} />
+          <Menu size={19} strokeWidth={2.4} />
         </button>
         <button
           type="button"

@@ -5,192 +5,192 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260323.195645.485d93f",
-  "buildId": "0.1.9+20260323.195645.485d93f-20260323.195645-485d93f",
-  "builtAt": "2026-03-23T19:56:45.794Z",
-  "commitHash": "485d93f9d47aa883d702bfffb72667a856236cc6",
-  "shortHash": "485d93f",
+  "versionInternal": "0.1.9+20260330.151025.ee90ef0",
+  "buildId": "0.1.9+20260330.151025.ee90ef0-20260330.151025-ee90ef0",
+  "builtAt": "2026-03-30T15:10:25.072Z",
+  "commitHash": "ee90ef014d2a52feb3469872ae56d914d38e428e",
+  "shortHash": "ee90ef0",
   "branch": "main",
   "commits": [
     {
-      "hash": "485d93f9d47aa883d702bfffb72667a856236cc6",
-      "shortHash": "485d93f",
-      "dateIso": "2026-03-23T16:51:12-03:00",
-      "subject": "feat(ui): premium auth layout mesh gradient and refined login experience"
+      "hash": "ee90ef014d2a52feb3469872ae56d914d38e428e",
+      "shortHash": "ee90ef0",
+      "dateIso": "2026-03-30T11:59:34-03:00",
+      "subject": "feat: reorganizar navegação em grupos com submenus no desktop e mobile"
     },
     {
-      "hash": "568236d1309e462550596d6c76d7607516927c53",
-      "shortHash": "568236d",
-      "dateIso": "2026-03-23T16:39:43-03:00",
-      "subject": "refactor(login): reescala visual premium e melhora hierarquia web/mobile"
+      "hash": "7bd69513d0659313803368bfb678efc06052ca4f",
+      "shortHash": "7bd6951",
+      "dateIso": "2026-03-30T11:53:54-03:00",
+      "subject": "feat: melhorar usabilidade da movimentação com filtros e atalho por produto"
     },
     {
-      "hash": "ac83913e3ff2c6fa44dba82dd4f5efd9095de9bf",
-      "shortHash": "ac83913",
-      "dateIso": "2026-03-23T16:33:01-03:00",
-      "subject": "feat(login): refina split web e adiciona checkbox premium nos acessos"
+      "hash": "70d282d23d9f1c0a463983b1608367962c8754aa",
+      "shortHash": "70d282d",
+      "dateIso": "2026-03-30T11:47:51-03:00",
+      "subject": "feat: melhorar card de movimentação com link de pedido e origem amigável"
     },
     {
-      "hash": "ae5af4e3ca8b0dd61bf8d92f4a0c69edfec8746c",
-      "shortHash": "ae5af4e",
-      "dateIso": "2026-03-23T16:09:25-03:00",
-      "subject": "feat(login): unifica UX premium e oculta superadmin com easter egg"
+      "hash": "fa04eb2f9ae468952593e1bdcb0506ea2997a36e",
+      "shortHash": "fa04eb2",
+      "dateIso": "2026-03-30T11:42:10-03:00",
+      "subject": "hotfix: impedir abort de transação por falha no log de movimentação"
     },
     {
-      "hash": "b2a518c74248484183691056c742a7966b6dab19",
-      "shortHash": "b2a518c",
-      "dateIso": "2026-03-23T16:05:41-03:00",
-      "subject": "fix(vendas): neutraliza barra de progresso no modal de itens vendidos"
+      "hash": "d40d1d19d5587dceca4610e69b1d9688dab6cd71",
+      "shortHash": "d40d1d1",
+      "dateIso": "2026-03-30T11:36:31-03:00",
+      "subject": "refactor: simplificar info de movimentação para pedido, cliente e origem"
     },
     {
-      "hash": "02880dacf5c9db757231cf7cde4bfc972cd9ac67",
-      "shortHash": "02880da",
-      "dateIso": "2026-03-23T16:03:53-03:00",
-      "subject": "feat(versioning): patch semantico automatico e exibicao limpa da versao"
+      "hash": "8df243b30924dcc53d0de9d1117e782e54a7e636",
+      "shortHash": "8df243b",
+      "dateIso": "2026-03-30T11:27:58-03:00",
+      "subject": "feat: permitir ativar controle e editar alerta no ajuste de estoque"
     },
     {
-      "hash": "9bbf264588e1616938d336ce99fd2c637cf63490",
-      "shortHash": "9bbf264",
-      "dateIso": "2026-03-23T15:55:57-03:00",
-      "subject": "feat(auth-ui): harmoniza login com identidade visual principal"
+      "hash": "12a5cab9ad95966fea778097ebd58ba04dd55920",
+      "shortHash": "12a5cab",
+      "dateIso": "2026-03-30T11:25:54-03:00",
+      "subject": "feat: adicionar link de movimentação para pedido filtrado"
     },
     {
-      "hash": "abef6dc980b9db68bcdc605e1bef6ecdbc687450",
-      "shortHash": "abef6dc",
-      "dateIso": "2026-03-23T15:49:40-03:00",
-      "subject": "feat(vendas): modal de itens vendidos com ranking e barras de desempenho"
+      "hash": "8244506adc1a5a47d6698a83f56018918ee56079",
+      "shortHash": "8244506",
+      "dateIso": "2026-03-30T11:24:03-03:00",
+      "subject": "feat: exibir pedido/origem em movimentações e enriquecer rastreio de estoque"
     },
     {
-      "hash": "de0bcea3a939e87d49c9b5cbcd8a0a3ef27742a9",
-      "shortHash": "de0bcea",
-      "dateIso": "2026-03-23T15:46:24-03:00",
-      "subject": "feat(versioning): gerar versao unica a cada build e deploy frontend"
+      "hash": "a5f0620e6fe9e83b062eaf54007f2e0424de2e8c",
+      "shortHash": "a5f0620",
+      "dateIso": "2026-03-30T11:20:35-03:00",
+      "subject": "feat: adicionar origem e ajuda visual nas movimentações de estoque"
     },
     {
-      "hash": "e93dbc3ffac0e4f5de83401d23f9fc38529b2593",
-      "shortHash": "e93dbc3",
-      "dateIso": "2026-03-23T15:42:18-03:00",
-      "subject": "feat(auth-ui): redesign premium de login admin motoboy e superadmin"
+      "hash": "e6069b93541ec585f43be73e0cc03f78d7017a19",
+      "shortHash": "e6069b9",
+      "dateIso": "2026-03-30T11:08:21-03:00",
+      "subject": "fix: tornar ajuste de estoque e movimentação atômicos na mesma transação"
     },
     {
-      "hash": "3324a6ad63eaf282cbf225b6d5d6a64573fadcd1",
-      "shortHash": "3324a6a",
-      "dateIso": "2026-03-23T14:02:04-03:00",
-      "subject": "fix(order): evitar auto-fechamento imediato de pedido reaberto"
+      "hash": "ebc1e0c116f97186e1d2666c0cf196d137cf5139",
+      "shortHash": "ebc1e0c",
+      "dateIso": "2026-03-30T11:02:56-03:00",
+      "subject": "feat: traduzir tipos de movimentação de estoque com badges amigáveis"
     },
     {
-      "hash": "15d9a6a6acd655abe9cd1019053d48c5cc4a0cf9",
-      "shortHash": "15d9a6a",
-      "dateIso": "2026-03-21T10:54:40-03:00",
-      "subject": "fix(superadmin): exibir receita mensal apenas na aba pagamentos"
+      "hash": "0e84a954dbcc2e553a84b87a84af3216f1e13c92",
+      "shortHash": "0e84a95",
+      "dateIso": "2026-03-30T10:57:56-03:00",
+      "subject": "fix: corrigir atualização imediata do estoque após ajuste"
     },
     {
-      "hash": "7c7fb6283935933e08cdee375044ebd931ac22c1",
-      "shortHash": "7c7fb62",
-      "dateIso": "2026-03-21T10:46:45-03:00",
-      "subject": "feat(vendas): detalhar itens vendidos em modal e reforcar update de build"
+      "hash": "92be38bdb37a51e3c6e228b641693f94bc93db57",
+      "shortHash": "92be38b",
+      "dateIso": "2026-03-30T10:53:30-03:00",
+      "subject": "fix: evitar travamento em salvar estoque com timeout e fallback de modal"
     },
     {
-      "hash": "0aed6708a639104df91fd5d69407f54ac1d2b4fc",
-      "shortHash": "0aed670",
-      "dateIso": "2026-03-21T10:39:47-03:00",
-      "subject": "fix(queue): destacar timer em vermelho ao ultrapassar SLA"
+      "hash": "b2fd9cbe37a254a184d0d5cd0b147d9ee14b90ed",
+      "shortHash": "b2fd9cb",
+      "dateIso": "2026-03-30T10:47:23-03:00",
+      "subject": "fix: reduzir conflitos 409 no ajuste de estoque com retry backend/frontend"
     },
     {
-      "hash": "e24a0a4693285ca7549ba2b1f2077468c3ea1bfa",
-      "shortHash": "e24a0a4",
-      "dateIso": "2026-03-21T10:37:20-03:00",
-      "subject": "fix(order): reabrir pedido retorna para fila pendente"
+      "hash": "2eeb23e0f39bf73dcd77e1153f144b1bd17b1951",
+      "shortHash": "2eeb23e",
+      "dateIso": "2026-03-30T10:35:11-03:00",
+      "subject": "feat: melhorar UX do estoque com atualização imediata e filtro por categoria"
     },
     {
-      "hash": "4bba9b76faa654a916e5e0474004c52a2ce17677",
-      "shortHash": "4bba9b7",
-      "dateIso": "2026-03-21T10:31:26-03:00",
-      "subject": "chore(release): v0.1.8"
+      "hash": "76a3837d564693934ae0479d0805ab039a66583a",
+      "shortHash": "76a3837",
+      "dateIso": "2026-03-30T10:26:51-03:00",
+      "subject": "fix: retry automático em conflito de lock no ajuste de estoque"
     },
     {
-      "hash": "b8c73afb13af1dd46edf8aaa373a39444dbdad0b",
-      "shortHash": "b8c73af",
-      "dateIso": "2026-03-21T10:31:21-03:00",
-      "subject": "fix(print): aumenta destaque visual da linha cliente no chrome e rawbt"
+      "hash": "9d9697d3c9924848d047cea7fcfb2808fe29629a",
+      "shortHash": "9d9697d",
+      "dateIso": "2026-03-30T10:20:14-03:00",
+      "subject": "perf: reduzir chamadas de pedidos fora da fila no dashboard"
     },
     {
-      "hash": "48a676b2be4234f293bd8339b7efe9f9aa588f94",
-      "shortHash": "48a676b",
-      "dateIso": "2026-03-21T10:28:39-03:00",
-      "subject": "chore(release): v0.1.7"
+      "hash": "b0e63271121749ccf6f72e06f7f27a93c871e1f9",
+      "shortHash": "b0e6327",
+      "dateIso": "2026-03-30T10:15:15-03:00",
+      "subject": "fix: estabilizar navegação de abas no admin dashboard"
     },
     {
-      "hash": "0e88117d43f4ad3846ee33f6de33bd13f979cb17",
-      "shortHash": "0e88117",
-      "dateIso": "2026-03-21T10:28:35-03:00",
-      "subject": "fix(queue-mobile): compacta botao imprimir para nao quebrar acoes"
+      "hash": "a874cc511e465663df38f40f4ee8f8df40b37a24",
+      "shortHash": "a874cc5",
+      "dateIso": "2026-03-30T10:08:18-03:00",
+      "subject": "fix: evitar timeout no ajuste de estoque com lock/statement timeout"
     },
     {
-      "hash": "9314529ea2d5d5018b1cb356fb71091ad0246695",
-      "shortHash": "9314529",
-      "dateIso": "2026-03-21T10:24:44-03:00",
-      "subject": "chore(release): v0.1.6"
+      "hash": "7219cbee524bb8cb5e400b893c5e7a3d5452a68c",
+      "shortHash": "7219cbe",
+      "dateIso": "2026-03-30T09:42:24-03:00",
+      "subject": "feat: implementar módulo de estoque com alertas e auditoria"
     },
     {
-      "hash": "6c4f37f490002d37298c8164169697004dd71881",
-      "shortHash": "6c4f37f",
-      "dateIso": "2026-03-21T10:24:38-03:00",
-      "subject": "docs(readme): atualiza fluxo de deploy, scripts e versionamento"
+      "hash": "e20c863f42d793f736793b69f1c32342242f8967",
+      "shortHash": "e20c863",
+      "dateIso": "2026-03-27T22:47:34-03:00",
+      "subject": "refactor(catalog-nav): aplica segmented control minimalista em Catalogo/Pedidos"
     },
     {
-      "hash": "c41597c3015402b4dd25ba2b3bc9b656dc288e0c",
-      "shortHash": "c41597c",
-      "dateIso": "2026-03-21T10:21:15-03:00",
-      "subject": "chore(release): v0.1.5"
+      "hash": "d6bb5bfe77e6ad295626a88f682f601c82c374f4",
+      "shortHash": "d6bb5bf",
+      "dateIso": "2026-03-27T22:37:37-03:00",
+      "subject": "feat(catalog-ui): premiumiza seletor Catalogo/Pedidos na vitrine"
     },
     {
-      "hash": "b426863d0f0bd513f5185cf263c8fa4938d831c7",
-      "shortHash": "b426863",
-      "dateIso": "2026-03-21T10:21:10-03:00",
-      "subject": "fix(print): aplica modo inverso para cliente e mesa/local em chrome e rawbt"
+      "hash": "ffd36a2ce6c4c934f9accc99f41f6787125062ed",
+      "shortHash": "ffd36a2",
+      "dateIso": "2026-03-27T22:31:15-03:00",
+      "subject": "fix(queue): ordena pedidos ativos por mais recentes primeiro"
     },
     {
-      "hash": "28059d74a63b165c4d60da559fa78e287c3f8ad2",
-      "shortHash": "28059d7",
-      "dateIso": "2026-03-21T10:15:37-03:00",
-      "subject": "chore(release): v0.1.4"
+      "hash": "74261a2776f58fc7b9a913e1f34d4ff788865ff7",
+      "shortHash": "74261a2",
+      "dateIso": "2026-03-27T22:24:17-03:00",
+      "subject": "fix(queue): reduz delay ao trocar loja e ao dar refresh"
     },
     {
-      "hash": "badad4f2f359b01f0a263b92bbd3170e1f95669a",
-      "shortHash": "badad4f",
-      "dateIso": "2026-03-21T10:15:33-03:00",
-      "subject": "fix(print): unifica destaque de mesa/local em branco com borda preta"
+      "hash": "714e70b7b2e1ceb4be42b12d627c1565a8365655",
+      "shortHash": "714e70b",
+      "dateIso": "2026-03-27T17:07:57-03:00",
+      "subject": "fix(queue): força store atual e polling contínuo para estabilidade no Android"
     },
     {
-      "hash": "833450a36fb08e853a442ea01ab62a5c0f960f88",
-      "shortHash": "833450a",
-      "dateIso": "2026-03-21T10:13:02-03:00",
-      "subject": "chore(release): v0.1.3"
+      "hash": "e26ad18407cb1228ad3aedb67b72ec17c87a41ae",
+      "shortHash": "e26ad18",
+      "dateIso": "2026-03-24T10:13:20-03:00",
+      "subject": "fix(print): reforca mesa/local no RawBT com bold e tamanho maior"
     },
     {
-      "hash": "4db3ed48264578127b51558a62cd795c51f540c5",
-      "shortHash": "4db3ed4",
-      "dateIso": "2026-03-21T10:12:58-03:00",
-      "subject": "fix(print): aplica destaque da linha cliente no RawBT mobile"
+      "hash": "26a9b37b594defd525bbf6a380f963f032bba4e0",
+      "shortHash": "26a9b37",
+      "dateIso": "2026-03-24T10:05:16-03:00",
+      "subject": "fix(print): fallback RawBT para destaque sem modo inverso"
     },
     {
-      "hash": "b7ab5bf94bdaed923961f94be949985bf86cd218",
-      "shortHash": "b7ab5bf",
-      "dateIso": "2026-03-21T10:11:57-03:00",
-      "subject": "chore(release): v0.1.2"
+      "hash": "a27fa94e37b9eac15c1d8c5b05298657d1b9dd1e",
+      "shortHash": "a27fa94",
+      "dateIso": "2026-03-23T18:30:12-03:00",
+      "subject": "fix(create-store): redes sociais com checkbox e campo por rede"
     },
     {
-      "hash": "6b5f6f185099f3ffd249da77fde8f705a753cd7e",
-      "shortHash": "6b5f6f1",
-      "dateIso": "2026-03-21T10:11:53-03:00",
-      "subject": "fix(print): destaca linha de cliente com fundo branco e borda preta"
+      "hash": "142f84bb05b6ac8bd0e378b7640655a82586a3d0",
+      "shortHash": "142f84b",
+      "dateIso": "2026-03-23T18:23:46-03:00",
+      "subject": "fix(create-store): permite digitar tipo de rede social"
     },
     {
-      "hash": "376c29f61f95e9491f9c7fddade30c4cd834b29a",
-      "shortHash": "376c29f",
-      "dateIso": "2026-03-21T10:07:51-03:00",
-      "subject": "chore(release): v0.1.1"
+      "hash": "6e5ef4742a31ed7ce75677ded7a73e33a9a9380d",
+      "shortHash": "6e5ef47",
+      "dateIso": "2026-03-23T18:23:43-03:00",
+      "subject": "fix(admin): unifica navegação de pedidos e padroniza header da fila"
     }
   ]
 } as const;

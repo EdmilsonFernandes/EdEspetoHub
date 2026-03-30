@@ -884,11 +884,11 @@ body {
 
   .ds-admin-sidebar {
     border-radius: 22px;
-    border: 1px solid rgba(51, 65, 85, 0.78);
+    border: 1px solid rgba(51, 65, 85, 0.72);
     background:
-      radial-gradient(120% 100% at 100% 0%, rgba(47,157,247,0.22), transparent 52%),
-      linear-gradient(180deg, #0b1324 0%, #0f172a 56%, #111827 100%);
-    box-shadow: 0 32px 60px -36px rgba(2, 6, 23, 0.86);
+      radial-gradient(120% 100% at 100% 0%, rgba(47,157,247,0.14), transparent 52%),
+      linear-gradient(180deg, #0b1220 0%, #0f172a 58%, #111827 100%);
+    box-shadow: 0 30px 56px -36px rgba(2, 6, 23, 0.82);
   }
 
   .ds-admin-sidebar-title {
@@ -901,27 +901,29 @@ body {
 
   .ds-admin-sidebar-item {
     width: 100%;
-    border-radius: 14px;
+    border-radius: 10px;
     padding: 0.62rem 0.74rem;
     font-size: 0.86rem;
-    font-weight: 700;
+    font-weight: 600;
     color: #cbd5e1;
     border: 1px solid transparent;
     transition: background-color 180ms ease, color 180ms ease, transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
   }
 
   .ds-admin-sidebar-item:hover {
-    background: rgba(148, 163, 184, 0.16);
-    border-color: rgba(148, 163, 184, 0.22);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(148, 163, 184, 0.16);
     color: #f8fafc;
-    transform: translateY(-1px);
+    transform: none;
   }
 
   .ds-admin-sidebar-item-active {
-    background: linear-gradient(120deg, var(--color-primary) 0%, color-mix(in srgb, var(--color-secondary) 76%, #111827) 100%);
-    border-color: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(148, 163, 184, 0.28);
+    border-left-color: var(--color-primary);
+    border-left-width: 3px;
     color: #fff;
-    box-shadow: 0 20px 36px -22px rgba(15, 23, 42, 0.95);
+    box-shadow: none;
   }
 
   .ds-metric-card {
@@ -1333,4 +1335,3 @@ body {
   .animate-shake {
     animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
   }
-

@@ -199,7 +199,7 @@ export function AdminLayout({
                 <X size={16} weight="bold" />
               </button>
             </div>
-            <div className="pt-3 space-y-2 flex-1 overflow-y-auto">
+            <div className="pt-2 space-y-1 flex-1 overflow-y-auto">
               {groupedMobileSections.map((section: any) => {
                 if (section.type === 'item') {
                   const item = section.item;
@@ -209,12 +209,12 @@ export function AdminLayout({
                       key={item.id}
                       type="button"
                       onClick={() => handleNavSelect(item.id)}
-                      className={`w-full min-h-12 px-3 py-3 rounded-xl border text-left text-sm font-semibold flex items-center justify-between ${
+                      className={`w-full min-h-11 px-2.5 py-2.5 rounded-lg text-left text-sm font-medium flex items-center justify-between transition-colors ${
                         item.disabled
-                          ? 'border-violet-200 bg-violet-50 text-violet-700'
+                          ? 'bg-violet-50 text-violet-700'
                           : activeMobileId === item.id
-                          ? 'border-slate-300 bg-slate-100 text-slate-900'
-                          : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                          ? 'bg-slate-50 text-brand-primary border-l-4 border-brand-primary pl-2'
+                          : 'text-slate-700 hover:bg-slate-50'
                       }`}
                     >
                       <span className="inline-flex items-center gap-2">
@@ -228,14 +228,14 @@ export function AdminLayout({
                 const isOpen = mobileOpenGroup === section.id;
                 const hasActiveChild = section.children.some((child: any) => child.id === activeMobileId);
                 return (
-                  <div key={section.id} className="space-y-1">
+                  <div key={section.id} className="space-y-0.5 border-b border-slate-100 pb-1.5 last:border-b-0">
                     <button
                       type="button"
                       onClick={() => setMobileOpenGroup((prev) => (prev === section.id ? null : section.id))}
-                      className={`w-full min-h-12 px-3 py-3 rounded-xl border text-left text-sm font-semibold flex items-center justify-between ${
+                      className={`w-full min-h-11 px-2.5 py-2.5 rounded-lg text-left text-sm font-semibold flex items-center justify-between transition-colors ${
                         hasActiveChild
-                          ? 'border-slate-300 bg-slate-100 text-slate-900'
-                          : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                          ? 'bg-slate-100 text-slate-900'
+                          : 'text-slate-800 hover:bg-slate-50'
                       }`}
                       aria-expanded={isOpen}
                     >
@@ -243,7 +243,7 @@ export function AdminLayout({
                       <CaretDown size={16} weight="bold" className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
                     </button>
                     {isOpen && (
-                      <div className="space-y-1.5">
+                      <div className="space-y-0.5 bg-slate-50/90 rounded-lg py-1">
                         {section.children.map((item: any) => {
                           const Icon = item.icon;
                           return (
@@ -251,12 +251,12 @@ export function AdminLayout({
                               key={item.id}
                               type="button"
                               onClick={() => handleNavSelect(item.id)}
-                              className={`w-full min-h-11 pl-7 pr-3 py-2.5 rounded-xl border text-left text-sm font-semibold flex items-center justify-between ${
+                              className={`w-full min-h-11 pl-5 pr-2.5 py-2.5 rounded-md text-left text-sm font-normal flex items-center justify-between transition-colors ${
                                 item.disabled
-                                  ? 'border-violet-200 bg-violet-50 text-violet-700'
+                                  ? 'bg-violet-50 text-violet-700'
                                   : activeMobileId === item.id
-                                  ? 'border-slate-300 bg-slate-100 text-slate-900'
-                                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                                  ? 'bg-white text-brand-primary border-l-4 border-brand-primary pl-4'
+                                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
                               }`}
                             >
                               <span className="inline-flex items-center gap-2">
