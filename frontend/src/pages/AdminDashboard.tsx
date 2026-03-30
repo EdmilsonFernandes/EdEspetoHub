@@ -1974,15 +1974,21 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     if (!storeId && !storeSlug) return;
 
     const storeIdentifier = storeId || storeSlug;
+    const needsOrdersFeed = ['resumo', 'pedidos', 'fila'].includes(String(activeTab));
 
     const unsubscribeProducts = productService.subscribe(setProducts, storeIdentifier);
-    const unsubscribeOrders = orderService.subscribeAll(storeIdentifier, setOrders);
+    const unsubscribeOrders = needsOrdersFeed
+      ? orderService.subscribeAll(storeIdentifier, setOrders)
+      : undefined;
+    if (!needsOrdersFeed) {
+      setOrders([]);
+    }
 
     return () => {
       unsubscribeProducts?.();
       unsubscribeOrders?.();
     };
-  }, [storeId, storeSlug]);
+  }, [storeId, storeSlug, activeTab]);
 
   useEffect(() => {
     if (!storeId) return;
