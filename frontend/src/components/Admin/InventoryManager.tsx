@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowsClockwise, WarningCircle, Package, TrendDown, TrendUp, Info } from '@phosphor-icons/react';
 import { productService } from '../../services/productService';
 import { useToast } from '../../contexts/ToastContext';
@@ -76,6 +76,7 @@ const parseOrderIdFromReason = (value: unknown) => {
 export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (items: any[]) => void }) => {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const movementsSectionRef = useRef<HTMLDivElement | null>(null);
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [alerts, setAlerts] = useState<any>(null);
   const [movements, setMovements] = useState<any[]>([]);
@@ -83,6 +84,8 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
   const [statusFilter, setStatusFilter] = useState<'all' | 'out' | 'low' | 'ok' | 'not_managed'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [query, setQuery] = useState('');
+  const [movementProductId, setMovementProductId] = useState<string>('');
+  const [movementQuery, setMovementQuery] = useState('');
   const [adjustModal, setAdjustModal] = useState<null | {
     item: InventoryItem;
     mode: 'in' | 'out' | 'set';
@@ -100,7 +103,7 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
       const [inventoryResp, alertsResp, movementsResp] = await Promise.all([
         productService.listInventory({ status: statusFilter, query, includeNotManaged: true, limit: 500 }),
         productService.getInventoryAlerts(),
-        productService.listInventoryMovements({ limit: 30 }),
+        productService.listInventoryMovements({ limit: 120, productId: movementProductId || undefined }),
       ]);
       setItems(Array.isArray(inventoryResp?.items) ? inventoryResp.items : []);
       setAlerts(alertsResp || null);
@@ -114,7 +117,7 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
 
   useEffect(() => {
     void load();
-  }, [statusFilter]);
+  }, [statusFilter, movementProductId]);
 
   const categories = useMemo(() => {
     const unique = new Set<string>();
@@ -133,6 +136,24 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
       return `${item?.name || ''} ${item?.category || ''}`.toLowerCase().includes(normalized);
     });
   }, [items, query, categoryFilter]);
+
+  const filteredMovements = useMemo(() => {
+    const normalized = String(movementQuery || '').trim().toLowerCase();
+    if (!normalized) return movements;
+    return (movements || []).filter((movement: any) => {
+      const haystack = [
+        movement?.productName,
+        movement?.reason,
+        movement?.orderId,
+        movement?.orderCustomerName,
+        movement?.movementType,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(normalized);
+    });
+  }, [movements, movementQuery]);
 
   const handleAdjust = async () => {
     if (!adjustModal) return;
@@ -351,23 +372,36 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
                       </span>
                     </td>
                     <td className="py-2 text-right">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowAdjustHelp(false);
-                          setAdjustModal({
-                            item,
-                            mode: item?.manageStock ? 'in' : 'set',
-                            quantity: '1',
-                            reason: '',
-                            manageStock: Boolean(item?.manageStock),
-                            lowStockAlert: String(Math.max(1, Number(item?.lowStockAlert || 3))),
-                          });
-                        }}
-                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-                      >
-                        Ajustar
-                      </button>
+                      <div className="inline-flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMovementProductId(String(item.id || ''));
+                            setMovementQuery('');
+                            movementsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }}
+                          className="inline-flex items-center gap-1 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1.5 text-[11px] font-semibold text-indigo-700 hover:bg-indigo-100"
+                        >
+                          Histórico
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowAdjustHelp(false);
+                            setAdjustModal({
+                              item,
+                              mode: item?.manageStock ? 'in' : 'set',
+                              quantity: '1',
+                              reason: '',
+                              manageStock: Boolean(item?.manageStock),
+                              lowStockAlert: String(Math.max(1, Number(item?.lowStockAlert || 3))),
+                            });
+                          }}
+                          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+                        >
+                          Ajustar
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -384,16 +418,48 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+      <section ref={movementsSectionRef} className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
         <div className="flex items-center gap-2 mb-2">
           <TrendUp size={16} className="text-slate-500" />
           <h4 className="text-sm font-bold text-slate-800">Movimentações recentes</h4>
         </div>
+        <div className="mb-2 flex flex-wrap items-center gap-2">
+          <select
+            value={movementProductId}
+            onChange={(event) => setMovementProductId(event.target.value)}
+            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700"
+          >
+            <option value="">Todos os produtos</option>
+            {items.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+          <input
+            value={movementQuery}
+            onChange={(event) => setMovementQuery(event.target.value)}
+            placeholder="Buscar na movimentação..."
+            className="min-w-[220px] flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700"
+          />
+          {(movementProductId || movementQuery) && (
+            <button
+              type="button"
+              onClick={() => {
+                setMovementProductId('');
+                setMovementQuery('');
+              }}
+              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+            >
+              Limpar filtros
+            </button>
+          )}
+        </div>
         <div className="space-y-2 max-h-[320px] overflow-auto">
-          {movements.length === 0 ? (
+          {filteredMovements.length === 0 ? (
             <p className="text-sm text-slate-500">Sem movimentações recentes.</p>
           ) : (
-            movements.map((movement) => {
+            filteredMovements.map((movement) => {
               const meta = resolveMovementMeta(movement.movementType);
               const origin = resolveMovementOrigin(movement);
               const effectiveOrderId = String(movement?.orderId || parseOrderIdFromReason(movement?.reason) || '').trim();
