@@ -1335,6 +1335,58 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     }
   };
 
+  const handlePostalMarkPosted = async (order: any) => {
+    if (!order?.id) return false;
+    const currentCode = String(order?.shipment?.trackingCode || '').trim();
+    const trackingCode = String(window.prompt('Código de rastreio:', currentCode) || '').trim();
+    if (!trackingCode) return false;
+
+    const previousQueue = queue;
+    try {
+      setUpdating(order.id);
+      setQueueFilter('all');
+      setQueue((prev) =>
+        prev.map((item) =>
+          item.id === order.id
+            ? {
+                ...item,
+                status: 'dispatched',
+                shipment: {
+                  ...(item.shipment || {}),
+                  trackingCode,
+                  shipmentStatus: 'posted',
+                },
+              }
+            : item
+        )
+      );
+      setSelectedOrder((prev: any) =>
+        prev?.id === order.id
+          ? {
+              ...prev,
+              status: 'dispatched',
+              shipment: {
+                ...(prev.shipment || {}),
+                trackingCode,
+                shipmentStatus: 'posted',
+              },
+            }
+          : prev
+      );
+      await orderService.updatePostalShipment(order.id, { trackingCode, markPosted: true });
+      setError('');
+      void loadQueue();
+      return true;
+    } catch (err) {
+      console.error('Erro ao registrar postagem', err);
+      setQueue(previousQueue);
+      setError('Não foi possível registrar rastreio agora. Tente novamente.');
+      return false;
+    } finally {
+      setUpdating(null);
+    }
+  };
+
   const openReopenModal = (order: any) => {
     setReopenModal({
       open: true,
@@ -1695,7 +1747,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   }, [queue]);
 
   const inRouteQueue = useMemo(() => {
-    const routeStatuses = new Set([ 'in_delivery' ]);
+    const routeStatuses = new Set([ 'in_delivery', 'dispatched' ]);
     return [...queue]
       .filter((order) => routeStatuses.has(String(order?.status || '').toLowerCase()))
       .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
@@ -1947,7 +1999,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     if (status === 'pending') return 'pending';
     if (status === 'preparing') return 'preparing';
     if (status === 'ready') return 'ready';
-    if (type === 'delivery' && isPostalOrder(order) && status === 'dispatched') return 'ready';
     if (type === 'delivery' && !isPostalOrder(order) && (status === 'ready_for_delivery' || status === 'waiting_for_motoboy')) return 'ready';
     return status;
   };
@@ -1972,7 +2023,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   }, [productionQueue, currentTime, PREP_SLA_MS]);
 
   const allActiveQueue = useMemo(() => {
-    const activeStatuses = new Set([ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy', 'dispatched' ]);
+    const activeStatuses = new Set([ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ]);
     return [...queue]
       .filter((order) => activeStatuses.has(String(order?.status || '').toLowerCase()))
       .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
@@ -2054,8 +2105,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       return;
     }
     const latestStatus = String(latest.status || '').toLowerCase();
-    const queueVisibleStatuses = new Set([ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy', 'dispatched' ]);
-    const routeStatuses = new Set([ 'in_delivery' ]);
+    const queueVisibleStatuses = new Set([ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ]);
+    const routeStatuses = new Set([ 'in_delivery', 'dispatched' ]);
 
     if (activeTab === 'queue' && !queueVisibleStatuses.has(latestStatus)) {
       closeOrderOverlays();
@@ -2346,15 +2397,19 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       {order.status === "ready" && isPostalOrder(order) && (
         <div className="w-full">
           <div className="mb-2 text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg px-2.5 py-1">
-            Pedido postal pronto. Marque como despachado após postar.
+            Pedido postal pronto para postagem. Informe o rastreio ao postar.
           </div>
           <button
-            onClick={() => { pulseCta(order.id + '-dispatch-postal'); handleAdvance(order.id, "dispatched"); }}
+            onClick={async () => {
+              pulseCta(order.id + '-dispatch-postal');
+              const ok = await handlePostalMarkPosted(order);
+              if (ok) setActiveTab('inroute');
+            }}
             disabled={updating === order.id}
             style={ctaPulseId === order.id + '-dispatch-postal' ? { animation: 'btnPop 220ms ease' } : undefined}
             className="w-full px-3 py-3 rounded-lg bg-indigo-600 text-white text-sm font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
           >
-            <CheckSquare size={16} weight="duotone" /> Marcar como despachado
+            <CheckSquare size={16} weight="duotone" /> Informar rastreio e postar
           </button>
         </div>
       )}
@@ -2379,6 +2434,18 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           <div className="mb-2 text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg px-2.5 py-1">
             Pedido postal postado. Finalize quando a entrega for concluída.
           </div>
+          {order?.shipment?.trackingCode ? (
+            <div className="mb-2 text-[11px] text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1">
+              Código: <span className="font-semibold">{order.shipment.trackingCode}</span>
+            </div>
+          ) : null}
+          <button
+            onClick={() => { void handlePostalMarkPosted(order); }}
+            disabled={updating === order.id}
+            className="w-full mb-2 px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm font-semibold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:bg-slate-50"
+          >
+            Editar rastreio
+          </button>
           <button
             onClick={() => { pulseCta(order.id + '-finish-postal-dispatched'); handleAdvance(order.id, "finished"); }}
             disabled={updating === order.id}
