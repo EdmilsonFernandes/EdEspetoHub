@@ -625,7 +625,11 @@ export class OrderService
 
     // Backward-compat: queue actions still send delivery-local statuses in some UI paths.
     // For postal flow, normalize those aliases to postal statuses to avoid invalid transitions.
+    let normalizedCurrentStatus = currentStatus;
     if (isPostalFlow) {
+      if (normalizedCurrentStatus === 'ready_for_delivery') normalizedCurrentStatus = 'ready';
+      else if (normalizedCurrentStatus === 'waiting_for_motoboy' || normalizedCurrentStatus === 'in_delivery') normalizedCurrentStatus = 'dispatched';
+
       if (nextStatus === 'ready_for_delivery') nextStatus = 'ready';
       else if (nextStatus === 'waiting_for_motoboy' || nextStatus === 'in_delivery') nextStatus = 'dispatched';
     }
@@ -662,8 +666,8 @@ export class OrderService
         dispatched: [ 'delivered', 'finished' ],
         delivered: [ 'finished' ],
       };
-      const allowedNext = postalTransitions[currentStatus] || [];
-      if (nextStatus !== currentStatus && !allowedNext.includes(nextStatus)) {
+      const allowedNext = postalTransitions[normalizedCurrentStatus] || [];
+      if (nextStatus !== normalizedCurrentStatus && !allowedNext.includes(nextStatus)) {
         throw new AppError('ORDER-004', 400);
       }
     }

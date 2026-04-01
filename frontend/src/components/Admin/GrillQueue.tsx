@@ -2334,12 +2334,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       {order.status === "ready" && isPostalOrder(order) && (
         <div className="w-full">
           <div className="mb-2 text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg px-2.5 py-1">
-            Pedido postal pronto. Finalize quando estiver postado.
+            Pedido postal pronto. Marque como despachado após postar.
           </div>
           <button
-            onClick={() => { pulseCta(order.id + '-finish-postal'); handleAdvance(order.id, "finished"); }}
+            onClick={() => { pulseCta(order.id + '-dispatch-postal'); handleAdvance(order.id, "dispatched"); }}
             disabled={updating === order.id}
-            style={ctaPulseId === order.id + '-finish-postal' ? { animation: 'btnPop 220ms ease' } : undefined}
+            style={ctaPulseId === order.id + '-dispatch-postal' ? { animation: 'btnPop 220ms ease' } : undefined}
             className="w-full px-3 py-3 rounded-lg bg-indigo-600 text-white text-sm font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
           >
             <CheckSquare size={16} weight="duotone" /> Marcar como despachado
