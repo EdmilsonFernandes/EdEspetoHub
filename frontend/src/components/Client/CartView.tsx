@@ -963,16 +963,31 @@ export const CartView = ({
                       </div>
                     )}
                     {isPostalDelivery && (
-                      <div className="space-y-2">
+                      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm space-y-3">
+                        <div className="space-y-1">
+                          <h4 className="text-sm font-semibold text-slate-900">Escolha o frete</h4>
+                          <p className="text-xs text-slate-500">
+                            Compare prazo e valor para o CEP de destino.
+                          </p>
+                        </div>
                         <button
                           type="button"
                           onClick={() => onCalculatePostalQuote?.()}
                           disabled={postalQuoteLoading}
-                          className="w-full rounded-xl bg-slate-900 text-white px-3 py-2.5 text-sm font-bold disabled:opacity-60"
+                          className="w-full min-h-11 rounded-xl bg-slate-900 text-white px-3 py-2.5 text-sm font-bold disabled:opacity-60 inline-flex items-center justify-center gap-2"
                         >
+                          {postalQuoteLoading && (
+                            <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                          )}
                           {postalQuoteLoading ? "Calculando..." : "Calcular frete postal"}
                         </button>
-                        {postalServices.length > 0 && (
+                        {postalQuoteLoading && (
+                          <div className="space-y-2">
+                            <div className="animate-pulse rounded-xl border border-slate-200 bg-slate-50 p-3 h-[74px]" />
+                            <div className="animate-pulse rounded-xl border border-slate-200 bg-slate-50 p-3 h-[74px]" />
+                          </div>
+                        )}
+                        {!postalQuoteLoading && postalServices.length > 0 && (
                           <div className="space-y-2">
                             {postalServices.map((service) => {
                               const selected = String(service?.serviceCode || "") === String(selectedPostalService?.serviceCode || "");
@@ -981,26 +996,56 @@ export const CartView = ({
                                   type="button"
                                   key={String(service?.serviceCode || service?.serviceName || Math.random())}
                                   onClick={() => onSelectPostalService?.(String(service?.serviceCode || ""))}
-                                  className={`w-full rounded-xl border px-3 py-2 text-left transition ${
+                                  className={`w-full rounded-xl border px-3 py-3 text-left transition min-h-11 ${
                                     selected
-                                      ? "border-emerald-300 bg-emerald-50"
+                                      ? "border-brand-primary bg-brand-primary/10 shadow-sm"
                                       : "border-slate-200 bg-white hover:bg-slate-50"
                                   }`}
                                 >
-                                  <div className="flex items-center justify-between">
-                                    <span className="text-sm font-semibold text-slate-800">
-                                      {service?.serviceName || service?.serviceCode || "Serviço"}
-                                    </span>
-                                    <span className="text-sm font-black text-emerald-700">
-                                      {formatCurrency(Number(service?.price || 0))}
-                                    </span>
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="space-y-1 min-w-0">
+                                      <p className="text-sm font-semibold text-slate-900 truncate">
+                                        {service?.serviceName || service?.serviceCode || "Serviço"}
+                                      </p>
+                                      <p className="text-xs text-slate-500">
+                                        Prazo: {Number(service?.estimatedDays || 0) > 0 ? `${service.estimatedDays} dia(s)` : "a confirmar"}
+                                      </p>
+                                    </div>
+                                    <div className="flex items-center gap-2 flex-shrink-0">
+                                      <span className="text-base font-black text-slate-900">
+                                        {formatCurrency(Number(service?.price || 0))}
+                                      </span>
+                                      {selected && (
+                                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-brand-primary text-white text-[11px] font-black">
+                                          ✓
+                                        </span>
+                                      )}
+                                    </div>
                                   </div>
-                                  <p className="text-xs text-slate-500 mt-1">
-                                    Prazo estimado: {Number(service?.estimatedDays || 0) > 0 ? `${service.estimatedDays} dia(s)` : "a confirmar"}
-                                  </p>
                                 </button>
                               );
                             })}
+                          </div>
+                        )}
+                        {!postalQuoteLoading && !postalServices.length && String(customer.cep || "").replace(/\D/g, "").length === 8 && (
+                          <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 space-y-2">
+                            <p>Não foi possível encontrar opções agora.</p>
+                            <button
+                              type="button"
+                              onClick={() => onCalculatePostalQuote?.()}
+                              className="w-full min-h-11 rounded-xl border border-amber-300 bg-white px-3 py-2 text-sm font-semibold text-amber-800"
+                            >
+                              Tentar novamente
+                            </button>
+                          </div>
+                        )}
+                        {selectedPostalService && (
+                          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800">
+                            Frete selecionado: {selectedPostalService?.serviceName || selectedPostalService?.serviceCode || "Serviço"} •{" "}
+                            {Number(selectedPostalService?.estimatedDays || 0) > 0
+                              ? `${selectedPostalService?.estimatedDays} dia(s)`
+                              : "Prazo a confirmar"}{" "}
+                            • {formatCurrency(Number(selectedPostalService?.price || 0))}
                           </div>
                         )}
                       </div>
