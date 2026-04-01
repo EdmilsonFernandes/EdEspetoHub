@@ -713,7 +713,7 @@ export class OrderService
     if (saved.type === 'delivery' && !isPostalFlow && [ 'ready_for_delivery', 'waiting_for_motoboy' ].includes(nextStatus)) {
       await deliveryService.ensureQueueDelivery(saved as any);
     }
-    if (saved.type === 'delivery' && [ 'delivered', 'finished' ].includes(nextStatus)) {
+    if (saved.type === 'delivery' && !isPostalFlow && [ 'delivered', 'finished' ].includes(nextStatus)) {
       await this.deliveryBillingService.recordDelivery(saved);
     }
     return saved;

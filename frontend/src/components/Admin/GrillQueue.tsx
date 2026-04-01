@@ -2374,6 +2374,22 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         </div>
       )}
 
+      {order.status === "dispatched" && isPostalOrder(order) && (
+        <div className="w-full">
+          <div className="mb-2 text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg px-2.5 py-1">
+            Pedido postal postado. Finalize quando a entrega for concluída.
+          </div>
+          <button
+            onClick={() => { pulseCta(order.id + '-finish-postal-dispatched'); handleAdvance(order.id, "finished"); }}
+            disabled={updating === order.id}
+            style={ctaPulseId === order.id + '-finish-postal-dispatched' ? { animation: 'btnPop 220ms ease' } : undefined}
+            className="w-full px-3 py-3 rounded-lg bg-emerald-600 text-white text-sm font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
+          >
+            <CheckSquare size={16} weight="duotone" /> Finalizar pedido
+          </button>
+        </div>
+      )}
+
       {order.status === "waiting_for_motoboy" && order.type === "delivery" && isPostalOrder(order) && (
         <div className="w-full">
           <div className="mb-2 text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg px-2.5 py-1">
