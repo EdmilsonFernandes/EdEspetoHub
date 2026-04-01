@@ -2118,13 +2118,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     }
     const latestStatus = String(latest.status || '').toLowerCase();
     const queueVisibleStatuses = new Set([ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ]);
-    const routeStatuses = new Set([ 'in_delivery', 'dispatched' ]);
 
     if (activeTab === 'queue' && !queueVisibleStatuses.has(latestStatus)) {
       closeOrderOverlays();
-      if (routeStatuses.has(latestStatus)) {
-        setActiveTab('inroute');
-      }
       return;
     }
 
@@ -2415,7 +2411,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             onClick={async () => {
               pulseCta(order.id + '-dispatch-postal');
               const ok = await handlePostalMarkPosted(order);
-              if (ok) setActiveTab('inroute');
+              if (ok) {
+                closeOrderOverlays();
+                setActiveTab('queue');
+              }
             }}
             disabled={updating === order.id}
             style={ctaPulseId === order.id + '-dispatch-postal' ? { animation: 'btnPop 220ms ease' } : undefined}
@@ -2824,6 +2823,14 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   {order.phone && (
                     <p className="text-[11px] text-gray-500 break-words">{order.phone}</p>
                   )}
+                  {isPostalOrder(order) ? (
+                    <p className="text-[11px] text-gray-500 break-words">
+                      Rastreio:{' '}
+                      <span className="font-semibold text-slate-700">
+                        {String(order?.shipment?.trackingCode || '').trim() || 'não informado'}
+                      </span>
+                    </p>
+                  ) : null}
 
                   <p className="text-[11px] text-gray-500 uppercase mt-1 inline-flex flex-wrap items-center gap-2">
                     Pagamento:
@@ -3314,6 +3321,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       Envio postal postado. Aguardando entrega da transportadora.
                     </div>
                   ) : null}
+                  {isDispatched && order?.shipment?.trackingCode ? (
+                    <div className="mt-2 text-[11px] text-slate-700 bg-white border border-slate-200 rounded-lg px-2.5 py-1">
+                      Código de rastreio: <span className="font-semibold">{order.shipment.trackingCode}</span>
+                    </div>
+                  ) : null}
 
                   {formatAddress(order.address || order.deliveryAddress) ? (
                     <div className="mt-3 text-xs text-slate-600">
@@ -3326,14 +3338,25 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 	                    <div className="flex-1 min-w-0">
 	                      {renderMoneyBreakdown(order)}
 	                    </div>
-	                    <a
-	                      href={`/pedido/${order.id}`}
-	                      target="_blank"
-	                      rel="noreferrer"
-	                      className="px-3 py-2 rounded-lg bg-slate-900 text-white text-xs font-bold"
-                    >
-                      Acompanhar
-                    </a>
+                      <div className="flex items-center gap-2">
+                        {isDispatched ? (
+                          <button
+                            type="button"
+                            onClick={() => { void handlePostalMarkPosted(order); }}
+                            className="px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50"
+                          >
+                            Editar rastreio
+                          </button>
+                        ) : null}
+                        <a
+                          href={`/pedido/${order.id}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-3 py-2 rounded-lg bg-slate-900 text-white text-xs font-bold"
+                        >
+                          Acompanhar
+                        </a>
+                      </div>
 	                  </div>
                 </div>
               )})}
