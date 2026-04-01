@@ -619,9 +619,16 @@ export class OrderService
     if (!order) throw new AppError('ORDER-001', 404);
     this.ensureStoreAccess(order.store, authStoreId);
     const currentStatus = String(order.status || '').toLowerCase();
-    const nextStatus = String(status || '').toLowerCase();
+    let nextStatus = String(status || '').toLowerCase();
     const fulfillmentMode = String((order as any)?.fulfillmentMode || 'distance').toLowerCase();
     const isPostalFlow = order.type === 'delivery' && fulfillmentMode === 'postal';
+
+    // Backward-compat: queue actions still send delivery-local statuses in some UI paths.
+    // For postal flow, normalize those aliases to postal statuses to avoid invalid transitions.
+    if (isPostalFlow) {
+      if (nextStatus === 'ready_for_delivery') nextStatus = 'ready';
+      else if (nextStatus === 'waiting_for_motoboy' || nextStatus === 'in_delivery') nextStatus = 'dispatched';
+    }
 
     const deliveryStatuses = new Set([
       'ready_for_delivery',
