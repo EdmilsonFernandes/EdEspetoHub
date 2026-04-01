@@ -799,17 +799,23 @@ export const MenuView = ({
                         setActiveCategoryKey(category.key);
                         scrollToCategory(category.key);
                       }}
-                      className={
+                      className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full transition-all snap-start ${
+                        isActive ? "font-semibold shadow-sm scale-105" : "font-medium"
+                      } ${filteredGrouped.length <= 2 ? "w-full min-w-0" : ""}`}
+                      style={
                         isActive
-                          ? `inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-amber-500 text-white font-semibold shadow-sm scale-105 transition-all snap-start ${filteredGrouped.length <= 2 ? "w-full min-w-0" : ""}`
-                          : `inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-gray-50 text-gray-500 font-medium transition-all snap-start ${filteredGrouped.length <= 2 ? "w-full min-w-0" : ""}`
+                          ? { backgroundColor: catalogPrimaryColor, color: catalogPrimaryText }
+                          : { backgroundColor: "#f8fafc", color: catalogSecondaryColor }
                       }
                     >
                       <span className="text-[17px] leading-none" aria-hidden="true">
                         {categoryGlyph(category.key)}
                       </span>
                       <span className="whitespace-nowrap text-xs sm:text-sm">{category.label}</span>
-                      <span className={`rounded-full px-2 py-0.5 text-[10px] ${isActive ? "bg-white/20 text-white/95" : "bg-white text-slate-400 border border-slate-200"}`}>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] ${isActive ? "" : "bg-white border border-slate-200"}`}
+                        style={isActive ? { backgroundColor: "rgba(255,255,255,0.2)", color: catalogPrimaryText } : { color: "#64748b" }}
+                      >
                         {category.items.length}
                       </span>
                     </button>
@@ -825,6 +831,7 @@ export const MenuView = ({
                   aria-label="Abrir categorias"
                   onClick={() => setIsCategorySheetOpen(true)}
                   className="h-9 px-3 rounded-full bg-white shadow-sm inline-flex items-center justify-center gap-1 text-slate-700 border border-slate-200 active:scale-95 transition-all"
+                  style={{ color: catalogSecondaryColor }}
                 >
                   <SquaresFour size={16} weight="duotone" />
                   <span className="text-xs font-semibold">Mais</span>
@@ -1412,11 +1419,12 @@ export const MenuView = ({
                     scrollToCategory(category.key);
                     setIsCategorySheetOpen(false);
                   }}
-                  className={`rounded-xl border p-3 text-left transition active:scale-[0.98] ${
+                  className="rounded-xl border p-3 text-left transition active:scale-[0.98]"
+                  style={
                     isActive
-                      ? "bg-slate-900 text-white border-slate-900"
-                      : "bg-slate-50 text-slate-700 border-slate-100"
-                  }`}
+                      ? { backgroundColor: catalogPrimaryColor, color: catalogPrimaryText, borderColor: catalogPrimaryColor }
+                      : { backgroundColor: "#f8fafc", color: catalogSecondaryColor, borderColor: "#f1f5f9" }
+                  }
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-sm leading-none" aria-hidden="true">
@@ -1450,12 +1458,20 @@ export const MenuView = ({
           <button
             ref={cartButtonRef}
             onClick={() => onProceed?.()}
-            className={`w-full bg-amber-500 text-white px-4 py-3 rounded-full shadow-2xl shadow-amber-500/35 flex justify-between items-center hover:brightness-95 active:scale-[0.99] transition-all text-sm sm:text-base ${
+            className={`w-full px-4 py-3 rounded-full flex justify-between items-center active:scale-[0.99] transition-all text-sm sm:text-base ${
               cartPulse ? "scale-[1.03]" : "scale-100"
             }`}
+            style={{
+              backgroundColor: catalogPrimaryColor,
+              color: catalogPrimaryText,
+              boxShadow: `0 16px 32px -18px ${catalogPrimaryColor}80`,
+            }}
           >
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <span className="h-7 min-w-7 px-2 rounded-full text-xs font-extrabold text-amber-600 bg-white inline-flex items-center justify-center">
+              <span
+                className="h-7 min-w-7 px-2 rounded-full text-xs font-extrabold inline-flex items-center justify-center"
+                style={{ color: catalogPrimaryColor, backgroundColor: "#ffffff" }}
+              >
                 {cartItemsCount}
               </span>
               <span className="font-bold truncate">Ver sacola</span>

@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260401.004556.b92adc8",
-  "buildId": "0.1.9+20260401.004556.b92adc8-20260401.004556-b92adc8",
-  "builtAt": "2026-04-01T00:45:56.252Z",
-  "commitHash": "b92adc89025b5619f5e13dfad0ff00d49f2dfa25",
-  "shortHash": "b92adc8",
+  "versionInternal": "0.1.9+20260401.004932.37165be",
+  "buildId": "0.1.9+20260401.004932.37165be-20260401.004932-37165be",
+  "builtAt": "2026-04-01T00:49:32.316Z",
+  "commitHash": "37165be00d9201d605fdca765d8c72b63b340d9c",
+  "shortHash": "37165be",
   "branch": "main",
   "commits": [
+    {
+      "hash": "37165be00d9201d605fdca765d8c72b63b340d9c",
+      "shortHash": "37165be",
+      "dateIso": "2026-03-31T21:47:15-03:00",
+      "subject": "feat(catalog-ui): animate item flying to bag on add"
+    },
     {
       "hash": "b92adc89025b5619f5e13dfad0ff00d49f2dfa25",
       "shortHash": "b92adc8",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "a874cc5",
       "dateIso": "2026-03-30T10:08:18-03:00",
       "subject": "fix: evitar timeout no ajuste de estoque com lock/statement timeout"
-    },
-    {
-      "hash": "7219cbee524bb8cb5e400b893c5e7a3d5452a68c",
-      "shortHash": "7219cbe",
-      "dateIso": "2026-03-30T09:42:24-03:00",
-      "subject": "feat: implementar módulo de estoque com alertas e auditoria"
     }
   ]
 } as const;
