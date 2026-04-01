@@ -96,24 +96,30 @@ const isPostalOrder = (order: any) =>
 const PremiumCheckToggle = ({
   selected = false,
   onToggle,
+  disabled = false,
   ariaLabel,
   title,
 }: {
   selected?: boolean;
   onToggle?: () => void;
+  disabled?: boolean;
   ariaLabel?: string;
   title?: string;
 }) => (
   <button
     type="button"
+    disabled={disabled}
     onClick={(event) => {
       event.stopPropagation();
+      if (disabled) return;
       onToggle?.();
     }}
     className={`relative z-20 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-[10px] border-2 shadow-sm transition-all ${
       selected
         ? "border-emerald-500 bg-emerald-500 text-white animate-[satinPop_180ms_ease-out]"
-        : "border-slate-300 bg-white text-transparent hover:border-slate-400 hover:bg-slate-50"
+        : disabled
+          ? "border-slate-200 bg-slate-100 text-transparent opacity-60 cursor-not-allowed"
+          : "border-slate-300 bg-white text-transparent hover:border-slate-400 hover:bg-slate-50"
     }`}
     aria-label={ariaLabel}
     title={title}
@@ -404,6 +410,7 @@ const OrderSummaryCard = ({
       if (orderType === 'delivery' && fulfillment === 'postal') return { icon: Package };
       if (orderType === 'delivery') return { icon: Truck };
       if (orderType === 'pickup') return { icon: Storefront };
+      if (orderType === 'table') return { icon: Monitor };
       return { icon: Hash };
     })();
     return (
@@ -423,9 +430,14 @@ const OrderSummaryCard = ({
       <div className={`ml-0.5 shrink-0 w-11 rounded-xl border ${selectorToneClass} flex flex-col items-center justify-center gap-2 px-1.5 transition-all duration-200 ${selected ? 'shadow-[0_10px_20px_-16px_rgba(16,185,129,0.95)] ring-1 ring-emerald-200/70 scale-[1.01]' : 'hover:shadow-sm'}`}>
         <PremiumCheckToggle
           selected={selected}
+          disabled={!showQuickFinalize}
           onToggle={onToggleSelect}
           ariaLabel={selected ? "Desmarcar pedido" : "Selecionar pedido"}
-          title={selected ? "Desmarcar pedido" : "Selecionar pedido"}
+          title={
+            showQuickFinalize
+              ? (selected ? "Desmarcar pedido" : "Selecionar pedido")
+              : "Ação em lote indisponível neste status"
+          }
         />
         <div className={`flex items-center justify-center transition-all duration-200 ${selected ? 'opacity-100 translate-y-0' : 'opacity-90 translate-y-[1px]'}`}>
           <selectorMeta.icon size={16} weight="duotone" />
@@ -2619,7 +2631,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   canPrint={hasPrintAccess}
                   onPrint={() => handlePrintOrder(order, index + 1)}
                   archived={isArchived}
-                  showSelector={activeTab === 'queue' && canQuickFinalize}
+                  showSelector={activeTab === 'queue'}
                   selected={isSelected}
                   onToggleSelect={() =>
                     setSelectedOrderIds((prev) =>

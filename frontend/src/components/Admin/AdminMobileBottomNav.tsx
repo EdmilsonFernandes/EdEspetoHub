@@ -39,9 +39,18 @@ export function AdminMobileBottomNav() {
       try {
         const queue = await orderService.fetchQueue();
         if (!active) return;
+        const openStatuses = new Set([
+          'pending',
+          'preparing',
+          'ready',
+          'ready_for_delivery',
+          'waiting_for_motoboy',
+          'in_delivery',
+          'dispatched',
+        ]);
         const count = (Array.isArray(queue) ? queue : []).filter((order: any) => {
           const st = String(order?.status || '').toLowerCase();
-          return st !== 'done' && st !== 'delivered' && st !== 'cancelled';
+          return openStatuses.has(st);
         }).length;
         setMonitorCount(count);
       } catch {
