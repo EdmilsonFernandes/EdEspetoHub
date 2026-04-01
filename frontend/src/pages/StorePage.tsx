@@ -48,6 +48,12 @@ export function StorePage() {
   const [storePixKey, setStorePixKey] = useState('');
   const [deliveryRadiusKm, setDeliveryRadiusKm] = useState('');
   const [deliveryFee, setDeliveryFee] = useState('');
+  const [postalEnabled, setPostalEnabled] = useState(false);
+  const [postalOriginZip, setPostalOriginZip] = useState('');
+  const [deliveryMode, setDeliveryMode] = useState<'distance' | 'postal'>('distance');
+  const [postalQuoteLoading, setPostalQuoteLoading] = useState(false);
+  const [postalQuote, setPostalQuote] = useState<any | null>(null);
+  const [selectedPostalServiceCode, setSelectedPostalServiceCode] = useState('');
   const [promoMessage, setPromoMessage] = useState('');
   const [openingHours, setOpeningHours] = useState([]);
   const [orderTypes, setOrderTypes] = useState([ 'delivery', 'pickup', 'table' ]);
@@ -189,12 +195,24 @@ export function StorePage() {
     if (!value || value <= 0) return null;
     return value;
   }, [deliveryRadiusKm]);
+  const isPostalDelivery = customer.type === 'delivery' && deliveryMode === 'postal';
+  const selectedPostalService = useMemo(() => {
+    if (!isPostalDelivery) return null;
+    const services = Array.isArray(postalQuote?.quote?.services) ? postalQuote.quote.services : [];
+    if (!services.length) return null;
+    const exact = services.find((service: any) => String(service?.serviceCode || '') === String(selectedPostalServiceCode || ''));
+    return exact || services[0];
+  }, [isPostalDelivery, postalQuote, selectedPostalServiceCode]);
   const deliveryFeeValue = useMemo(() => {
     if (customer.type !== 'delivery') return 0;
+    if (isPostalDelivery) {
+      const value = Number(selectedPostalService?.price || 0);
+      return Number.isFinite(value) && value > 0 ? value : 0;
+    }
     const value = getNumeric(deliveryFee);
     if (!value || value <= 0) return 0;
     return value;
-  }, [customer.type, deliveryFee]);
+  }, [customer.type, deliveryFee, isPostalDelivery, selectedPostalService]);
   const deliveryAddress = useMemo(() => {
     if (customer.type !== 'delivery') return customer.address || '';
     const street = String(customer.street || '').trim();
@@ -228,6 +246,28 @@ export function StorePage() {
       if (customer.type === 'delivery' && !String(customer.number || '').trim()) {
         return { blocked: true, reason: 'Informe o número do endereço para finalizar a entrega.' };
       }
+      if (customer.type === 'delivery' && isPostalDelivery) {
+        const cepDigits = String(customer.cep || '').replace(/\D/g, '');
+        if (cepDigits.length !== 8) {
+          return { blocked: true, reason: 'Informe o CEP para cotar envio postal.' };
+        }
+        if (!selectedPostalService) {
+          return { blocked: true, reason: 'Calcule e selecione o frete postal para finalizar.' };
+        }
+      }
+      return { blocked: false, reason: '' };
+    }
+    if (isPostalDelivery) {
+      const cepDigits = String(customer.cep || '').replace(/\D/g, '');
+      if (cepDigits.length !== 8) {
+        return { blocked: true, reason: 'Informe o CEP para cotar envio postal.' };
+      }
+      if (!selectedPostalService) {
+        return { blocked: true, reason: 'Calcule e selecione o frete postal para finalizar.' };
+      }
+      if (!String(customer.number || '').trim()) {
+        return { blocked: true, reason: 'Informe o número do endereço para finalizar.' };
+      }
       return { blocked: false, reason: '' };
     }
     if (deliveryCheck.status === 'loading') {
@@ -249,7 +289,7 @@ export function StorePage() {
       return { blocked: true, reason: 'Informe o número do endereço para finalizar a entrega.' };
     }
     return { blocked: false, reason: '' };
-  }, [customer.number, customer.type, deliveryCheck.status, deliveryRadiusValue, storeCoords]);
+  }, [customer.number, customer.type, customer.cep, deliveryCheck.status, deliveryRadiusValue, storeCoords, isPostalDelivery, selectedPostalService]);
 
   const resolveItemPrice = (item) => {
     const promoPrice = item?.promoPrice != null ? Number(item.promoPrice) : null;
@@ -449,6 +489,8 @@ export function StorePage() {
           setStorePixKey(data.settings?.pixKey || '');
           setDeliveryRadiusKm(data.settings?.deliveryRadiusKm ?? '');
           setDeliveryFee(data.settings?.deliveryFee ?? '');
+          setPostalEnabled(Boolean(data.settings?.postalEnabled));
+          setPostalOriginZip(String(data.settings?.postalOriginZip || ''));
           setStoreOpenNow(isStoreOpenNow(normalizedHours));
           setStoreSubscription(data.subscription || null);
           setStorePlanExempt(Boolean(data.settings?.planExempt || data.subscription?.planExempt));
@@ -766,6 +808,11 @@ export function StorePage() {
       setDeliveryCoords(null);
       return;
     }
+    if (isPostalDelivery) {
+      setDeliveryCheck({ status: 'idle', distanceKm: null, durationMin: null });
+      setDeliveryCoords(null);
+      return;
+    }
     if (!deliveryRadiusValue) {
       setDeliveryCheck({ status: 'ok', distanceKm: null, durationMin: null });
       return;
@@ -830,7 +877,7 @@ export function StorePage() {
     return () => {
       window.clearTimeout(timeout);
     };
-  }, [customer.type, deliveryAddress, deliveryRadiusValue, storeCoords, storeSlug, manualDeliveryCoords]);
+  }, [customer.type, deliveryAddress, deliveryRadiusValue, storeCoords, storeSlug, manualDeliveryCoords, isPostalDelivery]);
 
   useEffect(() => {
     if (!manualDeliveryCoords) return;
@@ -839,6 +886,24 @@ export function StorePage() {
       setManualDeliveryCoords(null);
     }
   }, [deliveryAddress, manualDeliveryCoords]);
+
+  useEffect(() => {
+    if (customer.type !== 'delivery') {
+      setDeliveryMode('distance');
+      setPostalQuote(null);
+      setSelectedPostalServiceCode('');
+      return;
+    }
+    if (!postalEnabled && deliveryMode !== 'distance') {
+      setDeliveryMode('distance');
+    }
+  }, [customer.type, postalEnabled, deliveryMode]);
+
+  useEffect(() => {
+    if (!isPostalDelivery) return;
+    setPostalQuote(null);
+    setSelectedPostalServiceCode('');
+  }, [customer.cep, isPostalDelivery, cartItemsCount, storeSlug]);
 
   const handleUseCurrentLocation = async () => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
@@ -884,6 +949,55 @@ export function StorePage() {
       },
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 }
     );
+  };
+
+  const handleCalculatePostalQuote = async () => {
+    if (!storeSlug) {
+      showToast('Loja não especificada.', 'error');
+      return;
+    }
+    const destinationZip = String(customer.cep || '').replace(/\D/g, '');
+    if (destinationZip.length !== 8) {
+      showToast('Informe um CEP válido para cotar envio postal.', 'warning');
+      return;
+    }
+    if (!validCartItems.length) {
+      showToast('Adicione ao menos 1 item para cotar frete postal.', 'warning');
+      return;
+    }
+    setPostalQuoteLoading(true);
+    try {
+      const payload = {
+        destinationZip,
+        items: validCartItems.map((item: any) => ({
+          productId: item.id,
+          quantity: Number(item.qty || 1),
+        })),
+      };
+      const quote = await storeService.quotePostalBySlug(storeSlug, payload);
+      setPostalQuote(quote || null);
+      const services = Array.isArray(quote?.quote?.services) ? quote.quote.services : [];
+      if (services.length > 0) {
+        const sorted = [ ...services ].sort((a: any, b: any) => Number(a?.price || 0) - Number(b?.price || 0));
+        const defaultService = sorted[0];
+        setSelectedPostalServiceCode(String(defaultService?.serviceCode || ''));
+      } else {
+        setSelectedPostalServiceCode('');
+      }
+      showToast('Frete postal calculado.', 'success');
+    } catch (error: any) {
+      const message =
+        error?.details?.message ||
+        error?.error?.details?.message ||
+        error?.error?.message ||
+        error?.message ||
+        'Não foi possível calcular o frete postal agora.';
+      setPostalQuote(null);
+      setSelectedPostalServiceCode('');
+      showToast(message, 'error');
+    } finally {
+      setPostalQuoteLoading(false);
+    }
   };
 
   const updateCart = (item, qty, options) => {
@@ -1043,7 +1157,18 @@ export function StorePage() {
       showToast('Informe o número da mesa.', 'warning');
       return;
     }
-    if (customer.type === 'delivery' && deliveryRadiusValue) {
+    if (customer.type === 'delivery' && isPostalDelivery) {
+      const cepDigits = String(customer.cep || '').replace(/\D/g, '');
+      if (cepDigits.length !== 8) {
+        showErrorNotice('Informe um CEP válido para cotar envio postal.');
+        return;
+      }
+      if (!selectedPostalService) {
+        showErrorNotice('Calcule e selecione o frete postal antes de finalizar.');
+        return;
+      }
+    }
+    if (customer.type === 'delivery' && !isPostalDelivery && deliveryRadiusValue) {
       if (deliveryCheck.status === 'loading') {
         showErrorNotice('Validando distância de entrega. Aguarde um instante.');
         return;
@@ -1074,6 +1199,7 @@ export function StorePage() {
       address: deliveryAddress || customer.address,
       table: customer.table,
       type: customer.type,
+      fulfillmentMode: customer.type === 'delivery' ? (isPostalDelivery ? 'postal' : 'distance') : undefined,
       paymentMethod: payment,
       deliveryFee: customer.type === 'delivery' && deliveryFeeValue > 0 ? deliveryFeeValue : undefined,
       cashTendered: cashTendered !== null ? cashTendered : undefined,
@@ -1111,6 +1237,9 @@ export function StorePage() {
       reconcileLocalStockAfterCheckout(validCartItems);
       setCart({});
       setCustomer(initialCustomer);
+      setDeliveryMode('distance');
+      setPostalQuote(null);
+      setSelectedPostalServiceCode('');
       setPaymentMethod(defaultPaymentMethod);
       setLastOrder({
         id: demoId,
@@ -1164,6 +1293,7 @@ export function StorePage() {
             selectedModifiers: item.selectedModifiers || [],
           })),
           phone: customer.phone,
+          fulfillmentMode: customer.type === 'delivery' ? (isPostalDelivery ? 'postal' : 'distance') : undefined,
           deliveryFee: customer.type === 'delivery' && deliveryFeeValue > 0 ? deliveryFeeValue : null,
           total: orderTotal,
           store: { name: 'Já no Caminho Demo', slug: storeSlug },
@@ -1231,6 +1361,9 @@ export function StorePage() {
         '',
         customerLabel,
         `🛒 Tipo: ${formatOrderType(customer.type)}`,
+        customer.type === 'delivery'
+          ? `🚚 Modalidade: ${isPostalDelivery ? `Envio postal (${selectedPostalService?.serviceName || selectedPostalService?.serviceCode || 'postal'})` : 'Entrega local'}`
+          : '',
         customer.table ? `🪑 Mesa: ${customer.table}` : '',
         payment ? `💳 Pagamento: ${formatPaymentMethod(payment)}` : '',
         customer.address ? `📌 Endereço do cliente: ${customer.address}` : '',
@@ -1264,6 +1397,9 @@ export function StorePage() {
 
     setCart({});
     setCustomer(initialCustomer);
+    setDeliveryMode('distance');
+    setPostalQuote(null);
+    setSelectedPostalServiceCode('');
     setPaymentMethod(defaultPaymentMethod);
     setLastOrder({
       id: createdOrder?.id,
@@ -1819,7 +1955,16 @@ export function StorePage() {
             deliveryRadiusKm={deliveryRadiusValue}
             deliveryFee={deliveryFeeValue}
             deliveryCheck={deliveryCheck}
+            deliveryMode={deliveryMode}
+            postalEnabled={postalEnabled}
+            postalOriginZip={postalOriginZip}
+            postalQuote={postalQuote}
+            postalQuoteLoading={postalQuoteLoading}
+            selectedPostalServiceCode={selectedPostalServiceCode}
             onUseCurrentLocation={handleUseCurrentLocation}
+            onChangeDeliveryMode={setDeliveryMode}
+            onCalculatePostalQuote={handleCalculatePostalQuote}
+            onSelectPostalService={setSelectedPostalServiceCode}
             storeAddress={storeAddress}
             storeCoords={storeCoords}
             deliveryCoords={deliveryCoords}

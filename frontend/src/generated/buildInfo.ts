@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260401.165059.85456c8",
-  "buildId": "0.1.9+20260401.165059.85456c8-20260401.165059-85456c8",
-  "builtAt": "2026-04-01T16:50:59.559Z",
-  "commitHash": "85456c86ca810baafd8fd20aacc39da9a30b43be",
-  "shortHash": "85456c8",
+  "versionInternal": "0.1.9+20260401.170130.3c9e8b8",
+  "buildId": "0.1.9+20260401.170130.3c9e8b8-20260401.170130-3c9e8b8",
+  "builtAt": "2026-04-01T17:01:30.307Z",
+  "commitHash": "3c9e8b8ebce29e7ab0f668544c76fa22efc7b3b6",
+  "shortHash": "3c9e8b8",
   "branch": "main",
   "commits": [
+    {
+      "hash": "3c9e8b8ebce29e7ab0f668544c76fa22efc7b3b6",
+      "shortHash": "3c9e8b8",
+      "dateIso": "2026-04-01T13:52:37-03:00",
+      "subject": "feat(postal-phase2): add dimensions, postal store config and quote api"
+    },
     {
       "hash": "85456c86ca810baafd8fd20aacc39da9a30b43be",
       "shortHash": "85456c8",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "2eeb23e",
       "dateIso": "2026-03-30T10:35:11-03:00",
       "subject": "feat: melhorar UX do estoque com atualização imediata e filtro por categoria"
-    },
-    {
-      "hash": "76a3837d564693934ae0479d0805ab039a66583a",
-      "shortHash": "76a3837",
-      "dateIso": "2026-03-30T10:26:51-03:00",
-      "subject": "fix: retry automático em conflito de lock no ajuste de estoque"
     }
   ]
 } as const;

@@ -73,7 +73,16 @@ export const CartView = ({
   deliveryRadiusKm = null,
   deliveryFee = 0,
   deliveryCheck = { status: "idle", distanceKm: null, durationMin: null },
+  deliveryMode = "distance",
+  postalEnabled = false,
+  postalOriginZip = "",
+  postalQuote = null,
+  postalQuoteLoading = false,
+  selectedPostalServiceCode = "",
   onUseCurrentLocation,
+  onChangeDeliveryMode,
+  onCalculatePostalQuote,
+  onSelectPostalService,
   storeAddress = "",
   storeCoords = null,
   deliveryCoords = null,
@@ -127,6 +136,7 @@ export const CartView = ({
     : [ "delivery", "pickup", "table" ];
   const isPickup = customer.type === "pickup";
   const isDelivery = customer.type === "delivery";
+  const isPostalDelivery = isDelivery && String(deliveryMode || "").toLowerCase() === "postal";
   const isOptionalPhoneMode = customer.type === "table" || customer.type === "pickup";
   const isPix = paymentMethod === "pix";
   const isCredit = paymentMethod === "credito";
@@ -160,11 +170,31 @@ export const CartView = ({
     if (isPix) return "Finalizar pedido (Pix)";
     return "Finalizar pedido na mesa";
   }, [isDelivery, isPickup, isPix, isCredit, isDebit, isCash]);
-  const isDeliveryAddressValidated = !isDelivery || deliveryCheck?.status === "ok";
-  const primaryCtaLabel = isDelivery && !isDeliveryAddressValidated ? "Validar Endereço" : actionLabel;
-  const isDeliveryValidationMode = isDelivery && !isDeliveryAddressValidated;
+  const postalServices = useMemo(
+    () => (Array.isArray(postalQuote?.quote?.services) ? postalQuote.quote.services : []),
+    [postalQuote]
+  );
+  const selectedPostalService = useMemo(() => {
+    if (!isPostalDelivery) return null;
+    if (!postalServices.length) return null;
+    return (
+      postalServices.find((service) => String(service?.serviceCode || "") === String(selectedPostalServiceCode || "")) ||
+      postalServices[0]
+    );
+  }, [isPostalDelivery, postalServices, selectedPostalServiceCode]);
+  const isDeliveryAddressValidated = !isDelivery || isPostalDelivery || deliveryCheck?.status === "ok";
+  const primaryCtaLabel =
+    isPostalDelivery && !selectedPostalService
+      ? "Calcular frete postal"
+      : isDelivery && !isDeliveryAddressValidated
+      ? "Validar Endereço"
+      : actionLabel;
+  const isDeliveryValidationMode = isDelivery && !isPostalDelivery && !isDeliveryAddressValidated;
+  const isPostalQuoteMode = isPostalDelivery && !selectedPostalService;
   const primaryCtaDisabled = isDeliveryValidationMode
     ? (cepLoading || checkoutLoading)
+    : isPostalQuoteMode
+    ? (checkoutLoading || postalQuoteLoading)
     : (checkoutLoading || checkoutDisabled || cashValidation.blocked);
 
   const [selectedDdd, setSelectedDdd] = useState(() => extractPhoneParts(customer.phone || "").ddd);
@@ -364,6 +394,30 @@ export const CartView = ({
     normalizeAddressForCompare(normalizedStoreAddress) === normalizeAddressForCompare(normalizedCustomerAddress);
   const deliveryStatus = useMemo(() => {
     if (!isDelivery) return null;
+    if (isPostalDelivery) {
+      if (!String(customer.cep || "").replace(/\D/g, "")) {
+        return {
+          tone: "bg-slate-50 text-slate-600 border-slate-200",
+          label: "Informe o CEP para cotar o envio postal.",
+        };
+      }
+      if (postalQuoteLoading) {
+        return {
+          tone: "bg-slate-50 text-slate-600 border-slate-200",
+          label: "Calculando opções de PAC/SEDEX...",
+        };
+      }
+      if (!postalServices.length) {
+        return {
+          tone: "bg-amber-50 text-amber-700 border-amber-200",
+          label: "Sem cotação postal ainda. Toque em Calcular frete postal.",
+        };
+      }
+      return {
+        tone: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        label: `Frete postal selecionado: ${selectedPostalService?.serviceName || selectedPostalService?.serviceCode || "serviço"}.`,
+      };
+    }
     if (!normalizedStoreAddress) {
       return {
         tone: "bg-amber-50 text-amber-700 border-amber-200",
@@ -423,7 +477,7 @@ export const CartView = ({
       tone: "bg-slate-50 text-slate-600 border-slate-200",
       label: "Preencha o endereço para validar a entrega.",
     };
-  }, [customer, deliveryCheck?.distanceKm, deliveryCheck?.status, isDelivery, normalizedStoreAddress, radiusValue, sameAddressAsStore, storeCoords]);
+  }, [customer, deliveryCheck?.distanceKm, deliveryCheck?.status, isDelivery, normalizedStoreAddress, radiusValue, sameAddressAsStore, storeCoords, isPostalDelivery, postalQuoteLoading, postalServices, selectedPostalService]);
 
   const deliveryDebug = useMemo(() => {
     if (!isDelivery) return null;
@@ -455,20 +509,22 @@ export const CartView = ({
     normalizedStoreAddress,
   ]);
 
-  const showRouteMap = Boolean(storeCoords?.lat && deliveryCoords?.lat);
-  const showDeliveryStatus = deliveryStatus && deliveryCheck?.status !== "ok" && deliveryCheck?.status !== "out";
-  const showDeliveryDebug = deliveryDebug && deliveryCheck?.status !== "ok";
-  const hideOutOfRangeInlineReason = isDelivery && deliveryCheck?.status === "out";
+  const showRouteMap = !isPostalDelivery && Boolean(storeCoords?.lat && deliveryCoords?.lat);
+  const showDeliveryStatus = isPostalDelivery
+    ? Boolean(deliveryStatus)
+    : deliveryStatus && deliveryCheck?.status !== "ok" && deliveryCheck?.status !== "out";
+  const showDeliveryDebug = !isPostalDelivery && deliveryDebug && deliveryCheck?.status !== "ok";
+  const hideOutOfRangeInlineReason = !isPostalDelivery && isDelivery && deliveryCheck?.status === "out";
 
   useEffect(() => {
-    if (isDelivery && deliveryCheck?.status === "out") {
+    if (!isPostalDelivery && isDelivery && deliveryCheck?.status === "out") {
       setShowOutOfRangeSheet(true);
       return;
     }
     if (!isDelivery) {
       setShowOutOfRangeSheet(false);
     }
-  }, [isDelivery, deliveryCheck?.status]);
+  }, [isDelivery, deliveryCheck?.status, isPostalDelivery]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -712,13 +768,45 @@ export const CartView = ({
                   Endereço de entrega
                 </p>
                 <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-semibold px-2 py-1">
-                  Entrega
+                  {isPostalDelivery ? "Postal" : "Entrega"}
                 </span>
               </div>
+              {postalEnabled && (
+                <div className="mb-3 rounded-xl border border-slate-200 bg-slate-50 p-1 grid grid-cols-2 gap-1">
+                  <button
+                    type="button"
+                    onClick={() => onChangeDeliveryMode?.("distance")}
+                    className={`px-3 py-2 rounded-lg text-xs font-bold transition ${
+                      !isPostalDelivery
+                        ? "bg-slate-900 text-white"
+                        : "bg-transparent text-slate-600 hover:bg-white"
+                    }`}
+                  >
+                    Entrega local
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onChangeDeliveryMode?.("postal")}
+                    className={`px-3 py-2 rounded-lg text-xs font-bold transition ${
+                      isPostalDelivery
+                        ? "bg-slate-900 text-white"
+                        : "bg-transparent text-slate-600 hover:bg-white"
+                    }`}
+                  >
+                    Envio postal
+                  </button>
+                </div>
+              )}
               <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-4">
                 <div className="space-y-4">
-                  <div className="rounded-2xl border border-sky-100 bg-sky-50/70 px-3 py-2.5 text-xs text-sky-800">
-                    Insira seu CEP para conferirmos a distância e o tempo de entrega.
+                  <div className={`rounded-2xl border px-3 py-2.5 text-xs ${
+                    isPostalDelivery
+                      ? "border-amber-100 bg-amber-50/70 text-amber-800"
+                      : "border-sky-100 bg-sky-50/70 text-sky-800"
+                  }`}>
+                    {isPostalDelivery
+                      ? "Insira seu CEP para cotar PAC/SEDEX e escolher o envio."
+                      : "Insira seu CEP para conferirmos a distância e o tempo de entrega."}
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="sm:col-span-2">
@@ -733,7 +821,7 @@ export const CartView = ({
                           placeholder="00000-000"
                           className={`${premiumInputClass} pr-12 disabled:opacity-60`}
                         />
-                        {!!onUseCurrentLocation && (
+                        {!!onUseCurrentLocation && !isPostalDelivery && (
                           <button
                             type="button"
                             onClick={onUseCurrentLocation}
@@ -819,50 +907,107 @@ export const CartView = ({
                     </div>
                   </div>
                 </div>
-                <div className="rounded-2xl premium-card-soft p-4 space-y-4 bg-slate-50 border border-slate-100">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Entrega</p>
-                      <p className="text-base font-semibold text-slate-800">
-                        {radiusValue ? `Raio até ${radiusValue} km` : 'Sem limite de raio'}
-                      </p>
-                    </div>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold px-2 py-1 border border-emerald-100">
-                      <MapPinLine size={12} weight="duotone" />
-                      Frete
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="rounded-xl border border-emerald-100 bg-white px-3 py-2 flex flex-col gap-1">
-                      <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Valor do frete</span>
-                      <span className={`text-base font-bold ${deliveryFeeValue > 0 ? 'text-emerald-600' : 'text-slate-600'}`}>
-                        {deliveryFeeValue > 0 ? formatCurrency(deliveryFeeValue) : 'Grátis'}
+                  <div className="rounded-2xl premium-card-soft p-4 space-y-4 bg-slate-50 border border-slate-100">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.25em] text-slate-400">
+                          {isPostalDelivery ? "Envio postal" : "Entrega"}
+                        </p>
+                        <p className="text-base font-semibold text-slate-800">
+                          {isPostalDelivery
+                            ? "PAC / SEDEX"
+                            : radiusValue
+                            ? `Raio até ${radiusValue} km`
+                            : "Sem limite de raio"}
+                        </p>
+                      </div>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold px-2 py-1 border border-emerald-100">
+                        <MapPinLine size={12} weight="duotone" />
+                        {isPostalDelivery ? "Postagem" : "Frete"}
                       </span>
                     </div>
-                    <div className="rounded-xl border border-slate-100 bg-white px-3 py-2 flex flex-col gap-1">
-                      <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Distância</span>
-                      <span className="text-base font-semibold text-slate-800">
-                        {deliveryCheck?.distanceKm ? `${deliveryCheck.distanceKm.toFixed(1)} km` : "-"}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="rounded-xl border border-emerald-100 bg-white px-3 py-2 flex flex-col gap-1">
+                        <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Valor do frete</span>
+                        <span className={`text-base font-bold ${deliveryFeeValue > 0 ? 'text-emerald-600' : 'text-slate-600'}`}>
+                          {deliveryFeeValue > 0 ? formatCurrency(deliveryFeeValue) : 'Grátis'}
+                        </span>
+                      </div>
+                      <div className="rounded-xl border border-slate-100 bg-white px-3 py-2 flex flex-col gap-1">
+                        <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                          {isPostalDelivery ? "Origem" : "Distância"}
+                        </span>
+                        <span className="text-base font-semibold text-slate-800">
+                          {isPostalDelivery
+                            ? (postalOriginZip || "-")
+                            : deliveryCheck?.distanceKm
+                            ? `${deliveryCheck.distanceKm.toFixed(1)} km`
+                            : "-"}
+                        </span>
+                      </div>
+                    </div>
+                    {!isPostalDelivery && (
+                    <div className="rounded-xl border border-slate-100 bg-white px-3 py-2 flex items-center justify-between text-base">
+                      <span className="font-semibold text-slate-600 inline-flex items-center gap-2">
+                        <Clock size={14} weight="duotone" />
+                        Tempo de rota
+                      </span>
+                      <span className="font-semibold text-slate-800">
+                        {deliveryCheck?.durationMin ? `${deliveryCheck.durationMin} min` : "-"}
                       </span>
                     </div>
-                  </div>
-                  <div className="rounded-xl border border-slate-100 bg-white px-3 py-2 flex items-center justify-between text-base">
-                    <span className="font-semibold text-slate-600 inline-flex items-center gap-2">
-                      <Clock size={14} weight="duotone" />
-                      Tempo de rota
-                    </span>
-                    <span className="font-semibold text-slate-800">
-                      {deliveryCheck?.durationMin ? `${deliveryCheck.durationMin} min` : "-"}
-                    </span>
-                  </div>
-                  {customer.address && (
-                    <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm text-slate-600">
-                      {customer.address}
-                    </div>
-                  )}
-                  {showDeliveryStatus && (
-                    <div className={`rounded-xl border px-3 py-2 text-base font-semibold ${deliveryStatus.tone}`}>
-                      {deliveryStatus.label}
+                    )}
+                    {customer.address && (
+                      <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                        {customer.address}
+                      </div>
+                    )}
+                    {isPostalDelivery && (
+                      <div className="space-y-2">
+                        <button
+                          type="button"
+                          onClick={() => onCalculatePostalQuote?.()}
+                          disabled={postalQuoteLoading}
+                          className="w-full rounded-xl bg-slate-900 text-white px-3 py-2.5 text-sm font-bold disabled:opacity-60"
+                        >
+                          {postalQuoteLoading ? "Calculando..." : "Calcular frete postal"}
+                        </button>
+                        {postalServices.length > 0 && (
+                          <div className="space-y-2">
+                            {postalServices.map((service) => {
+                              const selected = String(service?.serviceCode || "") === String(selectedPostalService?.serviceCode || "");
+                              return (
+                                <button
+                                  type="button"
+                                  key={String(service?.serviceCode || service?.serviceName || Math.random())}
+                                  onClick={() => onSelectPostalService?.(String(service?.serviceCode || ""))}
+                                  className={`w-full rounded-xl border px-3 py-2 text-left transition ${
+                                    selected
+                                      ? "border-emerald-300 bg-emerald-50"
+                                      : "border-slate-200 bg-white hover:bg-slate-50"
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm font-semibold text-slate-800">
+                                      {service?.serviceName || service?.serviceCode || "Serviço"}
+                                    </span>
+                                    <span className="text-sm font-black text-emerald-700">
+                                      {formatCurrency(Number(service?.price || 0))}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-slate-500 mt-1">
+                                    Prazo estimado: {Number(service?.estimatedDays || 0) > 0 ? `${service.estimatedDays} dia(s)` : "a confirmar"}
+                                  </p>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {showDeliveryStatus && (
+                      <div className={`rounded-xl border px-3 py-2 text-base font-semibold ${deliveryStatus.tone}`}>
+                        {deliveryStatus.label}
                     </div>
                   )}
                   {showRouteMap && (
@@ -1185,6 +1330,10 @@ export const CartView = ({
                 return;
               }
               await handleCepLookup();
+              return;
+            }
+            if (isPostalQuoteMode) {
+              await Promise.resolve(onCalculatePostalQuote?.());
               return;
             }
             await Promise.resolve(
