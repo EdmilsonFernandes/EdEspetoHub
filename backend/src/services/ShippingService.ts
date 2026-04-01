@@ -14,6 +14,12 @@
 import { AppError } from '../errors/AppError';
 import { ProductRepository } from '../repositories/ProductRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
+import { env } from '../config/env';
+import { logger } from '../utils/logger';
+import { InternalShippingQuoteProvider } from './shipping/providers/InternalShippingQuoteProvider';
+import { MelhorEnvioShippingQuoteProvider } from './shipping/providers/MelhorEnvioShippingQuoteProvider';
+import { ShippingQuoteProvider } from './shipping/providers/ShippingQuoteProvider';
+import { QuoteItemResolved } from './shipping/types';
 
 type QuoteItemInput = {
   productId?: string;
@@ -33,6 +39,9 @@ type QuoteInput = {
 export class ShippingService {
   private readonly storeRepository = new StoreRepository();
   private readonly productRepository = new ProductRepository();
+  private readonly log = logger.child({ scope: 'ShippingService' });
+  private readonly internalProvider = new InternalShippingQuoteProvider();
+  private readonly melhorEnvioProvider = new MelhorEnvioShippingQuoteProvider();
 
   private normalizeZip(value: unknown) {
     return String(value || '').replace(/\D/g, '').slice(0, 8);
@@ -48,13 +57,6 @@ export class ShippingService {
     const parsed = Math.floor(Number(value));
     if (!Number.isFinite(parsed) || parsed <= 0) return 1;
     return parsed;
-  }
-
-  private parseDistanceFactor(originZip: string, destinationZip: string) {
-    if (!originZip || !destinationZip) return 1.2;
-    if (originZip.slice(0, 3) === destinationZip.slice(0, 3)) return 1.0;
-    if (originZip.slice(0, 2) === destinationZip.slice(0, 2)) return 1.25;
-    return 1.5;
   }
 
   private buildPackageFromItems(items: Array<Required<Pick<QuoteItemInput, 'quantity' | 'weightG' | 'lengthCm' | 'widthCm' | 'heightCm'>>>) {
@@ -92,67 +94,89 @@ export class ShippingService {
     };
   }
 
-  private buildFallbackQuote(args: {
-    originZip: string;
-    destinationZip: string;
-    packageWeightG: number;
-    packageLengthCm: number;
-    packageWidthCm: number;
-    packageHeightCm: number;
-    baseFee: number;
-  }) {
-    const weightKg = Math.max(0.3, args.packageWeightG / 1000);
-    const volumetricKg = Math.max(0.3, (args.packageLengthCm * args.packageWidthCm * args.packageHeightCm) / 6000);
-    const billableWeightKg = Math.max(weightKg, volumetricKg);
-    const distanceFactor = this.parseDistanceFactor(args.originZip, args.destinationZip);
-    const baseFee = Number.isFinite(args.baseFee) && args.baseFee > 0 ? args.baseFee : 9.9;
-
-    const pacPrice = Number((baseFee + billableWeightKg * 4.6 * distanceFactor).toFixed(2));
-    const sedexPrice = Number((baseFee + 8 + billableWeightKg * 6.9 * distanceFactor).toFixed(2));
-    const pacDays = distanceFactor <= 1 ? 4 : distanceFactor <= 1.25 ? 6 : 8;
-    const sedexDays = distanceFactor <= 1 ? 2 : distanceFactor <= 1.25 ? 3 : 4;
-
-    return {
-      provider: 'internal_postal_v1',
-      services: [
-        {
-          serviceCode: 'PAC',
-          serviceName: 'PAC',
-          price: pacPrice,
-          estimatedDays: pacDays,
-          currency: 'BRL',
-        },
-        {
-          serviceCode: 'SEDEX',
-          serviceName: 'SEDEX',
-          price: sedexPrice,
-          estimatedDays: sedexDays,
-          currency: 'BRL',
-        },
-      ],
-      debug: {
-        billableWeightKg: Number(billableWeightKg.toFixed(3)),
-        weightKg: Number(weightKg.toFixed(3)),
-        volumetricKg: Number(volumetricKg.toFixed(3)),
-        distanceFactor,
-      },
-    };
+  private resolveProviderOrder(): ShippingQuoteProvider[] {
+    const provider = String(env.shipping.provider || 'internal').toLowerCase();
+    if (provider === 'melhor_envio') return [this.melhorEnvioProvider, this.internalProvider];
+    if (provider === 'auto') return [this.melhorEnvioProvider, this.internalProvider];
+    return [this.internalProvider];
   }
 
-  private async resolveInputItems(storeId: string, inputItems: QuoteItemInput[]) {
-    if (!Array.isArray(inputItems) || inputItems.length === 0) {
-      throw new AppError('ORDER-004', 400, { message: 'Informe ao menos 1 item para cotação postal.' });
-    }
-
-    const resolved: Array<{
-      productId: string | null;
-      quantity: number;
-      name: string;
+  private async quoteWithProviderFallback(args: {
+    originZip: string;
+    destinationZip: string;
+    pkg: {
       weightG: number;
       lengthCm: number;
       widthCm: number;
       heightCm: number;
-    }> = [];
+      totalVolumeCm3: number;
+    };
+    items: QuoteItemResolved[];
+    baseFee: number;
+  }) {
+    const providers = this.resolveProviderOrder();
+    const strictProvider = Boolean(env.shipping.strictProvider);
+    const configuredProvider = String(env.shipping.provider || 'internal').toLowerCase();
+    const errors: Array<Record<string, unknown>> = [];
+
+    for (const provider of providers) {
+      if (
+        provider === this.melhorEnvioProvider &&
+        !this.melhorEnvioProvider.isConfigured()
+      ) {
+        if (strictProvider && configuredProvider === 'melhor_envio') {
+          throw new AppError('ORDER-004', 400, {
+            message: 'Credenciais do provedor melhor_envio não configuradas.',
+            provider: 'melhor_envio',
+          });
+        }
+        errors.push({ provider: provider.name, reason: 'not_configured' });
+        continue;
+      }
+
+      try {
+        return await provider.quote({
+          originZip: args.originZip,
+          destinationZip: args.destinationZip,
+          pkg: args.pkg,
+          items: args.items,
+          baseFee: args.baseFee,
+        });
+      } catch (error: any) {
+        this.log.warn('Shipping provider quote failed', {
+          provider: provider.name,
+          status: error?.status,
+          message: error?.details?.message || error?.message || 'unknown_error',
+        });
+        errors.push({
+          provider: provider.name,
+          status: error?.status || null,
+          message: error?.details?.message || error?.message || 'unknown_error',
+        });
+
+        if (strictProvider && configuredProvider === provider.name) {
+          throw error instanceof AppError
+            ? error
+            : new AppError('ORDER-004', 502, {
+                message: 'Falha ao consultar frete no provedor configurado.',
+                provider: provider.name,
+              });
+        }
+      }
+    }
+
+    throw new AppError('ORDER-004', 502, {
+      message: 'Não foi possível cotar frete com os provedores disponíveis.',
+      providersTried: errors,
+    });
+  }
+
+  private async resolveInputItems(storeId: string, inputItems: QuoteItemInput[]): Promise<QuoteItemResolved[]> {
+    if (!Array.isArray(inputItems) || inputItems.length === 0) {
+      throw new AppError('ORDER-004', 400, { message: 'Informe ao menos 1 item para cotação postal.' });
+    }
+
+    const resolved: QuoteItemResolved[] = [];
 
     for (const row of inputItems) {
       const quantity = this.normalizeQuantity(row?.quantity);
@@ -197,13 +221,11 @@ export class ShippingService {
 
     const items = await this.resolveInputItems(store.id, input.items || []);
     const pkg = this.buildPackageFromItems(items);
-    const quote = this.buildFallbackQuote({
+    const quote = await this.quoteWithProviderFallback({
       originZip,
       destinationZip,
-      packageWeightG: pkg.weightG,
-      packageLengthCm: pkg.lengthCm,
-      packageWidthCm: pkg.widthCm,
-      packageHeightCm: pkg.heightCm,
+      pkg,
+      items,
       baseFee: Number(store?.settings?.deliveryFee || 0),
     });
 
@@ -248,4 +270,3 @@ export class ShippingService {
     return this.quoteByStoreInternal(store, input, true);
   }
 }
-

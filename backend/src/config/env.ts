@@ -83,4 +83,15 @@ export const env = {
   whatsapp: {
     notifyUrl: process.env.WHATSAPP_NOTIFY_URL || '',
   },
+  shipping: {
+    provider: String(process.env.SHIPPING_PROVIDER || 'internal').toLowerCase(),
+    strictProvider: process.env.SHIPPING_STRICT_PROVIDER === 'true',
+  },
+  melhorEnvio: {
+    baseUrl: process.env.MELHOR_ENVIO_BASE_URL || 'https://sandbox.melhorenvio.com.br',
+    accessToken: process.env.MELHOR_ENVIO_ACCESS_TOKEN || '',
+    clientId: process.env.MELHOR_ENVIO_CLIENT_ID || '',
+    clientSecret: process.env.MELHOR_ENVIO_CLIENT_SECRET || '',
+    refreshToken: process.env.MELHOR_ENVIO_REFRESH_TOKEN || '',
+  },
 };
