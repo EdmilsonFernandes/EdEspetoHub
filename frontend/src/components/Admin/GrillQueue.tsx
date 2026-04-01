@@ -384,6 +384,14 @@ const OrderSummaryCard = ({
       : isTimerWarning
         ? 'text-amber-500'
         : 'text-slate-400';
+    const selectorToneClass = selected
+      ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+      : 'border-slate-200 bg-slate-50 text-slate-500';
+    const selectorMeta = (() => {
+      if (orderType === 'delivery') return { icon: Truck, label: 'ENTREGA' };
+      if (orderType === 'pickup') return { icon: Storefront, label: 'RETIRADA' };
+      return { icon: Hash, label: 'MESA' };
+    })();
     return (
   <div
     role="button"
@@ -395,16 +403,22 @@ const OrderSummaryCard = ({
         onClick();
       }
     }}
-    className={`relative w-full min-h-[132px] rounded-lg border border-[#E0E0E0] ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-4 text-left flex items-start gap-4 transition-all duration-200 hover:border-slate-300 hover:shadow-sm cursor-pointer`}
+    className={`relative w-full min-h-[132px] rounded-lg border border-[#E0E0E0] ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-4 text-left flex items-stretch gap-3 transition-all duration-200 hover:border-slate-300 hover:shadow-sm cursor-pointer`}
   >
     {showSelector && (
-      <div className="ml-0.5 mr-3 mt-0.5 shrink-0">
+      <div className={`ml-0.5 shrink-0 w-11 rounded-xl border ${selectorToneClass} flex flex-col items-center justify-between py-2 px-1.5`}>
         <PremiumCheckToggle
           selected={selected}
           onToggle={onToggleSelect}
           ariaLabel={selected ? "Desmarcar pedido" : "Selecionar pedido"}
           title={selected ? "Desmarcar pedido" : "Selecionar pedido"}
         />
+        <div className="mt-2 flex flex-col items-center gap-1">
+          <selectorMeta.icon size={14} weight="duotone" />
+          <span className="text-[8px] font-bold tracking-[0.1em] leading-none">
+            {selectorMeta.label}
+          </span>
+        </div>
       </div>
     )}
     <div className="min-w-0 flex-1 space-y-3">
