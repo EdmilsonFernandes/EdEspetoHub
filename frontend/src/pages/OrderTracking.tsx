@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Bicycle, CheckCircle, Clock, CircleNotch, CreditCard, MapPin, Phone, Star, User } from '@phosphor-icons/react';
+import { Bicycle, CheckCircle, Clock, CircleNotch, CreditCard, MapPin, Package, Phone, Star, User } from '@phosphor-icons/react';
 import { orderService } from '../services/orderService';
 import { mapsService } from '../services/mapsService';
 import { formatAddress, formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId } from '../utils/format';
@@ -233,6 +233,9 @@ export function OrderTracking() {
   const storeLogo =
     resolveAssetUrl(order?.store?.settings?.logoUrl) || '/janocaminho.jpg';
   const statusLabel = useMemo(() => {
+    if (isPostalDelivery && (normalizedStatus === 'delivered' || normalizedStatus === 'finished')) return 'Entregue';
+    if (isPostalDelivery && (normalizedStatus === 'dispatched' || normalizedStatus === 'waiting_for_motoboy' || normalizedStatus === 'in_delivery')) return 'Despachado';
+    if (isPostalDelivery && (normalizedStatus === 'ready' || normalizedStatus === 'ready_for_delivery')) return 'Pronto para postagem';
     if (isDelivery && (deliveryStatus === 'DELIVERED' || normalizedStatus === 'delivered' || normalizedStatus === 'finished')) return 'Entregue';
     if (isDelivery && (deliveryStatus === 'IN_TRANSIT' || normalizedStatus === 'in_delivery')) return 'Em rota';
     if (isDelivery && (deliveryStatus === 'ACCEPTED' || deliveryStatus === 'PICKED_UP')) return 'Entregador a caminho';
@@ -245,7 +248,7 @@ export function OrderTracking() {
     if (order?.type === 'table' && normalizedStatus === 'done') return 'Pedido Pronto';
     if (order?.type === 'pickup' && (normalizedStatus === 'ready' || normalizedStatus === 'ready_for_pickup')) return 'Disponível para Coleta';
     return statusLabels[normalizedStatus] || statusLabels[status] || status;
-  }, [isDelivery, order?.type, status, normalizedStatus, (order as any)?.delivery?.status]);
+  }, [isDelivery, isPostalDelivery, order?.type, status, normalizedStatus, (order as any)?.delivery?.status]);
   const isReady =
     status === 'done' ||
     status === 'delivered' ||
@@ -306,7 +309,10 @@ export function OrderTracking() {
   }, [deliveryRoute?.durationMin, (etaDetails as any)?.travelMinutes, etaWindowMax]);
   const routeEtaRemainingMinutes = useMemo(() => {
     if (!isDelivery) return null;
-    const deliveryInRoute = deliveryStatus === 'IN_TRANSIT' || status === 'in_delivery';
+    const deliveryInRoute =
+      deliveryStatus === 'IN_TRANSIT' ||
+      status === 'in_delivery' ||
+      (isPostalDelivery && normalizedStatus === 'dispatched');
     if (!deliveryInRoute) return null;
     if (!routeDurationMinutes || routeDurationMinutes <= 0) return null;
     const startCandidates = [
@@ -321,8 +327,10 @@ export function OrderTracking() {
       return Math.max(0, Math.round(routeDurationMinutes - elapsedMin));
     }
     return Math.max(0, Math.round(routeDurationMinutes));
-  }, [isDelivery, deliveryStatus, status, routeDurationMinutes, (order as any)?.delivery?.inTransitAt, (order as any)?.delivery?.pickedUpAt]);
-  const isInTransitPhase = isDelivery && (deliveryStatus === 'IN_TRANSIT' || status === 'in_delivery');
+  }, [isDelivery, isPostalDelivery, normalizedStatus, deliveryStatus, status, routeDurationMinutes, (order as any)?.delivery?.inTransitAt, (order as any)?.delivery?.pickedUpAt]);
+  const isInTransitPhase =
+    isDelivery &&
+    (deliveryStatus === 'IN_TRANSIT' || status === 'in_delivery' || (isPostalDelivery && normalizedStatus === 'dispatched'));
   const etaPhaseLabel = isInTransitPhase ? 'Tempo de trajeto' : 'Tempo de preparo';
   const etaForecastLabel = isDelivery
     ? (isInTransitPhase ? 'Previsão de chegada' : 'Previsão de entrega')
@@ -692,6 +700,15 @@ export function OrderTracking() {
 
   const steps = useMemo(() => {
     if (isDelivery) {
+      if (isPostalDelivery) {
+        return [
+          { id: 'pending', label: 'Pedido Recebido' },
+          { id: 'preparing', label: 'Em Preparação' },
+          { id: 'ready', label: 'Pronto para postagem' },
+          { id: 'in_delivery', label: 'Despachado' },
+          { id: 'delivered', label: 'Entregue' },
+        ];
+      }
       return [
         { id: 'pending', label: 'Pedido Recebido' },
         { id: 'preparing', label: 'Em Preparação' },
@@ -713,7 +730,7 @@ export function OrderTracking() {
       { id: 'preparing', label: 'Em Preparação' },
       { id: 'done', label: order?.type === 'table' ? 'Pedido Pronto' : 'Pronto' },
     ];
-  }, [isDelivery, order?.type]);
+  }, [isDelivery, isPostalDelivery, order?.type]);
   const currentStep = (() => {
     if (!isDelivery) {
       const st = normalizedStatus;
@@ -731,6 +748,13 @@ export function OrderTracking() {
       return steps[0]?.id || 'pending';
     }
     const deliveryStatus = String((order as any)?.delivery?.status || '').toUpperCase();
+    if (isPostalDelivery) {
+      if (normalizedStatus === 'delivered' || normalizedStatus === 'finished') return 'delivered';
+      if (normalizedStatus === 'dispatched' || normalizedStatus === 'waiting_for_motoboy' || normalizedStatus === 'in_delivery') return 'in_delivery';
+      if (normalizedStatus === 'ready_for_delivery' || normalizedStatus === 'ready') return 'ready';
+      if (normalizedStatus === 'preparing') return 'preparing';
+      return 'pending';
+    }
     if (deliveryStatus === 'DELIVERED') return 'delivered';
     if (deliveryStatus === 'IN_TRANSIT') return 'in_delivery';
     if (deliveryStatus === 'ACCEPTED' || deliveryStatus === 'PICKED_UP') return 'ready';
@@ -795,13 +819,17 @@ export function OrderTracking() {
                     </p>
                     <div className="mt-2 flex items-center gap-3 flex-wrap">
                       <h1 className="text-[26px] leading-none sm:text-3xl font-black text-slate-900">{statusLabel}</h1>
-                      {isDelivery && (String((order as any)?.delivery?.status || '').toUpperCase() === 'IN_TRANSIT' || status === 'in_delivery') && (
+                      {isDelivery && (
+                        String((order as any)?.delivery?.status || '').toUpperCase() === 'IN_TRANSIT' ||
+                        status === 'in_delivery' ||
+                        (isPostalDelivery && normalizedStatus === 'dispatched')
+                      ) && (
                         <span
                           className="inline-flex items-center rounded-full bg-orange-50 text-orange-600 text-xs font-semibold px-3 py-1"
                           title="Saiu para entrega"
                           aria-label="Saiu para entrega"
                         >
-                        <Bicycle size={14} weight="duotone" />
+                        {isPostalDelivery ? <Package size={14} weight="duotone" /> : <Bicycle size={14} weight="duotone" />}
                         </span>
                       )}
                       <span
@@ -825,7 +853,7 @@ export function OrderTracking() {
                       </div>
                     ) : null}
 
-                    {isDelivery && motoboyFirst && ['ACCEPTED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED'].includes(deliveryStatus) ? (
+                    {isDelivery && !isPostalDelivery && motoboyFirst && ['ACCEPTED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED'].includes(deliveryStatus) ? (
                       <div className="mt-3 rounded-2xl bg-slate-50/80 px-4 py-3 text-sm text-slate-800">
                         <div className="flex items-start gap-3">
                           {motoboyProfileImageUrl ? (

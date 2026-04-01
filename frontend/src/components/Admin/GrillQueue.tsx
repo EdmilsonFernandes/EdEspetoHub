@@ -3180,10 +3180,16 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   : "grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3"
               }`}
             >
-              {inRouteQueue.map((order) => (
+              {inRouteQueue.map((order) => {
+                const isDispatched = String(order?.status || '').toLowerCase() === 'dispatched';
+                return (
                 <div
                   key={order.id}
-                  className="relative w-full max-w-full p-3 rounded-2xl border border-l-4 border-l-blue-400 bg-gradient-to-br from-blue-50/70 via-white to-blue-50/30 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)]"
+                  className={`relative w-full max-w-full p-3 rounded-2xl border border-l-4 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)] ${
+                    isDispatched
+                      ? 'border-l-indigo-400 bg-gradient-to-br from-indigo-50/70 via-white to-indigo-50/30'
+                      : 'border-l-blue-400 bg-gradient-to-br from-blue-50/70 via-white to-blue-50/30'
+                  }`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
@@ -3196,10 +3202,22 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       {order.phone ? <p className="text-[11px] text-slate-500">{order.phone}</p> : null}
                       <p className="text-[11px] text-slate-400">{formatDateTime(order.createdAt)}</p>
                     </div>
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200">
-                      {String(order?.status || '').toLowerCase() === 'dispatched' ? 'Despachado' : 'Em rota'}
+                    <span
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+                        isDispatched
+                          ? 'bg-indigo-100 text-indigo-700 border-indigo-200'
+                          : 'bg-blue-100 text-blue-700 border-blue-200'
+                      }`}
+                    >
+                      {isDispatched ? <Package size={11} weight="duotone" /> : <Truck size={11} weight="duotone" />}
+                      {isDispatched ? 'Despachado' : 'Em rota'}
                     </span>
                   </div>
+                  {isDispatched ? (
+                    <div className="mt-2 text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg px-2.5 py-1">
+                      Envio postal postado. Aguardando entrega da transportadora.
+                    </div>
+                  ) : null}
 
                   {formatAddress(order.address || order.deliveryAddress) ? (
                     <div className="mt-3 text-xs text-slate-600">
@@ -3222,7 +3240,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     </a>
 	                  </div>
                 </div>
-              ))}
+              )})}
             </div>
           )}
         </div>
