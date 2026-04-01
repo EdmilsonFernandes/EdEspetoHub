@@ -1695,7 +1695,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   }, [queue]);
 
   const inRouteQueue = useMemo(() => {
-    const routeStatuses = new Set([ 'in_delivery', 'dispatched' ]);
+    const routeStatuses = new Set([ 'in_delivery' ]);
     return [...queue]
       .filter((order) => routeStatuses.has(String(order?.status || '').toLowerCase()))
       .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
@@ -1947,6 +1947,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     if (status === 'pending') return 'pending';
     if (status === 'preparing') return 'preparing';
     if (status === 'ready') return 'ready';
+    if (type === 'delivery' && isPostalOrder(order) && status === 'dispatched') return 'ready';
     if (type === 'delivery' && !isPostalOrder(order) && (status === 'ready_for_delivery' || status === 'waiting_for_motoboy')) return 'ready';
     return status;
   };
@@ -1971,7 +1972,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   }, [productionQueue, currentTime, PREP_SLA_MS]);
 
   const allActiveQueue = useMemo(() => {
-    const activeStatuses = new Set([ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ]);
+    const activeStatuses = new Set([ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy', 'dispatched' ]);
     return [...queue]
       .filter((order) => activeStatuses.has(String(order?.status || '').toLowerCase()))
       .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
@@ -2053,8 +2054,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       return;
     }
     const latestStatus = String(latest.status || '').toLowerCase();
-    const queueVisibleStatuses = new Set([ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ]);
-    const routeStatuses = new Set([ 'in_delivery', 'dispatched' ]);
+    const queueVisibleStatuses = new Set([ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy', 'dispatched' ]);
+    const routeStatuses = new Set([ 'in_delivery' ]);
 
     if (activeTab === 'queue' && !queueVisibleStatuses.has(latestStatus)) {
       closeOrderOverlays();

@@ -232,6 +232,7 @@ export function OrderTracking() {
   };
   const storeLogo =
     resolveAssetUrl(order?.store?.settings?.logoUrl) || '/janocaminho.jpg';
+  const isPostalDelivery = isDelivery && String((order as any)?.fulfillmentMode || '').toLowerCase() === 'postal';
   const statusLabel = useMemo(() => {
     if (isPostalDelivery && (normalizedStatus === 'delivered' || normalizedStatus === 'finished')) return 'Entregue';
     if (isPostalDelivery && (normalizedStatus === 'dispatched' || normalizedStatus === 'waiting_for_motoboy' || normalizedStatus === 'in_delivery')) return 'Despachado';
@@ -274,7 +275,6 @@ export function OrderTracking() {
     );
   const hasDeliveryFee =
     order?.deliveryFee !== null && order?.deliveryFee !== undefined && isDelivery;
-  const isPostalDelivery = isDelivery && String((order as any)?.fulfillmentMode || '').toLowerCase() === 'postal';
   const shipment = (order as any)?.shipment || (trackingV2 as any)?.shipment || null;
   const shipmentTrackingCode = String(shipment?.trackingCode || '').trim();
   const shipmentTrackingUrl = String(shipment?.trackingUrl || '').trim();
