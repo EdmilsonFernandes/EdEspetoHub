@@ -89,6 +89,10 @@ const parseMesaIdentifier = (value: any) => {
   return { isMesa: true, number: String(match[1] || "").trim(), raw };
 };
 
+const isPostalOrder = (order: any) =>
+  String(order?.type || "").toLowerCase() === "delivery" &&
+  String(order?.fulfillmentMode || "").toLowerCase() === "postal";
+
 const PremiumCheckToggle = ({
   selected = false,
   onToggle,
@@ -1313,6 +1317,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       payment: order.payment,
       phone: order.phone || '',
       pixKey: storePixKey,
+      isPostal: isPostalOrder(order),
     });
   };
 
@@ -1323,7 +1328,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
   const handleConfirmPaid = async () => {
     if (!confirmModal?.id) return;
-    const success = await handleAdvance(confirmModal.id, 'done');
+    const success = await handleAdvance(confirmModal.id, confirmModal?.isPostal ? 'finished' : 'done');
     if (success) {
       setConfirmModal(null);
       setSelectedOrder(null);
@@ -1428,7 +1433,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
     try {
       const results = await Promise.allSettled(
-        targetOrders.map((order) => orderService.updateStatus(order.id, 'done'))
+        targetOrders.map((order) => orderService.updateStatus(order.id, isPostalOrder(order) ? 'finished' : 'done'))
       );
       const failedCount = results.filter((result) => result.status === 'rejected').length;
       if (failedCount > 0) {
@@ -1455,6 +1460,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     const normalized = String(order?.status || '').toLowerCase();
     if (!normalized) return false;
     if ([ 'done', 'delivered', 'finished', 'cancelled', 'in_delivery' ].includes(normalized)) return false;
+    if (isPostalOrder(order) && [ 'pending', 'preparing', 'ready' ].includes(normalized)) return false;
     return true;
   };
 
@@ -1481,7 +1487,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     if (!order?.id || quickFinalizeModal.loading) return;
     setQuickFinalizeModal((prev) => ({ ...prev, loading: true }));
     try {
-      const success = await handleAdvance(order.id, 'done');
+      const targetStatus = isPostalOrder(order) ? 'finished' : 'done';
+      const success = await handleAdvance(order.id, targetStatus);
       if (success) {
         setQuickFinalizeModal({ open: false, order: null, loading: false });
         setSelectedOrder((prev: any) => (prev?.id === order.id ? null : prev));
@@ -1940,7 +1947,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     if (status === 'pending') return 'pending';
     if (status === 'preparing') return 'preparing';
     if (status === 'ready') return 'ready';
-    if (type === 'delivery' && (status === 'ready_for_delivery' || status === 'waiting_for_motoboy')) return 'ready';
+    if (type === 'delivery' && !isPostalOrder(order) && (status === 'ready_for_delivery' || status === 'waiting_for_motoboy')) return 'ready';
     return status;
   };
 
@@ -2067,6 +2074,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
   const getStatusStyles = (status, orderType, order?: any) => {
     const normalizedStatus = String(status || '').toLowerCase();
+    const postal = isPostalOrder(order);
     if (normalizedStatus === "done" || normalizedStatus === "delivered" || normalizedStatus === "finished") {
       const label = orderType === "delivery" ? "Finalizado" : "Finalizado";
       return { label, className: "bg-emerald-50 text-emerald-700 border-emerald-100" };
@@ -2075,6 +2083,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       return { label: "Em rota", className: "bg-blue-50 text-blue-700 border-blue-100" };
     }
     if (orderType === "delivery" && normalizedStatus === "waiting_for_motoboy") {
+      if (postal) {
+        return { label: "Despachado", className: "bg-indigo-50 text-indigo-700 border-indigo-100" };
+      }
       const deliveryStatus = String(order?.delivery?.status || '').toUpperCase();
       const hasAssignedMotoboy = Boolean(
         order?.delivery?.motoboy?.id ||
@@ -2088,6 +2099,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       return { label: "Buscando entregador", className: "bg-amber-50 text-amber-700 border-amber-100" };
     }
     if (orderType === "delivery" && normalizedStatus === "ready_for_delivery") {
+      if (postal) {
+        return { label: "Pronto para postagem", className: "bg-violet-50 text-violet-700 border-violet-100" };
+      }
       return { label: "Disponível para Coleta", className: "bg-violet-50 text-violet-700 border-violet-100" };
     }
     if (normalizedStatus === "preparing") {
@@ -2096,7 +2110,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     if (normalizedStatus === "ready") {
       const label =
         orderType === "delivery"
-          ? "Pronto"
+          ? (postal ? "Pronto para postagem" : "Pronto")
           : orderType === "pickup"
           ? "Pronto"
           : "Pronto";
@@ -2111,10 +2125,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     done: { dot: "bg-emerald-500", text: "text-emerald-700" },
   };
 
-  const renderTimeline = (status, orderType) => {
+  const renderTimeline = (status, orderType, order?: any) => {
+    const postal = isPostalOrder(order);
     const normalizedStatus = (() => {
       const raw = String(status || '').toLowerCase();
-      if (orderType === 'delivery' && (raw === 'ready_for_delivery' || raw === 'waiting_for_motoboy')) return 'ready';
+      if (orderType === 'delivery' && !postal && (raw === 'ready_for_delivery' || raw === 'waiting_for_motoboy')) return 'ready';
+      if (postal && (raw === 'dispatched' || raw === 'waiting_for_motoboy')) return 'done';
       if (orderType === 'delivery' && raw === 'in_delivery') return 'done';
       if (raw === 'delivered' || raw === 'finished') return 'done';
       return raw;
@@ -2131,8 +2147,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         ? [
             { key: "pending", label: "Pedido Recebido" },
             { key: "preparing", label: "Em Preparação" },
-            { key: "ready", label: "Aguardando entregador" },
-            { key: "done", label: "Saiu para entrega" },
+            { key: "ready", label: postal ? "Pronto para postagem" : "Aguardando entregador" },
+            { key: "done", label: postal ? "Despachado" : "Saiu para entrega" },
           ]
         : [
             { key: "pending", label: "Pedido Recebido" },
@@ -2199,7 +2215,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         </div>
       )}
 
-      {order.status === "preparing" && order.type === "delivery" && (
+      {order.status === "preparing" && order.type === "delivery" && !isPostalOrder(order) && (
         <div className="w-full">
           <div className="mb-2 text-[11px] font-semibold text-sky-700 bg-sky-50 border border-sky-100 rounded-lg px-2.5 py-1">
             Pedido pronto? Marque como pronto para chamar o entregador.
@@ -2220,7 +2236,23 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         </div>
       )}
 
-      {order.status === "ready_for_delivery" && order.type === "delivery" && (
+
+      {order.status === "preparing" && order.type === "delivery" && isPostalOrder(order) && (
+        <div className="w-full">
+          <div className="mb-2 text-[11px] font-semibold text-violet-700 bg-violet-50 border border-violet-100 rounded-lg px-2.5 py-1">
+            Pedido pronto para postagem.
+          </div>
+          <button
+            onClick={() => { pulseCta(order.id + '-ready-postal'); handleAdvance(order.id, "ready"); }}
+            disabled={updating === order.id}
+            style={ctaPulseId === order.id + '-ready-postal' ? { animation: 'btnPop 220ms ease' } : undefined}
+            className="w-full px-3 py-3 rounded-lg bg-violet-600 text-white text-sm font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
+          >
+            <CheckSquare size={16} weight="duotone" /> Pronto para postagem
+          </button>
+        </div>
+      )}
+      {order.status === "ready_for_delivery" && order.type === "delivery" && !isPostalOrder(order) && (
         <div className="w-full">
           <div className="mb-2 text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg px-2.5 py-1">
             Pedido pronto. Chame o entregador para retirada.
@@ -2276,7 +2308,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         </div>
       )}
 
-      {order.status === "ready" && (
+      {order.status === "ready" && !isPostalOrder(order) && (
         <div className="w-full">
           <div className={`mb-2 text-[11px] font-semibold border rounded-lg px-2.5 py-1 ${
             order.type === "delivery"
@@ -2298,7 +2330,23 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         </div>
       )}
 
-      {order.status === "waiting_for_motoboy" && order.type === "delivery" && (
+
+      {order.status === "ready" && isPostalOrder(order) && (
+        <div className="w-full">
+          <div className="mb-2 text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg px-2.5 py-1">
+            Pedido postal pronto. Finalize quando estiver postado.
+          </div>
+          <button
+            onClick={() => { pulseCta(order.id + '-finish-postal'); handleAdvance(order.id, "finished"); }}
+            disabled={updating === order.id}
+            style={ctaPulseId === order.id + '-finish-postal' ? { animation: 'btnPop 220ms ease' } : undefined}
+            className="w-full px-3 py-3 rounded-lg bg-indigo-600 text-white text-sm font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
+          >
+            <CheckSquare size={16} weight="duotone" /> Marcar como despachado
+          </button>
+        </div>
+      )}
+      {order.status === "waiting_for_motoboy" && order.type === "delivery" && !isPostalOrder(order) && (
         <div className="w-full">
           {(order?.delivery?.motoboy?.name || order?.delivery?.motoboyId || order?.delivery?.motoboy_id || String(order?.delivery?.status || '').toUpperCase() === 'ACCEPTED') ? (
             <div className="mb-2 text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg px-2.5 py-1">
@@ -2311,6 +2359,22 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               Buscando entregador para retirada.
             </div>
           )}
+        </div>
+      )}
+
+      {order.status === "waiting_for_motoboy" && order.type === "delivery" && isPostalOrder(order) && (
+        <div className="w-full">
+          <div className="mb-2 text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg px-2.5 py-1">
+            Pedido postal despachado.
+          </div>
+          <button
+            onClick={() => { pulseCta(order.id + '-finish-postal-wait'); handleAdvance(order.id, "finished"); }}
+            disabled={updating === order.id}
+            style={ctaPulseId === order.id + '-finish-postal-wait' ? { animation: 'btnPop 220ms ease' } : undefined}
+            className="w-full px-3 py-3 rounded-lg bg-emerald-600 text-white text-sm font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
+          >
+            <CheckSquare size={16} weight="duotone" /> Finalizar pedido
+          </button>
         </div>
       )}
     </div>
@@ -2837,7 +2901,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 </button>
               </div>
 
-              {tvMode ? renderTimeline(order.status, order.type) : null}
+              {tvMode ? renderTimeline(order.status, order.type, order) : null}
 
               <div className="mt-3">
                 {renderMoneyBreakdown(order)}
@@ -3985,10 +4049,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         </div>,
         document.body
       )}
+
     </div>
     </>
   );
 };
+
 
 
 
