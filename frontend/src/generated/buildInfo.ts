@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260401.001232.2da2718",
-  "buildId": "0.1.9+20260401.001232.2da2718-20260401.001232-2da2718",
-  "builtAt": "2026-04-01T00:12:32.575Z",
-  "commitHash": "2da2718d60b00c23051c9ce56bd9b000161e6162",
-  "shortHash": "2da2718",
+  "versionInternal": "0.1.9+20260401.002329.2aed231",
+  "buildId": "0.1.9+20260401.002329.2aed231-20260401.002329-2aed231",
+  "builtAt": "2026-04-01T00:23:29.688Z",
+  "commitHash": "2aed2319beadbc670dad0fcc77ef03a07823d659",
+  "shortHash": "2aed231",
   "branch": "main",
   "commits": [
+    {
+      "hash": "2aed2319beadbc670dad0fcc77ef03a07823d659",
+      "shortHash": "2aed231",
+      "dateIso": "2026-03-31T21:15:20-03:00",
+      "subject": "refactor(catalog-ui): premiumiza card de item no estilo iFood/99"
+    },
     {
       "hash": "2da2718d60b00c23051c9ce56bd9b000161e6162",
       "shortHash": "2da2718",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "ffd36a2",
       "dateIso": "2026-03-27T22:31:15-03:00",
       "subject": "fix(queue): ordena pedidos ativos por mais recentes primeiro"
-    },
-    {
-      "hash": "74261a2776f58fc7b9a913e1f34d4ff788865ff7",
-      "shortHash": "74261a2",
-      "dateIso": "2026-03-27T22:24:17-03:00",
-      "subject": "fix(queue): reduz delay ao trocar loja e ao dar refresh"
     }
   ]
 } as const;

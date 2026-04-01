@@ -417,7 +417,6 @@ export const MenuView = ({
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
   const [qtyPulseId, setQtyPulseId] = useState<string | null>(null);
   const canOrder = isOrderingEnabled !== false;
-  const buttonColor = branding?.accentColor || branding?.secondaryColor || "#0f172a";
   const categoryRefs = React.useRef({});
   const formatStoreAddress = (address = "") => {
     const raw = address.toString().trim();
@@ -998,6 +997,32 @@ export const MenuView = ({
                   openProductModal(item);
                 };
 
+                const handleIncrement = (event: React.MouseEvent) => {
+                  event.stopPropagation();
+                  if (!canIncrease) {
+                    if (isEspetoCategory(item.category)) {
+                      onUpdateCart(item, 1, { cookingPoint: "ao ponto", passSkewer: false });
+                      return;
+                    }
+                    onUpdateCart(item, 1);
+                    return;
+                  }
+                  pulseQty(String(item.id));
+                  if (isEspetoCategory(item.category)) {
+                    onUpdateCart(item, 1, { cookingPoint: "ao ponto", passSkewer: false });
+                    return;
+                  }
+                  onUpdateCart(item, 1);
+                };
+
+                const handleDecrement = (event: React.MouseEvent) => {
+                  event.stopPropagation();
+                  const entry = resolveQuickAdjustEntry(item);
+                  if (!entry) return;
+                  pulseQty(String(item.id));
+                  onUpdateCart(item, -1, buildCartOptions(entry));
+                };
+
                 return (
                 <div
                   key={item.id}
@@ -1071,16 +1096,17 @@ export const MenuView = ({
                   </div>
 
                   <div className={`flex flex-col items-end gap-2 ${staffView ? "min-w-[132px]" : "min-w-[118px]"}`}>
-                    <button
-                      type="button"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        if (!staffView || allowStaffModal) {
-                          openProductModal(item);
-                        }
-                      }}
-                      className={`relative aspect-[4/3] sm:aspect-square ${staffView ? "w-[120px] rounded-3xl" : "w-[108px] rounded-3xl"} overflow-hidden bg-gray-100 border border-slate-100 shadow-sm ${(!staffView || allowStaffModal) ? 'cursor-pointer' : 'cursor-default'}`}
-                    >
+                    <div className={`relative aspect-[4/3] sm:aspect-square ${staffView ? "w-[120px]" : "w-[108px]"}`}>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          if (!staffView || allowStaffModal) {
+                            openProductModal(item);
+                          }
+                        }}
+                        className={`h-full w-full rounded-3xl overflow-hidden bg-gray-100 border border-slate-100 shadow-sm ${(!staffView || allowStaffModal) ? 'cursor-pointer' : 'cursor-default'}`}
+                      >
                       {stockState.soldOut && (
                         <span className="absolute z-10 top-2 left-2 rounded-full bg-rose-600 text-white text-[10px] font-bold px-2 py-1">
                           ESGOTADO
@@ -1097,34 +1123,21 @@ export const MenuView = ({
                           <ForkKnife size={18} weight="duotone" />
                         </div>
                       )}
-                    </button>
+                      </button>
+                      {canOrder && itemQty <= 0 && (
+                        <button
+                          type="button"
+                          onClick={handleIncrement}
+                          title={stockState.soldOut ? "Esgotado" : "Adicionar"}
+                          disabled={stockState.soldOut}
+                          className="absolute -bottom-2 -right-1 h-10 w-10 rounded-full border border-amber-300 bg-amber-400 text-slate-900 shadow-md ring-2 ring-white inline-flex items-center justify-center transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                          aria-label={`Adicionar ${item.name}`}
+                        >
+                          <Plus size={18} weight="bold" />
+                        </button>
+                      )}
+                    </div>
                     {(() => {
-                      const handleIncrement = (event: React.MouseEvent) => {
-                        event.stopPropagation();
-                        if (!canIncrease) {
-                          if (isEspetoCategory(item.category)) {
-                            onUpdateCart(item, 1, { cookingPoint: "ao ponto", passSkewer: false });
-                            return;
-                          }
-                          onUpdateCart(item, 1);
-                          return;
-                        }
-                        pulseQty(String(item.id));
-                        if (isEspetoCategory(item.category)) {
-                          onUpdateCart(item, 1, { cookingPoint: "ao ponto", passSkewer: false });
-                          return;
-                        }
-                        onUpdateCart(item, 1);
-                      };
-
-                      const handleDecrement = (event: React.MouseEvent) => {
-                        event.stopPropagation();
-                        const entry = resolveQuickAdjustEntry(item);
-                        if (!entry) return;
-                        pulseQty(String(item.id));
-                        onUpdateCart(item, -1, buildCartOptions(entry));
-                      };
-
                       const priceNode = (
                         <div className="flex flex-col items-end leading-none">
                           {resolvePromoPrice(item) ? (
@@ -1159,19 +1172,11 @@ export const MenuView = ({
                         return (
                           <div className="w-full flex items-center justify-end gap-2">
                             {priceNode}
-                            <button
-                              onClick={handleIncrement}
-                              title={stockState.soldOut ? "Esgotado" : "Adicionar"}
-                              disabled={stockState.soldOut}
-                              className="h-10 px-5 py-1.5 rounded-full border text-sm font-semibold shadow-sm transition-all active:scale-95 inline-flex items-center justify-center gap-1.5 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                              style={{
-                                borderColor: stockState.soldOut ? '#e2e8f0' : buttonColor,
-                                color: stockState.soldOut ? '#94a3b8' : buttonColor,
-                              }}
-                            >
-                              <Plus size={14} weight="duotone" />
-                              {stockState.soldOut ? 'Esgotado' : 'Adicionar'}
-                            </button>
+                            {stockState.soldOut && (
+                              <span className="text-[11px] font-semibold text-slate-500 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1">
+                                Esgotado
+                              </span>
+                            )}
                           </div>
                         );
                       }
