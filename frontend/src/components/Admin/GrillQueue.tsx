@@ -16,7 +16,8 @@ import {
   CurrencyDollar,
   Play,
   CaretDown,
-  Check
+  Check,
+  Package
 } from "@phosphor-icons/react";
 import { orderService } from "../../services/orderService";
 import { storeService } from "../../services/storeService";
@@ -384,13 +385,22 @@ const OrderSummaryCard = ({
       : isTimerWarning
         ? 'text-amber-500'
         : 'text-slate-400';
-    const selectorToneClass = selected
-      ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-      : 'border-slate-200 bg-slate-50 text-slate-500';
+    const selectorToneClass = (() => {
+      const raw = String(order?.status || '').toLowerCase();
+      if (raw === 'pending') return 'border-amber-200 bg-amber-50/80 text-amber-700';
+      if (raw === 'preparing') return 'border-sky-200 bg-sky-50/80 text-sky-700';
+      if (raw === 'ready' || raw === 'ready_for_delivery' || raw === 'waiting_for_motoboy' || raw === 'dispatched' || raw === 'in_delivery') {
+        return 'border-violet-200 bg-violet-50/80 text-violet-700';
+      }
+      if (raw === 'done' || raw === 'delivered' || raw === 'finished') return 'border-emerald-200 bg-emerald-50/80 text-emerald-700';
+      return 'border-slate-200 bg-slate-50 text-slate-500';
+    })();
     const selectorMeta = (() => {
-      if (orderType === 'delivery') return { icon: Truck, label: 'ENTREGA' };
-      if (orderType === 'pickup') return { icon: Storefront, label: 'RETIRADA' };
-      return { icon: Hash, label: 'MESA' };
+      const fulfillment = String(order?.fulfillmentMode || '').toLowerCase();
+      if (orderType === 'delivery' && fulfillment === 'postal') return { icon: Package };
+      if (orderType === 'delivery') return { icon: Truck };
+      if (orderType === 'pickup') return { icon: Storefront };
+      return { icon: Hash };
     })();
     return (
   <div
@@ -406,18 +416,15 @@ const OrderSummaryCard = ({
     className={`relative w-full min-h-[132px] rounded-lg border border-[#E0E0E0] ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-4 text-left flex items-stretch gap-3 transition-all duration-200 hover:border-slate-300 hover:shadow-sm cursor-pointer`}
   >
     {showSelector && (
-      <div className={`ml-0.5 shrink-0 w-11 rounded-xl border ${selectorToneClass} flex flex-col items-center justify-between py-2 px-1.5 transition-all duration-200 ${selected ? 'shadow-[0_10px_20px_-16px_rgba(16,185,129,0.95)] ring-1 ring-emerald-200/70 scale-[1.01]' : 'hover:shadow-sm'}`}>
+      <div className={`ml-0.5 shrink-0 w-11 rounded-xl border ${selectorToneClass} flex flex-col items-center justify-center gap-2 px-1.5 transition-all duration-200 ${selected ? 'shadow-[0_10px_20px_-16px_rgba(16,185,129,0.95)] ring-1 ring-emerald-200/70 scale-[1.01]' : 'hover:shadow-sm'}`}>
         <PremiumCheckToggle
           selected={selected}
           onToggle={onToggleSelect}
           ariaLabel={selected ? "Desmarcar pedido" : "Selecionar pedido"}
           title={selected ? "Desmarcar pedido" : "Selecionar pedido"}
         />
-        <div className={`mt-2 flex flex-col items-center gap-1 transition-all duration-200 ${selected ? 'opacity-100 translate-y-0' : 'opacity-90 translate-y-[1px]'}`}>
-          <selectorMeta.icon size={14} weight="duotone" />
-          <span className="text-[8px] font-bold tracking-[0.1em] leading-none">
-            {selectorMeta.label}
-          </span>
+        <div className={`flex items-center justify-center transition-all duration-200 ${selected ? 'opacity-100 translate-y-0' : 'opacity-90 translate-y-[1px]'}`}>
+          <selectorMeta.icon size={16} weight="duotone" />
         </div>
       </div>
     )}
