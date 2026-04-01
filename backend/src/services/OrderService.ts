@@ -486,6 +486,58 @@ export class OrderService
     });
   }
 
+  private async seedPostalShipmentFromCheckoutTx(
+    manager: EntityManager,
+    order: Order,
+    input: any
+  ) {
+    if (!order?.id) return;
+    const orderType = String(order?.type || '').toLowerCase();
+    const mode = String((order as any)?.fulfillmentMode || input?.fulfillmentMode || 'distance').toLowerCase();
+    if (orderType !== 'delivery' || mode !== 'postal') return;
+
+    const checkoutShipment = input?.postalShipment || {};
+    const provider = String(checkoutShipment?.provider || '').trim() || 'checkout';
+    const serviceCode = String(checkoutShipment?.serviceCode || '').trim();
+    const serviceName = String(checkoutShipment?.serviceName || '').trim();
+    const estimatedDaysRaw = Number(checkoutShipment?.estimatedDays || 0);
+    const estimatedDays =
+      Number.isFinite(estimatedDaysRaw) && estimatedDaysRaw > 0
+        ? Math.ceil(estimatedDaysRaw)
+        : null;
+    const priceRaw = Number(checkoutShipment?.price || 0);
+    const price = Number.isFinite(priceRaw) && priceRaw > 0 ? Number(priceRaw.toFixed(2)) : null;
+    const currency = String(checkoutShipment?.currency || '').trim() || 'BRL';
+    const originZip = String(checkoutShipment?.originZip || '').trim() || null;
+    const destinationZip = String(checkoutShipment?.destinationZip || '').trim() || null;
+
+    if (!serviceCode && !serviceName && !estimatedDays && !price) return;
+
+    const shipmentRepo = manager.getRepository(OrderShipment);
+    let shipment = await shipmentRepo.findOne({ where: { orderId: order.id } });
+    if (!shipment) {
+      shipment = shipmentRepo.create({
+        orderId: order.id,
+        shipmentStatus: 'pending_posting',
+      });
+    }
+
+    shipment.provider = provider;
+    shipment.serviceCode = serviceCode || null;
+    shipment.serviceName = serviceName || null;
+    shipment.quotePayload = {
+      ...(shipment.quotePayload || {}),
+      estimatedDays: estimatedDays ?? null,
+      price: price ?? null,
+      currency: currency || null,
+      originZip,
+      destinationZip,
+      selectedAt: new Date().toISOString(),
+    };
+
+    await shipmentRepo.save(shipment);
+  }
+
 
 
 
@@ -501,7 +553,9 @@ export class OrderService
     if (!store) throw new AppError('STORE-001', 404);
     return AppDataSource.transaction(async (manager) => {
       const order = await this.buildOrder(input, store, manager, randomUUID());
-      return manager.getRepository(Order).save(order);
+      const saved = await manager.getRepository(Order).save(order);
+      await this.seedPostalShipmentFromCheckoutTx(manager, saved, input as any);
+      return saved;
     });
   }
 
@@ -520,7 +574,9 @@ export class OrderService
     if (!store) throw new AppError('STORE-001', 404);
     return AppDataSource.transaction(async (manager) => {
       const order = await this.buildOrder(input, store, manager, randomUUID());
-      return manager.getRepository(Order).save(order);
+      const saved = await manager.getRepository(Order).save(order);
+      await this.seedPostalShipmentFromCheckoutTx(manager, saved, input as any);
+      return saved;
     });
   }
 

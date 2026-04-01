@@ -1200,6 +1200,19 @@ export function StorePage() {
       table: customer.table,
       type: customer.type,
       fulfillmentMode: customer.type === 'delivery' ? (isPostalDelivery ? 'postal' : 'distance') : undefined,
+      postalShipment:
+        customer.type === 'delivery' && isPostalDelivery && selectedPostalService
+          ? {
+              provider: String(postalQuote?.quote?.provider || 'internal_postal_v1'),
+              serviceCode: String(selectedPostalService?.serviceCode || ''),
+              serviceName: String(selectedPostalService?.serviceName || selectedPostalService?.serviceCode || ''),
+              estimatedDays: Number(selectedPostalService?.estimatedDays || 0) || undefined,
+              price: Number(selectedPostalService?.price || 0) || undefined,
+              currency: String(selectedPostalService?.currency || 'BRL'),
+              originZip: String(postalQuote?.originZip || ''),
+              destinationZip: String(postalQuote?.destinationZip || ''),
+            }
+          : undefined,
       paymentMethod: payment,
       deliveryFee: customer.type === 'delivery' && deliveryFeeValue > 0 ? deliveryFeeValue : undefined,
       cashTendered: cashTendered !== null ? cashTendered : undefined,

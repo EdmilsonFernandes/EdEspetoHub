@@ -38,6 +38,16 @@ export interface CreateOrderDto {
   paymentStatus?: string;
   cashTendered?: number;
   deliveryFee?: number;
+  postalShipment?: {
+    provider?: string;
+    serviceCode?: string;
+    serviceName?: string;
+    estimatedDays?: number;
+    price?: number;
+    currency?: string;
+    originZip?: string;
+    destinationZip?: string;
+  };
   items: CreateOrderItemInput[];
   storeId: string;
 }
