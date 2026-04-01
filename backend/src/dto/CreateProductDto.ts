@@ -34,6 +34,10 @@ export interface CreateProductDto {
   manageStock?: boolean;
   stockQuantity?: number;
   lowStockAlert?: number;
+  weightG?: number;
+  lengthCm?: number;
+  widthCm?: number;
+  heightCm?: number;
   active?: boolean;
   availabilityDays?: Record<string, boolean> | null;
   modifiers?: ProductModifierOptionDto[] | null;

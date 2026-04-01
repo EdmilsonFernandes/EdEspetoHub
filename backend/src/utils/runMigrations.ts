@@ -234,6 +234,25 @@ export async function runMigrations() {
   `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS postal_enabled BOOLEAN NOT NULL DEFAULT FALSE;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS postal_origin_zip VARCHAR(8);
+  `);
+  await AppDataSource.query(`
+    UPDATE store_settings
+    SET postal_origin_zip = LEFT(REGEXP_REPLACE(COALESCE(postal_origin_zip, ''), '\\D', '', 'g'), 8)
+    WHERE postal_origin_zip IS NOT NULL;
+  `);
+  await AppDataSource.query(`
+    UPDATE store_settings
+    SET postal_enabled = FALSE
+    WHERE postal_enabled = TRUE
+      AND (postal_origin_zip IS NULL OR LENGTH(postal_origin_zip) <> 8);
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
     ADD COLUMN IF NOT EXISTS prep_base_minutes INT;
   `);
   await AppDataSource.query(`
@@ -414,6 +433,22 @@ export async function runMigrations() {
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS products
     ADD COLUMN IF NOT EXISTS low_stock_alert INT NOT NULL DEFAULT 3;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS products
+    ADD COLUMN IF NOT EXISTS weight_g INT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS products
+    ADD COLUMN IF NOT EXISTS length_cm INT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS products
+    ADD COLUMN IF NOT EXISTS width_cm INT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS products
+    ADD COLUMN IF NOT EXISTS height_cm INT;
   `);
   await AppDataSource.query(`
     UPDATE products

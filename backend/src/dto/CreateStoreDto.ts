@@ -31,6 +31,8 @@ export interface CreateStoreDto {
   segment?: string;
   deliveryRadiusKm?: number;
   deliveryFee?: number;
+  postalEnabled?: boolean;
+  postalOriginZip?: string;
   prepBaseMinutes?: number;
   prepAttentionMinutes?: number;
   address?: string;

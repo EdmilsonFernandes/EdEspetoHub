@@ -498,12 +498,49 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
               <div>
                 <p className="text-sm font-semibold text-gray-800">Entrega por raio</p>
-                <p className="text-xs text-gray-500">Defina alcance e valor de frete.</p>
+                <p className="text-xs text-gray-500">Defina alcance local e habilite envio postal.</p>
               </div>
             </div>
             <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.delivery ? 'Fechar' : 'Abrir'}</span>
           </button>
           <div className={`${sectionsOpen.delivery ? 'block' : 'hidden'} sm:block px-4 pb-4 sm:px-5 sm:pb-5 space-y-5`}>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">Envio postal (PAC/SEDEX)</p>
+                  <p className="text-xs text-slate-500">Não altera retirada, mesa e entrega local.</p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={branding.postalEnabled === true}
+                  onClick={() => handleChange("postalEnabled", !(branding.postalEnabled === true))}
+                  className={`relative inline-flex h-7 w-12 items-center rounded-full transition ${
+                    branding.postalEnabled === true ? 'bg-emerald-500' : 'bg-slate-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${
+                      branding.postalEnabled === true ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-600">CEP de origem do envio</label>
+                  <input
+                    type="text"
+                    value={branding.postalOriginZip || ''}
+                    onChange={(e) => handleChange("postalOriginZip", e.target.value)}
+                    className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                    placeholder="00000-000"
+                    maxLength={9}
+                  />
+                  <p className="text-[11px] text-slate-500">Obrigatório para cotar frete postal.</p>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700">Raio de entrega (km)</label>

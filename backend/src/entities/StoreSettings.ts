@@ -111,6 +111,12 @@ export class StoreSettings
   @Column('decimal', { name: 'delivery_fee', precision: 10, scale: 2, nullable: true })
   deliveryFee?: number | null;
 
+  @Column({ name: 'postal_enabled', type: 'boolean', default: false })
+  postalEnabled!: boolean;
+
+  @Column({ name: 'postal_origin_zip', type: 'varchar', nullable: true })
+  postalOriginZip?: string | null;
+
   @Column({
     name: 'social_links',
     type: 'jsonb',

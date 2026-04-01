@@ -46,6 +46,22 @@ export const storeService = {
     return toJson(response);
   },
 
+  async quotePostalBySlug(
+    slug: string,
+    payload: { destinationZip: string; items: Array<{ productId?: string; quantity?: number; weightG?: number; lengthCm?: number; widthCm?: number; heightCm?: number; name?: string }> }
+  ) {
+    const response = await apiClient.rawPost(`/stores/slug/${slug}/postal/quote`, payload);
+    return toJson(response);
+  },
+
+  async quotePostalByStore(
+    storeId: string,
+    payload: { destinationZip: string; items: Array<{ productId?: string; quantity?: number; weightG?: number; lengthCm?: number; widthCm?: number; heightCm?: number; name?: string }> }
+  ) {
+    const response = await apiClient.rawPost(`/stores/${storeId}/postal/quote`, payload);
+    return toJson(response);
+  },
+
   async setStatus(storeId: any, isOpen: any) {
     const response = await apiClient.rawPut(`/stores/${storeId}/status`, { open: isOpen });
     return toJson(response);

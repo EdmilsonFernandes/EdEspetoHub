@@ -69,6 +69,13 @@ export class StoreService
     return String(value || '').toLowerCase() === 'top' ? 'top' : 'center';
   }
 
+  private normalizePostalZip(value?: string | null) {
+    if (value === undefined) return undefined;
+    if (value === null) return null;
+    const digits = String(value).replace(/\D/g, '').slice(0, 8);
+    return digits || null;
+  }
+
   /* =========================
    * CREATE STORE
    * ========================= */
@@ -111,6 +118,8 @@ export class StoreService
       const segment = sanitizeStoreSegment(input.segment);
       const segmentPreset = getStoreSegmentPreset(segment);
       const bannerPosition = this.normalizeBannerPosition(input.bannerPosition);
+      const postalOriginZip = this.normalizePostalZip(input.postalOriginZip);
+      const postalEnabled = Boolean(input.postalEnabled) && Boolean(postalOriginZip);
 
       // 3️⃣ Settings
       const normalizedPix = this.normalizePixKey(input.pixKey);
@@ -132,6 +141,8 @@ export class StoreService
         segment,
         deliveryRadiusKm: deliveryRadiusKm ?? null,
         deliveryFee: deliveryFee ?? null,
+        postalEnabled,
+        postalOriginZip: postalOriginZip ?? null,
         socialLinks,
         openingHours: input.openingHours ?? [],
         orderTypes: input.orderTypes ?? segmentPreset.orderTypes,
@@ -259,6 +270,17 @@ export class StoreService
       if (data.deliveryFee !== undefined)
       {
         store.settings.deliveryFee = this.parseNumber(data.deliveryFee) ?? null;
+      }
+      if (data.postalOriginZip !== undefined)
+      {
+        store.settings.postalOriginZip = this.normalizePostalZip(data.postalOriginZip) ?? null;
+      }
+      if (data.postalEnabled !== undefined)
+      {
+        const nextPostalEnabled = Boolean(data.postalEnabled);
+        store.settings.postalEnabled = nextPostalEnabled && Boolean(store.settings.postalOriginZip);
+      } else if (store.settings.postalEnabled && !store.settings.postalOriginZip) {
+        store.settings.postalEnabled = false;
       }
       if (data.prepBaseMinutes !== undefined)
       {

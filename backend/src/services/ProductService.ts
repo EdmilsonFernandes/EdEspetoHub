@@ -198,6 +198,13 @@ export class ProductService
     return 'ok';
   }
 
+  private parseOptionalPositiveInt(value: unknown): number | null {
+    if (value === undefined || value === null || String(value).trim() === '') return null;
+    const parsed = Math.floor(Number(value));
+    if (!Number.isFinite(parsed) || parsed <= 0) return null;
+    return parsed;
+  }
+
   private async appendInventoryMovement(payload: {
     storeId: string;
     productId: string;
@@ -335,6 +342,10 @@ export class ProductService
     const stockQuantity = Number.isFinite(stockQuantityRaw) ? Math.max(0, Math.floor(stockQuantityRaw)) : 0;
     const lowStockAlertRaw = Number((input as any).lowStockAlert ?? 3);
     const lowStockAlert = Number.isFinite(lowStockAlertRaw) ? Math.max(1, Math.floor(lowStockAlertRaw)) : 3;
+    const weightG = this.parseOptionalPositiveInt((input as any).weightG);
+    const lengthCm = this.parseOptionalPositiveInt((input as any).lengthCm);
+    const widthCm = this.parseOptionalPositiveInt((input as any).widthCm);
+    const heightCm = this.parseOptionalPositiveInt((input as any).heightCm);
 
     const product = this.productRepository.create({
       name: input.name,
@@ -351,6 +362,10 @@ export class ProductService
       manageStock,
       stockQuantity: manageStock ? stockQuantity : 0,
       lowStockAlert,
+      weightG,
+      lengthCm,
+      widthCm,
+      heightCm,
       active: input.active === false ? false : true,
       availabilityDays,
       modifiers,
@@ -633,6 +648,18 @@ export class ProductService
       if (Number.isFinite(lowStockAlertRaw)) {
         product.lowStockAlert = Math.max(1, Math.floor(lowStockAlertRaw));
       }
+    }
+    if ((data as any).weightG !== undefined) {
+      product.weightG = this.parseOptionalPositiveInt((data as any).weightG);
+    }
+    if ((data as any).lengthCm !== undefined) {
+      product.lengthCm = this.parseOptionalPositiveInt((data as any).lengthCm);
+    }
+    if ((data as any).widthCm !== undefined) {
+      product.widthCm = this.parseOptionalPositiveInt((data as any).widthCm);
+    }
+    if ((data as any).heightCm !== undefined) {
+      product.heightCm = this.parseOptionalPositiveInt((data as any).heightCm);
     }
     if (data.availabilityDays !== undefined) {
       product.availabilityDays = normalizeAvailabilityDays(data.availabilityDays);

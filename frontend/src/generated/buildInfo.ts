@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260401.162808.64043fb",
-  "buildId": "0.1.9+20260401.162808.64043fb-20260401.162808-64043fb",
-  "builtAt": "2026-04-01T16:28:08.929Z",
-  "commitHash": "64043fb62f776c5db0ecb1670f6d7ef3c6e4fa4c",
-  "shortHash": "64043fb",
+  "versionInternal": "0.1.9+20260401.165059.85456c8",
+  "buildId": "0.1.9+20260401.165059.85456c8-20260401.165059-85456c8",
+  "builtAt": "2026-04-01T16:50:59.559Z",
+  "commitHash": "85456c86ca810baafd8fd20aacc39da9a30b43be",
+  "shortHash": "85456c8",
   "branch": "main",
   "commits": [
+    {
+      "hash": "85456c86ca810baafd8fd20aacc39da9a30b43be",
+      "shortHash": "85456c8",
+      "dateIso": "2026-04-01T13:31:02-03:00",
+      "subject": "feat(postal): add manual shipment flow with tracking and dispatched status"
+    },
     {
       "hash": "64043fb62f776c5db0ecb1670f6d7ef3c6e4fa4c",
       "shortHash": "64043fb",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "76a3837",
       "dateIso": "2026-03-30T10:26:51-03:00",
       "subject": "fix: retry automático em conflito de lock no ajuste de estoque"
-    },
-    {
-      "hash": "9d9697d3c9924848d047cea7fcfb2808fe29629a",
-      "shortHash": "9d9697d",
-      "dateIso": "2026-03-30T10:20:14-03:00",
-      "subject": "perf: reduzir chamadas de pedidos fora da fila no dashboard"
     }
   ]
 } as const;

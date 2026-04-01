@@ -52,6 +52,10 @@ const initialForm = {
   manageStock: false,
   stockQuantity: '',
   lowStockAlert: '3',
+  weightG: '',
+  lengthCm: '',
+  widthCm: '',
+  heightCm: '',
   active: true,
   availabilityDays: { ...defaultAvailability },
   modifiers: [],
@@ -327,6 +331,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     manageStock: false,
     stockQuantity: '',
     lowStockAlert: '3',
+    weightG: '',
+    lengthCm: '',
+    widthCm: '',
+    heightCm: '',
     active: true,
     availabilityDays: { ...defaultAvailability },
     modifiers: [],
@@ -663,6 +671,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
       manageStock: Boolean(formData.manageStock),
       stockQuantity: formData.manageStock ? Math.max(0, Math.floor(Number(formData.stockQuantity || 0))) : 0,
       lowStockAlert: Math.max(1, Math.floor(Number(formData.lowStockAlert || 3))),
+      weightG: formData.weightG ? Math.max(1, Math.floor(Number(formData.weightG || 0))) : null,
+      lengthCm: formData.lengthCm ? Math.max(1, Math.floor(Number(formData.lengthCm || 0))) : null,
+      widthCm: formData.widthCm ? Math.max(1, Math.floor(Number(formData.widthCm || 0))) : null,
+      heightCm: formData.heightCm ? Math.max(1, Math.floor(Number(formData.heightCm || 0))) : null,
       availabilityDays: buildAvailabilityPayload(formData.availabilityDays),
       modifiers: normalizeProductModifiers(formData.modifiers || []),
     };
@@ -715,6 +727,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
       manageStock: Boolean(product.manageStock),
       stockQuantity: String(Math.max(0, Number(product.stockQuantity ?? 0))),
       lowStockAlert: String(Math.max(1, Number(product.lowStockAlert ?? 3))),
+      weightG: product.weightG ? String(Math.max(1, Number(product.weightG))) : '',
+      lengthCm: product.lengthCm ? String(Math.max(1, Number(product.lengthCm))) : '',
+      widthCm: product.widthCm ? String(Math.max(1, Number(product.widthCm))) : '',
+      heightCm: product.heightCm ? String(Math.max(1, Number(product.heightCm))) : '',
       active: product.active !== false,
       availabilityDays: normalizeAvailabilityState(product.availabilityDays),
       modifiers: normalizeProductModifiers(product.modifiers || []).map((modifier, index) => ({
@@ -758,6 +774,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
         manageStock: Boolean(inlineForm.manageStock),
         stockQuantity: inlineForm.manageStock ? Math.max(0, Math.floor(Number(inlineForm.stockQuantity || 0))) : 0,
         lowStockAlert: Math.max(1, Math.floor(Number(inlineForm.lowStockAlert || 3))),
+        weightG: inlineForm.weightG ? Math.max(1, Math.floor(Number(inlineForm.weightG || 0))) : null,
+        lengthCm: inlineForm.lengthCm ? Math.max(1, Math.floor(Number(inlineForm.lengthCm || 0))) : null,
+        widthCm: inlineForm.widthCm ? Math.max(1, Math.floor(Number(inlineForm.widthCm || 0))) : null,
+        heightCm: inlineForm.heightCm ? Math.max(1, Math.floor(Number(inlineForm.heightCm || 0))) : null,
         active: inlineForm.active,
         availabilityDays: buildAvailabilityPayload(inlineForm.availabilityDays),
         modifiers: normalizeProductModifiers(inlineForm.modifiers || []),
@@ -1315,6 +1335,60 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                 </div>
               </div>
             )}
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 space-y-2">
+              <p className="text-xs font-semibold text-slate-700 uppercase tracking-[0.16em]">Envio postal (opcional)</p>
+              <p className="text-[11px] text-slate-500">Usado na cotação de PAC/SEDEX quando a loja habilitar envio postal.</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-slate-600">Peso (g)</label>
+                  <input
+                    className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={formData.weightG}
+                    onChange={(e) => setFormData({ ...formData, weightG: e.target.value })}
+                    placeholder="300"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-slate-600">Comp. (cm)</label>
+                  <input
+                    className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={formData.lengthCm}
+                    onChange={(e) => setFormData({ ...formData, lengthCm: e.target.value })}
+                    placeholder="16"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-slate-600">Larg. (cm)</label>
+                  <input
+                    className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={formData.widthCm}
+                    onChange={(e) => setFormData({ ...formData, widthCm: e.target.value })}
+                    placeholder="11"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-slate-600">Alt. (cm)</label>
+                  <input
+                    className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={formData.heightCm}
+                    onChange={(e) => setFormData({ ...formData, heightCm: e.target.value })}
+                    placeholder="2"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
             <div className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50/60 p-4 sm:p-5">
@@ -2198,6 +2272,59 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     </div>
                   </div>
                 )}
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-2">
+                  <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-[0.16em]">Envio postal (opcional)</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-500">Peso (g)</label>
+                      <input
+                        className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-1 bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={inlineForm.weightG}
+                        onChange={(e) => setInlineForm((prev) => ({ ...prev, weightG: e.target.value }))}
+                        placeholder="300"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-500">Comp. (cm)</label>
+                      <input
+                        className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-1 bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={inlineForm.lengthCm}
+                        onChange={(e) => setInlineForm((prev) => ({ ...prev, lengthCm: e.target.value }))}
+                        placeholder="16"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-500">Larg. (cm)</label>
+                      <input
+                        className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-1 bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={inlineForm.widthCm}
+                        onChange={(e) => setInlineForm((prev) => ({ ...prev, widthCm: e.target.value }))}
+                        placeholder="11"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-500">Alt. (cm)</label>
+                      <input
+                        className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-1 bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={inlineForm.heightCm}
+                        onChange={(e) => setInlineForm((prev) => ({ ...prev, heightCm: e.target.value }))}
+                        placeholder="2"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-white p-3.5">
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Imagem</label>

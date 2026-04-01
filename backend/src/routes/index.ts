@@ -28,6 +28,7 @@ import { DeliveryController } from '../controllers/DeliveryController';
 import { LegalController } from '../controllers/LegalController';
 import { DeliveryBillingController } from '../controllers/DeliveryBillingController';
 import { StoreUserController } from '../controllers/StoreUserController';
+import { ShippingController } from '../controllers/ShippingController';
 
 import { requireAuth, requireRole } from '../middleware/authGuard';
 import { requireActiveSubscription } from '../middleware/subscriptionGuard';
@@ -100,8 +101,10 @@ routes.get('/chamanoespeto/:slug', StoreController.getBySlug);
 routes.get('/janocaminho/:slug', StoreController.getBySlug);
 routes.get('/stores/slug/:slug/products', ProductController.listPublicBySlug);
 routes.get('/public/stores/slug/:slug/products', ProductController.listPublicBySlug);
+routes.post('/public/stores/slug/:slug/postal/quote', ShippingController.quotePostalPublicBySlug);
 routes.get('/stores/slug/:slug/categories', ProductController.listPublicCategoriesBySlug);
 routes.get('/public/stores/slug/:slug/categories', ProductController.listPublicCategoriesBySlug);
+routes.post('/stores/slug/:slug/postal/quote', ShippingController.quotePostalPublicBySlug);
 routes.get('/public/stores/slug/:slug/highlights', OrderController.listHighlightsBySlug);
 routes.get('/public/stores/slug/:slug/tables/status', OrderController.listTableStatusBySlug);
 
@@ -125,6 +128,7 @@ routes.get('/stores/:storeId/inventory', requireAuth, requireRole('ADMIN', 'OPER
 routes.get('/stores/:storeId/inventory/alerts', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), ProductController.getInventoryAlerts);
 routes.get('/stores/:storeId/inventory/movements', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), ProductController.listInventoryMovements);
 routes.patch('/stores/:storeId/products/:productId/stock', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), ProductController.adjustStock);
+routes.post('/stores/:storeId/postal/quote', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), ShippingController.quotePostalByStore);
 
 // Orders - cliente cria (aqui sim assinatura com carência)
 routes.post('/stores/:storeId/orders', requireActiveSubscription, OrderController.create);

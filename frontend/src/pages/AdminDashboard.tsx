@@ -1483,6 +1483,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     instagram: instagramHandle?.replace('@', '') || '',
     deliveryRadiusKm: session?.store?.settings?.deliveryRadiusKm || '',
     deliveryFee: session?.store?.settings?.deliveryFee || '',
+    postalEnabled: session?.store?.settings?.postalEnabled === true,
+    postalOriginZip: session?.store?.settings?.postalOriginZip || '',
     prepBaseMinutes: session?.store?.settings?.prepBaseMinutes || '20',
     prepAttentionMinutes: session?.store?.settings?.prepAttentionMinutes || '15',
   }));
@@ -1631,6 +1633,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       instagram: instagramHandle?.replace('@', '') || '',
       deliveryRadiusKm: session?.store?.settings?.deliveryRadiusKm || '',
       deliveryFee: session?.store?.settings?.deliveryFee || '',
+      postalEnabled: session?.store?.settings?.postalEnabled === true,
+      postalOriginZip: session?.store?.settings?.postalOriginZip || '',
       prepBaseMinutes: session?.store?.settings?.prepBaseMinutes || '20',
       prepAttentionMinutes: session?.store?.settings?.prepAttentionMinutes || '15',
     });
@@ -1651,6 +1655,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     session?.store?.owner?.address,
     session?.store?.settings?.deliveryRadiusKm,
     session?.store?.settings?.deliveryFee,
+    session?.store?.settings?.postalEnabled,
+    session?.store?.settings?.postalOriginZip,
     session?.store?.settings?.prepBaseMinutes,
     session?.store?.settings?.prepAttentionMinutes,
     instagramHandle,
@@ -1674,6 +1680,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       instagram: normalize(instagramHandle?.replace('@', '') || ''),
       deliveryRadiusKm: normalize(session?.store?.settings?.deliveryRadiusKm),
       deliveryFee: normalize(session?.store?.settings?.deliveryFee),
+      postalEnabled: session?.store?.settings?.postalEnabled === true ? 'true' : 'false',
+      postalOriginZip: normalize(session?.store?.settings?.postalOriginZip),
       prepBaseMinutes: normalize(session?.store?.settings?.prepBaseMinutes || '20'),
       prepAttentionMinutes: normalize(session?.store?.settings?.prepAttentionMinutes || '15'),
     };
@@ -1694,6 +1702,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       instagram: normalize(brandingDraft.instagram),
       deliveryRadiusKm: normalize(brandingDraft.deliveryRadiusKm),
       deliveryFee: normalize(brandingDraft.deliveryFee),
+      postalEnabled: brandingDraft.postalEnabled === true ? 'true' : 'false',
+      postalOriginZip: normalize(brandingDraft.postalOriginZip),
       prepBaseMinutes: normalize(brandingDraft.prepBaseMinutes || '20'),
       prepAttentionMinutes: normalize(brandingDraft.prepAttentionMinutes || '15'),
     };
@@ -2278,6 +2288,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         address: brandingDraft.address?.trim() ?? '',
         deliveryRadiusKm: brandingDraft.deliveryRadiusKm,
         deliveryFee: brandingDraft.deliveryFee,
+        postalEnabled: brandingDraft.postalEnabled === true,
+        postalOriginZip: brandingDraft.postalOriginZip,
         prepBaseMinutes: brandingDraft.prepBaseMinutes,
         prepAttentionMinutes: brandingDraft.prepAttentionMinutes,
         socialLinks: brandingDraft.instagram ? [{ type: 'instagram', value: brandingDraft.instagram }] : [],

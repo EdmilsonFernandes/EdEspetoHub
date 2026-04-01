@@ -68,6 +68,18 @@ export class Product {
   @Column({ name: 'low_stock_alert', type: 'int', default: 3 })
   lowStockAlert!: number;
 
+  @Column({ name: 'weight_g', type: 'int', nullable: true })
+  weightG?: number | null;
+
+  @Column({ name: 'length_cm', type: 'int', nullable: true })
+  lengthCm?: number | null;
+
+  @Column({ name: 'width_cm', type: 'int', nullable: true })
+  widthCm?: number | null;
+
+  @Column({ name: 'height_cm', type: 'int', nullable: true })
+  heightCm?: number | null;
+
   @Column({ default: true })
   active!: boolean;
 
