@@ -1695,7 +1695,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   }, [queue]);
 
   const inRouteQueue = useMemo(() => {
-    const routeStatuses = new Set([ 'in_delivery' ]);
+    const routeStatuses = new Set([ 'in_delivery', 'dispatched' ]);
     return [...queue]
       .filter((order) => routeStatuses.has(String(order?.status || '').toLowerCase()))
       .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
@@ -2053,6 +2053,17 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       return;
     }
     const latestStatus = String(latest.status || '').toLowerCase();
+    const queueVisibleStatuses = new Set([ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ]);
+    const routeStatuses = new Set([ 'in_delivery', 'dispatched' ]);
+
+    if (activeTab === 'queue' && !queueVisibleStatuses.has(latestStatus)) {
+      closeOrderOverlays();
+      if (routeStatuses.has(latestStatus)) {
+        setActiveTab('inroute');
+      }
+      return;
+    }
+
     const isFinal = latestStatus === 'done' || latestStatus === 'delivered' || latestStatus === 'finished';
     if ((isFinal && !editingFinalizedOrder) || latestStatus === 'cancelled') {
       closeOrderOverlays();
@@ -2061,7 +2072,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     if (latest !== selectedOrder) {
       setSelectedOrder(latest);
     }
-  }, [queue, selectedOrder, editingFinalizedOrder]);
+  }, [queue, selectedOrder, editingFinalizedOrder, activeTab]);
   useEffect(() => {
     setCompletedPage(1);
   }, [completedPageSize]);
@@ -3155,7 +3166,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       {activeTab === 'inroute' && (
         <div className="space-y-3">
           <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">
-            Pedidos em deslocamento: o entregador já retirou o pedido e está a caminho do cliente.
+            Pedidos em deslocamento e postagens despachadas.
           </div>
           {inRouteQueue.length === 0 ? (
             <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
@@ -3186,7 +3197,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       <p className="text-[11px] text-slate-400">{formatDateTime(order.createdAt)}</p>
                     </div>
                     <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200">
-                      Em rota
+                      {String(order?.status || '').toLowerCase() === 'dispatched' ? 'Despachado' : 'Em rota'}
                     </span>
                   </div>
 
