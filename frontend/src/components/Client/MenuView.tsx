@@ -434,6 +434,7 @@ export const MenuView = ({
       startY: number;
       deltaX: number;
       deltaY: number;
+      size: number;
       imageUrl?: string;
       active: boolean;
     }>
@@ -441,6 +442,10 @@ export const MenuView = ({
   const [cartPulse, setCartPulse] = useState(false);
   const qtyControlIdleTimersRef = React.useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const cartButtonRef = React.useRef<HTMLButtonElement | null>(null);
+  const categoryTabsContainerRef = React.useRef<HTMLDivElement | null>(null);
+  const categoryTabRefs = React.useRef<Record<string, HTMLButtonElement | null>>({});
+  const categorySyncLockRef = React.useRef(false);
+  const categorySyncLockTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const canOrder = isOrderingEnabled !== false;
   const catalogPrimaryColor = branding?.primaryColor || "#f59e0b";
   const catalogSecondaryColor = branding?.secondaryColor || branding?.accentColor || "#0f172a";
@@ -648,10 +653,27 @@ export const MenuView = ({
     }
   };
 
+  const getCategoryScrollOffset = () => {
+    const tabsHeight = categoryTabsContainerRef.current?.getBoundingClientRect?.().height || 0;
+    return tabsHeight + 12;
+  };
+
   const scrollToCategory = (key) => {
     const target = categoryRefs.current[key];
-    if (target?.scrollIntoView) {
-      target.scrollIntoView({ behavior: staffView ? "auto" : "smooth", block: "start" });
+    if (target) {
+      categorySyncLockRef.current = true;
+      if (categorySyncLockTimerRef.current) {
+        window.clearTimeout(categorySyncLockTimerRef.current);
+      }
+      const targetRect = target.getBoundingClientRect();
+      const targetY = window.scrollY + targetRect.top - getCategoryScrollOffset();
+      window.scrollTo({
+        top: Math.max(0, targetY),
+        behavior: staffView ? "auto" : "smooth",
+      });
+      categorySyncLockTimerRef.current = window.setTimeout(() => {
+        categorySyncLockRef.current = false;
+      }, 520);
     }
   };
 
@@ -699,6 +721,9 @@ export const MenuView = ({
       const timers = qtyControlIdleTimersRef.current;
       Object.values(timers).forEach((timerId) => window.clearTimeout(timerId));
       qtyControlIdleTimersRef.current = {};
+      if (categorySyncLockTimerRef.current) {
+        window.clearTimeout(categorySyncLockTimerRef.current);
+      }
     };
   }, []);
 
@@ -707,7 +732,7 @@ export const MenuView = ({
     if (!originEl || !cartEl) return;
     const originRect = originEl.getBoundingClientRect();
     const cartRect = cartEl.getBoundingClientRect();
-    const size = 22;
+    const size = 38;
     const startX = originRect.left + originRect.width / 2 - size / 2;
     const startY = originRect.top + originRect.height / 2 - size / 2;
     const endX = cartRect.left + Math.min(cartRect.width * 0.22, 42) - size / 2;
@@ -723,6 +748,7 @@ export const MenuView = ({
         startY,
         deltaX: endX - startX,
         deltaY: endY - startY,
+        size,
         imageUrl,
         active: false,
       },
@@ -748,6 +774,56 @@ export const MenuView = ({
     }
   }, [filteredGrouped, activeCategoryKey]);
 
+  useEffect(() => {
+    if (!filteredGrouped.length) return;
+    let frame = 0;
+
+    const syncActiveCategoryByScroll = () => {
+      if (categorySyncLockRef.current) return;
+      const offset = getCategoryScrollOffset();
+      let nextActive = filteredGrouped[0].key;
+
+      for (const category of filteredGrouped) {
+        const node = categoryRefs.current[category.key];
+        if (!node) continue;
+        const top = node.getBoundingClientRect().top - offset;
+        if (top <= 28) {
+          nextActive = category.key;
+          continue;
+        }
+        break;
+      }
+
+      setActiveCategoryKey((prev) => (prev === nextActive ? prev : nextActive));
+    };
+
+    const onScroll = () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(syncActiveCategoryByScroll);
+    };
+
+    syncActiveCategoryByScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [filteredGrouped]);
+
+  useEffect(() => {
+    if (!activeCategoryKey) return;
+    const tabButton = categoryTabRefs.current[activeCategoryKey];
+    if (tabButton?.scrollIntoView) {
+      tabButton.scrollIntoView({
+        behavior: "auto",
+        block: "nearest",
+        inline: "center",
+      });
+    }
+  }, [activeCategoryKey]);
+
   return (
     <div className="bg-slate-50 overflow-x-clip">
 
@@ -770,6 +846,7 @@ export const MenuView = ({
 
       {filteredGrouped.length > 1 && (
         <div
+          ref={categoryTabsContainerRef}
           className={`sticky ${showHeader ? "top-0 sm:top-[92px]" : "top-0"} z-40 px-4 pb-2 pt-1 max-w-6xl mx-auto`}
         >
           <div className="rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur-md shadow-sm ds-tabs px-2 py-2">
@@ -794,6 +871,9 @@ export const MenuView = ({
                   return (
                     <button
                       key={category.key}
+                      ref={(node) => {
+                        categoryTabRefs.current[category.key] = node;
+                      }}
                       type="button"
                       onClick={() => {
                         setActiveCategoryKey(category.key);
@@ -1106,6 +1186,7 @@ export const MenuView = ({
 
                 const handleIncrement = (event: React.MouseEvent) => {
                   const originButton = event.currentTarget as HTMLElement;
+                  const imageOrigin = originButton.closest("[data-menu-item-media]") as HTMLElement | null;
                   event.stopPropagation();
                   openQtyControl(itemId);
                   if (!canIncrease) {
@@ -1117,7 +1198,7 @@ export const MenuView = ({
                     return;
                   }
                   pulseQty(itemId);
-                  animateItemToCart(originButton, item);
+                  animateItemToCart(imageOrigin || originButton, item);
                   if (isEspetoCategory(item.category)) {
                     onUpdateCart(item, 1, { cookingPoint: "ao ponto", passSkewer: false });
                     return;
@@ -1205,8 +1286,8 @@ export const MenuView = ({
                     )}
                   </div>
 
-                  <div className={`flex flex-col items-end gap-2 ${staffView ? "min-w-[132px]" : "min-w-[118px]"}`}>
-                    <div className={`relative aspect-[4/3] sm:aspect-square ${staffView ? "w-[120px]" : "w-[108px]"}`}>
+                  <div className={`flex flex-col items-end gap-2 flex-shrink-0 ${staffView ? "min-w-[132px]" : "min-w-[118px]"}`}>
+                    <div data-menu-item-media className={`relative h-[108px] w-[108px] sm:h-[116px] sm:w-[116px] ${staffView ? "md:h-[120px] md:w-[120px]" : ""}`}>
                       <button
                         type="button"
                         onClick={(event) => {
@@ -1226,7 +1307,9 @@ export const MenuView = ({
                         <img
                           src={resolveAssetUrl(item.imageUrl)}
                           alt={item.name}
-                          className="w-full h-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-full object-cover object-center transition duration-300 group-hover:scale-[1.03]"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-slate-300">
@@ -1256,29 +1339,29 @@ export const MenuView = ({
                                 event.stopPropagation();
                                 openQtyControl(itemId);
                               }}
-                              className="absolute bottom-1 right-1 h-9 min-w-[36px] rounded-full border shadow-md ring-2 ring-white inline-flex items-center justify-center px-2 transition-all duration-300 active:scale-95"
+                              className="absolute bottom-1 right-1 h-10 min-w-[42px] rounded-full border shadow-md ring-2 ring-white inline-flex items-center justify-center px-2.5 transition-all duration-300 active:scale-95"
                               style={{ backgroundColor: catalogPrimaryColor, borderColor: catalogPrimaryColor, color: catalogPrimaryText }}
                               aria-label={`Quantidade ${itemQty} de ${item.name}`}
                             >
-                              <span className="text-sm font-black leading-none">{itemQty}</span>
+                              <span className="text-base font-black leading-none tracking-tight">{itemQty}</span>
                             </button>
                           )}
                           {itemQty > 0 && isQtyControlExpanded && (
                             <div
-                              className="absolute bottom-1 right-1 h-9 rounded-full border border-slate-200 bg-white shadow-md ring-2 ring-white inline-flex items-center gap-1 px-1.5 transition-all duration-300"
+                              className="absolute bottom-1 right-1 h-10 rounded-full border border-slate-200 bg-white shadow-md ring-2 ring-white inline-flex items-center gap-1.5 px-2 transition-all duration-300"
                               onClick={(event) => event.stopPropagation()}
                             >
                               <button
                                 type="button"
                                 onClick={handleDecrement}
-                                className="h-6 w-6 rounded-full border transition inline-flex items-center justify-center"
+                                className="h-7 w-7 rounded-full border transition inline-flex items-center justify-center"
                                 style={{ borderColor: `${catalogPrimaryColor}33`, color: catalogSecondaryColor, backgroundColor: "#ffffff" }}
                                 aria-label={`Remover uma unidade de ${item.name}`}
                               >
-                                <Minus size={12} weight="bold" />
+                                <Minus size={13} weight="bold" />
                               </button>
                               <span
-                                className={`min-w-[22px] text-center text-xs font-black leading-none ${
+                                className={`min-w-[26px] text-center text-base font-black leading-none ${
                                   qtyPulseId === itemId ? "scale-110" : ""
                                 }`}
                                 style={{ color: qtyPulseId === itemId ? catalogPrimaryColor : catalogSecondaryColor }}
@@ -1289,11 +1372,11 @@ export const MenuView = ({
                                 type="button"
                                 onClick={handleIncrement}
                                 disabled={stockState.soldOut}
-                                className="h-6 w-6 rounded-full transition inline-flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
+                                className="h-7 w-7 rounded-full transition inline-flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
                                 style={{ backgroundColor: catalogPrimaryColor, color: catalogPrimaryText }}
                                 aria-label={`Adicionar uma unidade de ${item.name}`}
                               >
-                                <Plus size={12} weight="bold" />
+                                <Plus size={13} weight="bold" />
                               </button>
                             </div>
                           )}
@@ -1485,18 +1568,19 @@ export const MenuView = ({
         {flyToCartItems.map((fly) => (
           <div
             key={fly.id}
-            className="absolute rounded-full overflow-hidden border border-white/70 shadow-md"
+            className="absolute rounded-full overflow-hidden border-2 border-white/90 shadow-lg"
             style={{
               left: `${fly.startX}px`,
               top: `${fly.startY}px`,
-              width: "22px",
-              height: "22px",
+              width: `${fly.size}px`,
+              height: `${fly.size}px`,
               transform: fly.active
-                ? `translate3d(${fly.deltaX}px, ${fly.deltaY}px, 0) scale(0.42)`
+                ? `translate3d(${fly.deltaX}px, ${fly.deltaY}px, 0) scale(0.52)`
                 : "translate3d(0, 0, 0) scale(1)",
-              opacity: fly.active ? 0.22 : 0.98,
+              opacity: fly.active ? 0.3 : 1,
               transition: "transform 620ms cubic-bezier(0.22, 1, 0.36, 1), opacity 620ms ease",
               background: fly.imageUrl ? "#ffffff" : catalogPrimaryColor,
+              boxShadow: fly.imageUrl ? "0 8px 18px -8px rgba(15,23,42,0.45)" : undefined,
             }}
           >
             {fly.imageUrl ? (

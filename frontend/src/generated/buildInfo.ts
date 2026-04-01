@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260401.004932.37165be",
-  "buildId": "0.1.9+20260401.004932.37165be-20260401.004932-37165be",
-  "builtAt": "2026-04-01T00:49:32.316Z",
-  "commitHash": "37165be00d9201d605fdca765d8c72b63b340d9c",
-  "shortHash": "37165be",
+  "versionInternal": "0.1.9+20260401.133536.2d51ac1",
+  "buildId": "0.1.9+20260401.133536.2d51ac1-20260401.133536-2d51ac1",
+  "builtAt": "2026-04-01T13:35:36.667Z",
+  "commitHash": "2d51ac1eac4ccf679c33b167674c916fc0b7f100",
+  "shortHash": "2d51ac1",
   "branch": "main",
   "commits": [
+    {
+      "hash": "2d51ac1eac4ccf679c33b167674c916fc0b7f100",
+      "shortHash": "2d51ac1",
+      "dateIso": "2026-03-31T21:50:11-03:00",
+      "subject": "feat(catalog-theme): apply store colors to bag and category controls"
+    },
     {
       "hash": "37165be00d9201d605fdca765d8c72b63b340d9c",
       "shortHash": "37165be",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "b0e6327",
       "dateIso": "2026-03-30T10:15:15-03:00",
       "subject": "fix: estabilizar navegação de abas no admin dashboard"
-    },
-    {
-      "hash": "a874cc511e465663df38f40f4ee8f8df40b37a24",
-      "shortHash": "a874cc5",
-      "dateIso": "2026-03-30T10:08:18-03:00",
-      "subject": "fix: evitar timeout no ajuste de estoque com lock/statement timeout"
     }
   ]
 } as const;
