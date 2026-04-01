@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260401.133536.2d51ac1",
-  "buildId": "0.1.9+20260401.133536.2d51ac1-20260401.133536-2d51ac1",
-  "builtAt": "2026-04-01T13:35:36.667Z",
-  "commitHash": "2d51ac1eac4ccf679c33b167674c916fc0b7f100",
-  "shortHash": "2d51ac1",
+  "versionInternal": "0.1.9+20260401.162808.64043fb",
+  "buildId": "0.1.9+20260401.162808.64043fb-20260401.162808-64043fb",
+  "builtAt": "2026-04-01T16:28:08.929Z",
+  "commitHash": "64043fb62f776c5db0ecb1670f6d7ef3c6e4fa4c",
+  "shortHash": "64043fb",
   "branch": "main",
   "commits": [
+    {
+      "hash": "64043fb62f776c5db0ecb1670f6d7ef3c6e4fa4c",
+      "shortHash": "64043fb",
+      "dateIso": "2026-04-01T10:36:54-03:00",
+      "subject": "feat(catalog): refine mobile UX, image consistency and category scroll sync"
+    },
     {
       "hash": "2d51ac1eac4ccf679c33b167674c916fc0b7f100",
       "shortHash": "2d51ac1",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "9d9697d",
       "dateIso": "2026-03-30T10:20:14-03:00",
       "subject": "perf: reduzir chamadas de pedidos fora da fila no dashboard"
-    },
-    {
-      "hash": "b0e63271121749ccf6f72e06f7f27a93c871e1f9",
-      "shortHash": "b0e6327",
-      "dateIso": "2026-03-30T10:15:15-03:00",
-      "subject": "fix: estabilizar navegação de abas no admin dashboard"
     }
   ]
 } as const;

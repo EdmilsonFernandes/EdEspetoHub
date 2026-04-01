@@ -21,6 +21,7 @@ const statusLabels: Record<string, string> = {
   ready_for_delivery: 'Pronto para entrega',
   waiting_for_motoboy: 'Aguardando entregador',
   in_delivery: 'Em rota',
+  dispatched: 'Despachado',
   done: 'Pronto',
   paid: 'Pago',
   delivered: 'Entregue',
@@ -235,6 +236,7 @@ export function OrderTracking() {
     if (isDelivery && (deliveryStatus === 'DELIVERED' || normalizedStatus === 'delivered' || normalizedStatus === 'finished')) return 'Entregue';
     if (isDelivery && (deliveryStatus === 'IN_TRANSIT' || normalizedStatus === 'in_delivery')) return 'Em rota';
     if (isDelivery && (deliveryStatus === 'ACCEPTED' || deliveryStatus === 'PICKED_UP')) return 'Entregador a caminho';
+    if (isDelivery && normalizedStatus === 'dispatched') return 'Despachado';
     if (isDelivery && normalizedStatus === 'waiting_for_motoboy') return 'Aguardando entregador';
     if (isDelivery && normalizedStatus === 'ready_for_delivery') return 'Pronto para entrega';
     if (isDelivery && normalizedStatus === 'ready') return 'Aguardando entregador';
@@ -269,6 +271,10 @@ export function OrderTracking() {
     );
   const hasDeliveryFee =
     order?.deliveryFee !== null && order?.deliveryFee !== undefined && isDelivery;
+  const isPostalDelivery = isDelivery && String((order as any)?.fulfillmentMode || '').toLowerCase() === 'postal';
+  const shipment = (order as any)?.shipment || (trackingV2 as any)?.shipment || null;
+  const shipmentTrackingCode = String(shipment?.trackingCode || '').trim();
+  const shipmentTrackingUrl = String(shipment?.trackingUrl || '').trim();
   const pixPayload = pixKey
     ? buildPixPayload({
         key: pixKey,
@@ -1089,6 +1095,34 @@ export function OrderTracking() {
                         <MapPin size={16} weight="duotone" className="text-slate-400 mt-0.5" />
                         <span>{formatAddress(order.address || order.deliveryAddress)}</span>
                       </p>
+                    )}
+                    {isPostalDelivery && (
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-2">
+                        <p className="text-xs font-bold uppercase tracking-[0.08em] text-slate-500">
+                          Envio postal
+                        </p>
+                        <p className="text-sm text-slate-700">
+                          <span className="font-semibold">Status:</span>{' '}
+                          {shipment?.shipmentStatus === 'posted' ? 'Postado' : 'Aguardando postagem'}
+                        </p>
+                        {shipmentTrackingCode ? (
+                          <p className="text-sm text-slate-700 break-all">
+                            <span className="font-semibold">Código:</span> {shipmentTrackingCode}
+                          </p>
+                        ) : (
+                          <p className="text-sm text-slate-500">Código de rastreio ainda não informado.</p>
+                        )}
+                        {shipmentTrackingUrl ? (
+                          <a
+                            href={shipmentTrackingUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+                          >
+                            Acompanhar entrega
+                          </a>
+                        ) : null}
+                      </div>
                     )}
                     {hasDeliveryFee ? (
                       <p className="flex items-center gap-2">

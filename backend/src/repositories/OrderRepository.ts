@@ -106,7 +106,7 @@ export class OrderRepository
   {
     return this.repository.findOne({
       where: { id: orderId },
-      relations: [ 'store', 'store.settings', 'store.owner', 'items', 'items.product' ],
+      relations: [ 'store', 'store.settings', 'store.owner', 'items', 'items.product', 'shipment' ],
     });
   }
 

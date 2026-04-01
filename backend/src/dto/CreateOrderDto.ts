@@ -33,6 +33,7 @@ export interface CreateOrderDto {
   address?: string;
   table?: string;
   type: string;
+  fulfillmentMode?: 'distance' | 'postal' | string;
   paymentMethod?: string;
   paymentStatus?: string;
   cashTendered?: number;

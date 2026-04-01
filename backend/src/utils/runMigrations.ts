@@ -297,7 +297,55 @@ export async function runMigrations() {
   `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS orders
+    ADD COLUMN IF NOT EXISTS fulfillment_mode TEXT NOT NULL DEFAULT 'distance';
+  `);
+  await AppDataSource.query(`
+    UPDATE orders
+    SET fulfillment_mode = 'distance'
+    WHERE fulfillment_mode IS NULL OR TRIM(fulfillment_mode) = '';
+  `);
+  await AppDataSource.query(`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'chk_orders_fulfillment_mode'
+      ) THEN
+        ALTER TABLE orders
+        ADD CONSTRAINT chk_orders_fulfillment_mode
+        CHECK (fulfillment_mode IN ('distance', 'postal'));
+      END IF;
+    END $$;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS orders
     ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+  `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS order_shipments (
+      order_id UUID PRIMARY KEY REFERENCES orders(id) ON DELETE CASCADE,
+      provider TEXT,
+      service_code TEXT,
+      service_name TEXT,
+      tracking_code TEXT,
+      tracking_url TEXT,
+      shipment_status TEXT NOT NULL DEFAULT 'pending_posting',
+      quote_payload JSONB,
+      tracking_last_event JSONB,
+      tracking_last_at TIMESTAMPTZ,
+      posted_at TIMESTAMPTZ,
+      delivered_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_order_shipments_tracking_code
+    ON order_shipments(tracking_code);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_order_shipments_status
+    ON order_shipments(shipment_status);
   `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS products

@@ -26,6 +26,19 @@ const normalizeOrder = (order: any) => ({
   cashTendered: order.cashTendered ?? order.cash_tendered ?? null,
   deliveryFee: order.deliveryFee ?? order.delivery_fee ?? null,
   paymentStatus: order.paymentStatus ?? order.payment_status ?? 'PENDING',
+  fulfillmentMode: order.fulfillmentMode ?? order.fulfillment_mode ?? 'distance',
+  shipment: order.shipment
+    ? {
+        provider: order.shipment.provider ?? null,
+        serviceCode: order.shipment.serviceCode ?? order.shipment.service_code ?? null,
+        serviceName: order.shipment.serviceName ?? order.shipment.service_name ?? null,
+        trackingCode: order.shipment.trackingCode ?? order.shipment.tracking_code ?? null,
+        trackingUrl: order.shipment.trackingUrl ?? order.shipment.tracking_url ?? null,
+        shipmentStatus: order.shipment.shipmentStatus ?? order.shipment.shipment_status ?? null,
+        postedAt: order.shipment.postedAt ?? order.shipment.posted_at ?? null,
+        deliveredAt: order.shipment.deliveredAt ?? order.shipment.delivered_at ?? null,
+      }
+    : null,
   type: order.type ?? order.order_type,
   items: (order.items || []).map((item: any) => {
     const quantity = item.qty ?? item.quantity ?? 0;
@@ -240,6 +253,24 @@ export const orderService = {
   async updateStatus(id: string, status: string)
   {
     await apiClient.patch(`/orders/${id}/status`, { status });
+  },
+
+  async updateFulfillmentMode(id: string, fulfillmentMode: 'distance' | 'postal') {
+    return apiClient.patch(`/orders/${id}/fulfillment-mode`, { fulfillmentMode });
+  },
+
+  async updatePostalShipment(
+    id: string,
+    payload: {
+      provider?: string;
+      serviceCode?: string;
+      serviceName?: string;
+      trackingCode?: string;
+      trackingUrl?: string;
+      markPosted?: boolean;
+    }
+  ) {
+    return apiClient.patch(`/orders/${id}/postal`, payload || {});
   },
 
   async updateItems(id: string, items: any, total: number)

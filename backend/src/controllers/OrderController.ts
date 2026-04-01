@@ -198,6 +198,42 @@ export class OrderController {
     }
   }
 
+  static async updateFulfillmentMode(req: Request, res: Response) {
+    const { fulfillmentMode } = req.body || {};
+    try {
+      const order = await orderService.updateFulfillmentMode(
+        req.params.orderId,
+        fulfillmentMode,
+        req.auth?.storeId
+      );
+      return res.json(order);
+    } catch (error: any) {
+      log.warn('Order fulfillment mode update failed', { orderId: req.params.orderId, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async updatePostalShipment(req: Request, res: Response) {
+    try {
+      const result = await orderService.updatePostalShipment(
+        req.params.orderId,
+        {
+          provider: req.body?.provider,
+          serviceCode: req.body?.serviceCode,
+          serviceName: req.body?.serviceName,
+          trackingCode: req.body?.trackingCode,
+          trackingUrl: req.body?.trackingUrl,
+          markPosted: req.body?.markPosted,
+        },
+        req.auth?.storeId
+      );
+      return res.json(result);
+    } catch (error: any) {
+      log.warn('Order postal shipment update failed', { orderId: req.params.orderId, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
   static async reopen(req: Request, res: Response) {
     try {
       const order = await orderService.reopenOrder(
@@ -270,6 +306,7 @@ export class OrderController {
         id: order.id,
         status: order.status,
         type: order.type,
+        fulfillmentMode: (order as any).fulfillmentMode || 'distance',
         table: order.table,
         customerName: order.customerName,
         phone: order.phone,
@@ -279,6 +316,20 @@ export class OrderController {
         cashTendered: order.cashTendered ?? null,
         total: order.total,
         deliveryFee: order.deliveryFee ?? null,
+        shipment: (order as any)?.shipment
+          ? {
+              provider: (order as any).shipment.provider || null,
+              serviceCode: (order as any).shipment.serviceCode || null,
+              serviceName: (order as any).shipment.serviceName || null,
+              trackingCode: (order as any).shipment.trackingCode || null,
+              trackingUrl: (order as any).shipment.trackingUrl || null,
+              shipmentStatus: (order as any).shipment.shipmentStatus || null,
+              postedAt: (order as any).shipment.postedAt || null,
+              deliveredAt: (order as any).shipment.deliveredAt || null,
+              trackingLastEvent: (order as any).shipment.trackingLastEvent || null,
+              trackingLastAt: (order as any).shipment.trackingLastAt || null,
+            }
+          : null,
         delivery: deliveryRow
           ? {
               status: deliveryRow.status,
@@ -383,6 +434,7 @@ export class OrderController {
         id: order.id,
         status: order.status,
         type: order.type,
+        fulfillmentMode: (order as any).fulfillmentMode || 'distance',
         createdAt: order.createdAt,
         storeId: order.store?.id || null,
         queuePosition,
@@ -393,6 +445,20 @@ export class OrderController {
             at: order.createdAt,
           },
         ],
+        shipment: (order as any)?.shipment
+          ? {
+              provider: (order as any).shipment.provider || null,
+              serviceCode: (order as any).shipment.serviceCode || null,
+              serviceName: (order as any).shipment.serviceName || null,
+              trackingCode: (order as any).shipment.trackingCode || null,
+              trackingUrl: (order as any).shipment.trackingUrl || null,
+              shipmentStatus: (order as any).shipment.shipmentStatus || null,
+              postedAt: (order as any).shipment.postedAt || null,
+              deliveredAt: (order as any).shipment.deliveredAt || null,
+              trackingLastEvent: (order as any).shipment.trackingLastEvent || null,
+              trackingLastAt: (order as any).shipment.trackingLastAt || null,
+            }
+          : null,
         eta: {
           totalMinutes: eta.totalMinutes,
           windowMin: eta.windowMin,

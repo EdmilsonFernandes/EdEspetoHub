@@ -18,11 +18,13 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Store } from './Store';
 import { OrderItem } from './OrderItem';
+import { OrderShipment } from './OrderShipment';
 
 @Entity({ name: 'orders' })
 /**
@@ -50,6 +52,9 @@ export class Order {
   @Column({ default: 'delivery' })
   type!: string;
 
+  @Column({ name: 'fulfillment_mode', default: 'distance' })
+  fulfillmentMode!: string;
+
   @Column({ default: 'pending' })
   status!: string;
 
@@ -74,6 +79,9 @@ export class Order {
 
   @OneToMany(() => OrderItem, (item) => item.order, { cascade: true, eager: true })
   items!: OrderItem[];
+
+  @OneToOne(() => OrderShipment, (shipment) => shipment.order, { nullable: true })
+  shipment?: OrderShipment | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;

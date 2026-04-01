@@ -68,6 +68,7 @@ export const formatOrderStatus = (status?: string, type?: string) => {
     ready: readyLabel,
     waiting_for_motoboy: 'Aguardando entregador',
     in_delivery: 'Em rota',
+    dispatched: 'Despachado',
     ready_for_delivery: 'Pronto para entrega',
     done: doneLabel,
     delivered: 'Entregue',

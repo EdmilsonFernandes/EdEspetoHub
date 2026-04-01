@@ -29,6 +29,7 @@ import bcrypt from 'bcryptjs';
 import { randomUUID } from 'crypto';
 import { EntityManager } from 'typeorm';
 import { Product } from '../entities/Product';
+import { OrderShipment } from '../entities/OrderShipment';
 /**
  * Provides OrderService functionality.
  *
@@ -177,6 +178,66 @@ export class OrderService
       return {
         ...order,
         delivery: snapshot,
+      };
+    });
+  }
+
+  private async attachShipmentSnapshot(orders: any[]) {
+    if (!Array.isArray(orders) || orders.length === 0) return orders;
+    const orderIds = orders
+      .map((order: any) => String(order?.id || '').trim())
+      .filter(Boolean);
+    if (!orderIds.length) return orders;
+
+    const rows: Array<any> = await AppDataSource.query(
+      `
+        SELECT
+          os.order_id,
+          os.provider,
+          os.service_code,
+          os.service_name,
+          os.tracking_code,
+          os.tracking_url,
+          os.shipment_status,
+          os.quote_payload,
+          os.tracking_last_event,
+          os.tracking_last_at,
+          os.posted_at,
+          os.delivered_at,
+          os.created_at,
+          os.updated_at
+        FROM order_shipments os
+        WHERE os.order_id = ANY($1::uuid[])
+      `,
+      [ orderIds ]
+    );
+
+    const shipmentByOrderId = new Map<string, any>();
+    for (const row of rows) {
+      const orderId = String(row?.order_id || '').trim();
+      if (!orderId) continue;
+      shipmentByOrderId.set(orderId, {
+        provider: row?.provider || null,
+        serviceCode: row?.service_code || null,
+        serviceName: row?.service_name || null,
+        trackingCode: row?.tracking_code || null,
+        trackingUrl: row?.tracking_url || null,
+        shipmentStatus: row?.shipment_status || null,
+        quotePayload: row?.quote_payload || null,
+        trackingLastEvent: row?.tracking_last_event || null,
+        trackingLastAt: row?.tracking_last_at || null,
+        postedAt: row?.posted_at || null,
+        deliveredAt: row?.delivered_at || null,
+        createdAt: row?.created_at || null,
+        updatedAt: row?.updated_at || null,
+      });
+    }
+
+    return orders.map((order: any) => {
+      const orderId = String(order?.id || '').trim();
+      return {
+        ...order,
+        shipment: shipmentByOrderId.get(orderId) || null,
       };
     });
   }
@@ -478,7 +539,8 @@ export class OrderService
     this.ensureStoreAccess(store, authStoreId);
     await this.reconcileDeliveredOrdersByStore(store!.id);
     const orders = await this.orderRepository.findByStoreId(store!.id);
-    return this.attachDeliverySnapshot(orders as any[]);
+    const withDelivery = await this.attachDeliverySnapshot(orders as any[]);
+    return this.attachShipmentSnapshot(withDelivery as any[]);
   }
 
 
@@ -496,7 +558,8 @@ export class OrderService
     this.ensureStoreAccess(store, authStoreId);
     await this.reconcileDeliveredOrdersByStore(store!.id);
     const orders = await this.orderRepository.findByStoreId(store!.id);
-    return this.attachDeliverySnapshot(orders as any[]);
+    const withDelivery = await this.attachDeliverySnapshot(orders as any[]);
+    return this.attachShipmentSnapshot(withDelivery as any[]);
   }
 
 
@@ -557,6 +620,8 @@ export class OrderService
     this.ensureStoreAccess(order.store, authStoreId);
     const currentStatus = String(order.status || '').toLowerCase();
     const nextStatus = String(status || '').toLowerCase();
+    const fulfillmentMode = String((order as any)?.fulfillmentMode || 'distance').toLowerCase();
+    const isPostalFlow = order.type === 'delivery' && fulfillmentMode === 'postal';
 
     const deliveryStatuses = new Set([
       'ready_for_delivery',
@@ -568,7 +633,7 @@ export class OrderService
     if (order.type !== 'delivery' && deliveryStatuses.has(nextStatus)) {
       throw new AppError('ORDER-004', 400);
     }
-    if (order.type === 'delivery' && deliveryStatuses.has(nextStatus)) {
+    if (order.type === 'delivery' && !isPostalFlow && deliveryStatuses.has(nextStatus)) {
       const transitions: Record<string, string[]> = {
         pending: [ 'preparing' ],
         preparing: [ 'ready_for_delivery', 'waiting_for_motoboy' ],
@@ -579,6 +644,19 @@ export class OrderService
       };
       const allowedNext = transitions[order.status] || [];
       if (!allowedNext.includes(nextStatus)) {
+        throw new AppError('ORDER-004', 400);
+      }
+    }
+    if (isPostalFlow) {
+      const postalTransitions: Record<string, string[]> = {
+        pending: [ 'preparing', 'cancelled' ],
+        preparing: [ 'ready', 'dispatched', 'cancelled' ],
+        ready: [ 'dispatched', 'cancelled' ],
+        dispatched: [ 'delivered', 'finished' ],
+        delivered: [ 'finished' ],
+      };
+      const allowedNext = postalTransitions[currentStatus] || [];
+      if (nextStatus !== currentStatus && !allowedNext.includes(nextStatus)) {
         throw new AppError('ORDER-004', 400);
       }
     }
@@ -621,13 +699,105 @@ export class OrderService
       return repo.save(lockedOrder);
     });
 
-    if (saved.type === 'delivery' && [ 'ready_for_delivery', 'waiting_for_motoboy' ].includes(nextStatus)) {
+    if (saved.type === 'delivery' && !isPostalFlow && [ 'ready_for_delivery', 'waiting_for_motoboy' ].includes(nextStatus)) {
       await deliveryService.ensureQueueDelivery(saved as any);
     }
     if (saved.type === 'delivery' && [ 'delivered', 'finished' ].includes(nextStatus)) {
       await this.deliveryBillingService.recordDelivery(saved);
     }
     return saved;
+  }
+
+  async updateFulfillmentMode(
+    orderId: string,
+    mode: 'distance' | 'postal' | string,
+    authStoreId?: string
+  ) {
+    const order = await this.orderRepository.findById(orderId);
+    if (!order) throw new AppError('ORDER-001', 404);
+    this.ensureStoreAccess(order.store, authStoreId);
+    if (String(order.type || '').toLowerCase() !== 'delivery') {
+      throw new AppError('ORDER-004', 400, { message: 'Modo de entrega só é válido para pedidos de entrega.' });
+    }
+    const normalizedMode = String(mode || '').toLowerCase() === 'postal' ? 'postal' : 'distance';
+    const currentStatus = String(order.status || '').toLowerCase();
+    if (normalizedMode === 'postal' && [ 'waiting_for_motoboy', 'in_delivery' ].includes(currentStatus)) {
+      throw new AppError('ORDER-004', 400, { message: 'Não é possível mudar para postal em pedido já no fluxo de motoboy.' });
+    }
+    (order as any).fulfillmentMode = normalizedMode;
+    return this.orderRepository.save(order);
+  }
+
+  async updatePostalShipment(
+    orderId: string,
+    input: {
+      provider?: string;
+      serviceCode?: string;
+      serviceName?: string;
+      trackingCode?: string;
+      trackingUrl?: string;
+      markPosted?: boolean;
+    },
+    authStoreId?: string
+  ) {
+    const order = await this.orderRepository.findById(orderId);
+    if (!order) throw new AppError('ORDER-001', 404);
+    this.ensureStoreAccess(order.store, authStoreId);
+    if (String(order.type || '').toLowerCase() !== 'delivery') {
+      throw new AppError('ORDER-004', 400, { message: 'Rastreio postal só é válido para pedidos de entrega.' });
+    }
+
+    const normalizedMode = String((order as any).fulfillmentMode || 'distance').toLowerCase();
+    if (normalizedMode !== 'postal') {
+      throw new AppError('ORDER-004', 400, { message: 'Ative o modo postal antes de informar rastreio.' });
+    }
+
+    const trackingCode = String(input?.trackingCode || '').trim();
+    const trackingUrl = String(input?.trackingUrl || '').trim();
+    const markPosted = Boolean(input?.markPosted);
+    if (markPosted && !trackingCode) {
+      throw new AppError('ORDER-005', 400, { message: 'Código de rastreio é obrigatório para marcar como postado.' });
+    }
+
+    const result = await AppDataSource.transaction(async (manager) => {
+      const shipmentRepo = manager.getRepository(OrderShipment);
+      const orderRepo = manager.getRepository(Order);
+
+      let shipment = await shipmentRepo.findOne({ where: { orderId: order.id } });
+      if (!shipment) {
+        shipment = shipmentRepo.create({
+          orderId: order.id,
+          provider: input?.provider || 'manual',
+          shipmentStatus: 'pending_posting',
+        });
+      }
+
+      if (input?.provider !== undefined) shipment.provider = String(input.provider || '').trim() || null;
+      if (input?.serviceCode !== undefined) shipment.serviceCode = String(input.serviceCode || '').trim() || null;
+      if (input?.serviceName !== undefined) shipment.serviceName = String(input.serviceName || '').trim() || null;
+      if (input?.trackingCode !== undefined) shipment.trackingCode = trackingCode || null;
+      if (input?.trackingUrl !== undefined) shipment.trackingUrl = trackingUrl || null;
+
+      if (markPosted) {
+        shipment.shipmentStatus = 'posted';
+        shipment.postedAt = new Date();
+      }
+
+      await shipmentRepo.save(shipment);
+
+      const orderLock = await orderRepo.findOne({ where: { id: order.id } });
+      if (!orderLock) throw new AppError('ORDER-001', 404);
+
+      const currentStatus = String(orderLock.status || '').toLowerCase();
+      if (markPosted && ![ 'delivered', 'finished', 'cancelled' ].includes(currentStatus)) {
+        orderLock.status = 'dispatched';
+        await orderRepo.save(orderLock);
+      }
+
+      return { order: orderLock, shipment };
+    });
+
+    return result;
   }
 
   async reopenOrder(
@@ -931,6 +1101,11 @@ export class OrderService
       ? Number(deliveryFee)
       : 0;
 
+    const normalizedFulfillmentMode =
+      input.type === 'delivery' && String((input as any).fulfillmentMode || '').toLowerCase() === 'postal'
+        ? 'postal'
+        : 'distance';
+
     return this.orderRepository.create({
       id: orderRefId as any,
       customerName: input.customerName,
@@ -938,6 +1113,7 @@ export class OrderService
       address: input.address,
       table: input.table,
       type: input.type,
+      fulfillmentMode: normalizedFulfillmentMode,
       paymentMethod: input.paymentMethod,
       paymentStatus,
       cashTendered,

@@ -24,6 +24,7 @@ export function AdminOrders() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [query, setQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('');
+  const [postalSavingId, setPostalSavingId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'cards' | 'table'>(() => {
     if (typeof window === 'undefined') return 'cards';
     return localStorage.getItem('adminOrdersView') === 'table' ? 'table' : 'cards';
@@ -149,7 +150,7 @@ export function AdminOrders() {
   const canonicalStatus = (raw: any) => {
     const st = String(raw || '').toLowerCase();
     if (st === 'delivered') return 'done';
-    if (st === 'ready_for_delivery' || st === 'waiting_for_motoboy') return 'ready';
+    if (st === 'ready_for_delivery' || st === 'waiting_for_motoboy' || st === 'in_delivery' || st === 'dispatched') return 'ready';
     return st || 'pending';
   };
 
@@ -199,7 +200,7 @@ export function AdminOrders() {
     const st = String(status || '').toLowerCase();
     if (st === 'pending') return 'bg-amber-100 text-amber-800';
     if (st === 'preparing') return 'bg-sky-100 text-sky-700';
-    if (st === 'ready') return 'bg-violet-100 text-violet-700';
+    if (st === 'ready' || st === 'dispatched' || st === 'in_delivery') return 'bg-violet-100 text-violet-700';
     if (st === 'done' || st === 'delivered') return 'bg-emerald-100 text-emerald-800';
     if (st === 'cancelled') return 'bg-slate-100 text-slate-600';
     return 'bg-red-100 text-red-700';
@@ -208,7 +209,7 @@ export function AdminOrders() {
     const st = String(status || '').toLowerCase();
     if (st === 'pending') return 'border-l-amber-400 bg-gradient-to-r from-amber-50/70 to-white';
     if (st === 'preparing') return 'border-l-sky-400 bg-gradient-to-r from-sky-50/70 to-white';
-    if (st === 'ready') return 'border-l-violet-400 bg-gradient-to-r from-violet-50/70 to-white';
+    if (st === 'ready' || st === 'dispatched' || st === 'in_delivery') return 'border-l-violet-400 bg-gradient-to-r from-violet-50/70 to-white';
     if (st === 'done' || st === 'delivered') return 'border-l-emerald-400 bg-gradient-to-r from-emerald-50/70 to-white';
     if (st === 'cancelled') return 'border-l-slate-300 bg-gradient-to-r from-slate-50 to-white';
     return 'border-l-rose-400 bg-gradient-to-r from-rose-50/70 to-white';
@@ -305,6 +306,54 @@ export function AdminOrders() {
     setStatusFilter('all');
     setQuery('');
     setDateFilter('');
+  };
+
+  const refreshOrders = async () => {
+    const storeIdentifier = storeId || storeSlug;
+    if (!storeIdentifier) return;
+    try {
+      const list = await orderService.fetchAll(storeIdentifier);
+      setOrders(list || []);
+    } catch (error) {
+      console.error('Erro ao atualizar pedidos', error);
+    }
+  };
+
+  const handleFulfillmentModeChange = async (order: any, nextMode: 'distance' | 'postal') => {
+    if (!order?.id || String(order?.type || '').toLowerCase() !== 'delivery') return;
+    try {
+      setPostalSavingId(order.id);
+      await orderService.updateFulfillmentMode(order.id, nextMode);
+      await refreshOrders();
+    } catch (error: any) {
+      alert(error?.message || 'Não foi possível atualizar o modo de entrega.');
+    } finally {
+      setPostalSavingId(null);
+    }
+  };
+
+  const handlePostalTrackAndPost = async (order: any) => {
+    if (!order?.id) return;
+    const currentCode = String(order?.shipment?.trackingCode || '').trim();
+    const trackingCode = String(window.prompt('Código de rastreio:', currentCode) || '').trim();
+    if (!trackingCode) return;
+    const currentUrl = String(order?.shipment?.trackingUrl || '').trim();
+    const trackingUrl = String(
+      window.prompt('Link de rastreio (opcional):', currentUrl) || ''
+    ).trim();
+    try {
+      setPostalSavingId(order.id);
+      await orderService.updatePostalShipment(order.id, {
+        trackingCode,
+        trackingUrl: trackingUrl || undefined,
+        markPosted: true,
+      });
+      await refreshOrders();
+    } catch (error: any) {
+      alert(error?.message || 'Não foi possível salvar o rastreio.');
+    } finally {
+      setPostalSavingId(null);
+    }
   };
 
   useEffect(() => {
@@ -495,6 +544,57 @@ export function AdminOrders() {
                         <span className="text-slate-400">•</span>
                         <span>{order.phone || 'Sem telefone'}</span>
                       </div>
+                      {String(order?.type || '').toLowerCase() === 'delivery' && (
+                        <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[11px] font-semibold text-slate-600">Modo de entrega</span>
+                            <span className="text-[11px] font-bold text-slate-700">
+                              {String(order?.fulfillmentMode || 'distance').toLowerCase() === 'postal' ? 'Postal' : 'Local'}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              disabled={postalSavingId === order.id}
+                              onClick={() => handleFulfillmentModeChange(order, 'distance')}
+                              className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
+                                String(order?.fulfillmentMode || 'distance').toLowerCase() === 'distance'
+                                  ? 'bg-slate-900 text-white border-slate-900'
+                                  : 'bg-white text-slate-700 border-slate-200'
+                              }`}
+                            >
+                              Local
+                            </button>
+                            <button
+                              type="button"
+                              disabled={postalSavingId === order.id}
+                              onClick={() => handleFulfillmentModeChange(order, 'postal')}
+                              className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
+                                String(order?.fulfillmentMode || 'distance').toLowerCase() === 'postal'
+                                  ? 'bg-slate-900 text-white border-slate-900'
+                                  : 'bg-white text-slate-700 border-slate-200'
+                              }`}
+                            >
+                              Postal
+                            </button>
+                            {String(order?.fulfillmentMode || '').toLowerCase() === 'postal' && (
+                              <button
+                                type="button"
+                                disabled={postalSavingId === order.id}
+                                onClick={() => handlePostalTrackAndPost(order)}
+                                className="ml-auto px-2.5 py-1 rounded-full text-[11px] font-semibold border border-slate-300 bg-white text-slate-700"
+                              >
+                                Rastreio + Postado
+                              </button>
+                            )}
+                          </div>
+                          {order?.shipment?.trackingCode && (
+                            <p className="text-[11px] text-slate-600 break-all">
+                              Código: <span className="font-semibold">{order.shipment.trackingCode}</span>
+                            </p>
+                          )}
+                        </div>
+                      )}
                       {previewItems.length > 0 && (
                         <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3 text-xs text-slate-600 space-y-2">
                           {previewItems.map((item, itemIndex) => (
@@ -590,6 +690,57 @@ export function AdminOrders() {
                         )}
                       </div>
                     </div>
+                    {String(order?.type || '').toLowerCase() === 'delivery' && (
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-2">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-xs font-semibold uppercase text-slate-500">Fluxo de entrega</p>
+                          <span className="text-xs font-bold text-slate-700">
+                            {String(order?.fulfillmentMode || 'distance').toLowerCase() === 'postal' ? 'Postal' : 'Local'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            disabled={postalSavingId === order.id}
+                            onClick={() => handleFulfillmentModeChange(order, 'distance')}
+                            className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
+                              String(order?.fulfillmentMode || 'distance').toLowerCase() === 'distance'
+                                ? 'bg-slate-900 text-white border-slate-900'
+                                : 'bg-white text-slate-700 border-slate-200'
+                            }`}
+                          >
+                            Entrega local
+                          </button>
+                          <button
+                            type="button"
+                            disabled={postalSavingId === order.id}
+                            onClick={() => handleFulfillmentModeChange(order, 'postal')}
+                            className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
+                              String(order?.fulfillmentMode || 'distance').toLowerCase() === 'postal'
+                                ? 'bg-slate-900 text-white border-slate-900'
+                                : 'bg-white text-slate-700 border-slate-200'
+                            }`}
+                          >
+                            Envio postal
+                          </button>
+                          {String(order?.fulfillmentMode || '').toLowerCase() === 'postal' && (
+                            <button
+                              type="button"
+                              disabled={postalSavingId === order.id}
+                              onClick={() => handlePostalTrackAndPost(order)}
+                              className="ml-auto px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-300 bg-white text-slate-700"
+                            >
+                              Informar rastreio
+                            </button>
+                          )}
+                        </div>
+                        {order?.shipment?.trackingCode && (
+                          <div className="text-xs text-slate-600">
+                            Código de rastreio: <span className="font-semibold">{order.shipment.trackingCode}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {groupOrderItems(order.items || []).length > 0 && (
                       <div className="border-t border-slate-100 pt-3">
