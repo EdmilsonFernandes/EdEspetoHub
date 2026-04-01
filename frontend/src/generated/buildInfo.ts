@@ -5,13 +5,43 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260401.170130.3c9e8b8",
-  "buildId": "0.1.9+20260401.170130.3c9e8b8-20260401.170130-3c9e8b8",
-  "builtAt": "2026-04-01T17:01:30.307Z",
-  "commitHash": "3c9e8b8ebce29e7ab0f668544c76fa22efc7b3b6",
-  "shortHash": "3c9e8b8",
+  "versionInternal": "0.1.9+20260401.183213.7a8d094",
+  "buildId": "0.1.9+20260401.183213.7a8d094-20260401.183213-7a8d094",
+  "builtAt": "2026-04-01T18:32:13.584Z",
+  "commitHash": "7a8d094830017bf52fe59ea45168004dd6ad0b82",
+  "shortHash": "7a8d094",
   "branch": "main",
   "commits": [
+    {
+      "hash": "7a8d094830017bf52fe59ea45168004dd6ad0b82",
+      "shortHash": "7a8d094",
+      "dateIso": "2026-04-01T14:59:04-03:00",
+      "subject": "chore(shipping): add one-shot setup script from authorization code"
+    },
+    {
+      "hash": "ddde33fb8c27c32d90c3478e2b6b5b402a08c42f",
+      "shortHash": "ddde33f",
+      "dateIso": "2026-04-01T14:42:53-03:00",
+      "subject": "chore(shipping): add one-command token refresh and api deploy helper"
+    },
+    {
+      "hash": "b6131ed6b40ee5761cc6d0bf928c61bb9afd8104",
+      "shortHash": "b6131ed",
+      "dateIso": "2026-04-01T14:40:34-03:00",
+      "subject": "chore(shipping): add scripts to configure Melhor Envio env and test postal quote"
+    },
+    {
+      "hash": "1d258683c98eda22129880e11fc4ecc7fe12820b",
+      "shortHash": "1d25868",
+      "dateIso": "2026-04-01T14:11:30-03:00",
+      "subject": "feat(shipping): add pluggable provider architecture with Melhor Envio integration"
+    },
+    {
+      "hash": "f9dc8665153bd561b673c13df67d671235598a09",
+      "shortHash": "f9dc866",
+      "dateIso": "2026-04-01T14:02:19-03:00",
+      "subject": "feat(checkout): add delivery mode switch and postal quote flow"
+    },
     {
       "hash": "3c9e8b8ebce29e7ab0f668544c76fa22efc7b3b6",
       "shortHash": "3c9e8b8",
@@ -161,36 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "e6069b9",
       "dateIso": "2026-03-30T11:08:21-03:00",
       "subject": "fix: tornar ajuste de estoque e movimentação atômicos na mesma transação"
-    },
-    {
-      "hash": "ebc1e0c116f97186e1d2666c0cf196d137cf5139",
-      "shortHash": "ebc1e0c",
-      "dateIso": "2026-03-30T11:02:56-03:00",
-      "subject": "feat: traduzir tipos de movimentação de estoque com badges amigáveis"
-    },
-    {
-      "hash": "0e84a954dbcc2e553a84b87a84af3216f1e13c92",
-      "shortHash": "0e84a95",
-      "dateIso": "2026-03-30T10:57:56-03:00",
-      "subject": "fix: corrigir atualização imediata do estoque após ajuste"
-    },
-    {
-      "hash": "92be38bdb37a51e3c6e228b641693f94bc93db57",
-      "shortHash": "92be38b",
-      "dateIso": "2026-03-30T10:53:30-03:00",
-      "subject": "fix: evitar travamento em salvar estoque com timeout e fallback de modal"
-    },
-    {
-      "hash": "b2fd9cbe37a254a184d0d5cd0b147d9ee14b90ed",
-      "shortHash": "b2fd9cb",
-      "dateIso": "2026-03-30T10:47:23-03:00",
-      "subject": "fix: reduzir conflitos 409 no ajuste de estoque com retry backend/frontend"
-    },
-    {
-      "hash": "2eeb23e0f39bf73dcd77e1153f144b1bd17b1951",
-      "shortHash": "2eeb23e",
-      "dateIso": "2026-03-30T10:35:11-03:00",
-      "subject": "feat: melhorar UX do estoque com atualização imediata e filtro por categoria"
     }
   ]
 } as const;
