@@ -427,7 +427,20 @@ export const MenuView = ({
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
   const [qtyPulseId, setQtyPulseId] = useState<string | null>(null);
   const [activeQtyControlId, setActiveQtyControlId] = useState<string | null>(null);
+  const [flyToCartItems, setFlyToCartItems] = useState<
+    Array<{
+      id: string;
+      startX: number;
+      startY: number;
+      deltaX: number;
+      deltaY: number;
+      imageUrl?: string;
+      active: boolean;
+    }>
+  >([]);
+  const [cartPulse, setCartPulse] = useState(false);
   const qtyControlIdleTimersRef = React.useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const cartButtonRef = React.useRef<HTMLButtonElement | null>(null);
   const canOrder = isOrderingEnabled !== false;
   const catalogPrimaryColor = branding?.primaryColor || "#f59e0b";
   const catalogSecondaryColor = branding?.secondaryColor || branding?.accentColor || "#0f172a";
@@ -688,6 +701,45 @@ export const MenuView = ({
       qtyControlIdleTimersRef.current = {};
     };
   }, []);
+
+  const animateItemToCart = (originEl: HTMLElement | null, item: any) => {
+    const cartEl = cartButtonRef.current;
+    if (!originEl || !cartEl) return;
+    const originRect = originEl.getBoundingClientRect();
+    const cartRect = cartEl.getBoundingClientRect();
+    const size = 22;
+    const startX = originRect.left + originRect.width / 2 - size / 2;
+    const startY = originRect.top + originRect.height / 2 - size / 2;
+    const endX = cartRect.left + Math.min(cartRect.width * 0.22, 42) - size / 2;
+    const endY = cartRect.top + cartRect.height / 2 - size / 2;
+    const flyId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const imageUrl = item?.imageUrl ? resolveAssetUrl(item.imageUrl) : "";
+
+    setFlyToCartItems((prev) => [
+      ...prev,
+      {
+        id: flyId,
+        startX,
+        startY,
+        deltaX: endX - startX,
+        deltaY: endY - startY,
+        imageUrl,
+        active: false,
+      },
+    ]);
+
+    window.requestAnimationFrame(() => {
+      setFlyToCartItems((prev) =>
+        prev.map((fly) => (fly.id === flyId ? { ...fly, active: true } : fly))
+      );
+    });
+
+    window.setTimeout(() => {
+      setFlyToCartItems((prev) => prev.filter((fly) => fly.id !== flyId));
+      setCartPulse(true);
+      window.setTimeout(() => setCartPulse(false), 260);
+    }, 620);
+  };
 
   useEffect(() => {
     if (!filteredGrouped.length) return;
@@ -1046,6 +1098,7 @@ export const MenuView = ({
                 };
 
                 const handleIncrement = (event: React.MouseEvent) => {
+                  const originButton = event.currentTarget as HTMLElement;
                   event.stopPropagation();
                   openQtyControl(itemId);
                   if (!canIncrease) {
@@ -1057,6 +1110,7 @@ export const MenuView = ({
                     return;
                   }
                   pulseQty(itemId);
+                  animateItemToCart(originButton, item);
                   if (isEspetoCategory(item.category)) {
                     onUpdateCart(item, 1, { cookingPoint: "ao ponto", passSkewer: false });
                     return;
@@ -1392,10 +1446,13 @@ export const MenuView = ({
           cartItemsCount > 0 && canOrder ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0 pointer-events-none"
         }`}
       >
-        {cartItemsCount > 0 && canOrder && (
+        {canOrder && (
           <button
+            ref={cartButtonRef}
             onClick={() => onProceed?.()}
-            className="w-full bg-amber-500 text-white px-4 py-3 rounded-full shadow-2xl shadow-amber-500/35 flex justify-between items-center hover:brightness-95 active:scale-[0.99] transition-all text-sm sm:text-base"
+            className={`w-full bg-amber-500 text-white px-4 py-3 rounded-full shadow-2xl shadow-amber-500/35 flex justify-between items-center hover:brightness-95 active:scale-[0.99] transition-all text-sm sm:text-base ${
+              cartPulse ? "scale-[1.03]" : "scale-100"
+            }`}
           >
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <span className="h-7 min-w-7 px-2 rounded-full text-xs font-extrabold text-amber-600 bg-white inline-flex items-center justify-center">
@@ -1406,6 +1463,35 @@ export const MenuView = ({
             <span className="font-bold text-base sm:text-lg ml-2 flex-shrink-0">{formatCurrency(cartTotalValue)}</span>
           </button>
         )}
+      </div>
+
+      <div className="pointer-events-none fixed inset-0 z-[70]">
+        {flyToCartItems.map((fly) => (
+          <div
+            key={fly.id}
+            className="absolute rounded-full overflow-hidden border border-white/70 shadow-md"
+            style={{
+              left: `${fly.startX}px`,
+              top: `${fly.startY}px`,
+              width: "22px",
+              height: "22px",
+              transform: fly.active
+                ? `translate3d(${fly.deltaX}px, ${fly.deltaY}px, 0) scale(0.42)`
+                : "translate3d(0, 0, 0) scale(1)",
+              opacity: fly.active ? 0.22 : 0.98,
+              transition: "transform 620ms cubic-bezier(0.22, 1, 0.36, 1), opacity 620ms ease",
+              background: fly.imageUrl ? "#ffffff" : catalogPrimaryColor,
+            }}
+          >
+            {fly.imageUrl ? (
+              <img src={fly.imageUrl} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <div className="h-full w-full flex items-center justify-center" style={{ color: catalogPrimaryText }}>
+                <Plus size={12} weight="bold" />
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );

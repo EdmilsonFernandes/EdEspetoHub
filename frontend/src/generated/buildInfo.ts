@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260401.004237.95ae4fe",
-  "buildId": "0.1.9+20260401.004237.95ae4fe-20260401.004237-95ae4fe",
-  "builtAt": "2026-04-01T00:42:37.579Z",
-  "commitHash": "95ae4fe4de63cfe601c2cfd022894ab2d10b6f66",
-  "shortHash": "95ae4fe",
+  "versionInternal": "0.1.9+20260401.004556.b92adc8",
+  "buildId": "0.1.9+20260401.004556.b92adc8-20260401.004556-b92adc8",
+  "builtAt": "2026-04-01T00:45:56.252Z",
+  "commitHash": "b92adc89025b5619f5e13dfad0ff00d49f2dfa25",
+  "shortHash": "b92adc8",
   "branch": "main",
   "commits": [
+    {
+      "hash": "b92adc89025b5619f5e13dfad0ff00d49f2dfa25",
+      "shortHash": "b92adc8",
+      "dateIso": "2026-03-31T21:43:18-03:00",
+      "subject": "feat(catalog-theme): apply store primary/secondary colors to qty controls"
+    },
     {
       "hash": "95ae4fe4de63cfe601c2cfd022894ab2d10b6f66",
       "shortHash": "95ae4fe",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "7219cbe",
       "dateIso": "2026-03-30T09:42:24-03:00",
       "subject": "feat: implementar módulo de estoque com alertas e auditoria"
-    },
-    {
-      "hash": "e20c863f42d793f736793b69f1c32342242f8967",
-      "shortHash": "e20c863",
-      "dateIso": "2026-03-27T22:47:34-03:00",
-      "subject": "refactor(catalog-nav): aplica segmented control minimalista em Catalogo/Pedidos"
     }
   ]
 } as const;
