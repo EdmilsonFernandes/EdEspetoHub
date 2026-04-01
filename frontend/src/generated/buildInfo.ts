@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260401.002329.2aed231",
-  "buildId": "0.1.9+20260401.002329.2aed231-20260401.002329-2aed231",
-  "builtAt": "2026-04-01T00:23:29.688Z",
-  "commitHash": "2aed2319beadbc670dad0fcc77ef03a07823d659",
-  "shortHash": "2aed231",
+  "versionInternal": "0.1.9+20260401.003607.95c939c",
+  "buildId": "0.1.9+20260401.003607.95c939c-20260401.003607-95c939c",
+  "builtAt": "2026-04-01T00:36:07.353Z",
+  "commitHash": "95c939caef27ea0329163b3c4b6a5d557b63ee53",
+  "shortHash": "95c939c",
   "branch": "main",
   "commits": [
+    {
+      "hash": "95c939caef27ea0329163b3c4b6a5d557b63ee53",
+      "shortHash": "95c939c",
+      "dateIso": "2026-03-31T21:24:10-03:00",
+      "subject": "refactor(catalog-ui): move add action to floating plus on product image"
+    },
     {
       "hash": "2aed2319beadbc670dad0fcc77ef03a07823d659",
       "shortHash": "2aed231",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "d6bb5bf",
       "dateIso": "2026-03-27T22:37:37-03:00",
       "subject": "feat(catalog-ui): premiumiza seletor Catalogo/Pedidos na vitrine"
-    },
-    {
-      "hash": "ffd36a2ce6c4c934f9accc99f41f6787125062ed",
-      "shortHash": "ffd36a2",
-      "dateIso": "2026-03-27T22:31:15-03:00",
-      "subject": "fix(queue): ordena pedidos ativos por mais recentes primeiro"
     }
   ]
 } as const;

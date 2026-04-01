@@ -416,6 +416,8 @@ export const MenuView = ({
   const [activeCategoryKey, setActiveCategoryKey] = useState("");
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
   const [qtyPulseId, setQtyPulseId] = useState<string | null>(null);
+  const [activeQtyControlId, setActiveQtyControlId] = useState<string | null>(null);
+  const qtyControlIdleTimersRef = React.useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const canOrder = isOrderingEnabled !== false;
   const categoryRefs = React.useRef({});
   const formatStoreAddress = (address = "") => {
@@ -642,6 +644,37 @@ export const MenuView = ({
     setQtyPulseId(id);
     window.setTimeout(() => setQtyPulseId((prev) => (prev === id ? null : prev)), 220);
   };
+
+  const scheduleQtyControlIdle = (id: string) => {
+    const timers = qtyControlIdleTimersRef.current;
+    if (timers[id]) window.clearTimeout(timers[id]);
+    timers[id] = window.setTimeout(() => {
+      setActiveQtyControlId((prev) => (prev === id ? null : prev));
+      delete timers[id];
+    }, 3000);
+  };
+
+  const openQtyControl = (id: string) => {
+    setActiveQtyControlId(id);
+    scheduleQtyControlIdle(id);
+  };
+
+  const closeQtyControl = (id: string) => {
+    const timers = qtyControlIdleTimersRef.current;
+    if (timers[id]) {
+      window.clearTimeout(timers[id]);
+      delete timers[id];
+    }
+    setActiveQtyControlId((prev) => (prev === id ? null : prev));
+  };
+
+  useEffect(() => {
+    return () => {
+      const timers = qtyControlIdleTimersRef.current;
+      Object.values(timers).forEach((timerId) => window.clearTimeout(timerId));
+      qtyControlIdleTimersRef.current = {};
+    };
+  }, []);
 
   useEffect(() => {
     if (!filteredGrouped.length) return;
@@ -983,8 +1016,10 @@ export const MenuView = ({
                 const hasAnyDescription = String(item?.description || '').trim().length > 0;
                 const allowStaffModal = hasConfigurableOptions || hasAnyDescription;
                 const stockState = resolveStockState(item);
-                const itemQty = itemQtyMap.get(String(item.id)) || 0;
+                const itemId = String(item.id);
+                const itemQty = itemQtyMap.get(itemId) || 0;
                 const canIncrease = !stockState.soldOut && (!stockState.manageStock || itemQty < stockState.stockQuantity);
+                const isQtyControlExpanded = activeQtyControlId === itemId && itemQty > 0;
 
                 const handleOpenOptions = (event?: React.MouseEvent) => {
                   event?.stopPropagation();
@@ -999,6 +1034,7 @@ export const MenuView = ({
 
                 const handleIncrement = (event: React.MouseEvent) => {
                   event.stopPropagation();
+                  openQtyControl(itemId);
                   if (!canIncrease) {
                     if (isEspetoCategory(item.category)) {
                       onUpdateCart(item, 1, { cookingPoint: "ao ponto", passSkewer: false });
@@ -1007,7 +1043,7 @@ export const MenuView = ({
                     onUpdateCart(item, 1);
                     return;
                   }
-                  pulseQty(String(item.id));
+                  pulseQty(itemId);
                   if (isEspetoCategory(item.category)) {
                     onUpdateCart(item, 1, { cookingPoint: "ao ponto", passSkewer: false });
                     return;
@@ -1019,14 +1055,19 @@ export const MenuView = ({
                   event.stopPropagation();
                   const entry = resolveQuickAdjustEntry(item);
                   if (!entry) return;
-                  pulseQty(String(item.id));
+                  pulseQty(itemId);
                   onUpdateCart(item, -1, buildCartOptions(entry));
+                  if (itemQty <= 1) {
+                    closeQtyControl(itemId);
+                    return;
+                  }
+                  scheduleQtyControlIdle(itemId);
                 };
 
                 return (
                 <div
                   key={item.id}
-                  className={`group bg-white rounded-3xl border border-transparent shadow-sm p-4 sm:p-5 grid grid-cols-[1fr_auto] gap-3 md:hover:scale-[1.01] md:hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] transition ${!staffView ? "cursor-pointer" : "cursor-default"}`}
+                  className={`group bg-white rounded-3xl border border-transparent shadow-sm p-3.5 sm:p-4 grid grid-cols-[1fr_auto] gap-3 md:hover:scale-[1.01] md:hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] transition ${!staffView ? "cursor-pointer" : "cursor-default"}`}
                   onClick={() => {
                     if (!staffView) openProductModal(item);
                   }}
@@ -1046,11 +1087,6 @@ export const MenuView = ({
                     </button>
                     {item.description && (
                       <p className="text-sm sm:text-[15px] text-gray-500 leading-relaxed line-clamp-2">{item.description}</p>
-                    )}
-                    {itemQtyMap.get(String(item.id)) > 0 && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold bg-lime-50 text-lime-700 border border-lime-200">
-                        {itemQtyMap.get(String(item.id))} no carrinho
-                      </span>
                     )}
                     {item.isFeatured && (
                       <span className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
@@ -1124,17 +1160,65 @@ export const MenuView = ({
                         </div>
                       )}
                       </button>
-                      {canOrder && itemQty <= 0 && (
-                        <button
-                          type="button"
-                          onClick={handleIncrement}
-                          title={stockState.soldOut ? "Esgotado" : "Adicionar"}
-                          disabled={stockState.soldOut}
-                          className="absolute -bottom-2 -right-1 h-10 w-10 rounded-full border border-amber-300 bg-amber-400 text-slate-900 shadow-md ring-2 ring-white inline-flex items-center justify-center transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                          aria-label={`Adicionar ${item.name}`}
-                        >
-                          <Plus size={18} weight="bold" />
-                        </button>
+                      {canOrder && (
+                        <>
+                          {itemQty <= 0 && (
+                            <button
+                              type="button"
+                              onClick={handleIncrement}
+                              title={stockState.soldOut ? "Esgotado" : "Adicionar"}
+                              disabled={stockState.soldOut}
+                              className="absolute bottom-1 right-1 h-9 w-9 rounded-full border border-amber-300 bg-amber-400 text-slate-900 shadow-md ring-2 ring-white inline-flex items-center justify-center transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                              aria-label={`Adicionar ${item.name}`}
+                            >
+                              <Plus size={17} weight="bold" />
+                            </button>
+                          )}
+                          {itemQty > 0 && !isQtyControlExpanded && (
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                openQtyControl(itemId);
+                              }}
+                              className="absolute bottom-1 right-1 h-9 min-w-[36px] rounded-full border border-amber-300 bg-amber-400 text-slate-900 shadow-md ring-2 ring-white inline-flex items-center justify-center px-2 transition-all duration-300 active:scale-95"
+                              aria-label={`Quantidade ${itemQty} de ${item.name}`}
+                            >
+                              <span className="text-sm font-black leading-none">{itemQty}</span>
+                            </button>
+                          )}
+                          {itemQty > 0 && isQtyControlExpanded && (
+                            <div
+                              className="absolute bottom-1 right-1 h-9 rounded-full border border-slate-200 bg-white shadow-md ring-2 ring-white inline-flex items-center gap-1 px-1.5 transition-all duration-300"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              <button
+                                type="button"
+                                onClick={handleDecrement}
+                                className="h-6 w-6 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition inline-flex items-center justify-center"
+                                aria-label={`Remover uma unidade de ${item.name}`}
+                              >
+                                <Minus size={12} weight="bold" />
+                              </button>
+                              <span
+                                className={`min-w-[22px] text-center text-xs font-black leading-none ${
+                                  qtyPulseId === itemId ? "scale-110 text-amber-600" : "text-slate-900"
+                                }`}
+                              >
+                                {itemQty}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={handleIncrement}
+                                disabled={stockState.soldOut}
+                                className="h-6 w-6 rounded-full bg-slate-900 text-white hover:bg-slate-800 transition inline-flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
+                                aria-label={`Adicionar uma unidade de ${item.name}`}
+                              >
+                                <Plus size={12} weight="bold" />
+                              </button>
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                     {(() => {
@@ -1181,41 +1265,7 @@ export const MenuView = ({
                         );
                       }
 
-                      return (
-                        <div className="w-full flex items-center justify-end gap-2">
-                          {priceNode}
-                          <div
-                            className="h-10 min-w-[112px] rounded-full bg-slate-50 px-1.5 flex items-center justify-between gap-1"
-                            onClick={(event) => event.stopPropagation()}
-                          >
-                            <button
-                              type="button"
-                              onClick={handleDecrement}
-                              disabled={itemQty <= 0}
-                              className="h-7 w-7 rounded-full bg-white text-slate-700 hover:bg-slate-100 transition flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
-                              aria-label={`Remover uma unidade de ${item.name}`}
-                            >
-                              <Minus size={13} weight="bold" />
-                            </button>
-                            <span
-                              className={`min-w-[26px] text-center text-xs font-black transition-all duration-200 ${
-                                qtyPulseId === String(item.id) ? "scale-110 text-amber-600" : "text-slate-900"
-                              }`}
-                            >
-                              {itemQty}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={handleIncrement}
-                              disabled={stockState.soldOut}
-                              className="h-7 w-7 rounded-full bg-slate-900 text-white hover:bg-slate-800 transition flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
-                              aria-label={`Adicionar uma unidade de ${item.name}`}
-                            >
-                              <Plus size={13} weight="bold" />
-                            </button>
-                          </div>
-                        </div>
-                      );
+                      return <div className="w-full flex items-center justify-end">{priceNode}</div>;
                     })()}
                   </div>
                 </div>
