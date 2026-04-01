@@ -64,6 +64,16 @@ const categoryDotTone = (key = "") => {
   return "bg-violet-500";
 };
 
+const getContrastTextColor = (hexColor = "") => {
+  const normalized = String(hexColor || "").trim().replace("#", "");
+  if (!/^[0-9a-fA-F]{6}$/.test(normalized)) return "#0f172a";
+  const r = parseInt(normalized.slice(0, 2), 16);
+  const g = parseInt(normalized.slice(2, 4), 16);
+  const b = parseInt(normalized.slice(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.62 ? "#0f172a" : "#ffffff";
+};
+
 const CatalogQueueSwitch = ({ onOpenQueue }: { onOpenQueue?: () => void }) => {
   if (!onOpenQueue) return null;
   return (
@@ -419,6 +429,9 @@ export const MenuView = ({
   const [activeQtyControlId, setActiveQtyControlId] = useState<string | null>(null);
   const qtyControlIdleTimersRef = React.useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const canOrder = isOrderingEnabled !== false;
+  const catalogPrimaryColor = branding?.primaryColor || "#f59e0b";
+  const catalogSecondaryColor = branding?.secondaryColor || branding?.accentColor || "#0f172a";
+  const catalogPrimaryText = getContrastTextColor(catalogPrimaryColor);
   const categoryRefs = React.useRef({});
   const formatStoreAddress = (address = "") => {
     const raw = address.toString().trim();
@@ -1168,7 +1181,8 @@ export const MenuView = ({
                               onClick={handleIncrement}
                               title={stockState.soldOut ? "Esgotado" : "Adicionar"}
                               disabled={stockState.soldOut}
-                              className="absolute bottom-1 right-1 h-9 w-9 rounded-full border border-amber-300 bg-amber-400 text-slate-900 shadow-md ring-2 ring-white inline-flex items-center justify-center transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="absolute bottom-1 right-1 h-9 w-9 rounded-full border shadow-md ring-2 ring-white inline-flex items-center justify-center transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                              style={{ backgroundColor: catalogPrimaryColor, borderColor: catalogPrimaryColor, color: catalogPrimaryText }}
                               aria-label={`Adicionar ${item.name}`}
                             >
                               <Plus size={17} weight="bold" />
@@ -1181,7 +1195,8 @@ export const MenuView = ({
                                 event.stopPropagation();
                                 openQtyControl(itemId);
                               }}
-                              className="absolute bottom-1 right-1 h-9 min-w-[36px] rounded-full border border-amber-300 bg-amber-400 text-slate-900 shadow-md ring-2 ring-white inline-flex items-center justify-center px-2 transition-all duration-300 active:scale-95"
+                              className="absolute bottom-1 right-1 h-9 min-w-[36px] rounded-full border shadow-md ring-2 ring-white inline-flex items-center justify-center px-2 transition-all duration-300 active:scale-95"
+                              style={{ backgroundColor: catalogPrimaryColor, borderColor: catalogPrimaryColor, color: catalogPrimaryText }}
                               aria-label={`Quantidade ${itemQty} de ${item.name}`}
                             >
                               <span className="text-sm font-black leading-none">{itemQty}</span>
@@ -1195,15 +1210,17 @@ export const MenuView = ({
                               <button
                                 type="button"
                                 onClick={handleDecrement}
-                                className="h-6 w-6 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition inline-flex items-center justify-center"
+                                className="h-6 w-6 rounded-full border transition inline-flex items-center justify-center"
+                                style={{ borderColor: `${catalogPrimaryColor}33`, color: catalogSecondaryColor, backgroundColor: "#ffffff" }}
                                 aria-label={`Remover uma unidade de ${item.name}`}
                               >
                                 <Minus size={12} weight="bold" />
                               </button>
                               <span
                                 className={`min-w-[22px] text-center text-xs font-black leading-none ${
-                                  qtyPulseId === itemId ? "scale-110 text-amber-600" : "text-slate-900"
+                                  qtyPulseId === itemId ? "scale-110" : ""
                                 }`}
+                                style={{ color: qtyPulseId === itemId ? catalogPrimaryColor : catalogSecondaryColor }}
                               >
                                 {itemQty}
                               </span>
@@ -1211,7 +1228,8 @@ export const MenuView = ({
                                 type="button"
                                 onClick={handleIncrement}
                                 disabled={stockState.soldOut}
-                                className="h-6 w-6 rounded-full bg-slate-900 text-white hover:bg-slate-800 transition inline-flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
+                                className="h-6 w-6 rounded-full transition inline-flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
+                                style={{ backgroundColor: catalogPrimaryColor, color: catalogPrimaryText }}
                                 aria-label={`Adicionar uma unidade de ${item.name}`}
                               >
                                 <Plus size={12} weight="bold" />

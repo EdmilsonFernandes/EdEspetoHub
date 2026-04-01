@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260401.003607.95c939c",
-  "buildId": "0.1.9+20260401.003607.95c939c-20260401.003607-95c939c",
-  "builtAt": "2026-04-01T00:36:07.353Z",
-  "commitHash": "95c939caef27ea0329163b3c4b6a5d557b63ee53",
-  "shortHash": "95c939c",
+  "versionInternal": "0.1.9+20260401.004237.95ae4fe",
+  "buildId": "0.1.9+20260401.004237.95ae4fe-20260401.004237-95ae4fe",
+  "builtAt": "2026-04-01T00:42:37.579Z",
+  "commitHash": "95ae4fe4de63cfe601c2cfd022894ab2d10b6f66",
+  "shortHash": "95ae4fe",
   "branch": "main",
   "commits": [
+    {
+      "hash": "95ae4fe4de63cfe601c2cfd022894ab2d10b6f66",
+      "shortHash": "95ae4fe",
+      "dateIso": "2026-03-31T21:36:52-03:00",
+      "subject": "feat(catalog-ui): add dynamic floating qty control over product image"
+    },
     {
       "hash": "95c939caef27ea0329163b3c4b6a5d557b63ee53",
       "shortHash": "95c939c",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "e20c863",
       "dateIso": "2026-03-27T22:47:34-03:00",
       "subject": "refactor(catalog-nav): aplica segmented control minimalista em Catalogo/Pedidos"
-    },
-    {
-      "hash": "d6bb5bfe77e6ad295626a88f682f601c82c374f4",
-      "shortHash": "d6bb5bf",
-      "dateIso": "2026-03-27T22:37:37-03:00",
-      "subject": "feat(catalog-ui): premiumiza seletor Catalogo/Pedidos na vitrine"
     }
   ]
 } as const;
