@@ -406,14 +406,14 @@ const OrderSummaryCard = ({
     className={`relative w-full min-h-[132px] rounded-lg border border-[#E0E0E0] ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-4 text-left flex items-stretch gap-3 transition-all duration-200 hover:border-slate-300 hover:shadow-sm cursor-pointer`}
   >
     {showSelector && (
-      <div className={`ml-0.5 shrink-0 w-11 rounded-xl border ${selectorToneClass} flex flex-col items-center justify-between py-2 px-1.5`}>
+      <div className={`ml-0.5 shrink-0 w-11 rounded-xl border ${selectorToneClass} flex flex-col items-center justify-between py-2 px-1.5 transition-all duration-200 ${selected ? 'shadow-[0_10px_20px_-16px_rgba(16,185,129,0.95)] ring-1 ring-emerald-200/70 scale-[1.01]' : 'hover:shadow-sm'}`}>
         <PremiumCheckToggle
           selected={selected}
           onToggle={onToggleSelect}
           ariaLabel={selected ? "Desmarcar pedido" : "Selecionar pedido"}
           title={selected ? "Desmarcar pedido" : "Selecionar pedido"}
         />
-        <div className="mt-2 flex flex-col items-center gap-1">
+        <div className={`mt-2 flex flex-col items-center gap-1 transition-all duration-200 ${selected ? 'opacity-100 translate-y-0' : 'opacity-90 translate-y-[1px]'}`}>
           <selectorMeta.icon size={14} weight="duotone" />
           <span className="text-[8px] font-bold tracking-[0.1em] leading-none">
             {selectorMeta.label}
