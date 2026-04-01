@@ -1001,7 +1001,7 @@ export const MenuView = ({
                 return (
                 <div
                   key={item.id}
-                  className={`group bg-white rounded-2xl border border-slate-100 shadow-sm p-3 sm:p-4 grid grid-cols-[1fr_auto] gap-3 md:hover:scale-[1.01] md:hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] transition ${!staffView ? "cursor-pointer" : "cursor-default"}`}
+                  className={`group bg-white rounded-3xl border border-transparent shadow-sm p-4 sm:p-5 grid grid-cols-[1fr_auto] gap-3 md:hover:scale-[1.01] md:hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] transition ${!staffView ? "cursor-pointer" : "cursor-default"}`}
                   onClick={() => {
                     if (!staffView) openProductModal(item);
                   }}
@@ -1015,12 +1015,12 @@ export const MenuView = ({
                           openProductModal(item);
                         }
                       }}
-                      className={`text-left font-semibold text-slate-900 text-base sm:text-lg leading-tight line-clamp-2 ${(!staffView || allowStaffModal) ? 'cursor-pointer hover:text-slate-700' : 'cursor-default'}`}
+                      className={`text-left font-bold text-gray-900 text-base sm:text-lg leading-tight line-clamp-2 ${(!staffView || allowStaffModal) ? 'cursor-pointer hover:text-gray-700' : 'cursor-default'}`}
                     >
                       {item.name}
                     </button>
                     {item.description && (
-                      <p className="text-sm sm:text-[15px] text-slate-600 leading-relaxed line-clamp-2">{item.description}</p>
+                      <p className="text-sm sm:text-[15px] text-gray-500 leading-relaxed line-clamp-2">{item.description}</p>
                     )}
                     {itemQtyMap.get(String(item.id)) > 0 && (
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold bg-lime-50 text-lime-700 border border-lime-200">
@@ -1037,7 +1037,7 @@ export const MenuView = ({
                       <button
                         type="button"
                         onClick={handleOpenOptions}
-                        className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:bg-slate-100 transition cursor-pointer"
+                        className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-600 bg-white border border-slate-200 px-3.5 py-1.5 rounded-full hover:bg-slate-50 transition cursor-pointer"
                       >
                         <SlidersHorizontal size={12} weight="bold" />
                         {isEspetoCategory(item?.category) ? "Customizar espeto" : "Ver opções"}
@@ -1079,7 +1079,7 @@ export const MenuView = ({
                           openProductModal(item);
                         }
                       }}
-                      className={`relative aspect-[4/3] sm:aspect-square ${staffView ? "w-[120px] rounded-2xl" : "w-[108px] rounded-2xl"} overflow-hidden bg-gray-100 border border-gray-200 shadow-sm ${(!staffView || allowStaffModal) ? 'cursor-pointer' : 'cursor-default'}`}
+                      className={`relative aspect-[4/3] sm:aspect-square ${staffView ? "w-[120px] rounded-3xl" : "w-[108px] rounded-3xl"} overflow-hidden bg-gray-100 border border-slate-100 shadow-sm ${(!staffView || allowStaffModal) ? 'cursor-pointer' : 'cursor-default'}`}
                     >
                       {stockState.soldOut && (
                         <span className="absolute z-10 top-2 left-2 rounded-full bg-rose-600 text-white text-[10px] font-bold px-2 py-1">
@@ -1132,12 +1132,12 @@ export const MenuView = ({
                               <span className="text-[11px] font-semibold text-slate-400 line-through">
                                 {formatCurrency(item.price)}
                               </span>
-                              <span className="text-xl font-bold tracking-tight text-amber-600">
+                              <span className="text-xl font-bold tracking-tight text-slate-900">
                                 {formatCurrency(resolvePromoPrice(item))}
                               </span>
                             </>
                           ) : (
-                            <span className="text-xl font-bold tracking-tight text-amber-600">
+                            <span className="text-xl font-bold tracking-tight text-slate-900">
                               {formatCurrency(item.price)}
                             </span>
                           )}
@@ -1163,7 +1163,7 @@ export const MenuView = ({
                               onClick={handleIncrement}
                               title={stockState.soldOut ? "Esgotado" : "Adicionar"}
                               disabled={stockState.soldOut}
-                              className="h-9 px-4 py-1.5 rounded-full border text-sm font-semibold transition-all active:scale-[0.98] inline-flex items-center justify-center gap-1.5 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                              className="h-10 px-5 py-1.5 rounded-full border text-sm font-semibold shadow-sm transition-all active:scale-95 inline-flex items-center justify-center gap-1.5 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                               style={{
                                 borderColor: stockState.soldOut ? '#e2e8f0' : buttonColor,
                                 color: stockState.soldOut ? '#94a3b8' : buttonColor,

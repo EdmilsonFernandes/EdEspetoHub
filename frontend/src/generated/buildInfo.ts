@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260330.191744.4234d44",
-  "buildId": "0.1.9+20260330.191744.4234d44-20260330.191744-4234d44",
-  "builtAt": "2026-03-30T19:17:44.447Z",
-  "commitHash": "4234d4479af8a079363532140bc7be3bf961e4cb",
-  "shortHash": "4234d44",
+  "versionInternal": "0.1.9+20260401.001232.2da2718",
+  "buildId": "0.1.9+20260401.001232.2da2718-20260401.001232-2da2718",
+  "builtAt": "2026-04-01T00:12:32.575Z",
+  "commitHash": "2da2718d60b00c23051c9ce56bd9b000161e6162",
+  "shortHash": "2da2718",
   "branch": "main",
   "commits": [
+    {
+      "hash": "2da2718d60b00c23051c9ce56bd9b000161e6162",
+      "shortHash": "2da2718",
+      "dateIso": "2026-03-30T16:18:44-03:00",
+      "subject": "fix(orders-mobile): prevent totals overlap in order history cards"
+    },
     {
       "hash": "4234d4479af8a079363532140bc7be3bf961e4cb",
       "shortHash": "4234d44",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "74261a2",
       "dateIso": "2026-03-27T22:24:17-03:00",
       "subject": "fix(queue): reduz delay ao trocar loja e ao dar refresh"
-    },
-    {
-      "hash": "714e70b7b2e1ceb4be42b12d627c1565a8365655",
-      "shortHash": "714e70b",
-      "dateIso": "2026-03-27T17:07:57-03:00",
-      "subject": "fix(queue): força store atual e polling contínuo para estabilidade no Android"
     }
   ]
 } as const;
