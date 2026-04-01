@@ -58,6 +58,17 @@ const firstName = (fullName?: string | null) => {
   return n.split(/\s+/)[0] || n;
 };
 
+const addBusinessDays = (startDate: Date, businessDays: number) => {
+  const result = new Date(startDate);
+  let added = 0;
+  while (added < businessDays) {
+    result.setDate(result.getDate() + 1);
+    const day = result.getDay();
+    if (day !== 0 && day !== 6) added += 1;
+  }
+  return result;
+};
+
 export function OrderTracking() {
   const { orderId } = useParams();
   const location = useLocation();
@@ -276,6 +287,8 @@ export function OrderTracking() {
   const hasDeliveryFee =
     order?.deliveryFee !== null && order?.deliveryFee !== undefined && isDelivery;
   const shipment = (order as any)?.shipment || (trackingV2 as any)?.shipment || null;
+  const shipmentServiceCode = String(shipment?.serviceCode || '').trim().toUpperCase();
+  const shipmentServiceName = String(shipment?.serviceName || '').trim();
   const shipmentTrackingCode = String(shipment?.trackingCode || '').trim();
   const shipmentTrackingUrl = String(shipment?.trackingUrl || '').trim();
   const pixPayload = pixKey
@@ -296,6 +309,39 @@ export function OrderTracking() {
     : null;
   const etaWindowMin = etaDetails?.windowMin ? Number(etaDetails.windowMin) : null;
   const etaWindowMax = etaDetails?.windowMax ? Number(etaDetails.windowMax) : null;
+  const postalEstimatedDays = useMemo(() => {
+    if (!isPostalDelivery) return null;
+    const explicitCandidates = [
+      Number((trackingV2 as any)?.shipment?.estimatedDays || 0),
+      Number((shipment as any)?.estimatedDays || 0),
+      Number((shipment as any)?.quotePayload?.estimatedDays || 0),
+    ].filter((value) => Number.isFinite(value) && value > 0);
+    if (explicitCandidates.length) return Math.ceil(explicitCandidates[0]);
+
+    if (shipmentServiceCode.includes('SEDEX') || shipmentServiceName.toUpperCase().includes('SEDEX')) {
+      return 4;
+    }
+    if (shipmentServiceCode.includes('PAC') || shipmentServiceName.toUpperCase().includes('PAC')) {
+      return 8;
+    }
+    return null;
+  }, [isPostalDelivery, trackingV2, shipment, shipmentServiceCode, shipmentServiceName]);
+  const postalPostedAtMs = shipment?.postedAt ? new Date(shipment.postedAt).getTime() : null;
+  const postalBaseMs = postalPostedAtMs && Number.isFinite(postalPostedAtMs)
+    ? postalPostedAtMs
+    : order?.createdAt;
+  const postalExpectedDeliveryDate = useMemo(() => {
+    if (!isPostalDelivery || !postalEstimatedDays || !postalBaseMs) return null;
+    const start = new Date(postalBaseMs);
+    if (!Number.isFinite(start.getTime())) return null;
+    return addBusinessDays(start, postalEstimatedDays);
+  }, [isPostalDelivery, postalEstimatedDays, postalBaseMs]);
+  const postalRemainingDays = useMemo(() => {
+    if (!isPostalDelivery || isReady || !postalExpectedDeliveryDate) return null;
+    const diffMs = postalExpectedDeliveryDate.getTime() - Date.now();
+    if (!Number.isFinite(diffMs)) return null;
+    return Math.max(0, Math.ceil(diffMs / (24 * 60 * 60 * 1000)));
+  }, [isPostalDelivery, isReady, postalExpectedDeliveryDate]);
   const estimateMinutes = etaTotalMinutes;
   const deliveryFeeValue = hasDeliveryFee ? Number(order?.deliveryFee || 0) : null;
   const routeDurationMinutes = useMemo(() => {
@@ -308,11 +354,10 @@ export function OrderTracking() {
     return null;
   }, [deliveryRoute?.durationMin, (etaDetails as any)?.travelMinutes, etaWindowMax]);
   const routeEtaRemainingMinutes = useMemo(() => {
-    if (!isDelivery) return null;
+    if (!isDelivery || isPostalDelivery) return null;
     const deliveryInRoute =
       deliveryStatus === 'IN_TRANSIT' ||
-      status === 'in_delivery' ||
-      (isPostalDelivery && normalizedStatus === 'dispatched');
+      status === 'in_delivery';
     if (!deliveryInRoute) return null;
     if (!routeDurationMinutes || routeDurationMinutes <= 0) return null;
     const startCandidates = [
@@ -327,16 +372,20 @@ export function OrderTracking() {
       return Math.max(0, Math.round(routeDurationMinutes - elapsedMin));
     }
     return Math.max(0, Math.round(routeDurationMinutes));
-  }, [isDelivery, isPostalDelivery, normalizedStatus, deliveryStatus, status, routeDurationMinutes, (order as any)?.delivery?.inTransitAt, (order as any)?.delivery?.pickedUpAt]);
+  }, [isDelivery, isPostalDelivery, deliveryStatus, status, routeDurationMinutes, (order as any)?.delivery?.inTransitAt, (order as any)?.delivery?.pickedUpAt]);
   const isInTransitPhase =
     isDelivery &&
-    (deliveryStatus === 'IN_TRANSIT' || status === 'in_delivery' || (isPostalDelivery && normalizedStatus === 'dispatched'));
-  const etaPhaseLabel = isInTransitPhase ? 'Tempo de trajeto' : 'Tempo de preparo';
-  const etaForecastLabel = isDelivery
+    !isPostalDelivery &&
+    (deliveryStatus === 'IN_TRANSIT' || status === 'in_delivery');
+  const etaPhaseLabel = isPostalDelivery ? 'Prazo de entrega' : (isInTransitPhase ? 'Tempo de trajeto' : 'Tempo de preparo');
+  const etaForecastLabel = isPostalDelivery
+    ? 'Previsão dos Correios'
+    : isDelivery
     ? (isInTransitPhase ? 'Previsão de chegada' : 'Previsão de entrega')
     : 'Previsão de preparo';
-  const etaForecastPrefix = isDelivery ? 'Chega por volta de' : 'Pronto por volta de';
+  const etaForecastPrefix = isPostalDelivery ? 'Entrega estimada até' : isDelivery ? 'Chega por volta de' : 'Pronto por volta de';
   const remainingEstimateMinutes = useMemo(() => {
+    if (isPostalDelivery) return null;
     if (isReady) return null;
     if (routeEtaRemainingMinutes !== null) return routeEtaRemainingMinutes;
     if (!estimateMinutes) return null;
@@ -344,14 +393,19 @@ export function OrderTracking() {
     if (hasAnyEtaTotal) return Math.max(0, Math.round(estimateMinutes));
     const elapsedMin = Math.max(0, elapsedMs / 60000);
     return Math.max(0, Math.round(estimateMinutes - elapsedMin));
-  }, [isReady, routeEtaRemainingMinutes, estimateMinutes, elapsedMs, hasAnyEtaTotal]);
+  }, [isPostalDelivery, isReady, routeEtaRemainingMinutes, estimateMinutes, elapsedMs, hasAnyEtaTotal]);
   const isEstimateDelayed = useMemo(() => {
+    if (isPostalDelivery) {
+      if (isReady || !postalExpectedDeliveryDate) return false;
+      return Date.now() > postalExpectedDeliveryDate.getTime();
+    }
     if (isReady || !estimateMinutes) return false;
     const elapsedMin = Math.max(0, elapsedMs / 60000);
     return elapsedMin > estimateMinutes + 2 && remainingEstimateMinutes === 0;
-  }, [isReady, estimateMinutes, elapsedMs, remainingEstimateMinutes]);
+  }, [isPostalDelivery, isReady, estimateMinutes, elapsedMs, remainingEstimateMinutes, postalExpectedDeliveryDate]);
   const estimatedReadyAt = useMemo(() => {
     if (isReady) return null;
+    if (isPostalDelivery) return postalExpectedDeliveryDate;
     if (remainingEstimateMinutes !== null) {
       return new Date(Date.now() + remainingEstimateMinutes * 60 * 1000);
     }
@@ -359,9 +413,10 @@ export function OrderTracking() {
     const base = new Date(order.createdAt).getTime();
     if (!Number.isFinite(base)) return null;
     return new Date(base + estimateMinutes * 60 * 1000);
-  }, [isReady, remainingEstimateMinutes, estimateMinutes, order?.createdAt]);
+  }, [isReady, isPostalDelivery, postalExpectedDeliveryDate, remainingEstimateMinutes, estimateMinutes, order?.createdAt]);
   const deliveryEta = useMemo(() => {
     if (!isDelivery || isReady) return null;
+    if (isPostalDelivery) return postalExpectedDeliveryDate;
     if (routeEtaRemainingMinutes !== null) {
       return new Date(Date.now() + routeEtaRemainingMinutes * 60 * 1000);
     }
@@ -369,7 +424,7 @@ export function OrderTracking() {
       return new Date(Date.now() + remainingEstimateMinutes * 60 * 1000);
     }
     return null;
-  }, [isDelivery, isReady, routeEtaRemainingMinutes, remainingEstimateMinutes]);
+  }, [isDelivery, isReady, isPostalDelivery, postalExpectedDeliveryDate, routeEtaRemainingMinutes, remainingEstimateMinutes]);
   const storeWhatsappLink = storePhone
     ? `https://wa.me/55${String(storePhone || '').replace(/\D/g, '').replace(/^55/, '')}`
     : '';
@@ -848,8 +903,16 @@ export function OrderTracking() {
                       <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
                         <p className="text-xs uppercase tracking-[0.16em] text-slate-500 font-semibold">{etaForecastLabel}</p>
                         <p className="mt-1 text-xl font-extrabold text-slate-900">
-                          {etaForecastPrefix} {estimatedReadyAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                          {etaForecastPrefix}{' '}
+                          {isPostalDelivery
+                            ? estimatedReadyAt.toLocaleDateString('pt-BR')
+                            : estimatedReadyAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                         </p>
+                        {isPostalDelivery ? (
+                          <p className="mt-1 text-xs text-slate-600">
+                            {shipmentServiceName || shipmentServiceCode || 'Serviço postal'}{postalEstimatedDays ? ` • ${postalEstimatedDays} dia(s) úteis` : ''}
+                          </p>
+                        ) : null}
                       </div>
                     ) : null}
 
@@ -920,12 +983,22 @@ export function OrderTracking() {
                   </div>
                   <div className="mt-2 text-xs text-slate-500">{progress}% completo</div>
                 </div>
-                {(isReady && elapsedMs > 0) || (remainingEstimateMinutes !== null && !isReady) || (etaWindowMin && etaWindowMax && !isReady) || isEstimateDelayed ? (
+                {(isReady && elapsedMs > 0) ||
+                (remainingEstimateMinutes !== null && !isReady) ||
+                (!isPostalDelivery && etaWindowMin && etaWindowMax && !isReady) ||
+                (isPostalDelivery && !isReady && (postalRemainingDays !== null || Boolean(postalExpectedDeliveryDate))) ||
+                isEstimateDelayed ? (
                   <div className="mb-4 space-y-1.5">
                     {isReady && elapsedMs > 0 && (
                       <div className="inline-flex items-center gap-2 text-sm text-slate-500">
                         <Clock size={13} weight="duotone" className="text-slate-400" />
                         <span className="font-medium">Tempo total: {formatDuration(elapsedMs)}</span>
+                      </div>
+                    )}
+                    {isPostalDelivery && !isReady && postalRemainingDays !== null && (
+                      <div className="inline-flex items-center gap-2 text-sm text-slate-500">
+                        <Clock size={13} weight="duotone" className="text-slate-400" />
+                        <span className="font-medium">Prazo restante: ~{postalRemainingDays} dia(s)</span>
                       </div>
                     )}
                     {remainingEstimateMinutes !== null && !isReady && (
@@ -934,7 +1007,7 @@ export function OrderTracking() {
                         <span className="font-medium">{etaPhaseLabel} restante: ~{remainingEstimateMinutes} min</span>
                       </div>
                     )}
-                    {etaWindowMin && etaWindowMax && !isReady && (
+                    {!isPostalDelivery && etaWindowMin && etaWindowMax && !isReady && (
                       <div className="inline-flex items-center gap-2 text-sm text-slate-500">
                         <Clock size={13} weight="duotone" className="text-slate-400" />
                         <span className="font-medium">Janela prevista: {etaWindowMin}–{etaWindowMax} min</span>
@@ -1133,6 +1206,21 @@ export function OrderTracking() {
                           <span className="font-semibold">Status:</span>{' '}
                           {shipment?.shipmentStatus === 'posted' ? 'Postado' : 'Aguardando postagem'}
                         </p>
+                        <p className="text-sm text-slate-700">
+                          <span className="font-semibold">Serviço:</span>{' '}
+                          {shipmentServiceName || shipmentServiceCode || 'A confirmar'}
+                        </p>
+                        {postalEstimatedDays ? (
+                          <p className="text-sm text-slate-700">
+                            <span className="font-semibold">Prazo estimado:</span> {postalEstimatedDays} dia(s) úteis
+                          </p>
+                        ) : null}
+                        {postalExpectedDeliveryDate ? (
+                          <p className="text-sm text-slate-700">
+                            <span className="font-semibold">Previsão de entrega:</span>{' '}
+                            {postalExpectedDeliveryDate.toLocaleDateString('pt-BR')}
+                          </p>
+                        ) : null}
                         {shipmentTrackingCode ? (
                           <p className="text-sm text-slate-700 break-all">
                             <span className="font-semibold">Código:</span> {shipmentTrackingCode}
@@ -1218,7 +1306,7 @@ export function OrderTracking() {
                       )}
                     </div>
                   )}
-                  {isDelivery && storeCoords?.lat && deliveryCoords?.lat && (
+                  {isDelivery && !isPostalDelivery && storeCoords?.lat && deliveryCoords?.lat && (
                     <div className="rounded-2xl border border-slate-200 bg-white p-3 space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold text-slate-600">Rota da entrega</span>
@@ -1320,14 +1408,24 @@ export function OrderTracking() {
                         <span className="font-semibold">{etaPhaseLabel} restante:</span> ~{remainingEstimateMinutes} min
                       </p>
                     )}
+                    {isPostalDelivery && !isReady && postalRemainingDays !== null && (
+                      <p>
+                        <span className="font-semibold">Prazo restante:</span> ~{postalRemainingDays} dia(s)
+                      </p>
+                    )}
                     {isEstimateDelayed && (
                       <p>
                         <span className="font-semibold">Status da previsão:</span> Em atraso (acompanhamento em tempo real)
                       </p>
                     )}
-                  {etaWindowMin && etaWindowMax && !isReady && (
+                  {!isPostalDelivery && etaWindowMin && etaWindowMax && !isReady && (
                     <p>
                       <span className="font-semibold">Janela prevista:</span> {etaWindowMin}–{etaWindowMax} min
+                    </p>
+                  )}
+                  {isPostalDelivery && postalExpectedDeliveryDate && !isReady && (
+                    <p>
+                      <span className="font-semibold">Previsão de entrega:</span> {postalExpectedDeliveryDate.toLocaleDateString('pt-BR')}
                     </p>
                   )}
                   {deliveryFeeValue !== null && (
