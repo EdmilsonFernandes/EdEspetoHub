@@ -1,8 +1,8 @@
 ﻿// @ts-nocheck
 import React, { useEffect, useMemo, useState } from "react";
+import { Drawer } from "vaul";
 import {
   SquaresFour,
-  X,
   Plus,
   Minus,
   SignOut,
@@ -929,14 +929,15 @@ export const MenuView = ({
           <div ref={categoryTabsContainerRef} className="mx-auto w-full max-w-6xl px-4 pb-3">
             <div className="w-full flex items-center gap-2">
               {filteredGrouped.length > 2 && (
-                <button
-                  type="button"
-                  aria-label="Abrir categorias"
-                  onClick={() => setIsCategorySheetOpen(true)}
-                  className="h-10 w-10 shrink-0 rounded-lg bg-white border border-slate-200 text-slate-700 inline-flex items-center justify-center shadow-sm active:scale-95 transition-all"
-                >
-                  <List size={18} weight="bold" />
-                </button>
+                <Drawer.Trigger asChild>
+                  <button
+                    type="button"
+                    aria-label="Abrir categorias"
+                    className="h-10 w-10 shrink-0 rounded-lg bg-white border border-slate-200 text-slate-700 inline-flex items-center justify-center shadow-sm active:scale-95 transition-all"
+                  >
+                    <List size={18} weight="bold" />
+                  </button>
+                </Drawer.Trigger>
               )}
               <div className={`${
                 filteredGrouped.length > 2
@@ -1496,63 +1497,48 @@ export const MenuView = ({
         </div>
       </div>
 
-      <div
-        className={`fixed inset-0 z-50 transition-opacity duration-300 ${isCategorySheetOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
-      >
-        <button
-          type="button"
-          aria-label="Fechar menu de categorias"
-          onClick={() => setIsCategorySheetOpen(false)}
-          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        />
-        <div
-          className={`absolute bottom-0 left-0 w-full bg-white rounded-t-3xl shadow-2xl transform transition-transform duration-300 ease-out ${isCategorySheetOpen ? "translate-y-0" : "translate-y-full"}`}
-          onClick={(event) => event.stopPropagation()}
-        >
-          <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-3" />
-          <div className="flex items-center justify-between px-5 pt-4 pb-2">
-            <h3 className="text-lg font-bold text-slate-800">Todas as categorias</h3>
-            <button
-              type="button"
-              aria-label="Fechar"
-              onClick={() => setIsCategorySheetOpen(false)}
-              className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-600 hover:text-slate-800 hover:border-slate-300 transition inline-flex items-center justify-center"
-            >
-              <X size={18} weight="bold" />
-            </button>
-          </div>
-          <div className="grid grid-cols-2 gap-3 p-5 pt-3 max-h-[65vh] overflow-y-auto">
-            {filteredGrouped.map((category) => {
-              const isActive = activeCategoryKey === category.key;
-
-              return (
-                <button
-                  key={`sheet-${category.key}`}
-                  type="button"
-                  onClick={() => {
-                    setActiveCategoryKey(category.key);
-                    scrollToCategory(category.key);
-                    setIsCategorySheetOpen(false);
-                  }}
-                  className="rounded-xl border p-3 text-left transition active:scale-[0.98]"
-                  style={
-                    isActive
-                      ? { backgroundColor: catalogPrimaryColor, color: catalogPrimaryText, borderColor: catalogPrimaryColor }
-                      : { backgroundColor: "#f8fafc", color: catalogSecondaryColor, borderColor: "#f1f5f9" }
-                  }
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm leading-none" aria-hidden="true">
-                      {categoryGlyph(category.key)}
+      <Drawer.Root open={isCategorySheetOpen} onOpenChange={setIsCategorySheetOpen}>
+        <Drawer.Portal>
+          <Drawer.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-[2px]" />
+          <Drawer.Content className="fixed bottom-0 left-0 right-0 z-[60] mt-24 h-fit max-h-[85vh] rounded-t-[32px] bg-white outline-none">
+            <div className="mx-auto my-4 h-1.5 w-12 shrink-0 rounded-full bg-zinc-300" />
+            <div className="px-6 py-2">
+              <h3 className="text-xl font-black text-zinc-900">Menu</h3>
+            </div>
+            <div className="max-h-[65vh] overflow-y-auto pb-5">
+              {filteredGrouped.map((category) => {
+                const isActive = activeCategoryKey === category.key;
+                return (
+                  <button
+                    key={`sheet-${category.key}`}
+                    type="button"
+                    onClick={() => {
+                      setActiveCategoryKey(category.key);
+                      scrollToCategory(category.key);
+                      setIsCategorySheetOpen(false);
+                    }}
+                    className="flex w-full items-center justify-between px-6 py-4 text-left transition-colors active:bg-zinc-50"
+                  >
+                    <div className="min-w-0">
+                      <p className={`truncate text-base font-semibold ${isActive ? "text-zinc-900" : "text-zinc-800"}`}>
+                        {category.label}
+                        <span className="ml-2 text-sm font-medium text-zinc-400">{category.items.length}</span>
+                      </p>
+                    </div>
+                    <span
+                      className={`relative h-6 w-6 shrink-0 rounded-full border-2 ${
+                        isActive ? "border-zinc-900" : "border-zinc-200"
+                      }`}
+                    >
+                      {isActive && <span className="absolute inset-1 rounded-full bg-zinc-900" />}
                     </span>
-                    <span className="text-sm font-medium truncate">{category.label}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+                  </button>
+                );
+              })}
+            </div>
+          </Drawer.Content>
+        </Drawer.Portal>
+      </Drawer.Root>
 
       <ProductModal
         product={selectedProduct}

@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.153216.afc24dd",
-  "buildId": "0.1.9+20260402.153216.afc24dd-20260402.153216-afc24dd",
-  "builtAt": "2026-04-02T15:32:16.229Z",
-  "commitHash": "afc24dd9fcf7fbe784eb45578adc7d772a640df1",
-  "shortHash": "afc24dd",
+  "versionInternal": "0.1.9+20260402.170921.141300e",
+  "buildId": "0.1.9+20260402.170921.141300e-20260402.170921-141300e",
+  "builtAt": "2026-04-02T17:09:21.618Z",
+  "commitHash": "141300ee0d090dea999c2c7591055f4aab539ac4",
+  "shortHash": "141300e",
   "branch": "main",
   "commits": [
+    {
+      "hash": "141300ee0d090dea999c2c7591055f4aab539ac4",
+      "shortHash": "141300e",
+      "dateIso": "2026-04-02T12:33:02-03:00",
+      "subject": "style(menu): move category drawer icon to left and simplify pills"
+    },
     {
       "hash": "afc24dd9fcf7fbe784eb45578adc7d772a640df1",
       "shortHash": "afc24dd",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "0f79b4b",
       "dateIso": "2026-04-01T15:47:58-03:00",
       "subject": "style(queue): add subtle selection rail micro-animation for premium feedback"
-    },
-    {
-      "hash": "4c4614b4953ca19159a68056f260376afc871ef1",
-      "shortHash": "4c4614b",
-      "dateIso": "2026-04-01T15:46:14-03:00",
-      "subject": "feat(queue): redesign selection rail on order cards for premium mobile/web look"
     }
   ]
 } as const;
