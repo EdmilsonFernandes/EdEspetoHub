@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.205701.8a95e99",
-  "buildId": "0.1.9+20260402.205701.8a95e99-20260402.205701-8a95e99",
-  "builtAt": "2026-04-02T20:57:01.883Z",
-  "commitHash": "8a95e996f033fa8fe1c33e65b28c07f61fd99f00",
-  "shortHash": "8a95e99",
+  "versionInternal": "0.1.9+20260402.205924.07a6669",
+  "buildId": "0.1.9+20260402.205924.07a6669-20260402.205924-07a6669",
+  "builtAt": "2026-04-02T20:59:24.657Z",
+  "commitHash": "07a6669b5879027cbc23d16bebef9f3d5fb038ee",
+  "shortHash": "07a6669",
   "branch": "main",
   "commits": [
+    {
+      "hash": "07a6669b5879027cbc23d16bebef9f3d5fb038ee",
+      "shortHash": "07a6669",
+      "dateIso": "2026-04-02T17:57:31-03:00",
+      "subject": "feat(a11y): respect reduced-motion preference in landing footer animations"
+    },
     {
       "hash": "8a95e996f033fa8fe1c33e65b28c07f61fd99f00",
       "shortHash": "8a95e99",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "18c1027",
       "dateIso": "2026-04-02T10:33:06-03:00",
       "subject": "fix(categories): preserve manual order when saving products"
-    },
-    {
-      "hash": "d01f18e5967f86b872baf39f83ec6b3e26c113fe",
-      "shortHash": "d01f18e",
-      "dateIso": "2026-04-01T18:49:03-03:00",
-      "subject": "feat(postal): persiste servico e prazo no checkout para tracking"
     }
   ]
 } as const;

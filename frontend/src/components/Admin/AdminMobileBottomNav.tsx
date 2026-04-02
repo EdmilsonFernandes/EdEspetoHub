@@ -11,6 +11,16 @@ export function AdminMobileBottomNav() {
   const { auth } = useAuth();
   const role = String(auth?.user?.role || '').toUpperCase();
   const isOperator = role === 'OPERATOR' || role === 'CHURRASQUEIRO';
+  const primaryColor = String(
+    auth?.store?.settings?.primaryColor ||
+    auth?.store?.settings?.primary_color ||
+    '#0f172a'
+  );
+  const secondaryColor = String(
+    auth?.store?.settings?.secondaryColor ||
+    auth?.store?.settings?.secondary_color ||
+    '#e2e8f0'
+  );
   const path = location.pathname || '';
   const dashboardTab = (location.state as any)?.activeTab || '';
   const [monitorCount, setMonitorCount] = useState(0);
@@ -32,6 +42,30 @@ export function AdminMobileBottomNav() {
       return '';
     }
   }, [auth?.store?.slug]);
+
+  const getContrastTextColor = (hexColor = '') => {
+    const normalized = String(hexColor || '').trim().replace('#', '');
+    if (!/^[0-9a-fA-F]{6}$/.test(normalized)) return '#0f172a';
+    const r = parseInt(normalized.slice(0, 2), 16);
+    const g = parseInt(normalized.slice(2, 4), 16);
+    const b = parseInt(normalized.slice(4, 6), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.62 ? '#0f172a' : '#ffffff';
+  };
+
+  const hexToRgba = (hexColor = '', alpha = 0.1, fallback = 'rgba(15,23,42,0.08)') => {
+    const normalized = String(hexColor || '').trim().replace('#', '');
+    if (!/^[0-9a-fA-F]{6}$/.test(normalized)) return fallback;
+    const r = parseInt(normalized.slice(0, 2), 16);
+    const g = parseInt(normalized.slice(2, 4), 16);
+    const b = parseInt(normalized.slice(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
+  const activePillColor = hexToRgba(secondaryColor, 0.16, hexToRgba(primaryColor, 0.1));
+  const activeTextColor = primaryColor;
+  const activeIconBg = primaryColor;
+  const activeIconColor = getContrastTextColor(primaryColor);
 
   useEffect(() => {
     let active = true;
@@ -161,7 +195,7 @@ export function AdminMobileBottomNav() {
         transform: isVisible ? 'translateY(0)' : 'translateY(calc(100% - 4px))',
       }}
     >
-      <ul className={`pointer-events-auto mx-auto grid ${items.length <= 2 ? 'grid-cols-2' : 'grid-cols-4'} gap-1.5 max-w-none rounded-none border-t border-white/10 bg-slate-900/80 p-2 pb-[max(env(safe-area-inset-bottom),8px)] shadow-none backdrop-blur-lg`}>
+      <ul className={`pointer-events-auto mx-auto grid ${items.length <= 2 ? 'grid-cols-2' : 'grid-cols-4'} gap-1.5 max-w-none rounded-none border-t border-slate-200/40 bg-white/72 p-2 pb-[max(env(safe-area-inset-bottom),6px)] shadow-[0_-12px_24px_-20px_rgba(15,23,42,0.35)] backdrop-blur-2xl`}>
         {items.map((item) => {
           const Icon = item.icon;
           return (
@@ -169,21 +203,27 @@ export function AdminMobileBottomNav() {
               <button
                 type="button"
                 onClick={item.onClick}
-                className={`w-full rounded-full py-2 text-[11px] font-bold flex flex-col items-center justify-center gap-1 transition ${
+                className={`w-full min-h-14 rounded-2xl py-1.5 text-[9px] font-black uppercase tracking-[0.1em] flex flex-col items-center justify-center gap-1 transition ${
                   item.active
-                    ? 'bg-white text-slate-900 shadow-[0_10px_24px_-14px_rgba(255,255,255,0.45)]'
-                    : 'bg-transparent text-slate-300 hover:bg-slate-800/70 hover:text-white'
+                    ? 'shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)]'
+                    : 'bg-transparent text-slate-500 hover:bg-slate-100/80 hover:text-slate-800'
                 }`}
+                style={item.active ? { backgroundColor: activePillColor, color: activeTextColor } : undefined}
               >
-                <span className="relative inline-flex">
-                  <Icon size={16} weight="duotone" />
+                <span
+                  className={`relative inline-flex h-7 w-7 items-center justify-center rounded-full ${
+                    item.active ? '' : 'bg-slate-100 text-slate-600'
+                  }`}
+                  style={item.active ? { backgroundColor: activeIconBg, color: activeIconColor } : undefined}
+                >
+                  <Icon size={18} weight={item.active ? 'fill' : 'duotone'} />
                   {item.badge ? (
                     <span className="absolute -top-2 -right-3 min-w-[18px] h-[18px] rounded-full bg-rose-500 px-1 text-[10px] font-black text-white flex items-center justify-center">
                       {item.badge}
                     </span>
                   ) : null}
                 </span>
-                <span>{item.label}</span>
+                <span className="leading-none">{item.label}</span>
               </button>
             </li>
           );
