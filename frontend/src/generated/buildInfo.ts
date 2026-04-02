@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.205433.93e0b66",
-  "buildId": "0.1.9+20260402.205433.93e0b66-20260402.205433-93e0b66",
-  "builtAt": "2026-04-02T20:54:33.484Z",
-  "commitHash": "93e0b6685ed37ffdb5e734181abc5342ab3c26d7",
-  "shortHash": "93e0b66",
+  "versionInternal": "0.1.9+20260402.205701.8a95e99",
+  "buildId": "0.1.9+20260402.205701.8a95e99-20260402.205701-8a95e99",
+  "builtAt": "2026-04-02T20:57:01.883Z",
+  "commitHash": "8a95e996f033fa8fe1c33e65b28c07f61fd99f00",
+  "shortHash": "8a95e99",
   "branch": "main",
   "commits": [
+    {
+      "hash": "8a95e996f033fa8fe1c33e65b28c07f61fd99f00",
+      "shortHash": "8a95e99",
+      "dateIso": "2026-04-02T17:55:20-03:00",
+      "subject": "feat(ui): add subtle entrance animation to landing footer sections"
+    },
     {
       "hash": "93e0b6685ed37ffdb5e734181abc5342ab3c26d7",
       "shortHash": "93e0b66",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "d01f18e",
       "dateIso": "2026-04-01T18:49:03-03:00",
       "subject": "feat(postal): persiste servico e prazo no checkout para tracking"
-    },
-    {
-      "hash": "be6dd3cc65c5dd84f9e7b465e63de81364ecf599",
-      "shortHash": "be6dd3c",
-      "dateIso": "2026-04-01T18:41:38-03:00",
-      "subject": "fix(postal-tracking): usa prazo em dias e previsao de entrega no detalhe"
     }
   ]
 } as const;
