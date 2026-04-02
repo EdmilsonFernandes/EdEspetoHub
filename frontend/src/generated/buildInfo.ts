@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.204646.49088a9",
-  "buildId": "0.1.9+20260402.204646.49088a9-20260402.204646-49088a9",
-  "builtAt": "2026-04-02T20:46:46.641Z",
-  "commitHash": "49088a95fd7964c6ed68ec0ded7c0960b19a7b5a",
-  "shortHash": "49088a9",
+  "versionInternal": "0.1.9+20260402.204938.e90f556",
+  "buildId": "0.1.9+20260402.204938.e90f556-20260402.204938-e90f556",
+  "builtAt": "2026-04-02T20:49:38.616Z",
+  "commitHash": "e90f55635fccd30307c6573f67180c235661f2b1",
+  "shortHash": "e90f556",
   "branch": "main",
   "commits": [
+    {
+      "hash": "e90f55635fccd30307c6573f67180c235661f2b1",
+      "shortHash": "e90f556",
+      "dateIso": "2026-04-02T17:47:22-03:00",
+      "subject": "feat(ux): streamline customer addresses and apply saved address in checkout"
+    },
     {
       "hash": "49088a95fd7964c6ed68ec0ded7c0960b19a7b5a",
       "shortHash": "49088a9",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "ca3c3a1",
       "dateIso": "2026-04-01T18:23:56-03:00",
       "subject": "fix(queue): corrige badge do rodape e restaura rail de icones/checkbox"
-    },
-    {
-      "hash": "7d0f1f0972378cd36e1425852737fc4c96a1ca7b",
-      "shortHash": "7d0f1f0",
-      "dateIso": "2026-04-01T18:15:54-03:00",
-      "subject": "feat(postal): adiciona rastreio na fila e envia postado para Em rota"
     }
   ]
 } as const;
