@@ -927,12 +927,23 @@ export const MenuView = ({
         </div>
         {filteredGrouped.length > 1 && (
           <div ref={categoryTabsContainerRef} className="mx-auto w-full max-w-6xl px-4 pb-3">
-            <div className="relative w-full">
+            <div className="w-full flex items-center gap-2">
+              {filteredGrouped.length > 2 && (
+                <button
+                  type="button"
+                  aria-label="Abrir categorias"
+                  onClick={() => setIsCategorySheetOpen(true)}
+                  className="h-10 w-10 shrink-0 rounded-lg bg-white border border-slate-200 text-slate-700 inline-flex items-center justify-center shadow-sm active:scale-95 transition-all"
+                >
+                  <List size={18} weight="bold" />
+                </button>
+              )}
               <div className={`${
                 filteredGrouped.length > 2
-                  ? "flex overflow-x-auto whitespace-nowrap gap-2 no-scrollbar scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pr-20"
-                  : "grid grid-cols-2 gap-2"
+                  ? "flex-1 overflow-x-auto whitespace-nowrap no-scrollbar scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                  : "flex-1 grid grid-cols-2 gap-2"
               }`}>
+                <div className={`${filteredGrouped.length > 2 ? "inline-flex items-center gap-2 pr-6" : "contents"}`}>
                 {filteredGrouped.map((category) => {
                   const isActive = activeCategoryKey === category.key;
                   return (
@@ -946,7 +957,7 @@ export const MenuView = ({
                         setActiveCategoryKey(category.key);
                         scrollToCategory(category.key);
                       }}
-                      className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border text-xs font-bold transition-colors snap-start ${
+                      className={`inline-flex items-center justify-center px-4 py-2 rounded-lg border text-sm font-bold transition-colors snap-start ${
                         filteredGrouped.length <= 2 ? "w-full min-w-0" : ""
                       }`}
                       style={
@@ -955,28 +966,12 @@ export const MenuView = ({
                           : { backgroundColor: "#f8fafc", color: "#475569", borderColor: "#e2e8f0" }
                       }
                     >
-                      <span className="text-[14px] leading-none" aria-hidden="true">
-                        {categoryGlyph(category.key)}
-                      </span>
                       <span className="whitespace-nowrap">{category.label}</span>
                     </button>
                   );
                 })}
               </div>
-              {filteredGrouped.length > 2 && (
-                <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white via-white to-transparent" />
-              )}
-              {filteredGrouped.length > 2 && (
-                <button
-                  type="button"
-                  aria-label="Abrir categorias"
-                  onClick={() => setIsCategorySheetOpen(true)}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 h-9 px-3 rounded-lg bg-white border border-slate-200 text-slate-700 inline-flex items-center gap-1 shadow-sm active:scale-95 transition-all"
-                >
-                  <List size={16} weight="bold" />
-                  <span className="text-xs font-semibold">Mais</span>
-                </button>
-              )}
+              </div>
             </div>
           </div>
         )}

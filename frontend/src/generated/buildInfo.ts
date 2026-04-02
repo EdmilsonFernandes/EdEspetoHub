@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.152951.3c0874f",
-  "buildId": "0.1.9+20260402.152951.3c0874f-20260402.152951-3c0874f",
-  "builtAt": "2026-04-02T15:29:51.705Z",
-  "commitHash": "3c0874f1e2b6b15b053ef0d3882f25a871c6c4f4",
-  "shortHash": "3c0874f",
+  "versionInternal": "0.1.9+20260402.153216.afc24dd",
+  "buildId": "0.1.9+20260402.153216.afc24dd-20260402.153216-afc24dd",
+  "builtAt": "2026-04-02T15:32:16.229Z",
+  "commitHash": "afc24dd9fcf7fbe784eb45578adc7d772a640df1",
+  "shortHash": "afc24dd",
   "branch": "main",
   "commits": [
+    {
+      "hash": "afc24dd9fcf7fbe784eb45578adc7d772a640df1",
+      "shortHash": "afc24dd",
+      "dateIso": "2026-04-02T12:30:35-03:00",
+      "subject": "fix(queue): stabilize desktop order-card actions with wrap-safe footer"
+    },
     {
       "hash": "3c0874f1e2b6b15b053ef0d3882f25a871c6c4f4",
       "shortHash": "3c0874f",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "4c4614b",
       "dateIso": "2026-04-01T15:46:14-03:00",
       "subject": "feat(queue): redesign selection rail on order cards for premium mobile/web look"
-    },
-    {
-      "hash": "852e157ecf555a4dfe943044da9fe0d49d9198e0",
-      "shortHash": "852e157",
-      "dateIso": "2026-04-01T15:42:55-03:00",
-      "subject": "Ed"
     }
   ]
 } as const;
