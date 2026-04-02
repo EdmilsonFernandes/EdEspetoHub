@@ -227,6 +227,18 @@ const Header = ({
     if (!compact) setMobileCollapsedStable(false);
   }, [compact]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.dispatchEvent(
+      new CustomEvent("admin:mobile-menu", {
+        detail: { open: Boolean(isCategorySheetOpen) },
+      })
+    );
+    return () => {
+      window.dispatchEvent(new CustomEvent("admin:mobile-menu", { detail: { open: false } }));
+    };
+  }, [isCategorySheetOpen]);
+
   return (
     <div className={`w-full ${compact ? 'pb-1' : 'pb-3'} pt-2`}>
       <div className="max-w-6xl mx-auto px-3 sm:px-4">

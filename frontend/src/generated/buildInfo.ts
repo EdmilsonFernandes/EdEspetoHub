@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.210329.4a5d7e1",
-  "buildId": "0.1.9+20260402.210329.4a5d7e1-20260402.210329-4a5d7e1",
-  "builtAt": "2026-04-02T21:03:29.898Z",
-  "commitHash": "4a5d7e1aabf2b869c06e1ecd6e35e53723c518f1",
-  "shortHash": "4a5d7e1",
+  "versionInternal": "0.1.9+20260402.210938.488b42e",
+  "buildId": "0.1.9+20260402.210938.488b42e-20260402.210938-488b42e",
+  "builtAt": "2026-04-02T21:09:38.269Z",
+  "commitHash": "488b42e190bea8cc71abd8e683e6c71fd504266e",
+  "shortHash": "488b42e",
   "branch": "main",
   "commits": [
+    {
+      "hash": "488b42e190bea8cc71abd8e683e6c71fd504266e",
+      "shortHash": "488b42e",
+      "dateIso": "2026-04-02T18:04:01-03:00",
+      "subject": "fix(frontend): import ShieldCheck icon used in landing footer"
+    },
     {
       "hash": "4a5d7e1aabf2b869c06e1ecd6e35e53723c518f1",
       "shortHash": "4a5d7e1",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "20b3ca0",
       "dateIso": "2026-04-02T11:02:29-03:00",
       "subject": "feat(create-store): streamline onboarding into 4 guided steps"
-    },
-    {
-      "hash": "b8d361ad7f4da314cbc7e3126a3472659291e762",
-      "shortHash": "b8d361a",
-      "dateIso": "2026-04-02T10:44:12-03:00",
-      "subject": "feat(branding): upgrade trust footer across catalog and admin"
     }
   ]
 } as const;
