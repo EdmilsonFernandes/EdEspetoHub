@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.140612.20b3ca0",
-  "buildId": "0.1.9+20260402.140612.20b3ca0-20260402.140612-20b3ca0",
-  "builtAt": "2026-04-02T14:06:12.038Z",
-  "commitHash": "20b3ca0980ccb6c174a84ccfeb987ad70f62d49c",
-  "shortHash": "20b3ca0",
+  "versionInternal": "0.1.9+20260402.141537.8222451",
+  "buildId": "0.1.9+20260402.141537.8222451-20260402.141537-8222451",
+  "builtAt": "2026-04-02T14:15:37.986Z",
+  "commitHash": "82224518f728a6575d84f7f375eacd5b7232f2ea",
+  "shortHash": "8222451",
   "branch": "main",
   "commits": [
+    {
+      "hash": "82224518f728a6575d84f7f375eacd5b7232f2ea",
+      "shortHash": "8222451",
+      "dateIso": "2026-04-02T11:06:53-03:00",
+      "subject": "style(create-store): polish stepper with icons, progress and checklist"
+    },
     {
       "hash": "20b3ca0980ccb6c174a84ccfeb987ad70f62d49c",
       "shortHash": "20b3ca0",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "64043fb",
       "dateIso": "2026-04-01T10:36:54-03:00",
       "subject": "feat(catalog): refine mobile UX, image consistency and category scroll sync"
-    },
-    {
-      "hash": "2d51ac1eac4ccf679c33b167674c916fc0b7f100",
-      "shortHash": "2d51ac1",
-      "dateIso": "2026-03-31T21:50:11-03:00",
-      "subject": "feat(catalog-theme): apply store colors to bag and category controls"
     }
   ]
 } as const;

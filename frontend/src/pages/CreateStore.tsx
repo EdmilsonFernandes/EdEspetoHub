@@ -1028,13 +1028,13 @@ export function CreateStore() {
           </div>
           <div className="flex items-center justify-between w-full relative mb-2">
             <div className="absolute top-1/2 left-0 w-full h-[2px] bg-slate-100 -z-10 -translate-y-1/2" />
-            {steps.map((step) => (
-              <button
-                type="button"
-                key={step.id}
-                onClick={() => scrollToStep(step.id)}
-                className="flex flex-col items-center gap-2 bg-white px-2 py-1 transition-all"
-              >
+              {steps.map((step) => (
+                <button
+                  type="button"
+                  key={step.id}
+                  onClick={() => scrollToStep(step.id)}
+                className="flex flex-col items-center gap-2 bg-white px-2 py-1 transition-all duration-200 hover:-translate-y-0.5 active:scale-95"
+                >
                   <span
                     className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
                       currentStep === step.id || step.done
@@ -1075,7 +1075,7 @@ export function CreateStore() {
               variant="primary"
               contentClassName="space-y-4"
             >
-              <div className={currentStep === 1 ? 'space-y-4' : 'hidden'}>
+              <div className={currentStep === 1 ? 'space-y-4 motion-safe:animate-[createStoreStepIn_.26s_ease-out]' : 'hidden'}>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">Nome completo</label>
                   <input
@@ -1212,7 +1212,7 @@ export function CreateStore() {
                 </div>
               </div>
 
-                <div ref={addressSectionRef} className={`pt-4 border-t border-gray-200 scroll-mt-36 ${currentStep === 2 ? '' : 'hidden'}`} onFocusCapture={() => setCurrentStep(2)}>
+                <div ref={addressSectionRef} className={`pt-4 border-t border-gray-200 scroll-mt-36 ${currentStep === 2 ? 'motion-safe:animate-[createStoreStepIn_.26s_ease-out]' : 'hidden'}`} onFocusCapture={() => setCurrentStep(2)}>
                   <h4 className="text-sm font-semibold text-gray-700">Endereço</h4>
                   <p className="text-xs text-slate-500 mb-3">Onde sua loja opera e recebe pedidos.</p>
                   <div className="space-y-4">
@@ -1368,7 +1368,7 @@ export function CreateStore() {
             </FormSection>
             </div>
 
-            <div ref={storeSectionRef} className={`pt-6 border-t border-gray-100 scroll-mt-36 ${currentStep === 3 ? '' : 'hidden'}`} onFocusCapture={() => setCurrentStep(3)}>
+            <div ref={storeSectionRef} className={`pt-6 border-t border-gray-100 scroll-mt-36 ${currentStep === 3 ? 'motion-safe:animate-[createStoreStepIn_.26s_ease-out]' : 'hidden'}`} onFocusCapture={() => setCurrentStep(3)}>
               <FormSection
                 title="Configurações da loja"
                 subtitle="Defina identidade, segmento e canais de contato."
@@ -1599,7 +1599,7 @@ export function CreateStore() {
               </FormSection>
             </div>
 
-            <div ref={planSectionRef} className={`pt-6 border-t border-gray-100 ${currentStep === 4 ? '' : 'hidden'}`} onFocusCapture={() => setCurrentStep(4)}>
+            <div ref={planSectionRef} className={`pt-6 border-t border-gray-100 ${currentStep === 4 ? 'motion-safe:animate-[createStoreStepIn_.26s_ease-out]' : 'hidden'}`} onFocusCapture={() => setCurrentStep(4)}>
               <FormSection
                 title="Selecione um plano"
                 subtitle="Comece pelo teste gratuito e escolha o plano ideal depois."
@@ -1827,7 +1827,7 @@ export function CreateStore() {
                     type="button"
                     onClick={() => scrollToStep(Math.max(1, currentStep - 1))}
                     disabled={currentStep === 1}
-                    className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Voltar
                   </button>
@@ -1836,7 +1836,7 @@ export function CreateStore() {
                       type="button"
                       onClick={handleNextStep}
                       disabled={!canAdvanceFromStep(currentStep)}
-                      className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="rounded-xl bg-gradient-to-r from-slate-900 to-slate-700 px-4 py-2 text-sm font-bold text-white shadow-[0_10px_22px_-14px_rgba(15,23,42,0.7)] transition-all duration-200 hover:-translate-y-0.5 hover:from-slate-800 hover:to-slate-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Próximo
                     </button>
@@ -1844,7 +1844,7 @@ export function CreateStore() {
                     <button
                       type="submit"
                       disabled={isRegistering}
-                      className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="rounded-xl bg-gradient-to-r from-slate-900 to-slate-700 px-4 py-2 text-sm font-bold text-white shadow-[0_10px_22px_-14px_rgba(15,23,42,0.7)] transition-all duration-200 hover:-translate-y-0.5 hover:from-slate-800 hover:to-slate-700 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       {isRegistering ? (
                         <span className="inline-flex items-center justify-center gap-2">
@@ -2039,6 +2039,18 @@ export function CreateStore() {
           </div>
         </div>
       )}
+      <style>{`
+        @keyframes createStoreStepIn {
+          from {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }
