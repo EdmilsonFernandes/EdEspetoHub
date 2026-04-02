@@ -122,8 +122,10 @@ export function ClientAuth() {
   };
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(160deg,#020617_0%,#0f172a_100%)] text-white px-4 py-8">
-      <div className="max-w-md mx-auto">
+    <main className="min-h-screen bg-[linear-gradient(165deg,#020617_0%,#0b1324_42%,#0f172a_100%)] text-white px-4 py-8">
+      <div className="max-w-md mx-auto relative">
+        <div className="absolute -top-6 -left-6 h-24 w-24 rounded-full bg-amber-400/10 blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-6 -right-6 h-24 w-24 rounded-full bg-sky-400/10 blur-2xl pointer-events-none" />
         <button
           type="button"
           onClick={() => navigate('/')}
@@ -133,9 +135,9 @@ export function ClientAuth() {
           Voltar
         </button>
 
-        <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md p-5 sm:p-6 shadow-2xl">
+        <div className="relative rounded-[2rem] border border-white/15 bg-white/8 backdrop-blur-xl p-5 sm:p-6 shadow-[0_28px_80px_-45px_rgba(15,23,42,0.9)]">
           <div className="flex items-center gap-3 mb-4">
-            <div className="h-10 w-10 rounded-xl bg-white/10 inline-flex items-center justify-center">
+            <div className="h-10 w-10 rounded-xl bg-white/15 inline-flex items-center justify-center shadow-inner">
               <UserCircle size={22} weight="duotone" />
             </div>
             <div>
@@ -144,18 +146,18 @@ export function ClientAuth() {
             </div>
           </div>
 
-          <div className="flex gap-2 mb-4">
+          <div className="flex gap-2 mb-4 rounded-xl bg-white/5 p-1 border border-white/10">
             <button
               type="button"
               onClick={() => setMode('login')}
-              className={`rounded-xl px-3 py-2 text-xs font-bold border ${mode === 'login' ? 'bg-white text-slate-900 border-white' : 'bg-white/5 text-white border-white/20'}`}
+              className={`flex-1 rounded-lg px-3 py-2 text-xs font-bold transition-all ${mode === 'login' ? 'bg-white text-slate-900 shadow-sm' : 'text-white/85 hover:bg-white/10'}`}
             >
               Login
             </button>
             <button
               type="button"
               onClick={() => setMode('register')}
-              className={`rounded-xl px-3 py-2 text-xs font-bold border ${mode === 'register' ? 'bg-white text-slate-900 border-white' : 'bg-white/5 text-white border-white/20'}`}
+              className={`flex-1 rounded-lg px-3 py-2 text-xs font-bold transition-all ${mode === 'register' ? 'bg-white text-slate-900 shadow-sm' : 'text-white/85 hover:bg-white/10'}`}
             >
               Cadastro
             </button>
@@ -167,7 +169,7 @@ export function ClientAuth() {
                 value={form.fullName}
                 onChange={(e) => setForm((p) => ({ ...p, fullName: e.target.value }))}
                 placeholder="Nome completo"
-                className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-sm placeholder:text-slate-300"
+                className="w-full rounded-xl border border-white/15 bg-white/10 px-3 py-3 text-sm placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-300/50"
               />
             )}
             {mode === 'register' && (
@@ -175,21 +177,21 @@ export function ClientAuth() {
                 value={form.phone}
                 onChange={(e) => setForm((p) => ({ ...p, phone: formatPhoneBr(e.target.value) }))}
                 placeholder="Telefone (opcional)"
-                className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-sm placeholder:text-slate-300"
+                className="w-full rounded-xl border border-white/15 bg-white/10 px-3 py-3 text-sm placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-300/50"
               />
             )}
             <input
               value={form.email}
               onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
               placeholder="E-mail"
-              className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-sm placeholder:text-slate-300"
+              className="w-full rounded-xl border border-white/15 bg-white/10 px-3 py-3 text-sm placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-300/50"
             />
             <input
               type="password"
               value={form.password}
               onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
               placeholder="Senha"
-              className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-sm placeholder:text-slate-300"
+              className="w-full rounded-xl border border-white/15 bg-white/10 px-3 py-3 text-sm placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-300/50"
             />
 
             <div>
@@ -197,7 +199,7 @@ export function ClientAuth() {
               <select
                 value={selectedStoreSlug}
                 onChange={(e) => setSelectedStoreSlug(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-sm"
+                className="mt-1 w-full rounded-xl border border-white/15 bg-white/10 px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300/50"
               >
                 {stores.length === 0 ? (
                   <option value="">Selecionar depois</option>
@@ -218,7 +220,7 @@ export function ClientAuth() {
               type="button"
               onClick={submit}
               disabled={loading}
-              className="w-full rounded-xl bg-white px-4 py-3 text-sm font-black text-slate-900 disabled:opacity-60"
+              className="w-full rounded-xl bg-[linear-gradient(120deg,#f8fafc,#e2e8f0)] px-4 py-3 text-sm font-black text-slate-900 shadow-[0_14px_26px_-16px_rgba(255,255,255,0.6)] active:scale-[0.99] disabled:opacity-60"
             >
               {loading ? 'Processando...' : mode === 'register' ? 'Criar e entrar' : 'Entrar'}
             </button>

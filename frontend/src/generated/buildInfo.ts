@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.203356.6aeb3a3",
-  "buildId": "0.1.9+20260402.203356.6aeb3a3-20260402.203356-6aeb3a3",
-  "builtAt": "2026-04-02T20:33:56.611Z",
-  "commitHash": "6aeb3a3f9f1835c6255e8f7aa3def5af1e73e4e4",
-  "shortHash": "6aeb3a3",
+  "versionInternal": "0.1.9+20260402.203942.30d9532",
+  "buildId": "0.1.9+20260402.203942.30d9532-20260402.203942-30d9532",
+  "builtAt": "2026-04-02T20:39:42.727Z",
+  "commitHash": "30d9532ad1fb40bbedfb2b21c75ae3c61853d380",
+  "shortHash": "30d9532",
   "branch": "main",
   "commits": [
+    {
+      "hash": "30d9532ad1fb40bbedfb2b21c75ae3c61853d380",
+      "shortHash": "30d9532",
+      "dateIso": "2026-04-02T17:34:34-03:00",
+      "subject": "feat(customer): phone mask, forgot password and customer password change flow"
+    },
     {
       "hash": "6aeb3a3f9f1835c6255e8f7aa3def5af1e73e4e4",
       "shortHash": "6aeb3a3",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "9e92406",
       "dateIso": "2026-04-01T18:03:30-03:00",
       "subject": "fix(postal): restaura finalizar em despachado e evita GEN-001 na finalizacao"
-    },
-    {
-      "hash": "e1a72672802bf7d0e11b5c853d57747b631d38a1",
-      "shortHash": "e1a7267",
-      "dateIso": "2026-04-01T17:39:58-03:00",
-      "subject": "fix(postal): mantém despachado em Pedidos e corrige tela branca no acompanhamento"
     }
   ]
 } as const;

@@ -77,7 +77,7 @@ export function ClientAccount() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-6">
+    <main className="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] px-4 py-6">
       <div className="max-w-3xl mx-auto space-y-4">
         <div className="flex items-center justify-between">
           <button
@@ -98,7 +98,7 @@ export function ClientAccount() {
           </button>
         </div>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-4">
+        <section className="rounded-3xl border border-slate-200/80 bg-white/95 backdrop-blur-sm p-4 shadow-[0_14px_40px_-30px_rgba(15,23,42,0.4)]">
           <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 font-black">Minha conta</p>
           {loading ? (
             <p className="text-sm text-slate-500 mt-2">Carregando...</p>
@@ -113,14 +113,14 @@ export function ClientAccount() {
           )}
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-4">
+        <section className="rounded-3xl border border-slate-200/80 bg-white/95 backdrop-blur-sm p-4 shadow-[0_14px_40px_-30px_rgba(15,23,42,0.4)]">
           <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 font-black">Endereços</p>
           {addresses.length === 0 ? (
             <p className="text-sm text-slate-500 mt-2">Nenhum endereço cadastrado ainda.</p>
           ) : (
             <div className="mt-2 space-y-2">
               {addresses.map((address: any) => (
-                <div key={address.id} className="rounded-xl border border-slate-200 p-3">
+                <div key={address.id} className="rounded-2xl border border-slate-200/90 p-3 bg-slate-50/60">
                   <p className="text-sm font-semibold text-slate-700">{address.label || 'Endereço'} {address.isDefault ? '• Principal' : ''}</p>
                   <p className="text-xs text-slate-500">
                     {address.street}, {address.number || 's/n'} - {address.neighborhood} - {address.city}/{address.state}
@@ -131,7 +131,7 @@ export function ClientAccount() {
           )}
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-4">
+        <section className="rounded-3xl border border-slate-200/80 bg-white/95 backdrop-blur-sm p-4 shadow-[0_14px_40px_-30px_rgba(15,23,42,0.4)]">
           <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 font-black">Segurança</p>
           <div className="mt-2 grid gap-2 sm:grid-cols-2">
             <input
@@ -139,14 +139,14 @@ export function ClientAccount() {
               value={pwdForm.currentPassword}
               onChange={(e) => setPwdForm((p) => ({ ...p, currentPassword: e.target.value }))}
               placeholder="Senha atual"
-              className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
             />
             <input
               type="password"
               value={pwdForm.newPassword}
               onChange={(e) => setPwdForm((p) => ({ ...p, newPassword: e.target.value }))}
               placeholder="Nova senha"
-              className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
             />
           </div>
           <div className="mt-2 flex items-center gap-2">
@@ -154,7 +154,7 @@ export function ClientAccount() {
               type="button"
               onClick={handleChangePassword}
               disabled={pwdLoading}
-              className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-bold text-white disabled:opacity-60"
+              className="rounded-xl bg-[linear-gradient(120deg,#0f172a,#1e293b)] px-3 py-2 text-xs font-bold text-white shadow-[0_10px_20px_-14px_rgba(15,23,42,0.8)] active:scale-[0.99] disabled:opacity-60"
             >
               {pwdLoading ? 'Alterando...' : 'Trocar senha'}
             </button>
@@ -162,14 +162,14 @@ export function ClientAccount() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-4">
+        <section className="rounded-3xl border border-slate-200/80 bg-white/95 backdrop-blur-sm p-4 shadow-[0_14px_40px_-30px_rgba(15,23,42,0.4)]">
           <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 font-black">Meus pedidos</p>
           {orders.length === 0 ? (
             <p className="text-sm text-slate-500 mt-2">Sem pedidos vinculados.</p>
           ) : (
             <div className="mt-2 space-y-2">
               {orders.slice(0, 20).map((order: any) => (
-                <div key={order.id} className="rounded-xl border border-slate-200 p-3">
+                <div key={order.id} className="rounded-2xl border border-slate-200/90 p-3 bg-slate-50/60">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm font-semibold text-slate-700">
                       #{formatOrderDisplayId(order.id, order?.store?.slug)}
@@ -184,7 +184,7 @@ export function ClientAccount() {
                     <button
                       type="button"
                       onClick={() => navigate(`/pedido/${order.id}`)}
-                      className="rounded-lg bg-slate-900 px-3 py-1.5 text-[11px] font-bold text-white"
+                      className="rounded-lg bg-[linear-gradient(120deg,#0f172a,#1e293b)] px-3 py-1.5 text-[11px] font-bold text-white shadow-[0_10px_20px_-14px_rgba(15,23,42,0.8)]"
                     >
                       Acompanhar
                     </button>

@@ -67,6 +67,11 @@ export function StorePage() {
     if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
     return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
   };
+  const formatCepBr = (value: string) => {
+    const digits = String(value || '').replace(/\D/g, '').slice(0, 8);
+    if (digits.length <= 5) return digits;
+    return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+  };
   const [products, setProducts] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [view, setView] = useState('menu');
@@ -2239,19 +2244,19 @@ export function StorePage() {
       {isStoreAdmin && view === 'menu' && <AdminMobileBottomNav />}
 
       {showCustomerAccount && !isStoreAdmin && (
-        <div className="fixed inset-0 z-[9998] bg-black/55 backdrop-blur-sm flex items-center justify-center px-3 py-5">
-          <div className="w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-3xl bg-white border border-slate-200 shadow-2xl p-4 sm:p-5">
+        <div className="fixed inset-0 z-[9998] bg-slate-950/65 backdrop-blur-sm flex items-center justify-center px-3 py-5">
+          <div className="w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-[2rem] bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] border border-slate-200/80 shadow-[0_28px_80px_-42px_rgba(15,23,42,0.75)] p-4 sm:p-5">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400 font-extrabold">Conta do cliente</p>
-                <h3 className="text-lg font-black text-slate-900">
+                <p className="text-[10px] uppercase tracking-[0.24em] text-slate-400 font-extrabold">Conta do cliente</p>
+                <h3 className="text-xl font-black text-slate-900">
                   {customerSession?.user ? 'Meu perfil' : 'Entrar ou criar conta'}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowCustomerAccount(false)}
-                className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-600"
+                className="rounded-xl border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-slate-600 hover:bg-white"
               >
                 Fechar
               </button>
@@ -2259,18 +2264,18 @@ export function StorePage() {
 
             {!customerSession?.token ? (
               <div className="mt-4 space-y-3">
-                <div className="flex gap-2">
+                <div className="flex gap-2 rounded-xl bg-slate-100 p-1 border border-slate-200/80">
                   <button
                     type="button"
                     onClick={() => setCustomerAuthMode('login')}
-                    className={`rounded-xl px-3 py-2 text-xs font-bold border ${customerAuthMode === 'login' ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200'}`}
+                    className={`flex-1 rounded-lg px-3 py-2 text-xs font-bold transition-all ${customerAuthMode === 'login' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
                   >
                     Login
                   </button>
                   <button
                     type="button"
                     onClick={() => setCustomerAuthMode('register')}
-                    className={`rounded-xl px-3 py-2 text-xs font-bold border ${customerAuthMode === 'register' ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200'}`}
+                    className={`flex-1 rounded-lg px-3 py-2 text-xs font-bold transition-all ${customerAuthMode === 'register' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
                   >
                     Cadastro
                   </button>
@@ -2280,7 +2285,7 @@ export function StorePage() {
                     value={customerAuthForm.fullName}
                     onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, fullName: e.target.value }))}
                     placeholder="Nome completo"
-                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                    className="w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
                   />
                 )}
                 {customerAuthMode === 'register' && (
@@ -2288,21 +2293,21 @@ export function StorePage() {
                     value={customerAuthForm.phone}
                     onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, phone: formatPhoneBr(e.target.value) }))}
                     placeholder="Telefone (opcional)"
-                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                    className="w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
                   />
                 )}
                 <input
                   value={customerAuthForm.email}
                   onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, email: e.target.value }))}
                   placeholder="E-mail"
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                  className="w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
                 />
                 <input
                   type="password"
                   value={customerAuthForm.password}
                   onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, password: e.target.value }))}
                   placeholder="Senha"
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                  className="w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
                 />
                 {customerAccountError ? (
                   <p className="text-sm text-rose-600">{customerAccountError}</p>
@@ -2311,7 +2316,7 @@ export function StorePage() {
                   type="button"
                   disabled={customerAccountLoading}
                   onClick={handleCustomerAuthSubmit}
-                  className="w-full rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-60"
+                  className="w-full rounded-xl bg-[linear-gradient(120deg,#0f172a,#1e293b)] px-4 py-2.5 text-sm font-bold text-white shadow-[0_18px_30px_-20px_rgba(15,23,42,0.85)] active:scale-[0.99] disabled:opacity-60"
                 >
                   {customerAccountLoading ? 'Processando...' : customerAuthMode === 'register' ? 'Criar conta' : 'Entrar'}
                 </button>
@@ -2319,7 +2324,7 @@ export function StorePage() {
                   <button
                     type="button"
                     onClick={handleCustomerForgotPassword}
-                    className="w-full text-center text-xs font-semibold text-slate-500 hover:text-slate-700"
+                    className="w-full text-center text-xs font-semibold text-sky-700 hover:text-sky-800"
                   >
                     Esqueci minha senha
                   </button>
@@ -2327,26 +2332,26 @@ export function StorePage() {
               </div>
             ) : (
               <div className="mt-4 space-y-4">
-                <div className="rounded-2xl border border-slate-200 p-3">
+                <div className="rounded-2xl border border-slate-200/90 bg-white p-3 shadow-sm">
                   <p className="text-sm font-semibold text-slate-800">{customerSession?.user?.fullName}</p>
                   <p className="text-xs text-slate-500">{customerSession?.user?.email}</p>
                   <button
                     type="button"
                     onClick={handleCustomerLogout}
-                    className="mt-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700"
+                    className="mt-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
                   >
                     Sair da conta
                   </button>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 p-3 space-y-2">
-                  <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400 font-extrabold">Endereços</p>
+                <div className="rounded-2xl border border-slate-200/90 bg-white p-3 space-y-2 shadow-sm">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-slate-400 font-extrabold">Endereços</p>
                   {customerAddresses.length === 0 ? (
                     <p className="text-sm text-slate-500">Nenhum endereço salvo ainda.</p>
                   ) : (
                     <div className="space-y-2">
                       {customerAddresses.map((address: any) => (
-                        <div key={address.id} className="rounded-xl border border-slate-200 p-2">
+                        <div key={address.id} className="rounded-xl border border-slate-200 bg-slate-50/70 p-2.5">
                           <p className="text-sm font-semibold text-slate-700">
                             {address.label || 'Endereço'} {address.isDefault ? '• Principal' : ''}
                           </p>
@@ -2357,7 +2362,7 @@ export function StorePage() {
                             <button
                               type="button"
                               onClick={() => handleUseAddressForCheckout(address)}
-                              className="rounded-lg bg-slate-900 px-2 py-1 text-[11px] font-bold text-white"
+                              className="rounded-lg bg-[linear-gradient(120deg,#0f172a,#1e293b)] px-2.5 py-1 text-[11px] font-bold text-white"
                             >
                               Usar no checkout
                             </button>
@@ -2368,7 +2373,7 @@ export function StorePage() {
                                   await customerAccountService.setDefaultAddress(address.id);
                                   await refreshCustomerData();
                                 }}
-                                className="rounded-lg border border-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-700"
+                                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700"
                               >
                                 Tornar principal
                               </button>
@@ -2380,29 +2385,29 @@ export function StorePage() {
                   )}
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                    <input value={newAddressForm.label} onChange={(e) => setNewAddressForm((p) => ({ ...p, label: e.target.value }))} placeholder="Apelido" className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                    <input value={newAddressForm.recipientName} onChange={(e) => setNewAddressForm((p) => ({ ...p, recipientName: e.target.value }))} placeholder="Nome do recebedor" className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                    <input value={newAddressForm.phone} onChange={(e) => setNewAddressForm((p) => ({ ...p, phone: e.target.value }))} placeholder="Telefone" className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                    <input value={newAddressForm.cep} onChange={(e) => setNewAddressForm((p) => ({ ...p, cep: e.target.value }))} placeholder="CEP" className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                    <input value={newAddressForm.street} onChange={(e) => setNewAddressForm((p) => ({ ...p, street: e.target.value }))} placeholder="Rua" className="rounded-xl border border-slate-200 px-3 py-2 text-sm sm:col-span-2" />
-                    <input value={newAddressForm.number} onChange={(e) => setNewAddressForm((p) => ({ ...p, number: e.target.value }))} placeholder="Número" className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                    <input value={newAddressForm.complement} onChange={(e) => setNewAddressForm((p) => ({ ...p, complement: e.target.value }))} placeholder="Complemento" className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                    <input value={newAddressForm.neighborhood} onChange={(e) => setNewAddressForm((p) => ({ ...p, neighborhood: e.target.value }))} placeholder="Bairro" className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                    <input value={newAddressForm.city} onChange={(e) => setNewAddressForm((p) => ({ ...p, city: e.target.value }))} placeholder="Cidade" className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                    <input value={newAddressForm.state} onChange={(e) => setNewAddressForm((p) => ({ ...p, state: e.target.value }))} placeholder="UF" className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                    <input value={newAddressForm.label} onChange={(e) => setNewAddressForm((p) => ({ ...p, label: e.target.value }))} placeholder="Apelido" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                    <input value={newAddressForm.recipientName} onChange={(e) => setNewAddressForm((p) => ({ ...p, recipientName: e.target.value }))} placeholder="Nome do recebedor" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                    <input value={newAddressForm.phone} onChange={(e) => setNewAddressForm((p) => ({ ...p, phone: formatPhoneBr(e.target.value) }))} placeholder="Telefone" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                    <input value={newAddressForm.cep} onChange={(e) => setNewAddressForm((p) => ({ ...p, cep: formatCepBr(e.target.value) }))} placeholder="CEP" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                    <input value={newAddressForm.street} onChange={(e) => setNewAddressForm((p) => ({ ...p, street: e.target.value }))} placeholder="Rua" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm sm:col-span-2 focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                    <input value={newAddressForm.number} onChange={(e) => setNewAddressForm((p) => ({ ...p, number: e.target.value }))} placeholder="Número" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                    <input value={newAddressForm.complement} onChange={(e) => setNewAddressForm((p) => ({ ...p, complement: e.target.value }))} placeholder="Complemento" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                    <input value={newAddressForm.neighborhood} onChange={(e) => setNewAddressForm((p) => ({ ...p, neighborhood: e.target.value }))} placeholder="Bairro" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                    <input value={newAddressForm.city} onChange={(e) => setNewAddressForm((p) => ({ ...p, city: e.target.value }))} placeholder="Cidade" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                    <input value={newAddressForm.state} onChange={(e) => setNewAddressForm((p) => ({ ...p, state: e.target.value.toUpperCase().slice(0, 2) }))} placeholder="UF" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
                   </div>
                   <button
                     type="button"
                     onClick={handleCreateAddress}
                     disabled={customerAccountLoading}
-                    className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-bold text-white disabled:opacity-60"
+                    className="rounded-xl bg-[linear-gradient(120deg,#0f172a,#1e293b)] px-3 py-2 text-xs font-bold text-white shadow-[0_12px_22px_-18px_rgba(15,23,42,0.75)] disabled:opacity-60"
                   >
                     Salvar endereço
                   </button>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 p-3">
-                  <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400 font-extrabold">Meus pedidos</p>
+                <div className="rounded-2xl border border-slate-200/90 bg-white p-3 shadow-sm">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-slate-400 font-extrabold">Meus pedidos</p>
                   {customerOrders.length === 0 ? (
                     <p className="text-sm text-slate-500 mt-2">Sem pedidos vinculados ainda.</p>
                   ) : (
@@ -2411,7 +2416,7 @@ export function StorePage() {
                         <button
                           key={order.id}
                           onClick={() => navigate(`/pedido/${order.id}`)}
-                          className="w-full text-left rounded-xl border border-slate-200 px-3 py-2 hover:bg-slate-50"
+                          className="w-full text-left rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2 hover:bg-slate-100"
                         >
                           <p className="text-sm font-semibold text-slate-700">
                             #{formatOrderDisplayId(order.id, order?.store?.slug || storeSlug)} • {order?.store?.name || 'Loja'}
