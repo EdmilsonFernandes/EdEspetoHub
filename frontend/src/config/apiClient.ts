@@ -86,6 +86,17 @@ const handleResponse = async (
   return response.json();
 };
 
+const getCustomerToken = (): string | null => {
+  try {
+    const raw = localStorage.getItem('customerSession');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.token ?? null;
+  } catch {
+    return null;
+  }
+};
+
 const getAdminRole = (): string =>
 {
   try
@@ -104,7 +115,10 @@ const request = async (path: string, options: any = {}) =>
 {
   const url = buildUrl(path);
   const isMotoboyRoute = path.startsWith('/motoboy') || path.startsWith('motoboy');
-  const token = isMotoboyRoute ? getMotoboyToken() : getAdminToken();
+  const motoboyToken = getMotoboyToken();
+  const adminToken = getAdminToken();
+  const customerToken = getCustomerToken();
+  const token = isMotoboyRoute ? motoboyToken : adminToken || customerToken;
 
   const finalOptions: any = {
     ...options,
@@ -124,7 +138,8 @@ const request = async (path: string, options: any = {}) =>
   const response = await fetch(url, finalOptions);
   const adminRole = getAdminRole();
   const isOperator = adminRole === 'OPERATOR' || adminRole === 'CHURRASQUEIRO';
-  const canAutoLogout = Boolean(token) && !(response.status === 403 && isOperator && !isMotoboyRoute);
+  const hasPrivilegedSession = isMotoboyRoute ? Boolean(motoboyToken) : Boolean(adminToken);
+  const canAutoLogout = hasPrivilegedSession && !(response.status === 403 && isOperator && !isMotoboyRoute);
   return handleResponse(response, isMotoboyRoute ? 'motoboy' : 'admin', canAutoLogout); // ⬅️ NÃO mascarar erro
 };
 
@@ -133,7 +148,7 @@ const rawRequest = async (path: string, options: any = {}) =>
 {
   const url = buildUrl(path);
   const isMotoboyRoute = path.startsWith('/motoboy') || path.startsWith('motoboy');
-  const token = isMotoboyRoute ? getMotoboyToken() : getAdminToken();
+  const token = isMotoboyRoute ? getMotoboyToken() : getAdminToken() || getCustomerToken();
 
   const finalOptions: any = {
     ...options,

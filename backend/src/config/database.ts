@@ -44,6 +44,7 @@ import { StoreLinkHit } from '../entities/StoreLinkHit';
 import { StoreUser } from '../entities/StoreUser';
 import { InventoryMovement } from '../entities/InventoryMovement';
 import { OrderShipment } from '../entities/OrderShipment';
+import { CustomerAddress } from '../entities/CustomerAddress';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -53,7 +54,7 @@ export const AppDataSource = new DataSource({
   password: env.database.password,
   database: env.database.database,
   synchronize: false,
-  entities: [ User, Store, StoreSettings, Product, Order, OrderShipment, OrderReview, OrderItem, OrderEtaEstimate, Motoboy, MotoboyStore, OrderDelivery, DeliveryEvent, MotoboyDocument, MotoboyStoreRequest, MotoboyAuditLog, DeliveryBillingCycle, DeliveryBillingCharge, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog, StoreLinkHit, StoreUser, InventoryMovement ],
+  entities: [ User, Store, StoreSettings, Product, Order, OrderShipment, OrderReview, OrderItem, OrderEtaEstimate, Motoboy, MotoboyStore, OrderDelivery, DeliveryEvent, MotoboyDocument, MotoboyStoreRequest, MotoboyAuditLog, DeliveryBillingCycle, DeliveryBillingCharge, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog, StoreLinkHit, StoreUser, InventoryMovement, CustomerAddress ],
   migrations: [],
   logging: [ 'error' ]
   //logging: [ 'error', 'query' ]

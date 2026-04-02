@@ -29,6 +29,7 @@ export interface CreateOrderItemInput {
 
 export interface CreateOrderDto {
   customerName: string;
+  customerUserId?: string | null;
   phone?: string;
   address?: string;
   table?: string;

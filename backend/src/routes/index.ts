@@ -29,8 +29,9 @@ import { LegalController } from '../controllers/LegalController';
 import { DeliveryBillingController } from '../controllers/DeliveryBillingController';
 import { StoreUserController } from '../controllers/StoreUserController';
 import { ShippingController } from '../controllers/ShippingController';
+import { CustomerAccountController } from '../controllers/CustomerAccountController';
 
-import { requireAuth, requireRole } from '../middleware/authGuard';
+import { hydrateAuthOptional, requireAuth, requireRole } from '../middleware/authGuard';
 import { requireActiveSubscription } from '../middleware/subscriptionGuard';
 import { requirePlanFeature } from '../middleware/planFeatureGuard';
 
@@ -48,6 +49,17 @@ routes.post('/auth/verify-email', AuthController.verifyEmail);
 routes.get('/auth/verify-email', AuthController.verifyEmail);
 routes.post('/auth/resend-verification', AuthController.resendVerification);
 routes.post('/auth/change-password', requireAuth, AuthController.changePassword);
+routes.post('/customer/auth/register', CustomerAccountController.register);
+routes.post('/customer/auth/login', CustomerAccountController.login);
+routes.get('/customer/me', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.me);
+routes.patch('/customer/me', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.updateMe);
+routes.post('/customer/me/change-password', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.changePassword);
+routes.get('/customer/orders', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.listOrders);
+routes.get('/customer/addresses', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.listAddresses);
+routes.post('/customer/addresses', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.createAddress);
+routes.patch('/customer/addresses/:addressId', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.updateAddress);
+routes.patch('/customer/addresses/:addressId/default', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.setDefaultAddress);
+routes.delete('/customer/addresses/:addressId', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.deleteAddress);
 
 // Plans / payments
 routes.get('/plans', PlanController.list);
@@ -131,8 +143,8 @@ routes.patch('/stores/:storeId/products/:productId/stock', requireAuth, requireR
 routes.post('/stores/:storeId/postal/quote', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), ShippingController.quotePostalByStore);
 
 // Orders - cliente cria (aqui sim assinatura com carência)
-routes.post('/stores/:storeId/orders', requireActiveSubscription, OrderController.create);
-routes.post('/stores/slug/:slug/orders', requireActiveSubscription, OrderController.createBySlug);
+routes.post('/stores/:storeId/orders', hydrateAuthOptional, requireActiveSubscription, OrderController.create);
+routes.post('/stores/slug/:slug/orders', hydrateAuthOptional, requireActiveSubscription, OrderController.createBySlug);
 
 // Orders - staff vê fila/histórico (churrasqueiro + admin)
 routes.get('/stores/:storeId/orders', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.list);

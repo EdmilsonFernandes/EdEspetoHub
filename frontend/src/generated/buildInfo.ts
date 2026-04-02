@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.181629.4214612",
-  "buildId": "0.1.9+20260402.181629.4214612-20260402.181629-4214612",
-  "builtAt": "2026-04-02T18:16:29.312Z",
-  "commitHash": "4214612500cc408f8c9117f68de9195d0bf42e23",
-  "shortHash": "4214612",
+  "versionInternal": "0.1.9+20260402.201644.12e7293",
+  "buildId": "0.1.9+20260402.201644.12e7293-20260402.201644-12e7293",
+  "builtAt": "2026-04-02T20:16:44.859Z",
+  "commitHash": "12e7293e83c92bc29d96b0cebafc44d9b929795f",
+  "shortHash": "12e7293",
   "branch": "main",
   "commits": [
+    {
+      "hash": "12e7293e83c92bc29d96b0cebafc44d9b929795f",
+      "shortHash": "12e7293",
+      "dateIso": "2026-04-02T15:17:13-03:00",
+      "subject": "refactor(nav): unify mobile admin/operator navigation to bottom bar"
+    },
     {
       "hash": "4214612500cc408f8c9117f68de9195d0bf42e23",
       "shortHash": "4214612",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "538b539",
       "dateIso": "2026-04-01T16:37:46-03:00",
       "subject": "feat(postal): unifica status visual no tracking do cliente e aba Em rota"
-    },
-    {
-      "hash": "052c81ad53cc15ad0383862447eb56025259066e",
-      "shortHash": "052c81a",
-      "dateIso": "2026-04-01T16:32:38-03:00",
-      "subject": "fix(queue): evita sumico de pedido postal despachado e envia para Em rota"
     }
   ]
 } as const;

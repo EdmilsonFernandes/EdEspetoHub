@@ -5,6 +5,7 @@ import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLe
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import { customerService } from '../services/customerService';
+import { customerAccountService } from '../services/customerAccountService';
 import { storeService } from '../services/storeService';
 import { mapsService } from '../services/mapsService';
 import { MenuView } from '../components/Client/MenuView';
@@ -33,6 +34,31 @@ export function StorePage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [user, setUser] = useState(null);
+  const [customerSession, setCustomerSession] = useState<any | null>(null);
+  const [customerAddresses, setCustomerAddresses] = useState<any[]>([]);
+  const [customerOrders, setCustomerOrders] = useState<any[]>([]);
+  const [showCustomerAccount, setShowCustomerAccount] = useState(false);
+  const [customerAccountLoading, setCustomerAccountLoading] = useState(false);
+  const [customerAccountError, setCustomerAccountError] = useState('');
+  const [customerAuthMode, setCustomerAuthMode] = useState<'login' | 'register'>('login');
+  const [customerAuthForm, setCustomerAuthForm] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    password: '',
+  });
+  const [newAddressForm, setNewAddressForm] = useState({
+    label: 'Casa',
+    recipientName: '',
+    phone: '',
+    cep: '',
+    street: '',
+    number: '',
+    complement: '',
+    neighborhood: '',
+    city: '',
+    state: '',
+  });
   const [products, setProducts] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [view, setView] = useState('menu');
@@ -82,6 +108,10 @@ export function StorePage() {
   const [deliveryCheck, setDeliveryCheck] = useState({ status: 'idle', distanceKm: null, durationMin: null });
   const customersStorageKey = useMemo(
     () => `customers:${storeSlug || defaultBranding.espetoId}`,
+    [storeSlug]
+  );
+  const customerSessionStorageKey = useMemo(
+    () => `customerSession:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
   );
   const checkoutCustomerStorageKey = useMemo(
@@ -381,6 +411,69 @@ export function StorePage() {
     return normalized.slice(0, 3);
   };
 
+  const persistCustomerSession = (session: any | null) => {
+    if (session?.token) {
+      localStorage.setItem('customerSession', JSON.stringify(session));
+      localStorage.setItem(customerSessionStorageKey, JSON.stringify(session));
+      setCustomerSession(session);
+      return;
+    }
+    localStorage.removeItem('customerSession');
+    localStorage.removeItem(customerSessionStorageKey);
+    setCustomerSession(null);
+  };
+
+  const hydrateCustomerFromAddress = (address: any | null) => {
+    if (!address) return;
+    setCustomer((prev: any) => {
+      const next = {
+        ...prev,
+        name: prev?.name || address.recipientName || customerSession?.user?.fullName || '',
+        phone: prev?.phone || address.phone || customerSession?.user?.phone || '',
+        cep: address.cep || prev?.cep || '',
+        street: address.street || prev?.street || '',
+        number: address.number || prev?.number || '',
+        complement: address.complement || prev?.complement || '',
+        neighborhood: address.neighborhood || prev?.neighborhood || '',
+        city: address.city || prev?.city || '',
+        state: address.state || prev?.state || '',
+      };
+      const street = String(next.street || '').trim();
+      const number = String(next.number || '').trim();
+      const streetWithNumber = street ? (number ? `${street}, ${number}` : street) : '';
+      next.address = [
+        streetWithNumber,
+        next.complement,
+        next.neighborhood,
+        next.city && next.state ? `${next.city} - ${next.state}` : next.city,
+        next.cep && `CEP ${next.cep}`,
+      ].filter(Boolean).join(' | ');
+      return next;
+    });
+  };
+
+  const refreshCustomerData = async () => {
+    try {
+      const [me, addresses, orders] = await Promise.all([
+        customerAccountService.me(),
+        customerAccountService.listAddresses(),
+        customerAccountService.listOrders(),
+      ]);
+      const nextSession = { ...(customerSession || {}), user: me };
+      persistCustomerSession(nextSession);
+      setCustomerAddresses(Array.isArray(addresses) ? addresses : []);
+      setCustomerOrders(Array.isArray(orders) ? orders : []);
+      const preferred =
+        (Array.isArray(addresses) ? addresses : []).find((item: any) => item?.isDefault) ||
+        (Array.isArray(addresses) ? addresses[0] : null);
+      hydrateCustomerFromAddress(preferred || null);
+    } catch {
+      persistCustomerSession(null);
+      setCustomerAddresses([]);
+      setCustomerOrders([]);
+    }
+  };
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const media = window.matchMedia('(max-width: 640px)');
@@ -415,6 +508,20 @@ export function StorePage() {
     if (savedSession) {
       const parsedSession = JSON.parse(savedSession);
       setUser(parsedSession);
+    }
+    const savedCustomerSession =
+      localStorage.getItem('customerSession') || localStorage.getItem(customerSessionStorageKey);
+    if (savedCustomerSession) {
+      try {
+        const parsedCustomerSession = JSON.parse(savedCustomerSession);
+        if (parsedCustomerSession?.token) {
+          setCustomerSession(parsedCustomerSession);
+          localStorage.setItem('customerSession', JSON.stringify(parsedCustomerSession));
+        }
+      } catch {
+        localStorage.removeItem('customerSession');
+        localStorage.removeItem(customerSessionStorageKey);
+      }
     }
 
     const savedCustomers = localStorage.getItem(customersStorageKey);
@@ -625,7 +732,17 @@ export function StorePage() {
       cancelledRecentLoad = true;
       document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, [storeSlug, customersStorageKey, checkoutCustomerStorageKey]);
+  }, [storeSlug, customersStorageKey, checkoutCustomerStorageKey, customerSessionStorageKey]);
+
+  useEffect(() => {
+    if (!customerSession?.token) {
+      setCustomerAddresses([]);
+      setCustomerOrders([]);
+      return;
+    }
+    refreshCustomerData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customerSession?.token]);
 
   useEffect(() => {
     if (!storeSlug) return undefined;
@@ -1505,6 +1622,82 @@ export function StorePage() {
     }
     navigate('/', { replace: true });
   };
+  const handleCustomerLogout = () => {
+    persistCustomerSession(null);
+    setCustomerAddresses([]);
+    setCustomerOrders([]);
+    setShowCustomerAccount(false);
+    showToast('Sessão de cliente encerrada.', 'success');
+  };
+
+  const handleCustomerAuthSubmit = async () => {
+    if (customerAccountLoading) return;
+    setCustomerAccountLoading(true);
+    setCustomerAccountError('');
+    try {
+      let response: any;
+      if (customerAuthMode === 'register') {
+        response = await customerAccountService.register({
+          fullName: String(customerAuthForm.fullName || '').trim(),
+          email: String(customerAuthForm.email || '').trim(),
+          password: String(customerAuthForm.password || ''),
+          phone: String(customerAuthForm.phone || '').trim(),
+        });
+      } else {
+        response = await customerAccountService.login({
+          email: String(customerAuthForm.email || '').trim(),
+          password: String(customerAuthForm.password || ''),
+        });
+      }
+
+      if (!response?.token) {
+        throw new Error('Falha ao autenticar cliente.');
+      }
+      persistCustomerSession(response);
+      setCustomerAuthForm((prev) => ({ ...prev, password: '' }));
+      await refreshCustomerData();
+      showToast(customerAuthMode === 'register' ? 'Cadastro concluído.' : 'Login realizado.', 'success');
+    } catch (error: any) {
+      setCustomerAccountError(error?.message || 'Não foi possível autenticar.');
+    } finally {
+      setCustomerAccountLoading(false);
+    }
+  };
+
+  const handleCreateAddress = async () => {
+    if (!customerSession?.token || customerAccountLoading) return;
+    setCustomerAccountLoading(true);
+    setCustomerAccountError('');
+    try {
+      await customerAccountService.createAddress(newAddressForm);
+      await refreshCustomerData();
+      setNewAddressForm({
+        label: 'Casa',
+        recipientName: '',
+        phone: '',
+        cep: '',
+        street: '',
+        number: '',
+        complement: '',
+        neighborhood: '',
+        city: '',
+        state: '',
+      });
+      showToast('Endereço salvo.', 'success');
+    } catch (error: any) {
+      setCustomerAccountError(error?.message || 'Falha ao salvar endereço.');
+    } finally {
+      setCustomerAccountLoading(false);
+    }
+  };
+
+  const handleUseAddressForCheckout = (address: any) => {
+    hydrateCustomerFromAddress(address);
+    setView('cart');
+    setShowCustomerAccount(false);
+    showToast('Endereço aplicado no checkout.', 'success');
+  };
+
   const goToDemoGuide = () => {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('scrollToDemoFlow', 'true');
@@ -1931,6 +2124,8 @@ export function StorePage() {
               onOpenQueue={isStoreAdmin ? requireAdminSession : undefined}
               onOpenAdmin={isStoreAdmin && normalizedRole === 'admin' ? () => navigate('/admin/dashboard') : undefined}
               onLogout={isStoreAdmin ? handleStoreSessionLogout : undefined}
+              onOpenCustomerAccount={!isStoreAdmin ? () => setShowCustomerAccount(true) : undefined}
+              isCustomerAuthenticated={Boolean(customerSession?.token)}
               userRole={normalizedRole}
               isAuthenticated={Boolean(user?.token)}
               isOpenNow={storeOpenNow}
@@ -2016,6 +2211,189 @@ export function StorePage() {
       </main>
 
       {isStoreAdmin && view === 'menu' && <AdminMobileBottomNav />}
+
+      {showCustomerAccount && !isStoreAdmin && (
+        <div className="fixed inset-0 z-[9998] bg-black/55 backdrop-blur-sm flex items-center justify-center px-3 py-5">
+          <div className="w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-3xl bg-white border border-slate-200 shadow-2xl p-4 sm:p-5">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400 font-extrabold">Conta do cliente</p>
+                <h3 className="text-lg font-black text-slate-900">
+                  {customerSession?.user ? 'Meu perfil' : 'Entrar ou criar conta'}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCustomerAccount(false)}
+                className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-600"
+              >
+                Fechar
+              </button>
+            </div>
+
+            {!customerSession?.token ? (
+              <div className="mt-4 space-y-3">
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setCustomerAuthMode('login')}
+                    className={`rounded-xl px-3 py-2 text-xs font-bold border ${customerAuthMode === 'login' ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200'}`}
+                  >
+                    Login
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCustomerAuthMode('register')}
+                    className={`rounded-xl px-3 py-2 text-xs font-bold border ${customerAuthMode === 'register' ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200'}`}
+                  >
+                    Cadastro
+                  </button>
+                </div>
+                {customerAuthMode === 'register' && (
+                  <input
+                    value={customerAuthForm.fullName}
+                    onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, fullName: e.target.value }))}
+                    placeholder="Nome completo"
+                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                  />
+                )}
+                {customerAuthMode === 'register' && (
+                  <input
+                    value={customerAuthForm.phone}
+                    onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, phone: e.target.value }))}
+                    placeholder="Telefone (opcional)"
+                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                  />
+                )}
+                <input
+                  value={customerAuthForm.email}
+                  onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, email: e.target.value }))}
+                  placeholder="E-mail"
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                />
+                <input
+                  type="password"
+                  value={customerAuthForm.password}
+                  onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, password: e.target.value }))}
+                  placeholder="Senha"
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                />
+                {customerAccountError ? (
+                  <p className="text-sm text-rose-600">{customerAccountError}</p>
+                ) : null}
+                <button
+                  type="button"
+                  disabled={customerAccountLoading}
+                  onClick={handleCustomerAuthSubmit}
+                  className="w-full rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-60"
+                >
+                  {customerAccountLoading ? 'Processando...' : customerAuthMode === 'register' ? 'Criar conta' : 'Entrar'}
+                </button>
+              </div>
+            ) : (
+              <div className="mt-4 space-y-4">
+                <div className="rounded-2xl border border-slate-200 p-3">
+                  <p className="text-sm font-semibold text-slate-800">{customerSession?.user?.fullName}</p>
+                  <p className="text-xs text-slate-500">{customerSession?.user?.email}</p>
+                  <button
+                    type="button"
+                    onClick={handleCustomerLogout}
+                    className="mt-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700"
+                  >
+                    Sair da conta
+                  </button>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 p-3 space-y-2">
+                  <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400 font-extrabold">Endereços</p>
+                  {customerAddresses.length === 0 ? (
+                    <p className="text-sm text-slate-500">Nenhum endereço salvo ainda.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {customerAddresses.map((address: any) => (
+                        <div key={address.id} className="rounded-xl border border-slate-200 p-2">
+                          <p className="text-sm font-semibold text-slate-700">
+                            {address.label || 'Endereço'} {address.isDefault ? '• Principal' : ''}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {address.street}, {address.number || 's/n'} - {address.neighborhood} - {address.city}/{address.state}
+                          </p>
+                          <div className="mt-2 flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleUseAddressForCheckout(address)}
+                              className="rounded-lg bg-slate-900 px-2 py-1 text-[11px] font-bold text-white"
+                            >
+                              Usar no checkout
+                            </button>
+                            {!address.isDefault && (
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  await customerAccountService.setDefaultAddress(address.id);
+                                  await refreshCustomerData();
+                                }}
+                                className="rounded-lg border border-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-700"
+                              >
+                                Tornar principal
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                    <input value={newAddressForm.label} onChange={(e) => setNewAddressForm((p) => ({ ...p, label: e.target.value }))} placeholder="Apelido" className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                    <input value={newAddressForm.recipientName} onChange={(e) => setNewAddressForm((p) => ({ ...p, recipientName: e.target.value }))} placeholder="Nome do recebedor" className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                    <input value={newAddressForm.phone} onChange={(e) => setNewAddressForm((p) => ({ ...p, phone: e.target.value }))} placeholder="Telefone" className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                    <input value={newAddressForm.cep} onChange={(e) => setNewAddressForm((p) => ({ ...p, cep: e.target.value }))} placeholder="CEP" className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                    <input value={newAddressForm.street} onChange={(e) => setNewAddressForm((p) => ({ ...p, street: e.target.value }))} placeholder="Rua" className="rounded-xl border border-slate-200 px-3 py-2 text-sm sm:col-span-2" />
+                    <input value={newAddressForm.number} onChange={(e) => setNewAddressForm((p) => ({ ...p, number: e.target.value }))} placeholder="Número" className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                    <input value={newAddressForm.complement} onChange={(e) => setNewAddressForm((p) => ({ ...p, complement: e.target.value }))} placeholder="Complemento" className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                    <input value={newAddressForm.neighborhood} onChange={(e) => setNewAddressForm((p) => ({ ...p, neighborhood: e.target.value }))} placeholder="Bairro" className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                    <input value={newAddressForm.city} onChange={(e) => setNewAddressForm((p) => ({ ...p, city: e.target.value }))} placeholder="Cidade" className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                    <input value={newAddressForm.state} onChange={(e) => setNewAddressForm((p) => ({ ...p, state: e.target.value }))} placeholder="UF" className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCreateAddress}
+                    disabled={customerAccountLoading}
+                    className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-bold text-white disabled:opacity-60"
+                  >
+                    Salvar endereço
+                  </button>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 p-3">
+                  <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400 font-extrabold">Meus pedidos</p>
+                  {customerOrders.length === 0 ? (
+                    <p className="text-sm text-slate-500 mt-2">Sem pedidos vinculados ainda.</p>
+                  ) : (
+                    <div className="mt-2 space-y-2 max-h-44 overflow-y-auto">
+                      {customerOrders.slice(0, 8).map((order: any) => (
+                        <button
+                          key={order.id}
+                          onClick={() => navigate(`/pedido/${order.id}`)}
+                          className="w-full text-left rounded-xl border border-slate-200 px-3 py-2 hover:bg-slate-50"
+                        >
+                          <p className="text-sm font-semibold text-slate-700">
+                            #{formatOrderDisplayId(order.id, order?.store?.slug || storeSlug)} • {order?.store?.name || 'Loja'}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {new Date(order.createdAt).toLocaleString('pt-BR')} • {formatCurrency(Number(order.total || 0))}
+                          </p>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {showPrintPrompt && (
         <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center px-4">

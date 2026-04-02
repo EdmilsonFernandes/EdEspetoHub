@@ -31,7 +31,14 @@ import { env } from '../config/env';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
 
-export type UserRole = 'ADMIN' | 'OPERATOR' | 'CHURRASQUEIRO' | 'SUPER_ADMIN' | 'MOTOBOY' | 'STORE_OWNER';
+export type UserRole =
+  | 'ADMIN'
+  | 'OPERATOR'
+  | 'CHURRASQUEIRO'
+  | 'SUPER_ADMIN'
+  | 'MOTOBOY'
+  | 'STORE_OWNER'
+  | 'CUSTOMER';
 
 type JwtPayload = {
   sub: string;        // userId
@@ -98,4 +105,21 @@ export const requireRole = (...roles: UserRole[]) =>
     }
     return next();
   };
+};
+
+export const hydrateAuthOptional = (req: Request, _res: Response, next: NextFunction) => {
+  const header = req.headers.authorization;
+  if (!header?.startsWith('Bearer ')) {
+    return next();
+  }
+
+  try {
+    const token = header.slice('Bearer '.length);
+    const payload = jwt.verify(token, env.jwtSecret) as JwtPayload;
+    req.auth = payload;
+  } catch {
+    // Intencional: para rotas públicas, token inválido não deve bloquear o request.
+  }
+
+  return next();
 };

@@ -25,6 +25,7 @@ import {
 import { Store } from './Store';
 import { OrderItem } from './OrderItem';
 import { OrderShipment } from './OrderShipment';
+import { User } from './User';
 
 @Entity({ name: 'orders' })
 /**
@@ -42,6 +43,13 @@ export class Order {
 
   @Column({ nullable: true })
   phone?: string;
+
+  @Column({ name: 'customer_user_id', type: 'uuid', nullable: true })
+  customerUserId?: string | null;
+
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'customer_user_id' })
+  customerUser?: User | null;
 
   @Column({ nullable: true })
   address?: string;

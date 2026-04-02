@@ -1088,6 +1088,69 @@ export async function runMigrations() {
   await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_delivery_billing_charges_cycle ON delivery_billing_charges(cycle_id);
   `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS users
+    ADD COLUMN IF NOT EXISTS user_role VARCHAR DEFAULT 'STORE_OWNER';
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS orders
+    ADD COLUMN IF NOT EXISTS customer_user_id UUID REFERENCES users(id) ON DELETE SET NULL;
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_orders_customer_user_id
+    ON orders(customer_user_id);
+  `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS customer_addresses (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      label TEXT,
+      recipient_name TEXT,
+      phone TEXT,
+      cep VARCHAR(8) NOT NULL,
+      street TEXT NOT NULL,
+      number TEXT,
+      complement TEXT,
+      neighborhood TEXT,
+      city TEXT NOT NULL,
+      state VARCHAR(2) NOT NULL,
+      is_default BOOLEAN NOT NULL DEFAULT FALSE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_customer_addresses_user_id
+    ON customer_addresses(user_id);
+  `);
+  await AppDataSource.query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS uq_customer_addresses_default_per_user
+    ON customer_addresses(user_id)
+    WHERE is_default = TRUE;
+  `);
+  await AppDataSource.query(`
+    WITH ranked AS (
+      SELECT id, user_id,
+             ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY created_at ASC, id ASC) AS rn
+      FROM customer_addresses
+      WHERE is_default = TRUE
+    )
+    UPDATE customer_addresses ca
+    SET is_default = FALSE
+    FROM ranked
+    WHERE ca.id = ranked.id
+      AND ranked.rn > 1;
+  `);
+  await AppDataSource.query(`
+    UPDATE customer_addresses
+    SET cep = LEFT(REGEXP_REPLACE(COALESCE(cep, ''), '\\D', '', 'g'), 8)
+    WHERE cep IS NOT NULL;
+  `);
+  await AppDataSource.query(`
+    UPDATE customer_addresses
+    SET state = UPPER(LEFT(COALESCE(state, ''), 2))
+    WHERE state IS NOT NULL;
+  `);
   // Rebrand migration (idempotent): update legacy brand/domain mentions in persisted text settings.
   await AppDataSource.query(`
     UPDATE site_settings

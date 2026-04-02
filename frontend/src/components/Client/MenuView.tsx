@@ -16,6 +16,7 @@ import {
   ShareNetwork,
   HeartStraight,
   List,
+  UserCircle,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
@@ -85,6 +86,8 @@ const Header = ({
   onOpenQueue,
   onOpenAdmin,
   onLogout,
+  onOpenCustomerAccount,
+  isCustomerAuthenticated,
   userRole,
   isAuthenticated,
   compact,
@@ -248,6 +251,17 @@ const Header = ({
           >
             <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/30 to-black/10" />
             <div className="absolute right-3 top-3 z-20 flex items-center gap-2">
+              {onOpenCustomerAccount && (
+                <button
+                  type="button"
+                  onClick={onOpenCustomerAccount}
+                  className="h-9 w-9 rounded-full border border-white/35 bg-black/25 text-white backdrop-blur-md inline-flex items-center justify-center active:scale-95 transition"
+                  aria-label={isCustomerAuthenticated ? "Minha conta" : "Entrar na conta"}
+                  title={isCustomerAuthenticated ? "Minha conta" : "Entrar"}
+                >
+                  <UserCircle size={16} weight={isCustomerAuthenticated ? "fill" : "regular"} />
+                </button>
+              )}
               <button
                 type="button"
                 onClick={handleShareStore}
@@ -436,6 +450,8 @@ export const MenuView = ({
   isOrderingEnabled = true,
   userRole,
   isAuthenticated = false,
+  onOpenCustomerAccount,
+  isCustomerAuthenticated = false,
 }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -889,6 +905,8 @@ export const MenuView = ({
           onOpenQueue={onOpenQueue}
           onOpenAdmin={onOpenAdmin}
           onLogout={onLogout}
+          onOpenCustomerAccount={onOpenCustomerAccount}
+          isCustomerAuthenticated={isCustomerAuthenticated}
           userRole={userRole}
           isAuthenticated={isAuthenticated}
           compact={effectiveCompactHeader}

@@ -1,0 +1,159 @@
+// @ts-nocheck
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, SignOut, MapPinLine } from '@phosphor-icons/react';
+import { customerAccountService } from '../services/customerAccountService';
+import { formatCurrency, formatOrderDisplayId } from '../utils/format';
+
+export function ClientAccount() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [me, setMe] = useState<any | null>(null);
+  const [addresses, setAddresses] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
+
+  useEffect(() => {
+    document.title = 'Minha Conta | Já no Caminho';
+  }, []);
+
+  useEffect(() => {
+    const sessionRaw = localStorage.getItem('customerSession');
+    if (!sessionRaw) {
+      navigate('/cliente?next=/cliente/conta', { replace: true });
+      return;
+    }
+
+    let mounted = true;
+    Promise.all([
+      customerAccountService.me(),
+      customerAccountService.listAddresses(),
+      customerAccountService.listOrders(),
+    ])
+      .then(([meData, addressesData, ordersData]) => {
+        if (!mounted) return;
+        setMe(meData || null);
+        setAddresses(Array.isArray(addressesData) ? addressesData : []);
+        setOrders(Array.isArray(ordersData) ? ordersData : []);
+      })
+      .catch((e: any) => {
+        if (!mounted) return;
+        setError(e?.message || 'Falha ao carregar conta.');
+      })
+      .finally(() => {
+        if (!mounted) return;
+        setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [navigate]);
+
+  const logout = () => {
+    localStorage.removeItem('customerSession');
+    navigate('/cliente', { replace: true });
+  };
+
+  return (
+    <main className="min-h-screen bg-slate-50 px-4 py-6">
+      <div className="max-w-3xl mx-auto space-y-4">
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-slate-500 hover:text-slate-900"
+          >
+            <ArrowLeft size={14} />
+            Voltar
+          </button>
+          <button
+            type="button"
+            onClick={logout}
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700"
+          >
+            <SignOut size={14} />
+            Sair
+          </button>
+        </div>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-4">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 font-black">Minha conta</p>
+          {loading ? (
+            <p className="text-sm text-slate-500 mt-2">Carregando...</p>
+          ) : error ? (
+            <p className="text-sm text-rose-600 mt-2">{error}</p>
+          ) : (
+            <>
+              <p className="text-lg font-black text-slate-900 mt-2">{me?.fullName || '-'}</p>
+              <p className="text-sm text-slate-600">{me?.email || '-'}</p>
+              <p className="text-sm text-slate-600">{me?.phone || 'Telefone não informado'}</p>
+            </>
+          )}
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-4">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 font-black">Endereços</p>
+          {addresses.length === 0 ? (
+            <p className="text-sm text-slate-500 mt-2">Nenhum endereço cadastrado ainda.</p>
+          ) : (
+            <div className="mt-2 space-y-2">
+              {addresses.map((address: any) => (
+                <div key={address.id} className="rounded-xl border border-slate-200 p-3">
+                  <p className="text-sm font-semibold text-slate-700">{address.label || 'Endereço'} {address.isDefault ? '• Principal' : ''}</p>
+                  <p className="text-xs text-slate-500">
+                    {address.street}, {address.number || 's/n'} - {address.neighborhood} - {address.city}/{address.state}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-4">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 font-black">Meus pedidos</p>
+          {orders.length === 0 ? (
+            <p className="text-sm text-slate-500 mt-2">Sem pedidos vinculados.</p>
+          ) : (
+            <div className="mt-2 space-y-2">
+              {orders.slice(0, 20).map((order: any) => (
+                <div key={order.id} className="rounded-xl border border-slate-200 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-semibold text-slate-700">
+                      #{formatOrderDisplayId(order.id, order?.store?.slug)}
+                    </p>
+                    <span className="text-xs font-bold text-slate-500 uppercase">{order.status}</span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {new Date(order.createdAt).toLocaleString('pt-BR')} • {order?.store?.name || 'Loja'}
+                  </p>
+                  <p className="text-sm font-bold text-slate-900 mt-1">{formatCurrency(Number(order.total || 0))}</p>
+                  <div className="mt-2 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/pedido/${order.id}`)}
+                      className="rounded-lg bg-slate-900 px-3 py-1.5 text-[11px] font-bold text-white"
+                    >
+                      Acompanhar
+                    </button>
+                    {order?.store?.slug ? (
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/${order.store.slug}`)}
+                        className="rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] font-semibold text-slate-700 inline-flex items-center gap-1"
+                      >
+                        <MapPinLine size={12} />
+                        Ir para loja
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+    </main>
+  );
+}
+

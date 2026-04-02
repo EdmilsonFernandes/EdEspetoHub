@@ -29,3 +29,5 @@ export { MotoboyRegister } from './MotoboyRegister';
 export { MotoboyProfile } from './MotoboyProfile';
 export { ArchitecturePage } from './ArchitecturePage';
 export { InstallAppPage } from './InstallAppPage';
+export { ClientAuth } from './ClientAuth';
+export { ClientAccount } from './ClientAccount';

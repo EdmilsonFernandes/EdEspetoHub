@@ -42,7 +42,13 @@ export class OrderController {
   static async create(req: Request, res: Response) {
     try {
       log.info('Order create request', { storeId: req.params.storeId });
-      const order = await orderService.create({ ...req.body, storeId: req.params.storeId });
+      const customerUserId =
+        String(req.auth?.role || '').toUpperCase() === 'CUSTOMER' ? req.auth?.sub : null;
+      const order = await orderService.create({
+        ...req.body,
+        customerUserId,
+        storeId: req.params.storeId,
+      });
       log.info('Order created', { orderId: order?.id, storeId: req.params.storeId });
       return res.status(201).json({
         ...order,
@@ -86,7 +92,13 @@ export class OrderController {
   static async createBySlug(req: Request, res: Response) {
     try {
       log.info('Order create by slug request', { slug: req.params.slug });
-      const order = await orderService.createBySlug({ ...req.body, storeSlug: req.params.slug });
+      const customerUserId =
+        String(req.auth?.role || '').toUpperCase() === 'CUSTOMER' ? req.auth?.sub : null;
+      const order = await orderService.createBySlug({
+        ...req.body,
+        customerUserId,
+        storeSlug: req.params.slug,
+      });
       log.info('Order created by slug', { orderId: order?.id, slug: req.params.slug });
       return res.status(201).json({
         ...order,

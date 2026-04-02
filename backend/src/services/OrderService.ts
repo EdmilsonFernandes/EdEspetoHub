@@ -1176,6 +1176,7 @@ export class OrderService
     return this.orderRepository.create({
       id: orderRefId as any,
       customerName: input.customerName,
+      customerUserId: input.customerUserId || null,
       phone: input.phone,
       address: input.address,
       table: input.table,

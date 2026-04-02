@@ -9,11 +9,13 @@ import {
   TrendUp,
   ShieldCheck,
   Desktop,
+  UserCircle,
 } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { LandingPageLayout } from '../layouts/LandingPageLayout';
 import { platformService } from '../services/platformService';
 import { storeService } from '../services/storeService';
+import { customerAccountService } from '../services/customerAccountService';
 import { formatCurrency } from '../utils/format';
 import { SocialProofMarquee } from '../components/Landing/SocialProofMarquee';
 
@@ -66,6 +68,18 @@ export function LandingPage() {
   } | null>(null);
   const [activeProof, setActiveProof] = useState<{ title: string; image: string; description?: string } | null>(null);
   const [featuredStores, setFeaturedStores] = useState<Array<{ id: string; name: string; slug: string; logoUrl?: string | null }>>([]);
+  const [showCustomerAuth, setShowCustomerAuth] = useState(false);
+  const [hasCustomerSession, setHasCustomerSession] = useState(false);
+  const [customerAuthMode, setCustomerAuthMode] = useState<'login' | 'register'>('login');
+  const [customerAuthForm, setCustomerAuthForm] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    password: '',
+  });
+  const [customerAuthLoading, setCustomerAuthLoading] = useState(false);
+  const [customerAuthError, setCustomerAuthError] = useState('');
+  const [targetStoreSlug, setTargetStoreSlug] = useState('');
 
   useEffect(() => {
     document.title = 'Já no Caminho | Plataforma completa para gestão de pedidos e entregas';
@@ -78,6 +92,63 @@ export function LandingPage() {
     upsertMeta('og:image', 'https://www.janocaminho.com.br/janocaminho.jpg', 'property');
     upsertMeta('og:type', 'website', 'property');
   }, []);
+
+  useEffect(() => {
+    const sync = () => {
+      try {
+        const raw = localStorage.getItem('customerSession');
+        const parsed = raw ? JSON.parse(raw) : null;
+        setHasCustomerSession(Boolean(parsed?.token));
+      } catch {
+        setHasCustomerSession(false);
+      }
+    };
+    sync();
+    window.addEventListener('storage', sync);
+    return () => window.removeEventListener('storage', sync);
+  }, []);
+
+  useEffect(() => {
+    if (!targetStoreSlug && featuredStores.length > 0) {
+      setTargetStoreSlug(featuredStores[0].slug);
+    }
+  }, [featuredStores, targetStoreSlug]);
+
+  const handleCustomerAuthSubmit = async () => {
+    if (customerAuthLoading) return;
+    setCustomerAuthLoading(true);
+    setCustomerAuthError('');
+    try {
+      let result: any;
+      if (customerAuthMode === 'register') {
+        result = await customerAccountService.register({
+          fullName: String(customerAuthForm.fullName || '').trim(),
+          email: String(customerAuthForm.email || '').trim(),
+          phone: String(customerAuthForm.phone || '').trim(),
+          password: String(customerAuthForm.password || ''),
+        });
+      } else {
+        result = await customerAccountService.login({
+          email: String(customerAuthForm.email || '').trim(),
+          password: String(customerAuthForm.password || ''),
+        });
+      }
+
+      if (!result?.token) throw new Error('Não foi possível autenticar.');
+      localStorage.setItem('customerSession', JSON.stringify(result));
+
+      const slug = String(targetStoreSlug || '').trim();
+      if (slug) {
+        navigate(`/${slug}`);
+      } else {
+        navigate('/');
+      }
+    } catch (error: any) {
+      setCustomerAuthError(error?.message || 'Falha ao autenticar cliente.');
+    } finally {
+      setCustomerAuthLoading(false);
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -189,6 +260,20 @@ export function LandingPage() {
                   className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-base font-black text-white backdrop-blur-md hover:bg-white/10 transition-all active:scale-[0.98]"
                 >
                   Criar minha loja
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (hasCustomerSession) {
+                      navigate('/cliente/conta');
+                      return;
+                    }
+                    setShowCustomerAuth(true);
+                  }}
+                  className="inline-flex items-center gap-2 justify-center rounded-2xl border border-sky-300/30 bg-sky-500/10 px-8 py-4 text-base font-black text-sky-100 backdrop-blur-md hover:bg-sky-500/15 transition-all active:scale-[0.98]"
+                >
+                  <UserCircle size={18} weight="duotone" />
+                  {hasCustomerSession ? 'Minha conta' : 'Entrar como cliente'}
                 </button>
               </div>
 
@@ -350,6 +435,107 @@ export function LandingPage() {
             </div>
             <div className="bg-slate-950 p-4 sm:p-8 overflow-y-auto max-h-[70vh]">
               <img src={activeProof.image} alt={activeProof.title} className="w-full h-auto object-contain rounded-3xl shadow-2xl" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCustomerAuth && (
+        <div className="fixed inset-0 z-[130] bg-slate-950/85 backdrop-blur-sm p-4 flex items-center justify-center">
+          <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 font-black">Área do cliente</p>
+                <h3 className="text-xl font-black text-slate-900">
+                  {customerAuthMode === 'register' ? 'Criar conta' : 'Entrar na sua conta'}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCustomerAuth(false)}
+                className="h-10 w-10 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-slate-900 flex items-center justify-center"
+              >
+                <X size={18} weight="bold" />
+              </button>
+            </div>
+
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setCustomerAuthMode('login')}
+                className={`rounded-xl px-3 py-2 text-xs font-bold border ${customerAuthMode === 'login' ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200'}`}
+              >
+                Login
+              </button>
+              <button
+                type="button"
+                onClick={() => setCustomerAuthMode('register')}
+                className={`rounded-xl px-3 py-2 text-xs font-bold border ${customerAuthMode === 'register' ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200'}`}
+              >
+                Cadastro
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {customerAuthMode === 'register' && (
+                <input
+                  value={customerAuthForm.fullName}
+                  onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, fullName: e.target.value }))}
+                  placeholder="Nome completo"
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+                />
+              )}
+              {customerAuthMode === 'register' && (
+                <input
+                  value={customerAuthForm.phone}
+                  onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, phone: e.target.value }))}
+                  placeholder="Telefone (opcional)"
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+                />
+              )}
+              <input
+                value={customerAuthForm.email}
+                onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, email: e.target.value }))}
+                placeholder="E-mail"
+                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+              />
+              <input
+                type="password"
+                value={customerAuthForm.password}
+                onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, password: e.target.value }))}
+                placeholder="Senha"
+                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+              />
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Ir para loja</label>
+                <select
+                  value={targetStoreSlug}
+                  onChange={(e) => setTargetStoreSlug(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-white"
+                >
+                  {featuredStores.length === 0 ? (
+                    <option value="">Selecionar depois</option>
+                  ) : (
+                    featuredStores.map((store) => (
+                      <option key={store.id} value={store.slug}>
+                        {store.name} ({store.slug})
+                      </option>
+                    ))
+                  )}
+                </select>
+              </div>
+
+              {customerAuthError ? <p className="text-sm text-rose-600">{customerAuthError}</p> : null}
+
+              <button
+                type="button"
+                disabled={customerAuthLoading}
+                onClick={handleCustomerAuthSubmit}
+                className="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-black text-white disabled:opacity-60"
+              >
+                {customerAuthLoading ? 'Processando...' : customerAuthMode === 'register' ? 'Criar e entrar' : 'Entrar'}
+              </button>
             </div>
           </div>
         </div>
