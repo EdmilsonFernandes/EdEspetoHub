@@ -410,63 +410,101 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
         </div>
       )}
       {/* Footer */}
-      <footer className="bg-gradient-to-b from-transparent to-slate-900/50 dark:to-black text-gray-300 dark:text-gray-400 py-12">
+      <footer className="bg-[#070b14] text-slate-300 pt-14 pb-10 border-t border-slate-800/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-xl font-black text-white">Já no Caminho</span>
+          <section className="rounded-[2rem] border border-slate-700/60 bg-[linear-gradient(120deg,#111827_0%,#0f172a_50%,#111827_100%)] p-6 sm:p-8 shadow-[0_24px_60px_-36px_rgba(14,165,233,0.45)]">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
+              <div className="space-y-2">
+                <p className="text-[11px] uppercase tracking-[0.22em] font-black text-sky-300">Plataforma profissional</p>
+                <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Pronto para estruturar seu delivery?</h3>
+                <p className="text-sm text-slate-400">Ative seu ambiente em minutos e opere com mais controle.</p>
               </div>
-              <p className="text-sm text-gray-400">Plataforma completa para gestão de pedidos e entregas online.</p>
+              <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+                <button
+                  type="button"
+                  onClick={() => navigate('/create?plan=trial')}
+                  className="inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 text-sm font-black text-slate-900 hover:bg-sky-50 transition"
+                >
+                  Começar teste grátis
+                </button>
+                <a
+                  href="https://wa.me/5512997822784"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center rounded-xl border border-slate-600 bg-white/5 px-5 py-3 text-sm font-black text-slate-100 hover:bg-white/10 transition"
+                >
+                  Falar com especialista
+                </a>
+              </div>
             </div>
+          </section>
+
+          <section className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              <h3 className="font-bold text-white mb-3">Links rápidos</h3>
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl border border-slate-700 bg-slate-900 p-0.5">
+                  <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover rounded-lg" />
+                </div>
+                <div>
+                  <p className="text-base font-black text-white">Já no Caminho</p>
+                  <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-500">Gestão de pedidos</p>
+                </div>
+              </div>
+              <p className="mt-3 text-sm text-slate-400">Solução completa para pedidos, operação e entregas com experiência app-like.</p>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-black text-white mb-3 uppercase tracking-[0.12em]">Links rápidos</h3>
               <div className="space-y-2 text-sm">
-                <button onClick={() => navigate('/create?plan=trial')} className="block hover:text-sky-400 transition-colors">
-                  Criar Loja
+                <button onClick={() => navigate('/create?plan=trial')} className="block text-slate-400 hover:text-white transition-colors">
+                  Criar loja
                 </button>
-                <button onClick={goToDemoGuide} className="block hover:text-sky-400 transition-colors">
-                  Ver Demo
+                <button onClick={goToDemoGuide} className="block text-slate-400 hover:text-white transition-colors">
+                  Ver demo
                 </button>
-                <button onClick={() => navigate('/arquitetura')} className="block hover:text-sky-400 transition-colors">
-                  Arquitetura
+                <button onClick={() => navigate('/arquitetura')} className="block text-slate-400 hover:text-white transition-colors">
+                  Tecnologia
                 </button>
-                <button onClick={() => navigate('/instalar')} className="block hover:text-sky-400 transition-colors">
+                <button onClick={() => navigate('/instalar')} className="block text-slate-400 hover:text-white transition-colors">
                   Instalar app
                 </button>
-                <a href="/terms" className="block hover:text-sky-400 transition-colors">
-                  Termos e Privacidade
+                <a href="/terms" className="block text-slate-400 hover:text-white transition-colors">
+                  Termos e privacidade
                 </a>
-                <button onClick={() => navigate('/admin')} className="block hover:text-sky-400 transition-colors">
-                  Admin
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-black text-white mb-3 uppercase tracking-[0.12em]">Suporte</h3>
+              <div className="space-y-2 text-sm text-slate-400">
+                <a href="mailto:contato@janocaminho.com.br" className="block hover:text-white transition-colors">
+                  contato@janocaminho.com.br
+                </a>
+                <a href="https://wa.me/5512997822784" target="_blank" rel="noreferrer" className="block hover:text-white transition-colors">
+                  WhatsApp comercial
+                </a>
+                <button onClick={() => navigate('/admin')} className="block hover:text-white transition-colors">
+                  Acesso administrativo
                 </button>
               </div>
             </div>
+
             <div>
-              <h3 className="font-bold text-white mb-3">Contato</h3>
-              <a href="mailto:contato@janocaminho.com.br" className="text-sm text-gray-400">
-                contato@janocaminho.com.br
-              </a>
-            </div>
-            <div>
-              <h3 className="font-bold text-white mb-3">Desenvolvimento</h3>
-              <div className="space-y-2 text-sm text-gray-400">
-                <p>
-                  <span className="text-white font-semibold">Edmilson Lopes</span>
-                  <br />
-                  Arquiteto principal e liderança técnica
-                </p>
-                <p>
-                  Equipe Já no Caminho
-                  <br />
-                  Frontend, backend, produto e operação
-                </p>
+              <h3 className="text-sm font-black text-white mb-3 uppercase tracking-[0.12em]">Liderança técnica</h3>
+              <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">
+                <p className="text-sm font-semibold text-white">Edmilson Lopes</p>
+                <p className="text-xs text-slate-400 mt-1">Arquitetura, produto e operação da plataforma.</p>
+                <div className="mt-3 flex items-center gap-2 text-[11px] text-emerald-300 font-bold uppercase tracking-[0.12em]">
+                  <ShieldCheck size={14} weight="duotone" />
+                  Plataforma segura
+                </div>
               </div>
             </div>
-          </div>
-          <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500 space-y-1">
-            <p>Edmilson Tecnologia da Informação • CNPJ 44.771.427/0001-69</p>
-            © {new Date().getFullYear()} Já no Caminho. Todos os direitos reservados.
+          </section>
+
+          <div className="mt-10 border-t border-slate-800/80 pt-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">Edmilson Tecnologia da Informação • CNPJ 44.771.427/0001-69</p>
+            <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">© {new Date().getFullYear()} Já no Caminho. Todos os direitos reservados.</p>
           </div>
         </div>
       </footer>

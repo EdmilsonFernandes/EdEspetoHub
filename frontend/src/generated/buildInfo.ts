@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.204938.e90f556",
-  "buildId": "0.1.9+20260402.204938.e90f556-20260402.204938-e90f556",
-  "builtAt": "2026-04-02T20:49:38.616Z",
-  "commitHash": "e90f55635fccd30307c6573f67180c235661f2b1",
-  "shortHash": "e90f556",
+  "versionInternal": "0.1.9+20260402.205304.5447bf2",
+  "buildId": "0.1.9+20260402.205304.5447bf2-20260402.205304-5447bf2",
+  "builtAt": "2026-04-02T20:53:04.766Z",
+  "commitHash": "5447bf2fd2e1bd3702db5613cfadbf6c7b7f2a3c",
+  "shortHash": "5447bf2",
   "branch": "main",
   "commits": [
+    {
+      "hash": "5447bf2fd2e1bd3702db5613cfadbf6c7b7f2a3c",
+      "shortHash": "5447bf2",
+      "dateIso": "2026-04-02T17:50:23-03:00",
+      "subject": "feat(ui): upgrade saved-address cards in checkout to app-like horizontal layout"
+    },
     {
       "hash": "e90f55635fccd30307c6573f67180c235661f2b1",
       "shortHash": "e90f556",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "92c4c53",
       "dateIso": "2026-04-01T18:29:57-03:00",
       "subject": "fix(postal): salva/exibe rastreio e mantém fila geral ao postar"
-    },
-    {
-      "hash": "ca3c3a1d37a4b67ef3a3b375675fd4121ef2ecef",
-      "shortHash": "ca3c3a1",
-      "dateIso": "2026-04-01T18:23:56-03:00",
-      "subject": "fix(queue): corrige badge do rodape e restaura rail de icones/checkbox"
     }
   ]
 } as const;
