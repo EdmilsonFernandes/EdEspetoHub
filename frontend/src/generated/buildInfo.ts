@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.143027.31574b0",
-  "buildId": "0.1.9+20260402.143027.31574b0-20260402.143027-31574b0",
-  "builtAt": "2026-04-02T14:30:27.916Z",
-  "commitHash": "31574b005376bc97a8ae8a414e1ca230fcf6d493",
-  "shortHash": "31574b0",
+  "versionInternal": "0.1.9+20260402.143508.084baa8",
+  "buildId": "0.1.9+20260402.143508.084baa8-20260402.143508-084baa8",
+  "builtAt": "2026-04-02T14:35:08.195Z",
+  "commitHash": "084baa8e9b310857d19ec991d96d942c3cb3e637",
+  "shortHash": "084baa8",
   "branch": "main",
   "commits": [
+    {
+      "hash": "084baa8e9b310857d19ec991d96d942c3cb3e637",
+      "shortHash": "084baa8",
+      "dateIso": "2026-04-02T11:31:07-03:00",
+      "subject": "style(sidebar-footer): refine minimal branding spacing and typography"
+    },
     {
       "hash": "31574b005376bc97a8ae8a414e1ca230fcf6d493",
       "shortHash": "31574b0",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "f9dc866",
       "dateIso": "2026-04-01T14:02:19-03:00",
       "subject": "feat(checkout): add delivery mode switch and postal quote flow"
-    },
-    {
-      "hash": "3c9e8b8ebce29e7ab0f668544c76fa22efc7b3b6",
-      "shortHash": "3c9e8b8",
-      "dateIso": "2026-04-01T13:52:37-03:00",
-      "subject": "feat(postal-phase2): add dimensions, postal store config and quote api"
     }
   ]
 } as const;

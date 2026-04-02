@@ -281,7 +281,7 @@ export function AdminOrders() {
   const renderMoneyBreakdown = (order: any, compact = false) => {
     const money = getOrderMoney(order);
     return (
-      <div className={compact ? 'w-full rounded-2xl border border-slate-200 bg-white p-2.5' : 'mt-2 w-full sm:mt-0 sm:w-auto'}>
+      <div className={compact ? 'w-full rounded-2xl border border-slate-100 bg-slate-50/70 p-2.5' : 'mt-2 w-full sm:mt-0 sm:w-auto'}>
         <div className="flex flex-wrap gap-1.5 text-[10px] sm:text-[11px] font-semibold sm:flex-nowrap sm:justify-end">
           <span className="flex flex-col whitespace-nowrap rounded-xl border border-slate-200 bg-slate-50 px-2 py-1.5">
             <span className="text-slate-500">Volume</span>
@@ -293,9 +293,9 @@ export function AdminOrders() {
             <span className="text-slate-500">Frete</span>
             <span className="text-slate-800">{money.fee > 0 ? formatCurrency(money.fee) : '—'}</span>
           </span>
-          <span className="flex flex-col whitespace-nowrap rounded-xl border border-brand-primary/20 bg-brand-primary-soft px-2 py-1.5">
+          <span className="flex flex-col whitespace-nowrap rounded-xl border border-slate-900/10 bg-white px-2.5 py-1.5 shadow-[0_6px_18px_-14px_rgba(15,23,42,0.45)]">
             <span className="text-slate-500">Total</span>
-            <span className="text-brand-primary font-extrabold">{formatCurrency(money.total)}</span>
+            <span className="text-slate-900 font-black text-base leading-none">{formatCurrency(money.total)}</span>
           </span>
         </div>
       </div>
@@ -400,7 +400,7 @@ export function AdminOrders() {
         <div className="min-w-0 flex-1 space-y-6">
         <AdminHeader contextLabel="Pedidos" />
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm relative z-20">
+        <div className="rounded-[24px] border border-slate-100 bg-white p-5 shadow-[0_8px_30px_rgba(15,23,42,0.04)] relative z-20">
           <div className="flex items-center justify-between gap-3 mb-4">
             <div>
               <h2 className="text-lg font-bold text-slate-800">Lista de pedidos</h2>
@@ -409,7 +409,7 @@ export function AdminOrders() {
           </div>
 
             <div className="flex flex-col lg:flex-row lg:items-center gap-3 mb-4">
-              <div className="inline-flex flex-wrap items-center gap-1 rounded-lg bg-slate-100 p-1">
+              <div className="inline-flex flex-wrap items-center gap-1 rounded-full bg-slate-100 p-1">
 	                {[
 	                  { id: 'all', label: 'Todos', count: statusCounts.all },
 	                  { id: 'pending', label: 'Pendentes', count: statusCounts.pending },
@@ -421,10 +421,10 @@ export function AdminOrders() {
                 <button
                   key={filter.id}
                   onClick={() => setStatusFilter(filter.id)}
-                  className={`px-3 py-1.5 rounded-md text-xs font-semibold border transition-colors duration-150 ${
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 ${
                     statusFilter === filter.id
-                      ? 'bg-white text-slate-900 border-slate-300 shadow-sm'
-                      : 'bg-transparent text-slate-600 border-transparent hover:bg-white/70'
+                      ? 'bg-white text-slate-900 border-slate-200 shadow-[0_4px_14px_rgba(15,23,42,0.08)]'
+                      : 'bg-transparent text-slate-600 border-transparent hover:bg-white/80'
                   }`}
                 >
                   {filter.label} ({filter.count})
@@ -448,9 +448,9 @@ export function AdminOrders() {
               <div className="flex gap-2">
                 <button
                   onClick={() => setViewMode('cards')}
-                  className={`px-3 py-2 rounded-lg text-sm font-semibold border transition ${
+                  className={`px-3 py-2 rounded-xl text-sm font-semibold border transition-all duration-200 ${
                     viewMode === 'cards'
-                      ? 'bg-brand-primary text-white border-brand-primary'
+                      ? 'bg-brand-primary text-white border-brand-primary shadow-[0_8px_20px_-12px_rgba(59,130,246,0.55)]'
                       : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
                   }`}
                 >
@@ -458,9 +458,9 @@ export function AdminOrders() {
                 </button>
                 <button
                   onClick={() => setViewMode('table')}
-                  className={`px-3 py-2 rounded-lg text-sm font-semibold border transition ${
+                  className={`px-3 py-2 rounded-xl text-sm font-semibold border transition-all duration-200 ${
                     viewMode === 'table'
-                      ? 'bg-brand-primary text-white border-brand-primary'
+                      ? 'bg-brand-primary text-white border-brand-primary shadow-[0_8px_20px_-12px_rgba(59,130,246,0.55)]'
                       : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
                   }`}
                 >
@@ -504,17 +504,17 @@ export function AdminOrders() {
                   return (
                     <div
                       key={order.id || `${order.customerName}-${index}`}
-                      className={`rounded-2xl border border-slate-200 border-l-4 ${statusAccent(order.status)} p-4 shadow-sm space-y-3 ds-interactive-card`}
+                      className="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.04)] space-y-3 ds-interactive-card"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 text-[11px] text-slate-500">
-                            <span className="px-2 py-0.5 rounded-full border border-slate-200 bg-slate-50 font-semibold">
+                            <span className="px-2 py-0.5 rounded-full border border-slate-200 bg-slate-50 font-bold uppercase tracking-[0.12em]">
                               Pedido #{shortId(order.id)}
                             </span>
                             <span>{formatDateTime(order.createdAt)}</span>
                           </div>
-                          <p className="text-sm font-semibold text-slate-800">
+                          <p className="text-lg font-extrabold text-slate-800 leading-tight">
                             {order.customerName || order.name || 'Cliente'}
                           </p>
                           <div className="mt-1">
@@ -623,12 +623,12 @@ export function AdminOrders() {
                 {filteredOrders.map((order, index) => (
                   <div
                     key={order.id || `${order.customerName}-${index}`}
-                    className={`border border-slate-200 border-l-4 ${statusAccent(order.status)} rounded-2xl p-5 shadow-sm flex flex-col gap-4 ds-interactive-card`}
+                    className="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.04)] flex flex-col gap-4 ds-interactive-card"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div>
                         <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                          <span className="px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 font-semibold">
+                          <span className="px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 font-bold uppercase tracking-[0.12em]">
                             Pedido #{shortId(order.id)}
                           </span>
                           <span>{formatDateTime(order.createdAt)}</span>
@@ -656,7 +656,7 @@ export function AdminOrders() {
                     <div className="grid sm:grid-cols-3 gap-3 text-sm text-slate-600">
                       <div>
                         <p className="text-xs uppercase text-slate-400">Cliente</p>
-                        <p className="font-semibold text-slate-700">{order.customerName || order.name || 'Cliente'}</p>
+                        <p className="font-extrabold text-slate-800 text-base leading-tight">{order.customerName || order.name || 'Cliente'}</p>
                         <p className="text-xs text-slate-500">{order.phone || '-'}</p>
                       </div>
                       <div>
