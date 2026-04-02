@@ -223,7 +223,7 @@ export function AdminDesktopSidebar({
             )}
           </button>
           {!compact && (
-            <PlatformTrustFooter className="mt-2 px-2" tone="dark" compact align="left" mode="minimal" />
+            <PlatformTrustFooter className="mt-3 px-3 pb-1" tone="dark" compact align="left" mode="minimal" />
           )}
         </div>
       </div>

@@ -280,7 +280,7 @@ export function AdminLayout({
               <SignOut size={16} weight="bold" />
               Sair
             </button>
-            <PlatformTrustFooter className="mt-2" compact mode="minimal" />
+            <PlatformTrustFooter className="mt-3 pt-1" compact mode="minimal" />
           </aside>
         </div>
       )}

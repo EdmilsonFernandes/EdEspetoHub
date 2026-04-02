@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.141925.7a9e77a",
-  "buildId": "0.1.9+20260402.141925.7a9e77a-20260402.141925-7a9e77a",
-  "builtAt": "2026-04-02T14:19:25.685Z",
-  "commitHash": "7a9e77a02924cbcba0fbaffb38b0c961b4a482c8",
-  "shortHash": "7a9e77a",
+  "versionInternal": "0.1.9+20260402.143027.31574b0",
+  "buildId": "0.1.9+20260402.143027.31574b0-20260402.143027-31574b0",
+  "builtAt": "2026-04-02T14:30:27.916Z",
+  "commitHash": "31574b005376bc97a8ae8a414e1ca230fcf6d493",
+  "shortHash": "31574b0",
   "branch": "main",
   "commits": [
+    {
+      "hash": "31574b005376bc97a8ae8a414e1ca230fcf6d493",
+      "shortHash": "31574b0",
+      "dateIso": "2026-04-02T11:20:06-03:00",
+      "subject": "style(admin-footer): remove duplicate footer and switch sidebar branding to minimal mode"
+    },
     {
       "hash": "7a9e77a02924cbcba0fbaffb38b0c961b4a482c8",
       "shortHash": "7a9e77a",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "3c9e8b8",
       "dateIso": "2026-04-01T13:52:37-03:00",
       "subject": "feat(postal-phase2): add dimensions, postal store config and quote api"
-    },
-    {
-      "hash": "85456c86ca810baafd8fd20aacc39da9a30b43be",
-      "shortHash": "85456c8",
-      "dateIso": "2026-04-01T13:31:02-03:00",
-      "subject": "feat(postal): add manual shipment flow with tracking and dispatched status"
     }
   ]
 } as const;

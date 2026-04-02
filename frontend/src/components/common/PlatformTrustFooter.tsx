@@ -27,8 +27,9 @@ export function PlatformTrustFooter({
     : 'border-slate-200 bg-slate-50 text-slate-600';
   const versionClass = tone === 'dark' ? 'text-slate-400/70' : 'text-slate-400';
   const minimalText = tone === 'dark' ? 'text-slate-400/90' : 'text-slate-500';
-  const minimalMuted = tone === 'dark' ? 'text-slate-500/80' : 'text-slate-400';
-  const minimalBorder = tone === 'dark' ? 'border-slate-700/60' : 'border-slate-200';
+  const minimalMuted = tone === 'dark' ? 'text-slate-500/75' : 'text-slate-400';
+  const minimalBorder = tone === 'dark' ? 'border-slate-700/50' : 'border-slate-200';
+  const minimalBrand = tone === 'dark' ? 'text-slate-300/90' : 'text-slate-700/90';
 
   if (mode === 'minimal') {
     return (
@@ -38,17 +39,30 @@ export function PlatformTrustFooter({
             href={href}
             target="_blank"
             rel="noreferrer"
-            className={`group inline-flex items-center gap-2 border-t pt-2 ${minimalBorder} ${minimalText}`}
+            className={`group w-full max-w-full border-t px-1 py-3 ${minimalBorder} ${minimalText}`}
             aria-label="Plataforma Já no Caminho"
           >
-            <span className="h-5 w-5 overflow-hidden rounded-md border border-slate-300/60 bg-white transition-all grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100">
-              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
-            </span>
-            <span className={`${compact ? 'text-[10px]' : 'text-[11px]'} uppercase tracking-[0.14em] font-bold`}>Desenvolvido por Já no Caminho</span>
-            <ShieldCheck size={12} weight="bold" className="text-emerald-500" />
-            <span className={`text-[9px] ${minimalMuted}`}>
-              <AppVersionBadge />
-            </span>
+            <div className="flex w-full items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className={`${compact ? 'text-[9px]' : 'text-[10px]'} font-medium uppercase tracking-[0.15em] ${minimalText}`}>
+                  desenvolvido por
+                </p>
+                <div className="mt-0.5 inline-flex items-center gap-1.5">
+                  <span className="h-5 w-5 overflow-hidden rounded-md border border-slate-300/60 bg-white transition-all grayscale opacity-65 group-hover:grayscale-0 group-hover:opacity-100">
+                    <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
+                  </span>
+                  <span className={`${compact ? 'text-[10px]' : 'text-[11px]'} uppercase tracking-[0.14em] font-bold ${minimalBrand}`}>
+                    Já no Caminho
+                  </span>
+                </div>
+              </div>
+              <div className="flex shrink-0 items-center gap-1.5">
+                <ShieldCheck size={12} weight="bold" className="text-emerald-600/50" />
+                <span className={`text-[8px] ${minimalMuted}`}>
+                  <AppVersionBadge />
+                </span>
+              </div>
+            </div>
           </a>
         </div>
       </div>
