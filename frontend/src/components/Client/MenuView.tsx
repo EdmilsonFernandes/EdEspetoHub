@@ -249,7 +249,7 @@ const Header = ({
   }, [compact]);
 
   return (
-    <div className={`w-full sticky top-0 z-50 ${compact ? 'pb-1' : 'pb-3'} pt-2`}>
+    <div className={`w-full ${compact ? 'pb-1' : 'pb-3'} pt-2`}>
       <div className="max-w-6xl mx-auto px-3 sm:px-4">
         <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
           <div
@@ -913,49 +913,28 @@ export const MenuView = ({
         />
       )}
 
-      <div
-        ref={stickySearchContainerRef}
-        className={`sticky ${
-          showHeader
-            ? effectiveCompactHeader
-              ? "top-[68px] sm:top-[86px]"
-              : "top-[84px] sm:top-[102px]"
-            : "top-0"
-        } z-40 px-4 pb-2 pt-1 max-w-6xl mx-auto`}
-      >
-        <div className="rounded-2xl border border-slate-200/85 bg-white/95 backdrop-blur-md shadow-sm px-2.5 py-2.5 space-y-2">
+      <div ref={stickySearchContainerRef} className="sticky top-0 z-[100] w-full border-b border-slate-100 bg-white shadow-sm">
+        <div className="mx-auto w-full max-w-6xl px-4 pt-3 pb-2">
           <div className="relative">
             <MagnifyingGlass className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              className="w-full rounded-xl border border-transparent bg-slate-100 py-2.5 pl-10 pr-4 text-sm text-slate-700 placeholder:text-[13px] placeholder:font-medium placeholder:text-slate-400 outline-none focus:border-slate-300 focus:ring-2 focus:ring-slate-900/15 transition-all"
+              className="w-full h-10 rounded-full border border-transparent bg-slate-100 pl-10 pr-4 text-sm text-slate-700 placeholder:text-[13px] placeholder:font-medium placeholder:text-slate-400 outline-none focus:border-slate-300 focus:ring-2 focus:ring-slate-900/10 transition-all"
               placeholder="Buscar produtos por nome ou categoria"
             />
           </div>
-          {filteredGrouped.length > 1 && (
-            <div
-              ref={categoryTabsContainerRef}
-              className="rounded-xl border border-slate-200/70 bg-white/90 shadow-sm ds-tabs px-2 py-2"
-            >
-              <div className="relative w-full flex items-center">
-              <div
-                className={`${
-                  filteredGrouped.length > 2
-                    ? "flex-1 overflow-x-auto no-scrollbar scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] snap-x snap-mandatory pr-16"
-                    : "flex-1"
-                }`}
-              >
-                <div
-                  className={`${
-                    filteredGrouped.length <= 2
-                      ? "grid grid-cols-2 gap-2 w-full"
-                      : `flex items-center gap-2 ${filteredGrouped.length > 2 ? "w-max pr-1" : "w-full"}`
-                  }`}
-                >
+        </div>
+        {filteredGrouped.length > 1 && (
+          <div ref={categoryTabsContainerRef} className="mx-auto w-full max-w-6xl px-4 pb-3">
+            <div className="relative w-full">
+              <div className={`${
+                filteredGrouped.length > 2
+                  ? "flex overflow-x-auto whitespace-nowrap gap-2 no-scrollbar scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pr-20"
+                  : "grid grid-cols-2 gap-2"
+              }`}>
                 {filteredGrouped.map((category) => {
                   const isActive = activeCategoryKey === category.key;
-
                   return (
                     <button
                       key={category.key}
@@ -967,49 +946,40 @@ export const MenuView = ({
                         setActiveCategoryKey(category.key);
                         scrollToCategory(category.key);
                       }}
-                      className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full transition-all snap-start ${
-                        isActive ? "font-semibold shadow-sm" : "font-medium"
-                      } ${filteredGrouped.length <= 2 ? "w-full min-w-0" : ""}`}
+                      className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border text-xs font-bold transition-colors snap-start ${
+                        filteredGrouped.length <= 2 ? "w-full min-w-0" : ""
+                      }`}
                       style={
                         isActive
-                          ? { backgroundColor: catalogPrimaryColor, color: catalogPrimaryText }
-                          : { backgroundColor: "#f8fafc", color: catalogSecondaryColor }
+                          ? { backgroundColor: catalogPrimaryColor, color: catalogPrimaryText, borderColor: catalogPrimaryColor }
+                          : { backgroundColor: "#f8fafc", color: "#475569", borderColor: "#e2e8f0" }
                       }
                     >
-                      <span className="text-[17px] leading-none" aria-hidden="true">
+                      <span className="text-[14px] leading-none" aria-hidden="true">
                         {categoryGlyph(category.key)}
                       </span>
-                      <span className="whitespace-nowrap text-xs sm:text-sm">{category.label}</span>
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] ${isActive ? "" : "bg-white border border-slate-200"}`}
-                        style={isActive ? { backgroundColor: "rgba(255,255,255,0.2)", color: catalogPrimaryText } : { color: "#64748b" }}
-                      >
-                        {category.items.length}
-                      </span>
+                      <span className="whitespace-nowrap">{category.label}</span>
                     </button>
                   );
                 })}
               </div>
-              </div>
               {filteredGrouped.length > 2 && (
-                <>
-                  <div className="pointer-events-none absolute right-12 top-1 bottom-1 w-10 bg-gradient-to-l from-white via-white/80 to-transparent rounded-r-2xl" />
+                <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white via-white to-transparent" />
+              )}
+              {filteredGrouped.length > 2 && (
                 <button
                   type="button"
                   aria-label="Abrir categorias"
                   onClick={() => setIsCategorySheetOpen(true)}
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8.5 px-2.5 rounded-full bg-white shadow-[0_10px_18px_-16px_rgba(15,23,42,0.65)] inline-flex items-center justify-center gap-1 text-slate-700 border border-slate-200 active:scale-95 transition-all"
-                  style={{ color: catalogSecondaryColor }}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 h-9 px-3 rounded-lg bg-white border border-slate-200 text-slate-700 inline-flex items-center gap-1 shadow-sm active:scale-95 transition-all"
                 >
-                  <List size={15} weight="bold" />
+                  <List size={16} weight="bold" />
                   <span className="text-xs font-semibold">Mais</span>
                 </button>
-                </>
               )}
             </div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <div className={`space-y-6 sm:space-y-8 px-3 sm:px-4 py-3 sm:py-4 max-w-6xl mx-auto ${cartItemsCount > 0 ? 'pb-28 sm:pb-8' : ''}`}>

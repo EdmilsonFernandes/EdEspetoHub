@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.150823.4e7f2df",
-  "buildId": "0.1.9+20260402.150823.4e7f2df-20260402.150823-4e7f2df",
-  "builtAt": "2026-04-02T15:08:23.366Z",
-  "commitHash": "4e7f2dfb0c46f1b759689f7a6ca44ea5f72332b0",
-  "shortHash": "4e7f2df",
+  "versionInternal": "0.1.9+20260402.151813.8506a8c",
+  "buildId": "0.1.9+20260402.151813.8506a8c-20260402.151813-8506a8c",
+  "builtAt": "2026-04-02T15:18:13.216Z",
+  "commitHash": "8506a8c7cf7b6af838aa2260cb7fb8d00fe68bfe",
+  "shortHash": "8506a8c",
   "branch": "main",
   "commits": [
+    {
+      "hash": "8506a8c7cf7b6af838aa2260cb7fb8d00fe68bfe",
+      "shortHash": "8506a8c",
+      "dateIso": "2026-04-02T12:09:04-03:00",
+      "subject": "fix(queue): prevent desktop action button clipping on order cards"
+    },
     {
       "hash": "4e7f2dfb0c46f1b759689f7a6ca44ea5f72332b0",
       "shortHash": "4e7f2df",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "81a8b10",
       "dateIso": "2026-04-01T15:33:18-03:00",
       "subject": "feat(checkout): polish postal shipping UI with premium service cards and loading states"
-    },
-    {
-      "hash": "7a8d094830017bf52fe59ea45168004dd6ad0b82",
-      "shortHash": "7a8d094",
-      "dateIso": "2026-04-01T14:59:04-03:00",
-      "subject": "chore(shipping): add one-shot setup script from authorization code"
     }
   ]
 } as const;
