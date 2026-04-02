@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.152325.11230d0",
-  "buildId": "0.1.9+20260402.152325.11230d0-20260402.152325-11230d0",
-  "builtAt": "2026-04-02T15:23:25.718Z",
-  "commitHash": "11230d0bd3dbee34e1634ff28cd333c1de4cbe0a",
-  "shortHash": "11230d0",
+  "versionInternal": "0.1.9+20260402.152951.3c0874f",
+  "buildId": "0.1.9+20260402.152951.3c0874f-20260402.152951-3c0874f",
+  "builtAt": "2026-04-02T15:29:51.705Z",
+  "commitHash": "3c0874f1e2b6b15b053ef0d3882f25a871c6c4f4",
+  "shortHash": "3c0874f",
   "branch": "main",
   "commits": [
+    {
+      "hash": "3c0874f1e2b6b15b053ef0d3882f25a871c6c4f4",
+      "shortHash": "3c0874f",
+      "dateIso": "2026-04-02T12:23:53-03:00",
+      "subject": "fix(menu): keep sticky header below product modal layer"
+    },
     {
       "hash": "11230d0bd3dbee34e1634ff28cd333c1de4cbe0a",
       "shortHash": "11230d0",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "852e157",
       "dateIso": "2026-04-01T15:42:55-03:00",
       "subject": "Ed"
-    },
-    {
-      "hash": "b53eb9d0beb9737a3b4adf02b6f84ceb81ba1b19",
-      "shortHash": "b53eb9d",
-      "dateIso": "2026-04-01T15:37:49-03:00",
-      "subject": "fix(order): accept delivery-status aliases in postal flow transitions"
     }
   ]
 } as const;

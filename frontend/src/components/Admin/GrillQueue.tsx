@@ -485,15 +485,14 @@ const OrderSummaryCard = ({
       {itemsCount} {itemsCount === 1 ? 'item' : 'itens'}{itemsSummary ? ` • ${itemsSummary}` : ''}
     </div>
 
-    <div className="border-t border-slate-100 pt-2 mt-0.5 flex items-end justify-between gap-3">
-      <div className="flex items-center gap-2">
-        <span className="text-base font-black text-slate-900">{totalLabel}</span>
+    <div className="border-t border-slate-100 pt-2 mt-0.5 flex flex-wrap items-end justify-between gap-2">
+      <div className="flex min-w-0 items-center gap-2">
+        <span className="text-base font-black text-slate-900 whitespace-nowrap">{totalLabel}</span>
       </div>
-      <div className="text-right flex flex-col items-end gap-1 shrink-0">
-        <span className={`text-[11px] font-black uppercase tracking-[0.06em] ${statusToneClass}`}>
+      <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
+        <span className={`text-[10px] font-black uppercase tracking-[0.06em] ${statusToneClass} whitespace-nowrap`}>
           {archived ? 'Finalizado' : statusMeta.label}
         </span>
-        <div className="inline-flex items-center justify-end gap-2 shrink-0 flex-nowrap">
           {canPrint && (
             <button
               type="button"
@@ -502,14 +501,11 @@ const OrderSummaryCard = ({
                 onPrint();
               }}
               disabled={printBusy}
-              className="inline-flex h-10 w-10 lg:h-9 lg:min-w-[102px] lg:px-3 items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-700 shadow-sm hover:bg-amber-100 hover:text-amber-900 transition-all no-print disabled:opacity-60 disabled:hover:bg-amber-50 shrink-0"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-amber-300 bg-amber-50 text-amber-700 shadow-sm hover:bg-amber-100 hover:text-amber-900 transition-all no-print disabled:opacity-60 disabled:hover:bg-amber-50 shrink-0"
               aria-label={`Imprimir pedido ${orderDisplayId}`}
               title="Imprimir pedido"
             >
               <Printer size={15} weight="duotone" />
-              <span className="hidden lg:inline text-[11px] font-extrabold uppercase tracking-[0.06em]">
-                {printBusy ? "Gerando..." : "Imprimir"}
-              </span>
             </button>
           )}
         {!archived && showQuickStart && typeof onQuickStart === 'function' && (
@@ -519,7 +515,7 @@ const OrderSummaryCard = ({
               event.stopPropagation();
               onQuickStart();
             }}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-orange-500 text-white shadow-[0_14px_24px_-14px_rgba(249,115,22,0.92)] ring-2 ring-orange-100 hover:bg-orange-600 hover:scale-105 transition-all"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-500 text-white shadow-[0_14px_24px_-14px_rgba(249,115,22,0.92)] ring-2 ring-orange-100 hover:bg-orange-600 hover:scale-105 transition-all"
             aria-label={`Iniciar atendimento do pedido ${orderDisplayId}`}
             title="Iniciar atendimento"
           >
@@ -533,7 +529,7 @@ const OrderSummaryCard = ({
               event.stopPropagation();
               onQuickFinalize();
             }}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-700 text-white shadow-[0_14px_24px_-14px_rgba(4,120,87,0.95)] ring-2 ring-emerald-100 hover:bg-emerald-800 hover:scale-105 transition-all"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-700 text-white shadow-[0_14px_24px_-14px_rgba(4,120,87,0.95)] ring-2 ring-emerald-100 hover:bg-emerald-800 hover:scale-105 transition-all"
             aria-label={`Finalizar agora o pedido ${orderDisplayId}`}
             title="Finalizar agora"
           >
@@ -556,7 +552,6 @@ const OrderSummaryCard = ({
         )}
         </div>
       </div>
-    </div>
     </div>
   </div>
     );
