@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.151813.8506a8c",
-  "buildId": "0.1.9+20260402.151813.8506a8c-20260402.151813-8506a8c",
-  "builtAt": "2026-04-02T15:18:13.216Z",
-  "commitHash": "8506a8c7cf7b6af838aa2260cb7fb8d00fe68bfe",
-  "shortHash": "8506a8c",
+  "versionInternal": "0.1.9+20260402.152325.11230d0",
+  "buildId": "0.1.9+20260402.152325.11230d0-20260402.152325-11230d0",
+  "builtAt": "2026-04-02T15:23:25.718Z",
+  "commitHash": "11230d0bd3dbee34e1634ff28cd333c1de4cbe0a",
+  "shortHash": "11230d0",
   "branch": "main",
   "commits": [
+    {
+      "hash": "11230d0bd3dbee34e1634ff28cd333c1de4cbe0a",
+      "shortHash": "11230d0",
+      "dateIso": "2026-04-02T12:18:53-03:00",
+      "subject": "fix(menu): unify top sticky search and categories with stable top alignment"
+    },
     {
       "hash": "8506a8c7cf7b6af838aa2260cb7fb8d00fe68bfe",
       "shortHash": "8506a8c",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "b53eb9d",
       "dateIso": "2026-04-01T15:37:49-03:00",
       "subject": "fix(order): accept delivery-status aliases in postal flow transitions"
-    },
-    {
-      "hash": "81a8b102b358d1d021d7fadf9558944362138984",
-      "shortHash": "81a8b10",
-      "dateIso": "2026-04-01T15:33:18-03:00",
-      "subject": "feat(checkout): polish postal shipping UI with premium service cards and loading states"
     }
   ]
 } as const;

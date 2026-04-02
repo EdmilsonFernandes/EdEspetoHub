@@ -913,7 +913,7 @@ export const MenuView = ({
         />
       )}
 
-      <div ref={stickySearchContainerRef} className="sticky top-0 z-[100] w-full border-b border-slate-100 bg-white shadow-sm">
+      <div ref={stickySearchContainerRef} className="sticky top-0 z-30 w-full border-b border-slate-100 bg-white shadow-sm">
         <div className="mx-auto w-full max-w-6xl px-4 pt-3 pb-2">
           <div className="relative">
             <MagnifyingGlass className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
