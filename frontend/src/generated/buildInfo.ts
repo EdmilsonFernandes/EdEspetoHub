@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.134233.18c1027",
-  "buildId": "0.1.9+20260402.134233.18c1027-20260402.134233-18c1027",
-  "builtAt": "2026-04-02T13:42:33.355Z",
-  "commitHash": "18c102701580721fda1e3492c5043cae6230dee5",
-  "shortHash": "18c1027",
+  "versionInternal": "0.1.9+20260402.140140.b8d361a",
+  "buildId": "0.1.9+20260402.140140.b8d361a-20260402.140140-b8d361a",
+  "builtAt": "2026-04-02T14:01:40.982Z",
+  "commitHash": "b8d361ad7f4da314cbc7e3126a3472659291e762",
+  "shortHash": "b8d361a",
   "branch": "main",
   "commits": [
+    {
+      "hash": "b8d361ad7f4da314cbc7e3126a3472659291e762",
+      "shortHash": "b8d361a",
+      "dateIso": "2026-04-02T10:44:12-03:00",
+      "subject": "feat(branding): upgrade trust footer across catalog and admin"
+    },
     {
       "hash": "18c102701580721fda1e3492c5043cae6230dee5",
       "shortHash": "18c1027",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "37165be",
       "dateIso": "2026-03-31T21:47:15-03:00",
       "subject": "feat(catalog-ui): animate item flying to bag on add"
-    },
-    {
-      "hash": "b92adc89025b5619f5e13dfad0ff00d49f2dfa25",
-      "shortHash": "b92adc8",
-      "dateIso": "2026-03-31T21:43:18-03:00",
-      "subject": "feat(catalog-theme): apply store primary/secondary colors to qty controls"
     }
   ]
 } as const;

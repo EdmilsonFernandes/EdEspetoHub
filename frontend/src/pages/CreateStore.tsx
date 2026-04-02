@@ -213,6 +213,7 @@ export function CreateStore() {
   const personalSectionRef = useRef<HTMLDivElement | null>(null);
   const addressSectionRef = useRef<HTMLDivElement | null>(null);
   const storeSectionRef = useRef<HTMLDivElement | null>(null);
+  const planSectionRef = useRef<HTMLDivElement | null>(null);
   const [registerForm, setRegisterForm] = useState({
     fullName: '',
     email: '',
@@ -790,9 +791,10 @@ export function CreateStore() {
   };
 
   const steps = [
-    { id: 1, title: 'Dados pessoais', done: Boolean(registerForm.fullName && registerForm.email && registerForm.phone) },
-    { id: 2, title: 'Endereço', done: Boolean(registerForm.cep && registerForm.city && registerForm.state && registerForm.street && registerForm.number) },
+    { id: 1, title: 'Dados', done: Boolean(registerForm.fullName && registerForm.email && registerForm.phone && registerForm.document && registerForm.password) },
+    { id: 2, title: 'Endereço', done: Boolean(registerForm.cep && registerForm.city && registerForm.state && registerForm.street && registerForm.number && registerForm.neighborhood) },
     { id: 3, title: 'Loja', done: Boolean(registerForm.storeName && registerForm.segment) },
+    { id: 4, title: 'Plano', done: Boolean(termsAccepted && lgpdAccepted) },
   ];
 
   const canAdvanceFromStep = (stepId: number) => {
@@ -815,12 +817,16 @@ export function CreateStore() {
           registerForm.neighborhood
       );
     }
+    if (stepId === 3) {
+      return Boolean(registerForm.storeName && registerForm.segment);
+    }
     return true;
   };
 
   const getStepValidationMessage = (stepId: number) => {
     if (stepId === 1) return 'Preencha os dados pessoais obrigatórios para continuar.';
     if (stepId === 2) return 'Preencha o endereço completo para continuar.';
+    if (stepId === 3) return 'Complete as informações da loja para continuar.';
     return 'Confira os dados obrigatórios antes de continuar.';
   };
 
@@ -831,7 +837,13 @@ export function CreateStore() {
       return;
     }
     const target =
-      stepId === 1 ? personalSectionRef.current : stepId === 2 ? addressSectionRef.current : storeSectionRef.current;
+      stepId === 1
+        ? personalSectionRef.current
+        : stepId === 2
+        ? addressSectionRef.current
+        : stepId === 3
+        ? storeSectionRef.current
+        : planSectionRef.current;
     if (!target) return;
     setCurrentStep(stepId);
     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -843,7 +855,7 @@ export function CreateStore() {
       setShowValidationModal(true);
       return;
     }
-    scrollToStep(currentStep + 1);
+    scrollToStep(Math.min(4, currentStep + 1));
   };
 
   const previewDisplayName = registerForm.storeName.trim() || 'Sua Loja';
@@ -958,7 +970,8 @@ export function CreateStore() {
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-6 items-start">
         <div className="min-w-0 rounded-2xl border border-slate-100 bg-white p-6 md:p-10 shadow-sm">
           <div className="mb-5 flex flex-col items-center text-center gap-3 sm:gap-2">
             <div className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-slate-600">
@@ -966,13 +979,13 @@ export function CreateStore() {
               Criar nova loja
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-gray-900 leading-tight">Criar minha loja</h1>
-            <p className="text-sm sm:text-base text-slate-600">Em 3 etapas você publica seu link e começa a vender.</p>
+            <p className="text-sm sm:text-base text-slate-600">Em 4 etapas você publica sua loja com visual premium e checkout pronto.</p>
           </div>
 
           <div className="sticky top-[72px] sm:top-[84px] z-20 mb-6 rounded-2xl border border-slate-200 bg-white/95 p-3 sm:p-4 backdrop-blur">
             <div className="mb-2 flex items-center justify-between gap-2">
               <p className="text-xs uppercase tracking-[0.22em] font-semibold text-slate-500">Onboarding</p>
-              <span className="text-[11px] text-slate-500 font-semibold">Etapa {currentStep} de 3</span>
+              <span className="text-[11px] text-slate-500 font-semibold">Etapa {currentStep} de 4</span>
             </div>
             <div className="flex items-center justify-between w-full relative mb-2">
               <div className="absolute top-1/2 left-0 w-full h-[2px] bg-slate-100 -z-10 -translate-y-1/2" />
@@ -997,7 +1010,7 @@ export function CreateStore() {
                       currentStep === step.id ? 'text-slate-800' : 'text-slate-400'
                     }`}
                   >
-                    {step.id === 1 ? 'Dados' : step.id === 2 ? 'Endereço' : 'Loja'}
+                    {step.title}
                   </span>
                 </button>
               ))}
@@ -1011,13 +1024,14 @@ export function CreateStore() {
           )}
 
           <form className="space-y-6 pb-24 md:pb-0 [&_label]:text-xs [&_label]:font-bold [&_label]:text-slate-500 [&_label]:uppercase [&_label]:tracking-wider" onSubmit={handleCreateStore}>
-            <div ref={personalSectionRef} className="scroll-mt-36" onFocusCapture={() => setCurrentStep(1)}>
+            <div ref={personalSectionRef} className={`scroll-mt-36 ${currentStep === 1 || currentStep === 2 ? '' : 'hidden'}`} onFocusCapture={() => setCurrentStep(currentStep <= 2 ? currentStep : 1)}>
             <FormSection
-              title="Informações pessoais"
-              subtitle="Dados do responsável pela operação da loja."
+              title={currentStep === 2 ? 'Endereço da operação' : 'Informações pessoais'}
+              subtitle={currentStep === 2 ? 'Onde sua loja opera e recebe pedidos.' : 'Dados do responsável pela operação da loja.'}
               variant="primary"
               contentClassName="space-y-4"
             >
+              <div className={currentStep === 1 ? 'space-y-4' : 'hidden'}>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">Nome completo</label>
                   <input
@@ -1152,8 +1166,9 @@ export function CreateStore() {
                     </div>
                   </div>
                 </div>
+              </div>
 
-                <div ref={addressSectionRef} className="pt-4 border-t border-gray-200 scroll-mt-36" onFocusCapture={() => setCurrentStep(2)}>
+                <div ref={addressSectionRef} className={`pt-4 border-t border-gray-200 scroll-mt-36 ${currentStep === 2 ? '' : 'hidden'}`} onFocusCapture={() => setCurrentStep(2)}>
                   <h4 className="text-sm font-semibold text-gray-700">Endereço</h4>
                   <p className="text-xs text-slate-500 mb-3">Onde sua loja opera e recebe pedidos.</p>
                   <div className="space-y-4">
@@ -1309,7 +1324,7 @@ export function CreateStore() {
             </FormSection>
             </div>
 
-            <div ref={storeSectionRef} className="pt-6 border-t border-gray-100 scroll-mt-36" onFocusCapture={() => setCurrentStep(3)}>
+            <div ref={storeSectionRef} className={`pt-6 border-t border-gray-100 scroll-mt-36 ${currentStep === 3 ? '' : 'hidden'}`} onFocusCapture={() => setCurrentStep(3)}>
               <FormSection
                 title="Configurações da loja"
                 subtitle="Defina identidade, segmento e canais de contato."
@@ -1540,7 +1555,7 @@ export function CreateStore() {
               </FormSection>
             </div>
 
-            <div className="pt-6 border-t border-gray-100">
+            <div ref={planSectionRef} className={`pt-6 border-t border-gray-100 ${currentStep === 4 ? '' : 'hidden'}`} onFocusCapture={() => setCurrentStep(4)}>
               <FormSection
                 title="Selecione um plano"
                 subtitle="Comece pelo teste gratuito e escolha o plano ideal depois."
@@ -1716,7 +1731,7 @@ export function CreateStore() {
               </FormSection>
             </div>
 
-            <div ref={termsRef} className="pt-6 border-t border-gray-100 space-y-3">
+            <div ref={termsRef} className={`pt-6 border-t border-gray-100 space-y-3 ${currentStep === 4 ? '' : 'hidden'}`}>
               <label className="flex items-start gap-3 text-sm text-gray-600">
                 <input
                   type="checkbox"
@@ -1761,7 +1776,7 @@ export function CreateStore() {
             <div className="fixed bottom-0 left-0 w-full z-50 rounded-none border-t border-slate-200 bg-white/90 backdrop-blur-md p-4 shadow-[0_-10px_26px_-20px_rgba(15,23,42,0.45)] md:static md:rounded-2xl md:border md:border-slate-200/90 md:p-3 md:shadow-[0_24px_46px_-30px_rgba(15,23,42,0.55)]">
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
                 <div className="text-[11px] text-slate-500">
-                  Etapa atual <span className="font-semibold text-slate-700">{currentStep} de 3</span>
+                  Etapa atual <span className="font-semibold text-slate-700">{currentStep} de 4</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -1772,7 +1787,7 @@ export function CreateStore() {
                   >
                     Voltar
                   </button>
-                  {currentStep < 3 ? (
+                  {currentStep < 4 ? (
                     <button
                       type="button"
                       onClick={handleNextStep}
@@ -1877,6 +1892,10 @@ export function CreateStore() {
               Ao criar sua conta, você confirma a veracidade dos dados fornecidos.
             </p>
           </form>
+        </div>
+        <aside className="hidden xl:block sticky top-28">
+          {previewPanel}
+        </aside>
         </div>
       </main>
       {showTerms && (
