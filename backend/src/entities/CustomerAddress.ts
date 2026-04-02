@@ -21,14 +21,14 @@ export class CustomerAddress {
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @Column({ nullable: true })
-  label?: string | null;
+  @Column({ type: 'text', nullable: true })
+  label?: string;
 
-  @Column({ name: 'recipient_name', nullable: true })
-  recipientName?: string | null;
+  @Column({ name: 'recipient_name', type: 'text', nullable: true })
+  recipientName?: string;
 
-  @Column({ nullable: true })
-  phone?: string | null;
+  @Column({ type: 'text', nullable: true })
+  phone?: string;
 
   @Column({ type: 'varchar', length: 8 })
   cep!: string;
@@ -36,14 +36,14 @@ export class CustomerAddress {
   @Column()
   street!: string;
 
-  @Column({ nullable: true })
-  number?: string | null;
+  @Column({ type: 'text', nullable: true })
+  number?: string;
 
-  @Column({ nullable: true })
-  complement?: string | null;
+  @Column({ type: 'text', nullable: true })
+  complement?: string;
 
-  @Column({ nullable: true })
-  neighborhood?: string | null;
+  @Column({ type: 'text', nullable: true })
+  neighborhood?: string;
 
   @Column()
   city!: string;
@@ -60,4 +60,3 @@ export class CustomerAddress {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt!: Date;
 }
-

@@ -188,18 +188,18 @@ export class CustomerAccountService {
 
       const entity = repo.create({
         userId,
-        label: input?.label ? String(input.label).trim() : null,
-        recipientName: input?.recipientName ? String(input.recipientName).trim() : null,
-        phone: this.sanitizePhone(input?.phone || null) || null,
+        label: input?.label ? String(input.label).trim() : undefined,
+        recipientName: input?.recipientName ? String(input.recipientName).trim() : undefined,
+        phone: this.sanitizePhone(input?.phone || null) || undefined,
         cep,
         street,
-        number: input?.number ? String(input.number).trim() : null,
-        complement: input?.complement ? String(input.complement).trim() : null,
-        neighborhood: input?.neighborhood ? String(input.neighborhood).trim() : null,
+        number: input?.number ? String(input.number).trim() : undefined,
+        complement: input?.complement ? String(input.complement).trim() : undefined,
+        neighborhood: input?.neighborhood ? String(input.neighborhood).trim() : undefined,
         city,
         state,
         isDefault: shouldBeDefault,
-      });
+      } as Partial<CustomerAddress>);
       const saved = await repo.save(entity);
       return this.mapAddress(saved);
     });
@@ -211,23 +211,23 @@ export class CustomerAccountService {
       const address = await repo.findOne({ where: { id: addressId, userId } });
       if (!address) throw new AppError('GEN-001', 404, { message: 'Endereço não encontrado.' });
 
-      if (input?.label !== undefined) address.label = input.label ? String(input.label).trim() : null;
+      if (input?.label !== undefined) address.label = input.label ? String(input.label).trim() : undefined;
       if (input?.recipientName !== undefined) {
-        address.recipientName = input.recipientName ? String(input.recipientName).trim() : null;
+        address.recipientName = input.recipientName ? String(input.recipientName).trim() : undefined;
       }
-      if (input?.phone !== undefined) address.phone = this.sanitizePhone(input.phone) || null;
+      if (input?.phone !== undefined) address.phone = this.sanitizePhone(input.phone) || undefined;
       if (input?.cep !== undefined) {
         const cep = String(input.cep || '').replace(/\D/g, '').slice(0, 8);
         if (cep.length !== 8) throw new AppError('GEN-002', 400, { message: 'CEP inválido.' });
         address.cep = cep;
       }
       if (input?.street !== undefined) address.street = String(input.street || '').trim();
-      if (input?.number !== undefined) address.number = input.number ? String(input.number).trim() : null;
+      if (input?.number !== undefined) address.number = input.number ? String(input.number).trim() : undefined;
       if (input?.complement !== undefined) {
-        address.complement = input.complement ? String(input.complement).trim() : null;
+        address.complement = input.complement ? String(input.complement).trim() : undefined;
       }
       if (input?.neighborhood !== undefined) {
-        address.neighborhood = input.neighborhood ? String(input.neighborhood).trim() : null;
+        address.neighborhood = input.neighborhood ? String(input.neighborhood).trim() : undefined;
       }
       if (input?.city !== undefined) address.city = String(input.city || '').trim();
       if (input?.state !== undefined) address.state = String(input.state || '').trim().toUpperCase().slice(0, 2);
