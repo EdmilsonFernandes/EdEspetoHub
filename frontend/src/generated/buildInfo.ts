@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.150611.07a0175",
-  "buildId": "0.1.9+20260402.150611.07a0175-20260402.150611-07a0175",
-  "builtAt": "2026-04-02T15:06:11.849Z",
-  "commitHash": "07a0175bd568552dfdcc00e96e09cbfe73653835",
-  "shortHash": "07a0175",
+  "versionInternal": "0.1.9+20260402.150823.4e7f2df",
+  "buildId": "0.1.9+20260402.150823.4e7f2df-20260402.150823-4e7f2df",
+  "builtAt": "2026-04-02T15:08:23.366Z",
+  "commitHash": "4e7f2dfb0c46f1b759689f7a6ca44ea5f72332b0",
+  "shortHash": "4e7f2df",
   "branch": "main",
   "commits": [
+    {
+      "hash": "4e7f2dfb0c46f1b759689f7a6ca44ea5f72332b0",
+      "shortHash": "4e7f2df",
+      "dateIso": "2026-04-02T12:06:57-03:00",
+      "subject": "style(menu): refine sticky search/categories and premium header card"
+    },
     {
       "hash": "07a0175bd568552dfdcc00e96e09cbfe73653835",
       "shortHash": "07a0175",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "7a8d094",
       "dateIso": "2026-04-01T14:59:04-03:00",
       "subject": "chore(shipping): add one-shot setup script from authorization code"
-    },
-    {
-      "hash": "ddde33fb8c27c32d90c3478e2b6b5b402a08c42f",
-      "shortHash": "ddde33f",
-      "dateIso": "2026-04-01T14:42:53-03:00",
-      "subject": "chore(shipping): add one-command token refresh and api deploy helper"
     }
   ]
 } as const;
