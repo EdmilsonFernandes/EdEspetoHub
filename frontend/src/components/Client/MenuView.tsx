@@ -13,6 +13,8 @@ import {
   ShoppingCart,
   ForkKnife,
   SlidersHorizontal,
+  ShareNetwork,
+  HeartStraight,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
@@ -117,6 +119,7 @@ const Header = ({
   const isOperatorUser = normalizedRole === "operator" || normalizedRole === "churrasqueiro";
   const isLogged = Boolean(isAuthenticated || isAdminUser || isOperatorUser);
   const [mobileCollapsedStable, setMobileCollapsedStable] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
   const collapseLockUntilRef = React.useRef(0);
   const collapsedRef = React.useRef(false);
   const lastYRef = React.useRef(0);
@@ -151,6 +154,28 @@ const Header = ({
         .map((part) => part.trim())
         .filter(Boolean)[1] || todayHoursLabel
     : "";
+  const handleShareStore = async () => {
+    if (!storeUrl || typeof window === "undefined") return;
+    try {
+      if (navigator?.share) {
+        await navigator.share({
+          title: branding?.brandName || "Loja",
+          text: `Olha essa loja no Já no Caminho: ${branding?.brandName || ""}`,
+          url: storeUrl,
+        });
+        return;
+      }
+    } catch (_) {
+      return;
+    }
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(storeUrl);
+      }
+    } catch (_) {
+      // no-op
+    }
+  };
 
   useEffect(() => {
     if (!compact) return;
@@ -245,6 +270,24 @@ const Header = ({
             }
           >
             <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/30 to-black/10" />
+            <div className="absolute right-3 top-3 z-20 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleShareStore}
+                className="h-9 w-9 rounded-full border border-white/35 bg-black/25 text-white backdrop-blur-md inline-flex items-center justify-center active:scale-95 transition"
+                aria-label="Compartilhar loja"
+              >
+                <ShareNetwork size={15} weight="bold" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsFavorite((prev) => !prev)}
+                className="h-9 w-9 rounded-full border border-white/35 bg-black/25 text-white backdrop-blur-md inline-flex items-center justify-center active:scale-95 transition"
+                aria-label={isFavorite ? "Remover dos favoritos" : "Favoritar loja"}
+              >
+                <HeartStraight size={15} weight={isFavorite ? "fill" : "regular"} />
+              </button>
+            </div>
             {compact && !mobileCollapsedStable && (
               <div className="sm:hidden absolute inset-x-0 bottom-0 px-4 pb-3">
                 <div className="pr-14">
@@ -440,6 +483,7 @@ export const MenuView = ({
     }>
   >([]);
   const [cartPulse, setCartPulse] = useState(false);
+  const [autoCompactHeader, setAutoCompactHeader] = useState(false);
   const qtyControlIdleTimersRef = React.useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const cartButtonRef = React.useRef<HTMLButtonElement | null>(null);
   const categoryTabsContainerRef = React.useRef<HTMLDivElement | null>(null);
@@ -447,6 +491,7 @@ export const MenuView = ({
   const categorySyncLockRef = React.useRef(false);
   const categorySyncLockTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const canOrder = isOrderingEnabled !== false;
+  const effectiveCompactHeader = compactHeader || autoCompactHeader;
   const catalogPrimaryColor = branding?.primaryColor || "#f59e0b";
   const catalogSecondaryColor = branding?.secondaryColor || branding?.accentColor || "#0f172a";
   const catalogPrimaryText = getContrastTextColor(catalogPrimaryColor);
@@ -824,6 +869,27 @@ export const MenuView = ({
     }
   }, [activeCategoryKey]);
 
+  useEffect(() => {
+    if (!showHeader) {
+      setAutoCompactHeader(false);
+      return;
+    }
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        const y = window.scrollY || document.documentElement.scrollTop || 0;
+        setAutoCompactHeader(y > 16);
+      });
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [showHeader]);
+
   return (
     <div className="bg-slate-50 overflow-x-clip">
 
@@ -838,16 +904,44 @@ export const MenuView = ({
           onLogout={onLogout}
           userRole={userRole}
           isAuthenticated={isAuthenticated}
-          compact={compactHeader}
+          compact={effectiveCompactHeader}
           isOpenNow={isOpenNow}
           todayHoursLabel={todayHoursLabel}
         />
       )}
 
+      <div
+        className={`sticky ${
+          showHeader
+            ? effectiveCompactHeader
+              ? "top-[68px] sm:top-[86px]"
+              : "top-[84px] sm:top-[102px]"
+            : "top-0"
+        } z-40 px-4 pb-2 pt-1 max-w-6xl mx-auto`}
+      >
+        <div className="rounded-2xl border border-slate-200/85 bg-white/90 backdrop-blur-md shadow-sm px-2.5 py-2.5">
+          <div className="relative">
+            <MagnifyingGlass className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              className="w-full rounded-xl border border-transparent bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-700 placeholder:text-[13px] placeholder:font-medium placeholder:text-slate-400 outline-none focus:border-slate-300 focus:ring-2 focus:ring-slate-900/15 transition-all"
+              placeholder="Buscar produtos por nome ou categoria"
+            />
+          </div>
+        </div>
+      </div>
+
       {filteredGrouped.length > 1 && (
         <div
           ref={categoryTabsContainerRef}
-          className={`sticky ${showHeader ? "top-0 sm:top-[92px]" : "top-0"} z-40 px-4 pb-2 pt-1 max-w-6xl mx-auto`}
+          className={`sticky ${
+            showHeader
+              ? effectiveCompactHeader
+                ? "top-[136px] sm:top-[156px]"
+                : "top-[152px] sm:top-[172px]"
+              : "top-[62px]"
+          } z-40 px-4 pb-2 pt-1 max-w-6xl mx-auto`}
         >
           <div className="rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur-md shadow-sm ds-tabs px-2 py-2">
             <div className="relative w-full flex items-center gap-2">
@@ -937,7 +1031,7 @@ export const MenuView = ({
               </div>
             )}
 
-            {!compactHeader && storeAddress && (
+            {!effectiveCompactHeader && storeAddress && (
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
@@ -949,7 +1043,7 @@ export const MenuView = ({
               </div>
             )}
 
-            {!compactHeader && showStoreDetails && storeAddress && (
+            {!effectiveCompactHeader && showStoreDetails && storeAddress && (
               <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
                 <div className="flex flex-col gap-4 sm:grid sm:grid-cols-[1.1fr_0.9fr] sm:items-start">
                   <div className="space-y-3">
@@ -1006,15 +1100,6 @@ export const MenuView = ({
               </div>
             )}
 
-            <div className="relative">
-              <MagnifyingGlass className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                className="w-full rounded-2xl border border-transparent bg-white py-2.5 pl-10 pr-4 text-sm text-slate-700 placeholder:text-[13px] placeholder:font-medium placeholder:text-slate-400 shadow-sm outline-none focus:border-slate-300 focus:ring-2 focus:ring-slate-900/20 transition-all"
-                placeholder="Buscar produtos por nome ou categoria"
-              />
-            </div>
           </div>
         </section>
         <div id="menu-list" className="space-y-10">

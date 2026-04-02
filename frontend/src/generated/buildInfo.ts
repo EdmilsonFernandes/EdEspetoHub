@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.143508.084baa8",
-  "buildId": "0.1.9+20260402.143508.084baa8-20260402.143508-084baa8",
-  "builtAt": "2026-04-02T14:35:08.195Z",
-  "commitHash": "084baa8e9b310857d19ec991d96d942c3cb3e637",
-  "shortHash": "084baa8",
+  "versionInternal": "0.1.9+20260402.144638.7c8e85d",
+  "buildId": "0.1.9+20260402.144638.7c8e85d-20260402.144638-7c8e85d",
+  "builtAt": "2026-04-02T14:46:38.723Z",
+  "commitHash": "7c8e85d072b2504b364eecbf96c30ea3603f5e5b",
+  "shortHash": "7c8e85d",
   "branch": "main",
   "commits": [
+    {
+      "hash": "7c8e85d072b2504b364eecbf96c30ea3603f5e5b",
+      "shortHash": "7c8e85d",
+      "dateIso": "2026-04-02T11:35:52-03:00",
+      "subject": "style(orders): premium visual polish for cards, filters and value hierarchy"
+    },
     {
       "hash": "084baa8e9b310857d19ec991d96d942c3cb3e637",
       "shortHash": "084baa8",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "1d25868",
       "dateIso": "2026-04-01T14:11:30-03:00",
       "subject": "feat(shipping): add pluggable provider architecture with Melhor Envio integration"
-    },
-    {
-      "hash": "f9dc8665153bd561b673c13df67d671235598a09",
-      "shortHash": "f9dc866",
-      "dateIso": "2026-04-01T14:02:19-03:00",
-      "subject": "feat(checkout): add delivery mode switch and postal quote flow"
     }
   ]
 } as const;
