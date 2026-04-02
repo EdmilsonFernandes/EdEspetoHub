@@ -173,11 +173,6 @@ export function AdminLayout({
         )}
         {children}
       </div>
-      <div className="w-full px-3 sm:px-4 lg:px-6 xl:px-8 pb-3">
-        <div className="mx-auto max-w-[1600px]">
-          <PlatformTrustFooter align="right" compact />
-        </div>
-      </div>
       <AdminMobileBottomNav />
       {mobileNavOpen && (
         <div className="lg:hidden fixed inset-0 z-[9999] bg-black/55 backdrop-blur-sm" onClick={() => setMobileNavOpen(false)}>
@@ -285,7 +280,7 @@ export function AdminLayout({
               <SignOut size={16} weight="bold" />
               Sair
             </button>
-            <PlatformTrustFooter className="mt-2" compact />
+            <PlatformTrustFooter className="mt-2" compact mode="minimal" />
           </aside>
         </div>
       )}

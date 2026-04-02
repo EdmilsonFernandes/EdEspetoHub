@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.141537.8222451",
-  "buildId": "0.1.9+20260402.141537.8222451-20260402.141537-8222451",
-  "builtAt": "2026-04-02T14:15:37.986Z",
-  "commitHash": "82224518f728a6575d84f7f375eacd5b7232f2ea",
-  "shortHash": "8222451",
+  "versionInternal": "0.1.9+20260402.141925.7a9e77a",
+  "buildId": "0.1.9+20260402.141925.7a9e77a-20260402.141925-7a9e77a",
+  "builtAt": "2026-04-02T14:19:25.685Z",
+  "commitHash": "7a9e77a02924cbcba0fbaffb38b0c961b4a482c8",
+  "shortHash": "7a9e77a",
   "branch": "main",
   "commits": [
+    {
+      "hash": "7a9e77a02924cbcba0fbaffb38b0c961b4a482c8",
+      "shortHash": "7a9e77a",
+      "dateIso": "2026-04-02T11:16:18-03:00",
+      "subject": "style(create-store): add subtle step transitions and premium button microinteractions"
+    },
     {
       "hash": "82224518f728a6575d84f7f375eacd5b7232f2ea",
       "shortHash": "8222451",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "85456c8",
       "dateIso": "2026-04-01T13:31:02-03:00",
       "subject": "feat(postal): add manual shipment flow with tracking and dispatched status"
-    },
-    {
-      "hash": "64043fb62f776c5db0ecb1670f6d7ef3c6e4fa4c",
-      "shortHash": "64043fb",
-      "dateIso": "2026-04-01T10:36:54-03:00",
-      "subject": "feat(catalog): refine mobile UX, image consistency and category scroll sync"
     }
   ]
 } as const;
