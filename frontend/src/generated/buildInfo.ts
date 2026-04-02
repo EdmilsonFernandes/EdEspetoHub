@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.140140.b8d361a",
-  "buildId": "0.1.9+20260402.140140.b8d361a-20260402.140140-b8d361a",
-  "builtAt": "2026-04-02T14:01:40.982Z",
-  "commitHash": "b8d361ad7f4da314cbc7e3126a3472659291e762",
-  "shortHash": "b8d361a",
+  "versionInternal": "0.1.9+20260402.140612.20b3ca0",
+  "buildId": "0.1.9+20260402.140612.20b3ca0-20260402.140612-20b3ca0",
+  "builtAt": "2026-04-02T14:06:12.038Z",
+  "commitHash": "20b3ca0980ccb6c174a84ccfeb987ad70f62d49c",
+  "shortHash": "20b3ca0",
   "branch": "main",
   "commits": [
+    {
+      "hash": "20b3ca0980ccb6c174a84ccfeb987ad70f62d49c",
+      "shortHash": "20b3ca0",
+      "dateIso": "2026-04-02T11:02:29-03:00",
+      "subject": "feat(create-store): streamline onboarding into 4 guided steps"
+    },
     {
       "hash": "b8d361ad7f4da314cbc7e3126a3472659291e762",
       "shortHash": "b8d361a",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "2d51ac1",
       "dateIso": "2026-03-31T21:50:11-03:00",
       "subject": "feat(catalog-theme): apply store colors to bag and category controls"
-    },
-    {
-      "hash": "37165be00d9201d605fdca765d8c72b63b340d9c",
-      "shortHash": "37165be",
-      "dateIso": "2026-03-31T21:47:15-03:00",
-      "subject": "feat(catalog-ui): animate item flying to bag on add"
     }
   ]
 } as const;

@@ -7,7 +7,7 @@ import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, reso
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { formatPhoneInput } from '../utils/format';
 import { FormSection } from '../components/common/FormSection';
-import { Buildings, CopySimple, GlobeHemisphereWest, RocketLaunch } from '@phosphor-icons/react';
+import { Buildings, CheckCircle, CopySimple, CreditCard, GlobeHemisphereWest, MapPinLine, RocketLaunch, Storefront, UserCircle } from '@phosphor-icons/react';
 
 const BRAZIL_DDDS = [
   '11', '12', '13', '14', '15', '16', '17', '18', '19',
@@ -796,6 +796,13 @@ export function CreateStore() {
     { id: 3, title: 'Loja', done: Boolean(registerForm.storeName && registerForm.segment) },
     { id: 4, title: 'Plano', done: Boolean(termsAccepted && lgpdAccepted) },
   ];
+  const progressPercent = Math.max(0, Math.min(100, (currentStep / steps.length) * 100));
+  const stepMeta: Record<number, { icon: any; hint: string }> = {
+    1: { icon: UserCircle, hint: 'Responsável e acesso' },
+    2: { icon: MapPinLine, hint: 'Local de operação' },
+    3: { icon: Storefront, hint: 'Identidade da loja' },
+    4: { icon: CreditCard, hint: 'Plano e termos' },
+  };
 
   const canAdvanceFromStep = (stepId: number) => {
     if (stepId === 1) {
@@ -908,6 +915,32 @@ export function CreateStore() {
         </p>
       </div>
       <div className="rounded-xl border border-slate-200 bg-white p-3">
+        <p className="text-[11px] font-semibold text-slate-500 mb-2 uppercase tracking-[0.18em]">Checklist do cadastro</p>
+        <div className="space-y-1.5">
+          {steps.map((step) => {
+            const Icon = stepMeta[step.id]?.icon || Buildings;
+            const done = Boolean(step.done);
+            const active = currentStep === step.id;
+            return (
+              <div key={`preview-step-${step.id}`} className="flex items-center justify-between gap-2 text-xs">
+                <span className={`inline-flex items-center gap-2 ${active ? 'text-slate-900 font-semibold' : 'text-slate-600'}`}>
+                  <Icon size={13} weight="duotone" />
+                  {step.title}
+                </span>
+                {done ? (
+                  <span className="inline-flex items-center gap-1 text-emerald-600 font-semibold">
+                    <CheckCircle size={13} weight="fill" />
+                    OK
+                  </span>
+                ) : (
+                  <span className="text-slate-400">Pendente</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="rounded-xl border border-slate-200 bg-white p-3">
         <p className="text-[11px] font-semibold text-slate-500 mb-2">Como ficará sua loja</p>
         <div className="overflow-hidden rounded-xl border border-slate-100 bg-slate-50 shadow-[0_12px_28px_-20px_rgba(15,23,42,0.45)]">
           <div className="relative h-20" style={previewBannerStyle}>
@@ -983,27 +1016,37 @@ export function CreateStore() {
           </div>
 
           <div className="sticky top-[72px] sm:top-[84px] z-20 mb-6 rounded-2xl border border-slate-200 bg-white/95 p-3 sm:p-4 backdrop-blur">
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <p className="text-xs uppercase tracking-[0.22em] font-semibold text-slate-500">Onboarding</p>
-              <span className="text-[11px] text-slate-500 font-semibold">Etapa {currentStep} de 4</span>
-            </div>
-            <div className="flex items-center justify-between w-full relative mb-2">
-              <div className="absolute top-1/2 left-0 w-full h-[2px] bg-slate-100 -z-10 -translate-y-1/2" />
-              {steps.map((step) => (
-                <button
-                  type="button"
-                  key={step.id}
-                  onClick={() => scrollToStep(step.id)}
-                  className="flex flex-col items-center gap-2 bg-white px-2 py-1 transition-all"
-                >
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <p className="text-xs uppercase tracking-[0.22em] font-semibold text-slate-500">Onboarding</p>
+            <span className="text-[11px] text-slate-500 font-semibold">Etapa {currentStep} de 4</span>
+          </div>
+          <div className="mb-3 h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-[linear-gradient(90deg,#0f172a,#334155)] transition-all duration-300"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+          <div className="flex items-center justify-between w-full relative mb-2">
+            <div className="absolute top-1/2 left-0 w-full h-[2px] bg-slate-100 -z-10 -translate-y-1/2" />
+            {steps.map((step) => (
+              <button
+                type="button"
+                key={step.id}
+                onClick={() => scrollToStep(step.id)}
+                className="flex flex-col items-center gap-2 bg-white px-2 py-1 transition-all"
+              >
                   <span
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
+                    className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
                       currentStep === step.id || step.done
                         ? 'bg-slate-900 text-white'
                         : 'bg-slate-100 text-slate-400'
                     }`}
                   >
-                    {step.id}
+                    {step.done ? (
+                      <CheckCircle size={16} weight="fill" />
+                    ) : (
+                      React.createElement(stepMeta[step.id]?.icon || Buildings, { size: 16, weight: 'duotone' })
+                    )}
                   </span>
                   <span
                     className={`text-[11px] uppercase tracking-wider font-bold ${
@@ -1012,6 +1055,7 @@ export function CreateStore() {
                   >
                     {step.title}
                   </span>
+                  <span className="hidden sm:block text-[10px] text-slate-400 -mt-1">{stepMeta[step.id]?.hint || ''}</span>
                 </button>
               ))}
             </div>
