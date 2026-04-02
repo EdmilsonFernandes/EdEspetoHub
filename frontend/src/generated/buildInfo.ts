@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.145217.72c1866",
-  "buildId": "0.1.9+20260402.145217.72c1866-20260402.145217-72c1866",
-  "builtAt": "2026-04-02T14:52:17.006Z",
-  "commitHash": "72c1866ae365e9a80503dbaa531f1e217b79d168",
-  "shortHash": "72c1866",
+  "versionInternal": "0.1.9+20260402.150611.07a0175",
+  "buildId": "0.1.9+20260402.150611.07a0175-20260402.150611-07a0175",
+  "builtAt": "2026-04-02T15:06:11.849Z",
+  "commitHash": "07a0175bd568552dfdcc00e96e09cbfe73653835",
+  "shortHash": "07a0175",
   "branch": "main",
   "commits": [
+    {
+      "hash": "07a0175bd568552dfdcc00e96e09cbfe73653835",
+      "shortHash": "07a0175",
+      "dateIso": "2026-04-02T11:53:11-03:00",
+      "subject": "style(queue): fix action button containment and footer mobile alignment"
+    },
     {
       "hash": "72c1866ae365e9a80503dbaa531f1e217b79d168",
       "shortHash": "72c1866",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "ddde33f",
       "dateIso": "2026-04-01T14:42:53-03:00",
       "subject": "chore(shipping): add one-command token refresh and api deploy helper"
-    },
-    {
-      "hash": "b6131ed6b40ee5761cc6d0bf928c61bb9afd8104",
-      "shortHash": "b6131ed",
-      "dateIso": "2026-04-01T14:40:34-03:00",
-      "subject": "chore(shipping): add scripts to configure Melhor Envio env and test postal quote"
     }
   ]
 } as const;

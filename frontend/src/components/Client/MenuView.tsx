@@ -15,6 +15,7 @@ import {
   SlidersHorizontal,
   ShareNetwork,
   HeartStraight,
+  List,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
@@ -311,7 +312,7 @@ const Header = ({
             )}
           </div>
 
-          <div className={`relative px-4 sm:px-6 pb-4 pt-11 sm:pt-4 ${compact ? "hidden sm:block" : ""}`}>
+          <div className={`relative -mt-7 sm:-mt-10 mx-3 sm:mx-4 rounded-3xl border border-slate-100 bg-white px-4 sm:px-6 pb-4 pt-11 sm:pt-4 shadow-[0_20px_40px_-30px_rgba(15,23,42,0.5)] ${compact ? "hidden sm:block" : ""}`}>
             <div className="absolute -top-10 sm:-top-12 left-1/2 -translate-x-1/2 sm:left-6 sm:translate-x-0 h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden border-4 border-white bg-white shadow-xl flex items-center justify-center">
               {branding?.logoUrl ? (
                 <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" />
@@ -487,6 +488,7 @@ export const MenuView = ({
   const qtyControlIdleTimersRef = React.useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const cartButtonRef = React.useRef<HTMLButtonElement | null>(null);
   const categoryTabsContainerRef = React.useRef<HTMLDivElement | null>(null);
+  const stickySearchContainerRef = React.useRef<HTMLDivElement | null>(null);
   const categoryTabRefs = React.useRef<Record<string, HTMLButtonElement | null>>({});
   const categorySyncLockRef = React.useRef(false);
   const categorySyncLockTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -700,7 +702,8 @@ export const MenuView = ({
 
   const getCategoryScrollOffset = () => {
     const tabsHeight = categoryTabsContainerRef.current?.getBoundingClientRect?.().height || 0;
-    return tabsHeight + 12;
+    const searchHeight = stickySearchContainerRef.current?.getBoundingClientRect?.().height || 0;
+    return tabsHeight + searchHeight + 12;
   };
 
   const scrollToCategory = (key) => {
@@ -911,6 +914,7 @@ export const MenuView = ({
       )}
 
       <div
+        ref={stickySearchContainerRef}
         className={`sticky ${
           showHeader
             ? effectiveCompactHeader
@@ -919,36 +923,26 @@ export const MenuView = ({
             : "top-0"
         } z-40 px-4 pb-2 pt-1 max-w-6xl mx-auto`}
       >
-        <div className="rounded-2xl border border-slate-200/85 bg-white/90 backdrop-blur-md shadow-sm px-2.5 py-2.5">
+        <div className="rounded-2xl border border-slate-200/85 bg-white/95 backdrop-blur-md shadow-sm px-2.5 py-2.5 space-y-2">
           <div className="relative">
             <MagnifyingGlass className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              className="w-full rounded-xl border border-transparent bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-700 placeholder:text-[13px] placeholder:font-medium placeholder:text-slate-400 outline-none focus:border-slate-300 focus:ring-2 focus:ring-slate-900/15 transition-all"
+              className="w-full rounded-xl border border-transparent bg-slate-100 py-2.5 pl-10 pr-4 text-sm text-slate-700 placeholder:text-[13px] placeholder:font-medium placeholder:text-slate-400 outline-none focus:border-slate-300 focus:ring-2 focus:ring-slate-900/15 transition-all"
               placeholder="Buscar produtos por nome ou categoria"
             />
           </div>
-        </div>
-      </div>
-
-      {filteredGrouped.length > 1 && (
-        <div
-          ref={categoryTabsContainerRef}
-          className={`sticky ${
-            showHeader
-              ? effectiveCompactHeader
-                ? "top-[136px] sm:top-[156px]"
-                : "top-[152px] sm:top-[172px]"
-              : "top-[62px]"
-          } z-40 px-4 pb-2 pt-1 max-w-6xl mx-auto`}
-        >
-          <div className="rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur-md shadow-sm ds-tabs px-2 py-2">
-            <div className="relative w-full flex items-center gap-2">
+          {filteredGrouped.length > 1 && (
+            <div
+              ref={categoryTabsContainerRef}
+              className="rounded-xl border border-slate-200/70 bg-white/90 shadow-sm ds-tabs px-2 py-2"
+            >
+              <div className="relative w-full flex items-center">
               <div
                 className={`${
                   filteredGrouped.length > 2
-                    ? "flex-1 overflow-x-auto no-scrollbar scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] snap-x snap-mandatory"
+                    ? "flex-1 overflow-x-auto no-scrollbar scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] snap-x snap-mandatory pr-16"
                     : "flex-1"
                 }`}
               >
@@ -974,7 +968,7 @@ export const MenuView = ({
                         scrollToCategory(category.key);
                       }}
                       className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full transition-all snap-start ${
-                        isActive ? "font-semibold shadow-sm scale-105" : "font-medium"
+                        isActive ? "font-semibold shadow-sm" : "font-medium"
                       } ${filteredGrouped.length <= 2 ? "w-full min-w-0" : ""}`}
                       style={
                         isActive
@@ -999,23 +993,24 @@ export const MenuView = ({
               </div>
               {filteredGrouped.length > 2 && (
                 <>
-                  <div className="pointer-events-none absolute right-14 top-1 bottom-1 w-10 bg-gradient-to-l from-white/95 via-white/75 to-transparent rounded-r-2xl" />
+                  <div className="pointer-events-none absolute right-12 top-1 bottom-1 w-10 bg-gradient-to-l from-white via-white/80 to-transparent rounded-r-2xl" />
                 <button
                   type="button"
                   aria-label="Abrir categorias"
                   onClick={() => setIsCategorySheetOpen(true)}
-                  className="h-9 px-3 rounded-full bg-white shadow-sm inline-flex items-center justify-center gap-1 text-slate-700 border border-slate-200 active:scale-95 transition-all"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8.5 px-2.5 rounded-full bg-white shadow-[0_10px_18px_-16px_rgba(15,23,42,0.65)] inline-flex items-center justify-center gap-1 text-slate-700 border border-slate-200 active:scale-95 transition-all"
                   style={{ color: catalogSecondaryColor }}
                 >
-                  <SquaresFour size={16} weight="duotone" />
+                  <List size={15} weight="bold" />
                   <span className="text-xs font-semibold">Mais</span>
                 </button>
                 </>
               )}
             </div>
-          </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       <div className={`space-y-6 sm:space-y-8 px-3 sm:px-4 py-3 sm:py-4 max-w-6xl mx-auto ${cartItemsCount > 0 ? 'pb-28 sm:pb-8' : ''}`}>
         <section className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
