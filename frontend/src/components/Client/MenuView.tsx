@@ -77,30 +77,6 @@ const getContrastTextColor = (hexColor = "") => {
   return luminance > 0.62 ? "#0f172a" : "#ffffff";
 };
 
-const CatalogQueueSwitch = ({ onOpenQueue }: { onOpenQueue?: () => void }) => {
-  if (!onOpenQueue) return null;
-  return (
-    <div className="relative rounded-full bg-[#F2F2F7] p-1 shadow-[inset_0_1px_1px_rgba(15,23,42,0.06)]">
-      <div className="relative grid grid-cols-2 items-center">
-        <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-1/2 rounded-full bg-white shadow-[0_1px_2px_rgba(15,23,42,0.12)] transition-all duration-250 ease-out" />
-        <button
-          type="button"
-          className="relative z-10 px-4 py-2.5 rounded-full text-sm font-semibold text-slate-900 text-center"
-        >
-          Catálogo
-        </button>
-        <button
-          type="button"
-          onClick={onOpenQueue}
-          className="relative z-10 px-4 py-2.5 rounded-full text-sm font-normal text-slate-500 hover:text-slate-700 text-center transition-colors duration-200"
-        >
-          Pedidos
-        </button>
-      </div>
-    </div>
-  );
-};
-
 const Header = ({
   branding,
   segment,
@@ -380,7 +356,6 @@ const Header = ({
 
             {isLogged && (
               <div className="mt-3 sm:mt-0 sm:absolute sm:right-6 sm:bottom-4 flex flex-row items-center justify-center sm:justify-end gap-2">
-              <CatalogQueueSwitch onOpenQueue={onOpenQueue} />
               {isAdminUser && onOpenAdmin && (
                 <button
                   onClick={onOpenAdmin}
@@ -406,7 +381,6 @@ const Header = ({
           {compact && !mobileCollapsedStable && isLogged && (
             <div className="sm:hidden relative px-3 pb-2">
               <div className="flex flex-row items-center justify-end gap-2">
-                <CatalogQueueSwitch onOpenQueue={onOpenQueue} />
                 {isAdminUser && onOpenAdmin && (
                   <button
                     onClick={onOpenAdmin}

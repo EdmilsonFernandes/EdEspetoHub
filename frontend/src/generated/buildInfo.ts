@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.172455.2d68f7b",
-  "buildId": "0.1.9+20260402.172455.2d68f7b-20260402.172455-2d68f7b",
-  "builtAt": "2026-04-02T17:24:55.819Z",
-  "commitHash": "2d68f7be71609065e5134940c8a7fea2a58e22d4",
-  "shortHash": "2d68f7b",
+  "versionInternal": "0.1.9+20260402.181629.4214612",
+  "buildId": "0.1.9+20260402.181629.4214612-20260402.181629-4214612",
+  "builtAt": "2026-04-02T18:16:29.312Z",
+  "commitHash": "4214612500cc408f8c9117f68de9195d0bf42e23",
+  "shortHash": "4214612",
   "branch": "main",
   "commits": [
+    {
+      "hash": "4214612500cc408f8c9117f68de9195d0bf42e23",
+      "shortHash": "4214612",
+      "dateIso": "2026-04-02T14:25:34-03:00",
+      "subject": "fix(menu): open category drawer via state to avoid DialogTrigger context error"
+    },
     {
       "hash": "2d68f7be71609065e5134940c8a7fea2a58e22d4",
       "shortHash": "2d68f7b",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "052c81a",
       "dateIso": "2026-04-01T16:32:38-03:00",
       "subject": "fix(queue): evita sumico de pedido postal despachado e envia para Em rota"
-    },
-    {
-      "hash": "3029c5100ad598454387148278ceafc6588a481f",
-      "shortHash": "3029c51",
-      "dateIso": "2026-04-01T16:25:41-03:00",
-      "subject": "fix(postal): corrige transicao pronta->despachado e compat de status legado"
     }
   ]
 } as const;

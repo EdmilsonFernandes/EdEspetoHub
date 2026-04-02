@@ -10,6 +10,7 @@ import { mapsService } from '../services/mapsService';
 import { MenuView } from '../components/Client/MenuView';
 import { CartView } from '../components/Client/CartView';
 import { SuccessView } from '../components/Client/SuccessView';
+import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { useToast } from '../contexts/ToastContext';
 import { formatCurrency, formatOrderDisplayId, formatOrderType, formatPaymentMethod } from '../utils/format';
@@ -2013,6 +2014,8 @@ export function StorePage() {
           </div>
         )}
       </main>
+
+      {isStoreAdmin && view === 'menu' && <AdminMobileBottomNav />}
 
       {showPrintPrompt && (
         <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center px-4">
