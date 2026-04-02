@@ -424,10 +424,10 @@ const OrderSummaryCard = ({
         onClick();
       }
     }}
-    className={`relative w-full min-h-[132px] rounded-lg border border-[#E0E0E0] ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-4 text-left flex items-stretch gap-3 transition-all duration-200 hover:border-slate-300 hover:shadow-sm cursor-pointer`}
+    className={`relative w-full min-h-[132px] rounded-2xl border border-slate-200 ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-4 text-left flex items-stretch gap-3 transition-all duration-200 hover:border-slate-300 hover:shadow-[0_10px_24px_-18px_rgba(15,23,42,0.55)] cursor-pointer overflow-hidden`}
   >
     {showSelector && (
-      <div className={`ml-0.5 shrink-0 w-11 rounded-xl border ${selectorToneClass} flex flex-col items-center justify-center gap-2 px-1.5 transition-all duration-200 ${selected ? 'shadow-[0_10px_20px_-16px_rgba(16,185,129,0.95)] ring-1 ring-emerald-200/70 scale-[1.01]' : 'hover:shadow-sm'}`}>
+      <div className={`ml-0.5 shrink-0 w-12 rounded-xl border ${selectorToneClass} flex flex-col items-center justify-center gap-2 px-1.5 transition-all duration-200 ${selected ? 'shadow-[0_10px_20px_-16px_rgba(16,185,129,0.95)] ring-1 ring-emerald-200/70 scale-[1.01]' : 'hover:shadow-sm'}`}>
         <PremiumCheckToggle
           selected={selected}
           disabled={!showQuickFinalize}
@@ -493,7 +493,7 @@ const OrderSummaryCard = ({
         <span className={`text-[11px] font-black uppercase tracking-[0.06em] ${statusToneClass}`}>
           {archived ? 'Finalizado' : statusMeta.label}
         </span>
-        <div className="flex items-center justify-end gap-2">
+        <div className="inline-flex items-center justify-end gap-2 shrink-0 flex-nowrap">
           {canPrint && (
             <button
               type="button"
@@ -502,7 +502,7 @@ const OrderSummaryCard = ({
                 onPrint();
               }}
               disabled={printBusy}
-              className="inline-flex h-10 w-10 sm:h-9 sm:w-auto sm:px-3 items-center justify-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 text-amber-700 shadow-sm hover:bg-amber-100 hover:text-amber-900 transition-all no-print disabled:opacity-60 disabled:hover:bg-amber-50 shrink-0"
+              className="inline-flex h-10 w-10 sm:h-9 sm:w-auto sm:px-3 items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-700 shadow-sm hover:bg-amber-100 hover:text-amber-900 transition-all no-print disabled:opacity-60 disabled:hover:bg-amber-50 shrink-0"
               aria-label={`Imprimir pedido ${orderDisplayId}`}
               title="Imprimir pedido"
             >
@@ -519,7 +519,7 @@ const OrderSummaryCard = ({
               event.stopPropagation();
               onQuickStart();
             }}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 text-white shadow-[0_14px_24px_-14px_rgba(249,115,22,0.92)] ring-2 ring-orange-100 hover:bg-orange-600 hover:scale-105 transition-all"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-orange-500 text-white shadow-[0_14px_24px_-14px_rgba(249,115,22,0.92)] ring-2 ring-orange-100 hover:bg-orange-600 hover:scale-105 transition-all"
             aria-label={`Iniciar atendimento do pedido ${orderDisplayId}`}
             title="Iniciar atendimento"
           >
@@ -533,7 +533,7 @@ const OrderSummaryCard = ({
               event.stopPropagation();
               onQuickFinalize();
             }}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-emerald-700 text-white shadow-[0_14px_24px_-14px_rgba(4,120,87,0.95)] ring-2 ring-emerald-100 hover:bg-emerald-800 hover:scale-105 transition-all"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-700 text-white shadow-[0_14px_24px_-14px_rgba(4,120,87,0.95)] ring-2 ring-emerald-100 hover:bg-emerald-800 hover:scale-105 transition-all"
             aria-label={`Finalizar agora o pedido ${orderDisplayId}`}
             title="Finalizar agora"
           >

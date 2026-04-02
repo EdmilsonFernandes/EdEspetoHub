@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.144638.7c8e85d",
-  "buildId": "0.1.9+20260402.144638.7c8e85d-20260402.144638-7c8e85d",
-  "builtAt": "2026-04-02T14:46:38.723Z",
-  "commitHash": "7c8e85d072b2504b364eecbf96c30ea3603f5e5b",
-  "shortHash": "7c8e85d",
+  "versionInternal": "0.1.9+20260402.145217.72c1866",
+  "buildId": "0.1.9+20260402.145217.72c1866-20260402.145217-72c1866",
+  "builtAt": "2026-04-02T14:52:17.006Z",
+  "commitHash": "72c1866ae365e9a80503dbaa531f1e217b79d168",
+  "shortHash": "72c1866",
   "branch": "main",
   "commits": [
+    {
+      "hash": "72c1866ae365e9a80503dbaa531f1e217b79d168",
+      "shortHash": "72c1866",
+      "dateIso": "2026-04-02T11:47:25-03:00",
+      "subject": "feat(menu): sticky search/categories and premium header actions"
+    },
     {
       "hash": "7c8e85d072b2504b364eecbf96c30ea3603f5e5b",
       "shortHash": "7c8e85d",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "b6131ed",
       "dateIso": "2026-04-01T14:40:34-03:00",
       "subject": "chore(shipping): add scripts to configure Melhor Envio env and test postal quote"
-    },
-    {
-      "hash": "1d258683c98eda22129880e11fc4ecc7fe12820b",
-      "shortHash": "1d25868",
-      "dateIso": "2026-04-01T14:11:30-03:00",
-      "subject": "feat(shipping): add pluggable provider architecture with Melhor Envio integration"
     }
   ]
 } as const;

@@ -30,6 +30,8 @@ export function PlatformTrustFooter({
   const minimalMuted = tone === 'dark' ? 'text-slate-500/75' : 'text-slate-400';
   const minimalBorder = tone === 'dark' ? 'border-slate-700/50' : 'border-slate-200';
   const minimalBrand = tone === 'dark' ? 'text-slate-300/90' : 'text-slate-700/90';
+  const isLeft = align === 'left';
+  const isRight = align === 'right';
 
   if (mode === 'minimal') {
     return (
@@ -39,15 +41,23 @@ export function PlatformTrustFooter({
             href={href}
             target="_blank"
             rel="noreferrer"
-            className={`group w-full max-w-full border-t px-1 py-3 ${minimalBorder} ${minimalText}`}
+            className={`group w-full max-w-full border-t px-2 py-4 ${minimalBorder} ${minimalText}`}
             aria-label="Plataforma Já no Caminho"
           >
-            <div className="flex w-full items-center justify-between gap-2">
-              <div className="min-w-0">
+            <div
+              className={`flex w-full gap-2 ${
+                isLeft
+                  ? 'items-center justify-between text-left'
+                  : isRight
+                  ? 'items-center justify-end text-right'
+                  : 'flex-col items-center justify-center text-center sm:flex-row sm:items-center sm:justify-between sm:text-left'
+              }`}
+            >
+              <div className={`min-w-0 ${isLeft ? '' : isRight ? 'order-2' : ''}`}>
                 <p className={`${compact ? 'text-[9px]' : 'text-[10px]'} font-medium uppercase tracking-[0.15em] ${minimalText}`}>
                   desenvolvido por
                 </p>
-                <div className="mt-0.5 inline-flex items-center gap-1.5">
+                <div className={`mt-0.5 inline-flex items-center gap-1.5 ${isLeft ? '' : isRight ? 'justify-end w-full' : 'justify-center sm:justify-start w-full'}`}>
                   <span className="h-5 w-5 overflow-hidden rounded-md border border-slate-300/60 bg-white transition-all grayscale opacity-65 group-hover:grayscale-0 group-hover:opacity-100">
                     <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
                   </span>
@@ -56,7 +66,7 @@ export function PlatformTrustFooter({
                   </span>
                 </div>
               </div>
-              <div className="flex shrink-0 items-center gap-1.5">
+              <div className={`flex shrink-0 items-center gap-1.5 ${isLeft ? '' : isRight ? 'order-1' : ''}`}>
                 <ShieldCheck size={12} weight="bold" className="text-emerald-600/50" />
                 <span className={`text-[8px] ${minimalMuted}`}>
                   <AppVersionBadge />
