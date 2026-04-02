@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.170921.141300e",
-  "buildId": "0.1.9+20260402.170921.141300e-20260402.170921-141300e",
-  "builtAt": "2026-04-02T17:09:21.618Z",
-  "commitHash": "141300ee0d090dea999c2c7591055f4aab539ac4",
-  "shortHash": "141300e",
+  "versionInternal": "0.1.9+20260402.171140.ac6ece3",
+  "buildId": "0.1.9+20260402.171140.ac6ece3-20260402.171140-ac6ece3",
+  "builtAt": "2026-04-02T17:11:40.933Z",
+  "commitHash": "ac6ece3fce5874ede84daa9c6f3c81f8001a24e7",
+  "shortHash": "ac6ece3",
   "branch": "main",
   "commits": [
+    {
+      "hash": "ac6ece3fce5874ede84daa9c6f3c81f8001a24e7",
+      "shortHash": "ac6ece3",
+      "dateIso": "2026-04-02T14:10:34-03:00",
+      "subject": "feat(menu): replace category sheet with Vaul bottom drawer"
+    },
     {
       "hash": "141300ee0d090dea999c2c7591055f4aab539ac4",
       "shortHash": "141300e",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "a1acc3e",
       "dateIso": "2026-04-01T16:01:36-03:00",
       "subject": "style(queue): refine selector rail grouping and status tint for cleaner premium cards"
-    },
-    {
-      "hash": "0f79b4bf9e51332246daed898d43357d74ef19d2",
-      "shortHash": "0f79b4b",
-      "dateIso": "2026-04-01T15:47:58-03:00",
-      "subject": "style(queue): add subtle selection rail micro-animation for premium feedback"
     }
   ]
 } as const;
