@@ -18,7 +18,7 @@ import { formatCurrency } from "../../utils/format";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { ProductModal } from "../Cart/ProductModal";
 import { GoogleMapView } from "../GoogleMapView";
-import { AppVersionBadge } from "../common/AppVersionBadge";
+import { PlatformTrustFooter } from "../common/PlatformTrustFooter";
 
 // =======================================
 // HEADER PREMIUM COM LOGO OFICIAL
@@ -1445,21 +1445,8 @@ export const MenuView = ({
             Nenhum item encontrado.
           </div>
         )}
-        <div className="pt-1 pb-2 text-center">
-          <a
-            href="https://www.janocaminho.com.br"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 hover:text-slate-700 hover:border-slate-300 transition"
-          >
-            <span className="h-4 w-4 rounded-full overflow-hidden border border-slate-200">
-              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
-            </span>
-            Desenvolvido por Já no Caminho
-            <span className="normal-case tracking-normal text-[10px]">
-              <AppVersionBadge prefix=" | " />
-            </span>
-          </a>
+        <div className="pt-1 pb-2">
+          <PlatformTrustFooter />
         </div>
         </div>
       </div>

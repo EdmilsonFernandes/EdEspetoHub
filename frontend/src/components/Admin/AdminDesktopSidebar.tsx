@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { CaretDown, SignOut } from '@phosphor-icons/react';
-import { AppVersionBadge } from '../common/AppVersionBadge';
+import { PlatformTrustFooter } from '../common/PlatformTrustFooter';
 
 interface SidebarItem {
   id: string;
@@ -223,10 +223,7 @@ export function AdminDesktopSidebar({
             )}
           </button>
           {!compact && (
-            <div className="mt-2 px-2 text-[10px] text-slate-400/90">
-              Desenvolvido por Já no Caminho
-              <AppVersionBadge prefix=" | " />
-            </div>
+            <PlatformTrustFooter className="mt-2 px-2" tone="dark" compact align="left" />
           )}
         </div>
       </div>

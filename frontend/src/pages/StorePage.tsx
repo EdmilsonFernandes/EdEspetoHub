@@ -10,6 +10,7 @@ import { mapsService } from '../services/mapsService';
 import { MenuView } from '../components/Client/MenuView';
 import { CartView } from '../components/Client/CartView';
 import { SuccessView } from '../components/Client/SuccessView';
+import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { useToast } from '../contexts/ToastContext';
 import { formatCurrency, formatOrderDisplayId, formatOrderType, formatPaymentMethod } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
@@ -1843,19 +1844,7 @@ export function StorePage() {
                     </div>
                   )}
 
-                  <div className="text-xs text-slate-400 text-center">
-                    <a
-                      href="https://www.janocaminho.com.br"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 font-semibold text-slate-500 hover:text-slate-700 underline-offset-2 hover:underline"
-                    >
-                      <span className="h-4 w-4 rounded-full overflow-hidden border border-slate-200">
-                        <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
-                      </span>
-                      Desenvolvido por Já no Caminho
-                    </a>
-                  </div>
+                  <PlatformTrustFooter className="pt-1" />
                 </div>
               </div>
             </div>

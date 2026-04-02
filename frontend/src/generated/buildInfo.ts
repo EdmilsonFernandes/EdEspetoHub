@@ -5,13 +5,127 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260401.183213.7a8d094",
-  "buildId": "0.1.9+20260401.183213.7a8d094-20260401.183213-7a8d094",
-  "builtAt": "2026-04-01T18:32:13.584Z",
-  "commitHash": "7a8d094830017bf52fe59ea45168004dd6ad0b82",
-  "shortHash": "7a8d094",
+  "versionInternal": "0.1.9+20260402.134233.18c1027",
+  "buildId": "0.1.9+20260402.134233.18c1027-20260402.134233-18c1027",
+  "builtAt": "2026-04-02T13:42:33.355Z",
+  "commitHash": "18c102701580721fda1e3492c5043cae6230dee5",
+  "shortHash": "18c1027",
   "branch": "main",
   "commits": [
+    {
+      "hash": "18c102701580721fda1e3492c5043cae6230dee5",
+      "shortHash": "18c1027",
+      "dateIso": "2026-04-02T10:33:06-03:00",
+      "subject": "fix(categories): preserve manual order when saving products"
+    },
+    {
+      "hash": "d01f18e5967f86b872baf39f83ec6b3e26c113fe",
+      "shortHash": "d01f18e",
+      "dateIso": "2026-04-01T18:49:03-03:00",
+      "subject": "feat(postal): persiste servico e prazo no checkout para tracking"
+    },
+    {
+      "hash": "be6dd3cc65c5dd84f9e7b465e63de81364ecf599",
+      "shortHash": "be6dd3c",
+      "dateIso": "2026-04-01T18:41:38-03:00",
+      "subject": "fix(postal-tracking): usa prazo em dias e previsao de entrega no detalhe"
+    },
+    {
+      "hash": "92c4c53deb30a229e5f362e001d42fbb081b62f2",
+      "shortHash": "92c4c53",
+      "dateIso": "2026-04-01T18:29:57-03:00",
+      "subject": "fix(postal): salva/exibe rastreio e mantém fila geral ao postar"
+    },
+    {
+      "hash": "ca3c3a1d37a4b67ef3a3b375675fd4121ef2ecef",
+      "shortHash": "ca3c3a1",
+      "dateIso": "2026-04-01T18:23:56-03:00",
+      "subject": "fix(queue): corrige badge do rodape e restaura rail de icones/checkbox"
+    },
+    {
+      "hash": "7d0f1f0972378cd36e1425852737fc4c96a1ca7b",
+      "shortHash": "7d0f1f0",
+      "dateIso": "2026-04-01T18:15:54-03:00",
+      "subject": "feat(postal): adiciona rastreio na fila e envia postado para Em rota"
+    },
+    {
+      "hash": "9e924060ae361bdf19d6c23ec8a3f8a008cd3882",
+      "shortHash": "9e92406",
+      "dateIso": "2026-04-01T18:03:30-03:00",
+      "subject": "fix(postal): restaura finalizar em despachado e evita GEN-001 na finalizacao"
+    },
+    {
+      "hash": "e1a72672802bf7d0e11b5c853d57747b631d38a1",
+      "shortHash": "e1a7267",
+      "dateIso": "2026-04-01T17:39:58-03:00",
+      "subject": "fix(postal): mantém despachado em Pedidos e corrige tela branca no acompanhamento"
+    },
+    {
+      "hash": "a308f48aed5279c483fd82cf4c83a3b26df03074",
+      "shortHash": "a308f48",
+      "dateIso": "2026-04-01T16:53:10-03:00",
+      "subject": "fix(pwa): aumenta limite de precache do workbox para builds >2MB"
+    },
+    {
+      "hash": "538b5399a3931fed8050df7b695c1fb1f2887077",
+      "shortHash": "538b539",
+      "dateIso": "2026-04-01T16:37:46-03:00",
+      "subject": "feat(postal): unifica status visual no tracking do cliente e aba Em rota"
+    },
+    {
+      "hash": "052c81ad53cc15ad0383862447eb56025259066e",
+      "shortHash": "052c81a",
+      "dateIso": "2026-04-01T16:32:38-03:00",
+      "subject": "fix(queue): evita sumico de pedido postal despachado e envia para Em rota"
+    },
+    {
+      "hash": "3029c5100ad598454387148278ceafc6588a481f",
+      "shortHash": "3029c51",
+      "dateIso": "2026-04-01T16:25:41-03:00",
+      "subject": "fix(postal): corrige transicao pronta->despachado e compat de status legado"
+    },
+    {
+      "hash": "4fe4c35b612a5c01d64c609a62004f2cde85a9c9",
+      "shortHash": "4fe4c35",
+      "dateIso": "2026-04-01T16:18:40-03:00",
+      "subject": "fix(queue): corrige transicoes de status para pedidos postais"
+    },
+    {
+      "hash": "a1acc3e195233a0815eea491646463f58359a73a",
+      "shortHash": "a1acc3e",
+      "dateIso": "2026-04-01T16:01:36-03:00",
+      "subject": "style(queue): refine selector rail grouping and status tint for cleaner premium cards"
+    },
+    {
+      "hash": "0f79b4bf9e51332246daed898d43357d74ef19d2",
+      "shortHash": "0f79b4b",
+      "dateIso": "2026-04-01T15:47:58-03:00",
+      "subject": "style(queue): add subtle selection rail micro-animation for premium feedback"
+    },
+    {
+      "hash": "4c4614b4953ca19159a68056f260376afc871ef1",
+      "shortHash": "4c4614b",
+      "dateIso": "2026-04-01T15:46:14-03:00",
+      "subject": "feat(queue): redesign selection rail on order cards for premium mobile/web look"
+    },
+    {
+      "hash": "852e157ecf555a4dfe943044da9fe0d49d9198e0",
+      "shortHash": "852e157",
+      "dateIso": "2026-04-01T15:42:55-03:00",
+      "subject": "Ed"
+    },
+    {
+      "hash": "b53eb9d0beb9737a3b4adf02b6f84ceb81ba1b19",
+      "shortHash": "b53eb9d",
+      "dateIso": "2026-04-01T15:37:49-03:00",
+      "subject": "fix(order): accept delivery-status aliases in postal flow transitions"
+    },
+    {
+      "hash": "81a8b102b358d1d021d7fadf9558944362138984",
+      "shortHash": "81a8b10",
+      "dateIso": "2026-04-01T15:33:18-03:00",
+      "subject": "feat(checkout): polish postal shipping UI with premium service cards and loading states"
+    },
     {
       "hash": "7a8d094830017bf52fe59ea45168004dd6ad0b82",
       "shortHash": "7a8d094",
@@ -77,120 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "b92adc8",
       "dateIso": "2026-03-31T21:43:18-03:00",
       "subject": "feat(catalog-theme): apply store primary/secondary colors to qty controls"
-    },
-    {
-      "hash": "95ae4fe4de63cfe601c2cfd022894ab2d10b6f66",
-      "shortHash": "95ae4fe",
-      "dateIso": "2026-03-31T21:36:52-03:00",
-      "subject": "feat(catalog-ui): add dynamic floating qty control over product image"
-    },
-    {
-      "hash": "95c939caef27ea0329163b3c4b6a5d557b63ee53",
-      "shortHash": "95c939c",
-      "dateIso": "2026-03-31T21:24:10-03:00",
-      "subject": "refactor(catalog-ui): move add action to floating plus on product image"
-    },
-    {
-      "hash": "2aed2319beadbc670dad0fcc77ef03a07823d659",
-      "shortHash": "2aed231",
-      "dateIso": "2026-03-31T21:15:20-03:00",
-      "subject": "refactor(catalog-ui): premiumiza card de item no estilo iFood/99"
-    },
-    {
-      "hash": "2da2718d60b00c23051c9ce56bd9b000161e6162",
-      "shortHash": "2da2718",
-      "dateIso": "2026-03-30T16:18:44-03:00",
-      "subject": "fix(orders-mobile): prevent totals overlap in order history cards"
-    },
-    {
-      "hash": "4234d4479af8a079363532140bc7be3bf961e4cb",
-      "shortHash": "4234d44",
-      "dateIso": "2026-03-30T12:40:16-03:00",
-      "subject": "docs(notes): atualiza contexto operacional e entregas recentes"
-    },
-    {
-      "hash": "b6ae0a31006f6b17584eef1a47c6e1c2b2f1b204",
-      "shortHash": "b6ae0a3",
-      "dateIso": "2026-03-30T12:39:04-03:00",
-      "subject": "feat(inventory): show current and projected stock in adjust modal"
-    },
-    {
-      "hash": "bb038ddab1ffa70dd37ba2eb68fb62aed517219b",
-      "shortHash": "bb038dd",
-      "dateIso": "2026-03-30T12:34:04-03:00",
-      "subject": "fix(store): refresh local stock state after checkout without page reload"
-    },
-    {
-      "hash": "f3cd21af7ee127f1e4f0c8c55c00e7a113561532",
-      "shortHash": "f3cd21a",
-      "dateIso": "2026-03-30T12:26:23-03:00",
-      "subject": "feat(ui): add sidebar version badge and stock-limit feedback"
-    },
-    {
-      "hash": "1af4a3b2ef7f392d5e44d5ac61ffbd5f5daef67f",
-      "shortHash": "1af4a3b",
-      "dateIso": "2026-03-30T12:11:36-03:00",
-      "subject": "refactor(admin-nav): polish sidebar and mobile drawer visual hierarchy"
-    },
-    {
-      "hash": "ee90ef014d2a52feb3469872ae56d914d38e428e",
-      "shortHash": "ee90ef0",
-      "dateIso": "2026-03-30T11:59:34-03:00",
-      "subject": "feat: reorganizar navegação em grupos com submenus no desktop e mobile"
-    },
-    {
-      "hash": "7bd69513d0659313803368bfb678efc06052ca4f",
-      "shortHash": "7bd6951",
-      "dateIso": "2026-03-30T11:53:54-03:00",
-      "subject": "feat: melhorar usabilidade da movimentação com filtros e atalho por produto"
-    },
-    {
-      "hash": "70d282d23d9f1c0a463983b1608367962c8754aa",
-      "shortHash": "70d282d",
-      "dateIso": "2026-03-30T11:47:51-03:00",
-      "subject": "feat: melhorar card de movimentação com link de pedido e origem amigável"
-    },
-    {
-      "hash": "fa04eb2f9ae468952593e1bdcb0506ea2997a36e",
-      "shortHash": "fa04eb2",
-      "dateIso": "2026-03-30T11:42:10-03:00",
-      "subject": "hotfix: impedir abort de transação por falha no log de movimentação"
-    },
-    {
-      "hash": "d40d1d19d5587dceca4610e69b1d9688dab6cd71",
-      "shortHash": "d40d1d1",
-      "dateIso": "2026-03-30T11:36:31-03:00",
-      "subject": "refactor: simplificar info de movimentação para pedido, cliente e origem"
-    },
-    {
-      "hash": "8df243b30924dcc53d0de9d1117e782e54a7e636",
-      "shortHash": "8df243b",
-      "dateIso": "2026-03-30T11:27:58-03:00",
-      "subject": "feat: permitir ativar controle e editar alerta no ajuste de estoque"
-    },
-    {
-      "hash": "12a5cab9ad95966fea778097ebd58ba04dd55920",
-      "shortHash": "12a5cab",
-      "dateIso": "2026-03-30T11:25:54-03:00",
-      "subject": "feat: adicionar link de movimentação para pedido filtrado"
-    },
-    {
-      "hash": "8244506adc1a5a47d6698a83f56018918ee56079",
-      "shortHash": "8244506",
-      "dateIso": "2026-03-30T11:24:03-03:00",
-      "subject": "feat: exibir pedido/origem em movimentações e enriquecer rastreio de estoque"
-    },
-    {
-      "hash": "a5f0620e6fe9e83b062eaf54007f2e0424de2e8c",
-      "shortHash": "a5f0620",
-      "dateIso": "2026-03-30T11:20:35-03:00",
-      "subject": "feat: adicionar origem e ajuda visual nas movimentações de estoque"
-    },
-    {
-      "hash": "e6069b93541ec585f43be73e0cc03f78d7017a19",
-      "shortHash": "e6069b9",
-      "dateIso": "2026-03-30T11:08:21-03:00",
-      "subject": "fix: tornar ajuste de estoque e movimentação atômicos na mesma transação"
     }
   ]
 } as const;

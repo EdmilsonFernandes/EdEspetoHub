@@ -6,7 +6,7 @@ import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { CaretDown, ChartBar, CheckSquare, ClipboardText, CreditCard, Gear, Package, ShoppingCart, SignOut, Scooter, Star, X, UsersThree } from '@phosphor-icons/react';
-import { AppVersionBadge } from '../components/common/AppVersionBadge';
+import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -174,8 +174,8 @@ export function AdminLayout({
         {children}
       </div>
       <div className="w-full px-3 sm:px-4 lg:px-6 xl:px-8 pb-3">
-        <div className="mx-auto max-w-[1600px] text-center lg:text-right text-[11px] text-slate-500">
-          Desenvolvido por Já no Caminho <AppVersionBadge prefix=" | " />
+        <div className="mx-auto max-w-[1600px]">
+          <PlatformTrustFooter align="right" compact />
         </div>
       </div>
       <AdminMobileBottomNav />
@@ -285,9 +285,7 @@ export function AdminLayout({
               <SignOut size={16} weight="bold" />
               Sair
             </button>
-            <div className="mt-2 text-center text-[10px] text-slate-500">
-              Desenvolvido por Já no Caminho <AppVersionBadge prefix=" | " />
-            </div>
+            <PlatformTrustFooter className="mt-2" compact />
           </aside>
         </div>
       )}
