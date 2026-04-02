@@ -831,6 +831,10 @@ export const MenuView = ({
       if (categorySyncLockRef.current) return;
       const offset = getCategoryScrollOffset();
       let nextActive = filteredGrouped[0].key;
+      const lastCategoryKey = filteredGrouped[filteredGrouped.length - 1]?.key;
+      const viewportBottom = window.scrollY + window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight || 0;
+      const nearPageBottom = documentHeight > 0 && documentHeight - viewportBottom <= 80;
 
       for (const category of filteredGrouped) {
         const node = categoryRefs.current[category.key];
@@ -841,6 +845,11 @@ export const MenuView = ({
           continue;
         }
         break;
+      }
+
+      // Guarantees the last category becomes active when user reaches the page end.
+      if (nearPageBottom && lastCategoryKey) {
+        nextActive = lastCategoryKey;
       }
 
       setActiveCategoryKey((prev) => (prev === nextActive ? prev : nextActive));
@@ -1538,10 +1547,16 @@ export const MenuView = ({
                     </div>
                     <span
                       className={`relative h-6 w-6 shrink-0 rounded-full border-2 ${
-                        isActive ? "border-zinc-900" : "border-zinc-200"
+                        isActive ? "" : "border-zinc-200"
                       }`}
+                      style={isActive ? { borderColor: catalogPrimaryColor } : undefined}
                     >
-                      {isActive && <span className="absolute inset-1 rounded-full bg-zinc-900" />}
+                      {isActive && (
+                        <span
+                          className="absolute inset-1 rounded-full"
+                          style={{ backgroundColor: catalogPrimaryColor }}
+                        />
+                      )}
                     </span>
                   </button>
                 );

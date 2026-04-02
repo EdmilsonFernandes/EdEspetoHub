@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.171140.ac6ece3",
-  "buildId": "0.1.9+20260402.171140.ac6ece3-20260402.171140-ac6ece3",
-  "builtAt": "2026-04-02T17:11:40.933Z",
-  "commitHash": "ac6ece3fce5874ede84daa9c6f3c81f8001a24e7",
-  "shortHash": "ac6ece3",
+  "versionInternal": "0.1.9+20260402.171427.3bf07e4",
+  "buildId": "0.1.9+20260402.171427.3bf07e4-20260402.171427-3bf07e4",
+  "builtAt": "2026-04-02T17:14:27.119Z",
+  "commitHash": "3bf07e4f50ed190018a0b6256468251f51b60ad4",
+  "shortHash": "3bf07e4",
   "branch": "main",
   "commits": [
+    {
+      "hash": "3bf07e4f50ed190018a0b6256468251f51b60ad4",
+      "shortHash": "3bf07e4",
+      "dateIso": "2026-04-02T14:12:45-03:00",
+      "subject": "style(menu): add Vaul snap points for native category drawer feel"
+    },
     {
       "hash": "ac6ece3fce5874ede84daa9c6f3c81f8001a24e7",
       "shortHash": "ac6ece3",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "4fe4c35",
       "dateIso": "2026-04-01T16:18:40-03:00",
       "subject": "fix(queue): corrige transicoes de status para pedidos postais"
-    },
-    {
-      "hash": "a1acc3e195233a0815eea491646463f58359a73a",
-      "shortHash": "a1acc3e",
-      "dateIso": "2026-04-01T16:01:36-03:00",
-      "subject": "style(queue): refine selector rail grouping and status tint for cleaner premium cards"
     }
   ]
 } as const;
