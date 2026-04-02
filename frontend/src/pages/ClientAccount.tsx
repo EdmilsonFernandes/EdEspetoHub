@@ -12,6 +12,9 @@ export function ClientAccount() {
   const [me, setMe] = useState<any | null>(null);
   const [addresses, setAddresses] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
+  const [pwdForm, setPwdForm] = useState({ currentPassword: '', newPassword: '' });
+  const [pwdLoading, setPwdLoading] = useState(false);
+  const [pwdMessage, setPwdMessage] = useState('');
 
   useEffect(() => {
     document.title = 'Minha Conta | Já no Caminho';
@@ -53,6 +56,24 @@ export function ClientAccount() {
   const logout = () => {
     localStorage.removeItem('customerSession');
     navigate('/cliente', { replace: true });
+  };
+
+  const handleChangePassword = async () => {
+    if (pwdLoading) return;
+    setPwdLoading(true);
+    setPwdMessage('');
+    try {
+      await customerAccountService.changePassword({
+        currentPassword: String(pwdForm.currentPassword || ''),
+        newPassword: String(pwdForm.newPassword || ''),
+      });
+      setPwdForm({ currentPassword: '', newPassword: '' });
+      setPwdMessage('Senha alterada com sucesso.');
+    } catch (e: any) {
+      setPwdMessage(e?.message || 'Não foi possível alterar a senha.');
+    } finally {
+      setPwdLoading(false);
+    }
   };
 
   return (
@@ -111,6 +132,37 @@ export function ClientAccount() {
         </section>
 
         <section className="rounded-2xl border border-slate-200 bg-white p-4">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 font-black">Segurança</p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            <input
+              type="password"
+              value={pwdForm.currentPassword}
+              onChange={(e) => setPwdForm((p) => ({ ...p, currentPassword: e.target.value }))}
+              placeholder="Senha atual"
+              className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+            />
+            <input
+              type="password"
+              value={pwdForm.newPassword}
+              onChange={(e) => setPwdForm((p) => ({ ...p, newPassword: e.target.value }))}
+              placeholder="Nova senha"
+              className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+            />
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleChangePassword}
+              disabled={pwdLoading}
+              className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-bold text-white disabled:opacity-60"
+            >
+              {pwdLoading ? 'Alterando...' : 'Trocar senha'}
+            </button>
+            {pwdMessage ? <p className="text-xs text-slate-600">{pwdMessage}</p> : null}
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-4">
           <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 font-black">Meus pedidos</p>
           {orders.length === 0 ? (
             <p className="text-sm text-slate-500 mt-2">Sem pedidos vinculados.</p>
@@ -156,4 +208,3 @@ export function ClientAccount() {
     </main>
   );
 }
-

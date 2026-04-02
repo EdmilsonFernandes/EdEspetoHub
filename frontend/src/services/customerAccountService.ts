@@ -21,6 +21,10 @@ export const customerAccountService = {
     return apiClient.post('/customer/me/change-password', payload);
   },
 
+  forgotPassword(email: string) {
+    return apiClient.post('/auth/forgot-password', { email });
+  },
+
   listOrders() {
     return apiClient.get('/customer/orders');
   },
@@ -45,4 +49,3 @@ export const customerAccountService = {
     return apiClient.delete(`/customer/addresses/${addressId}`);
   },
 };
-

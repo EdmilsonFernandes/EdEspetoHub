@@ -5,13 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.201644.12e7293",
-  "buildId": "0.1.9+20260402.201644.12e7293-20260402.201644-12e7293",
-  "builtAt": "2026-04-02T20:16:44.859Z",
-  "commitHash": "12e7293e83c92bc29d96b0cebafc44d9b929795f",
-  "shortHash": "12e7293",
+  "versionInternal": "0.1.9+20260402.203356.6aeb3a3",
+  "buildId": "0.1.9+20260402.203356.6aeb3a3-20260402.203356-6aeb3a3",
+  "builtAt": "2026-04-02T20:33:56.611Z",
+  "commitHash": "6aeb3a3f9f1835c6255e8f7aa3def5af1e73e4e4",
+  "shortHash": "6aeb3a3",
   "branch": "main",
   "commits": [
+    {
+      "hash": "6aeb3a3f9f1835c6255e8f7aa3def5af1e73e4e4",
+      "shortHash": "6aeb3a3",
+      "dateIso": "2026-04-02T17:24:19-03:00",
+      "subject": "fix(api): explicit postgres text types for customer address nullable fields"
+    },
+    {
+      "hash": "858dd942a9caea73148a5ad8c19a1723410b61a6",
+      "shortHash": "858dd94",
+      "dateIso": "2026-04-02T17:17:55-03:00",
+      "subject": "feat(customer): add customer account auth, addresses, orders and dedicated routes"
+    },
     {
       "hash": "12e7293e83c92bc29d96b0cebafc44d9b929795f",
       "shortHash": "12e7293",
@@ -179,18 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "e1a7267",
       "dateIso": "2026-04-01T17:39:58-03:00",
       "subject": "fix(postal): mantém despachado em Pedidos e corrige tela branca no acompanhamento"
-    },
-    {
-      "hash": "a308f48aed5279c483fd82cf4c83a3b26df03074",
-      "shortHash": "a308f48",
-      "dateIso": "2026-04-01T16:53:10-03:00",
-      "subject": "fix(pwa): aumenta limite de precache do workbox para builds >2MB"
-    },
-    {
-      "hash": "538b5399a3931fed8050df7b695c1fb1f2887077",
-      "shortHash": "538b539",
-      "dateIso": "2026-04-01T16:37:46-03:00",
-      "subject": "feat(postal): unifica status visual no tracking do cliente e aba Em rota"
     }
   ]
 } as const;

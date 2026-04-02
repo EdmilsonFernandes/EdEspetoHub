@@ -6,6 +6,7 @@ import { AppError } from '../errors/AppError';
 import { CustomerAddress } from '../entities/CustomerAddress';
 import { User } from '../entities/User';
 import { Order } from '../entities/Order';
+import { EmailService } from './EmailService';
 
 type AddressInput = {
   label?: string;
@@ -22,6 +23,7 @@ type AddressInput = {
 };
 
 export class CustomerAccountService {
+  private emailService = new EmailService();
   private normalizeEmail(value: string) {
     return String(value || '').trim().toLowerCase();
   }
@@ -86,6 +88,11 @@ export class CustomerAccountService {
       userRole: 'CUSTOMER',
     } as Partial<User>);
     const saved = await userRepo.save(user);
+    try {
+      await this.emailService.sendCustomerWelcome(saved.email, saved.fullName);
+    } catch {
+      // Não bloqueia cadastro do cliente por falha de e-mail.
+    }
 
     const token = jwt.sign(
       { sub: saved.id, role: 'CUSTOMER' as const },

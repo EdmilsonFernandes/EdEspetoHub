@@ -265,6 +265,37 @@ export class EmailService {
     await this.send({ to: email, subject, text, html });
   }
 
+  async sendCustomerWelcome(email: string, fullName: string) {
+    const logoUrl = this.getLogoUrl();
+    const appUrl = env.appUrl || 'https://janocaminho.com.br';
+    const subject = await this.getTemplateValue(
+      'email_templates.customer_welcome.subject',
+      'Cadastro concluído - Já no Caminho'
+    );
+    const textTemplate = await this.getTemplateValue(
+      'email_templates.customer_welcome.text',
+      'Olá, {{NAME}}!\n\nSeu cadastro foi concluído com sucesso.\nAcesse: {{APP_URL}}\n\nBoas compras!'
+    );
+    const htmlTemplate = await this.getTemplateValue(
+      'email_templates.customer_welcome.html',
+      `
+      <div style="font-family: Arial, sans-serif; background: #f8fafc; padding: 24px;">
+        <div style="max-width: 520px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;">
+          <img src="{{LOGO_URL}}" alt="Já no Caminho" style="width: 120px; height: auto; margin-bottom: 16px;" />
+          <h2 style="margin: 0 0 8px; color: #0f172a;">Cadastro concluído</h2>
+          <p style="margin: 0 0 16px; color: #475569;">Olá, {{NAME}}! Sua conta foi criada com sucesso.</p>
+          <a href="{{APP_URL}}" style="display: inline-block; padding: 10px 16px; background: #0f172a; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600;">Acessar plataforma</a>
+          <p style="margin: 16px 0 0; color: #64748b; font-size: 12px;">Boas compras!</p>
+        </div>
+      </div>
+      `
+    );
+    const vars = { NAME: fullName || 'Cliente', APP_URL: appUrl, LOGO_URL: logoUrl };
+    const text = this.renderTemplate(textTemplate, vars);
+    const html = this.renderTemplate(htmlTemplate, vars);
+    await this.send({ to: email, subject, text, html });
+  }
+
   /**
    * Sends subscription reminder.
    *

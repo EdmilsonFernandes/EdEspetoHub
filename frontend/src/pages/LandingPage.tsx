@@ -59,6 +59,14 @@ const upsertMeta = (name: string, content: string, attr: 'name' | 'property' = '
   tag.setAttribute('content', content);
 };
 
+const formatPhoneBr = (value: string) => {
+  const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+};
+
 export function LandingPage() {
   const navigate = useNavigate();
   const [metrics, setMetrics] = useState<{
@@ -145,6 +153,24 @@ export function LandingPage() {
       }
     } catch (error: any) {
       setCustomerAuthError(error?.message || 'Falha ao autenticar cliente.');
+    } finally {
+      setCustomerAuthLoading(false);
+    }
+  };
+
+  const handleCustomerForgotPassword = async () => {
+    const email = String(customerAuthForm.email || '').trim();
+    if (!email) {
+      setCustomerAuthError('Informe seu e-mail para recuperar a senha.');
+      return;
+    }
+    setCustomerAuthLoading(true);
+    setCustomerAuthError('');
+    try {
+      await customerAccountService.forgotPassword(email);
+      setCustomerAuthError('Enviamos um link de recuperação para seu e-mail.');
+    } catch (error: any) {
+      setCustomerAuthError(error?.message || 'Não foi possível enviar recuperação.');
     } finally {
       setCustomerAuthLoading(false);
     }
@@ -486,12 +512,12 @@ export function LandingPage() {
                 />
               )}
               {customerAuthMode === 'register' && (
-                <input
-                  value={customerAuthForm.phone}
-                  onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, phone: e.target.value }))}
-                  placeholder="Telefone (opcional)"
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
-                />
+                  <input
+                    value={customerAuthForm.phone}
+                    onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, phone: formatPhoneBr(e.target.value) }))}
+                    placeholder="Telefone (opcional)"
+                    className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+                  />
               )}
               <input
                 value={customerAuthForm.email}
@@ -536,6 +562,15 @@ export function LandingPage() {
               >
                 {customerAuthLoading ? 'Processando...' : customerAuthMode === 'register' ? 'Criar e entrar' : 'Entrar'}
               </button>
+              {customerAuthMode === 'login' && (
+                <button
+                  type="button"
+                  onClick={handleCustomerForgotPassword}
+                  className="w-full text-center text-xs font-semibold text-slate-500 hover:text-slate-700"
+                >
+                  Esqueci minha senha
+                </button>
+              )}
             </div>
           </div>
         </div>

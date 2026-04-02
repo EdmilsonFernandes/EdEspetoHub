@@ -5,6 +5,14 @@ import { UserCircle, ArrowLeft } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
 import { storeService } from '../services/storeService';
 
+const formatPhoneBr = (value: string) => {
+  const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+};
+
 const getModeFromSearch = (search: string) => {
   const params = new URLSearchParams(search || '');
   const mode = String(params.get('mode') || 'login').toLowerCase();
@@ -17,6 +25,7 @@ export function ClientAuth() {
   const [mode, setMode] = useState<'login' | 'register'>(getModeFromSearch(location.search));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const [stores, setStores] = useState<any[]>([]);
   const [selectedStoreSlug, setSelectedStoreSlug] = useState('');
   const [form, setForm] = useState({
@@ -58,6 +67,7 @@ export function ClientAuth() {
     if (loading) return;
     setLoading(true);
     setError('');
+    setMessage('');
     try {
       let result: any;
       if (mode === 'register') {
@@ -87,6 +97,25 @@ export function ClientAuth() {
       navigate('/cliente/conta', { replace: true });
     } catch (e: any) {
       setError(e?.message || 'Não foi possível autenticar.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    const email = String(form.email || '').trim();
+    if (!email) {
+      setError('Informe seu e-mail para recuperar a senha.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    setMessage('');
+    try {
+      await customerAccountService.forgotPassword(email);
+      setMessage('Enviamos o link de recuperação para seu e-mail.');
+    } catch (e: any) {
+      setError(e?.message || 'Não foi possível enviar recuperação de senha.');
     } finally {
       setLoading(false);
     }
@@ -144,7 +173,7 @@ export function ClientAuth() {
             {mode === 'register' && (
               <input
                 value={form.phone}
-                onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
+                onChange={(e) => setForm((p) => ({ ...p, phone: formatPhoneBr(e.target.value) }))}
                 placeholder="Telefone (opcional)"
                 className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-sm placeholder:text-slate-300"
               />
@@ -183,6 +212,7 @@ export function ClientAuth() {
             </div>
 
             {error ? <p className="text-sm text-rose-300">{error}</p> : null}
+            {message ? <p className="text-sm text-emerald-300">{message}</p> : null}
 
             <button
               type="button"
@@ -192,10 +222,18 @@ export function ClientAuth() {
             >
               {loading ? 'Processando...' : mode === 'register' ? 'Criar e entrar' : 'Entrar'}
             </button>
+            {mode === 'login' && (
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="w-full text-center text-xs font-semibold text-sky-200 hover:text-sky-100"
+              >
+                Esqueci minha senha
+              </button>
+            )}
           </div>
         </div>
       </div>
     </main>
   );
 }
-

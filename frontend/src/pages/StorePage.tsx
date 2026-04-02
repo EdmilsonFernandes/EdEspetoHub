@@ -59,6 +59,14 @@ export function StorePage() {
     city: '',
     state: '',
   });
+
+  const formatPhoneBr = (value: string) => {
+    const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  };
   const [products, setProducts] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [view, setView] = useState('menu');
@@ -1664,6 +1672,24 @@ export function StorePage() {
     }
   };
 
+  const handleCustomerForgotPassword = async () => {
+    const email = String(customerAuthForm.email || '').trim();
+    if (!email) {
+      setCustomerAccountError('Informe o e-mail para recuperar a senha.');
+      return;
+    }
+    setCustomerAccountLoading(true);
+    setCustomerAccountError('');
+    try {
+      await customerAccountService.forgotPassword(email);
+      setCustomerAccountError('Enviamos um link de recuperação para seu e-mail.');
+    } catch (error: any) {
+      setCustomerAccountError(error?.message || 'Não foi possível enviar recuperação.');
+    } finally {
+      setCustomerAccountLoading(false);
+    }
+  };
+
   const handleCreateAddress = async () => {
     if (!customerSession?.token || customerAccountLoading) return;
     setCustomerAccountLoading(true);
@@ -2260,7 +2286,7 @@ export function StorePage() {
                 {customerAuthMode === 'register' && (
                   <input
                     value={customerAuthForm.phone}
-                    onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, phone: e.target.value }))}
+                    onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, phone: formatPhoneBr(e.target.value) }))}
                     placeholder="Telefone (opcional)"
                     className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                   />
@@ -2289,6 +2315,15 @@ export function StorePage() {
                 >
                   {customerAccountLoading ? 'Processando...' : customerAuthMode === 'register' ? 'Criar conta' : 'Entrar'}
                 </button>
+                {customerAuthMode === 'login' && (
+                  <button
+                    type="button"
+                    onClick={handleCustomerForgotPassword}
+                    className="w-full text-center text-xs font-semibold text-slate-500 hover:text-slate-700"
+                  >
+                    Esqueci minha senha
+                  </button>
+                )}
               </div>
             ) : (
               <div className="mt-4 space-y-4">
