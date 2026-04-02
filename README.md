@@ -145,10 +145,10 @@ Backup/rotação (SQL gz) via script:
   - `MIN_INTERVAL_HOURS` (default `48`)
   - `KEEP_LATEST` (default `1`)
 
-Exemplo (cron a cada 2 dias, mantendo apenas 1 arquivo):
+Exemplo (cron a cada 4h, mantendo apenas 1 arquivo):
 
 ```bash
-BACKUP_DIR=/home/ec2-user/backups/chamanoespeto MIN_INTERVAL_HOURS=48 KEEP_LATEST=1 bash /home/ec2-user/EdEspetoHub/scripts/pg-backup-rotate.sh
+BACKUP_DIR=/home/ec2-user/backups/chamanoespeto MIN_INTERVAL_HOURS=4 KEEP_LATEST=1 bash /home/ec2-user/EdEspetoHub/scripts/pg-backup-rotate.sh
 ```
 
 ## Rodar local sem Docker
@@ -593,11 +593,17 @@ Backup com rotacao (recomendado em producao com pouco disco):
 sh scripts/pg-backup-rotate.sh
 ```
 
-Exemplo de cron (executa diariamente, mas so faz dump se ja passaram 48h e remove o anterior):
+Exemplo de cron (executa a cada 4h, faz dump quando vencida a janela e remove o anterior):
 ```bash
 sudo crontab -e
 # adicionar:
-# 15 3 * * * BACKUP_DIR=/var/backups/chamanoespeto MIN_INTERVAL_HOURS=48 KEEP_LATEST=1 sh /caminho/para/repo/scripts/pg-backup-rotate.sh >> /var/log/pg-backup.log 2>&1
+# 0 */4 * * * BACKUP_DIR=/var/backups/chamanoespeto MIN_INTERVAL_HOURS=4 KEEP_LATEST=1 sh /caminho/para/repo/scripts/pg-backup-rotate.sh >> /var/log/pg-backup.log 2>&1
+```
+
+Verificar crontab e ultimos backups:
+```bash
+sudo crontab -l
+ls -lah /var/backups/chamanoespeto
 ```
 
 4) Verificacao rapida:

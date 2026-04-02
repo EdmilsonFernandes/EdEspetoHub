@@ -207,7 +207,7 @@ export async function runMigrations() {
       GROUP BY store_id
     )
     UPDATE store_settings ss
-    SET category_priorities = COALESCE(ss.category_priorities, '{}'::jsonb) || payload.priority_map
+    SET category_priorities = payload.priority_map || COALESCE(ss.category_priorities, '{}'::jsonb)
     FROM payload
     WHERE ss.store_id = payload.store_id;
   `);

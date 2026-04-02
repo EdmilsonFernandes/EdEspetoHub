@@ -316,6 +316,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   const [inlineCategorySelect, setInlineCategorySelect] = useState(initialForm.category);
   const [inlineCustomCategory, setInlineCustomCategory] = useState('');
   const [inlineCategoryPriority, setInlineCategoryPriority] = useState(String(defaultCategoryPriority(initialForm.category)));
+  const [inlineCategoryPriorityTouched, setInlineCategoryPriorityTouched] = useState(false);
   const [inlineForm, setInlineForm] = useState({
     name: '',
     price: '',
@@ -343,6 +344,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   const [inlineImagePreview, setInlineImagePreview] = useState('');
   const [formData, setFormData] = useState(initialForm);
   const [formCategoryPriority, setFormCategoryPriority] = useState(String(defaultCategoryPriority(initialForm.category)));
+  const [formCategoryPriorityTouched, setFormCategoryPriorityTouched] = useState(false);
   const [imagePreview, setImagePreview] = useState('');
   const [categorySelect, setCategorySelect] = useState(initialForm.category);
   const [customCategory, setCustomCategory] = useState('');
@@ -415,6 +417,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     if (!defaultCategoryId) return;
     setCategorySelect((prev) => (prev && prev !== initialForm.category ? prev : defaultCategoryId));
     setFormCategoryPriority((prev) => (prev ? prev : String(defaultCategoryPriority(defaultCategoryId))));
+    setFormCategoryPriorityTouched(false);
     setFormData((prev) => {
       const shouldReplace = !prev?.category || prev.category === initialForm.category;
       if (!shouldReplace) return prev;
@@ -480,6 +483,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     setImagePreview('');
     setCategorySelect(defaultCategoryId);
     setFormCategoryPriority(String(defaultCategoryPriority(defaultCategoryId)));
+    setFormCategoryPriorityTouched(false);
     setCustomCategory('');
     setShowCustomInput(false);
   };
@@ -682,7 +686,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     try {
       await productService.save(payload);
       const parsedPriority = Math.max(1, Math.floor(Number(formCategoryPriority || defaultCategoryPriority(formData.category))));
-      if (formData.category && Number.isFinite(parsedPriority)) {
+      if (formCategoryPriorityTouched && formData.category && Number.isFinite(parsedPriority)) {
         try {
           await productService.setCategoryPriority(formData.category, parsedPriority);
         } catch (priorityError) {
@@ -708,6 +712,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     setInlineCategorySelect(isKnown ? normalizedCategory : '__custom__');
     setInlineCustomCategory(isKnown ? '' : normalizedCategory);
     setInlineCategoryPriority(String(resolveCategoryPriorityValue(normalizedCategory)));
+    setInlineCategoryPriorityTouched(false);
     setInlineEditId(product.id);
     setInlineImageFile('');
     if (inlineImagePreview?.startsWith('blob:')) URL.revokeObjectURL(inlineImagePreview);
@@ -783,7 +788,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
         modifiers: normalizeProductModifiers(inlineForm.modifiers || []),
       });
       const parsedPriority = Math.max(1, Math.floor(Number(inlineCategoryPriority || defaultCategoryPriority(inlineForm.category))));
-      if (inlineForm.category && Number.isFinite(parsedPriority)) {
+      if (inlineCategoryPriorityTouched && inlineForm.category && Number.isFinite(parsedPriority)) {
         try {
           await productService.setCategoryPriority(inlineForm.category, parsedPriority);
         } catch (priorityError) {
@@ -806,6 +811,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   const handleInlineCancel = () => {
     setInlineEditId(null);
     setInlineImageFile('');
+    setInlineCategoryPriorityTouched(false);
     if (inlineImagePreview?.startsWith('blob:')) URL.revokeObjectURL(inlineImagePreview);
     setInlineImagePreview('');
     setMobileEditOpen(false);
@@ -1404,6 +1410,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     onClick={() => {
                       setCategorySelect(option.id);
                       setFormCategoryPriority(String(resolveCategoryPriorityValue(option.id)));
+                      setFormCategoryPriorityTouched(false);
                       setCustomCategory('');
                       setShowCustomInput(false);
                       setFormData({ ...formData, category: option.id });
@@ -1451,6 +1458,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   const value = e.target.value;
                   setCustomCategory(value);
                   setFormCategoryPriority(String(defaultCategoryPriority(value)));
+                  setFormCategoryPriorityTouched(false);
                   setFormData({ ...formData, category: normalizeCategory(value) });
                 }}
                 autoFocus
@@ -1462,7 +1470,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               </label>
               <select
                 value={formCategoryPriority}
-                onChange={(e) => setFormCategoryPriority(e.target.value)}
+                onChange={(e) => {
+                  setFormCategoryPriority(e.target.value);
+                  setFormCategoryPriorityTouched(true);
+                }}
                 className="w-full sm:w-40 p-2.5 border border-gray-200 rounded-xl bg-white text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-brand-primary focus:border-transparent"
               >
                 {CATEGORY_PRIORITY_OPTIONS.map((option) => (
@@ -2045,10 +2056,12 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     if (value === '__custom__') {
                       const normalized = normalizeCategory(inlineCustomCategory);
                       setInlineCategoryPriority(String(resolveCategoryPriorityValue(normalized || inlineForm.category)));
+                      setInlineCategoryPriorityTouched(false);
                       setInlineForm((prev) => ({ ...prev, category: normalized || prev.category }));
                     } else {
                       setInlineCustomCategory('');
                       setInlineCategoryPriority(String(resolveCategoryPriorityValue(value)));
+                      setInlineCategoryPriorityTouched(false);
                       setInlineForm((prev) => ({ ...prev, category: value }));
                     }
                   }}
@@ -2069,6 +2082,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                       const value = e.target.value;
                       setInlineCustomCategory(value);
                       setInlineCategoryPriority(String(defaultCategoryPriority(value)));
+                      setInlineCategoryPriorityTouched(false);
                       setInlineForm((prev) => ({ ...prev, category: normalizeCategory(value) }));
                     }}
                     autoFocus
@@ -2079,7 +2093,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   <select
                     className="w-full sm:w-36 p-3 border border-gray-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                     value={inlineCategoryPriority}
-                    onChange={(e) => setInlineCategoryPriority(e.target.value)}
+                    onChange={(e) => {
+                      setInlineCategoryPriority(e.target.value);
+                      setInlineCategoryPriorityTouched(true);
+                    }}
                   >
                     {CATEGORY_PRIORITY_OPTIONS.map((option) => (
                       <option key={`edit-priority-${option}`} value={option}>

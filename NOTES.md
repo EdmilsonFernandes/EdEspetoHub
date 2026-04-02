@@ -280,3 +280,22 @@ docker restart chamanoespeto-api
 ### Status
 - Ajustes críticos de navegação + estoque concluídos e em `origin/main`.
 - `NOTES.md` atualizado para servir como referência de contexto nas próximas sessões.
+
+## RESUME - 2026-04-02
+
+### Incidente de banco e recuperação
+- Banco `espetinho` foi perdido em produção e restaurado de backup (`espetinho_20260401T031501Z.sql.gz`).
+- Após restore, schema estava defasado em relação à API atual; colunas/tabelas de migração foram reaplicadas para normalizar login, pedidos e produtos.
+- Indicadores de comprometimento no Postgres exigem postura de incidente de segurança.
+
+### Hardening mínimo aplicado
+- Grupo de segurança da instância de produção revisado para manter apenas:
+  - `80/tcp` público
+  - `443/tcp` público
+  - `22/tcp` restrito ao IP administrativo
+- Recomendada rotação de credenciais de banco e segredos após incidente.
+
+### Política nova de backup (produção)
+- Padronizar backup automático a cada 4 horas com rotação (manter somente o mais recente).
+- Cron recomendado:
+  - `0 */4 * * * BACKUP_DIR=/var/backups/chamanoespeto MIN_INTERVAL_HOURS=4 KEEP_LATEST=1 sh /home/ec2-user/EdEspetoHub/scripts/pg-backup-rotate.sh >> /var/log/pg-backup.log 2>&1`
