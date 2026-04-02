@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.211611.4b53aba",
-  "buildId": "0.1.9+20260402.211611.4b53aba-20260402.211611-4b53aba",
-  "builtAt": "2026-04-02T21:16:11.916Z",
-  "commitHash": "4b53aba535f8d3662d2e36e113739d137ba3f05a",
-  "shortHash": "4b53aba",
+  "versionInternal": "0.1.9+20260402.211811.8e161f6",
+  "buildId": "0.1.9+20260402.211811.8e161f6-20260402.211811-8e161f6",
+  "builtAt": "2026-04-02T21:18:11.677Z",
+  "commitHash": "8e161f6147cb08c31a494cf3d6c751b367c3320d",
+  "shortHash": "8e161f6",
   "branch": "main",
   "commits": [
+    {
+      "hash": "8e161f6147cb08c31a494cf3d6c751b367c3320d",
+      "shortHash": "8e161f6",
+      "dateIso": "2026-04-02T18:16:59-03:00",
+      "subject": "feat(checkout): enforce saved-address flow for logged customers on delivery"
+    },
     {
       "hash": "4b53aba535f8d3662d2e36e113739d137ba3f05a",
       "shortHash": "4b53aba",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "7a9e77a",
       "dateIso": "2026-04-02T11:16:18-03:00",
       "subject": "style(create-store): add subtle step transitions and premium button microinteractions"
-    },
-    {
-      "hash": "82224518f728a6575d84f7f375eacd5b7232f2ea",
-      "shortHash": "8222451",
-      "dateIso": "2026-04-02T11:06:53-03:00",
-      "subject": "style(create-store): polish stepper with icons, progress and checklist"
     }
   ]
 } as const;
