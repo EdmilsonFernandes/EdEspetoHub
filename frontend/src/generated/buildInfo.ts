@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.205304.5447bf2",
-  "buildId": "0.1.9+20260402.205304.5447bf2-20260402.205304-5447bf2",
-  "builtAt": "2026-04-02T20:53:04.766Z",
-  "commitHash": "5447bf2fd2e1bd3702db5613cfadbf6c7b7f2a3c",
-  "shortHash": "5447bf2",
+  "versionInternal": "0.1.9+20260402.205433.93e0b66",
+  "buildId": "0.1.9+20260402.205433.93e0b66-20260402.205433-93e0b66",
+  "builtAt": "2026-04-02T20:54:33.484Z",
+  "commitHash": "93e0b6685ed37ffdb5e734181abc5342ab3c26d7",
+  "shortHash": "93e0b66",
   "branch": "main",
   "commits": [
+    {
+      "hash": "93e0b6685ed37ffdb5e734181abc5342ab3c26d7",
+      "shortHash": "93e0b66",
+      "dateIso": "2026-04-02T17:53:48-03:00",
+      "subject": "feat(ui): redesign landing footer with premium dark layout and CTA"
+    },
     {
       "hash": "5447bf2fd2e1bd3702db5613cfadbf6c7b7f2a3c",
       "shortHash": "5447bf2",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "be6dd3c",
       "dateIso": "2026-04-01T18:41:38-03:00",
       "subject": "fix(postal-tracking): usa prazo em dias e previsao de entrega no detalhe"
-    },
-    {
-      "hash": "92c4c53deb30a229e5f362e001d42fbb081b62f2",
-      "shortHash": "92c4c53",
-      "dateIso": "2026-04-01T18:29:57-03:00",
-      "subject": "fix(postal): salva/exibe rastreio e mantém fila geral ao postar"
     }
   ]
 } as const;

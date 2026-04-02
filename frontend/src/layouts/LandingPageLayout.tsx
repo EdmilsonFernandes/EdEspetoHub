@@ -410,9 +410,9 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
         </div>
       )}
       {/* Footer */}
-      <footer className="bg-[#070b14] text-slate-300 pt-14 pb-10 border-t border-slate-800/60">
+      <footer className="bg-[#070b14] text-slate-300 pt-14 pb-10 border-t border-slate-800/60 animate-in fade-in duration-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <section className="rounded-[2rem] border border-slate-700/60 bg-[linear-gradient(120deg,#111827_0%,#0f172a_50%,#111827_100%)] p-6 sm:p-8 shadow-[0_24px_60px_-36px_rgba(14,165,233,0.45)]">
+          <section className="rounded-[2rem] border border-slate-700/60 bg-[linear-gradient(120deg,#111827_0%,#0f172a_50%,#111827_100%)] p-6 sm:p-8 shadow-[0_24px_60px_-36px_rgba(14,165,233,0.45)] animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
               <div className="space-y-2">
                 <p className="text-[11px] uppercase tracking-[0.22em] font-black text-sky-300">Plataforma profissional</p>
@@ -439,7 +439,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             </div>
           </section>
 
-          <section className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <section className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 animate-in fade-in slide-in-from-bottom-3 duration-700 delay-100">
             <div>
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl border border-slate-700 bg-slate-900 p-0.5">
@@ -502,7 +502,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             </div>
           </section>
 
-          <div className="mt-10 border-t border-slate-800/80 pt-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <div className="mt-10 border-t border-slate-800/80 pt-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 animate-in fade-in duration-700 delay-200">
             <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">Edmilson Tecnologia da Informação • CNPJ 44.771.427/0001-69</p>
             <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">© {new Date().getFullYear()} Já no Caminho. Todos os direitos reservados.</p>
           </div>
