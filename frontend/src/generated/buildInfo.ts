@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.205924.07a6669",
-  "buildId": "0.1.9+20260402.205924.07a6669-20260402.205924-07a6669",
-  "builtAt": "2026-04-02T20:59:24.657Z",
-  "commitHash": "07a6669b5879027cbc23d16bebef9f3d5fb038ee",
-  "shortHash": "07a6669",
+  "versionInternal": "0.1.9+20260402.210329.4a5d7e1",
+  "buildId": "0.1.9+20260402.210329.4a5d7e1-20260402.210329-4a5d7e1",
+  "builtAt": "2026-04-02T21:03:29.898Z",
+  "commitHash": "4a5d7e1aabf2b869c06e1ecd6e35e53723c518f1",
+  "shortHash": "4a5d7e1",
   "branch": "main",
   "commits": [
+    {
+      "hash": "4a5d7e1aabf2b869c06e1ecd6e35e53723c518f1",
+      "shortHash": "4a5d7e1",
+      "dateIso": "2026-04-02T18:00:08-03:00",
+      "subject": "feat(ui): make admin mobile bottom nav compact and store-color aware"
+    },
     {
       "hash": "07a6669b5879027cbc23d16bebef9f3d5fb038ee",
       "shortHash": "07a6669",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "b8d361a",
       "dateIso": "2026-04-02T10:44:12-03:00",
       "subject": "feat(branding): upgrade trust footer across catalog and admin"
-    },
-    {
-      "hash": "18c102701580721fda1e3492c5043cae6230dee5",
-      "shortHash": "18c1027",
-      "dateIso": "2026-04-02T10:33:06-03:00",
-      "subject": "fix(categories): preserve manual order when saving products"
     }
   ]
 } as const;

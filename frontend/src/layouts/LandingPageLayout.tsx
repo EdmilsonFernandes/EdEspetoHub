@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { ChatCircleText, DownloadSimple, House, List, Moon, SignOut, Storefront, Sun, Truck, X } from '@phosphor-icons/react';
+import { ChatCircleText, DownloadSimple, House, List, Moon, ShieldCheck, SignOut, Storefront, Sun, Truck, X } from '@phosphor-icons/react';
 
 interface LandingPageLayoutProps {
   children: React.ReactNode;
