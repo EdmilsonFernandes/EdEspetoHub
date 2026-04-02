@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.203942.30d9532",
-  "buildId": "0.1.9+20260402.203942.30d9532-20260402.203942-30d9532",
-  "builtAt": "2026-04-02T20:39:42.727Z",
-  "commitHash": "30d9532ad1fb40bbedfb2b21c75ae3c61853d380",
-  "shortHash": "30d9532",
+  "versionInternal": "0.1.9+20260402.204646.49088a9",
+  "buildId": "0.1.9+20260402.204646.49088a9-20260402.204646-49088a9",
+  "builtAt": "2026-04-02T20:46:46.641Z",
+  "commitHash": "49088a95fd7964c6ed68ec0ded7c0960b19a7b5a",
+  "shortHash": "49088a9",
   "branch": "main",
   "commits": [
+    {
+      "hash": "49088a95fd7964c6ed68ec0ded7c0960b19a7b5a",
+      "shortHash": "49088a9",
+      "dateIso": "2026-04-02T17:40:36-03:00",
+      "subject": "feat(ui): polish customer auth/account experience with app-like styling"
+    },
     {
       "hash": "30d9532ad1fb40bbedfb2b21c75ae3c61853d380",
       "shortHash": "30d9532",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "7d0f1f0",
       "dateIso": "2026-04-01T18:15:54-03:00",
       "subject": "feat(postal): adiciona rastreio na fila e envia postado para Em rota"
-    },
-    {
-      "hash": "9e924060ae361bdf19d6c23ec8a3f8a008cd3882",
-      "shortHash": "9e92406",
-      "dateIso": "2026-04-01T18:03:30-03:00",
-      "subject": "fix(postal): restaura finalizar em despachado e evita GEN-001 na finalizacao"
     }
   ]
 } as const;

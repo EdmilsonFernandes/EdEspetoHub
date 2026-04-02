@@ -59,6 +59,7 @@ export function StorePage() {
     city: '',
     state: '',
   });
+  const [showNewAddressForm, setShowNewAddressForm] = useState(false);
 
   const formatPhoneBr = (value: string) => {
     const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
@@ -756,6 +757,34 @@ export function StorePage() {
     refreshCustomerData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customerSession?.token]);
+
+  useEffect(() => {
+    if (!customerSession?.token) return;
+    if (customer.type !== 'delivery') return;
+    const hasAddressData = Boolean(
+      String(customer.cep || '').trim() ||
+      String(customer.street || '').trim() ||
+      String(customer.neighborhood || '').trim() ||
+      String(customer.city || '').trim() ||
+      String(customer.state || '').trim()
+    );
+    if (hasAddressData) return;
+    const preferred =
+      customerAddresses.find((item: any) => item?.isDefault) ||
+      customerAddresses[0];
+    if (preferred) {
+      hydrateCustomerFromAddress(preferred);
+    }
+  }, [
+    customerSession?.token,
+    customer.type,
+    customer.cep,
+    customer.street,
+    customer.neighborhood,
+    customer.city,
+    customer.state,
+    customerAddresses,
+  ]);
 
   useEffect(() => {
     if (!storeSlug) return undefined;
@@ -1714,9 +1743,37 @@ export function StorePage() {
         city: '',
         state: '',
       });
+      setShowNewAddressForm(false);
       showToast('Endereço salvo.', 'success');
     } catch (error: any) {
       setCustomerAccountError(error?.message || 'Falha ao salvar endereço.');
+    } finally {
+      setCustomerAccountLoading(false);
+    }
+  };
+
+  const handleNewAddressCepLookup = async () => {
+    const rawCep = String(newAddressForm.cep || '').replace(/\D/g, '');
+    if (rawCep.length !== 8 || customerAccountLoading) return;
+    setCustomerAccountLoading(true);
+    setCustomerAccountError('');
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${rawCep}/json/`);
+      const data = await response.json();
+      if (data?.erro) {
+        setCustomerAccountError('CEP não encontrado.');
+        return;
+      }
+      setNewAddressForm((prev) => ({
+        ...prev,
+        street: String(data?.logradouro || ''),
+        neighborhood: String(data?.bairro || ''),
+        city: String(data?.localidade || ''),
+        state: String(data?.uf || '').toUpperCase().slice(0, 2),
+        complement: prev?.complement || String(data?.complemento || ''),
+      }));
+    } catch {
+      setCustomerAccountError('Não foi possível consultar o CEP agora.');
     } finally {
       setCustomerAccountLoading(false);
     }
@@ -2197,6 +2254,13 @@ export function StorePage() {
             storeAddress={storeAddress}
             storeCoords={storeCoords}
             deliveryCoords={deliveryCoords}
+            isCustomerLogged={Boolean(customerSession?.token)}
+            savedAddresses={customerAddresses}
+            onApplySavedAddress={(address: any) => {
+              hydrateCustomerFromAddress(address);
+              showToast('Endereço aplicado no checkout.', 'success');
+            }}
+            onOpenAddressManager={() => setShowCustomerAccount(true)}
             checkoutDisabled={!cartItemsCount || deliveryValidation.blocked}
             checkoutDisabledReason={
               !cartItemsCount
@@ -2384,26 +2448,44 @@ export function StorePage() {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                    <input value={newAddressForm.label} onChange={(e) => setNewAddressForm((p) => ({ ...p, label: e.target.value }))} placeholder="Apelido" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
-                    <input value={newAddressForm.recipientName} onChange={(e) => setNewAddressForm((p) => ({ ...p, recipientName: e.target.value }))} placeholder="Nome do recebedor" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
-                    <input value={newAddressForm.phone} onChange={(e) => setNewAddressForm((p) => ({ ...p, phone: formatPhoneBr(e.target.value) }))} placeholder="Telefone" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
-                    <input value={newAddressForm.cep} onChange={(e) => setNewAddressForm((p) => ({ ...p, cep: formatCepBr(e.target.value) }))} placeholder="CEP" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
-                    <input value={newAddressForm.street} onChange={(e) => setNewAddressForm((p) => ({ ...p, street: e.target.value }))} placeholder="Rua" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm sm:col-span-2 focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
-                    <input value={newAddressForm.number} onChange={(e) => setNewAddressForm((p) => ({ ...p, number: e.target.value }))} placeholder="Número" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
-                    <input value={newAddressForm.complement} onChange={(e) => setNewAddressForm((p) => ({ ...p, complement: e.target.value }))} placeholder="Complemento" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
-                    <input value={newAddressForm.neighborhood} onChange={(e) => setNewAddressForm((p) => ({ ...p, neighborhood: e.target.value }))} placeholder="Bairro" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
-                    <input value={newAddressForm.city} onChange={(e) => setNewAddressForm((p) => ({ ...p, city: e.target.value }))} placeholder="Cidade" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
-                    <input value={newAddressForm.state} onChange={(e) => setNewAddressForm((p) => ({ ...p, state: e.target.value.toUpperCase().slice(0, 2) }))} placeholder="UF" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                  <div className="pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowNewAddressForm((prev) => !prev)}
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700"
+                    >
+                      {showNewAddressForm ? 'Fechar cadastro de endereço' : 'Cadastrar novo endereço'}
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleCreateAddress}
-                    disabled={customerAccountLoading}
-                    className="rounded-xl bg-[linear-gradient(120deg,#0f172a,#1e293b)] px-3 py-2 text-xs font-bold text-white shadow-[0_12px_22px_-18px_rgba(15,23,42,0.75)] disabled:opacity-60"
-                  >
-                    Salvar endereço
-                  </button>
+                  {showNewAddressForm && (
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                        <input value={newAddressForm.label} onChange={(e) => setNewAddressForm((p) => ({ ...p, label: e.target.value }))} placeholder="Apelido" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                        <input value={newAddressForm.recipientName} onChange={(e) => setNewAddressForm((p) => ({ ...p, recipientName: e.target.value }))} placeholder="Nome do recebedor" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                        <input value={newAddressForm.phone} onChange={(e) => setNewAddressForm((p) => ({ ...p, phone: formatPhoneBr(e.target.value) }))} placeholder="Telefone" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                        <div className="flex gap-2">
+                          <input value={newAddressForm.cep} onBlur={handleNewAddressCepLookup} onChange={(e) => setNewAddressForm((p) => ({ ...p, cep: formatCepBr(e.target.value) }))} placeholder="CEP" className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                          <button type="button" onClick={handleNewAddressCepLookup} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700">
+                            Buscar CEP
+                          </button>
+                        </div>
+                        <input value={newAddressForm.street} onChange={(e) => setNewAddressForm((p) => ({ ...p, street: e.target.value }))} placeholder="Rua" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm sm:col-span-2 focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                        <input value={newAddressForm.number} onChange={(e) => setNewAddressForm((p) => ({ ...p, number: e.target.value }))} placeholder="Número" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                        <input value={newAddressForm.complement} onChange={(e) => setNewAddressForm((p) => ({ ...p, complement: e.target.value }))} placeholder="Complemento" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                        <input value={newAddressForm.neighborhood} onChange={(e) => setNewAddressForm((p) => ({ ...p, neighborhood: e.target.value }))} placeholder="Bairro" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                        <input value={newAddressForm.city} onChange={(e) => setNewAddressForm((p) => ({ ...p, city: e.target.value }))} placeholder="Cidade" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                        <input value={newAddressForm.state} onChange={(e) => setNewAddressForm((p) => ({ ...p, state: e.target.value.toUpperCase().slice(0, 2) }))} placeholder="UF" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleCreateAddress}
+                        disabled={customerAccountLoading}
+                        className="rounded-xl bg-[linear-gradient(120deg,#0f172a,#1e293b)] px-3 py-2 text-xs font-bold text-white shadow-[0_12px_22px_-18px_rgba(15,23,42,0.75)] disabled:opacity-60"
+                      >
+                        Salvar endereço
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="rounded-2xl border border-slate-200/90 bg-white p-3 shadow-sm">

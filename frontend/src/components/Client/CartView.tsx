@@ -79,6 +79,10 @@ export const CartView = ({
   postalQuote = null,
   postalQuoteLoading = false,
   selectedPostalServiceCode = "",
+  isCustomerLogged = false,
+  savedAddresses = [],
+  onApplySavedAddress,
+  onOpenAddressManager,
   onUseCurrentLocation,
   onChangeDeliveryMode,
   onCalculatePostalQuote,
@@ -508,6 +512,10 @@ export const CartView = ({
     isDelivery,
     normalizedStoreAddress,
   ]);
+  const savedDeliveryAddresses = useMemo(
+    () => (Array.isArray(savedAddresses) ? savedAddresses.slice(0, 3) : []),
+    [savedAddresses]
+  );
 
   const showRouteMap = !isPostalDelivery && Boolean(storeCoords?.lat && deliveryCoords?.lat);
   const showDeliveryStatus = isPostalDelivery
@@ -795,6 +803,47 @@ export const CartView = ({
                   >
                     Envio postal
                   </button>
+                </div>
+              )}
+              {isCustomerLogged && !isPostalDelivery && (
+                <div className="mb-3 space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 font-bold">Endereços salvos</p>
+                    <button
+                      type="button"
+                      onClick={() => onOpenAddressManager?.()}
+                      className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700"
+                    >
+                      Gerenciar
+                    </button>
+                  </div>
+                  {savedDeliveryAddresses.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {savedDeliveryAddresses.map((address: any) => (
+                        <button
+                          type="button"
+                          key={String(address?.id || Math.random())}
+                          onClick={() => onApplySavedAddress?.(address)}
+                          className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-left hover:bg-slate-100 transition"
+                        >
+                          <p className="text-xs font-bold text-slate-700">
+                            {address?.label || "Endereço"} {address?.isDefault ? "• Principal" : ""}
+                          </p>
+                          <p className="text-[11px] text-slate-500 truncate">
+                            {address?.street}, {address?.number || "s/n"} - {address?.neighborhood}
+                          </p>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => onOpenAddressManager?.()}
+                      className="w-full rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-600"
+                    >
+                      Cadastrar primeiro endereço
+                    </button>
+                  )}
                 </div>
               )}
               <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-4">
