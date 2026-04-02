@@ -516,6 +516,8 @@ export const CartView = ({
     () => (Array.isArray(savedAddresses) ? savedAddresses.slice(0, 3) : []),
     [savedAddresses]
   );
+  const isLoggedDeliveryFlow = Boolean(isCustomerLogged && isDelivery);
+  const hasSavedAddress = savedDeliveryAddresses.length > 0;
 
   const showRouteMap = !isPostalDelivery && Boolean(storeCoords?.lat && deliveryCoords?.lat);
   const showDeliveryStatus = isPostalDelivery
@@ -879,6 +881,21 @@ export const CartView = ({
               )}
               <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-4">
                 <div className="space-y-4">
+                  {isLoggedDeliveryFlow ? (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50/70 px-3 py-3 text-sm text-slate-600">
+                      {hasSavedAddress ? (
+                        <>
+                          <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 mb-1">Entrega vinculada</p>
+                          <p className="font-semibold text-slate-800">Usaremos seu endereço salvo para calcular frete e validar entrega.</p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-700 mb-1">Endereço obrigatório</p>
+                          <p className="font-semibold text-slate-800">Cadastre um endereço para continuar com entrega.</p>
+                        </>
+                      )}
+                    </div>
+                  ) : null}
                   <div className={`rounded-2xl border px-3 py-2.5 text-xs ${
                     isPostalDelivery
                       ? "border-amber-100 bg-amber-50/70 text-amber-800"
@@ -888,6 +905,7 @@ export const CartView = ({
                       ? "Insira seu CEP para cotar PAC/SEDEX e escolher o envio."
                       : "Insira seu CEP para conferirmos a distância e o tempo de entrega."}
                   </div>
+                  {!isLoggedDeliveryFlow && (
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="sm:col-span-2">
                       <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">CEP</label>
@@ -925,67 +943,72 @@ export const CartView = ({
                       </button>
                     </div>
                   </div>
+                  )}
                   {hasTriedCheckout && cepError && <p className="text-xs text-red-600">{cepError}</p>}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Rua / Avenida</label>
-                      <input
-                        value={customer.street || ""}
-                        onChange={(e) => updateDeliveryField("street", e.target.value)}
-                        placeholder="Rua, avenida"
-                        className={premiumInputClass}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Numero</label>
-                      <input
-                        value={customer.number || ""}
-                        onChange={(e) => updateDeliveryField("number", e.target.value)}
-                        placeholder="Numero"
-                        className={premiumInputClass}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Bairro</label>
-                      <input
-                        value={customer.neighborhood || ""}
-                        onChange={(e) => updateDeliveryField("neighborhood", e.target.value)}
-                        placeholder="Bairro"
-                        className={premiumInputClass}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Complemento</label>
-                      <input
-                        value={customer.complement || ""}
-                        onChange={(e) => updateDeliveryField("complement", e.target.value)}
-                        placeholder="Apto, bloco, referencia"
-                        className={premiumInputClass}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="sm:col-span-2">
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Cidade</label>
-                      <input
-                        value={customer.city || ""}
-                        onChange={(e) => updateDeliveryField("city", e.target.value)}
-                        placeholder="Cidade"
-                        className={premiumInputClass}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">UF</label>
-                      <input
-                        value={customer.state || ""}
-                        onChange={(e) => updateDeliveryField("state", e.target.value)}
-                        placeholder="UF"
-                        className={premiumInputClass}
-                      />
-                    </div>
-                  </div>
+                  {!isLoggedDeliveryFlow && (
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Rua / Avenida</label>
+                          <input
+                            value={customer.street || ""}
+                            onChange={(e) => updateDeliveryField("street", e.target.value)}
+                            placeholder="Rua, avenida"
+                            className={premiumInputClass}
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Numero</label>
+                          <input
+                            value={customer.number || ""}
+                            onChange={(e) => updateDeliveryField("number", e.target.value)}
+                            placeholder="Numero"
+                            className={premiumInputClass}
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Bairro</label>
+                          <input
+                            value={customer.neighborhood || ""}
+                            onChange={(e) => updateDeliveryField("neighborhood", e.target.value)}
+                            placeholder="Bairro"
+                            className={premiumInputClass}
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Complemento</label>
+                          <input
+                            value={customer.complement || ""}
+                            onChange={(e) => updateDeliveryField("complement", e.target.value)}
+                            placeholder="Apto, bloco, referencia"
+                            className={premiumInputClass}
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="sm:col-span-2">
+                          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Cidade</label>
+                          <input
+                            value={customer.city || ""}
+                            onChange={(e) => updateDeliveryField("city", e.target.value)}
+                            placeholder="Cidade"
+                            className={premiumInputClass}
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">UF</label>
+                          <input
+                            value={customer.state || ""}
+                            onChange={(e) => updateDeliveryField("state", e.target.value)}
+                            placeholder="UF"
+                            className={premiumInputClass}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
                   <div className="rounded-2xl premium-card-soft p-4 space-y-4 bg-slate-50 border border-slate-100">
                     <div className="flex items-start justify-between gap-3">
@@ -1037,7 +1060,7 @@ export const CartView = ({
                       </span>
                     </div>
                     )}
-                    {customer.address && (
+                    {customer.address && !isLoggedDeliveryFlow && (
                       <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm text-slate-600">
                         {customer.address}
                       </div>
@@ -1447,6 +1470,10 @@ export const CartView = ({
             setHasTriedCheckout(true);
             setCtaPulse(true);
             window.setTimeout(() => setCtaPulse(false), 220);
+            if (isLoggedDeliveryFlow && !hasSavedAddress) {
+              onOpenAddressManager?.();
+              return;
+            }
             if (isDeliveryValidationMode) {
               const rawCep = (customer.cep || "").replace(/\D/g, "");
               if (rawCep.length !== 8) {

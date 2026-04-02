@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.210938.488b42e",
-  "buildId": "0.1.9+20260402.210938.488b42e-20260402.210938-488b42e",
-  "builtAt": "2026-04-02T21:09:38.269Z",
-  "commitHash": "488b42e190bea8cc71abd8e683e6c71fd504266e",
-  "shortHash": "488b42e",
+  "versionInternal": "0.1.9+20260402.211611.4b53aba",
+  "buildId": "0.1.9+20260402.211611.4b53aba-20260402.211611-4b53aba",
+  "builtAt": "2026-04-02T21:16:11.916Z",
+  "commitHash": "4b53aba535f8d3662d2e36e113739d137ba3f05a",
+  "shortHash": "4b53aba",
   "branch": "main",
   "commits": [
+    {
+      "hash": "4b53aba535f8d3662d2e36e113739d137ba3f05a",
+      "shortHash": "4b53aba",
+      "dateIso": "2026-04-02T18:10:24-03:00",
+      "subject": "fix(ui): slim mobile bottom nav and hide it while category drawer is open"
+    },
     {
       "hash": "488b42e190bea8cc71abd8e683e6c71fd504266e",
       "shortHash": "488b42e",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "8222451",
       "dateIso": "2026-04-02T11:06:53-03:00",
       "subject": "style(create-store): polish stepper with icons, progress and checklist"
-    },
-    {
-      "hash": "20b3ca0980ccb6c174a84ccfeb987ad70f62d49c",
-      "shortHash": "20b3ca0",
-      "dateIso": "2026-04-02T11:02:29-03:00",
-      "subject": "feat(create-store): streamline onboarding into 4 guided steps"
     }
   ]
 } as const;

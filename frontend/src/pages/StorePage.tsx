@@ -287,6 +287,11 @@ export function StorePage() {
       ![ 'PENDING', 'CANCELLED', 'SUSPENDED', 'EXPIRED' ].includes(subscriptionStatus));
   const showInactiveState = view === 'menu' && isSubscriptionKnown && !isSubscriptionActive;
   const showClosedState = view === 'menu' && isSubscriptionActive && !storeOpenNow;
+  const loggedDeliveryNeedsSavedAddress = Boolean(
+    customerSession?.token &&
+    customer.type === 'delivery' &&
+    !customerAddresses.length
+  );
   const deliveryValidation = useMemo(() => {
     if (customer.type !== 'delivery' || !deliveryRadiusValue) {
       if (customer.type === 'delivery' && !String(customer.number || '').trim()) {
@@ -2261,10 +2266,12 @@ export function StorePage() {
               showToast('Endereço aplicado no checkout.', 'success');
             }}
             onOpenAddressManager={() => setShowCustomerAccount(true)}
-            checkoutDisabled={!cartItemsCount || deliveryValidation.blocked}
+            checkoutDisabled={!cartItemsCount || deliveryValidation.blocked || loggedDeliveryNeedsSavedAddress}
             checkoutDisabledReason={
               !cartItemsCount
                 ? 'Adicione pelo menos 1 item para continuar.'
+                : loggedDeliveryNeedsSavedAddress
+                ? 'Cadastre um endereço na sua conta para finalizar entrega.'
                 : deliveryValidation.reason
             }
             pricingSummary={{
