@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.171427.3bf07e4",
-  "buildId": "0.1.9+20260402.171427.3bf07e4-20260402.171427-3bf07e4",
-  "builtAt": "2026-04-02T17:14:27.119Z",
-  "commitHash": "3bf07e4f50ed190018a0b6256468251f51b60ad4",
-  "shortHash": "3bf07e4",
+  "versionInternal": "0.1.9+20260402.172455.2d68f7b",
+  "buildId": "0.1.9+20260402.172455.2d68f7b-20260402.172455-2d68f7b",
+  "builtAt": "2026-04-02T17:24:55.819Z",
+  "commitHash": "2d68f7be71609065e5134940c8a7fea2a58e22d4",
+  "shortHash": "2d68f7b",
   "branch": "main",
   "commits": [
+    {
+      "hash": "2d68f7be71609065e5134940c8a7fea2a58e22d4",
+      "shortHash": "2d68f7b",
+      "dateIso": "2026-04-02T14:15:05-03:00",
+      "subject": "fix(menu): activate last category at page end and brand active dot in drawer"
+    },
     {
       "hash": "3bf07e4f50ed190018a0b6256468251f51b60ad4",
       "shortHash": "3bf07e4",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "3029c51",
       "dateIso": "2026-04-01T16:25:41-03:00",
       "subject": "fix(postal): corrige transicao pronta->despachado e compat de status legado"
-    },
-    {
-      "hash": "4fe4c35b612a5c01d64c609a62004f2cde85a9c9",
-      "shortHash": "4fe4c35",
-      "dateIso": "2026-04-01T16:18:40-03:00",
-      "subject": "fix(queue): corrige transicoes de status para pedidos postais"
     }
   ]
 } as const;

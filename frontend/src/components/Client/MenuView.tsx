@@ -939,15 +939,14 @@ export const MenuView = ({
           <div ref={categoryTabsContainerRef} className="mx-auto w-full max-w-6xl px-4 pb-3">
             <div className="w-full flex items-center gap-2">
               {filteredGrouped.length > 2 && (
-                <Drawer.Trigger asChild>
-                  <button
-                    type="button"
-                    aria-label="Abrir categorias"
-                    className="h-10 w-10 shrink-0 rounded-lg bg-white border border-slate-200 text-slate-700 inline-flex items-center justify-center shadow-sm active:scale-95 transition-all"
-                  >
-                    <List size={18} weight="bold" />
-                  </button>
-                </Drawer.Trigger>
+                <button
+                  type="button"
+                  aria-label="Abrir categorias"
+                  onClick={() => setIsCategorySheetOpen(true)}
+                  className="h-10 w-10 shrink-0 rounded-lg bg-white border border-slate-200 text-slate-700 inline-flex items-center justify-center shadow-sm active:scale-95 transition-all"
+                >
+                  <List size={18} weight="bold" />
+                </button>
               )}
               <div className={`${
                 filteredGrouped.length > 2
