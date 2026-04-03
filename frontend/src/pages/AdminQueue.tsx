@@ -60,7 +60,7 @@ export function AdminQueue() {
     () =>
       (isOperatorUser
         ? [
-            { id: 'cardapio', label: 'Catálogo Online', icon: Package },
+            { id: 'cardapio', label: 'Loja Online', icon: Package },
             { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
           ]
         : [
@@ -74,7 +74,7 @@ export function AdminQueue() {
             { id: 'usuarios', label: 'Usuários', icon: UsersThree },
             { id: 'config', label: 'Configurações', icon: Gear },
             { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
-            { id: 'cardapio', label: 'Catálogo Online', icon: Package },
+            { id: 'cardapio', label: 'Loja Online', icon: Package },
           ]),
     [isOperatorUser, canUseMotoboys]
   );

@@ -1329,7 +1329,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     () =>
       (isOperatorUser
         ? [
-            { id: 'cardapio', label: 'Catálogo', icon: Package },
+            { id: 'cardapio', label: 'Loja Online', icon: Package },
             { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
           ]
         : [
@@ -1350,7 +1350,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     if (isOperatorUser) return desktopTabItems;
     return [
       ...desktopTabItems,
-      { id: 'cardapio', label: 'Catálogo Online', icon: BookOpen, disabled: false, standalone: true },
+      { id: 'cardapio', label: 'Loja Online', icon: BookOpen, disabled: false, standalone: true },
     ];
   }, [desktopTabItems, isOperatorUser]);
   const tabMeta = useMemo(

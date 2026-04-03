@@ -178,7 +178,7 @@ export function AdminMobileBottomNav() {
     },
     {
       id: 'catalogo',
-      label: 'Catálogo',
+      label: 'Loja Online',
       icon: Package,
       active: Boolean(storeSlug && (path === `/${storeSlug}` || path === `/store/${storeSlug}` || path === `/chamanoespeto/${storeSlug}`)),
       onClick: openCatalog,

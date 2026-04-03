@@ -45,7 +45,7 @@ export function AdminLayout({
       (isOperatorUser
         ? [
             { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
-            { id: 'cardapio', label: 'Catálogo', icon: Package },
+            { id: 'cardapio', label: 'Loja Online', icon: Package },
           ]
         : [
             { id: 'resumo', label: 'Resumo', icon: ChartBar },
@@ -53,7 +53,7 @@ export function AdminLayout({
             { id: 'vendas', label: 'Histórico de Pedidos', icon: ClipboardText },
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'estoque', label: 'Estoque', icon: Package },
-            { id: 'cardapio', label: 'Catálogo', icon: ShoppingCart },
+            { id: 'cardapio', label: 'Loja Online', icon: ShoppingCart },
             { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
             { id: 'usuarios', label: 'Usuários', icon: UsersThree },
@@ -82,7 +82,7 @@ export function AdminLayout({
     const vendas = ['fila', 'vendas', 'avaliacoes'].map(consume).filter(Boolean);
     if (vendas.length) sections.push({ type: 'group', id: 'vendas', label: 'Vendas', children: vendas });
     const catalogo = ['produtos', 'estoque', 'cardapio'].map(consume).filter(Boolean);
-    if (catalogo.length) sections.push({ type: 'group', id: 'catalogo', label: 'Catálogo', children: catalogo });
+    if (catalogo.length) sections.push({ type: 'group', id: 'catalogo', label: 'Produtos e Loja', children: catalogo });
     const financeiro = ['pagamentos'].map(consume).filter(Boolean);
     if (financeiro.length) sections.push({ type: 'group', id: 'financeiro', label: 'Financeiro', children: financeiro });
     const gestao = ['motoboys', 'usuarios'].map(consume).filter(Boolean);

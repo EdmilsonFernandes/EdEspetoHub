@@ -51,7 +51,7 @@ export function AdminDesktopSidebar({
     if (vendas.length) sections.push({ type: 'group', id: 'vendas', label: 'Vendas', children: vendas });
 
     const catalogo = ['produtos', 'estoque', 'cardapio'].map(consume).filter(Boolean);
-    if (catalogo.length) sections.push({ type: 'group', id: 'catalogo', label: 'Catálogo', children: catalogo });
+    if (catalogo.length) sections.push({ type: 'group', id: 'catalogo', label: 'Produtos e Loja', children: catalogo });
 
     const financeiro = ['pagamentos'].map(consume).filter(Boolean);
     if (financeiro.length) sections.push({ type: 'group', id: 'financeiro', label: 'Financeiro', children: financeiro });
