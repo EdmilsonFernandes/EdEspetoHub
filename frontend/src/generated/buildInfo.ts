@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.222508.866b8fe1",
-  "buildId": "0.1.9+20260403.222508.866b8fe1-20260403.222508-866b8fe1",
-  "builtAt": "2026-04-03T22:25:08.538Z",
-  "commitHash": "866b8fe15e4b1ae3b8489eb3f84f17081eb96adc",
-  "shortHash": "866b8fe1",
+  "versionInternal": "0.1.9+20260403.222959.05611ae1",
+  "buildId": "0.1.9+20260403.222959.05611ae1-20260403.222959-05611ae1",
+  "builtAt": "2026-04-03T22:29:59.090Z",
+  "commitHash": "05611ae1255835d9b30b3071dd8a401853c06397",
+  "shortHash": "05611ae1",
   "branch": "main",
   "commits": [
+    {
+      "hash": "05611ae1255835d9b30b3071dd8a401853c06397",
+      "shortHash": "05611ae1",
+      "dateIso": "2026-04-03T19:27:59-03:00",
+      "subject": "Landing: add premium Android download section and publish latest APK asset"
+    },
     {
       "hash": "866b8fe15e4b1ae3b8489eb3f84f17081eb96adc",
       "shortHash": "866b8fe1",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "49df2c76",
       "dateIso": "2026-04-03T13:10:46-03:00",
       "subject": "Normaliza rodape do Hub com padrao da plataforma e melhora localizacao"
-    },
-    {
-      "hash": "f2e8ad59e715050b02d6f33f60632b648d8f407c",
-      "shortHash": "f2e8ad59",
-      "dateIso": "2026-04-03T13:07:56-03:00",
-      "subject": "Eleva Hub com distancia aproximada real, branding e UX premium generica"
     }
   ]
 } as const;

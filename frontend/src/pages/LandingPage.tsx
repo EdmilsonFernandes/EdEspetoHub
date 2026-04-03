@@ -13,6 +13,8 @@ import {
   DownloadSimple,
   DeviceMobile,
   GooglePlayLogo,
+  CopySimple,
+  QrCode,
 } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { LandingPageLayout } from '../layouts/LandingPageLayout';
@@ -72,6 +74,11 @@ const formatPhoneBr = (value: string) => {
 
 export function LandingPage() {
   const navigate = useNavigate();
+  const androidApkPath = '/downloads/ja-no-caminho-android-latest.apk';
+  const androidApkPublicUrl = 'https://www.janocaminho.com.br/downloads/ja-no-caminho-android-latest.apk';
+  const androidApkQrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data=${encodeURIComponent(
+    androidApkPublicUrl
+  )}`;
   const [metrics, setMetrics] = useState<{
     activeStores?: number;
     totalOrders?: number;
@@ -91,6 +98,7 @@ export function LandingPage() {
   const [customerAuthLoading, setCustomerAuthLoading] = useState(false);
   const [customerAuthError, setCustomerAuthError] = useState('');
   const [targetStoreSlug, setTargetStoreSlug] = useState('');
+  const [apkLinkCopied, setApkLinkCopied] = useState(false);
 
   useEffect(() => {
     document.title = 'Já no Caminho | Plataforma completa para gestão de pedidos e entregas';
@@ -176,6 +184,16 @@ export function LandingPage() {
       setCustomerAuthError(error?.message || 'Não foi possível enviar recuperação.');
     } finally {
       setCustomerAuthLoading(false);
+    }
+  };
+
+  const handleCopyApkLink = async () => {
+    try {
+      await navigator.clipboard.writeText(androidApkPublicUrl);
+      setApkLinkCopied(true);
+      window.setTimeout(() => setApkLinkCopied(false), 2200);
+    } catch {
+      setApkLinkCopied(false);
     }
   };
 
@@ -597,7 +615,7 @@ export function LandingPage() {
 
               <div className="mt-6 flex flex-col sm:flex-row gap-3">
                 <a
-                  href="/downloads/ja-no-caminho-android-latest.apk"
+                  href={androidApkPath}
                   download
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-[linear-gradient(120deg,#0f172a,#1e293b)] px-5 py-3 text-sm font-black text-white shadow-[0_16px_30px_-18px_rgba(15,23,42,0.85)] transition-all hover:scale-[1.01] active:scale-[0.98]"
                 >
@@ -618,6 +636,28 @@ export function LandingPage() {
 
             <div className="rounded-[2rem] border border-slate-200/80 bg-white/90 backdrop-blur-xl p-6 sm:p-8 shadow-[0_24px_50px_-28px_rgba(15,23,42,0.35)]">
               <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400 font-black">Instalação rápida</p>
+              <div className="mt-4 flex items-center gap-4">
+                <div className="rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
+                  <img
+                    src={androidApkQrSrc}
+                    alt="QR Code para baixar o app Android"
+                    loading="lazy"
+                    className="h-24 w-24 sm:h-28 sm:w-28 rounded-lg object-cover"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Baixar via QR Code</p>
+                  <p className="mt-1 text-xs text-slate-600">Escaneie no celular e instale em poucos passos.</p>
+                  <button
+                    type="button"
+                    onClick={handleCopyApkLink}
+                    className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50"
+                  >
+                    <CopySimple size={13} weight="bold" />
+                    {apkLinkCopied ? 'Link copiado' : 'Copiar link'}
+                  </button>
+                </div>
+              </div>
               <ol className="mt-4 space-y-3 text-sm text-slate-600">
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-900 text-[10px] font-black text-white">1</span>
@@ -632,6 +672,10 @@ export function LandingPage() {
                   Instale e abra o app. Publicação na Play Store em andamento.
                 </li>
               </ol>
+              <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">
+                <QrCode size={12} weight="duotone" />
+                Play Store em breve
+              </div>
             </div>
           </div>
         </div>

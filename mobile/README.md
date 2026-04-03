@@ -47,3 +47,110 @@ Debug APK output:
 
 - This setup is ready for iterative Android work while web continues normally.
 - Next step after Android validation: add iOS platform (`npx cap add ios`) with same architecture.
+
+## Mobile runtime architecture
+
+- Shell: Capacitor Android app (`mobile/android`).
+- Rendering: WebView loading production Hub (`/hub`) from `janocaminho.com.br`.
+- Navigation:
+  - Back behavior handled natively in `MainActivity`.
+  - Deep link support:
+    - `https://janocaminho.com.br/...`
+    - `janocaminho://...`
+- Session persistence:
+  - WebView cookies + DOM storage enabled.
+  - Last URL restore on app reopen.
+- Push notifications:
+  - Capacitor Push plugin enabled (Android).
+  - Frontend registers token and syncs with backend customer endpoints.
+  - Backend stores tokens and triggers push on order status changes.
+
+## Environment required for push in production
+
+Set on API environment (SSM / `.env.prod`):
+
+```bash
+FCM_SERVER_KEY=YOUR_FIREBASE_SERVER_KEY
+```
+
+Without this key, token registration works, but push delivery is skipped.
+
+## Release workflow (Android)
+
+1. Build frontend:
+
+```bash
+cd frontend
+npm run build
+```
+
+2. Sync Capacitor Android:
+
+```bash
+cd ../mobile
+npm run android:sync
+```
+
+3. Build APK (debug/internal):
+
+```bash
+cd android
+./gradlew assembleDebug
+```
+
+4. Build AAB (Google Play):
+
+```bash
+./gradlew bundleRelease
+```
+
+Artifacts:
+
+- APK debug: `mobile/android/app/build/outputs/apk/debug/app-debug.apk`
+- AAB release: `mobile/android/app/build/outputs/bundle/release/app-release.aab`
+
+## Google Play Store publication checklist
+
+1. **Create app in Play Console**
+   - app name, default language, category
+   - privacy policy URL
+
+2. **Prepare signing**
+   - generate keystore (`.jks`)
+   - configure `signingConfigs` in `app/build.gradle`
+   - keep keystore + passwords secure
+
+3. **Set release identifiers**
+   - increment `versionCode`
+   - update `versionName`
+
+4. **Build release AAB**
+   - `./gradlew bundleRelease`
+
+5. **Upload to Play Console**
+   - Internal testing first
+   - validate install/update on real devices
+
+6. **Complete store listing**
+   - icon (512x512)
+   - feature graphic
+   - screenshots (phone/tablet)
+   - short/long descriptions
+
+7. **Policy compliance**
+   - Data safety form
+   - content rating
+   - app access instructions if needed
+
+8. **Rollout**
+   - Internal -> Closed -> Production
+   - staged rollout (recommended)
+
+## Landing APK distribution
+
+- Public APK endpoint used by landing page:
+  - `/downloads/ja-no-caminho-android-latest.apk`
+- File maintained in repository:
+  - `frontend/public/downloads/ja-no-caminho-android-latest.apk`
+- Folder policy (`frontend/public/downloads/.gitignore`):
+  - keeps only `latest.apk` tracked to avoid repository bloat.
