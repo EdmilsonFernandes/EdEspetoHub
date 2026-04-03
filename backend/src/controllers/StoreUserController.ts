@@ -7,7 +7,12 @@ const service = new StoreUserService();
 const log = logger.child({ scope: 'StoreUserController' });
 
 export class StoreUserController {
-  static async list(req: Request, res: Response) {
+    /**
+   * Lists records for list.
+   *
+   * @author Edmilson Lopes
+   */
+static async list(req: Request, res: Response) {
     try {
       const list = await service.listByStore(req.params.storeId, req.auth?.storeId);
       return res.json(list);
@@ -17,7 +22,12 @@ export class StoreUserController {
     }
   }
 
-  static async create(req: Request, res: Response) {
+    /**
+   * Creates resources for create.
+   *
+   * @author Edmilson Lopes
+   */
+static async create(req: Request, res: Response) {
     try {
       const created = await service.createForStore(req.params.storeId, req.body || {}, req.auth?.storeId);
       return res.status(201).json(created);
@@ -27,7 +37,12 @@ export class StoreUserController {
     }
   }
 
-  static async updatePassword(req: Request, res: Response) {
+    /**
+   * Updates resources for update password.
+   *
+   * @author Edmilson Lopes
+   */
+static async updatePassword(req: Request, res: Response) {
     try {
       const result = await service.updatePasswordForStoreUser(
         req.params.storeId,
@@ -46,7 +61,12 @@ export class StoreUserController {
     }
   }
 
-  static async remove(req: Request, res: Response) {
+    /**
+   * Removes resources for remove.
+   *
+   * @author Edmilson Lopes
+   */
+static async remove(req: Request, res: Response) {
     try {
       const result = await service.removeForStore(
         req.params.storeId,

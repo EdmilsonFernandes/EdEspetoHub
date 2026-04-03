@@ -89,7 +89,12 @@ const buildDemoStore = (slug: string) => {
  * @date 2025-12-17
  */
 export class StoreController {
-  private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?: string | null; planExempt?: boolean; subscriptionStatus?: string | null }) {
+    /**
+   * Executes sanitize order types by plan business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?: string | null; planExempt?: boolean; subscriptionStatus?: string | null }) {
     const incoming = Array.isArray(orderTypes) ? orderTypes : [ 'delivery', 'pickup', 'table' ];
     const features = resolvePlanFeatures({
       planName: params.planName,

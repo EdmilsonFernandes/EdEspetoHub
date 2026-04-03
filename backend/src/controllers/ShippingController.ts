@@ -20,7 +20,12 @@ const shippingService = new ShippingService();
 const log = logger.child({ scope: 'ShippingController' });
 
 export class ShippingController {
-  static async quotePostalPublicBySlug(req: Request, res: Response) {
+    /**
+   * Calculates values for quote postal public by slug.
+   *
+   * @author Edmilson Lopes
+   */
+static async quotePostalPublicBySlug(req: Request, res: Response) {
     try {
       const payload = await shippingService.quoteByStoreSlug(req.params.slug, {
         destinationZip: req.body?.destinationZip,
@@ -33,7 +38,12 @@ export class ShippingController {
     }
   }
 
-  static async quotePostalByStore(req: Request, res: Response) {
+    /**
+   * Calculates values for quote postal by store.
+   *
+   * @author Edmilson Lopes
+   */
+static async quotePostalByStore(req: Request, res: Response) {
     try {
       const payload = await shippingService.quoteByStoreId(
         req.params.storeId,

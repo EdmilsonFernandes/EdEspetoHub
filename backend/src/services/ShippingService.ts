@@ -43,23 +43,43 @@ export class ShippingService {
   private readonly internalProvider = new InternalShippingQuoteProvider();
   private readonly melhorEnvioProvider = new MelhorEnvioShippingQuoteProvider();
 
-  private normalizeZip(value: unknown) {
+    /**
+   * Executes normalize zip business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private normalizeZip(value: unknown) {
     return String(value || '').replace(/\D/g, '').slice(0, 8);
   }
 
-  private normalizePositiveInt(value: unknown, fallback: number) {
+    /**
+   * Executes normalize positive int business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private normalizePositiveInt(value: unknown, fallback: number) {
     const parsed = Math.floor(Number(value));
     if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
     return parsed;
   }
 
-  private normalizeQuantity(value: unknown) {
+    /**
+   * Executes normalize quantity business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private normalizeQuantity(value: unknown) {
     const parsed = Math.floor(Number(value));
     if (!Number.isFinite(parsed) || parsed <= 0) return 1;
     return parsed;
   }
 
-  private buildPackageFromItems(items: Array<Required<Pick<QuoteItemInput, 'quantity' | 'weightG' | 'lengthCm' | 'widthCm' | 'heightCm'>>>) {
+    /**
+   * Executes build package from items business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private buildPackageFromItems(items: Array<Required<Pick<QuoteItemInput, 'quantity' | 'weightG' | 'lengthCm' | 'widthCm' | 'heightCm'>>>) {
     let totalWeightG = 0;
     let totalVolumeCm3 = 0;
     let maxLength = 16;
@@ -94,14 +114,24 @@ export class ShippingService {
     };
   }
 
-  private resolveProviderOrder(): ShippingQuoteProvider[] {
+    /**
+   * Executes resolve provider order business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private resolveProviderOrder(): ShippingQuoteProvider[] {
     const provider = String(env.shipping.provider || 'internal').toLowerCase();
     if (provider === 'melhor_envio') return [this.melhorEnvioProvider, this.internalProvider];
     if (provider === 'auto') return [this.melhorEnvioProvider, this.internalProvider];
     return [this.internalProvider];
   }
 
-  private async quoteWithProviderFallback(args: {
+    /**
+   * Calculates values for quote with provider fallback.
+   *
+   * @author Edmilson Lopes
+   */
+private async quoteWithProviderFallback(args: {
     originZip: string;
     destinationZip: string;
     pkg: {
@@ -171,7 +201,12 @@ export class ShippingService {
     });
   }
 
-  private async resolveInputItems(storeId: string, inputItems: QuoteItemInput[]): Promise<QuoteItemResolved[]> {
+    /**
+   * Executes resolve input items business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async resolveInputItems(storeId: string, inputItems: QuoteItemInput[]): Promise<QuoteItemResolved[]> {
     if (!Array.isArray(inputItems) || inputItems.length === 0) {
       throw new AppError('ORDER-004', 400, { message: 'Informe ao menos 1 item para cotação postal.' });
     }
@@ -203,7 +238,12 @@ export class ShippingService {
     return resolved;
   }
 
-  private async quoteByStoreInternal(store: any, input: QuoteInput, enforcePostalEnabled: boolean) {
+    /**
+   * Calculates values for quote by store internal.
+   *
+   * @author Edmilson Lopes
+   */
+private async quoteByStoreInternal(store: any, input: QuoteInput, enforcePostalEnabled: boolean) {
     if (!store) throw new AppError('STORE-001', 404);
 
     const destinationZip = this.normalizeZip(input?.destinationZip);
@@ -253,7 +293,12 @@ export class ShippingService {
     };
   }
 
-  async quoteByStoreId(
+    /**
+   * Calculates values for quote by store id.
+   *
+   * @author Edmilson Lopes
+   */
+async quoteByStoreId(
     storeId: string,
     input: QuoteInput,
     authStoreId?: string
@@ -265,7 +310,12 @@ export class ShippingService {
     return this.quoteByStoreInternal(store, input, false);
   }
 
-  async quoteByStoreSlug(slug: string, input: QuoteInput) {
+    /**
+   * Calculates values for quote by store slug.
+   *
+   * @author Edmilson Lopes
+   */
+async quoteByStoreSlug(slug: string, input: QuoteInput) {
     const store = await this.storeRepository.findBySlug(slug);
     return this.quoteByStoreInternal(store, input, true);
   }

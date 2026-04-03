@@ -22,19 +22,34 @@ export class OrderReviewRepository {
     this.repository = AppDataSource.getRepository(OrderReview);
   }
 
-  findByOrderId(orderId: string) {
+    /**
+   * Retrieves data for find by order id.
+   *
+   * @author Edmilson Lopes
+   */
+findByOrderId(orderId: string) {
     return this.repository.findOne({
       where: { orderId },
       order: { createdAt: 'DESC' },
     });
   }
 
-  findById(id: string) {
+    /**
+   * Retrieves data for find by id.
+   *
+   * @author Edmilson Lopes
+   */
+findById(id: string) {
     if (!id) return Promise.resolve(null);
     return this.repository.findOne({ where: { id } });
   }
 
-  async saveReview(input: Partial<OrderReview>) {
+    /**
+   * Executes save review business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async saveReview(input: Partial<OrderReview>) {
     const existing = input.orderId ? await this.findByOrderId(input.orderId) : null;
     if (existing) {
       Object.assign(existing, input);
@@ -44,7 +59,12 @@ export class OrderReviewRepository {
     return this.repository.save(entity);
   }
 
-  async listByStoreId(storeId: string, limit = 100) {
+    /**
+   * Lists records for list by store id.
+   *
+   * @author Edmilson Lopes
+   */
+async listByStoreId(storeId: string, limit = 100) {
     return this.repository
       .createQueryBuilder('r')
       .leftJoin('motoboys', 'm', 'm.id = r.motoboy_id')
@@ -76,7 +96,12 @@ export class OrderReviewRepository {
       .getRawMany();
   }
 
-  async getStoreSummary(storeId: string) {
+    /**
+   * Retrieves data for get store summary.
+   *
+   * @author Edmilson Lopes
+   */
+async getStoreSummary(storeId: string) {
     const [summary] = await AppDataSource.query(
       `
       SELECT
@@ -126,7 +151,12 @@ export class OrderReviewRepository {
     return { summary: summary || {}, distribution: distribution || [], motoboy: motoboy || [] };
   }
 
-  async listTipPayoutsByStoreId(storeId: string, limit = 300) {
+    /**
+   * Lists records for list tip payouts by store id.
+   *
+   * @author Edmilson Lopes
+   */
+async listTipPayoutsByStoreId(storeId: string, limit = 300) {
     return AppDataSource.query(
       `
       SELECT
@@ -160,7 +190,12 @@ export class OrderReviewRepository {
     );
   }
 
-  async listTipPayoutsByMotoboyId(motoboyId: string, limit = 300) {
+    /**
+   * Lists records for list tip payouts by motoboy id.
+   *
+   * @author Edmilson Lopes
+   */
+async listTipPayoutsByMotoboyId(motoboyId: string, limit = 300) {
     return AppDataSource.query(
       `
       SELECT

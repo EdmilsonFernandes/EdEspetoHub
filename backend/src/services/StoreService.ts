@@ -35,7 +35,12 @@ export class StoreService
 {
   private subscriptionService = new SubscriptionService();
   private storeRepository = AppDataSource.getRepository(Store);
-  private parseNumber(value?: any): number | null | undefined
+    /**
+   * Executes parse number business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private parseNumber(value?: any): number | null | undefined
   {
     if (value === undefined) return undefined;
     if (value === null) return null;
@@ -45,7 +50,12 @@ export class StoreService
     if (Number.isNaN(parsed)) return null;
     return parsed;
   }
-  private normalizePixKey(value?: string)
+    /**
+   * Executes normalize pix key business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private normalizePixKey(value?: string)
   {
     if (!value) return undefined;
     const trimmed = value.toString().trim();
@@ -65,11 +75,21 @@ export class StoreService
     if (digits.length > 11) return `+${digits}`;
     return trimmed;
   }
-  private normalizeBannerPosition(value?: string | null): 'center' | 'top' {
+    /**
+   * Executes normalize banner position business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private normalizeBannerPosition(value?: string | null): 'center' | 'top' {
     return String(value || '').toLowerCase() === 'top' ? 'top' : 'center';
   }
 
-  private normalizePostalZip(value?: string | null) {
+    /**
+   * Executes normalize postal zip business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private normalizePostalZip(value?: string | null) {
     if (value === undefined) return undefined;
     if (value === null) return null;
     const digits = String(value).replace(/\D/g, '').slice(0, 8);

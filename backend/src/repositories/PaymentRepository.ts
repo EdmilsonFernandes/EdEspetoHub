@@ -75,7 +75,12 @@ export class PaymentRepository {
     });
   }
 
-  findLatestPaidByStoreId(storeId: string) {
+    /**
+   * Retrieves data for find latest paid by store id.
+   *
+   * @author Edmilson Lopes
+   */
+findLatestPaidByStoreId(storeId: string) {
     return this.repository.findOne({
       where: { store: { id: storeId }, status: 'PAID' },
       order: { createdAt: 'DESC' },

@@ -47,7 +47,12 @@ export class OrderService
   private storeUserRepository = new StoreUserRepository();
   private tz = process.env.APP_TZ || 'America/Sao_Paulo';
 
-  private async reconcileDeliveredOrdersByStore(storeId: string) {
+    /**
+   * Executes reconcile delivered orders by store business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async reconcileDeliveredOrdersByStore(storeId: string) {
     if (!storeId) return;
     await AppDataSource.query(
       `
@@ -80,7 +85,12 @@ export class OrderService
     );
   }
 
-  private async reconcileDeliveredOrderById(orderId: string) {
+    /**
+   * Executes reconcile delivered order by id business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async reconcileDeliveredOrderById(orderId: string) {
     if (!orderId) return;
     await AppDataSource.query(
       `
@@ -97,7 +107,12 @@ export class OrderService
     );
   }
 
-  private async attachDeliverySnapshot(orders: any[]) {
+    /**
+   * Executes attach delivery snapshot business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async attachDeliverySnapshot(orders: any[]) {
     if (!Array.isArray(orders) || orders.length === 0) return orders;
     const orderIds = orders
       .map((order: any) => String(order?.id || '').trim())
@@ -182,7 +197,12 @@ export class OrderService
     });
   }
 
-  private async attachShipmentSnapshot(orders: any[]) {
+    /**
+   * Executes attach shipment snapshot business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async attachShipmentSnapshot(orders: any[]) {
     if (!Array.isArray(orders) || orders.length === 0) return orders;
     const orderIds = orders
       .map((order: any) => String(order?.id || '').trim())
@@ -260,7 +280,12 @@ export class OrderService
     return Number((product as any).price) || 0;
   }
 
-  private resolveBundleDiscount(
+    /**
+   * Executes resolve bundle discount business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private resolveBundleDiscount(
     product: Awaited<ReturnType<ProductRepository[ 'findById' ]>>,
     quantity: number
   )
@@ -285,12 +310,22 @@ export class OrderService
     return Number((discountPerGroup * groups).toFixed(2));
   }
 
-  private normalizeText(value: unknown)
+    /**
+   * Executes normalize text business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private normalizeText(value: unknown)
   {
     return String(value || '').trim().toLowerCase();
   }
 
-  private resolveSelectedModifiers(
+    /**
+   * Executes resolve selected modifiers business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private resolveSelectedModifiers(
     product: Awaited<ReturnType<ProductRepository[ 'findById' ]>>,
     selected: any
   )
@@ -352,7 +387,12 @@ export class OrderService
     }
   }
 
-  private async appendInventoryMovementTx(
+    /**
+   * Executes append inventory movement tx business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async appendInventoryMovementTx(
     manager: EntityManager,
     payload: {
       storeId: string;
@@ -421,7 +461,12 @@ export class OrderService
     }
   }
 
-  private async adjustManagedStockTx(
+    /**
+   * Executes adjust managed stock tx business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async adjustManagedStockTx(
     manager: EntityManager,
     payload: {
       storeId: string;
@@ -486,7 +531,12 @@ export class OrderService
     });
   }
 
-  private async seedPostalShipmentFromCheckoutTx(
+    /**
+   * Executes seed postal shipment from checkout tx business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async seedPostalShipmentFromCheckoutTx(
     manager: EntityManager,
     order: Order,
     input: any
@@ -775,7 +825,12 @@ export class OrderService
     return saved;
   }
 
-  async updateFulfillmentMode(
+    /**
+   * Updates resources for update fulfillment mode.
+   *
+   * @author Edmilson Lopes
+   */
+async updateFulfillmentMode(
     orderId: string,
     mode: 'distance' | 'postal' | string,
     authStoreId?: string
@@ -795,7 +850,12 @@ export class OrderService
     return this.orderRepository.save(order);
   }
 
-  async updatePostalShipment(
+    /**
+   * Updates resources for update postal shipment.
+   *
+   * @author Edmilson Lopes
+   */
+async updatePostalShipment(
     orderId: string,
     input: {
       provider?: string;
@@ -867,7 +927,12 @@ export class OrderService
     return result;
   }
 
-  async reopenOrder(
+    /**
+   * Executes reopen order business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async reopenOrder(
     orderId: string,
     input: { reason?: string; adminIdentifier?: string; adminPassword?: string },
     auth?: { storeId?: string; role?: string; sub?: string }
@@ -1028,7 +1093,12 @@ export class OrderService
     });
   }
 
-  async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authStoreId?: string) {
+    /**
+   * Marks workflow state for mark items as printed.
+   *
+   * @author Edmilson Lopes
+   */
+async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authStoreId?: string) {
     const order = await this.orderRepository.findById(orderId);
     if (!order) throw new AppError('ORDER-001', 404);
     this.ensureStoreAccess(order.store, authStoreId);

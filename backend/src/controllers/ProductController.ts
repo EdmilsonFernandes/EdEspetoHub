@@ -197,7 +197,12 @@ export class ProductController {
     }
   }
 
-  static async listCategories(req: Request, res: Response) {
+    /**
+   * Lists records for list categories.
+   *
+   * @author Edmilson Lopes
+   */
+static async listCategories(req: Request, res: Response) {
     try {
       const categories = await productService.listCategoriesByStoreId(req.params.storeId, req.auth?.storeId);
       return res.json(categories);
@@ -206,7 +211,12 @@ export class ProductController {
     }
   }
 
-  static async listPublicCategoriesBySlug(req: Request, res: Response) {
+    /**
+   * Lists records for list public categories by slug.
+   *
+   * @author Edmilson Lopes
+   */
+static async listPublicCategoriesBySlug(req: Request, res: Response) {
     try {
       const categories = await productService.listCategoriesByStoreSlug(req.params.slug);
       return res.json(categories);
@@ -215,7 +225,12 @@ export class ProductController {
     }
   }
 
-  static async setCategoryPriority(req: Request, res: Response) {
+    /**
+   * Sets state or configuration for set category priority.
+   *
+   * @author Edmilson Lopes
+   */
+static async setCategoryPriority(req: Request, res: Response) {
     try {
       const payload = await productService.setCategoryPriority(
         req.params.storeId,
@@ -231,7 +246,12 @@ export class ProductController {
     }
   }
 
-  static async listInventory(req: Request, res: Response) {
+    /**
+   * Lists records for list inventory.
+   *
+   * @author Edmilson Lopes
+   */
+static async listInventory(req: Request, res: Response) {
     try {
       const payload = await productService.listInventoryByStoreId(
         req.params.storeId,
@@ -250,7 +270,12 @@ export class ProductController {
     }
   }
 
-  static async getInventoryAlerts(req: Request, res: Response) {
+    /**
+   * Retrieves data for get inventory alerts.
+   *
+   * @author Edmilson Lopes
+   */
+static async getInventoryAlerts(req: Request, res: Response) {
     try {
       const payload = await productService.getInventoryAlertsByStoreId(req.params.storeId, req.auth?.storeId);
       return res.json(payload);
@@ -259,7 +284,12 @@ export class ProductController {
     }
   }
 
-  static async listInventoryMovements(req: Request, res: Response) {
+    /**
+   * Lists records for list inventory movements.
+   *
+   * @author Edmilson Lopes
+   */
+static async listInventoryMovements(req: Request, res: Response) {
     try {
       const payload = await productService.listInventoryMovementsByStoreId(
         req.params.storeId,
@@ -276,7 +306,12 @@ export class ProductController {
     }
   }
 
-  static async adjustStock(req: Request, res: Response) {
+    /**
+   * Executes adjust stock business logic.
+   *
+   * @author Edmilson Lopes
+   */
+static async adjustStock(req: Request, res: Response) {
     try {
       const payload = await productService.adjustStock(
         req.params.storeId,

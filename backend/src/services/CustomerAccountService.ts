@@ -24,15 +24,30 @@ type AddressInput = {
 
 export class CustomerAccountService {
   private emailService = new EmailService();
-  private normalizeEmail(value: string) {
+    /**
+   * Executes normalize email business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private normalizeEmail(value: string) {
     return String(value || '').trim().toLowerCase();
   }
 
-  private sanitizePhone(value?: string | null) {
+    /**
+   * Executes sanitize phone business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private sanitizePhone(value?: string | null) {
     return String(value || '').replace(/\D/g, '');
   }
 
-  private sanitizeUser(user: User) {
+    /**
+   * Executes sanitize user business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private sanitizeUser(user: User) {
     return {
       id: user.id,
       fullName: user.fullName,
@@ -43,7 +58,12 @@ export class CustomerAccountService {
     };
   }
 
-  private mapAddress(entity: CustomerAddress) {
+    /**
+   * Executes map address business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private mapAddress(entity: CustomerAddress) {
     return {
       id: entity.id,
       label: entity.label || null,
@@ -62,7 +82,12 @@ export class CustomerAccountService {
     };
   }
 
-  async register(input: { fullName: string; email: string; password: string; phone?: string | null }) {
+    /**
+   * Creates resources for register.
+   *
+   * @author Edmilson Lopes
+   */
+async register(input: { fullName: string; email: string; password: string; phone?: string | null }) {
     const fullName = String(input?.fullName || '').trim();
     const email = this.normalizeEmail(input?.email || '');
     const password = String(input?.password || '');
@@ -91,7 +116,7 @@ export class CustomerAccountService {
     try {
       await this.emailService.sendCustomerWelcome(saved.email, saved.fullName);
     } catch {
-      // Não bloqueia cadastro do cliente por falha de e-mail.
+      // Do not block customer registration when email delivery fails.
     }
 
     const token = jwt.sign(
@@ -106,7 +131,12 @@ export class CustomerAccountService {
     };
   }
 
-  async login(input: { email: string; password: string }) {
+    /**
+   * Executes login business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async login(input: { email: string; password: string }) {
     const email = this.normalizeEmail(input?.email || '');
     const password = String(input?.password || '');
     if (!email || !password) throw new AppError('AUTH-004', 401);
@@ -130,13 +160,23 @@ export class CustomerAccountService {
     };
   }
 
-  async me(userId: string) {
+    /**
+   * Executes me business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async me(userId: string) {
     const user = await AppDataSource.getRepository(User).findOne({ where: { id: userId } });
     if (!user) throw new AppError('AUTH-004', 401);
     return this.sanitizeUser(user);
   }
 
-  async updateMe(userId: string, input: { fullName?: string; phone?: string | null }) {
+    /**
+   * Updates resources for update me.
+   *
+   * @author Edmilson Lopes
+   */
+async updateMe(userId: string, input: { fullName?: string; phone?: string | null }) {
     const repo = AppDataSource.getRepository(User);
     const user = await repo.findOne({ where: { id: userId } });
     if (!user) throw new AppError('AUTH-004', 401);
@@ -149,7 +189,12 @@ export class CustomerAccountService {
     return this.sanitizeUser(saved);
   }
 
-  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    /**
+   * Executes change password business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async changePassword(userId: string, currentPassword: string, newPassword: string) {
     const repo = AppDataSource.getRepository(User);
     const user = await repo.findOne({ where: { id: userId } });
     if (!user) throw new AppError('AUTH-004', 401);
@@ -167,7 +212,12 @@ export class CustomerAccountService {
     return { ok: true };
   }
 
-  async listAddresses(userId: string) {
+    /**
+   * Lists records for list addresses.
+   *
+   * @author Edmilson Lopes
+   */
+async listAddresses(userId: string) {
     const rows = await AppDataSource.getRepository(CustomerAddress).find({
       where: { userId },
       order: { isDefault: 'DESC', createdAt: 'DESC' },
@@ -175,7 +225,12 @@ export class CustomerAccountService {
     return rows.map((row) => this.mapAddress(row));
   }
 
-  async createAddress(userId: string, input: AddressInput) {
+    /**
+   * Creates resources for create address.
+   *
+   * @author Edmilson Lopes
+   */
+async createAddress(userId: string, input: AddressInput) {
     const cep = String(input?.cep || '').replace(/\D/g, '').slice(0, 8);
     const state = String(input?.state || '').trim().toUpperCase().slice(0, 2);
     const street = String(input?.street || '').trim();
@@ -212,7 +267,12 @@ export class CustomerAccountService {
     });
   }
 
-  async updateAddress(userId: string, addressId: string, input: Partial<AddressInput>) {
+    /**
+   * Updates resources for update address.
+   *
+   * @author Edmilson Lopes
+   */
+async updateAddress(userId: string, addressId: string, input: Partial<AddressInput>) {
     return AppDataSource.transaction(async (manager) => {
       const repo = manager.getRepository(CustomerAddress);
       const address = await repo.findOne({ where: { id: addressId, userId } });
@@ -249,7 +309,12 @@ export class CustomerAccountService {
     });
   }
 
-  async deleteAddress(userId: string, addressId: string) {
+    /**
+   * Removes resources for delete address.
+   *
+   * @author Edmilson Lopes
+   */
+async deleteAddress(userId: string, addressId: string) {
     return AppDataSource.transaction(async (manager) => {
       const repo = manager.getRepository(CustomerAddress);
       const address = await repo.findOne({ where: { id: addressId, userId } });
@@ -269,7 +334,12 @@ export class CustomerAccountService {
     });
   }
 
-  async setDefaultAddress(userId: string, addressId: string) {
+    /**
+   * Sets state or configuration for set default address.
+   *
+   * @author Edmilson Lopes
+   */
+async setDefaultAddress(userId: string, addressId: string) {
     return AppDataSource.transaction(async (manager) => {
       const repo = manager.getRepository(CustomerAddress);
       const address = await repo.findOne({ where: { id: addressId, userId } });
@@ -281,7 +351,12 @@ export class CustomerAccountService {
     });
   }
 
-  async listOrders(userId: string) {
+    /**
+   * Lists records for list orders.
+   *
+   * @author Edmilson Lopes
+   */
+async listOrders(userId: string) {
     const rows = await AppDataSource.getRepository(Order).find({
       where: { customerUserId: userId },
       relations: [ 'store', 'items', 'items.product', 'shipment' ],

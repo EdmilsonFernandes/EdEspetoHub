@@ -29,7 +29,12 @@ export class ProductService
 {
   private productRepository = new ProductRepository();
   private storeRepository = new StoreRepository();
-  private normalizeCategoryKey(value: unknown)
+    /**
+   * Executes normalize category key business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private normalizeCategoryKey(value: unknown)
   {
     return String(value || '')
       .trim()
@@ -41,7 +46,12 @@ export class ProductService
       .replace(/^-+|-+$/g, '');
   }
 
-  private defaultCategoryPriorityFor(rawCategory: unknown)
+    /**
+   * Executes default category priority for business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private defaultCategoryPriorityFor(rawCategory: unknown)
   {
     const key = this.normalizeCategoryKey(rawCategory);
     if (!key) return 99;
@@ -54,7 +64,12 @@ export class ProductService
     return 99;
   }
 
-  private buildCategoryPriorityMap(store: Awaited<ReturnType<StoreRepository['findById']>>)
+    /**
+   * Executes build category priority map business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private buildCategoryPriorityMap(store: Awaited<ReturnType<StoreRepository['findById']>>)
   {
     const map = new Map<string, number>();
     const settingsMap = (store as any)?.settings?.categoryPriorities || {};
@@ -69,7 +84,12 @@ export class ProductService
     return map;
   }
 
-  private getCategoryPriority(store: Awaited<ReturnType<StoreRepository['findById']>>, category: unknown)
+    /**
+   * Retrieves data for get category priority.
+   *
+   * @author Edmilson Lopes
+   */
+private getCategoryPriority(store: Awaited<ReturnType<StoreRepository['findById']>>, category: unknown)
   {
     const normalized = this.normalizeCategoryKey(category);
     if (!normalized) return 99;
@@ -78,7 +98,12 @@ export class ProductService
     return this.defaultCategoryPriorityFor(normalized);
   }
 
-  private attachCategoryPriority(
+    /**
+   * Executes attach category priority business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private attachCategoryPriority(
     store: Awaited<ReturnType<StoreRepository['findById']>>,
     products: any[]
   )
@@ -98,7 +123,12 @@ export class ProductService
     });
   }
 
-  private formatCategoryLabel(category: unknown)
+    /**
+   * Executes format category label business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private formatCategoryLabel(category: unknown)
   {
     const raw = String(category || '').trim();
     if (!raw) return '';
@@ -107,7 +137,12 @@ export class ProductService
       .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
       .join(' ');
   }
-  private normalizeModifierId(value: unknown)
+    /**
+   * Executes normalize modifier id business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private normalizeModifierId(value: unknown)
   {
     return String(value || '')
       .trim()
@@ -116,7 +151,12 @@ export class ProductService
       .replace(/^-+|-+$/g, '');
   }
 
-  private normalizeModifiers(input: unknown)
+    /**
+   * Executes normalize modifiers business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private normalizeModifiers(input: unknown)
   {
     if (!Array.isArray(input)) return null;
     const result: Array<{ id: string; name: string; price: number; active?: boolean }> = [];
@@ -139,7 +179,12 @@ export class ProductService
     return result.length ? result : null;
   }
 
-  private resolveBundlePromo(input: Partial<CreateProductDto>, baseUnitPrice: number, current?: { qty?: number | null; price?: number | null; active?: boolean })
+    /**
+   * Executes resolve bundle promo business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private resolveBundlePromo(input: Partial<CreateProductDto>, baseUnitPrice: number, current?: { qty?: number | null; price?: number | null; active?: boolean })
   {
     const parseOptionalNumber = (value: unknown) => {
       if (value === undefined || value === null || String(value).trim() === '') return null;
@@ -188,7 +233,12 @@ export class ProductService
     }
   }
 
-  private resolveInventoryStatus(product: any) {
+    /**
+   * Executes resolve inventory status business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private resolveInventoryStatus(product: any) {
     const manageStock = Boolean(product?.manageStock);
     if (!manageStock) return 'not_managed';
     const qty = Math.max(0, Number(product?.stockQuantity || 0));
@@ -198,14 +248,24 @@ export class ProductService
     return 'ok';
   }
 
-  private parseOptionalPositiveInt(value: unknown): number | null {
+    /**
+   * Executes parse optional positive int business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private parseOptionalPositiveInt(value: unknown): number | null {
     if (value === undefined || value === null || String(value).trim() === '') return null;
     const parsed = Math.floor(Number(value));
     if (!Number.isFinite(parsed) || parsed <= 0) return null;
     return parsed;
   }
 
-  private async appendInventoryMovement(payload: {
+    /**
+   * Executes append inventory movement business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async appendInventoryMovement(payload: {
     storeId: string;
     productId: string;
     orderId?: string | null;
@@ -241,7 +301,12 @@ export class ProductService
     }
   }
 
-  private async appendInventoryMovementTx(
+    /**
+   * Executes append inventory movement tx business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async appendInventoryMovementTx(
     manager: EntityManager,
     payload: {
       storeId: string;
@@ -392,7 +457,12 @@ export class ProductService
     return this.attachCategoryPriority(store, products as any[]);
   }
 
-  async listInventoryByStoreId(
+    /**
+   * Lists records for list inventory by store id.
+   *
+   * @author Edmilson Lopes
+   */
+async listInventoryByStoreId(
     storeId: string,
     options?: { status?: string; query?: string; includeNotManaged?: boolean; limit?: number; offset?: number },
     authStoreId?: string
@@ -453,7 +523,12 @@ export class ProductService
     };
   }
 
-  async getInventoryAlertsByStoreId(storeId: string, authStoreId?: string) {
+    /**
+   * Retrieves data for get inventory alerts by store id.
+   *
+   * @author Edmilson Lopes
+   */
+async getInventoryAlertsByStoreId(storeId: string, authStoreId?: string) {
     const store = await this.storeRepository.findById(storeId);
     this.ensureStoreAccess(store, authStoreId);
     const products = await this.productRepository.findByStoreId(store!.id);
@@ -514,7 +589,12 @@ export class ProductService
     return this.attachCategoryPriority(store, activeToday as any[]);
   }
 
-  async listCategoriesByStoreId(storeId: string, authStoreId?: string)
+    /**
+   * Lists records for list categories by store id.
+   *
+   * @author Edmilson Lopes
+   */
+async listCategoriesByStoreId(storeId: string, authStoreId?: string)
   {
     const store = await this.storeRepository.findById(storeId);
     this.ensureStoreAccess(store, authStoreId);
@@ -540,7 +620,12 @@ export class ProductService
     );
   }
 
-  async listCategoriesByStoreSlug(slug: string)
+    /**
+   * Lists records for list categories by store slug.
+   *
+   * @author Edmilson Lopes
+   */
+async listCategoriesByStoreSlug(slug: string)
   {
     const store = await this.storeRepository.findBySlug(slug);
     if (!store) throw new AppError('STORE-001', 404);
@@ -567,7 +652,12 @@ export class ProductService
     );
   }
 
-  async setCategoryPriority(
+    /**
+   * Sets state or configuration for set category priority.
+   *
+   * @author Edmilson Lopes
+   */
+async setCategoryPriority(
     storeId: string,
     input: { name: string; priority: number },
     authStoreId?: string
@@ -688,7 +778,12 @@ export class ProductService
     return this.productRepository.save(product);
   }
 
-  async adjustStock(
+    /**
+   * Executes adjust stock business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async adjustStock(
     storeId: string,
     productId: string,
     input: { mode: 'in' | 'out' | 'set'; quantity: number; reason?: string; lowStockAlert?: number; manageStock?: boolean },
@@ -814,7 +909,12 @@ export class ProductService
     }
   }
 
-  async listInventoryMovementsByStoreId(
+    /**
+   * Lists records for list inventory movements by store id.
+   *
+   * @author Edmilson Lopes
+   */
+async listInventoryMovementsByStoreId(
     storeId: string,
     options?: { productId?: string; limit?: number; offset?: number },
     authStoreId?: string

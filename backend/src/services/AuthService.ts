@@ -59,11 +59,21 @@ export class AuthService
   private settingsService = new SettingsService();
   private storeUserRepository = new StoreUserRepository();
 
-  private normalizePhone(value?: string | null) {
+    /**
+   * Executes normalize phone business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private normalizePhone(value?: string | null) {
     return String(value || '').replace(/\D/g, '');
   }
 
-  private async comparePasswordWithLegacy(rawPassword: string, user?: User | null) {
+    /**
+   * Executes compare password with legacy business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async comparePasswordWithLegacy(rawPassword: string, user?: User | null) {
     if (!user?.password) return false;
     const stored = String(user.password);
     const isBcryptHash =
@@ -90,7 +100,12 @@ export class AuthService
     return true;
   }
 
-  private maskEmail(email: string) {
+    /**
+   * Executes mask email business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private maskEmail(email: string) {
     const [local = '', domain = ''] = String(email || '').split('@');
     if (!local || !domain) return '';
     const head = local.slice(0, 2);
@@ -98,14 +113,24 @@ export class AuthService
     return `${maskedLocal}@${domain}`;
   }
 
-  private getClientIp(ipAddress?: string | null) {
+    /**
+   * Retrieves data for get client ip.
+   *
+   * @author Edmilson Lopes
+   */
+private getClientIp(ipAddress?: string | null) {
     const raw = String(ipAddress || '').trim();
     if (!raw) return null;
     if (raw.includes(',')) return raw.split(',')[0].trim();
     return raw;
   }
 
-  private async isVerificationResendAllowed(userId: string, ipAddress?: string | null) {
+    /**
+   * Executes is verification resend allowed business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async isVerificationResendAllowed(userId: string, ipAddress?: string | null) {
     const cooldownSeconds = 60;
     const now = Date.now();
     const oneHourAgo = new Date(now - 60 * 60 * 1000);
@@ -162,7 +187,12 @@ export class AuthService
     return { allowed: true, cooldownSeconds };
   }
 
-  private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
+    /**
+   * Executes ensure phone is available business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     const digits = this.normalizePhone(phone);
     if (!digits) return;
     const rows = await manager.query(
@@ -879,7 +909,12 @@ export class AuthService
     return { code: 'AUTH-S003' };
   }
 
-  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    /**
+   * Executes change password business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async changePassword(userId: string, currentPassword: string, newPassword: string) {
     const normalizedUserId = String(userId || '').trim();
     if (!normalizedUserId) throw new AppError('AUTH-001', 401);
     if (!currentPassword) throw new AppError('AUTH-006', 400);

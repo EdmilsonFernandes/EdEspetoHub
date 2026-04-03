@@ -22,7 +22,12 @@ const motoboyService = new MotoboyService();
 const log = logger.child({ scope: 'OrderReviewController' });
 
 export class OrderReviewController {
-  private static resolveAccessToken(req: Request) {
+    /**
+   * Executes resolve access token business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private static resolveAccessToken(req: Request) {
     const headerToken =
       typeof req.headers['x-order-access-token'] === 'string'
         ? req.headers['x-order-access-token']
@@ -32,7 +37,12 @@ export class OrderReviewController {
     return String(headerToken || queryToken || bodyToken || '').trim();
   }
 
-  static async getByOrder(req: Request, res: Response) {
+    /**
+   * Retrieves data for get by order.
+   *
+   * @author Edmilson Lopes
+   */
+static async getByOrder(req: Request, res: Response) {
     try {
       const payload = await orderReviewService.getByOrderId(
         req.params.orderId,
@@ -45,7 +55,12 @@ export class OrderReviewController {
     }
   }
 
-  static async submitByOrder(req: Request, res: Response) {
+    /**
+   * Executes submit by order business logic.
+   *
+   * @author Edmilson Lopes
+   */
+static async submitByOrder(req: Request, res: Response) {
     try {
       const payload = await orderReviewService.submitByOrderId(
         req.params.orderId,
@@ -59,7 +74,12 @@ export class OrderReviewController {
     }
   }
 
-  static async listByStore(req: Request, res: Response) {
+    /**
+   * Lists records for list by store.
+   *
+   * @author Edmilson Lopes
+   */
+static async listByStore(req: Request, res: Response) {
     try {
       const limit = Number(req.query?.limit || 100);
       const payload = await orderReviewService.listByStoreId(req.params.storeId, req.auth?.storeId, limit);
@@ -70,7 +90,12 @@ export class OrderReviewController {
     }
   }
 
-  static async summaryByStore(req: Request, res: Response) {
+    /**
+   * Executes summary by store business logic.
+   *
+   * @author Edmilson Lopes
+   */
+static async summaryByStore(req: Request, res: Response) {
     try {
       const payload = await orderReviewService.summaryByStoreId(req.params.storeId, req.auth?.storeId);
       return res.json(payload);
@@ -80,7 +105,12 @@ export class OrderReviewController {
     }
   }
 
-  static async listTipPayoutsByStore(req: Request, res: Response) {
+    /**
+   * Lists records for list tip payouts by store.
+   *
+   * @author Edmilson Lopes
+   */
+static async listTipPayoutsByStore(req: Request, res: Response) {
     try {
       const limit = Number(req.query?.limit || 300);
       const payload = await orderReviewService.listTipPayoutsByStoreId(
@@ -95,7 +125,12 @@ export class OrderReviewController {
     }
   }
 
-  static async markTipPayoutByStore(req: Request, res: Response) {
+    /**
+   * Marks workflow state for mark tip payout by store.
+   *
+   * @author Edmilson Lopes
+   */
+static async markTipPayoutByStore(req: Request, res: Response) {
     try {
       const payload = await orderReviewService.markTipPayoutByStoreId(
         req.params.storeId,
@@ -115,7 +150,12 @@ export class OrderReviewController {
     }
   }
 
-  static async listTipPayoutsForMotoboy(req: Request, res: Response) {
+    /**
+   * Lists records for list tip payouts for motoboy.
+   *
+   * @author Edmilson Lopes
+   */
+static async listTipPayoutsForMotoboy(req: Request, res: Response) {
     try {
       const motoboy = await motoboyService.getActiveMotoboyByUserId(req.auth?.sub || '');
       const limit = Number(req.query?.limit || 300);

@@ -41,30 +41,55 @@ export class MotoboyService {
   private userRepository = new UserRepository();
   private emailService = new EmailService();
 
-  private normalizePlate(value?: string | null) {
+    /**
+   * Executes normalize plate business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private normalizePlate(value?: string | null) {
     return String(value || '')
       .toUpperCase()
       .replace(/[^A-Z0-9]/g, '');
   }
 
-  private isValidBrazilPlate(value?: string | null) {
+    /**
+   * Executes is valid brazil plate business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private isValidBrazilPlate(value?: string | null) {
     const plate = this.normalizePlate(value);
     // Old format: ABC1234. Mercosul: ABC1D23.
     return /^(?:[A-Z]{3}[0-9]{4}|[A-Z]{3}[0-9][A-Z][0-9]{2})$/.test(plate);
   }
 
-  private normalizeCnhCategory(value?: string | null) {
+    /**
+   * Executes normalize cnh category business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private normalizeCnhCategory(value?: string | null) {
     return String(value || '')
       .toUpperCase()
       .replace(/[^A-Z]/g, '');
   }
 
-  private hasCategoryA(value?: string | null) {
+    /**
+   * Executes has category a business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private hasCategoryA(value?: string | null) {
     const normalized = this.normalizeCnhCategory(value);
     return normalized.includes('A');
   }
 
-  private normalizeMotoboyPixKey(
+    /**
+   * Executes normalize motoboy pix key business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private normalizeMotoboyPixKey(
     value?: string | null,
     cpfDocument?: string | null,
     documentType?: string | null
@@ -86,7 +111,12 @@ export class MotoboyService {
     return keyDigits;
   }
 
-  private async ensureMotoboyProfileIsComplete(motoboy: Motoboy) {
+    /**
+   * Executes ensure motoboy profile is complete business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async ensureMotoboyProfileIsComplete(motoboy: Motoboy) {
     const vehicleType = String(motoboy.vehicleType || '').toUpperCase();
     const plate = this.normalizePlate(motoboy.vehiclePlate);
     const cnhCategory = this.normalizeCnhCategory(motoboy.cnhCategory);
@@ -104,14 +134,24 @@ export class MotoboyService {
     if (!city || !state || state.length !== 2 || !address) throw new AppError('MOTO-029', 400);
   }
 
-  private getRequiredDocTypesForMotoboy(motoboy: Motoboy) {
+    /**
+   * Retrieves data for get required doc types for motoboy.
+   *
+   * @author Edmilson Lopes
+   */
+private getRequiredDocTypesForMotoboy(motoboy: Motoboy) {
     const vehicleType = String(motoboy.vehicleType || '').toUpperCase();
     const mustHave = [ 'CNH', 'SELFIE' ];
     if (vehicleType === 'MOTO' || vehicleType === 'CARRO' || vehicleType === 'OUTRO') mustHave.push('CRLV');
     return mustHave;
   }
 
-  private async listLatestDocsByType(motoboyId: string) {
+    /**
+   * Lists records for list latest docs by type.
+   *
+   * @author Edmilson Lopes
+   */
+private async listLatestDocsByType(motoboyId: string) {
     const docRepo = AppDataSource.getRepository(MotoboyDocument);
     const docs = await docRepo.find({ where: { motoboyId }, order: { uploadedAt: 'DESC' } });
     const byType = new Map<string, MotoboyDocument>();
@@ -174,7 +214,12 @@ export class MotoboyService {
     }
   }
 
-  private async logAudit(input: {
+    /**
+   * Executes log audit business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async logAudit(input: {
     storeId?: string | null;
     motoboyId?: string | null;
     action: string;
@@ -192,7 +237,12 @@ export class MotoboyService {
     await repo.save(log);
   }
 
-  private async notifyMotoboyByEmail(motoboyId: string, subject: string, message: string) {
+    /**
+   * Executes notify motoboy by email business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async notifyMotoboyByEmail(motoboyId: string, subject: string, message: string) {
     const motoboy = await this.motoboyRepository.findById(motoboyId);
     if (!motoboy?.user?.email) return;
     await this.emailService.send({
@@ -203,7 +253,12 @@ export class MotoboyService {
     });
   }
 
-  private async notifyMotoboyByWhatsapp(motoboyId: string, message: string) {
+    /**
+   * Executes notify motoboy by whatsapp business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async notifyMotoboyByWhatsapp(motoboyId: string, message: string) {
     const notifyUrl = env.whatsapp.notifyUrl;
     if (!notifyUrl) return;
     const motoboy = await this.motoboyRepository.findById(motoboyId);
@@ -216,7 +271,12 @@ export class MotoboyService {
     });
   }
 
-  private applyStoreReuploadRequestMetadata(input: {
+    /**
+   * Executes apply store reupload request metadata business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private applyStoreReuploadRequestMetadata(input: {
     metadata: any;
     storeId: string;
     reason?: string | null;
@@ -248,7 +308,12 @@ export class MotoboyService {
     };
   }
 
-  async requestDocumentReupload(storeId: string, motoboyId: string, documentId: string, ownerId: string, reason?: string | null) {
+    /**
+   * Executes request document reupload business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async requestDocumentReupload(storeId: string, motoboyId: string, documentId: string, ownerId: string, reason?: string | null) {
     const store = await this.storeRepository.findByIdWithOwner(storeId);
     if (!store) throw new AppError('STORE-001', 404);
     if (store.owner?.id !== ownerId) throw new AppError('AUTH-003', 403);
@@ -269,7 +334,12 @@ export class MotoboyService {
     return doc;
   }
 
-  async listPendingKycQueue() {
+    /**
+   * Lists records for list pending kyc queue.
+   *
+   * @author Edmilson Lopes
+   */
+async listPendingKycQueue() {
     const docRepo = AppDataSource.getRepository(MotoboyDocument);
     const rows = await docRepo.find({
       where: { status: 'PENDING' as any },
@@ -297,7 +367,12 @@ export class MotoboyService {
       .map((x) => ({ ...x, latestAt: x.latestAt.toISOString() }));
   }
 
-  async listAllDocumentsForMotoboy(motoboyId: string) {
+    /**
+   * Lists records for list all documents for motoboy.
+   *
+   * @author Edmilson Lopes
+   */
+async listAllDocumentsForMotoboy(motoboyId: string) {
     if (!motoboyId) throw new AppError('MOTO-023', 404);
     const repo = AppDataSource.getRepository(MotoboyDocument);
     const docs = await repo.find({
@@ -309,7 +384,12 @@ export class MotoboyService {
     return docs;
   }
 
-  private async attachPlatformReviewerInfo(docs: MotoboyDocument[]) {
+    /**
+   * Executes attach platform reviewer info business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async attachPlatformReviewerInfo(docs: MotoboyDocument[]) {
     if (!Array.isArray(docs) || docs.length === 0) return;
     const platformAdminIds = Array.from(
       new Set(
@@ -342,7 +422,12 @@ export class MotoboyService {
     }
   }
 
-  async listRecentKycReviews(limit = 30) {
+    /**
+   * Lists records for list recent kyc reviews.
+   *
+   * @author Edmilson Lopes
+   */
+async listRecentKycReviews(limit = 30) {
     const safeLimit = Number.isFinite(limit) ? Math.min(Math.max(Math.floor(limit), 1), 100) : 30;
     const repo = AppDataSource.getRepository(MotoboyDocument);
     const docs = await repo.find({
@@ -355,7 +440,12 @@ export class MotoboyService {
     return docs;
   }
 
-  async getKycAuditSummary(days = 30) {
+    /**
+   * Retrieves data for get kyc audit summary.
+   *
+   * @author Edmilson Lopes
+   */
+async getKycAuditSummary(days = 30) {
     const safeDays = Number.isFinite(days) && days > 0 ? Math.min(Math.floor(days), 365) : 30;
 
     const rows: Array<{ status: string; face_label: string; face_reason: string; auto_rejected: boolean }> =
@@ -419,7 +509,12 @@ export class MotoboyService {
     };
   }
 
-  async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: string, status: string, reason?: string | null) {
+    /**
+   * Executes platform review document business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: string, status: string, reason?: string | null) {
     if (!motoboyId || !documentId) throw new AppError('MOTO-023', 404);
     const repo = AppDataSource.getRepository(MotoboyDocument);
     const document = await repo.findOne({ where: { id: documentId, motoboyId } });

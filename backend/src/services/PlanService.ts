@@ -40,7 +40,12 @@ const LEGACY_PLANS: PlanName[] = ['monthly', 'yearly'];
 export class PlanService {
   private planRepository = new PlanRepository();
 
-  private resolveMonthlyPrice(byName: Map<string, Plan>, planName: 'basic_monthly' | 'pro_monthly', fallback: number) {
+    /**
+   * Executes resolve monthly price business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private resolveMonthlyPrice(byName: Map<string, Plan>, planName: 'basic_monthly' | 'pro_monthly', fallback: number) {
     const existing = byName.get(planName);
     const value = Number((existing as any)?.price);
     return Number.isFinite(value) && value > 0 ? value : fallback;

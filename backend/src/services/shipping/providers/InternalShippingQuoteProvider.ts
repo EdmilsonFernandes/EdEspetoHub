@@ -4,14 +4,24 @@ import { ShippingQuoteProvider } from './ShippingQuoteProvider';
 export class InternalShippingQuoteProvider implements ShippingQuoteProvider {
   readonly name = 'internal_postal_v1';
 
-  private parseDistanceFactor(originZip: string, destinationZip: string) {
+    /**
+   * Executes parse distance factor business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private parseDistanceFactor(originZip: string, destinationZip: string) {
     if (!originZip || !destinationZip) return 1.2;
     if (originZip.slice(0, 3) === destinationZip.slice(0, 3)) return 1.0;
     if (originZip.slice(0, 2) === destinationZip.slice(0, 2)) return 1.25;
     return 1.5;
   }
 
-  async quote(input: ShippingQuoteProviderInput): Promise<ShippingQuoteResult> {
+    /**
+   * Calculates values for quote.
+   *
+   * @author Edmilson Lopes
+   */
+async quote(input: ShippingQuoteProviderInput): Promise<ShippingQuoteResult> {
     const weightKg = Math.max(0.3, input.pkg.weightG / 1000);
     const volumetricKg = Math.max(
       0.3,

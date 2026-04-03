@@ -62,7 +62,12 @@ export class UserRepository {
     return this.repository.findOne({ where: { email }, relations: ['stores', 'stores.settings'] });
   }
 
-  findByLoginIdentifier(identifier: string) {
+    /**
+   * Retrieves data for find by login identifier.
+   *
+   * @author Edmilson Lopes
+   */
+findByLoginIdentifier(identifier: string) {
     const normalized = String(identifier || '').trim().toLowerCase();
     if (!normalized) return Promise.resolve(null);
     return this.repository

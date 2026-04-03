@@ -8,7 +8,12 @@ const service = new CustomerAccountService();
 const log = logger.child({ scope: 'CustomerAccountController' });
 
 export class CustomerAccountController {
-  static async register(req: Request, res: Response) {
+    /**
+   * Creates resources for register.
+   *
+   * @author Edmilson Lopes
+   */
+static async register(req: Request, res: Response) {
     try {
       const result = await service.register(req.body || {});
       return res.status(201).json(result);
@@ -18,7 +23,12 @@ export class CustomerAccountController {
     }
   }
 
-  static async login(req: Request, res: Response) {
+    /**
+   * Executes login business logic.
+   *
+   * @author Edmilson Lopes
+   */
+static async login(req: Request, res: Response) {
     try {
       const result = await service.login(req.body || {});
       return res.json(result);
@@ -28,7 +38,12 @@ export class CustomerAccountController {
     }
   }
 
-  static async me(req: Request, res: Response) {
+    /**
+   * Executes me business logic.
+   *
+   * @author Edmilson Lopes
+   */
+static async me(req: Request, res: Response) {
     try {
       if (!req.auth?.sub) throw new AppError('AUTH-001', 401);
       const user = await service.me(req.auth.sub);
@@ -38,7 +53,12 @@ export class CustomerAccountController {
     }
   }
 
-  static async updateMe(req: Request, res: Response) {
+    /**
+   * Updates resources for update me.
+   *
+   * @author Edmilson Lopes
+   */
+static async updateMe(req: Request, res: Response) {
     try {
       if (!req.auth?.sub) throw new AppError('AUTH-001', 401);
       const user = await service.updateMe(req.auth.sub, req.body || {});
@@ -48,7 +68,12 @@ export class CustomerAccountController {
     }
   }
 
-  static async changePassword(req: Request, res: Response) {
+    /**
+   * Executes change password business logic.
+   *
+   * @author Edmilson Lopes
+   */
+static async changePassword(req: Request, res: Response) {
     try {
       if (!req.auth?.sub) throw new AppError('AUTH-001', 401);
       const currentPassword = String(req.body?.currentPassword || '');
@@ -60,7 +85,12 @@ export class CustomerAccountController {
     }
   }
 
-  static async listAddresses(req: Request, res: Response) {
+    /**
+   * Lists records for list addresses.
+   *
+   * @author Edmilson Lopes
+   */
+static async listAddresses(req: Request, res: Response) {
     try {
       if (!req.auth?.sub) throw new AppError('AUTH-001', 401);
       const rows = await service.listAddresses(req.auth.sub);
@@ -70,7 +100,12 @@ export class CustomerAccountController {
     }
   }
 
-  static async createAddress(req: Request, res: Response) {
+    /**
+   * Creates resources for create address.
+   *
+   * @author Edmilson Lopes
+   */
+static async createAddress(req: Request, res: Response) {
     try {
       if (!req.auth?.sub) throw new AppError('AUTH-001', 401);
       const row = await service.createAddress(req.auth.sub, req.body || {});
@@ -80,7 +115,12 @@ export class CustomerAccountController {
     }
   }
 
-  static async updateAddress(req: Request, res: Response) {
+    /**
+   * Updates resources for update address.
+   *
+   * @author Edmilson Lopes
+   */
+static async updateAddress(req: Request, res: Response) {
     try {
       if (!req.auth?.sub) throw new AppError('AUTH-001', 401);
       const row = await service.updateAddress(req.auth.sub, req.params.addressId, req.body || {});
@@ -90,7 +130,12 @@ export class CustomerAccountController {
     }
   }
 
-  static async setDefaultAddress(req: Request, res: Response) {
+    /**
+   * Sets state or configuration for set default address.
+   *
+   * @author Edmilson Lopes
+   */
+static async setDefaultAddress(req: Request, res: Response) {
     try {
       if (!req.auth?.sub) throw new AppError('AUTH-001', 401);
       const row = await service.setDefaultAddress(req.auth.sub, req.params.addressId);
@@ -100,7 +145,12 @@ export class CustomerAccountController {
     }
   }
 
-  static async deleteAddress(req: Request, res: Response) {
+    /**
+   * Removes resources for delete address.
+   *
+   * @author Edmilson Lopes
+   */
+static async deleteAddress(req: Request, res: Response) {
     try {
       if (!req.auth?.sub) throw new AppError('AUTH-001', 401);
       const result = await service.deleteAddress(req.auth.sub, req.params.addressId);
@@ -110,7 +160,12 @@ export class CustomerAccountController {
     }
   }
 
-  static async listOrders(req: Request, res: Response) {
+    /**
+   * Lists records for list orders.
+   *
+   * @author Edmilson Lopes
+   */
+static async listOrders(req: Request, res: Response) {
     try {
       if (!req.auth?.sub) throw new AppError('AUTH-001', 401);
       const rows = await service.listOrders(req.auth.sub);

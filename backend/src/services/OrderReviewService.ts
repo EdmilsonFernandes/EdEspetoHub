@@ -48,7 +48,12 @@ export class OrderReviewService {
   private orderDeliveryRepository = new OrderDeliveryRepository();
   private orderReviewRepository = new OrderReviewRepository();
 
-  private async resolveStoreReviewFeatures(storeId: string) {
+    /**
+   * Executes resolve store review features business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async resolveStoreReviewFeatures(storeId: string) {
     const store = await this.storeRepository.findById(storeId);
     const subscription = await this.subscriptionRepository.findLatestByStoreId(storeId);
     const features = resolvePlanFeatures({
@@ -61,14 +66,24 @@ export class OrderReviewService {
     return { deliveryFeedbackEnabled, tipEnabled };
   }
 
-  private ensureStoreAccess(storeId: string, authStoreId?: string) {
+    /**
+   * Executes ensure store access business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private ensureStoreAccess(storeId: string, authStoreId?: string) {
     if (!authStoreId) return;
     if (storeId !== authStoreId) {
       throw new AppError('AUTH-003', 403);
     }
   }
 
-  private sanitizeTags(value: unknown) {
+    /**
+   * Executes sanitize tags business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private sanitizeTags(value: unknown) {
     if (!Array.isArray(value)) return [];
     return value
       .map((item) => String(item || '').trim())
@@ -76,14 +91,24 @@ export class OrderReviewService {
       .slice(0, 8);
   }
 
-  private ensureOrderAccess(orderId: string, accessToken?: string | null) {
+    /**
+   * Executes ensure order access business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private ensureOrderAccess(orderId: string, accessToken?: string | null) {
     const ok = verifyOrderAccessToken(String(accessToken || ''), orderId);
     if (!ok) {
       throw new AppError('AUTH-003', 403, { reason: 'order_access_required' });
     }
   }
 
-  private async ensureTipPayment(order: any, review: any) {
+    /**
+   * Executes ensure tip payment business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async ensureTipPayment(order: any, review: any) {
     const tipAmount = Number(review?.tipAmount || 0);
     if (!(tipAmount > 0)) {
       review.tipStatus = 'NONE';
@@ -158,7 +183,12 @@ export class OrderReviewService {
     return this.orderReviewRepository.saveReview(review);
   }
 
-  private normalizeRating(value: unknown, field: string, required = false) {
+    /**
+   * Executes normalize rating business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private normalizeRating(value: unknown, field: string, required = false) {
     if (value === undefined || value === null || value === '') {
       if (required) throw new AppError('REVIEW-001', 400, { field });
       return null;
@@ -170,7 +200,12 @@ export class OrderReviewService {
     return Math.round(n);
   }
 
-  async submitByOrderId(orderId: string, input: SubmitReviewInput, accessToken?: string | null) {
+    /**
+   * Executes submit by order id business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async submitByOrderId(orderId: string, input: SubmitReviewInput, accessToken?: string | null) {
     const order = await this.orderRepository.findById(orderId);
     if (!order) throw new AppError('ORDER-001', 404);
     this.ensureOrderAccess(order.id, accessToken);
@@ -212,7 +247,12 @@ export class OrderReviewService {
     return this.ensureTipPayment(order, review);
   }
 
-  async getByOrderId(orderId: string, accessToken?: string | null) {
+    /**
+   * Retrieves data for get by order id.
+   *
+   * @author Edmilson Lopes
+   */
+async getByOrderId(orderId: string, accessToken?: string | null) {
     const order = await this.orderRepository.findById(orderId);
     if (!order) throw new AppError('ORDER-001', 404);
     this.ensureOrderAccess(order.id, accessToken);
@@ -252,32 +292,57 @@ export class OrderReviewService {
     };
   }
 
-  async listByStoreId(storeId: string, authStoreId?: string, limit = 100) {
+    /**
+   * Lists records for list by store id.
+   *
+   * @author Edmilson Lopes
+   */
+async listByStoreId(storeId: string, authStoreId?: string, limit = 100) {
     const store = await this.storeRepository.findById(storeId);
     if (!store) throw new AppError('STORE-001', 404);
     this.ensureStoreAccess(store.id, authStoreId);
     return this.orderReviewRepository.listByStoreId(store.id, limit);
   }
 
-  async summaryByStoreId(storeId: string, authStoreId?: string) {
+    /**
+   * Executes summary by store id business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async summaryByStoreId(storeId: string, authStoreId?: string) {
     const store = await this.storeRepository.findById(storeId);
     if (!store) throw new AppError('STORE-001', 404);
     this.ensureStoreAccess(store.id, authStoreId);
     return this.orderReviewRepository.getStoreSummary(store.id);
   }
 
-  async listTipPayoutsByStoreId(storeId: string, authStoreId?: string, limit = 300) {
+    /**
+   * Lists records for list tip payouts by store id.
+   *
+   * @author Edmilson Lopes
+   */
+async listTipPayoutsByStoreId(storeId: string, authStoreId?: string, limit = 300) {
     const store = await this.storeRepository.findById(storeId);
     if (!store) throw new AppError('STORE-001', 404);
     this.ensureStoreAccess(store.id, authStoreId);
     return this.orderReviewRepository.listTipPayoutsByStoreId(store.id, limit);
   }
 
-  async listTipPayoutsByMotoboyId(motoboyId: string, limit = 300) {
+    /**
+   * Lists records for list tip payouts by motoboy id.
+   *
+   * @author Edmilson Lopes
+   */
+async listTipPayoutsByMotoboyId(motoboyId: string, limit = 300) {
     return this.orderReviewRepository.listTipPayoutsByMotoboyId(motoboyId, limit);
   }
 
-  async markTipPayoutByStoreId(
+    /**
+   * Marks workflow state for mark tip payout by store id.
+   *
+   * @author Edmilson Lopes
+   */
+async markTipPayoutByStoreId(
     storeId: string,
     reviewId: string,
     authStoreId: string | undefined,
@@ -323,7 +388,12 @@ export class OrderReviewService {
     return this.orderReviewRepository.saveReview(review);
   }
 
-  async publicSummaryByStoreId(storeId: string) {
+    /**
+   * Executes public summary by store id business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async publicSummaryByStoreId(storeId: string) {
     const store = await this.storeRepository.findById(storeId);
     if (!store) throw new AppError('STORE-001', 404);
     const { summary } = await this.orderReviewRepository.getStoreSummary(store.id);
@@ -335,7 +405,12 @@ export class OrderReviewService {
     };
   }
 
-  async markTipPaidFromWebhook(reviewId: string, mpPayment: any) {
+    /**
+   * Marks workflow state for mark tip paid from webhook.
+   *
+   * @author Edmilson Lopes
+   */
+async markTipPaidFromWebhook(reviewId: string, mpPayment: any) {
     const review = await this.orderReviewRepository.findById(reviewId);
     if (!review) return null;
     review.tipStatus = 'PAID';
@@ -354,7 +429,12 @@ export class OrderReviewService {
     return this.orderReviewRepository.saveReview(review);
   }
 
-  async markTipFailedFromWebhook(reviewId: string, mpPayment: any) {
+    /**
+   * Marks workflow state for mark tip failed from webhook.
+   *
+   * @author Edmilson Lopes
+   */
+async markTipFailedFromWebhook(reviewId: string, mpPayment: any) {
     const review = await this.orderReviewRepository.findById(reviewId);
     if (!review) return null;
     review.tipStatus = 'FAILED';

@@ -149,12 +149,22 @@ export class OrderEtaServiceV2 {
     return eta;
   }
 
-  private toNumber(value: number | null | undefined, fallback: number) {
+    /**
+   * Executes to number business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private toNumber(value: number | null | undefined, fallback: number) {
     const numeric = typeof value === 'number' ? value : Number(value);
     return Number.isFinite(numeric) ? numeric : fallback;
   }
 
-  private calculateQueueMinutes(queuePosition?: number | null, storeSettings?: StoreSettings) {
+    /**
+   * Calculates values for calculate queue minutes.
+   *
+   * @author Edmilson Lopes
+   */
+private calculateQueueMinutes(queuePosition?: number | null, storeSettings?: StoreSettings) {
     const buffer = this.toNumber(
       storeSettings?.queueBufferMinutes,
       env.etaV2.defaultQueueBufferMinutes
@@ -171,7 +181,12 @@ export class OrderEtaServiceV2 {
     return Math.max(0, Math.round(baseQueue + buffer));
   }
 
-  private async getTravelData(
+    /**
+   * Retrieves data for get travel data.
+   *
+   * @author Edmilson Lopes
+   */
+private async getTravelData(
     originAddress: string,
     destinationAddress: string,
     correlationId?: string
@@ -188,13 +203,23 @@ export class OrderEtaServiceV2 {
     }
   }
 
-  private async findDeliveryByOrderId(orderId: string): Promise<OrderDelivery | null> {
+    /**
+   * Retrieves data for find delivery by order id.
+   *
+   * @author Edmilson Lopes
+   */
+private async findDeliveryByOrderId(orderId: string): Promise<OrderDelivery | null> {
     if (!orderId) return null;
     if (!AppDataSource.isInitialized || !AppDataSource.hasMetadata(OrderDelivery)) return null;
     return AppDataSource.getRepository(OrderDelivery).findOne({ where: { orderId } });
   }
 
-  private normalizeDeliveryStatus(value: unknown): DeliveryStatus | null {
+    /**
+   * Executes normalize delivery status business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private normalizeDeliveryStatus(value: unknown): DeliveryStatus | null {
     const status = String(value || '').trim().toUpperCase();
     if (!status) return null;
     if (
@@ -205,7 +230,12 @@ export class OrderEtaServiceV2 {
     return null;
   }
 
-  private resolveRouteStart(delivery?: OrderDelivery | null): Date | null {
+    /**
+   * Executes resolve route start business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private resolveRouteStart(delivery?: OrderDelivery | null): Date | null {
     const candidates = [ delivery?.inTransitAt, delivery?.pickedUpAt ];
     for (const candidate of candidates) {
       if (!candidate) continue;
@@ -215,14 +245,24 @@ export class OrderEtaServiceV2 {
     return null;
   }
 
-  private resolveRemainingTravelMinutes(travelMinutes: number | null, startedAt: Date | null): number | null {
+    /**
+   * Executes resolve remaining travel minutes business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private resolveRemainingTravelMinutes(travelMinutes: number | null, startedAt: Date | null): number | null {
     if (travelMinutes === null || !Number.isFinite(Number(travelMinutes))) return null;
     if (!startedAt) return Math.max(1, Math.round(Number(travelMinutes)));
     const elapsedMinutes = Math.max(0, (Date.now() - startedAt.getTime()) / 60000);
     return Math.max(1, Math.round(Number(travelMinutes) - elapsedMinutes));
   }
 
-  private async geocode(address: string, correlationId?: string): Promise<MapsCoords | null> {
+    /**
+   * Executes geocode business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async geocode(address: string, correlationId?: string): Promise<MapsCoords | null> {
     const response = await fetch(`${env.etaV2.mapsBaseUrl}/geocode`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -237,7 +277,12 @@ export class OrderEtaServiceV2 {
     return payload;
   }
 
-  private async route(origin: MapsCoords, destination: MapsCoords, correlationId?: string): Promise<MapsRoute | null> {
+    /**
+   * Executes route business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async route(origin: MapsCoords, destination: MapsCoords, correlationId?: string): Promise<MapsRoute | null> {
     const response = await fetch(`${env.etaV2.mapsBaseUrl}/route`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -252,7 +297,12 @@ export class OrderEtaServiceV2 {
     return payload;
   }
 
-  private async persistEstimate(order: Order, eta: EtaBreakdown) {
+    /**
+   * Executes persist estimate business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async persistEstimate(order: Order, eta: EtaBreakdown) {
     if (!order.store?.id) return;
     const existing = await this.repo.findLatestByOrderId(order.id);
     const entity = existing || new OrderEtaEstimate();

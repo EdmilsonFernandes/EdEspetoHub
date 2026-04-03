@@ -235,7 +235,12 @@ export class AuthController
     }
   }
 
-  static async changePassword(req: Request, res: Response) {
+    /**
+   * Executes change password business logic.
+   *
+   * @author Edmilson Lopes
+   */
+static async changePassword(req: Request, res: Response) {
     const currentPassword = String(req.body?.currentPassword || '');
     const newPassword = String(req.body?.newPassword || '');
     try {

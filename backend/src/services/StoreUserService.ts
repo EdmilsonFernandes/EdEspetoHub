@@ -9,13 +9,23 @@ export class StoreUserService {
   private storeUserRepository = new StoreUserRepository();
   private userRepository = new UserRepository();
 
-  private ensureStoreAccess(storeId: string, authStoreId?: string) {
+    /**
+   * Executes ensure store access business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private ensureStoreAccess(storeId: string, authStoreId?: string) {
     if (!authStoreId || authStoreId !== storeId) {
       throw new AppError('AUTH-003', 403);
     }
   }
 
-  async listByStore(storeId: string, authStoreId?: string) {
+    /**
+   * Lists records for list by store.
+   *
+   * @author Edmilson Lopes
+   */
+async listByStore(storeId: string, authStoreId?: string) {
     this.ensureStoreAccess(storeId, authStoreId);
     const store = await this.storeRepository.findById(storeId);
     if (!store) throw new AppError('STORE-001', 404);
@@ -32,7 +42,12 @@ export class StoreUserService {
     }));
   }
 
-  async createForStore(
+    /**
+   * Creates resources for create for store.
+   *
+   * @author Edmilson Lopes
+   */
+async createForStore(
     storeId: string,
     input: { fullName?: string; email?: string; password?: string; phone?: string; role?: string },
     authStoreId?: string
@@ -89,7 +104,12 @@ export class StoreUserService {
     };
   }
 
-  async updatePasswordForStoreUser(
+    /**
+   * Updates resources for update password for store user.
+   *
+   * @author Edmilson Lopes
+   */
+async updatePasswordForStoreUser(
     storeId: string,
     userId: string,
     input: { newPassword?: string },
@@ -121,7 +141,12 @@ export class StoreUserService {
     return { id: targetUserId, updated: true };
   }
 
-  async removeForStore(storeId: string, userId: string, authStoreId?: string, authUserId?: string) {
+    /**
+   * Removes resources for remove for store.
+   *
+   * @author Edmilson Lopes
+   */
+async removeForStore(storeId: string, userId: string, authStoreId?: string, authUserId?: string) {
     this.ensureStoreAccess(storeId, authStoreId);
     const store = await this.storeRepository.findByIdWithOwner(storeId);
     if (!store) throw new AppError('STORE-001', 404);

@@ -48,7 +48,12 @@ export class DeliveryService {
       ? Number(process.env.DELIVERY_EXPIRE_MINUTES)
       : 20;
 
-  private async insertEvent(
+    /**
+   * Executes insert event business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async insertEvent(
     manager: EntityManager,
     input: {
       deliveryId: string;
@@ -71,14 +76,24 @@ export class DeliveryService {
     await repo.save(event);
   }
 
-  private assertTransition(from: DeliveryStatus, to: DeliveryStatus) {
+    /**
+   * Executes assert transition business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private assertTransition(from: DeliveryStatus, to: DeliveryStatus) {
     const allowed = DELIVERY_TRANSITIONS[from] || [];
     if (!allowed.includes(to)) {
       throw new AppError('DELIV-002', 400, { from, to });
     }
   }
 
-  async ensureQueueDelivery(order: Order, manager?: EntityManager) {
+    /**
+   * Executes ensure queue delivery business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async ensureQueueDelivery(order: Order, manager?: EntityManager) {
     if (!order || order.type !== 'delivery') return null;
     if (![ 'ready_for_delivery', 'waiting_for_motoboy' ].includes(String(order.status || ''))) return null;
 
@@ -115,7 +130,12 @@ export class DeliveryService {
     return repo.save(delivery);
   }
 
-  async acceptDelivery(orderId: string, motoboy: Motoboy) {
+    /**
+   * Executes accept delivery business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async acceptDelivery(orderId: string, motoboy: Motoboy) {
     return AppDataSource.transaction(async (manager) => {
       const deliveryRepo = manager.getRepository(OrderDelivery);
       const orderRepo = manager.getRepository(Order);
@@ -224,15 +244,30 @@ export class DeliveryService {
     });
   }
 
-  async pickup(orderId: string, motoboy: Motoboy) {
+    /**
+   * Executes pickup business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async pickup(orderId: string, motoboy: Motoboy) {
     return this.advance(orderId, motoboy, 'PICKED_UP');
   }
 
-  async start(orderId: string, motoboy: Motoboy) {
+    /**
+   * Executes start business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async start(orderId: string, motoboy: Motoboy) {
     return this.advance(orderId, motoboy, 'IN_TRANSIT');
   }
 
-  async pickupAndStart(orderId: string, motoboy: Motoboy) {
+    /**
+   * Executes pickup and start business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async pickupAndStart(orderId: string, motoboy: Motoboy) {
     return AppDataSource.transaction(async (manager) => {
       const repo = manager.getRepository(OrderDelivery);
       const orderRepo = manager.getRepository(Order);
@@ -280,7 +315,12 @@ export class DeliveryService {
     });
   }
 
-  private async advance(orderId: string, motoboy: Motoboy, to: DeliveryStatus) {
+    /**
+   * Executes advance business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async advance(orderId: string, motoboy: Motoboy, to: DeliveryStatus) {
     return AppDataSource.transaction(async (manager) => {
       const repo = manager.getRepository(OrderDelivery);
       const delivery = await repo
@@ -320,7 +360,12 @@ export class DeliveryService {
     });
   }
 
-  async complete(orderId: string, motoboy: Motoboy) {
+    /**
+   * Executes complete business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async complete(orderId: string, motoboy: Motoboy) {
     return AppDataSource.transaction(async (manager) => {
       const deliveryRepo = manager.getRepository(OrderDelivery);
       const orderRepo = manager.getRepository(Order);
@@ -366,7 +411,12 @@ export class DeliveryService {
     });
   }
 
-  async cancelByStore(orderId: string, storeId: string, reason?: string | null) {
+    /**
+   * Executes cancel by store business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async cancelByStore(orderId: string, storeId: string, reason?: string | null) {
     return AppDataSource.transaction(async (manager) => {
       const deliveryRepo = manager.getRepository(OrderDelivery);
       const orderRepo = manager.getRepository(Order);
@@ -432,7 +482,12 @@ export class DeliveryService {
     });
   }
 
-  async stats(motoboy: Motoboy, range: 'day' | 'week' | 'month' = 'day') {
+    /**
+   * Executes stats business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async stats(motoboy: Motoboy, range: 'day' | 'week' | 'month' = 'day') {
     const tz = process.env.APP_TZ || 'America/Sao_Paulo';
     const safeRange = [ 'day', 'week', 'month' ].includes(range) ? range : 'day';
 

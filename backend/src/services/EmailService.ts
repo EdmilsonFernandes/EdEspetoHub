@@ -86,7 +86,12 @@ export class EmailService {
     });
   }
 
-  private async getTemplateValue(key: string, fallback: string) {
+    /**
+   * Retrieves data for get template value.
+   *
+   * @author Edmilson Lopes
+   */
+private async getTemplateValue(key: string, fallback: string) {
     try {
       const value = await this.settingsService.getValue(key);
       return this.normalizeBrandingContent(value || fallback);
@@ -95,7 +100,12 @@ export class EmailService {
     }
   }
 
-  private normalizeBrandingContent(content: string) {
+    /**
+   * Executes normalize branding content business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private normalizeBrandingContent(content: string) {
     return String(content || '')
       .replace(/Chama no Espeto/g, 'Já no Caminho')
       .replace(/chama no espeto/g, 'já no caminho')
@@ -105,7 +115,12 @@ export class EmailService {
       .replace(/chama-no-espeto\.jpeg/g, 'janocaminho.jpg');
   }
 
-  private renderTemplate(template: string, vars: Record<string, string>) {
+    /**
+   * Executes render template business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private renderTemplate(template: string, vars: Record<string, string>) {
     return template.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? '');
   }
 
@@ -265,7 +280,12 @@ export class EmailService {
     await this.send({ to: email, subject, text, html });
   }
 
-  async sendCustomerWelcome(email: string, fullName: string) {
+    /**
+   * Executes send customer welcome business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async sendCustomerWelcome(email: string, fullName: string) {
     const logoUrl = this.getLogoUrl();
     const appUrl = env.appUrl || 'https://janocaminho.com.br';
     const subject = await this.getTemplateValue(

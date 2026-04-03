@@ -66,7 +66,12 @@ export class SubscriptionRepository {
     });
   }
 
-  findCurrentByStoreId(storeId: string) {
+    /**
+   * Retrieves data for find current by store id.
+   *
+   * @author Edmilson Lopes
+   */
+findCurrentByStoreId(storeId: string) {
     return this.repository
       .createQueryBuilder('subscription')
       .leftJoinAndSelect('subscription.store', 'store')

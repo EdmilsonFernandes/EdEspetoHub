@@ -41,7 +41,12 @@ export class DeliveryBillingService {
   private mpService = new MercadoPagoService();
   private log = logger.child({ scope: 'DeliveryBillingService' });
 
-  private async getConfig(): Promise<BillingConfig> {
+    /**
+   * Retrieves data for get config.
+   *
+   * @author Edmilson Lopes
+   */
+private async getConfig(): Promise<BillingConfig> {
     return {
       feeRate: await this.settingsService.getNumber('delivery_fee_rate', 0.03),
       minFee: await this.settingsService.getNumber('delivery_min_fee', 0.5),
@@ -51,25 +56,45 @@ export class DeliveryBillingService {
     };
   }
 
-  private addDays(date: Date, days: number) {
+    /**
+   * Creates resources for add days.
+   *
+   * @author Edmilson Lopes
+   */
+private addDays(date: Date, days: number) {
     const result = new Date(date);
     result.setDate(result.getDate() + days);
     return result;
   }
 
-  private calculatePenalty(subtotal: number, overdueDays: number, cfg: BillingConfig) {
+    /**
+   * Calculates values for calculate penalty.
+   *
+   * @author Edmilson Lopes
+   */
+private calculatePenalty(subtotal: number, overdueDays: number, cfg: BillingConfig) {
     if (overdueDays <= 0 || subtotal <= 0) return 0;
     const raw = subtotal * cfg.penaltyDailyRate * overdueDays;
     const cap = subtotal * cfg.penaltyCapRate;
     return Math.min(raw, cap);
   }
 
-  private async getOpenCycle(storeId: string) {
+    /**
+   * Retrieves data for get open cycle.
+   *
+   * @author Edmilson Lopes
+   */
+private async getOpenCycle(storeId: string) {
     const repo = AppDataSource.getRepository(DeliveryBillingCycle);
     return repo.findOne({ where: { storeId, status: 'OPEN' }, order: { createdAt: 'DESC' } });
   }
 
-  private async createCycle(storeId: string, cfg: BillingConfig, now: Date) {
+    /**
+   * Creates resources for create cycle.
+   *
+   * @author Edmilson Lopes
+   */
+private async createCycle(storeId: string, cfg: BillingConfig, now: Date) {
     const repo = AppDataSource.getRepository(DeliveryBillingCycle);
     const cycle = repo.create({
       storeId,
@@ -91,7 +116,12 @@ export class DeliveryBillingService {
     return repo.save(cycle);
   }
 
-  private async closeCycleIfNeeded(cycle: DeliveryBillingCycle, now: Date) {
+    /**
+   * Executes close cycle if needed business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async closeCycleIfNeeded(cycle: DeliveryBillingCycle, now: Date) {
     if (cycle.status !== 'OPEN') return cycle;
     if (now <= cycle.endDate) return cycle;
     cycle.status = 'PENDING_PAYMENT';
@@ -100,7 +130,12 @@ export class DeliveryBillingService {
     return this.ensurePayment(cycle);
   }
 
-  private async updatePenalty(cycle: DeliveryBillingCycle, now: Date) {
+    /**
+   * Updates resources for update penalty.
+   *
+   * @author Edmilson Lopes
+   */
+private async updatePenalty(cycle: DeliveryBillingCycle, now: Date) {
     const repo = AppDataSource.getRepository(DeliveryBillingCycle);
     const cfg = await this.getConfig();
     const overdueDays = Math.floor((now.getTime() - cycle.endDate.getTime()) / (24 * 60 * 60 * 1000));
@@ -113,7 +148,12 @@ export class DeliveryBillingService {
     return repo.save(cycle);
   }
 
-  private async ensurePayment(cycle: DeliveryBillingCycle) {
+    /**
+   * Executes ensure payment business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async ensurePayment(cycle: DeliveryBillingCycle) {
     if (cycle.paymentStatus === 'PAID') return cycle;
     if (cycle.paymentLink || cycle.qrCodeText || cycle.providerId) return cycle;
 
@@ -155,7 +195,12 @@ export class DeliveryBillingService {
     return repo.save(cycle);
   }
 
-  async recordDelivery(order: Order) {
+    /**
+   * Executes record delivery business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async recordDelivery(order: Order) {
     if (!order || order.type !== 'delivery') return;
 
     const cfg = await this.getConfig();
@@ -200,12 +245,22 @@ export class DeliveryBillingService {
     }
   }
 
-  async getCurrentCycle(storeId: string) {
+    /**
+   * Retrieves data for get current cycle.
+   *
+   * @author Edmilson Lopes
+   */
+async getCurrentCycle(storeId: string) {
     const repo = AppDataSource.getRepository(DeliveryBillingCycle);
     return repo.findOne({ where: { storeId }, order: { createdAt: 'DESC' } });
   }
 
-  async ensurePaymentForCycle(storeId: string) {
+    /**
+   * Executes ensure payment for cycle business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async ensurePaymentForCycle(storeId: string) {
     const cycle = await this.getCurrentCycle(storeId);
     if (!cycle) return null;
     const now = new Date();
@@ -220,7 +275,12 @@ export class DeliveryBillingService {
     return this.ensurePayment(updated);
   }
 
-  async markPaidFromWebhook(cycleId: string, mpPayment: any) {
+    /**
+   * Marks workflow state for mark paid from webhook.
+   *
+   * @author Edmilson Lopes
+   */
+async markPaidFromWebhook(cycleId: string, mpPayment: any) {
     const repo = AppDataSource.getRepository(DeliveryBillingCycle);
     const cycle = await repo.findOne({ where: { id: cycleId } });
     if (!cycle) return null;
@@ -232,7 +292,12 @@ export class DeliveryBillingService {
     return repo.save(cycle);
   }
 
-  async markFailedFromWebhook(cycleId: string, mpPayment: any) {
+    /**
+   * Marks workflow state for mark failed from webhook.
+   *
+   * @author Edmilson Lopes
+   */
+async markFailedFromWebhook(cycleId: string, mpPayment: any) {
     const repo = AppDataSource.getRepository(DeliveryBillingCycle);
     const cycle = await repo.findOne({ where: { id: cycleId } });
     if (!cycle) return null;
@@ -243,7 +308,12 @@ export class DeliveryBillingService {
     return repo.save(cycle);
   }
 
-  async isStoreBlocked(storeId: string) {
+    /**
+   * Executes is store blocked business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async isStoreBlocked(storeId: string) {
     const cycle = await this.getCurrentCycle(storeId);
     if (!cycle) return false;
     const now = new Date();

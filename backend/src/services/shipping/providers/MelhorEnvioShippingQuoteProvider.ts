@@ -22,24 +22,44 @@ export class MelhorEnvioShippingQuoteProvider implements ShippingQuoteProvider {
   private log = logger.child({ scope: 'MelhorEnvioShippingQuoteProvider' });
   private accessToken = env.melhorEnvio.accessToken || '';
 
-  isConfigured() {
+    /**
+   * Executes is configured business logic.
+   *
+   * @author Edmilson Lopes
+   */
+isConfigured() {
     return Boolean(
       this.accessToken ||
         (env.melhorEnvio.clientId && env.melhorEnvio.clientSecret && env.melhorEnvio.refreshToken)
     );
   }
 
-  private parsePrice(value: unknown) {
+    /**
+   * Executes parse price business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private parsePrice(value: unknown) {
     const parsed = Number(value);
     return Number.isFinite(parsed) && parsed > 0 ? Number(parsed.toFixed(2)) : 0;
   }
 
-  private parseDays(value: unknown) {
+    /**
+   * Executes parse days business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private parseDays(value: unknown) {
     const parsed = Math.floor(Number(value));
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
   }
 
-  private async refreshToken() {
+    /**
+   * Executes refresh token business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async refreshToken() {
     if (!env.melhorEnvio.clientId || !env.melhorEnvio.clientSecret || !env.melhorEnvio.refreshToken) {
       return false;
     }
@@ -69,7 +89,12 @@ export class MelhorEnvioShippingQuoteProvider implements ShippingQuoteProvider {
     return true;
   }
 
-  private async callQuote(input: ShippingQuoteProviderInput, retryOnUnauthorized = true): Promise<MelhorEnvioService[]> {
+    /**
+   * Executes call quote business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async callQuote(input: ShippingQuoteProviderInput, retryOnUnauthorized = true): Promise<MelhorEnvioService[]> {
     const baseUrl = env.melhorEnvio.baseUrl.replace(/\/+$/, '');
     const products = input.items.map((item, index) => ({
       id: item.productId || `item-${index + 1}`,
@@ -120,7 +145,12 @@ export class MelhorEnvioShippingQuoteProvider implements ShippingQuoteProvider {
     return (await response.json().catch(() => [])) as MelhorEnvioService[];
   }
 
-  async quote(input: ShippingQuoteProviderInput): Promise<ShippingQuoteResult> {
+    /**
+   * Calculates values for quote.
+   *
+   * @author Edmilson Lopes
+   */
+async quote(input: ShippingQuoteProviderInput): Promise<ShippingQuoteResult> {
     if (!this.accessToken && !(await this.refreshToken())) {
       throw new AppError('ORDER-004', 400, {
         message: 'Credenciais de frete postal não configuradas.',

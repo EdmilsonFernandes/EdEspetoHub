@@ -52,7 +52,12 @@ export class PaymentService {
     return `data:image/png;base64,${qrCode}`;
   }
 
-  private resolvePlanChargeAmount(plan: Plan) {
+    /**
+   * Executes resolve plan charge amount business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private resolvePlanChargeAmount(plan: Plan) {
     const fullPrice = Number((plan as any)?.price) || 0;
     const promoPrice = Number((plan as any)?.promoPrice) || 0;
     if (promoPrice > 0 && promoPrice < fullPrice) {

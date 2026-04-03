@@ -36,7 +36,12 @@ export class MotoboyOrderService {
   private tz = process.env.APP_TZ || 'America/Sao_Paulo';
   private log = logger.child({ scope: 'MotoboyOrderService' });
 
-  private isDeliveryOrder(order: Order) {
+    /**
+   * Executes is delivery order business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private isDeliveryOrder(order: Order) {
     return order.type === 'delivery';
   }
 
@@ -229,12 +234,22 @@ export class MotoboyOrderService {
     return deliveryService.acceptDelivery(orderId, motoboy);
   }
 
-  async pickupOrder(orderId: string, motoboy: Motoboy) {
+    /**
+   * Executes pickup order business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async pickupOrder(orderId: string, motoboy: Motoboy) {
     // Business: picking up the order already means the courier is starting the route.
     return deliveryService.pickupAndStart(orderId, motoboy);
   }
 
-  async startOrder(orderId: string, motoboy: Motoboy) {
+    /**
+   * Executes start order business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async startOrder(orderId: string, motoboy: Motoboy) {
     return deliveryService.start(orderId, motoboy);
   }
 

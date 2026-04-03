@@ -210,7 +210,12 @@ export class OrderController {
     }
   }
 
-  static async updateFulfillmentMode(req: Request, res: Response) {
+    /**
+   * Updates resources for update fulfillment mode.
+   *
+   * @author Edmilson Lopes
+   */
+static async updateFulfillmentMode(req: Request, res: Response) {
     const { fulfillmentMode } = req.body || {};
     try {
       const order = await orderService.updateFulfillmentMode(
@@ -225,7 +230,12 @@ export class OrderController {
     }
   }
 
-  static async updatePostalShipment(req: Request, res: Response) {
+    /**
+   * Updates resources for update postal shipment.
+   *
+   * @author Edmilson Lopes
+   */
+static async updatePostalShipment(req: Request, res: Response) {
     try {
       const result = await orderService.updatePostalShipment(
         req.params.orderId,
@@ -246,7 +256,12 @@ export class OrderController {
     }
   }
 
-  static async reopen(req: Request, res: Response) {
+    /**
+   * Executes reopen business logic.
+   *
+   * @author Edmilson Lopes
+   */
+static async reopen(req: Request, res: Response) {
     try {
       const order = await orderService.reopenOrder(
         req.params.orderId,
@@ -268,7 +283,12 @@ export class OrderController {
     }
   }
 
-  static async markItemsAsPrinted(req: Request, res: Response) {
+    /**
+   * Marks workflow state for mark items as printed.
+   *
+   * @author Edmilson Lopes
+   */
+static async markItemsAsPrinted(req: Request, res: Response) {
     try {
       const itemIds = Array.isArray(req.body?.itemIds) ? req.body.itemIds : undefined;
       log.info('Order items mark-as-printed request', {

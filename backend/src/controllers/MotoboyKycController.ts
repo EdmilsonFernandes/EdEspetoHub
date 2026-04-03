@@ -15,7 +15,12 @@ import { MotoboyService } from '../services/MotoboyService';
 const motoboyService = new MotoboyService();
 
 export class MotoboyKycController {
-  static async auditSummary(req: Request, res: Response) {
+    /**
+   * Executes audit summary business logic.
+   *
+   * @author Edmilson Lopes
+   */
+static async auditSummary(req: Request, res: Response) {
     try {
       const days = Number(req.query?.days || 30);
       const data = await motoboyService.getKycAuditSummary(days);
@@ -63,7 +68,12 @@ export class MotoboyKycController {
     }
   }
 
-  static async approveDocument(req: Request, res: Response) {
+    /**
+   * Approves workflow step for approve document.
+   *
+   * @author Edmilson Lopes
+   */
+static async approveDocument(req: Request, res: Response) {
     try {
       const motoboyId = String(req.params.motoboyId || '');
       const documentId = String(req.params.documentId || '');
@@ -79,7 +89,12 @@ export class MotoboyKycController {
     }
   }
 
-  static async rejectDocument(req: Request, res: Response) {
+    /**
+   * Rejects workflow step for reject document.
+   *
+   * @author Edmilson Lopes
+   */
+static async rejectDocument(req: Request, res: Response) {
     try {
       const motoboyId = String(req.params.motoboyId || '');
       const documentId = String(req.params.documentId || '');

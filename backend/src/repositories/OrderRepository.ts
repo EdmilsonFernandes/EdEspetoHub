@@ -245,7 +245,12 @@ export class OrderRepository
       .getRawMany();
   }
 
-  async findTopItemsByStoreToday(storeId: string, limit = 3, tz = process.env.APP_TZ || 'America/Sao_Paulo')
+    /**
+   * Retrieves data for find top items by store today.
+   *
+   * @author Edmilson Lopes
+   */
+async findTopItemsByStoreToday(storeId: string, limit = 3, tz = process.env.APP_TZ || 'America/Sao_Paulo')
   {
     return AppDataSource.getRepository(OrderItem)
       .createQueryBuilder('oi')
@@ -270,7 +275,12 @@ export class OrderRepository
       .getRawMany();
   }
 
-  async markItemsAsPrinted(orderId: string, itemIds?: string[]) {
+    /**
+   * Marks workflow state for mark items as printed.
+   *
+   * @author Edmilson Lopes
+   */
+async markItemsAsPrinted(orderId: string, itemIds?: string[]) {
     const normalizedIds = Array.isArray(itemIds)
       ? itemIds.map((id) => String(id || '').trim()).filter(Boolean)
       : [];

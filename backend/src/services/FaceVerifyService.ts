@@ -73,7 +73,12 @@ export class FaceVerifyService {
       ? Number(process.env.FACE_VERIFY_TIMEOUT_MS)
       : 90_000;
 
-  async getSelfieCooldown(motoboyId: string): Promise<{ blocked: boolean; attempts: number; nextAllowedAt: Date | null }> {
+    /**
+   * Retrieves data for get selfie cooldown.
+   *
+   * @author Edmilson Lopes
+   */
+async getSelfieCooldown(motoboyId: string): Promise<{ blocked: boolean; attempts: number; nextAllowedAt: Date | null }> {
     const row = await AppDataSource.query(
       `
       WITH attempts AS (
@@ -98,7 +103,12 @@ export class FaceVerifyService {
     return { blocked, attempts, nextAllowedAt };
   }
 
-  async markPendingIfReady(motoboyId: string) {
+    /**
+   * Marks workflow state for mark pending if ready.
+   *
+   * @author Edmilson Lopes
+   */
+async markPendingIfReady(motoboyId: string) {
     if (!this.enabled) return;
 
     const repo = AppDataSource.getRepository(MotoboyDocument);
@@ -119,7 +129,12 @@ export class FaceVerifyService {
     await repo.save(selfie);
   }
 
-  async processNextBatch(limit = 3) {
+    /**
+   * Executes process next batch business logic.
+   *
+   * @author Edmilson Lopes
+   */
+async processNextBatch(limit = 3) {
     if (!this.enabled) return;
 
     // Find selfies that are pending/failed/manual_required and have a CNH available.
@@ -153,7 +168,12 @@ export class FaceVerifyService {
     }
   }
 
-  private async processOne(selfieId: string, cnhKey: string, selfieKey: string) {
+    /**
+   * Executes process one business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async processOne(selfieId: string, cnhKey: string, selfieKey: string) {
     const repo = AppDataSource.getRepository(MotoboyDocument);
     const selfie = await repo.findOne({ where: { id: selfieId } });
     if (!selfie) return;
