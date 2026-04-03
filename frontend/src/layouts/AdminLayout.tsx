@@ -45,6 +45,7 @@ export function AdminLayout({
       (isOperatorUser
         ? [
             { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
+            { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'cardapio', label: 'Loja Online', icon: Package },
           ]
         : [
@@ -67,6 +68,7 @@ export function AdminLayout({
     if (isOperatorUser) {
       return [
         { type: 'item', item: mobileNavItems.find((i) => i.id === 'fila') },
+        { type: 'item', item: mobileNavItems.find((i) => i.id === 'produtos') },
         { type: 'item', item: mobileNavItems.find((i) => i.id === 'cardapio') },
       ].filter((entry) => Boolean(entry?.item));
     }

@@ -184,6 +184,13 @@ export function AdminMobileBottomNav() {
       onClick: openCatalog,
     },
     {
+      id: 'produtos',
+      label: 'Produtos',
+      icon: Package,
+      active: path === '/admin/dashboard' && dashboardTab === 'produtos',
+      onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'produtos' } }),
+    },
+    {
       id: 'pedidos',
       label: 'Vendas',
       icon: CurrencyDollar,
@@ -198,7 +205,9 @@ export function AdminMobileBottomNav() {
       onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'resumo' } }),
     },
   ];
-  const items = isOperator ? baseItems.filter((item) => item.id === 'monitor' || item.id === 'catalogo') : baseItems;
+  const items = isOperator
+    ? baseItems.filter((item) => item.id === 'monitor' || item.id === 'produtos' || item.id === 'catalogo')
+    : baseItems.filter((item) => item.id !== 'produtos');
 
   if (isSuperAdmin || hiddenByOverlay) return null;
 
@@ -209,7 +218,7 @@ export function AdminMobileBottomNav() {
         transform: isVisible ? 'translateY(0)' : 'translateY(calc(100% - 4px))',
       }}
     >
-      <ul className={`pointer-events-auto mx-auto grid ${items.length <= 2 ? 'grid-cols-2' : 'grid-cols-4'} gap-1 max-w-none rounded-none border-t border-slate-200/40 bg-white/72 p-1.5 pb-[max(env(safe-area-inset-bottom),4px)] shadow-[0_-12px_24px_-20px_rgba(15,23,42,0.35)] backdrop-blur-2xl`}>
+      <ul className={`pointer-events-auto mx-auto grid ${items.length <= 2 ? 'grid-cols-2' : items.length === 3 ? 'grid-cols-3' : 'grid-cols-4'} gap-1 max-w-none rounded-none border-t border-slate-200/40 bg-white/72 p-1.5 pb-[max(env(safe-area-inset-bottom),4px)] shadow-[0_-12px_24px_-20px_rgba(15,23,42,0.35)] backdrop-blur-2xl`}>
         {items.map((item) => {
           const Icon = item.icon;
           return (

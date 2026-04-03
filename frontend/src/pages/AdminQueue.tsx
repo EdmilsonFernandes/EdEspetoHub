@@ -60,6 +60,7 @@ export function AdminQueue() {
     () =>
       (isOperatorUser
         ? [
+            { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'cardapio', label: 'Loja Online', icon: Package },
             { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
           ]
