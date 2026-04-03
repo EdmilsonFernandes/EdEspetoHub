@@ -2434,28 +2434,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   )}
                 </div>
               </div>
-              <div
-                className="relative z-20 -mx-5 mt-4 border-t border-slate-200 bg-white/90 px-5 py-3 pb-[calc(env(safe-area-inset-bottom)+12px)] backdrop-blur-xl sm:-mx-6 sm:px-6"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="mx-auto flex w-full max-w-2xl gap-3">
-                <button
-                  type="button"
-                  onClick={handleInlineCancel}
-                  className="flex-1 py-3 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={handleInlineSave}
-                  disabled={saving}
-                  className="flex-1 py-3 rounded-xl bg-brand-gradient text-white text-sm font-semibold shadow-[0_12px_24px_-16px_rgba(59,130,246,0.85)] hover:opacity-95 disabled:opacity-60"
-                >
-                  Salvar
-                </button>
-                </div>
-              </div>
               <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-3.5">
                 <div className="flex items-center justify-between gap-2">
                   <label className="text-xs font-semibold text-emerald-700 uppercase tracking-[0.2em]">Combo promocional</label>
@@ -2513,6 +2491,28 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     </p>
                   );
                 })()}
+              </div>
+              <div
+                className="relative z-20 -mx-5 mt-4 border-t border-slate-200 bg-white/90 px-5 py-3 pb-[calc(env(safe-area-inset-bottom)+12px)] backdrop-blur-xl sm:-mx-6 sm:px-6"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="mx-auto flex w-full max-w-2xl gap-3">
+                <button
+                  type="button"
+                  onClick={handleInlineCancel}
+                  className="flex-1 py-3 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleInlineSave}
+                  disabled={saving}
+                  className="flex-1 py-3 rounded-xl bg-brand-gradient text-white text-sm font-semibold shadow-[0_12px_24px_-16px_rgba(59,130,246,0.85)] hover:opacity-95 disabled:opacity-60"
+                >
+                  Salvar
+                </button>
+                </div>
               </div>
             </div>
           </div>
