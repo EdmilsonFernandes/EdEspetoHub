@@ -104,6 +104,15 @@ type FeaturedProduct = {
   price: number;
 };
 
+const pickRandomIndex = (length: number, current: number) => {
+  if (length <= 1) return 0;
+  let next = current;
+  while (next === current) {
+    next = Math.floor(Math.random() * length);
+  }
+  return next;
+};
+
 export function MarketplacePage() {
   const navigate = useNavigate();
   const [stores, setStores] = useState<MarketplaceStore[]>([]);
@@ -121,6 +130,7 @@ export function MarketplacePage() {
   const [locationLabel, setLocationLabel] = useState('Sua região');
   const [distanceByStore, setDistanceByStore] = useState<Record<string, number>>({});
   const [distanceLoading, setDistanceLoading] = useState(false);
+  const [rotatingHeroIndex, setRotatingHeroIndex] = useState(0);
 
   useEffect(() => {
     document.title = 'Hub Já no Caminho';
@@ -314,7 +324,7 @@ export function MarketplacePage() {
   }, [segmentOptions]);
 
   const heroBanners = useMemo(() => {
-    const byStore = enrichedStores.slice(0, 3).map((store) => ({
+    const byStore = enrichedStores.map((store) => ({
       id: store.id,
       title: store.name,
       subtitle: `${store.etaMin}-${store.etaMax} min • ${store.freeShipping ? 'Frete gratis' : 'Entrega rapida'}`,
@@ -332,6 +342,19 @@ export function MarketplacePage() {
       },
     ];
   }, [enrichedStores]);
+
+  useEffect(() => {
+    const length = heroBanners.length;
+    if (length <= 1) {
+      setRotatingHeroIndex(0);
+      return;
+    }
+    setRotatingHeroIndex((prev) => (prev < length ? prev : 0));
+    const timer = window.setInterval(() => {
+      setRotatingHeroIndex((prev) => pickRandomIndex(length, prev));
+    }, 3000);
+    return () => window.clearInterval(timer);
+  }, [heroBanners]);
 
   useEffect(() => {
     let cancelled = false;
@@ -602,30 +625,32 @@ export function MarketplacePage() {
         </section>
 
         <section>
-          <div className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory">
-            {heroBanners.map((banner) => (
-              <div
-                key={banner.id}
-                className="relative snap-start min-w-[90%] sm:min-w-[560px] lg:min-w-[720px] aspect-[16/7] rounded-3xl p-5 text-white shadow-lg overflow-hidden"
-              >
-                <img src={banner.image} alt={banner.title} className="absolute inset-0 h-full w-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-r from-slate-900/75 via-slate-900/40 to-slate-900/20" />
-                <div className="relative">
-                  <p className="text-xs uppercase tracking-[0.16em] text-slate-200 font-bold">Ja no Caminho</p>
-                  <p className="text-xl sm:text-2xl font-black mt-1">{banner.title}</p>
-                  <p className="text-sm text-slate-100 mt-1">{banner.subtitle}</p>
-                  {banner.slug ? (
-                    <Link
-                      to={`/${banner.slug}`}
-                      className="mt-3 inline-flex rounded-full bg-white/95 px-4 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-slate-900"
-                    >
-                      Ver loja
-                    </Link>
-                  ) : null}
-                </div>
+          {heroBanners[rotatingHeroIndex] && (
+            <div className="relative aspect-[16/6] sm:aspect-[16/5] rounded-3xl p-4 sm:p-5 text-white shadow-lg overflow-hidden">
+              <img
+                src={heroBanners[rotatingHeroIndex].image}
+                alt={heroBanners[rotatingHeroIndex].title}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-900/75 via-slate-900/35 to-slate-900/15" />
+              <div className="relative">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-slate-200 font-bold">Já no Caminho</p>
+                <p className="text-lg sm:text-xl font-black mt-1">{heroBanners[rotatingHeroIndex].title}</p>
+                <p className="text-xs sm:text-sm text-slate-100 mt-1">{heroBanners[rotatingHeroIndex].subtitle}</p>
+                {heroBanners[rotatingHeroIndex].slug ? (
+                  <Link
+                    to={`/${heroBanners[rotatingHeroIndex].slug}`}
+                    className="mt-2.5 inline-flex rounded-full bg-white/95 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-900"
+                  >
+                    Ver loja
+                  </Link>
+                ) : null}
               </div>
-            ))}
-          </div>
+              <div className="absolute bottom-2.5 right-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black text-slate-700">
+                {rotatingHeroIndex + 1}/{heroBanners.length}
+              </div>
+            </div>
+          )}
         </section>
 
         <section className="space-y-3">
@@ -636,8 +661,8 @@ export function MarketplacePage() {
           <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
             {featuredLoading &&
               Array.from({ length: 4 }).map((_, idx) => (
-                <div key={`featured-skeleton-${idx}`} className="min-w-[182px] rounded-2xl border border-slate-200 bg-white p-2.5 animate-pulse">
-                  <div className="h-24 rounded-xl bg-slate-100" />
+                <div key={`featured-skeleton-${idx}`} className="min-w-[156px] rounded-2xl border border-slate-200 bg-white p-2 animate-pulse">
+                  <div className="h-20 rounded-xl bg-slate-100" />
                   <div className="mt-2 h-3 w-24 rounded bg-slate-100" />
                   <div className="mt-1 flex items-center gap-1.5">
                     <div className="h-4 w-4 rounded-full bg-slate-100" />
@@ -650,10 +675,13 @@ export function MarketplacePage() {
                 <Link
                   key={`${item.storeSlug}-${item.id}`}
                   to={`/${item.storeSlug}`}
-                  className="group relative min-w-[182px] rounded-2xl border border-slate-200 bg-white p-2.5 shadow-sm hover:shadow-md transition"
+                  className="group relative min-w-[156px] rounded-2xl border border-slate-200 bg-white p-2 shadow-sm hover:shadow-md transition"
                 >
-                  <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-24 w-full rounded-xl object-cover" />
-                  <p className="mt-2 line-clamp-1 text-sm font-bold text-slate-900">{item.name}</p>
+                  <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-20 w-full rounded-xl object-cover" />
+                  <span className="absolute top-3 left-3 rounded-full bg-slate-100/95 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] text-slate-600">
+                    Destaque
+                  </span>
+                  <p className="mt-2 line-clamp-1 text-[13px] font-bold text-slate-900">{item.name}</p>
                   <div className="mt-1 flex items-center gap-1.5">
                     <img src={item.storeLogo} alt={item.storeName} className="h-4 w-4 rounded-full object-cover border border-slate-200" />
                     <p className="line-clamp-1 text-[11px] text-slate-500">{item.storeName}</p>
@@ -673,15 +701,15 @@ export function MarketplacePage() {
         </section>
 
         <section className="space-y-4">
-          <div className="flex flex-col items-center justify-center text-center gap-1">
-            <h2 className="text-lg sm:text-2xl font-black text-slate-900">Hub Já no Caminho</h2>
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-base sm:text-lg font-black text-slate-900">Lojas da região</h2>
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">{filteredStores.length} resultados</p>
           </div>
 
           {loading && (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, idx) => (
-                <div key={idx} className="h-44 rounded-3xl bg-white border border-slate-200 animate-pulse" />
+                <div key={idx} className="h-36 rounded-3xl bg-white border border-slate-200 animate-pulse" />
               ))}
             </div>
           )}
@@ -714,7 +742,7 @@ export function MarketplacePage() {
                   to={`/${store.slug}`}
                   className="w-full max-w-[420px] group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_12px_32px_rgba(0,0,0,0.05)] transition-all duration-300 hover:scale-[1.01] hover:shadow-lg active:scale-[0.99]"
                 >
-                  <div className="relative aspect-[16/8] md:aspect-[16/7] overflow-hidden">
+                  <div className="relative aspect-[16/6] overflow-hidden">
                     <img
                       src={store.banner}
                       alt={store.name}
@@ -723,12 +751,12 @@ export function MarketplacePage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/55 via-slate-900/10 to-transparent" />
                   </div>
-                  <div className="p-3.5 flex gap-3">
+                  <div className="p-3 flex gap-2.5">
                     <img
                       src={store.logo}
                       alt={`${store.name} logo`}
                       loading="lazy"
-                      className="h-14 w-14 rounded-2xl object-cover border border-slate-200 bg-white"
+                      className="h-12 w-12 rounded-xl object-cover border border-slate-200 bg-white"
                     />
                     <div className="min-w-0 flex-1 space-y-1">
                       <div className="flex items-center justify-between gap-2">
@@ -739,7 +767,7 @@ export function MarketplacePage() {
                       <p className="text-xs text-slate-500 inline-flex items-center gap-1">
                         <MapPin size={12} /> {store.city}{store.state ? ` • ${store.state}` : ''}
                       </p>
-                      <div className="pt-1 flex flex-wrap gap-1.5 text-[11px] text-slate-600">
+                      <div className="pt-1 flex flex-wrap gap-1 text-[10px] text-slate-600">
                         <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 font-semibold text-amber-700">
                           <Star size={12} weight="fill" className="text-amber-500" />
                           {store.rating.toFixed(1)}
