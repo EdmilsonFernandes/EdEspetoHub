@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.221127.0d3288ca",
-  "buildId": "0.1.9+20260403.221127.0d3288ca-20260403.221127-0d3288ca",
-  "builtAt": "2026-04-03T22:11:27.180Z",
-  "commitHash": "0d3288ca830faa185662126f99fbc86cbe8939d5",
-  "shortHash": "0d3288ca",
+  "versionInternal": "0.1.9+20260403.221658.8c2e952d",
+  "buildId": "0.1.9+20260403.221658.8c2e952d-20260403.221658-8c2e952d",
+  "builtAt": "2026-04-03T22:16:58.648Z",
+  "commitHash": "8c2e952d8ab36c372a7147e477fd20fb1736c9e7",
+  "shortHash": "8c2e952d",
   "branch": "main",
   "commits": [
+    {
+      "hash": "8c2e952d8ab36c372a7147e477fd20fb1736c9e7",
+      "shortHash": "8c2e952d",
+      "dateIso": "2026-04-03T19:12:59-03:00",
+      "subject": "Mobile: add native deep-link + push bootstrap + session persistence; polish featured store icon"
+    },
     {
       "hash": "0d3288ca830faa185662126f99fbc86cbe8939d5",
       "shortHash": "0d3288ca",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "992479bc",
       "dateIso": "2026-04-03T12:50:12-03:00",
       "subject": "Refina Hub para marketplace generico com cards compactos e destaque de produtos"
-    },
-    {
-      "hash": "258802da28cb838a1b8ab722719c5c8c582d8494",
-      "shortHash": "258802da",
-      "dateIso": "2026-04-03T12:48:02-03:00",
-      "subject": "Refina Hub mobile/web com PT-BR, destaque da marca e carrossel de produtos"
     }
   ]
 } as const;

@@ -30,6 +30,7 @@ import { randomUUID } from 'crypto';
 import { EntityManager } from 'typeorm';
 import { Product } from '../entities/Product';
 import { OrderShipment } from '../entities/OrderShipment';
+import { PushNotificationService } from './PushNotificationService';
 /**
  * Provides OrderService functionality.
  *
@@ -45,7 +46,30 @@ export class OrderService
   private subscriptionService = new SubscriptionService();
   private userRepository = new UserRepository();
   private storeUserRepository = new StoreUserRepository();
+  private pushService = new PushNotificationService();
   private tz = process.env.APP_TZ || 'America/Sao_Paulo';
+
+  /**
+   * Maps internal order status into customer-friendly push copy.
+   *
+   * @author Edmilson Lopes
+   */
+  private resolveOrderStatusPushMessage(status: string, orderDisplayId: string) {
+    const normalized = String(status || '').toLowerCase();
+    const dictionary: Record<string, string> = {
+      pending: `Pedido ${orderDisplayId} recebido com sucesso.`,
+      preparing: `Pedido ${orderDisplayId} está em preparação.`,
+      ready: `Pedido ${orderDisplayId} pronto para postagem.`,
+      ready_for_delivery: `Pedido ${orderDisplayId} pronto para entrega.`,
+      waiting_for_motoboy: `Pedido ${orderDisplayId} aguardando entregador.`,
+      dispatched: `Pedido ${orderDisplayId} foi postado e está em trânsito.`,
+      in_delivery: `Pedido ${orderDisplayId} saiu para entrega.`,
+      delivered: `Pedido ${orderDisplayId} foi entregue.`,
+      finished: `Pedido ${orderDisplayId} foi finalizado.`,
+      cancelled: `Pedido ${orderDisplayId} foi cancelado.`,
+    };
+    return dictionary[normalized] || `Pedido ${orderDisplayId} teve atualização de status.`;
+  }
 
     /**
    * Reconciles order statuses with delivery snapshots and auto-closes stale queue entries for one store.
@@ -601,12 +625,25 @@ private async seedPostalShipmentFromCheckoutTx(
   {
     const store = await this.storeRepository.findById(input.storeId);
     if (!store) throw new AppError('STORE-001', 404);
-    return AppDataSource.transaction(async (manager) => {
+    const saved = await AppDataSource.transaction(async (manager) => {
       const order = await this.buildOrder(input, store, manager, randomUUID());
       const saved = await manager.getRepository(Order).save(order);
       await this.seedPostalShipmentFromCheckoutTx(manager, saved, input as any);
       return saved;
     });
+    if (saved?.customerUserId) {
+      const body = this.resolveOrderStatusPushMessage(String(saved.status || 'pending'), `#${String(saved.id || '').slice(0, 8)}`);
+      void this.pushService.notifyCustomerOrderUpdate(String(saved.customerUserId), {
+        title: 'Pedido atualizado',
+        body,
+        data: {
+          url: `https://janocaminho.com.br/pedido/${saved.id}`,
+          orderId: String(saved.id),
+          status: String(saved.status || ''),
+        },
+      });
+    }
+    return saved;
   }
 
 
@@ -622,12 +659,25 @@ private async seedPostalShipmentFromCheckoutTx(
   {
     const store = await this.storeRepository.findBySlug(input.storeSlug);
     if (!store) throw new AppError('STORE-001', 404);
-    return AppDataSource.transaction(async (manager) => {
+    const saved = await AppDataSource.transaction(async (manager) => {
       const order = await this.buildOrder(input, store, manager, randomUUID());
       const saved = await manager.getRepository(Order).save(order);
       await this.seedPostalShipmentFromCheckoutTx(manager, saved, input as any);
       return saved;
     });
+    if (saved?.customerUserId) {
+      const body = this.resolveOrderStatusPushMessage(String(saved.status || 'pending'), `#${String(saved.id || '').slice(0, 8)}`);
+      void this.pushService.notifyCustomerOrderUpdate(String(saved.customerUserId), {
+        title: 'Pedido atualizado',
+        body,
+        data: {
+          url: `https://janocaminho.com.br/pedido/${saved.id}`,
+          orderId: String(saved.id),
+          status: String(saved.status || ''),
+        },
+      });
+    }
+    return saved;
   }
 
 
@@ -822,6 +872,18 @@ private async seedPostalShipmentFromCheckoutTx(
     if (saved.type === 'delivery' && !isPostalFlow && [ 'delivered', 'finished' ].includes(nextStatus)) {
       await this.deliveryBillingService.recordDelivery(saved);
     }
+    if ((saved as any)?.customerUserId) {
+      const body = this.resolveOrderStatusPushMessage(String(saved.status || nextStatus), `#${String(saved.id || '').slice(0, 8)}`);
+      void this.pushService.notifyCustomerOrderUpdate(String((saved as any).customerUserId), {
+        title: 'Pedido atualizado',
+        body,
+        data: {
+          url: `https://janocaminho.com.br/pedido/${saved.id}`,
+          orderId: String(saved.id),
+          status: String(saved.status || nextStatus || ''),
+        },
+      });
+    }
     return saved;
   }
 
@@ -923,6 +985,22 @@ async updatePostalShipment(
 
       return { order: orderLock, shipment };
     });
+
+    if ((result?.order as any)?.customerUserId) {
+      const body = this.resolveOrderStatusPushMessage(
+        String(result?.order?.status || ''),
+        `#${String(result?.order?.id || '').slice(0, 8)}`
+      );
+      void this.pushService.notifyCustomerOrderUpdate(String((result.order as any).customerUserId), {
+        title: 'Pedido atualizado',
+        body,
+        data: {
+          url: `https://janocaminho.com.br/pedido/${result.order.id}`,
+          orderId: String(result.order.id),
+          status: String(result.order.status || ''),
+        },
+      });
+    }
 
     return result;
   }

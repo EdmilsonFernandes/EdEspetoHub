@@ -48,4 +48,12 @@ export const customerAccountService = {
   deleteAddress(addressId: string) {
     return apiClient.delete(`/customer/addresses/${addressId}`);
   },
+
+  registerPushToken(payload: { token: string; platform?: string; appVersion?: string; deviceModel?: string }) {
+    return apiClient.post('/customer/push/register', payload);
+  },
+
+  unregisterPushToken(payload?: { token?: string | null }) {
+    return apiClient.post('/customer/push/unregister', payload || {});
+  },
 };

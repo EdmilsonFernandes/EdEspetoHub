@@ -7,6 +7,7 @@ import { CustomerAddress } from '../entities/CustomerAddress';
 import { User } from '../entities/User';
 import { Order } from '../entities/Order';
 import { EmailService } from './EmailService';
+import { PushNotificationService } from './PushNotificationService';
 
 type AddressInput = {
   label?: string;
@@ -24,6 +25,7 @@ type AddressInput = {
 
 export class CustomerAccountService {
   private emailService = new EmailService();
+  private pushService = new PushNotificationService();
     /**
    * Executes normalize email business logic.
    *
@@ -406,5 +408,31 @@ async listOrders(userId: string) {
         price: Number(item.price || 0),
       })),
     }));
+  }
+
+  /**
+   * Registers a mobile push token for the authenticated customer.
+   *
+   * @author Edmilson Lopes
+   */
+  async registerPushToken(
+    userId: string,
+    input: { token?: string; platform?: string; appVersion?: string; deviceModel?: string }
+  ) {
+    return this.pushService.registerCustomerToken(userId, {
+      token: String(input?.token || ''),
+      platform: input?.platform,
+      appVersion: input?.appVersion,
+      deviceModel: input?.deviceModel,
+    });
+  }
+
+  /**
+   * Unregisters one or all push tokens for the authenticated customer.
+   *
+   * @author Edmilson Lopes
+   */
+  async unregisterPushToken(userId: string, input: { token?: string | null }) {
+    return this.pushService.unregisterCustomerToken(userId, input?.token || null);
   }
 }

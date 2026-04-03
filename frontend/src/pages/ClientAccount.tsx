@@ -54,6 +54,12 @@ export function ClientAccount() {
   }, [navigate]);
 
   const logout = () => {
+    const token = String(localStorage.getItem('jnk_mobile_push_token') || '').trim();
+    if (token) {
+      void customerAccountService.unregisterPushToken({ token });
+    } else {
+      void customerAccountService.unregisterPushToken({});
+    }
     localStorage.removeItem('customerSession');
     navigate('/cliente', { replace: true });
   };

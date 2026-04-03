@@ -1,9 +1,11 @@
 import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { PushNotifications } from '@capacitor/push-notifications';
+import { customerAccountService } from '../services/customerAccountService';
 
 const PUSH_PROMPTED_KEY = 'jnk_mobile_push_prompted';
 const PUSH_TOKEN_KEY = 'jnk_mobile_push_token';
+const PUSH_LAST_SYNC_TOKEN_KEY = 'jnk_mobile_push_last_sync_token';
 
 const normalizeInternalUrl = (rawUrl: string): string | null => {
   try {
@@ -37,14 +39,47 @@ const navigateFromPayload = (payload?: unknown) => {
   window.location.assign(internal);
 };
 
+const getCustomerSessionToken = () => {
+  try {
+    const raw = localStorage.getItem('customerSession');
+    if (!raw) return '';
+    const parsed = JSON.parse(raw);
+    return String(parsed?.token || '').trim();
+  } catch {
+    return '';
+  }
+};
+
+const syncPushTokenWithBackend = async (tokenRaw?: string | null) => {
+  const token = String(tokenRaw || localStorage.getItem(PUSH_TOKEN_KEY) || '').trim();
+  if (!token) return;
+  const customerToken = getCustomerSessionToken();
+  if (!customerToken) return;
+
+  const lastSynced = String(localStorage.getItem(PUSH_LAST_SYNC_TOKEN_KEY) || '').trim();
+  if (lastSynced === token) return;
+
+  try {
+    await customerAccountService.registerPushToken({
+      token,
+      platform: Capacitor.getPlatform(),
+    });
+    localStorage.setItem(PUSH_LAST_SYNC_TOKEN_KEY, token);
+  } catch {
+    // no-op
+  }
+};
+
 const bootstrapPushNotifications = async () => {
   try {
     await PushNotifications.addListener('registration', (token) => {
+      const value = String(token?.value || '').trim();
       try {
-        localStorage.setItem(PUSH_TOKEN_KEY, String(token?.value || ''));
+        localStorage.setItem(PUSH_TOKEN_KEY, value);
       } catch {
         // no-op
       }
+      void syncPushTokenWithBackend(value);
     });
 
     await PushNotifications.addListener('registrationError', () => {
@@ -100,5 +135,8 @@ export const bootstrapNativeApp = async () => {
   }
 
   await bootstrapPushNotifications();
+  void syncPushTokenWithBackend();
+  window.addEventListener('focus', () => {
+    void syncPushTokenWithBackend();
+  });
 };
-

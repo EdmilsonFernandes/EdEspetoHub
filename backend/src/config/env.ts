@@ -94,4 +94,7 @@ export const env = {
     clientSecret: process.env.MELHOR_ENVIO_CLIENT_SECRET || '',
     refreshToken: process.env.MELHOR_ENVIO_REFRESH_TOKEN || '',
   },
+  push: {
+    fcmServerKey: process.env.FCM_SERVER_KEY || process.env.MOBILE_FCM_SERVER_KEY || '',
+  },
 };

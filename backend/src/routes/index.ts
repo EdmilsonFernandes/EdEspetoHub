@@ -56,6 +56,8 @@ routes.get('/customer/me', requireAuth, requireRole('CUSTOMER'), CustomerAccount
 routes.patch('/customer/me', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.updateMe);
 routes.post('/customer/me/change-password', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.changePassword);
 routes.get('/customer/orders', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.listOrders);
+routes.post('/customer/push/register', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.registerPushToken);
+routes.post('/customer/push/unregister', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.unregisterPushToken);
 routes.get('/customer/addresses', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.listAddresses);
 routes.post('/customer/addresses', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.createAddress);
 routes.patch('/customer/addresses/:addressId', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.updateAddress);

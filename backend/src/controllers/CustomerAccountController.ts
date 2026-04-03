@@ -174,5 +174,34 @@ static async listOrders(req: Request, res: Response) {
       return respondWithError(req, res, error, 400);
     }
   }
-}
 
+    /**
+   * Registers customer mobile push token.
+   *
+   * @author Edmilson Lopes
+   */
+static async registerPushToken(req: Request, res: Response) {
+    try {
+      if (!req.auth?.sub) throw new AppError('AUTH-001', 401);
+      const result = await service.registerPushToken(req.auth.sub, req.body || {});
+      return res.json(result);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+    /**
+   * Unregisters customer mobile push token.
+   *
+   * @author Edmilson Lopes
+   */
+static async unregisterPushToken(req: Request, res: Response) {
+    try {
+      if (!req.auth?.sub) throw new AppError('AUTH-001', 401);
+      const result = await service.unregisterPushToken(req.auth.sub, req.body || {});
+      return res.json(result);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+}
