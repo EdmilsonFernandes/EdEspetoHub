@@ -132,6 +132,7 @@ private normalizePostalZip(value?: string | null) {
       const socialLinks = sanitizeSocialLinks(input.socialLinks);
       const deliveryRadiusKm = this.parseNumber(input.deliveryRadiusKm);
       const deliveryFee = this.parseNumber(input.deliveryFee);
+      const orderNotificationSound = input.orderNotificationSound?.toString().trim() || null;
       const trimmedAddress = input.address?.toString().trim();
       const trimmedCity = input.city?.toString().trim();
       const trimmedState = input.state?.toString().trim().toUpperCase();
@@ -161,6 +162,7 @@ private normalizePostalZip(value?: string | null) {
         segment,
         deliveryRadiusKm: deliveryRadiusKm ?? null,
         deliveryFee: deliveryFee ?? null,
+        orderNotificationSound,
         postalEnabled,
         postalOriginZip: postalOriginZip ?? null,
         socialLinks,
@@ -290,6 +292,11 @@ private normalizePostalZip(value?: string | null) {
       if (data.deliveryFee !== undefined)
       {
         store.settings.deliveryFee = this.parseNumber(data.deliveryFee) ?? null;
+      }
+      if (data.orderNotificationSound !== undefined)
+      {
+        const trimmedSound = data.orderNotificationSound?.toString().trim();
+        store.settings.orderNotificationSound = trimmedSound || null;
       }
       if (data.postalOriginZip !== undefined)
       {

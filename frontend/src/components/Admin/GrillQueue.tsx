@@ -637,6 +637,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     if (!Number.isFinite(raw)) return fallback;
     return Math.min(prepSlaMinutes, Math.max(1, Math.round(raw)));
   }, [auth?.store?.settings?.prepAttentionMinutes, prepSlaMinutes]);
+  const configuredOrderNotificationSound = useMemo(
+    () => String(auth?.store?.settings?.orderNotificationSound || '').trim(),
+    [auth?.store?.settings?.orderNotificationSound]
+  );
   const PREP_SLA_MS = prepSlaMinutes * 60 * 1000;
   const PREP_ATTENTION_MS = prepAttentionMinutes * 60 * 1000;
   const [queue, setQueue] = useState([]);
@@ -756,6 +760,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   });
   const previousIdsRef = useRef<string[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
+  const lastNotificationAudioSrcRef = useRef<string>('');
   const isDrawerOpen = selectedOrder !== null;
   const isPaymentModalOpen = confirmModal !== null;
 
@@ -1168,26 +1174,80 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     return context;
   };
 
+  const playPresetTone = (context: AudioContext, preset: 'default' | 'chime' | 'triple' | 'alert') => {
+    const schedule = (offset: number, frequency: number, duration: number, gainValue = 0.07) => {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.value = frequency;
+      gain.gain.value = gainValue;
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start(context.currentTime + offset);
+      oscillator.stop(context.currentTime + offset + duration);
+    };
+    if (preset === 'chime') {
+      schedule(0, 720, 0.12, 0.06);
+      schedule(0.14, 980, 0.14, 0.065);
+      return;
+    }
+    if (preset === 'triple') {
+      schedule(0, 900, 0.1, 0.07);
+      schedule(0.16, 900, 0.1, 0.07);
+      schedule(0.32, 1020, 0.12, 0.075);
+      return;
+    }
+    if (preset === 'alert') {
+      schedule(0, 760, 0.14, 0.08);
+      schedule(0.18, 620, 0.14, 0.08);
+      schedule(0.36, 760, 0.14, 0.08);
+      return;
+    }
+    schedule(0, 880, 0.2, 0.07);
+  };
+
   const playNewOrderSound = () => {
     if (!soundEnabled) return;
+    const rawSetting = String(configuredOrderNotificationSound || '').trim();
+    const normalizedSetting = rawSetting.toLowerCase();
+    const customUrl = /^(https?:\/\/|\/)/i.test(rawSetting) ? rawSetting : '';
+    const preset =
+      normalizedSetting === 'preset:chime'
+        ? 'chime'
+        : normalizedSetting === 'preset:triple'
+        ? 'triple'
+        : normalizedSetting === 'preset:alert'
+        ? 'alert'
+        : 'default';
+
+    if (customUrl) {
+      try {
+        if (!notificationAudioRef.current || lastNotificationAudioSrcRef.current !== customUrl) {
+          notificationAudioRef.current = new Audio(customUrl);
+          notificationAudioRef.current.preload = 'auto';
+          lastNotificationAudioSrcRef.current = customUrl;
+        }
+        const audio = notificationAudioRef.current;
+        audio.currentTime = 0;
+        audio.play().catch(() => {
+          const context = audioContextRef.current || new AudioContext();
+          audioContextRef.current = context;
+          if (context.state === 'suspended') return;
+          playPresetTone(context, preset);
+        });
+        return;
+      } catch {
+        // Fallback to preset tone below.
+      }
+    }
+
     try {
       const context = audioContextRef.current || new AudioContext();
       audioContextRef.current = context;
-      if (context.state === "suspended") {
+      if (context.state === 'suspended') {
         return;
       }
-
-      const oscillator = context.createOscillator();
-      const gain = context.createGain();
-      oscillator.type = "sine";
-      oscillator.frequency.value = 880;
-      gain.gain.value = 0.07;
-
-      oscillator.connect(gain);
-      gain.connect(context.destination);
-
-      oscillator.start();
-      oscillator.stop(context.currentTime + 0.2);
+      playPresetTone(context, preset);
     } catch (err) {
       console.error("Não foi possível tocar o som", err);
     }

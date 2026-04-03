@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.201841.7ddea69d",
-  "buildId": "0.1.9+20260403.201841.7ddea69d-20260403.201841-7ddea69d",
-  "builtAt": "2026-04-03T20:18:41.150Z",
-  "commitHash": "7ddea69d1ab3939f312a3a6247488598f0bc4c51",
-  "shortHash": "7ddea69d",
+  "versionInternal": "0.1.9+20260403.202523.5e831102",
+  "buildId": "0.1.9+20260403.202523.5e831102-20260403.202523-5e831102",
+  "builtAt": "2026-04-03T20:25:23.521Z",
+  "commitHash": "5e831102cef8caa36e876797cc1a6e93ff5b64a6",
+  "shortHash": "5e831102",
   "branch": "main",
   "commits": [
+    {
+      "hash": "5e831102cef8caa36e876797cc1a6e93ff5b64a6",
+      "shortHash": "5e831102",
+      "dateIso": "2026-04-03T17:19:15-03:00",
+      "subject": "refactor(hub): apply premium glass identity and compact top density (items 1-6)"
+    },
     {
       "hash": "7ddea69d1ab3939f312a3a6247488598f0bc4c51",
       "shortHash": "7ddea69d",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "6abdc5a5",
       "dateIso": "2026-04-03T12:09:51-03:00",
       "subject": "Corrige acesso de Produtos para operador e simplifica configuracoes"
-    },
-    {
-      "hash": "2e47a2a8ab1579ae1001a30fb0c6161f41cfb1d6",
-      "shortHash": "2e47a2a8",
-      "dateIso": "2026-04-03T12:03:39-03:00",
-      "subject": "Adiciona mapeamento completo dos metodos da API em ingles"
     }
   ]
 } as const;

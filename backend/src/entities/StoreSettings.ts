@@ -117,6 +117,9 @@ export class StoreSettings
   @Column({ name: 'postal_origin_zip', type: 'varchar', nullable: true })
   postalOriginZip?: string | null;
 
+  @Column({ name: 'order_notification_sound', type: 'text', nullable: true })
+  orderNotificationSound?: string | null;
+
   @Column({
     name: 'social_links',
     type: 'jsonb',

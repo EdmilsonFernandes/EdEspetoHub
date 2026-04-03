@@ -140,6 +140,8 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
 
   const logoPreview = resolveAssetUrl(branding.logoUrl) || branding.logoFile || "";
   const bannerPreview = resolveAssetUrl(branding.bannerUrl) || branding.bannerFile || "";
+  const orderSoundValue = String(branding.orderNotificationSound || '').trim();
+  const orderSoundIsCustom = /^(https?:\/\/|\/)/i.test(orderSoundValue);
   return (
 
     <div className="bg-white/95 rounded-2xl shadow-[0_16px_36px_-28px_rgba(15,23,42,0.35)] border border-slate-200 overflow-hidden">
@@ -752,6 +754,44 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                   />
                 </button>
               </div>
+            </div>
+
+            <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 space-y-2.5">
+              <div>
+                <p className="text-sm font-semibold text-slate-800">Vinheta de novo pedido</p>
+                <p className="text-xs text-slate-500">Define o som tocado quando um pedido novo entra na fila.</p>
+              </div>
+              <select
+                value={orderSoundIsCustom ? 'custom' : (orderSoundValue || 'default')}
+                onChange={(event) => {
+                  const next = String(event.target.value || 'default');
+                  if (next === 'default') {
+                    handleChange('orderNotificationSound', '');
+                    return;
+                  }
+                  if (next === 'custom') {
+                    if (!orderSoundIsCustom) handleChange('orderNotificationSound', '');
+                    return;
+                  }
+                  handleChange('orderNotificationSound', next);
+                }}
+                className="w-full border border-gray-200 rounded-xl p-3 bg-white/90 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors text-sm"
+              >
+                <option value="default">Padrão (apito clássico)</option>
+                <option value="preset:chime">Vinheta suave</option>
+                <option value="preset:triple">Vinheta destaque</option>
+                <option value="preset:alert">Vinheta urgente</option>
+                <option value="custom">URL personalizada (MP3/OGG/WAV)</option>
+              </select>
+              {orderSoundIsCustom && (
+                <input
+                  type="url"
+                  value={orderSoundIsCustom ? orderSoundValue : ''}
+                  onChange={(event) => handleChange('orderNotificationSound', event.target.value)}
+                  className="w-full border border-gray-200 rounded-xl p-3 bg-white/90 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors text-sm"
+                  placeholder="https://exemplo.com/vinheta.mp3"
+                />
+              )}
             </div>
           </div>
         </div>

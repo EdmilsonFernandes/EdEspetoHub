@@ -241,6 +241,10 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS postal_origin_zip VARCHAR(8);
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS order_notification_sound TEXT;
+  `);
+  await AppDataSource.query(`
     UPDATE store_settings
     SET postal_origin_zip = LEFT(REGEXP_REPLACE(COALESCE(postal_origin_zip, ''), '\\D', '', 'g'), 8)
     WHERE postal_origin_zip IS NOT NULL;

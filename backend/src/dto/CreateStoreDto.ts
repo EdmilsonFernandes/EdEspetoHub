@@ -33,6 +33,7 @@ export interface CreateStoreDto {
   deliveryFee?: number;
   postalEnabled?: boolean;
   postalOriginZip?: string;
+  orderNotificationSound?: string;
   prepBaseMinutes?: number;
   prepAttentionMinutes?: number;
   address?: string;
