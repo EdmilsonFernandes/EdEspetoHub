@@ -299,6 +299,44 @@ export class FeaturedProductService {
     return this.repo.save(row);
   }
 
+  async refreshPaymentStatusByStore(storeId: string, requestId: string, authStoreId: string | undefined) {
+    if (authStoreId && authStoreId !== storeId) throw new AppError('AUTH-003', 403);
+    const current = await this.repo.findOne({
+      where: { id: requestId },
+      relations: [ 'store', 'product', 'requestedByUser' ],
+    });
+    if (!current || String((current as any)?.store?.id || '') !== storeId) {
+      throw new AppError('GEN-001', 404, { message: 'Solicitação não encontrada.' });
+    }
+
+    const paymentStatus = normalizeStatus(current.paymentStatus);
+    if (paymentStatus === 'PAID') return current;
+
+    const provider = normalizeStatus(current.paymentProvider || undefined);
+    const providerId = String(current.paymentProviderId || '').trim();
+    if (provider !== 'MERCADO_PAGO' || !providerId || !env.mercadoPago.accessToken) {
+      return current;
+    }
+
+    try {
+      const mpPayment: any = await this.mercadoPago.getPayment(providerId);
+      const mpStatus = String(mpPayment?.status || '').trim().toLowerCase();
+      if (mpStatus === 'approved') {
+        await this.markPaidFromWebhook(requestId, mpPayment);
+      } else if ([ 'rejected', 'cancelled', 'charged_back', 'refunded', 'failed' ].includes(mpStatus)) {
+        await this.markFailedFromWebhook(requestId, mpPayment);
+      }
+    } catch {
+      // Keep current state and return latest row.
+    }
+
+    const latest = await this.repo.findOne({
+      where: { id: requestId },
+      relations: [ 'store', 'product', 'requestedByUser' ],
+    });
+    return latest || current;
+  }
+
   async markPaidFromWebhook(requestId: string, mpPayment?: any) {
     const config = await this.loadPricingConfig();
     await AppDataSource.transaction(async (manager) => {

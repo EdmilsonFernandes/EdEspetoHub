@@ -47,6 +47,12 @@ export const featuredService = {
     return apiClient.patch(`/stores/${targetStoreId}/featured-requests/${requestId}/cancel`, {});
   },
 
+  async refreshPaymentByStore(requestId: string, storeId?: string) {
+    const targetStoreId = String(storeId || resolveStoreIdFromSession() || '').trim();
+    if (!targetStoreId) throw new Error('Sessão de loja inválida');
+    return apiClient.patch(`/stores/${targetStoreId}/featured-requests/${requestId}/refresh-payment`, {});
+  },
+
   async listPublicFeatured(limit = 18) {
     const response = await apiClient.rawGet(`/public/featured-products?limit=${Math.max(1, Math.min(60, Number(limit || 18)))}`);
     return toJson(response);

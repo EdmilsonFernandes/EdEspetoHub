@@ -102,6 +102,30 @@ export class FeaturedProductController {
   }
 
   /**
+   * Refreshes payment status for a featured request on store scope.
+   *
+   * @author Edmilson Lopes
+   */
+  static async refreshPaymentByStore(req: Request, res: Response) {
+    try {
+      const payload = await service.refreshPaymentStatusByStore(
+        req.params.storeId,
+        req.params.requestId,
+        req.auth?.storeId
+      );
+      return res.json(payload);
+    } catch (error: any) {
+      log.warn('Featured request payment refresh failed', {
+        storeId: req.params.storeId,
+        requestId: req.params.requestId,
+        userId: req.auth?.sub,
+        error,
+      });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
    * Lists featured product requests for platform admin review.
    *
    * @author Edmilson Lopes

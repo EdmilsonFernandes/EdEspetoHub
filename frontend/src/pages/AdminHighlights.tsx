@@ -6,6 +6,7 @@ import { useToast } from '../contexts/ToastContext';
 import { productService } from '../services/productService';
 import { featuredService } from '../services/featuredService';
 import { formatCurrency, formatDateTime } from '../utils/format';
+import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 type DurationUnit = 'DAY' | 'WEEK' | 'MONTH';
 
@@ -70,6 +71,7 @@ export function AdminHighlights() {
   const [createOpen, setCreateOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [nowTs, setNowTs] = useState(() => Date.now());
   const [form, setForm] = useState({
     productId: '',
     durationUnit: 'DAY' as DurationUnit,
@@ -112,6 +114,12 @@ export function AdminHighlights() {
     loadAll();
   }, [storeId]);
 
+  useEffect(() => {
+    if (!paymentOpen) return;
+    const timer = window.setInterval(() => setNowTs(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [paymentOpen]);
+
   const openPayment = (request: any) => {
     setSelectedRequest(request);
     setPaymentOpen(true);
@@ -135,6 +143,67 @@ export function AdminHighlights() {
       showToast('Não foi possível copiar agora.', 'warning');
     }
   };
+
+  const formatRemaining = (expiresAt?: string | Date | null) => {
+    if (!expiresAt) return '';
+    const exp = new Date(expiresAt).getTime();
+    if (!Number.isFinite(exp)) return '';
+    const diff = exp - nowTs;
+    if (diff <= 0) return 'Expirado';
+    const totalSec = Math.floor(diff / 1000);
+    const min = Math.floor(totalSec / 60);
+    const sec = totalSec % 60;
+    return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+  };
+
+  const selectedRemaining = useMemo(
+    () => formatRemaining(selectedRequest?.paymentExpiresAt),
+    [selectedRequest?.paymentExpiresAt, nowTs]
+  );
+
+  const refreshSelectedPaymentStatus = async (silent = false) => {
+    const requestId = String(selectedRequest?.id || '').trim();
+    if (!requestId || !storeId) return;
+    const previous = selectedRequest;
+    try {
+      const updated = await featuredService.refreshPaymentByStore(requestId, storeId);
+      setRequests((prev) =>
+        (Array.isArray(prev) ? prev : []).map((entry) =>
+          String(entry?.id || '') === String(updated?.id || '') ? updated : entry
+        )
+      );
+      setSelectedRequest((prev: any) =>
+        String(prev?.id || '') === String(updated?.id || '') ? updated : prev
+      );
+      const becamePaid =
+        String(previous?.paymentStatus || '').toUpperCase() !== 'PAID' &&
+        String(updated?.paymentStatus || '').toUpperCase() === 'PAID';
+      if (becamePaid) {
+        showToast('Pagamento confirmado. Seu destaque foi atualizado.', 'success');
+        await loadAll();
+      }
+    } catch (error: any) {
+      if (!silent) showToast(error?.message || 'Não foi possível atualizar o pagamento agora.', 'warning');
+    }
+  };
+
+  useEffect(() => {
+    if (!paymentOpen || !selectedRequest?.id) return;
+    const status = String(selectedRequest?.status || '').toUpperCase();
+    const paymentStatus = String(selectedRequest?.paymentStatus || '').toUpperCase();
+    const shouldPoll = status === 'PENDING_PAYMENT' && paymentStatus !== 'PAID';
+    if (!shouldPoll) return;
+    const first = window.setTimeout(() => {
+      void refreshSelectedPaymentStatus(true);
+    }, 1200);
+    const timer = window.setInterval(() => {
+      void refreshSelectedPaymentStatus(true);
+    }, 5000);
+    return () => {
+      window.clearTimeout(first);
+      window.clearInterval(timer);
+    };
+  }, [paymentOpen, selectedRequest?.id, selectedRequest?.status, selectedRequest?.paymentStatus, storeId]);
 
   const handleCreate = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -241,7 +310,13 @@ export function AdminHighlights() {
                 return (
                   <div key={request.id} className="rounded-2xl border border-slate-200 bg-slate-50/60 p-3">
                     <div className="flex flex-wrap items-start justify-between gap-2">
-                      <div>
+                      <div className="flex items-start gap-2.5 min-w-0">
+                        <img
+                          src={resolveAssetUrl(request?.product?.imageUrl || undefined) || '/janocaminho.jpg'}
+                          alt={request?.product?.name || 'Produto'}
+                          className="h-11 w-11 rounded-xl object-cover border border-slate-200 bg-white"
+                        />
+                        <div className="min-w-0">
                         <p className="text-sm font-bold text-slate-900">{request?.product?.name || 'Produto'}</p>
                         <p className="text-xs text-slate-500">
                           Criado em {formatDateTime(request?.createdAt)} • {DURATION_META[String(request?.durationUnit || 'DAY').toUpperCase() as DurationUnit]?.label || `${Number(request?.durationDays || 1)} dia(s)`}
@@ -262,6 +337,7 @@ export function AdminHighlights() {
                         {status === 'PAID_WAITING_SLOT' && (
                           <p className="text-xs font-semibold text-indigo-700 mt-1">Pagamento confirmado. Entrará no Hub assim que abrir uma vaga.</p>
                         )}
+                        </div>
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-bold ${statusTone(status)}`}>
@@ -410,6 +486,11 @@ export function AdminHighlights() {
                 Status: <strong>{paymentStatusLabel(selectedRequest?.paymentStatus)}</strong>
                 {selectedRequest?.paymentExpiresAt ? ` • expira em ${formatDateTime(selectedRequest.paymentExpiresAt)}` : ''}
               </p>
+              {selectedRemaining ? (
+                <p className={`text-xs mt-1 ${selectedRemaining === 'Expirado' ? 'text-rose-600' : 'text-slate-600'}`}>
+                  Tempo restante: <strong>{selectedRemaining}</strong>
+                </p>
+              ) : null}
             </div>
 
             {selectedRequest?.paymentQrCodeBase64 && (
@@ -447,7 +528,7 @@ export function AdminHighlights() {
               <button
                 type="button"
                 onClick={async () => {
-                  await loadAll();
+                  await refreshSelectedPaymentStatus(false);
                 }}
                 className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
               >
