@@ -21,6 +21,7 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/marketplace" element={<MarketplacePage />} />
             <Route path="/descobrir" element={<MarketplacePage />} />
+            <Route path="/praca" element={<MarketplacePage />} />
             <Route path="/portfolio" element={<PortfolioPage />} />
             <Route path="/arquitetura" element={<ArchitecturePage />} />
             <Route path="/instalar" element={<InstallAppPage />} />

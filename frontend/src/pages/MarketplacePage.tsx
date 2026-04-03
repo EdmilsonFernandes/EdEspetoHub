@@ -101,7 +101,7 @@ export function MarketplacePage() {
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
 
   useEffect(() => {
-    document.title = 'Marketplace | Já no Caminho';
+    document.title = 'Praça Já no Caminho';
   }, []);
 
   useEffect(() => {
@@ -114,7 +114,7 @@ export function MarketplacePage() {
       })
       .catch((err: any) => {
         if (!active) return;
-        setError(err?.message || 'Could not load marketplace stores right now.');
+        setError(err?.message || 'Não foi possível carregar a praça de lojas agora.');
       })
       .finally(() => {
         if (!active) return;
@@ -158,7 +158,7 @@ export function MarketplacePage() {
         const rawCity = String((store as any)?.settings?.city || '').trim();
         const rawState = String((store as any)?.settings?.state || '').trim().toUpperCase();
         const fallbackLocation = parseCityStateFromAddress((store as any)?.settings?.address || '');
-        const city = rawCity || fallbackLocation.city || 'Nearby';
+        const city = rawCity || fallbackLocation.city || 'Perto de você';
         const state = rawState || fallbackLocation.state;
         const segment = segmentLabel(store?.settings?.segment);
         const rating = Number(store?.reviewSummary?.avgStoreRating || 0) > 0
@@ -174,7 +174,7 @@ export function MarketplacePage() {
         const searchIndex = [store?.name, slug, segment, city, state].filter(Boolean).join(' ').toLowerCase();
         return {
           id: String(store?.id || slug || index),
-          name: String(store?.name || 'Store'),
+          name: String(store?.name || 'Loja'),
           slug,
           segment,
           city,
@@ -234,14 +234,14 @@ export function MarketplacePage() {
         <div className="max-w-7xl mx-auto px-4 py-3 space-y-3">
           <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700">
             <MapPin size={14} weight="duotone" className="text-slate-500" />
-            Deliver to: Rua Sebastião...
+            Entregar em: Rua Sebastião...
           </div>
           <div className="relative">
             <MagnifyingGlass size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="What do you want to order now?"
+              placeholder="O que você quer pedir agora?"
               className="w-full rounded-2xl bg-slate-100 border-none px-12 py-4 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
             />
           </div>
@@ -249,12 +249,12 @@ export function MarketplacePage() {
             {['all', 'free_shipping', 'nearby', 'open_now'].map((filter) => {
               const label =
                 filter === 'all'
-                  ? 'All'
+                  ? 'Todos'
                   : filter === 'free_shipping'
-                  ? 'Free delivery'
+                  ? 'Frete grátis'
                   : filter === 'nearby'
-                  ? 'Nearby'
-                  : 'Open now';
+                  ? 'Mais próximos'
+                  : 'Abertos agora';
               const active = quickFilter === filter;
               return (
                 <button
@@ -274,12 +274,12 @@ export function MarketplacePage() {
               onClick={() => setShowAdvancedFilters((prev) => !prev)}
               className="rounded-full px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] whitespace-nowrap bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
             >
-              Filters
+              Filtros
             </button>
           </div>
           {showAdvancedFilters && (
             <div className="rounded-2xl border border-slate-200 bg-white p-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500 mb-2">Category</p>
+              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500 mb-2">Categoria</p>
               <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
                 <button
                   type="button"
@@ -288,7 +288,7 @@ export function MarketplacePage() {
                     segmentFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'
                   }`}
                 >
-                  All segments
+                  Todos os segmentos
                 </button>
                 {segmentOptions.map((segment) => (
                   <button
@@ -332,8 +332,8 @@ export function MarketplacePage() {
         <section>
           <div className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory">
             {[
-              { title: 'Top rated stores this week', subtitle: 'Discover premium local sellers' },
-              { title: 'Fast delivery routes', subtitle: 'Order now and receive quickly' },
+              { title: 'Lojas mais bem avaliadas da semana', subtitle: 'Encontre os melhores lojistas da sua região' },
+              { title: 'Entrega mais rápida perto de você', subtitle: 'Peça agora e receba sem complicação' },
             ].map((banner) => (
               <div
                 key={banner.title}
@@ -349,8 +349,8 @@ export function MarketplacePage() {
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg sm:text-2xl font-black text-slate-900">Discover stores</h2>
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">{filteredStores.length} results</p>
+            <h2 className="text-lg sm:text-2xl font-black text-slate-900">Praça Já no Caminho</h2>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">{filteredStores.length} resultados</p>
           </div>
 
           {loading && (
@@ -365,7 +365,7 @@ export function MarketplacePage() {
 
           {!loading && !error && filteredStores.length === 0 && (
             <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
-              <p className="text-slate-700 font-semibold">No stores found with current filters.</p>
+              <p className="text-slate-700 font-semibold">Nenhuma loja encontrada com esses filtros.</p>
               <button
                 type="button"
                 onClick={() => {
@@ -376,7 +376,7 @@ export function MarketplacePage() {
                 }}
                 className="mt-3 rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600"
               >
-                Reset filters
+                Limpar filtros
               </button>
             </div>
           )}
@@ -426,7 +426,7 @@ export function MarketplacePage() {
                         </span>
                         <span className={`inline-flex items-center gap-1 font-semibold ${store.freeShipping ? 'text-emerald-600' : 'text-slate-600'}`}>
                           <Scooter size={12} />
-                          {store.freeShipping ? 'Free delivery' : 'Delivery available'}
+                          {store.freeShipping ? 'Frete grátis' : 'Entrega disponível'}
                         </span>
                       </div>
                     </div>
@@ -438,7 +438,7 @@ export function MarketplacePage() {
         </section>
 
         <section className="pb-6">
-          <p className="text-center text-xs font-semibold text-slate-500">Connecting you to the best local sellers in your region.</p>
+          <p className="text-center text-xs font-semibold text-slate-500">Conectando você aos melhores lojistas da região.</p>
         </section>
       </main>
 
@@ -449,23 +449,22 @@ export function MarketplacePage() {
         <div className="h-full grid grid-cols-4 px-2 pb-[max(env(safe-area-inset-bottom),0px)]">
           <button type="button" onClick={() => navigate('/')} className="flex flex-col items-center justify-center text-slate-500">
             <House size={18} />
-            <span className="text-[9px] font-black uppercase">Home</span>
+            <span className="text-[9px] font-black uppercase">Início</span>
           </button>
           <button type="button" className="flex flex-col items-center justify-center text-slate-900">
             <Storefront size={18} weight="fill" />
-            <span className="text-[9px] font-black uppercase">Discover</span>
+            <span className="text-[9px] font-black uppercase">Praça</span>
           </button>
           <button type="button" onClick={() => navigate('/portfolio')} className="flex flex-col items-center justify-center text-slate-500">
             <Heart size={18} />
-            <span className="text-[9px] font-black uppercase">Portfolio</span>
+            <span className="text-[9px] font-black uppercase">Portfólio</span>
           </button>
           <button type="button" onClick={() => navigate('/cliente')} className="flex flex-col items-center justify-center text-slate-500">
             <UserCircle size={18} />
-            <span className="text-[9px] font-black uppercase">Account</span>
+            <span className="text-[9px] font-black uppercase">Conta</span>
           </button>
         </div>
       </nav>
     </div>
   );
 }
-

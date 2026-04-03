@@ -152,7 +152,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
         navigate('/');
       },
     },
-    { id: 'marketplace', label: 'Descobrir', onClick: () => navigate('/marketplace') },
+    { id: 'marketplace', label: 'Praça', onClick: () => navigate('/marketplace') },
     { id: 'portfolio', label: 'Portfólio', onClick: () => navigate('/portfolio') },
     { id: 'architecture', label: 'Arquitetura', onClick: () => navigate('/arquitetura') },
     { id: 'install', label: 'Instalar app', onClick: () => navigate('/instalar') },
@@ -282,7 +282,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               onClick={() => navigate('/marketplace')}
               className="w-full inline-flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200"
             >
-              Descobrir lojas
+              Praça de lojas
               <MagnifyingGlass size={18} weight="duotone" />
             </button>
             <button
