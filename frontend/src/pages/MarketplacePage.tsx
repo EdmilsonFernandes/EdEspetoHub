@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MagnifyingGlass, MapPin, Star, Clock, Scooter, Storefront, House, UserCircle } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
@@ -128,6 +128,10 @@ export function MarketplacePage() {
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
   const [featuredLoading, setFeaturedLoading] = useState(false);
   const [featuredOffset, setFeaturedOffset] = useState(0);
+  const [storeCarouselIndex, setStoreCarouselIndex] = useState(0);
+  const [isStoreCarouselPaused, setIsStoreCarouselPaused] = useState(false);
+  const storeCarouselRef = useRef<HTMLDivElement | null>(null);
+  const resumeStoreCarouselTimerRef = useRef<number | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationLabel, setLocationLabel] = useState('Sua região');
   const [distanceByStore, setDistanceByStore] = useState<Record<string, number>>({});
@@ -222,7 +226,7 @@ export function MarketplacePage() {
     }
     const timer = window.setInterval(() => {
       setFeaturedOffset((prev) => (prev + 1) % featuredProducts.length);
-    }, 3000);
+    }, 5 * 60 * 1000);
     return () => window.clearInterval(timer);
   }, [featuredProducts]);
 
@@ -331,6 +335,55 @@ export function MarketplacePage() {
       return true;
     });
   }, [enrichedStores, debouncedQuery, segmentFilter, quickFilter]);
+
+  useEffect(() => {
+    if (filteredStores.length <= 1) {
+      setStoreCarouselIndex(0);
+      return;
+    }
+    if (isStoreCarouselPaused) return;
+    setStoreCarouselIndex((prev) => (prev < filteredStores.length ? prev : 0));
+    const timer = window.setInterval(() => {
+      setStoreCarouselIndex((prev) => (prev + 1) % filteredStores.length);
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [filteredStores.length, isStoreCarouselPaused]);
+
+  useEffect(() => {
+    const container = storeCarouselRef.current;
+    if (!container) return;
+    const target = container.querySelector<HTMLElement>(`[data-store-slide="${storeCarouselIndex}"]`);
+    if (!target) return;
+    target.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+  }, [storeCarouselIndex]);
+
+  const pauseStoreCarousel = () => {
+    if (resumeStoreCarouselTimerRef.current) {
+      window.clearTimeout(resumeStoreCarouselTimerRef.current);
+      resumeStoreCarouselTimerRef.current = null;
+    }
+    setIsStoreCarouselPaused(true);
+  };
+
+  const resumeStoreCarouselDelayed = (delayMs = 2500) => {
+    if (resumeStoreCarouselTimerRef.current) {
+      window.clearTimeout(resumeStoreCarouselTimerRef.current);
+      resumeStoreCarouselTimerRef.current = null;
+    }
+    resumeStoreCarouselTimerRef.current = window.setTimeout(() => {
+      setIsStoreCarouselPaused(false);
+      resumeStoreCarouselTimerRef.current = null;
+    }, delayMs);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (resumeStoreCarouselTimerRef.current) {
+        window.clearTimeout(resumeStoreCarouselTimerRef.current);
+        resumeStoreCarouselTimerRef.current = null;
+      }
+    };
+  }, []);
 
   const categoryTiles = useMemo(() => {
     return segmentOptions.map((segment) => categoryVisuals[segment] || { emoji: '🏪', label: segment });
@@ -629,13 +682,13 @@ export function MarketplacePage() {
           <div className="flex items-center gap-3">
             <img
               src="/janocaminho.jpg"
-              alt="Ja no Caminho"
+              alt="Já no Caminho"
               className="h-11 w-11 rounded-2xl object-cover border border-slate-200"
               style={{ borderColor: `${theme.primary}44` }}
             />
             <div className="min-w-0">
               <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Marketplace Oficial</p>
-              <h1 className="truncate text-lg sm:text-xl font-black" style={{ color: theme.primary }}>Ja no Caminho</h1>
+              <h1 className="truncate text-lg sm:text-xl font-black" style={{ color: theme.primary }}>Já no Caminho</h1>
             </div>
           </div>
         </section>
@@ -643,19 +696,33 @@ export function MarketplacePage() {
         <section>
           <div className="flex items-center gap-4 overflow-x-auto scrollbar-hide px-0.5 py-1">
             {categoryTiles.map((item, index) => (
+              (() => {
+                const active = segmentFilter === item.label;
+                return (
               <button
                 key={`${item.label}-${index}`}
                 type="button"
-                className="min-w-[64px] flex-shrink-0"
-                onClick={() => setSegmentFilter(item.label)}
+                className="min-w-[64px] flex-shrink-0 transition-transform duration-200 active:scale-95"
+                onClick={() => setSegmentFilter((prev) => (prev === item.label ? 'all' : item.label))}
               >
-                <span className="mx-auto grid h-12 w-12 place-items-center rounded-full border border-slate-200 bg-white shadow-sm text-lg">
+                <span
+                  className={`mx-auto grid h-12 w-12 place-items-center rounded-full border shadow-sm text-lg transition-all duration-200 ${
+                    active ? 'text-white border-transparent ring-2 ring-offset-2 ring-slate-300' : 'border-slate-200 bg-white'
+                  }`}
+                  style={active ? { backgroundColor: theme.primary } : undefined}
+                >
                   {item.emoji}
                 </span>
-                <span className="mt-2 block text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">
+                <span
+                  className={`mt-2 block text-[10px] font-black uppercase tracking-widest text-center transition-colors ${
+                    active ? 'text-slate-900' : 'text-slate-500'
+                  }`}
+                >
                   {item.label}
                 </span>
               </button>
+                );
+              })()
             ))}
           </div>
         </section>
@@ -771,12 +838,23 @@ export function MarketplacePage() {
           )}
 
           {!loading && !error && filteredStores.length > 0 && (
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 justify-items-center">
-              {filteredStores.map((store) => (
+            <div
+              ref={storeCarouselRef}
+              className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-1"
+              onMouseEnter={pauseStoreCarousel}
+              onMouseLeave={() => resumeStoreCarouselDelayed(900)}
+              onTouchStart={pauseStoreCarousel}
+              onTouchMove={pauseStoreCarousel}
+              onTouchEnd={() => resumeStoreCarouselDelayed(2600)}
+              onPointerDown={pauseStoreCarousel}
+              onPointerUp={() => resumeStoreCarouselDelayed(1800)}
+            >
+              {filteredStores.map((store, index) => (
                 <Link
                   key={store.id}
                   to={`/${store.slug}`}
-                  className="w-full max-w-[420px] group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_12px_32px_rgba(0,0,0,0.05)] transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-[0_20px_44px_-26px_rgba(15,23,42,0.55)] active:scale-[0.99]"
+                  data-store-slide={index}
+                  className="snap-start shrink-0 w-[90%] sm:w-[58%] lg:w-[38%] xl:w-[31%] group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_12px_32px_rgba(0,0,0,0.05)] transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-[0_20px_44px_-26px_rgba(15,23,42,0.55)] active:scale-[0.99]"
                 >
                   <div className="relative aspect-[16/6] overflow-hidden">
                     <img

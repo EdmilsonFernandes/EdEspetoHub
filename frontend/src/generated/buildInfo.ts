@@ -5,192 +5,192 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.161235.49df2c7",
-  "buildId": "0.1.9+20260403.161235.49df2c7-20260403.161235-49df2c7",
-  "builtAt": "2026-04-03T16:12:35.466Z",
-  "commitHash": "49df2c76ad361617bf361b7ed20127f36bfc55b5",
-  "shortHash": "49df2c7",
+  "versionInternal": "0.1.9+20260403.192848.ce879fdb",
+  "buildId": "0.1.9+20260403.192848.ce879fdb-20260403.192848-ce879fdb",
+  "builtAt": "2026-04-03T19:28:48.991Z",
+  "commitHash": "ce879fdb4e6fb18eb74084e82f30aa0d7e10a963",
+  "shortHash": "ce879fdb",
   "branch": "main",
   "commits": [
     {
+      "hash": "ce879fdb4e6fb18eb74084e82f30aa0d7e10a963",
+      "shortHash": "ce879fdb",
+      "dateIso": "2026-04-03T16:14:52-03:00",
+      "subject": "fix(product-edit): place combo promo section above save action bar"
+    },
+    {
+      "hash": "b8e583cc382d9f3cb129a622ea017ac60cb4ac95",
+      "shortHash": "b8e583cc",
+      "dateIso": "2026-04-03T16:11:30-03:00",
+      "subject": "feat(featured): auto-refresh payment status in modal with countdown and product thumbnails"
+    },
+    {
+      "hash": "aca05299ca70911ad6f222a9885ff11c2719b148",
+      "shortHash": "aca05299",
+      "dateIso": "2026-04-03T16:07:33-03:00",
+      "subject": "fix(hub): prioritize sponsored featured items and backfill with rotating organic products"
+    },
+    {
+      "hash": "d401daf9c97dc2821e2e30ba3f3089eb8b2a80cc",
+      "shortHash": "d401daf9",
+      "dateIso": "2026-04-03T16:04:19-03:00",
+      "subject": "refactor(hub): premium micro-polish and rotating featured window"
+    },
+    {
+      "hash": "9430b66870c51f6d6e759b7e1e1ed614d8635008",
+      "shortHash": "9430b668",
+      "dateIso": "2026-04-03T16:02:22-03:00",
+      "subject": "feat(hub): rotate all stores every 3s and refine card density"
+    },
+    {
+      "hash": "699da2146863a4905208bdcfcd9093aa4acb27fd",
+      "shortHash": "699da214",
+      "dateIso": "2026-04-03T15:57:13-03:00",
+      "subject": "chore(ui): default product manager tab to list"
+    },
+    {
+      "hash": "7f1a5ce04900a50c9932839b5a363811a8b2cf95",
+      "shortHash": "7f1a5ce0",
+      "dateIso": "2026-04-03T15:54:45-03:00",
+      "subject": "feat(ui): split product manager into cadastro/list tabs and show payment method label"
+    },
+    {
+      "hash": "17cc1ac85c779bb71ee1681cb6e052cfe07a932f",
+      "shortHash": "17cc1ac8",
+      "dateIso": "2026-04-03T15:51:38-03:00",
+      "subject": "fix(ui/payments): operator nav cleanup, products active state, and featured payment options"
+    },
+    {
+      "hash": "eec17eaf97864b17d853d0ce50f8a47e06e26dfe",
+      "shortHash": "eec17eaf",
+      "dateIso": "2026-04-03T15:19:12-03:00",
+      "subject": "feat(featured): activate hub highlights by payment approval"
+    },
+    {
+      "hash": "b762a134b0453f92f9c89ed2ffedf6aa4d967270",
+      "shortHash": "b762a134",
+      "dateIso": "2026-04-03T15:08:35-03:00",
+      "subject": "Ajusta rodapé admin e corrige acesso de operador à aba de produtos"
+    },
+    {
+      "hash": "d16d4167db48da6d9830541fc495c9e6606da6c5",
+      "shortHash": "d16d4167",
+      "dateIso": "2026-04-03T13:32:38-03:00",
+      "subject": "Remove portfolio da navegação e centraliza vitrine no Hub"
+    },
+    {
+      "hash": "a67f4c1924588334f178798689bfc212f46ff646",
+      "shortHash": "a67f4c19",
+      "dateIso": "2026-04-03T13:29:40-03:00",
+      "subject": "Implementa fluxo de destaques patrocinados com gestão por super admin"
+    },
+    {
+      "hash": "3b3bc4861a6a190a94658e97f6ec8d70cc634dd3",
+      "shortHash": "3b3bc486",
+      "dateIso": "2026-04-03T13:13:11-03:00",
+      "subject": "Restaura diagrama na arquitetura e suaviza visual da pagina"
+    },
+    {
       "hash": "49df2c76ad361617bf361b7ed20127f36bfc55b5",
-      "shortHash": "49df2c7",
+      "shortHash": "49df2c76",
       "dateIso": "2026-04-03T13:10:46-03:00",
       "subject": "Normaliza rodape do Hub com padrao da plataforma e melhora localizacao"
     },
     {
       "hash": "f2e8ad59e715050b02d6f33f60632b648d8f407c",
-      "shortHash": "f2e8ad5",
+      "shortHash": "f2e8ad59",
       "dateIso": "2026-04-03T13:07:56-03:00",
       "subject": "Eleva Hub com distancia aproximada real, branding e UX premium generica"
     },
     {
       "hash": "a8ab3e1780de574d60ffa67a4919dae07afcc978",
-      "shortHash": "a8ab3e1",
+      "shortHash": "a8ab3e17",
       "dateIso": "2026-04-03T12:53:40-03:00",
       "subject": "Adiciona atalho Hub no rodape mobile da landing e tema dinamico no hub"
     },
     {
       "hash": "992479bc1ad5d7e93ed24dc121686038cf304fbc",
-      "shortHash": "992479b",
+      "shortHash": "992479bc",
       "dateIso": "2026-04-03T12:50:12-03:00",
       "subject": "Refina Hub para marketplace generico com cards compactos e destaque de produtos"
     },
     {
       "hash": "258802da28cb838a1b8ab722719c5c8c582d8494",
-      "shortHash": "258802d",
+      "shortHash": "258802da",
       "dateIso": "2026-04-03T12:48:02-03:00",
       "subject": "Refina Hub mobile/web com PT-BR, destaque da marca e carrossel de produtos"
     },
     {
       "hash": "3d79372051b5b280972f61e2c6e09edceb6cb91d",
-      "shortHash": "3d79372",
+      "shortHash": "3d793720",
       "dateIso": "2026-04-03T12:35:44-03:00",
       "subject": "Padroniza Hub como rota canonica e reforca naming na landing"
     },
     {
       "hash": "5e8e022c9bbab8b029b3a96c918afb2a914f7714",
-      "shortHash": "5e8e022",
+      "shortHash": "5e8e022c",
       "dateIso": "2026-04-03T12:30:44-03:00",
       "subject": "Renomeia discovery para Praca e reforca posicionamento do hub"
     },
     {
       "hash": "59a02411f129983f925a37f355c34a6a6660119c",
-      "shortHash": "59a0241",
+      "shortHash": "59a02411",
       "dateIso": "2026-04-03T12:28:49-03:00",
       "subject": "Adiciona acesso ao marketplace na navegacao da landing"
     },
     {
       "hash": "e7f7e11dd9009e54db87449842e06e0a662a4f88",
-      "shortHash": "e7f7e11",
+      "shortHash": "e7f7e11d",
       "dateIso": "2026-04-03T12:26:17-03:00",
       "subject": "Cria pagina marketplace discovery com UX mobile premium"
     },
     {
       "hash": "8b9ca8c9504d4581b88e5e10f8657578f2241558",
-      "shortHash": "8b9ca8c",
+      "shortHash": "8b9ca8c9",
       "dateIso": "2026-04-03T12:21:32-03:00",
       "subject": "Refina documentacao tecnica de metodos criticos no backend"
     },
     {
       "hash": "f5ed7bd35c982073fed53e4073cc358e2c0d6b82",
-      "shortHash": "f5ed7bd",
+      "shortHash": "f5ed7bd3",
       "dateIso": "2026-04-03T12:18:09-03:00",
       "subject": "Adiciona documentacao tecnica em ingles para metodos do backend"
     },
     {
       "hash": "6abdc5a5ebd83a3899d76218262b1d6ddefa1d78",
-      "shortHash": "6abdc5a",
+      "shortHash": "6abdc5a5",
       "dateIso": "2026-04-03T12:09:51-03:00",
       "subject": "Corrige acesso de Produtos para operador e simplifica configuracoes"
     },
     {
       "hash": "2e47a2a8ab1579ae1001a30fb0c6161f41cfb1d6",
-      "shortHash": "2e47a2a",
+      "shortHash": "2e47a2a8",
       "dateIso": "2026-04-03T12:03:39-03:00",
       "subject": "Adiciona mapeamento completo dos metodos da API em ingles"
     },
     {
       "hash": "5fb5a6a58c79a6d362b4d4de2b3acfd9bbaa5d9c",
-      "shortHash": "5fb5a6a",
+      "shortHash": "5fb5a6a5",
       "dateIso": "2026-04-03T11:58:57-03:00",
       "subject": "Eleva portfolio da landing com visual premium e CTA por loja"
     },
     {
       "hash": "a5ceca828e6ac2ee4e951adbed526f75adee2659",
-      "shortHash": "a5ceca8",
+      "shortHash": "a5ceca82",
       "dateIso": "2026-04-03T11:55:39-03:00",
       "subject": "Libera produtos para operador na navegacao mobile e desktop"
     },
     {
       "hash": "1a4dc5f6baca679b03822b9cf6a3acca09d1f630",
-      "shortHash": "1a4dc5f",
+      "shortHash": "1a4dc5f6",
       "dateIso": "2026-04-03T11:52:42-03:00",
       "subject": "Padroniza nomes de navegacao para Loja Online no admin"
     },
     {
       "hash": "d384ac8a816d45144644a662604d6c89c570aebb",
-      "shortHash": "d384ac8",
+      "shortHash": "d384ac8a",
       "dateIso": "2026-04-03T11:47:24-03:00",
       "subject": "Adiciona stepper guiado na configuracao da loja"
-    },
-    {
-      "hash": "ffdc05d6c83793cab4acc8418b06f70d5443a1fc",
-      "shortHash": "ffdc05d",
-      "dateIso": "2026-04-03T11:44:13-03:00",
-      "subject": "Refina configuracoes da loja com secoes guiadas e menos scroll"
-    },
-    {
-      "hash": "273ebedf48bd8d43da4742d5a32274f211e3c352",
-      "shortHash": "273ebed",
-      "dateIso": "2026-04-03T11:33:42-03:00",
-      "subject": "fix(catalog): stabilize category drawer and always show full category list"
-    },
-    {
-      "hash": "cf62ec6d1fb6a9671f22ae1aad08c2f6ab0f762c",
-      "shortHash": "cf62ec6",
-      "dateIso": "2026-04-03T11:26:34-03:00",
-      "subject": "fix(admin): hide mobile nav for super admin, adjust product save bar, speed queue count updates"
-    },
-    {
-      "hash": "63d6b0817ee802583f72808f1b76d99f678d77b2",
-      "shortHash": "63d6b08",
-      "dateIso": "2026-04-02T18:18:55-03:00",
-      "subject": "fix(menu): move category-drawer overlay event to MenuView scope"
-    },
-    {
-      "hash": "8e161f6147cb08c31a494cf3d6c751b367c3320d",
-      "shortHash": "8e161f6",
-      "dateIso": "2026-04-02T18:16:59-03:00",
-      "subject": "feat(checkout): enforce saved-address flow for logged customers on delivery"
-    },
-    {
-      "hash": "4b53aba535f8d3662d2e36e113739d137ba3f05a",
-      "shortHash": "4b53aba",
-      "dateIso": "2026-04-02T18:10:24-03:00",
-      "subject": "fix(ui): slim mobile bottom nav and hide it while category drawer is open"
-    },
-    {
-      "hash": "488b42e190bea8cc71abd8e683e6c71fd504266e",
-      "shortHash": "488b42e",
-      "dateIso": "2026-04-02T18:04:01-03:00",
-      "subject": "fix(frontend): import ShieldCheck icon used in landing footer"
-    },
-    {
-      "hash": "4a5d7e1aabf2b869c06e1ecd6e35e53723c518f1",
-      "shortHash": "4a5d7e1",
-      "dateIso": "2026-04-02T18:00:08-03:00",
-      "subject": "feat(ui): make admin mobile bottom nav compact and store-color aware"
-    },
-    {
-      "hash": "07a6669b5879027cbc23d16bebef9f3d5fb038ee",
-      "shortHash": "07a6669",
-      "dateIso": "2026-04-02T17:57:31-03:00",
-      "subject": "feat(a11y): respect reduced-motion preference in landing footer animations"
-    },
-    {
-      "hash": "8a95e996f033fa8fe1c33e65b28c07f61fd99f00",
-      "shortHash": "8a95e99",
-      "dateIso": "2026-04-02T17:55:20-03:00",
-      "subject": "feat(ui): add subtle entrance animation to landing footer sections"
-    },
-    {
-      "hash": "93e0b6685ed37ffdb5e734181abc5342ab3c26d7",
-      "shortHash": "93e0b66",
-      "dateIso": "2026-04-02T17:53:48-03:00",
-      "subject": "feat(ui): redesign landing footer with premium dark layout and CTA"
-    },
-    {
-      "hash": "5447bf2fd2e1bd3702db5613cfadbf6c7b7f2a3c",
-      "shortHash": "5447bf2",
-      "dateIso": "2026-04-02T17:50:23-03:00",
-      "subject": "feat(ui): upgrade saved-address cards in checkout to app-like horizontal layout"
-    },
-    {
-      "hash": "e90f55635fccd30307c6573f67180c235661f2b1",
-      "shortHash": "e90f556",
-      "dateIso": "2026-04-02T17:47:22-03:00",
-      "subject": "feat(ux): streamline customer addresses and apply saved address in checkout"
     }
   ]
 } as const;

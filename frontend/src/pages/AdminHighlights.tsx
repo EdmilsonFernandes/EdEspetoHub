@@ -71,7 +71,7 @@ export function AdminHighlights() {
   const [createOpen, setCreateOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
-  const [nowTs, setNowTs] = useState(() => Date.now());
+  const [paymentCountdownMs, setPaymentCountdownMs] = useState(0);
   const [form, setForm] = useState({
     productId: '',
     durationUnit: 'DAY' as DurationUnit,
@@ -114,15 +114,27 @@ export function AdminHighlights() {
     loadAll();
   }, [storeId]);
 
-  useEffect(() => {
-    if (!paymentOpen) return;
-    const timer = window.setInterval(() => setNowTs(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, [paymentOpen]);
+  const formatCountdown = (ms: number) => {
+    const safe = Math.max(0, Number(ms || 0));
+    const totalSec = Math.floor(safe / 1000);
+    const min = Math.floor(totalSec / 60);
+    const sec = totalSec % 60;
+    return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+  };
 
   const openPayment = (request: any) => {
     setSelectedRequest(request);
     setPaymentOpen(true);
+    const paymentStatus = String(request?.paymentStatus || '').toUpperCase();
+    const status = String(request?.status || '').toUpperCase();
+    const terminalStatus = status === 'CANCELLED' || status === 'EXPIRED' || status === 'REJECTED';
+    const shouldStartCountdown = paymentStatus !== 'PAID' && !terminalStatus;
+    setPaymentCountdownMs(shouldStartCountdown ? 5 * 60 * 1000 : 0);
+    if (shouldStartCountdown && request?.id) {
+      window.setTimeout(() => {
+        void refreshPaymentStatusByRequest(String(request.id), true);
+      }, 120);
+    }
   };
 
   const openCreate = () => {
@@ -133,7 +145,11 @@ export function AdminHighlights() {
   };
 
   const closeCreate = () => setCreateOpen(false);
-  const closePayment = () => setPaymentOpen(false);
+  const closePayment = () => {
+    setPaymentOpen(false);
+    setSelectedRequest(null);
+    setPaymentCountdownMs(0);
+  };
 
   const copyText = async (text: string, okMessage: string) => {
     try {
@@ -144,27 +160,10 @@ export function AdminHighlights() {
     }
   };
 
-  const formatRemaining = (expiresAt?: string | Date | null) => {
-    if (!expiresAt) return '';
-    const exp = new Date(expiresAt).getTime();
-    if (!Number.isFinite(exp)) return '';
-    const diff = exp - nowTs;
-    if (diff <= 0) return 'Expirado';
-    const totalSec = Math.floor(diff / 1000);
-    const min = Math.floor(totalSec / 60);
-    const sec = totalSec % 60;
-    return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
-  };
-
-  const selectedRemaining = useMemo(
-    () => formatRemaining(selectedRequest?.paymentExpiresAt),
-    [selectedRequest?.paymentExpiresAt, nowTs]
-  );
-
-  const refreshSelectedPaymentStatus = async (silent = false) => {
-    const requestId = String(selectedRequest?.id || '').trim();
+  const refreshPaymentStatusByRequest = async (requestIdRaw: string, silent = false) => {
+    const requestId = String(requestIdRaw || '').trim();
     if (!requestId || !storeId) return;
-    const previous = selectedRequest;
+    const previous = requests.find((entry) => String(entry?.id || '') === requestId) || selectedRequest;
     try {
       const updated = await featuredService.refreshPaymentByStore(requestId, storeId);
       setRequests((prev) =>
@@ -181,29 +180,65 @@ export function AdminHighlights() {
       if (becamePaid) {
         showToast('Pagamento confirmado. Seu destaque foi atualizado.', 'success');
         await loadAll();
+        closePayment();
       }
     } catch (error: any) {
       if (!silent) showToast(error?.message || 'Não foi possível atualizar o pagamento agora.', 'warning');
     }
   };
 
+  const refreshSelectedPaymentStatus = async (silent = false) => {
+    const requestId = String(selectedRequest?.id || '').trim();
+    if (!requestId) return;
+    await refreshPaymentStatusByRequest(requestId, silent);
+  };
+
   useEffect(() => {
     if (!paymentOpen || !selectedRequest?.id) return;
-    const status = String(selectedRequest?.status || '').toUpperCase();
     const paymentStatus = String(selectedRequest?.paymentStatus || '').toUpperCase();
-    const shouldPoll = status === 'PENDING_PAYMENT' && paymentStatus !== 'PAID';
+    const status = String(selectedRequest?.status || '').toUpperCase();
+    const terminalStatus = status === 'CANCELLED' || status === 'EXPIRED' || status === 'REJECTED';
+    const shouldPoll = !terminalStatus && paymentStatus !== 'PAID' && paymentCountdownMs > 0;
     if (!shouldPoll) return;
     const first = window.setTimeout(() => {
       void refreshSelectedPaymentStatus(true);
-    }, 1200);
+    }, 400);
     const timer = window.setInterval(() => {
       void refreshSelectedPaymentStatus(true);
-    }, 5000);
+    }, 3000);
     return () => {
       window.clearTimeout(first);
       window.clearInterval(timer);
     };
-  }, [paymentOpen, selectedRequest?.id, selectedRequest?.status, selectedRequest?.paymentStatus, storeId]);
+  }, [paymentOpen, selectedRequest?.id, selectedRequest?.status, selectedRequest?.paymentStatus, storeId, paymentCountdownMs]);
+
+  useEffect(() => {
+    if (!paymentOpen || !selectedRequest?.id) return;
+    const paymentStatus = String(selectedRequest?.paymentStatus || '').toUpperCase();
+    if (paymentStatus === 'PAID') return;
+    if (paymentCountdownMs <= 0) return;
+    const timer = window.setInterval(() => {
+      setPaymentCountdownMs((prev) => Math.max(0, prev - 1000));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [paymentOpen, selectedRequest?.id, selectedRequest?.paymentStatus, paymentCountdownMs]);
+
+  useEffect(() => {
+    if (!paymentOpen || !selectedRequest?.id) return;
+    const paymentStatus = String(selectedRequest?.paymentStatus || '').toUpperCase();
+    if (paymentStatus === 'PAID') return;
+    if (paymentCountdownMs > 0) return;
+    showToast('Tempo de tentativa expirado. Reabra o pagamento para tentar novamente.', 'warning');
+    closePayment();
+  }, [paymentOpen, selectedRequest?.id, selectedRequest?.paymentStatus, paymentCountdownMs]);
+
+  useEffect(() => {
+    if (!paymentOpen || !selectedRequest) return;
+    const paymentStatus = String(selectedRequest?.paymentStatus || '').toUpperCase();
+    if (paymentStatus !== 'PAID') return;
+    setPaymentOpen(false);
+    setSelectedRequest(null);
+  }, [paymentOpen, selectedRequest]);
 
   const handleCreate = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -372,7 +407,7 @@ export function AdminHighlights() {
       </div>
 
       {createOpen && (
-        <div className="fixed inset-0 z-[70] bg-slate-950/55 backdrop-blur-[1px] flex items-end sm:items-center justify-center p-3">
+        <div className="fixed inset-0 z-[320] bg-slate-950/55 backdrop-blur-[1px] flex items-end sm:items-center justify-center p-3">
           <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-2xl">
             <div className="mb-3">
               <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Novo destaque</p>
@@ -477,7 +512,7 @@ export function AdminHighlights() {
       )}
 
       {paymentOpen && selectedRequest && (
-        <div className="fixed inset-0 z-[70] bg-slate-950/55 backdrop-blur-[1px] flex items-end sm:items-center justify-center p-3">
+        <div className="fixed inset-0 z-[320] bg-slate-950/55 backdrop-blur-[1px] flex items-end sm:items-center justify-center p-3">
           <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-2xl">
             <div className="mb-3">
               <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Pagamento do destaque</p>
@@ -486,11 +521,11 @@ export function AdminHighlights() {
                 Status: <strong>{paymentStatusLabel(selectedRequest?.paymentStatus)}</strong>
                 {selectedRequest?.paymentExpiresAt ? ` • expira em ${formatDateTime(selectedRequest.paymentExpiresAt)}` : ''}
               </p>
-              {selectedRemaining ? (
-                <p className={`text-xs mt-1 ${selectedRemaining === 'Expirado' ? 'text-rose-600' : 'text-slate-600'}`}>
-                  Tempo restante: <strong>{selectedRemaining}</strong>
+              {String(selectedRequest?.paymentStatus || '').toUpperCase() !== 'PAID' && paymentCountdownMs > 0 && (
+                <p className="text-xs text-amber-700 mt-1">
+                  Tempo para atualização automática: <strong>{formatCountdown(paymentCountdownMs)}</strong>
                 </p>
-              ) : null}
+              )}
             </div>
 
             {selectedRequest?.paymentQrCodeBase64 && (

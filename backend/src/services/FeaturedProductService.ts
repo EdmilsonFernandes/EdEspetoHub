@@ -108,7 +108,9 @@ export class FeaturedProductService {
       WHERE status = 'APPROVED'
         AND payment_status = 'PAID'
         AND starts_at IS NOT NULL
-        AND (ends_at IS NULL OR ends_at >= NOW())
+        AND starts_at <= NOW()
+        AND ends_at IS NOT NULL
+        AND ends_at >= NOW()
     `
     );
     return Number(raw?.[0]?.total || 0);
@@ -120,8 +122,11 @@ export class FeaturedProductService {
       SET status = 'EXPIRED'
       WHERE status = 'APPROVED'
         AND payment_status = 'PAID'
-        AND ends_at IS NOT NULL
-        AND ends_at < NOW()
+        AND (
+          starts_at IS NULL
+          OR ends_at IS NULL
+          OR ends_at < NOW()
+        )
     `);
 
     let active = await this.activeSlotsCount(manager);
@@ -451,7 +456,10 @@ export class FeaturedProductService {
       .leftJoinAndSelect('request.product', 'product')
       .where('UPPER(request.status) = :status', { status: 'APPROVED' })
       .andWhere('UPPER(request.paymentStatus) = :paymentStatus', { paymentStatus: 'PAID' })
-      .andWhere('(request.endsAt IS NULL OR request.endsAt >= NOW())')
+      .andWhere('request.startsAt IS NOT NULL')
+      .andWhere('request.startsAt <= NOW()')
+      .andWhere('request.endsAt IS NOT NULL')
+      .andWhere('request.endsAt >= NOW()')
       .orderBy('request.startsAt', 'DESC')
       .take(Math.max(1, Math.min(60, Number(limit || 18))))
       .getMany();
