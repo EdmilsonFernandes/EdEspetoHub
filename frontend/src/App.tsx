@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-    import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, AdminRenewal, AdminDemo, PaymentPage, SuperAdmin, ForgotPassword, ResetPassword, VerifyEmail, TermsOfUse, OrderTracking, AddressDistance, AdminMotoboys, MotoboyAvailable, MotoboyCurrent, MotoboyHistory, MotoboyProfile, MotoboyDone, MotoboyLogin, MotoboyRegister, MotoboyHome, MotoboyEarnings, ArchitecturePage, InstallAppPage, ClientAuth, ClientAccount } from './pages';
+    import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, AdminRenewal, AdminDemo, PaymentPage, SuperAdmin, ForgotPassword, ResetPassword, VerifyEmail, TermsOfUse, OrderTracking, AddressDistance, AdminMotoboys, MotoboyAvailable, MotoboyCurrent, MotoboyHistory, MotoboyProfile, MotoboyDone, MotoboyLogin, MotoboyRegister, MotoboyHome, MotoboyEarnings, ArchitecturePage, InstallAppPage, ClientAuth, ClientAccount, MarketplacePage } from './pages';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { AdminRoute } from './components/Admin/AdminRoute';
@@ -19,6 +19,8 @@ function App() {
         <Router>
           <Routes>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/marketplace" element={<MarketplacePage />} />
+            <Route path="/descobrir" element={<MarketplacePage />} />
             <Route path="/portfolio" element={<PortfolioPage />} />
             <Route path="/arquitetura" element={<ArchitecturePage />} />
             <Route path="/instalar" element={<InstallAppPage />} />

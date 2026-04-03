@@ -31,3 +31,4 @@ export { ArchitecturePage } from './ArchitecturePage';
 export { InstallAppPage } from './InstallAppPage';
 export { ClientAuth } from './ClientAuth';
 export { ClientAccount } from './ClientAccount';
+export { MarketplacePage } from './MarketplacePage';
