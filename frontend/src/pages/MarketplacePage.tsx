@@ -792,7 +792,7 @@ export function MarketplacePage() {
                   to={`/${store.slug}`}
                   className="w-full max-w-[420px] group overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.05)] transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-[0_20px_40px_-24px_rgba(15,23,42,0.50)] active:scale-[0.99]"
                 >
-                  <div className="relative aspect-[16/5.2] overflow-hidden">
+                  <div className="relative aspect-[16/7] sm:aspect-[16/6.4] overflow-hidden">
                     <img
                       src={store.banner}
                       alt={store.name}

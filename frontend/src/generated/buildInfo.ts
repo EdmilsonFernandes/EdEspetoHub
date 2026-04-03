@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.194353.a15cb771",
-  "buildId": "0.1.9+20260403.194353.a15cb771-20260403.194353-a15cb771",
-  "builtAt": "2026-04-03T19:43:53.531Z",
-  "commitHash": "a15cb771c8a6ef464aad3184adf3ee262ecd1b71",
-  "shortHash": "a15cb771",
+  "versionInternal": "0.1.9+20260403.201202.3f1830fe",
+  "buildId": "0.1.9+20260403.201202.3f1830fe-20260403.201202-3f1830fe",
+  "builtAt": "2026-04-03T20:12:02.962Z",
+  "commitHash": "3f1830fe46782ee880c79b2ec78f4842d6b14d62",
+  "shortHash": "3f1830fe",
   "branch": "main",
   "commits": [
+    {
+      "hash": "3f1830fe46782ee880c79b2ec78f4842d6b14d62",
+      "shortHash": "3f1830fe",
+      "dateIso": "2026-04-03T16:44:31-03:00",
+      "subject": "fix(featured): increase slots to 50 default, dedupe paid toasts and keep premium hub cards"
+    },
     {
       "hash": "a15cb771c8a6ef464aad3184adf3ee262ecd1b71",
       "shortHash": "a15cb771",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "a5ceca82",
       "dateIso": "2026-04-03T11:55:39-03:00",
       "subject": "Libera produtos para operador na navegacao mobile e desktop"
-    },
-    {
-      "hash": "1a4dc5f6baca679b03822b9cf6a3acca09d1f630",
-      "shortHash": "1a4dc5f6",
-      "dateIso": "2026-04-03T11:52:42-03:00",
-      "subject": "Padroniza nomes de navegacao para Loja Online no admin"
     }
   ]
 } as const;
