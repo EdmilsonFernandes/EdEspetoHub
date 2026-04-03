@@ -5,6 +5,7 @@ import { storeService } from '../services/storeService';
 import { productService } from '../services/productService';
 import { mapsService } from '../services/mapsService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 
 type MarketplaceStore = {
   id?: string;
@@ -116,12 +117,48 @@ export function MarketplacePage() {
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
   const [featuredLoading, setFeaturedLoading] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationLabel, setLocationLabel] = useState('Sua região');
   const [distanceByStore, setDistanceByStore] = useState<Record<string, number>>({});
   const [distanceLoading, setDistanceLoading] = useState(false);
 
   useEffect(() => {
     document.title = 'Hub Já no Caminho';
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const resolveUserLabel = async () => {
+      if (!userLocation) return;
+      try {
+        const controller = new AbortController();
+        const timeout = window.setTimeout(() => controller.abort(), 4500);
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${userLocation.lat}&lon=${userLocation.lng}`,
+          { signal: controller.signal }
+        );
+        window.clearTimeout(timeout);
+        const data = await response.json().catch(() => null);
+        const addr = data?.address || {};
+        const locality =
+          addr.suburb ||
+          addr.neighbourhood ||
+          addr.city_district ||
+          addr.city ||
+          addr.town ||
+          addr.village ||
+          '';
+        const state = (addr.state_code || addr.state || '').toString();
+        const nextLabel = [locality, state].filter(Boolean).join(' - ').trim();
+        if (!cancelled && nextLabel) setLocationLabel(nextLabel);
+      } catch (_error) {
+        if (!cancelled) setLocationLabel('Sua região');
+      }
+    };
+    resolveUserLabel();
+    return () => {
+      cancelled = true;
+    };
+  }, [userLocation]);
 
   useEffect(() => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) return;
@@ -431,7 +468,7 @@ export function MarketplacePage() {
         <div className="max-w-7xl mx-auto px-4 py-3 space-y-3">
           <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700">
             <MapPin size={14} weight="duotone" className="text-slate-500" />
-            Entregar em: Rua Sebastião...
+            Entregar em: {locationLabel}
           </div>
           <div className="relative">
             <MagnifyingGlass size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -582,7 +619,10 @@ export function MarketplacePage() {
                 <div key={`featured-skeleton-${idx}`} className="min-w-[182px] rounded-2xl border border-slate-200 bg-white p-2.5 animate-pulse">
                   <div className="h-24 rounded-xl bg-slate-100" />
                   <div className="mt-2 h-3 w-24 rounded bg-slate-100" />
-                  <div className="mt-2 h-3 w-16 rounded bg-slate-100" />
+                  <div className="mt-1 flex items-center gap-1.5">
+                    <div className="h-4 w-4 rounded-full bg-slate-100" />
+                    <div className="h-3 w-16 rounded bg-slate-100" />
+                  </div>
                 </div>
               ))}
             {!featuredLoading &&
@@ -708,14 +748,9 @@ export function MarketplacePage() {
           )}
         </section>
 
-        <section className="pb-6">
+        <section className="pb-6 space-y-2">
           <p className="text-center text-xs font-semibold text-slate-500">Conectando você aos melhores lojistas da região.</p>
-          <a
-            href="/"
-            className="mt-2 block text-center text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500 hover:text-slate-800"
-          >
-            Powered by Ja no Caminho
-          </a>
+          <PlatformTrustFooter mode="minimal" align="center" compact />
         </section>
       </main>
 

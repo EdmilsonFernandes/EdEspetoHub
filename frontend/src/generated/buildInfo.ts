@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.160722.a8ab3e1",
-  "buildId": "0.1.9+20260403.160722.a8ab3e1-20260403.160722-a8ab3e1",
-  "builtAt": "2026-04-03T16:07:22.578Z",
-  "commitHash": "a8ab3e1780de574d60ffa67a4919dae07afcc978",
-  "shortHash": "a8ab3e1",
+  "versionInternal": "0.1.9+20260403.161010.f2e8ad5",
+  "buildId": "0.1.9+20260403.161010.f2e8ad5-20260403.161010-f2e8ad5",
+  "builtAt": "2026-04-03T16:10:10.459Z",
+  "commitHash": "f2e8ad59e715050b02d6f33f60632b648d8f407c",
+  "shortHash": "f2e8ad5",
   "branch": "main",
   "commits": [
+    {
+      "hash": "f2e8ad59e715050b02d6f33f60632b648d8f407c",
+      "shortHash": "f2e8ad5",
+      "dateIso": "2026-04-03T13:07:56-03:00",
+      "subject": "Eleva Hub com distancia aproximada real, branding e UX premium generica"
+    },
     {
       "hash": "a8ab3e1780de574d60ffa67a4919dae07afcc978",
       "shortHash": "a8ab3e1",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "49088a9",
       "dateIso": "2026-04-02T17:40:36-03:00",
       "subject": "feat(ui): polish customer auth/account experience with app-like styling"
-    },
-    {
-      "hash": "30d9532ad1fb40bbedfb2b21c75ae3c61853d380",
-      "shortHash": "30d9532",
-      "dateIso": "2026-04-02T17:34:34-03:00",
-      "subject": "feat(customer): phone mask, forgot password and customer password change flow"
     }
   ]
 } as const;
