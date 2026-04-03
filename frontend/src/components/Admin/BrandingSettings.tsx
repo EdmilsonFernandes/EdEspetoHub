@@ -27,9 +27,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
     { key: "colors", label: "Cores" },
     { key: "access", label: "Acesso" },
   ];
-  const activeSectionKey = sectionTabs.find((tab) => sectionsOpen[tab.key])?.key || "identity";
-  const activeSectionIndex = Math.max(0, sectionTabs.findIndex((tab) => tab.key === activeSectionKey));
-  const progressPercent = Math.round(((activeSectionIndex + 1) / sectionTabs.length) * 100);
   const openSection = (target) => {
     setSectionsOpen({
       identity: target === "identity",
@@ -39,14 +36,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
       colors: target === "colors",
       access: target === "access",
     });
-  };
-  const goPrevSection = () => {
-    if (activeSectionIndex <= 0) return;
-    openSection(sectionTabs[activeSectionIndex - 1].key);
-  };
-  const goNextSection = () => {
-    if (activeSectionIndex >= sectionTabs.length - 1) return;
-    openSection(sectionTabs[activeSectionIndex + 1].key);
   };
   const normalizeCep = (input = "") => {
     const digits = input.toString().replace(/\D/g, "").slice(0, 8);
@@ -151,22 +140,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
 
   const logoPreview = resolveAssetUrl(branding.logoUrl) || branding.logoFile || "";
   const bannerPreview = resolveAssetUrl(branding.bannerUrl) || branding.bannerFile || "";
-  const sectionCompleted = {
-    identity: Boolean((branding.brandName || "").trim()) && Boolean(logoPreview || bannerPreview),
-    promo: Boolean((branding.promoMessage || "").trim() || (branding.description || "").trim()),
-    contact:
-      Boolean((branding.contactEmail || "").trim()) &&
-      Boolean((addressForm.cep || "").trim()) &&
-      Boolean((addressForm.city || "").trim()),
-    delivery:
-      Number(branding.deliveryRadiusKm ?? 0) > 0 &&
-      Number(branding.deliveryFee ?? 0) >= 0 &&
-      Number(branding.prepBaseMinutes ?? 0) > 0,
-    colors: Boolean((branding.primaryColor || "").trim()) && Boolean((branding.secondaryColor || "").trim()),
-    access: branding.isOrderingEnabled !== undefined,
-  };
-  const completedSteps = sectionTabs.filter((tab) => sectionCompleted[tab.key]).length;
-
   return (
 
     <div className="bg-white/95 rounded-2xl shadow-[0_16px_36px_-28px_rgba(15,23,42,0.35)] border border-slate-200 overflow-hidden">
@@ -178,38 +151,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
       </div>
 
       <div className="p-4 sm:p-5 space-y-5">
-        <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 sm:px-4">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-              Passo {activeSectionIndex + 1} de {sectionTabs.length}
-            </p>
-            <p className="text-[11px] font-semibold text-slate-500">
-              {completedSteps}/{sectionTabs.length} concluídos
-            </p>
-          </div>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-            <div className="h-full rounded-full bg-brand-gradient transition-all duration-300" style={{ width: `${progressPercent}%` }} />
-          </div>
-          <div className="mt-3 flex items-center gap-2">
-            <button
-              type="button"
-              onClick={goPrevSection}
-              disabled={activeSectionIndex === 0}
-              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Anterior
-            </button>
-            <button
-              type="button"
-              onClick={goNextSection}
-              disabled={activeSectionIndex >= sectionTabs.length - 1}
-              className="inline-flex items-center justify-center rounded-xl border border-brand-primary/40 bg-brand-primary-soft px-3 py-2 text-xs font-semibold text-brand-primary transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Próximo
-            </button>
-          </div>
-        </div>
-
         <div className="overflow-x-auto pb-1">
           <div className="inline-flex min-w-full gap-2">
             {sectionTabs.map((tab) => {
@@ -225,8 +166,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                       : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
                   }`}
                 >
-                  <span>{tab.label}</span>
-                  {sectionCompleted[tab.key] && <span className="ml-1 text-emerald-600">✓</span>}
+                  {tab.label}
                 </button>
               );
             })}

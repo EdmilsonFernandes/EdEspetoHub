@@ -1249,7 +1249,9 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [subscriptionError, setSubscriptionError] = useState('');
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'avaliacoes' | 'produtos' | 'estoque' | 'config' | 'fila' | 'pagamentos' | 'motoboys' | 'usuarios'>(() => {
-    const requestedTab = String((location.state as any)?.activeTab || '').trim();
+    const requestedTabFromState = String((location.state as any)?.activeTab || '').trim();
+    const requestedTabFromQuery = String(new URLSearchParams(location.search || '').get('tab') || '').trim();
+    const requestedTab = requestedTabFromState || requestedTabFromQuery;
     if (requestedTab === 'pedidos') return 'fila';
     return (requestedTab as any) || 'fila';
   });
@@ -1570,7 +1572,9 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     };
   }, [storeId, canUseDeliveryReviewsAndTips]);
   useEffect(() => {
-    const nextTab = String((location.state as any)?.activeTab || '').trim();
+    const nextTabFromState = String((location.state as any)?.activeTab || '').trim();
+    const nextTabFromQuery = String(new URLSearchParams(location.search || '').get('tab') || '').trim();
+    const nextTab = nextTabFromState || nextTabFromQuery;
     if (!nextTab) return;
     if (nextTab === 'pedidos') {
       navigate('/admin/orders', { replace: true });
@@ -1588,7 +1592,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     setActiveTab(nextTab as typeof activeTab);
     // Consome o estado de navegação para evitar "reaplicar" aba e causar pisca ao trocar de menu.
     navigate('/admin/dashboard', { replace: true, state: {} });
-  }, [location.state, openQueueMonitor, navigate]);
+  }, [location.state, location.search, openQueueMonitor, navigate]);
   const [savingBranding, setSavingBranding] = useState(false);
   const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
   const pendingNavigationActionRef = useRef<null | (() => void)>(null);

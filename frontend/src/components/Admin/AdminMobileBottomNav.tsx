@@ -188,7 +188,7 @@ export function AdminMobileBottomNav() {
       label: 'Produtos',
       icon: Package,
       active: path === '/admin/dashboard' && dashboardTab === 'produtos',
-      onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'produtos' } }),
+      onClick: () => navigate('/admin/dashboard?tab=produtos'),
     },
     {
       id: 'pedidos',
