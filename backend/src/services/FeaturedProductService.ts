@@ -16,6 +16,7 @@ const DURATION_OPTIONS = {
 } as const;
 
 type DurationUnit = keyof typeof DURATION_OPTIONS;
+type FeaturedPaymentMethod = 'PIX' | 'CREDIT_CARD';
 
 type PricingConfig = {
   dayPrice: number;
@@ -50,6 +51,14 @@ export class FeaturedProductService {
     const value = String(input || '').trim().toUpperCase();
     if (value === 'DAY' || value === 'WEEK' || value === 'MONTH') return value as DurationUnit;
     return 'DAY';
+  }
+
+  private normalizePaymentMethod(input?: string): FeaturedPaymentMethod {
+    const value = String(input || '').trim().toUpperCase();
+    if (value === 'CREDIT_CARD' || value === 'CARD' || value === 'CARTAO' || value === 'CARTÃO') {
+      return 'CREDIT_CARD';
+    }
+    return 'PIX';
   }
 
   private async loadPricingConfig(): Promise<PricingConfig> {
@@ -168,13 +177,14 @@ export class FeaturedProductService {
     storeId: string,
     authStoreId: string | undefined,
     userId: string | undefined,
-    payload: { productId?: string; durationUnit?: string; publicNote?: string }
+    payload: { productId?: string; durationUnit?: string; paymentMethod?: string; publicNote?: string }
   ) {
     if (authStoreId && authStoreId !== storeId) throw new AppError('AUTH-003', 403);
     const productId = String(payload?.productId || '').trim();
     if (!productId) throw new AppError('GEN-001', 400, { message: 'Produto é obrigatório para solicitar destaque.' });
 
     const durationUnit = this.normalizeDurationUnit(payload?.durationUnit);
+    const paymentMethod = this.normalizePaymentMethod(payload?.paymentMethod);
     const durationDays = DURATION_OPTIONS[durationUnit];
 
     const store = await this.resolveStore(storeId);
@@ -197,7 +207,7 @@ export class FeaturedProductService {
       requestedSlots: 1,
       priceAmount: amount,
       publicNote: String(payload?.publicNote || '').trim() || null,
-      paymentMethod: 'PIX',
+      paymentMethod,
       requestedByUser: user || null,
       paymentExpiresAt: expiresAt,
     });
@@ -218,7 +228,7 @@ export class FeaturedProductService {
       try {
         const mp: any = await this.mercadoPago.createPayment({
           amount,
-          method: 'PIX',
+          method: paymentMethod,
           description: `Destaque Hub ${durationUnit} - ${store.name}`,
           externalReference: `featured_request:${created.id}`,
           payer: {
@@ -242,11 +252,16 @@ export class FeaturedProductService {
       }
     }
 
-    if (!qrCodeText) {
+    if (paymentMethod === 'PIX' && !qrCodeText) {
       qrCodeText = `PIX DESTAQUE HUB | Store:${store.name} | Amount:${amount.toFixed(2)} | Request:${created.id}`;
     }
-    if (!qrCodeBase64) {
-      qrCodeBase64 = await QRCode.toDataURL(qrCodeText);
+    if (paymentMethod === 'PIX' && !qrCodeBase64) {
+      const pixPayload = String(qrCodeText || `PIX DESTAQUE HUB | Request:${created.id}`);
+      qrCodeBase64 = await QRCode.toDataURL(pixPayload);
+      qrCodeText = pixPayload;
+    }
+    if (paymentMethod === 'CREDIT_CARD' && !paymentLink) {
+      paymentLink = `https://pay.janocaminho.com/checkout/featured/${created.id}`;
     }
 
     created.paymentProvider = provider;

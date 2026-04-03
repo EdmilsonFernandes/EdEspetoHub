@@ -67,6 +67,7 @@ export function AdminHighlights() {
   const [form, setForm] = useState({
     productId: '',
     durationUnit: 'DAY' as DurationUnit,
+    paymentMethod: 'PIX' as 'PIX' | 'CREDIT_CARD',
     publicNote: '',
   });
 
@@ -120,6 +121,15 @@ export function AdminHighlights() {
   const closeCreate = () => setCreateOpen(false);
   const closePayment = () => setPaymentOpen(false);
 
+  const copyText = async (text: string, okMessage: string) => {
+    try {
+      await navigator.clipboard.writeText(String(text || ''));
+      showToast(okMessage, 'success');
+    } catch {
+      showToast('Não foi possível copiar agora.', 'warning');
+    }
+  };
+
   const handleCreate = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!form.productId) {
@@ -132,6 +142,7 @@ export function AdminHighlights() {
         {
           productId: form.productId,
           durationUnit: form.durationUnit,
+          paymentMethod: form.paymentMethod,
           publicNote: String(form.publicNote || '').trim(),
         },
         storeId
@@ -325,6 +336,26 @@ export function AdminHighlights() {
                 </p>
               </div>
 
+              <div className="space-y-1.5">
+                <span className="text-xs font-semibold text-slate-600">Forma de pagamento</span>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setForm((prev) => ({ ...prev, paymentMethod: 'PIX' }))}
+                    className={`rounded-xl border px-3 py-2 text-sm font-bold ${form.paymentMethod === 'PIX' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-700'}`}
+                  >
+                    PIX
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setForm((prev) => ({ ...prev, paymentMethod: 'CREDIT_CARD' }))}
+                    className={`rounded-xl border px-3 py-2 text-sm font-bold ${form.paymentMethod === 'CREDIT_CARD' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-700'}`}
+                  >
+                    Cartão
+                  </button>
+                </div>
+              </div>
+
               <label className="space-y-1 block">
                 <span className="text-xs font-semibold text-slate-600">Observação (opcional)</span>
                 <textarea
@@ -384,6 +415,13 @@ export function AdminHighlights() {
               <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">PIX copia e cola</p>
                 <p className="mt-1 break-all text-xs text-slate-700">{selectedRequest.paymentQrCodeText}</p>
+                <button
+                  type="button"
+                  onClick={() => copyText(String(selectedRequest.paymentQrCodeText || ''), 'Código PIX copiado.')}
+                  className="mt-2 inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700"
+                >
+                  Copiar código PIX
+                </button>
               </div>
             )}
 
@@ -422,4 +460,3 @@ export function AdminHighlights() {
     </AdminLayout>
   );
 }
-

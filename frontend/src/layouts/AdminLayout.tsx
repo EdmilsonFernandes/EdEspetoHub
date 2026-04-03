@@ -46,7 +46,6 @@ export function AdminLayout({
         ? [
             { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
             { id: 'produtos', label: 'Produtos', icon: Package },
-            { id: 'destaques', label: 'Destaques', icon: Star },
             { id: 'cardapio', label: 'Loja Online', icon: Package },
           ]
         : [
@@ -71,7 +70,6 @@ export function AdminLayout({
       return [
         { type: 'item', item: mobileNavItems.find((i) => i.id === 'fila') },
         { type: 'item', item: mobileNavItems.find((i) => i.id === 'produtos') },
-        { type: 'item', item: mobileNavItems.find((i) => i.id === 'destaques') },
         { type: 'item', item: mobileNavItems.find((i) => i.id === 'cardapio') },
       ].filter((entry) => Boolean(entry?.item));
     }
@@ -101,9 +99,10 @@ export function AdminLayout({
 
   const activeMobileId = useMemo(() => {
     const path = String(location.pathname || '');
+    const persistedTab = typeof window !== 'undefined' ? String(sessionStorage.getItem('admin:activeTab') || '') : '';
     if (path.startsWith('/admin/queue')) return 'fila';
     if (path.startsWith('/admin/orders')) return 'vendas';
-    if (path.startsWith('/admin/dashboard')) return String((location.state as any)?.activeTab || '');
+    if (path.startsWith('/admin/dashboard')) return String((location.state as any)?.activeTab || persistedTab || '');
     return '';
   }, [location.pathname, location.state]);
 

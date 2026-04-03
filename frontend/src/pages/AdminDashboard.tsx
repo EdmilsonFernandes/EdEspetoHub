@@ -1251,7 +1251,9 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'avaliacoes' | 'produtos' | 'estoque' | 'config' | 'fila' | 'pagamentos' | 'motoboys' | 'usuarios'>(() => {
     const requestedTabFromState = String((location.state as any)?.activeTab || '').trim();
     const requestedTabFromQuery = String(new URLSearchParams(location.search || '').get('tab') || '').trim();
-    const requestedTab = requestedTabFromState || requestedTabFromQuery;
+    const requestedTabFromSession =
+      typeof window !== 'undefined' ? String(sessionStorage.getItem('admin:activeTab') || '').trim() : '';
+    const requestedTab = requestedTabFromState || requestedTabFromQuery || requestedTabFromSession;
     if (requestedTab === 'pedidos') return 'fila';
     return (requestedTab as any) || 'fila';
   });
@@ -1292,6 +1294,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     payoutPaidCount: 0,
   });
   const prevTabRef = useRef(activeTab);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    sessionStorage.setItem('admin:activeTab', String(activeTab || 'fila'));
+  }, [activeTab]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [showReviewsCardMobile, setShowReviewsCardMobile] = useState(() => {
     if (typeof window === 'undefined') return true;
@@ -1332,7 +1338,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       (isOperatorUser
         ? [
             { id: 'produtos', label: 'Produtos', icon: Package },
-            { id: 'destaques', label: 'Destaques', icon: Star },
             { id: 'cardapio', label: 'Loja Online', icon: Package },
             { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
           ]

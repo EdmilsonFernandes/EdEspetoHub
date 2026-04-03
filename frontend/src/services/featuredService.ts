@@ -33,7 +33,7 @@ export const featuredService = {
   },
 
   async createByStore(
-    payload: { productId: string; durationUnit: 'DAY' | 'WEEK' | 'MONTH'; publicNote?: string },
+    payload: { productId: string; durationUnit: 'DAY' | 'WEEK' | 'MONTH'; paymentMethod?: 'PIX' | 'CREDIT_CARD'; publicNote?: string },
     storeId?: string
   ) {
     const targetStoreId = String(storeId || resolveStoreIdFromSession() || '').trim();

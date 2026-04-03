@@ -23,7 +23,9 @@ export function AdminMobileBottomNav() {
     '#e2e8f0'
   );
   const path = location.pathname || '';
-  const dashboardTab = (location.state as any)?.activeTab || '';
+  const dashboardTab =
+    (location.state as any)?.activeTab ||
+    (typeof window !== 'undefined' ? String(sessionStorage.getItem('admin:activeTab') || '') : '');
   const [monitorCount, setMonitorCount] = useState(0);
   const [hiddenByOverlay, setHiddenByOverlay] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -164,6 +166,7 @@ export function AdminMobileBottomNav() {
       navigate(`/${storeSlug}`);
       return;
     }
+    if (typeof window !== 'undefined') sessionStorage.setItem('admin:activeTab', 'resumo');
     navigate('/admin/dashboard', { state: { activeTab: 'resumo' } });
   };
 
@@ -188,7 +191,10 @@ export function AdminMobileBottomNav() {
       label: 'Produtos',
       icon: Package,
       active: path === '/admin/dashboard' && dashboardTab === 'produtos',
-      onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'produtos' } }),
+      onClick: () => {
+        if (typeof window !== 'undefined') sessionStorage.setItem('admin:activeTab', 'produtos');
+        navigate('/admin/dashboard', { state: { activeTab: 'produtos' } });
+      },
     },
     {
       id: 'pedidos',
@@ -202,7 +208,10 @@ export function AdminMobileBottomNav() {
       label: 'Resumo',
       icon: ChartBar,
       active: path === '/admin/dashboard' && (!dashboardTab || dashboardTab === 'resumo'),
-      onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'resumo' } }),
+      onClick: () => {
+        if (typeof window !== 'undefined') sessionStorage.setItem('admin:activeTab', 'resumo');
+        navigate('/admin/dashboard', { state: { activeTab: 'resumo' } });
+      },
     },
   ];
   const items = isOperator
