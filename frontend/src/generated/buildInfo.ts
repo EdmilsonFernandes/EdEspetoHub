@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.161010.f2e8ad5",
-  "buildId": "0.1.9+20260403.161010.f2e8ad5-20260403.161010-f2e8ad5",
-  "builtAt": "2026-04-03T16:10:10.459Z",
-  "commitHash": "f2e8ad59e715050b02d6f33f60632b648d8f407c",
-  "shortHash": "f2e8ad5",
+  "versionInternal": "0.1.9+20260403.161235.49df2c7",
+  "buildId": "0.1.9+20260403.161235.49df2c7-20260403.161235-49df2c7",
+  "builtAt": "2026-04-03T16:12:35.466Z",
+  "commitHash": "49df2c76ad361617bf361b7ed20127f36bfc55b5",
+  "shortHash": "49df2c7",
   "branch": "main",
   "commits": [
+    {
+      "hash": "49df2c76ad361617bf361b7ed20127f36bfc55b5",
+      "shortHash": "49df2c7",
+      "dateIso": "2026-04-03T13:10:46-03:00",
+      "subject": "Normaliza rodape do Hub com padrao da plataforma e melhora localizacao"
+    },
     {
       "hash": "f2e8ad59e715050b02d6f33f60632b648d8f407c",
       "shortHash": "f2e8ad5",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "e90f556",
       "dateIso": "2026-04-02T17:47:22-03:00",
       "subject": "feat(ux): streamline customer addresses and apply saved address in checkout"
-    },
-    {
-      "hash": "49088a95fd7964c6ed68ec0ded7c0960b19a7b5a",
-      "shortHash": "49088a9",
-      "dateIso": "2026-04-02T17:40:36-03:00",
-      "subject": "feat(ui): polish customer auth/account experience with app-like styling"
     }
   ]
 } as const;

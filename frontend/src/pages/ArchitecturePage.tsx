@@ -99,22 +99,30 @@ export function ArchitecturePage() {
 
   return (
     <LandingPageLayout>
-      <section className="relative overflow-hidden bg-[linear-gradient(135deg,#020617_0%,#0b1220_45%,#0f2c2c_100%)] py-16 sm:py-20">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.2),_transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,_rgba(95,211,90,0.14),_transparent_45%)]" />
+      <section className="relative overflow-hidden bg-[linear-gradient(180deg,#eff6ff_0%,#f8fafc_60%,#ffffff_100%)] py-14 sm:py-16">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.16),_transparent_52%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,_rgba(95,211,90,0.10),_transparent_48%)]" />
         <div className="relative max-w-6xl mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto">
-            <p className="text-xs uppercase tracking-[0.3em] text-sky-200 font-semibold">Arquitetura da Plataforma</p>
-            <h1 className="mt-3 text-3xl sm:text-5xl font-black leading-[1.05] text-white">
+            <p className="text-xs uppercase tracking-[0.3em] text-sky-700 font-semibold">Arquitetura da Plataforma</p>
+            <h1 className="mt-3 text-3xl sm:text-5xl font-black leading-[1.05] text-slate-900">
               Infraestrutura técnica de nível enterprise para operação em escala
             </h1>
-            <p className="mt-4 text-sm sm:text-lg text-slate-200">
+            <p className="mt-4 text-sm sm:text-lg text-slate-600">
               Uma base cloud-native projetada para disponibilidade, segurança e crescimento contínuo.
             </p>
           </div>
 
-          <div className="mt-10 rounded-3xl border border-white/15 bg-white/5 p-4 sm:p-6">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-4 sm:p-6 shadow-[0_24px_60px_-44px_rgba(15,23,42,0.35)]">
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+              <img
+                src="/marketing/arquitetura-jano-caminho.png"
+                alt="Diagrama da arquitetura do Já no Caminho"
+                className="w-full h-auto object-cover"
+                loading="lazy"
+              />
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 { title: 'Clientes e Operação', desc: 'Vitrine, pedido e monitor em tempo real', icon: SquareCode },
                 { title: 'Core APIs', desc: 'Autenticação, pedidos, catálogo e pagamentos', icon: ServerCog },
@@ -123,12 +131,12 @@ export function ArchitecturePage() {
               ].map((item) => {
                 const Icon = item.icon;
                 return (
-                  <article key={item.title} className="rounded-2xl border border-white/15 bg-white/10 p-4">
-                    <div className="h-10 w-10 rounded-xl bg-white/15 text-white grid place-items-center">
+                  <article key={item.title} className="rounded-2xl border border-slate-200 bg-white p-4">
+                    <div className="h-10 w-10 rounded-xl bg-[linear-gradient(135deg,#0f172a,#1d4ed8)] text-white grid place-items-center">
                       <Icon size={18} />
                     </div>
-                    <p className="mt-3 text-sm font-black text-white">{item.title}</p>
-                    <p className="mt-1 text-xs text-slate-200">{item.desc}</p>
+                    <p className="mt-3 text-sm font-black text-slate-900">{item.title}</p>
+                    <p className="mt-1 text-xs text-slate-600">{item.desc}</p>
                   </article>
                 );
               })}
