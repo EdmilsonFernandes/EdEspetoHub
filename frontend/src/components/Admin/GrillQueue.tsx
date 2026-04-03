@@ -1251,6 +1251,28 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   }, [storeIdentifier]);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const openStatuses = new Set([
+      'pending',
+      'preparing',
+      'ready',
+      'ready_for_delivery',
+      'waiting_for_motoboy',
+      'in_delivery',
+      'dispatched',
+    ]);
+    const openCount = (Array.isArray(queue) ? queue : []).filter((order: any) => {
+      const st = String(order?.status || '').toLowerCase();
+      return openStatuses.has(st);
+    }).length;
+    window.dispatchEvent(
+      new CustomEvent('admin:queue-count', {
+        detail: { openCount },
+      })
+    );
+  }, [queue]);
+
+  useEffect(() => {
     localStorage.setItem("queueSoundEnabled", String(soundEnabled));
     if (!soundEnabled) return;
 

@@ -11,6 +11,7 @@ export function AdminMobileBottomNav() {
   const { auth } = useAuth();
   const role = String(auth?.user?.role || '').toUpperCase();
   const isOperator = role === 'OPERATOR' || role === 'CHURRASQUEIRO';
+  const isSuperAdmin = role === 'SUPER_ADMIN';
   const primaryColor = String(
     auth?.store?.settings?.primaryColor ||
     auth?.store?.settings?.primary_color ||
@@ -92,10 +93,23 @@ export function AdminMobileBottomNav() {
       }
     };
     load();
-    const timer = window.setInterval(load, 10000);
+    const timer = window.setInterval(load, 3000);
     return () => {
       active = false;
       window.clearInterval(timer);
+    };
+  }, []);
+
+  useEffect(() => {
+    const onQueueCount = (event: any) => {
+      const value = Number(event?.detail?.openCount);
+      if (Number.isFinite(value) && value >= 0) {
+        setMonitorCount(value);
+      }
+    };
+    window.addEventListener('admin:queue-count', onQueueCount as EventListener);
+    return () => {
+      window.removeEventListener('admin:queue-count', onQueueCount as EventListener);
     };
   }, []);
 
@@ -186,7 +200,7 @@ export function AdminMobileBottomNav() {
   ];
   const items = isOperator ? baseItems.filter((item) => item.id === 'monitor' || item.id === 'catalogo') : baseItems;
 
-  if (hiddenByOverlay) return null;
+  if (isSuperAdmin || hiddenByOverlay) return null;
 
   return (
     <nav

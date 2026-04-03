@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260402.211811.8e161f6",
-  "buildId": "0.1.9+20260402.211811.8e161f6-20260402.211811-8e161f6",
-  "builtAt": "2026-04-02T21:18:11.677Z",
-  "commitHash": "8e161f6147cb08c31a494cf3d6c751b367c3320d",
-  "shortHash": "8e161f6",
+  "versionInternal": "0.1.9+20260403.142141.63d6b08",
+  "buildId": "0.1.9+20260403.142141.63d6b08-20260403.142141-63d6b08",
+  "builtAt": "2026-04-03T14:21:41.744Z",
+  "commitHash": "63d6b0817ee802583f72808f1b76d99f678d77b2",
+  "shortHash": "63d6b08",
   "branch": "main",
   "commits": [
+    {
+      "hash": "63d6b0817ee802583f72808f1b76d99f678d77b2",
+      "shortHash": "63d6b08",
+      "dateIso": "2026-04-02T18:18:55-03:00",
+      "subject": "fix(menu): move category-drawer overlay event to MenuView scope"
+    },
     {
       "hash": "8e161f6147cb08c31a494cf3d6c751b367c3320d",
       "shortHash": "8e161f6",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "31574b0",
       "dateIso": "2026-04-02T11:20:06-03:00",
       "subject": "style(admin-footer): remove duplicate footer and switch sidebar branding to minimal mode"
-    },
-    {
-      "hash": "7a9e77a02924cbcba0fbaffb38b0c961b4a482c8",
-      "shortHash": "7a9e77a",
-      "dateIso": "2026-04-02T11:16:18-03:00",
-      "subject": "style(create-store): add subtle step transitions and premium button microinteractions"
     }
   ]
 } as const;

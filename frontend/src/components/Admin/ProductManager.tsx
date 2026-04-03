@@ -2403,7 +2403,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                 </div>
               </div>
               <div
-                className="sticky bottom-0 z-20 -mx-5 mt-4 border-t border-slate-200 bg-white/90 px-5 py-3 pb-[calc(env(safe-area-inset-bottom)+12px)] backdrop-blur-xl sm:-mx-6 sm:px-6"
+                className="relative z-20 -mx-5 mt-4 border-t border-slate-200 bg-white/90 px-5 py-3 pb-[calc(env(safe-area-inset-bottom)+12px)] backdrop-blur-xl sm:-mx-6 sm:px-6"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="mx-auto flex w-full max-w-2xl gap-3">
