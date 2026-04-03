@@ -363,7 +363,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   const [categoryPriorityDrafts, setCategoryPriorityDrafts] = useState<Record<string, string>>({});
   const [categoryPriorityLoading, setCategoryPriorityLoading] = useState(false);
   const [categoryPrioritySavingKey, setCategoryPrioritySavingKey] = useState<string | null>(null);
-  const [productPanelTab, setProductPanelTab] = useState<'cadastro' | 'lista'>('cadastro');
+  const [productPanelTab, setProductPanelTab] = useState<'cadastro' | 'lista'>('lista');
 
   const categoryOptions = useMemo(() => {
     const segmentKey = normalizeCategory(storeSegment) || 'outros';
