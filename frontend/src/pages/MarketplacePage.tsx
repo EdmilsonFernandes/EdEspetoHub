@@ -102,6 +102,7 @@ type FeaturedProduct = {
   name: string;
   imageUrl: string;
   price: number;
+  sponsored?: boolean;
 };
 
 const pickRandomIndex = (length: number, current: number) => {
@@ -436,13 +437,9 @@ export function MarketplacePage() {
             storeLogo: resolveAssetUrl(item?.storeLogoUrl || undefined) || '/janocaminho.jpg',
             imageUrl: resolveAssetUrl(item?.imageUrl || undefined) || resolveAssetUrl(item?.storeLogoUrl || undefined) || '/janocaminho.jpg',
             price: Number(item?.price || 0),
+            sponsored: true,
           }))
           .filter((item: any) => item.storeSlug && item.price > 0);
-
-        if (sponsoredEntries.length > 0) {
-          if (!cancelled) setFeaturedProducts(sponsoredEntries.slice(0, 18));
-          return;
-        }
 
         const candidates = enrichedStores.slice(0, 6);
         const responses = await Promise.allSettled(
@@ -461,6 +458,7 @@ export function MarketplacePage() {
                   (product?.promoActive && product?.promoPrice != null ? product?.promoPrice : product?.price) || 0
                 ),
                 featured: Boolean(product?.isFeatured),
+                sponsored: false,
               }))
               .sort((a, b) => Number(b.featured) - Number(a.featured))
               .slice(0, 5);
@@ -468,11 +466,18 @@ export function MarketplacePage() {
           })
         );
         if (cancelled) return;
-        const merged = responses
+        const organicPool = responses
           .flatMap((result) => (result.status === 'fulfilled' ? result.value : []))
           .filter((entry) => entry.price > 0)
-          .slice(0, 18)
           .map(({ featured: _featured, ...entry }) => entry);
+        const sponsoredKeys = new Set(
+          sponsoredEntries.map((entry: any) => `${entry.storeSlug}::${entry.id}::${entry.name}`)
+        );
+        const uniqueOrganic = organicPool.filter(
+          (entry: any) => !sponsoredKeys.has(`${entry.storeSlug}::${entry.id}::${entry.name}`)
+        );
+        const shuffledOrganic = [...uniqueOrganic].sort(() => Math.random() - 0.5);
+        const merged = [...sponsoredEntries, ...shuffledOrganic].slice(0, 18);
         setFeaturedProducts(merged);
       } catch (_error) {
         if (!cancelled) setFeaturedProducts([]);
@@ -519,13 +524,21 @@ export function MarketplacePage() {
 
   const displayedFeaturedProducts = useMemo(() => {
     const items = Array.isArray(featuredProducts) ? featuredProducts : [];
-    if (items.length <= 8) return items;
+    const sponsored = items.filter((item) => item.sponsored);
+    const organic = items.filter((item) => !item.sponsored);
     const windowSize = 8;
-    const visible: FeaturedProduct[] = [];
-    for (let i = 0; i < windowSize; i += 1) {
-      visible.push(items[(featuredOffset + i) % items.length]);
+    if (items.length <= windowSize) return items;
+    if (organic.length === 0) return sponsored.slice(0, windowSize);
+
+    const fixedSponsored = sponsored.slice(0, Math.min(windowSize, sponsored.length));
+    const remainingSlots = Math.max(0, windowSize - fixedSponsored.length);
+    if (remainingSlots === 0) return fixedSponsored;
+
+    const rotatedOrganic: FeaturedProduct[] = [];
+    for (let i = 0; i < remainingSlots; i += 1) {
+      rotatedOrganic.push(organic[(featuredOffset + i) % organic.length]);
     }
-    return visible;
+    return [...fixedSponsored, ...rotatedOrganic];
   }, [featuredProducts, featuredOffset]);
 
   return (
