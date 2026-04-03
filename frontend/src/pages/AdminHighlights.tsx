@@ -45,6 +45,12 @@ const paymentStatusLabel = (value: string) => {
   return 'Pendente';
 };
 
+const paymentMethodLabel = (value: string) => {
+  const method = String(value || '').toUpperCase();
+  if (method === 'CREDIT_CARD') return 'Cartão';
+  return 'PIX';
+};
+
 export function AdminHighlights() {
   const { auth } = useAuth();
   const { showToast } = useToast();
@@ -242,6 +248,7 @@ export function AdminHighlights() {
                         </p>
                         <p className="text-xs text-slate-600 mt-1">
                           Pagamento: <strong>{paymentStatusLabel(request?.paymentStatus)}</strong>
+                          {` • Método: ${paymentMethodLabel(request?.paymentMethod)}`}
                           {request?.priceAmount != null ? ` • ${formatCurrency(Number(request.priceAmount || 0))}` : ''}
                         </p>
                         {request?.paymentPaidAt && (

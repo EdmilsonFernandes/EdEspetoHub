@@ -363,6 +363,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   const [categoryPriorityDrafts, setCategoryPriorityDrafts] = useState<Record<string, string>>({});
   const [categoryPriorityLoading, setCategoryPriorityLoading] = useState(false);
   const [categoryPrioritySavingKey, setCategoryPrioritySavingKey] = useState<string | null>(null);
+  const [productPanelTab, setProductPanelTab] = useState<'cadastro' | 'lista'>('cadastro');
 
   const categoryOptions = useMemo(() => {
     const segmentKey = normalizeCategory(storeSegment) || 'outros';
@@ -957,6 +958,34 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
 
   return (
     <div className="space-y-6">
+      <div className="rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_12px_24px_-22px_rgba(15,23,42,0.45)]">
+        <div className="inline-flex w-full rounded-xl bg-slate-100 p-1 sm:w-auto">
+          <button
+            type="button"
+            onClick={() => setProductPanelTab('cadastro')}
+            className={`flex-1 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] transition sm:flex-none ${
+              productPanelTab === 'cadastro'
+                ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                : 'text-slate-600 hover:text-slate-800'
+            }`}
+          >
+            Cadastro
+          </button>
+          <button
+            type="button"
+            onClick={() => setProductPanelTab('lista')}
+            className={`flex-1 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] transition sm:flex-none ${
+              productPanelTab === 'lista'
+                ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                : 'text-slate-600 hover:text-slate-800'
+            }`}
+          >
+            Lista de produtos
+          </button>
+        </div>
+      </div>
+
+      {productPanelTab === 'cadastro' && (
       <div
         ref={formRef}
         className="overflow-hidden rounded-3xl border border-slate-200/90 bg-gradient-to-b from-white via-white to-slate-50/70 p-5 sm:p-6 shadow-[0_18px_40px_-28px_rgba(15,23,42,0.45)]"
@@ -1700,7 +1729,9 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
 
         </div>
       </div>
+      )}
 
+      {productPanelTab === 'lista' && (
       <div className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-[0_16px_34px_-26px_rgba(15,23,42,0.45)]">
         <div className="px-4 py-3 border-b border-slate-100 bg-white">
           <div className="inline-flex flex-wrap items-center gap-1 rounded-lg bg-slate-100 p-1">
@@ -1992,6 +2023,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
           </div>
         </div>
       </div>
+      )}
       {mobileEditOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
           <div
