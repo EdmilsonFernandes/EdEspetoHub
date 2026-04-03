@@ -5,6 +5,7 @@ import { registerSW } from 'virtual:pwa-register';
 import './index.css';
 import App from './App';
 import { AuthProvider } from './contexts/AuthContext';
+import { bootstrapNativeApp } from './mobile/nativeAppBootstrap';
 
 registerSW({
   immediate: true,
@@ -24,6 +25,8 @@ if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
     window.location.reload();
   });
 }
+
+void bootstrapNativeApp();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

@@ -5,13 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.215853.cd2b324c",
-  "buildId": "0.1.9+20260403.215853.cd2b324c-20260403.215853-cd2b324c",
-  "builtAt": "2026-04-03T21:58:53.251Z",
-  "commitHash": "cd2b324c25ce8a9832e1edfbc3fe71ccf0e5d800",
-  "shortHash": "cd2b324c",
+  "versionInternal": "0.1.9+20260403.221127.0d3288ca",
+  "buildId": "0.1.9+20260403.221127.0d3288ca-20260403.221127-0d3288ca",
+  "builtAt": "2026-04-03T22:11:27.180Z",
+  "commitHash": "0d3288ca830faa185662126f99fbc86cbe8939d5",
+  "shortHash": "0d3288ca",
   "branch": "main",
   "commits": [
+    {
+      "hash": "0d3288ca830faa185662126f99fbc86cbe8939d5",
+      "shortHash": "0d3288ca",
+      "dateIso": "2026-04-03T19:04:27-03:00",
+      "subject": "Hub: pause hero autoplay on touch/hover and resume smoothly"
+    },
+    {
+      "hash": "8ca80ab5cefc5f35dc1be0d4f263b4a8eabcfaf1",
+      "shortHash": "8ca80ab5",
+      "dateIso": "2026-04-03T19:00:04-03:00",
+      "subject": "Hub + Android: premium header polish, hidden category scrollbar, fixed open-hours mapping, app back navigation and launcher icon"
+    },
     {
       "hash": "cd2b324c25ce8a9832e1edfbc3fe71ccf0e5d800",
       "shortHash": "cd2b324c",
@@ -179,18 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "258802da",
       "dateIso": "2026-04-03T12:48:02-03:00",
       "subject": "Refina Hub mobile/web com PT-BR, destaque da marca e carrossel de produtos"
-    },
-    {
-      "hash": "3d79372051b5b280972f61e2c6e09edceb6cb91d",
-      "shortHash": "3d793720",
-      "dateIso": "2026-04-03T12:35:44-03:00",
-      "subject": "Padroniza Hub como rota canonica e reforca naming na landing"
-    },
-    {
-      "hash": "5e8e022c9bbab8b029b3a96c918afb2a914f7714",
-      "shortHash": "5e8e022c",
-      "dateIso": "2026-04-03T12:30:44-03:00",
-      "subject": "Renomeia discovery para Praca e reforca posicionamento do hub"
     }
   ]
 } as const;

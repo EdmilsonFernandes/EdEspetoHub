@@ -878,9 +878,13 @@ export function MarketplacePage() {
                     </span>
                   )}
                   <p className="mt-1.5 line-clamp-1 text-[12px] sm:text-[13px] font-bold text-slate-900">{item.name}</p>
-                  <div className="mt-1 flex items-center gap-1">
-                    <img src={item.storeLogo} alt={item.storeName} className="h-3.5 w-3.5 rounded-full object-cover border border-slate-200" />
-                    <p className="line-clamp-1 text-[10px] text-slate-500">{item.storeName}</p>
+                  <div className="mt-1 flex items-center gap-1.5">
+                    <img
+                      src={item.storeLogo}
+                      alt={item.storeName}
+                      className="h-4 w-4 shrink-0 rounded-full object-cover border border-slate-200 ring-1 ring-white"
+                    />
+                    <p className="line-clamp-1 text-[10px] text-slate-500 leading-none">{item.storeName}</p>
                   </div>
                   <div className="mt-1 flex items-center justify-between gap-1.5">
                     <p className="text-[13px] sm:text-sm font-black text-slate-900">{currency.format(item.price)}</p>
