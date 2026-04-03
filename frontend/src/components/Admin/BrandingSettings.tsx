@@ -19,6 +19,24 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
     colors: false,
     access: false,
   });
+  const sectionTabs = [
+    { key: "identity", label: "Identidade" },
+    { key: "promo", label: "Promo" },
+    { key: "contact", label: "Contato" },
+    { key: "delivery", label: "Entrega" },
+    { key: "colors", label: "Cores" },
+    { key: "access", label: "Acesso" },
+  ];
+  const openSection = (target) => {
+    setSectionsOpen({
+      identity: target === "identity",
+      promo: target === "promo",
+      contact: target === "contact",
+      delivery: target === "delivery",
+      colors: target === "colors",
+      access: target === "access",
+    });
+  };
   const normalizeCep = (input = "") => {
     const digits = input.toString().replace(/\D/g, "").slice(0, 8);
     if (digits.length <= 5) return digits;
@@ -134,10 +152,32 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
       </div>
 
       <div className="p-4 sm:p-5 space-y-5">
+        <div className="overflow-x-auto pb-1">
+          <div className="inline-flex min-w-full gap-2">
+            {sectionTabs.map((tab) => {
+              const active = sectionsOpen[tab.key];
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => openSection(tab.key)}
+                  className={`rounded-xl border px-3 py-2 text-xs font-semibold whitespace-nowrap transition ${
+                    active
+                      ? "border-brand-primary/40 bg-brand-primary-soft text-brand-primary"
+                      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
           <button
             type="button"
-            onClick={() => setSectionsOpen((prev) => ({ ...prev, identity: !prev.identity }))}
+            onClick={() => openSection("identity")}
             className="w-full flex items-start justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left hover:bg-slate-50/70 transition"
           >
             <div className="flex items-start gap-2">
@@ -147,9 +187,9 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 <p className="text-xs text-gray-500">Nome, Instagram, descrição, logo e banner.</p>
               </div>
             </div>
-            <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.identity ? 'Fechar' : 'Abrir'}</span>
+            <span className="text-xs text-gray-500">{sectionsOpen.identity ? 'Ativa' : 'Abrir'}</span>
           </button>
-          <div className={`${sectionsOpen.identity ? 'block' : 'hidden'} sm:block px-4 pb-4 sm:px-5 sm:pb-5 space-y-6`}>
+          <div className={`${sectionsOpen.identity ? 'block' : 'hidden'} px-4 pb-4 sm:px-5 sm:pb-5 space-y-6`}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
           <label className="text-sm font-semibold text-gray-700">Nome da marca</label>
@@ -310,7 +350,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
         <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
           <button
             type="button"
-            onClick={() => setSectionsOpen((prev) => ({ ...prev, promo: !prev.promo }))}
+            onClick={() => openSection("promo")}
             className="w-full flex items-start justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left hover:bg-slate-50/70 transition"
           >
             <div className="flex items-start gap-2">
@@ -320,9 +360,9 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 <p className="text-xs text-gray-500">Mensagem curta no topo da vitrine.</p>
               </div>
             </div>
-            <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.promo ? 'Fechar' : 'Abrir'}</span>
+            <span className="text-xs text-gray-500">{sectionsOpen.promo ? 'Ativa' : 'Abrir'}</span>
           </button>
-          <div className={`${sectionsOpen.promo ? 'block' : 'hidden'} sm:block px-4 pb-4 sm:px-5 sm:pb-5 space-y-4`}>
+          <div className={`${sectionsOpen.promo ? 'block' : 'hidden'} px-4 pb-4 sm:px-5 sm:pb-5 space-y-4`}>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Mensagem promocional</label>
               <textarea
@@ -343,7 +383,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
         <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
           <button
             type="button"
-            onClick={() => setSectionsOpen((prev) => ({ ...prev, contact: !prev.contact }))}
+            onClick={() => openSection("contact")}
             className="w-full flex items-start justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left hover:bg-slate-50/70 transition"
           >
             <div className="flex items-start gap-2">
@@ -353,9 +393,9 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 <p className="text-xs text-gray-500">Contato oficial, endereço e chave Pix.</p>
               </div>
             </div>
-            <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.contact ? 'Fechar' : 'Abrir'}</span>
+            <span className="text-xs text-gray-500">{sectionsOpen.contact ? 'Ativa' : 'Abrir'}</span>
           </button>
-          <div className={`${sectionsOpen.contact ? 'block' : 'hidden'} sm:block px-4 pb-4 sm:px-5 sm:pb-5 space-y-6`}>
+          <div className={`${sectionsOpen.contact ? 'block' : 'hidden'} px-4 pb-4 sm:px-5 sm:pb-5 space-y-6`}>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Email de contato</label>
               <input
@@ -491,7 +531,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
         <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
           <button
             type="button"
-            onClick={() => setSectionsOpen((prev) => ({ ...prev, delivery: !prev.delivery }))}
+            onClick={() => openSection("delivery")}
             className="w-full flex items-start justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left hover:bg-slate-50/70 transition"
           >
             <div className="flex items-start gap-2">
@@ -501,9 +541,9 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 <p className="text-xs text-gray-500">Defina alcance local e habilite envio postal.</p>
               </div>
             </div>
-            <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.delivery ? 'Fechar' : 'Abrir'}</span>
+            <span className="text-xs text-gray-500">{sectionsOpen.delivery ? 'Ativa' : 'Abrir'}</span>
           </button>
-          <div className={`${sectionsOpen.delivery ? 'block' : 'hidden'} sm:block px-4 pb-4 sm:px-5 sm:pb-5 space-y-5`}>
+          <div className={`${sectionsOpen.delivery ? 'block' : 'hidden'} px-4 pb-4 sm:px-5 sm:pb-5 space-y-5`}>
             <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
               <div className="flex items-center justify-between gap-3">
                 <div>
@@ -601,7 +641,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
         <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
           <button
             type="button"
-            onClick={() => setSectionsOpen((prev) => ({ ...prev, colors: !prev.colors }))}
+            onClick={() => openSection("colors")}
             className="w-full flex items-start justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left hover:bg-slate-50/70 transition"
           >
             <div className="flex items-start gap-2">
@@ -611,9 +651,9 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 <p className="text-xs text-gray-500">Define o visual da sua vitrine.</p>
               </div>
             </div>
-            <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.colors ? 'Fechar' : 'Abrir'}</span>
+            <span className="text-xs text-gray-500">{sectionsOpen.colors ? 'Ativa' : 'Abrir'}</span>
           </button>
-          <div className={`${sectionsOpen.colors ? 'block' : 'hidden'} sm:block px-4 pb-4 sm:px-5 sm:pb-5 space-y-6`}>
+          <div className={`${sectionsOpen.colors ? 'block' : 'hidden'} px-4 pb-4 sm:px-5 sm:pb-5 space-y-6`}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-3">
             <label className="text-sm font-semibold text-gray-700">Cor principal</label>
@@ -669,7 +709,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
         <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
           <button
             type="button"
-            onClick={() => setSectionsOpen((prev) => ({ ...prev, access: !prev.access }))}
+            onClick={() => openSection("access")}
             className="w-full flex items-start justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left hover:bg-slate-50/70 transition"
           >
             <div className="flex items-start gap-2">
@@ -679,9 +719,9 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 <p className="text-xs text-gray-500">Link público definitivo da vitrine.</p>
               </div>
             </div>
-            <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.access ? 'Fechar' : 'Abrir'}</span>
+            <span className="text-xs text-gray-500">{sectionsOpen.access ? 'Ativa' : 'Abrir'}</span>
           </button>
-          <div className={`${sectionsOpen.access ? 'block' : 'hidden'} sm:block px-4 pb-4 sm:px-5 sm:pb-5 space-y-2`}>
+          <div className={`${sectionsOpen.access ? 'block' : 'hidden'} px-4 pb-4 sm:px-5 sm:pb-5 space-y-2`}>
             <label className="text-sm font-semibold text-gray-700">Slug da loja (fixo)</label>
             <input
               type="text"
