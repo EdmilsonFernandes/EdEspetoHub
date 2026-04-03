@@ -162,6 +162,13 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
     () => [
       { id: 'home', label: 'Início', icon: House, onClick: () => navigate('/'), active: location.pathname === '/' },
       {
+        id: 'hub',
+        label: 'Hub',
+        icon: MagnifyingGlass,
+        onClick: () => navigate('/hub'),
+        active: location.pathname === '/hub' || location.pathname === '/marketplace' || location.pathname === '/descobrir' || location.pathname === '/praca',
+      },
+      {
         id: 'admin',
         label: 'Admin',
         icon: Storefront,
@@ -335,7 +342,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
       </div>
 
       <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-[70] border-t border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl shadow-[0_-12px_24px_-20px_rgba(2,6,23,0.9)]">
-        <div className="grid grid-cols-4 gap-1 px-2 pt-1 pb-[max(env(safe-area-inset-bottom),0.5rem)]">
+        <div className="grid grid-cols-5 gap-1 px-2 pt-1 pb-[max(env(safe-area-inset-bottom),0.5rem)]">
           {mobilePrimaryNav.map((item) => {
             const Icon = item.icon;
             return (

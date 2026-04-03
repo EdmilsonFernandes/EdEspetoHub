@@ -20,6 +20,8 @@ type MarketplaceStore = {
     address?: string | null;
     city?: string | null;
     state?: string | null;
+    primaryColor?: string | null;
+    secondaryColor?: string | null;
     isOrderingEnabled?: boolean;
   } | null;
 };
@@ -197,6 +199,8 @@ export function MarketplacePage() {
           etaMax,
           freeShipping,
           isOpen,
+          primaryColor: String(store?.settings?.primaryColor || '').trim(),
+          secondaryColor: String(store?.settings?.secondaryColor || '').trim(),
           logo,
           banner,
           searchIndex,
@@ -215,6 +219,8 @@ export function MarketplacePage() {
       etaMax: number;
       freeShipping: boolean;
       isOpen: boolean;
+      primaryColor: string;
+      secondaryColor: string;
       logo: string;
       banner: string;
       searchIndex: string;
@@ -319,6 +325,14 @@ export function MarketplacePage() {
     []
   );
 
+  const theme = useMemo(() => {
+    const target = filteredStores[0] || enrichedStores[0];
+    const isHexColor = (value: string) => /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(value);
+    const primary = isHexColor(String(target?.primaryColor || '')) ? String(target?.primaryColor) : '#0f172a';
+    const secondary = isHexColor(String(target?.secondaryColor || '')) ? String(target?.secondaryColor) : '#e2e8f0';
+    return { primary, secondary };
+  }, [filteredStores, enrichedStores]);
+
   const genericHighlightLabel = useMemo(() => {
     const hasFoodHeavy = enrichedStores.some((store) =>
       [ 'Restaurante', 'Hamburguer', 'Lanche', 'Pizza', 'Doces' ].includes(store.segment)
@@ -360,8 +374,9 @@ export function MarketplacePage() {
                   type="button"
                   onClick={() => setQuickFilter(filter as any)}
                   className={`rounded-full px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] whitespace-nowrap transition ${
-                    active ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    active ? 'text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
+                  style={active ? { backgroundColor: theme.primary } : undefined}
                 >
                   {label}
                 </button>
@@ -383,8 +398,9 @@ export function MarketplacePage() {
                   type="button"
                   onClick={() => setSegmentFilter('all')}
                   className={`rounded-full px-3 py-2 text-xs font-semibold whitespace-nowrap ${
-                    segmentFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'
+                    segmentFilter === 'all' ? 'text-white' : 'bg-slate-100 text-slate-600'
                   }`}
+                  style={segmentFilter === 'all' ? { backgroundColor: theme.primary } : undefined}
                 >
                   Todos os segmentos
                 </button>
@@ -394,8 +410,9 @@ export function MarketplacePage() {
                     type="button"
                     onClick={() => setSegmentFilter(segment)}
                     className={`rounded-full px-3 py-2 text-xs font-semibold whitespace-nowrap ${
-                      segmentFilter === segment ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'
+                      segmentFilter === segment ? 'text-white' : 'bg-slate-100 text-slate-600'
                     }`}
+                    style={segmentFilter === segment ? { backgroundColor: theme.primary } : undefined}
                   >
                     {segment}
                   </button>
@@ -407,12 +424,17 @@ export function MarketplacePage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 pt-4 space-y-6">
-        <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+        <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm" style={{ borderColor: `${theme.secondary}66` }}>
           <div className="flex items-center gap-3">
-            <img src="/janocaminho.jpg" alt="Ja no Caminho" className="h-11 w-11 rounded-2xl object-cover border border-slate-200" />
+            <img
+              src="/janocaminho.jpg"
+              alt="Ja no Caminho"
+              className="h-11 w-11 rounded-2xl object-cover border border-slate-200"
+              style={{ borderColor: `${theme.primary}44` }}
+            />
             <div className="min-w-0">
               <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Marketplace Oficial</p>
-              <h1 className="truncate text-lg sm:text-xl font-black text-slate-900">Ja no Caminho</h1>
+              <h1 className="truncate text-lg sm:text-xl font-black" style={{ color: theme.primary }}>Ja no Caminho</h1>
             </div>
           </div>
         </section>
@@ -490,7 +512,10 @@ export function MarketplacePage() {
                   <p className="line-clamp-1 text-[11px] text-slate-500">{item.storeName}</p>
                   <div className="mt-1 flex items-center justify-between gap-2">
                     <p className="text-sm font-black text-slate-900">{currency.format(item.price)}</p>
-                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-900 text-white text-sm font-black shadow-sm transition-transform active:scale-95 group-hover:scale-105">
+                    <span
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-full text-white text-sm font-black shadow-sm transition-transform active:scale-95 group-hover:scale-105"
+                      style={{ backgroundColor: theme.primary }}
+                    >
                       +
                     </span>
                   </div>
@@ -609,7 +634,7 @@ export function MarketplacePage() {
             <House size={18} />
             <span className="text-[9px] font-black uppercase">Início</span>
           </button>
-          <button type="button" className="flex flex-col items-center justify-center text-slate-900">
+          <button type="button" className="flex flex-col items-center justify-center" style={{ color: theme.primary }}>
             <Storefront size={18} weight="fill" />
             <span className="text-[9px] font-black uppercase">Hub</span>
           </button>

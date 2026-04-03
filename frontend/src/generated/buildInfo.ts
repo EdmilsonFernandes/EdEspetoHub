@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.154932.258802d",
-  "buildId": "0.1.9+20260403.154932.258802d-20260403.154932-258802d",
-  "builtAt": "2026-04-03T15:49:32.764Z",
-  "commitHash": "258802da28cb838a1b8ab722719c5c8c582d8494",
-  "shortHash": "258802d",
+  "versionInternal": "0.1.9+20260403.155306.992479b",
+  "buildId": "0.1.9+20260403.155306.992479b-20260403.155306-992479b",
+  "builtAt": "2026-04-03T15:53:06.617Z",
+  "commitHash": "992479bc1ad5d7e93ed24dc121686038cf304fbc",
+  "shortHash": "992479b",
   "branch": "main",
   "commits": [
+    {
+      "hash": "992479bc1ad5d7e93ed24dc121686038cf304fbc",
+      "shortHash": "992479b",
+      "dateIso": "2026-04-03T12:50:12-03:00",
+      "subject": "Refina Hub para marketplace generico com cards compactos e destaque de produtos"
+    },
     {
       "hash": "258802da28cb838a1b8ab722719c5c8c582d8494",
       "shortHash": "258802d",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "6aeb3a3",
       "dateIso": "2026-04-02T17:24:19-03:00",
       "subject": "fix(api): explicit postgres text types for customer address nullable fields"
-    },
-    {
-      "hash": "858dd942a9caea73148a5ad8c19a1723410b61a6",
-      "shortHash": "858dd94",
-      "dateIso": "2026-04-02T17:17:55-03:00",
-      "subject": "feat(customer): add customer account auth, addresses, orders and dedicated routes"
     }
   ]
 } as const;
