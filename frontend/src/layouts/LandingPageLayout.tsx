@@ -153,7 +153,6 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
       },
     },
     { id: 'marketplace', label: 'Já no Caminho', onClick: () => navigate('/hub') },
-    { id: 'portfolio', label: 'Portfólio', onClick: () => navigate('/portfolio') },
     { id: 'architecture', label: 'Arquitetura', onClick: () => navigate('/arquitetura') },
     { id: 'install', label: 'Instalar app', onClick: () => navigate('/instalar') },
   ];
@@ -291,14 +290,6 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             >
               Hub Já no Caminho
               <MagnifyingGlass size={18} weight="duotone" />
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/portfolio')}
-              className="w-full inline-flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200"
-            >
-              Portfólio
-              <Storefront size={18} weight="duotone" />
             </button>
             <button
               type="button"

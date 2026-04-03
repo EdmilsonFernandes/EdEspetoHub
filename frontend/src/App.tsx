@@ -9,7 +9,6 @@ import { MotoboyRoute } from './components/Motoboy/MotoboyRoute';
 import { AdminLayout } from './layouts/AdminLayout';
 import { AppErrorBoundary } from './components/common/AppErrorBoundary';
 import './index.css';
-import { PortfolioPage } from './pages/PortfolioPage';
 import { MotoboyLayout } from './layouts/MotoboyLayout';
 
 function App() {
@@ -23,7 +22,7 @@ function App() {
             <Route path="/marketplace" element={<Navigate to="/hub" replace />} />
             <Route path="/descobrir" element={<Navigate to="/hub" replace />} />
             <Route path="/praca" element={<Navigate to="/hub" replace />} />
-            <Route path="/portfolio" element={<PortfolioPage />} />
+            <Route path="/portfolio" element={<Navigate to="/hub" replace />} />
             <Route path="/arquitetura" element={<ArchitecturePage />} />
             <Route path="/instalar" element={<InstallAppPage />} />
             <Route path="/create" element={<CreateStore />} />

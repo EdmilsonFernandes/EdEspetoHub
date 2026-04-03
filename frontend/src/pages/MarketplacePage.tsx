@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MagnifyingGlass, MapPin, Star, Clock, Scooter, Storefront, House, Heart, UserCircle } from '@phosphor-icons/react';
+import { MagnifyingGlass, MapPin, Star, Clock, Scooter, Storefront, House, UserCircle } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { productService } from '../services/productService';
 import { featuredService } from '../services/featuredService';
@@ -778,7 +778,7 @@ export function MarketplacePage() {
         className="fixed bottom-0 left-0 right-0 z-[100] border-t border-slate-200 bg-white/80 backdrop-blur-2xl h-14 lg:hidden transition-transform duration-300"
         style={{ transform: isBottomNavVisible ? 'translateY(0)' : 'translateY(100%)' }}
       >
-        <div className="h-full grid grid-cols-4 px-2 pb-[max(env(safe-area-inset-bottom),0px)]">
+        <div className="h-full grid grid-cols-3 px-2 pb-[max(env(safe-area-inset-bottom),0px)]">
           <button type="button" onClick={() => navigate('/')} className="flex flex-col items-center justify-center text-slate-500">
             <House size={18} />
             <span className="text-[9px] font-black uppercase">Início</span>
@@ -786,10 +786,6 @@ export function MarketplacePage() {
           <button type="button" className="flex flex-col items-center justify-center" style={{ color: theme.primary }}>
             <Storefront size={18} weight="fill" />
             <span className="text-[9px] font-black uppercase">Hub</span>
-          </button>
-          <button type="button" onClick={() => navigate('/portfolio')} className="flex flex-col items-center justify-center text-slate-500">
-            <Heart size={18} />
-            <span className="text-[9px] font-black uppercase">Portfólio</span>
           </button>
           <button type="button" onClick={() => navigate('/cliente')} className="flex flex-col items-center justify-center text-slate-500">
             <UserCircle size={18} />
