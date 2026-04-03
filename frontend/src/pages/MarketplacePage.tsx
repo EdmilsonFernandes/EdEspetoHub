@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { MagnifyingGlass, MapPin, Star, Clock, Scooter, Storefront, House, Heart, UserCircle } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { productService } from '../services/productService';
+import { mapsService } from '../services/mapsService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 type MarketplaceStore = {
@@ -95,6 +96,7 @@ type FeaturedProduct = {
   id: string;
   storeSlug: string;
   storeName: string;
+  storeLogo: string;
   name: string;
   imageUrl: string;
   price: number;
@@ -113,9 +115,28 @@ export function MarketplacePage() {
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
   const [featuredLoading, setFeaturedLoading] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [distanceByStore, setDistanceByStore] = useState<Record<string, number>>({});
+  const [distanceLoading, setDistanceLoading] = useState(false);
 
   useEffect(() => {
     document.title = 'Hub Já no Caminho';
+  }, []);
+
+  useEffect(() => {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({
+          lat: Number(position.coords.latitude),
+          lng: Number(position.coords.longitude),
+        });
+      },
+      () => {
+        setUserLocation(null);
+      },
+      { enableHighAccuracy: false, timeout: 6000, maximumAge: 10 * 60 * 1000 }
+    );
   }, []);
 
   useEffect(() => {
@@ -201,6 +222,13 @@ export function MarketplacePage() {
           isOpen,
           primaryColor: String(store?.settings?.primaryColor || '').trim(),
           secondaryColor: String(store?.settings?.secondaryColor || '').trim(),
+          addressText: [
+            String((store as any)?.settings?.address || '').trim(),
+            String((store as any)?.settings?.city || '').trim(),
+            String((store as any)?.settings?.state || '').trim(),
+          ]
+            .filter(Boolean)
+            .join(', '),
           logo,
           banner,
           searchIndex,
@@ -221,6 +249,7 @@ export function MarketplacePage() {
       isOpen: boolean;
       primaryColor: string;
       secondaryColor: string;
+      addressText: string;
       logo: string;
       banner: string;
       searchIndex: string;
@@ -268,6 +297,54 @@ export function MarketplacePage() {
 
   useEffect(() => {
     let cancelled = false;
+    const toRad = (deg: number) => (deg * Math.PI) / 180;
+    const haversineKm = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
+      const R = 6371;
+      const dLat = toRad(b.lat - a.lat);
+      const dLng = toRad(b.lng - a.lng);
+      const lat1 = toRad(a.lat);
+      const lat2 = toRad(b.lat);
+      const x =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.sin(dLng / 2) * Math.sin(dLng / 2) * Math.cos(lat1) * Math.cos(lat2);
+      const c = 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+      return R * c;
+    };
+
+    const loadApproxDistances = async () => {
+      if (!userLocation || enrichedStores.length === 0) return;
+      setDistanceLoading(true);
+      try {
+        const targets = enrichedStores.slice(0, 18).filter((store) => store.addressText.length >= 8);
+        const settled = await Promise.allSettled(
+          targets.map(async (store) => {
+            const geo = await mapsService.geocode(store.addressText);
+            const km = haversineKm(userLocation, { lat: geo.lat, lng: geo.lng });
+            return [store.id, km] as const;
+          })
+        );
+        if (cancelled) return;
+        const next: Record<string, number> = {};
+        settled.forEach((result) => {
+          if (result.status === 'fulfilled') {
+            next[result.value[0]] = result.value[1];
+          }
+        });
+        setDistanceByStore(next);
+      } catch (_err) {
+        if (!cancelled) setDistanceByStore({});
+      } finally {
+        if (!cancelled) setDistanceLoading(false);
+      }
+    };
+    loadApproxDistances();
+    return () => {
+      cancelled = true;
+    };
+  }, [userLocation, enrichedStores]);
+
+  useEffect(() => {
+    let cancelled = false;
     const loadFeaturedProducts = async () => {
       if (enrichedStores.length === 0) {
         setFeaturedProducts([]);
@@ -286,6 +363,7 @@ export function MarketplacePage() {
                 storeSlug: store.slug,
                 storeName: store.name,
                 name: String(product?.name || 'Produto'),
+                storeLogo: store.logo,
                 imageUrl: resolveAssetUrl(product?.imageUrl || undefined) || store.logo,
                 price: Number(
                   (product?.promoActive && product?.promoPrice != null ? product?.promoPrice : product?.price) || 0
@@ -339,6 +417,13 @@ export function MarketplacePage() {
     );
     return hasFoodHeavy ? 'Itens em destaque' : 'Produtos em destaque';
   }, [enrichedStores]);
+
+  const formatDistance = (km: number) => {
+    if (!Number.isFinite(km) || km <= 0) return 'Região';
+    if (km > 50) return 'Região';
+    if (km < 1) return `${Math.max(100, Math.round(km * 1000 / 100) * 100)} m`;
+    return `${km.toFixed(1)} km`;
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 pb-28 sm:pb-20">
@@ -489,7 +574,7 @@ export function MarketplacePage() {
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-base sm:text-xl font-black text-slate-900">{genericHighlightLabel}</h2>
-            <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Marketplace</span>
+            <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Mais pedidos</span>
           </div>
           <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
             {featuredLoading &&
@@ -509,7 +594,10 @@ export function MarketplacePage() {
                 >
                   <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-24 w-full rounded-xl object-cover" />
                   <p className="mt-2 line-clamp-1 text-sm font-bold text-slate-900">{item.name}</p>
-                  <p className="line-clamp-1 text-[11px] text-slate-500">{item.storeName}</p>
+                  <div className="mt-1 flex items-center gap-1.5">
+                    <img src={item.storeLogo} alt={item.storeName} className="h-4 w-4 rounded-full object-cover border border-slate-200" />
+                    <p className="line-clamp-1 text-[11px] text-slate-500">{item.storeName}</p>
+                  </div>
                   <div className="mt-1 flex items-center justify-between gap-2">
                     <p className="text-sm font-black text-slate-900">{currency.format(item.price)}</p>
                     <span
@@ -559,12 +647,12 @@ export function MarketplacePage() {
           )}
 
           {!loading && !error && filteredStores.length > 0 && (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 justify-items-center">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 justify-items-center">
               {filteredStores.map((store) => (
                 <Link
                   key={store.id}
                   to={`/${store.slug}`}
-                  className="w-full max-w-[420px] group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_12px_32px_rgba(0,0,0,0.05)] transition-all duration-300 hover:scale-[1.01] hover:shadow-lg"
+                  className="w-full max-w-[420px] group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_12px_32px_rgba(0,0,0,0.05)] transition-all duration-300 hover:scale-[1.01] hover:shadow-lg active:scale-[0.99]"
                 >
                   <div className="relative aspect-[16/8] md:aspect-[16/7] overflow-hidden">
                     <img
@@ -597,7 +685,7 @@ export function MarketplacePage() {
                           {store.rating.toFixed(1)}
                         </span>
                         <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1">
-                          {store.distanceKm.toFixed(1)} km
+                          {distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)}
                         </span>
                         <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1">
                           <Clock size={12} />
@@ -622,6 +710,12 @@ export function MarketplacePage() {
 
         <section className="pb-6">
           <p className="text-center text-xs font-semibold text-slate-500">Conectando você aos melhores lojistas da região.</p>
+          <a
+            href="/"
+            className="mt-2 block text-center text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500 hover:text-slate-800"
+          >
+            Powered by Ja no Caminho
+          </a>
         </section>
       </main>
 

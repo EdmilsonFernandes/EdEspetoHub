@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.155306.992479b",
-  "buildId": "0.1.9+20260403.155306.992479b-20260403.155306-992479b",
-  "builtAt": "2026-04-03T15:53:06.617Z",
-  "commitHash": "992479bc1ad5d7e93ed24dc121686038cf304fbc",
-  "shortHash": "992479b",
+  "versionInternal": "0.1.9+20260403.160722.a8ab3e1",
+  "buildId": "0.1.9+20260403.160722.a8ab3e1-20260403.160722-a8ab3e1",
+  "builtAt": "2026-04-03T16:07:22.578Z",
+  "commitHash": "a8ab3e1780de574d60ffa67a4919dae07afcc978",
+  "shortHash": "a8ab3e1",
   "branch": "main",
   "commits": [
+    {
+      "hash": "a8ab3e1780de574d60ffa67a4919dae07afcc978",
+      "shortHash": "a8ab3e1",
+      "dateIso": "2026-04-03T12:53:40-03:00",
+      "subject": "Adiciona atalho Hub no rodape mobile da landing e tema dinamico no hub"
+    },
     {
       "hash": "992479bc1ad5d7e93ed24dc121686038cf304fbc",
       "shortHash": "992479b",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "30d9532",
       "dateIso": "2026-04-02T17:34:34-03:00",
       "subject": "feat(customer): phone mask, forgot password and customer password change flow"
-    },
-    {
-      "hash": "6aeb3a3f9f1835c6255e8f7aa3def5af1e73e4e4",
-      "shortHash": "6aeb3a3",
-      "dateIso": "2026-04-02T17:24:19-03:00",
-      "subject": "fix(api): explicit postgres text types for customer address nullable fields"
     }
   ]
 } as const;
