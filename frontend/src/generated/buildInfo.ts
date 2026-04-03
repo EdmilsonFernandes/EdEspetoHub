@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.201202.3f1830fe",
-  "buildId": "0.1.9+20260403.201202.3f1830fe-20260403.201202-3f1830fe",
-  "builtAt": "2026-04-03T20:12:02.962Z",
-  "commitHash": "3f1830fe46782ee880c79b2ec78f4842d6b14d62",
-  "shortHash": "3f1830fe",
+  "versionInternal": "0.1.9+20260403.201419.b80eebed",
+  "buildId": "0.1.9+20260403.201419.b80eebed-20260403.201419-b80eebed",
+  "builtAt": "2026-04-03T20:14:19.358Z",
+  "commitHash": "b80eebed33371b1a1b05d2188f85cfdfad3c5b93",
+  "shortHash": "b80eebed",
   "branch": "main",
   "commits": [
+    {
+      "hash": "b80eebed33371b1a1b05d2188f85cfdfad3c5b93",
+      "shortHash": "b80eebed",
+      "dateIso": "2026-04-03T17:12:35-03:00",
+      "subject": "refactor(hub): increase regional store banner height to avoid flattened look"
+    },
     {
       "hash": "3f1830fe46782ee880c79b2ec78f4842d6b14d62",
       "shortHash": "3f1830fe",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "5fb5a6a5",
       "dateIso": "2026-04-03T11:58:57-03:00",
       "subject": "Eleva portfolio da landing com visual premium e CTA por loja"
-    },
-    {
-      "hash": "a5ceca828e6ac2ee4e951adbed526f75adee2659",
-      "shortHash": "a5ceca82",
-      "dateIso": "2026-04-03T11:55:39-03:00",
-      "subject": "Libera produtos para operador na navegacao mobile e desktop"
     }
   ]
 } as const;

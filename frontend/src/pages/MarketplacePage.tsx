@@ -711,8 +711,8 @@ export function MarketplacePage() {
           <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
             {featuredLoading &&
               Array.from({ length: 4 }).map((_, idx) => (
-                <div key={`featured-skeleton-${idx}`} className="min-w-[156px] rounded-2xl border border-slate-200 bg-white p-2 animate-pulse">
-                  <div className="h-20 rounded-xl bg-slate-100" />
+                <div key={`featured-skeleton-${idx}`} className="min-w-[140px] sm:min-w-[148px] md:min-w-[154px] rounded-2xl border border-slate-200 bg-white p-1.5 sm:p-2 animate-pulse">
+                  <div className="h-[68px] sm:h-[74px] rounded-xl bg-slate-100" />
                   <div className="mt-2 h-3 w-24 rounded bg-slate-100" />
                   <div className="mt-1 flex items-center gap-1.5">
                     <div className="h-4 w-4 rounded-full bg-slate-100" />
@@ -725,21 +725,21 @@ export function MarketplacePage() {
                 <Link
                   key={`${item.storeSlug}-${item.id}`}
                   to={`/${item.storeSlug}`}
-                  className="group relative min-w-[156px] rounded-2xl border border-slate-200 bg-white p-2 shadow-sm transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-lg active:scale-[0.99]"
+                  className="group relative min-w-[140px] sm:min-w-[148px] md:min-w-[154px] rounded-2xl border border-slate-200 bg-white p-1.5 sm:p-2 shadow-sm transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-lg active:scale-[0.99]"
                 >
-                  <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-20 w-full rounded-xl object-cover" />
-                  <span className="absolute top-3 left-3 rounded-full bg-slate-100/95 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] text-slate-600">
+                  <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-[68px] sm:h-[74px] w-full rounded-xl object-cover" />
+                  <span className="absolute top-2.5 left-2.5 rounded-full bg-slate-100/95 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-[0.08em] text-slate-600">
                     Destaque
                   </span>
-                  <p className="mt-2 line-clamp-1 text-[13px] font-bold text-slate-900">{item.name}</p>
-                  <div className="mt-1 flex items-center gap-1.5">
-                    <img src={item.storeLogo} alt={item.storeName} className="h-4 w-4 rounded-full object-cover border border-slate-200" />
-                    <p className="line-clamp-1 text-[11px] text-slate-500">{item.storeName}</p>
+                  <p className="mt-1.5 line-clamp-1 text-[12px] sm:text-[13px] font-bold text-slate-900">{item.name}</p>
+                  <div className="mt-1 flex items-center gap-1">
+                    <img src={item.storeLogo} alt={item.storeName} className="h-3.5 w-3.5 rounded-full object-cover border border-slate-200" />
+                    <p className="line-clamp-1 text-[10px] text-slate-500">{item.storeName}</p>
                   </div>
-                  <div className="mt-1 flex items-center justify-between gap-2">
-                    <p className="text-sm font-black text-slate-900">{currency.format(item.price)}</p>
+                  <div className="mt-1 flex items-center justify-between gap-1.5">
+                    <p className="text-[13px] sm:text-sm font-black text-slate-900">{currency.format(item.price)}</p>
                     <span
-                      className="inline-flex h-7 w-7 items-center justify-center rounded-full text-white text-sm font-black shadow-sm transition-transform active:scale-95 group-hover:scale-105"
+                      className="inline-flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full text-white text-xs sm:text-sm font-black shadow-sm transition-transform active:scale-95 group-hover:scale-105"
                       style={{ backgroundColor: theme.primary }}
                     >
                       +
@@ -785,14 +785,14 @@ export function MarketplacePage() {
           )}
 
           {!loading && !error && filteredStores.length > 0 && (
-            <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 lg:grid-cols-3 justify-items-center">
+            <div className="grid grid-cols-1 gap-2.5 md:gap-3 lg:gap-3.5 md:grid-cols-2 lg:grid-cols-3 justify-items-center">
               {filteredStores.map((store) => (
                 <Link
                   key={store.id}
                   to={`/${store.slug}`}
-                  className="w-full max-w-[420px] group overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.05)] transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-[0_20px_40px_-24px_rgba(15,23,42,0.50)] active:scale-[0.99]"
+                  className="w-full max-w-[420px] md:max-w-none group overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.05)] transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-[0_20px_40px_-24px_rgba(15,23,42,0.50)] active:scale-[0.99]"
                 >
-                  <div className="relative aspect-[16/7] sm:aspect-[16/6.4] overflow-hidden">
+                  <div className="relative aspect-[16/7.2] sm:aspect-[16/6.7] md:aspect-[16/6.2] lg:aspect-[16/5.9] overflow-hidden">
                     <img
                       src={store.banner}
                       alt={store.name}
@@ -801,7 +801,7 @@ export function MarketplacePage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/55 via-slate-900/10 to-transparent" />
                   </div>
-                  <div className="p-2.5 flex gap-2.5">
+                  <div className="p-2.5 md:p-3 flex gap-2.5">
                     <img
                       src={store.logo}
                       alt={`${store.name} logo`}
