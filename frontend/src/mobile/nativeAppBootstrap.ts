@@ -3,6 +3,7 @@ import { App } from '@capacitor/app';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { customerAccountService } from '../services/customerAccountService';
 
+const MOBILE_PUSH_ENABLED = String(import.meta.env.VITE_MOBILE_PUSH_ENABLED || 'false').toLowerCase() === 'true';
 const PUSH_PROMPTED_KEY = 'jnk_mobile_push_prompted';
 const PUSH_TOKEN_KEY = 'jnk_mobile_push_token';
 const PUSH_LAST_SYNC_TOKEN_KEY = 'jnk_mobile_push_last_sync_token';
@@ -71,6 +72,8 @@ const syncPushTokenWithBackend = async (tokenRaw?: string | null) => {
 };
 
 const bootstrapPushNotifications = async () => {
+  if (!MOBILE_PUSH_ENABLED) return;
+  if (!Capacitor.isPluginAvailable('PushNotifications')) return;
   try {
     await PushNotifications.addListener('registration', (token) => {
       const value = String(token?.value || '').trim();
@@ -135,8 +138,10 @@ export const bootstrapNativeApp = async () => {
   }
 
   await bootstrapPushNotifications();
-  void syncPushTokenWithBackend();
-  window.addEventListener('focus', () => {
+  if (MOBILE_PUSH_ENABLED) {
     void syncPushTokenWithBackend();
-  });
+    window.addEventListener('focus', () => {
+      void syncPushTokenWithBackend();
+    });
+  }
 };

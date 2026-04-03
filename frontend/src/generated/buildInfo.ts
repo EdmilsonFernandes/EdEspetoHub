@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.222959.05611ae1",
-  "buildId": "0.1.9+20260403.222959.05611ae1-20260403.222959-05611ae1",
-  "builtAt": "2026-04-03T22:29:59.090Z",
-  "commitHash": "05611ae1255835d9b30b3071dd8a401853c06397",
-  "shortHash": "05611ae1",
+  "versionInternal": "0.1.9+20260403.223612.534bae7b",
+  "buildId": "0.1.9+20260403.223612.534bae7b-20260403.223612-534bae7b",
+  "builtAt": "2026-04-03T22:36:12.857Z",
+  "commitHash": "534bae7bdfb1c1e3a481cd1d4fae1f2722f1f54b",
+  "shortHash": "534bae7b",
   "branch": "main",
   "commits": [
+    {
+      "hash": "534bae7bdfb1c1e3a481cd1d4fae1f2722f1f54b",
+      "shortHash": "534bae7b",
+      "dateIso": "2026-04-03T19:31:27-03:00",
+      "subject": "Landing + Mobile docs: add APK QR download CTA and Play Store publication guide"
+    },
     {
       "hash": "05611ae1255835d9b30b3071dd8a401853c06397",
       "shortHash": "05611ae1",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "3b3bc486",
       "dateIso": "2026-04-03T13:13:11-03:00",
       "subject": "Restaura diagrama na arquitetura e suaviza visual da pagina"
-    },
-    {
-      "hash": "49df2c76ad361617bf361b7ed20127f36bfc55b5",
-      "shortHash": "49df2c76",
-      "dateIso": "2026-04-03T13:10:46-03:00",
-      "subject": "Normaliza rodape do Hub com padrao da plataforma e melhora localizacao"
     }
   ]
 } as const;
