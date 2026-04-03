@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.142141.63d6b08",
-  "buildId": "0.1.9+20260403.142141.63d6b08-20260403.142141-63d6b08",
-  "builtAt": "2026-04-03T14:21:41.744Z",
-  "commitHash": "63d6b0817ee802583f72808f1b76d99f678d77b2",
-  "shortHash": "63d6b08",
+  "versionInternal": "0.1.9+20260403.143309.cf62ec6",
+  "buildId": "0.1.9+20260403.143309.cf62ec6-20260403.143309-cf62ec6",
+  "builtAt": "2026-04-03T14:33:09.351Z",
+  "commitHash": "cf62ec6d1fb6a9671f22ae1aad08c2f6ab0f762c",
+  "shortHash": "cf62ec6",
   "branch": "main",
   "commits": [
+    {
+      "hash": "cf62ec6d1fb6a9671f22ae1aad08c2f6ab0f762c",
+      "shortHash": "cf62ec6",
+      "dateIso": "2026-04-03T11:26:34-03:00",
+      "subject": "fix(admin): hide mobile nav for super admin, adjust product save bar, speed queue count updates"
+    },
     {
       "hash": "63d6b0817ee802583f72808f1b76d99f678d77b2",
       "shortHash": "63d6b08",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "084baa8",
       "dateIso": "2026-04-02T11:31:07-03:00",
       "subject": "style(sidebar-footer): refine minimal branding spacing and typography"
-    },
-    {
-      "hash": "31574b005376bc97a8ae8a414e1ca230fcf6d493",
-      "shortHash": "31574b0",
-      "dateIso": "2026-04-02T11:20:06-03:00",
-      "subject": "style(admin-footer): remove duplicate footer and switch sidebar branding to minimal mode"
     }
   ]
 } as const;

@@ -459,7 +459,6 @@ export const MenuView = ({
   const [showStoreDetails, setShowStoreDetails] = useState(false);
   const [activeCategoryKey, setActiveCategoryKey] = useState("");
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
-  const [categorySheetSnap, setCategorySheetSnap] = useState<number | string | null>(0.85);
   const [qtyPulseId, setQtyPulseId] = useState<string | null>(null);
   const [activeQtyControlId, setActiveQtyControlId] = useState<string | null>(null);
   const [flyToCartItems, setFlyToCartItems] = useState<
@@ -1513,33 +1512,29 @@ export const MenuView = ({
 
       <Drawer.Root
         open={isCategorySheetOpen}
-        onOpenChange={(open) => {
-          setIsCategorySheetOpen(open);
-          if (open) setCategorySheetSnap(0.85);
-        }}
-        snapPoints={[0.52, 0.85]}
-        activeSnapPoint={categorySheetSnap}
-        setActiveSnapPoint={setCategorySheetSnap}
-        fadeFromIndex={0}
+        onOpenChange={setIsCategorySheetOpen}
       >
         <Drawer.Portal>
           <Drawer.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-[2px]" />
-          <Drawer.Content className="fixed bottom-0 left-0 right-0 z-[60] mt-24 h-fit max-h-[85vh] rounded-t-[32px] bg-white outline-none shadow-[0_-24px_64px_-38px_rgba(15,23,42,0.55)]">
+          <Drawer.Content className="fixed bottom-0 left-0 right-0 z-[60] mt-24 h-fit max-h-[88vh] rounded-t-[32px] bg-white outline-none shadow-[0_-24px_64px_-38px_rgba(15,23,42,0.55)]">
             <div className="mx-auto my-4 h-1.5 w-12 shrink-0 rounded-full bg-zinc-300" />
             <div className="px-6 py-2">
               <h3 className="text-xl font-black text-zinc-900">Menu</h3>
             </div>
-            <div className="max-h-[65vh] overflow-y-auto pb-5">
-              {filteredGrouped.map((category) => {
+            <div className="max-h-[72vh] overflow-y-auto pb-5">
+              {grouped.map((category) => {
                 const isActive = activeCategoryKey === category.key;
                 return (
                   <button
                     key={`sheet-${category.key}`}
                     type="button"
                     onClick={() => {
+                      if (query) setQuery("");
                       setActiveCategoryKey(category.key);
-                      scrollToCategory(category.key);
                       setIsCategorySheetOpen(false);
+                      window.setTimeout(() => {
+                        scrollToCategory(category.key);
+                      }, 80);
                     }}
                     className="flex w-full items-center justify-between px-6 py-4 text-left transition-colors active:bg-zinc-50"
                   >
