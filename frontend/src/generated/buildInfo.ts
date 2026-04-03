@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.201419.b80eebed",
-  "buildId": "0.1.9+20260403.201419.b80eebed-20260403.201419-b80eebed",
-  "builtAt": "2026-04-03T20:14:19.358Z",
-  "commitHash": "b80eebed33371b1a1b05d2188f85cfdfad3c5b93",
-  "shortHash": "b80eebed",
+  "versionInternal": "0.1.9+20260403.201841.7ddea69d",
+  "buildId": "0.1.9+20260403.201841.7ddea69d-20260403.201841-7ddea69d",
+  "builtAt": "2026-04-03T20:18:41.150Z",
+  "commitHash": "7ddea69d1ab3939f312a3a6247488598f0bc4c51",
+  "shortHash": "7ddea69d",
   "branch": "main",
   "commits": [
+    {
+      "hash": "7ddea69d1ab3939f312a3a6247488598f0bc4c51",
+      "shortHash": "7ddea69d",
+      "dateIso": "2026-04-03T17:15:50-03:00",
+      "subject": "refactor(hub): fine-tune featured cards density and md/lg regional card proportions"
+    },
     {
       "hash": "b80eebed33371b1a1b05d2188f85cfdfad3c5b93",
       "shortHash": "b80eebed",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "2e47a2a8",
       "dateIso": "2026-04-03T12:03:39-03:00",
       "subject": "Adiciona mapeamento completo dos metodos da API em ingles"
-    },
-    {
-      "hash": "5fb5a6a58c79a6d362b4d4de2b3acfd9bbaa5d9c",
-      "shortHash": "5fb5a6a5",
-      "dateIso": "2026-04-03T11:58:57-03:00",
-      "subject": "Eleva portfolio da landing com visual premium e CTA por loja"
     }
   ]
 } as const;
