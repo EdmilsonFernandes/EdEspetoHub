@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.222231.f48dd2c9",
-  "buildId": "0.1.9+20260403.222231.f48dd2c9-20260403.222231-f48dd2c9",
-  "builtAt": "2026-04-03T22:22:31.106Z",
-  "commitHash": "f48dd2c9eb8c9a009193cf98a700c6893ce77466",
-  "shortHash": "f48dd2c9",
+  "versionInternal": "0.1.9+20260403.222508.866b8fe1",
+  "buildId": "0.1.9+20260403.222508.866b8fe1-20260403.222508-866b8fe1",
+  "builtAt": "2026-04-03T22:25:08.538Z",
+  "commitHash": "866b8fe15e4b1ae3b8489eb3f84f17081eb96adc",
+  "shortHash": "866b8fe1",
   "branch": "main",
   "commits": [
+    {
+      "hash": "866b8fe15e4b1ae3b8489eb3f84f17081eb96adc",
+      "shortHash": "866b8fe1",
+      "dateIso": "2026-04-03T19:23:19-03:00",
+      "subject": "Hub: refine location/quick-filters UI and fix overnight open-hours status"
+    },
     {
       "hash": "f48dd2c9eb8c9a009193cf98a700c6893ce77466",
       "shortHash": "f48dd2c9",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "f2e8ad59",
       "dateIso": "2026-04-03T13:07:56-03:00",
       "subject": "Eleva Hub com distancia aproximada real, branding e UX premium generica"
-    },
-    {
-      "hash": "a8ab3e1780de574d60ffa67a4919dae07afcc978",
-      "shortHash": "a8ab3e17",
-      "dateIso": "2026-04-03T12:53:40-03:00",
-      "subject": "Adiciona atalho Hub no rodape mobile da landing e tema dinamico no hub"
     }
   ]
 } as const;

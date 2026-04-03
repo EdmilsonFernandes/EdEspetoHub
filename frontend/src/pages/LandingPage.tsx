@@ -10,6 +10,9 @@ import {
   ShieldCheck,
   Desktop,
   UserCircle,
+  DownloadSimple,
+  DeviceMobile,
+  GooglePlayLogo,
 } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { LandingPageLayout } from '../layouts/LandingPageLayout';
@@ -575,6 +578,64 @@ export function LandingPage() {
           </div>
         </div>
       )}
+
+      <section className="bg-[linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] py-20 sm:py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.14),_transparent_45%)]" />
+        <div className="max-w-7xl mx-auto px-4 relative">
+          <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] items-stretch">
+            <div className="rounded-[2rem] border border-slate-200/80 bg-white/90 backdrop-blur-xl p-6 sm:p-8 shadow-[0_24px_50px_-28px_rgba(15,23,42,0.35)]">
+              <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-sky-700">
+                <DeviceMobile size={14} weight="duotone" />
+                App Android
+              </div>
+              <h3 className="mt-4 text-2xl sm:text-3xl font-black text-slate-900 leading-tight">
+                Baixe o app do Já no Caminho
+              </h3>
+              <p className="mt-2 text-slate-600 text-sm sm:text-base leading-relaxed">
+                Instale agora no Android com experiência app-like e acesso rápido ao Hub.
+              </p>
+
+              <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                <a
+                  href="/downloads/ja-no-caminho-android-latest.apk"
+                  download
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[linear-gradient(120deg,#0f172a,#1e293b)] px-5 py-3 text-sm font-black text-white shadow-[0_16px_30px_-18px_rgba(15,23,42,0.85)] transition-all hover:scale-[1.01] active:scale-[0.98]"
+                >
+                  <DownloadSimple size={16} weight="bold" />
+                  Baixar APK
+                </a>
+                <button
+                  type="button"
+                  disabled
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-500"
+                  title="Publicação em andamento"
+                >
+                  <GooglePlayLogo size={16} weight="duotone" />
+                  Em breve na Play Store
+                </button>
+              </div>
+            </div>
+
+            <div className="rounded-[2rem] border border-slate-200/80 bg-white/90 backdrop-blur-xl p-6 sm:p-8 shadow-[0_24px_50px_-28px_rgba(15,23,42,0.35)]">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400 font-black">Instalação rápida</p>
+              <ol className="mt-4 space-y-3 text-sm text-slate-600">
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-900 text-[10px] font-black text-white">1</span>
+                  Toque em <span className="font-black text-slate-800">Baixar APK</span>.
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-900 text-[10px] font-black text-white">2</span>
+                  Autorize instalação de fontes desconhecidas no Android.
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-900 text-[10px] font-black text-white">3</span>
+                  Instale e abra o app. Publicação na Play Store em andamento.
+                </li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="bg-slate-900 py-24 sm:py-32 relative overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_rgba(47,157,247,0.3),_transparent_70%)]" />
