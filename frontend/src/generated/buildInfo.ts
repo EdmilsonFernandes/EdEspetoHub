@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.153433.5e8e022",
-  "buildId": "0.1.9+20260403.153433.5e8e022-20260403.153433-5e8e022",
-  "builtAt": "2026-04-03T15:34:33.966Z",
-  "commitHash": "5e8e022c9bbab8b029b3a96c918afb2a914f7714",
-  "shortHash": "5e8e022",
+  "versionInternal": "0.1.9+20260403.154727.3d79372",
+  "buildId": "0.1.9+20260403.154727.3d79372-20260403.154727-3d79372",
+  "builtAt": "2026-04-03T15:47:27.177Z",
+  "commitHash": "3d79372051b5b280972f61e2c6e09edceb6cb91d",
+  "shortHash": "3d79372",
   "branch": "main",
   "commits": [
+    {
+      "hash": "3d79372051b5b280972f61e2c6e09edceb6cb91d",
+      "shortHash": "3d79372",
+      "dateIso": "2026-04-03T12:35:44-03:00",
+      "subject": "Padroniza Hub como rota canonica e reforca naming na landing"
+    },
     {
       "hash": "5e8e022c9bbab8b029b3a96c918afb2a914f7714",
       "shortHash": "5e8e022",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "12e7293",
       "dateIso": "2026-04-02T15:17:13-03:00",
       "subject": "refactor(nav): unify mobile admin/operator navigation to bottom bar"
-    },
-    {
-      "hash": "4214612500cc408f8c9117f68de9195d0bf42e23",
-      "shortHash": "4214612",
-      "dateIso": "2026-04-02T14:25:34-03:00",
-      "subject": "fix(menu): open category drawer via state to avoid DialogTrigger context error"
     }
   ]
 } as const;

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MagnifyingGlass, MapPin, Star, Clock, Scooter, Storefront, House, Heart, UserCircle } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
+import { productService } from '../services/productService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 type MarketplaceStore = {
@@ -33,19 +34,19 @@ const normalizeSegment = (segment?: string | null) =>
 const segmentLabel = (segment?: string | null) => {
   const value = normalizeSegment(segment);
   const map: Record<string, string> = {
-    restaurante: 'Restaurant',
-    restaurantes: 'Restaurant',
-    hamburgueria: 'Burger',
-    hamburguerias: 'Burger',
-    lanchonete: 'Snack',
+    restaurante: 'Restaurante',
+    restaurantes: 'Restaurante',
+    hamburgueria: 'Hamburguer',
+    hamburguerias: 'Hamburguer',
+    lanchonete: 'Lanche',
     pizzaria: 'Pizza',
-    adega: 'Beverages',
-    mercado: 'Market',
-    farmacia: 'Pharmacy',
-    confeitaria: 'Desserts',
-    outros: 'Local Shop',
+    adega: 'Bebidas',
+    mercado: 'Mercado',
+    farmacia: 'Farmacia',
+    confeitaria: 'Doces',
+    outros: 'Loja Local',
   };
-  return map[value] || 'Local Shop';
+  return map[value] || 'Loja Local';
 };
 
 const parseCityStateFromAddress = (address?: string | null) => {
@@ -77,15 +78,24 @@ const hashFrom = (value: string) => {
 };
 
 const categoryVisuals: Record<string, { emoji: string; label: string }> = {
-  Restaurant: { emoji: '🍽️', label: 'Restaurant' },
-  Burger: { emoji: '🍔', label: 'Burger' },
-  Snack: { emoji: '🥪', label: 'Snack' },
+  Restaurante: { emoji: '🍽️', label: 'Restaurante' },
+  Hamburguer: { emoji: '🍔', label: 'Hamburguer' },
+  Lanche: { emoji: '🥪', label: 'Lanche' },
   Pizza: { emoji: '🍕', label: 'Pizza' },
-  Beverages: { emoji: '🍷', label: 'Beverages' },
-  Market: { emoji: '🛒', label: 'Market' },
-  Pharmacy: { emoji: '💊', label: 'Pharmacy' },
-  Desserts: { emoji: '🧁', label: 'Desserts' },
-  'Local Shop': { emoji: '🏬', label: 'Local Shop' },
+  Bebidas: { emoji: '🍷', label: 'Bebidas' },
+  Mercado: { emoji: '🛒', label: 'Mercado' },
+  Farmacia: { emoji: '💊', label: 'Farmacia' },
+  Doces: { emoji: '🧁', label: 'Doces' },
+  'Loja Local': { emoji: '🏬', label: 'Loja Local' },
+};
+
+type FeaturedProduct = {
+  id: string;
+  storeSlug: string;
+  storeName: string;
+  name: string;
+  imageUrl: string;
+  price: number;
 };
 
 export function MarketplacePage() {
@@ -99,6 +109,8 @@ export function MarketplacePage() {
   const [quickFilter, setQuickFilter] = useState<'all' | 'free_shipping' | 'nearby' | 'open_now'>('all');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
+  const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
+  const [featuredLoading, setFeaturedLoading] = useState(false);
 
   useEffect(() => {
     document.title = 'Hub Já no Caminho';
@@ -210,7 +222,7 @@ export function MarketplacePage() {
   }, [stores]);
 
   const segmentOptions = useMemo(() => {
-    return Array.from(new Set(enrichedStores.map((item) => item.segment))).sort((a, b) => a.localeCompare(b));
+    return Array.from(new Set(enrichedStores.map((item) => item.segment))).sort((a, b) => a.localeCompare(b, 'pt-BR'));
   }, [enrichedStores]);
 
   const filteredStores = useMemo(() => {
@@ -227,6 +239,85 @@ export function MarketplacePage() {
   const categoryTiles = useMemo(() => {
     return segmentOptions.map((segment) => categoryVisuals[segment] || { emoji: '🏪', label: segment });
   }, [segmentOptions]);
+
+  const heroBanners = useMemo(() => {
+    const byStore = enrichedStores.slice(0, 3).map((store) => ({
+      id: store.id,
+      title: store.name,
+      subtitle: `${store.etaMin}-${store.etaMax} min • ${store.freeShipping ? 'Frete gratis' : 'Entrega rapida'}`,
+      image: store.banner,
+      slug: store.slug,
+    }));
+    if (byStore.length > 0) return byStore;
+    return [
+      {
+        id: 'fallback',
+        title: 'As melhores lojas em um so lugar',
+        subtitle: 'Descubra, compare e faca seu pedido com rapidez.',
+        image: '/janocaminho.jpg',
+        slug: '',
+      },
+    ];
+  }, [enrichedStores]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadFeaturedProducts = async () => {
+      if (enrichedStores.length === 0) {
+        setFeaturedProducts([]);
+        return;
+      }
+      setFeaturedLoading(true);
+      try {
+        const candidates = enrichedStores.slice(0, 6);
+        const responses = await Promise.allSettled(
+          candidates.map(async (store) => {
+            const products = await productService.listPublicBySlug(store.slug);
+            const valid = (Array.isArray(products) ? products : [])
+              .filter((product: any) => Boolean(product?.name) && Number(product?.price || product?.promoPrice || 0) > 0)
+              .map((product: any) => ({
+                id: String(product?.id || `${store.slug}-${product?.name}`),
+                storeSlug: store.slug,
+                storeName: store.name,
+                name: String(product?.name || 'Produto'),
+                imageUrl: resolveAssetUrl(product?.imageUrl || undefined) || store.logo,
+                price: Number(
+                  (product?.promoActive && product?.promoPrice != null ? product?.promoPrice : product?.price) || 0
+                ),
+                featured: Boolean(product?.isFeatured),
+              }))
+              .sort((a, b) => Number(b.featured) - Number(a.featured))
+              .slice(0, 5);
+            return valid;
+          })
+        );
+        if (cancelled) return;
+        const merged = responses
+          .flatMap((result) => (result.status === 'fulfilled' ? result.value : []))
+          .filter((entry) => entry.price > 0)
+          .slice(0, 18)
+          .map(({ featured: _featured, ...entry }) => entry);
+        setFeaturedProducts(merged);
+      } catch (_error) {
+        if (!cancelled) setFeaturedProducts([]);
+      } finally {
+        if (!cancelled) setFeaturedLoading(false);
+      }
+    };
+    loadFeaturedProducts();
+    return () => {
+      cancelled = true;
+    };
+  }, [enrichedStores]);
+
+  const currency = useMemo(
+    () =>
+      new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }),
+    []
+  );
 
   return (
     <div className="min-h-screen bg-slate-50 pb-28 sm:pb-20">
@@ -308,17 +399,27 @@ export function MarketplacePage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 pt-4 space-y-7">
+      <main className="max-w-7xl mx-auto px-4 pt-4 space-y-6">
+        <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <img src="/janocaminho.jpg" alt="Ja no Caminho" className="h-11 w-11 rounded-2xl object-cover border border-slate-200" />
+            <div className="min-w-0">
+              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Marketplace Oficial</p>
+              <h1 className="truncate text-lg sm:text-xl font-black text-slate-900">Ja no Caminho</h1>
+            </div>
+          </div>
+        </section>
+
         <section>
-          <div className="flex items-center gap-6 overflow-x-auto scrollbar-hide px-0.5 py-1">
+          <div className="flex items-center gap-4 overflow-x-auto scrollbar-hide px-0.5 py-1">
             {categoryTiles.map((item, index) => (
               <button
                 key={`${item.label}-${index}`}
                 type="button"
-                className="min-w-[72px] flex-shrink-0"
+                className="min-w-[64px] flex-shrink-0"
                 onClick={() => setSegmentFilter(item.label)}
               >
-                <span className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-slate-200 bg-white shadow-sm text-xl">
+                <span className="mx-auto grid h-12 w-12 place-items-center rounded-full border border-slate-200 bg-white shadow-sm text-lg">
                   {item.emoji}
                 </span>
                 <span className="mt-2 block text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">
@@ -331,19 +432,58 @@ export function MarketplacePage() {
 
         <section>
           <div className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory">
-            {[
-              { title: 'Lojas mais bem avaliadas da semana', subtitle: 'Encontre os melhores lojistas da sua região' },
-              { title: 'Entrega mais rápida perto de você', subtitle: 'Peça agora e receba sem complicação' },
-            ].map((banner) => (
+            {heroBanners.map((banner) => (
               <div
-                key={banner.title}
-                className="snap-start min-w-full aspect-[16/6] rounded-3xl p-5 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-lg"
+                key={banner.id}
+                className="relative snap-start min-w-[90%] sm:min-w-[560px] lg:min-w-[720px] aspect-[16/7] rounded-3xl p-5 text-white shadow-lg overflow-hidden"
               >
-                <p className="text-xs uppercase tracking-[0.16em] text-slate-300 font-bold">Já no Caminho</p>
-                <p className="text-xl sm:text-2xl font-black mt-1">{banner.title}</p>
-                <p className="text-sm text-slate-300 mt-1">{banner.subtitle}</p>
+                <img src={banner.image} alt={banner.title} className="absolute inset-0 h-full w-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-900/75 via-slate-900/40 to-slate-900/20" />
+                <div className="relative">
+                  <p className="text-xs uppercase tracking-[0.16em] text-slate-200 font-bold">Ja no Caminho</p>
+                  <p className="text-xl sm:text-2xl font-black mt-1">{banner.title}</p>
+                  <p className="text-sm text-slate-100 mt-1">{banner.subtitle}</p>
+                  {banner.slug ? (
+                    <Link
+                      to={`/${banner.slug}`}
+                      className="mt-3 inline-flex rounded-full bg-white/95 px-4 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-slate-900"
+                    >
+                      Ver loja
+                    </Link>
+                  ) : null}
+                </div>
               </div>
             ))}
+          </div>
+        </section>
+
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base sm:text-xl font-black text-slate-900">Pratos em destaque</h2>
+            <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Estilo app</span>
+          </div>
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
+            {featuredLoading &&
+              Array.from({ length: 4 }).map((_, idx) => (
+                <div key={`featured-skeleton-${idx}`} className="min-w-[182px] rounded-2xl border border-slate-200 bg-white p-2.5 animate-pulse">
+                  <div className="h-24 rounded-xl bg-slate-100" />
+                  <div className="mt-2 h-3 w-24 rounded bg-slate-100" />
+                  <div className="mt-2 h-3 w-16 rounded bg-slate-100" />
+                </div>
+              ))}
+            {!featuredLoading &&
+              featuredProducts.map((item) => (
+                <Link
+                  key={`${item.storeSlug}-${item.id}`}
+                  to={`/${item.storeSlug}`}
+                  className="min-w-[182px] rounded-2xl border border-slate-200 bg-white p-2.5 shadow-sm hover:shadow-md transition"
+                >
+                  <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-24 w-full rounded-xl object-cover" />
+                  <p className="mt-2 line-clamp-1 text-sm font-bold text-slate-900">{item.name}</p>
+                  <p className="line-clamp-1 text-[11px] text-slate-500">{item.storeName}</p>
+                  <p className="mt-1 text-sm font-black text-slate-900">{currency.format(item.price)}</p>
+                </Link>
+              ))}
           </div>
         </section>
 
@@ -389,7 +529,7 @@ export function MarketplacePage() {
                   to={`/${store.slug}`}
                   className="w-full max-w-[420px] group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
                 >
-                  <div className="relative aspect-[16/6] overflow-hidden">
+                  <div className="relative aspect-[16/8] md:aspect-[16/7] overflow-hidden">
                     <img
                       src={store.banner}
                       alt={store.name}
