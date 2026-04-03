@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.154727.3d79372",
-  "buildId": "0.1.9+20260403.154727.3d79372-20260403.154727-3d79372",
-  "builtAt": "2026-04-03T15:47:27.177Z",
-  "commitHash": "3d79372051b5b280972f61e2c6e09edceb6cb91d",
-  "shortHash": "3d79372",
+  "versionInternal": "0.1.9+20260403.154932.258802d",
+  "buildId": "0.1.9+20260403.154932.258802d-20260403.154932-258802d",
+  "builtAt": "2026-04-03T15:49:32.764Z",
+  "commitHash": "258802da28cb838a1b8ab722719c5c8c582d8494",
+  "shortHash": "258802d",
   "branch": "main",
   "commits": [
+    {
+      "hash": "258802da28cb838a1b8ab722719c5c8c582d8494",
+      "shortHash": "258802d",
+      "dateIso": "2026-04-03T12:48:02-03:00",
+      "subject": "Refina Hub mobile/web com PT-BR, destaque da marca e carrossel de produtos"
+    },
     {
       "hash": "3d79372051b5b280972f61e2c6e09edceb6cb91d",
       "shortHash": "3d79372",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "858dd94",
       "dateIso": "2026-04-02T17:17:55-03:00",
       "subject": "feat(customer): add customer account auth, addresses, orders and dedicated routes"
-    },
-    {
-      "hash": "12e7293e83c92bc29d96b0cebafc44d9b929795f",
-      "shortHash": "12e7293",
-      "dateIso": "2026-04-02T15:17:13-03:00",
-      "subject": "refactor(nav): unify mobile admin/operator navigation to bottom bar"
     }
   ]
 } as const;

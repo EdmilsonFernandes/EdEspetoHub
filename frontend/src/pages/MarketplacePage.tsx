@@ -319,6 +319,13 @@ export function MarketplacePage() {
     []
   );
 
+  const genericHighlightLabel = useMemo(() => {
+    const hasFoodHeavy = enrichedStores.some((store) =>
+      [ 'Restaurante', 'Hamburguer', 'Lanche', 'Pizza', 'Doces' ].includes(store.segment)
+    );
+    return hasFoodHeavy ? 'Itens em destaque' : 'Produtos em destaque';
+  }, [enrichedStores]);
+
   return (
     <div className="min-h-screen bg-slate-50 pb-28 sm:pb-20">
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100 shadow-sm">
@@ -459,8 +466,8 @@ export function MarketplacePage() {
 
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-base sm:text-xl font-black text-slate-900">Pratos em destaque</h2>
-            <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Estilo app</span>
+            <h2 className="text-base sm:text-xl font-black text-slate-900">{genericHighlightLabel}</h2>
+            <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Marketplace</span>
           </div>
           <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
             {featuredLoading &&
@@ -476,12 +483,17 @@ export function MarketplacePage() {
                 <Link
                   key={`${item.storeSlug}-${item.id}`}
                   to={`/${item.storeSlug}`}
-                  className="min-w-[182px] rounded-2xl border border-slate-200 bg-white p-2.5 shadow-sm hover:shadow-md transition"
+                  className="group relative min-w-[182px] rounded-2xl border border-slate-200 bg-white p-2.5 shadow-sm hover:shadow-md transition"
                 >
                   <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-24 w-full rounded-xl object-cover" />
                   <p className="mt-2 line-clamp-1 text-sm font-bold text-slate-900">{item.name}</p>
                   <p className="line-clamp-1 text-[11px] text-slate-500">{item.storeName}</p>
-                  <p className="mt-1 text-sm font-black text-slate-900">{currency.format(item.price)}</p>
+                  <div className="mt-1 flex items-center justify-between gap-2">
+                    <p className="text-sm font-black text-slate-900">{currency.format(item.price)}</p>
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-900 text-white text-sm font-black shadow-sm transition-transform active:scale-95 group-hover:scale-105">
+                      +
+                    </span>
+                  </div>
                 </Link>
               ))}
           </div>
@@ -522,12 +534,12 @@ export function MarketplacePage() {
           )}
 
           {!loading && !error && filteredStores.length > 0 && (
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 justify-items-center">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 justify-items-center">
               {filteredStores.map((store) => (
                 <Link
                   key={store.id}
                   to={`/${store.slug}`}
-                  className="w-full max-w-[420px] group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+                  className="w-full max-w-[420px] group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_12px_32px_rgba(0,0,0,0.05)] transition-all duration-300 hover:scale-[1.01] hover:shadow-lg"
                 >
                   <div className="relative aspect-[16/8] md:aspect-[16/7] overflow-hidden">
                     <img
@@ -538,33 +550,39 @@ export function MarketplacePage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/55 via-slate-900/10 to-transparent" />
                   </div>
-                  <div className="p-4 flex gap-3">
+                  <div className="p-3.5 flex gap-3">
                     <img
                       src={store.logo}
                       alt={`${store.name} logo`}
                       loading="lazy"
-                      className="h-16 w-16 rounded-2xl object-cover border border-slate-200 bg-white"
+                      className="h-14 w-14 rounded-2xl object-cover border border-slate-200 bg-white"
                     />
                     <div className="min-w-0 flex-1 space-y-1">
                       <div className="flex items-center justify-between gap-2">
-                        <h3 className="truncate text-lg font-black text-slate-900 tracking-tight">{store.name}</h3>
+                        <h3 className="truncate text-base font-black text-slate-900 tracking-tight">{store.name}</h3>
                         <span className="inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
                       </div>
-                      <p className="text-xs uppercase tracking-[0.14em] text-slate-400">{store.segment}</p>
+                      <p className="text-[10px] uppercase tracking-[0.14em] text-slate-400">{store.segment}</p>
                       <p className="text-xs text-slate-500 inline-flex items-center gap-1">
                         <MapPin size={12} /> {store.city}{store.state ? ` • ${store.state}` : ''}
                       </p>
-                      <div className="pt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-600">
-                        <span className="inline-flex items-center gap-1 font-semibold">
+                      <div className="pt-1 flex flex-wrap gap-1.5 text-[11px] text-slate-600">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 font-semibold text-amber-700">
                           <Star size={12} weight="fill" className="text-amber-500" />
                           {store.rating.toFixed(1)}
                         </span>
-                        <span>{store.distanceKm.toFixed(1)} km</span>
-                        <span className="inline-flex items-center gap-1">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1">
+                          {store.distanceKm.toFixed(1)} km
+                        </span>
+                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1">
                           <Clock size={12} />
                           {store.etaMin}-{store.etaMax} min
                         </span>
-                        <span className={`inline-flex items-center gap-1 font-semibold ${store.freeShipping ? 'text-emerald-600' : 'text-slate-600'}`}>
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-full px-2 py-1 font-semibold ${
+                            store.freeShipping ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700'
+                          }`}
+                        >
                           <Scooter size={12} />
                           {store.freeShipping ? 'Frete grátis' : 'Entrega disponível'}
                         </span>
