@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ChartBar, ChefHat, CurrencyDollar, Package, Star } from '@phosphor-icons/react';
+import { ChartBar, ChefHat, CurrencyDollar, Package } from '@phosphor-icons/react';
 import { orderService } from '../../services/orderService';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -188,14 +188,7 @@ export function AdminMobileBottomNav() {
       label: 'Produtos',
       icon: Package,
       active: path === '/admin/dashboard' && dashboardTab === 'produtos',
-      onClick: () => navigate('/admin/dashboard?tab=produtos'),
-    },
-    {
-      id: 'destaques',
-      label: 'Destaques',
-      icon: Star,
-      active: path === '/admin/highlights',
-      onClick: () => navigate('/admin/highlights'),
+      onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'produtos' } }),
     },
     {
       id: 'pedidos',
@@ -213,7 +206,7 @@ export function AdminMobileBottomNav() {
     },
   ];
   const items = isOperator
-    ? baseItems.filter((item) => item.id === 'monitor' || item.id === 'produtos' || item.id === 'destaques' || item.id === 'catalogo')
+    ? baseItems.filter((item) => item.id === 'monitor' || item.id === 'produtos' || item.id === 'catalogo')
     : baseItems.filter((item) => item.id !== 'produtos');
 
   if (isSuperAdmin || hiddenByOverlay) return null;
