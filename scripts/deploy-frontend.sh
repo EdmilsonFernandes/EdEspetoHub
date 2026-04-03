@@ -109,4 +109,6 @@ docker compose \
   --env-file "$ENV_FILE" \
   up -d --build --no-deps frontend
 
+sh "$ROOT_DIR/scripts/docker-clean-build-cache.sh" || true
+
 echo "Frontend deploy done."

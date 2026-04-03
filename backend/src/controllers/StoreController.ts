@@ -153,6 +153,48 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
     });
   }
 
+  /**
+   * Resolves next opening label for closed stores.
+   *
+   * @author Edmilson Lopes
+   */
+  private static getNextOpeningLabel(store: any): string | null {
+    const openingHours = store?.settings?.openingHours;
+    if (!Array.isArray(openingHours) || openingHours.length === 0) return null;
+
+    const now = new Date();
+    const currentDay = now.getDay();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const weekdayNames = [ 'domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado' ];
+
+    for (let dayOffset = 0; dayOffset <= 7; dayOffset += 1) {
+      const day = (currentDay + dayOffset) % 7;
+      const dayEntry = openingHours.find((entry: any) => Number(entry?.day) === day);
+      if (!dayEntry || dayEntry?.enabled === false) continue;
+
+      const intervals = (Array.isArray(dayEntry.intervals) ? dayEntry.intervals : [])
+        .map((interval: any) => {
+          if (!interval?.start || typeof interval.start !== 'string') return null;
+          const [h, m] = interval.start.split(':').map(Number);
+          if (Number.isNaN(h) || Number.isNaN(m)) return null;
+          return { start: `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`, startMinutes: h * 60 + m };
+        })
+        .filter(Boolean)
+        .sort((a: any, b: any) => a.startMinutes - b.startMinutes);
+
+      if (!intervals.length) continue;
+
+      const nextInterval = intervals.find((interval: any) => dayOffset > 0 || interval.startMinutes > currentMinutes);
+      if (!nextInterval) continue;
+
+      if (dayOffset === 0) return `Abre hoje as ${nextInterval.start}`;
+      if (dayOffset === 1) return `Abre amanha as ${nextInterval.start}`;
+      return `Abre ${weekdayNames[day]} as ${nextInterval.start}`;
+    }
+
+    return null;
+  }
+
 
 
 
@@ -172,12 +214,21 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
           const isVip = Boolean(store?.settings?.planExempt);
           const isActive = isVip || subscriptionService.isActiveSubscription(subscription);
           if (!isActive) return null;
+          const orderTypes = StoreController.sanitizeOrderTypesByPlan(store.settings?.orderTypes, {
+            planName: subscription?.plan?.name,
+            planExempt: Boolean(store.settings?.planExempt),
+            subscriptionStatus: subscription?.status || null,
+          });
+          const isOrderingEnabled = store.settings?.isOrderingEnabled !== false;
+          const openNow = Boolean(store.open) && isOrderingEnabled && StoreController.isStoreOpenNow(store);
+          const nextOpeningLabel = openNow ? null : StoreController.getNextOpeningLabel(store);
           return {
             id: store.id,
             name: store.name,
             slug: store.slug,
             open: store.open,
-            openNow: StoreController.isStoreOpenNow(store),
+            openNow,
+            nextOpeningLabel,
             reviewSummary: await orderReviewService.publicSummaryByStoreId(store.id),
             settings: store.settings
               ? {
@@ -190,6 +241,9 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
                   segment: store.settings.segment || 'outros',
                   city: store.settings.city || null,
                   state: store.settings.state || null,
+                  isOrderingEnabled,
+                  orderTypes,
+                  postalEnabled: Boolean(store.settings.postalEnabled),
                 }
               : null,
           };

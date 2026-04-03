@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MagnifyingGlass, MapPin, Star, Clock, Scooter, Storefront, House, UserCircle, SealCheck } from '@phosphor-icons/react';
+import { MagnifyingGlass, MapPin, Star, Clock, Scooter, Storefront, House, UserCircle, SealCheck, List } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { productService } from '../services/productService';
 import { featuredService } from '../services/featuredService';
@@ -26,7 +26,11 @@ type MarketplaceStore = {
     primaryColor?: string | null;
     secondaryColor?: string | null;
     isOrderingEnabled?: boolean;
+    orderTypes?: string[] | null;
+    postalEnabled?: boolean | null;
   } | null;
+  openNow?: boolean;
+  nextOpeningLabel?: string | null;
 };
 
 const normalizeSegment = (segment?: string | null) =>
@@ -264,7 +268,19 @@ export function MarketplacePage() {
         const etaMin = 18 + (seed % 18);
         const etaMax = etaMin + 10;
         const freeShipping = seed % 3 === 0;
-        const isOpen = (store?.settings?.isOrderingEnabled ?? true) !== false;
+        const rawOrderTypes = Array.isArray(store?.settings?.orderTypes)
+          ? (store?.settings?.orderTypes as unknown[])
+              .map((value) => String(value || '').trim().toLowerCase())
+              .filter(Boolean)
+          : [];
+        const supportsDelivery = rawOrderTypes.includes('delivery');
+        const supportsPickup = rawOrderTypes.includes('pickup');
+        const supportsTable = rawOrderTypes.includes('table');
+        const supportsPostal = supportsDelivery && Boolean(store?.settings?.postalEnabled);
+        const isOpen =
+          typeof store?.openNow === 'boolean'
+            ? store.openNow
+            : (store?.settings?.isOrderingEnabled ?? true) !== false;
         const logo = resolveAssetUrl(store?.settings?.logoUrl || undefined) || '/janocaminho.jpg';
         const banner = resolveAssetUrl(store?.settings?.bannerUrl || undefined) || logo;
         const searchIndex = [store?.name, slug, segment, city, state].filter(Boolean).join(' ').toLowerCase();
@@ -281,6 +297,11 @@ export function MarketplacePage() {
           etaMax,
           freeShipping,
           isOpen,
+          supportsDelivery,
+          supportsPickup,
+          supportsTable,
+          supportsPostal,
+          nextOpeningLabel: String(store?.nextOpeningLabel || '').trim(),
           primaryColor: String(store?.settings?.primaryColor || '').trim(),
           secondaryColor: String(store?.settings?.secondaryColor || '').trim(),
           addressText: [
@@ -308,6 +329,11 @@ export function MarketplacePage() {
       etaMax: number;
       freeShipping: boolean;
       isOpen: boolean;
+      supportsDelivery: boolean;
+      supportsPickup: boolean;
+      supportsTable: boolean;
+      supportsPostal: boolean;
+      nextOpeningLabel: string;
       primaryColor: string;
       secondaryColor: string;
       addressText: string;
@@ -322,14 +348,16 @@ export function MarketplacePage() {
   }, [enrichedStores]);
 
   const filteredStores = useMemo(() => {
-    return enrichedStores.filter((store) => {
-      if (debouncedQuery && !store.searchIndex.includes(debouncedQuery)) return false;
-      if (segmentFilter !== 'all' && store.segment !== segmentFilter) return false;
-      if (quickFilter === 'free_shipping' && !store.freeShipping) return false;
-      if (quickFilter === 'nearby' && store.distanceKm > 2.5) return false;
-      if (quickFilter === 'open_now' && !store.isOpen) return false;
-      return true;
-    });
+    return enrichedStores
+      .filter((store) => {
+        if (debouncedQuery && !store.searchIndex.includes(debouncedQuery)) return false;
+        if (segmentFilter !== 'all' && store.segment !== segmentFilter) return false;
+        if (quickFilter === 'free_shipping' && !store.freeShipping) return false;
+        if (quickFilter === 'nearby' && store.distanceKm > 2.5) return false;
+        if (quickFilter === 'open_now' && !store.isOpen) return false;
+        return true;
+      })
+      .sort((a, b) => Number(b.isOpen) - Number(a.isOpen));
   }, [enrichedStores, debouncedQuery, segmentFilter, quickFilter]);
 
   const categoryTiles = useMemo(() => {
@@ -651,6 +679,33 @@ export function MarketplacePage() {
 
         <section>
           <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide px-0.5 py-0.5">
+            {(() => {
+              const active = segmentFilter === 'all';
+              return (
+                <button
+                  type="button"
+                  className="min-w-[64px] flex-shrink-0 transition-transform duration-200 active:scale-95"
+                  onClick={() => setSegmentFilter('all')}
+                  aria-label="Ver todas as categorias"
+                >
+                  <span
+                    className={`mx-auto grid h-11 w-11 place-items-center rounded-full border shadow-sm text-base transition-all duration-200 ${
+                      active ? 'text-white border-transparent ring-2 ring-offset-2 ring-slate-300' : 'border-slate-200 bg-white text-slate-600'
+                    }`}
+                    style={active ? { backgroundColor: theme.primary } : undefined}
+                  >
+                    <List size={18} weight={active ? 'fill' : 'regular'} />
+                  </span>
+                  <span
+                    className={`mt-1.5 block text-[9px] font-black uppercase tracking-widest text-center transition-colors ${
+                      active ? 'text-slate-900' : 'text-slate-500'
+                    }`}
+                  >
+                    Todos
+                  </span>
+                </button>
+              );
+            })()}
             {categoryTiles.map((item, index) => (
               (() => {
                 const active = segmentFilter === item.label;
@@ -684,32 +739,45 @@ export function MarketplacePage() {
         </section>
 
         <section>
-          {heroBanners[rotatingHeroIndex] && (
-            <div className="relative aspect-[16/6] sm:aspect-[16/5] rounded-3xl p-4 sm:p-5 text-white shadow-lg overflow-hidden">
-              <img
-                src={heroBanners[rotatingHeroIndex].image}
-                alt={heroBanners[rotatingHeroIndex].title}
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-900/75 via-slate-900/35 to-slate-900/15" />
-              <div className="relative">
-                <p className="text-[10px] uppercase tracking-[0.18em] text-slate-200 font-bold">Já no Caminho</p>
-                <p className="text-lg sm:text-xl font-black mt-1">{heroBanners[rotatingHeroIndex].title}</p>
-                <p className="text-xs sm:text-sm text-slate-100 mt-1">{heroBanners[rotatingHeroIndex].subtitle}</p>
-                {heroBanners[rotatingHeroIndex].slug ? (
-                  <Link
-                    to={`/${heroBanners[rotatingHeroIndex].slug}`}
-                    className="mt-2.5 inline-flex rounded-full bg-white/95 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-900 transition-transform duration-300 hover:scale-105 active:scale-95"
-                  >
-                    Ver loja
-                  </Link>
-                ) : null}
+          {heroBanners[rotatingHeroIndex] &&
+            (heroBanners[rotatingHeroIndex].slug ? (
+              <Link
+                to={`/${heroBanners[rotatingHeroIndex].slug}`}
+                className="group relative block aspect-[16/6] sm:aspect-[16/5] rounded-3xl p-4 sm:p-5 text-white shadow-lg overflow-hidden transition-transform duration-300 hover:scale-[1.01] active:scale-[0.99]"
+              >
+                <img
+                  src={heroBanners[rotatingHeroIndex].image}
+                  alt={heroBanners[rotatingHeroIndex].title}
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-900/75 via-slate-900/35 to-slate-900/15" />
+                <div className="relative">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-slate-200 font-bold">Já no Caminho</p>
+                  <p className="text-lg sm:text-xl font-black mt-1">{heroBanners[rotatingHeroIndex].title}</p>
+                  <p className="text-xs sm:text-sm text-slate-100 mt-1">{heroBanners[rotatingHeroIndex].subtitle}</p>
+                </div>
+                <div className="absolute bottom-2.5 right-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black text-slate-700">
+                  {rotatingHeroIndex + 1}/{heroBanners.length}
+                </div>
+              </Link>
+            ) : (
+              <div className="relative aspect-[16/6] sm:aspect-[16/5] rounded-3xl p-4 sm:p-5 text-white shadow-lg overflow-hidden">
+                <img
+                  src={heroBanners[rotatingHeroIndex].image}
+                  alt={heroBanners[rotatingHeroIndex].title}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-900/75 via-slate-900/35 to-slate-900/15" />
+                <div className="relative">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-slate-200 font-bold">Já no Caminho</p>
+                  <p className="text-lg sm:text-xl font-black mt-1">{heroBanners[rotatingHeroIndex].title}</p>
+                  <p className="text-xs sm:text-sm text-slate-100 mt-1">{heroBanners[rotatingHeroIndex].subtitle}</p>
+                </div>
+                <div className="absolute bottom-2.5 right-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black text-slate-700">
+                  {rotatingHeroIndex + 1}/{heroBanners.length}
+                </div>
               </div>
-              <div className="absolute bottom-2.5 right-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black text-slate-700">
-                {rotatingHeroIndex + 1}/{heroBanners.length}
-              </div>
-            </div>
-          )}
+            ))}
         </section>
 
         <section className="space-y-3">
@@ -737,9 +805,16 @@ export function MarketplacePage() {
                   className="group relative min-w-[140px] sm:min-w-[148px] md:min-w-[154px] rounded-2xl border border-slate-200 bg-white p-1.5 sm:p-2 shadow-sm transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-lg active:scale-[0.99]"
                 >
                   <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-[68px] sm:h-[74px] w-full rounded-xl object-cover" />
-                  <span className="absolute top-2.5 left-2.5 rounded-full bg-slate-100/95 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-[0.08em] text-slate-600">
-                    Destaque
-                  </span>
+                  {item.sponsored ? (
+                    <span className="absolute top-2.5 left-2.5 inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50/95 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-[0.08em] text-amber-700">
+                      <Star size={9} weight="fill" className="text-amber-500" />
+                      Patrocinado
+                    </span>
+                  ) : (
+                    <span className="absolute top-2.5 left-2.5 rounded-full bg-slate-100/95 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-[0.08em] text-slate-600">
+                      Destaque
+                    </span>
+                  )}
                   <p className="mt-1.5 line-clamp-1 text-[12px] sm:text-[13px] font-bold text-slate-900">{item.name}</p>
                   <div className="mt-1 flex items-center gap-1">
                     <img src={item.storeLogo} alt={item.storeName} className="h-3.5 w-3.5 rounded-full object-cover border border-slate-200" />
@@ -799,7 +874,11 @@ export function MarketplacePage() {
                 <Link
                   key={store.id}
                   to={`/${store.slug}`}
-                  className="w-full max-w-[420px] md:max-w-none group overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.05)] transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-[0_20px_40px_-24px_rgba(15,23,42,0.50)] active:scale-[0.99]"
+                  className={`w-full max-w-[420px] md:max-w-none group overflow-hidden rounded-3xl border bg-white transition-all duration-300 active:scale-[0.99] ${
+                    store.isOpen
+                      ? 'border-slate-200/90 shadow-[0_10px_24px_rgba(15,23,42,0.05)] md:hover:-translate-y-0.5 md:hover:shadow-[0_20px_40px_-24px_rgba(15,23,42,0.50)]'
+                      : 'border-slate-200/70 opacity-70 saturate-75'
+                  }`}
                 >
                   <div className="relative aspect-[16/7.2] sm:aspect-[16/6.7] md:aspect-[16/6.2] lg:aspect-[16/5.9] overflow-hidden">
                     <img
@@ -820,7 +899,9 @@ export function MarketplacePage() {
                     <div className="min-w-0 flex-1 space-y-1">
                       <div className="flex items-center justify-between gap-2">
                         <h3 className="truncate text-[15px] font-black text-slate-900 tracking-tight">{store.name}</h3>
-                        <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span
+                          className={`inline-flex h-2 w-2 rounded-full ${store.isOpen ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`}
+                        />
                       </div>
                       <p className="text-[9px] uppercase tracking-[0.16em] text-slate-400">{store.segment}</p>
                       <p className="text-[11px] text-slate-500 inline-flex items-center gap-1">
@@ -838,14 +919,45 @@ export function MarketplacePage() {
                           <Clock size={12} />
                           {store.etaMin}-{store.etaMax} min
                         </span>
-                        <span
-                          className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-semibold ${
-                            store.freeShipping ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700'
-                          }`}
-                        >
-                          <Scooter size={12} />
-                          {store.freeShipping ? 'Frete grátis' : 'Entrega disponível'}
-                        </span>
+                        {store.isOpen ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-1.5 py-0.5 font-semibold text-emerald-700">
+                            Aberta
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 px-1.5 py-0.5 font-semibold text-slate-600">
+                            Fechada
+                          </span>
+                        )}
+                        {!store.isOpen && store.nextOpeningLabel && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 font-semibold text-slate-600">
+                            {store.nextOpeningLabel}
+                          </span>
+                        )}
+                        {!store.isOpen && !store.nextOpeningLabel && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 font-semibold text-slate-600">
+                            Sem horario cadastrado
+                          </span>
+                        )}
+                        {store.supportsDelivery && (
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-semibold ${
+                              store.freeShipping ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700'
+                            }`}
+                          >
+                            <Scooter size={12} />
+                            {store.supportsPostal ? 'Entrega postal' : 'Entrega'}
+                          </span>
+                        )}
+                        {store.supportsPickup && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-1.5 py-0.5 font-semibold text-sky-700">
+                            Retirada
+                          </span>
+                        )}
+                        {store.supportsTable && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 px-1.5 py-0.5 font-semibold text-violet-700">
+                            Mesa
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>

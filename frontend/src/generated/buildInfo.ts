@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.202523.5e831102",
-  "buildId": "0.1.9+20260403.202523.5e831102-20260403.202523-5e831102",
-  "builtAt": "2026-04-03T20:25:23.521Z",
-  "commitHash": "5e831102cef8caa36e876797cc1a6e93ff5b64a6",
-  "shortHash": "5e831102",
+  "versionInternal": "0.1.9+20260403.204343.946695b3",
+  "buildId": "0.1.9+20260403.204343.946695b3-20260403.204343-946695b3",
+  "builtAt": "2026-04-03T20:43:43.388Z",
+  "commitHash": "946695b309645223ed1ffd2577db48f76fb97fcd",
+  "shortHash": "946695b3",
   "branch": "main",
   "commits": [
+    {
+      "hash": "946695b309645223ed1ffd2577db48f76fb97fcd",
+      "shortHash": "946695b3",
+      "dateIso": "2026-04-03T17:26:00-03:00",
+      "subject": "feat(queue): allow configurable store order notification sound and play custom jingle"
+    },
     {
       "hash": "5e831102cef8caa36e876797cc1a6e93ff5b64a6",
       "shortHash": "5e831102",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "f5ed7bd3",
       "dateIso": "2026-04-03T12:18:09-03:00",
       "subject": "Adiciona documentacao tecnica em ingles para metodos do backend"
-    },
-    {
-      "hash": "6abdc5a5ebd83a3899d76218262b1d6ddefa1d78",
-      "shortHash": "6abdc5a5",
-      "dateIso": "2026-04-03T12:09:51-03:00",
-      "subject": "Corrige acesso de Produtos para operador e simplifica configuracoes"
     }
   ]
 } as const;
