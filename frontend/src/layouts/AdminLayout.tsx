@@ -46,6 +46,7 @@ export function AdminLayout({
         ? [
             { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
             { id: 'produtos', label: 'Produtos', icon: Package },
+            { id: 'destaques', label: 'Destaques', icon: Star },
             { id: 'cardapio', label: 'Loja Online', icon: Package },
           ]
         : [
@@ -54,6 +55,7 @@ export function AdminLayout({
             { id: 'vendas', label: 'Histórico de Pedidos', icon: ClipboardText },
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'estoque', label: 'Estoque', icon: Package },
+            { id: 'destaques', label: 'Destaques', icon: Star },
             { id: 'cardapio', label: 'Loja Online', icon: ShoppingCart },
             { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
@@ -69,6 +71,7 @@ export function AdminLayout({
       return [
         { type: 'item', item: mobileNavItems.find((i) => i.id === 'fila') },
         { type: 'item', item: mobileNavItems.find((i) => i.id === 'produtos') },
+        { type: 'item', item: mobileNavItems.find((i) => i.id === 'destaques') },
         { type: 'item', item: mobileNavItems.find((i) => i.id === 'cardapio') },
       ].filter((entry) => Boolean(entry?.item));
     }
@@ -83,7 +86,7 @@ export function AdminLayout({
     if (principal) sections.push({ type: 'item', item: principal });
     const vendas = ['fila', 'vendas', 'avaliacoes'].map(consume).filter(Boolean);
     if (vendas.length) sections.push({ type: 'group', id: 'vendas', label: 'Vendas', children: vendas });
-    const catalogo = ['produtos', 'estoque', 'cardapio'].map(consume).filter(Boolean);
+    const catalogo = ['produtos', 'estoque', 'destaques', 'cardapio'].map(consume).filter(Boolean);
     if (catalogo.length) sections.push({ type: 'group', id: 'catalogo', label: 'Produtos e Loja', children: catalogo });
     const financeiro = ['pagamentos'].map(consume).filter(Boolean);
     if (financeiro.length) sections.push({ type: 'group', id: 'financeiro', label: 'Financeiro', children: financeiro });
@@ -148,6 +151,11 @@ export function AdminLayout({
     }
     if (id === 'cardapio') {
       if (storeSlug) navigate(`/${storeSlug}`);
+      setMobileNavOpen(false);
+      return;
+    }
+    if (id === 'destaques') {
+      navigate('/admin/highlights');
       setMobileNavOpen(false);
       return;
     }

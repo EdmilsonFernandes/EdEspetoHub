@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { MagnifyingGlass, MapPin, Star, Clock, Scooter, Storefront, House, Heart, UserCircle } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { productService } from '../services/productService';
+import { featuredService } from '../services/featuredService';
 import { mapsService } from '../services/mapsService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
@@ -389,6 +390,25 @@ export function MarketplacePage() {
       }
       setFeaturedLoading(true);
       try {
+        const sponsored = await featuredService.listPublicFeatured(18).catch(() => []);
+        const sponsoredEntries = (Array.isArray(sponsored) ? sponsored : [])
+          .filter((item: any) => String(item?.storeSlug || '').trim())
+          .map((item: any) => ({
+            id: String(item?.id || `${item?.storeSlug}-${item?.productId || item?.productName || 'sponsored'}`),
+            storeSlug: String(item?.storeSlug || ''),
+            storeName: String(item?.storeName || 'Loja'),
+            name: String(item?.productName || 'Produto em destaque'),
+            storeLogo: resolveAssetUrl(item?.storeLogoUrl || undefined) || '/janocaminho.jpg',
+            imageUrl: resolveAssetUrl(item?.imageUrl || undefined) || resolveAssetUrl(item?.storeLogoUrl || undefined) || '/janocaminho.jpg',
+            price: Number(item?.price || 0),
+          }))
+          .filter((item: any) => item.storeSlug && item.price > 0);
+
+        if (sponsoredEntries.length > 0) {
+          if (!cancelled) setFeaturedProducts(sponsoredEntries.slice(0, 18));
+          return;
+        }
+
         const candidates = enrichedStores.slice(0, 6);
         const responses = await Promise.allSettled(
           candidates.map(async (store) => {

@@ -30,6 +30,7 @@ import { DeliveryBillingController } from '../controllers/DeliveryBillingControl
 import { StoreUserController } from '../controllers/StoreUserController';
 import { ShippingController } from '../controllers/ShippingController';
 import { CustomerAccountController } from '../controllers/CustomerAccountController';
+import { FeaturedProductController } from '../controllers/FeaturedProductController';
 
 import { hydrateAuthOptional, requireAuth, requireRole } from '../middleware/authGuard';
 import { requireActiveSubscription } from '../middleware/subscriptionGuard';
@@ -107,6 +108,7 @@ routes.post(
 // Store public
 routes.get('/public/platform/metrics', PlatformPublicController.metrics);
 routes.get('/public/stores', StoreController.listPortfolio);
+routes.get('/public/featured-products', FeaturedProductController.listPublic);
 routes.post('/public/stores/slug/:slug/track', StoreController.trackLink);
 routes.get('/stores/slug/:slug', StoreController.getBySlug);
 routes.get('/chamanoespeto/:slug', StoreController.getBySlug);
@@ -128,6 +130,9 @@ routes.get('/stores/:storeId/users', requireAuth, requireRole('ADMIN'), StoreUse
 routes.post('/stores/:storeId/users', requireAuth, requireRole('ADMIN'), StoreUserController.create);
 routes.patch('/stores/:storeId/users/:userId/password', requireAuth, requireRole('ADMIN'), StoreUserController.updatePassword);
 routes.delete('/stores/:storeId/users/:userId', requireAuth, requireRole('ADMIN'), StoreUserController.remove);
+routes.get('/stores/:storeId/featured-requests', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), FeaturedProductController.listByStore);
+routes.post('/stores/:storeId/featured-requests', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), FeaturedProductController.createStoreRequest);
+routes.patch('/stores/:storeId/featured-requests/:requestId/cancel', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), FeaturedProductController.cancelByStore);
 
 // Products admin (cadastro não depende de assinatura)
 routes.post('/stores/:storeId/products', requireAuth, requireRole('ADMIN'), ProductController.create);
@@ -196,6 +201,8 @@ routes.post('/motoboy/stores/:storeId/leave', requireAuth, MotoboyController.lea
 routes.get('/legal/terms', LegalController.getTerms);
 routes.get('/legal/lgpd', LegalController.getLgpd);
 routes.post('/admin/site-settings', requireAuth, requireRole('SUPER_ADMIN'), LegalController.setSetting);
+routes.get('/admin/featured-requests', requireAuth, requireRole('SUPER_ADMIN'), FeaturedProductController.listForAdmin);
+routes.patch('/admin/featured-requests/:requestId/review', requireAuth, requireRole('SUPER_ADMIN'), FeaturedProductController.reviewByAdmin);
 
 // Store owner motoboy management
 routes.get('/stores/:storeId/motoboys', requireAuth, requireRole('ADMIN'), requirePlanFeature('motoboyManagement'), MotoboyController.listByStore);

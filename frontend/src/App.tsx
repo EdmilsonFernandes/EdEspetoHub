@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-    import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, AdminRenewal, AdminDemo, PaymentPage, SuperAdmin, ForgotPassword, ResetPassword, VerifyEmail, TermsOfUse, OrderTracking, AddressDistance, AdminMotoboys, MotoboyAvailable, MotoboyCurrent, MotoboyHistory, MotoboyProfile, MotoboyDone, MotoboyLogin, MotoboyRegister, MotoboyHome, MotoboyEarnings, ArchitecturePage, InstallAppPage, ClientAuth, ClientAccount, MarketplacePage } from './pages';
+    import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, AdminRenewal, AdminDemo, PaymentPage, SuperAdmin, ForgotPassword, ResetPassword, VerifyEmail, TermsOfUse, OrderTracking, AddressDistance, AdminMotoboys, MotoboyAvailable, MotoboyCurrent, MotoboyHistory, MotoboyProfile, MotoboyDone, MotoboyLogin, MotoboyRegister, MotoboyHome, MotoboyEarnings, ArchitecturePage, InstallAppPage, ClientAuth, ClientAccount, MarketplacePage, AdminHighlights, SuperAdminHighlights } from './pages';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { AdminRoute } from './components/Admin/AdminRoute';
@@ -99,6 +99,16 @@ function App() {
               }
             />
             <Route
+              path="/admin/highlights"
+              element={
+                <AppErrorBoundary>
+                  <AdminRoute allowedRoles={['ADMIN', 'OPERATOR', 'CHURRASQUEIRO']}>
+                    <AdminHighlights />
+                  </AdminRoute>
+                </AppErrorBoundary>
+              }
+            />
+            <Route
               path="/admin/demo"
               element={
                 <AppErrorBoundary>
@@ -116,6 +126,7 @@ function App() {
             <Route path="/pedido/:orderId" element={<OrderTracking />} />
             <Route path="/payment/:paymentId" element={<PaymentPage />} />
             <Route path="/superadmin" element={<SuperAdmin />} />
+            <Route path="/superadmin/highlights" element={<SuperAdminHighlights />} />
             <Route path="/maps" element={<AddressDistance />} />
             <Route path="/motoboy/login" element={<MotoboyLogin />} />
             <Route path="/motoboy/register" element={<MotoboyRegister />} />

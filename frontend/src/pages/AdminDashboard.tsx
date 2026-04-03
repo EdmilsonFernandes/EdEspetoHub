@@ -1332,6 +1332,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       (isOperatorUser
         ? [
             { id: 'produtos', label: 'Produtos', icon: Package },
+            { id: 'destaques', label: 'Destaques', icon: Star },
             { id: 'cardapio', label: 'Loja Online', icon: Package },
             { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
           ]
@@ -1341,6 +1342,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             { id: 'avaliacoes', label: 'Avaliações', icon: Star },
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'estoque', label: 'Estoque', icon: Package },
+            { id: 'destaques', label: 'Destaques', icon: Star },
             { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
             { id: 'usuarios', label: 'Usuários', icon: UsersThree, standalone: true },
@@ -1363,6 +1365,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       avaliacoes: { title: 'Avaliações', subtitle: 'Notas e comentários dos clientes por pedido.' },
       produtos: { title: 'Produtos', subtitle: 'Gerencie catálogo, preço, disponibilidade e destaque da vitrine.' },
       estoque: { title: 'Estoque', subtitle: 'Monitore níveis, alertas e movimentações dos produtos.' },
+      destaques: { title: 'Destaques patrocinados', subtitle: 'Solicite e acompanhe campanhas de destaque para o Hub.' },
       pagamentos: { title: 'Pagamentos', subtitle: 'Controle assinatura, ciclo e eventos de cobrança da loja.' },
       config: { title: 'Configurações', subtitle: 'Ajuste identidade, canais, tipos de pedido e horários da operação.' },
       fila: { title: 'Gestor de Pedidos', subtitle: 'Acompanhe pedidos em andamento e a fila da loja em tempo real.' },
@@ -1394,6 +1397,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             }
             if (item.id === 'pedidos') {
               navigate('/admin/orders');
+              return;
+            }
+            if (item.id === 'destaques') {
+              navigate('/admin/highlights');
               return;
             }
             if (item.id === 'usuarios') {
@@ -2358,6 +2365,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       }
       if (id === 'pedidos') {
         navigate('/admin/orders');
+        return;
+      }
+      if (id === 'destaques') {
+        navigate('/admin/highlights');
         return;
       }
       if (id === 'motoboys' && !canUseMotoboys) {

@@ -1172,4 +1172,43 @@ export async function runMigrations() {
     SET value = REPLACE(value, 'chamanoespeto', 'janocaminho')
     WHERE value ILIKE '%chamanoespeto%';
   `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS featured_product_requests (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+      product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+      requested_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+      status TEXT NOT NULL DEFAULT 'PENDING',
+      payment_status TEXT NOT NULL DEFAULT 'PENDING',
+      duration_days INT NOT NULL DEFAULT 7,
+      requested_slots INT NOT NULL DEFAULT 1,
+      price_amount NUMERIC(10,2),
+      starts_at TIMESTAMPTZ,
+      ends_at TIMESTAMPTZ,
+      approved_by_admin_id TEXT,
+      admin_note TEXT,
+      public_note TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_featured_product_requests_store_id
+    ON featured_product_requests(store_id);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_featured_product_requests_status
+    ON featured_product_requests(status);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_featured_product_requests_ends_at
+    ON featured_product_requests(ends_at);
+  `);
+  await AppDataSource.query(`
+    UPDATE featured_product_requests
+    SET status = 'EXPIRED'
+    WHERE status = 'APPROVED'
+      AND ends_at IS NOT NULL
+      AND ends_at < NOW();
+  `);
 }

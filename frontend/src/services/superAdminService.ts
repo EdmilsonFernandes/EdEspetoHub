@@ -158,4 +158,36 @@ export const superAdminService = {
     });
     return handleResponse(response);
   },
+
+  async fetchFeaturedRequests(token: string, filters: { status?: string; storeId?: string; limit?: number } = {}) {
+    const params = new URLSearchParams();
+    if (filters.status) params.set('status', String(filters.status));
+    if (filters.storeId) params.set('storeId', String(filters.storeId));
+    if (filters.limit != null) params.set('limit', String(filters.limit));
+    const suffix = params.toString() ? `?${params.toString()}` : '';
+    const response = await fetch(buildUrl(`/admin/featured-requests${suffix}`), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return handleResponse(response);
+  },
+
+  async reviewFeaturedRequest(
+    token: string,
+    requestId: string,
+    payload: {
+      status: 'APPROVED' | 'REJECTED';
+      durationDays?: number;
+      startsAt?: string;
+      priceAmount?: number;
+      paymentStatus?: 'PENDING' | 'PAID';
+      adminNote?: string;
+    }
+  ) {
+    const response = await fetch(buildUrl(`/admin/featured-requests/${requestId}/review`), {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload || {}),
+    });
+    return handleResponse(response);
+  },
 };

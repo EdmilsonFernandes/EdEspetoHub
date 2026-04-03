@@ -50,7 +50,7 @@ export function AdminDesktopSidebar({
     const vendas = ['fila', 'pedidos', 'vendas', 'avaliacoes'].map(consume).filter(Boolean);
     if (vendas.length) sections.push({ type: 'group', id: 'vendas', label: 'Vendas', children: vendas });
 
-    const catalogo = ['produtos', 'estoque', 'cardapio'].map(consume).filter(Boolean);
+    const catalogo = ['produtos', 'estoque', 'destaques', 'cardapio'].map(consume).filter(Boolean);
     if (catalogo.length) sections.push({ type: 'group', id: 'catalogo', label: 'Produtos e Loja', children: catalogo });
 
     const financeiro = ['pagamentos'].map(consume).filter(Boolean);
