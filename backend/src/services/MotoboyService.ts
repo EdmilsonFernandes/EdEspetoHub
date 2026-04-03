@@ -42,7 +42,7 @@ export class MotoboyService {
   private emailService = new EmailService();
 
     /**
-   * Executes normalize plate business logic.
+   * Normalizes vehicle plate input to canonical alphanumeric format.
    *
    * @author Edmilson Lopes
    */
@@ -53,7 +53,7 @@ private normalizePlate(value?: string | null) {
   }
 
     /**
-   * Executes is valid brazil plate business logic.
+   * Validates Brazilian old and Mercosul plate formats.
    *
    * @author Edmilson Lopes
    */
@@ -64,7 +64,7 @@ private isValidBrazilPlate(value?: string | null) {
   }
 
     /**
-   * Executes normalize cnh category business logic.
+   * Normalizes CNH category string to uppercase letters only.
    *
    * @author Edmilson Lopes
    */
@@ -75,7 +75,7 @@ private normalizeCnhCategory(value?: string | null) {
   }
 
     /**
-   * Executes has category a business logic.
+   * Checks whether CNH category includes motorcycle permission (A).
    *
    * @author Edmilson Lopes
    */
@@ -85,7 +85,7 @@ private hasCategoryA(value?: string | null) {
   }
 
     /**
-   * Executes normalize motoboy pix key business logic.
+   * Validates and normalizes courier PIX key with CPF consistency rules.
    *
    * @author Edmilson Lopes
    */
@@ -112,7 +112,7 @@ private normalizeMotoboyPixKey(
   }
 
     /**
-   * Executes ensure motoboy profile is complete business logic.
+   * Validates mandatory courier profile fields required for operations.
    *
    * @author Edmilson Lopes
    */
@@ -135,7 +135,7 @@ private async ensureMotoboyProfileIsComplete(motoboy: Motoboy) {
   }
 
     /**
-   * Retrieves data for get required doc types for motoboy.
+   * Determines required KYC document types based on vehicle type.
    *
    * @author Edmilson Lopes
    */
@@ -147,7 +147,7 @@ private getRequiredDocTypesForMotoboy(motoboy: Motoboy) {
   }
 
     /**
-   * Lists records for list latest docs by type.
+   * Loads latest courier document per type for KYC decisions.
    *
    * @author Edmilson Lopes
    */
@@ -169,7 +169,9 @@ private async listLatestDocsByType(motoboyId: string) {
    * - Blocks if any required doc is missing or REJECTED
    *
    * Store owners need to see the request + docs while platform review is pending.
-   */
+    *
+ * @author Edmilson Lopes
+ */
   private async ensureMotoboyCanRequestStoreLinks(motoboy: Motoboy) {
     await this.ensureMotoboyProfileIsComplete(motoboy);
 
@@ -194,7 +196,9 @@ private async listLatestDocsByType(motoboyId: string) {
   /**
    * Gate for approving store link requests:
    * required docs must be globally APPROVED by platform (SUPER_ADMIN).
-   */
+    *
+ * @author Edmilson Lopes
+ */
   private async ensureMotoboyKycApproved(motoboy: Motoboy) {
     const byType = await this.listLatestDocsByType(motoboy.id);
     const mustHave = this.getRequiredDocTypesForMotoboy(motoboy);
@@ -215,7 +219,7 @@ private async listLatestDocsByType(motoboyId: string) {
   }
 
     /**
-   * Executes log audit business logic.
+   * Persists structured audit event for courier/store workflow actions.
    *
    * @author Edmilson Lopes
    */
@@ -238,7 +242,7 @@ private async logAudit(input: {
   }
 
     /**
-   * Executes notify motoboy by email business logic.
+   * Sends courier email notifications for status and review updates.
    *
    * @author Edmilson Lopes
    */
@@ -254,7 +258,7 @@ private async notifyMotoboyByEmail(motoboyId: string, subject: string, message: 
   }
 
     /**
-   * Executes notify motoboy by whatsapp business logic.
+   * Sends courier WhatsApp notifications when configured.
    *
    * @author Edmilson Lopes
    */
@@ -272,7 +276,7 @@ private async notifyMotoboyByWhatsapp(motoboyId: string, message: string) {
   }
 
     /**
-   * Executes apply store reupload request metadata business logic.
+   * Executes apply store reupload request metadata workflow for MotoboyService.
    *
    * @author Edmilson Lopes
    */
@@ -309,7 +313,7 @@ private applyStoreReuploadRequestMetadata(input: {
   }
 
     /**
-   * Executes request document reupload business logic.
+   * Requests document reupload and records audit trail for compliance.
    *
    * @author Edmilson Lopes
    */
@@ -335,7 +339,7 @@ async requestDocumentReupload(storeId: string, motoboyId: string, documentId: st
   }
 
     /**
-   * Lists records for list pending kyc queue.
+   * Lists pending KYC items waiting for platform review.
    *
    * @author Edmilson Lopes
    */
@@ -368,7 +372,7 @@ async listPendingKycQueue() {
   }
 
     /**
-   * Lists records for list all documents for motoboy.
+   * Lists all KYC documents for one courier with metadata.
    *
    * @author Edmilson Lopes
    */
@@ -385,7 +389,7 @@ async listAllDocumentsForMotoboy(motoboyId: string) {
   }
 
     /**
-   * Executes attach platform reviewer info business logic.
+   * Appends reviewer profile data to reviewed documents.
    *
    * @author Edmilson Lopes
    */
@@ -423,7 +427,7 @@ private async attachPlatformReviewerInfo(docs: MotoboyDocument[]) {
   }
 
     /**
-   * Lists records for list recent kyc reviews.
+   * Lists recent KYC review decisions for audit visibility.
    *
    * @author Edmilson Lopes
    */
@@ -441,7 +445,7 @@ async listRecentKycReviews(limit = 30) {
   }
 
     /**
-   * Retrieves data for get kyc audit summary.
+   * Builds KYC review metrics and rejection reasons summary.
    *
    * @author Edmilson Lopes
    */
@@ -510,7 +514,7 @@ async getKycAuditSummary(days = 30) {
   }
 
     /**
-   * Executes platform review document business logic.
+   * Approves or rejects a courier document from platform governance flow.
    *
    * @author Edmilson Lopes
    */
@@ -577,7 +581,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   }
 
   /**
-   * Updates motoboy profile data.
+   * Updates courier profile, vehicle, and compliance-sensitive attributes.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-29
@@ -687,7 +691,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   }
 
   /**
-   * Creates or returns motoboy profile.
+   * Creates courier profile under store-owner initiated onboarding flow.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-29
@@ -789,7 +793,9 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   /**
    * Motoboy leaves a store (disables an active link).
    * This is motoboy-initiated, does not require store owner.
-   */
+    *
+ * @author Edmilson Lopes
+ */
   async leaveStore(motoboy: Motoboy, storeId: string) {
     if (!storeId) throw new AppError('STORE-001', 404);
 
@@ -873,7 +879,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   }
 
   /**
-   * Lists store ids for motoboy.
+   * Lists store IDs currently linked to the courier.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-29
@@ -883,7 +889,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   }
 
   /**
-   * Lists motoboys linked to a store.
+   * Lists couriers linked to a store for admin management.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-29
@@ -940,7 +946,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   }
 
   /**
-   * Lists documents for a motoboy.
+   * Lists courier documents for store-admin review screens.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-29
@@ -955,7 +961,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   }
 
   /**
-   * Lists documents for motoboy itself.
+   * Lists courier own uploaded documents with statuses.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-29
@@ -1006,7 +1012,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   }
 
   /**
-   * Creates store requests for motoboy.
+   * Creates courier requests to join one or more stores.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-29
@@ -1054,7 +1060,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   }
 
   /**
-   * Lists store requests for motoboy.
+   * Lists courier own store-link requests.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-29
@@ -1069,7 +1075,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   }
 
   /**
-   * Lists pending store requests for a store owner.
+   * Lists store incoming courier requests for decision.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-29

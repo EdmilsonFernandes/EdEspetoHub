@@ -41,7 +41,7 @@ export class PaymentService {
   private orderReviewService = new OrderReviewService();
   private log = logger.child({ scope: 'PaymentService' });
   /**
-   * Handles normalize qr code.
+   * Normalizes QR payload to Data URL format for consistent client rendering.
    *
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
@@ -53,7 +53,7 @@ export class PaymentService {
   }
 
     /**
-   * Executes resolve plan charge amount business logic.
+   * Resolves effective plan charge amount considering promotional pricing.
    *
    * @author Edmilson Lopes
    */
@@ -82,7 +82,7 @@ private resolvePlanChargeAmount(plan: Plan) {
 
 
   /**
-   * Creates payment.
+   * Creates payment record and optionally provisions provider checkout artifacts.
    *
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
@@ -186,7 +186,7 @@ private resolvePlanChargeAmount(plan: Plan) {
   }
 
   /**
-   * Handles confirm payment.
+   * Confirms payment and activates subscription/store access atomically.
    *
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
@@ -248,7 +248,7 @@ private resolvePlanChargeAmount(plan: Plan) {
   }
 
   /**
-   * Handles confirm mercado pago payment.
+   * Confirms payment using Mercado Pago provider ID and syncs local state.
    *
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
@@ -268,7 +268,7 @@ private resolvePlanChargeAmount(plan: Plan) {
   }
 
   /**
-   * Handles reprocess by payment id.
+   * Forces provider status refresh and reprocessing for an existing payment.
    *
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
@@ -302,7 +302,7 @@ private resolvePlanChargeAmount(plan: Plan) {
 
 
   /**
-   * Updates payment status.
+   * Fetches provider status and updates payment state machine.
    *
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
@@ -324,7 +324,7 @@ private resolvePlanChargeAmount(plan: Plan) {
 
 
   /**
-   * Executes apply mercado pago status logic.
+   * Maps Mercado Pago status to local payment/subscription transitions.
    *
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
@@ -417,7 +417,7 @@ private resolvePlanChargeAmount(plan: Plan) {
   }
 
   /**
-   * Handles find by id.
+   * Retrieves payment by ID with related entities for diagnostics.
    *
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17

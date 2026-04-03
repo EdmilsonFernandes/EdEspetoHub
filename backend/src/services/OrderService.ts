@@ -48,7 +48,7 @@ export class OrderService
   private tz = process.env.APP_TZ || 'America/Sao_Paulo';
 
     /**
-   * Executes reconcile delivered orders by store business logic.
+   * Reconciles order statuses with delivery snapshots and auto-closes stale queue entries for one store.
    *
    * @author Edmilson Lopes
    */
@@ -86,7 +86,7 @@ private async reconcileDeliveredOrdersByStore(storeId: string) {
   }
 
     /**
-   * Executes reconcile delivered order by id business logic.
+   * Synchronizes a single order status with its delivery state when marked as delivered.
    *
    * @author Edmilson Lopes
    */
@@ -108,7 +108,7 @@ private async reconcileDeliveredOrderById(orderId: string) {
   }
 
     /**
-   * Executes attach delivery snapshot business logic.
+   * Enriches order payloads with delivery timeline and courier snapshot data.
    *
    * @author Edmilson Lopes
    */
@@ -198,7 +198,7 @@ private async attachDeliverySnapshot(orders: any[]) {
   }
 
     /**
-   * Executes attach shipment snapshot business logic.
+   * Enriches order payloads with postal shipment and tracking metadata.
    *
    * @author Edmilson Lopes
    */
@@ -281,7 +281,7 @@ private async attachShipmentSnapshot(orders: any[]) {
   }
 
     /**
-   * Executes resolve bundle discount business logic.
+   * Executes resolve bundle discount workflow for OrderService.
    *
    * @author Edmilson Lopes
    */
@@ -311,7 +311,7 @@ private resolveBundleDiscount(
   }
 
     /**
-   * Executes normalize text business logic.
+   * Executes normalize text workflow for OrderService.
    *
    * @author Edmilson Lopes
    */
@@ -321,7 +321,7 @@ private normalizeText(value: unknown)
   }
 
     /**
-   * Executes resolve selected modifiers business logic.
+   * Executes resolve selected modifiers workflow for OrderService.
    *
    * @author Edmilson Lopes
    */
@@ -388,7 +388,7 @@ private resolveSelectedModifiers(
   }
 
     /**
-   * Executes append inventory movement tx business logic.
+   * Registers an inventory movement entry inside the current transaction scope.
    *
    * @author Edmilson Lopes
    */
@@ -462,7 +462,7 @@ private async appendInventoryMovementTx(
   }
 
     /**
-   * Executes adjust managed stock tx business logic.
+   * Applies stock decrement/increment for managed products in a transactional context.
    *
    * @author Edmilson Lopes
    */
@@ -532,7 +532,7 @@ private async adjustManagedStockTx(
   }
 
     /**
-   * Executes seed postal shipment from checkout tx business logic.
+   * Seeds initial postal shipment record from checkout quote selection.
    *
    * @author Edmilson Lopes
    */
@@ -592,7 +592,7 @@ private async seedPostalShipmentFromCheckoutTx(
 
 
   /**
-   * Executes create logic.
+   * Creates a new order using store ID context and applies stock, ETA, and delivery side effects.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -613,7 +613,7 @@ private async seedPostalShipmentFromCheckoutTx(
 
 
   /**
-   * Creates by slug.
+   * Creates a new order using store slug context and resolves store internally.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -634,7 +634,7 @@ private async seedPostalShipmentFromCheckoutTx(
 
 
   /**
-   * Lists by store id.
+   * Lists store orders and appends delivery/shipment snapshots for operations.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -653,7 +653,7 @@ private async seedPostalShipmentFromCheckoutTx(
 
 
   /**
-   * Lists by store slug.
+   * Lists store orders by slug for staff dashboards and queue screens.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -672,7 +672,7 @@ private async seedPostalShipmentFromCheckoutTx(
 
 
   /**
-   * Lists top items for today.
+   * Returns most ordered items for storefront highlights.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-21
@@ -693,7 +693,7 @@ private async seedPostalShipmentFromCheckoutTx(
   }
 
   /**
-   * Lists public table occupancy status by store slug.
+   * Returns current table occupancy/status for public table mode.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-03-12
@@ -714,7 +714,7 @@ private async seedPostalShipmentFromCheckoutTx(
 
 
   /**
-   * Updates status.
+   * Updates operational order status and applies workflow side effects.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -826,7 +826,7 @@ private async seedPostalShipmentFromCheckoutTx(
   }
 
     /**
-   * Updates resources for update fulfillment mode.
+   * Switches order fulfillment mode and aligns related shipping metadata.
    *
    * @author Edmilson Lopes
    */
@@ -851,7 +851,7 @@ async updateFulfillmentMode(
   }
 
     /**
-   * Updates resources for update postal shipment.
+   * Updates postal shipping service, tracking data, and shipment status.
    *
    * @author Edmilson Lopes
    */
@@ -928,7 +928,7 @@ async updatePostalShipment(
   }
 
     /**
-   * Executes reopen order business logic.
+   * Reopens a finalized order and restores editable/operational state.
    *
    * @author Edmilson Lopes
    */
@@ -982,7 +982,7 @@ async reopenOrder(
 
 
   /**
-   * Updates items.
+   * Replaces editable order items and recalculates totals with stock reconciliation.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
