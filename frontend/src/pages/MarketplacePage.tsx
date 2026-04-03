@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MagnifyingGlass, MapPin, Star, Clock, Scooter, Storefront, House, UserCircle, SealCheck, List } from '@phosphor-icons/react';
+import { MagnifyingGlass, MapPin, Star, Clock, Scooter, Storefront, House, UserCircle, SealCheck, List, CaretDown } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { productService } from '../services/productService';
 import { featuredService } from '../services/featuredService';
@@ -603,10 +603,17 @@ export function MarketplacePage() {
     <div className="min-h-screen bg-slate-50 pb-28 sm:pb-20">
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100 shadow-sm">
         <div className="max-w-[1200px] mx-auto px-4 py-2.5 space-y-2.5">
-          <div className="inline-flex items-center gap-2 rounded-full bg-slate-100/90 px-3 py-1 text-[11px] font-semibold text-slate-700">
-            <MapPin size={14} weight="duotone" className="text-slate-500" />
-            Entregar em: {locationLabel}
-          </div>
+          <button
+            type="button"
+            className="inline-flex max-w-full items-center gap-1.5 text-[12px] font-bold text-slate-700 transition-colors hover:text-sky-700"
+            onClick={() => setShowAdvancedFilters((prev) => !prev)}
+            aria-label="Alterar localização"
+            title="Alterar localização"
+          >
+            <MapPin size={14} weight="duotone" className="text-sky-600" />
+            <span className="truncate">Entregar em: {locationLabel}</span>
+            <CaretDown size={12} className="text-slate-400" />
+          </button>
           <div className="relative">
             <MagnifyingGlass size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
@@ -616,7 +623,7 @@ export function MarketplacePage() {
               className="h-10 w-full rounded-xl bg-slate-100 border-none px-11 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
             />
           </div>
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
+          <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-1">
             {['all', 'free_shipping', 'nearby', 'open_now'].map((filter) => {
               const label =
                 filter === 'all'
@@ -632,8 +639,10 @@ export function MarketplacePage() {
                   key={filter}
                   type="button"
                   onClick={() => setQuickFilter(filter as any)}
-                  className={`rounded-full px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] whitespace-nowrap transition-all duration-300 active:scale-95 ${
-                    active ? 'text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  className={`rounded-full border px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] whitespace-nowrap transition-all duration-300 active:scale-95 ${
+                    active
+                      ? 'text-white border-transparent shadow-[0_10px_20px_-15px_rgba(15,23,42,0.7)]'
+                      : 'border-slate-200 bg-white/80 text-slate-600 hover:border-slate-300 hover:bg-white'
                   }`}
                   style={active ? { backgroundColor: theme.primary } : undefined}
                 >
@@ -644,7 +653,7 @@ export function MarketplacePage() {
             <button
               type="button"
               onClick={() => setShowAdvancedFilters((prev) => !prev)}
-              className="rounded-full px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] whitespace-nowrap bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+              className="rounded-full px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] whitespace-nowrap bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-white"
             >
               Filtros
             </button>

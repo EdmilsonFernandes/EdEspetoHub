@@ -133,6 +133,43 @@ export class StoreController {
       return Number.isFinite(value) && candidates.includes(value);
     });
   }
+
+  /**
+   * Checks whether current minutes are inside one interval.
+   *
+   * @author Edmilson Lopes
+   */
+  private static isInsideInterval(nowMinutes: number, start: number, end: number) {
+    if (start === end) return true;
+    if (end < start) return nowMinutes >= start || nowMinutes < end;
+    return nowMinutes >= start && nowMinutes < end;
+  }
+
+  /**
+   * Checks whether the previous day's overnight interval still keeps the store open.
+   *
+   * @author Edmilson Lopes
+   */
+  private static isOpenFromPreviousDayOvernight(openingHours: any[], currentDay: number, currentMinutes: number) {
+    const previousDay = (currentDay + 6) % 7;
+    const previousEntry = StoreController.resolveDayEntry(openingHours, previousDay);
+    if (!previousEntry || previousEntry?.enabled === false) return false;
+    const prevIntervals = Array.isArray(previousEntry.intervals) ? previousEntry.intervals : [];
+    if (!prevIntervals.length) return false;
+
+    return prevIntervals.some((interval: any) => {
+      if (!interval?.start || !interval?.end) return false;
+      const start = StoreController.toMinutes(String(interval.start));
+      const end = StoreController.toMinutes(String(interval.end));
+      if (start == null || end == null) return false;
+      if (start === end) return true;
+      if (end < start) {
+        // Overnight interval from previous day keeps store open until `end`.
+        return currentMinutes < end;
+      }
+      return false;
+    });
+  }
     /**
    * Executes sanitize order types by plan business logic.
    *
@@ -174,25 +211,21 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
      * @date 2025-12-17
      */
     const dayEntry = StoreController.resolveDayEntry(openingHours, day);
-    if (!dayEntry || dayEntry?.enabled === false) return false;
+    if (!dayEntry || dayEntry?.enabled === false) {
+      return StoreController.isOpenFromPreviousDayOvernight(openingHours, day, minutes);
+    }
 
     const intervals = Array.isArray(dayEntry.intervals) ? dayEntry.intervals : [];
     if (!intervals.length) return true;
-    return intervals.some((interval: any) => {
+    const openByTodayInterval = intervals.some((interval: any) => {
       if (!interval?.start || !interval?.end) return false;
       const start = StoreController.toMinutes(String(interval.start));
       const end = StoreController.toMinutes(String(interval.end));
       if (start == null || end == null) return false;
-
-      // 24h operation convention: same start/end means always open for the day.
-      if (start === end) return true;
-
-      if (end < start) {
-        return minutes >= start || minutes < end;
-      }
-
-      return minutes >= start && minutes < end;
+      return StoreController.isInsideInterval(minutes, start, end);
     });
+    if (openByTodayInterval) return true;
+    return StoreController.isOpenFromPreviousDayOvernight(openingHours, day, minutes);
   }
 
   /**

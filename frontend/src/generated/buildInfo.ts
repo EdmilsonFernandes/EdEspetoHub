@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.221658.8c2e952d",
-  "buildId": "0.1.9+20260403.221658.8c2e952d-20260403.221658-8c2e952d",
-  "builtAt": "2026-04-03T22:16:58.648Z",
-  "commitHash": "8c2e952d8ab36c372a7147e477fd20fb1736c9e7",
-  "shortHash": "8c2e952d",
+  "versionInternal": "0.1.9+20260403.222231.f48dd2c9",
+  "buildId": "0.1.9+20260403.222231.f48dd2c9-20260403.222231-f48dd2c9",
+  "builtAt": "2026-04-03T22:22:31.106Z",
+  "commitHash": "f48dd2c9eb8c9a009193cf98a700c6893ce77466",
+  "shortHash": "f48dd2c9",
   "branch": "main",
   "commits": [
+    {
+      "hash": "f48dd2c9eb8c9a009193cf98a700c6893ce77466",
+      "shortHash": "f48dd2c9",
+      "dateIso": "2026-04-03T19:18:31-03:00",
+      "subject": "Mobile push: customer token register/unregister + order status notifications + new Android build support"
+    },
     {
       "hash": "8c2e952d8ab36c372a7147e477fd20fb1736c9e7",
       "shortHash": "8c2e952d",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "a8ab3e17",
       "dateIso": "2026-04-03T12:53:40-03:00",
       "subject": "Adiciona atalho Hub no rodape mobile da landing e tema dinamico no hub"
-    },
-    {
-      "hash": "992479bc1ad5d7e93ed24dc121686038cf304fbc",
-      "shortHash": "992479bc",
-      "dateIso": "2026-04-03T12:50:12-03:00",
-      "subject": "Refina Hub para marketplace generico com cards compactos e destaque de produtos"
     }
   ]
 } as const;
