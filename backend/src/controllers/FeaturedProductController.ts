@@ -13,6 +13,28 @@ const log = logger.child({ scope: 'FeaturedProductController' });
  */
 export class FeaturedProductController {
   /**
+   * Returns pricing and slot summary for featured products.
+   *
+   * @author Edmilson Lopes
+   */
+  static async getStorePricing(req: Request, res: Response) {
+    try {
+      if (req.auth?.storeId && req.auth.storeId !== req.params.storeId) {
+        return res.status(403).json({ code: 'AUTH-003', message: 'Acesso negado para esta loja.' });
+      }
+      const payload = await service.getStorePricingSummary();
+      return res.json(payload);
+    } catch (error: any) {
+      log.warn('Featured pricing load failed', {
+        storeId: req.params.storeId,
+        userId: req.auth?.sub,
+        error,
+      });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
    * Creates a featured product request for a store.
    *
    * @author Edmilson Lopes

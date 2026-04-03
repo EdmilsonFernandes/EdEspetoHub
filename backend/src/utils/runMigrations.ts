@@ -587,7 +587,11 @@ export async function runMigrations() {
     INSERT INTO site_settings (key, value)
     VALUES
       ('legal.terms', '<h2>Termos de uso</h2><p>Atualize os termos no painel do super admin.</p>'),
-      ('legal.lgpd', '<h2>LGPD</h2><p>Atualize a política LGPD no painel do super admin.</p>')
+      ('legal.lgpd', '<h2>LGPD</h2><p>Atualize a política LGPD no painel do super admin.</p>'),
+      ('hub_sponsored_daily_price', '14.90'),
+      ('hub_sponsored_weekly_price', '79.90'),
+      ('hub_sponsored_monthly_price', '249.90'),
+      ('hub_sponsored_max_active_slots', '3')
     ON CONFLICT (key) DO NOTHING;
   `);
   await AppDataSource.query(`
@@ -1178,11 +1182,20 @@ export async function runMigrations() {
       store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
       product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
       requested_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-      status TEXT NOT NULL DEFAULT 'PENDING',
+      status TEXT NOT NULL DEFAULT 'PENDING_PAYMENT',
       payment_status TEXT NOT NULL DEFAULT 'PENDING',
       duration_days INT NOT NULL DEFAULT 7,
+      duration_unit TEXT NOT NULL DEFAULT 'DAY',
       requested_slots INT NOT NULL DEFAULT 1,
       price_amount NUMERIC(10,2),
+      payment_method TEXT NOT NULL DEFAULT 'PIX',
+      payment_provider TEXT,
+      payment_provider_id TEXT,
+      payment_link TEXT,
+      payment_qr_code_base64 TEXT,
+      payment_qr_code_text TEXT,
+      payment_expires_at TIMESTAMPTZ,
+      payment_paid_at TIMESTAMPTZ,
       starts_at TIMESTAMPTZ,
       ends_at TIMESTAMPTZ,
       approved_by_admin_id TEXT,
@@ -1191,6 +1204,42 @@ export async function runMigrations() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS featured_product_requests
+    ADD COLUMN IF NOT EXISTS duration_unit TEXT NOT NULL DEFAULT 'DAY';
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS featured_product_requests
+    ADD COLUMN IF NOT EXISTS payment_method TEXT NOT NULL DEFAULT 'PIX';
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS featured_product_requests
+    ADD COLUMN IF NOT EXISTS payment_provider TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS featured_product_requests
+    ADD COLUMN IF NOT EXISTS payment_provider_id TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS featured_product_requests
+    ADD COLUMN IF NOT EXISTS payment_link TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS featured_product_requests
+    ADD COLUMN IF NOT EXISTS payment_qr_code_base64 TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS featured_product_requests
+    ADD COLUMN IF NOT EXISTS payment_qr_code_text TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS featured_product_requests
+    ADD COLUMN IF NOT EXISTS payment_expires_at TIMESTAMPTZ;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS featured_product_requests
+    ADD COLUMN IF NOT EXISTS payment_paid_at TIMESTAMPTZ;
   `);
   await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_featured_product_requests_store_id
@@ -1205,10 +1254,20 @@ export async function runMigrations() {
     ON featured_product_requests(ends_at);
   `);
   await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_featured_product_requests_payment_provider_id
+    ON featured_product_requests(payment_provider_id);
+  `);
+  await AppDataSource.query(`
     UPDATE featured_product_requests
     SET status = 'EXPIRED'
     WHERE status = 'APPROVED'
       AND ends_at IS NOT NULL
       AND ends_at < NOW();
+  `);
+  await AppDataSource.query(`
+    UPDATE featured_product_requests
+    SET status = 'PAID_WAITING_SLOT'
+    WHERE payment_status = 'PAID'
+      AND (status = 'PENDING' OR status = 'PENDING_PAYMENT');
   `);
 }

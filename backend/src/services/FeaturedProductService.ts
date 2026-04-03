@@ -1,13 +1,32 @@
+import QRCode from 'qrcode';
 import { AppDataSource } from '../config/database';
-import { AppError } from '../errors/AppError';
+import { env } from '../config/env';
 import { FeaturedProductRequest } from '../entities/FeaturedProductRequest';
 import { Product } from '../entities/Product';
 import { Store } from '../entities/Store';
+import { User } from '../entities/User';
+import { AppError } from '../errors/AppError';
+import { MercadoPagoService } from './MercadoPagoService';
 
 const normalizeStatus = (value?: string) => String(value || '').trim().toUpperCase();
+const DURATION_OPTIONS = {
+  DAY: 1,
+  WEEK: 7,
+  MONTH: 30,
+} as const;
+
+type DurationUnit = keyof typeof DURATION_OPTIONS;
+
+type PricingConfig = {
+  dayPrice: number;
+  weekPrice: number;
+  monthPrice: number;
+  maxActiveSlots: number;
+};
 
 export class FeaturedProductService {
   private repo = AppDataSource.getRepository(FeaturedProductRequest);
+  private mercadoPago = new MercadoPagoService();
 
   private async resolveStore(storeId: string) {
     const store = await AppDataSource.getRepository(Store).findOne({ where: { id: storeId } });
@@ -27,42 +46,229 @@ export class FeaturedProductService {
     return product;
   }
 
+  private normalizeDurationUnit(input?: string): DurationUnit {
+    const value = String(input || '').trim().toUpperCase();
+    if (value === 'DAY' || value === 'WEEK' || value === 'MONTH') return value as DurationUnit;
+    return 'DAY';
+  }
+
+  private async loadPricingConfig(): Promise<PricingConfig> {
+    const rows = await AppDataSource.query(
+      `
+        SELECT key, value
+        FROM site_settings
+        WHERE key IN (
+          'hub_sponsored_daily_price',
+          'hub_sponsored_weekly_price',
+          'hub_sponsored_monthly_price',
+          'hub_sponsored_max_active_slots'
+        )
+      `
+    );
+    const map = new Map<string, string>();
+    (rows || []).forEach((row: any) => map.set(String(row?.key || ''), String(row?.value || '')));
+    const toMoney = (raw: string | undefined, fallback: number) => {
+      const n = Number(raw || fallback);
+      if (!Number.isFinite(n) || n <= 0) return fallback;
+      return Number(n.toFixed(2));
+    };
+    const toInt = (raw: string | undefined, fallback: number) => {
+      const n = Number(raw || fallback);
+      if (!Number.isFinite(n)) return fallback;
+      return Math.max(1, Math.min(20, Math.trunc(n)));
+    };
+    return {
+      dayPrice: toMoney(map.get('hub_sponsored_daily_price'), 14.9),
+      weekPrice: toMoney(map.get('hub_sponsored_weekly_price'), 79.9),
+      monthPrice: toMoney(map.get('hub_sponsored_monthly_price'), 249.9),
+      maxActiveSlots: toInt(map.get('hub_sponsored_max_active_slots'), 3),
+    };
+  }
+
+  private priceByDuration(config: PricingConfig, durationUnit: DurationUnit) {
+    if (durationUnit === 'WEEK') return config.weekPrice;
+    if (durationUnit === 'MONTH') return config.monthPrice;
+    return config.dayPrice;
+  }
+
+  private async activeSlotsCount(manager = AppDataSource.manager) {
+    const raw = await manager.query(
+      `
+      SELECT COUNT(*)::int AS total
+      FROM featured_product_requests
+      WHERE status = 'APPROVED'
+        AND payment_status = 'PAID'
+        AND starts_at IS NOT NULL
+        AND (ends_at IS NULL OR ends_at >= NOW())
+    `
+    );
+    return Number(raw?.[0]?.total || 0);
+  }
+
+  private async reconcileExpiredAndQueue(config: PricingConfig, manager = AppDataSource.manager) {
+    await manager.query(`
+      UPDATE featured_product_requests
+      SET status = 'EXPIRED'
+      WHERE status = 'APPROVED'
+        AND payment_status = 'PAID'
+        AND ends_at IS NOT NULL
+        AND ends_at < NOW()
+    `);
+
+    let active = await this.activeSlotsCount(manager);
+    const free = Math.max(0, config.maxActiveSlots - active);
+    if (free <= 0) return;
+
+    const waiting = await manager.query(
+      `
+      SELECT id, duration_days
+      FROM featured_product_requests
+      WHERE status = 'PAID_WAITING_SLOT'
+        AND payment_status = 'PAID'
+      ORDER BY payment_paid_at ASC NULLS LAST, created_at ASC
+      LIMIT $1
+    `,
+      [free]
+    );
+
+    for (const row of waiting || []) {
+      const durationDays = Math.max(1, Number(row?.duration_days || 1));
+      await manager.query(
+        `
+        UPDATE featured_product_requests
+        SET status = 'APPROVED',
+            starts_at = NOW(),
+            ends_at = NOW() + ($2::text || ' days')::interval
+        WHERE id = $1
+      `,
+        [row.id, String(durationDays)]
+      );
+      active += 1;
+      if (active >= config.maxActiveSlots) break;
+    }
+  }
+
+  async getStorePricingSummary() {
+    const config = await this.loadPricingConfig();
+    await this.reconcileExpiredAndQueue(config);
+    const activeSlots = await this.activeSlotsCount();
+    return {
+      prices: {
+        DAY: config.dayPrice,
+        WEEK: config.weekPrice,
+        MONTH: config.monthPrice,
+      },
+      maxActiveSlots: config.maxActiveSlots,
+      activeSlots,
+      availableSlots: Math.max(0, config.maxActiveSlots - activeSlots),
+    };
+  }
+
   async createStoreRequest(
     storeId: string,
     authStoreId: string | undefined,
     userId: string | undefined,
-    payload: { productId?: string; durationDays?: number; requestedSlots?: number; publicNote?: string }
+    payload: { productId?: string; durationUnit?: string; publicNote?: string }
   ) {
     if (authStoreId && authStoreId !== storeId) throw new AppError('AUTH-003', 403);
     const productId = String(payload?.productId || '').trim();
     if (!productId) throw new AppError('GEN-001', 400, { message: 'Produto é obrigatório para solicitar destaque.' });
 
-    const durationDays = Math.max(1, Math.min(180, Number(payload?.durationDays || 7)));
-    const requestedSlots = Math.max(1, Math.min(10, Number(payload?.requestedSlots || 1)));
+    const durationUnit = this.normalizeDurationUnit(payload?.durationUnit);
+    const durationDays = DURATION_OPTIONS[durationUnit];
 
     const store = await this.resolveStore(storeId);
     const product = await this.resolveProduct(storeId, productId);
+    const user =
+      userId
+        ? await AppDataSource.getRepository(User).findOne({ where: { id: userId } })
+        : null;
+    const config = await this.loadPricingConfig();
+    const amount = this.priceByDuration(config, durationUnit);
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
 
     const row = this.repo.create({
       store,
       product,
-      status: 'PENDING',
+      status: 'PENDING_PAYMENT',
       paymentStatus: 'PENDING',
       durationDays,
-      requestedSlots,
+      durationUnit,
+      requestedSlots: 1,
+      priceAmount: amount,
       publicNote: String(payload?.publicNote || '').trim() || null,
-      requestedByUser: userId ? ({ id: userId } as any) : null,
-    } as any);
-    return this.repo.save(row);
+      paymentMethod: 'PIX',
+      requestedByUser: user || null,
+      paymentExpiresAt: expiresAt,
+    });
+    const created = (await this.repo.save(row)) as FeaturedProductRequest;
+
+    let provider = 'MOCK';
+    let providerId: string | null = null;
+    let paymentLink: string | null = null;
+    let qrCodeBase64: string | null = null;
+    let qrCodeText: string | null = null;
+    let providerExpiresAt: Date | null = expiresAt;
+
+    const mpEnabled = Boolean(env.mercadoPago.accessToken);
+    const payerEmail = String(user?.email || store?.owner?.email || '').trim();
+    const payerName = String(user?.fullName || store?.owner?.fullName || store?.name || 'Cliente').trim();
+
+    if (mpEnabled && payerEmail) {
+      try {
+        const mp: any = await this.mercadoPago.createPayment({
+          amount,
+          method: 'PIX',
+          description: `Destaque Hub ${durationUnit} - ${store.name}`,
+          externalReference: `featured_request:${created.id}`,
+          payer: {
+            email: payerEmail,
+            name: payerName,
+          },
+        });
+        provider = 'MERCADO_PAGO';
+        providerId = String(mp?.providerId || '');
+        paymentLink = mp?.paymentLink || null;
+        qrCodeBase64 = mp?.qrCodeBase64
+          ? (String(mp.qrCodeBase64).startsWith('data:image') ? mp.qrCodeBase64 : `data:image/png;base64,${mp.qrCodeBase64}`)
+          : null;
+        qrCodeText = mp?.qrCodeText || null;
+        if (mp?.expiresAt) {
+          const parsed = new Date(mp.expiresAt);
+          providerExpiresAt = Number.isFinite(parsed.getTime()) ? parsed : providerExpiresAt;
+        }
+      } catch {
+        // Fallback to mock QR payload below.
+      }
+    }
+
+    if (!qrCodeText) {
+      qrCodeText = `PIX DESTAQUE HUB | Store:${store.name} | Amount:${amount.toFixed(2)} | Request:${created.id}`;
+    }
+    if (!qrCodeBase64) {
+      qrCodeBase64 = await QRCode.toDataURL(qrCodeText);
+    }
+
+    created.paymentProvider = provider;
+    created.paymentProviderId = providerId;
+    created.paymentLink = paymentLink;
+    created.paymentQrCodeBase64 = qrCodeBase64;
+    created.paymentQrCodeText = qrCodeText;
+    created.paymentExpiresAt = providerExpiresAt;
+    await this.repo.save(created);
+
+    return created;
   }
 
   async listByStore(storeId: string, authStoreId: string | undefined) {
     if (authStoreId && authStoreId !== storeId) throw new AppError('AUTH-003', 403);
+    const config = await this.loadPricingConfig();
+    await this.reconcileExpiredAndQueue(config);
     return this.repo.find({
       where: { store: { id: storeId } as any },
       relations: [ 'product', 'requestedByUser' ],
       order: { createdAt: 'DESC' },
-      take: 100,
+      take: 120,
     });
   }
 
@@ -76,6 +282,58 @@ export class FeaturedProductService {
     }
     row.status = 'CANCELLED';
     return this.repo.save(row);
+  }
+
+  async markPaidFromWebhook(requestId: string, mpPayment?: any) {
+    const config = await this.loadPricingConfig();
+    await AppDataSource.transaction(async (manager) => {
+      const locked = await manager
+        .getRepository(FeaturedProductRequest)
+        .createQueryBuilder('request')
+        .setLock('pessimistic_write')
+        .where('request.id = :id', { id: requestId })
+        .getOne();
+      if (!locked) throw new AppError('GEN-001', 404, { message: 'Solicitação de destaque não encontrada.' });
+      if (locked.paymentStatus === 'PAID') return;
+
+      locked.paymentStatus = 'PAID';
+      locked.paymentPaidAt = new Date();
+      locked.paymentProvider = 'MERCADO_PAGO';
+      if (mpPayment?.id) locked.paymentProviderId = String(mpPayment.id);
+      const mpQr = mpPayment?.point_of_interaction?.transaction_data?.qr_code_base64;
+      const mpQrText = mpPayment?.point_of_interaction?.transaction_data?.qr_code;
+      const mpLink = mpPayment?.transaction_details?.external_resource_url;
+      if (mpQr) {
+        locked.paymentQrCodeBase64 = String(mpQr).startsWith('data:image') ? mpQr : `data:image/png;base64,${mpQr}`;
+      }
+      if (mpQrText) locked.paymentQrCodeText = mpQrText;
+      if (mpLink) locked.paymentLink = mpLink;
+
+      await this.reconcileExpiredAndQueue(config, manager);
+      const active = await this.activeSlotsCount(manager);
+      if (active < config.maxActiveSlots) {
+        const durationDays = Math.max(1, Number(locked.durationDays || 1));
+        locked.status = 'APPROVED';
+        locked.startsAt = new Date();
+        locked.endsAt = new Date(locked.startsAt.getTime() + durationDays * 24 * 60 * 60 * 1000);
+      } else {
+        locked.status = 'PAID_WAITING_SLOT';
+        locked.startsAt = null;
+        locked.endsAt = null;
+      }
+      await manager.save(locked);
+    });
+  }
+
+  async markFailedFromWebhook(requestId: string, mpPayment?: any) {
+    const row = await this.repo.findOne({ where: { id: requestId } });
+    if (!row) return;
+    if (String(row.paymentStatus || '').toUpperCase() === 'PAID') return;
+    row.paymentStatus = 'FAILED';
+    row.status = 'PAYMENT_FAILED';
+    row.paymentProvider = 'MERCADO_PAGO';
+    if (mpPayment?.id) row.paymentProviderId = String(mpPayment.id);
+    await this.repo.save(row);
   }
 
   async listForAdmin(filters: { status?: string; storeId?: string; limit?: number }) {
@@ -131,21 +389,17 @@ export class FeaturedProductService {
   }
 
   async listActivePublic(limit = 18) {
-    await AppDataSource.query(`
-      UPDATE featured_product_requests
-      SET status = 'EXPIRED'
-      WHERE status = 'APPROVED'
-        AND ends_at IS NOT NULL
-        AND ends_at < NOW()
-    `);
+    const config = await this.loadPricingConfig();
+    await this.reconcileExpiredAndQueue(config);
     const rows = await this.repo
       .createQueryBuilder('request')
       .leftJoinAndSelect('request.store', 'store')
       .leftJoinAndSelect('store.settings', 'settings')
       .leftJoinAndSelect('request.product', 'product')
       .where('UPPER(request.status) = :status', { status: 'APPROVED' })
+      .andWhere('UPPER(request.paymentStatus) = :paymentStatus', { paymentStatus: 'PAID' })
       .andWhere('(request.endsAt IS NULL OR request.endsAt >= NOW())')
-      .orderBy('request.createdAt', 'DESC')
+      .orderBy('request.startsAt', 'DESC')
       .take(Math.max(1, Math.min(60, Number(limit || 18))))
       .getMany();
 

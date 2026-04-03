@@ -20,6 +20,12 @@ const resolveStoreIdFromSession = () => {
 };
 
 export const featuredService = {
+  async getPricingByStore(storeId?: string) {
+    const targetStoreId = String(storeId || resolveStoreIdFromSession() || '').trim();
+    if (!targetStoreId) throw new Error('Sessão de loja inválida');
+    return apiClient.get(`/stores/${targetStoreId}/featured-pricing`);
+  },
+
   async listByStore(storeId?: string) {
     const targetStoreId = String(storeId || resolveStoreIdFromSession() || '').trim();
     if (!targetStoreId) throw new Error('Sessão de loja inválida');
@@ -27,7 +33,7 @@ export const featuredService = {
   },
 
   async createByStore(
-    payload: { productId: string; durationDays?: number; requestedSlots?: number; publicNote?: string },
+    payload: { productId: string; durationUnit: 'DAY' | 'WEEK' | 'MONTH'; publicNote?: string },
     storeId?: string
   ) {
     const targetStoreId = String(storeId || resolveStoreIdFromSession() || '').trim();

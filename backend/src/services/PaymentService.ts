@@ -27,6 +27,7 @@ import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { DeliveryBillingService } from './DeliveryBillingService';
 import { OrderReviewService } from './OrderReviewService';
+import { FeaturedProductService } from './FeaturedProductService';
 /**
  * Provides PaymentService functionality.
  *
@@ -39,6 +40,7 @@ export class PaymentService {
   private emailService = new EmailService();
   private deliveryBillingService = new DeliveryBillingService();
   private orderReviewService = new OrderReviewService();
+  private featuredProductService = new FeaturedProductService();
   private log = logger.child({ scope: 'PaymentService' });
   /**
    * Normalizes QR payload to Data URL format for consistent client rendering.
@@ -347,6 +349,15 @@ private resolvePlanChargeAmount(plan: Plan) {
           await this.orderReviewService.markTipPaidFromWebhook(reviewId, mpPayment);
         } else {
           await this.orderReviewService.markTipFailedFromWebhook(reviewId, mpPayment);
+        }
+        return { status: mpPayment.status };
+      }
+      if (paymentId.startsWith('featured_request:')) {
+        const requestId = paymentId.replace('featured_request:', '');
+        if (mpPayment.status === 'approved') {
+          await this.featuredProductService.markPaidFromWebhook(requestId, mpPayment);
+        } else {
+          await this.featuredProductService.markFailedFromWebhook(requestId, mpPayment);
         }
         return { status: mpPayment.status };
       }
