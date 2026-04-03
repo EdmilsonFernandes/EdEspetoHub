@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MagnifyingGlass, MapPin, Star, Clock, Scooter, Storefront, House, UserCircle, SealCheck, List } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
@@ -137,6 +137,8 @@ export function MarketplacePage() {
   const [distanceByStore, setDistanceByStore] = useState<Record<string, number>>({});
   const [distanceLoading, setDistanceLoading] = useState(false);
   const [rotatingHeroIndex, setRotatingHeroIndex] = useState(0);
+  const [isHeroAutoplayPaused, setIsHeroAutoplayPaused] = useState(false);
+  const heroResumeTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     document.title = 'Hub Já no Caminho';
@@ -390,12 +392,22 @@ export function MarketplacePage() {
       setRotatingHeroIndex(0);
       return;
     }
+    if (isHeroAutoplayPaused) return;
     setRotatingHeroIndex((prev) => (prev < length ? prev : 0));
     const timer = window.setInterval(() => {
       setRotatingHeroIndex((prev) => pickRandomIndex(length, prev));
     }, 3000);
     return () => window.clearInterval(timer);
-  }, [heroBanners]);
+  }, [heroBanners, isHeroAutoplayPaused]);
+
+  useEffect(
+    () => () => {
+      if (heroResumeTimerRef.current) {
+        window.clearTimeout(heroResumeTimerRef.current);
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -568,6 +580,24 @@ export function MarketplacePage() {
     }
     return [...fixedSponsored, ...rotatedOrganic];
   }, [featuredProducts, featuredOffset]);
+
+  const handlePauseHero = () => {
+    if (heroResumeTimerRef.current) {
+      window.clearTimeout(heroResumeTimerRef.current);
+      heroResumeTimerRef.current = null;
+    }
+    setIsHeroAutoplayPaused(true);
+  };
+
+  const handleResumeHero = () => {
+    if (heroResumeTimerRef.current) {
+      window.clearTimeout(heroResumeTimerRef.current);
+    }
+    heroResumeTimerRef.current = window.setTimeout(() => {
+      setIsHeroAutoplayPaused(false);
+      heroResumeTimerRef.current = null;
+    }, 2200);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 pb-28 sm:pb-20">
@@ -766,6 +796,10 @@ export function MarketplacePage() {
               <Link
                 to={`/${heroBanners[rotatingHeroIndex].slug}`}
                 className="group relative block aspect-[16/6] sm:aspect-[16/5] rounded-3xl p-4 sm:p-5 text-white shadow-lg overflow-hidden transition-transform duration-300 hover:scale-[1.01] active:scale-[0.99]"
+                onMouseEnter={handlePauseHero}
+                onMouseLeave={handleResumeHero}
+                onTouchStart={handlePauseHero}
+                onTouchEnd={handleResumeHero}
               >
                 <img
                   src={heroBanners[rotatingHeroIndex].image}
@@ -784,6 +818,13 @@ export function MarketplacePage() {
               </Link>
             ) : (
               <div className="relative aspect-[16/6] sm:aspect-[16/5] rounded-3xl p-4 sm:p-5 text-white shadow-lg overflow-hidden">
+                <div
+                  className="absolute inset-0 z-10"
+                  onMouseEnter={handlePauseHero}
+                  onMouseLeave={handleResumeHero}
+                  onTouchStart={handlePauseHero}
+                  onTouchEnd={handleResumeHero}
+                />
                 <img
                   src={heroBanners[rotatingHeroIndex].image}
                   alt={heroBanners[rotatingHeroIndex].title}
