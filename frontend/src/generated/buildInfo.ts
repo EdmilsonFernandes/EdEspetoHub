@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.213551.50962ebb",
-  "buildId": "0.1.9+20260403.213551.50962ebb-20260403.213551-50962ebb",
-  "builtAt": "2026-04-03T21:35:51.788Z",
-  "commitHash": "50962ebbbd50d8c5759741c197fde748d9ebeac3",
-  "shortHash": "50962ebb",
+  "versionInternal": "0.1.9+20260403.215853.cd2b324c",
+  "buildId": "0.1.9+20260403.215853.cd2b324c-20260403.215853-cd2b324c",
+  "builtAt": "2026-04-03T21:58:53.251Z",
+  "commitHash": "cd2b324c25ce8a9832e1edfbc3fe71ccf0e5d800",
+  "shortHash": "cd2b324c",
   "branch": "main",
   "commits": [
+    {
+      "hash": "cd2b324c25ce8a9832e1edfbc3fe71ccf0e5d800",
+      "shortHash": "cd2b324c",
+      "dateIso": "2026-04-03T18:38:20-03:00",
+      "subject": "Hub: premium CTA polish + sponsored star badge; fix open-hours timezone logic"
+    },
     {
       "hash": "50962ebbbd50d8c5759741c197fde748d9ebeac3",
       "shortHash": "50962ebb",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "5e8e022c",
       "dateIso": "2026-04-03T12:30:44-03:00",
       "subject": "Renomeia discovery para Praca e reforca posicionamento do hub"
-    },
-    {
-      "hash": "59a02411f129983f925a37f355c34a6a6660119c",
-      "shortHash": "59a02411",
-      "dateIso": "2026-04-03T12:28:49-03:00",
-      "subject": "Adiciona acesso ao marketplace na navegacao da landing"
     }
   ]
 } as const;

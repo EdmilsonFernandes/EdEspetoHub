@@ -117,6 +117,22 @@ export class StoreController {
     if (h < 0 || h > 23 || m < 0 || m > 59) return null;
     return h * 60 + m;
   }
+
+  /**
+   * Resolves opening-hours entry for a given JS weekday (0..6),
+   * accepting legacy persisted formats (0..6, ISO 1..7, and Sun-first 1..7).
+   *
+   * @author Edmilson Lopes
+   */
+  private static resolveDayEntry(openingHours: any[], jsDay: number) {
+    const asIso = jsDay === 0 ? 7 : jsDay; // Mon=1..Sun=7
+    const asSunFirst = jsDay + 1; // Sun=1..Sat=7
+    const candidates = [jsDay, asIso, asSunFirst];
+    return openingHours.find((entry: any) => {
+      const value = Number(entry?.day);
+      return Number.isFinite(value) && candidates.includes(value);
+    });
+  }
     /**
    * Executes sanitize order types by plan business logic.
    *
@@ -157,7 +173,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
      * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
      * @date 2025-12-17
      */
-    const dayEntry = openingHours.find((entry: any) => Number(entry?.day) === day);
+    const dayEntry = StoreController.resolveDayEntry(openingHours, day);
     if (!dayEntry || dayEntry?.enabled === false) return false;
 
     const intervals = Array.isArray(dayEntry.intervals) ? dayEntry.intervals : [];
@@ -193,7 +209,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
 
     for (let dayOffset = 0; dayOffset <= 7; dayOffset += 1) {
       const day = (currentDay + dayOffset) % 7;
-      const dayEntry = openingHours.find((entry: any) => Number(entry?.day) === day);
+      const dayEntry = StoreController.resolveDayEntry(openingHours, day);
       if (!dayEntry || dayEntry?.enabled === false) continue;
 
       const intervals = (Array.isArray(dayEntry.intervals) ? dayEntry.intervals : [])

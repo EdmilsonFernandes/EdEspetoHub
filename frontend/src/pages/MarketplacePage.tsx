@@ -654,43 +654,44 @@ export function MarketplacePage() {
 
       <main className="max-w-[1200px] mx-auto px-4 pt-3 space-y-5">
         <section
-          className="rounded-2xl border border-slate-200/30 bg-white/40 backdrop-blur-xl p-3.5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] transition-all duration-300"
-          style={{ borderColor: `${theme.secondary}55` }}
+          className="rounded-2xl border border-white/25 bg-white/30 backdrop-blur-xl px-3 py-2.5 shadow-[0_10px_26px_-18px_rgba(15,23,42,0.28)] transition-all duration-300"
+          style={{ borderColor: `${theme.secondary}33` }}
         >
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5 min-w-0">
               <Link to="/" className="shrink-0">
                 <img
                   src="/janocaminho.jpg"
                   alt="Já no Caminho"
-                className="h-9 w-9 rounded-xl object-cover border border-slate-200 ring-1 ring-white/70"
+                  className="h-8 w-8 rounded-xl object-cover border border-slate-200 ring-1 ring-white/70"
                 style={{ borderColor: `${theme.primary}44` }}
                 />
               </Link>
-            <div className="min-w-0">
-                <h1 className="truncate text-[15px] sm:text-base font-black text-slate-900">Já no Caminho</h1>
-                <p className="text-[11px] text-slate-500 font-medium">Os melhores da região, entregues agora.</p>
-                <div className="mt-2 flex items-center gap-2">
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <h1 className="truncate text-[14px] sm:text-[15px] font-black text-slate-900">Já no Caminho</h1>
+                  <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-sky-100 text-sky-700">
+                    <SealCheck size={10} weight="fill" />
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-500 font-medium">Os melhores da região, entregues agora.</p>
+                <div className="mt-1.5 flex items-center gap-1.5 whitespace-nowrap">
                   <Link
                     to="/"
-                    className="inline-flex items-center rounded-full border border-slate-200 bg-white/90 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+                    className="inline-flex items-center rounded-full border border-slate-200 bg-white/85 px-2 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
                   >
-                    Conhecer plataforma
+                    Conhecer
                   </Link>
                   <Link
                     to="/create?plan=trial"
-                    className="inline-flex items-center rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-white shadow-[0_8px_20px_-12px_rgba(14,165,233,0.75)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                    className="inline-flex items-center rounded-full px-2 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-white shadow-[0_8px_20px_-12px_rgba(14,165,233,0.75)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
                     style={{ backgroundColor: theme.primary }}
                   >
-                    Criar minha loja
+                    Criar loja
                   </Link>
                 </div>
+              </div>
             </div>
-            </div>
-            <span className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-2 py-1 text-[10px] font-bold text-sky-700">
-              <SealCheck size={12} weight="fill" />
-              Verificado
-            </span>
           </div>
         </section>
 
@@ -698,7 +699,7 @@ export function MarketplacePage() {
           <div className="relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 z-[2] w-5 bg-gradient-to-r from-slate-50 to-transparent" />
             <div className="pointer-events-none absolute inset-y-0 right-0 z-[2] w-5 bg-gradient-to-l from-slate-50 to-transparent" />
-            <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide px-0.5 py-0.5 snap-x snap-mandatory">
+            <div className="flex items-center gap-3 overflow-x-auto no-scrollbar scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-0.5 py-0.5 snap-x snap-mandatory">
             {(() => {
               const active = segmentFilter === 'all';
               return (
