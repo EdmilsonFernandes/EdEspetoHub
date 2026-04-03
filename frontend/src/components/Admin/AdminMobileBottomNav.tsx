@@ -1,14 +1,14 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ChartBar, ChefHat, CurrencyDollar, Package } from '@phosphor-icons/react';
+import { ChartBar, ChefHat, CurrencyDollar, Package, SignOut } from '@phosphor-icons/react';
 import { orderService } from '../../services/orderService';
 import { useAuth } from '../../contexts/AuthContext';
 
 export function AdminMobileBottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { auth } = useAuth();
+  const { auth, logout } = useAuth();
   const role = String(auth?.user?.role || '').toUpperCase();
   const isOperator = role === 'OPERATOR' || role === 'CHURRASQUEIRO';
   const isSuperAdmin = role === 'SUPER_ADMIN';
@@ -217,6 +217,20 @@ export function AdminMobileBottomNav() {
   const items = isOperator
     ? baseItems.filter((item) => item.id === 'monitor' || item.id === 'produtos' || item.id === 'catalogo')
     : baseItems.filter((item) => item.id !== 'produtos');
+  const navItems = [
+    ...items,
+    {
+      id: 'logout',
+      label: 'Sair',
+      icon: SignOut,
+      active: false,
+      onClick: () => {
+        logout();
+        if (typeof window !== 'undefined') sessionStorage.removeItem('admin:activeTab');
+        navigate('/admin');
+      },
+    },
+  ];
 
   if (isSuperAdmin || hiddenByOverlay) return null;
 
@@ -227,8 +241,8 @@ export function AdminMobileBottomNav() {
         transform: isVisible ? 'translateY(0)' : 'translateY(calc(100% - 4px))',
       }}
     >
-      <ul className={`pointer-events-auto mx-auto grid ${items.length <= 2 ? 'grid-cols-2' : items.length === 3 ? 'grid-cols-3' : 'grid-cols-4'} gap-1 max-w-none rounded-none border-t border-slate-200/40 bg-white/72 p-1.5 pb-[max(env(safe-area-inset-bottom),4px)] shadow-[0_-12px_24px_-20px_rgba(15,23,42,0.35)] backdrop-blur-2xl`}>
-        {items.map((item) => {
+      <ul className={`pointer-events-auto mx-auto grid ${navItems.length <= 2 ? 'grid-cols-2' : navItems.length === 3 ? 'grid-cols-3' : navItems.length === 4 ? 'grid-cols-4' : 'grid-cols-5'} gap-1 max-w-none rounded-none border-t border-slate-200/40 bg-white/72 p-1.5 pb-[max(env(safe-area-inset-bottom),4px)] shadow-[0_-12px_24px_-20px_rgba(15,23,42,0.35)] backdrop-blur-2xl`}>
+        {navItems.map((item) => {
           const Icon = item.icon;
           return (
             <li key={item.id}>

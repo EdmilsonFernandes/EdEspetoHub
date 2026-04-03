@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.204343.946695b3",
-  "buildId": "0.1.9+20260403.204343.946695b3-20260403.204343-946695b3",
-  "builtAt": "2026-04-03T20:43:43.388Z",
-  "commitHash": "946695b309645223ed1ffd2577db48f76fb97fcd",
-  "shortHash": "946695b3",
+  "versionInternal": "0.1.9+20260403.210405.00ee46f9",
+  "buildId": "0.1.9+20260403.210405.00ee46f9-20260403.210405-00ee46f9",
+  "builtAt": "2026-04-03T21:04:05.455Z",
+  "commitHash": "00ee46f90d46cbafd1a1903c47c97f09b6e50e49",
+  "shortHash": "00ee46f9",
   "branch": "main",
   "commits": [
+    {
+      "hash": "00ee46f90d46cbafd1a1903c47c97f09b6e50e49",
+      "shortHash": "00ee46f9",
+      "dateIso": "2026-04-03T17:49:41-03:00",
+      "subject": "Hub: refine store status/modes + opening labels; auto-clean docker build cache on deploy"
+    },
     {
       "hash": "946695b309645223ed1ffd2577db48f76fb97fcd",
       "shortHash": "946695b3",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "8b9ca8c9",
       "dateIso": "2026-04-03T12:21:32-03:00",
       "subject": "Refina documentacao tecnica de metodos criticos no backend"
-    },
-    {
-      "hash": "f5ed7bd35c982073fed53e4073cc358e2c0d6b82",
-      "shortHash": "f5ed7bd3",
-      "dateIso": "2026-04-03T12:18:09-03:00",
-      "subject": "Adiciona documentacao tecnica em ingles para metodos do backend"
     }
   ]
 } as const;

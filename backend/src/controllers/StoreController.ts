@@ -25,6 +25,7 @@ const subscriptionService = new SubscriptionService();
 const orderReviewService = new OrderReviewService();
 const DEMO_SLUGS = new Set([ 'demo', 'test-store' ]);
 const log = logger.child({ scope: 'StoreController' });
+const SAO_PAULO_TZ = 'America/Sao_Paulo';
 /**
  * Builds demo store.
  *
@@ -89,6 +90,36 @@ const buildDemoStore = (slug: string) => {
  * @date 2025-12-17
  */
 export class StoreController {
+  /**
+   * Gets current Sao Paulo local day and minutes.
+   *
+   * @author Edmilson Lopes
+   */
+  private static getSaoPauloNowParts() {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: SAO_PAULO_TZ,
+      weekday: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+    const parts = formatter.formatToParts(new Date());
+    const weekdayRaw = String(parts.find((part) => part.type === 'weekday')?.value || '').toLowerCase();
+    const hour = Number(parts.find((part) => part.type === 'hour')?.value || 0);
+    const minute = Number(parts.find((part) => part.type === 'minute')?.value || 0);
+    const weekDayMap: Record<string, number> = {
+      sun: 0,
+      mon: 1,
+      tue: 2,
+      wed: 3,
+      thu: 4,
+      fri: 5,
+      sat: 6,
+    };
+    const day = weekDayMap[weekdayRaw.slice(0, 3)] ?? 0;
+    const minutes = Math.max(0, Math.min(23, Number.isFinite(hour) ? hour : 0)) * 60 + Math.max(0, Math.min(59, Number.isFinite(minute) ? minute : 0));
+    return { day, minutes };
+  }
     /**
    * Executes sanitize order types by plan business logic.
    *
@@ -122,9 +153,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
     const openingHours = store?.settings?.openingHours;
     if (!Array.isArray(openingHours) || openingHours.length === 0) return true;
 
-    const now = new Date();
-    const day = now.getDay();
-    const minutes = now.getHours() * 60 + now.getMinutes();
+    const { day, minutes } = StoreController.getSaoPauloNowParts();
     /**
      * Handles day entry.
      *
@@ -162,9 +191,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
     const openingHours = store?.settings?.openingHours;
     if (!Array.isArray(openingHours) || openingHours.length === 0) return null;
 
-    const now = new Date();
-    const currentDay = now.getDay();
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const { day: currentDay, minutes: currentMinutes } = StoreController.getSaoPauloNowParts();
     const weekdayNames = [ 'domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado' ];
 
     for (let dayOffset = 0; dayOffset <= 7; dayOffset += 1) {
@@ -298,7 +325,10 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
             address: store.owner.address,
           }
           : null,
-        openNow: StoreController.isStoreOpenNow(store),
+        openNow:
+          Boolean(store.open) &&
+          (store?.settings?.isOrderingEnabled !== false) &&
+          StoreController.isStoreOpenNow(store),
       };
       return res.json({ ...sanitizedStore, subscription });
     } catch (error: any) {

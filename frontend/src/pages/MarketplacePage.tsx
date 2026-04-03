@@ -659,15 +659,32 @@ export function MarketplacePage() {
         >
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-            <img
-              src="/janocaminho.jpg"
-              alt="Já no Caminho"
+              <Link to="/" className="shrink-0">
+                <img
+                  src="/janocaminho.jpg"
+                  alt="Já no Caminho"
                 className="h-9 w-9 rounded-xl object-cover border border-slate-200 ring-1 ring-white/70"
                 style={{ borderColor: `${theme.primary}44` }}
-            />
+                />
+              </Link>
             <div className="min-w-0">
                 <h1 className="truncate text-[15px] sm:text-base font-black text-slate-900">Já no Caminho</h1>
                 <p className="text-[11px] text-slate-500 font-medium">Os melhores da região, entregues agora.</p>
+                <div className="mt-1 flex items-center gap-2">
+                  <Link
+                    to="/"
+                    className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600 hover:text-slate-900"
+                  >
+                    Conhecer plataforma
+                  </Link>
+                  <span className="text-slate-300">•</span>
+                  <Link
+                    to="/create?plan=trial"
+                    className="text-[10px] font-bold uppercase tracking-[0.12em] text-sky-700 hover:text-sky-900"
+                  >
+                    Criar minha loja
+                  </Link>
+                </div>
             </div>
             </div>
             <span className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-2 py-1 text-[10px] font-bold text-sky-700">
@@ -678,13 +695,16 @@ export function MarketplacePage() {
         </section>
 
         <section>
-          <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide px-0.5 py-0.5">
+          <div className="relative">
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-[2] w-5 bg-gradient-to-r from-slate-50 to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-[2] w-5 bg-gradient-to-l from-slate-50 to-transparent" />
+            <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide px-0.5 py-0.5 snap-x snap-mandatory">
             {(() => {
               const active = segmentFilter === 'all';
               return (
                 <button
                   type="button"
-                  className="min-w-[64px] flex-shrink-0 transition-transform duration-200 active:scale-95"
+                    className="min-w-[64px] flex-shrink-0 snap-start transition-transform duration-200 active:scale-95"
                   onClick={() => setSegmentFilter('all')}
                   aria-label="Ver todas as categorias"
                 >
@@ -713,7 +733,7 @@ export function MarketplacePage() {
               <button
                 key={`${item.label}-${index}`}
                 type="button"
-                className="min-w-[64px] flex-shrink-0 transition-transform duration-200 active:scale-95"
+                    className="min-w-[64px] flex-shrink-0 snap-start transition-transform duration-200 active:scale-95"
                 onClick={() => setSegmentFilter((prev) => (prev === item.label ? 'all' : item.label))}
               >
                 <span
@@ -732,9 +752,10 @@ export function MarketplacePage() {
                   {item.label}
                 </span>
               </button>
-                );
+              );
               })()
             ))}
+            </div>
           </div>
         </section>
 
