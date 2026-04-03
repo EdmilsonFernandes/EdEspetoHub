@@ -126,6 +126,7 @@ export function MarketplacePage() {
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
   const [featuredLoading, setFeaturedLoading] = useState(false);
+  const [featuredOffset, setFeaturedOffset] = useState(0);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationLabel, setLocationLabel] = useState('Sua região');
   const [distanceByStore, setDistanceByStore] = useState<Record<string, number>>({});
@@ -212,6 +213,17 @@ export function MarketplacePage() {
     const timer = window.setTimeout(() => setDebouncedQuery(query.trim().toLowerCase()), 180);
     return () => window.clearTimeout(timer);
   }, [query]);
+
+  useEffect(() => {
+    if (featuredProducts.length <= 8) {
+      setFeaturedOffset(0);
+      return;
+    }
+    const timer = window.setInterval(() => {
+      setFeaturedOffset((prev) => (prev + 1) % featuredProducts.length);
+    }, 3000);
+    return () => window.clearInterval(timer);
+  }, [featuredProducts]);
 
   useEffect(() => {
     let lastY = window.scrollY || 0;
@@ -505,6 +517,17 @@ export function MarketplacePage() {
     return `${km.toFixed(1)} km`;
   };
 
+  const displayedFeaturedProducts = useMemo(() => {
+    const items = Array.isArray(featuredProducts) ? featuredProducts : [];
+    if (items.length <= 8) return items;
+    const windowSize = 8;
+    const visible: FeaturedProduct[] = [];
+    for (let i = 0; i < windowSize; i += 1) {
+      visible.push(items[(featuredOffset + i) % items.length]);
+    }
+    return visible;
+  }, [featuredProducts, featuredOffset]);
+
   return (
     <div className="min-h-screen bg-slate-50 pb-28 sm:pb-20">
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100 shadow-sm">
@@ -519,7 +542,7 @@ export function MarketplacePage() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="O que você quer pedir agora?"
-              className="w-full rounded-2xl bg-slate-100 border-none px-12 py-4 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
+              className="h-11 w-full rounded-2xl bg-slate-100 border-none px-12 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
             />
           </div>
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
@@ -538,7 +561,7 @@ export function MarketplacePage() {
                   key={filter}
                   type="button"
                   onClick={() => setQuickFilter(filter as any)}
-                  className={`rounded-full px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] whitespace-nowrap transition ${
+                  className={`rounded-full px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] whitespace-nowrap transition-all duration-300 active:scale-95 ${
                     active ? 'text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                   style={active ? { backgroundColor: theme.primary } : undefined}
@@ -640,7 +663,7 @@ export function MarketplacePage() {
                 {heroBanners[rotatingHeroIndex].slug ? (
                   <Link
                     to={`/${heroBanners[rotatingHeroIndex].slug}`}
-                    className="mt-2.5 inline-flex rounded-full bg-white/95 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-900"
+                    className="mt-2.5 inline-flex rounded-full bg-white/95 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-900 transition-transform duration-300 hover:scale-105 active:scale-95"
                   >
                     Ver loja
                   </Link>
@@ -671,11 +694,11 @@ export function MarketplacePage() {
                 </div>
               ))}
             {!featuredLoading &&
-              featuredProducts.map((item) => (
+              displayedFeaturedProducts.map((item) => (
                 <Link
                   key={`${item.storeSlug}-${item.id}`}
                   to={`/${item.storeSlug}`}
-                  className="group relative min-w-[156px] rounded-2xl border border-slate-200 bg-white p-2 shadow-sm hover:shadow-md transition"
+                  className="group relative min-w-[156px] rounded-2xl border border-slate-200 bg-white p-2 shadow-sm transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-lg active:scale-[0.99]"
                 >
                   <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-20 w-full rounded-xl object-cover" />
                   <span className="absolute top-3 left-3 rounded-full bg-slate-100/95 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] text-slate-600">
@@ -740,7 +763,7 @@ export function MarketplacePage() {
                 <Link
                   key={store.id}
                   to={`/${store.slug}`}
-                  className="w-full max-w-[420px] group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_12px_32px_rgba(0,0,0,0.05)] transition-all duration-300 hover:scale-[1.01] hover:shadow-lg active:scale-[0.99]"
+                  className="w-full max-w-[420px] group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_12px_32px_rgba(0,0,0,0.05)] transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-[0_20px_44px_-26px_rgba(15,23,42,0.55)] active:scale-[0.99]"
                 >
                   <div className="relative aspect-[16/6] overflow-hidden">
                     <img
