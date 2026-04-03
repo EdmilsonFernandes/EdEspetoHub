@@ -19,9 +19,10 @@ function App() {
         <Router>
           <Routes>
             <Route path="/" element={<LandingPage />} />
-            <Route path="/marketplace" element={<MarketplacePage />} />
-            <Route path="/descobrir" element={<MarketplacePage />} />
-            <Route path="/praca" element={<MarketplacePage />} />
+            <Route path="/hub" element={<MarketplacePage />} />
+            <Route path="/marketplace" element={<Navigate to="/hub" replace />} />
+            <Route path="/descobrir" element={<Navigate to="/hub" replace />} />
+            <Route path="/praca" element={<Navigate to="/hub" replace />} />
             <Route path="/portfolio" element={<PortfolioPage />} />
             <Route path="/arquitetura" element={<ArchitecturePage />} />
             <Route path="/instalar" element={<InstallAppPage />} />

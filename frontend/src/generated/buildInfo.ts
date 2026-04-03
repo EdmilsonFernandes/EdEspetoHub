@@ -5,13 +5,91 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.143309.cf62ec6",
-  "buildId": "0.1.9+20260403.143309.cf62ec6-20260403.143309-cf62ec6",
-  "builtAt": "2026-04-03T14:33:09.351Z",
-  "commitHash": "cf62ec6d1fb6a9671f22ae1aad08c2f6ab0f762c",
-  "shortHash": "cf62ec6",
+  "versionInternal": "0.1.9+20260403.153433.5e8e022",
+  "buildId": "0.1.9+20260403.153433.5e8e022-20260403.153433-5e8e022",
+  "builtAt": "2026-04-03T15:34:33.966Z",
+  "commitHash": "5e8e022c9bbab8b029b3a96c918afb2a914f7714",
+  "shortHash": "5e8e022",
   "branch": "main",
   "commits": [
+    {
+      "hash": "5e8e022c9bbab8b029b3a96c918afb2a914f7714",
+      "shortHash": "5e8e022",
+      "dateIso": "2026-04-03T12:30:44-03:00",
+      "subject": "Renomeia discovery para Praca e reforca posicionamento do hub"
+    },
+    {
+      "hash": "59a02411f129983f925a37f355c34a6a6660119c",
+      "shortHash": "59a0241",
+      "dateIso": "2026-04-03T12:28:49-03:00",
+      "subject": "Adiciona acesso ao marketplace na navegacao da landing"
+    },
+    {
+      "hash": "e7f7e11dd9009e54db87449842e06e0a662a4f88",
+      "shortHash": "e7f7e11",
+      "dateIso": "2026-04-03T12:26:17-03:00",
+      "subject": "Cria pagina marketplace discovery com UX mobile premium"
+    },
+    {
+      "hash": "8b9ca8c9504d4581b88e5e10f8657578f2241558",
+      "shortHash": "8b9ca8c",
+      "dateIso": "2026-04-03T12:21:32-03:00",
+      "subject": "Refina documentacao tecnica de metodos criticos no backend"
+    },
+    {
+      "hash": "f5ed7bd35c982073fed53e4073cc358e2c0d6b82",
+      "shortHash": "f5ed7bd",
+      "dateIso": "2026-04-03T12:18:09-03:00",
+      "subject": "Adiciona documentacao tecnica em ingles para metodos do backend"
+    },
+    {
+      "hash": "6abdc5a5ebd83a3899d76218262b1d6ddefa1d78",
+      "shortHash": "6abdc5a",
+      "dateIso": "2026-04-03T12:09:51-03:00",
+      "subject": "Corrige acesso de Produtos para operador e simplifica configuracoes"
+    },
+    {
+      "hash": "2e47a2a8ab1579ae1001a30fb0c6161f41cfb1d6",
+      "shortHash": "2e47a2a",
+      "dateIso": "2026-04-03T12:03:39-03:00",
+      "subject": "Adiciona mapeamento completo dos metodos da API em ingles"
+    },
+    {
+      "hash": "5fb5a6a58c79a6d362b4d4de2b3acfd9bbaa5d9c",
+      "shortHash": "5fb5a6a",
+      "dateIso": "2026-04-03T11:58:57-03:00",
+      "subject": "Eleva portfolio da landing com visual premium e CTA por loja"
+    },
+    {
+      "hash": "a5ceca828e6ac2ee4e951adbed526f75adee2659",
+      "shortHash": "a5ceca8",
+      "dateIso": "2026-04-03T11:55:39-03:00",
+      "subject": "Libera produtos para operador na navegacao mobile e desktop"
+    },
+    {
+      "hash": "1a4dc5f6baca679b03822b9cf6a3acca09d1f630",
+      "shortHash": "1a4dc5f",
+      "dateIso": "2026-04-03T11:52:42-03:00",
+      "subject": "Padroniza nomes de navegacao para Loja Online no admin"
+    },
+    {
+      "hash": "d384ac8a816d45144644a662604d6c89c570aebb",
+      "shortHash": "d384ac8",
+      "dateIso": "2026-04-03T11:47:24-03:00",
+      "subject": "Adiciona stepper guiado na configuracao da loja"
+    },
+    {
+      "hash": "ffdc05d6c83793cab4acc8418b06f70d5443a1fc",
+      "shortHash": "ffdc05d",
+      "dateIso": "2026-04-03T11:44:13-03:00",
+      "subject": "Refina configuracoes da loja com secoes guiadas e menos scroll"
+    },
+    {
+      "hash": "273ebedf48bd8d43da4742d5a32274f211e3c352",
+      "shortHash": "273ebed",
+      "dateIso": "2026-04-03T11:33:42-03:00",
+      "subject": "fix(catalog): stabilize category drawer and always show full category list"
+    },
     {
       "hash": "cf62ec6d1fb6a9671f22ae1aad08c2f6ab0f762c",
       "shortHash": "cf62ec6",
@@ -113,84 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "4214612",
       "dateIso": "2026-04-02T14:25:34-03:00",
       "subject": "fix(menu): open category drawer via state to avoid DialogTrigger context error"
-    },
-    {
-      "hash": "2d68f7be71609065e5134940c8a7fea2a58e22d4",
-      "shortHash": "2d68f7b",
-      "dateIso": "2026-04-02T14:15:05-03:00",
-      "subject": "fix(menu): activate last category at page end and brand active dot in drawer"
-    },
-    {
-      "hash": "3bf07e4f50ed190018a0b6256468251f51b60ad4",
-      "shortHash": "3bf07e4",
-      "dateIso": "2026-04-02T14:12:45-03:00",
-      "subject": "style(menu): add Vaul snap points for native category drawer feel"
-    },
-    {
-      "hash": "ac6ece3fce5874ede84daa9c6f3c81f8001a24e7",
-      "shortHash": "ac6ece3",
-      "dateIso": "2026-04-02T14:10:34-03:00",
-      "subject": "feat(menu): replace category sheet with Vaul bottom drawer"
-    },
-    {
-      "hash": "141300ee0d090dea999c2c7591055f4aab539ac4",
-      "shortHash": "141300e",
-      "dateIso": "2026-04-02T12:33:02-03:00",
-      "subject": "style(menu): move category drawer icon to left and simplify pills"
-    },
-    {
-      "hash": "afc24dd9fcf7fbe784eb45578adc7d772a640df1",
-      "shortHash": "afc24dd",
-      "dateIso": "2026-04-02T12:30:35-03:00",
-      "subject": "fix(queue): stabilize desktop order-card actions with wrap-safe footer"
-    },
-    {
-      "hash": "3c0874f1e2b6b15b053ef0d3882f25a871c6c4f4",
-      "shortHash": "3c0874f",
-      "dateIso": "2026-04-02T12:23:53-03:00",
-      "subject": "fix(menu): keep sticky header below product modal layer"
-    },
-    {
-      "hash": "11230d0bd3dbee34e1634ff28cd333c1de4cbe0a",
-      "shortHash": "11230d0",
-      "dateIso": "2026-04-02T12:18:53-03:00",
-      "subject": "fix(menu): unify top sticky search and categories with stable top alignment"
-    },
-    {
-      "hash": "8506a8c7cf7b6af838aa2260cb7fb8d00fe68bfe",
-      "shortHash": "8506a8c",
-      "dateIso": "2026-04-02T12:09:04-03:00",
-      "subject": "fix(queue): prevent desktop action button clipping on order cards"
-    },
-    {
-      "hash": "4e7f2dfb0c46f1b759689f7a6ca44ea5f72332b0",
-      "shortHash": "4e7f2df",
-      "dateIso": "2026-04-02T12:06:57-03:00",
-      "subject": "style(menu): refine sticky search/categories and premium header card"
-    },
-    {
-      "hash": "07a0175bd568552dfdcc00e96e09cbfe73653835",
-      "shortHash": "07a0175",
-      "dateIso": "2026-04-02T11:53:11-03:00",
-      "subject": "style(queue): fix action button containment and footer mobile alignment"
-    },
-    {
-      "hash": "72c1866ae365e9a80503dbaa531f1e217b79d168",
-      "shortHash": "72c1866",
-      "dateIso": "2026-04-02T11:47:25-03:00",
-      "subject": "feat(menu): sticky search/categories and premium header actions"
-    },
-    {
-      "hash": "7c8e85d072b2504b364eecbf96c30ea3603f5e5b",
-      "shortHash": "7c8e85d",
-      "dateIso": "2026-04-02T11:35:52-03:00",
-      "subject": "style(orders): premium visual polish for cards, filters and value hierarchy"
-    },
-    {
-      "hash": "084baa8e9b310857d19ec991d96d942c3cb3e637",
-      "shortHash": "084baa8",
-      "dateIso": "2026-04-02T11:31:07-03:00",
-      "subject": "style(sidebar-footer): refine minimal branding spacing and typography"
     }
   ]
 } as const;

@@ -101,7 +101,7 @@ export function MarketplacePage() {
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
 
   useEffect(() => {
-    document.title = 'Praça Já no Caminho';
+    document.title = 'Hub Já no Caminho';
   }, []);
 
   useEffect(() => {
@@ -114,7 +114,7 @@ export function MarketplacePage() {
       })
       .catch((err: any) => {
         if (!active) return;
-        setError(err?.message || 'Não foi possível carregar a praça de lojas agora.');
+        setError(err?.message || 'Não foi possível carregar o Hub de lojas agora.');
       })
       .finally(() => {
         if (!active) return;
@@ -348,8 +348,8 @@ export function MarketplacePage() {
         </section>
 
         <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg sm:text-2xl font-black text-slate-900">Praça Já no Caminho</h2>
+          <div className="flex flex-col items-center justify-center text-center gap-1">
+            <h2 className="text-lg sm:text-2xl font-black text-slate-900">Hub Já no Caminho</h2>
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">{filteredStores.length} resultados</p>
           </div>
 
@@ -382,12 +382,12 @@ export function MarketplacePage() {
           )}
 
           {!loading && !error && filteredStores.length > 0 && (
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 justify-items-center">
               {filteredStores.map((store) => (
                 <Link
                   key={store.id}
                   to={`/${store.slug}`}
-                  className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+                  className="w-full max-w-[420px] group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
                 >
                   <div className="relative aspect-[16/6] overflow-hidden">
                     <img
@@ -453,7 +453,7 @@ export function MarketplacePage() {
           </button>
           <button type="button" className="flex flex-col items-center justify-center text-slate-900">
             <Storefront size={18} weight="fill" />
-            <span className="text-[9px] font-black uppercase">Praça</span>
+            <span className="text-[9px] font-black uppercase">Hub</span>
           </button>
           <button type="button" onClick={() => navigate('/portfolio')} className="flex flex-col items-center justify-center text-slate-500">
             <Heart size={18} />
