@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Ja no Caminho</string>
+    <string name="title_activity_main">Ja no Caminho</string>
+    <string name="package_name">com.janocaminho.app</string>
+    <string name="custom_url_scheme">com.janocaminho.app</string>
+</resources>

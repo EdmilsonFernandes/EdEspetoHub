@@ -1,0 +1,22 @@
+﻿{
+  "name": "ed-espeto-mobile",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Android/iOS wrapper for Ja no Caminho Hub using Capacitor",
+  "scripts": {
+    "android:init": "npx cap add android",
+    "android:sync": "npx cap sync android",
+    "android:open": "npx cap open android",
+    "android:run": "npx cap run android",
+    "apk:debug": "cd android && ./gradlew assembleDebug",
+    "doctor": "npx cap doctor"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/core": "^7.4.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.3",
+    "typescript": "^5.9.3"
+  }
+}
