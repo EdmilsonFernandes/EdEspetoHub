@@ -670,17 +670,17 @@ export function MarketplacePage() {
             <div className="min-w-0">
                 <h1 className="truncate text-[15px] sm:text-base font-black text-slate-900">Já no Caminho</h1>
                 <p className="text-[11px] text-slate-500 font-medium">Os melhores da região, entregues agora.</p>
-                <div className="mt-1 flex items-center gap-2">
+                <div className="mt-2 flex items-center gap-2">
                   <Link
                     to="/"
-                    className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600 hover:text-slate-900"
+                    className="inline-flex items-center rounded-full border border-slate-200 bg-white/90 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
                   >
                     Conhecer plataforma
                   </Link>
-                  <span className="text-slate-300">•</span>
                   <Link
                     to="/create?plan=trial"
-                    className="text-[10px] font-bold uppercase tracking-[0.12em] text-sky-700 hover:text-sky-900"
+                    className="inline-flex items-center rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-white shadow-[0_8px_20px_-12px_rgba(14,165,233,0.75)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                    style={{ backgroundColor: theme.primary }}
                   >
                     Criar minha loja
                   </Link>
@@ -827,9 +827,8 @@ export function MarketplacePage() {
                 >
                   <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-[68px] sm:h-[74px] w-full rounded-xl object-cover" />
                   {item.sponsored ? (
-                    <span className="absolute top-2.5 left-2.5 inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50/95 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-[0.08em] text-amber-700">
-                      <Star size={9} weight="fill" className="text-amber-500" />
-                      Patrocinado
+                    <span className="absolute top-2.5 left-2.5 inline-flex h-5 w-5 items-center justify-center rounded-full border border-amber-200 bg-amber-50/95 text-amber-600 shadow-sm ring-1 ring-white/80">
+                      <Star size={10} weight="fill" className="text-amber-500" />
                     </span>
                   ) : (
                     <span className="absolute top-2.5 left-2.5 rounded-full bg-slate-100/95 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-[0.08em] text-slate-600">

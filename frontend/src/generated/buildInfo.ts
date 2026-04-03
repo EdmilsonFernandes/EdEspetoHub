@@ -5,13 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.210405.00ee46f9",
-  "buildId": "0.1.9+20260403.210405.00ee46f9-20260403.210405-00ee46f9",
-  "builtAt": "2026-04-03T21:04:05.455Z",
-  "commitHash": "00ee46f90d46cbafd1a1903c47c97f09b6e50e49",
-  "shortHash": "00ee46f9",
+  "versionInternal": "0.1.9+20260403.213551.50962ebb",
+  "buildId": "0.1.9+20260403.213551.50962ebb-20260403.213551-50962ebb",
+  "builtAt": "2026-04-03T21:35:51.788Z",
+  "commitHash": "50962ebbbd50d8c5759741c197fde748d9ebeac3",
+  "shortHash": "50962ebb",
   "branch": "main",
   "commits": [
+    {
+      "hash": "50962ebbbd50d8c5759741c197fde748d9ebeac3",
+      "shortHash": "50962ebb",
+      "dateIso": "2026-04-03T18:13:48-03:00",
+      "subject": "Mobile: bootstrap Android app wrapper with Capacitor under /mobile"
+    },
+    {
+      "hash": "ce01c2112906c3a8ef94b5ab0cb28f7fd42e5e10",
+      "shortHash": "ce01c211",
+      "dateIso": "2026-04-03T18:05:34-03:00",
+      "subject": "Hub + admin mobile: open-hours fixes, CTA links, category UX, quick logout"
+    },
     {
       "hash": "00ee46f90d46cbafd1a1903c47c97f09b6e50e49",
       "shortHash": "00ee46f9",
@@ -179,18 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "59a02411",
       "dateIso": "2026-04-03T12:28:49-03:00",
       "subject": "Adiciona acesso ao marketplace na navegacao da landing"
-    },
-    {
-      "hash": "e7f7e11dd9009e54db87449842e06e0a662a4f88",
-      "shortHash": "e7f7e11d",
-      "dateIso": "2026-04-03T12:26:17-03:00",
-      "subject": "Cria pagina marketplace discovery com UX mobile premium"
-    },
-    {
-      "hash": "8b9ca8c9504d4581b88e5e10f8657578f2241558",
-      "shortHash": "8b9ca8c9",
-      "dateIso": "2026-04-03T12:21:32-03:00",
-      "subject": "Refina documentacao tecnica de metodos criticos no backend"
     }
   ]
 } as const;

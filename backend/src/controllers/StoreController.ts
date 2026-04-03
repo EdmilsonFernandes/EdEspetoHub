@@ -96,29 +96,26 @@ export class StoreController {
    * @author Edmilson Lopes
    */
   private static getSaoPauloNowParts() {
-    const formatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: SAO_PAULO_TZ,
-      weekday: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
-    const parts = formatter.formatToParts(new Date());
-    const weekdayRaw = String(parts.find((part) => part.type === 'weekday')?.value || '').toLowerCase();
-    const hour = Number(parts.find((part) => part.type === 'hour')?.value || 0);
-    const minute = Number(parts.find((part) => part.type === 'minute')?.value || 0);
-    const weekDayMap: Record<string, number> = {
-      sun: 0,
-      mon: 1,
-      tue: 2,
-      wed: 3,
-      thu: 4,
-      fri: 5,
-      sat: 6,
-    };
-    const day = weekDayMap[weekdayRaw.slice(0, 3)] ?? 0;
+    const now = new Date();
+    const zonedNow = new Date(now.toLocaleString('en-US', { timeZone: SAO_PAULO_TZ }));
+    const day = zonedNow.getDay();
+    const hour = zonedNow.getHours();
+    const minute = zonedNow.getMinutes();
     const minutes = Math.max(0, Math.min(23, Number.isFinite(hour) ? hour : 0)) * 60 + Math.max(0, Math.min(59, Number.isFinite(minute) ? minute : 0));
     return { day, minutes };
+  }
+
+  /**
+   * Parses HH:mm to minutes in day.
+   *
+   * @author Edmilson Lopes
+   */
+  private static toMinutes(value: string): number | null {
+    if (!value || typeof value !== 'string') return null;
+    const [h, m] = value.split(':').map(Number);
+    if (Number.isNaN(h) || Number.isNaN(m)) return null;
+    if (h < 0 || h > 23 || m < 0 || m > 59) return null;
+    return h * 60 + m;
   }
     /**
    * Executes sanitize order types by plan business logic.
@@ -167,12 +164,12 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
     if (!intervals.length) return true;
     return intervals.some((interval: any) => {
       if (!interval?.start || !interval?.end) return false;
-      const [startH, startM] = interval.start.split(':').map(Number);
-      const [endH, endM] = interval.end.split(':').map(Number);
-      if (Number.isNaN(startH) || Number.isNaN(startM) || Number.isNaN(endH) || Number.isNaN(endM)) return false;
+      const start = StoreController.toMinutes(String(interval.start));
+      const end = StoreController.toMinutes(String(interval.end));
+      if (start == null || end == null) return false;
 
-      const start = startH * 60 + startM;
-      const end = endH * 60 + endM;
+      // 24h operation convention: same start/end means always open for the day.
+      if (start === end) return true;
 
       if (end < start) {
         return minutes >= start || minutes < end;
@@ -202,9 +199,11 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
       const intervals = (Array.isArray(dayEntry.intervals) ? dayEntry.intervals : [])
         .map((interval: any) => {
           if (!interval?.start || typeof interval.start !== 'string') return null;
-          const [h, m] = interval.start.split(':').map(Number);
-          if (Number.isNaN(h) || Number.isNaN(m)) return null;
-          return { start: `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`, startMinutes: h * 60 + m };
+          const startMinutes = StoreController.toMinutes(interval.start);
+          if (startMinutes == null) return null;
+          const h = Math.floor(startMinutes / 60);
+          const m = startMinutes % 60;
+          return { start: `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`, startMinutes };
         })
         .filter(Boolean)
         .sort((a: any, b: any) => a.startMinutes - b.startMinutes);
