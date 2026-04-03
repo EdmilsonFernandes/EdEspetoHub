@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MagnifyingGlass, MapPin, Star, Clock, Scooter, Storefront, House, UserCircle } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
@@ -128,10 +128,6 @@ export function MarketplacePage() {
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
   const [featuredLoading, setFeaturedLoading] = useState(false);
   const [featuredOffset, setFeaturedOffset] = useState(0);
-  const [storeCarouselIndex, setStoreCarouselIndex] = useState(0);
-  const [isStoreCarouselPaused, setIsStoreCarouselPaused] = useState(false);
-  const storeCarouselRef = useRef<HTMLDivElement | null>(null);
-  const resumeStoreCarouselTimerRef = useRef<number | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationLabel, setLocationLabel] = useState('Sua região');
   const [distanceByStore, setDistanceByStore] = useState<Record<string, number>>({});
@@ -335,55 +331,6 @@ export function MarketplacePage() {
       return true;
     });
   }, [enrichedStores, debouncedQuery, segmentFilter, quickFilter]);
-
-  useEffect(() => {
-    if (filteredStores.length <= 1) {
-      setStoreCarouselIndex(0);
-      return;
-    }
-    if (isStoreCarouselPaused) return;
-    setStoreCarouselIndex((prev) => (prev < filteredStores.length ? prev : 0));
-    const timer = window.setInterval(() => {
-      setStoreCarouselIndex((prev) => (prev + 1) % filteredStores.length);
-    }, 1000);
-    return () => window.clearInterval(timer);
-  }, [filteredStores.length, isStoreCarouselPaused]);
-
-  useEffect(() => {
-    const container = storeCarouselRef.current;
-    if (!container) return;
-    const target = container.querySelector<HTMLElement>(`[data-store-slide="${storeCarouselIndex}"]`);
-    if (!target) return;
-    target.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
-  }, [storeCarouselIndex]);
-
-  const pauseStoreCarousel = () => {
-    if (resumeStoreCarouselTimerRef.current) {
-      window.clearTimeout(resumeStoreCarouselTimerRef.current);
-      resumeStoreCarouselTimerRef.current = null;
-    }
-    setIsStoreCarouselPaused(true);
-  };
-
-  const resumeStoreCarouselDelayed = (delayMs = 2500) => {
-    if (resumeStoreCarouselTimerRef.current) {
-      window.clearTimeout(resumeStoreCarouselTimerRef.current);
-      resumeStoreCarouselTimerRef.current = null;
-    }
-    resumeStoreCarouselTimerRef.current = window.setTimeout(() => {
-      setIsStoreCarouselPaused(false);
-      resumeStoreCarouselTimerRef.current = null;
-    }, delayMs);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (resumeStoreCarouselTimerRef.current) {
-        window.clearTimeout(resumeStoreCarouselTimerRef.current);
-        resumeStoreCarouselTimerRef.current = null;
-      }
-    };
-  }, []);
 
   const categoryTiles = useMemo(() => {
     return segmentOptions.map((segment) => categoryVisuals[segment] || { emoji: '🏪', label: segment });
@@ -838,63 +785,52 @@ export function MarketplacePage() {
           )}
 
           {!loading && !error && filteredStores.length > 0 && (
-            <div
-              ref={storeCarouselRef}
-              className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-1"
-              onMouseEnter={pauseStoreCarousel}
-              onMouseLeave={() => resumeStoreCarouselDelayed(900)}
-              onTouchStart={pauseStoreCarousel}
-              onTouchMove={pauseStoreCarousel}
-              onTouchEnd={() => resumeStoreCarouselDelayed(2600)}
-              onPointerDown={pauseStoreCarousel}
-              onPointerUp={() => resumeStoreCarouselDelayed(1800)}
-            >
-              {filteredStores.map((store, index) => (
+            <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 lg:grid-cols-3 justify-items-center">
+              {filteredStores.map((store) => (
                 <Link
                   key={store.id}
                   to={`/${store.slug}`}
-                  data-store-slide={index}
-                  className="snap-start shrink-0 w-[90%] sm:w-[58%] lg:w-[38%] xl:w-[31%] group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_12px_32px_rgba(0,0,0,0.05)] transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-[0_20px_44px_-26px_rgba(15,23,42,0.55)] active:scale-[0.99]"
+                  className="w-full max-w-[420px] group overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.05)] transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-[0_20px_40px_-24px_rgba(15,23,42,0.50)] active:scale-[0.99]"
                 >
-                  <div className="relative aspect-[16/6] overflow-hidden">
+                  <div className="relative aspect-[16/5.2] overflow-hidden">
                     <img
                       src={store.banner}
                       alt={store.name}
                       loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.06]"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/55 via-slate-900/10 to-transparent" />
                   </div>
-                  <div className="p-3 flex gap-2.5">
+                  <div className="p-2.5 flex gap-2.5">
                     <img
                       src={store.logo}
                       alt={`${store.name} logo`}
                       loading="lazy"
-                      className="h-12 w-12 rounded-xl object-cover border border-slate-200 bg-white"
+                      className="h-10 w-10 rounded-xl object-cover border border-slate-200 bg-white ring-1 ring-white"
                     />
                     <div className="min-w-0 flex-1 space-y-1">
                       <div className="flex items-center justify-between gap-2">
-                        <h3 className="truncate text-base font-black text-slate-900 tracking-tight">{store.name}</h3>
-                        <span className="inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <h3 className="truncate text-[15px] font-black text-slate-900 tracking-tight">{store.name}</h3>
+                        <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                       </div>
-                      <p className="text-[10px] uppercase tracking-[0.14em] text-slate-400">{store.segment}</p>
-                      <p className="text-xs text-slate-500 inline-flex items-center gap-1">
+                      <p className="text-[9px] uppercase tracking-[0.16em] text-slate-400">{store.segment}</p>
+                      <p className="text-[11px] text-slate-500 inline-flex items-center gap-1">
                         <MapPin size={12} /> {store.city}{store.state ? ` • ${store.state}` : ''}
                       </p>
-                      <div className="pt-1 flex flex-wrap gap-1 text-[10px] text-slate-600">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 font-semibold text-amber-700">
+                      <div className="pt-0.5 flex flex-wrap gap-1 text-[10px] text-slate-600">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-1.5 py-0.5 font-semibold text-amber-700">
                           <Star size={12} weight="fill" className="text-amber-500" />
                           {store.rating.toFixed(1)}
                         </span>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5">
                           {distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)}
                         </span>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5">
                           <Clock size={12} />
                           {store.etaMin}-{store.etaMax} min
                         </span>
                         <span
-                          className={`inline-flex items-center gap-1 rounded-full px-2 py-1 font-semibold ${
+                          className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-semibold ${
                             store.freeShipping ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700'
                           }`}
                         >

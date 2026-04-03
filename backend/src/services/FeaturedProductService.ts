@@ -84,13 +84,13 @@ export class FeaturedProductService {
     const toInt = (raw: string | undefined, fallback: number) => {
       const n = Number(raw || fallback);
       if (!Number.isFinite(n)) return fallback;
-      return Math.max(1, Math.min(20, Math.trunc(n)));
+      return Math.max(1, Math.min(500, Math.trunc(n)));
     };
     return {
       dayPrice: toMoney(map.get('hub_sponsored_daily_price'), 14.9),
       weekPrice: toMoney(map.get('hub_sponsored_weekly_price'), 79.9),
       monthPrice: toMoney(map.get('hub_sponsored_monthly_price'), 249.9),
-      maxActiveSlots: toInt(map.get('hub_sponsored_max_active_slots'), 3),
+      maxActiveSlots: toInt(map.get('hub_sponsored_max_active_slots'), 50),
     };
   }
 

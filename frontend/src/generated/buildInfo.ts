@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.192848.ce879fdb",
-  "buildId": "0.1.9+20260403.192848.ce879fdb-20260403.192848-ce879fdb",
-  "builtAt": "2026-04-03T19:28:48.991Z",
-  "commitHash": "ce879fdb4e6fb18eb74084e82f30aa0d7e10a963",
-  "shortHash": "ce879fdb",
+  "versionInternal": "0.1.9+20260403.194353.a15cb771",
+  "buildId": "0.1.9+20260403.194353.a15cb771-20260403.194353-a15cb771",
+  "builtAt": "2026-04-03T19:43:53.531Z",
+  "commitHash": "a15cb771c8a6ef464aad3184adf3ee262ecd1b71",
+  "shortHash": "a15cb771",
   "branch": "main",
   "commits": [
+    {
+      "hash": "a15cb771c8a6ef464aad3184adf3ee262ecd1b71",
+      "shortHash": "a15cb771",
+      "dateIso": "2026-04-03T16:32:03-03:00",
+      "subject": "fix(featured/hub): auto-close paid modal, 5min rotation, carousel UX and slot counting"
+    },
     {
       "hash": "ce879fdb4e6fb18eb74084e82f30aa0d7e10a963",
       "shortHash": "ce879fdb",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "1a4dc5f6",
       "dateIso": "2026-04-03T11:52:42-03:00",
       "subject": "Padroniza nomes de navegacao para Loja Online no admin"
-    },
-    {
-      "hash": "d384ac8a816d45144644a662604d6c89c570aebb",
-      "shortHash": "d384ac8a",
-      "dateIso": "2026-04-03T11:47:24-03:00",
-      "subject": "Adiciona stepper guiado na configuracao da loja"
     }
   ]
 } as const;

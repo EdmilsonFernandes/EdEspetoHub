@@ -591,8 +591,14 @@ export async function runMigrations() {
       ('hub_sponsored_daily_price', '14.90'),
       ('hub_sponsored_weekly_price', '79.90'),
       ('hub_sponsored_monthly_price', '249.90'),
-      ('hub_sponsored_max_active_slots', '3')
+      ('hub_sponsored_max_active_slots', '50')
     ON CONFLICT (key) DO NOTHING;
+  `);
+  await AppDataSource.query(`
+    UPDATE site_settings
+    SET value = '50', updated_at = NOW()
+    WHERE key = 'hub_sponsored_max_active_slots'
+      AND TRIM(COALESCE(value, '')) IN ('', '3', '3.0', '03');
   `);
   await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_email_verifications_user ON email_verifications(user_id);

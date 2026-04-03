@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
@@ -63,15 +63,16 @@ export function AdminHighlights() {
   const [submitting, setSubmitting] = useState(false);
   const [pricing, setPricing] = useState<any>({
     prices: { DAY: 14.9, WEEK: 79.9, MONTH: 249.9 },
-    maxActiveSlots: 3,
+    maxActiveSlots: 50,
     activeSlots: 0,
-    availableSlots: 3,
+    availableSlots: 50,
   });
 
   const [createOpen, setCreateOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [paymentCountdownMs, setPaymentCountdownMs] = useState(0);
+  const paidToastShownRef = useRef<Set<string>>(new Set());
   const [form, setForm] = useState({
     productId: '',
     durationUnit: 'DAY' as DurationUnit,
@@ -178,7 +179,10 @@ export function AdminHighlights() {
         String(previous?.paymentStatus || '').toUpperCase() !== 'PAID' &&
         String(updated?.paymentStatus || '').toUpperCase() === 'PAID';
       if (becamePaid) {
-        showToast('Pagamento confirmado. Seu destaque foi atualizado.', 'success');
+        if (!paidToastShownRef.current.has(requestId)) {
+          paidToastShownRef.current.add(requestId);
+          showToast('Pagamento confirmado. Seu destaque foi atualizado.', 'success');
+        }
         await loadAll();
         closePayment();
       }
@@ -306,7 +310,7 @@ export function AdminHighlights() {
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Vagas ativas</p>
-              <p className="mt-1 text-xl font-black text-slate-900">{Number(pricing?.activeSlots || 0)} / {Number(pricing?.maxActiveSlots || 3)}</p>
+              <p className="mt-1 text-xl font-black text-slate-900">{Number(pricing?.activeSlots || 0)} / {Number(pricing?.maxActiveSlots || 50)}</p>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Preço diário</p>
