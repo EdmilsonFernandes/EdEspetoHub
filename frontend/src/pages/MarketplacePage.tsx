@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MagnifyingGlass, MapPin, Star, Clock, Scooter, Storefront, House, UserCircle, List, CaretDown, Heart, ShareNetwork } from '@phosphor-icons/react';
+import { MagnifyingGlass, MapPin, Star, Storefront, House, UserCircle, List, CaretDown, Heart, ShareNetwork } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { productService } from '../services/productService';
 import { featuredService } from '../services/featuredService';
@@ -949,93 +949,69 @@ export function MarketplacePage() {
           )}
 
           {!loading && !error && filteredStores.length > 0 && (
-            <div className="grid grid-cols-1 gap-2.5 md:gap-3 lg:gap-3.5 md:grid-cols-2 lg:grid-cols-3 justify-items-center">
+            <div className="grid grid-cols-1 gap-2 md:gap-2.5 md:grid-cols-2 lg:grid-cols-3">
               {filteredStores.map((store) => (
                 <Link
                   key={store.id}
                   to={`/${store.slug}`}
-                  className={`w-full max-w-[420px] md:max-w-none group overflow-hidden rounded-3xl border bg-white transition-all duration-300 active:scale-[0.99] ${
+                  className={`group rounded-2xl border bg-white p-2.5 transition-all duration-300 active:scale-[0.99] ${
                     store.isOpen
-                      ? 'border-slate-200/90 shadow-[0_10px_24px_rgba(15,23,42,0.08)] md:hover:-translate-y-0.5 md:hover:shadow-[0_20px_40px_-24px_rgba(15,23,42,0.30)]'
+                      ? 'border-slate-200/90 shadow-[0_6px_18px_rgba(15,23,42,0.07)] md:hover:-translate-y-0.5 md:hover:shadow-[0_14px_28px_-16px_rgba(15,23,42,0.25)]'
                       : 'border-slate-200/70 opacity-90 saturate-90'
                   }`}
                 >
-                  <div className="relative aspect-[16/7.2] sm:aspect-[16/6.7] md:aspect-[16/6.2] lg:aspect-[16/5.9] overflow-hidden">
+                  <div className="flex items-center gap-3">
                     <img
-                      src={store.banner}
+                      src={store.banner || store.logo}
                       alt={store.name}
                       loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.06]"
+                      className="h-16 w-16 md:h-[72px] md:w-[72px] shrink-0 rounded-xl object-cover border border-slate-200 bg-white"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/55 via-slate-900/10 to-transparent" />
-                  </div>
-                  <div className="p-2.5 md:p-3 flex gap-2.5">
-                    <img
-                      src={store.logo}
-                      alt={`${store.name} logo`}
-                      loading="lazy"
-                      className="h-10 w-10 rounded-xl object-cover border border-slate-200 bg-white ring-1 ring-white"
-                    />
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <h3 className="truncate text-[15px] font-black text-slate-900 tracking-tight">{store.name}</h3>
-                        <span
-                          className={`inline-flex h-2 w-2 rounded-full ${store.isOpen ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`}
-                        />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <h3 className="truncate text-sm font-black text-slate-900">{store.name}</h3>
+                            <span className={`inline-flex h-1.5 w-1.5 rounded-full ${store.isOpen ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                            {!store.isOpen && <span className="text-[10px] font-semibold text-slate-500">Fechada</span>}
+                          </div>
+                          {(store as any).sponsored && (
+                            <p className="mt-0.5 text-[10px] text-slate-400 font-semibold">Patrocinado</p>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(event) => event.preventDefault()}
+                          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:text-rose-500"
+                          aria-label={`Favoritar ${store.name}`}
+                          title={`Favoritar ${store.name}`}
+                        >
+                          <Heart size={15} weight="regular" />
+                        </button>
                       </div>
-                      <p className="text-[9px] uppercase tracking-[0.16em] text-slate-600">{store.segment}</p>
-                      <p className="text-[11px] text-slate-700 font-medium inline-flex items-center gap-1">
-                        <MapPin size={12} /> {store.city}{store.state ? ` • ${store.state}` : ''}
+                      <p className="mt-0.5 truncate text-[11px] font-medium text-slate-600">
+                        {store.etaMin}-{store.etaMax} min • {distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)} • {store.freeShipping ? 'Grátis' : 'Taxa'}
                       </p>
-                      <div className="pt-0.5 flex flex-wrap gap-1 text-[10px] text-slate-600">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-1.5 py-0.5 font-semibold text-amber-700">
-                          <Star size={12} weight="fill" className="text-amber-500" />
-                          {store.rating.toFixed(1)}
-                        </span>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 px-1.5 py-0.5 font-semibold text-slate-700">
-                          {distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)}
-                        </span>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 px-1.5 py-0.5 font-semibold text-slate-700">
-                          <Clock size={12} />
-                          {store.etaMin}-{store.etaMax} min
-                        </span>
-                        {store.isOpen ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-900/50 px-1.5 py-0.5 font-semibold text-emerald-300">
-                            Aberta
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 px-1.5 py-0.5 font-semibold text-slate-600">
-                            Fechada
+                      {!store.isOpen && (
+                        <p className="mt-0.5 truncate text-[10px] text-slate-500">
+                          {store.nextOpeningLabel || 'Sem horário cadastrado'}
+                        </p>
+                      )}
+                      <div className="mt-1.5 flex flex-wrap items-center gap-1">
+                        {store.freeShipping && (
+                          <span className="inline-flex rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">
+                            Frete grátis
                           </span>
                         )}
-                        {!store.isOpen && store.nextOpeningLabel && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 px-1.5 py-0.5 font-semibold text-slate-700">
-                            {store.nextOpeningLabel}
+                        {store.rating >= 4.8 && (
+                          <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">
+                            <Star size={10} weight="fill" className="text-emerald-600" />
+                            Mais bem avaliadas
                           </span>
                         )}
-                        {!store.isOpen && !store.nextOpeningLabel && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 px-1.5 py-0.5 font-semibold text-slate-700">
-                            Sem horario cadastrado
-                          </span>
-                        )}
-                        {store.supportsDelivery && (
-                          <span
-                            className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-semibold ${
-                              store.freeShipping ? 'bg-emerald-900/50 text-emerald-300' : 'bg-slate-100 text-slate-700'
-                            }`}
-                          >
-                            <Scooter size={12} />
-                            {store.supportsPostal ? 'Entrega postal' : 'Entrega'}
-                          </span>
-                        )}
-                        {store.supportsPickup && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-1.5 py-0.5 font-semibold text-sky-700">
-                            Retirada
-                          </span>
-                        )}
-                        {store.supportsTable && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 px-1.5 py-0.5 font-semibold text-violet-700">
-                            Mesa
+                        {!store.freeShipping && store.rating < 4.8 && (
+                          <span className="inline-flex rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">
+                            Ofertas da loja
                           </span>
                         )}
                       </div>
