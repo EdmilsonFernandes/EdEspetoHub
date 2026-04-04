@@ -785,7 +785,7 @@ export function MarketplacePage() {
       >
         <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(14,165,233,0.18),transparent_45%),radial-gradient(circle_at_bottom_left,rgba(99,102,241,0.16),transparent_40%)]" />
-        <div className="absolute right-3 top-3 z-20 flex items-center gap-2 sm:right-5 sm:top-4">
+        <div className="absolute right-3 z-20 flex items-center gap-2 sm:right-5" style={{ top: 'max(0.75rem, env(safe-area-inset-top))' }}>
           <button
             type="button"
             onClick={(event) => event.preventDefault()}
@@ -810,16 +810,9 @@ export function MarketplacePage() {
           <Link
             to="/"
             onClick={(event) => event.stopPropagation()}
-            className="hidden sm:inline-flex items-center rounded-full border border-sky-300/70 bg-sky-500/85 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-[0_8px_18px_-12px_rgba(14,165,233,0.9)] backdrop-blur-sm"
+            className="inline-flex items-center rounded-full border border-sky-300/70 bg-sky-500/85 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-[0_8px_18px_-12px_rgba(14,165,233,0.9)] backdrop-blur-sm"
           >
-            Criar minha loja
-          </Link>
-          <Link
-            to="/"
-            onClick={(event) => event.stopPropagation()}
-            className="inline-flex sm:hidden items-center rounded-full border border-sky-300/70 bg-sky-500/85 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] text-white shadow-[0_8px_18px_-12px_rgba(14,165,233,0.9)] backdrop-blur-sm"
-          >
-            Criar
+            Criar loja
           </Link>
         </div>
         <div className="relative z-10 flex h-full flex-col px-4 pb-5 pt-10 text-white sm:px-6">
@@ -864,7 +857,7 @@ export function MarketplacePage() {
             </div>
           </div>
 
-          <div className="mt-3 flex items-center justify-between">
+          <div className="mt-3 flex items-center justify-start">
             <div className="flex items-center gap-1.5">
               {Array.from({ length: Math.max(1, Math.min(heroStores.length, 5)) }).map((_, idx) => (
                 <span
@@ -873,9 +866,6 @@ export function MarketplacePage() {
                 />
               ))}
             </div>
-            <span className="rounded-full border border-white/25 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white/90 backdrop-blur-sm">
-              Criar loja
-            </span>
           </div>
         </div>
       </a>
@@ -887,7 +877,7 @@ export function MarketplacePage() {
       >
         <header className={`sticky top-0 z-[60] rounded-t-[32px] border-b border-slate-200/70 bg-slate-50/95 px-4 pb-3 pt-5 backdrop-blur-md transition-shadow duration-300 ${isHeaderElevated ? 'shadow-sm' : 'shadow-none'}`}>
           <div className="mx-auto max-w-[1200px] space-y-2.5">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pl-1 sm:pl-0">
               <HeaderAvatarTrigger
                 displayName={customerDisplayName}
                 hasNotification={!isCustomerLogged}

@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260404.204519.fa910fe2",
-  "buildId": "0.1.9+20260404.204519.fa910fe2-20260404.204519-fa910fe2",
-  "builtAt": "2026-04-04T20:45:19.133Z",
-  "commitHash": "fa910fe2f428ae0d65ff9e481aea44947bb09a39",
-  "shortHash": "fa910fe2",
+  "versionInternal": "0.1.9+20260404.205206.4777fe56",
+  "buildId": "0.1.9+20260404.205206.4777fe56-20260404.205206-4777fe56",
+  "builtAt": "2026-04-04T20:52:06.053Z",
+  "commitHash": "4777fe566a5bc29b34851f990e5b7785502ce8ad",
+  "shortHash": "4777fe56",
   "branch": "main",
   "commits": [
+    {
+      "hash": "4777fe566a5bc29b34851f990e5b7785502ce8ad",
+      "shortHash": "4777fe56",
+      "dateIso": "2026-04-04T17:46:56-03:00",
+      "subject": "feat(hub): add touch swipe navigation for top banner carousel"
+    },
     {
       "hash": "fa910fe2f428ae0d65ff9e481aea44947bb09a39",
       "shortHash": "fa910fe2",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "904a28ec",
       "dateIso": "2026-04-04T00:14:16-03:00",
       "subject": "refactor(hub-hero): improve text legibility with glass split panel"
-    },
-    {
-      "hash": "b6231d5438fe0c916d3617c8517d8263ae7d19a2",
-      "shortHash": "b6231d54",
-      "dateIso": "2026-04-04T00:06:46-03:00",
-      "subject": "fix(hub-mobile): prevent horizontal page drag with x-overflow lock"
     }
   ]
 } as const;
