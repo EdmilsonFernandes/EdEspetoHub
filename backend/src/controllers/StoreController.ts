@@ -365,6 +365,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
                   bannerUrl: store.settings.bannerUrl || null,
                   description: store.settings.description || null,
                   address: store.settings.address || null,
+                  openingHours: Array.isArray(store.settings.openingHours) ? store.settings.openingHours : [],
                   primaryColor: store.settings.primaryColor || null,
                   secondaryColor: store.settings.secondaryColor || null,
                   segment: store.settings.segment || 'outros',

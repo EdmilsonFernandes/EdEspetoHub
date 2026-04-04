@@ -6,6 +6,7 @@ import { productService } from '../services/productService';
 import { featuredService } from '../services/featuredService';
 import { mapsService } from '../services/mapsService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 
 type MarketplaceStore = {
@@ -28,6 +29,11 @@ type MarketplaceStore = {
     isOrderingEnabled?: boolean;
     orderTypes?: string[] | null;
     postalEnabled?: boolean | null;
+    openingHours?: Array<{
+      day: number;
+      enabled?: boolean;
+      intervals?: Array<{ start: string; end: string }>;
+    }> | null;
   } | null;
   openNow?: boolean;
   nextOpeningLabel?: string | null;
@@ -342,10 +348,18 @@ export function MarketplacePage() {
         const supportsPickup = rawOrderTypes.includes('pickup');
         const supportsTable = rawOrderTypes.includes('table');
         const supportsPostal = supportsDelivery && Boolean(store?.settings?.postalEnabled);
+        const rawHours = Array.isArray(store?.settings?.openingHours) ? (store?.settings?.openingHours as any[]) : [];
+        const runtimeHours = rawHours.length > 0 ? normalizeOpeningHours(rawHours as any) : [];
+        const isOpenByRuntime = runtimeHours.length > 0 ? isStoreOpenNow(runtimeHours as any) : null;
         const isOpen =
-          typeof store?.openNow === 'boolean'
-            ? store.openNow
-            : (store?.settings?.isOrderingEnabled ?? true) !== false;
+          (store?.settings?.isOrderingEnabled ?? true) !== false &&
+          (
+            typeof isOpenByRuntime === 'boolean'
+              ? isOpenByRuntime
+              : (typeof store?.openNow === 'boolean'
+                  ? store.openNow
+                  : true)
+          );
         const logo = resolveAssetUrl(store?.settings?.logoUrl || undefined) || '/janocaminho-logo.png';
         const banner = resolveAssetUrl(store?.settings?.bannerUrl || undefined) || logo;
         const searchIndex = [store?.name, slug, segment, city, state].filter(Boolean).join(' ').toLowerCase();
@@ -635,12 +649,7 @@ export function MarketplacePage() {
         }`}
         aria-label="Abrir landing page Já no Caminho"
       >
-        <img
-          src="/janocaminho.jpg"
-          alt="Já no Caminho"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0B0F1A] via-[#0B0F1A]/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900 to-slate-800" />
         <div className="absolute right-3 top-3 z-20 flex items-center gap-2 sm:right-5 sm:top-4">
           <button
             type="button"
@@ -671,8 +680,12 @@ export function MarketplacePage() {
           </span>
         </div>
         <div className="relative z-10 flex h-full w-[85%] max-w-[560px] flex-col justify-center px-4 pt-10 text-white sm:w-[70%] sm:px-6 md:w-[60%]">
-          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-100/95">Já no Caminho</p>
-          <h1 className="mt-1 line-clamp-2 text-lg font-black tracking-tight text-white sm:text-2xl">Sua vitrine digital pronta para vender</h1>
+          <img
+            src="/janocaminho-logo.png"
+            alt="Já no Caminho"
+            className="h-8 w-auto max-w-[220px] object-contain sm:h-10 sm:max-w-[260px]"
+          />
+          <h1 className="mt-4 line-clamp-2 text-lg font-black tracking-tight text-white sm:text-2xl">Sua vitrine digital pronta para vender</h1>
           <p className="mt-2 line-clamp-2 text-xs font-medium text-slate-200 sm:text-sm">
             Hub oficial com lojas locais, pedidos em tempo real e experiência premium.
           </p>
