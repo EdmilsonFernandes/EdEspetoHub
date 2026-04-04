@@ -129,6 +129,7 @@ export function MarketplacePage() {
   const [quickFilter, setQuickFilter] = useState<'all' | 'free_shipping' | 'nearby' | 'open_now'>('all');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
+  const [isTopPromoVisible, setIsTopPromoVisible] = useState(true);
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
   const [featuredLoading, setFeaturedLoading] = useState(false);
   const [featuredOffset, setFeaturedOffset] = useState(0);
@@ -243,6 +244,8 @@ export function MarketplacePage() {
         const delta = currentY - lastY;
         if (delta > 8 && currentY > 120) setIsBottomNavVisible(false);
         if (delta < -8) setIsBottomNavVisible(true);
+        if (currentY > 36 && delta > 2) setIsTopPromoVisible(false);
+        if (currentY <= 16 || delta < -2) setIsTopPromoVisible(true);
         lastY = currentY;
         ticking = false;
       });
@@ -681,7 +684,13 @@ export function MarketplacePage() {
       </header>
 
       <main className="max-w-[1200px] mx-auto px-4 pt-3 space-y-5">
-        <section>
+        <section
+          className={`transition-all duration-300 ease-out ${
+            isTopPromoVisible
+              ? 'max-h-16 opacity-100 translate-y-0 mb-0'
+              : 'max-h-0 opacity-0 -translate-y-2 pointer-events-none mb-[-4px] overflow-hidden'
+          }`}
+        >
           <div className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/75 px-3 py-1.5 text-[12px] font-bold text-slate-700">
             <MapPin size={14} weight="duotone" className="text-sky-400" />
             <span className="truncate">Entregar em: {locationLabel}</span>
@@ -690,6 +699,13 @@ export function MarketplacePage() {
         </section>
 
         <section
+          className={`transition-all duration-300 ease-out ${
+            isTopPromoVisible
+              ? 'max-h-36 opacity-100 translate-y-0'
+              : 'max-h-0 opacity-0 -translate-y-2 pointer-events-none overflow-hidden'
+          }`}
+        >
+        <div
           className="rounded-2xl border border-slate-200/70 bg-white/60 backdrop-blur-xl px-3 py-2.5 shadow-[0_10px_26px_-18px_rgba(15,23,42,0.22)] transition-all duration-300"
           style={{ borderColor: `${theme.secondary}33` }}
         >
@@ -729,6 +745,7 @@ export function MarketplacePage() {
               </div>
             </div>
           </div>
+        </div>
         </section>
 
         <section>
