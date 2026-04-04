@@ -1,18 +1,24 @@
 package com.janocaminho.app;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.pm.PackageManager;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.webkit.CookieManager;
+import android.webkit.GeolocationPermissions;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebViewClient;
 import android.webkit.WebView;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.splashscreen.SplashScreen;
 
 import com.getcapacitor.BridgeActivity;
@@ -24,8 +30,11 @@ public class MainActivity extends BridgeActivity {
     private static final String LAST_URL_KEY = "last_url";
     private static final String ROOT_DOMAIN = "janocaminho.com.br";
     private static final long NAV_ANIM_DURATION_MS = 220L;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 4401;
 
     private String lastKnownUrl = HUB_URL;
+    private GeolocationPermissions.Callback pendingGeoCallback = null;
+    private String pendingGeoOrigin = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,11 +106,44 @@ public class MainActivity extends BridgeActivity {
         WebSettings settings = webView.getSettings();
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
+        settings.setGeolocationEnabled(true);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
+                if (hasLocationPermission()) {
+                    callback.invoke(origin, true, false);
+                    return;
+                }
+                pendingGeoOrigin = origin;
+                pendingGeoCallback = callback;
+                ActivityCompat.requestPermissions(
+                    MainActivity.this,
+                    new String[] { Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION },
+                    LOCATION_PERMISSION_REQUEST_CODE
+                );
+            }
+        });
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.setAcceptCookie(true);
         cookieManager.setAcceptThirdPartyCookies(webView, true);
         cookieManager.flush();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) return;
+        if (pendingGeoCallback == null || pendingGeoOrigin == null) return;
+        boolean granted = hasLocationPermission();
+        pendingGeoCallback.invoke(pendingGeoOrigin, granted, false);
+        pendingGeoCallback = null;
+        pendingGeoOrigin = null;
+    }
+
+    private boolean hasLocationPermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
     private void configureNavigationTransitions() {

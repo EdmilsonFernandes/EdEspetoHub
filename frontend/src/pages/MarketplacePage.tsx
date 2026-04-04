@@ -894,10 +894,6 @@ export function MarketplacePage() {
         <section className="space-y-3" style={{ transition: 'all .45s ease', transitionDelay: hasEntered ? '200ms' : '0ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-amber-700">
-                <Star size={10} weight="fill" />
-                Curadoria
-              </span>
               <h2 className="text-base sm:text-xl font-black text-slate-900">{genericHighlightLabel}</h2>
             </div>
             <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Mais pedidos</span>

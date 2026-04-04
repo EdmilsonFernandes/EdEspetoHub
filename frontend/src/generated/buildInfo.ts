@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260404.211001.efc58c14",
-  "buildId": "0.1.9+20260404.211001.efc58c14-20260404.211001-efc58c14",
-  "builtAt": "2026-04-04T21:10:01.751Z",
-  "commitHash": "efc58c141b708b5282f8cc12533f41a3a60977d3",
-  "shortHash": "efc58c14",
+  "versionInternal": "0.1.9+20260404.211217.30b993d3",
+  "buildId": "0.1.9+20260404.211217.30b993d3-20260404.211217-30b993d3",
+  "builtAt": "2026-04-04T21:12:17.495Z",
+  "commitHash": "30b993d346f8695bd59a5522e19ae2b355bbe859",
+  "shortHash": "30b993d3",
   "branch": "main",
   "commits": [
+    {
+      "hash": "30b993d346f8695bd59a5522e19ae2b355bbe859",
+      "shortHash": "30b993d3",
+      "dateIso": "2026-04-04T18:10:37-03:00",
+      "subject": "fix(hub): improve top branding, avatar size and region fallback label"
+    },
     {
       "hash": "efc58c141b708b5282f8cc12533f41a3a60977d3",
       "shortHash": "efc58c14",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "0fbbf770",
       "dateIso": "2026-04-04T00:28:43-03:00",
       "subject": "feat(android): add native splash exit animation and Android 12 splash theme"
-    },
-    {
-      "hash": "6c361cdbc8d3197ba780122094949c29815a4a1a",
-      "shortHash": "6c361cdb",
-      "dateIso": "2026-04-04T00:25:41-03:00",
-      "subject": "fix(hub-hero): replace hard panel with smooth gradient overlay"
     }
   ]
 } as const;
