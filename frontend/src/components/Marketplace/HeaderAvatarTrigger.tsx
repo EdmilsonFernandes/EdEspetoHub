@@ -2,6 +2,7 @@ import { UserCircle } from '@phosphor-icons/react';
 
 type HeaderAvatarTriggerProps = {
   displayName?: string;
+  profileImageUrl?: string | null;
   onClick: () => void;
   hasNotification?: boolean;
 };
@@ -16,6 +17,7 @@ const initialsFrom = (value?: string) => {
 
 export function HeaderAvatarTrigger({
   displayName,
+  profileImageUrl,
   onClick,
   hasNotification = true,
 }: HeaderAvatarTriggerProps) {
@@ -23,11 +25,17 @@ export function HeaderAvatarTrigger({
     <button
       type="button"
       onClick={onClick}
-      className="relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-95"
+      className="relative inline-flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-95"
       aria-label="Abrir menu de perfil"
       title="Abrir menu de perfil"
     >
-      {displayName ? (
+      {profileImageUrl ? (
+        <img
+          src={profileImageUrl}
+          alt={displayName || 'Perfil'}
+          className="h-full w-full object-cover"
+        />
+      ) : displayName ? (
         <span className="text-[11px] font-black uppercase tracking-[0.08em]">
           {initialsFrom(displayName)}
         </span>

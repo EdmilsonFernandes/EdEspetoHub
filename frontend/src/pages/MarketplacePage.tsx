@@ -684,6 +684,7 @@ export function MarketplacePage() {
     customerSession?.user?.fullName || customerSession?.user?.name || (isCustomerLogged ? 'Cliente' : 'Anônimo')
   ).trim();
   const customerEmail = String(customerSession?.user?.email || '').trim();
+  const customerProfileImage = resolveAssetUrl(customerSession?.user?.profileImageUrl || undefined);
   const displayLocationLabel = locationLabel === 'Sua região' && fallbackRegionLabel ? fallbackRegionLabel : locationLabel;
 
   const openCustomerAccount = useCallback(() => {
@@ -747,6 +748,7 @@ export function MarketplacePage() {
         isLogged={isCustomerLogged}
         userName={customerDisplayName || 'Anônimo'}
         userEmail={customerEmail}
+        profileImageUrl={customerProfileImage}
         locationLabel={displayLocationLabel}
         onClose={() => setProfileDrawerOpen(false)}
         onLogin={openCustomerLogin}
@@ -770,6 +772,7 @@ export function MarketplacePage() {
               <div className="flex min-w-0 items-center gap-2">
               <HeaderAvatarTrigger
                 displayName={customerDisplayName}
+                profileImageUrl={customerProfileImage}
                 hasNotification={!isCustomerLogged}
                 onClick={() => setProfileDrawerOpen(true)}
               />

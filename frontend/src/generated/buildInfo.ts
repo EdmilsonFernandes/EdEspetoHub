@@ -5,13 +5,61 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260404.212936.32ed4baf",
-  "buildId": "0.1.9+20260404.212936.32ed4baf-20260404.212936-32ed4baf",
-  "builtAt": "2026-04-04T21:29:36.283Z",
-  "commitHash": "32ed4bafd64194dd75c6e793ce98076ba1c6fe0f",
-  "shortHash": "32ed4baf",
+  "versionInternal": "0.1.9+20260404.234837.8a41b531",
+  "buildId": "0.1.9+20260404.234837.8a41b531-20260404.234837-8a41b531",
+  "builtAt": "2026-04-04T23:48:37.140Z",
+  "commitHash": "8a41b531cb491ebf6a73d1e4442a748daf77ec28",
+  "shortHash": "8a41b531",
   "branch": "main",
   "commits": [
+    {
+      "hash": "8a41b531cb491ebf6a73d1e4442a748daf77ec28",
+      "shortHash": "8a41b531",
+      "dateIso": "2026-04-04T20:33:35-03:00",
+      "subject": "fix(frontend): change autocomplete to autoComplete to fix TS build error"
+    },
+    {
+      "hash": "67bc37b062f59d95042734b9e96528129ec9a14b",
+      "shortHash": "67bc37b0",
+      "dateIso": "2026-04-04T20:30:55-03:00",
+      "subject": "feat(hub): improve marketplace logo, enable login autocomplete, and fix profile photo upload permissions/limits"
+    },
+    {
+      "hash": "3fc6ed467ac86f779abec4bfa55466ae60489cbd",
+      "shortHash": "3fc6ed46",
+      "dateIso": "2026-04-04T19:58:54-03:00",
+      "subject": "feat(motoboy): notify available delivery orders via push"
+    },
+    {
+      "hash": "809189620952fbf2b20f8124093442e0f7598eda",
+      "shortHash": "80918962",
+      "dateIso": "2026-04-04T19:54:03-03:00",
+      "subject": "fix(hub): remove stale advanced-filters handler causing frontend build failure"
+    },
+    {
+      "hash": "e377e456779fdd11d63cdeac66e03ae599721646",
+      "shortHash": "e377e456",
+      "dateIso": "2026-04-04T19:51:37-03:00",
+      "subject": "feat(hub): add favorites carousel section above regional stores"
+    },
+    {
+      "hash": "665fade7c1b495808a0ac9187e12917c150126cc",
+      "shortHash": "665fade7",
+      "dateIso": "2026-04-04T19:49:27-03:00",
+      "subject": "feat(hub): persist store favorites, simplify filters, and remove redundant menu entries"
+    },
+    {
+      "hash": "9ef8c6fc2cf938a1eca00c6d5a5ff400b06d4520",
+      "shortHash": "9ef8c6fc",
+      "dateIso": "2026-04-04T19:42:21-03:00",
+      "subject": "feat(hub/customer): unify auth flow, profile photo, push toggle, legal fallback and whatsapp apk fallback"
+    },
+    {
+      "hash": "2e82fe74bf837603b21debbf1c4f18666058fb82",
+      "shortHash": "2e82fe74",
+      "dateIso": "2026-04-04T18:31:11-03:00",
+      "subject": "fix(frontend): resolve syntax error in store hours summary"
+    },
     {
       "hash": "32ed4bafd64194dd75c6e793ce98076ba1c6fe0f",
       "shortHash": "32ed4baf",
@@ -143,54 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "8bf93700",
       "dateIso": "2026-04-04T16:20:16-03:00",
       "subject": "chore(security): ignore local service account key directory"
-    },
-    {
-      "hash": "52d954d42a39ee0f46a00039eecd449824aefbfc",
-      "shortHash": "52d954d4",
-      "dateIso": "2026-04-04T11:13:05-03:00",
-      "subject": "fix(push): use global guest push id in checkout payload"
-    },
-    {
-      "hash": "5875e777306232a6e20e4fea50eb04449d11e809",
-      "shortHash": "5875e777",
-      "dateIso": "2026-04-04T11:02:31-03:00",
-      "subject": "feat(mobile): add brand logo to push permission banner"
-    },
-    {
-      "hash": "73ee38eeb963b249f0fece11f899b0a2a680b2c6",
-      "shortHash": "73ee38ee",
-      "dateIso": "2026-04-04T10:56:53-03:00",
-      "subject": "feat(mobile): add in-app push permission enable banner"
-    },
-    {
-      "hash": "db4c06cb71effea99e8dcf7edfc28d1607195100",
-      "shortHash": "db4c06cb",
-      "dateIso": "2026-04-04T10:48:45-03:00",
-      "subject": "feat: support anonymous customer push notifications"
-    },
-    {
-      "hash": "64625fd81cfc631d4a1e81c181c2849be83c755d",
-      "shortHash": "64625fd8",
-      "dateIso": "2026-04-04T10:39:23-03:00",
-      "subject": "fix(mobile-push): re-request permission when previously denied to recover token"
-    },
-    {
-      "hash": "5cdba95ef8287162137cf05ef4d4f75ec3f2bd52",
-      "shortHash": "5cdba95e",
-      "dateIso": "2026-04-04T10:34:12-03:00",
-      "subject": "fix(push): handle FCM legacy result errors and add delivery diagnostics"
-    },
-    {
-      "hash": "c45f9e52d7fe0b432240eda67b26e3eef0ee7073",
-      "shortHash": "c45f9e52",
-      "dateIso": "2026-04-04T10:31:56-03:00",
-      "subject": "refactor(hub): compact horizontal store cards with 99-style density"
-    },
-    {
-      "hash": "d4a26e62de6f1b259970fac10c19ddc54298f2d3",
-      "shortHash": "d4a26e62",
-      "dateIso": "2026-04-04T10:18:36-03:00",
-      "subject": "feat(mobile): enable FCM plugin sync and auto token registration flow"
     }
   ]
 } as const;

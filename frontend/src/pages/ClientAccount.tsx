@@ -50,6 +50,26 @@ export function ClientAccount() {
         setPhoneDraft(String(meData?.phone || ''));
         setAddresses(Array.isArray(addressesData) ? addressesData : []);
         setOrders(Array.isArray(ordersData) ? ordersData : []);
+
+        // Sync local storage session user data
+        if (meData) {
+          try {
+            const raw = localStorage.getItem('customerSession');
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              const next = {
+                ...parsed,
+                user: {
+                  ...(parsed?.user || {}),
+                  ...meData,
+                },
+              };
+              localStorage.setItem('customerSession', JSON.stringify(next));
+            }
+          } catch {
+            // ignore
+          }
+        }
       })
       .catch((e: any) => {
         if (!mounted) return;

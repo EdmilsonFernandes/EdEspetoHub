@@ -26,6 +26,7 @@ type ProfileDrawerProps = {
   isLogged: boolean;
   userName: string;
   userEmail?: string;
+  profileImageUrl?: string | null;
   locationLabel?: string;
   onClose: () => void;
   onLogin: () => void;
@@ -71,6 +72,7 @@ export function ProfileDrawer({
   isLogged,
   userName,
   userEmail,
+  profileImageUrl,
   locationLabel,
   onClose,
   onLogin,
@@ -148,7 +150,9 @@ export function ProfileDrawer({
             </div>
             <div className="relative">
               <span className="grid h-12 w-12 place-items-center overflow-hidden rounded-full border border-white bg-slate-900 text-sm font-black text-white shadow">
-                {(userName || 'AN').slice(0, 2).toUpperCase()}
+                {profileImageUrl ? (
+                  <img src={profileImageUrl} alt={userName} className="h-full w-full object-cover" />
+                ) : (userName || 'AN').slice(0, 2).toUpperCase()}
               </span>
             </div>
           </div>
