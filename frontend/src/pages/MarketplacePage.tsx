@@ -109,15 +109,6 @@ type FeaturedProduct = {
   sponsored?: boolean;
 };
 
-const pickRandomIndex = (length: number, current: number) => {
-  if (length <= 1) return 0;
-  let next = current;
-  while (next === current) {
-    next = Math.floor(Math.random() * length);
-  }
-  return next;
-};
-
 export function MarketplacePage() {
   const navigate = useNavigate();
   const [stores, setStores] = useState<MarketplaceStore[]>([]);
@@ -140,9 +131,6 @@ export function MarketplacePage() {
   const [locationLabel, setLocationLabel] = useState('Sua região');
   const [distanceByStore, setDistanceByStore] = useState<Record<string, number>>({});
   const [distanceLoading, setDistanceLoading] = useState(false);
-  const [rotatingHeroIndex, setRotatingHeroIndex] = useState(0);
-  const [isHeroAutoplayPaused, setIsHeroAutoplayPaused] = useState(false);
-  const heroResumeTimerRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number | null>(null);
   const touchPullActiveRef = useRef(false);
   const pullDistanceRef = useRef(0);
@@ -441,49 +429,6 @@ export function MarketplacePage() {
     return segmentOptions.map((segment) => categoryVisuals[segment] || { emoji: '🏪', label: segment });
   }, [segmentOptions]);
 
-  const heroBanners = useMemo(() => {
-    const byStore = enrichedStores.map((store) => ({
-      id: store.id,
-      title: store.name,
-      subtitle: `${store.etaMin}-${store.etaMax} min • ${store.freeShipping ? 'Frete gratis' : 'Entrega rapida'}`,
-      image: store.banner,
-      slug: store.slug,
-    }));
-    if (byStore.length > 0) return byStore;
-    return [
-      {
-        id: 'fallback',
-        title: 'As melhores lojas em um so lugar',
-        subtitle: 'Descubra, compare e faca seu pedido com rapidez.',
-        image: '/janocaminho-logo.png',
-        slug: '',
-      },
-    ];
-  }, [enrichedStores]);
-
-  useEffect(() => {
-    const length = heroBanners.length;
-    if (length <= 1) {
-      setRotatingHeroIndex(0);
-      return;
-    }
-    if (isHeroAutoplayPaused) return;
-    setRotatingHeroIndex((prev) => (prev < length ? prev : 0));
-    const timer = window.setInterval(() => {
-      setRotatingHeroIndex((prev) => pickRandomIndex(length, prev));
-    }, 3000);
-    return () => window.clearInterval(timer);
-  }, [heroBanners, isHeroAutoplayPaused]);
-
-  useEffect(
-    () => () => {
-      if (heroResumeTimerRef.current) {
-        window.clearTimeout(heroResumeTimerRef.current);
-      }
-    },
-    []
-  );
-
   useEffect(() => {
     let cancelled = false;
     const toRad = (deg: number) => (deg * Math.PI) / 180;
@@ -655,24 +600,6 @@ export function MarketplacePage() {
     }
     return [...fixedSponsored, ...rotatedOrganic];
   }, [featuredProducts, featuredOffset]);
-
-  const handlePauseHero = () => {
-    if (heroResumeTimerRef.current) {
-      window.clearTimeout(heroResumeTimerRef.current);
-      heroResumeTimerRef.current = null;
-    }
-    setIsHeroAutoplayPaused(true);
-  };
-
-  const handleResumeHero = () => {
-    if (heroResumeTimerRef.current) {
-      window.clearTimeout(heroResumeTimerRef.current);
-    }
-    heroResumeTimerRef.current = window.setTimeout(() => {
-      setIsHeroAutoplayPaused(false);
-      heroResumeTimerRef.current = null;
-    }, 2200);
-  };
 
   return (
     <div className="min-h-screen bg-slate-100 pb-28 sm:pb-20 text-slate-900 pt-[max(1rem,env(safe-area-inset-top))]">
@@ -864,59 +791,6 @@ export function MarketplacePage() {
           </div>
         </section>
 
-        <section style={{ transition: 'all .45s ease', transitionDelay: hasEntered ? '140ms' : '0ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
-          {heroBanners[rotatingHeroIndex] &&
-            (heroBanners[rotatingHeroIndex].slug ? (
-              <Link
-                to={`/${heroBanners[rotatingHeroIndex].slug}`}
-                className="group relative block aspect-[16/6] sm:aspect-[16/5] rounded-3xl p-4 sm:p-5 text-white shadow-lg overflow-hidden transition-transform duration-300 hover:scale-[1.01] active:scale-[0.99]"
-                onMouseEnter={handlePauseHero}
-                onMouseLeave={handleResumeHero}
-                onTouchStart={handlePauseHero}
-                onTouchEnd={handleResumeHero}
-              >
-                <img
-                  src={heroBanners[rotatingHeroIndex].image}
-                  alt={heroBanners[rotatingHeroIndex].title}
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-slate-900/75 via-slate-900/35 to-slate-900/15" />
-                <div className="relative">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-slate-200 font-bold">Já no Caminho</p>
-                  <p className="text-lg sm:text-xl font-black mt-1">{heroBanners[rotatingHeroIndex].title}</p>
-                  <p className="text-xs sm:text-sm text-slate-100 mt-1">{heroBanners[rotatingHeroIndex].subtitle}</p>
-                </div>
-                <div className="absolute bottom-2.5 right-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black text-slate-700">
-                  {rotatingHeroIndex + 1}/{heroBanners.length}
-                </div>
-              </Link>
-            ) : (
-              <div className="relative aspect-[16/6] sm:aspect-[16/5] rounded-3xl p-4 sm:p-5 text-white shadow-lg overflow-hidden">
-                <div
-                  className="absolute inset-0 z-10"
-                  onMouseEnter={handlePauseHero}
-                  onMouseLeave={handleResumeHero}
-                  onTouchStart={handlePauseHero}
-                  onTouchEnd={handleResumeHero}
-                />
-                <img
-                  src={heroBanners[rotatingHeroIndex].image}
-                  alt={heroBanners[rotatingHeroIndex].title}
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-slate-900/75 via-slate-900/35 to-slate-900/15" />
-                <div className="relative">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-slate-200 font-bold">Já no Caminho</p>
-                  <p className="text-lg sm:text-xl font-black mt-1">{heroBanners[rotatingHeroIndex].title}</p>
-                  <p className="text-xs sm:text-sm text-slate-100 mt-1">{heroBanners[rotatingHeroIndex].subtitle}</p>
-                </div>
-                <div className="absolute bottom-2.5 right-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black text-slate-700">
-                  {rotatingHeroIndex + 1}/{heroBanners.length}
-                </div>
-              </div>
-            ))}
-        </section>
-
         <section className="space-y-3" style={{ transition: 'all .45s ease', transitionDelay: hasEntered ? '200ms' : '0ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
           <div className="flex items-center justify-between">
             <h2 className="text-base sm:text-xl font-black text-slate-900">{genericHighlightLabel}</h2>
@@ -1017,7 +891,7 @@ export function MarketplacePage() {
                   className={`w-full max-w-[420px] md:max-w-none group overflow-hidden rounded-3xl border bg-white transition-all duration-300 active:scale-[0.99] ${
                     store.isOpen
                       ? 'border-slate-200/90 shadow-[0_10px_24px_rgba(15,23,42,0.08)] md:hover:-translate-y-0.5 md:hover:shadow-[0_20px_40px_-24px_rgba(15,23,42,0.30)]'
-                      : 'border-slate-200/70 opacity-70 saturate-75'
+                      : 'border-slate-200/70 opacity-90 saturate-90'
                   }`}
                 >
                   <div className="relative aspect-[16/7.2] sm:aspect-[16/6.7] md:aspect-[16/6.2] lg:aspect-[16/5.9] overflow-hidden">
@@ -1047,7 +921,7 @@ export function MarketplacePage() {
                       <p className="text-[11px] text-slate-700 font-medium inline-flex items-center gap-1">
                         <MapPin size={12} /> {store.city}{store.state ? ` • ${store.state}` : ''}
                       </p>
-                      <div className="pt-0.5 flex flex-wrap gap-1 text-[10px] text-slate-300">
+                      <div className="pt-0.5 flex flex-wrap gap-1 text-[10px] text-slate-600">
                         <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-1.5 py-0.5 font-semibold text-amber-700">
                           <Star size={12} weight="fill" className="text-amber-500" />
                           {store.rating.toFixed(1)}

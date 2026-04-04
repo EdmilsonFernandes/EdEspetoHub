@@ -144,13 +144,15 @@ export class StoreController {
    * @author Edmilson Lopes
    */
   private static resolveDayEntry(openingHours: any[], jsDay: number) {
-    const asIso = jsDay === 0 ? 7 : jsDay; // Mon=1..Sun=7
-    const asSunFirst = jsDay + 1; // Sun=1..Sat=7
-    const candidates = [jsDay, asIso, asSunFirst];
-    return openingHours.find((entry: any) => {
-      const value = Number(entry?.day);
-      return Number.isFinite(value) && candidates.includes(value);
-    });
+    const valueSet = new Set(
+      openingHours
+        .map((entry: any) => Number(entry?.day))
+        .filter((value: number) => Number.isFinite(value))
+    );
+    const usesJsWeek = valueSet.has(0);
+    const usesIsoWeek = !usesJsWeek && valueSet.has(7);
+    const targetDay = usesIsoWeek ? (jsDay === 0 ? 7 : jsDay) : jsDay;
+    return openingHours.find((entry: any) => Number(entry?.day) === targetDay);
   }
 
   /**
@@ -160,12 +162,17 @@ export class StoreController {
    * @author Edmilson Lopes
    */
   private static resolveDayEntries(openingHours: any[], jsDay: number) {
-    const asIso = jsDay === 0 ? 7 : jsDay; // Mon=1..Sun=7
-    const asSunFirst = jsDay + 1; // Sun=1..Sat=7
-    const candidateSet = new Set([jsDay, asIso, asSunFirst]);
+    const valueSet = new Set(
+      openingHours
+        .map((entry: any) => Number(entry?.day))
+        .filter((value: number) => Number.isFinite(value))
+    );
+    const usesJsWeek = valueSet.has(0);
+    const usesIsoWeek = !usesJsWeek && valueSet.has(7);
+    const targetDay = usesIsoWeek ? (jsDay === 0 ? 7 : jsDay) : jsDay;
     return openingHours.filter((entry: any) => {
       const value = Number(entry?.day);
-      return Number.isFinite(value) && candidateSet.has(value);
+      return Number.isFinite(value) && value === targetDay;
     });
   }
 
