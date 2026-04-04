@@ -600,20 +600,9 @@ export function MarketplacePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b1220] pb-28 sm:pb-20 text-slate-100">
+    <div className="min-h-screen bg-[#0b1220] pb-28 sm:pb-20 text-slate-100 pt-[max(1rem,env(safe-area-inset-top))]">
       <header className="sticky top-0 z-50 bg-[#0b1220]/90 backdrop-blur-md border-b border-slate-800/80 shadow-sm">
         <div className="max-w-[1200px] mx-auto px-4 py-2.5 space-y-2.5">
-          <button
-            type="button"
-            className="inline-flex max-w-full items-center gap-1.5 text-[12px] font-bold text-slate-200 transition-colors hover:text-sky-300"
-            onClick={() => setShowAdvancedFilters((prev) => !prev)}
-            aria-label="Alterar localização"
-            title="Alterar localização"
-          >
-            <MapPin size={14} weight="duotone" className="text-sky-400" />
-            <span className="truncate">Entregar em: {locationLabel}</span>
-            <CaretDown size={12} className="text-slate-500" />
-          </button>
           <div className="relative">
             <MagnifyingGlass size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
             <input
@@ -692,6 +681,14 @@ export function MarketplacePage() {
       </header>
 
       <main className="max-w-[1200px] mx-auto px-4 pt-3 space-y-5">
+        <section>
+          <div className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-slate-700/70 bg-slate-900/55 px-3 py-1.5 text-[12px] font-bold text-slate-200">
+            <MapPin size={14} weight="duotone" className="text-sky-400" />
+            <span className="truncate">Entregar em: {locationLabel}</span>
+            <CaretDown size={12} className="text-slate-500" />
+          </div>
+        </section>
+
         <section
           className="rounded-2xl border border-slate-700/70 bg-slate-900/45 backdrop-blur-xl px-3 py-2.5 shadow-[0_10px_26px_-18px_rgba(2,6,23,0.65)] transition-all duration-300"
           style={{ borderColor: `${theme.secondary}33` }}
@@ -713,21 +710,21 @@ export function MarketplacePage() {
                     <SealCheck size={10} weight="fill" />
                   </span>
                 </div>
-                <p className="text-[10px] text-slate-400 font-medium">Os melhores da região, entregues agora.</p>
+                <p className="text-[10px] text-slate-400 font-medium">Gostou do app? Tenha o seu.</p>
                 <div className="mt-1.5 flex items-center gap-1.5 whitespace-nowrap">
-                  <Link
-                    to="/"
-                    className="inline-flex items-center rounded-full border border-slate-200 bg-white/85 px-2 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+                  <a
+                    href="https://www.janocaminho.com.br/"
+                    className="inline-flex items-center rounded-full border border-slate-600 bg-slate-800/85 px-2 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-slate-200 transition-all hover:border-slate-500 hover:bg-slate-700/80 hover:text-white"
                   >
-                    Conhecer
-                  </Link>
-                  <Link
-                    to="/create?plan=trial"
+                    Conhecer plataforma
+                  </a>
+                  <a
+                    href="https://www.janocaminho.com.br/create?plan=trial"
                     className="inline-flex items-center rounded-full px-2 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-white shadow-[0_8px_20px_-12px_rgba(14,165,233,0.75)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
                     style={{ backgroundColor: theme.primary }}
                   >
                     Criar loja
-                  </Link>
+                  </a>
                 </div>
               </div>
             </div>
