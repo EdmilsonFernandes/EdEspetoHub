@@ -664,6 +664,18 @@ export function MarketplacePage() {
     navigate('/cliente?mode=login');
   }, [navigate]);
 
+  const openAdminLogin = useCallback(() => {
+    navigate('/admin');
+  }, [navigate]);
+
+  const openMotoboyLogin = useCallback(() => {
+    navigate('/motoboy/login');
+  }, [navigate]);
+
+  const openSuperAdminLogin = useCallback(() => {
+    navigate('/superadmin');
+  }, [navigate]);
+
   const openTerms = useCallback(() => {
     navigate('/terms');
   }, [navigate]);
@@ -703,6 +715,9 @@ export function MarketplacePage() {
         locationLabel={displayLocationLabel}
         onClose={() => setProfileDrawerOpen(false)}
         onLogin={openCustomerLogin}
+        onOpenAdminLogin={openAdminLogin}
+        onOpenMotoboyLogin={openMotoboyLogin}
+        onOpenSuperAdminLogin={openSuperAdminLogin}
         onOpenAccount={openCustomerAccount}
         onOpenTerms={openTerms}
         onOpenPrivacy={openPrivacy}

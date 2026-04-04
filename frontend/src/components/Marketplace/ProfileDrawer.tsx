@@ -1,11 +1,15 @@
 import { useEffect, type ReactNode } from 'react';
 import {
+  ArrowsClockwise,
   BellSimple,
   ChatCenteredDots,
+  CookingPot,
   Lifebuoy,
   MapPin,
+  ShieldChevron,
   ShieldCheck,
   SignOut,
+  Truck,
   UserCircle,
   UserRectangle,
 } from '@phosphor-icons/react';
@@ -26,6 +30,9 @@ type ProfileDrawerProps = {
   locationLabel?: string;
   onClose: () => void;
   onLogin: () => void;
+  onOpenAdminLogin: () => void;
+  onOpenMotoboyLogin: () => void;
+  onOpenSuperAdminLogin: () => void;
   onOpenAccount: () => void;
   onOpenTerms: () => void;
   onOpenPrivacy: () => void;
@@ -69,6 +76,9 @@ export function ProfileDrawer({
   locationLabel,
   onClose,
   onLogin,
+  onOpenAdminLogin,
+  onOpenMotoboyLogin,
+  onOpenSuperAdminLogin,
   onOpenAccount,
   onOpenTerms,
   onOpenPrivacy,
@@ -104,7 +114,7 @@ export function ProfileDrawer({
         { id: 'logout', label: 'Sair', icon: <SignOut size={18} weight="duotone" />, onClick: onLogout, tone: 'danger' },
       ]
     : [
-        { id: 'login', label: 'Entrar ou criar conta', icon: <UserCircle size={18} weight="duotone" />, onClick: onLogin },
+        { id: 'login', label: 'Entrar como cliente', icon: <UserCircle size={18} weight="duotone" />, onClick: onLogin },
         { id: 'security', label: 'Central de segurança', icon: <ShieldCheck size={18} weight="duotone" />, onClick: onLogin },
         { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={18} weight="duotone" />, onClick: onOpenHelp },
         { id: 'terms', label: 'Termos de uso', icon: <UserRectangle size={18} weight="duotone" />, onClick: onOpenTerms },
@@ -152,6 +162,17 @@ export function ProfileDrawer({
         </div>
 
         <div className="px-3 py-3">
+          {!isLogged ? (
+            <div className="mb-3 rounded-2xl border border-slate-200 bg-slate-50 px-2.5 py-2.5">
+              <p className="mb-2 px-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">Entrar como</p>
+              <div className="space-y-1">
+                <ItemButton label="Cliente" icon={<UserCircle size={18} weight="duotone" />} onClick={() => { onClose(); onLogin(); }} />
+                <ItemButton label="Operacional (Admin/Operador)" icon={<CookingPot size={18} weight="duotone" />} onClick={() => { onClose(); onOpenAdminLogin(); }} />
+                <ItemButton label="Entregador" icon={<Truck size={18} weight="duotone" />} onClick={() => { onClose(); onOpenMotoboyLogin(); }} />
+                <ItemButton label="Master Console" icon={<ShieldChevron size={18} weight="duotone" />} onClick={() => { onClose(); onOpenSuperAdminLogin(); }} />
+              </div>
+            </div>
+          ) : null}
           {actions.map((item) => (
             <ItemButton
               key={item.id}
@@ -164,6 +185,19 @@ export function ProfileDrawer({
               tone={item.tone}
             />
           ))}
+          {!isLogged ? (
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                window.location.reload();
+              }}
+              className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+            >
+              <ArrowsClockwise size={14} weight="bold" />
+              Atualizar sessão
+            </button>
+          ) : null}
         </div>
         <div className="border-t border-slate-200 px-4 py-3 text-[11px] text-slate-500">
           <p className="font-semibold">Já no Caminho</p>
