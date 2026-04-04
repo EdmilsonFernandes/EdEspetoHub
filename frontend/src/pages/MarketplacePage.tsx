@@ -600,8 +600,8 @@ export function MarketplacePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b1220] pb-28 sm:pb-20 text-slate-100 pt-[max(1rem,env(safe-area-inset-top))]">
-      <header className="sticky top-0 z-50 bg-[#0b1220]/90 backdrop-blur-md border-b border-slate-800/80 shadow-sm">
+    <div className="min-h-screen bg-slate-100 pb-28 sm:pb-20 text-slate-900 pt-[max(1rem,env(safe-area-inset-top))]">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-2xl border-b border-slate-200/70 shadow-sm">
         <div className="max-w-[1200px] mx-auto px-4 py-2.5 space-y-2.5">
           <div className="relative">
             <MagnifyingGlass size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
@@ -609,7 +609,7 @@ export function MarketplacePage() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="O que você quer pedir agora?"
-              className="h-10 w-full rounded-xl bg-slate-900 border border-slate-800 px-11 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-600"
+              className="h-10 w-full rounded-xl bg-white/90 border border-slate-200 px-11 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
             />
           </div>
           <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-1">
@@ -631,7 +631,7 @@ export function MarketplacePage() {
                   className={`rounded-full border px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] whitespace-nowrap transition-all duration-300 active:scale-95 ${
                     active
                       ? 'text-white border-transparent shadow-[0_10px_20px_-15px_rgba(15,23,42,0.7)]'
-                      : 'border-slate-700 bg-slate-900/80 text-slate-300 hover:border-slate-600 hover:bg-slate-900'
+                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
                   }`}
                   style={active ? { backgroundColor: theme.primary } : undefined}
                 >
@@ -642,20 +642,20 @@ export function MarketplacePage() {
             <button
               type="button"
               onClick={() => setShowAdvancedFilters((prev) => !prev)}
-              className="rounded-full px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] whitespace-nowrap bg-slate-900 border border-slate-700 text-slate-300 hover:border-slate-600 hover:bg-slate-900"
+              className="rounded-full px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] whitespace-nowrap bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
             >
               Filtros
             </button>
           </div>
           {showAdvancedFilters && (
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-3">
+            <div className="rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur p-3">
               <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500 mb-2">Categoria</p>
               <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
                 <button
                   type="button"
                   onClick={() => setSegmentFilter('all')}
                   className={`rounded-full px-3 py-2 text-xs font-semibold whitespace-nowrap ${
-                    segmentFilter === 'all' ? 'text-white' : 'bg-slate-800 text-slate-300'
+                    segmentFilter === 'all' ? 'text-white' : 'bg-slate-100 text-slate-600'
                   }`}
                   style={segmentFilter === 'all' ? { backgroundColor: theme.primary } : undefined}
                 >
@@ -667,7 +667,7 @@ export function MarketplacePage() {
                     type="button"
                     onClick={() => setSegmentFilter(segment)}
                     className={`rounded-full px-3 py-2 text-xs font-semibold whitespace-nowrap ${
-                      segmentFilter === segment ? 'text-white' : 'bg-slate-800 text-slate-300'
+                      segmentFilter === segment ? 'text-white' : 'bg-slate-100 text-slate-600'
                     }`}
                     style={segmentFilter === segment ? { backgroundColor: theme.primary } : undefined}
                   >
@@ -682,7 +682,7 @@ export function MarketplacePage() {
 
       <main className="max-w-[1200px] mx-auto px-4 pt-3 space-y-5">
         <section>
-          <div className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-slate-700/70 bg-slate-900/55 px-3 py-1.5 text-[12px] font-bold text-slate-200">
+          <div className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/75 px-3 py-1.5 text-[12px] font-bold text-slate-700">
             <MapPin size={14} weight="duotone" className="text-sky-400" />
             <span className="truncate">Entregar em: {locationLabel}</span>
             <CaretDown size={12} className="text-slate-500" />
@@ -690,7 +690,7 @@ export function MarketplacePage() {
         </section>
 
         <section
-          className="rounded-2xl border border-slate-700/70 bg-slate-900/45 backdrop-blur-xl px-3 py-2.5 shadow-[0_10px_26px_-18px_rgba(2,6,23,0.65)] transition-all duration-300"
+          className="rounded-2xl border border-slate-200/70 bg-white/60 backdrop-blur-xl px-3 py-2.5 shadow-[0_10px_26px_-18px_rgba(15,23,42,0.22)] transition-all duration-300"
           style={{ borderColor: `${theme.secondary}33` }}
         >
           <div className="flex items-center justify-between gap-2">
@@ -699,22 +699,22 @@ export function MarketplacePage() {
                 <img
                   src="/janocaminho-logo.png"
                   alt="Já no Caminho"
-                  className="h-8 w-8 rounded-xl object-cover border border-slate-700 ring-1 ring-slate-800/70"
+                  className="h-8 w-8 rounded-xl object-cover border border-slate-200 ring-1 ring-white/70"
                 style={{ borderColor: `${theme.primary}44` }}
                 />
               </Link>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <h1 className="truncate text-[14px] sm:text-[15px] font-black text-slate-100">Já no Caminho</h1>
+                  <h1 className="truncate text-[14px] sm:text-[15px] font-black text-slate-900">Já no Caminho</h1>
                   <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-sky-900/60 text-sky-300">
                     <SealCheck size={10} weight="fill" />
                   </span>
                 </div>
-                <p className="text-[10px] text-slate-400 font-medium">Gostou do app? Tenha o seu.</p>
+                <p className="text-[10px] text-slate-500 font-medium">Gostou do app? Tenha o seu.</p>
                 <div className="mt-1.5 flex items-center gap-1.5 whitespace-nowrap">
                   <a
                     href="https://www.janocaminho.com.br/"
-                    className="inline-flex items-center rounded-full border border-slate-600 bg-slate-800/85 px-2 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-slate-200 transition-all hover:border-slate-500 hover:bg-slate-700/80 hover:text-white"
+                    className="inline-flex items-center rounded-full border border-slate-200 bg-white/85 px-2 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
                   >
                     Conhecer plataforma
                   </a>
@@ -733,8 +733,8 @@ export function MarketplacePage() {
 
         <section>
           <div className="relative">
-            <div className="pointer-events-none absolute inset-y-0 left-0 z-[2] w-5 bg-gradient-to-r from-[#0b1220] to-transparent" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 z-[2] w-5 bg-gradient-to-l from-[#0b1220] to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-[2] w-5 bg-gradient-to-r from-slate-100 to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-[2] w-5 bg-gradient-to-l from-slate-100 to-transparent" />
             <div className="flex items-center gap-3 overflow-x-auto no-scrollbar scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-0.5 py-0.5 snap-x snap-mandatory">
             {(() => {
               const active = segmentFilter === 'all';
@@ -747,7 +747,7 @@ export function MarketplacePage() {
                 >
                   <span
                     className={`mx-auto grid h-11 w-11 place-items-center rounded-full border shadow-sm text-base transition-all duration-200 ${
-                      active ? 'text-white border-transparent ring-2 ring-offset-2 ring-slate-500 ring-offset-[#0b1220]' : 'border-slate-700 bg-slate-900 text-slate-300'
+                      active ? 'text-white border-transparent ring-2 ring-offset-2 ring-slate-300 ring-offset-slate-100' : 'border-slate-200 bg-white text-slate-600'
                     }`}
                     style={active ? { backgroundColor: theme.primary } : undefined}
                   >
@@ -755,7 +755,7 @@ export function MarketplacePage() {
                   </span>
                   <span
                     className={`mt-1.5 block text-[9px] font-black uppercase tracking-widest text-center transition-colors ${
-                      active ? 'text-slate-100' : 'text-slate-500'
+                      active ? 'text-slate-900' : 'text-slate-500'
                     }`}
                   >
                     Todos
@@ -775,7 +775,7 @@ export function MarketplacePage() {
               >
                 <span
                   className={`mx-auto grid h-11 w-11 place-items-center rounded-full border shadow-sm text-base transition-all duration-200 ${
-                    active ? 'text-white border-transparent ring-2 ring-offset-2 ring-slate-500 ring-offset-[#0b1220]' : 'border-slate-700 bg-slate-900'
+                    active ? 'text-white border-transparent ring-2 ring-offset-2 ring-slate-300 ring-offset-slate-100' : 'border-slate-200 bg-white'
                   }`}
                   style={active ? { backgroundColor: theme.primary } : undefined}
                 >
@@ -783,7 +783,7 @@ export function MarketplacePage() {
                 </span>
                 <span
                   className={`mt-1.5 block text-[9px] font-black uppercase tracking-widest text-center transition-colors ${
-                    active ? 'text-slate-100' : 'text-slate-500'
+                    active ? 'text-slate-900' : 'text-slate-500'
                   }`}
                 >
                   {item.label}
@@ -851,18 +851,18 @@ export function MarketplacePage() {
 
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-base sm:text-xl font-black text-slate-100">{genericHighlightLabel}</h2>
+            <h2 className="text-base sm:text-xl font-black text-slate-900">{genericHighlightLabel}</h2>
             <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Mais pedidos</span>
           </div>
           <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
             {featuredLoading &&
               Array.from({ length: 4 }).map((_, idx) => (
-                <div key={`featured-skeleton-${idx}`} className="min-w-[140px] sm:min-w-[148px] md:min-w-[154px] rounded-2xl border border-slate-800 bg-slate-900 p-1.5 sm:p-2 animate-pulse">
-                  <div className="h-[68px] sm:h-[74px] rounded-xl bg-slate-800" />
-                  <div className="mt-2 h-3 w-24 rounded bg-slate-800" />
+                <div key={`featured-skeleton-${idx}`} className="min-w-[140px] sm:min-w-[148px] md:min-w-[154px] rounded-2xl border border-slate-200 bg-white p-1.5 sm:p-2 animate-pulse">
+                  <div className="h-[68px] sm:h-[74px] rounded-xl bg-slate-100" />
+                  <div className="mt-2 h-3 w-24 rounded bg-slate-100" />
                   <div className="mt-1 flex items-center gap-1.5">
-                    <div className="h-4 w-4 rounded-full bg-slate-800" />
-                    <div className="h-3 w-16 rounded bg-slate-800" />
+                    <div className="h-4 w-4 rounded-full bg-slate-100" />
+                    <div className="h-3 w-16 rounded bg-slate-100" />
                   </div>
                 </div>
               ))}
@@ -871,7 +871,7 @@ export function MarketplacePage() {
                 <Link
                   key={`${item.storeSlug}-${item.id}`}
                   to={`/${item.storeSlug}`}
-                  className="group relative min-w-[140px] sm:min-w-[148px] md:min-w-[154px] rounded-2xl border border-slate-800 bg-slate-900 p-1.5 sm:p-2 shadow-sm transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-lg active:scale-[0.99]"
+                  className="group relative min-w-[140px] sm:min-w-[148px] md:min-w-[154px] rounded-2xl border border-slate-200 bg-white p-1.5 sm:p-2 shadow-sm transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-lg active:scale-[0.99]"
                 >
                   <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-[68px] sm:h-[74px] w-full rounded-xl object-cover" />
                   {item.sponsored ? (
@@ -879,21 +879,21 @@ export function MarketplacePage() {
                       <Star size={10} weight="fill" className="text-amber-500" />
                     </span>
                   ) : (
-                    <span className="absolute top-2.5 left-2.5 rounded-full bg-slate-800/95 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-[0.08em] text-slate-300">
+                    <span className="absolute top-2.5 left-2.5 rounded-full bg-slate-100/95 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-[0.08em] text-slate-300">
                       Destaque
                     </span>
                   )}
-                  <p className="mt-1.5 line-clamp-1 text-[12px] sm:text-[13px] font-bold text-slate-100">{item.name}</p>
+                  <p className="mt-1.5 line-clamp-1 text-[12px] sm:text-[13px] font-bold text-slate-900">{item.name}</p>
                   <div className="mt-1 flex items-center gap-1.5">
                     <img
                       src={item.storeLogo}
                       alt={item.storeName}
-                      className="h-4 w-4 shrink-0 rounded-full object-cover border border-slate-700 ring-1 ring-slate-900"
+                      className="h-4 w-4 shrink-0 rounded-full object-cover border border-slate-200 ring-1 ring-white"
                     />
-                    <p className="line-clamp-1 text-[10px] text-slate-400 leading-none">{item.storeName}</p>
+                    <p className="line-clamp-1 text-[10px] text-slate-500 leading-none">{item.storeName}</p>
                   </div>
                   <div className="mt-1 flex items-center justify-between gap-1.5">
-                    <p className="text-[13px] sm:text-sm font-black text-slate-100">{currency.format(item.price)}</p>
+                    <p className="text-[13px] sm:text-sm font-black text-slate-900">{currency.format(item.price)}</p>
                     <span
                       className="inline-flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full text-white text-xs sm:text-sm font-black shadow-sm transition-transform active:scale-95 group-hover:scale-105"
                       style={{ backgroundColor: theme.primary }}
@@ -908,14 +908,14 @@ export function MarketplacePage() {
 
         <section className="space-y-4">
           <div className="flex items-center justify-between gap-2">
-            <h2 className="text-base sm:text-lg font-black text-slate-100">Lojas da região</h2>
+            <h2 className="text-base sm:text-lg font-black text-slate-900">Lojas da região</h2>
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">{filteredStores.length} resultados</p>
           </div>
 
           {loading && (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, idx) => (
-                <div key={idx} className="h-36 rounded-3xl bg-slate-900 border border-slate-800 animate-pulse" />
+                <div key={idx} className="h-36 rounded-3xl bg-white border border-slate-200 animate-pulse" />
               ))}
             </div>
           )}
@@ -923,8 +923,8 @@ export function MarketplacePage() {
           {!loading && error && <div className="rounded-2xl border border-rose-900/60 bg-rose-950/50 p-4 text-sm text-rose-200">{error}</div>}
 
           {!loading && !error && filteredStores.length === 0 && (
-            <div className="rounded-2xl border border-slate-800 bg-slate-900 p-8 text-center">
-              <p className="text-slate-200 font-semibold">Nenhuma loja encontrada com esses filtros.</p>
+            <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
+              <p className="text-slate-700 font-semibold">Nenhuma loja encontrada com esses filtros.</p>
               <button
                 type="button"
                 onClick={() => {
@@ -933,7 +933,7 @@ export function MarketplacePage() {
                   setQuickFilter('all');
                   setSegmentFilter('all');
                 }}
-                className="mt-3 rounded-xl border border-slate-700 px-4 py-2 text-xs font-bold text-slate-300"
+                className="mt-3 rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600"
               >
                 Limpar filtros
               </button>
@@ -946,10 +946,10 @@ export function MarketplacePage() {
                 <Link
                   key={store.id}
                   to={`/${store.slug}`}
-                  className={`w-full max-w-[420px] md:max-w-none group overflow-hidden rounded-3xl border bg-slate-900 transition-all duration-300 active:scale-[0.99] ${
+                  className={`w-full max-w-[420px] md:max-w-none group overflow-hidden rounded-3xl border bg-white transition-all duration-300 active:scale-[0.99] ${
                     store.isOpen
-                      ? 'border-slate-800/90 shadow-[0_10px_24px_rgba(2,6,23,0.35)] md:hover:-translate-y-0.5 md:hover:shadow-[0_20px_40px_-24px_rgba(2,6,23,0.85)]'
-                      : 'border-slate-800/70 opacity-70 saturate-75'
+                      ? 'border-slate-200/90 shadow-[0_10px_24px_rgba(15,23,42,0.08)] md:hover:-translate-y-0.5 md:hover:shadow-[0_20px_40px_-24px_rgba(15,23,42,0.30)]'
+                      : 'border-slate-200/70 opacity-70 saturate-75'
                   }`}
                 >
                   <div className="relative aspect-[16/7.2] sm:aspect-[16/6.7] md:aspect-[16/6.2] lg:aspect-[16/5.9] overflow-hidden">
@@ -966,11 +966,11 @@ export function MarketplacePage() {
                       src={store.logo}
                       alt={`${store.name} logo`}
                       loading="lazy"
-                      className="h-10 w-10 rounded-xl object-cover border border-slate-700 bg-slate-900 ring-1 ring-slate-800"
+                      className="h-10 w-10 rounded-xl object-cover border border-slate-200 bg-white ring-1 ring-white"
                     />
                     <div className="min-w-0 flex-1 space-y-1">
                       <div className="flex items-center justify-between gap-2">
-                        <h3 className="truncate text-[15px] font-black text-slate-100 tracking-tight">{store.name}</h3>
+                        <h3 className="truncate text-[15px] font-black text-slate-900 tracking-tight">{store.name}</h3>
                         <span
                           className={`inline-flex h-2 w-2 rounded-full ${store.isOpen ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`}
                         />
@@ -984,10 +984,10 @@ export function MarketplacePage() {
                           <Star size={12} weight="fill" className="text-amber-500" />
                           {store.rating.toFixed(1)}
                         </span>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-800 px-1.5 py-0.5">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5">
                           {distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)}
                         </span>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-800 px-1.5 py-0.5">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5">
                           <Clock size={12} />
                           {store.etaMin}-{store.etaMax} min
                         </span>
@@ -996,24 +996,24 @@ export function MarketplacePage() {
                             Aberta
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-700 px-1.5 py-0.5 font-semibold text-slate-200">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 px-1.5 py-0.5 font-semibold text-slate-600">
                             Fechada
                           </span>
                         )}
                         {!store.isOpen && store.nextOpeningLabel && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-800 px-1.5 py-0.5 font-semibold text-slate-600">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 font-semibold text-slate-600">
                             {store.nextOpeningLabel}
                           </span>
                         )}
                         {!store.isOpen && !store.nextOpeningLabel && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-800 px-1.5 py-0.5 font-semibold text-slate-600">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 font-semibold text-slate-600">
                             Sem horario cadastrado
                           </span>
                         )}
                         {store.supportsDelivery && (
                           <span
                             className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-semibold ${
-                              store.freeShipping ? 'bg-emerald-900/50 text-emerald-300' : 'bg-slate-800 text-slate-300'
+                              store.freeShipping ? 'bg-emerald-900/50 text-emerald-300' : 'bg-slate-100 text-slate-700'
                             }`}
                           >
                             <Scooter size={12} />
@@ -1021,12 +1021,12 @@ export function MarketplacePage() {
                           </span>
                         )}
                         {store.supportsPickup && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-sky-900/50 px-1.5 py-0.5 font-semibold text-sky-300">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-1.5 py-0.5 font-semibold text-sky-700">
                             Retirada
                           </span>
                         )}
                         {store.supportsTable && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-violet-900/50 px-1.5 py-0.5 font-semibold text-violet-300">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 px-1.5 py-0.5 font-semibold text-violet-700">
                             Mesa
                           </span>
                         )}
@@ -1040,13 +1040,13 @@ export function MarketplacePage() {
         </section>
 
         <section className="pb-6 space-y-2">
-          <p className="text-center text-xs font-semibold text-slate-400">Conectando você aos melhores lojistas da região.</p>
+          <p className="text-center text-xs font-semibold text-slate-500">Conectando você aos melhores lojistas da região.</p>
           <PlatformTrustFooter mode="minimal" align="center" compact />
         </section>
       </main>
 
       <nav
-        className="fixed bottom-0 left-0 right-0 z-[100] border-t border-slate-800 bg-[#0b1220]/90 backdrop-blur-2xl h-14 lg:hidden transition-transform duration-300"
+        className="fixed bottom-0 left-0 right-0 z-[100] border-t border-slate-200 bg-white/80 backdrop-blur-2xl h-14 lg:hidden transition-transform duration-300"
         style={{ transform: isBottomNavVisible ? 'translateY(0)' : 'translateY(100%)' }}
       >
         <div className="h-full grid grid-cols-3 px-2 pb-[max(env(safe-area-inset-bottom),0px)]">
@@ -1067,5 +1067,6 @@ export function MarketplacePage() {
     </div>
   );
 }
+
 
 
