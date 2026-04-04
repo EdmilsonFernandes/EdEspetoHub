@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MagnifyingGlass, MapPin, Star, Clock, Scooter, Storefront, House, UserCircle, List, CaretDown } from '@phosphor-icons/react';
+import { MagnifyingGlass, MapPin, Star, Clock, Scooter, Storefront, House, UserCircle, List, CaretDown, Heart, ShareNetwork } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { productService } from '../services/productService';
 import { featuredService } from '../services/featuredService';
@@ -601,6 +601,23 @@ export function MarketplacePage() {
     return [...fixedSponsored, ...rotatedOrganic];
   }, [featuredProducts, featuredOffset]);
 
+  const handleShareHub = useCallback(async () => {
+    const url = 'https://www.janocaminho.com.br/hub';
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        await navigator.share({
+          title: 'Hub Já no Caminho',
+          text: 'Conheça o Hub Já no Caminho',
+          url,
+        });
+        return;
+      }
+    } catch (_err) {
+      // Ignore and fallback to open URL.
+    }
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }, []);
+
   return (
     <div className="min-h-screen bg-slate-100 pb-28 sm:pb-20 text-slate-900 pt-[max(1rem,env(safe-area-inset-top))]">
       <div
@@ -613,7 +630,7 @@ export function MarketplacePage() {
       </div>
       <a
         href="https://www.janocaminho.com.br/"
-        className={`relative block h-72 w-full overflow-hidden transition-all duration-500 ${
+        className={`relative block min-h-[250px] h-[34vh] max-h-[360px] w-full overflow-hidden transition-all duration-500 ${
           hasEntered ? 'opacity-100' : 'opacity-0'
         }`}
         aria-label="Abrir landing page Já no Caminho"
@@ -624,19 +641,42 @@ export function MarketplacePage() {
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950/35 via-slate-950/20 to-slate-950/45" />
-        <div className="absolute inset-x-4 top-5 text-white sm:inset-x-6">
+        <div className="absolute right-3 top-3 z-20 flex items-center gap-2 sm:right-5 sm:top-4">
+          <button
+            type="button"
+            onClick={(event) => event.preventDefault()}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/35 bg-black/30 text-white backdrop-blur-sm transition-transform active:scale-95"
+            aria-label="Favoritar Hub"
+            title="Favoritar Hub"
+          >
+            <Heart size={16} weight="duotone" />
+          </button>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.preventDefault();
+              handleShareHub();
+            }}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/35 bg-black/30 text-white backdrop-blur-sm transition-transform active:scale-95"
+            aria-label="Compartilhar Hub"
+            title="Compartilhar Hub"
+          >
+            <ShareNetwork size={16} weight="duotone" />
+          </button>
+          <span className="inline-flex items-center rounded-full border border-sky-300/70 bg-sky-500/85 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-[0_8px_18px_-12px_rgba(14,165,233,0.9)] backdrop-blur-sm">
+            Criar minha loja
+          </span>
+        </div>
+        <div className="absolute inset-x-4 top-14 text-white sm:inset-x-6 sm:top-16">
           <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-100/95">Já no Caminho</p>
-          <h1 className="mt-1 text-xl font-black tracking-tight text-white sm:text-2xl">Sua vitrine digital pronta para vender</h1>
-          <p className="mt-1 max-w-[520px] text-xs font-medium text-slate-100/90 sm:text-sm">
+          <h1 className="mt-1 line-clamp-2 text-lg font-black tracking-tight text-white sm:text-2xl">Sua vitrine digital pronta para vender</h1>
+          <p className="mt-1 max-w-[520px] line-clamp-2 text-xs font-medium text-slate-100/90 sm:text-sm">
             Hub oficial com lojas locais, pedidos em tempo real e experiência premium.
           </p>
         </div>
-        <div className="absolute bottom-4 right-4 flex items-center gap-2">
+        <div className="absolute bottom-4 left-4">
           <span className="inline-flex items-center rounded-full border border-white/35 bg-black/30 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white backdrop-blur-sm">
             Conhecer plataforma
-          </span>
-          <span className="inline-flex items-center rounded-full border border-sky-300/70 bg-sky-500/85 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-[0_8px_18px_-12px_rgba(14,165,233,0.9)] backdrop-blur-sm">
-            Criar minha loja
           </span>
         </div>
       </a>
