@@ -8,12 +8,12 @@ export interface ClientLogo {
 }
 
 const mockClientLogos: ClientLogo[] = [
-  { id: 'mock-edsertaneja', name: 'edsertaneja', logoUrl: '/janocaminho.jpg' },
-  { id: 'mock-cris', name: 'Espetinho da Cris', logoUrl: '/janocaminho.jpg' },
-  { id: 'mock-teus', name: 'teus espetinhos', logoUrl: '/janocaminho.jpg' },
-  { id: 'mock-villa', name: 'Villa Grill', logoUrl: '/janocaminho.jpg' },
-  { id: 'mock-ranch', name: 'Ranch do Espeto', logoUrl: '/janocaminho.jpg' },
-  { id: 'mock-boteco', name: 'Boteco 77', logoUrl: '/janocaminho.jpg' },
+  { id: 'mock-edsertaneja', name: 'edsertaneja', logoUrl: '/janocaminho-logo.png' },
+  { id: 'mock-cris', name: 'Espetinho da Cris', logoUrl: '/janocaminho-logo.png' },
+  { id: 'mock-teus', name: 'teus espetinhos', logoUrl: '/janocaminho-logo.png' },
+  { id: 'mock-villa', name: 'Villa Grill', logoUrl: '/janocaminho-logo.png' },
+  { id: 'mock-ranch', name: 'Ranch do Espeto', logoUrl: '/janocaminho-logo.png' },
+  { id: 'mock-boteco', name: 'Boteco 77', logoUrl: '/janocaminho-logo.png' },
 ];
 
 interface SocialProofMarqueeProps {
@@ -97,3 +97,4 @@ export function SocialProofMarquee({ clients = [] }: SocialProofMarqueeProps) {
     </section>
   );
 }
+

@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../services/authService';
@@ -9,7 +9,7 @@ export function VerifyEmail() {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const platformLogo = '/janocaminho.jpg';
+  const platformLogo = '/janocaminho-logo.png';
 
   const [status, setStatus] = useState('Enviamos um e-mail com o link e o código de ativação.');
   const [error, setError] = useState('');
@@ -169,4 +169,5 @@ export function VerifyEmail() {
     </div>
   );
 }
+
 

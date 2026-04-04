@@ -351,7 +351,7 @@ export function AdminHighlights() {
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div className="flex items-start gap-2.5 min-w-0">
                         <img
-                          src={resolveAssetUrl(request?.product?.imageUrl || undefined) || '/janocaminho.jpg'}
+                          src={resolveAssetUrl(request?.product?.imageUrl || undefined) || '/janocaminho-logo.png'}
                           alt={request?.product?.name || 'Produto'}
                           className="h-11 w-11 rounded-xl object-cover border border-slate-200 bg-white"
                         />
@@ -587,3 +587,4 @@ export function AdminHighlights() {
     </AdminLayout>
   );
 }
+

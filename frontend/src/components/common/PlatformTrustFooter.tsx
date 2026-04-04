@@ -59,7 +59,7 @@ export function PlatformTrustFooter({
                 </p>
                 <div className={`mt-0.5 inline-flex items-center gap-1.5 ${isLeft ? '' : isRight ? 'justify-end w-full' : 'justify-center sm:justify-start w-full'}`}>
                   <span className="h-5 w-5 overflow-hidden rounded-md border border-slate-300/60 bg-white transition-all grayscale opacity-65 group-hover:grayscale-0 group-hover:opacity-100">
-                    <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
+                    <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-full w-full object-cover" />
                   </span>
                   <span className={`${compact ? 'text-[10px]' : 'text-[11px]'} uppercase tracking-[0.14em] font-bold ${minimalBrand}`}>
                     Já no Caminho
@@ -90,7 +90,7 @@ export function PlatformTrustFooter({
           aria-label="Plataforma Já no Caminho"
         >
           <span className="h-7 w-7 rounded-lg overflow-hidden border border-slate-200/70 shadow-sm bg-white">
-            <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
+            <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-full w-full object-cover" />
           </span>
           <span className="flex min-w-0 flex-col">
             <span className={`font-semibold leading-tight ${compact ? 'text-[11px]' : 'text-xs'}`}>Desenvolvido por Já no Caminho</span>
@@ -107,3 +107,4 @@ export function PlatformTrustFooter({
     </div>
   );
 }
+

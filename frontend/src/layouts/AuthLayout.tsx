@@ -24,7 +24,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           
           <div className="space-y-6 relative z-10">
             <div className="inline-block p-1 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl">
-              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-14 w-auto rounded-xl" />
+              <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-14 w-auto rounded-xl" />
             </div>
             
             <div className="space-y-3">
@@ -68,3 +68,4 @@ export function AuthLayout({ children }: AuthLayoutProps) {
     </div>
   );
 }
+

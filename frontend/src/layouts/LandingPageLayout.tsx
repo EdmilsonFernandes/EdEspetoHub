@@ -196,7 +196,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
           <div className="flex items-center justify-between h-20">
             <a href="https://www.janocaminho.com.br" className="flex items-center gap-3 group">
               <div className="h-10 w-10 rounded-xl bg-white/10 p-0.5 border border-white/10 group-hover:scale-105 transition-transform overflow-hidden shrink-0">
-                <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover rounded-lg" />
+                <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-full w-full object-cover rounded-lg" />
               </div>
               <div className="leading-tight">
                 <p className="text-lg font-black text-white tracking-tight">Já no Caminho</p>
@@ -450,7 +450,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             <div>
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl border border-slate-700 bg-slate-900 p-0.5">
-                  <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover rounded-lg" />
+                  <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-full w-full object-cover rounded-lg" />
                 </div>
                 <div>
                   <p className="text-base font-black text-white">Já no Caminho</p>
@@ -518,4 +518,5 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
     </div>
   );
 }
+
 

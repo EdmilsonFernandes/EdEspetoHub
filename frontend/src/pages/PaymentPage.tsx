@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { paymentService } from '../services/paymentService';
@@ -23,7 +23,7 @@ export function PaymentPage() {
   const [selectedPlanId, setSelectedPlanId] = useState('');
   const [isAnnual, setIsAnnual] = useState(false);
   const EVENTS_PAGE_SIZE = 25;
-  const platformLogo = '/janocaminho.jpg';
+  const platformLogo = '/janocaminho-logo.png';
   const redirectRef = useRef(false);
 
   const loadPayment = useCallback(
@@ -619,4 +619,5 @@ export function PaymentPage() {
     </div>
   );
 }
+
 

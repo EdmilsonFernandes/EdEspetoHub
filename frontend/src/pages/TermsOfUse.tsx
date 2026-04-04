@@ -1,10 +1,10 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../config/apiClient';
 
 export function TermsOfUse() {
   const navigate = useNavigate();
-  const platformLogo = '/janocaminho.jpg';
+  const platformLogo = '/janocaminho-logo.png';
   const [termsContent, setTermsContent] = useState('');
   const [lgpdContent, setLgpdContent] = useState('');
   const [loading, setLoading] = useState(true);
@@ -87,4 +87,5 @@ export function TermsOfUse() {
     </div>
   );
 }
+
 

@@ -203,7 +203,7 @@ export function CreateStore() {
     document: '',
     storeName: '',
   });
-  const platformLogo = '/janocaminho.jpg';
+  const platformLogo = '/janocaminho-logo.png';
   const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
   const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e', '#065f46', '#4b5563' ];
   const termsRef = useRef<HTMLDivElement | null>(null);
@@ -2054,5 +2054,6 @@ export function CreateStore() {
     </div>
   );
 }
+
 
 

@@ -242,7 +242,7 @@ export function OrderTracking() {
     navigate(storeHomePath);
   };
   const storeLogo =
-    resolveAssetUrl(order?.store?.settings?.logoUrl) || '/janocaminho.jpg';
+    resolveAssetUrl(order?.store?.settings?.logoUrl) || '/janocaminho-logo.png';
   const isPostalDelivery = isDelivery && String((order as any)?.fulfillmentMode || '').toLowerCase() === 'postal';
   const statusLabel = useMemo(() => {
     if (isPostalDelivery && (normalizedStatus === 'delivered' || normalizedStatus === 'finished')) return 'Entregue';
@@ -1730,6 +1730,7 @@ export function OrderTracking() {
     </div>
   );
 }
+
 
 
 

@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   CheckCircle,
   Cube,
@@ -108,7 +108,7 @@ export function LandingPage() {
     upsertMeta('description', description, 'name');
     upsertMeta('og:title', 'Já no Caminho | Plataforma completa para gestão de pedidos e entregas', 'property');
     upsertMeta('og:description', description, 'property');
-    upsertMeta('og:image', 'https://www.janocaminho.com.br/janocaminho.jpg', 'property');
+    upsertMeta('og:image', 'https://www.janocaminho.com.br/janocaminho-logo.png', 'property');
     upsertMeta('og:type', 'website', 'property');
   }, []);
 
@@ -738,5 +738,6 @@ const Cloud = (props: any) => <Cube {...props} />;
 const ArrowsClockwise = (props: any) => <Rocket {...props} />;
 const ChartLine = (props: any) => <TrendUp {...props} />;
 const ArrowRight = (props: any) => <Rocket {...props} className="rotate-90" />;
+
 
 

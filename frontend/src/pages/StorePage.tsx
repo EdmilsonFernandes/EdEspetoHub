@@ -378,7 +378,7 @@ export function StorePage() {
     if (!store) return;
     const name = store.name || store.slug || 'Já no Caminho';
     const description = `Vitrine online e pedidos da loja ${name}.`;
-    const logo = resolveAssetUrl(store.settings?.logoUrl) || '/janocaminho.jpg';
+    const logo = resolveAssetUrl(store.settings?.logoUrl) || '/janocaminho-logo.png';
     const url = typeof window !== 'undefined' ? window.location.href : '';
 
     const upsertMeta = (key: string, value: string, attr: 'name' | 'property' = 'name') => {
@@ -2043,7 +2043,7 @@ export function StorePage() {
                     <div className="flex items-center gap-4 min-w-0">
                       <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl overflow-hidden bg-slate-100 shrink-0">
                         <img
-                          src={branding?.logoUrl || '/janocaminho.jpg'}
+                          src={branding?.logoUrl || '/janocaminho-logo.png'}
                           alt={closedStateStoreName}
                           className="w-full h-full object-cover"
                         />
@@ -2579,4 +2579,5 @@ export function StorePage() {
     const planName = String(subscription?.plan?.name || '').toLowerCase();
     return planName.includes('pro') || planName.includes('vip');
   };
+
 

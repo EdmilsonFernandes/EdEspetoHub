@@ -93,7 +93,7 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
         <div className="flex items-center gap-3 min-w-0">
           <div className="relative h-11 w-16 sm:h-12 sm:w-20 rounded-2xl overflow-hidden shadow-sm shrink-0 bg-slate-100 p-1 border border-slate-200">
             <div className="absolute inset-0 bg-[linear-gradient(135deg,#e2e8f0,#f8fafc)] opacity-70" />
-            <img src="/janocaminho.jpg" alt="Já no Caminho" className="relative h-full w-full object-contain" />
+            <img src="/janocaminho-logo.png" alt="Já no Caminho" className="relative h-full w-full object-contain" />
           </div>
           <div className="min-w-0">
             <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.22em] sm:tracking-[0.3em] text-slate-500">Área do Entregador</p>
@@ -154,3 +154,4 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
     </div>
   );
 }
+

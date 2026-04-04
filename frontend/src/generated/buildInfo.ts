@@ -5,13 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260403.223612.534bae7b",
-  "buildId": "0.1.9+20260403.223612.534bae7b-20260403.223612-534bae7b",
-  "builtAt": "2026-04-03T22:36:12.857Z",
-  "commitHash": "534bae7bdfb1c1e3a481cd1d4fae1f2722f1f54b",
-  "shortHash": "534bae7b",
+  "versionInternal": "0.1.9+20260404.013745.249198f1",
+  "buildId": "0.1.9+20260404.013745.249198f1-20260404.013745-249198f1",
+  "builtAt": "2026-04-04T01:37:45.372Z",
+  "commitHash": "249198f17197d8cde792e9edb6faf0846087b6ce",
+  "shortHash": "249198f1",
   "branch": "main",
   "commits": [
+    {
+      "hash": "249198f17197d8cde792e9edb6faf0846087b6ce",
+      "shortHash": "249198f1",
+      "dateIso": "2026-04-03T19:51:48-03:00",
+      "subject": "Android: update launcher icon from playstore.png and refresh latest APK"
+    },
+    {
+      "hash": "0df73ea639fed5847c20cb656a068431ad746f02",
+      "shortHash": "0df73ea6",
+      "dateIso": "2026-04-03T19:38:06-03:00",
+      "subject": "Mobile hotfix: disable push bootstrap by default and remove native push plugin to prevent startup crash"
+    },
     {
       "hash": "534bae7bdfb1c1e3a481cd1d4fae1f2722f1f54b",
       "shortHash": "534bae7b",
@@ -179,18 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "d16d4167",
       "dateIso": "2026-04-03T13:32:38-03:00",
       "subject": "Remove portfolio da navegação e centraliza vitrine no Hub"
-    },
-    {
-      "hash": "a67f4c1924588334f178798689bfc212f46ff646",
-      "shortHash": "a67f4c19",
-      "dateIso": "2026-04-03T13:29:40-03:00",
-      "subject": "Implementa fluxo de destaques patrocinados com gestão por super admin"
-    },
-    {
-      "hash": "3b3bc4861a6a190a94658e97f6ec8d70cc634dd3",
-      "shortHash": "3b3bc486",
-      "dateIso": "2026-04-03T13:13:11-03:00",
-      "subject": "Restaura diagrama na arquitetura e suaviza visual da pagina"
     }
   ]
 } as const;
