@@ -992,8 +992,8 @@ export function MarketplacePage() {
                           className={`inline-flex h-2 w-2 rounded-full ${store.isOpen ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`}
                         />
                       </div>
-                      <p className="text-[9px] uppercase tracking-[0.16em] text-slate-500">{store.segment}</p>
-                      <p className="text-[11px] text-slate-500 inline-flex items-center gap-1">
+                      <p className="text-[9px] uppercase tracking-[0.16em] text-slate-600">{store.segment}</p>
+                      <p className="text-[11px] text-slate-700 font-medium inline-flex items-center gap-1">
                         <MapPin size={12} /> {store.city}{store.state ? ` • ${store.state}` : ''}
                       </p>
                       <div className="pt-0.5 flex flex-wrap gap-1 text-[10px] text-slate-300">
@@ -1001,10 +1001,10 @@ export function MarketplacePage() {
                           <Star size={12} weight="fill" className="text-amber-500" />
                           {store.rating.toFixed(1)}
                         </span>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 px-1.5 py-0.5 font-semibold text-slate-700">
                           {distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)}
                         </span>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 px-1.5 py-0.5 font-semibold text-slate-700">
                           <Clock size={12} />
                           {store.etaMin}-{store.etaMax} min
                         </span>
@@ -1018,12 +1018,12 @@ export function MarketplacePage() {
                           </span>
                         )}
                         {!store.isOpen && store.nextOpeningLabel && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 font-semibold text-slate-600">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 px-1.5 py-0.5 font-semibold text-slate-700">
                             {store.nextOpeningLabel}
                           </span>
                         )}
                         {!store.isOpen && !store.nextOpeningLabel && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 font-semibold text-slate-600">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 px-1.5 py-0.5 font-semibold text-slate-700">
                             Sem horario cadastrado
                           </span>
                         )}
