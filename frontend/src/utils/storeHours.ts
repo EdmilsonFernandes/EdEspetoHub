@@ -144,7 +144,6 @@ export const formatOpeningHoursSummary = (openingHours?: OpeningDay[]) => {
     if (entry.enabled === false) {
       return `${dayLabel}: fechado`;
     }
-    }
     const intervals = Array.isArray(entry.intervals) ? entry.intervals : [];
     if (!intervals.length) {
       return `${dayLabel}: horario livre`;
