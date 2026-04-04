@@ -640,7 +640,17 @@ export function MarketplacePage() {
           alt="Já no Caminho"
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/35 via-slate-950/20 to-slate-950/45" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/78 via-slate-950/48 to-slate-950/20" />
+        <div className="absolute inset-y-0 left-0 z-10 w-[74%] max-w-[560px] border-r border-white/10 bg-slate-950/42 px-4 pb-4 pt-16 backdrop-blur-lg sm:w-[62%] sm:px-6 sm:pt-20">
+          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-100/95">Já no Caminho</p>
+          <h1 className="mt-1 line-clamp-2 text-lg font-black tracking-tight text-white sm:text-2xl">Sua vitrine digital pronta para vender</h1>
+          <p className="mt-1 max-w-[520px] line-clamp-2 text-xs font-medium text-slate-100/90 sm:text-sm">
+            Hub oficial com lojas locais, pedidos em tempo real e experiência premium.
+          </p>
+          <span className="mt-3 inline-flex items-center rounded-full border border-white/35 bg-black/30 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white backdrop-blur-sm">
+            Conhecer plataforma
+          </span>
+        </div>
         <div className="absolute right-3 top-3 z-20 flex items-center gap-2 sm:right-5 sm:top-4">
           <button
             type="button"
@@ -663,20 +673,11 @@ export function MarketplacePage() {
           >
             <ShareNetwork size={16} weight="duotone" />
           </button>
-          <span className="inline-flex items-center rounded-full border border-sky-300/70 bg-sky-500/85 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-[0_8px_18px_-12px_rgba(14,165,233,0.9)] backdrop-blur-sm">
+          <span className="hidden sm:inline-flex items-center rounded-full border border-sky-300/70 bg-sky-500/85 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-[0_8px_18px_-12px_rgba(14,165,233,0.9)] backdrop-blur-sm">
             Criar minha loja
           </span>
-        </div>
-        <div className="absolute inset-x-4 top-14 text-white sm:inset-x-6 sm:top-16">
-          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-100/95">Já no Caminho</p>
-          <h1 className="mt-1 line-clamp-2 text-lg font-black tracking-tight text-white sm:text-2xl">Sua vitrine digital pronta para vender</h1>
-          <p className="mt-1 max-w-[520px] line-clamp-2 text-xs font-medium text-slate-100/90 sm:text-sm">
-            Hub oficial com lojas locais, pedidos em tempo real e experiência premium.
-          </p>
-        </div>
-        <div className="absolute bottom-4 left-4">
-          <span className="inline-flex items-center rounded-full border border-white/35 bg-black/30 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white backdrop-blur-sm">
-            Conhecer plataforma
+          <span className="inline-flex sm:hidden items-center rounded-full border border-sky-300/70 bg-sky-500/85 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] text-white shadow-[0_8px_18px_-12px_rgba(14,165,233,0.9)] backdrop-blur-sm">
+            Criar
           </span>
         </div>
       </a>
