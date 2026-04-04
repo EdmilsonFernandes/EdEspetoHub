@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowClockwise,
   TrendUp,
@@ -23,6 +23,7 @@ import {
   Car,
   ShieldCheck,
   Megaphone,
+  CaretDown,
 } from '@phosphor-icons/react';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { superAdminService } from '../services/superAdminService';
@@ -249,6 +250,8 @@ export function SuperAdmin() {
   });
   const [broadcastSending, setBroadcastSending] = useState(false);
   const [broadcastLastResult, setBroadcastLastResult] = useState<any | null>(null);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const [kycQueue, setKycQueue] = useState<any[]>([]);
   const [kycLoading, setKycLoading] = useState(false);
   const [kycReason, setKycReason] = useState('');
@@ -929,6 +932,22 @@ export function SuperAdmin() {
   }, [token, autoRefresh, accessLogsPage, accessLogQuery, accessLogRole, accessLogMethod, accessLogStatus, accessLogStore]);
 
   useEffect(() => {
+    if (!profileMenuOpen) return;
+    const handleOutside = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node | null;
+      if (profileMenuRef.current && target && !profileMenuRef.current.contains(target)) {
+        setProfileMenuOpen(false);
+      }
+    };
+    window.addEventListener('mousedown', handleOutside);
+    window.addEventListener('touchstart', handleOutside, { passive: true });
+    return () => {
+      window.removeEventListener('mousedown', handleOutside);
+      window.removeEventListener('touchstart', handleOutside);
+    };
+  }, [profileMenuOpen]);
+
+  useEffect(() => {
     setAccessLogsPage(1);
   }, [accessLogQuery, accessLogRole, accessLogMethod, accessLogStatus, accessLogStore]);
 
@@ -1111,50 +1130,73 @@ export function SuperAdmin() {
             <p className="text-sm text-slate-500">Visão executiva da plataforma</p>
           </div>
         </div>
-        <div className="relative flex gap-2">
-          <div className="flex items-center gap-2 px-3 py-2 rounded-full border border-slate-200 bg-white/80 shadow-sm">
-            <div className="w-7 h-7 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center">
+        <div className="relative" ref={profileMenuRef}>
+          <button
+            type="button"
+            onClick={() => setProfileMenuOpen((prev) => !prev)}
+            className="flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-2.5 py-2 shadow-sm transition hover:bg-white"
+            aria-haspopup="menu"
+            aria-expanded={profileMenuOpen}
+            title="Abrir menu de perfil"
+          >
+            <div className="h-8 w-8 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center">
               {superAdminUser ? superAdminUser.slice(0, 2).toUpperCase() : 'SA'}
             </div>
-            <div className="text-xs leading-tight">
-              <div className="font-semibold text-slate-800">{superAdminUser || 'Super Admin'}</div>
+            <div className="hidden sm:block text-left text-xs leading-tight">
+              <div className="font-semibold text-slate-800">{superAdminUser || 'Admin Já no Caminho'}</div>
               <div className="text-slate-500">SUPER_ADMIN</div>
             </div>
-          </div>
-          <div className="flex gap-2 items-center">
-            <span className="text-sm font-semibold text-slate-600">Auto-refresh</span>
-            <button
-              onClick={() => setAutoRefresh((prev) => !prev)}
-              className={`relative inline-flex h-6 w-12 items-center rounded-full transition-colors ${
-                autoRefresh ? 'bg-brand-primary' : 'bg-slate-300'
-              }`}
-              title={autoRefresh ? 'Auto-refresh ON' : 'Auto-refresh OFF'}
-            >
-              <span
-                className={`h-4 w-4 transform rounded-full bg-white transition-transform flex items-center justify-center ${
-                  autoRefresh ? 'translate-x-7' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
-          <button
-            onClick={() => loadOverview(token)}
-            className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-2"
-          >
-            <ArrowClockwise size={16} weight="duotone" />
-            Atualizar
+            <CaretDown size={14} className={`text-slate-500 transition-transform ${profileMenuOpen ? 'rotate-180' : ''}`} />
           </button>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-800"
-          >
-            Sair
-          </button>
+          {profileMenuOpen && (
+            <div className="absolute right-0 top-[calc(100%+8px)] z-30 w-[260px] rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_24px_40px_-24px_rgba(15,23,42,0.45)]">
+              <div className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+                <span className="text-xs font-semibold text-slate-600">Auto-refresh</span>
+                <button
+                  type="button"
+                  onClick={() => setAutoRefresh((prev) => !prev)}
+                  className={`relative inline-flex h-6 w-12 items-center rounded-full transition-colors ${
+                    autoRefresh ? 'bg-brand-primary' : 'bg-slate-300'
+                  }`}
+                  title={autoRefresh ? 'Auto-refresh ON' : 'Auto-refresh OFF'}
+                >
+                  <span
+                    className={`h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      autoRefresh ? 'translate-x-7' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setProfileMenuOpen(false);
+                  loadOverview(token);
+                }}
+                className="mt-2 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+              >
+                <ArrowClockwise size={16} weight="duotone" />
+                Atualizar dados
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setProfileMenuOpen(false);
+                  handleLogout();
+                }}
+                className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-50"
+              >
+                Sair
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-white/90 backdrop-blur border-b border-slate-200">
         <PremiumTabs
+          listClassName="flex flex-nowrap gap-2 overflow-x-auto no-scrollbar scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          buttonClassName="shrink-0 whitespace-nowrap"
           items={[
             { id: 'executive', label: 'Resumo' },
             { id: 'rankings', label: 'Rankings' },

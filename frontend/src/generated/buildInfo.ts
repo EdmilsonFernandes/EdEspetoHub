@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260404.202011.6f9fb35d",
-  "buildId": "0.1.9+20260404.202011.6f9fb35d-20260404.202011-6f9fb35d",
-  "builtAt": "2026-04-04T20:20:11.704Z",
-  "commitHash": "6f9fb35dd138c9e853a3bc753a8fe9b738dbd054",
-  "shortHash": "6f9fb35d",
+  "versionInternal": "0.1.9+20260404.202835.d18aec9a",
+  "buildId": "0.1.9+20260404.202835.d18aec9a-20260404.202835-d18aec9a",
+  "builtAt": "2026-04-04T20:28:35.745Z",
+  "commitHash": "d18aec9a5497726d070ebec300372fcead703155",
+  "shortHash": "d18aec9a",
   "branch": "main",
   "commits": [
+    {
+      "hash": "d18aec9a5497726d070ebec300372fcead703155",
+      "shortHash": "d18aec9a",
+      "dateIso": "2026-04-04T17:21:35-03:00",
+      "subject": "feat(hub): redesign hero banner with visual store carousel and cleaner branding"
+    },
     {
       "hash": "6f9fb35dd138c9e853a3bc753a8fe9b738dbd054",
       "shortHash": "6f9fb35d",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "4d83c45d",
       "dateIso": "2026-04-03T23:47:10-03:00",
       "subject": "fix: stabilize store open-time evaluation and use static clickable brand hero"
-    },
-    {
-      "hash": "704caad95775c07f2b23eac04159a5c7ae35d14b",
-      "shortHash": "704caad9",
-      "dateIso": "2026-04-03T23:29:51-03:00",
-      "subject": "feat: enhance hub hero banner and add entrance animations"
     }
   ]
 } as const;
