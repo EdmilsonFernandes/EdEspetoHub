@@ -778,7 +778,7 @@ export function MarketplacePage() {
                   <button
                     type="button"
                     className="inline-flex min-w-0 items-center gap-1.5 text-[12px] font-bold text-slate-700 transition-colors hover:text-sky-700"
-                    onClick={() => setShowAdvancedFilters((prev) => !prev)}
+                    onClick={() => setQuickFilter((prev) => (prev === 'nearby' ? 'all' : 'nearby'))}
                     aria-label="Alterar localização"
                     title="Alterar localização"
                   >
