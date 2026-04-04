@@ -874,7 +874,7 @@ export function MarketplacePage() {
                       <Star size={10} weight="fill" className="text-amber-500" />
                     </span>
                   ) : (
-                    <span className="absolute top-2.5 left-2.5 rounded-full border border-white/25 bg-slate-900/70 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-[0.08em] text-white shadow-sm backdrop-blur-sm">
+                    <span className="absolute top-2 left-2 rounded-full border border-white/30 bg-slate-950/80 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.06em] text-white shadow-sm backdrop-blur-sm">
                       Destaque
                     </span>
                   )}
