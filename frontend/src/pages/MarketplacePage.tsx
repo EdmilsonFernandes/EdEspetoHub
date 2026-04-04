@@ -640,17 +640,7 @@ export function MarketplacePage() {
           alt="Já no Caminho"
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/78 via-slate-950/48 to-slate-950/20" />
-        <div className="absolute inset-y-0 left-0 z-10 w-[74%] max-w-[560px] border-r border-white/10 bg-slate-950/42 px-4 pb-4 pt-16 backdrop-blur-lg sm:w-[62%] sm:px-6 sm:pt-20">
-          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-100/95">Já no Caminho</p>
-          <h1 className="mt-1 line-clamp-2 text-lg font-black tracking-tight text-white sm:text-2xl">Sua vitrine digital pronta para vender</h1>
-          <p className="mt-1 max-w-[520px] line-clamp-2 text-xs font-medium text-slate-100/90 sm:text-sm">
-            Hub oficial com lojas locais, pedidos em tempo real e experiência premium.
-          </p>
-          <span className="mt-3 inline-flex items-center rounded-full border border-white/35 bg-black/30 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white backdrop-blur-sm">
-            Conhecer plataforma
-          </span>
-        </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0B0F1A] via-[#0B0F1A]/80 to-transparent" />
         <div className="absolute right-3 top-3 z-20 flex items-center gap-2 sm:right-5 sm:top-4">
           <button
             type="button"
@@ -678,6 +668,16 @@ export function MarketplacePage() {
           </span>
           <span className="inline-flex sm:hidden items-center rounded-full border border-sky-300/70 bg-sky-500/85 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] text-white shadow-[0_8px_18px_-12px_rgba(14,165,233,0.9)] backdrop-blur-sm">
             Criar
+          </span>
+        </div>
+        <div className="relative z-10 flex h-full w-[85%] max-w-[560px] flex-col justify-center px-4 pt-10 text-white sm:w-[70%] sm:px-6 md:w-[60%]">
+          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-100/95">Já no Caminho</p>
+          <h1 className="mt-1 line-clamp-2 text-lg font-black tracking-tight text-white sm:text-2xl">Sua vitrine digital pronta para vender</h1>
+          <p className="mt-2 line-clamp-2 text-xs font-medium text-slate-200 sm:text-sm">
+            Hub oficial com lojas locais, pedidos em tempo real e experiência premium.
+          </p>
+          <span className="mt-4 inline-flex w-max items-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold text-white backdrop-blur-md">
+            Conhecer plataforma
           </span>
         </div>
       </a>
