@@ -132,10 +132,7 @@ export function StorePage() {
     () => `checkoutCustomer:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
   );
-  const guestPushIdStorageKey = useMemo(
-    () => `guestPushId:${storeSlug || defaultBranding.espetoId}`,
-    [storeSlug]
-  );
+  const guestPushIdStorageKey = 'jnk_mobile_push_guest_id';
   const resolvedWhatsApp = useMemo(() => {
     const raw = storePhone || WHATSAPP_NUMBER;
     const digits = (raw || '').toString().replace(/\D/g, '');
