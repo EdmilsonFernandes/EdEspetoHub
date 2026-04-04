@@ -274,7 +274,7 @@ export function ClientAccount() {
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 <input
                   name="fullName"
-                  autocomplete="name"
+                  autoComplete="name"
                   value={nameDraft}
                   onChange={(e) => setNameDraft(e.target.value)}
                   placeholder="Nome completo"
@@ -282,7 +282,7 @@ export function ClientAccount() {
                 />
                 <input
                   name="phone"
-                  autocomplete="tel"
+                  autoComplete="tel"
                   value={phoneDraft}
                   onChange={(e) => setPhoneDraft(e.target.value)}
                   placeholder="Telefone"
@@ -333,7 +333,7 @@ export function ClientAccount() {
             <input
               type="password"
               name="current-password"
-              autocomplete="current-password"
+              autoComplete="current-password"
               value={pwdForm.currentPassword}
               onChange={(e) => setPwdForm((p) => ({ ...p, currentPassword: e.target.value }))}
               placeholder="Senha atual"
@@ -342,7 +342,7 @@ export function ClientAccount() {
             <input
               type="password"
               name="new-password"
-              autocomplete="new-password"
+              autoComplete="new-password"
               value={pwdForm.newPassword}
               onChange={(e) => setPwdForm((p) => ({ ...p, newPassword: e.target.value }))}
               placeholder="Nova senha"

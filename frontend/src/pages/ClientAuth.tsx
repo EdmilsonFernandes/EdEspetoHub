@@ -150,7 +150,7 @@ export function ClientAuth() {
             {mode === 'register' && (
               <input
                 name="fullName"
-                autocomplete="name"
+                autoComplete="name"
                 value={form.fullName}
                 onChange={(e) => setForm((p) => ({ ...p, fullName: e.target.value }))}
                 placeholder="Nome completo"
@@ -160,7 +160,7 @@ export function ClientAuth() {
             {mode === 'register' && (
               <input
                 name="phone"
-                autocomplete="tel"
+                autoComplete="tel"
                 value={form.phone}
                 onChange={(e) => setForm((p) => ({ ...p, phone: formatPhoneBr(e.target.value) }))}
                 placeholder="Telefone (opcional)"
@@ -169,7 +169,7 @@ export function ClientAuth() {
             )}
             <input
               name="email"
-              autocomplete="username"
+              autoComplete="username"
               type="email"
               value={form.email}
               onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
@@ -178,7 +178,7 @@ export function ClientAuth() {
             />
             <input
               name="password"
-              autocomplete={mode === 'register' ? 'new-password' : 'current-password'}
+              autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
               type="password"
               value={form.password}
               onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
