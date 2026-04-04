@@ -1573,9 +1573,15 @@ export function StorePage() {
         trackingLink ? `🔎 Acompanhar pedido: ${trackingLink}` : '',
       ].filter(Boolean);
 
-      const encodedMessage = encodeURIComponent(messageLines.join('\n'));
       const targetNumber = resolvedWhatsApp || WHATSAPP_NUMBER;
-      window.open(`https://wa.me/${targetNumber}?text=${encodedMessage}`, '_blank');
+      const phone = String(targetNumber || '').replace(/\D/g, '');
+      const text = encodeURIComponent(messageLines.join('\n'));
+      const whatsappUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${text}`;
+      try {
+        window.location.href = whatsappUrl;
+      } catch {
+        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+      }
     }
     // Evita abrir uma segunda janela do WhatsApp automaticamente.
     // O acompanhamento fica no botão da tela de sucesso e no histórico recente.
@@ -2032,14 +2038,21 @@ export function StorePage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 {storePhone && (
-                  <a
-                    href={`https://wa.me/${storePhone.replace(/\D/g, '')}`}
-                    target="_blank"
-                    rel="noreferrer"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const phone = String(storePhone || '').replace(/\D/g, '');
+                      const whatsappUrl = `https://api.whatsapp.com/send?phone=${phone}`;
+                      try {
+                        window.location.href = whatsappUrl;
+                      } catch {
+                        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+                      }
+                    }}
                     className="px-6 py-3 rounded-lg bg-green-600 text-white font-semibold hover:opacity-90 transition-all"
                   >
                     Falar no WhatsApp
-                  </a>
+                  </button>
                 )}
                 <button
                   onClick={() => navigate(storeSlug ? `/admin?slug=${encodeURIComponent(storeSlug)}` : '/admin')}

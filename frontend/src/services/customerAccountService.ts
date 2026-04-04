@@ -13,7 +13,7 @@ export const customerAccountService = {
     return apiClient.get('/customer/me');
   },
 
-  updateMe(payload: { fullName?: string; phone?: string }) {
+  updateMe(payload: { fullName?: string; phone?: string; profileImageFile?: string | null }) {
     return apiClient.patch('/customer/me', payload);
   },
 

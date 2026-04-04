@@ -1,13 +1,53 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { apiClient } from '../config/apiClient';
+
+const FALLBACK_TERMS = `
+<h2>Termos de Uso — Já no Caminho</h2>
+<p>Ao usar a plataforma, você concorda com estes termos. Este documento regula o uso do serviço, sem substituir orientação jurídica individual.</p>
+<h3>1. Uso da Plataforma</h3>
+<p>O usuário deve fornecer dados verdadeiros, manter a segurança de sua conta e respeitar a legislação aplicável.</p>
+<h3>2. Pedidos e Pagamentos</h3>
+<p>Pedidos são intermediados pela plataforma e executados pelas lojas parceiras. Preços, disponibilidade e prazos podem variar por loja.</p>
+<h3>3. Responsabilidades</h3>
+<p>A plataforma adota medidas técnicas razoáveis de segurança, mas nenhum sistema é totalmente imune a falhas ou ataques.</p>
+<h3>4. Limitação</h3>
+<p>A responsabilidade é limitada nos termos da legislação aplicável, respeitados os direitos do consumidor.</p>
+<h3>5. Contato</h3>
+<p>Suporte: contato@janocaminho.com.br</p>
+`;
+
+const FALLBACK_LGPD = `
+<h2>Política de Privacidade e LGPD</h2>
+<p>Tratamos dados pessoais com base na Lei nº 13.709/2018 (LGPD), para autenticação, pedidos, notificações e suporte.</p>
+<h3>1. Dados Coletados</h3>
+<p>Nome, e-mail, telefone, endereço, histórico de pedidos, dados técnicos do dispositivo e token de notificações.</p>
+<h3>2. Finalidades</h3>
+<p>Operação do serviço, execução de pedidos, prevenção de fraude, atendimento e melhoria do produto.</p>
+<h3>3. Compartilhamento</h3>
+<p>Compartilhamos dados estritamente necessários com lojas, gateways de pagamento, serviços de envio/notificação e provedores de infraestrutura.</p>
+<h3>4. Direitos do Titular</h3>
+<p>Você pode solicitar confirmação de tratamento, acesso, correção, exclusão e portabilidade conforme LGPD.</p>
+<h3>5. Terceiros Utilizados</h3>
+<ul>
+  <li>Mercado Pago (pagamentos)</li>
+  <li>AWS (infraestrutura/armazenamento)</li>
+  <li>Google Firebase/FCM (notificações push)</li>
+  <li>ViaCEP (consulta de CEP)</li>
+</ul>
+<h3>6. Canal de Privacidade</h3>
+<p>Solicitações: contato@janocaminho.com.br</p>
+<p><em>Importante: este conteúdo é modelo operacional e deve ser revisado por assessoria jurídica para adequação final ao seu contexto.</em></p>
+`;
 
 export function TermsOfUse() {
   const navigate = useNavigate();
+  const location = useLocation();
   const platformLogo = '/janocaminho-logo.png';
   const [termsContent, setTermsContent] = useState('');
   const [lgpdContent, setLgpdContent] = useState('');
   const [loading, setLoading] = useState(true);
+  const fromHub = new URLSearchParams(location.search || '').get('from') === 'hub';
 
   useEffect(() => {
     const load = async () => {
@@ -41,10 +81,10 @@ export function TermsOfUse() {
             </div>
           </button>
           <button
-            onClick={() => navigate('/create')}
+            onClick={() => navigate(fromHub ? '/hub' : '/create')}
             className="px-3 py-2 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
           >
-            Voltar ao cadastro
+            {fromHub ? 'Voltar ao app' : 'Voltar ao cadastro'}
           </button>
         </div>
       </header>
@@ -66,7 +106,7 @@ export function TermsOfUse() {
               dangerouslySetInnerHTML={{ __html: termsContent }}
             />
           ) : (
-            <p className="text-sm text-slate-500">Termos indisponíveis no momento.</p>
+            <div className="prose prose-slate max-w-none text-sm" dangerouslySetInnerHTML={{ __html: FALLBACK_TERMS }} />
           )}
 
           <div className="border-t border-slate-200 pt-6">
@@ -79,7 +119,7 @@ export function TermsOfUse() {
                 dangerouslySetInnerHTML={{ __html: lgpdContent }}
               />
             ) : (
-              <p className="text-sm text-slate-500">Política LGPD indisponível no momento.</p>
+              <div className="prose prose-slate max-w-none text-sm" dangerouslySetInnerHTML={{ __html: FALLBACK_LGPD }} />
             )}
           </div>
         </div>

@@ -8,6 +8,7 @@ import { User } from '../entities/User';
 import { Order } from '../entities/Order';
 import { EmailService } from './EmailService';
 import { PushNotificationService } from './PushNotificationService';
+import { saveBase64Image } from '../utils/imageStorage';
 
 type AddressInput = {
   label?: string;
@@ -55,6 +56,7 @@ private sanitizeUser(user: User) {
       fullName: user.fullName,
       email: user.email,
       phone: user.phone || null,
+      profileImageUrl: user.profileImageUrl || null,
       role: 'CUSTOMER',
       createdAt: user.createdAt,
     };
@@ -178,7 +180,7 @@ async me(userId: string) {
    *
    * @author Edmilson Lopes
    */
-async updateMe(userId: string, input: { fullName?: string; phone?: string | null }) {
+async updateMe(userId: string, input: { fullName?: string; phone?: string | null; profileImageFile?: string | null }) {
     const repo = AppDataSource.getRepository(User);
     const user = await repo.findOne({ where: { id: userId } });
     if (!user) throw new AppError('AUTH-004', 401);
@@ -186,6 +188,15 @@ async updateMe(userId: string, input: { fullName?: string; phone?: string | null
     const fullName = String(input?.fullName || '').trim();
     if (fullName) user.fullName = fullName;
     if (input?.phone !== undefined) user.phone = this.sanitizePhone(input.phone) || undefined;
+    if (input?.profileImageFile !== undefined) {
+      const raw = String(input?.profileImageFile || '').trim();
+      if (!raw) {
+        user.profileImageUrl = undefined;
+      } else {
+        const uploaded = await saveBase64Image(raw, `customer-${user.id}`, 'customers');
+        if (uploaded) user.profileImageUrl = uploaded;
+      }
+    }
 
     const saved = await repo.save(user);
     return this.sanitizeUser(saved);

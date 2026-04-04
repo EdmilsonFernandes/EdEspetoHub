@@ -661,7 +661,7 @@ export function MarketplacePage() {
   }, [navigate]);
 
   const openCustomerLogin = useCallback(() => {
-    navigate('/cliente?mode=login');
+    navigate('/cliente?mode=login&next=/hub&hub=1');
   }, [navigate]);
 
   const openAdminLogin = useCallback(() => {
@@ -677,11 +677,11 @@ export function MarketplacePage() {
   }, [navigate]);
 
   const openTerms = useCallback(() => {
-    navigate('/terms');
+    navigate('/terms?from=hub');
   }, [navigate]);
 
   const openPrivacy = useCallback(() => {
-    navigate('/terms');
+    navigate('/terms?from=hub#lgpd');
   }, [navigate]);
 
   const openHelp = useCallback(() => {
