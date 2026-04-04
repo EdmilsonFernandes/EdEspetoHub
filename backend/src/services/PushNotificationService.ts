@@ -459,5 +459,79 @@ export class PushNotificationService {
       dispatchFinishedMessage: 'Guest push dispatch finished',
     });
   }
-}
 
+  /**
+   * Broadcasts one push notification to all active customer/guest tokens.
+   *
+   * @author Edmilson Lopes
+   */
+  async broadcastToAllActive(
+    payload: CustomerPushPayload,
+    options?: { limit?: number; topic?: string | null }
+  ) {
+    const normalizedTopic = String(options?.topic || 'janocaminho_global').trim().toLowerCase();
+    if (normalizedTopic !== 'janocaminho_global') {
+      return { ok: false, sent: 0, attempted: 0, skipped: true, reason: 'unsupported_topic' as const };
+    }
+
+    const hasV1 = Boolean(this.resolveFcmV1Config());
+    const hasLegacy = Boolean(String(env.push?.fcmServerKey || '').trim());
+    if (!hasV1 && !hasLegacy) {
+      log.info('Push broadcast skipped (missing FCM config)', { topic: normalizedTopic });
+      return { ok: false, sent: 0, attempted: 0, skipped: true, reason: 'missing_config' as const };
+    }
+
+    const limit = Math.max(1, Math.min(5000, Number(options?.limit || 1500)));
+    const rows: Array<{ token: string }> = await AppDataSource.query(
+      `
+        SELECT DISTINCT token
+        FROM customer_push_tokens
+        WHERE is_active = TRUE
+        ORDER BY token
+        LIMIT $1
+      `,
+      [limit]
+    );
+    const tokens = rows.map((row) => String(row?.token || '').trim()).filter(Boolean);
+    if (!tokens.length) {
+      log.info('Push broadcast skipped (no active tokens)', { topic: normalizedTopic });
+      return { ok: true, sent: 0, attempted: 0, skipped: true };
+    }
+
+    let sent = 0;
+    let deactivated = 0;
+    for (const token of tokens) {
+      const result = await this.sendToToken(token, payload);
+      if (result.ok) {
+        sent += 1;
+        continue;
+      }
+      log.warn('Push broadcast send failed', {
+        topic: normalizedTopic,
+        tokenSuffix: token.slice(-8),
+        status: result.status,
+        errorCode: result.errorCode,
+        body: result.body,
+      });
+      if (result.deactivateToken) {
+        await AppDataSource.query(
+          `
+            UPDATE customer_push_tokens
+            SET is_active = FALSE, updated_at = NOW()
+            WHERE token = $1
+          `,
+          [token]
+        );
+        deactivated += 1;
+      }
+    }
+
+    log.info('Push broadcast finished', {
+      topic: normalizedTopic,
+      sent,
+      attempted: tokens.length,
+      deactivated,
+    });
+    return { ok: true, sent, attempted: tokens.length, deactivated };
+  }
+}

@@ -29,6 +29,7 @@ import { SettingsService } from '../services/SettingsService';
 import { Plan } from '../entities/Plan';
 import { Subscription } from '../entities/Subscription';
 import { Store } from '../entities/Store';
+import { PushNotificationService } from '../services/PushNotificationService';
 
 const storeRepository = new StoreRepository();
 const subscriptionService = new SubscriptionService();
@@ -38,6 +39,7 @@ const orderRepository = new OrderRepository();
 const subscriptionRepository = new SubscriptionRepository();
 const accessLogRepository = new AccessLogRepository();
 const settingsService = new SettingsService();
+const pushNotificationService = new PushNotificationService();
 const log = logger.child({ scope: 'PlatformAdminController' });
 /**
  * Provides PlatformAdminController functionality.
@@ -586,6 +588,48 @@ export class PlatformAdminController {
       });
     } catch (error: any) {
       log.warn('Admin queue health failed', { storeId, storeSlug, repair, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Broadcasts push notification to all active app tokens (global topic audience).
+   *
+   * @author Edmilson Lopes
+   */
+  static async broadcastPush(req: Request, res: Response) {
+    const title = String(req.body?.title || '').trim();
+    const body = String(req.body?.body || '').trim();
+    const topic = String(req.body?.topic || 'janocaminho_global').trim();
+    const url = String(req.body?.url || '').trim();
+    const limit = req.body?.limit !== undefined ? Number(req.body.limit) : undefined;
+
+    if (!title || !body) {
+      return respondWithError(
+        req,
+        res,
+        new AppError('GEN-002', 400, { message: 'title e body são obrigatórios.' }),
+        400
+      );
+    }
+
+    try {
+      log.info('Admin push broadcast request', {
+        topic,
+        limit: limit || null,
+        title,
+      });
+      const result = await pushNotificationService.broadcastToAllActive(
+        {
+          title,
+          body,
+          data: url ? { url } : {},
+        },
+        { topic, limit }
+      );
+      return res.json(result);
+    } catch (error: any) {
+      log.warn('Admin push broadcast failed', { topic, error });
       return respondWithError(req, res, error, 400);
     }
   }
