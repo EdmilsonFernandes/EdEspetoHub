@@ -19,12 +19,15 @@ export class CustomerPushToken {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ name: 'user_id', type: 'uuid' })
-  userId!: string;
+  @Column({ name: 'user_id', type: 'uuid', nullable: true })
+  userId?: string | null;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user?: User;
+
+  @Column({ name: 'guest_id', type: 'text', nullable: true })
+  guestId?: string | null;
 
   @Column({ type: 'text' })
   token!: string;
@@ -47,4 +50,3 @@ export class CustomerPushToken {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt!: Date;
 }
-

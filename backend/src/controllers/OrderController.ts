@@ -44,9 +44,14 @@ export class OrderController {
       log.info('Order create request', { storeId: req.params.storeId });
       const customerUserId =
         String(req.auth?.role || '').toUpperCase() === 'CUSTOMER' ? req.auth?.sub : null;
+      const guestPushId =
+        !customerUserId && req.body?.guestPushId
+          ? String(req.body.guestPushId || '').trim() || null
+          : null;
       const order = await orderService.create({
         ...req.body,
         customerUserId,
+        guestPushId,
         storeId: req.params.storeId,
       });
       log.info('Order created', { orderId: order?.id, storeId: req.params.storeId });
@@ -94,9 +99,14 @@ export class OrderController {
       log.info('Order create by slug request', { slug: req.params.slug });
       const customerUserId =
         String(req.auth?.role || '').toUpperCase() === 'CUSTOMER' ? req.auth?.sub : null;
+      const guestPushId =
+        !customerUserId && req.body?.guestPushId
+          ? String(req.body.guestPushId || '').trim() || null
+          : null;
       const order = await orderService.createBySlug({
         ...req.body,
         customerUserId,
+        guestPushId,
         storeSlug: req.params.slug,
       });
       log.info('Order created by slug', { orderId: order?.id, slug: req.params.slug });

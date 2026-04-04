@@ -51,6 +51,9 @@ export class Order {
   @JoinColumn({ name: 'customer_user_id' })
   customerUser?: User | null;
 
+  @Column({ name: 'guest_push_id', type: 'text', nullable: true })
+  guestPushId?: string | null;
+
   @Column({ nullable: true })
   address?: string;
 

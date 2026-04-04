@@ -1302,4 +1302,20 @@ export async function runMigrations() {
     CREATE INDEX IF NOT EXISTS idx_customer_push_tokens_is_active
     ON customer_push_tokens(is_active);
   `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS customer_push_tokens
+    ADD COLUMN IF NOT EXISTS guest_id TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS customer_push_tokens
+    ALTER COLUMN user_id DROP NOT NULL;
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_customer_push_tokens_guest_id
+    ON customer_push_tokens(guest_id);
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS orders
+    ADD COLUMN IF NOT EXISTS guest_push_id TEXT;
+  `);
 }

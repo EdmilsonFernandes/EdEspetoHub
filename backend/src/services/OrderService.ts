@@ -71,6 +71,36 @@ export class OrderService
     return dictionary[normalized] || `Pedido ${orderDisplayId} teve atualização de status.`;
   }
 
+  /**
+   * Dispatches customer/guest push notification for order status update.
+   *
+   * @author Edmilson Lopes
+   */
+  private dispatchOrderUpdatePush(order: Pick<Order, 'id' | 'status' | 'customerUserId' | 'guestPushId'>) {
+    const userId = String(order?.customerUserId || '').trim();
+    const guestId = String(order?.guestPushId || '').trim();
+    if (!userId && !guestId) return;
+
+    const body = this.resolveOrderStatusPushMessage(
+      String(order?.status || 'pending'),
+      `#${String(order?.id || '').slice(0, 8)}`
+    );
+    const payload = {
+      title: 'Pedido atualizado',
+      body,
+      data: {
+        url: `https://janocaminho.com.br/pedido/${order.id}`,
+        orderId: String(order.id),
+        status: String(order.status || ''),
+      },
+    };
+    if (userId) {
+      void this.pushService.notifyCustomerOrderUpdate(userId, payload);
+      return;
+    }
+    void this.pushService.notifyGuestOrderUpdate(guestId, payload);
+  }
+
     /**
    * Reconciles order statuses with delivery snapshots and auto-closes stale queue entries for one store.
    *
@@ -631,18 +661,7 @@ private async seedPostalShipmentFromCheckoutTx(
       await this.seedPostalShipmentFromCheckoutTx(manager, saved, input as any);
       return saved;
     });
-    if (saved?.customerUserId) {
-      const body = this.resolveOrderStatusPushMessage(String(saved.status || 'pending'), `#${String(saved.id || '').slice(0, 8)}`);
-      void this.pushService.notifyCustomerOrderUpdate(String(saved.customerUserId), {
-        title: 'Pedido atualizado',
-        body,
-        data: {
-          url: `https://janocaminho.com.br/pedido/${saved.id}`,
-          orderId: String(saved.id),
-          status: String(saved.status || ''),
-        },
-      });
-    }
+    this.dispatchOrderUpdatePush(saved as any);
     return saved;
   }
 
@@ -665,18 +684,7 @@ private async seedPostalShipmentFromCheckoutTx(
       await this.seedPostalShipmentFromCheckoutTx(manager, saved, input as any);
       return saved;
     });
-    if (saved?.customerUserId) {
-      const body = this.resolveOrderStatusPushMessage(String(saved.status || 'pending'), `#${String(saved.id || '').slice(0, 8)}`);
-      void this.pushService.notifyCustomerOrderUpdate(String(saved.customerUserId), {
-        title: 'Pedido atualizado',
-        body,
-        data: {
-          url: `https://janocaminho.com.br/pedido/${saved.id}`,
-          orderId: String(saved.id),
-          status: String(saved.status || ''),
-        },
-      });
-    }
+    this.dispatchOrderUpdatePush(saved as any);
     return saved;
   }
 
@@ -872,18 +880,7 @@ private async seedPostalShipmentFromCheckoutTx(
     if (saved.type === 'delivery' && !isPostalFlow && [ 'delivered', 'finished' ].includes(nextStatus)) {
       await this.deliveryBillingService.recordDelivery(saved);
     }
-    if ((saved as any)?.customerUserId) {
-      const body = this.resolveOrderStatusPushMessage(String(saved.status || nextStatus), `#${String(saved.id || '').slice(0, 8)}`);
-      void this.pushService.notifyCustomerOrderUpdate(String((saved as any).customerUserId), {
-        title: 'Pedido atualizado',
-        body,
-        data: {
-          url: `https://janocaminho.com.br/pedido/${saved.id}`,
-          orderId: String(saved.id),
-          status: String(saved.status || nextStatus || ''),
-        },
-      });
-    }
+    this.dispatchOrderUpdatePush(saved as any);
     return saved;
   }
 
@@ -986,21 +983,7 @@ async updatePostalShipment(
       return { order: orderLock, shipment };
     });
 
-    if ((result?.order as any)?.customerUserId) {
-      const body = this.resolveOrderStatusPushMessage(
-        String(result?.order?.status || ''),
-        `#${String(result?.order?.id || '').slice(0, 8)}`
-      );
-      void this.pushService.notifyCustomerOrderUpdate(String((result.order as any).customerUserId), {
-        title: 'Pedido atualizado',
-        body,
-        data: {
-          url: `https://janocaminho.com.br/pedido/${result.order.id}`,
-          orderId: String(result.order.id),
-          status: String(result.order.status || ''),
-        },
-      });
-    }
+    this.dispatchOrderUpdatePush((result?.order || {}) as any);
 
     return result;
   }
@@ -1325,6 +1308,7 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
       id: orderRefId as any,
       customerName: input.customerName,
       customerUserId: input.customerUserId || null,
+      guestPushId: input.guestPushId || null,
       phone: input.phone,
       address: input.address,
       table: input.table,

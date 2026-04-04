@@ -435,4 +435,30 @@ async listOrders(userId: string) {
   async unregisterPushToken(userId: string, input: { token?: string | null }) {
     return this.pushService.unregisterCustomerToken(userId, input?.token || null);
   }
+
+  /**
+   * Registers a mobile push token for an anonymous customer session.
+   *
+   * @author Edmilson Lopes
+   */
+  async registerGuestPushToken(
+    guestId: string,
+    input: { token?: string; platform?: string; appVersion?: string; deviceModel?: string }
+  ) {
+    return this.pushService.registerGuestToken(guestId, {
+      token: String(input?.token || ''),
+      platform: input?.platform,
+      appVersion: input?.appVersion,
+      deviceModel: input?.deviceModel,
+    });
+  }
+
+  /**
+   * Unregisters one or all push tokens for an anonymous customer session.
+   *
+   * @author Edmilson Lopes
+   */
+  async unregisterGuestPushToken(guestId: string, input: { token?: string | null }) {
+    return this.pushService.unregisterGuestToken(guestId, input?.token || null);
+  }
 }

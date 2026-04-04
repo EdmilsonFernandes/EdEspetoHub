@@ -58,6 +58,8 @@ routes.post('/customer/me/change-password', requireAuth, requireRole('CUSTOMER')
 routes.get('/customer/orders', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.listOrders);
 routes.post('/customer/push/register', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.registerPushToken);
 routes.post('/customer/push/unregister', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.unregisterPushToken);
+routes.post('/public/push/register', CustomerAccountController.registerGuestPushToken);
+routes.post('/public/push/unregister', CustomerAccountController.unregisterGuestPushToken);
 routes.get('/customer/addresses', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.listAddresses);
 routes.post('/customer/addresses', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.createAddress);
 routes.patch('/customer/addresses/:addressId', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.updateAddress);

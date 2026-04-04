@@ -56,4 +56,18 @@ export const customerAccountService = {
   unregisterPushToken(payload?: { token?: string | null }) {
     return apiClient.post('/customer/push/unregister', payload || {});
   },
+
+  registerGuestPushToken(payload: {
+    guestId: string;
+    token: string;
+    platform?: string;
+    appVersion?: string;
+    deviceModel?: string;
+  }) {
+    return apiClient.post('/public/push/register', payload);
+  },
+
+  unregisterGuestPushToken(payload: { guestId: string; token?: string | null }) {
+    return apiClient.post('/public/push/unregister', payload || {});
+  },
 };

@@ -25,9 +25,33 @@ export class PushNotificationService {
     userId: string,
     input: { token: string; platform?: string; appVersion?: string; deviceModel?: string }
   ) {
+    return this.registerTokenCore({ userId, guestId: null, input });
+  }
+
+  /**
+   * Registers or reactivates a guest push token.
+   *
+   * @author Edmilson Lopes
+   */
+  async registerGuestToken(
+    guestId: string,
+    input: { token: string; platform?: string; appVersion?: string; deviceModel?: string }
+  ) {
+    return this.registerTokenCore({ userId: null, guestId, input });
+  }
+
+  private async registerTokenCore(params: {
+    userId: string | null;
+    guestId: string | null;
+    input: { token: string; platform?: string; appVersion?: string; deviceModel?: string };
+  }) {
+    const { userId, guestId, input } = params;
     const token = String(input?.token || '').trim();
     if (!token || token.length < 24) {
       return { ok: false, reason: 'invalid_token' as const };
+    }
+    if (!userId && !guestId) {
+      return { ok: false, reason: 'missing_identity' as const };
     }
     const platform = String(input?.platform || 'android').trim().toLowerCase() || 'android';
     const appVersion = String(input?.appVersion || '').trim() || null;
@@ -35,18 +59,19 @@ export class PushNotificationService {
 
     await AppDataSource.query(
       `
-        INSERT INTO customer_push_tokens (user_id, token, platform, app_version, device_model, is_active, updated_at)
-        VALUES ($1, $2, $3, $4, $5, TRUE, NOW())
+        INSERT INTO customer_push_tokens (user_id, guest_id, token, platform, app_version, device_model, is_active, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, TRUE, NOW())
         ON CONFLICT (token)
         DO UPDATE SET
           user_id = EXCLUDED.user_id,
+          guest_id = EXCLUDED.guest_id,
           platform = EXCLUDED.platform,
           app_version = EXCLUDED.app_version,
           device_model = EXCLUDED.device_model,
           is_active = TRUE,
           updated_at = NOW()
       `,
-      [userId, token, platform, appVersion, deviceModel]
+      [userId, guestId || null, token, platform, appVersion, deviceModel]
     );
 
     return { ok: true };
@@ -79,6 +104,38 @@ export class PushNotificationService {
         WHERE user_id = $1
       `,
       [userId]
+    );
+    return { ok: true };
+  }
+
+  /**
+   * Deactivates one token or all tokens for a guest id.
+   *
+   * @author Edmilson Lopes
+   */
+  async unregisterGuestToken(guestId: string, token?: string | null) {
+    const normalizedGuest = String(guestId || '').trim();
+    if (!normalizedGuest) return { ok: false, reason: 'missing_guest' as const };
+    const normalizedToken = String(token || '').trim();
+    if (normalizedToken) {
+      await AppDataSource.query(
+        `
+          UPDATE customer_push_tokens
+          SET is_active = FALSE, updated_at = NOW()
+          WHERE guest_id = $1
+            AND token = $2
+        `,
+        [normalizedGuest, normalizedToken]
+      );
+      return { ok: true };
+    }
+    await AppDataSource.query(
+      `
+        UPDATE customer_push_tokens
+        SET is_active = FALSE, updated_at = NOW()
+        WHERE guest_id = $1
+      `,
+      [normalizedGuest]
     );
     return { ok: true };
   }
@@ -184,6 +241,93 @@ export class PushNotificationService {
     }
 
     log.info('Push dispatch finished', { userId, sent, attempted: tokens.length });
+    return { ok: true, sent };
+  }
+
+  /**
+   * Dispatches an order update push to active tokens from one guest session.
+   *
+   * @author Edmilson Lopes
+   */
+  async notifyGuestOrderUpdate(guestId: string, payload: CustomerPushPayload) {
+    const normalizedGuest = String(guestId || '').trim();
+    if (!normalizedGuest) return { ok: false, sent: 0, skipped: true };
+
+    const serverKey = String(env.push?.fcmServerKey || '').trim();
+    if (!serverKey) {
+      log.info('Push skipped (missing FCM server key)', { guestId: normalizedGuest });
+      return { ok: false, sent: 0, skipped: true };
+    }
+
+    const rows: Array<{ token: string }> = await AppDataSource.query(
+      `
+        SELECT token
+        FROM customer_push_tokens
+        WHERE guest_id = $1
+          AND is_active = TRUE
+        ORDER BY updated_at DESC
+        LIMIT 10
+      `,
+      [normalizedGuest]
+    );
+
+    const tokens = rows.map((row) => String(row?.token || '').trim()).filter(Boolean);
+    if (!tokens.length) {
+      log.info('Push skipped (no active guest tokens)', { guestId: normalizedGuest });
+      return { ok: true, sent: 0, skipped: true };
+    }
+
+    let sent = 0;
+    for (const token of tokens) {
+      try {
+        const response = await fetch('https://fcm.googleapis.com/fcm/send', {
+          method: 'POST',
+          headers: {
+            Authorization: `key=${serverKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            to: token,
+            priority: 'high',
+            notification: {
+              title: payload.title,
+              body: payload.body,
+            },
+            data: payload.data || {},
+          }),
+        });
+
+        let body: any = null;
+        try {
+          body = await response.json();
+        } catch {
+          body = null;
+        }
+
+        if (!response.ok) {
+          log.warn('Guest push send failed (http)', {
+            guestId: normalizedGuest,
+            status: response.status,
+            tokenSuffix: token.slice(-8),
+            body,
+          });
+          continue;
+        }
+
+        const result = Array.isArray(body?.results) ? body.results[0] : null;
+        if (result?.message_id) {
+          sent += 1;
+          continue;
+        }
+      } catch (error) {
+        log.warn('Guest push send failed', {
+          guestId: normalizedGuest,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    log.info('Guest push dispatch finished', { guestId: normalizedGuest, sent, attempted: tokens.length });
     return { ok: true, sent };
   }
 }

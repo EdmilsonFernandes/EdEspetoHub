@@ -204,4 +204,36 @@ static async unregisterPushToken(req: Request, res: Response) {
       return respondWithError(req, res, error, 400);
     }
   }
+
+  /**
+   * Registers guest mobile push token without authenticated customer account.
+   *
+   * @author Edmilson Lopes
+   */
+  static async registerGuestPushToken(req: Request, res: Response) {
+    try {
+      const guestId = String(req.body?.guestId || '').trim();
+      if (!guestId) throw new AppError('GEN-002', 400, { message: 'guestId é obrigatório.' });
+      const result = await service.registerGuestPushToken(guestId, req.body || {});
+      return res.json(result);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Unregisters guest mobile push token without authenticated customer account.
+   *
+   * @author Edmilson Lopes
+   */
+  static async unregisterGuestPushToken(req: Request, res: Response) {
+    try {
+      const guestId = String(req.body?.guestId || '').trim();
+      if (!guestId) throw new AppError('GEN-002', 400, { message: 'guestId é obrigatório.' });
+      const result = await service.unregisterGuestPushToken(guestId, req.body || {});
+      return res.json(result);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
 }

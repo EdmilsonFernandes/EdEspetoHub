@@ -132,6 +132,10 @@ export function StorePage() {
     () => `checkoutCustomer:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
   );
+  const guestPushIdStorageKey = useMemo(
+    () => `guestPushId:${storeSlug || defaultBranding.espetoId}`,
+    [storeSlug]
+  );
   const resolvedWhatsApp = useMemo(() => {
     const raw = storePhone || WHATSAPP_NUMBER;
     const digits = (raw || '').toString().replace(/\D/g, '');
@@ -440,6 +444,21 @@ export function StorePage() {
     localStorage.removeItem('customerSession');
     localStorage.removeItem(customerSessionStorageKey);
     setCustomerSession(null);
+  };
+
+  const getOrCreateGuestPushId = () => {
+    try {
+      const existing = String(localStorage.getItem(guestPushIdStorageKey) || '').trim();
+      if (existing) return existing;
+      const generated =
+        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : `guest-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      localStorage.setItem(guestPushIdStorageKey, generated);
+      return generated;
+    } catch {
+      return `guest-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    }
   };
 
   const hydrateCustomerFromAddress = (address: any | null) => {
@@ -1361,6 +1380,7 @@ export function StorePage() {
 
     const order = {
       customerName: effectiveCustomerName,
+      guestPushId: customerSession?.token ? undefined : getOrCreateGuestPushId(),
       phone: customer.phone,
       address: deliveryAddress || customer.address,
       table: customer.table,

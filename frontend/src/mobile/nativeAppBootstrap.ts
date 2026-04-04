@@ -11,6 +11,7 @@ const MOBILE_PUSH_ENABLED =
 const PUSH_PROMPTED_KEY = 'jnk_mobile_push_prompted';
 const PUSH_TOKEN_KEY = 'jnk_mobile_push_token';
 const PUSH_LAST_SYNC_TOKEN_KEY = 'jnk_mobile_push_last_sync_token';
+const PUSH_GUEST_ID_KEY = 'jnk_mobile_push_guest_id';
 
 const normalizeInternalUrl = (rawUrl: string): string | null => {
   try {
@@ -55,21 +56,46 @@ const getCustomerSessionToken = () => {
   }
 };
 
+const getOrCreateGuestPushId = () => {
+  try {
+    const existing = String(localStorage.getItem(PUSH_GUEST_ID_KEY) || '').trim();
+    if (existing) return existing;
+    const generated =
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : `guest-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    localStorage.setItem(PUSH_GUEST_ID_KEY, generated);
+    return generated;
+  } catch {
+    return `guest-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  }
+};
+
 const syncPushTokenWithBackend = async (tokenRaw?: string | null) => {
   const token = String(tokenRaw || localStorage.getItem(PUSH_TOKEN_KEY) || '').trim();
   if (!token) return;
   const customerToken = getCustomerSessionToken();
-  if (!customerToken) return;
+  const guestId = getOrCreateGuestPushId();
+  const mode = customerToken ? 'customer' : 'guest';
+  const syncKey = `${mode}:${customerToken ? 'auth' : guestId}:${token}`;
 
   const lastSynced = String(localStorage.getItem(PUSH_LAST_SYNC_TOKEN_KEY) || '').trim();
-  if (lastSynced === token) return;
+  if (lastSynced === syncKey) return;
 
   try {
-    await customerAccountService.registerPushToken({
-      token,
-      platform: Capacitor.getPlatform(),
-    });
-    localStorage.setItem(PUSH_LAST_SYNC_TOKEN_KEY, token);
+    if (customerToken) {
+      await customerAccountService.registerPushToken({
+        token,
+        platform: Capacitor.getPlatform(),
+      });
+    } else {
+      await customerAccountService.registerGuestPushToken({
+        guestId,
+        token,
+        platform: Capacitor.getPlatform(),
+      });
+    }
+    localStorage.setItem(PUSH_LAST_SYNC_TOKEN_KEY, syncKey);
   } catch {
     // no-op
   }
