@@ -76,15 +76,19 @@ export class OrderService
    *
    * @author Edmilson Lopes
    */
-  private dispatchOrderUpdatePush(order: Pick<Order, 'id' | 'status' | 'customerUserId' | 'guestPushId'>) {
+  private dispatchOrderUpdatePush(
+    order: Pick<Order, 'id' | 'status' | 'customerUserId' | 'guestPushId'> & { store?: { name?: string } | null }
+  ) {
     const userId = String(order?.customerUserId || '').trim();
     const guestId = String(order?.guestPushId || '').trim();
     if (!userId && !guestId) return;
 
-    const body = this.resolveOrderStatusPushMessage(
+    const statusBody = this.resolveOrderStatusPushMessage(
       String(order?.status || 'pending'),
       `#${String(order?.id || '').slice(0, 8)}`
     );
+    const storeName = String(order?.store?.name || '').trim();
+    const body = storeName ? `${storeName}: ${statusBody}` : statusBody;
     const payload = {
       title: 'Pedido atualizado',
       body,
