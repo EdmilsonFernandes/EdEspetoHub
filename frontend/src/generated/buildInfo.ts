@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260404.203941.eec22ac7",
-  "buildId": "0.1.9+20260404.203941.eec22ac7-20260404.203941-eec22ac7",
-  "builtAt": "2026-04-04T20:39:41.741Z",
-  "commitHash": "eec22ac7698fd30159cb9d2585b03caaf684d20d",
-  "shortHash": "eec22ac7",
+  "versionInternal": "0.1.9+20260404.204310.eda2d5fd",
+  "buildId": "0.1.9+20260404.204310.eda2d5fd-20260404.204310-eda2d5fd",
+  "builtAt": "2026-04-04T20:43:10.346Z",
+  "commitHash": "eda2d5fdc9fe9d14622b3d8038fea6a3c6cd6112",
+  "shortHash": "eda2d5fd",
   "branch": "main",
   "commits": [
+    {
+      "hash": "eda2d5fdc9fe9d14622b3d8038fea6a3c6cd6112",
+      "shortHash": "eda2d5fd",
+      "dateIso": "2026-04-04T17:40:57-03:00",
+      "subject": "feat(hub): add terms/help actions and app version in profile drawer"
+    },
     {
       "hash": "eec22ac7698fd30159cb9d2585b03caaf684d20d",
       "shortHash": "eec22ac7",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "23cfb6d3",
       "dateIso": "2026-04-04T00:04:57-03:00",
       "subject": "refactor(hub): improve hero mobile fit and move premium actions to top-right"
-    },
-    {
-      "hash": "aa92053ed00a52c721fdc367455a3cb2c4b278c9",
-      "shortHash": "aa92053e",
-      "dateIso": "2026-04-03T23:58:36-03:00",
-      "subject": "feat(hub): restore premium top-banner copy and create-store CTA"
     }
   ]
 } as const;

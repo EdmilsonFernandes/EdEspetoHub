@@ -28,6 +28,7 @@ type ProfileDrawerProps = {
   onLogin: () => void;
   onOpenAccount: () => void;
   onOpenTerms: () => void;
+  onOpenPrivacy: () => void;
   onOpenHelp: () => void;
   onLogout: () => void;
   versionLabel?: string;
@@ -70,6 +71,7 @@ export function ProfileDrawer({
   onLogin,
   onOpenAccount,
   onOpenTerms,
+  onOpenPrivacy,
   onOpenHelp,
   onLogout,
   versionLabel,
@@ -97,6 +99,7 @@ export function ProfileDrawer({
         { id: 'security', label: 'Central de segurança', icon: <ShieldCheck size={18} weight="duotone" />, onClick: onOpenAccount },
         { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={18} weight="duotone" />, onClick: onOpenHelp },
         { id: 'terms', label: 'Termos de uso', icon: <UserRectangle size={18} weight="duotone" />, onClick: onOpenTerms },
+        { id: 'privacy', label: 'Política de privacidade', icon: <ShieldCheck size={18} weight="duotone" />, onClick: onOpenPrivacy },
         { id: 'messages', label: 'Mensagens', icon: <ChatCenteredDots size={18} weight="duotone" />, onClick: onOpenAccount },
         { id: 'logout', label: 'Sair', icon: <SignOut size={18} weight="duotone" />, onClick: onLogout, tone: 'danger' },
       ]
@@ -105,6 +108,7 @@ export function ProfileDrawer({
         { id: 'security', label: 'Central de segurança', icon: <ShieldCheck size={18} weight="duotone" />, onClick: onLogin },
         { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={18} weight="duotone" />, onClick: onOpenHelp },
         { id: 'terms', label: 'Termos de uso', icon: <UserRectangle size={18} weight="duotone" />, onClick: onOpenTerms },
+        { id: 'privacy', label: 'Política de privacidade', icon: <ShieldCheck size={18} weight="duotone" />, onClick: onOpenPrivacy },
       ];
 
   return (

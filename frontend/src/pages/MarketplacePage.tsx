@@ -485,6 +485,11 @@ export function MarketplacePage() {
     return () => window.clearInterval(timer);
   }, [heroStores.length]);
 
+  const activeHeroStore = useMemo(() => {
+    if (!heroStores.length) return null;
+    return heroStores[heroIndex % heroStores.length];
+  }, [heroStores, heroIndex]);
+
   const categoryTiles = useMemo(() => {
     return segmentOptions.map((segment) => categoryVisuals[segment] || { emoji: '🏪', label: segment });
   }, [segmentOptions]);
@@ -696,6 +701,10 @@ export function MarketplacePage() {
     navigate('/terms');
   }, [navigate]);
 
+  const openPrivacy = useCallback(() => {
+    navigate('/terms');
+  }, [navigate]);
+
   const openHelp = useCallback(() => {
     window.location.href = 'mailto:contato@janocaminho.com.br?subject=Ajuda%20-%20Ja%20no%20Caminho';
   }, []);
@@ -729,6 +738,7 @@ export function MarketplacePage() {
         onLogin={openCustomerLogin}
         onOpenAccount={openCustomerAccount}
         onOpenTerms={openTerms}
+        onOpenPrivacy={openPrivacy}
         onOpenHelp={openHelp}
         onLogout={handleCustomerLogout}
         versionLabel={APP_BUILD_INFO.versionLabel}
@@ -785,41 +795,36 @@ export function MarketplacePage() {
             <span className="text-sm font-black tracking-[0.06em] text-white sm:text-base">Já no Caminho</span>
           </div>
 
-          <div className="mt-4 grid flex-1 grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
-            {Array.from({ length: 3 }).map((_, slot) => {
-              const store = heroStores.length
-                ? heroStores[(heroIndex + slot) % heroStores.length]
-                : null;
-              return (
-                <div
-                  key={`hero-store-${slot}-${store?.id || 'fallback'}`}
-                  className="relative overflow-hidden rounded-2xl border border-white/20 bg-black/20 shadow-[0_14px_24px_-18px_rgba(15,23,42,0.8)] backdrop-blur-[1px]"
-                >
-                  {store ? (
-                    <>
-                      <img
-                        src={store.banner || store.logo}
-                        alt={store.name}
-                        className="h-full w-full object-cover transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
-                      <div className="absolute inset-x-2 bottom-2 flex items-center gap-1.5">
-                        <img
-                          src={store.logo}
-                          alt={store.name}
-                          className="h-5 w-5 rounded-full border border-white/60 object-cover"
-                        />
-                        <p className="line-clamp-1 text-[10px] font-bold text-white">{store.name}</p>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="flex h-full items-end bg-gradient-to-br from-slate-800/80 to-slate-700/80 p-2">
-                      <p className="text-[10px] font-bold text-white/90">Lojas da sua região</p>
+          <div className="mt-4 flex-1">
+            <div className="relative min-h-[156px] overflow-hidden rounded-3xl border border-white/20 bg-black/20 shadow-[0_18px_30px_-22px_rgba(15,23,42,0.8)] backdrop-blur-[1px] sm:min-h-[178px]">
+              {activeHeroStore ? (
+                <>
+                  <img
+                    src={activeHeroStore.banner || activeHeroStore.logo}
+                    alt={activeHeroStore.name}
+                    className="h-full w-full object-cover transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-black/5" />
+                  <div className="absolute inset-x-3 bottom-3 flex items-center gap-2">
+                    <img
+                      src={activeHeroStore.logo}
+                      alt={activeHeroStore.name}
+                      className="h-8 w-8 rounded-full border border-white/70 object-cover"
+                    />
+                    <div className="min-w-0">
+                      <p className="line-clamp-1 text-sm font-black text-white">{activeHeroStore.name}</p>
+                      <p className="line-clamp-1 text-[11px] font-semibold text-white/85">
+                        {activeHeroStore.segment} · {formatDistance(activeHeroStore.distanceKm)}
+                      </p>
                     </div>
-                  )}
+                  </div>
+                </>
+              ) : (
+                <div className="flex h-full items-end bg-gradient-to-br from-slate-800/80 to-slate-700/80 p-3">
+                  <p className="text-xs font-bold text-white/90">Lojas da sua região</p>
                 </div>
-              );
-            })}
+              )}
+            </div>
           </div>
 
           <div className="mt-3 flex items-center justify-between">
