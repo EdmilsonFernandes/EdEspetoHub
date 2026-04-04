@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type TouchEvent as ReactTouchEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MagnifyingGlass, MapPin, Star, Storefront, House, UserCircle, List, CaretDown, Heart, ShareNetwork } from '@phosphor-icons/react';
+import { MagnifyingGlass, MapPin, Star, Storefront, House, UserCircle, List, CaretDown, Heart } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { productService } from '../services/productService';
 import { featuredService } from '../services/featuredService';
@@ -157,9 +157,6 @@ export function MarketplacePage() {
   const [customerSession, setCustomerSession] = useState(() => readCustomerSession());
   const [distanceByStore, setDistanceByStore] = useState<Record<string, number>>({});
   const [distanceLoading, setDistanceLoading] = useState(false);
-  const [heroIndex, setHeroIndex] = useState(0);
-  const heroTouchStartXRef = useRef<number | null>(null);
-  const heroTouchActiveRef = useRef(false);
   const touchStartYRef = useRef<number | null>(null);
   const touchPullActiveRef = useRef(false);
   const pullDistanceRef = useRef(0);
@@ -472,57 +469,6 @@ export function MarketplacePage() {
       .sort((a, b) => Number(b.isOpen) - Number(a.isOpen));
   }, [enrichedStores, debouncedQuery, segmentFilter, quickFilter]);
 
-  const heroStores = useMemo(() => {
-    const source = enrichedStores.length > 0 ? enrichedStores : [];
-    const open = source.filter((store) => store.isOpen);
-    const ordered = open.length > 0 ? [...open, ...source.filter((store) => !store.isOpen)] : source;
-    return ordered.slice(0, 8);
-  }, [enrichedStores]);
-
-  useEffect(() => {
-    const total = Math.max(1, heroStores.length);
-    const timer = window.setInterval(() => {
-      setHeroIndex((prev) => (prev + 1) % total);
-    }, 4500);
-    return () => window.clearInterval(timer);
-  }, [heroStores.length]);
-
-  const activeHeroStore = useMemo(() => {
-    if (!heroStores.length) return null;
-    return heroStores[heroIndex % heroStores.length];
-  }, [heroStores, heroIndex]);
-
-  const moveHero = useCallback(
-    (direction: 'next' | 'prev') => {
-      const total = Math.max(1, heroStores.length);
-      if (total <= 1) return;
-      setHeroIndex((prev) => {
-        if (direction === 'next') return (prev + 1) % total;
-        return (prev - 1 + total) % total;
-      });
-    },
-    [heroStores.length]
-  );
-
-  const handleHeroTouchStart = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
-    heroTouchStartXRef.current = event.touches[0]?.clientX ?? null;
-    heroTouchActiveRef.current = true;
-  }, []);
-
-  const handleHeroTouchEnd = useCallback(
-    (event: ReactTouchEvent<HTMLDivElement>) => {
-      if (!heroTouchActiveRef.current || heroTouchStartXRef.current == null) return;
-      heroTouchActiveRef.current = false;
-      const endX = event.changedTouches[0]?.clientX ?? heroTouchStartXRef.current;
-      const deltaX = endX - heroTouchStartXRef.current;
-      heroTouchStartXRef.current = null;
-      if (Math.abs(deltaX) < 42) return;
-      if (deltaX < 0) moveHero('next');
-      else moveHero('prev');
-    },
-    [moveHero]
-  );
-
   const categoryTiles = useMemo(() => {
     return segmentOptions.map((segment) => categoryVisuals[segment] || { emoji: '🏪', label: segment });
   }, [segmentOptions]);
@@ -699,23 +645,6 @@ export function MarketplacePage() {
     return [...fixedSponsored, ...rotatedOrganic];
   }, [featuredProducts, featuredOffset]);
 
-  const handleShareHub = useCallback(async () => {
-    const url = 'https://www.janocaminho.com.br/hub';
-    try {
-      if (typeof navigator !== 'undefined' && navigator.share) {
-        await navigator.share({
-          title: 'Hub Já no Caminho',
-          text: 'Conheça o Hub Já no Caminho',
-          url,
-        });
-        return;
-      }
-    } catch (_err) {
-      // Ignore and fallback to open URL.
-    }
-    window.open(url, '_blank', 'noopener,noreferrer');
-  }, []);
-
   const isCustomerLogged = Boolean(customerSession?.token);
   const customerDisplayName = String(
     customerSession?.user?.fullName || customerSession?.user?.name || (isCustomerLogged ? 'Cliente' : 'Anônimo')
@@ -776,123 +705,43 @@ export function MarketplacePage() {
         onLogout={handleCustomerLogout}
         versionLabel={APP_BUILD_INFO.versionLabel}
       />
-      <a
-        href="https://www.janocaminho.com.br/"
-        className={`relative block min-h-[250px] h-[34vh] max-h-[360px] w-full overflow-hidden transition-all duration-500 ${
-          hasEntered ? 'opacity-100' : 'opacity-0'
-        }`}
-        aria-label="Abrir landing page Já no Caminho"
-      >
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(14,165,233,0.18),transparent_45%),radial-gradient(circle_at_bottom_left,rgba(99,102,241,0.16),transparent_40%)]" />
-        <div className="absolute right-3 z-20 flex items-center gap-2 sm:right-5" style={{ top: 'max(0.75rem, env(safe-area-inset-top))' }}>
-          <button
-            type="button"
-            onClick={(event) => event.preventDefault()}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/35 bg-black/30 text-white backdrop-blur-sm transition-transform active:scale-95"
-            aria-label="Favoritar Hub"
-            title="Favoritar Hub"
-          >
-            <Heart size={16} weight="duotone" />
-          </button>
-          <button
-            type="button"
-            onClick={(event) => {
-              event.preventDefault();
-              handleShareHub();
-            }}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/35 bg-black/30 text-white backdrop-blur-sm transition-transform active:scale-95"
-            aria-label="Compartilhar Hub"
-            title="Compartilhar Hub"
-          >
-            <ShareNetwork size={16} weight="duotone" />
-          </button>
-          <Link
-            to="/"
-            onClick={(event) => event.stopPropagation()}
-            className="inline-flex items-center rounded-full border border-white/35 bg-black/30 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-white backdrop-blur-sm transition-transform active:scale-95"
-          >
-            Criar conta
-          </Link>
-        </div>
-        <div className="relative z-10 flex h-full flex-col px-4 pb-5 pt-10 text-white sm:px-6">
-          <div className="flex items-center justify-center gap-2">
-            <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-7 w-7 rounded-lg object-cover ring-1 ring-white/25 sm:h-8 sm:w-8" />
-            <span className="text-sm font-black tracking-[0.06em] text-white sm:text-base">Já no Caminho</span>
-          </div>
-
-          <div className="mt-4 flex-1">
-            <div
-              className="relative min-h-[156px] overflow-hidden rounded-3xl border border-white/20 bg-black/20 shadow-[0_18px_30px_-22px_rgba(15,23,42,0.8)] backdrop-blur-[1px] sm:min-h-[178px]"
-              onTouchStart={handleHeroTouchStart}
-              onTouchEnd={handleHeroTouchEnd}
-            >
-              {activeHeroStore ? (
-                <>
-                  <img
-                    src={activeHeroStore.banner || activeHeroStore.logo}
-                    alt={activeHeroStore.name}
-                    className="h-full w-full object-cover transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-black/5" />
-                  <div className="absolute inset-x-3 bottom-3 flex items-center gap-2">
-                    <img
-                      src={activeHeroStore.logo}
-                      alt={activeHeroStore.name}
-                      className="h-8 w-8 rounded-full border border-white/70 object-cover"
-                    />
-                    <div className="min-w-0">
-                      <p className="line-clamp-1 text-sm font-black text-white">{activeHeroStore.name}</p>
-                      <p className="line-clamp-1 text-[11px] font-semibold text-white/85">
-                        {activeHeroStore.segment} · {formatDistance(activeHeroStore.distanceKm)}
-                      </p>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="flex h-full items-end bg-gradient-to-br from-slate-800/80 to-slate-700/80 p-3">
-                  <p className="text-xs font-bold text-white/90">Lojas da sua região</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-3 flex items-center justify-start">
-            <div className="flex items-center gap-1.5">
-              {Array.from({ length: Math.max(1, Math.min(heroStores.length, 5)) }).map((_, idx) => (
-                <span
-                  key={`hero-dot-${idx}`}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${idx === (heroIndex % Math.max(1, Math.min(heroStores.length, 5))) ? 'w-5 bg-white' : 'w-1.5 bg-white/45'}`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </a>
-
       <div
-        className={`relative -mt-10 min-h-screen rounded-t-[32px] bg-slate-50 transition-all duration-700 ${
+        className={`relative min-h-screen bg-slate-50 transition-all duration-700 ${
           hasEntered ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}
       >
-        <header className={`sticky top-0 z-[60] rounded-t-[32px] border-b border-slate-200/70 bg-slate-50/95 px-4 pb-3 pt-5 backdrop-blur-md transition-shadow duration-300 ${isHeaderElevated ? 'shadow-sm' : 'shadow-none'}`}>
+        <header className={`sticky top-0 z-[60] border-b border-slate-200/70 bg-slate-50/95 px-4 pb-3 pt-5 backdrop-blur-md transition-shadow duration-300 ${isHeaderElevated ? 'shadow-sm' : 'shadow-none'}`}>
           <div className="mx-auto max-w-[1200px] space-y-2.5">
-            <div className="flex items-center gap-2 pl-1 sm:pl-0">
+            <div className="flex items-center justify-between gap-2 pl-1 sm:pl-0">
+              <div className="flex min-w-0 items-center gap-2">
               <HeaderAvatarTrigger
                 displayName={customerDisplayName}
                 hasNotification={!isCustomerLogged}
                 onClick={() => setProfileDrawerOpen(true)}
               />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-black text-slate-900">Olá, {customerDisplayName || 'Anônimo'}</p>
+                  <button
+                    type="button"
+                    className="inline-flex min-w-0 items-center gap-1.5 text-[12px] font-bold text-slate-700 transition-colors hover:text-sky-700"
+                    onClick={() => setShowAdvancedFilters((prev) => !prev)}
+                    aria-label="Alterar localização"
+                    title="Alterar localização"
+                  >
+                    <MapPin size={14} weight="duotone" className="shrink-0 text-sky-500" />
+                    <span className="truncate text-left">Entregar em: {locationLabel}</span>
+                    <CaretDown size={12} className="shrink-0 text-slate-400" />
+                  </button>
+                </div>
+              </div>
               <button
                 type="button"
-                className="inline-flex min-w-0 flex-1 items-center gap-1.5 text-[12px] font-bold text-slate-700 transition-colors hover:text-sky-700"
-                onClick={() => setShowAdvancedFilters((prev) => !prev)}
-                aria-label="Alterar localização"
-                title="Alterar localização"
+                onClick={() => navigate('/')}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] text-slate-700"
+                title="Já no Caminho"
               >
-                <MapPin size={14} weight="duotone" className="shrink-0 text-sky-500" />
-                <span className="truncate text-left">Entregar em: {locationLabel}</span>
-                <CaretDown size={12} className="shrink-0 text-slate-400" />
+                <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-4 w-4 rounded object-cover" />
+                JNK
               </button>
             </div>
             <div className="relative">

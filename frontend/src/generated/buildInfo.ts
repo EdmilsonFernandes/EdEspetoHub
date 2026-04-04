@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260404.205443.f9bbd894",
-  "buildId": "0.1.9+20260404.205443.f9bbd894-20260404.205443-f9bbd894",
-  "builtAt": "2026-04-04T20:54:43.520Z",
-  "commitHash": "f9bbd89462c0b2f903ef52ffc744631267b39879",
-  "shortHash": "f9bbd894",
+  "versionInternal": "0.1.9+20260404.210226.3b26be5f",
+  "buildId": "0.1.9+20260404.210226.3b26be5f-20260404.210226-3b26be5f",
+  "builtAt": "2026-04-04T21:02:26.889Z",
+  "commitHash": "3b26be5fc55e57ee79cb354ed4ee054044df73b4",
+  "shortHash": "3b26be5f",
   "branch": "main",
   "commits": [
+    {
+      "hash": "3b26be5fc55e57ee79cb354ed4ee054044df73b4",
+      "shortHash": "3b26be5f",
+      "dateIso": "2026-04-04T17:55:18-03:00",
+      "subject": "style(hub): align top create account CTA with hub visual system"
+    },
     {
       "hash": "f9bbd89462c0b2f903ef52ffc744631267b39879",
       "shortHash": "f9bbd894",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "ea79994a",
       "dateIso": "2026-04-04T00:18:00-03:00",
       "subject": "style(hub): fine-tune organic highlight badge contrast and sizing"
-    },
-    {
-      "hash": "3deb56b1fc3387aded1b21f8dd7d57fa8864baf7",
-      "shortHash": "3deb56b1",
-      "dateIso": "2026-04-04T00:15:12-03:00",
-      "subject": "fix(hub): improve readability of organic highlight badge"
     }
   ]
 } as const;
