@@ -6,7 +6,6 @@ import {
   CookingPot,
   Lifebuoy,
   MapPin,
-  ShieldChevron,
   ShieldCheck,
   SignOut,
   Truck,
@@ -32,7 +31,6 @@ type ProfileDrawerProps = {
   onLogin: () => void;
   onOpenAdminLogin: () => void;
   onOpenMotoboyLogin: () => void;
-  onOpenSuperAdminLogin: () => void;
   onOpenAccount: () => void;
   onOpenTerms: () => void;
   onOpenPrivacy: () => void;
@@ -61,7 +59,7 @@ const ItemButton = ({
         : 'text-slate-700 hover:bg-slate-100'
     }`}
   >
-    <span className="grid h-8 w-8 place-items-center rounded-lg bg-slate-100 text-slate-600">
+    <span className="grid h-8 w-8 place-items-center rounded-lg border border-slate-200 bg-gradient-to-b from-white to-slate-100 text-slate-700 shadow-sm">
       {icon}
     </span>
     <span>{label}</span>
@@ -78,7 +76,6 @@ export function ProfileDrawer({
   onLogin,
   onOpenAdminLogin,
   onOpenMotoboyLogin,
-  onOpenSuperAdminLogin,
   onOpenAccount,
   onOpenTerms,
   onOpenPrivacy,
@@ -169,7 +166,6 @@ export function ProfileDrawer({
                 <ItemButton label="Cliente" icon={<UserCircle size={18} weight="duotone" />} onClick={() => { onClose(); onLogin(); }} />
                 <ItemButton label="Operacional (Admin/Operador)" icon={<CookingPot size={18} weight="duotone" />} onClick={() => { onClose(); onOpenAdminLogin(); }} />
                 <ItemButton label="Entregador" icon={<Truck size={18} weight="duotone" />} onClick={() => { onClose(); onOpenMotoboyLogin(); }} />
-                <ItemButton label="Master Console" icon={<ShieldChevron size={18} weight="duotone" />} onClick={() => { onClose(); onOpenSuperAdminLogin(); }} />
               </div>
             </div>
           ) : null}

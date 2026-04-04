@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MagnifyingGlass, MapPin, Star, Storefront, House, UserCircle, List, CaretDown, Heart } from '@phosphor-icons/react';
+import { MagnifyingGlass, MapPin, Star, Storefront, House, List, CaretDown, Heart } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { productService } from '../services/productService';
 import { featuredService } from '../services/featuredService';
@@ -133,6 +133,8 @@ const readCustomerSession = () => {
   }
 };
 
+const FAVORITES_STORAGE_KEY = 'hub:favorites:stores';
+
 export function MarketplacePage() {
   const navigate = useNavigate();
   const [stores, setStores] = useState<MarketplaceStore[]>([]);
@@ -141,8 +143,7 @@ export function MarketplacePage() {
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [segmentFilter, setSegmentFilter] = useState('all');
-  const [quickFilter, setQuickFilter] = useState<'all' | 'free_shipping' | 'nearby' | 'open_now'>('all');
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [quickFilter, setQuickFilter] = useState<'all' | 'free_shipping' | 'nearby' | 'open_now' | 'favorites'>('all');
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
@@ -157,6 +158,15 @@ export function MarketplacePage() {
   const [customerSession, setCustomerSession] = useState(() => readCustomerSession());
   const [distanceByStore, setDistanceByStore] = useState<Record<string, number>>({});
   const [distanceLoading, setDistanceLoading] = useState(false);
+  const [favoriteStoreSlugs, setFavoriteStoreSlugs] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed.map((item) => String(item || '').trim()).filter(Boolean) : [];
+    } catch {
+      return [];
+    }
+  });
   const touchStartYRef = useRef<number | null>(null);
   const touchPullActiveRef = useRef(false);
   const pullDistanceRef = useRef(0);
@@ -174,6 +184,14 @@ export function MarketplacePage() {
       window.removeEventListener('focus', syncSession);
     };
   }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favoriteStoreSlugs));
+    } catch {
+      // ignore
+    }
+  }, [favoriteStoreSlugs]);
 
   useEffect(() => {
     let cancelled = false;
@@ -468,10 +486,15 @@ export function MarketplacePage() {
         if (quickFilter === 'free_shipping' && !store.freeShipping) return false;
         if (quickFilter === 'nearby' && store.distanceKm > 2.5) return false;
         if (quickFilter === 'open_now' && !store.isOpen) return false;
+        if (quickFilter === 'favorites' && !favoriteStoreSlugs.includes(store.slug)) return false;
         return true;
       })
-      .sort((a, b) => Number(b.isOpen) - Number(a.isOpen));
-  }, [enrichedStores, debouncedQuery, segmentFilter, quickFilter]);
+      .sort((a, b) => {
+        const favoritesDelta = Number(favoriteStoreSlugs.includes(b.slug)) - Number(favoriteStoreSlugs.includes(a.slug));
+        if (favoritesDelta !== 0) return favoritesDelta;
+        return Number(b.isOpen) - Number(a.isOpen);
+      });
+  }, [enrichedStores, debouncedQuery, segmentFilter, quickFilter, favoriteStoreSlugs]);
 
   const categoryTiles = useMemo(() => {
     return segmentOptions.map((segment) => categoryVisuals[segment] || { emoji: '🏪', label: segment });
@@ -672,10 +695,6 @@ export function MarketplacePage() {
     navigate('/motoboy/login');
   }, [navigate]);
 
-  const openSuperAdminLogin = useCallback(() => {
-    navigate('/superadmin');
-  }, [navigate]);
-
   const openTerms = useCallback(() => {
     navigate('/terms?from=hub');
   }, [navigate]);
@@ -697,6 +716,15 @@ export function MarketplacePage() {
     navigate('/hub');
   }, [navigate]);
 
+  const toggleFavoriteStore = useCallback((slug: string) => {
+    const normalized = String(slug || '').trim();
+    if (!normalized) return;
+    setFavoriteStoreSlugs((prev) => {
+      if (prev.includes(normalized)) return prev.filter((item) => item !== normalized);
+      return [normalized, ...prev].slice(0, 200);
+    });
+  }, []);
+
   return (
     <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-slate-100 pb-28 sm:pb-20 text-slate-900 pt-[max(1rem,env(safe-area-inset-top))]">
       <div
@@ -717,7 +745,6 @@ export function MarketplacePage() {
         onLogin={openCustomerLogin}
         onOpenAdminLogin={openAdminLogin}
         onOpenMotoboyLogin={openMotoboyLogin}
-        onOpenSuperAdminLogin={openSuperAdminLogin}
         onOpenAccount={openCustomerAccount}
         onOpenTerms={openTerms}
         onOpenPrivacy={openPrivacy}
@@ -777,7 +804,7 @@ export function MarketplacePage() {
               />
             </div>
             <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-1">
-              {['all', 'free_shipping', 'nearby', 'open_now'].map((filter) => {
+              {['all', 'free_shipping', 'nearby', 'open_now', 'favorites'].map((filter) => {
                 const label =
                   filter === 'all'
                     ? 'Todos'
@@ -785,6 +812,8 @@ export function MarketplacePage() {
                     ? 'Frete grátis'
                     : filter === 'nearby'
                     ? 'Mais próximos'
+                    : filter === 'favorites'
+                    ? 'Favoritos'
                     : 'Abertos agora';
                 const active = quickFilter === filter;
                 return (
@@ -805,42 +834,15 @@ export function MarketplacePage() {
               })}
               <button
                 type="button"
-                onClick={() => setShowAdvancedFilters((prev) => !prev)}
+                onClick={() => {
+                  setSegmentFilter('all');
+                  setQuickFilter('all');
+                }}
                 className="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] whitespace-nowrap text-slate-600 hover:border-slate-300 hover:bg-slate-50"
               >
-                Filtros
+                Limpar
               </button>
             </div>
-            {showAdvancedFilters && (
-              <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-3 backdrop-blur">
-                <p className="mb-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Categoria</p>
-                <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-                  <button
-                    type="button"
-                    onClick={() => setSegmentFilter('all')}
-                    className={`rounded-full px-3 py-2 text-xs font-semibold whitespace-nowrap ${
-                      segmentFilter === 'all' ? 'text-white' : 'bg-slate-100 text-slate-600'
-                    }`}
-                    style={segmentFilter === 'all' ? { backgroundColor: theme.primary } : undefined}
-                  >
-                    Todos os segmentos
-                  </button>
-                  {segmentOptions.map((segment) => (
-                    <button
-                      key={segment}
-                      type="button"
-                      onClick={() => setSegmentFilter(segment)}
-                      className={`rounded-full px-3 py-2 text-xs font-semibold whitespace-nowrap ${
-                        segmentFilter === segment ? 'text-white' : 'bg-slate-100 text-slate-600'
-                      }`}
-                      style={segmentFilter === segment ? { backgroundColor: theme.primary } : undefined}
-                    >
-                      {segment}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </header>
 
@@ -1037,12 +1039,20 @@ export function MarketplacePage() {
                         </div>
                         <button
                           type="button"
-                          onClick={(event) => event.preventDefault()}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            toggleFavoriteStore(store.slug);
+                          }}
                           className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:text-rose-500"
                           aria-label={`Favoritar ${store.name}`}
                           title={`Favoritar ${store.name}`}
                         >
-                          <Heart size={15} weight="regular" />
+                          <Heart
+                            size={15}
+                            weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'}
+                            className={favoriteStoreSlugs.includes(store.slug) ? 'text-rose-500' : ''}
+                          />
                         </button>
                       </div>
                       <p className="mt-0.5 truncate text-[11px] font-medium text-slate-600">
@@ -1109,9 +1119,14 @@ export function MarketplacePage() {
             <Storefront size={18} weight="fill" />
             <span className="text-[9px] font-black uppercase">Hub</span>
           </button>
-          <button type="button" onClick={() => navigate('/cliente')} className="flex flex-col items-center justify-center text-slate-500">
-            <UserCircle size={18} />
-            <span className="text-[9px] font-black uppercase">Conta</span>
+          <button
+            type="button"
+            onClick={() => setQuickFilter((prev) => (prev === 'favorites' ? 'all' : 'favorites'))}
+            className="flex flex-col items-center justify-center text-slate-500"
+            style={quickFilter === 'favorites' ? { color: theme.primary } : undefined}
+          >
+            <Heart size={18} weight={quickFilter === 'favorites' ? 'fill' : 'regular'} />
+            <span className="text-[9px] font-black uppercase">Favoritos</span>
           </button>
         </div>
       </nav>
