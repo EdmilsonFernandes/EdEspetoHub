@@ -500,6 +500,13 @@ export function MarketplacePage() {
     return segmentOptions.map((segment) => categoryVisuals[segment] || { emoji: '🏪', label: segment });
   }, [segmentOptions]);
 
+  const favoriteStores = useMemo(() => {
+    if (!favoriteStoreSlugs.length) return [];
+    return enrichedStores
+      .filter((store) => favoriteStoreSlugs.includes(store.slug))
+      .sort((a, b) => Number(b.isOpen) - Number(a.isOpen) || b.rating - a.rating);
+  }, [enrichedStores, favoriteStoreSlugs]);
+
   useEffect(() => {
     let cancelled = false;
     const toRad = (deg: number) => (deg * Math.PI) / 180;
@@ -971,6 +978,39 @@ export function MarketplacePage() {
               ))}
           </div>
         </section>
+
+        {favoriteStores.length > 0 && (
+          <section className="space-y-3" style={{ transition: 'all .45s ease', transitionDelay: hasEntered ? '230ms' : '0ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
+            <div className="flex items-center justify-between">
+              <h2 className="text-base sm:text-lg font-black text-slate-900">Minhas favoritas</h2>
+              <button
+                type="button"
+                onClick={() => setQuickFilter('favorites')}
+                className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500 hover:text-slate-700"
+              >
+                Ver todas
+              </button>
+            </div>
+            <div className="flex gap-2.5 overflow-x-auto scrollbar-hide pb-1">
+              {favoriteStores.map((store) => (
+                <Link
+                  key={`favorite-${store.id}`}
+                  to={`/${store.slug}`}
+                  className="min-w-[168px] sm:min-w-[186px] rounded-2xl border border-slate-200 bg-white p-2 shadow-sm transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-lg"
+                >
+                  <img src={store.banner || store.logo} alt={store.name} loading="lazy" className="h-20 w-full rounded-xl object-cover border border-slate-200" />
+                  <div className="mt-1.5 flex items-center justify-between gap-2">
+                    <p className="line-clamp-1 text-sm font-black text-slate-900">{store.name}</p>
+                    <Heart size={14} weight="fill" className="text-rose-500 shrink-0" />
+                  </div>
+                  <p className="mt-0.5 text-[11px] text-slate-600">
+                    {distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)} • {store.etaMin}-{store.etaMax} min
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="space-y-4" style={{ transition: 'all .45s ease', transitionDelay: hasEntered ? '260ms' : '0ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
           <div className="flex items-center justify-between gap-2">
