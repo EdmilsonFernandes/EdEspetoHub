@@ -754,11 +754,18 @@ export function MarketplacePage() {
                   </button>
                 </div>
               </div>
-              <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-black tracking-[0.04em] text-slate-700">
-                <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-4 w-4 rounded object-cover" />
-                <span className="hidden sm:inline">Já no Caminho</span>
-                <span className="sm:hidden">Já</span>
-              </div>
+              <button
+                type="button"
+                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white/90 p-1.5 shadow-sm sm:h-9 sm:w-9"
+                aria-label="Já no Caminho"
+                title="Já no Caminho"
+              >
+                <img
+                  src="/janocaminho-logo.png"
+                  alt="Já no Caminho"
+                  className="h-full w-full object-contain"
+                />
+              </button>
             </div>
             <div className="relative">
               <MagnifyingGlass size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
