@@ -326,7 +326,12 @@ export class PlatformAdminController {
    */
   static async updatePlanExempt(req: Request, res: Response) {
     const storeId = req.params.storeId;
-    const planExempt = Boolean(req.body?.planExempt);
+    const rawPlanExempt = req.body?.planExempt;
+    const planExempt =
+      rawPlanExempt === true ||
+      rawPlanExempt === 'true' ||
+      rawPlanExempt === 1 ||
+      rawPlanExempt === '1';
     const label = req.body?.planExemptLabel?.toString().trim();
 
     try {
@@ -380,27 +385,29 @@ export class PlatformAdminController {
           if (!plan) {
             plan = await planRepo.findOne({ where: { enabled: true } as any, order: { price: 'ASC' } as any });
           }
-          if (!plan) {
-            throw new AppError('SUB-003', 400);
+          if (plan) {
+            const trialDays = await settingsService.getNumber('trial_days', env.trialDays);
+            const trialEnd = new Date(now);
+            trialEnd.setDate(trialEnd.getDate() + trialDays);
+
+            const created = subscriptionRepo.create({
+              store,
+              plan,
+              startDate: now,
+              endDate: trialEnd,
+              status: 'TRIAL',
+              autoRenew: false,
+              paymentMethod: 'PIX',
+            } as any);
+            await subscriptionRepo.save(created);
+            subscription = created as any;
+            store.open = true;
+            await storeRepo.save(store);
+          } else {
+            // Keep the VIP removal successful even when there is no enabled plan configured.
+            // Super admin can then direct the store to renewal flow.
+            subscription = null as any;
           }
-
-          const trialDays = await settingsService.getNumber('trial_days', env.trialDays);
-          const trialEnd = new Date(now);
-          trialEnd.setDate(trialEnd.getDate() + trialDays);
-
-          const created = subscriptionRepo.create({
-            store,
-            plan,
-            startDate: now,
-            endDate: trialEnd,
-            status: 'TRIAL',
-            autoRenew: false,
-            paymentMethod: 'PIX',
-          } as any);
-          await subscriptionRepo.save(created);
-          subscription = created as any;
-          store.open = true;
-          await storeRepo.save(store);
         }
 
         const finalSub = planExempt ? null : subscription;
