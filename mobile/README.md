@@ -53,13 +53,17 @@ Debug APK output:
 - Shell: Capacitor Android app (`mobile/android`).
 - Rendering: WebView loading production Hub (`/hub`) from `janocaminho.com.br`.
 - Navigation:
-  - Back behavior handled natively in `MainActivity`.
+  - App always opens in Hub (`/hub`) as home.
+  - Back behavior handled natively in `MainActivity`:
+    - If user is inside a store page, one back returns directly to Hub.
+    - In Hub, back exits app.
+  - Native slide transition is applied between Hub and store pages for app-like feel.
   - Deep link support:
     - `https://janocaminho.com.br/...`
     - `janocaminho://...`
 - Session persistence:
   - WebView cookies + DOM storage enabled.
-  - Last URL restore on app reopen.
+  - Last URL is saved, but app home remains Hub on reopen.
 - Push notifications:
   - Capacitor Push plugin enabled (Android).
   - Frontend registers token and syncs with backend customer endpoints.
