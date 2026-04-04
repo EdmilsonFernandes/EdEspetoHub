@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260404.203652.97df2358",
-  "buildId": "0.1.9+20260404.203652.97df2358-20260404.203652-97df2358",
-  "builtAt": "2026-04-04T20:36:52.096Z",
-  "commitHash": "97df2358be82d415b2fd098ce281a8f3d69e9768",
-  "shortHash": "97df2358",
+  "versionInternal": "0.1.9+20260404.203941.eec22ac7",
+  "buildId": "0.1.9+20260404.203941.eec22ac7-20260404.203941-eec22ac7",
+  "builtAt": "2026-04-04T20:39:41.741Z",
+  "commitHash": "eec22ac7698fd30159cb9d2585b03caaf684d20d",
+  "shortHash": "eec22ac7",
   "branch": "main",
   "commits": [
+    {
+      "hash": "eec22ac7698fd30159cb9d2585b03caaf684d20d",
+      "shortHash": "eec22ac7",
+      "dateIso": "2026-04-04T17:37:32-03:00",
+      "subject": "feat(hub): add profile drawer with avatar trigger and location row"
+    },
     {
       "hash": "97df2358be82d415b2fd098ce281a8f3d69e9768",
       "shortHash": "97df2358",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "aa92053e",
       "dateIso": "2026-04-03T23:58:36-03:00",
       "subject": "feat(hub): restore premium top-banner copy and create-store CTA"
-    },
-    {
-      "hash": "e67e87b8c5f4a8929f2d632d9f517d722c5cbcc4",
-      "shortHash": "e67e87b8",
-      "dateIso": "2026-04-03T23:52:48-03:00",
-      "subject": "fix(hub): remove rotating mid-banner and correct store open-day matching"
     }
   ]
 } as const;

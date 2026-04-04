@@ -10,6 +10,7 @@ import { isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { HeaderAvatarTrigger } from '../components/Marketplace/HeaderAvatarTrigger';
 import { ProfileDrawer } from '../components/Marketplace/ProfileDrawer';
+import { APP_BUILD_INFO } from '../generated/buildInfo';
 
 type MarketplaceStore = {
   id?: string;
@@ -691,6 +692,14 @@ export function MarketplacePage() {
     navigate('/cliente?mode=login');
   }, [navigate]);
 
+  const openTerms = useCallback(() => {
+    navigate('/terms');
+  }, [navigate]);
+
+  const openHelp = useCallback(() => {
+    window.location.href = 'mailto:contato@janocaminho.com.br?subject=Ajuda%20-%20Ja%20no%20Caminho';
+  }, []);
+
   const handleCustomerLogout = useCallback(() => {
     localStorage.removeItem('customerSession');
     Object.keys(localStorage).forEach((key) => {
@@ -719,7 +728,10 @@ export function MarketplacePage() {
         onClose={() => setProfileDrawerOpen(false)}
         onLogin={openCustomerLogin}
         onOpenAccount={openCustomerAccount}
+        onOpenTerms={openTerms}
+        onOpenHelp={openHelp}
         onLogout={handleCustomerLogout}
+        versionLabel={APP_BUILD_INFO.versionLabel}
       />
       <a
         href="https://www.janocaminho.com.br/"

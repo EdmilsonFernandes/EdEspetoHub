@@ -27,7 +27,10 @@ type ProfileDrawerProps = {
   onClose: () => void;
   onLogin: () => void;
   onOpenAccount: () => void;
+  onOpenTerms: () => void;
+  onOpenHelp: () => void;
   onLogout: () => void;
+  versionLabel?: string;
 };
 
 const ItemButton = ({
@@ -66,7 +69,10 @@ export function ProfileDrawer({
   onClose,
   onLogin,
   onOpenAccount,
+  onOpenTerms,
+  onOpenHelp,
   onLogout,
+  versionLabel,
 }: ProfileDrawerProps) {
   useEffect(() => {
     if (!isOpen) return;
@@ -89,14 +95,16 @@ export function ProfileDrawer({
         { id: 'account', label: 'Minha conta', icon: <UserRectangle size={18} weight="duotone" />, onClick: onOpenAccount },
         { id: 'orders', label: 'Meus pedidos', icon: <BellSimple size={18} weight="duotone" />, onClick: onOpenAccount },
         { id: 'security', label: 'Central de segurança', icon: <ShieldCheck size={18} weight="duotone" />, onClick: onOpenAccount },
-        { id: 'help', label: 'Ajuda e suporte', icon: <Lifebuoy size={18} weight="duotone" />, onClick: onOpenAccount },
+        { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={18} weight="duotone" />, onClick: onOpenHelp },
+        { id: 'terms', label: 'Termos de uso', icon: <UserRectangle size={18} weight="duotone" />, onClick: onOpenTerms },
         { id: 'messages', label: 'Mensagens', icon: <ChatCenteredDots size={18} weight="duotone" />, onClick: onOpenAccount },
         { id: 'logout', label: 'Sair', icon: <SignOut size={18} weight="duotone" />, onClick: onLogout, tone: 'danger' },
       ]
     : [
         { id: 'login', label: 'Entrar ou criar conta', icon: <UserCircle size={18} weight="duotone" />, onClick: onLogin },
         { id: 'security', label: 'Central de segurança', icon: <ShieldCheck size={18} weight="duotone" />, onClick: onLogin },
-        { id: 'help', label: 'Ajuda e suporte', icon: <Lifebuoy size={18} weight="duotone" />, onClick: onLogin },
+        { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={18} weight="duotone" />, onClick: onOpenHelp },
+        { id: 'terms', label: 'Termos de uso', icon: <UserRectangle size={18} weight="duotone" />, onClick: onOpenTerms },
       ];
 
   return (
@@ -152,6 +160,10 @@ export function ProfileDrawer({
               tone={item.tone}
             />
           ))}
+        </div>
+        <div className="border-t border-slate-200 px-4 py-3 text-[11px] text-slate-500">
+          <p className="font-semibold">Já no Caminho</p>
+          <p className="mt-0.5">Versão {versionLabel || 'v0.0.0'}</p>
         </div>
       </aside>
     </div>
