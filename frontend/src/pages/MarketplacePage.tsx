@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type TouchEvent as ReactTouchEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MagnifyingGlass, MapPin, Star, Storefront, House, UserCircle, List, CaretDown, Heart, ShareNetwork } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
@@ -158,6 +158,8 @@ export function MarketplacePage() {
   const [distanceByStore, setDistanceByStore] = useState<Record<string, number>>({});
   const [distanceLoading, setDistanceLoading] = useState(false);
   const [heroIndex, setHeroIndex] = useState(0);
+  const heroTouchStartXRef = useRef<number | null>(null);
+  const heroTouchActiveRef = useRef(false);
   const touchStartYRef = useRef<number | null>(null);
   const touchPullActiveRef = useRef(false);
   const pullDistanceRef = useRef(0);
@@ -490,6 +492,37 @@ export function MarketplacePage() {
     return heroStores[heroIndex % heroStores.length];
   }, [heroStores, heroIndex]);
 
+  const moveHero = useCallback(
+    (direction: 'next' | 'prev') => {
+      const total = Math.max(1, heroStores.length);
+      if (total <= 1) return;
+      setHeroIndex((prev) => {
+        if (direction === 'next') return (prev + 1) % total;
+        return (prev - 1 + total) % total;
+      });
+    },
+    [heroStores.length]
+  );
+
+  const handleHeroTouchStart = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
+    heroTouchStartXRef.current = event.touches[0]?.clientX ?? null;
+    heroTouchActiveRef.current = true;
+  }, []);
+
+  const handleHeroTouchEnd = useCallback(
+    (event: ReactTouchEvent<HTMLDivElement>) => {
+      if (!heroTouchActiveRef.current || heroTouchStartXRef.current == null) return;
+      heroTouchActiveRef.current = false;
+      const endX = event.changedTouches[0]?.clientX ?? heroTouchStartXRef.current;
+      const deltaX = endX - heroTouchStartXRef.current;
+      heroTouchStartXRef.current = null;
+      if (Math.abs(deltaX) < 42) return;
+      if (deltaX < 0) moveHero('next');
+      else moveHero('prev');
+    },
+    [moveHero]
+  );
+
   const categoryTiles = useMemo(() => {
     return segmentOptions.map((segment) => categoryVisuals[segment] || { emoji: '🏪', label: segment });
   }, [segmentOptions]);
@@ -796,7 +829,11 @@ export function MarketplacePage() {
           </div>
 
           <div className="mt-4 flex-1">
-            <div className="relative min-h-[156px] overflow-hidden rounded-3xl border border-white/20 bg-black/20 shadow-[0_18px_30px_-22px_rgba(15,23,42,0.8)] backdrop-blur-[1px] sm:min-h-[178px]">
+            <div
+              className="relative min-h-[156px] overflow-hidden rounded-3xl border border-white/20 bg-black/20 shadow-[0_18px_30px_-22px_rgba(15,23,42,0.8)] backdrop-blur-[1px] sm:min-h-[178px]"
+              onTouchStart={handleHeroTouchStart}
+              onTouchEnd={handleHeroTouchEnd}
+            >
               {activeHeroStore ? (
                 <>
                   <img

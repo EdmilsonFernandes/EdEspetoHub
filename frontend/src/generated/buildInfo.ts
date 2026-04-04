@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260404.204310.eda2d5fd",
-  "buildId": "0.1.9+20260404.204310.eda2d5fd-20260404.204310-eda2d5fd",
-  "builtAt": "2026-04-04T20:43:10.346Z",
-  "commitHash": "eda2d5fdc9fe9d14622b3d8038fea6a3c6cd6112",
-  "shortHash": "eda2d5fd",
+  "versionInternal": "0.1.9+20260404.204519.fa910fe2",
+  "buildId": "0.1.9+20260404.204519.fa910fe2-20260404.204519-fa910fe2",
+  "builtAt": "2026-04-04T20:45:19.133Z",
+  "commitHash": "fa910fe2f428ae0d65ff9e481aea44947bb09a39",
+  "shortHash": "fa910fe2",
   "branch": "main",
   "commits": [
+    {
+      "hash": "fa910fe2f428ae0d65ff9e481aea44947bb09a39",
+      "shortHash": "fa910fe2",
+      "dateIso": "2026-04-04T17:43:47-03:00",
+      "subject": "refactor(hub): simplify top store carousel banner and add privacy action"
+    },
     {
       "hash": "eda2d5fdc9fe9d14622b3d8038fea6a3c6cd6112",
       "shortHash": "eda2d5fd",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "b6231d54",
       "dateIso": "2026-04-04T00:06:46-03:00",
       "subject": "fix(hub-mobile): prevent horizontal page drag with x-overflow lock"
-    },
-    {
-      "hash": "23cfb6d3ea664d34463ca492000687bc0c0dd734",
-      "shortHash": "23cfb6d3",
-      "dateIso": "2026-04-04T00:04:57-03:00",
-      "subject": "refactor(hub): improve hero mobile fit and move premium actions to top-right"
     }
   ]
 } as const;
