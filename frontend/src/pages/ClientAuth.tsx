@@ -140,9 +140,17 @@ export function ClientAuth() {
             </button>
           </div>
 
-          <div className="space-y-3">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              submit();
+            }}
+            className="space-y-3"
+          >
             {mode === 'register' && (
               <input
+                name="fullName"
+                autocomplete="name"
                 value={form.fullName}
                 onChange={(e) => setForm((p) => ({ ...p, fullName: e.target.value }))}
                 placeholder="Nome completo"
@@ -151,6 +159,8 @@ export function ClientAuth() {
             )}
             {mode === 'register' && (
               <input
+                name="phone"
+                autocomplete="tel"
                 value={form.phone}
                 onChange={(e) => setForm((p) => ({ ...p, phone: formatPhoneBr(e.target.value) }))}
                 placeholder="Telefone (opcional)"
@@ -158,12 +168,17 @@ export function ClientAuth() {
               />
             )}
             <input
+              name="email"
+              autocomplete="username"
+              type="email"
               value={form.email}
               onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
               placeholder="E-mail"
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
             />
             <input
+              name="password"
+              autocomplete={mode === 'register' ? 'new-password' : 'current-password'}
               type="password"
               value={form.password}
               onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
@@ -175,8 +190,7 @@ export function ClientAuth() {
             {message ? <p className="text-sm text-emerald-300">{message}</p> : null}
 
             <button
-              type="button"
-              onClick={submit}
+              type="submit"
               disabled={loading}
               className="w-full rounded-xl bg-[linear-gradient(120deg,#0f172a,#1e293b)] px-4 py-3 text-sm font-black text-white shadow-[0_14px_26px_-16px_rgba(15,23,42,0.6)] active:scale-[0.99] disabled:opacity-60"
             >
@@ -191,7 +205,7 @@ export function ClientAuth() {
                 Esqueci minha senha
               </button>
             )}
-          </div>
+          </form>
         </div>
       </div>
     </main>

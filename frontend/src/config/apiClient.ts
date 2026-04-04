@@ -115,10 +115,18 @@ const request = async (path: string, options: any = {}) =>
 {
   const url = buildUrl(path);
   const isMotoboyRoute = path.startsWith('/motoboy') || path.startsWith('motoboy');
+  const isCustomerRoute = path.startsWith('/customer') || path.startsWith('customer');
+  
   const motoboyToken = getMotoboyToken();
   const adminToken = getAdminToken();
   const customerToken = getCustomerToken();
-  const token = isMotoboyRoute ? motoboyToken : adminToken || customerToken;
+  
+  let token = adminToken || customerToken;
+  if (isMotoboyRoute) {
+    token = motoboyToken;
+  } else if (isCustomerRoute) {
+    token = customerToken || adminToken;
+  }
 
   const finalOptions: any = {
     ...options,
@@ -148,7 +156,18 @@ const rawRequest = async (path: string, options: any = {}) =>
 {
   const url = buildUrl(path);
   const isMotoboyRoute = path.startsWith('/motoboy') || path.startsWith('motoboy');
-  const token = isMotoboyRoute ? getMotoboyToken() : getAdminToken() || getCustomerToken();
+  const isCustomerRoute = path.startsWith('/customer') || path.startsWith('customer');
+  
+  const motoboyToken = getMotoboyToken();
+  const adminToken = getAdminToken();
+  const customerToken = getCustomerToken();
+
+  let token = adminToken || customerToken;
+  if (isMotoboyRoute) {
+    token = motoboyToken;
+  } else if (isCustomerRoute) {
+    token = customerToken || adminToken;
+  }
 
   const finalOptions: any = {
     ...options,

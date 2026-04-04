@@ -229,6 +229,8 @@ export function AdminLogin() {
             <div className="floating-field">
               <input
                 id="admin-identifier"
+                name="identifier"
+                autocomplete="username"
                 type="text"
                 value={loginForm.identifier}
                 onChange={e => setLoginForm(prev => ({ ...prev, identifier: e.target.value }))}
@@ -242,6 +244,8 @@ export function AdminLogin() {
             <div className="floating-field">
               <input
                 id="admin-password"
+                name="password"
+                autocomplete="current-password"
                 type={showPassword ? 'text' : 'password'}
                 value={loginForm.password}
                 onChange={e => setLoginForm(prev => ({ ...prev, password: e.target.value }))}

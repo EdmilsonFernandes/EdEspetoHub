@@ -247,6 +247,8 @@ export function MotoboyLogin() {
                 <div className="floating-field">
                   <input
                     id="motoboy-email"
+                    name="email"
+                    autocomplete="username"
                     type="email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -259,6 +261,8 @@ export function MotoboyLogin() {
                 <div className="floating-field">
                   <input
                     id="motoboy-password"
+                    name="password"
+                    autocomplete="current-password"
                     type={showPassword ? 'text' : 'password'}
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}

@@ -790,14 +790,15 @@ export function MarketplacePage() {
               </div>
               <button
                 type="button"
-                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white/90 p-1.5 shadow-sm sm:h-9 sm:w-9"
+                className="inline-flex h-9 w-auto shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 shadow-sm transition-all hover:scale-105 active:scale-95"
                 aria-label="Já no Caminho"
                 title="Já no Caminho"
+                onClick={() => navigate('/hub')}
               >
                 <img
                   src="/janocaminho-logo.png"
                   alt="Já no Caminho"
-                  className="h-full w-full object-contain"
+                  className="h-full w-auto object-contain"
                 />
               </button>
             </div>

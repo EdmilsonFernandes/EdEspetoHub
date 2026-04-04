@@ -5,13 +5,37 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260404.211217.30b993d3",
-  "buildId": "0.1.9+20260404.211217.30b993d3-20260404.211217-30b993d3",
-  "builtAt": "2026-04-04T21:12:17.495Z",
-  "commitHash": "30b993d346f8695bd59a5522e19ae2b355bbe859",
-  "shortHash": "30b993d3",
+  "versionInternal": "0.1.9+20260404.212936.32ed4baf",
+  "buildId": "0.1.9+20260404.212936.32ed4baf-20260404.212936-32ed4baf",
+  "builtAt": "2026-04-04T21:29:36.283Z",
+  "commitHash": "32ed4bafd64194dd75c6e793ce98076ba1c6fe0f",
+  "shortHash": "32ed4baf",
   "branch": "main",
   "commits": [
+    {
+      "hash": "32ed4bafd64194dd75c6e793ce98076ba1c6fe0f",
+      "shortHash": "32ed4baf",
+      "dateIso": "2026-04-04T18:27:14-03:00",
+      "subject": "refactor(hub): use icon-only brand badge in header for cleaner mobile layout"
+    },
+    {
+      "hash": "8ba9be2387d7398d534f01cef40423405e0aab5c",
+      "shortHash": "8ba9be23",
+      "dateIso": "2026-04-04T18:25:43-03:00",
+      "subject": "feat(hub): add role-based login shortcuts in profile drawer"
+    },
+    {
+      "hash": "eb3ecfc5dc2ff99d3dacc0bc2185ac64d9bb814d",
+      "shortHash": "eb3ecfc5",
+      "dateIso": "2026-04-04T18:23:42-03:00",
+      "subject": "fix(hours): align hub open status with backend and robust day/tz handling"
+    },
+    {
+      "hash": "ecfc2910aac881bddeb59b09cd456f5c19899e8e",
+      "shortHash": "ecfc2910",
+      "dateIso": "2026-04-04T18:12:59-03:00",
+      "subject": "fix(hub/mobile): remove curadoria label and enable webview geolocation permission flow"
+    },
     {
       "hash": "30b993d346f8695bd59a5522e19ae2b355bbe859",
       "shortHash": "30b993d3",
@@ -167,30 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "d4a26e62",
       "dateIso": "2026-04-04T10:18:36-03:00",
       "subject": "feat(mobile): enable FCM plugin sync and auto token registration flow"
-    },
-    {
-      "hash": "deec04ea1d4799a7b1724a2659684906b43b232c",
-      "shortHash": "deec04ea",
-      "dateIso": "2026-04-04T10:09:34-03:00",
-      "subject": "chore(android): ignore google-services.json from VCS"
-    },
-    {
-      "hash": "d00a793accbaf2d6c0aa3a912475edf285c63cfc",
-      "shortHash": "d00a793a",
-      "dateIso": "2026-04-04T09:59:06-03:00",
-      "subject": "fix(hub): use runtime opening-hours checker and expose hours in portfolio payload"
-    },
-    {
-      "hash": "33b07a9f233782c5ea5577b9124787aad7279f3e",
-      "shortHash": "33b07a9f",
-      "dateIso": "2026-04-04T09:50:55-03:00",
-      "subject": "fix(admin): allow removing plan exemption without failing when no enabled plan exists"
-    },
-    {
-      "hash": "0fbbf770044825cb617ebd7c158d466fe595a864",
-      "shortHash": "0fbbf770",
-      "dateIso": "2026-04-04T00:28:43-03:00",
-      "subject": "feat(android): add native splash exit animation and Android 12 splash theme"
     }
   ]
 } as const;

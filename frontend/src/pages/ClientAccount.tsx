@@ -132,6 +132,14 @@ export function ClientAccount() {
 
   const handleProfileImageUpload = async (file?: File | null) => {
     if (!file || profileSaving) return;
+
+    // Check file size (max 5MB to avoid 413 Payload Too Large with Base64 overhead)
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      setProfileMessage('A imagem é muito grande. Escolha uma foto de até 5MB.');
+      return;
+    }
+
     setProfileSaving(true);
     setProfileMessage('');
     try {
@@ -152,7 +160,13 @@ export function ClientAccount() {
       }
       setProfileMessage('Foto de perfil atualizada.');
     } catch (e: any) {
-      setProfileMessage(e?.message || 'Não foi possível enviar foto.');
+      if (e.status === 413) {
+        setProfileMessage('A imagem excedeu o limite do servidor. Tente uma foto menor.');
+      } else if (e.status === 403 || e.status === 401) {
+        setProfileMessage('Sua sessão expirou ou você não tem permissão. Tente fazer login novamente.');
+      } else {
+        setProfileMessage(e?.message || 'Não foi possível enviar foto.');
+      }
     } finally {
       setProfileSaving(false);
     }
@@ -259,12 +273,16 @@ export function ClientAccount() {
               </div>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 <input
+                  name="fullName"
+                  autocomplete="name"
                   value={nameDraft}
                   onChange={(e) => setNameDraft(e.target.value)}
                   placeholder="Nome completo"
                   className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
                 />
                 <input
+                  name="phone"
+                  autocomplete="tel"
                   value={phoneDraft}
                   onChange={(e) => setPhoneDraft(e.target.value)}
                   placeholder="Telefone"
@@ -281,7 +299,11 @@ export function ClientAccount() {
                 >
                   {profileSaving ? 'Salvando...' : 'Salvar perfil'}
                 </button>
-                {profileMessage ? <p className="mt-1 text-xs text-slate-600">{profileMessage}</p> : null}
+                {profileMessage ? (
+                  <p className={`mt-1 text-xs font-bold ${profileMessage.includes('Erro') || profileMessage.includes('excedeu') || profileMessage.includes('expirou') || profileMessage.includes('muito grande') ? 'text-rose-600' : 'text-emerald-600'}`}>
+                    {profileMessage}
+                  </p>
+                ) : null}
               </div>
             </>
           )}
@@ -310,6 +332,8 @@ export function ClientAccount() {
           <div className="mt-2 grid gap-2 sm:grid-cols-2">
             <input
               type="password"
+              name="current-password"
+              autocomplete="current-password"
               value={pwdForm.currentPassword}
               onChange={(e) => setPwdForm((p) => ({ ...p, currentPassword: e.target.value }))}
               placeholder="Senha atual"
@@ -317,6 +341,8 @@ export function ClientAccount() {
             />
             <input
               type="password"
+              name="new-password"
+              autocomplete="new-password"
               value={pwdForm.newPassword}
               onChange={(e) => setPwdForm((p) => ({ ...p, newPassword: e.target.value }))}
               placeholder="Nova senha"
