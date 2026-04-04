@@ -135,6 +135,22 @@ export class StoreController {
   }
 
   /**
+   * Resolves all possible opening-hours entries for a given JS weekday (0..6),
+   * supporting mixed legacy formats without relying on entry order.
+   *
+   * @author Edmilson Lopes
+   */
+  private static resolveDayEntries(openingHours: any[], jsDay: number) {
+    const asIso = jsDay === 0 ? 7 : jsDay; // Mon=1..Sun=7
+    const asSunFirst = jsDay + 1; // Sun=1..Sat=7
+    const candidateSet = new Set([jsDay, asIso, asSunFirst]);
+    return openingHours.filter((entry: any) => {
+      const value = Number(entry?.day);
+      return Number.isFinite(value) && candidateSet.has(value);
+    });
+  }
+
+  /**
    * Checks whether current minutes are inside one interval.
    *
    * @author Edmilson Lopes
@@ -152,22 +168,27 @@ export class StoreController {
    */
   private static isOpenFromPreviousDayOvernight(openingHours: any[], currentDay: number, currentMinutes: number) {
     const previousDay = (currentDay + 6) % 7;
-    const previousEntry = StoreController.resolveDayEntry(openingHours, previousDay);
-    if (!previousEntry || previousEntry?.enabled === false) return false;
-    const prevIntervals = Array.isArray(previousEntry.intervals) ? previousEntry.intervals : [];
-    if (!prevIntervals.length) return false;
+    const previousEntries = StoreController.resolveDayEntries(openingHours, previousDay).filter(
+      (entry: any) => entry?.enabled !== false
+    );
+    if (!previousEntries.length) return false;
 
-    return prevIntervals.some((interval: any) => {
-      if (!interval?.start || !interval?.end) return false;
-      const start = StoreController.toMinutes(String(interval.start));
-      const end = StoreController.toMinutes(String(interval.end));
-      if (start == null || end == null) return false;
-      if (start === end) return true;
-      if (end < start) {
-        // Overnight interval from previous day keeps store open until `end`.
-        return currentMinutes < end;
-      }
-      return false;
+    return previousEntries.some((previousEntry: any) => {
+      const prevIntervals = Array.isArray(previousEntry.intervals) ? previousEntry.intervals : [];
+      if (!prevIntervals.length) return false;
+
+      return prevIntervals.some((interval: any) => {
+        if (!interval?.start || !interval?.end) return false;
+        const start = StoreController.toMinutes(String(interval.start));
+        const end = StoreController.toMinutes(String(interval.end));
+        if (start == null || end == null) return false;
+        if (start === end) return true;
+        if (end < start) {
+          // Overnight interval from previous day keeps store open until `end`.
+          return currentMinutes < end;
+        }
+        return false;
+      });
     });
   }
     /**
@@ -210,19 +231,23 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
      * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
      * @date 2025-12-17
      */
-    const dayEntry = StoreController.resolveDayEntry(openingHours, day);
-    if (!dayEntry || dayEntry?.enabled === false) {
+    const dayEntries = StoreController.resolveDayEntries(openingHours, day).filter(
+      (entry: any) => entry?.enabled !== false
+    );
+    if (!dayEntries.length) {
       return StoreController.isOpenFromPreviousDayOvernight(openingHours, day, minutes);
     }
 
-    const intervals = Array.isArray(dayEntry.intervals) ? dayEntry.intervals : [];
-    if (!intervals.length) return true;
-    const openByTodayInterval = intervals.some((interval: any) => {
-      if (!interval?.start || !interval?.end) return false;
-      const start = StoreController.toMinutes(String(interval.start));
-      const end = StoreController.toMinutes(String(interval.end));
-      if (start == null || end == null) return false;
-      return StoreController.isInsideInterval(minutes, start, end);
+    const openByTodayInterval = dayEntries.some((dayEntry: any) => {
+      const intervals = Array.isArray(dayEntry.intervals) ? dayEntry.intervals : [];
+      if (!intervals.length) return true;
+      return intervals.some((interval: any) => {
+        if (!interval?.start || !interval?.end) return false;
+        const start = StoreController.toMinutes(String(interval.start));
+        const end = StoreController.toMinutes(String(interval.end));
+        if (start == null || end == null) return false;
+        return StoreController.isInsideInterval(minutes, start, end);
+      });
     });
     if (openByTodayInterval) return true;
     return StoreController.isOpenFromPreviousDayOvernight(openingHours, day, minutes);
@@ -242,10 +267,13 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
 
     for (let dayOffset = 0; dayOffset <= 7; dayOffset += 1) {
       const day = (currentDay + dayOffset) % 7;
-      const dayEntry = StoreController.resolveDayEntry(openingHours, day);
-      if (!dayEntry || dayEntry?.enabled === false) continue;
+      const dayEntries = StoreController.resolveDayEntries(openingHours, day).filter(
+        (entry: any) => entry?.enabled !== false
+      );
+      if (!dayEntries.length) continue;
 
-      const intervals = (Array.isArray(dayEntry.intervals) ? dayEntry.intervals : [])
+      const intervals = dayEntries
+        .flatMap((dayEntry: any) => (Array.isArray(dayEntry.intervals) ? dayEntry.intervals : []))
         .map((interval: any) => {
           if (!interval?.start || typeof interval.start !== 'string') return null;
           const startMinutes = StoreController.toMinutes(interval.start);
