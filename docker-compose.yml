@@ -31,6 +31,7 @@ services:
       - ./backend/.env.docker
     volumes:
       - ./backend/uploads:/app/uploads
+      - ./backend/keys:/app/keys:ro
     ports:
       - "4000:4000"
     depends_on:

@@ -1,3 +1,5 @@
+import { createSign } from 'crypto';
+import fs from 'fs';
 import { AppDataSource } from '../config/database';
 import { env } from '../config/env';
 import { logger } from '../utils/logger';
@@ -8,6 +10,21 @@ type CustomerPushPayload = {
   data?: Record<string, string>;
 };
 
+type FirebaseServiceAccount = {
+  project_id: string;
+  client_email: string;
+  private_key: string;
+  token_uri?: string;
+};
+
+type PushSendResult = {
+  ok: boolean;
+  deactivateToken?: boolean;
+  status?: number;
+  errorCode?: string;
+  body?: any;
+};
+
 const log = logger.child({ scope: 'PushNotificationService' });
 
 /**
@@ -16,6 +33,8 @@ const log = logger.child({ scope: 'PushNotificationService' });
  * @author Edmilson Lopes
  */
 export class PushNotificationService {
+  private accessTokenCache: { token: string; expiresAt: number } | null = null;
+
   /**
    * Registers or reactivates a customer push token.
    *
@@ -140,18 +159,224 @@ export class PushNotificationService {
     return { ok: true };
   }
 
-  /**
-   * Dispatches an order update push to all active tokens from one customer.
-   *
-   * @author Edmilson Lopes
-   */
-  async notifyCustomerOrderUpdate(
-    userId: string,
-    payload: CustomerPushPayload
-  ) {
+  private base64Url(input: string) {
+    return Buffer.from(input).toString('base64url');
+  }
+
+  private resolveServiceAccount(): FirebaseServiceAccount | null {
+    const inlineJson = String(env.push?.fcmServiceAccountJson || '').trim();
+    if (inlineJson) {
+      try {
+        return JSON.parse(inlineJson) as FirebaseServiceAccount;
+      } catch {
+        log.warn('FCM v1 service account JSON is invalid');
+      }
+    }
+
+    const path = String(env.push?.fcmServiceAccountPath || '').trim();
+    if (!path) return null;
+    if (!fs.existsSync(path)) {
+      log.warn('FCM v1 service account file not found', { path });
+      return null;
+    }
+    try {
+      const raw = fs.readFileSync(path, 'utf8');
+      return JSON.parse(raw) as FirebaseServiceAccount;
+    } catch (error) {
+      log.warn('FCM v1 service account file is invalid', {
+        path,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return null;
+    }
+  }
+
+  private resolveFcmV1Config() {
+    const serviceAccount = this.resolveServiceAccount();
+    if (!serviceAccount) return null;
+
+    const projectId = String(env.push?.fcmProjectId || serviceAccount.project_id || '').trim();
+    const clientEmail = String(serviceAccount.client_email || '').trim();
+    const privateKey = String(serviceAccount.private_key || '').trim();
+    const tokenUri = String(serviceAccount.token_uri || 'https://oauth2.googleapis.com/token').trim();
+    if (!projectId || !clientEmail || !privateKey) return null;
+
+    return { projectId, clientEmail, privateKey, tokenUri };
+  }
+
+  private async getFcmV1AccessToken(config: {
+    clientEmail: string;
+    privateKey: string;
+    tokenUri: string;
+  }) {
+    const nowSeconds = Math.floor(Date.now() / 1000);
+    if (this.accessTokenCache && this.accessTokenCache.expiresAt > nowSeconds + 60) {
+      return this.accessTokenCache.token;
+    }
+
+    const header = { alg: 'RS256', typ: 'JWT' };
+    const payload = {
+      iss: config.clientEmail,
+      scope: 'https://www.googleapis.com/auth/firebase.messaging',
+      aud: config.tokenUri,
+      iat: nowSeconds,
+      exp: nowSeconds + 3600,
+    };
+    const unsignedJwt = `${this.base64Url(JSON.stringify(header))}.${this.base64Url(JSON.stringify(payload))}`;
+    const signature = createSign('RSA-SHA256').update(unsignedJwt).sign(config.privateKey, 'base64url');
+    const assertion = `${unsignedJwt}.${signature}`;
+
+    const body = new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion,
+    });
+    const response = await fetch(config.tokenUri, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body,
+    });
+
+    const json = await response.json().catch(() => null);
+    if (!response.ok || !json?.access_token) {
+      throw new Error(`FCM v1 token failed: status=${response.status}`);
+    }
+
+    const expiresIn = Number(json.expires_in || 3600);
+    this.accessTokenCache = {
+      token: String(json.access_token),
+      expiresAt: nowSeconds + Math.max(60, expiresIn - 60),
+    };
+    return this.accessTokenCache.token;
+  }
+
+  private normalizeV1ErrorCode(body: any) {
+    const detailCode = body?.error?.details?.find?.((item: any) => item?.errorCode)?.errorCode;
+    if (detailCode) return String(detailCode);
+    return String(body?.error?.status || body?.error?.message || '').trim();
+  }
+
+  private async sendViaFcmV1(token: string, payload: CustomerPushPayload): Promise<PushSendResult> {
+    const config = this.resolveFcmV1Config();
+    if (!config) return { ok: false, errorCode: 'FCM_V1_CONFIG_MISSING' };
+
+    try {
+      const accessToken = await this.getFcmV1AccessToken(config);
+      const response = await fetch(
+        `https://fcm.googleapis.com/v1/projects/${encodeURIComponent(config.projectId)}/messages:send`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: {
+              token,
+              notification: {
+                title: payload.title,
+                body: payload.body,
+              },
+              data: payload.data || {},
+              android: { priority: 'high' },
+            },
+          }),
+        }
+      );
+
+      const body = await response.json().catch(() => null);
+      if (response.ok) {
+        return { ok: true };
+      }
+
+      const code = this.normalizeV1ErrorCode(body);
+      const deactivateToken =
+        code === 'UNREGISTERED' ||
+        code === 'NOT_FOUND' ||
+        code === 'INVALID_ARGUMENT' ||
+        code === 'SENDER_ID_MISMATCH';
+      return {
+        ok: false,
+        status: response.status,
+        errorCode: code,
+        deactivateToken,
+        body,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        errorCode: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }
+
+  private async sendViaLegacyFcm(token: string, payload: CustomerPushPayload): Promise<PushSendResult> {
     const serverKey = String(env.push?.fcmServerKey || '').trim();
-    if (!serverKey) {
-      log.info('Push skipped (missing FCM server key)', { userId });
+    if (!serverKey) return { ok: false, errorCode: 'FCM_LEGACY_KEY_MISSING' };
+
+    try {
+      const response = await fetch('https://fcm.googleapis.com/fcm/send', {
+        method: 'POST',
+        headers: {
+          Authorization: `key=${serverKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: token,
+          priority: 'high',
+          notification: {
+            title: payload.title,
+            body: payload.body,
+          },
+          data: payload.data || {},
+        }),
+      });
+      const body = await response.json().catch(() => null);
+      if (!response.ok) {
+        return {
+          ok: false,
+          status: response.status,
+          body,
+          deactivateToken: response.status === 404 || response.status === 410,
+        };
+      }
+
+      const result = Array.isArray(body?.results) ? body.results[0] : null;
+      if (result?.message_id) return { ok: true };
+      const code = String(result?.error || '').trim();
+      return {
+        ok: false,
+        errorCode: code || 'LEGACY_RESULT_ERROR',
+        body,
+        deactivateToken:
+          code === 'InvalidRegistration' ||
+          code === 'NotRegistered' ||
+          code === 'MismatchSenderId',
+      };
+    } catch (error) {
+      return { ok: false, errorCode: error instanceof Error ? error.message : String(error) };
+    }
+  }
+
+  private async sendToToken(token: string, payload: CustomerPushPayload) {
+    const v1Config = this.resolveFcmV1Config();
+    if (v1Config) return this.sendViaFcmV1(token, payload);
+    return this.sendViaLegacyFcm(token, payload);
+  }
+
+  private async dispatchByOwner(params: {
+    ownerKey: string;
+    ownerValue: string;
+    payload: CustomerPushPayload;
+    noTokenLogMessage: string;
+    dispatchFinishedMessage: string;
+  }) {
+    const ownerValue = String(params.ownerValue || '').trim();
+    if (!ownerValue) return { ok: false, sent: 0, skipped: true };
+
+    const hasV1 = Boolean(this.resolveFcmV1Config());
+    const hasLegacy = Boolean(String(env.push?.fcmServerKey || '').trim());
+    if (!hasV1 && !hasLegacy) {
+      log.info('Push skipped (missing FCM config)', { [params.ownerKey]: ownerValue });
       return { ok: false, sent: 0, skipped: true };
     }
 
@@ -159,89 +384,65 @@ export class PushNotificationService {
       `
         SELECT token
         FROM customer_push_tokens
-        WHERE user_id = $1
+        WHERE ${params.ownerKey === 'userId' ? 'user_id' : 'guest_id'} = $1
           AND is_active = TRUE
         ORDER BY updated_at DESC
         LIMIT 10
       `,
-      [userId]
+      [ownerValue]
     );
-
     const tokens = rows.map((row) => String(row?.token || '').trim()).filter(Boolean);
     if (!tokens.length) {
-      log.info('Push skipped (no active tokens)', { userId });
+      log.info(params.noTokenLogMessage, { [params.ownerKey]: ownerValue });
       return { ok: true, sent: 0, skipped: true };
     }
 
     let sent = 0;
     for (const token of tokens) {
-      try {
-        const response = await fetch('https://fcm.googleapis.com/fcm/send', {
-          method: 'POST',
-          headers: {
-            Authorization: `key=${serverKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            to: token,
-            priority: 'high',
-            notification: {
-              title: payload.title,
-              body: payload.body,
-            },
-            data: payload.data || {},
-          }),
-        });
+      const result = await this.sendToToken(token, params.payload);
+      if (result.ok) {
+        sent += 1;
+        continue;
+      }
 
-        let body: any = null;
-        try {
-          body = await response.json();
-        } catch {
-          body = null;
-        }
+      log.warn('Push send failed', {
+        [params.ownerKey]: ownerValue,
+        tokenSuffix: token.slice(-8),
+        status: result.status,
+        errorCode: result.errorCode,
+        body: result.body,
+      });
 
-        if (!response.ok) {
-          log.warn('Push send failed (http)', {
-            userId,
-            status: response.status,
-            tokenSuffix: token.slice(-8),
-            body,
-          });
-          if (response.status === 404 || response.status === 410) {
-            await this.unregisterCustomerToken(userId, token);
-          }
-          continue;
+      if (result.deactivateToken) {
+        if (params.ownerKey === 'userId') {
+          await this.unregisterCustomerToken(ownerValue, token);
+        } else {
+          await this.unregisterGuestToken(ownerValue, token);
         }
-
-        // Legacy FCM can return HTTP 200 with per-token failure inside payload.
-        const result = Array.isArray(body?.results) ? body.results[0] : null;
-        const hasMessageId = Boolean(result?.message_id);
-        if (hasMessageId) {
-          sent += 1;
-          continue;
-        }
-
-        const errorCode = String(result?.error || '').trim();
-        log.warn('Push send failed (fcm result)', {
-          userId,
-          tokenSuffix: token.slice(-8),
-          errorCode: errorCode || 'unknown',
-          body,
-        });
-        if (
-          errorCode === 'InvalidRegistration' ||
-          errorCode === 'NotRegistered' ||
-          errorCode === 'MismatchSenderId'
-        ) {
-          await this.unregisterCustomerToken(userId, token);
-        }
-      } catch (error) {
-        log.warn('Push send failed', { userId, error: error instanceof Error ? error.message : String(error) });
       }
     }
 
-    log.info('Push dispatch finished', { userId, sent, attempted: tokens.length });
+    log.info(params.dispatchFinishedMessage, {
+      [params.ownerKey]: ownerValue,
+      sent,
+      attempted: tokens.length,
+    });
     return { ok: true, sent };
+  }
+
+  /**
+   * Dispatches an order update push to all active tokens from one customer.
+   *
+   * @author Edmilson Lopes
+   */
+  async notifyCustomerOrderUpdate(userId: string, payload: CustomerPushPayload) {
+    return this.dispatchByOwner({
+      ownerKey: 'userId',
+      ownerValue: userId,
+      payload,
+      noTokenLogMessage: 'Push skipped (no active tokens)',
+      dispatchFinishedMessage: 'Push dispatch finished',
+    });
   }
 
   /**
@@ -250,85 +451,13 @@ export class PushNotificationService {
    * @author Edmilson Lopes
    */
   async notifyGuestOrderUpdate(guestId: string, payload: CustomerPushPayload) {
-    const normalizedGuest = String(guestId || '').trim();
-    if (!normalizedGuest) return { ok: false, sent: 0, skipped: true };
-
-    const serverKey = String(env.push?.fcmServerKey || '').trim();
-    if (!serverKey) {
-      log.info('Push skipped (missing FCM server key)', { guestId: normalizedGuest });
-      return { ok: false, sent: 0, skipped: true };
-    }
-
-    const rows: Array<{ token: string }> = await AppDataSource.query(
-      `
-        SELECT token
-        FROM customer_push_tokens
-        WHERE guest_id = $1
-          AND is_active = TRUE
-        ORDER BY updated_at DESC
-        LIMIT 10
-      `,
-      [normalizedGuest]
-    );
-
-    const tokens = rows.map((row) => String(row?.token || '').trim()).filter(Boolean);
-    if (!tokens.length) {
-      log.info('Push skipped (no active guest tokens)', { guestId: normalizedGuest });
-      return { ok: true, sent: 0, skipped: true };
-    }
-
-    let sent = 0;
-    for (const token of tokens) {
-      try {
-        const response = await fetch('https://fcm.googleapis.com/fcm/send', {
-          method: 'POST',
-          headers: {
-            Authorization: `key=${serverKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            to: token,
-            priority: 'high',
-            notification: {
-              title: payload.title,
-              body: payload.body,
-            },
-            data: payload.data || {},
-          }),
-        });
-
-        let body: any = null;
-        try {
-          body = await response.json();
-        } catch {
-          body = null;
-        }
-
-        if (!response.ok) {
-          log.warn('Guest push send failed (http)', {
-            guestId: normalizedGuest,
-            status: response.status,
-            tokenSuffix: token.slice(-8),
-            body,
-          });
-          continue;
-        }
-
-        const result = Array.isArray(body?.results) ? body.results[0] : null;
-        if (result?.message_id) {
-          sent += 1;
-          continue;
-        }
-      } catch (error) {
-        log.warn('Guest push send failed', {
-          guestId: normalizedGuest,
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
-
-    log.info('Guest push dispatch finished', { guestId: normalizedGuest, sent, attempted: tokens.length });
-    return { ok: true, sent };
+    return this.dispatchByOwner({
+      ownerKey: 'guestId',
+      ownerValue: guestId,
+      payload,
+      noTokenLogMessage: 'Push skipped (no active guest tokens)',
+      dispatchFinishedMessage: 'Guest push dispatch finished',
+    });
   }
 }
 

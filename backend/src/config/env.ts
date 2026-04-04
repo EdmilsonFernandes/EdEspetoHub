@@ -96,5 +96,8 @@ export const env = {
   },
   push: {
     fcmServerKey: process.env.FCM_SERVER_KEY || process.env.MOBILE_FCM_SERVER_KEY || '',
+    fcmProjectId: process.env.FCM_PROJECT_ID || '',
+    fcmServiceAccountPath: process.env.FCM_SERVICE_ACCOUNT_PATH || process.env.GOOGLE_APPLICATION_CREDENTIALS || '',
+    fcmServiceAccountJson: process.env.FCM_SERVICE_ACCOUNT_JSON || '',
   },
 };
