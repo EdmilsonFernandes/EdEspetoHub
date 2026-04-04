@@ -105,6 +105,43 @@ export class OrderService
     void this.pushService.notifyGuestOrderUpdate(guestId, payload);
   }
 
+  /**
+   * Dispatches "order available for delivery" push to motoboys linked to this store.
+   *
+   * @author Edmilson Lopes
+   */
+  private dispatchMotoboyAvailableOrderPush(
+    order: Pick<Order, 'id' | 'status' | 'total'> & {
+      storeId?: string | null;
+      store?: { id?: string; name?: string | null } | null;
+    }
+  ) {
+    const normalizedStatus = String(order?.status || '').toLowerCase();
+    if (normalizedStatus !== 'waiting_for_motoboy') return;
+
+    const storeId =
+      String(order?.storeId || '').trim() ||
+      String(order?.store?.id || '').trim();
+    if (!storeId) return;
+
+    const storeName = String(order?.store?.name || '').trim() || 'Loja parceira';
+    const shortOrderId = `#${String(order?.id || '').slice(0, 8)}`;
+    const total = Number(order?.total || 0);
+    const totalLabel = Number.isFinite(total) && total > 0 ? ` • R$ ${total.toFixed(2).replace('.', ',')}` : '';
+
+    void this.pushService.notifyStoreMotoboysAvailableOrder(storeId, {
+      title: 'Novo pedido disponível para entrega',
+      body: `${storeName} • ${shortOrderId}${totalLabel}`,
+      data: {
+        url: 'https://janocaminho.com.br/motoboy',
+        screen: 'motoboy_available_orders',
+        orderId: String(order.id),
+        storeId,
+        status: normalizedStatus,
+      },
+    });
+  }
+
     /**
    * Reconciles order statuses with delivery snapshots and auto-closes stale queue entries for one store.
    *
@@ -881,6 +918,7 @@ private async seedPostalShipmentFromCheckoutTx(
     if (saved.type === 'delivery' && !isPostalFlow && [ 'ready_for_delivery', 'waiting_for_motoboy' ].includes(nextStatus)) {
       await deliveryService.ensureQueueDelivery(saved as any);
     }
+    this.dispatchMotoboyAvailableOrderPush(saved as any);
     if (saved.type === 'delivery' && !isPostalFlow && [ 'delivered', 'finished' ].includes(nextStatus)) {
       await this.deliveryBillingService.recordDelivery(saved);
     }

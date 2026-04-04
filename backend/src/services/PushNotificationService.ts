@@ -159,6 +159,82 @@ export class PushNotificationService {
     return { ok: true };
   }
 
+  /**
+   * Registers or reactivates a motoboy push token.
+   *
+   * @author Edmilson Lopes
+   */
+  async registerMotoboyToken(
+    motoboyId: string,
+    userId: string,
+    input: { token: string; platform?: string; appVersion?: string; deviceModel?: string }
+  ) {
+    const token = String(input?.token || '').trim();
+    if (!token || token.length < 24) {
+      return { ok: false, reason: 'invalid_token' as const };
+    }
+    const normalizedMotoboyId = String(motoboyId || '').trim();
+    const normalizedUserId = String(userId || '').trim();
+    if (!normalizedMotoboyId || !normalizedUserId) {
+      return { ok: false, reason: 'missing_identity' as const };
+    }
+
+    const platform = String(input?.platform || 'android').trim().toLowerCase() || 'android';
+    const appVersion = String(input?.appVersion || '').trim() || null;
+    const deviceModel = String(input?.deviceModel || '').trim() || null;
+
+    await AppDataSource.query(
+      `
+        INSERT INTO motoboy_push_tokens
+          (motoboy_id, user_id, token, platform, app_version, device_model, is_active, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, TRUE, NOW())
+        ON CONFLICT (token)
+        DO UPDATE SET
+          motoboy_id = EXCLUDED.motoboy_id,
+          user_id = EXCLUDED.user_id,
+          platform = EXCLUDED.platform,
+          app_version = EXCLUDED.app_version,
+          device_model = EXCLUDED.device_model,
+          is_active = TRUE,
+          updated_at = NOW()
+      `,
+      [normalizedMotoboyId, normalizedUserId, token, platform, appVersion, deviceModel]
+    );
+    return { ok: true };
+  }
+
+  /**
+   * Deactivates one token or all tokens for a motoboy.
+   *
+   * @author Edmilson Lopes
+   */
+  async unregisterMotoboyToken(motoboyId: string, token?: string | null) {
+    const normalizedMotoboyId = String(motoboyId || '').trim();
+    if (!normalizedMotoboyId) return { ok: false, reason: 'missing_motoboy' as const };
+    const normalizedToken = String(token || '').trim();
+    if (normalizedToken) {
+      await AppDataSource.query(
+        `
+          UPDATE motoboy_push_tokens
+          SET is_active = FALSE, updated_at = NOW()
+          WHERE motoboy_id = $1
+            AND token = $2
+        `,
+        [normalizedMotoboyId, normalizedToken]
+      );
+      return { ok: true };
+    }
+    await AppDataSource.query(
+      `
+        UPDATE motoboy_push_tokens
+        SET is_active = FALSE, updated_at = NOW()
+        WHERE motoboy_id = $1
+      `,
+      [normalizedMotoboyId]
+    );
+    return { ok: true };
+  }
+
   private base64Url(input: string) {
     return Buffer.from(input).toString('base64url');
   }
@@ -458,6 +534,79 @@ export class PushNotificationService {
       noTokenLogMessage: 'Push skipped (no active guest tokens)',
       dispatchFinishedMessage: 'Guest push dispatch finished',
     });
+  }
+
+  /**
+   * Dispatches "delivery available" push to active motoboys linked to one store.
+   *
+   * @author Edmilson Lopes
+   */
+  async notifyStoreMotoboysAvailableOrder(storeId: string, payload: CustomerPushPayload) {
+    const normalizedStoreId = String(storeId || '').trim();
+    if (!normalizedStoreId) return { ok: false, sent: 0, skipped: true };
+
+    const hasV1 = Boolean(this.resolveFcmV1Config());
+    const hasLegacy = Boolean(String(env.push?.fcmServerKey || '').trim());
+    if (!hasV1 && !hasLegacy) {
+      log.info('Motoboy push skipped (missing FCM config)', { storeId: normalizedStoreId });
+      return { ok: false, sent: 0, skipped: true };
+    }
+
+    const rows: Array<{ token: string; motoboy_id: string }> = await AppDataSource.query(
+      `
+        SELECT DISTINCT mpt.token, mpt.motoboy_id
+        FROM motoboy_push_tokens mpt
+        INNER JOIN motoboy_stores ms
+          ON ms.motoboy_id = mpt.motoboy_id
+         AND ms.active = TRUE
+        INNER JOIN motoboys m
+          ON m.id = mpt.motoboy_id
+         AND m.status = 'ACTIVE'
+        WHERE ms.store_id = $1
+          AND mpt.is_active = TRUE
+        ORDER BY mpt.motoboy_id, mpt.updated_at DESC
+        LIMIT 200
+      `,
+      [normalizedStoreId]
+    );
+
+    if (!rows.length) {
+      log.info('Motoboy push skipped (no active tokens for store)', { storeId: normalizedStoreId });
+      return { ok: true, sent: 0, skipped: true };
+    }
+
+    let sent = 0;
+    for (const row of rows) {
+      const token = String(row?.token || '').trim();
+      const motoboyId = String(row?.motoboy_id || '').trim();
+      if (!token || !motoboyId) continue;
+
+      const result = await this.sendToToken(token, payload);
+      if (result.ok) {
+        sent += 1;
+        continue;
+      }
+
+      log.warn('Motoboy push send failed', {
+        storeId: normalizedStoreId,
+        motoboyId,
+        tokenSuffix: token.slice(-8),
+        status: result.status,
+        errorCode: result.errorCode,
+        body: result.body,
+      });
+
+      if (result.deactivateToken) {
+        await this.unregisterMotoboyToken(motoboyId, token);
+      }
+    }
+
+    log.info('Motoboy push dispatch finished', {
+      storeId: normalizedStoreId,
+      sent,
+      attempted: rows.length,
+    });
+    return { ok: true, sent, attempted: rows.length };
   }
 
   /**

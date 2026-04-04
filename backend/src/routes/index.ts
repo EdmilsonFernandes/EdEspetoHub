@@ -178,6 +178,8 @@ routes.patch('/stores/:storeId/reviews/:reviewId/tip-payout', requireAuth, requi
 
 // Motoboy
 routes.get('/motoboy/orders/available', requireAuth, MotoboyController.listAvailableOrders);
+routes.post('/motoboy/push/register', requireAuth, MotoboyController.registerPushToken);
+routes.post('/motoboy/push/unregister', requireAuth, MotoboyController.unregisterPushToken);
 routes.get('/motoboy/orders/current', requireAuth, MotoboyController.getCurrentOrder);
 routes.get('/motoboy/orders/history', requireAuth, MotoboyController.listHistory);
 routes.get('/motoboy/earnings/today', requireAuth, MotoboyController.getEarningsToday);

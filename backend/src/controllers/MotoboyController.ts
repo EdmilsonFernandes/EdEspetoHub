@@ -18,9 +18,12 @@ import { deliveryService } from '../services/DeliveryService';
 import { respondWithError } from '../errors/respondWithError';
 import { logger } from '../utils/logger';
 import { AppDataSource } from '../config/database';
+import { PushNotificationService } from '../services/PushNotificationService';
+import { AppError } from '../errors/AppError';
 
 const motoboyService = new MotoboyService();
 const motoboyOrderService = new MotoboyOrderService();
+const pushService = new PushNotificationService();
 const log = logger.child({ scope: 'MotoboyController' });
 /**
  * Provides MotoboyController functionality.
@@ -29,6 +32,40 @@ const log = logger.child({ scope: 'MotoboyController' });
  * @date 2026-01-29
  */
 export class MotoboyController {
+  /**
+   * Registers motoboy mobile push token.
+   *
+   * @author Edmilson Lopes
+   */
+  static async registerPushToken(req: Request, res: Response) {
+    try {
+      if (!req.auth?.sub) throw new AppError('AUTH-001', 401);
+      const motoboy = await motoboyService.getActiveMotoboyByUserId(req.auth.sub);
+      const result = await pushService.registerMotoboyToken(motoboy.id, motoboy.userId, req.body || {});
+      return res.json(result);
+    } catch (error: any) {
+      log.warn('Motoboy register push failed', { error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Unregisters motoboy mobile push token.
+   *
+   * @author Edmilson Lopes
+   */
+  static async unregisterPushToken(req: Request, res: Response) {
+    try {
+      if (!req.auth?.sub) throw new AppError('AUTH-001', 401);
+      const motoboy = await motoboyService.getActiveMotoboyByUserId(req.auth.sub);
+      const result = await pushService.unregisterMotoboyToken(motoboy.id, req.body?.token || null);
+      return res.json(result);
+    } catch (error: any) {
+      log.warn('Motoboy unregister push failed', { error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
   /**
    * Lists available orders for motoboy.
    *

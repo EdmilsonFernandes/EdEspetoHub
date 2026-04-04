@@ -1318,4 +1318,31 @@ export async function runMigrations() {
     ALTER TABLE IF EXISTS orders
     ADD COLUMN IF NOT EXISTS guest_push_id TEXT;
   `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS motoboy_push_tokens (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      motoboy_id UUID NOT NULL REFERENCES motoboys(id) ON DELETE CASCADE,
+      user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      token TEXT NOT NULL,
+      platform TEXT NOT NULL DEFAULT 'android',
+      app_version TEXT,
+      device_model TEXT,
+      is_active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE(token)
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_motoboy_push_tokens_motoboy_id
+    ON motoboy_push_tokens(motoboy_id);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_motoboy_push_tokens_user_id
+    ON motoboy_push_tokens(user_id);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_motoboy_push_tokens_is_active
+    ON motoboy_push_tokens(is_active);
+  `);
 }
