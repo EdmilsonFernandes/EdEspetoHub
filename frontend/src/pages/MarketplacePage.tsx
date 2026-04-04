@@ -379,15 +379,13 @@ export function MarketplacePage() {
         const supportsTable = rawOrderTypes.includes('table');
         const supportsPostal = supportsDelivery && Boolean(store?.settings?.postalEnabled);
         const rawHours = Array.isArray(store?.settings?.openingHours) ? (store?.settings?.openingHours as any[]) : [];
-        const runtimeHours = rawHours.length > 0 ? normalizeOpeningHours(rawHours as any) : [];
-        const isOpenByRuntime = runtimeHours.length > 0 ? isStoreOpenNow(runtimeHours as any) : null;
         const isOpen =
           (store?.settings?.isOrderingEnabled ?? true) !== false &&
           (
-            typeof isOpenByRuntime === 'boolean'
-              ? isOpenByRuntime
-              : (typeof store?.openNow === 'boolean'
-                  ? store.openNow
+            typeof store?.openNow === 'boolean'
+              ? store.openNow
+              : (rawHours.length > 0
+                  ? isStoreOpenNow(normalizeOpeningHours(rawHours as any) as any)
                   : true)
           );
         const logo = resolveAssetUrl(store?.settings?.logoUrl || undefined) || '/janocaminho-logo.png';
