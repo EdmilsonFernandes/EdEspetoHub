@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260404.234837.8a41b531",
-  "buildId": "0.1.9+20260404.234837.8a41b531-20260404.234837-8a41b531",
-  "builtAt": "2026-04-04T23:48:37.140Z",
-  "commitHash": "8a41b531cb491ebf6a73d1e4442a748daf77ec28",
-  "shortHash": "8a41b531",
+  "versionInternal": "0.1.9+20260404.235212.d0ad42f7",
+  "buildId": "0.1.9+20260404.235212.d0ad42f7-20260404.235212-d0ad42f7",
+  "builtAt": "2026-04-04T23:52:12.309Z",
+  "commitHash": "d0ad42f7783471b9ffd3b9b6d1907bd8ebc1378c",
+  "shortHash": "d0ad42f7",
   "branch": "main",
   "commits": [
+    {
+      "hash": "d0ad42f7783471b9ffd3b9b6d1907bd8ebc1378c",
+      "shortHash": "d0ad42f7",
+      "dateIso": "2026-04-04T20:51:54-03:00",
+      "subject": "feat: melhorias no marketplace e perfil (HeaderAvatar, ProfileDrawer, ClientAccount)"
+    },
     {
       "hash": "8a41b531cb491ebf6a73d1e4442a748daf77ec28",
       "shortHash": "8a41b531",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "852d4863",
       "dateIso": "2026-04-04T16:24:59-03:00",
       "subject": "feat(push): migrate delivery to Firebase FCM HTTP v1"
-    },
-    {
-      "hash": "8bf9370000f5efeb6ff94e1d5891777ef11a8966",
-      "shortHash": "8bf93700",
-      "dateIso": "2026-04-04T16:20:16-03:00",
-      "subject": "chore(security): ignore local service account key directory"
     }
   ]
 } as const;
