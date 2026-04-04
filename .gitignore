@@ -79,3 +79,9 @@ logs/
 backend/uploads/products/
 
 mobile/cmdline-tools.zip
+
+# service account keys
+backend/keys/
+*.p12
+*.pem
+
