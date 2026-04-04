@@ -5,13 +5,49 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260404.013745.249198f1",
-  "buildId": "0.1.9+20260404.013745.249198f1-20260404.013745-249198f1",
-  "builtAt": "2026-04-04T01:37:45.372Z",
-  "commitHash": "249198f17197d8cde792e9edb6faf0846087b6ce",
-  "shortHash": "249198f1",
+  "versionInternal": "0.1.9+20260404.021210.0795c5f3",
+  "buildId": "0.1.9+20260404.021210.0795c5f3-20260404.021210-0795c5f3",
+  "builtAt": "2026-04-04T02:12:10.590Z",
+  "commitHash": "0795c5f31aea836b15d7b4ed02706e72d3fb81b0",
+  "shortHash": "0795c5f3",
   "branch": "main",
   "commits": [
+    {
+      "hash": "0795c5f31aea836b15d7b4ed02706e72d3fb81b0",
+      "shortHash": "0795c5f3",
+      "dateIso": "2026-04-03T23:09:40-03:00",
+      "subject": "style: increase contrast for location distance and ETA chips in marketplace cards"
+    },
+    {
+      "hash": "08a92b564540b341714f1ac0a5eea24a74d1b0fe",
+      "shortHash": "08a92b56",
+      "dateIso": "2026-04-03T23:07:49-03:00",
+      "subject": "fix: make store open status robust for mixed openingHours day formats"
+    },
+    {
+      "hash": "7674c3ace448a013418d79997b2d958725296a94",
+      "shortHash": "7674c3ac",
+      "dateIso": "2026-04-03T23:03:53-03:00",
+      "subject": "feat: collapse top promo and location on scroll in marketplace"
+    },
+    {
+      "hash": "2743211bcb54b00464d9d0eb2097998150bfd5cb",
+      "shortHash": "2743211b",
+      "dateIso": "2026-04-03T23:00:59-03:00",
+      "subject": "style: refine marketplace to light glass theme"
+    },
+    {
+      "hash": "5b9552b2e34992691050c60929f170addad096aa",
+      "shortHash": "5b9552b2",
+      "dateIso": "2026-04-03T22:51:14-03:00",
+      "subject": "feat: refine hub header conversion flow and refresh latest android apk"
+    },
+    {
+      "hash": "f26e01c9810f6641c4c7c5c50f66c66ea090962c",
+      "shortHash": "f26e01c9",
+      "dateIso": "2026-04-03T22:42:15-03:00",
+      "subject": "feat: dark hub branding update, logo swap and open-hours status fix"
+    },
     {
       "hash": "249198f17197d8cde792e9edb6faf0846087b6ce",
       "shortHash": "249198f1",
@@ -155,42 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "9430b668",
       "dateIso": "2026-04-03T16:02:22-03:00",
       "subject": "feat(hub): rotate all stores every 3s and refine card density"
-    },
-    {
-      "hash": "699da2146863a4905208bdcfcd9093aa4acb27fd",
-      "shortHash": "699da214",
-      "dateIso": "2026-04-03T15:57:13-03:00",
-      "subject": "chore(ui): default product manager tab to list"
-    },
-    {
-      "hash": "7f1a5ce04900a50c9932839b5a363811a8b2cf95",
-      "shortHash": "7f1a5ce0",
-      "dateIso": "2026-04-03T15:54:45-03:00",
-      "subject": "feat(ui): split product manager into cadastro/list tabs and show payment method label"
-    },
-    {
-      "hash": "17cc1ac85c779bb71ee1681cb6e052cfe07a932f",
-      "shortHash": "17cc1ac8",
-      "dateIso": "2026-04-03T15:51:38-03:00",
-      "subject": "fix(ui/payments): operator nav cleanup, products active state, and featured payment options"
-    },
-    {
-      "hash": "eec17eaf97864b17d853d0ce50f8a47e06e26dfe",
-      "shortHash": "eec17eaf",
-      "dateIso": "2026-04-03T15:19:12-03:00",
-      "subject": "feat(featured): activate hub highlights by payment approval"
-    },
-    {
-      "hash": "b762a134b0453f92f9c89ed2ffedf6aa4d967270",
-      "shortHash": "b762a134",
-      "dateIso": "2026-04-03T15:08:35-03:00",
-      "subject": "Ajusta rodapé admin e corrige acesso de operador à aba de produtos"
-    },
-    {
-      "hash": "d16d4167db48da6d9830541fc495c9e6606da6c5",
-      "shortHash": "d16d4167",
-      "dateIso": "2026-04-03T13:32:38-03:00",
-      "subject": "Remove portfolio da navegação e centraliza vitrine no Hub"
     }
   ]
 } as const;

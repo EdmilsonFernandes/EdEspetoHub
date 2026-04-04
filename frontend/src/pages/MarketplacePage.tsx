@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MagnifyingGlass, MapPin, Star, Clock, Scooter, Storefront, House, UserCircle, SealCheck, List, CaretDown } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
@@ -130,6 +130,8 @@ export function MarketplacePage() {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
   const [isTopPromoVisible, setIsTopPromoVisible] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [pullDistance, setPullDistance] = useState(0);
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
   const [featuredLoading, setFeaturedLoading] = useState(false);
   const [featuredOffset, setFeaturedOffset] = useState(0);
@@ -140,6 +142,9 @@ export function MarketplacePage() {
   const [rotatingHeroIndex, setRotatingHeroIndex] = useState(0);
   const [isHeroAutoplayPaused, setIsHeroAutoplayPaused] = useState(false);
   const heroResumeTimerRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+  const touchPullActiveRef = useRef(false);
+  const pullDistanceRef = useRef(0);
 
   useEffect(() => {
     document.title = 'Hub Já no Caminho';
@@ -196,14 +201,28 @@ export function MarketplacePage() {
     );
   }, []);
 
+  const loadPortfolio = useCallback(async () => {
+    const data = await storeService.listPortfolio();
+    setStores(Array.isArray(data) ? data : []);
+    setError('');
+  }, []);
+
+  const refreshHub = useCallback(async () => {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    try {
+      await loadPortfolio();
+    } catch (err: any) {
+      setError(err?.message || 'Não foi possível atualizar o Hub agora.');
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [isRefreshing, loadPortfolio]);
+
   useEffect(() => {
     let active = true;
-    storeService
-      .listPortfolio()
-      .then((data) => {
-        if (!active) return;
-        setStores(Array.isArray(data) ? data : []);
-      })
+    setLoading(true);
+    loadPortfolio()
       .catch((err: any) => {
         if (!active) return;
         setError(err?.message || 'Não foi possível carregar o Hub de lojas agora.');
@@ -215,7 +234,7 @@ export function MarketplacePage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [loadPortfolio]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedQuery(query.trim().toLowerCase()), 180);
@@ -253,6 +272,54 @@ export function MarketplacePage() {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  useEffect(() => {
+    const onTouchStart = (event: TouchEvent) => {
+      if (window.scrollY > 2 || isRefreshing) return;
+      touchStartYRef.current = event.touches[0]?.clientY ?? null;
+      touchPullActiveRef.current = touchStartYRef.current != null;
+    };
+
+    const onTouchMove = (event: TouchEvent) => {
+      if (!touchPullActiveRef.current || touchStartYRef.current == null) return;
+      const currentY = event.touches[0]?.clientY ?? touchStartYRef.current;
+      const delta = currentY - touchStartYRef.current;
+      if (delta <= 0) {
+        pullDistanceRef.current = 0;
+        setPullDistance(0);
+        return;
+      }
+      const withResistance = Math.min(120, delta * 0.45);
+      pullDistanceRef.current = withResistance;
+      setPullDistance(withResistance);
+    };
+
+    const onTouchEnd = () => {
+      if (!touchPullActiveRef.current) {
+        setPullDistance(0);
+        return;
+      }
+      touchPullActiveRef.current = false;
+      touchStartYRef.current = null;
+      const shouldRefresh = pullDistanceRef.current >= 68;
+      pullDistanceRef.current = 0;
+      setPullDistance(0);
+      if (shouldRefresh) {
+        refreshHub();
+      }
+    };
+
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('touchend', onTouchEnd, { passive: true });
+    window.addEventListener('touchcancel', onTouchEnd, { passive: true });
+    return () => {
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+      window.removeEventListener('touchcancel', onTouchEnd);
+    };
+  }, [isRefreshing, refreshHub]);
 
   const enrichedStores = useMemo(() => {
     return (stores || [])
@@ -604,6 +671,14 @@ export function MarketplacePage() {
 
   return (
     <div className="min-h-screen bg-slate-100 pb-28 sm:pb-20 text-slate-900 pt-[max(1rem,env(safe-area-inset-top))]">
+      <div
+        className={`pointer-events-none fixed left-1/2 z-[120] -translate-x-1/2 rounded-full border border-slate-200 bg-white/95 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm transition-all duration-200 ${
+          pullDistance > 0 || isRefreshing ? 'opacity-100' : 'opacity-0'
+        }`}
+        style={{ top: `${Math.max(8, 8 + pullDistance * 0.35)}px` }}
+      >
+        {isRefreshing ? 'Atualizando...' : pullDistance >= 68 ? 'Solte para atualizar' : 'Puxe para atualizar'}
+      </div>
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-2xl border-b border-slate-200/70 shadow-sm">
         <div className="max-w-[1200px] mx-auto px-4 py-2.5 space-y-2.5">
           <div className="relative">
