@@ -456,6 +456,12 @@ export function MarketplacePage() {
     return Array.from(new Set(enrichedStores.map((item) => item.segment))).sort((a, b) => a.localeCompare(b, 'pt-BR'));
   }, [enrichedStores]);
 
+  const fallbackRegionLabel = useMemo(() => {
+    const firstWithLocation = enrichedStores.find((store) => String(store.city || '').trim() && String(store.state || '').trim());
+    if (!firstWithLocation) return '';
+    return `${firstWithLocation.city} - ${firstWithLocation.state}`;
+  }, [enrichedStores]);
+
   const filteredStores = useMemo(() => {
     return enrichedStores
       .filter((store) => {
@@ -650,6 +656,7 @@ export function MarketplacePage() {
     customerSession?.user?.fullName || customerSession?.user?.name || (isCustomerLogged ? 'Cliente' : 'Anônimo')
   ).trim();
   const customerEmail = String(customerSession?.user?.email || '').trim();
+  const displayLocationLabel = locationLabel === 'Sua região' && fallbackRegionLabel ? fallbackRegionLabel : locationLabel;
 
   const openCustomerAccount = useCallback(() => {
     navigate('/cliente/conta');
@@ -695,7 +702,7 @@ export function MarketplacePage() {
         isLogged={isCustomerLogged}
         userName={customerDisplayName || 'Anônimo'}
         userEmail={customerEmail}
-        locationLabel={locationLabel}
+        locationLabel={displayLocationLabel}
         onClose={() => setProfileDrawerOpen(false)}
         onLogin={openCustomerLogin}
         onOpenAccount={openCustomerAccount}
@@ -729,20 +736,16 @@ export function MarketplacePage() {
                     title="Alterar localização"
                   >
                     <MapPin size={14} weight="duotone" className="shrink-0 text-sky-500" />
-                    <span className="truncate text-left">Entregar em: {locationLabel}</span>
+                    <span className="truncate text-left">Entregar em: {displayLocationLabel}</span>
                     <CaretDown size={12} className="shrink-0 text-slate-400" />
                   </button>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => navigate('/')}
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] text-slate-700"
-                title="Já no Caminho"
-              >
+              <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-black tracking-[0.04em] text-slate-700">
                 <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-4 w-4 rounded object-cover" />
-                JNK
-              </button>
+                <span className="hidden sm:inline">Já no Caminho</span>
+                <span className="sm:hidden">Já</span>
+              </div>
             </div>
             <div className="relative">
               <MagnifyingGlass size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />

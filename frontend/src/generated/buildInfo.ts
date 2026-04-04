@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260404.210226.3b26be5f",
-  "buildId": "0.1.9+20260404.210226.3b26be5f-20260404.210226-3b26be5f",
-  "builtAt": "2026-04-04T21:02:26.889Z",
-  "commitHash": "3b26be5fc55e57ee79cb354ed4ee054044df73b4",
-  "shortHash": "3b26be5f",
+  "versionInternal": "0.1.9+20260404.211001.efc58c14",
+  "buildId": "0.1.9+20260404.211001.efc58c14-20260404.211001-efc58c14",
+  "builtAt": "2026-04-04T21:10:01.751Z",
+  "commitHash": "efc58c141b708b5282f8cc12533f41a3a60977d3",
+  "shortHash": "efc58c14",
   "branch": "main",
   "commits": [
+    {
+      "hash": "efc58c141b708b5282f8cc12533f41a3a60977d3",
+      "shortHash": "efc58c14",
+      "dateIso": "2026-04-04T18:03:01-03:00",
+      "subject": "refactor(hub): remove hero banner and adopt ifood-like greeting header"
+    },
     {
       "hash": "3b26be5fc55e57ee79cb354ed4ee054044df73b4",
       "shortHash": "3b26be5f",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "6c361cdb",
       "dateIso": "2026-04-04T00:25:41-03:00",
       "subject": "fix(hub-hero): replace hard panel with smooth gradient overlay"
-    },
-    {
-      "hash": "ea79994afbbe18fcbc07abd1ac024cc4230c3ee3",
-      "shortHash": "ea79994a",
-      "dateIso": "2026-04-04T00:18:00-03:00",
-      "subject": "style(hub): fine-tune organic highlight badge contrast and sizing"
     }
   ]
 } as const;
