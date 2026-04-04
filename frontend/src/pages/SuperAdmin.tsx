@@ -22,6 +22,7 @@ import {
   Camera,
   Car,
   ShieldCheck,
+  Megaphone,
 } from '@phosphor-icons/react';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { superAdminService } from '../services/superAdminService';
@@ -174,6 +175,11 @@ const SECTION_META: Record<string, { title: string; description: string; tone: s
     description: 'Versão atual, build e histórico técnico de mudanças.',
     tone: 'from-slate-700 to-slate-900 text-white border-slate-700',
   },
+  push: {
+    title: 'Push Global',
+    description: 'Disparo de notificação para toda a base de apps ativos.',
+    tone: 'from-cyan-600 to-blue-600 text-white border-cyan-600',
+  },
 };
 
 export function SuperAdmin() {
@@ -234,6 +240,15 @@ export function SuperAdmin() {
     kyc: true,
   });
   const [activeSection, setActiveSection] = useState('executive');
+  const [broadcastForm, setBroadcastForm] = useState({
+    title: '',
+    body: '',
+    url: 'https://janocaminho.com.br/hub',
+    topic: 'janocaminho_global',
+    limit: 1500,
+  });
+  const [broadcastSending, setBroadcastSending] = useState(false);
+  const [broadcastLastResult, setBroadcastLastResult] = useState<any | null>(null);
   const [kycQueue, setKycQueue] = useState<any[]>([]);
   const [kycLoading, setKycLoading] = useState(false);
   const [kycReason, setKycReason] = useState('');
@@ -794,6 +809,31 @@ export function SuperAdmin() {
     }
   };
 
+  const handleBroadcastPush = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!token || broadcastSending) return;
+    if (!String(broadcastForm.title || '').trim() || !String(broadcastForm.body || '').trim()) {
+      showToast('Informe título e mensagem para o disparo.', 'warning');
+      return;
+    }
+    setBroadcastSending(true);
+    try {
+      const result = await superAdminService.broadcastPush(token, {
+        title: String(broadcastForm.title || '').trim(),
+        body: String(broadcastForm.body || '').trim(),
+        url: String(broadcastForm.url || '').trim(),
+        topic: String(broadcastForm.topic || 'janocaminho_global').trim(),
+        limit: Number(broadcastForm.limit || 1500),
+      });
+      setBroadcastLastResult(result || null);
+      showToast(`Push disparado: ${result?.sent || 0} envios concluídos.`, 'success');
+    } catch (err: any) {
+      showToast(err?.message || 'Não foi possível disparar o push global.', 'error');
+    } finally {
+      setBroadcastSending(false);
+    }
+  };
+
   const loadEvents = async (page = eventsPage, storeId = eventStoreFilter) => {
     if (!token) return;
     setEventsLoading(true);
@@ -1120,6 +1160,7 @@ export function SuperAdmin() {
             { id: 'rankings', label: 'Rankings' },
             { id: 'stores', label: 'Lojas' },
             { id: 'payments', label: 'Pagamentos' },
+            { id: 'push', label: 'Push Global' },
             { id: 'logs', label: 'Logs' },
             { id: 'events', label: 'Eventos' },
             { id: 'kyc', label: 'KYC' },
@@ -1547,6 +1588,84 @@ export function SuperAdmin() {
               </p>
             </div>
           </>
+        )}
+
+        {activeSection === 'push' && (
+          <FormSection
+            title="Push Global"
+            variant="primary"
+            className="bg-gradient-to-br from-cyan-50/70 via-white to-white border-cyan-100"
+            contentClassName="space-y-4"
+          >
+            <div className="flex items-center gap-2 text-slate-700">
+              <Megaphone size={18} weight="duotone" className="text-cyan-600" />
+              <p className="text-sm">
+                Envie uma notificação para todos os aplicativos ativos (audiência global).
+              </p>
+            </div>
+            <form onSubmit={handleBroadcastPush} className="grid gap-3">
+              <label className="grid gap-1">
+                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Título</span>
+                <input
+                  value={broadcastForm.title}
+                  onChange={(e) => setBroadcastForm((prev) => ({ ...prev, title: e.target.value }))}
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                  placeholder="Ex: Promoção Já no Caminho"
+                  maxLength={80}
+                />
+              </label>
+              <label className="grid gap-1">
+                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Mensagem</span>
+                <textarea
+                  value={broadcastForm.body}
+                  onChange={(e) => setBroadcastForm((prev) => ({ ...prev, body: e.target.value }))}
+                  className="min-h-[88px] rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                  placeholder="Ex: Hoje frete grátis nas lojas parceiras."
+                  maxLength={220}
+                />
+              </label>
+              <div className="grid sm:grid-cols-3 gap-3">
+                <label className="grid gap-1 sm:col-span-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">URL ao clicar</span>
+                  <input
+                    value={broadcastForm.url}
+                    onChange={(e) => setBroadcastForm((prev) => ({ ...prev, url: e.target.value }))}
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                    placeholder="https://janocaminho.com.br/hub"
+                  />
+                </label>
+                <label className="grid gap-1">
+                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Limite</span>
+                  <input
+                    type="number"
+                    min={1}
+                    max={5000}
+                    value={broadcastForm.limit}
+                    onChange={(e) => setBroadcastForm((prev) => ({ ...prev, limit: Number(e.target.value || 1500) }))}
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                  />
+                </label>
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs text-slate-500">
+                  Tópico: <span className="font-semibold text-slate-700">{broadcastForm.topic}</span>
+                </span>
+                <button
+                  type="submit"
+                  disabled={broadcastSending}
+                  className="rounded-xl bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-700 disabled:opacity-60"
+                >
+                  {broadcastSending ? 'Enviando...' : 'Enviar Push Global'}
+                </button>
+              </div>
+            </form>
+            {broadcastLastResult ? (
+              <div className="rounded-xl border border-cyan-100 bg-cyan-50 px-3 py-2 text-xs text-cyan-800">
+                Último disparo: enviados {Number(broadcastLastResult?.sent || 0)} de {Number(broadcastLastResult?.attempted || 0)}
+                {broadcastLastResult?.deactivated ? ` · desativados ${Number(broadcastLastResult.deactivated)}` : ''}
+              </div>
+            ) : null}
+          </FormSection>
         )}
 
         <FormSection

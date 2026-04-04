@@ -53,6 +53,20 @@ export const superAdminService = {
     });
     return handleResponse(response);
   },
+  async broadcastPush(
+    token: string,
+    payload: { title: string; body: string; url?: string; topic?: string; limit?: number }
+  ) {
+    const response = await fetch(buildUrl('/admin/push/broadcast'), {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload || {}),
+    });
+    return handleResponse(response);
+  },
   async fetchPaymentEvents(token: string, paymentId?: string, limit = 50, offset = 0, storeId?: string) {
     const params = new URLSearchParams();
     if (paymentId) params.set('paymentId', paymentId);
