@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MagnifyingGlass, MapPin, Star, Clock, Scooter, Storefront, House, UserCircle, SealCheck, List, CaretDown } from '@phosphor-icons/react';
+import { MagnifyingGlass, MapPin, Star, Clock, Scooter, Storefront, House, UserCircle, List, CaretDown } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { productService } from '../services/productService';
 import { featuredService } from '../services/featuredService';
@@ -129,7 +129,6 @@ export function MarketplacePage() {
   const [quickFilter, setQuickFilter] = useState<'all' | 'free_shipping' | 'nearby' | 'open_now'>('all');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
-  const [isTopPromoVisible, setIsTopPromoVisible] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
@@ -263,8 +262,6 @@ export function MarketplacePage() {
         const delta = currentY - lastY;
         if (delta > 8 && currentY > 120) setIsBottomNavVisible(false);
         if (delta < -8) setIsBottomNavVisible(true);
-        if (currentY > 36 && delta > 2) setIsTopPromoVisible(false);
-        if (currentY <= 16 || delta < -2) setIsTopPromoVisible(true);
         lastY = currentY;
         ticking = false;
       });
@@ -679,149 +676,113 @@ export function MarketplacePage() {
       >
         {isRefreshing ? 'Atualizando...' : pullDistance >= 68 ? 'Solte para atualizar' : 'Puxe para atualizar'}
       </div>
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-2xl border-b border-slate-200/70 shadow-sm">
-        <div className="max-w-[1200px] mx-auto px-4 py-2.5 space-y-2.5">
-          <div className="relative">
-            <MagnifyingGlass size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="O que você quer pedir agora?"
-              className="h-10 w-full rounded-xl bg-white/90 border border-slate-200 px-11 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
-            />
-          </div>
-          <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-1">
-            {['all', 'free_shipping', 'nearby', 'open_now'].map((filter) => {
-              const label =
-                filter === 'all'
-                  ? 'Todos'
-                  : filter === 'free_shipping'
-                  ? 'Frete grátis'
-                  : filter === 'nearby'
-                  ? 'Mais próximos'
-                  : 'Abertos agora';
-              const active = quickFilter === filter;
-              return (
-                <button
-                  key={filter}
-                  type="button"
-                  onClick={() => setQuickFilter(filter as any)}
-                  className={`rounded-full border px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] whitespace-nowrap transition-all duration-300 active:scale-95 ${
-                    active
-                      ? 'text-white border-transparent shadow-[0_10px_20px_-15px_rgba(15,23,42,0.7)]'
-                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
-                  }`}
-                  style={active ? { backgroundColor: theme.primary } : undefined}
-                >
-                  {label}
-                </button>
-              );
-            })}
+      <section className="h-72 w-full bg-[#0b0f1a] pb-12 pt-[env(safe-area-inset-top)] text-white">
+        <div className="mx-auto flex h-full max-w-[1200px] flex-col items-center justify-center gap-3 px-4 text-center">
+          <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-12 w-12 rounded-2xl border border-white/30 object-cover shadow-lg" />
+          <p className="text-[11px] uppercase tracking-[0.18em] text-slate-300">Já no Caminho</p>
+          <h1 className="text-xl sm:text-2xl font-black tracking-tight">Sua gestão levada a sério</h1>
+          <a
+            href="https://www.janocaminho.com.br/create?plan=trial"
+            className="inline-flex items-center rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-[0_12px_28px_-18px_rgba(14,165,233,0.9)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
+            style={{ backgroundColor: theme.primary }}
+          >
+            Criar loja
+          </a>
+        </div>
+      </section>
+
+      <div className="relative -mt-10 min-h-screen rounded-t-[32px] bg-slate-50">
+        <header className="sticky top-0 z-[60] rounded-t-[32px] border-b border-slate-200/70 bg-slate-50/95 px-4 pb-3 pt-5 shadow-sm backdrop-blur-md">
+          <div className="mx-auto max-w-[1200px] space-y-2.5">
             <button
               type="button"
+              className="inline-flex max-w-full items-center gap-1.5 text-[12px] font-bold text-slate-700 transition-colors hover:text-sky-700"
               onClick={() => setShowAdvancedFilters((prev) => !prev)}
-              className="rounded-full px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] whitespace-nowrap bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+              aria-label="Alterar localização"
+              title="Alterar localização"
             >
-              Filtros
+              <MapPin size={14} weight="duotone" className="text-sky-500" />
+              <span className="truncate">Entregar em: {locationLabel}</span>
+              <CaretDown size={12} className="text-slate-400" />
             </button>
-          </div>
-          {showAdvancedFilters && (
-            <div className="rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur p-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500 mb-2">Categoria</p>
-              <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-                <button
-                  type="button"
-                  onClick={() => setSegmentFilter('all')}
-                  className={`rounded-full px-3 py-2 text-xs font-semibold whitespace-nowrap ${
-                    segmentFilter === 'all' ? 'text-white' : 'bg-slate-100 text-slate-600'
-                  }`}
-                  style={segmentFilter === 'all' ? { backgroundColor: theme.primary } : undefined}
-                >
-                  Todos os segmentos
-                </button>
-                {segmentOptions.map((segment) => (
-                  <button
-                    key={segment}
-                    type="button"
-                    onClick={() => setSegmentFilter(segment)}
-                    className={`rounded-full px-3 py-2 text-xs font-semibold whitespace-nowrap ${
-                      segmentFilter === segment ? 'text-white' : 'bg-slate-100 text-slate-600'
-                    }`}
-                    style={segmentFilter === segment ? { backgroundColor: theme.primary } : undefined}
-                  >
-                    {segment}
-                  </button>
-                ))}
-              </div>
+            <div className="relative">
+              <MagnifyingGlass size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="O que você quer pedir agora?"
+                className="h-10 w-full rounded-xl border border-slate-200 bg-white/90 px-11 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
+              />
             </div>
-          )}
-        </div>
-      </header>
+            <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-1">
+              {['all', 'free_shipping', 'nearby', 'open_now'].map((filter) => {
+                const label =
+                  filter === 'all'
+                    ? 'Todos'
+                    : filter === 'free_shipping'
+                    ? 'Frete grátis'
+                    : filter === 'nearby'
+                    ? 'Mais próximos'
+                    : 'Abertos agora';
+                const active = quickFilter === filter;
+                return (
+                  <button
+                    key={filter}
+                    type="button"
+                    onClick={() => setQuickFilter(filter as any)}
+                    className={`rounded-full border px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] whitespace-nowrap transition-all duration-300 active:scale-95 ${
+                      active
+                        ? 'text-white border-transparent shadow-[0_10px_20px_-15px_rgba(15,23,42,0.7)]'
+                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                    }`}
+                    style={active ? { backgroundColor: theme.primary } : undefined}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                onClick={() => setShowAdvancedFilters((prev) => !prev)}
+                className="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] whitespace-nowrap text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+              >
+                Filtros
+              </button>
+            </div>
+            {showAdvancedFilters && (
+              <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-3 backdrop-blur">
+                <p className="mb-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Categoria</p>
+                <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+                  <button
+                    type="button"
+                    onClick={() => setSegmentFilter('all')}
+                    className={`rounded-full px-3 py-2 text-xs font-semibold whitespace-nowrap ${
+                      segmentFilter === 'all' ? 'text-white' : 'bg-slate-100 text-slate-600'
+                    }`}
+                    style={segmentFilter === 'all' ? { backgroundColor: theme.primary } : undefined}
+                  >
+                    Todos os segmentos
+                  </button>
+                  {segmentOptions.map((segment) => (
+                    <button
+                      key={segment}
+                      type="button"
+                      onClick={() => setSegmentFilter(segment)}
+                      className={`rounded-full px-3 py-2 text-xs font-semibold whitespace-nowrap ${
+                        segmentFilter === segment ? 'text-white' : 'bg-slate-100 text-slate-600'
+                      }`}
+                      style={segmentFilter === segment ? { backgroundColor: theme.primary } : undefined}
+                    >
+                      {segment}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </header>
 
       <main className="max-w-[1200px] mx-auto px-4 pt-3 space-y-5">
-        <section
-          className={`transition-all duration-300 ease-out ${
-            isTopPromoVisible
-              ? 'max-h-16 opacity-100 translate-y-0 mb-0'
-              : 'max-h-0 opacity-0 -translate-y-2 pointer-events-none mb-[-4px] overflow-hidden'
-          }`}
-        >
-          <div className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/75 px-3 py-1.5 text-[12px] font-bold text-slate-700">
-            <MapPin size={14} weight="duotone" className="text-sky-400" />
-            <span className="truncate">Entregar em: {locationLabel}</span>
-            <CaretDown size={12} className="text-slate-500" />
-          </div>
-        </section>
-
-        <section
-          className={`transition-all duration-300 ease-out ${
-            isTopPromoVisible
-              ? 'max-h-36 opacity-100 translate-y-0'
-              : 'max-h-0 opacity-0 -translate-y-2 pointer-events-none overflow-hidden'
-          }`}
-        >
-        <div
-          className="rounded-2xl border border-slate-200/70 bg-white/60 backdrop-blur-xl px-3 py-2.5 shadow-[0_10px_26px_-18px_rgba(15,23,42,0.22)] transition-all duration-300"
-          style={{ borderColor: `${theme.secondary}33` }}
-        >
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <Link to="/" className="shrink-0">
-                <img
-                  src="/janocaminho-logo.png"
-                  alt="Já no Caminho"
-                  className="h-8 w-8 rounded-xl object-cover border border-slate-200 ring-1 ring-white/70"
-                style={{ borderColor: `${theme.primary}44` }}
-                />
-              </Link>
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <h1 className="truncate text-[14px] sm:text-[15px] font-black text-slate-900">Já no Caminho</h1>
-                  <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-sky-900/60 text-sky-300">
-                    <SealCheck size={10} weight="fill" />
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-500 font-medium">Gostou do app? Tenha o seu.</p>
-                <div className="mt-1.5 flex items-center gap-1.5 whitespace-nowrap">
-                  <a
-                    href="https://www.janocaminho.com.br/"
-                    className="inline-flex items-center rounded-full border border-slate-200 bg-white/85 px-2 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
-                  >
-                    Conhecer plataforma
-                  </a>
-                  <a
-                    href="https://www.janocaminho.com.br/create?plan=trial"
-                    className="inline-flex items-center rounded-full px-2 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-white shadow-[0_8px_20px_-12px_rgba(14,165,233,0.75)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
-                    style={{ backgroundColor: theme.primary }}
-                  >
-                    Criar loja
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        </section>
 
         <section>
           <div className="relative">
@@ -1136,6 +1097,7 @@ export function MarketplacePage() {
           <PlatformTrustFooter mode="minimal" align="center" compact />
         </section>
       </main>
+      </div>
 
       <nav
         className="fixed bottom-0 left-0 right-0 z-[100] border-t border-slate-200 bg-white/80 backdrop-blur-2xl h-14 lg:hidden transition-transform duration-300"

@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260404.021210.0795c5f3",
-  "buildId": "0.1.9+20260404.021210.0795c5f3-20260404.021210-0795c5f3",
-  "builtAt": "2026-04-04T02:12:10.590Z",
-  "commitHash": "0795c5f31aea836b15d7b4ed02706e72d3fb81b0",
-  "shortHash": "0795c5f3",
+  "versionInternal": "0.1.9+20260404.021555.40dba903",
+  "buildId": "0.1.9+20260404.021555.40dba903-20260404.021555-40dba903",
+  "builtAt": "2026-04-04T02:15:55.857Z",
+  "commitHash": "40dba903186275215dedd20226db14b9c353b85f",
+  "shortHash": "40dba903",
   "branch": "main",
   "commits": [
+    {
+      "hash": "40dba903186275215dedd20226db14b9c353b85f",
+      "shortHash": "40dba903",
+      "dateIso": "2026-04-03T23:12:48-03:00",
+      "subject": "feat: add pull-to-refresh gesture and live refresh indicator on marketplace hub"
+    },
     {
       "hash": "0795c5f31aea836b15d7b4ed02706e72d3fb81b0",
       "shortHash": "0795c5f3",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "d401daf9",
       "dateIso": "2026-04-03T16:04:19-03:00",
       "subject": "refactor(hub): premium micro-polish and rotating featured window"
-    },
-    {
-      "hash": "9430b66870c51f6d6e759b7e1e1ed614d8635008",
-      "shortHash": "9430b668",
-      "dateIso": "2026-04-03T16:02:22-03:00",
-      "subject": "feat(hub): rotate all stores every 3s and refine card density"
     }
   ]
 } as const;
