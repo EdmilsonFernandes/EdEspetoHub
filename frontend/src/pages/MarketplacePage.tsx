@@ -624,8 +624,20 @@ export function MarketplacePage() {
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950/35 via-slate-950/20 to-slate-950/45" />
-        <div className="absolute bottom-4 right-4 inline-flex items-center rounded-full border border-white/40 bg-black/35 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white backdrop-blur-sm">
-          Conhecer plataforma
+        <div className="absolute inset-x-4 top-5 text-white sm:inset-x-6">
+          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-100/95">Já no Caminho</p>
+          <h1 className="mt-1 text-xl font-black tracking-tight text-white sm:text-2xl">Sua vitrine digital pronta para vender</h1>
+          <p className="mt-1 max-w-[520px] text-xs font-medium text-slate-100/90 sm:text-sm">
+            Hub oficial com lojas locais, pedidos em tempo real e experiência premium.
+          </p>
+        </div>
+        <div className="absolute bottom-4 right-4 flex items-center gap-2">
+          <span className="inline-flex items-center rounded-full border border-white/35 bg-black/30 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white backdrop-blur-sm">
+            Conhecer plataforma
+          </span>
+          <span className="inline-flex items-center rounded-full border border-sky-300/70 bg-sky-500/85 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-[0_8px_18px_-12px_rgba(14,165,233,0.9)] backdrop-blur-sm">
+            Criar minha loja
+          </span>
         </div>
       </a>
 
