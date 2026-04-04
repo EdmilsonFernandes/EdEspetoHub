@@ -111,7 +111,10 @@ export class PushNotificationService {
     );
 
     const tokens = rows.map((row) => String(row?.token || '').trim()).filter(Boolean);
-    if (!tokens.length) return { ok: true, sent: 0 };
+    if (!tokens.length) {
+      log.info('Push skipped (no active tokens)', { userId });
+      return { ok: true, sent: 0, skipped: true };
+    }
 
     let sent = 0;
     for (const token of tokens) {
@@ -132,11 +135,47 @@ export class PushNotificationService {
             data: payload.data || {},
           }),
         });
-        if (response.ok) {
+
+        let body: any = null;
+        try {
+          body = await response.json();
+        } catch {
+          body = null;
+        }
+
+        if (!response.ok) {
+          log.warn('Push send failed (http)', {
+            userId,
+            status: response.status,
+            tokenSuffix: token.slice(-8),
+            body,
+          });
+          if (response.status === 404 || response.status === 410) {
+            await this.unregisterCustomerToken(userId, token);
+          }
+          continue;
+        }
+
+        // Legacy FCM can return HTTP 200 with per-token failure inside payload.
+        const result = Array.isArray(body?.results) ? body.results[0] : null;
+        const hasMessageId = Boolean(result?.message_id);
+        if (hasMessageId) {
           sent += 1;
           continue;
         }
-        if (response.status === 404 || response.status === 410) {
+
+        const errorCode = String(result?.error || '').trim();
+        log.warn('Push send failed (fcm result)', {
+          userId,
+          tokenSuffix: token.slice(-8),
+          errorCode: errorCode || 'unknown',
+          body,
+        });
+        if (
+          errorCode === 'InvalidRegistration' ||
+          errorCode === 'NotRegistered' ||
+          errorCode === 'MismatchSenderId'
+        ) {
           await this.unregisterCustomerToken(userId, token);
         }
       } catch (error) {
@@ -144,6 +183,7 @@ export class PushNotificationService {
       }
     }
 
+    log.info('Push dispatch finished', { userId, sent, attempted: tokens.length });
     return { ok: true, sent };
   }
 }
