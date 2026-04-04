@@ -810,9 +810,9 @@ export function MarketplacePage() {
           <Link
             to="/"
             onClick={(event) => event.stopPropagation()}
-            className="inline-flex items-center rounded-full border border-sky-300/70 bg-sky-500/85 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-[0_8px_18px_-12px_rgba(14,165,233,0.9)] backdrop-blur-sm"
+            className="inline-flex items-center rounded-full border border-white/35 bg-black/30 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-white backdrop-blur-sm transition-transform active:scale-95"
           >
-            Criar loja
+            Criar conta
           </Link>
         </div>
         <div className="relative z-10 flex h-full flex-col px-4 pb-5 pt-10 text-white sm:px-6">

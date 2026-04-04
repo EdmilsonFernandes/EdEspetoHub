@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260404.205206.4777fe56",
-  "buildId": "0.1.9+20260404.205206.4777fe56-20260404.205206-4777fe56",
-  "builtAt": "2026-04-04T20:52:06.053Z",
-  "commitHash": "4777fe566a5bc29b34851f990e5b7785502ce8ad",
-  "shortHash": "4777fe56",
+  "versionInternal": "0.1.9+20260404.205443.f9bbd894",
+  "buildId": "0.1.9+20260404.205443.f9bbd894-20260404.205443-f9bbd894",
+  "builtAt": "2026-04-04T20:54:43.520Z",
+  "commitHash": "f9bbd89462c0b2f903ef52ffc744631267b39879",
+  "shortHash": "f9bbd894",
   "branch": "main",
   "commits": [
+    {
+      "hash": "f9bbd89462c0b2f903ef52ffc744631267b39879",
+      "shortHash": "f9bbd894",
+      "dateIso": "2026-04-04T17:52:42-03:00",
+      "subject": "fix(hub): remove redundant create CTA and improve mobile safe-area/header spacing"
+    },
     {
       "hash": "4777fe566a5bc29b34851f990e5b7785502ce8ad",
       "shortHash": "4777fe56",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "3deb56b1",
       "dateIso": "2026-04-04T00:15:12-03:00",
       "subject": "fix(hub): improve readability of organic highlight badge"
-    },
-    {
-      "hash": "904a28ec846afe883fca7671a53e0b3d684c2070",
-      "shortHash": "904a28ec",
-      "dateIso": "2026-04-04T00:14:16-03:00",
-      "subject": "refactor(hub-hero): improve text legibility with glass split panel"
     }
   ]
 } as const;
