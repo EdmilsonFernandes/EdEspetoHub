@@ -684,30 +684,23 @@ export function MarketplacePage() {
       >
         {isRefreshing ? 'Atualizando...' : pullDistance >= 68 ? 'Solte para atualizar' : 'Puxe para atualizar'}
       </div>
-      <section
-        className={`relative h-72 w-full overflow-hidden text-white transition-all duration-500 ${
+      <a
+        href="https://www.janocaminho.com.br/"
+        className={`relative block h-72 w-full overflow-hidden transition-all duration-500 ${
           hasEntered ? 'opacity-100' : 'opacity-0'
         }`}
+        aria-label="Abrir landing page Já no Caminho"
       >
         <img
-          src={heroBanners[rotatingHeroIndex]?.image || '/janocaminho-logo.png'}
-          alt="Banner Já no Caminho"
+          src="/janocaminho.jpg"
+          alt="Já no Caminho"
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/75 via-slate-950/70 to-slate-950/80" />
-        <div className="relative mx-auto flex h-full max-w-[1200px] flex-col items-center justify-center gap-3 px-4 text-center">
-          <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-12 w-12 rounded-2xl border border-white/30 object-cover shadow-lg" />
-          <p className="text-[11px] uppercase tracking-[0.18em] text-slate-300">Já no Caminho</p>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Bateu aquela fome?</h1>
-          <p className="text-sm text-slate-200">Os melhores pedidos da sua região, em minutos.</p>
-          <a
-            href="https://www.janocaminho.com.br/create?plan=trial"
-            className="inline-flex items-center rounded-full border border-white/25 bg-white/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-white backdrop-blur-md transition-all hover:bg-white/15 active:scale-[0.98]"
-          >
-            É dono de delivery? Crie sua loja
-          </a>
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/35 via-slate-950/20 to-slate-950/45" />
+        <div className="absolute bottom-4 right-4 inline-flex items-center rounded-full border border-white/40 bg-black/35 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white backdrop-blur-sm">
+          Conhecer plataforma
         </div>
-      </section>
+      </a>
 
       <div
         className={`relative -mt-10 min-h-screen rounded-t-[32px] bg-slate-50 transition-all duration-700 ${

@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260404.022814.7895a8ca",
-  "buildId": "0.1.9+20260404.022814.7895a8ca-20260404.022814-7895a8ca",
-  "builtAt": "2026-04-04T02:28:14.657Z",
-  "commitHash": "7895a8ca05687424a5e682a87b2f6d4d677a3019",
-  "shortHash": "7895a8ca",
+  "versionInternal": "0.1.9+20260404.024629.704caad9",
+  "buildId": "0.1.9+20260404.024629.704caad9-20260404.024629-704caad9",
+  "builtAt": "2026-04-04T02:46:29.259Z",
+  "commitHash": "704caad95775c07f2b23eac04159a5c7ae35d14b",
+  "shortHash": "704caad9",
   "branch": "main",
   "commits": [
+    {
+      "hash": "704caad95775c07f2b23eac04159a5c7ae35d14b",
+      "shortHash": "704caad9",
+      "dateIso": "2026-04-03T23:29:51-03:00",
+      "subject": "feat: enhance hub hero banner and add entrance animations"
+    },
     {
       "hash": "7895a8ca05687424a5e682a87b2f6d4d677a3019",
       "shortHash": "7895a8ca",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "b8e583cc",
       "dateIso": "2026-04-03T16:11:30-03:00",
       "subject": "feat(featured): auto-refresh payment status in modal with countdown and product thumbnails"
-    },
-    {
-      "hash": "aca05299ca70911ad6f222a9885ff11c2719b148",
-      "shortHash": "aca05299",
-      "dateIso": "2026-04-03T16:07:33-03:00",
-      "subject": "fix(hub): prioritize sponsored featured items and backfill with rotating organic products"
     }
   ]
 } as const;

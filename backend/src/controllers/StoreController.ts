@@ -97,11 +97,30 @@ export class StoreController {
    */
   private static getSaoPauloNowParts() {
     const now = new Date();
-    const zonedNow = new Date(now.toLocaleString('en-US', { timeZone: SAO_PAULO_TZ }));
-    const day = zonedNow.getDay();
-    const hour = zonedNow.getHours();
-    const minute = zonedNow.getMinutes();
-    const minutes = Math.max(0, Math.min(23, Number.isFinite(hour) ? hour : 0)) * 60 + Math.max(0, Math.min(59, Number.isFinite(minute) ? minute : 0));
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: SAO_PAULO_TZ,
+      weekday: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).formatToParts(now);
+
+    const weekdayRaw = String(parts.find((part) => part.type === 'weekday')?.value || '').toLowerCase();
+    const hour = Number(parts.find((part) => part.type === 'hour')?.value || 0);
+    const minute = Number(parts.find((part) => part.type === 'minute')?.value || 0);
+    const weekdayMap: Record<string, number> = {
+      sun: 0,
+      mon: 1,
+      tue: 2,
+      wed: 3,
+      thu: 4,
+      fri: 5,
+      sat: 6,
+    };
+    const day = Number.isFinite(weekdayMap[weekdayRaw]) ? weekdayMap[weekdayRaw] : now.getDay();
+    const safeHour = Math.max(0, Math.min(23, Number.isFinite(hour) ? hour : 0));
+    const safeMinute = Math.max(0, Math.min(59, Number.isFinite(minute) ? minute : 0));
+    const minutes = safeHour * 60 + safeMinute;
     return { day, minutes };
   }
 
