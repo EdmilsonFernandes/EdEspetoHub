@@ -107,6 +107,12 @@ const bootstrapPushNotifications = async () => {
       const permissions = await PushNotifications.checkPermissions();
       if (permissions.receive === 'granted') {
         await PushNotifications.register();
+        return;
+      }
+      // If user denied before, allow re-request to recover token registration.
+      const requested = await PushNotifications.requestPermissions();
+      if (requested.receive === 'granted') {
+        await PushNotifications.register();
       }
       return;
     }
