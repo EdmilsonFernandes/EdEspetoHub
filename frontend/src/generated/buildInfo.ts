@@ -5,192 +5,192 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260404.024629.704caad9",
-  "buildId": "0.1.9+20260404.024629.704caad9-20260404.024629-704caad9",
-  "builtAt": "2026-04-04T02:46:29.259Z",
-  "commitHash": "704caad95775c07f2b23eac04159a5c7ae35d14b",
-  "shortHash": "704caad9",
+  "versionInternal": "0.1.9+20260404.202011.6f9fb35d",
+  "buildId": "0.1.9+20260404.202011.6f9fb35d-20260404.202011-6f9fb35d",
+  "builtAt": "2026-04-04T20:20:11.704Z",
+  "commitHash": "6f9fb35dd138c9e853a3bc753a8fe9b738dbd054",
+  "shortHash": "6f9fb35d",
   "branch": "main",
   "commits": [
+    {
+      "hash": "6f9fb35dd138c9e853a3bc753a8fe9b738dbd054",
+      "shortHash": "6f9fb35d",
+      "dateIso": "2026-04-04T17:15:27-03:00",
+      "subject": "feat(mobile): make hub the fixed home and improve native webview navigation"
+    },
+    {
+      "hash": "c2a5c9205f39f881562a40b4b75ea5456b4b39bf",
+      "shortHash": "c2a5c920",
+      "dateIso": "2026-04-04T17:04:10-03:00",
+      "subject": "docs(ops): add production handoff and config backup runbook"
+    },
+    {
+      "hash": "860372616d1238d8dad105eb36784fb026309311",
+      "shortHash": "86037261",
+      "dateIso": "2026-04-04T17:00:55-03:00",
+      "subject": "feat(hub): refine premium hero and curated marketplace visuals"
+    },
+    {
+      "hash": "2588441236b35f9d7eb908048705b41298ccf858",
+      "shortHash": "25884412",
+      "dateIso": "2026-04-04T16:56:42-03:00",
+      "subject": "feat(superadmin): add global push broadcast tab"
+    },
+    {
+      "hash": "7ec61e841eff5a9ce1c9b4fe7a780ece43439c9f",
+      "shortHash": "7ec61e84",
+      "dateIso": "2026-04-04T16:47:33-03:00",
+      "subject": "feat(push): add super admin global broadcast endpoint"
+    },
+    {
+      "hash": "08f0cc9dca411c2205c60d56680fb8c4ef0cfb5e",
+      "shortHash": "08f0cc9d",
+      "dateIso": "2026-04-04T16:41:14-03:00",
+      "subject": "feat(push): include store name in order status notification body"
+    },
+    {
+      "hash": "852d4863f2af41402b35e033497f62f4ab7a9a7b",
+      "shortHash": "852d4863",
+      "dateIso": "2026-04-04T16:24:59-03:00",
+      "subject": "feat(push): migrate delivery to Firebase FCM HTTP v1"
+    },
+    {
+      "hash": "8bf9370000f5efeb6ff94e1d5891777ef11a8966",
+      "shortHash": "8bf93700",
+      "dateIso": "2026-04-04T16:20:16-03:00",
+      "subject": "chore(security): ignore local service account key directory"
+    },
+    {
+      "hash": "52d954d42a39ee0f46a00039eecd449824aefbfc",
+      "shortHash": "52d954d4",
+      "dateIso": "2026-04-04T11:13:05-03:00",
+      "subject": "fix(push): use global guest push id in checkout payload"
+    },
+    {
+      "hash": "5875e777306232a6e20e4fea50eb04449d11e809",
+      "shortHash": "5875e777",
+      "dateIso": "2026-04-04T11:02:31-03:00",
+      "subject": "feat(mobile): add brand logo to push permission banner"
+    },
+    {
+      "hash": "73ee38eeb963b249f0fece11f899b0a2a680b2c6",
+      "shortHash": "73ee38ee",
+      "dateIso": "2026-04-04T10:56:53-03:00",
+      "subject": "feat(mobile): add in-app push permission enable banner"
+    },
+    {
+      "hash": "db4c06cb71effea99e8dcf7edfc28d1607195100",
+      "shortHash": "db4c06cb",
+      "dateIso": "2026-04-04T10:48:45-03:00",
+      "subject": "feat: support anonymous customer push notifications"
+    },
+    {
+      "hash": "64625fd81cfc631d4a1e81c181c2849be83c755d",
+      "shortHash": "64625fd8",
+      "dateIso": "2026-04-04T10:39:23-03:00",
+      "subject": "fix(mobile-push): re-request permission when previously denied to recover token"
+    },
+    {
+      "hash": "5cdba95ef8287162137cf05ef4d4f75ec3f2bd52",
+      "shortHash": "5cdba95e",
+      "dateIso": "2026-04-04T10:34:12-03:00",
+      "subject": "fix(push): handle FCM legacy result errors and add delivery diagnostics"
+    },
+    {
+      "hash": "c45f9e52d7fe0b432240eda67b26e3eef0ee7073",
+      "shortHash": "c45f9e52",
+      "dateIso": "2026-04-04T10:31:56-03:00",
+      "subject": "refactor(hub): compact horizontal store cards with 99-style density"
+    },
+    {
+      "hash": "d4a26e62de6f1b259970fac10c19ddc54298f2d3",
+      "shortHash": "d4a26e62",
+      "dateIso": "2026-04-04T10:18:36-03:00",
+      "subject": "feat(mobile): enable FCM plugin sync and auto token registration flow"
+    },
+    {
+      "hash": "deec04ea1d4799a7b1724a2659684906b43b232c",
+      "shortHash": "deec04ea",
+      "dateIso": "2026-04-04T10:09:34-03:00",
+      "subject": "chore(android): ignore google-services.json from VCS"
+    },
+    {
+      "hash": "d00a793accbaf2d6c0aa3a912475edf285c63cfc",
+      "shortHash": "d00a793a",
+      "dateIso": "2026-04-04T09:59:06-03:00",
+      "subject": "fix(hub): use runtime opening-hours checker and expose hours in portfolio payload"
+    },
+    {
+      "hash": "33b07a9f233782c5ea5577b9124787aad7279f3e",
+      "shortHash": "33b07a9f",
+      "dateIso": "2026-04-04T09:50:55-03:00",
+      "subject": "fix(admin): allow removing plan exemption without failing when no enabled plan exists"
+    },
+    {
+      "hash": "0fbbf770044825cb617ebd7c158d466fe595a864",
+      "shortHash": "0fbbf770",
+      "dateIso": "2026-04-04T00:28:43-03:00",
+      "subject": "feat(android): add native splash exit animation and Android 12 splash theme"
+    },
+    {
+      "hash": "6c361cdbc8d3197ba780122094949c29815a4a1a",
+      "shortHash": "6c361cdb",
+      "dateIso": "2026-04-04T00:25:41-03:00",
+      "subject": "fix(hub-hero): replace hard panel with smooth gradient overlay"
+    },
+    {
+      "hash": "ea79994afbbe18fcbc07abd1ac024cc4230c3ee3",
+      "shortHash": "ea79994a",
+      "dateIso": "2026-04-04T00:18:00-03:00",
+      "subject": "style(hub): fine-tune organic highlight badge contrast and sizing"
+    },
+    {
+      "hash": "3deb56b1fc3387aded1b21f8dd7d57fa8864baf7",
+      "shortHash": "3deb56b1",
+      "dateIso": "2026-04-04T00:15:12-03:00",
+      "subject": "fix(hub): improve readability of organic highlight badge"
+    },
+    {
+      "hash": "904a28ec846afe883fca7671a53e0b3d684c2070",
+      "shortHash": "904a28ec",
+      "dateIso": "2026-04-04T00:14:16-03:00",
+      "subject": "refactor(hub-hero): improve text legibility with glass split panel"
+    },
+    {
+      "hash": "b6231d5438fe0c916d3617c8517d8263ae7d19a2",
+      "shortHash": "b6231d54",
+      "dateIso": "2026-04-04T00:06:46-03:00",
+      "subject": "fix(hub-mobile): prevent horizontal page drag with x-overflow lock"
+    },
+    {
+      "hash": "23cfb6d3ea664d34463ca492000687bc0c0dd734",
+      "shortHash": "23cfb6d3",
+      "dateIso": "2026-04-04T00:04:57-03:00",
+      "subject": "refactor(hub): improve hero mobile fit and move premium actions to top-right"
+    },
+    {
+      "hash": "aa92053ed00a52c721fdc367455a3cb2c4b278c9",
+      "shortHash": "aa92053e",
+      "dateIso": "2026-04-03T23:58:36-03:00",
+      "subject": "feat(hub): restore premium top-banner copy and create-store CTA"
+    },
+    {
+      "hash": "e67e87b8c5f4a8929f2d632d9f517d722c5cbcc4",
+      "shortHash": "e67e87b8",
+      "dateIso": "2026-04-03T23:52:48-03:00",
+      "subject": "fix(hub): remove rotating mid-banner and correct store open-day matching"
+    },
+    {
+      "hash": "4d83c45d1a496457d76ac0e076eeeb51d7299bed",
+      "shortHash": "4d83c45d",
+      "dateIso": "2026-04-03T23:47:10-03:00",
+      "subject": "fix: stabilize store open-time evaluation and use static clickable brand hero"
+    },
     {
       "hash": "704caad95775c07f2b23eac04159a5c7ae35d14b",
       "shortHash": "704caad9",
       "dateIso": "2026-04-03T23:29:51-03:00",
       "subject": "feat: enhance hub hero banner and add entrance animations"
-    },
-    {
-      "hash": "7895a8ca05687424a5e682a87b2f6d4d677a3019",
-      "shortHash": "7895a8ca",
-      "dateIso": "2026-04-03T23:16:37-03:00",
-      "subject": "feat: implement ifood-style hero banner collapse with sticky hub controls"
-    },
-    {
-      "hash": "40dba903186275215dedd20226db14b9c353b85f",
-      "shortHash": "40dba903",
-      "dateIso": "2026-04-03T23:12:48-03:00",
-      "subject": "feat: add pull-to-refresh gesture and live refresh indicator on marketplace hub"
-    },
-    {
-      "hash": "0795c5f31aea836b15d7b4ed02706e72d3fb81b0",
-      "shortHash": "0795c5f3",
-      "dateIso": "2026-04-03T23:09:40-03:00",
-      "subject": "style: increase contrast for location distance and ETA chips in marketplace cards"
-    },
-    {
-      "hash": "08a92b564540b341714f1ac0a5eea24a74d1b0fe",
-      "shortHash": "08a92b56",
-      "dateIso": "2026-04-03T23:07:49-03:00",
-      "subject": "fix: make store open status robust for mixed openingHours day formats"
-    },
-    {
-      "hash": "7674c3ace448a013418d79997b2d958725296a94",
-      "shortHash": "7674c3ac",
-      "dateIso": "2026-04-03T23:03:53-03:00",
-      "subject": "feat: collapse top promo and location on scroll in marketplace"
-    },
-    {
-      "hash": "2743211bcb54b00464d9d0eb2097998150bfd5cb",
-      "shortHash": "2743211b",
-      "dateIso": "2026-04-03T23:00:59-03:00",
-      "subject": "style: refine marketplace to light glass theme"
-    },
-    {
-      "hash": "5b9552b2e34992691050c60929f170addad096aa",
-      "shortHash": "5b9552b2",
-      "dateIso": "2026-04-03T22:51:14-03:00",
-      "subject": "feat: refine hub header conversion flow and refresh latest android apk"
-    },
-    {
-      "hash": "f26e01c9810f6641c4c7c5c50f66c66ea090962c",
-      "shortHash": "f26e01c9",
-      "dateIso": "2026-04-03T22:42:15-03:00",
-      "subject": "feat: dark hub branding update, logo swap and open-hours status fix"
-    },
-    {
-      "hash": "249198f17197d8cde792e9edb6faf0846087b6ce",
-      "shortHash": "249198f1",
-      "dateIso": "2026-04-03T19:51:48-03:00",
-      "subject": "Android: update launcher icon from playstore.png and refresh latest APK"
-    },
-    {
-      "hash": "0df73ea639fed5847c20cb656a068431ad746f02",
-      "shortHash": "0df73ea6",
-      "dateIso": "2026-04-03T19:38:06-03:00",
-      "subject": "Mobile hotfix: disable push bootstrap by default and remove native push plugin to prevent startup crash"
-    },
-    {
-      "hash": "534bae7bdfb1c1e3a481cd1d4fae1f2722f1f54b",
-      "shortHash": "534bae7b",
-      "dateIso": "2026-04-03T19:31:27-03:00",
-      "subject": "Landing + Mobile docs: add APK QR download CTA and Play Store publication guide"
-    },
-    {
-      "hash": "05611ae1255835d9b30b3071dd8a401853c06397",
-      "shortHash": "05611ae1",
-      "dateIso": "2026-04-03T19:27:59-03:00",
-      "subject": "Landing: add premium Android download section and publish latest APK asset"
-    },
-    {
-      "hash": "866b8fe15e4b1ae3b8489eb3f84f17081eb96adc",
-      "shortHash": "866b8fe1",
-      "dateIso": "2026-04-03T19:23:19-03:00",
-      "subject": "Hub: refine location/quick-filters UI and fix overnight open-hours status"
-    },
-    {
-      "hash": "f48dd2c9eb8c9a009193cf98a700c6893ce77466",
-      "shortHash": "f48dd2c9",
-      "dateIso": "2026-04-03T19:18:31-03:00",
-      "subject": "Mobile push: customer token register/unregister + order status notifications + new Android build support"
-    },
-    {
-      "hash": "8c2e952d8ab36c372a7147e477fd20fb1736c9e7",
-      "shortHash": "8c2e952d",
-      "dateIso": "2026-04-03T19:12:59-03:00",
-      "subject": "Mobile: add native deep-link + push bootstrap + session persistence; polish featured store icon"
-    },
-    {
-      "hash": "0d3288ca830faa185662126f99fbc86cbe8939d5",
-      "shortHash": "0d3288ca",
-      "dateIso": "2026-04-03T19:04:27-03:00",
-      "subject": "Hub: pause hero autoplay on touch/hover and resume smoothly"
-    },
-    {
-      "hash": "8ca80ab5cefc5f35dc1be0d4f263b4a8eabcfaf1",
-      "shortHash": "8ca80ab5",
-      "dateIso": "2026-04-03T19:00:04-03:00",
-      "subject": "Hub + Android: premium header polish, hidden category scrollbar, fixed open-hours mapping, app back navigation and launcher icon"
-    },
-    {
-      "hash": "cd2b324c25ce8a9832e1edfbc3fe71ccf0e5d800",
-      "shortHash": "cd2b324c",
-      "dateIso": "2026-04-03T18:38:20-03:00",
-      "subject": "Hub: premium CTA polish + sponsored star badge; fix open-hours timezone logic"
-    },
-    {
-      "hash": "50962ebbbd50d8c5759741c197fde748d9ebeac3",
-      "shortHash": "50962ebb",
-      "dateIso": "2026-04-03T18:13:48-03:00",
-      "subject": "Mobile: bootstrap Android app wrapper with Capacitor under /mobile"
-    },
-    {
-      "hash": "ce01c2112906c3a8ef94b5ab0cb28f7fd42e5e10",
-      "shortHash": "ce01c211",
-      "dateIso": "2026-04-03T18:05:34-03:00",
-      "subject": "Hub + admin mobile: open-hours fixes, CTA links, category UX, quick logout"
-    },
-    {
-      "hash": "00ee46f90d46cbafd1a1903c47c97f09b6e50e49",
-      "shortHash": "00ee46f9",
-      "dateIso": "2026-04-03T17:49:41-03:00",
-      "subject": "Hub: refine store status/modes + opening labels; auto-clean docker build cache on deploy"
-    },
-    {
-      "hash": "946695b309645223ed1ffd2577db48f76fb97fcd",
-      "shortHash": "946695b3",
-      "dateIso": "2026-04-03T17:26:00-03:00",
-      "subject": "feat(queue): allow configurable store order notification sound and play custom jingle"
-    },
-    {
-      "hash": "5e831102cef8caa36e876797cc1a6e93ff5b64a6",
-      "shortHash": "5e831102",
-      "dateIso": "2026-04-03T17:19:15-03:00",
-      "subject": "refactor(hub): apply premium glass identity and compact top density (items 1-6)"
-    },
-    {
-      "hash": "7ddea69d1ab3939f312a3a6247488598f0bc4c51",
-      "shortHash": "7ddea69d",
-      "dateIso": "2026-04-03T17:15:50-03:00",
-      "subject": "refactor(hub): fine-tune featured cards density and md/lg regional card proportions"
-    },
-    {
-      "hash": "b80eebed33371b1a1b05d2188f85cfdfad3c5b93",
-      "shortHash": "b80eebed",
-      "dateIso": "2026-04-03T17:12:35-03:00",
-      "subject": "refactor(hub): increase regional store banner height to avoid flattened look"
-    },
-    {
-      "hash": "3f1830fe46782ee880c79b2ec78f4842d6b14d62",
-      "shortHash": "3f1830fe",
-      "dateIso": "2026-04-03T16:44:31-03:00",
-      "subject": "fix(featured): increase slots to 50 default, dedupe paid toasts and keep premium hub cards"
-    },
-    {
-      "hash": "a15cb771c8a6ef464aad3184adf3ee262ecd1b71",
-      "shortHash": "a15cb771",
-      "dateIso": "2026-04-03T16:32:03-03:00",
-      "subject": "fix(featured/hub): auto-close paid modal, 5min rotation, carousel UX and slot counting"
-    },
-    {
-      "hash": "ce879fdb4e6fb18eb74084e82f30aa0d7e10a963",
-      "shortHash": "ce879fdb",
-      "dateIso": "2026-04-03T16:14:52-03:00",
-      "subject": "fix(product-edit): place combo promo section above save action bar"
-    },
-    {
-      "hash": "b8e583cc382d9f3cb129a622ea017ac60cb4ac95",
-      "shortHash": "b8e583cc",
-      "dateIso": "2026-04-03T16:11:30-03:00",
-      "subject": "feat(featured): auto-refresh payment status in modal with countdown and product thumbnails"
     }
   ]
 } as const;

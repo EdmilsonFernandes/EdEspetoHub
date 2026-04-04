@@ -254,13 +254,6 @@ export function MarketplacePage() {
   }, []);
 
   useEffect(() => {
-    const timer = window.setInterval(() => {
-      setHeroIndex((prev) => (prev + 1) % 2);
-    }, 6000);
-    return () => window.clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
     let lastY = window.scrollY || 0;
     let ticking = false;
     const onScroll = () => {
@@ -446,6 +439,21 @@ export function MarketplacePage() {
       })
       .sort((a, b) => Number(b.isOpen) - Number(a.isOpen));
   }, [enrichedStores, debouncedQuery, segmentFilter, quickFilter]);
+
+  const heroStores = useMemo(() => {
+    const source = enrichedStores.length > 0 ? enrichedStores : [];
+    const open = source.filter((store) => store.isOpen);
+    const ordered = open.length > 0 ? [...open, ...source.filter((store) => !store.isOpen)] : source;
+    return ordered.slice(0, 8);
+  }, [enrichedStores]);
+
+  useEffect(() => {
+    const total = Math.max(1, heroStores.length);
+    const timer = window.setInterval(() => {
+      setHeroIndex((prev) => (prev + 1) % total);
+    }, 4500);
+    return () => window.clearInterval(timer);
+  }, [heroStores.length]);
 
   const categoryTiles = useMemo(() => {
     return segmentOptions.map((segment) => categoryVisuals[segment] || { emoji: '🏪', label: segment });
@@ -640,23 +648,6 @@ export function MarketplacePage() {
     window.open(url, '_blank', 'noopener,noreferrer');
   }, []);
 
-  const heroSlides = useMemo(
-    () => [
-      {
-        title: 'Seleção exclusiva da sua região',
-        subtitle: 'O melhor de cada lojista local, curado com excelência.',
-        cta: 'Explorar seleção',
-      },
-      {
-        title: 'Descubra tesouros locais no Hub',
-        subtitle: 'Do ateliê ao delivery: experiências reais, sem ruído.',
-        cta: 'Descobrir lojas',
-      },
-    ],
-    []
-  );
-  const activeHero = heroSlides[heroIndex] || heroSlides[0];
-
   return (
     <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-slate-100 pb-28 sm:pb-20 text-slate-900 pt-[max(1rem,env(safe-area-inset-top))]">
       <div
@@ -713,29 +704,61 @@ export function MarketplacePage() {
             Criar
           </Link>
         </div>
-        <div className="relative z-10 flex h-full w-[85%] max-w-[560px] flex-col justify-center px-4 pt-10 text-white sm:w-[70%] sm:px-6 md:w-[60%]">
-          <img
-            src="/janocaminho-logo.png"
-            alt="Já no Caminho"
-            className="h-8 w-auto max-w-[220px] object-contain sm:h-10 sm:max-w-[260px]"
-          />
-          <span className="mt-4 inline-flex w-max items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white/90 backdrop-blur-sm">
-            Curadoria Premier Já no Caminho
-          </span>
-          <h1 className="mt-2 line-clamp-2 text-lg font-black tracking-tight text-white sm:text-2xl">{activeHero.title}</h1>
-          <p className="mt-2 line-clamp-2 text-xs font-medium text-slate-200 sm:text-sm">
-            {activeHero.subtitle}
-          </p>
-          <span className="mt-4 inline-flex w-max items-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold text-white backdrop-blur-md">
-            {activeHero.cta}
-          </span>
-          <div className="mt-3 flex items-center gap-1.5">
-            {heroSlides.map((_, idx) => (
-              <span
-                key={`hero-dot-${idx}`}
-                className={`h-1.5 rounded-full transition-all duration-300 ${idx === heroIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/45'}`}
-              />
-            ))}
+        <div className="relative z-10 flex h-full flex-col px-4 pb-5 pt-10 text-white sm:px-6">
+          <div className="flex items-center justify-center gap-2">
+            <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-7 w-7 rounded-lg object-cover ring-1 ring-white/25 sm:h-8 sm:w-8" />
+            <span className="text-sm font-black tracking-[0.06em] text-white sm:text-base">Já no Caminho</span>
+          </div>
+
+          <div className="mt-4 grid flex-1 grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
+            {Array.from({ length: 3 }).map((_, slot) => {
+              const store = heroStores.length
+                ? heroStores[(heroIndex + slot) % heroStores.length]
+                : null;
+              return (
+                <div
+                  key={`hero-store-${slot}-${store?.id || 'fallback'}`}
+                  className="relative overflow-hidden rounded-2xl border border-white/20 bg-black/20 shadow-[0_14px_24px_-18px_rgba(15,23,42,0.8)] backdrop-blur-[1px]"
+                >
+                  {store ? (
+                    <>
+                      <img
+                        src={store.banner || store.logo}
+                        alt={store.name}
+                        className="h-full w-full object-cover transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
+                      <div className="absolute inset-x-2 bottom-2 flex items-center gap-1.5">
+                        <img
+                          src={store.logo}
+                          alt={store.name}
+                          className="h-5 w-5 rounded-full border border-white/60 object-cover"
+                        />
+                        <p className="line-clamp-1 text-[10px] font-bold text-white">{store.name}</p>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex h-full items-end bg-gradient-to-br from-slate-800/80 to-slate-700/80 p-2">
+                      <p className="text-[10px] font-bold text-white/90">Lojas da sua região</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-3 flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              {Array.from({ length: Math.max(1, Math.min(heroStores.length, 5)) }).map((_, idx) => (
+                <span
+                  key={`hero-dot-${idx}`}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${idx === (heroIndex % Math.max(1, Math.min(heroStores.length, 5))) ? 'w-5 bg-white' : 'w-1.5 bg-white/45'}`}
+                />
+              ))}
+            </div>
+            <span className="rounded-full border border-white/25 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white/90 backdrop-blur-sm">
+              Criar loja
+            </span>
           </div>
         </div>
       </a>
