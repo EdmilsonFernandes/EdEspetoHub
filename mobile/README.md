@@ -73,7 +73,15 @@ Set on API environment (SSM / `.env.prod`):
 FCM_SERVER_KEY=YOUR_FIREBASE_SERVER_KEY
 ```
 
-Without this key, token registration works, but push delivery is skipped.
+Recommended (Firebase HTTP v1):
+
+```bash
+FIREBASE_SERVICE_ACCOUNT_PATH=/app/secrets/firebase-service-account.json
+# or
+FIREBASE_SERVICE_ACCOUNT_JSON='{"type":"service_account",...}'
+```
+
+Without FCM credentials, token registration works, but push delivery is skipped.
 
 ## Release workflow (Android)
 

@@ -3,7 +3,11 @@ import { App } from '@capacitor/app';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { customerAccountService } from '../services/customerAccountService';
 
-const MOBILE_PUSH_ENABLED = String(import.meta.env.VITE_MOBILE_PUSH_ENABLED || 'false').toLowerCase() === 'true';
+const MOBILE_PUSH_ENABLED =
+  String(
+    import.meta.env.VITE_MOBILE_PUSH_ENABLED ||
+      (Capacitor.isNativePlatform() ? 'true' : 'false')
+  ).toLowerCase() === 'true';
 const PUSH_PROMPTED_KEY = 'jnk_mobile_push_prompted';
 const PUSH_TOKEN_KEY = 'jnk_mobile_push_token';
 const PUSH_LAST_SYNC_TOKEN_KEY = 'jnk_mobile_push_last_sync_token';
@@ -142,6 +146,14 @@ export const bootstrapNativeApp = async () => {
     void syncPushTokenWithBackend();
     window.addEventListener('focus', () => {
       void syncPushTokenWithBackend();
+    });
+    window.setInterval(() => {
+      void syncPushTokenWithBackend();
+    }, 15000);
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'customerSession') {
+        void syncPushTokenWithBackend();
+      }
     });
   }
 };
