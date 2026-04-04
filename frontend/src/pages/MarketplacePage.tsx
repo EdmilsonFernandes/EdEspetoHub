@@ -8,6 +8,8 @@ import { mapsService } from '../services/mapsService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
+import { HeaderAvatarTrigger } from '../components/Marketplace/HeaderAvatarTrigger';
+import { ProfileDrawer } from '../components/Marketplace/ProfileDrawer';
 
 type MarketplaceStore = {
   id?: string;
@@ -115,6 +117,21 @@ type FeaturedProduct = {
   sponsored?: boolean;
 };
 
+const readCustomerSession = () => {
+  try {
+    const raw = localStorage.getItem('customerSession');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    return parsed as {
+      token?: string;
+      user?: { fullName?: string; name?: string; email?: string };
+    };
+  } catch {
+    return null;
+  }
+};
+
 export function MarketplacePage() {
   const navigate = useNavigate();
   const [stores, setStores] = useState<MarketplaceStore[]>([]);
@@ -135,6 +152,8 @@ export function MarketplacePage() {
   const [featuredOffset, setFeaturedOffset] = useState(0);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationLabel, setLocationLabel] = useState('Sua região');
+  const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
+  const [customerSession, setCustomerSession] = useState(() => readCustomerSession());
   const [distanceByStore, setDistanceByStore] = useState<Record<string, number>>({});
   const [distanceLoading, setDistanceLoading] = useState(false);
   const [heroIndex, setHeroIndex] = useState(0);
@@ -144,6 +163,16 @@ export function MarketplacePage() {
 
   useEffect(() => {
     document.title = 'Hub Já no Caminho';
+  }, []);
+
+  useEffect(() => {
+    const syncSession = () => setCustomerSession(readCustomerSession());
+    window.addEventListener('storage', syncSession);
+    window.addEventListener('focus', syncSession);
+    return () => {
+      window.removeEventListener('storage', syncSession);
+      window.removeEventListener('focus', syncSession);
+    };
   }, []);
 
   useEffect(() => {
@@ -648,6 +677,29 @@ export function MarketplacePage() {
     window.open(url, '_blank', 'noopener,noreferrer');
   }, []);
 
+  const isCustomerLogged = Boolean(customerSession?.token);
+  const customerDisplayName = String(
+    customerSession?.user?.fullName || customerSession?.user?.name || (isCustomerLogged ? 'Cliente' : 'Anônimo')
+  ).trim();
+  const customerEmail = String(customerSession?.user?.email || '').trim();
+
+  const openCustomerAccount = useCallback(() => {
+    navigate('/cliente/conta');
+  }, [navigate]);
+
+  const openCustomerLogin = useCallback(() => {
+    navigate('/cliente?mode=login');
+  }, [navigate]);
+
+  const handleCustomerLogout = useCallback(() => {
+    localStorage.removeItem('customerSession');
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('customerSession_')) localStorage.removeItem(key);
+    });
+    setCustomerSession(null);
+    navigate('/hub');
+  }, [navigate]);
+
   return (
     <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-slate-100 pb-28 sm:pb-20 text-slate-900 pt-[max(1rem,env(safe-area-inset-top))]">
       <div
@@ -658,6 +710,17 @@ export function MarketplacePage() {
       >
         {isRefreshing ? 'Atualizando...' : pullDistance >= 68 ? 'Solte para atualizar' : 'Puxe para atualizar'}
       </div>
+      <ProfileDrawer
+        isOpen={profileDrawerOpen}
+        isLogged={isCustomerLogged}
+        userName={customerDisplayName || 'Anônimo'}
+        userEmail={customerEmail}
+        locationLabel={locationLabel}
+        onClose={() => setProfileDrawerOpen(false)}
+        onLogin={openCustomerLogin}
+        onOpenAccount={openCustomerAccount}
+        onLogout={handleCustomerLogout}
+      />
       <a
         href="https://www.janocaminho.com.br/"
         className={`relative block min-h-[250px] h-[34vh] max-h-[360px] w-full overflow-hidden transition-all duration-500 ${
@@ -770,17 +833,24 @@ export function MarketplacePage() {
       >
         <header className={`sticky top-0 z-[60] rounded-t-[32px] border-b border-slate-200/70 bg-slate-50/95 px-4 pb-3 pt-5 backdrop-blur-md transition-shadow duration-300 ${isHeaderElevated ? 'shadow-sm' : 'shadow-none'}`}>
           <div className="mx-auto max-w-[1200px] space-y-2.5">
-            <button
-              type="button"
-              className="inline-flex max-w-full items-center gap-1.5 text-[12px] font-bold text-slate-700 transition-colors hover:text-sky-700"
-              onClick={() => setShowAdvancedFilters((prev) => !prev)}
-              aria-label="Alterar localização"
-              title="Alterar localização"
-            >
-              <MapPin size={14} weight="duotone" className="text-sky-500" />
-              <span className="truncate">Entregar em: {locationLabel}</span>
-              <CaretDown size={12} className="text-slate-400" />
-            </button>
+            <div className="flex items-center gap-2">
+              <HeaderAvatarTrigger
+                displayName={customerDisplayName}
+                hasNotification={!isCustomerLogged}
+                onClick={() => setProfileDrawerOpen(true)}
+              />
+              <button
+                type="button"
+                className="inline-flex min-w-0 flex-1 items-center gap-1.5 text-[12px] font-bold text-slate-700 transition-colors hover:text-sky-700"
+                onClick={() => setShowAdvancedFilters((prev) => !prev)}
+                aria-label="Alterar localização"
+                title="Alterar localização"
+              >
+                <MapPin size={14} weight="duotone" className="shrink-0 text-sky-500" />
+                <span className="truncate text-left">Entregar em: {locationLabel}</span>
+                <CaretDown size={12} className="shrink-0 text-slate-400" />
+              </button>
+            </div>
             <div className="relative">
               <MagnifyingGlass size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
               <input

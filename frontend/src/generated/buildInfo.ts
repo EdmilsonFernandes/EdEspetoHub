@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260404.202835.d18aec9a",
-  "buildId": "0.1.9+20260404.202835.d18aec9a-20260404.202835-d18aec9a",
-  "builtAt": "2026-04-04T20:28:35.745Z",
-  "commitHash": "d18aec9a5497726d070ebec300372fcead703155",
-  "shortHash": "d18aec9a",
+  "versionInternal": "0.1.9+20260404.203652.97df2358",
+  "buildId": "0.1.9+20260404.203652.97df2358-20260404.203652-97df2358",
+  "builtAt": "2026-04-04T20:36:52.096Z",
+  "commitHash": "97df2358be82d415b2fd098ce281a8f3d69e9768",
+  "shortHash": "97df2358",
   "branch": "main",
   "commits": [
+    {
+      "hash": "97df2358be82d415b2fd098ce281a8f3d69e9768",
+      "shortHash": "97df2358",
+      "dateIso": "2026-04-04T17:30:01-03:00",
+      "subject": "refactor(superadmin): responsive profile menu and scrollable tabs"
+    },
     {
       "hash": "d18aec9a5497726d070ebec300372fcead703155",
       "shortHash": "d18aec9a",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "e67e87b8",
       "dateIso": "2026-04-03T23:52:48-03:00",
       "subject": "fix(hub): remove rotating mid-banner and correct store open-day matching"
-    },
-    {
-      "hash": "4d83c45d1a496457d76ac0e076eeeb51d7299bed",
-      "shortHash": "4d83c45d",
-      "dateIso": "2026-04-03T23:47:10-03:00",
-      "subject": "fix: stabilize store open-time evaluation and use static clickable brand hero"
     }
   ]
 } as const;
