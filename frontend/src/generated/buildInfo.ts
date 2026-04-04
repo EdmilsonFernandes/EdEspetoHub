@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260404.021555.40dba903",
-  "buildId": "0.1.9+20260404.021555.40dba903-20260404.021555-40dba903",
-  "builtAt": "2026-04-04T02:15:55.857Z",
-  "commitHash": "40dba903186275215dedd20226db14b9c353b85f",
-  "shortHash": "40dba903",
+  "versionInternal": "0.1.9+20260404.022814.7895a8ca",
+  "buildId": "0.1.9+20260404.022814.7895a8ca-20260404.022814-7895a8ca",
+  "builtAt": "2026-04-04T02:28:14.657Z",
+  "commitHash": "7895a8ca05687424a5e682a87b2f6d4d677a3019",
+  "shortHash": "7895a8ca",
   "branch": "main",
   "commits": [
+    {
+      "hash": "7895a8ca05687424a5e682a87b2f6d4d677a3019",
+      "shortHash": "7895a8ca",
+      "dateIso": "2026-04-03T23:16:37-03:00",
+      "subject": "feat: implement ifood-style hero banner collapse with sticky hub controls"
+    },
     {
       "hash": "40dba903186275215dedd20226db14b9c353b85f",
       "shortHash": "40dba903",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "aca05299",
       "dateIso": "2026-04-03T16:07:33-03:00",
       "subject": "fix(hub): prioritize sponsored featured items and backfill with rotating organic products"
-    },
-    {
-      "hash": "d401daf9c97dc2821e2e30ba3f3089eb8b2a80cc",
-      "shortHash": "d401daf9",
-      "dateIso": "2026-04-03T16:04:19-03:00",
-      "subject": "refactor(hub): premium micro-polish and rotating featured window"
     }
   ]
 } as const;

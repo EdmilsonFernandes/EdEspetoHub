@@ -131,6 +131,8 @@ export function MarketplacePage() {
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
+  const [isHeaderElevated, setIsHeaderElevated] = useState(false);
+  const [hasEntered, setHasEntered] = useState(false);
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
   const [featuredLoading, setFeaturedLoading] = useState(false);
   const [featuredOffset, setFeaturedOffset] = useState(0);
@@ -252,6 +254,11 @@ export function MarketplacePage() {
   }, [featuredProducts]);
 
   useEffect(() => {
+    const raf = window.requestAnimationFrame(() => setHasEntered(true));
+    return () => window.cancelAnimationFrame(raf);
+  }, []);
+
+  useEffect(() => {
     let lastY = window.scrollY || 0;
     let ticking = false;
     const onScroll = () => {
@@ -262,6 +269,7 @@ export function MarketplacePage() {
         const delta = currentY - lastY;
         if (delta > 8 && currentY > 120) setIsBottomNavVisible(false);
         if (delta < -8) setIsBottomNavVisible(true);
+        setIsHeaderElevated(currentY > 8);
         lastY = currentY;
         ticking = false;
       });
@@ -676,23 +684,37 @@ export function MarketplacePage() {
       >
         {isRefreshing ? 'Atualizando...' : pullDistance >= 68 ? 'Solte para atualizar' : 'Puxe para atualizar'}
       </div>
-      <section className="h-72 w-full bg-[#0b0f1a] pb-12 pt-[env(safe-area-inset-top)] text-white">
-        <div className="mx-auto flex h-full max-w-[1200px] flex-col items-center justify-center gap-3 px-4 text-center">
+      <section
+        className={`relative h-72 w-full overflow-hidden text-white transition-all duration-500 ${
+          hasEntered ? 'opacity-100' : 'opacity-0'
+        }`}
+      >
+        <img
+          src={heroBanners[rotatingHeroIndex]?.image || '/janocaminho-logo.png'}
+          alt="Banner Já no Caminho"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/75 via-slate-950/70 to-slate-950/80" />
+        <div className="relative mx-auto flex h-full max-w-[1200px] flex-col items-center justify-center gap-3 px-4 text-center">
           <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-12 w-12 rounded-2xl border border-white/30 object-cover shadow-lg" />
           <p className="text-[11px] uppercase tracking-[0.18em] text-slate-300">Já no Caminho</p>
-          <h1 className="text-xl sm:text-2xl font-black tracking-tight">Sua gestão levada a sério</h1>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Bateu aquela fome?</h1>
+          <p className="text-sm text-slate-200">Os melhores pedidos da sua região, em minutos.</p>
           <a
             href="https://www.janocaminho.com.br/create?plan=trial"
-            className="inline-flex items-center rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-[0_12px_28px_-18px_rgba(14,165,233,0.9)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
-            style={{ backgroundColor: theme.primary }}
+            className="inline-flex items-center rounded-full border border-white/25 bg-white/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-white backdrop-blur-md transition-all hover:bg-white/15 active:scale-[0.98]"
           >
-            Criar loja
+            É dono de delivery? Crie sua loja
           </a>
         </div>
       </section>
 
-      <div className="relative -mt-10 min-h-screen rounded-t-[32px] bg-slate-50">
-        <header className="sticky top-0 z-[60] rounded-t-[32px] border-b border-slate-200/70 bg-slate-50/95 px-4 pb-3 pt-5 shadow-sm backdrop-blur-md">
+      <div
+        className={`relative -mt-10 min-h-screen rounded-t-[32px] bg-slate-50 transition-all duration-700 ${
+          hasEntered ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+        }`}
+      >
+        <header className={`sticky top-0 z-[60] rounded-t-[32px] border-b border-slate-200/70 bg-slate-50/95 px-4 pb-3 pt-5 backdrop-blur-md transition-shadow duration-300 ${isHeaderElevated ? 'shadow-sm' : 'shadow-none'}`}>
           <div className="mx-auto max-w-[1200px] space-y-2.5">
             <button
               type="button"
@@ -782,9 +804,9 @@ export function MarketplacePage() {
           </div>
         </header>
 
-      <main className="max-w-[1200px] mx-auto px-4 pt-3 space-y-5">
+        <main className="max-w-[1200px] mx-auto px-4 pt-3 space-y-5">
 
-        <section>
+        <section style={{ transition: 'all .45s ease', transitionDelay: hasEntered ? '80ms' : '0ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
           <div className="relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 z-[2] w-5 bg-gradient-to-r from-slate-100 to-transparent" />
             <div className="pointer-events-none absolute inset-y-0 right-0 z-[2] w-5 bg-gradient-to-l from-slate-100 to-transparent" />
@@ -849,7 +871,7 @@ export function MarketplacePage() {
           </div>
         </section>
 
-        <section>
+        <section style={{ transition: 'all .45s ease', transitionDelay: hasEntered ? '140ms' : '0ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
           {heroBanners[rotatingHeroIndex] &&
             (heroBanners[rotatingHeroIndex].slug ? (
               <Link
@@ -902,7 +924,7 @@ export function MarketplacePage() {
             ))}
         </section>
 
-        <section className="space-y-3">
+        <section className="space-y-3" style={{ transition: 'all .45s ease', transitionDelay: hasEntered ? '200ms' : '0ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
           <div className="flex items-center justify-between">
             <h2 className="text-base sm:text-xl font-black text-slate-900">{genericHighlightLabel}</h2>
             <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Mais pedidos</span>
@@ -959,7 +981,7 @@ export function MarketplacePage() {
           </div>
         </section>
 
-        <section className="space-y-4">
+        <section className="space-y-4" style={{ transition: 'all .45s ease', transitionDelay: hasEntered ? '260ms' : '0ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-base sm:text-lg font-black text-slate-900">Lojas da região</h2>
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">{filteredStores.length} resultados</p>
