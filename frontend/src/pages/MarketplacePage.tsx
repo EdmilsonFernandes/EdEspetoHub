@@ -137,6 +137,7 @@ export function MarketplacePage() {
   const [locationLabel, setLocationLabel] = useState('Sua região');
   const [distanceByStore, setDistanceByStore] = useState<Record<string, number>>({});
   const [distanceLoading, setDistanceLoading] = useState(false);
+  const [heroIndex, setHeroIndex] = useState(0);
   const touchStartYRef = useRef<number | null>(null);
   const touchPullActiveRef = useRef(false);
   const pullDistanceRef = useRef(0);
@@ -250,6 +251,13 @@ export function MarketplacePage() {
   useEffect(() => {
     const raf = window.requestAnimationFrame(() => setHasEntered(true));
     return () => window.cancelAnimationFrame(raf);
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setHeroIndex((prev) => (prev + 1) % 2);
+    }, 6000);
+    return () => window.clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -632,6 +640,23 @@ export function MarketplacePage() {
     window.open(url, '_blank', 'noopener,noreferrer');
   }, []);
 
+  const heroSlides = useMemo(
+    () => [
+      {
+        title: 'Seleção exclusiva da sua região',
+        subtitle: 'O melhor de cada lojista local, curado com excelência.',
+        cta: 'Explorar seleção',
+      },
+      {
+        title: 'Descubra tesouros locais no Hub',
+        subtitle: 'Do ateliê ao delivery: experiências reais, sem ruído.',
+        cta: 'Descobrir lojas',
+      },
+    ],
+    []
+  );
+  const activeHero = heroSlides[heroIndex] || heroSlides[0];
+
   return (
     <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-slate-100 pb-28 sm:pb-20 text-slate-900 pt-[max(1rem,env(safe-area-inset-top))]">
       <div
@@ -649,7 +674,8 @@ export function MarketplacePage() {
         }`}
         aria-label="Abrir landing page Já no Caminho"
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-900 to-slate-800" />
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(14,165,233,0.18),transparent_45%),radial-gradient(circle_at_bottom_left,rgba(99,102,241,0.16),transparent_40%)]" />
         <div className="absolute right-3 top-3 z-20 flex items-center gap-2 sm:right-5 sm:top-4">
           <button
             type="button"
@@ -672,12 +698,20 @@ export function MarketplacePage() {
           >
             <ShareNetwork size={16} weight="duotone" />
           </button>
-          <span className="hidden sm:inline-flex items-center rounded-full border border-sky-300/70 bg-sky-500/85 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-[0_8px_18px_-12px_rgba(14,165,233,0.9)] backdrop-blur-sm">
+          <Link
+            to="/"
+            onClick={(event) => event.stopPropagation()}
+            className="hidden sm:inline-flex items-center rounded-full border border-sky-300/70 bg-sky-500/85 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-[0_8px_18px_-12px_rgba(14,165,233,0.9)] backdrop-blur-sm"
+          >
             Criar minha loja
-          </span>
-          <span className="inline-flex sm:hidden items-center rounded-full border border-sky-300/70 bg-sky-500/85 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] text-white shadow-[0_8px_18px_-12px_rgba(14,165,233,0.9)] backdrop-blur-sm">
+          </Link>
+          <Link
+            to="/"
+            onClick={(event) => event.stopPropagation()}
+            className="inline-flex sm:hidden items-center rounded-full border border-sky-300/70 bg-sky-500/85 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] text-white shadow-[0_8px_18px_-12px_rgba(14,165,233,0.9)] backdrop-blur-sm"
+          >
             Criar
-          </span>
+          </Link>
         </div>
         <div className="relative z-10 flex h-full w-[85%] max-w-[560px] flex-col justify-center px-4 pt-10 text-white sm:w-[70%] sm:px-6 md:w-[60%]">
           <img
@@ -685,13 +719,24 @@ export function MarketplacePage() {
             alt="Já no Caminho"
             className="h-8 w-auto max-w-[220px] object-contain sm:h-10 sm:max-w-[260px]"
           />
-          <h1 className="mt-4 line-clamp-2 text-lg font-black tracking-tight text-white sm:text-2xl">Sua vitrine digital pronta para vender</h1>
+          <span className="mt-4 inline-flex w-max items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white/90 backdrop-blur-sm">
+            Curadoria Premier Já no Caminho
+          </span>
+          <h1 className="mt-2 line-clamp-2 text-lg font-black tracking-tight text-white sm:text-2xl">{activeHero.title}</h1>
           <p className="mt-2 line-clamp-2 text-xs font-medium text-slate-200 sm:text-sm">
-            Hub oficial com lojas locais, pedidos em tempo real e experiência premium.
+            {activeHero.subtitle}
           </p>
           <span className="mt-4 inline-flex w-max items-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold text-white backdrop-blur-md">
-            Conhecer plataforma
+            {activeHero.cta}
           </span>
+          <div className="mt-3 flex items-center gap-1.5">
+            {heroSlides.map((_, idx) => (
+              <span
+                key={`hero-dot-${idx}`}
+                className={`h-1.5 rounded-full transition-all duration-300 ${idx === heroIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/45'}`}
+              />
+            ))}
+          </div>
         </div>
       </a>
 
@@ -859,7 +904,13 @@ export function MarketplacePage() {
 
         <section className="space-y-3" style={{ transition: 'all .45s ease', transitionDelay: hasEntered ? '200ms' : '0ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
           <div className="flex items-center justify-between">
-            <h2 className="text-base sm:text-xl font-black text-slate-900">{genericHighlightLabel}</h2>
+            <div className="space-y-0.5">
+              <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-amber-700">
+                <Star size={10} weight="fill" />
+                Curadoria
+              </span>
+              <h2 className="text-base sm:text-xl font-black text-slate-900">{genericHighlightLabel}</h2>
+            </div>
             <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Mais pedidos</span>
           </div>
           <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
@@ -1009,9 +1060,19 @@ export function MarketplacePage() {
                             Mais bem avaliadas
                           </span>
                         )}
-                        {!store.freeShipping && store.rating < 4.8 && (
-                          <span className="inline-flex rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">
-                            Ofertas da loja
+                        {store.supportsDelivery && (
+                          <span className="inline-flex rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">
+                            Entrega
+                          </span>
+                        )}
+                        {store.supportsPickup && (
+                          <span className="inline-flex rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">
+                            Retirada
+                          </span>
+                        )}
+                        {store.supportsTable && (
+                          <span className="inline-flex rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">
+                            Mesa
                           </span>
                         )}
                       </div>
