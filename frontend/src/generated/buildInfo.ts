@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.120249.359e13bb",
-  "buildId": "0.1.9+20260405.120249.359e13bb-20260405.120249-359e13bb",
-  "builtAt": "2026-04-05T12:02:49.716Z",
-  "commitHash": "359e13bb4018bc1af64c3311f43af6b4280a6a95",
-  "shortHash": "359e13bb",
+  "versionInternal": "0.1.9+20260405.120701.68e4eb18",
+  "buildId": "0.1.9+20260405.120701.68e4eb18-20260405.120701-68e4eb18",
+  "builtAt": "2026-04-05T12:07:01.613Z",
+  "commitHash": "68e4eb1803e07256d4529f800ecedaaa93a1d7ab",
+  "shortHash": "68e4eb18",
   "branch": "main",
   "commits": [
+    {
+      "hash": "68e4eb1803e07256d4529f800ecedaaa93a1d7ab",
+      "shortHash": "68e4eb18",
+      "dateIso": "2026-04-05T09:05:27-03:00",
+      "subject": "feat: functional client address management and premium UI refinements for Marketplace (circular logo, smaller banners)"
+    },
     {
       "hash": "359e13bb4018bc1af64c3311f43af6b4280a6a95",
       "shortHash": "359e13bb",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "e377e456",
       "dateIso": "2026-04-04T19:51:37-03:00",
       "subject": "feat(hub): add favorites carousel section above regional stores"
-    },
-    {
-      "hash": "665fade7c1b495808a0ac9187e12917c150126cc",
-      "shortHash": "665fade7",
-      "dateIso": "2026-04-04T19:49:27-03:00",
-      "subject": "feat(hub): persist store favorites, simplify filters, and remove redundant menu entries"
     }
   ]
 } as const;

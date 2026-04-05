@@ -10,7 +10,10 @@ import {
   UserCircle,
   UserRectangle,
   House,
-  CaretRight
+  CaretRight,
+  MapPin,
+  CreditCard,
+  Gift
 } from '@phosphor-icons/react';
 
 type DrawerAction = {
@@ -19,6 +22,8 @@ type DrawerAction = {
   icon: ReactNode;
   onClick: () => void;
   tone?: 'default' | 'danger';
+  iconColor?: string;
+  bgColor?: string;
 };
 
 type ProfileDrawerProps = {
@@ -92,16 +97,18 @@ export function ProfileDrawer({
 
   const actions: DrawerAction[] = isLogged
     ? [
-        { id: 'account', label: 'Dados do perfil', icon: <UserRectangle size={20} weight="duotone" />, onClick: onOpenAccount },
-        { id: 'orders', label: 'Meus pedidos', icon: <BellSimple size={20} weight="duotone" />, onClick: onOpenAccount },
-        { id: 'security', label: 'Segurança', icon: <ShieldCheck size={20} weight="duotone" />, onClick: onOpenAccount },
-        { id: 'help', label: 'Central de ajuda', icon: <Lifebuoy size={20} weight="duotone" />, onClick: onOpenHelp },
-        { id: 'logout', label: 'Sair da conta', icon: <SignOut size={20} weight="duotone" />, onClick: onLogout, tone: 'danger' },
+        { id: 'account', label: 'Dados do perfil', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-sky-600', bgColor: 'bg-sky-50' },
+        { id: 'orders', label: 'Meus pedidos', icon: <BellSimple size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-amber-600', bgColor: 'bg-amber-50' },
+        { id: 'wallet', label: 'Pagamentos', icon: <CreditCard size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-emerald-600', bgColor: 'bg-emerald-50' },
+        { id: 'security', label: 'Segurança', icon: <ShieldCheck size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-indigo-600', bgColor: 'bg-indigo-50' },
+        { id: 'coupons', label: 'Cupons', icon: <Gift size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-rose-600', bgColor: 'bg-rose-50' },
+        { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={22} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
+        { id: 'logout', label: 'Sair da conta', icon: <SignOut size={22} weight="duotone" />, onClick: onLogout, tone: 'danger' },
       ]
     : [
-        { id: 'help', label: 'Central de ajuda', icon: <Lifebuoy size={20} weight="duotone" />, onClick: onOpenHelp },
-        { id: 'terms', label: 'Termos de uso', icon: <UserRectangle size={20} weight="duotone" />, onClick: onOpenTerms },
-        { id: 'privacy', label: 'Privacidade', icon: <ShieldCheck size={20} weight="duotone" />, onClick: onOpenPrivacy },
+        { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={22} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
+        { id: 'terms', label: 'Termos de uso', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
+        { id: 'privacy', label: 'Privacidade', icon: <ShieldCheck size={22} weight="duotone" />, onClick: onOpenPrivacy, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
       ];
 
   return (
@@ -113,7 +120,7 @@ export function ProfileDrawer({
       <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
 
       <aside
-        className={`absolute inset-y-0 left-0 w-[280px] max-w-[85vw] transform bg-white shadow-2xl transition-transform duration-500 ease-out ${
+        className={`absolute inset-y-0 left-0 w-[300px] max-w-[85vw] transform bg-white shadow-2xl transition-transform duration-500 ease-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } flex flex-col pt-[env(safe-area-inset-top)]`}
       >
@@ -121,19 +128,22 @@ export function ProfileDrawer({
           {isLogged ? (
             <div className="flex items-center gap-4">
               {profileImageUrl ? (
-                <img
-                  src={profileImageUrl}
-                  alt={userName}
-                  className="h-14 w-14 rounded-2xl border-2 border-white object-cover shadow-md ring-1 ring-slate-100"
-                />
+                <div className="relative">
+                  <img
+                    src={profileImageUrl}
+                    alt={userName}
+                    className="h-16 w-16 rounded-2xl border-2 border-white object-cover shadow-lg ring-2 ring-sky-100"
+                  />
+                  <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-500 shadow-sm" />
+                </div>
               ) : (
-                <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400 shadow-inner">
-                  <UserCircle size={32} weight="duotone" />
+                <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400 shadow-inner ring-2 ring-slate-50">
+                  <UserCircle size={36} weight="duotone" />
                 </div>
               )}
               <div className="min-w-0">
-                <p className="truncate text-[15px] font-black text-slate-900">{userName}</p>
-                <p className="truncate text-xs font-bold text-slate-400">{userEmail}</p>
+                <p className="truncate text-base font-black text-slate-900 leading-tight">{userName}</p>
+                <p className="truncate text-xs font-bold text-slate-400 mt-0.5">{userEmail}</p>
               </div>
             </div>
           ) : (
@@ -153,37 +163,41 @@ export function ProfileDrawer({
           )}
         </div>
 
-        <div className="flex-1 overflow-y-auto px-3 py-2 space-y-6">
+        <div className="flex-1 overflow-y-auto px-4 py-2 space-y-8">
           {isAdmin && (
-            <section className="space-y-2 px-3">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Minha Operação</p>
+            <section className="space-y-3">
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 px-1">Minha Operação</p>
               <div className="grid gap-2">
                 <button
                   onClick={() => {
                     if (storeSlug) window.location.href = `/${storeSlug}`;
                     onClose();
                   }}
-                  className="flex w-full items-center gap-3 rounded-xl border border-sky-100 bg-sky-50/50 p-3 text-sky-900 transition-all active:scale-95"
+                  className="flex w-full items-center gap-3 rounded-2xl border border-sky-100 bg-sky-50/50 p-3.5 text-sky-900 transition-all active:scale-95"
                 >
-                  <CookingPot size={20} weight="duotone" className="text-sky-600" />
-                  <span className="text-[13px] font-black">Gerenciar Loja</span>
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-white shadow-sm text-sky-600">
+                    <CookingPot size={22} weight="duotone" />
+                  </div>
+                  <span className="text-[14px] font-black">Gerenciar Loja</span>
                 </button>
                 <button
                   onClick={() => {
                     window.location.href = '/hub';
                     onClose();
                   }}
-                  className="flex w-full items-center gap-3 rounded-xl border border-emerald-100 bg-emerald-50/50 p-3 text-emerald-900 transition-all active:scale-95"
+                  className="flex w-full items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/50 p-3.5 text-emerald-900 transition-all active:scale-95"
                 >
-                  <House size={20} weight="duotone" className="text-emerald-600" />
-                  <span className="text-[13px] font-black">Voltar ao Hub</span>
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-white shadow-sm text-emerald-600">
+                    <House size={22} weight="duotone" />
+                  </div>
+                  <span className="text-[14px] font-black">Página Inicial (Hub)</span>
                 </button>
               </div>
             </section>
           )}
 
-          <nav className="space-y-1 px-3">
-            <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-3">Menu</p>
+          <nav className="space-y-1">
+            <p className="mb-3 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 px-1">Menu do Cliente</p>
             {actions.map((action) => (
               <button
                 key={action.id}
@@ -191,48 +205,52 @@ export function ProfileDrawer({
                   action.onClick();
                   onClose();
                 }}
-                className={`flex w-full items-center gap-4 rounded-xl px-3 py-3.5 transition-all active:scale-[0.98] ${
+                className={`flex w-full items-center gap-4 rounded-2xl px-3 py-3 transition-all active:scale-[0.97] ${
                   action.tone === 'danger'
-                    ? 'text-rose-600 hover:bg-rose-50 active:bg-rose-100'
-                    : 'text-slate-700 hover:bg-slate-50 active:bg-slate-100'
+                    ? 'text-rose-600 hover:bg-rose-50'
+                    : 'text-slate-700 hover:bg-slate-50'
                 }`}
               >
-                <span className={action.tone === 'danger' ? 'text-rose-500' : 'text-slate-400'}>
+                <div className={`grid h-10 w-10 place-items-center rounded-xl shrink-0 transition-colors ${action.bgColor || 'bg-slate-100'} ${action.iconColor || 'text-slate-500'}`}>
                   {action.icon}
-                </span>
-                <span className="text-[14px] font-bold">{action.label}</span>
+                </div>
+                <span className="text-[15px] font-bold">{action.label}</span>
               </button>
             ))}
           </nav>
 
-          <section className="px-3 pt-2">
-            <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-3">Acesso Profissional</p>
-            <div className="grid grid-cols-2 gap-2">
+          <section className="pt-2">
+            <p className="mb-3 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 px-1">Serviços Profissionais</p>
+            <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={onOpenAdminLogin}
-                className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-100 bg-slate-50/50 p-4 transition-all active:scale-95"
+                className="flex flex-col items-center justify-center gap-3 rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm transition-all active:scale-95"
               >
-                <Truck size={24} weight="duotone" className="text-slate-400" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 text-center">Sou Lojista</span>
+                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-sky-50 text-sky-600">
+                  <Truck size={28} weight="duotone" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 text-center">Lojista</span>
               </button>
               <button
                 onClick={onOpenMotoboyLogin}
-                className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-100 bg-slate-50/50 p-4 transition-all active:scale-95"
+                className="flex flex-col items-center justify-center gap-3 rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm transition-all active:scale-95"
               >
-                <ArrowsClockwise size={24} weight="duotone" className="text-slate-400" />
+                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-amber-50 text-amber-600">
+                  <ArrowsClockwise size={28} weight="duotone" />
+                </div>
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 text-center">Entregador</span>
               </button>
             </div>
           </section>
         </div>
 
-        <div className="border-t border-slate-100 bg-slate-50 p-6 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <div className="border-t border-slate-100 bg-slate-50 p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <p className="text-[11px] font-black text-slate-900">Já no Caminho</p>
+              <p className="text-[11px] font-black text-slate-900 uppercase tracking-tighter">Já no Caminho</p>
               <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Versão {versionLabel || 'v0.0.0'}</p>
             </div>
-            <img src="/janocaminho-logov1.svg" alt="Logo" className="h-6 w-auto opacity-30 grayscale" />
+            <img src="/janocaminho-logov1.svg" alt="Logo" className="h-7 w-auto opacity-40 grayscale" />
           </div>
         </div>
       </aside>
