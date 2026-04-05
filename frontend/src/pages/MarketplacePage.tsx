@@ -878,6 +878,8 @@ export function MarketplacePage() {
               <button
                 type="button"
                 onClick={() => {
+                  setQuery('');
+                  setDebouncedQuery('');
                   setSegmentFilter('all');
                   setQuickFilter('all');
                 }}

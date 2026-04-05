@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.035833.8e475350",
-  "buildId": "0.1.9+20260405.035833.8e475350-20260405.035833-8e475350",
-  "builtAt": "2026-04-05T03:58:33.156Z",
-  "commitHash": "8e4753503c7427e9d00f0dd164a82d61ecf2c3e9",
-  "shortHash": "8e475350",
+  "versionInternal": "0.1.9+20260405.040152.1eb9efad",
+  "buildId": "0.1.9+20260405.040152.1eb9efad-20260405.040152-1eb9efad",
+  "builtAt": "2026-04-05T04:01:52.954Z",
+  "commitHash": "1eb9efadccc0f79440d1b79ecc6145b06cd9e5a8",
+  "shortHash": "1eb9efad",
   "branch": "main",
   "commits": [
+    {
+      "hash": "1eb9efadccc0f79440d1b79ecc6145b06cd9e5a8",
+      "shortHash": "1eb9efad",
+      "dateIso": "2026-04-05T00:59:42-03:00",
+      "subject": "feat: premium client account redesign with address management and native camera integration"
+    },
     {
       "hash": "8e4753503c7427e9d00f0dd164a82d61ecf2c3e9",
       "shortHash": "8e475350",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "2e82fe74",
       "dateIso": "2026-04-04T18:31:11-03:00",
       "subject": "fix(frontend): resolve syntax error in store hours summary"
-    },
-    {
-      "hash": "32ed4bafd64194dd75c6e793ce98076ba1c6fe0f",
-      "shortHash": "32ed4baf",
-      "dateIso": "2026-04-04T18:27:14-03:00",
-      "subject": "refactor(hub): use icon-only brand badge in header for cleaner mobile layout"
     }
   ]
 } as const;
