@@ -54,39 +54,58 @@ Plataforma de pedidos "like app" para restaurantes (estilo iFood), com:
 - Arquivo:
   - `frontend/src/components/Admin/GrillQueue.tsx`
 
-## Atualizacoes recentes (2026-03-10 a 2026-03-13)
-1. PWA e instalacao
-- PWA consolidado (service worker + manifest + icones).
-- Nova pagina `/instalar` com passo a passo Android (Chrome) e iPhone (Safari).
-- Landing com CTAs para instalacao (menu, hero, footer).
+## Atualizacoes recentes (2026-04-04 a 2026-04-05)
 
-2. Queue/operacao (Admin)
-- Removida barra financeira da aba operacional de pedidos.
-- Removido filtro redundante `Todos` da fila; filtros focados em status.
-- Destaque de mesa reforcado (badge forte em laranja).
-- "Prazo estourado" com pulso suave para alerta visual.
+1. Estabilização do App Android (APK/Capacitor)
+- Permissões Nativas:
+  - Adicionadas permissões de `CAMERA`, `READ_MEDIA_IMAGES` e `STORAGE` no `AndroidManifest.xml`.
+  - Implementada solicitação de permissão em tempo de execução no `MainActivity.java`.
+- Seletor de Arquivos (Upload):
+  - Corrigido o `onShowFileChooser` no `MainActivity.java` para permitir que o WebView abra a galeria/câmera.
+  - No frontend (`ClientAccount.tsx`), substituído o `<label>` por um botão explícito para disparar o input de arquivo, garantindo 100% de compatibilidade com o WebView do Android.
+- Geração de APK:
+  - Scripts de build ajustados para limpar cache (`clean assembleDebug`) e evitar erros de memória (`Java heap space`).
 
-3. Financeiro/relatorios
-- Aba `Finalizados hoje` evoluida para `Faturamento & Relatorios` (admin).
-- Para operador, rotulo e foco em `Pedidos Finalizados` (sem poluicao financeira).
-- Filtros de periodo:
-  - Hoje
-  - Ontem
-  - Ultimos 7 dias
-  - Calendario (intervalo customizado)
-- Card de comparativo (% vs periodo anterior).
-- Bloco "Dinheiro em caixa (periodo)" com Pix, Dinheiro e Cartao (admin).
+2. Persistência e Sessão Premium
+- Duração da Sessão:
+  - Tokens JWT estendidos para **30 dias** no backend (`AuthService.ts` e `CustomerAccountService.ts`), evitando desconexões frequentes no celular.
+- Sincronização de Avatar/Perfil:
+  - Corrigido o `MarketplacePage.tsx` para incluir `profileImageUrl` no carregamento da sessão.
+  - Implementado gatilho manual de evento `storage` no `ClientAccount.tsx` para atualizar o avatar no Hub imediatamente após a troca da foto.
 
-4. Mobile footer
-- Botao `Vendas` no rodape mobile abre a visao de relatorios via `/admin/queue` com `activeTab: completed`.
-- Botao `Pedidos` permanece no monitor operacional.
+3. UI/UX Premium (Hub e Login)
+- Logo Premium:
+  - Substituído o logo antigo pelo novo `/logo.svg` vetorial no cabeçalho do Hub.
+  - Container do logo com efeito **Glassmorphism** (`backdrop-blur`, bordas suaves e fundo translúcido) para um visual mais sofisticado.
+- Telas de Login:
+  - Removidas bordas e sombras pesadas dos logos nas telas de Admin e Motoboy, integrando-os melhor ao design limpo.
 
-5. Semantica de valores no detalhe do pedido
-- Troca de "Itens: R$..." para "Volume: X itens".
-- Linha final padronizada para "Total a pagar".
-- Se frete for zero, exibicao simplificada (sem subtotal/frete desnecessario).
+4. Correções de Build e Tipagem
+- Corrigido erro de tipagem (`autocomplete` -> `autoComplete`) que impedia o build do frontend.
+- Scripts de sincronização do Capacitor integrados ao fluxo de build do APK.
 
-## Principais mudancas recentes (ja em `main`)
+## Commits de referencia (mais recentes)
+- `4e3e1fa` style: use premium logo.svg in header and fix photo picker compatibility
+- `7140386` fix(mobile): robust file selection for profile photo and premium logo tweaks
+- `03c6464` feat(mobile): add native permission request, fix webview file picker and extend session to 30d
+- `a6d9e10` style: improve platform logo appearance across hub and login pages
+- `7e3c08a` fix(mobile): add camera/gallery permissions and fix profile avatar sync on hub
+- `0684da9` m
+- `d0ad42f` feat: melhorias no marketplace e perfil (HeaderAvatar, ProfileDrawer, ClientAccount)
+- `8a41b53` fix(frontend): change autocomplete to autoComplete to fix TS build error
+
+## Problemas operacionais mapeados
+1. Java heap space no build do Android
+- Causa: Gradle consumindo muita memória em builds sucessivos.
+- Acao feita: `gradlew clean` antes de cada `assembleDebug`.
+
+2. Troca de foto no WebView
+- Resolvido com botão explícito + `onShowFileChooser` nativo.
+
+## Como retomar rapidamente em nova sessao Codex
+1. Abrir repo `EdEspetoHub`.
+2. O APK de debug mais recente está em `mobile/android/app/build/outputs/apk/debug/app-debug.apk`.
+3. Para novo build: `cd frontend; npm run build; cd ../mobile; npx cap sync android; cd android; .\gradlew.bat clean assembleDebug`.
 0. Admin UX premium (2026-03-05)
 - Header admin evoluido para visual premium minimalista com identidade dinamica da loja.
 - Bloco da loja com banner/cor principal, overlay para contraste e transicao fade para lado branco.

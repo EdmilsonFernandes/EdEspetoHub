@@ -95,7 +95,7 @@ public class MainActivity extends BridgeActivity {
         super.onStart();
         configureWebViewPersistence();
         configureNavigationTransitions();
-        openHubAsHome();
+        restoreLastVisitedUrl();
         openDeepLinkIfAny();
     }
 
@@ -120,10 +120,8 @@ public class MainActivity extends BridgeActivity {
         }
 
         WebView webView = bridge.getWebView();
-        String currentUrl = webView.getUrl();
-
-        if (currentUrl != null && !currentUrl.contains("/hub")) {
-            webView.loadUrl(HUB_URL);
+        if (webView.canGoBack()) {
+            webView.goBack();
             return;
         }
 
@@ -237,20 +235,25 @@ public class MainActivity extends BridgeActivity {
             .start();
     }
 
-    private void openHubAsHome() {
+    private void restoreLastVisitedUrl() {
         if (bridge == null || bridge.getWebView() == null) return;
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String savedUrl = prefs.getString(LAST_URL_KEY, HUB_URL);
+        
         WebView webView = bridge.getWebView();
         String currentUrl = webView.getUrl();
-        if (currentUrl == null || currentUrl.isEmpty() || !currentUrl.contains("/hub")) {
-            webView.loadUrl(HUB_URL);
-            lastKnownUrl = HUB_URL;
+        
+        // Se não houver URL carregada ou se for a tela inicial branca, carrega a salva
+        if (currentUrl == null || currentUrl.isEmpty() || currentUrl.equals("about:blank")) {
+            webView.loadUrl(savedUrl);
+            lastKnownUrl = savedUrl;
         }
     }
 
     private void saveLastVisitedUrl() {
         if (bridge == null || bridge.getWebView() == null) return;
         String currentUrl = bridge.getWebView().getUrl();
-        if (!isTrustedUrl(currentUrl)) return;
+        if (currentUrl == null || !isTrustedUrl(currentUrl)) return;
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         prefs.edit().putString(LAST_URL_KEY, currentUrl).apply();
     }

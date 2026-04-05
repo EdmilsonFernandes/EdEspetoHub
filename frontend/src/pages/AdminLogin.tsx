@@ -88,6 +88,12 @@ export function AdminLogin() {
       sessionStorage.removeItem('admin:redirectSlug');
       const loginRole = String(session?.user?.role || '').toUpperCase();
       if (loginRole === 'ADMIN') {
+        // No mobile, prefere ir direto para a fila/pedidos
+        const isMobile = window.matchMedia('(max-width: 767px)').matches;
+        if (isMobile) {
+          navigate('/admin/queue');
+          return;
+        }
         navigate('/admin/dashboard', { state: { activeTab: 'resumo' } });
         return;
       }

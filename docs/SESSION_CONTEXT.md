@@ -1,104 +1,28 @@
-# Session Context (Persistente)
+# SESSION CONTEXT - 2026-04-05 (21:40)
 
-Este arquivo mantém o estado de trabalho para retomada rápida entre sessões.
+## Resumo da Sessão
+Foco total na estabilização do app mobile (Android) e refinamento da experiência de usuário (sessão e UI premium).
 
-## Regra de uso
-- A cada alteração relevante (código, bug, decisão de arquitetura, deploy), atualizar este arquivo.
-- Sempre registrar:
-  - `Data/Hora`
-  - `Resumo objetivo`
-  - `Arquivos impactados`
-  - `Commit`
-  - `Próximo passo`
+## Mudanças Realizadas
 
----
+### 1. Mobile (Android/Capacitor)
+- **Correção de Permissões:** Adicionadas permissões nativas no `AndroidManifest.xml` e lógica de solicitação em runtime no `MainActivity.java` para Câmera e Galeria.
+- **Seletor de Arquivos:** Corrigida falha no WebView que impedia a abertura do seletor de arquivos. No frontend (`ClientAccount.tsx`), a troca de foto agora usa um botão explícito que força o clique no input, eliminando falhas de propagação em labels no mobile.
+- **Build:** Resolvido erro de "Java heap space" no Gradle com limpeza de cache antes do build.
 
-## Snapshot atual
-- Data: 2026-03-17
-- Branch: `main`
-- HEAD: `ec2e923`
-- Status local: com alteração somente em arquivos de contexto
+### 2. Sessão e Persistência
+- **Tokens de 30 dias:** Alterada a expiração do JWT de 12h para 30 dias no backend (`AuthService.ts` e `CustomerAccountService.ts`) para administradores, clientes e motoboys.
+- **Sincronização de Dados:** O avatar do perfil no Hub agora atualiza instantaneamente após a troca da foto, graças à inclusão do campo `profileImageUrl` na sessão e ao disparo manual de eventos de storage.
 
-### Últimos commits
-1. `ec2e923` fix(queue): show awaiting pickup only after motoboy assignment
-2. `997419b` feat(ui): prevent duplicate checkout and guard unsaved settings
-3. `f22a8a6` fix(layout): reset admin header state on route changes and keep menu/catalog visible
-4. `3ea2a64` fix(queue): align in-route semantics and copy with delivered pickup state
-5. `df85531` feat(mobile-nav): add smart bottom bar hide/show with hysteresis and safe-area support
+### 3. UI/UX Premium
+- **Header Premium:** Logo antigo removido. Novo `/logo.svg` integrado com efeito Glassmorphism (blur + transparência) no Hub.
+- **Logos de Login:** Visual limpo e moderno para as telas de login de Admin e Motoboy.
 
-### Estado funcional recente
-- Checkout e entrega:
-  - anti-duplo clique no botão final de checkout (`Processando...` + lock).
-  - anti-duplo clique no `Buscar CEP`.
-  - toast de sucesso de finalização do pedido com 3s.
-- Configurações da loja:
-  - dirty state visual (`Alterações não salvas detectadas`).
-  - save destacado enquanto houver pendências.
-  - guard de navegação (modal para descartar alterações).
-  - guard de refresh/fechar aba com `beforeunload`.
-- Fila de pedidos (delivery):
-  - `waiting_for_motoboy` agora diferencia:
-    - sem motoboy => `Buscando entregador`
-    - com motoboy => `Aguardando retirada`
-  - mensagem contextual no card conforme vínculo.
+## Estado do Repositório
+- Todos os commits foram enviados para a branch `main`.
+- APK de debug gerado com sucesso: `mobile/android/app/build/outputs/apk/debug/app-debug.apk`.
 
-### Atualização desta sessão
-- Data/Hora: 2026-03-17
-- Resumo objetivo:
-  - Blindagem de interação para evitar duplicidade no checkout e CEP.
-  - Implementação de guard de alterações não salvas em Configurações.
-  - Correção semântica de status no fluxo de entregador (fila/admin).
-- Arquivos impactados:
-  - `frontend/src/pages/StorePage.tsx`
-  - `frontend/src/components/Client/CartView.tsx`
-  - `frontend/src/pages/AdminDashboard.tsx`
-  - `frontend/src/components/Admin/GrillQueue.tsx`
-- Commits:
-  - `997419b` (anti-duplicidade + dirty guard)
-  - `ec2e923` (status de entrega aguardando retirada só após aceite)
-- Validação:
-  - `npm --prefix frontend run build` passou após as mudanças.
-- Próximo passo:
-  - smoke test em produção:
-    1) checkout com clique duplo
-    2) trocar aba em Config sem salvar
-    3) delivery: pronto -> aguardando motoboy -> aceite -> retirada -> em rota
-
-### Observações operacionais (Git/Deploy)
-- Em alguns ambientes houve instabilidade com `ssh.github.com:443`.
-- Fluxo que funcionou: push usando URL `git@github.com:EdmilsonFernandes/EdEspetoHub.git`.
-
----
-
-## Próximo passo sugerido
-- Rodar smoke test focado em blindagem e fluxo logístico:
-  - checkout/CEP sem duplicidade
-  - guard de alterações não salvas
-  - status correto de entrega antes/depois do aceite do motoboy
-
----
-
-## Atualização desta sessão (estoque universal)
-- Data/Hora: 2026-03-17
-- Resumo objetivo:
-  - Implementado módulo de estoque opcional por produto com retrocompatibilidade.
-  - Adicionado decremento atômico em transação na criação de pedidos.
-  - Aplicada UX de estoque no admin e vitrine (esgotado/baixo estoque).
-- Arquivos impactados:
-  - `backend/src/entities/Product.ts`
-  - `backend/src/dto/CreateProductDto.ts`
-  - `backend/src/services/ProductService.ts`
-  - `backend/src/services/OrderService.ts`
-  - `backend/src/utils/runMigrations.ts`
-  - `backend/schema.sql`
-  - `frontend/src/services/productService.ts`
-  - `frontend/src/components/Admin/ProductManager.tsx`
-  - `frontend/src/components/Client/MenuView.tsx`
-- Validação:
-  - `npm --prefix backend run build` OK
-  - `npm --prefix frontend run build` OK
-- Próximo passo:
-  - Deploy backend+frontend e executar smoke test:
-    1) produto com estoque `0` bloqueado na vitrine
-    2) produto com estoque baixo exibindo aviso
-    3) duas finalizações simultâneas para validar proteção contra oversell
+## Próximos Passos Sugeridos
+1. Validar o fluxo de push notifications no Android agora que as permissões nativas foram reforçadas.
+2. Monitorar o tamanho do banco de dados/disco devido ao aumento do tráfego.
+3. Considerar a implementação de refresh tokens caso queira sessões ainda mais longas com segurança reforçada.

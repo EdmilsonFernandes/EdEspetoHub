@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.002523.7140386f",
-  "buildId": "0.1.9+20260405.002523.7140386f-20260405.002523-7140386f",
-  "builtAt": "2026-04-05T00:25:23.558Z",
-  "commitHash": "7140386f0c5957d9440e976656557e2f68e3f88f",
-  "shortHash": "7140386f",
+  "versionInternal": "0.1.9+20260405.022901.4e3e1fa9",
+  "buildId": "0.1.9+20260405.022901.4e3e1fa9-20260405.022901-4e3e1fa9",
+  "builtAt": "2026-04-05T02:29:01.559Z",
+  "commitHash": "4e3e1fa9c90e625d4a709fdea1489d7d61b4dd63",
+  "shortHash": "4e3e1fa9",
   "branch": "main",
   "commits": [
+    {
+      "hash": "4e3e1fa9c90e625d4a709fdea1489d7d61b4dd63",
+      "shortHash": "4e3e1fa9",
+      "dateIso": "2026-04-04T21:26:12-03:00",
+      "subject": "style: use premium logo.svg in header and fix photo picker compatibility"
+    },
     {
       "hash": "7140386f0c5957d9440e976656557e2f68e3f88f",
       "shortHash": "7140386f",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "d18aec9a",
       "dateIso": "2026-04-04T17:21:35-03:00",
       "subject": "feat(hub): redesign hero banner with visual store carousel and cleaner branding"
-    },
-    {
-      "hash": "6f9fb35dd138c9e853a3bc753a8fe9b738dbd054",
-      "shortHash": "6f9fb35d",
-      "dateIso": "2026-04-04T17:15:27-03:00",
-      "subject": "feat(mobile): make hub the fixed home and improve native webview navigation"
     }
   ]
 } as const;
