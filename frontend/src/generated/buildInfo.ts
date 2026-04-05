@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.024235.a6a60b04",
-  "buildId": "0.1.9+20260405.024235.a6a60b04-20260405.024235-a6a60b04",
-  "builtAt": "2026-04-05T02:42:35.795Z",
-  "commitHash": "a6a60b0458a1f4b62730a10ce2571342486aa55d",
-  "shortHash": "a6a60b04",
+  "versionInternal": "0.1.9+20260405.025053.b4f223e3",
+  "buildId": "0.1.9+20260405.025053.b4f223e3-20260405.025053-b4f223e3",
+  "builtAt": "2026-04-05T02:50:53.333Z",
+  "commitHash": "b4f223e36a515c8019f35268391d4f7418da77da",
+  "shortHash": "b4f223e3",
   "branch": "main",
   "commits": [
+    {
+      "hash": "b4f223e36a515c8019f35268391d4f7418da77da",
+      "shortHash": "b4f223e3",
+      "dateIso": "2026-04-04T23:43:30-03:00",
+      "subject": "style: use original high-res PWA icon in header for premium look"
+    },
     {
       "hash": "a6a60b0458a1f4b62730a10ce2571342486aa55d",
       "shortHash": "a6a60b04",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "eda2d5fd",
       "dateIso": "2026-04-04T17:40:57-03:00",
       "subject": "feat(hub): add terms/help actions and app version in profile drawer"
-    },
-    {
-      "hash": "eec22ac7698fd30159cb9d2585b03caaf684d20d",
-      "shortHash": "eec22ac7",
-      "dateIso": "2026-04-04T17:37:32-03:00",
-      "subject": "feat(hub): add profile drawer with avatar trigger and location row"
     }
   ]
 } as const;

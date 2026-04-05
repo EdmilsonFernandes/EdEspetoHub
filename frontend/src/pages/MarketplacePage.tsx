@@ -799,16 +799,15 @@ export function MarketplacePage() {
               </div>
               <button
                 type="button"
-                className="group relative inline-flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/40 bg-white/45 p-1 shadow-[0_8px_16px_-6px_rgba(0,0,0,0.05)] backdrop-blur-md transition-all hover:border-white/60 hover:bg-white/60 hover:shadow-lg active:scale-95"
+                className="group relative inline-flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200/50 bg-white shadow-sm transition-all hover:scale-105 active:scale-95"
                 aria-label="Já no Caminho"
                 title="Já no Caminho"
                 onClick={() => navigate('/hub')}
               >
-                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 opacity-0 transition-opacity group-hover:opacity-100" />
                 <img
-                  src="/icons/pwa-512x512.png"
+                  src="/logo-datony.svg"
                   alt="Já no Caminho"
-                  className="relative z-10 h-full w-full object-contain"
+                  className="h-[85%] w-[85%] object-contain p-0.5"
                 />
               </button>
             </div>
