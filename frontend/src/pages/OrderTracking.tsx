@@ -823,11 +823,11 @@ export function OrderTracking() {
   const itemsToRender = Array.isArray(order?.items) ? order.items : [];
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 pt-[env(safe-area-inset-top)]">
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       <header className="sticky top-0 z-50 border-b border-white/20 bg-white/85 backdrop-blur-md shadow-[0_18px_36px_-28px_rgba(15,23,42,0.5)]">
         <div className="h-1 bg-slate-200" />
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-[max(0.5rem,env(safe-area-inset-top))]">
           <div className="flex items-center justify-between py-2.5 sm:py-4">
             <button onClick={handleBack} className="flex items-center gap-2.5 min-w-0">
               <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl overflow-hidden shadow-[0_14px_26px_-18px_rgba(239,68,68,0.7)] border border-white bg-white shrink-0">

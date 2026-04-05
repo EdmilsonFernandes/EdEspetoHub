@@ -2196,11 +2196,17 @@ export function StorePage() {
         ) : !showInactiveState && !showClosedState && view === 'menu' && products.length > 0 && (
           <div className="space-y-4">
               {!user?.token && recentPublicOrders.length > 0 && (
-              <div className="mx-3 sm:mx-6 rounded-3xl premium-card-glass px-4 py-4 text-sm text-emerald-900 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="space-y-2">
-                  <span className="text-[11px] uppercase tracking-[0.3em] text-emerald-700 font-extrabold">
-                    Acompanhar pedidos recentes
-                  </span>
+              <div className="fixed bottom-20 left-4 right-4 z-[110] sm:relative sm:bottom-0 sm:left-0 sm:right-0 sm:mx-6 rounded-[2rem] border border-emerald-200/50 bg-emerald-50/95 backdrop-blur-md px-5 py-4 shadow-[0_20px_50px_-20px_rgba(16,185,129,0.4)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span className="text-[11px] uppercase tracking-[0.25em] text-emerald-700 font-black">
+                      Acompanhar pedidos ativos
+                    </span>
+                  </div>
                   <div className="flex flex-wrap gap-2">
                     {recentPublicOrders.map((entry) => (
                       <button
@@ -2212,27 +2218,25 @@ export function StorePage() {
                               : `/pedido/${entry.id}`
                           )
                         }
-                        className="btn-press px-3 py-1.5 rounded-full bg-white/70 text-emerald-900 text-[11px] font-extrabold border border-emerald-200 hover:bg-emerald-100/70"
+                        className="btn-press px-3.5 py-2 rounded-xl bg-white text-emerald-900 text-[11px] font-black border border-emerald-100 shadow-sm transition-all hover:border-emerald-300"
                       >
                         #{formatOrderDisplayId(entry.id, storeSlug)}
                       </button>
                     ))}
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() =>
-                      navigate(
-                        recentPublicOrders[0]?.accessToken
-                          ? `/pedido/${recentPublicOrders[0].id}?ot=${encodeURIComponent(recentPublicOrders[0].accessToken)}`
-                          : `/pedido/${recentPublicOrders[0].id}`
-                      )
-                    }
-                    className="btn-press px-4 py-2 rounded-xl bg-[linear-gradient(120deg,#16a34a,#059669)] text-white text-xs font-extrabold shadow-[0_22px_48px_-32px_rgba(5,150,105,0.6)]"
-                  >
-                    Acompanhar agora
-                  </button>
-                </div>
+                <button
+                  onClick={() =>
+                    navigate(
+                      recentPublicOrders[0]?.accessToken
+                        ? `/pedido/${recentPublicOrders[0].id}?ot=${encodeURIComponent(recentPublicOrders[0].accessToken)}`
+                        : `/pedido/${recentPublicOrders[0].id}`
+                    )
+                  }
+                  className="btn-press w-full sm:w-auto px-6 py-3 rounded-2xl bg-emerald-600 text-white text-[13px] font-black shadow-[0_12px_24px_-12px_rgba(5,150,105,0.5)] transition-all hover:bg-emerald-700 active:scale-95"
+                >
+                  Ver Status Agora
+                </button>
               </div>
             )}
             <MenuView

@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.032219.caadfa13",
-  "buildId": "0.1.9+20260405.032219.caadfa13-20260405.032219-caadfa13",
-  "builtAt": "2026-04-05T03:22:19.235Z",
-  "commitHash": "caadfa13c5e9fb8646f92e2f5910bb2299932d36",
-  "shortHash": "caadfa13",
+  "versionInternal": "0.1.9+20260405.034040.ebb0b668",
+  "buildId": "0.1.9+20260405.034040.ebb0b668-20260405.034040-ebb0b668",
+  "builtAt": "2026-04-05T03:40:40.967Z",
+  "commitHash": "ebb0b6687b34dd4146fd13dba34ba6d6b98515b9",
+  "shortHash": "ebb0b668",
   "branch": "main",
   "commits": [
+    {
+      "hash": "ebb0b6687b34dd4146fd13dba34ba6d6b98515b9",
+      "shortHash": "ebb0b668",
+      "dateIso": "2026-04-05T00:23:24-03:00",
+      "subject": "style: use new janocaminho-logov1.svg in header and final tweaks"
+    },
     {
       "hash": "caadfa13c5e9fb8646f92e2f5910bb2299932d36",
       "shortHash": "caadfa13",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "eb3ecfc5",
       "dateIso": "2026-04-04T18:23:42-03:00",
       "subject": "fix(hours): align hub open status with backend and robust day/tz handling"
-    },
-    {
-      "hash": "ecfc2910aac881bddeb59b09cd456f5c19899e8e",
-      "shortHash": "ecfc2910",
-      "dateIso": "2026-04-04T18:12:59-03:00",
-      "subject": "fix(hub/mobile): remove curadoria label and enable webview geolocation permission flow"
     }
   ]
 } as const;

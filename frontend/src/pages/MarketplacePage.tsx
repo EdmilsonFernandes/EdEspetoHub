@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { MagnifyingGlass, MapPin, Star, Storefront, House, List, CaretDown, Heart } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { productService } from '../services/productService';
+import { customerAccountService } from '../services/customerAccountService';
 import { featuredService } from '../services/featuredService';
 import { mapsService } from '../services/mapsService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
@@ -739,6 +740,32 @@ export function MarketplacePage() {
     });
   }, []);
 
+  const [activeOrders, setActiveOrders] = useState<any[]>([]);
+
+  const loadActiveOrders = useCallback(async () => {
+    const session = readCustomerSession();
+    if (!session?.token) {
+      setActiveOrders([]);
+      return;
+    }
+    try {
+      const orders = await customerAccountService.listOrders();
+      const active = (orders || []).filter((o: any) => {
+        const status = String(o.status || '').toLowerCase();
+        return !['done', 'delivered', 'finished', 'cancelled', 'rejected'].includes(status);
+      });
+      setActiveOrders(active.slice(0, 3));
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    loadActiveOrders();
+    const interval = window.setInterval(loadActiveOrders, 30000);
+    return () => window.clearInterval(interval);
+  }, [loadActiveOrders]);
+
   return (
     <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-slate-100 pb-28 sm:pb-20 text-slate-900 pt-[max(1rem,env(safe-area-inset-top))]">
       <div
@@ -864,6 +891,82 @@ export function MarketplacePage() {
         </header>
 
         <main className="max-w-[1200px] mx-auto px-4 pt-3 space-y-5">
+          {activeOrders.length > 0 && (
+            <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+              <div className="relative overflow-hidden rounded-3xl border border-emerald-200/50 bg-emerald-50/90 backdrop-blur-md p-4 shadow-[0_12px_30px_-10px_rgba(16,185,129,0.3)]">
+                <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-emerald-200/20 blur-2xl" />
+                <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex-1 space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                      </span>
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">
+                        Seu pedido está em andamento
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {activeOrders.map((order) => (
+                        <button
+                          key={order.id}
+                          onClick={() => navigate(`/pedido/${order.id}`)}
+                          className="rounded-xl bg-white px-3 py-1.5 text-[11px] font-bold text-emerald-900 border border-emerald-100 shadow-sm transition-all active:scale-95"
+                        >
+                          #{String(order.id).slice(-6).toUpperCase()} • {order.store?.name || 'Loja'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => navigate(`/pedido/${activeOrders[0].id}`)}
+                    className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-2.5 text-xs font-black text-white shadow-lg transition-all hover:bg-emerald-700 active:scale-95"
+                  >
+                    Acompanhar Agora
+                    <div className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {activeOrders.length > 0 && (
+            <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+              <div className="relative overflow-hidden rounded-3xl border border-emerald-200/50 bg-emerald-50/90 backdrop-blur-md p-4 shadow-[0_12px_30px_-10px_rgba(16,185,129,0.3)]">
+                <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-emerald-200/20 blur-2xl" />
+                <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex-1 space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                      </span>
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">
+                        Seu pedido está em andamento
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {activeOrders.map((order) => (
+                        <button
+                          key={order.id}
+                          onClick={() => navigate(`/pedido/${order.id}`)}
+                          className="rounded-xl bg-white px-3 py-1.5 text-[11px] font-bold text-emerald-900 border border-emerald-100 shadow-sm transition-all active:scale-95"
+                        >
+                          #{String(order.id).slice(-6).toUpperCase()} • {order.store?.name || 'Loja'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => navigate(`/pedido/${activeOrders[0].id}`)}
+                    className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-2.5 text-xs font-black text-white shadow-lg transition-all hover:bg-emerald-700 active:scale-95"
+                  >
+                    Acompanhar Agora
+                    <div className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
         <section style={{ transition: 'all .45s ease', transitionDelay: hasEntered ? '80ms' : '0ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
           <div className="relative">
