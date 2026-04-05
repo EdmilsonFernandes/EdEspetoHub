@@ -91,15 +91,6 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        configureWebViewPersistence();
-        configureNavigationTransitions();
-        restoreLastVisitedUrl();
-        openDeepLinkIfAny();
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         restoreLastVisitedUrl();
@@ -189,74 +180,78 @@ public class MainActivity extends BridgeActivity {
 
     private void configureNavigationTransitions() {
         if (bridge == null || bridge.getWebView() == null) return;
-        WebView webView = bridge.getWebView();
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                if (url == null) return false;
+        
+        // Em vez de substituir o WebViewClient (o que quebra o Capacitor),
+        // vamos apenas observar as mudanças de URL se possível ou aceitar que o Bridge cuida disso.
+        // Para resolver o ERR_UNKNOWN_URL_SCHEME, precisamos que o Capacitor trate intents.
+        // O BridgeActivity do Capacitor já lida com muitos esquemas, mas podemos reforçar.
+    }
 
-                // Trata e-mail
-                if (url.startsWith("mailto:")) {
-                    try {
-                        android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_SENDTO, android.net.Uri.parse(url));
-                        startActivity(intent);
-                        return true;
-                    } catch (Exception e) {
-                        return false;
+    // Override para interceptar URLs antes do WebView tentar carregar e falhar com esquema desconhecido
+    @Override
+    public void onStart() {
+        super.onStart();
+        configureWebViewPersistence();
+        configureNavigationTransitions();
+        restoreLastVisitedUrl();
+        openDeepLinkIfAny();
+        
+        // Ajuste no WebView para aceitar intents de apps externos
+        if (bridge != null && bridge.getWebView() != null) {
+            bridge.getWebView().setWebViewClient(new com.getcapacitor.BridgeWebViewClient(bridge) {
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                    if (url == null) return false;
+
+                    if (url.startsWith("mailto:") || url.startsWith("rawbt:") || url.startsWith("tel:") || url.startsWith("whatsapp:")) {
+                        try {
+                            android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url));
+                            startActivity(intent);
+                            return true;
+                        } catch (Exception e) {
+                            return false;
+                        }
+                    }
+
+                    if (isTrustedUrl(url)) {
+                        saveLastVisitedUrl();
+                        return super.shouldOverrideUrlLoading(view, url);
+                    }
+
+                    return super.shouldOverrideUrlLoading(view, url);
+                }
+
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, android.webkit.WebResourceRequest request) {
+                    String url = request.getUrl().toString();
+                    return shouldOverrideUrlLoading(view, url);
+                }
+
+                @Override
+                public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+                    super.onPageStarted(view, url, favicon);
+                    if (!isTrustedUrl(url)) return;
+
+                    String previous = lastKnownUrl == null ? HUB_URL : lastKnownUrl;
+                    boolean fromHub = previous.contains("/hub");
+                    boolean toHub = url.contains("/hub");
+
+                    if (fromHub && !toHub) {
+                        animateSlideInFromRight(view);
+                    } else if (!fromHub && toHub) {
+                        animateSlideInFromLeft(view);
                     }
                 }
 
-                // Trata impressão térmica (RawBT)
-                if (url.startsWith("rawbt:")) {
-                    try {
-                        android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url));
-                        startActivity(intent);
-                        return true;
-                    } catch (Exception e) {
-                        return false;
+                @Override
+                public void onPageFinished(WebView view, String url) {
+                    super.onPageFinished(view, url);
+                    if (isTrustedUrl(url)) {
+                        lastKnownUrl = url;
                     }
                 }
-
-                // URLs internas do sistema
-                if (isTrustedUrl(url)) {
-                    saveLastVisitedUrl();
-                    return false;
-                }
-
-                // Outras URLs externas (WhatsApp, etc.)
-                try {
-                    android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url));
-                    startActivity(intent);
-                    return true;
-                } catch (Exception e) {
-                    return false;
-                }
-            }
-
-            @Override
-            public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
-                super.onPageStarted(view, url, favicon);
-                if (!isTrustedUrl(url)) return;
-
-                String previous = lastKnownUrl == null ? HUB_URL : lastKnownUrl;
-                boolean fromHub = previous.contains("/hub");
-                boolean toHub = url.contains("/hub");
-
-                if (fromHub && !toHub) {
-                    animateSlideInFromRight(view);
-                } else if (!fromHub && toHub) {
-                    animateSlideInFromLeft(view);
-                }
-            }
-
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view, url);
-                if (isTrustedUrl(url)) {
-                    lastKnownUrl = url;
-                }
-            }
-        });
+            });
+        }
     }
 
     private void animateSlideInFromRight(View view) {

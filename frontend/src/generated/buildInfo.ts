@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.025543.5dd62f0c",
-  "buildId": "0.1.9+20260405.025543.5dd62f0c-20260405.025543-5dd62f0c",
-  "builtAt": "2026-04-05T02:55:43.368Z",
-  "commitHash": "5dd62f0c1d1394a49be27dca8d0b3b3fbf6f77c0",
-  "shortHash": "5dd62f0c",
+  "versionInternal": "0.1.9+20260405.025850.5473287c",
+  "buildId": "0.1.9+20260405.025850.5473287c-20260405.025850-5473287c",
+  "builtAt": "2026-04-05T02:58:50.262Z",
+  "commitHash": "5473287c4d61b0a337450ac936ae72c9c778be9e",
+  "shortHash": "5473287c",
   "branch": "main",
   "commits": [
+    {
+      "hash": "5473287c4d61b0a337450ac936ae72c9c778be9e",
+      "shortHash": "5473287c",
+      "dateIso": "2026-04-04T23:56:47-03:00",
+      "subject": "fix(mobile): handle rawbt and mailto links in webview and restore official platform logo"
+    },
     {
       "hash": "5dd62f0c1d1394a49be27dca8d0b3b3fbf6f77c0",
       "shortHash": "5dd62f0c",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "f9bbd894",
       "dateIso": "2026-04-04T17:52:42-03:00",
       "subject": "fix(hub): remove redundant create CTA and improve mobile safe-area/header spacing"
-    },
-    {
-      "hash": "4777fe566a5bc29b34851f990e5b7785502ce8ad",
-      "shortHash": "4777fe56",
-      "dateIso": "2026-04-04T17:46:56-03:00",
-      "subject": "feat(hub): add touch swipe navigation for top banner carousel"
     }
   ]
 } as const;
