@@ -822,6 +822,11 @@
   resolved "https://registry.npmjs.org/@capacitor/app/-/app-7.0.0.tgz"
   integrity sha512-/UFwfPFsw/Jen6vjrV0lfTBOQWSaDDdmrYXKpYg4Xn8hwj0xrrRPXxC43j7VmPoj9AFMVPA+hx94ygqjChPASQ==
 
+"@capacitor/camera@^7.0.0":
+  version "7.0.0"
+  resolved "https://registry.npmjs.org/@capacitor/camera/-/camera-7.0.0.tgz"
+  integrity sha512-waEXGt1/qN8Uz8TWBl2exngLrkyll+fNFLj00ayJrPgZxQN8kfWHGz6YlJfQJLlBRXeay7W844Ao4iX0zziEMw==
+
 "@capacitor/core@^7.4.3", "@capacitor/core@>=7.0.0":
   version "7.4.3"
   resolved "https://registry.npmjs.org/@capacitor/core/-/core-7.4.3.tgz"

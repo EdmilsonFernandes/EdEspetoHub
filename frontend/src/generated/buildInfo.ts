@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.030942.46c39cb9",
-  "buildId": "0.1.9+20260405.030942.46c39cb9-20260405.030942-46c39cb9",
-  "builtAt": "2026-04-05T03:09:42.756Z",
-  "commitHash": "46c39cb99348d7149de60e4d8e2abd096c367e7f",
-  "shortHash": "46c39cb9",
+  "versionInternal": "0.1.9+20260405.031622.c858f1a8",
+  "buildId": "0.1.9+20260405.031622.c858f1a8-20260405.031622-c858f1a8",
+  "builtAt": "2026-04-05T03:16:22.234Z",
+  "commitHash": "c858f1a8b067bb41a21d753211809efe9788b7ec",
+  "shortHash": "c858f1a8",
   "branch": "main",
   "commits": [
+    {
+      "hash": "c858f1a8b067bb41a21d753211809efe9788b7ec",
+      "shortHash": "c858f1a8",
+      "dateIso": "2026-04-05T00:10:39-03:00",
+      "subject": "fix: store opening logic, respect manual toggle and fix day resolution overlaps"
+    },
     {
       "hash": "46c39cb99348d7149de60e4d8e2abd096c367e7f",
       "shortHash": "46c39cb9",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "30b993d3",
       "dateIso": "2026-04-04T18:10:37-03:00",
       "subject": "fix(hub): improve top branding, avatar size and region fallback label"
-    },
-    {
-      "hash": "efc58c141b708b5282f8cc12533f41a3a60977d3",
-      "shortHash": "efc58c14",
-      "dateIso": "2026-04-04T18:03:01-03:00",
-      "subject": "refactor(hub): remove hero banner and adopt ifood-like greeting header"
     }
   ]
 } as const;

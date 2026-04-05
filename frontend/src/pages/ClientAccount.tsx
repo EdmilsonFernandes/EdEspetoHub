@@ -8,6 +8,7 @@ import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { App as CapacitorApp } from '@capacitor/app';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 export function ClientAccount() {
   const navigate = useNavigate();
@@ -150,20 +151,34 @@ export function ClientAccount() {
     }
   };
 
-  const handleProfileImageUpload = async (file?: File | null) => {
-    if (!file || profileSaving) return;
+  const pickProfileImageNative = async () => {
+    try {
+      const image = await Camera.getPhoto({
+        quality: 80,
+        allowEditing: false,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Photos, // Abre galeria direto (pode trocar para Prompt para dar opção de câmera)
+        promptLabelHeader: 'Escolha sua foto',
+        promptLabelPhoto: 'Galeria de fotos',
+        promptLabelPicture: 'Tirar uma foto agora'
+      });
 
-    // Check file size (max 8MB)
-    const MAX_SIZE = 8 * 1024 * 1024;
-    if (file.size > MAX_SIZE) {
-      setProfileMessage('A imagem é muito grande. Escolha uma foto de até 8MB.');
-      return;
+      if (image.base64String) {
+        const dataUrl = `data:image/${image.format};base64,${image.base64String}`;
+        await uploadBase64ProfileImage(dataUrl);
+      }
+    } catch (e: any) {
+      // Ignora erro de cancelamento
+      if (e.message !== 'User cancelled photos app') {
+        setProfileMessage('Não foi possível acessar a galeria ou câmera.');
+      }
     }
+  };
 
+  const uploadBase64ProfileImage = async (base64: string) => {
     setProfileSaving(true);
     setProfileMessage('Enviando foto...');
     try {
-      const base64 = await toBase64DataUrl(file);
       const updated = await customerAccountService.updateMe({ profileImageFile: base64 });
       setMe(updated || null);
       const raw = localStorage.getItem('customerSession');
@@ -179,19 +194,41 @@ export function ClientAccount() {
         localStorage.setItem('customerSession', JSON.stringify(next));
       }
       setProfileMessage('Foto de perfil atualizada.');
-      // Force a slight delay to allow the user to see the success message
-      // and maybe trigger a re-render in Hub when they go back
       window.dispatchEvent(new Event('storage'));
     } catch (e: any) {
       if (e.status === 413) {
-        setProfileMessage('A imagem excedeu o limite do servidor. Tente uma foto menor.');
-      } else if (e.status === 403 || e.status === 401) {
-        setProfileMessage('Sua sessão expirou ou você não tem permissão. Tente fazer login novamente.');
+        setProfileMessage('A imagem excedeu o limite do servidor.');
       } else {
         setProfileMessage(e?.message || 'Não foi possível enviar foto.');
       }
     } finally {
       setProfileSaving(false);
+    }
+  };
+
+  const handleProfileImageUpload = async (file?: File | null) => {
+    if (!file || profileSaving) return;
+
+    const MAX_SIZE = 8 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      setProfileMessage('A imagem é muito grande (máx 8MB).');
+      return;
+    }
+
+    try {
+      const base64 = await toBase64DataUrl(file);
+      await uploadBase64ProfileImage(base64);
+    } catch (e: any) {
+      setProfileMessage('Falha ao processar arquivo.');
+    }
+  };
+
+  const handleProfileImageClick = () => {
+    if (Capacitor.isNativePlatform()) {
+      void pickProfileImageNative();
+    } else {
+      const input = document.getElementById('profile-upload-input');
+      if (input) (input as HTMLInputElement).click();
     }
   };
 
@@ -285,10 +322,7 @@ export function ClientAccount() {
                 <div className="min-w-0 flex-1">
                   <button
                     type="button"
-                    onClick={() => {
-                      const input = document.getElementById('profile-upload-input');
-                      if (input) (input as HTMLInputElement).click();
-                    }}
+                    onClick={handleProfileImageClick}
                     className="inline-flex cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2 text-[11px] font-black uppercase tracking-widest text-slate-700 active:scale-95 transition-all shadow-sm"
                   >
                     Trocar foto

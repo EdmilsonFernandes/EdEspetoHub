@@ -113,7 +113,6 @@ export function ProfileDrawer({
         { id: 'logout', label: 'Sair', icon: <SignOut size={18} weight="duotone" />, onClick: onLogout, tone: 'danger' },
       ]
     : [
-        { id: 'login', label: 'Entrar como cliente', icon: <UserCircle size={18} weight="duotone" />, onClick: onLogin },
         { id: 'security', label: 'Central de segurança', icon: <ShieldCheck size={18} weight="duotone" />, onClick: onLogin },
         { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={18} weight="duotone" />, onClick: onOpenHelp },
         { id: 'terms', label: 'Termos de uso', icon: <UserRectangle size={18} weight="duotone" />, onClick: onOpenTerms },
