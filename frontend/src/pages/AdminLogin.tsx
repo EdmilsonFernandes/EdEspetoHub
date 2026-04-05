@@ -170,7 +170,7 @@ export function AdminLogin() {
       <div className="space-y-4 ds-login-card-enter w-full">
         <div className="text-center space-y-2.5">
           <button type="button" onClick={handleLogoTap} className="mx-auto block hover:scale-105 transition-transform active:scale-95">
-            <img src="/janocaminho-logo.png" alt="Já no Caminho" className="mx-auto h-14 w-auto rounded-xl shadow-lg border border-slate-200" />
+            <img src="/janocaminho-logo.png" alt="Já no Caminho" className="mx-auto h-16 w-auto drop-shadow-md" />
           </button>
           <p className="text-[12px] font-bold uppercase tracking-[0.25em] text-slate-400">Acesso da plataforma</p>
           <div className="flex items-center justify-center gap-3">

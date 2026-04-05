@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.000300.0684da92",
-  "buildId": "0.1.9+20260405.000300.0684da92-20260405.000300-0684da92",
-  "builtAt": "2026-04-05T00:03:00.899Z",
-  "commitHash": "0684da925a25edc62b8e163a7599a3ad8a21e43a",
-  "shortHash": "0684da92",
+  "versionInternal": "0.1.9+20260405.000800.7e3c08a4",
+  "buildId": "0.1.9+20260405.000800.7e3c08a4-20260405.000800-7e3c08a4",
+  "builtAt": "2026-04-05T00:08:00.620Z",
+  "commitHash": "7e3c08a4d5c680e2646bdc2da5252f1da560f889",
+  "shortHash": "7e3c08a4",
   "branch": "main",
   "commits": [
+    {
+      "hash": "7e3c08a4d5c680e2646bdc2da5252f1da560f889",
+      "shortHash": "7e3c08a4",
+      "dateIso": "2026-04-04T21:04:52-03:00",
+      "subject": "fix(mobile): add camera/gallery permissions and fix profile avatar sync on hub"
+    },
     {
       "hash": "0684da925a25edc62b8e163a7599a3ad8a21e43a",
       "shortHash": "0684da92",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "7ec61e84",
       "dateIso": "2026-04-04T16:47:33-03:00",
       "subject": "feat(push): add super admin global broadcast endpoint"
-    },
-    {
-      "hash": "08f0cc9dca411c2205c60d56680fb8c4ef0cfb5e",
-      "shortHash": "08f0cc9d",
-      "dateIso": "2026-04-04T16:41:14-03:00",
-      "subject": "feat(push): include store name in order status notification body"
     }
   ]
 } as const;
