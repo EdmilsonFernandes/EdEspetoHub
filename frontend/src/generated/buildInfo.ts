@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.034917.89d87ddb",
-  "buildId": "0.1.9+20260405.034917.89d87ddb-20260405.034917-89d87ddb",
-  "builtAt": "2026-04-05T03:49:17.667Z",
-  "commitHash": "89d87ddb4e6612c87ead56a7eb9cf1afe8d1ac27",
-  "shortHash": "89d87ddb",
+  "versionInternal": "0.1.9+20260405.035833.8e475350",
+  "buildId": "0.1.9+20260405.035833.8e475350-20260405.035833-8e475350",
+  "builtAt": "2026-04-05T03:58:33.156Z",
+  "commitHash": "8e4753503c7427e9d00f0dd164a82d61ecf2c3e9",
+  "shortHash": "8e475350",
   "branch": "main",
   "commits": [
+    {
+      "hash": "8e4753503c7427e9d00f0dd164a82d61ecf2c3e9",
+      "shortHash": "8e475350",
+      "dateIso": "2026-04-05T00:51:06-03:00",
+      "subject": "feat: premium drawer with smart lojista shortcuts and improved back button UX"
+    },
     {
       "hash": "89d87ddb4e6612c87ead56a7eb9cf1afe8d1ac27",
       "shortHash": "89d87ddb",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "32ed4baf",
       "dateIso": "2026-04-04T18:27:14-03:00",
       "subject": "refactor(hub): use icon-only brand badge in header for cleaner mobile layout"
-    },
-    {
-      "hash": "8ba9be2387d7398d534f01cef40423405e0aab5c",
-      "shortHash": "8ba9be23",
-      "dateIso": "2026-04-04T18:25:43-03:00",
-      "subject": "feat(hub): add role-based login shortcuts in profile drawer"
     }
   ]
 } as const;

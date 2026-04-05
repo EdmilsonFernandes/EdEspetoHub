@@ -1,14 +1,27 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, SignOut, MapPinLine } from '@phosphor-icons/react';
+import { 
+  ArrowLeft, 
+  SignOut, 
+  MapPinLine, 
+  Plus, 
+  ShieldCheck, 
+  BellRinging, 
+  UserCircle, 
+  Package, 
+  CaretRight,
+  Phone,
+  EnvelopeSimple,
+  Camera
+} from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
 import { formatCurrency, formatOrderDisplayId } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { App as CapacitorApp } from '@capacitor/app';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 export function ClientAccount() {
   const navigate = useNavigate();
@@ -52,7 +65,6 @@ export function ClientAccount() {
         setAddresses(Array.isArray(addressesData) ? addressesData : []);
         setOrders(Array.isArray(ordersData) ? ordersData : []);
 
-        // Sync local storage session user data
         if (meData) {
           try {
             const raw = localStorage.getItem('customerSession');
@@ -106,20 +118,10 @@ export function ClientAccount() {
     const token = String(localStorage.getItem('jnk_mobile_push_token') || '').trim();
     if (token) {
       void customerAccountService.unregisterPushToken({ token });
-    } else {
-      void customerAccountService.unregisterPushToken({});
     }
     localStorage.removeItem('customerSession');
     navigate('/hub', { replace: true });
   };
-
-  const toBase64DataUrl = (file: File) =>
-    new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result || ''));
-      reader.onerror = () => reject(new Error('Falha ao ler imagem.'));
-      reader.readAsDataURL(file);
-    });
 
   const handleSaveProfile = async () => {
     if (profileSaving) return;
@@ -131,21 +133,9 @@ export function ClientAccount() {
         phone: String(phoneDraft || '').trim(),
       });
       setMe(updated || null);
-      const raw = localStorage.getItem('customerSession');
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        const next = {
-          ...parsed,
-          user: {
-            ...(parsed?.user || {}),
-            ...(updated || {}),
-          },
-        };
-        localStorage.setItem('customerSession', JSON.stringify(next));
-      }
-      setProfileMessage('Perfil atualizado.');
+      setProfileMessage('Perfil atualizado com sucesso.');
     } catch (e: any) {
-      setProfileMessage(e?.message || 'Não foi possível salvar perfil.');
+      setProfileMessage(e?.message || 'Erro ao salvar perfil.');
     } finally {
       setProfileSaving(false);
     }
@@ -153,82 +143,27 @@ export function ClientAccount() {
 
   const pickProfileImageNative = async () => {
     try {
-      const image = await Camera.getPhoto({
+      const image = await CapCamera.getPhoto({
         quality: 80,
         allowEditing: false,
         resultType: CameraResultType.Base64,
-        source: CameraSource.Photos, // Abre galeria direto (pode trocar para Prompt para dar opção de câmera)
-        promptLabelHeader: 'Escolha sua foto',
-        promptLabelPhoto: 'Galeria de fotos',
-        promptLabelPicture: 'Tirar uma foto agora'
+        source: CameraSource.Prompt,
+        promptLabelHeader: 'Trocar foto de perfil',
+        promptLabelPhoto: 'Escolher da Galeria',
+        promptLabelPicture: 'Tirar Foto'
       });
 
       if (image.base64String) {
         const dataUrl = `data:image/${image.format};base64,${image.base64String}`;
-        await uploadBase64ProfileImage(dataUrl);
+        setProfileSaving(true);
+        const updated = await customerAccountService.updateMe({ profileImageFile: dataUrl });
+        setMe(updated || null);
+        window.dispatchEvent(new Event('storage'));
+        setProfileMessage('Foto atualizada!');
+        setProfileSaving(false);
       }
-    } catch (e: any) {
-      // Ignora erro de cancelamento
-      if (e.message !== 'User cancelled photos app') {
-        setProfileMessage('Não foi possível acessar a galeria ou câmera.');
-      }
-    }
-  };
-
-  const uploadBase64ProfileImage = async (base64: string) => {
-    setProfileSaving(true);
-    setProfileMessage('Enviando foto...');
-    try {
-      const updated = await customerAccountService.updateMe({ profileImageFile: base64 });
-      setMe(updated || null);
-      const raw = localStorage.getItem('customerSession');
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        const next = {
-          ...parsed,
-          user: {
-            ...(parsed?.user || {}),
-            ...(updated || {}),
-          },
-        };
-        localStorage.setItem('customerSession', JSON.stringify(next));
-      }
-      setProfileMessage('Foto de perfil atualizada.');
-      window.dispatchEvent(new Event('storage'));
-    } catch (e: any) {
-      if (e.status === 413) {
-        setProfileMessage('A imagem excedeu o limite do servidor.');
-      } else {
-        setProfileMessage(e?.message || 'Não foi possível enviar foto.');
-      }
-    } finally {
+    } catch {
       setProfileSaving(false);
-    }
-  };
-
-  const handleProfileImageUpload = async (file?: File | null) => {
-    if (!file || profileSaving) return;
-
-    const MAX_SIZE = 8 * 1024 * 1024;
-    if (file.size > MAX_SIZE) {
-      setProfileMessage('A imagem é muito grande (máx 8MB).');
-      return;
-    }
-
-    try {
-      const base64 = await toBase64DataUrl(file);
-      await uploadBase64ProfileImage(base64);
-    } catch (e: any) {
-      setProfileMessage('Falha ao processar arquivo.');
-    }
-  };
-
-  const handleProfileImageClick = () => {
-    if (Capacitor.isNativePlatform()) {
-      void pickProfileImageNative();
-    } else {
-      const input = document.getElementById('profile-upload-input');
-      if (input) (input as HTMLInputElement).click();
     }
   };
 
@@ -236,26 +171,12 @@ export function ClientAccount() {
     if (pushLoading) return;
     setPushLoading(true);
     try {
-      if (!Capacitor.isNativePlatform() || !Capacitor.isPluginAvailable('PushNotifications')) {
-        setPushEnabled(false);
-        return;
-      }
-      const current = await PushNotifications.checkPermissions();
-      if (current.receive === 'granted' && pushEnabled) {
-        const token = String(localStorage.getItem('jnk_mobile_push_token') || '').trim();
-        if (token) await customerAccountService.unregisterPushToken({ token });
-        await PushNotifications.unregister();
-        setPushEnabled(false);
-        return;
-      }
+      if (!Capacitor.isNativePlatform()) return;
       const requested = await PushNotifications.requestPermissions();
-      if (requested.receive !== 'granted') {
-        const openSettings = (CapacitorApp as any)?.openSettings;
-        if (typeof openSettings === 'function') await openSettings();
-        return;
+      if (requested.receive === 'granted') {
+        await PushNotifications.register();
+        setPushEnabled(true);
       }
-      await PushNotifications.register();
-      setPushEnabled(true);
     } finally {
       setPushLoading(false);
     }
@@ -267,230 +188,230 @@ export function ClientAccount() {
     setPwdMessage('');
     try {
       await customerAccountService.changePassword({
-        currentPassword: String(pwdForm.currentPassword || ''),
-        newPassword: String(pwdForm.newPassword || ''),
+        currentPassword: pwdForm.currentPassword,
+        newPassword: pwdForm.newPassword,
       });
       setPwdForm({ currentPassword: '', newPassword: '' });
       setPwdMessage('Senha alterada com sucesso.');
     } catch (e: any) {
-      setPwdMessage(e?.message || 'Não foi possível alterar a senha.');
+      setPwdMessage(e?.message || 'Falha ao alterar senha.');
     } finally {
       setPwdLoading(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-slate-900" />
+      </div>
+    );
+  }
+
   return (
-    <main className="min-h-screen bg-slate-50 pt-[env(safe-area-inset-top)]">
-      <div className="mx-auto max-w-2xl px-4 py-4 space-y-4">
-        <header className="flex items-center justify-between">
+    <main className="min-h-screen bg-slate-50 pb-12 pt-[env(safe-area-inset-top)]">
+      <div className="mx-auto max-w-2xl">
+        {/* Header Fixo Premium */}
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white/80 px-4 py-4 backdrop-blur-md">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-3 py-2 text-[11px] font-black uppercase tracking-widest text-slate-600 shadow-sm transition-all active:scale-95 active:bg-slate-50"
+            className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-all active:scale-90"
           >
-            <ArrowLeft size={16} weight="bold" />
-            Voltar
+            <ArrowLeft size={20} weight="bold" />
           </button>
+          <h1 className="text-base font-black text-slate-900 uppercase tracking-widest">Minha Conta</h1>
           <button
             onClick={logout}
-            className="flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-3 py-2 text-[11px] font-black uppercase tracking-widest text-rose-600 shadow-sm transition-all active:scale-95 active:bg-rose-50"
+            className="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 transition-all active:scale-90"
           >
-            <SignOut size={16} weight="bold" />
-            Sair
+            <SignOut size={20} weight="bold" />
           </button>
         </header>
 
-        <section className="rounded-[2.5rem] border border-slate-200/80 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-xl font-black text-slate-900 tracking-tight">Meus Dados</h1>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Configurações</span>
-          </div>
-          {loading ? (
-            <p className="text-sm text-slate-500 mt-2">Carregando...</p>
-          ) : error ? (
-            <p className="text-sm text-rose-600 mt-2">{error}</p>
-          ) : (
-            <>
-              <div className="mt-3 flex items-center gap-3">
-                <div className="h-16 w-16 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+        <div className="px-4 py-6 space-y-6">
+          {/* Seção 1: Avatar e Dados Básicos */}
+          <section className="relative overflow-hidden rounded-[2.5rem] bg-white p-6 shadow-sm border border-slate-100">
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="relative">
+                <div className="h-24 w-24 overflow-hidden rounded-[2rem] border-4 border-slate-50 shadow-md">
                   {me?.profileImageUrl ? (
-                    <img src={resolveAssetUrl(String(me.profileImageUrl)) || ''} alt={me?.fullName || 'Cliente'} className="h-full w-full object-cover" />
+                    <img src={resolveAssetUrl(me.profileImageUrl)} alt={me.fullName} className="h-full w-full object-cover" />
                   ) : (
-                    <div className="grid h-full w-full place-items-center text-sm font-black text-slate-500">
-                      {String(me?.fullName || 'AN').slice(0, 2).toUpperCase()}
+                    <div className="grid h-full w-full place-items-center bg-slate-100 text-2xl font-black text-slate-400">
+                      {String(me?.fullName || 'U').slice(0, 1).toUpperCase()}
                     </div>
                   )}
                 </div>
-                <div className="min-w-0 flex-1">
-                  <button
-                    type="button"
-                    onClick={handleProfileImageClick}
-                    className="inline-flex cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2 text-[11px] font-black uppercase tracking-widest text-slate-700 active:scale-95 transition-all shadow-sm"
-                  >
-                    Trocar foto
-                  </button>
+                <button 
+                  onClick={pickProfileImageNative}
+                  className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-white shadow-lg active:scale-90 transition-transform"
+                >
+                  <Camera size={16} weight="fill" />
+                </button>
+              </div>
+              <div>
+                <h2 className="text-xl font-black text-slate-900">{me?.fullName || 'Usuário'}</h2>
+                <p className="text-sm font-bold text-slate-400">{me?.email}</p>
+              </div>
+            </div>
+
+            <div className="mt-8 space-y-3">
+              <div className="grid gap-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Nome Completo</label>
+                <div className="relative">
+                  <UserCircle size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
-                    id="profile-upload-input"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleProfileImageUpload(file);
-                      // Reset value to allow same file selection
-                      e.target.value = '';
-                    }}
+                    value={nameDraft}
+                    onChange={e => setNameDraft(e.target.value)}
+                    className="w-full rounded-2xl border border-slate-100 bg-slate-50 py-3 pl-11 pr-4 text-sm font-bold text-slate-700 focus:border-slate-900/20 focus:outline-none"
                   />
                 </div>
               </div>
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                <input
-                  name="fullName"
-                  autoComplete="name"
-                  value={nameDraft}
-                  onChange={(e) => setNameDraft(e.target.value)}
-                  placeholder="Nome completo"
-                  className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
-                />
-                <input
-                  name="phone"
-                  autoComplete="tel"
-                  value={phoneDraft}
-                  onChange={(e) => setPhoneDraft(e.target.value)}
-                  placeholder="Telefone"
-                  className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
-                />
-              </div>
-              <p className="text-sm text-slate-600 mt-2">{me?.email || '-'}</p>
-              <div className="mt-2">
-                <button
-                  type="button"
-                  onClick={handleSaveProfile}
-                  disabled={profileSaving}
-                  className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-bold text-white disabled:opacity-60"
-                >
-                  {profileSaving ? 'Salvando...' : 'Salvar perfil'}
-                </button>
-                {profileMessage ? (
-                  <p className={`mt-1 text-xs font-bold ${profileMessage.includes('Erro') || profileMessage.includes('excedeu') || profileMessage.includes('expirou') || profileMessage.includes('muito grande') ? 'text-rose-600' : 'text-emerald-600'}`}>
-                    {profileMessage}
-                  </p>
-                ) : null}
-              </div>
-            </>
-          )}
-        </section>
-
-        <section className="rounded-3xl border border-slate-200/80 bg-white/95 backdrop-blur-sm p-4 shadow-[0_14px_40px_-30px_rgba(15,23,42,0.4)]">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 font-black">Endereços</p>
-          {addresses.length === 0 ? (
-            <p className="text-sm text-slate-500 mt-2">Nenhum endereço cadastrado ainda.</p>
-          ) : (
-            <div className="mt-2 space-y-2">
-              {addresses.map((address: any) => (
-                <div key={address.id} className="rounded-2xl border border-slate-200/90 p-3 bg-slate-50/60">
-                  <p className="text-sm font-semibold text-slate-700">{address.label || 'Endereço'} {address.isDefault ? '• Principal' : ''}</p>
-                  <p className="text-xs text-slate-500">
-                    {address.street}, {address.number || 's/n'} - {address.neighborhood} - {address.city}/{address.state}
-                  </p>
+              <div className="grid gap-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Telefone para Contato</label>
+                <div className="relative">
+                  <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    value={phoneDraft}
+                    onChange={e => setPhoneDraft(e.target.value)}
+                    className="w-full rounded-2xl border border-slate-100 bg-slate-50 py-3 pl-11 pr-4 text-sm font-bold text-slate-700 focus:border-slate-900/20 focus:outline-none"
+                  />
                 </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section className="rounded-3xl border border-slate-200/80 bg-white/95 backdrop-blur-sm p-4 shadow-[0_14px_40px_-30px_rgba(15,23,42,0.4)]">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 font-black">Segurança</p>
-          <div className="mt-2 grid gap-2 sm:grid-cols-2">
-            <input
-              type="password"
-              name="current-password"
-              autoComplete="current-password"
-              value={pwdForm.currentPassword}
-              onChange={(e) => setPwdForm((p) => ({ ...p, currentPassword: e.target.value }))}
-              placeholder="Senha atual"
-              className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
-            />
-            <input
-              type="password"
-              name="new-password"
-              autoComplete="new-password"
-              value={pwdForm.newPassword}
-              onChange={(e) => setPwdForm((p) => ({ ...p, newPassword: e.target.value }))}
-              placeholder="Nova senha"
-              className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
-            />
-          </div>
-          <div className="mt-2 flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleChangePassword}
-              disabled={pwdLoading}
-              className="rounded-xl bg-[linear-gradient(120deg,#0f172a,#1e293b)] px-3 py-2 text-xs font-bold text-white shadow-[0_10px_20px_-14px_rgba(15,23,42,0.8)] active:scale-[0.99] disabled:opacity-60"
-            >
-              {pwdLoading ? 'Alterando...' : 'Trocar senha'}
-            </button>
-            {pwdMessage ? <p className="text-xs text-slate-600">{pwdMessage}</p> : null}
-          </div>
-          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-xs font-bold text-slate-800">Notificações push</p>
-                <p className="text-[11px] text-slate-500">Receber atualização de pedido no app.</p>
               </div>
               <button
-                type="button"
-                onClick={handleTogglePush}
-                disabled={pushLoading}
-                className={`rounded-full px-3 py-1.5 text-[11px] font-bold ${pushEnabled ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'} disabled:opacity-60`}
+                onClick={handleSaveProfile}
+                disabled={profileSaving}
+                className="w-full rounded-2xl bg-slate-900 py-3.5 text-xs font-black uppercase tracking-[0.2em] text-white shadow-lg shadow-slate-900/20 active:scale-95 transition-all disabled:opacity-50"
               >
-                {pushLoading ? 'Aguarde...' : pushEnabled ? 'Ativado' : 'Desativado'}
+                {profileSaving ? 'Salvando...' : 'Salvar Alterações'}
+              </button>
+              {profileMessage && (
+                <p className="text-center text-[11px] font-bold text-emerald-600">{profileMessage}</p>
+              )}
+            </div>
+          </section>
+
+          {/* Seção 2: Endereços */}
+          <section className="space-y-3">
+            <div className="flex items-center justify-between px-2">
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                <MapPinLine size={16} weight="duotone" className="text-sky-500" />
+                Meus Endereços
+              </h3>
+              <button 
+                onClick={() => navigate('/cliente/enderecos')}
+                className="flex items-center gap-1.5 rounded-xl bg-sky-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-sky-700 active:scale-95"
+              >
+                <Plus size={12} weight="bold" />
+                Cadastrar
               </button>
             </div>
-          </div>
-        </section>
-
-        <section className="rounded-3xl border border-slate-200/80 bg-white/95 backdrop-blur-sm p-4 shadow-[0_14px_40px_-30px_rgba(15,23,42,0.4)]">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 font-black">Meus pedidos</p>
-          {orders.length === 0 ? (
-            <p className="text-sm text-slate-500 mt-2">Sem pedidos vinculados.</p>
-          ) : (
-            <div className="mt-2 space-y-2">
-              {orders.slice(0, 20).map((order: any) => (
-                <div key={order.id} className="rounded-2xl border border-slate-200/90 p-3 bg-slate-50/60">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-semibold text-slate-700">
-                      #{formatOrderDisplayId(order.id, order?.store?.slug)}
-                    </p>
-                    <span className="text-xs font-bold text-slate-500 uppercase">{order.status}</span>
-                  </div>
-                  <p className="text-xs text-slate-500 mt-1">
-                    {new Date(order.createdAt).toLocaleString('pt-BR')} • {order?.store?.name || 'Loja'}
-                  </p>
-                  <p className="text-sm font-bold text-slate-900 mt-1">{formatCurrency(Number(order.total || 0))}</p>
-                  <div className="mt-2 flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => navigate(`/pedido/${order.id}`)}
-                      className="rounded-lg bg-[linear-gradient(120deg,#0f172a,#1e293b)] px-3 py-1.5 text-[11px] font-bold text-white shadow-[0_10px_20px_-14px_rgba(15,23,42,0.8)]"
-                    >
-                      Acompanhar
-                    </button>
-                    {order?.store?.slug ? (
-                      <button
-                        type="button"
-                        onClick={() => navigate(`/${order.store.slug}`)}
-                        className="rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] font-semibold text-slate-700 inline-flex items-center gap-1"
-                      >
-                        <MapPinLine size={12} />
-                        Ir para loja
-                      </button>
-                    ) : null}
-                  </div>
+            
+            <div className="space-y-2">
+              {addresses.length === 0 ? (
+                <div className="rounded-3xl border border-dashed border-slate-200 bg-white p-8 text-center">
+                  <p className="text-sm font-bold text-slate-400">Nenhum endereço cadastrado</p>
                 </div>
-              ))}
+              ) : (
+                addresses.map(addr => (
+                  <div key={addr.id} className="group flex items-center justify-between rounded-3xl bg-white p-4 shadow-sm border border-slate-100">
+                    <div className="flex items-center gap-3">
+                      <div className="grid h-10 w-10 place-items-center rounded-2xl bg-slate-50 text-slate-400 group-hover:bg-sky-50 group-hover:text-sky-600 transition-colors">
+                        <MapPinLine size={20} weight="duotone" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-black text-slate-900">{addr.label || 'Casa'}</p>
+                        <p className="truncate text-[11px] font-bold text-slate-400">{addr.street}, {addr.number}</p>
+                      </div>
+                    </div>
+                    <CaretRight size={16} className="text-slate-300" />
+                  </div>
+                ))
+              )}
             </div>
-          )}
-        </section>
+          </section>
+
+          {/* Seção 3: Segurança e Notificações */}
+          <section className="grid gap-4 sm:grid-cols-2">
+            {/* Segurança */}
+            <div className="rounded-[2rem] bg-white p-5 border border-slate-100 shadow-sm space-y-4">
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                <ShieldCheck size={16} weight="duotone" className="text-indigo-500" />
+                Segurança
+              </h3>
+              <div className="space-y-2">
+                <input
+                  type="password"
+                  placeholder="Nova senha"
+                  value={pwdForm.newPassword}
+                  onChange={e => setPwdForm(p => ({...p, newPassword: e.target.value}))}
+                  className="w-full rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-[13px] font-bold focus:outline-none"
+                />
+                <button
+                  onClick={handleChangePassword}
+                  disabled={pwdLoading}
+                  className="w-full rounded-xl bg-slate-100 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 active:scale-95 transition-all"
+                >
+                  Trocar Senha
+                </button>
+              </div>
+            </div>
+
+            {/* Notificações */}
+            <div className="rounded-[2rem] bg-white p-5 border border-slate-100 shadow-sm flex flex-col justify-between">
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                <BellRinging size={16} weight="duotone" className="text-amber-500" />
+                Notificações
+              </h3>
+              <div className="mt-4 flex items-center justify-between gap-3">
+                <p className="text-[11px] font-bold text-slate-500 leading-tight">Receber avisos sobre meus pedidos</p>
+                <button
+                  onClick={handleTogglePush}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${pushEnabled ? 'bg-emerald-500' : 'bg-slate-200'}`}
+                >
+                  <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${pushEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                </button>
+              </div>
+            </div>
+          </section>
+
+          {/* Seção 4: Pedidos Recentes */}
+          <section className="space-y-3">
+            <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2 px-2">
+              <Package size={16} weight="duotone" className="text-emerald-500" />
+              Pedidos Recentes
+            </h3>
+            <div className="space-y-2">
+              {orders.length === 0 ? (
+                <div className="rounded-3xl bg-white p-8 text-center border border-slate-100 shadow-sm">
+                  <p className="text-sm font-bold text-slate-400">Nenhum pedido realizado</p>
+                </div>
+              ) : (
+                orders.slice(0, 5).map(order => (
+                  <button
+                    key={order.id}
+                    onClick={() => navigate(`/pedido/${order.id}`)}
+                    className="flex w-full items-center justify-between rounded-3xl bg-white p-4 border border-slate-100 shadow-sm active:scale-[0.98] transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="grid h-10 w-10 place-items-center rounded-2xl bg-emerald-50 text-emerald-600">
+                        <Package size={20} weight="duotone" />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-sm font-black text-slate-900">#{formatOrderDisplayId(order.id, order.store?.slug)}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase">{order.status}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-black text-slate-900">{formatCurrency(order.total || 0)}</p>
+                      <p className="text-[10px] font-bold text-slate-400">{new Date(order.createdAt).toLocaleDateString('pt-BR')}</p>
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+          </section>
+        </div>
       </div>
     </main>
   );
