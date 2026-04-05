@@ -834,12 +834,12 @@ export function MarketplacePage() {
               <button
                 type="button"
                 onClick={() => navigate('/hub')}
-                className="relative shrink-0 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-[0_8px_20px_-6px_rgba(0,0,0,0.15)] border border-slate-100 transition-transform active:scale-90"
+                className="relative shrink-0 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-float-sm border border-brand-light transition-transform active:scale-90"
               >
                 <img
-                  src="/janocaminho-logov1.svg"
+                  src="/jnc.png"
                   alt="Logo"
-                  className="h-[70%] w-[70%] object-contain"
+                  className="h-[80%] w-[80%] object-contain"
                 />
               </button>
             </div>

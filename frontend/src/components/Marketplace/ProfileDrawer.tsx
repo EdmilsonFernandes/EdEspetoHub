@@ -11,6 +11,7 @@ import {
   UserRectangle,
   House,
   CaretRight,
+  MapPin,
   CreditCard,
   Gift
 } from '@phosphor-icons/react';
@@ -99,7 +100,7 @@ export function ProfileDrawer({
         { id: 'account', label: 'Dados do perfil', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-sky-600', bgColor: 'bg-sky-50' },
         { id: 'orders', label: 'Meus pedidos', icon: <BellSimple size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-amber-600', bgColor: 'bg-amber-50' },
         { id: 'security', label: 'Segurança', icon: <ShieldCheck size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-indigo-600', bgColor: 'bg-indigo-50' },
-        { id: 'help', label: 'Central de ajuda', icon: <Lifebuoy size={22} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
+        { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={22} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
         { id: 'logout', label: 'Sair da conta', icon: <SignOut size={22} weight="duotone" />, onClick: onLogout, tone: 'danger' },
       ]
     : [
@@ -226,7 +227,7 @@ export function ProfileDrawer({
                 <div className="grid h-12 w-12 place-items-center rounded-2xl bg-sky-50 text-sky-600">
                   <Truck size={28} weight="duotone" />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 text-center">Lojista</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 text-center">Sou Lojista</span>
               </button>
               <button
                 onClick={onOpenMotoboyLogin}
@@ -241,13 +242,13 @@ export function ProfileDrawer({
           </section>
         </div>
 
-        <div className="border-t border-slate-100 bg-slate-50 p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+        <div className="border-t border-slate-100 bg-slate-50 p-6 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <p className="text-[11px] font-black text-slate-900 uppercase tracking-tighter">Já no Caminho</p>
               <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Versão {versionLabel || 'v0.0.0'}</p>
             </div>
-            <img src="/janocaminho-logov1.svg" alt="Logo" className="h-7 w-auto opacity-40 grayscale" />
+            <img src="/jnc.png" alt="Logo" className="h-8 w-auto grayscale opacity-50" />
           </div>
         </div>
       </aside>

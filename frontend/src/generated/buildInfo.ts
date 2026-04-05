@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.140725.5daace36",
-  "buildId": "0.1.9+20260405.140725.5daace36-20260405.140725-5daace36",
-  "builtAt": "2026-04-05T14:07:25.658Z",
-  "commitHash": "5daace36d472d3182415336bcafa52e3c8d1b3b4",
-  "shortHash": "5daace36",
+  "versionInternal": "0.1.9+20260405.141651.95d41c49",
+  "buildId": "0.1.9+20260405.141651.95d41c49-20260405.141651-95d41c49",
+  "builtAt": "2026-04-05T14:16:51.902Z",
+  "commitHash": "95d41c49e3403bc3dc369b4165828e1f734762ac",
+  "shortHash": "95d41c49",
   "branch": "main",
   "commits": [
+    {
+      "hash": "95d41c49e3403bc3dc369b4165828e1f734762ac",
+      "shortHash": "95d41c49",
+      "dateIso": "2026-04-05T11:11:56-03:00",
+      "subject": "feat: complete client address management and final premium UI refinements for Marketplace"
+    },
     {
       "hash": "5daace36d472d3182415336bcafa52e3c8d1b3b4",
       "shortHash": "5daace36",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "8a41b531",
       "dateIso": "2026-04-04T20:33:35-03:00",
       "subject": "fix(frontend): change autocomplete to autoComplete to fix TS build error"
-    },
-    {
-      "hash": "67bc37b062f59d95042734b9e96528129ec9a14b",
-      "shortHash": "67bc37b0",
-      "dateIso": "2026-04-04T20:30:55-03:00",
-      "subject": "feat(hub): improve marketplace logo, enable login autocomplete, and fix profile photo upload permissions/limits"
     }
   ]
 } as const;
