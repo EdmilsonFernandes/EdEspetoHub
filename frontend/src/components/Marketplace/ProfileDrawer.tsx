@@ -11,7 +11,6 @@ import {
   UserRectangle,
   House,
   CaretRight,
-  MapPin,
   CreditCard,
   Gift
 } from '@phosphor-icons/react';

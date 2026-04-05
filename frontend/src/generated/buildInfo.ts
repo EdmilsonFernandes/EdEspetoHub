@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.120701.68e4eb18",
-  "buildId": "0.1.9+20260405.120701.68e4eb18-20260405.120701-68e4eb18",
-  "builtAt": "2026-04-05T12:07:01.613Z",
-  "commitHash": "68e4eb1803e07256d4529f800ecedaaa93a1d7ab",
-  "shortHash": "68e4eb18",
+  "versionInternal": "0.1.9+20260405.122702.1ba9d528",
+  "buildId": "0.1.9+20260405.122702.1ba9d528-20260405.122702-1ba9d528",
+  "builtAt": "2026-04-05T12:27:02.395Z",
+  "commitHash": "1ba9d52888086e0aa897c43b5ff9aea140406a81",
+  "shortHash": "1ba9d528",
   "branch": "main",
   "commits": [
+    {
+      "hash": "1ba9d52888086e0aa897c43b5ff9aea140406a81",
+      "shortHash": "1ba9d528",
+      "dateIso": "2026-04-05T09:09:17-03:00",
+      "subject": "style: premium drawer with colorful icons and final Marketplace UI refinements"
+    },
     {
       "hash": "68e4eb1803e07256d4529f800ecedaaa93a1d7ab",
       "shortHash": "68e4eb18",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "80918962",
       "dateIso": "2026-04-04T19:54:03-03:00",
       "subject": "fix(hub): remove stale advanced-filters handler causing frontend build failure"
-    },
-    {
-      "hash": "e377e456779fdd11d63cdeac66e03ae599721646",
-      "shortHash": "e377e456",
-      "dateIso": "2026-04-04T19:51:37-03:00",
-      "subject": "feat(hub): add favorites carousel section above regional stores"
     }
   ]
 } as const;

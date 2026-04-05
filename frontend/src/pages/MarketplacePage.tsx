@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MagnifyingGlass, MapPin, Star, Storefront, House, List, CaretDown, Heart, CaretRight } from '@phosphor-icons/react';
+import { MagnifyingGlass, Star, Storefront, House, List, CaretDown, Heart, CaretRight, MapPin } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { productService } from '../services/productService';
 import { customerAccountService } from '../services/customerAccountService';
@@ -853,7 +853,7 @@ export function MarketplacePage() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="O que você quer pedir agora?"
-                className="h-12 w-full rounded-2xl border-none bg-white px-12 text-[15px] font-medium text-slate-700 shadow-[0_10px_25px_-8px_rgba(0,0,0,0.08)] ring-1 ring-slate-200/50 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/5 transition-all"
+                className="h-13 w-full rounded-[1.25rem] border-none bg-white px-12 text-[15px] font-medium text-slate-700 shadow-[0_10px_25px_-8px_rgba(0,0,0,0.08)] ring-1 ring-slate-200/50 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/5 transition-all"
               />
             </div>
 
