@@ -5,13 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.122702.1ba9d528",
-  "buildId": "0.1.9+20260405.122702.1ba9d528-20260405.122702-1ba9d528",
-  "builtAt": "2026-04-05T12:27:02.395Z",
-  "commitHash": "1ba9d52888086e0aa897c43b5ff9aea140406a81",
-  "shortHash": "1ba9d528",
+  "versionInternal": "0.1.9+20260405.140725.5daace36",
+  "buildId": "0.1.9+20260405.140725.5daace36-20260405.140725-5daace36",
+  "builtAt": "2026-04-05T14:07:25.658Z",
+  "commitHash": "5daace36d472d3182415336bcafa52e3c8d1b3b4",
+  "shortHash": "5daace36",
   "branch": "main",
   "commits": [
+    {
+      "hash": "5daace36d472d3182415336bcafa52e3c8d1b3b4",
+      "shortHash": "5daace36",
+      "dateIso": "2026-04-05T09:45:41-03:00",
+      "subject": "style: premium lux minimalist overhaul for marketplace top section"
+    },
+    {
+      "hash": "4716a36bab9dd837fd423e7d82609563396f44e1",
+      "shortHash": "4716a36b",
+      "dateIso": "2026-04-05T09:34:46-03:00",
+      "subject": "feat: complete client address management and final premium UI refinements for Marketplace"
+    },
     {
       "hash": "1ba9d52888086e0aa897c43b5ff9aea140406a81",
       "shortHash": "1ba9d528",
@@ -179,18 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "67bc37b0",
       "dateIso": "2026-04-04T20:30:55-03:00",
       "subject": "feat(hub): improve marketplace logo, enable login autocomplete, and fix profile photo upload permissions/limits"
-    },
-    {
-      "hash": "3fc6ed467ac86f779abec4bfa55466ae60489cbd",
-      "shortHash": "3fc6ed46",
-      "dateIso": "2026-04-04T19:58:54-03:00",
-      "subject": "feat(motoboy): notify available delivery orders via push"
-    },
-    {
-      "hash": "809189620952fbf2b20f8124093442e0f7598eda",
-      "shortHash": "80918962",
-      "dateIso": "2026-04-04T19:54:03-03:00",
-      "subject": "fix(hub): remove stale advanced-filters handler causing frontend build failure"
     }
   ]
 } as const;

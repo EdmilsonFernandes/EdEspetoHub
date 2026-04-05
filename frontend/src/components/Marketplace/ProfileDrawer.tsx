@@ -98,10 +98,8 @@ export function ProfileDrawer({
     ? [
         { id: 'account', label: 'Dados do perfil', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-sky-600', bgColor: 'bg-sky-50' },
         { id: 'orders', label: 'Meus pedidos', icon: <BellSimple size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-amber-600', bgColor: 'bg-amber-50' },
-        { id: 'wallet', label: 'Pagamentos', icon: <CreditCard size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-emerald-600', bgColor: 'bg-emerald-50' },
         { id: 'security', label: 'Segurança', icon: <ShieldCheck size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-indigo-600', bgColor: 'bg-indigo-50' },
-        { id: 'coupons', label: 'Cupons', icon: <Gift size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-rose-600', bgColor: 'bg-rose-50' },
-        { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={22} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
+        { id: 'help', label: 'Central de ajuda', icon: <Lifebuoy size={22} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
         { id: 'logout', label: 'Sair da conta', icon: <SignOut size={22} weight="duotone" />, onClick: onLogout, tone: 'danger' },
       ]
     : [

@@ -1,8 +1,9 @@
 // @ts-nocheck
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPinLine, Plus, Trash, House, Suitcase, MapPin, CaretRight, CheckCircle } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
+import { mapsService } from '../services/mapsService'; // Importar mapsService
 import { useToast } from '../contexts/ToastContext';
 
 export function AddressDistance() {
@@ -12,6 +13,7 @@ export function AddressDistance() {
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [isSubmitting, setIsAddSubmitting] = useState(false);
+  const [isGeocoding, setIsGeocoding] = useState(false); // Novo estado para geocoding
 
   const [form, setForm] = useState({
     label: 'Casa',
@@ -26,7 +28,7 @@ export function AddressDistance() {
     phone: '',
   });
 
-  const loadAddresses = async () => {
+  const loadAddresses = useCallback(async () => {
     try {
       const data = await customerAccountService.listAddresses();
       setAddresses(Array.isArray(data) ? data : []);
@@ -35,16 +37,45 @@ export function AddressDistance() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
 
   useEffect(() => {
     loadAddresses();
-  }, []);
+  }, [loadAddresses]);
+
+  // Efeito para preencher endereço automaticamente pelo CEP
+  useEffect(() => {
+    const fetchAddressByCep = async () => {
+      const cleanedCep = String(form.cep || '').replace(/\D/g, '');
+      if (cleanedCep.length !== 8) return;
+
+      setIsGeocoding(true);
+      try {
+        const addressData = await mapsService.geocode(cleanedCep);
+        if (addressData) {
+          setForm(prev => ({
+            ...prev,
+            street: addressData.street || prev.street,
+            neighborhood: addressData.neighborhood || prev.neighborhood,
+            city: addressData.city || prev.city,
+            state: addressData.state || prev.state,
+            complement: addressData.complement || prev.complement,
+          }));
+        }
+      } catch (err) {
+        // showToast('CEP não encontrado ou inválido', 'warning');
+      } finally {
+        setIsGeocoding(false);
+      }
+    };
+    const timer = setTimeout(fetchAddressByCep, 500); // Debounce
+    return () => clearTimeout(timer);
+  }, [form.cep]); // Dispara quando o CEP muda
 
   const handleAddAddress = async (e) => {
     e.preventDefault();
-    if (!form.street || !form.number || !form.neighborhood) {
-      showToast('Preencha os campos obrigatórios', 'warning');
+    if (!form.cep || !form.street || !form.number || !form.neighborhood || !form.city || !form.state) {
+      showToast('Preencha CEP, rua, número, bairro, cidade e estado corretamente.', 'warning');
       return;
     }
     setIsAddSubmitting(true);
@@ -110,20 +141,13 @@ export function AddressDistance() {
               </div>
 
               <form onSubmit={handleAddAddress} className="space-y-3">
-                <div className="grid grid-cols-3 gap-2">
-                  {['Casa', 'Trabalho', 'Outro'].map(l => (
-                    <button
-                      key={l}
-                      type="button"
-                      onClick={() => setForm({...form, label: l})}
-                      className={`py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
-                        form.label === l ? 'bg-slate-900 border-slate-900 text-white shadow-md' : 'bg-white border-slate-200 text-slate-500'
-                      }`}
-                    >
-                      {l}
-                    </button>
-                  ))}
-                </div>
+                <input
+                  placeholder="CEP"
+                  value={form.cep}
+                  onChange={e => setForm({...form, cep: e.target.value})}
+                  className="w-full rounded-2xl bg-slate-50 border-none px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-slate-900/5 transition-all"
+                  disabled={isGeocoding}
+                />
 
                 <input
                   placeholder="Nome do Recebedor"
