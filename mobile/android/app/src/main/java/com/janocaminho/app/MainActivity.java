@@ -59,10 +59,10 @@ public class MainActivity extends BridgeActivity {
             set.start();
         });
         super.onCreate(savedInstanceState);
-        checkAndRequestMediaPermissions();
+        checkAndRequestMediaPermissionsOnce();
     }
 
-    private void checkAndRequestMediaPermissions() {
+    private void checkAndRequestMediaPermissionsOnce() {
         String[] permissions;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             permissions = new String[]{

@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.025850.5473287c",
-  "buildId": "0.1.9+20260405.025850.5473287c-20260405.025850-5473287c",
-  "builtAt": "2026-04-05T02:58:50.262Z",
-  "commitHash": "5473287c4d61b0a337450ac936ae72c9c778be9e",
-  "shortHash": "5473287c",
+  "versionInternal": "0.1.9+20260405.030227.f3aa0e93",
+  "buildId": "0.1.9+20260405.030227.f3aa0e93-20260405.030227-f3aa0e93",
+  "builtAt": "2026-04-05T03:02:27.964Z",
+  "commitHash": "f3aa0e93bea9dc14cce9b82005d18ea58962f38d",
+  "shortHash": "f3aa0e93",
   "branch": "main",
   "commits": [
+    {
+      "hash": "f3aa0e93bea9dc14cce9b82005d18ea58962f38d",
+      "shortHash": "f3aa0e93",
+      "dateIso": "2026-04-05T00:00:59-03:00",
+      "subject": "fix(mobile): resolve ERR_UNKNOWN_URL_SCHEME by using BridgeWebViewClient correctly"
+    },
     {
       "hash": "5473287c4d61b0a337450ac936ae72c9c778be9e",
       "shortHash": "5473287c",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "3b26be5f",
       "dateIso": "2026-04-04T17:55:18-03:00",
       "subject": "style(hub): align top create account CTA with hub visual system"
-    },
-    {
-      "hash": "f9bbd89462c0b2f903ef52ffc744631267b39879",
-      "shortHash": "f9bbd894",
-      "dateIso": "2026-04-04T17:52:42-03:00",
-      "subject": "fix(hub): remove redundant create CTA and improve mobile safe-area/header spacing"
     }
   ]
 } as const;
