@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.030227.f3aa0e93",
-  "buildId": "0.1.9+20260405.030227.f3aa0e93-20260405.030227-f3aa0e93",
-  "builtAt": "2026-04-05T03:02:27.964Z",
-  "commitHash": "f3aa0e93bea9dc14cce9b82005d18ea58962f38d",
-  "shortHash": "f3aa0e93",
+  "versionInternal": "0.1.9+20260405.030942.46c39cb9",
+  "buildId": "0.1.9+20260405.030942.46c39cb9-20260405.030942-46c39cb9",
+  "builtAt": "2026-04-05T03:09:42.756Z",
+  "commitHash": "46c39cb99348d7149de60e4d8e2abd096c367e7f",
+  "shortHash": "46c39cb9",
   "branch": "main",
   "commits": [
+    {
+      "hash": "46c39cb99348d7149de60e4d8e2abd096c367e7f",
+      "shortHash": "46c39cb9",
+      "dateIso": "2026-04-05T00:03:24-03:00",
+      "subject": "fix(mobile): request permissions only on create to avoid repeated prompts"
+    },
     {
       "hash": "f3aa0e93bea9dc14cce9b82005d18ea58962f38d",
       "shortHash": "f3aa0e93",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "efc58c14",
       "dateIso": "2026-04-04T18:03:01-03:00",
       "subject": "refactor(hub): remove hero banner and adopt ifood-like greeting header"
-    },
-    {
-      "hash": "3b26be5fc55e57ee79cb354ed4ee054044df73b4",
-      "shortHash": "3b26be5f",
-      "dateIso": "2026-04-04T17:55:18-03:00",
-      "subject": "style(hub): align top create account CTA with hub visual system"
     }
   ]
 } as const;

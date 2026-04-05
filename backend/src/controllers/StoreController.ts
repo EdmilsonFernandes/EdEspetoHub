@@ -162,6 +162,12 @@ export class StoreController {
    * @author Edmilson Lopes
    */
   private static resolveDayEntries(openingHours: any[], jsDay: number) {
+    const normalizedDay = ((jsDay % 7) + 7) % 7;
+    // Tenta primeiro o match exato (0-6)
+    const exactMatches = openingHours.filter((entry: any) => Number(entry?.day) === normalizedDay);
+    if (exactMatches.length > 0) return exactMatches;
+
+    // Se não houver match exato, tenta os candidatos legados (ISO ou Sun-first)
     const candidates = StoreController.candidateDayValues(jsDay);
     return openingHours.filter((entry: any) => {
       const value = Number(entry?.day);
@@ -240,6 +246,9 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
    * @date 2025-12-17
    */
   private static isStoreOpenNow(store: any) {
+    // Se a loja está fechada manualmente, nem checa horário
+    if (store.open === false) return false;
+
     const openingHours = store?.settings?.openingHours;
     if (!Array.isArray(openingHours) || openingHours.length === 0) return true;
 
@@ -253,12 +262,18 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
     const dayEntries = StoreController.resolveDayEntries(openingHours, day).filter(
       (entry: any) => entry?.enabled !== false
     );
+    
+    // Se hoje está explicitamente desativado (enabled: false para o match exato), dayEntries virá vazio
+    // e o código cairá no overnight. Se o overnight também falhar, retornará falso.
+    // O problema antes era que o candidato da segunda-feira (day: 1) batia no domingo (jsDay: 0)
+    // se o domingo não estivesse no DB.
     if (!dayEntries.length) {
       return StoreController.isOpenFromPreviousDayOvernight(openingHours, day, minutes);
     }
 
     const openByTodayInterval = dayEntries.some((dayEntry: any) => {
       const intervals = Array.isArray(dayEntry.intervals) ? dayEntry.intervals : [];
+      // Se não tem intervalos mas está habilitado, considera aberto o dia todo
       if (!intervals.length) return true;
       return intervals.some((interval: any) => {
         if (!interval?.start || !interval?.end) return false;

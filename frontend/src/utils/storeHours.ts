@@ -14,6 +14,20 @@ const candidateDayValues = (jsDay: number) => {
   return Array.from(new Set([ normalized, isoDay, sunFirstDay ]));
 };
 
+const resolveDayEntries = (openingHours: OpeningDay[], jsDay: number) => {
+  const normalized = ((jsDay % 7) + 7) % 7;
+  // Tenta primeiro o match exato (0-6)
+  const exactMatches = openingHours.filter((entry) => parseDayValue(entry?.day) === normalized);
+  if (exactMatches.length > 0) return exactMatches;
+
+  // Fallback para candidatos legados
+  const candidates = candidateDayValues(jsDay);
+  return openingHours.filter((entry) => {
+    const day = parseDayValue(entry?.day);
+    return day != null && candidates.includes(day);
+  });
+};
+
 const getSaoPauloNowParts = () => {
   const now = new Date();
   const parts = new Intl.DateTimeFormat('en-US', {
@@ -44,31 +58,15 @@ const getSaoPauloNowParts = () => {
 
 export const normalizeOpeningHours = (openingHours?: OpeningDay[]) => {
   const base = Array.isArray(openingHours) ? openingHours : [];
-  const byDay = new Map<number, OpeningDay>();
-  const groups = new Map<number, OpeningDay[]>();
-
-  base.forEach((entry) => {
-    const parsedDay = parseDayValue(entry?.day);
-    if (parsedDay == null) return;
-    const dayValue = ((parsedDay % 7) + 7) % 7;
-    const normalizedEntry = { ...entry, day: dayValue };
-    byDay.set(dayValue, normalizedEntry);
-    if (!groups.has(dayValue)) groups.set(dayValue, []);
-    groups.get(dayValue)?.push(normalizedEntry);
-  });
-
   const normalized = Array.from({ length: 7 }).map((_, day) => {
-    const entry = byDay.get(day);
-    const groupEntries = groups.get(day) || [];
-    const mergedIntervals = groupEntries.flatMap((item) =>
-      Array.isArray(item?.intervals) && item.intervals.length > 0 ? item.intervals : []
-    );
+    const dayEntries = resolveDayEntries(base, day);
+    const enabled = dayEntries.some(e => e.enabled !== false);
+    const mergedIntervals = dayEntries.flatMap(e => Array.isArray(e.intervals) ? e.intervals : []);
+    
     return {
       day,
-      enabled: entry?.enabled ?? groupEntries.some((item) => item?.enabled !== false),
-      intervals: mergedIntervals.length > 0
-        ? mergedIntervals
-        : [ { start: '10:00', end: '22:00' } ],
+      enabled,
+      intervals: mergedIntervals,
     };
   });
 
@@ -91,11 +89,7 @@ const isInsideInterval = (nowMinutes: number, start: number, end: number) => {
 
 const isOpenFromPreviousDayOvernight = (openingHours: OpeningDay[], currentDay: number, currentMinutes: number) => {
   const previousDay = (currentDay + 6) % 7;
-  const previousCandidates = candidateDayValues(previousDay);
-  const previousEntries = openingHours.filter((entry) => {
-    const day = parseDayValue(entry?.day);
-    return day != null && previousCandidates.includes(day) && entry?.enabled !== false;
-  });
+  const previousEntries = resolveDayEntries(openingHours, previousDay).filter(e => e.enabled !== false);
   if (!previousEntries.length) return false;
 
   return previousEntries.some((entry) => {
@@ -114,15 +108,13 @@ export const isStoreOpenNow = (openingHours?: OpeningDay[]) => {
   if (!Array.isArray(openingHours) || openingHours.length === 0) return true;
 
   const { day, minutes } = getSaoPauloNowParts();
-  const candidates = candidateDayValues(day);
-  const todayEntries = openingHours.filter((entry) => {
-    const parsed = parseDayValue(entry?.day);
-    return parsed != null && candidates.includes(parsed) && entry?.enabled !== false;
-  });
+  const todayEntries = resolveDayEntries(openingHours, day).filter(e => e.enabled !== false);
+  
   if (!todayEntries.length) return isOpenFromPreviousDayOvernight(openingHours, day, minutes);
 
   const openByToday = todayEntries.some((entry) => {
     const intervals = Array.isArray(entry?.intervals) ? entry.intervals : [];
+    // Habilitado mas sem intervalos = aberto o dia todo
     if (!intervals.length) return true;
     return intervals.some((interval) => {
       const start = toMinutes(interval?.start);

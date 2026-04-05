@@ -635,7 +635,7 @@ export function StorePage() {
           setDeliveryFee(data.settings?.deliveryFee ?? '');
           setPostalEnabled(Boolean(data.settings?.postalEnabled));
           setPostalOriginZip(String(data.settings?.postalOriginZip || ''));
-          setStoreOpenNow(isStoreOpenNow(normalizedHours));
+          setStoreOpenNow(typeof data.openNow === 'boolean' ? data.openNow : isStoreOpenNow(normalizedHours));
           setStoreSubscription(data.subscription || null);
           setStorePlanExempt(Boolean(data.settings?.planExempt || data.subscription?.planExempt));
           setStoreOrderingEnabled(data.settings?.isOrderingEnabled !== false);
