@@ -153,15 +153,15 @@ export function ClientAccount() {
   const handleProfileImageUpload = async (file?: File | null) => {
     if (!file || profileSaving) return;
 
-    // Check file size (max 5MB to avoid 413 Payload Too Large with Base64 overhead)
-    const MAX_SIZE = 5 * 1024 * 1024;
+    // Check file size (max 8MB)
+    const MAX_SIZE = 8 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
-      setProfileMessage('A imagem é muito grande. Escolha uma foto de até 5MB.');
+      setProfileMessage('A imagem é muito grande. Escolha uma foto de até 8MB.');
       return;
     }
 
     setProfileSaving(true);
-    setProfileMessage('');
+    setProfileMessage('Enviando foto...');
     try {
       const base64 = await toBase64DataUrl(file);
       const updated = await customerAccountService.updateMe({ profileImageFile: base64 });

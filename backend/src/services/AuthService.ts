@@ -240,7 +240,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     const token = jwt.sign(
       { sub: admin.id, role: 'SUPER_ADMIN' },
       env.jwtSecret,
-      { expiresIn: '12h' }
+      { expiresIn: '30d' }
     );
 
     return { token };
@@ -352,7 +352,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       const token = jwt.sign(
         { sub: result.user.id, role: 'MOTOBOY' },
         env.jwtSecret,
-        { expiresIn: '12h' }
+        { expiresIn: '30d' }
       );
 
       return {
@@ -538,7 +538,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     const token = jwt.sign(
       { sub: result.user.id, storeId: result.store.id },
       env.jwtSecret,
-      { expiresIn: '12h' }
+      { expiresIn: '30d' }
     );
 
     return {
@@ -1062,7 +1062,7 @@ async changePassword(userId: string, currentPassword: string, newPassword: strin
    */
   private generateToken(userId: string, storeId?: string)
   {
-    return jwt.sign({ sub: userId, storeId }, env.jwtSecret, { expiresIn: '12h' });
+    return jwt.sign({ sub: userId, storeId }, env.jwtSecret, { expiresIn: '30d' });
   }
 
 

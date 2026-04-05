@@ -124,10 +124,16 @@ const readCustomerSession = () => {
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== 'object') return null;
-    return parsed as {
-      token?: string;
-      user?: { fullName?: string; name?: string; email?: string; profileImageUrl?: string | null };
-    };
+    
+    // Check if token is potentially expired (client-side hint)
+    // Most tokens here are now 30d, but we can check if it exists
+    if (parsed.token && parsed.user) {
+      return parsed as {
+        token?: string;
+        user?: { fullName?: string; name?: string; email?: string; profileImageUrl?: string | null };
+      };
+    }
+    return null;
   } catch {
     return null;
   }

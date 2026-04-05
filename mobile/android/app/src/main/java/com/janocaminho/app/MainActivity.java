@@ -31,6 +31,7 @@ public class MainActivity extends BridgeActivity {
     private static final String ROOT_DOMAIN = "janocaminho.com.br";
     private static final long NAV_ANIM_DURATION_MS = 220L;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 4401;
+    private static final int MEDIA_PERMISSION_REQUEST_CODE = 4402;
 
     private String lastKnownUrl = HUB_URL;
     private GeolocationPermissions.Callback pendingGeoCallback = null;
@@ -58,6 +59,35 @@ public class MainActivity extends BridgeActivity {
             set.start();
         });
         super.onCreate(savedInstanceState);
+        checkAndRequestMediaPermissions();
+    }
+
+    private void checkAndRequestMediaPermissions() {
+        String[] permissions;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            permissions = new String[]{
+                Manifest.permission.CAMERA,
+                Manifest.permission.READ_MEDIA_IMAGES
+            };
+        } else {
+            permissions = new String[]{
+                Manifest.permission.CAMERA,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            };
+        }
+
+        boolean needRequest = false;
+        for (String p : permissions) {
+            if (ContextCompat.checkSelfPermission(this, p) != PackageManager.PERMISSION_GRANTED) {
+                needRequest = true;
+                break;
+            }
+        }
+
+        if (needRequest) {
+            ActivityCompat.requestPermissions(this, permissions, MEDIA_PERMISSION_REQUEST_CODE);
+        }
     }
 
     @Override
@@ -123,6 +153,12 @@ public class MainActivity extends BridgeActivity {
                     LOCATION_PERMISSION_REQUEST_CODE
                 );
             }
+
+            // Garante que o seletor de arquivos funcione no WebView
+            @Override
+            public boolean onShowFileChooser(WebView webView, android.webkit.ValueCallback<android.net.Uri[]> filePathCallback, WebChromeClient.FileChooserParams fileChooserParams) {
+                return super.onShowFileChooser(webView, filePathCallback, fileChooserParams);
+            }
         });
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.setAcceptCookie(true);
@@ -133,12 +169,13 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) return;
-        if (pendingGeoCallback == null || pendingGeoOrigin == null) return;
-        boolean granted = hasLocationPermission();
-        pendingGeoCallback.invoke(pendingGeoOrigin, granted, false);
-        pendingGeoCallback = null;
-        pendingGeoOrigin = null;
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (pendingGeoCallback == null || pendingGeoOrigin == null) return;
+            boolean granted = hasLocationPermission();
+            pendingGeoCallback.invoke(pendingGeoOrigin, granted, false);
+            pendingGeoCallback = null;
+            pendingGeoOrigin = null;
+        }
     }
 
     private boolean hasLocationPermission() {

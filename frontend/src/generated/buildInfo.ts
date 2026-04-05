@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.000800.7e3c08a4",
-  "buildId": "0.1.9+20260405.000800.7e3c08a4-20260405.000800-7e3c08a4",
-  "builtAt": "2026-04-05T00:08:00.620Z",
-  "commitHash": "7e3c08a4d5c680e2646bdc2da5252f1da560f889",
-  "shortHash": "7e3c08a4",
+  "versionInternal": "0.1.9+20260405.001404.a6d9e109",
+  "buildId": "0.1.9+20260405.001404.a6d9e109-20260405.001404-a6d9e109",
+  "builtAt": "2026-04-05T00:14:04.920Z",
+  "commitHash": "a6d9e1094e84bda505f7221735296168e0ef1531",
+  "shortHash": "a6d9e109",
   "branch": "main",
   "commits": [
+    {
+      "hash": "a6d9e1094e84bda505f7221735296168e0ef1531",
+      "shortHash": "a6d9e109",
+      "dateIso": "2026-04-04T21:08:49-03:00",
+      "subject": "style: improve platform logo appearance across hub and login pages"
+    },
     {
       "hash": "7e3c08a4d5c680e2646bdc2da5252f1da560f889",
       "shortHash": "7e3c08a4",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "25884412",
       "dateIso": "2026-04-04T16:56:42-03:00",
       "subject": "feat(superadmin): add global push broadcast tab"
-    },
-    {
-      "hash": "7ec61e841eff5a9ce1c9b4fe7a780ece43439c9f",
-      "shortHash": "7ec61e84",
-      "dateIso": "2026-04-04T16:47:33-03:00",
-      "subject": "feat(push): add super admin global broadcast endpoint"
     }
   ]
 } as const;
