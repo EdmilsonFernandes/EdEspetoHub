@@ -805,7 +805,7 @@ export function MarketplacePage() {
                 onClick={() => navigate('/hub')}
               >
                 <img
-                  src="/logo.svg"
+                  src="/janocaminho-logov1.svg"
                   alt="Já no Caminho"
                   className="h-[80%] w-[80%] object-contain"
                 />

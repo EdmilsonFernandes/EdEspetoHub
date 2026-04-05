@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.031622.c858f1a8",
-  "buildId": "0.1.9+20260405.031622.c858f1a8-20260405.031622-c858f1a8",
-  "builtAt": "2026-04-05T03:16:22.234Z",
-  "commitHash": "c858f1a8b067bb41a21d753211809efe9788b7ec",
-  "shortHash": "c858f1a8",
+  "versionInternal": "0.1.9+20260405.032219.caadfa13",
+  "buildId": "0.1.9+20260405.032219.caadfa13-20260405.032219-caadfa13",
+  "builtAt": "2026-04-05T03:22:19.235Z",
+  "commitHash": "caadfa13c5e9fb8646f92e2f5910bb2299932d36",
+  "shortHash": "caadfa13",
   "branch": "main",
   "commits": [
+    {
+      "hash": "caadfa13c5e9fb8646f92e2f5910bb2299932d36",
+      "shortHash": "caadfa13",
+      "dateIso": "2026-04-05T00:19:59-03:00",
+      "subject": "fix: remove drawer redundancy and implement native Capacitor Camera for profile photos"
+    },
     {
       "hash": "c858f1a8b067bb41a21d753211809efe9788b7ec",
       "shortHash": "c858f1a8",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "ecfc2910",
       "dateIso": "2026-04-04T18:12:59-03:00",
       "subject": "fix(hub/mobile): remove curadoria label and enable webview geolocation permission flow"
-    },
-    {
-      "hash": "30b993d346f8695bd59a5522e19ae2b355bbe859",
-      "shortHash": "30b993d3",
-      "dateIso": "2026-04-04T18:10:37-03:00",
-      "subject": "fix(hub): improve top branding, avatar size and region fallback label"
     }
   ]
 } as const;
