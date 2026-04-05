@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MagnifyingGlass, MapPin, Star, Storefront, House, List, CaretDown, Heart } from '@phosphor-icons/react';
+import { MagnifyingGlass, MapPin, Star, Storefront, House, List, CaretDown, Heart, CaretRight } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { productService } from '../services/productService';
 import { customerAccountService } from '../services/customerAccountService';
@@ -767,7 +767,11 @@ export function MarketplacePage() {
   }, [loadActiveOrders]);
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-slate-100 pb-28 sm:pb-20 text-slate-900 pt-[max(1rem,env(safe-area-inset-top))]">
+    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-slate-50 pb-28 sm:pb-20 text-slate-900 pt-[max(1rem,env(safe-area-inset-top))]">
+      {/* Elemento Decorativo de Fundo (Premium Look) */}
+      <div className="fixed top-0 left-0 right-0 h-[320px] bg-gradient-to-b from-sky-100/40 via-slate-50 to-transparent pointer-events-none -z-10" />
+      <div className="fixed top-[-10%] right-[-10%] h-[40%] w-[50%] bg-sky-200/20 blur-[120px] rounded-full pointer-events-none -z-10 animate-pulse" />
+
       <div
         className={`pointer-events-none fixed left-1/2 z-[120] -translate-x-1/2 rounded-full border border-slate-200 bg-white/95 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm transition-all duration-200 ${
           pullDistance > 0 || isRefreshing ? 'opacity-100' : 'opacity-0'
@@ -776,6 +780,7 @@ export function MarketplacePage() {
       >
         {isRefreshing ? 'Atualizando...' : pullDistance >= 68 ? 'Solte para atualizar' : 'Puxe para atualizar'}
       </div>
+      
       <ProfileDrawer
         isOpen={profileDrawerOpen}
         isLogged={isCustomerLogged}
@@ -793,83 +798,79 @@ export function MarketplacePage() {
         onLogout={handleCustomerLogout}
         versionLabel={APP_BUILD_INFO.versionLabel}
       />
+
       <div
-        className={`relative min-h-screen bg-slate-50 transition-all duration-700 ${
+        className={`relative transition-all duration-700 ${
           hasEntered ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}
       >
-        <header className={`sticky top-0 z-[60] border-b border-slate-200/70 bg-slate-50/95 px-4 pb-3 pt-5 backdrop-blur-md transition-shadow duration-300 ${isHeaderElevated ? 'shadow-sm' : 'shadow-none'}`}>
-          <div className="mx-auto max-w-[1200px] space-y-2.5">
-            <div className="flex items-center justify-between gap-2 pl-1 sm:pl-0">
-              <div className="flex min-w-0 items-center gap-2">
-              <HeaderAvatarTrigger
-                displayName={customerDisplayName}
-                profileImageUrl={customerProfileImage}
-                hasNotification={!isCustomerLogged}
-                onClick={() => setProfileDrawerOpen(true)}
-              />
+        <header className={`sticky top-0 z-[60] border-b border-slate-200/40 bg-slate-50/80 px-4 pb-3 pt-5 backdrop-blur-xl transition-all duration-300 ${isHeaderElevated ? 'shadow-[0_8px_30px_-12px_rgba(0,0,0,0.08)]' : 'shadow-none'}`}>
+          <div className="mx-auto max-w-[1200px] space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex min-w-0 items-center gap-3">
+                <HeaderAvatarTrigger
+                  displayName={customerDisplayName}
+                  profileImageUrl={customerProfileImage}
+                  hasNotification={!isCustomerLogged}
+                  onClick={() => setProfileDrawerOpen(true)}
+                />
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-black text-slate-900">Olá, {customerDisplayName || 'Anônimo'}</p>
+                  <p className="truncate text-sm font-black text-slate-900 tracking-tight">Olá, {customerDisplayName || 'Anônimo'}</p>
                   <button
                     type="button"
-                    className="inline-flex min-w-0 items-center gap-1.5 text-[12px] font-bold text-slate-700 transition-colors hover:text-sky-700"
+                    className="inline-flex min-w-0 items-center gap-1.5 text-[11px] font-bold text-slate-500 transition-colors hover:text-sky-700"
                     onClick={() => setQuickFilter((prev) => (prev === 'nearby' ? 'all' : 'nearby'))}
-                    aria-label="Alterar localização"
-                    title="Alterar localização"
                   >
-                    <MapPin size={14} weight="duotone" className="shrink-0 text-sky-500" />
-                    <span className="truncate text-left">Entregar em: {displayLocationLabel}</span>
-                    <CaretDown size={12} className="shrink-0 text-slate-400" />
+                    <MapPin size={13} weight="duotone" className="shrink-0 text-sky-500" />
+                    <span className="truncate text-left">{displayLocationLabel}</span>
+                    <CaretDown size={10} className="shrink-0 text-slate-400" />
                   </button>
                 </div>
               </div>
               <button
                 type="button"
-                className="group relative inline-flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200/50 bg-white shadow-sm transition-all hover:scale-105 active:scale-95"
+                className="group relative inline-flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white bg-white shadow-[0_4px_12px_-4px_rgba(0,0,0,0.1)] transition-all hover:scale-105 active:scale-95"
                 aria-label="Já no Caminho"
-                title="Já no Caminho"
                 onClick={() => navigate('/hub')}
               >
                 <img
                   src="/janocaminho-logov1.svg"
-                  alt="Já no Caminho"
-                  className="h-[80%] w-[80%] object-contain"
+                  alt="Logo"
+                  className="h-[75%] w-[75%] object-contain"
                 />
               </button>
             </div>
-            <div className="relative">
-              <MagnifyingGlass size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+
+            <div className="relative group">
+              <div className="absolute inset-0 bg-sky-100/50 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity rounded-2xl" />
+              <MagnifyingGlass size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10" />
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="O que você quer pedir agora?"
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white/90 px-11 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                className="relative z-10 h-11 w-full rounded-2xl border border-slate-200 bg-white/90 px-11 text-sm text-slate-700 placeholder:text-slate-400 shadow-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 transition-all"
               />
             </div>
-            <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-1">
+
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
               {['all', 'free_shipping', 'nearby', 'open_now', 'favorites'].map((filter) => {
                 const label =
-                  filter === 'all'
-                    ? 'Todos'
-                    : filter === 'free_shipping'
-                    ? 'Frete grátis'
-                    : filter === 'nearby'
-                    ? 'Mais próximos'
-                    : filter === 'favorites'
-                    ? 'Favoritos'
-                    : 'Abertos agora';
+                  filter === 'all' ? 'Todos' :
+                  filter === 'free_shipping' ? 'Frete grátis' :
+                  filter === 'nearby' ? 'Próximos' :
+                  filter === 'favorites' ? 'Favoritos' : 'Abertos';
                 const active = quickFilter === filter;
                 return (
                   <button
                     key={filter}
                     type="button"
                     onClick={() => setQuickFilter(filter as any)}
-                    className={`rounded-full border px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] whitespace-nowrap transition-all duration-300 active:scale-95 ${
+                    className={`rounded-xl border px-4 py-1.5 text-[10px] font-black uppercase tracking-wider whitespace-nowrap transition-all duration-300 active:scale-95 ${
                       active
-                        ? 'text-white border-transparent shadow-[0_10px_20px_-15px_rgba(15,23,42,0.7)]'
-                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                        ? 'text-white border-transparent shadow-lg'
+                        : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
                     }`}
-                    style={active ? { backgroundColor: theme.primary } : undefined}
+                    style={active ? { backgroundColor: theme.primary, boxShadow: `0 8px 20px -8px ${theme.primary}80` } : undefined}
                   >
                     {label}
                   </button>
@@ -883,7 +884,7 @@ export function MarketplacePage() {
                   setSegmentFilter('all');
                   setQuickFilter('all');
                 }}
-                className="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] whitespace-nowrap text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-1.5 text-[10px] font-black uppercase tracking-wider whitespace-nowrap text-slate-500 hover:bg-slate-50"
               >
                 Limpar
               </button>
@@ -891,20 +892,20 @@ export function MarketplacePage() {
           </div>
         </header>
 
-        <main className="max-w-[1200px] mx-auto px-4 pt-3 space-y-5">
+        <main className="max-w-[1200px] mx-auto px-4 pt-4 space-y-8">
           {activeOrders.length > 0 && (
             <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-              <div className="relative overflow-hidden rounded-3xl border border-emerald-200/50 bg-emerald-50/90 backdrop-blur-md p-4 shadow-[0_12px_30px_-10px_rgba(16,185,129,0.3)]">
+              <div className="relative overflow-hidden rounded-[2rem] border border-emerald-200/50 bg-emerald-50/90 backdrop-blur-md p-5 shadow-[0_20px_40px_-15px_rgba(16,185,129,0.25)]">
                 <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-emerald-200/20 blur-2xl" />
                 <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex-1 space-y-1.5">
+                  <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="relative flex h-2 w-2">
+                      <span className="relative flex h-2.5 w-2.5">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                       </span>
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">
-                        Seu pedido está em andamento
+                      <span className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-700">
+                        Pedido em Andamento
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -912,352 +913,287 @@ export function MarketplacePage() {
                         <button
                           key={order.id}
                           onClick={() => navigate(`/pedido/${order.id}`)}
-                          className="rounded-xl bg-white px-3 py-1.5 text-[11px] font-bold text-emerald-900 border border-emerald-100 shadow-sm transition-all active:scale-95"
+                          className="rounded-xl bg-white px-3 py-2 text-[11px] font-bold text-emerald-900 border border-emerald-100 shadow-sm active:scale-95"
                         >
-                          #{String(order.id).slice(-6).toUpperCase()} • {order.store?.name || 'Loja'}
+                          #{String(order.id).slice(-6).toUpperCase()} • {order.store?.name}
                         </button>
                       ))}
                     </div>
                   </div>
                   <button
                     onClick={() => navigate(`/pedido/${activeOrders[0].id}`)}
-                    className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-2.5 text-xs font-black text-white shadow-lg transition-all hover:bg-emerald-700 active:scale-95"
+                    className="group inline-flex items-center justify-center gap-3 rounded-2xl bg-emerald-600 px-6 py-3 text-sm font-black text-white shadow-xl transition-all hover:bg-emerald-700 active:scale-95"
                   >
                     Acompanhar Agora
-                    <div className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-          {activeOrders.length > 0 && (
-            <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-              <div className="relative overflow-hidden rounded-3xl border border-emerald-200/50 bg-emerald-50/90 backdrop-blur-md p-4 shadow-[0_12px_30px_-10px_rgba(16,185,129,0.3)]">
-                <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-emerald-200/20 blur-2xl" />
-                <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex-1 space-y-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                      </span>
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">
-                        Seu pedido está em andamento
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {activeOrders.map((order) => (
-                        <button
-                          key={order.id}
-                          onClick={() => navigate(`/pedido/${order.id}`)}
-                          className="rounded-xl bg-white px-3 py-1.5 text-[11px] font-bold text-emerald-900 border border-emerald-100 shadow-sm transition-all active:scale-95"
-                        >
-                          #{String(order.id).slice(-6).toUpperCase()} • {order.store?.name || 'Loja'}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => navigate(`/pedido/${activeOrders[0].id}`)}
-                    className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-2.5 text-xs font-black text-white shadow-lg transition-all hover:bg-emerald-700 active:scale-95"
-                  >
-                    Acompanhar Agora
-                    <div className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                    <CaretRight size={16} weight="bold" className="group-hover:translate-x-1 transition-transform" />
                   </button>
                 </div>
               </div>
             </div>
           )}
 
-        <section style={{ transition: 'all .45s ease', transitionDelay: hasEntered ? '80ms' : '0ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
-          <div className="relative">
-            <div className="pointer-events-none absolute inset-y-0 left-0 z-[2] w-5 bg-gradient-to-r from-slate-100 to-transparent" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 z-[2] w-5 bg-gradient-to-l from-slate-100 to-transparent" />
-            <div className="flex items-center gap-3 overflow-x-auto no-scrollbar scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-0.5 py-0.5 snap-x snap-mandatory">
-            {(() => {
-              const active = segmentFilter === 'all';
-              return (
-                <button
-                  type="button"
-                    className="min-w-[64px] flex-shrink-0 snap-start transition-transform duration-200 active:scale-95"
-                  onClick={() => setSegmentFilter('all')}
-                  aria-label="Ver todas as categorias"
-                >
-                  <span
-                    className={`mx-auto grid h-11 w-11 place-items-center rounded-full border shadow-sm text-base transition-all duration-200 ${
-                      active ? 'text-white border-transparent ring-2 ring-offset-2 ring-slate-300 ring-offset-slate-100' : 'border-slate-200 bg-white text-slate-600'
-                    }`}
-                    style={active ? { backgroundColor: theme.primary } : undefined}
-                  >
-                    <List size={18} weight={active ? 'fill' : 'regular'} />
-                  </span>
-                  <span
-                    className={`mt-1.5 block text-[9px] font-black uppercase tracking-widest text-center transition-colors ${
-                      active ? 'text-slate-900' : 'text-slate-500'
-                    }`}
-                  >
-                    Todos
-                  </span>
-                </button>
-              );
-            })()}
-            {categoryTiles.map((item, index) => (
-              (() => {
+          {/* Seção Categorias */}
+          <section className="relative px-1" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
+            <div className="flex items-center gap-4 overflow-x-auto no-scrollbar py-2 snap-x snap-mandatory">
+              <button
+                type="button"
+                className="flex-shrink-0 snap-start group"
+                onClick={() => setSegmentFilter('all')}
+              >
+                <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border-2 transition-all duration-300 ${
+                  segmentFilter === 'all' ? 'border-sky-500 bg-sky-50 shadow-lg shadow-sky-500/10 scale-110' : 'border-white bg-white shadow-sm'
+                }`}>
+                  <List size={24} weight="duotone" className={segmentFilter === 'all' ? 'text-sky-600' : 'text-slate-400'} />
+                </div>
+                <span className={`mt-2 block text-center text-[10px] font-black uppercase tracking-widest ${
+                  segmentFilter === 'all' ? 'text-slate-900' : 'text-slate-400'
+                }`}>Todos</span>
+              </button>
+              
+              {categoryTiles.map((item, index) => {
                 const active = segmentFilter === item.label;
                 return (
-              <button
-                key={`${item.label}-${index}`}
-                type="button"
-                    className="min-w-[64px] flex-shrink-0 snap-start transition-transform duration-200 active:scale-95"
-                onClick={() => setSegmentFilter((prev) => (prev === item.label ? 'all' : item.label))}
-              >
-                <span
-                  className={`mx-auto grid h-11 w-11 place-items-center rounded-full border shadow-sm text-base transition-all duration-200 ${
-                    active ? 'text-white border-transparent ring-2 ring-offset-2 ring-slate-300 ring-offset-slate-100' : 'border-slate-200 bg-white'
-                  }`}
-                  style={active ? { backgroundColor: theme.primary } : undefined}
-                >
-                  {item.emoji}
-                </span>
-                <span
-                  className={`mt-1.5 block text-[9px] font-black uppercase tracking-widest text-center transition-colors ${
-                    active ? 'text-slate-900' : 'text-slate-500'
-                  }`}
-                >
-                  {item.label}
-                </span>
-              </button>
-              );
-              })()
-            ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="space-y-3" style={{ transition: 'all .45s ease', transitionDelay: hasEntered ? '200ms' : '0ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <h2 className="text-base sm:text-xl font-black text-slate-900">{genericHighlightLabel}</h2>
-            </div>
-            <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Mais pedidos</span>
-          </div>
-          <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
-            {featuredLoading &&
-              Array.from({ length: 4 }).map((_, idx) => (
-                <div key={`featured-skeleton-${idx}`} className="min-w-[140px] sm:min-w-[148px] md:min-w-[154px] rounded-2xl border border-slate-200 bg-white p-1.5 sm:p-2 animate-pulse">
-                  <div className="h-[68px] sm:h-[74px] rounded-xl bg-slate-100" />
-                  <div className="mt-2 h-3 w-24 rounded bg-slate-100" />
-                  <div className="mt-1 flex items-center gap-1.5">
-                    <div className="h-4 w-4 rounded-full bg-slate-100" />
-                    <div className="h-3 w-16 rounded bg-slate-100" />
-                  </div>
-                </div>
-              ))}
-            {!featuredLoading &&
-              displayedFeaturedProducts.map((item) => (
-                <Link
-                  key={`${item.storeSlug}-${item.id}`}
-                  to={`/${item.storeSlug}`}
-                  className="group relative min-w-[140px] sm:min-w-[148px] md:min-w-[154px] rounded-2xl border border-slate-200 bg-white p-1.5 sm:p-2 shadow-sm transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-lg active:scale-[0.99]"
-                >
-                  <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-[68px] sm:h-[74px] w-full rounded-xl object-cover" />
-                  {item.sponsored ? (
-                    <span className="absolute top-2.5 left-2.5 inline-flex h-5 w-5 items-center justify-center rounded-full border border-amber-200 bg-amber-50/95 text-amber-600 shadow-sm ring-1 ring-white/80">
-                      <Star size={10} weight="fill" className="text-amber-500" />
-                    </span>
-                  ) : (
-                    <span className="absolute top-2 left-2 rounded-full border border-white/30 bg-slate-950/80 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.06em] text-white shadow-sm backdrop-blur-sm">
-                      Destaque
-                    </span>
-                  )}
-                  <p className="mt-1.5 line-clamp-1 text-[12px] sm:text-[13px] font-bold text-slate-900">{item.name}</p>
-                  <div className="mt-1 flex items-center gap-1.5">
-                    <img
-                      src={item.storeLogo}
-                      alt={item.storeName}
-                      className="h-4 w-4 shrink-0 rounded-full object-cover border border-slate-200 ring-1 ring-white"
-                    />
-                    <p className="line-clamp-1 text-[10px] text-slate-500 leading-none">{item.storeName}</p>
-                  </div>
-                  <div className="mt-1 flex items-center justify-between gap-1.5">
-                    <p className="text-[13px] sm:text-sm font-black text-slate-900">{currency.format(item.price)}</p>
-                    <span
-                      className="inline-flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full text-white text-xs sm:text-sm font-black shadow-sm transition-transform active:scale-95 group-hover:scale-105"
-                      style={{ backgroundColor: theme.primary }}
-                    >
-                      +
-                    </span>
-                  </div>
-                </Link>
-              ))}
-          </div>
-        </section>
-
-        {favoriteStores.length > 0 && (
-          <section className="space-y-3" style={{ transition: 'all .45s ease', transitionDelay: hasEntered ? '230ms' : '0ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
-            <div className="flex items-center justify-between">
-              <h2 className="text-base sm:text-lg font-black text-slate-900">Minhas favoritas</h2>
-              <button
-                type="button"
-                onClick={() => setQuickFilter('favorites')}
-                className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500 hover:text-slate-700"
-              >
-                Ver todas
-              </button>
-            </div>
-            <div className="flex gap-2.5 overflow-x-auto scrollbar-hide pb-1">
-              {favoriteStores.map((store) => (
-                <Link
-                  key={`favorite-${store.id}`}
-                  to={`/${store.slug}`}
-                  className="min-w-[168px] sm:min-w-[186px] rounded-2xl border border-slate-200 bg-white p-2 shadow-sm transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-lg"
-                >
-                  <img src={store.banner || store.logo} alt={store.name} loading="lazy" className="h-20 w-full rounded-xl object-cover border border-slate-200" />
-                  <div className="mt-1.5 flex items-center justify-between gap-2">
-                    <p className="line-clamp-1 text-sm font-black text-slate-900">{store.name}</p>
-                    <Heart size={14} weight="fill" className="text-rose-500 shrink-0" />
-                  </div>
-                  <p className="mt-0.5 text-[11px] text-slate-600">
-                    {distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)} • {store.etaMin}-{store.etaMax} min
-                  </p>
-                </Link>
-              ))}
+                  <button
+                    key={`${item.label}-${index}`}
+                    type="button"
+                    className="flex-shrink-0 snap-start group"
+                    onClick={() => setSegmentFilter(prev => prev === item.label ? 'all' : item.label)}
+                  >
+                    <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border-2 transition-all duration-300 ${
+                      active ? 'border-sky-500 bg-sky-50 shadow-lg shadow-sky-500/10 scale-110' : 'border-white bg-white shadow-sm'
+                    }`}>
+                      <span className="text-2xl">{item.emoji}</span>
+                    </div>
+                    <span className={`mt-2 block text-center text-[10px] font-black uppercase tracking-widest ${
+                      active ? 'text-slate-900' : 'text-slate-400'
+                    }`}>{item.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </section>
-        )}
 
-        <section className="space-y-4" style={{ transition: 'all .45s ease', transitionDelay: hasEntered ? '260ms' : '0ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="text-base sm:text-lg font-black text-slate-900">Lojas da região</h2>
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">{filteredStores.length} resultados</p>
-          </div>
-
-          {loading && (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, idx) => (
-                <div key={idx} className="h-36 rounded-3xl bg-white border border-slate-200 animate-pulse" />
-              ))}
+          {/* Banner de Destaques Premium */}
+          <section className="space-y-4" style={{ transition: 'all .45s ease', transitionDelay: '200ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
+            <div className="flex items-center justify-between px-1">
+              <h2 className="text-lg font-black text-slate-900 tracking-tight">{genericHighlightLabel}</h2>
+              <div className="flex gap-1">
+                <div className="h-1 w-4 rounded-full bg-sky-500" />
+                <div className="h-1 w-1 rounded-full bg-slate-300" />
+                <div className="h-1 w-1 rounded-full bg-slate-300" />
+              </div>
             </div>
-          )}
-
-          {!loading && error && <div className="rounded-2xl border border-rose-900/60 bg-rose-950/50 p-4 text-sm text-rose-200">{error}</div>}
-
-          {!loading && !error && filteredStores.length === 0 && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
-              <p className="text-slate-700 font-semibold">Nenhuma loja encontrada com esses filtros.</p>
-              <button
-                type="button"
-                onClick={() => {
-                  setQuery('');
-                  setDebouncedQuery('');
-                  setQuickFilter('all');
-                  setSegmentFilter('all');
-                }}
-                className="mt-3 rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600"
-              >
-                Limpar filtros
-              </button>
-            </div>
-          )}
-
-          {!loading && !error && filteredStores.length > 0 && (
-            <div className="grid grid-cols-1 gap-2 md:gap-2.5 md:grid-cols-2 lg:grid-cols-3">
-              {filteredStores.map((store) => (
-                <Link
-                  key={store.id}
-                  to={`/${store.slug}`}
-                  className={`group rounded-2xl border bg-white p-2.5 transition-all duration-300 active:scale-[0.99] ${
-                    store.isOpen
-                      ? 'border-slate-200/90 shadow-[0_6px_18px_rgba(15,23,42,0.07)] md:hover:-translate-y-0.5 md:hover:shadow-[0_14px_28px_-16px_rgba(15,23,42,0.25)]'
-                      : 'border-slate-200/70 opacity-90 saturate-90'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={store.banner || store.logo}
-                      alt={store.name}
-                      loading="lazy"
-                      className="h-16 w-16 md:h-[72px] md:w-[72px] shrink-0 rounded-xl object-cover border border-slate-200 bg-white"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <h3 className="truncate text-sm font-black text-slate-900">{store.name}</h3>
-                            <span className={`inline-flex h-1.5 w-1.5 rounded-full ${store.isOpen ? 'bg-emerald-500' : 'bg-slate-400'}`} />
-                            {!store.isOpen && <span className="text-[10px] font-semibold text-slate-500">Fechada</span>}
-                          </div>
-                          {(store as any).sponsored && (
-                            <p className="mt-0.5 text-[10px] text-slate-400 font-semibold">Patrocinado</p>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            toggleFavoriteStore(store.slug);
-                          }}
-                          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:text-rose-500"
-                          aria-label={`Favoritar ${store.name}`}
-                          title={`Favoritar ${store.name}`}
-                        >
-                          <Heart
-                            size={15}
-                            weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'}
-                            className={favoriteStoreSlugs.includes(store.slug) ? 'text-rose-500' : ''}
-                          />
-                        </button>
-                      </div>
-                      <p className="mt-0.5 truncate text-[11px] font-medium text-slate-600">
-                        {store.etaMin}-{store.etaMax} min • {distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)} • {store.freeShipping ? 'Grátis' : 'Taxa'}
-                      </p>
-                      {!store.isOpen && (
-                        <p className="mt-0.5 truncate text-[10px] text-slate-500">
-                          {store.nextOpeningLabel || 'Sem horário cadastrado'}
-                        </p>
+            
+            <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 snap-x snap-mandatory px-1">
+              {featuredLoading ? (
+                Array.from({ length: 3 }).map((_, idx) => (
+                  <div key={idx} className="min-w-[260px] h-[180px] rounded-[2.5rem] bg-white border border-slate-100 animate-pulse" />
+                ))
+              ) : (
+                displayedFeaturedProducts.map((item) => (
+                  <Link
+                    key={`${item.storeSlug}-${item.id}`}
+                    to={`/${item.storeSlug}`}
+                    className="group relative min-w-[280px] h-[160px] overflow-hidden rounded-[2.5rem] bg-white shadow-[0_15px_35px_-12px_rgba(0,0,0,0.1)] transition-all hover:scale-[1.02] active:scale-[0.98] snap-start border border-slate-100"
+                  >
+                    <img src={item.imageUrl} alt={item.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent" />
+                    
+                    <div className="absolute top-4 left-4">
+                      {item.sponsored ? (
+                        <span className="flex items-center gap-1.5 rounded-full bg-amber-400/90 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-slate-900 backdrop-blur-md shadow-lg">
+                          <Star size={10} weight="fill" /> Patrocinado
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-white/20 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-white backdrop-blur-md border border-white/30">
+                          Destaque
+                        </span>
                       )}
-                      <div className="mt-1.5 flex flex-wrap items-center gap-1">
-                        {store.freeShipping && (
-                          <span className="inline-flex rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">
-                            Frete grátis
-                          </span>
-                        )}
-                        {store.rating >= 4.8 && (
-                          <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">
-                            <Star size={10} weight="fill" className="text-emerald-600" />
-                            Mais bem avaliadas
-                          </span>
-                        )}
-                        {store.supportsDelivery && (
-                          <span className="inline-flex rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">
-                            Entrega
-                          </span>
-                        )}
-                        {store.supportsPickup && (
-                          <span className="inline-flex rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">
-                            Retirada
-                          </span>
-                        )}
-                        {store.supportsTable && (
-                          <span className="inline-flex rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">
-                            Mesa
-                          </span>
-                        )}
+                    </div>
+
+                    <div className="absolute bottom-4 left-4 right-4 text-white">
+                      <p className="text-sm font-black tracking-tight line-clamp-1">{item.name}</p>
+                      <div className="mt-1 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <img src={item.storeLogo} alt={item.storeName} className="h-5 w-5 rounded-full border border-white/50" />
+                          <span className="text-[10px] font-bold opacity-90">{item.storeName}</span>
+                        </div>
+                        <span className="rounded-xl bg-white px-2.5 py-1 text-xs font-black text-slate-900 shadow-lg">
+                          {currency.format(item.price)}
+                        </span>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                ))
+              )}
             </div>
-          )}
-        </section>
+          </section>
 
-        <section className="pb-6 space-y-2">
-          <p className="text-center text-xs font-semibold text-slate-500">Conectando você aos melhores lojistas da região.</p>
-          <PlatformTrustFooter mode="minimal" align="center" compact />
-        </section>
-      </main>
+          {favoriteStores.length > 0 && (
+            <section className="space-y-3" style={{ transition: 'all .45s ease', transitionDelay: '300ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
+              <div className="flex items-center justify-between">
+                <h2 className="text-base sm:text-lg font-black text-slate-900">Minhas favoritas</h2>
+                <button
+                  type="button"
+                  onClick={() => setQuickFilter('favorites')}
+                  className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500 hover:text-slate-700"
+                >
+                  Ver todas
+                </button>
+              </div>
+              <div className="flex gap-2.5 overflow-x-auto scrollbar-hide pb-1">
+                {favoriteStores.map((store) => (
+                  <Link
+                    key={`favorite-${store.id}`}
+                    to={`/${store.slug}`}
+                    className="min-w-[168px] sm:min-w-[186px] rounded-2xl border border-slate-200 bg-white p-2 shadow-sm transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-lg"
+                  >
+                    <img src={store.banner || store.logo} alt={store.name} loading="lazy" className="h-20 w-full rounded-xl object-cover border border-slate-200" />
+                    <div className="mt-1.5 flex items-center justify-between gap-2">
+                      <p className="line-clamp-1 text-sm font-black text-slate-900">{store.name}</p>
+                      <Heart size={14} weight="fill" className="text-rose-500 shrink-0" />
+                    </div>
+                    <p className="mt-0.5 text-[11px] text-slate-600">
+                      {distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)} • {store.etaMin}-{store.etaMax} min
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          <section className="space-y-4" style={{ transition: 'all .45s ease', transitionDelay: '400ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-base sm:text-lg font-black text-slate-900">Lojas da região</h2>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">{filteredStores.length} resultados</p>
+            </div>
+
+            {loading && (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, idx) => (
+                  <div key={idx} className="h-36 rounded-3xl bg-white border border-slate-200 animate-pulse" />
+                ))}
+              </div>
+            )}
+
+            {!loading && error && <div className="rounded-2xl border border-rose-900/60 bg-rose-950/50 p-4 text-sm text-rose-200">{error}</div>}
+
+            {!loading && !error && filteredStores.length === 0 && (
+              <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
+                <p className="text-slate-700 font-semibold">Nenhuma loja encontrada com esses filtros.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQuery('');
+                    setDebouncedQuery('');
+                    setQuickFilter('all');
+                    setSegmentFilter('all');
+                  }}
+                  className="mt-3 rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600"
+                >
+                  Limpar filtros
+                </button>
+              </div>
+            )}
+
+            {!loading && !error && filteredStores.length > 0 && (
+              <div className="grid grid-cols-1 gap-2 md:gap-2.5 md:grid-cols-2 lg:grid-cols-3">
+                {filteredStores.map((store) => (
+                  <Link
+                    key={store.id}
+                    to={`/${store.slug}`}
+                    className={`group rounded-2xl border bg-white p-2.5 transition-all duration-300 active:scale-[0.99] ${
+                      store.isOpen
+                        ? 'border-slate-200/90 shadow-[0_6px_18px_rgba(15,23,42,0.07)] md:hover:-translate-y-0.5 md:hover:shadow-[0_14px_28px_-16px_rgba(15,23,42,0.25)]'
+                        : 'border-slate-200/70 opacity-90 saturate-90'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={store.banner || store.logo}
+                        alt={store.name}
+                        loading="lazy"
+                        className="h-16 w-16 md:h-[72px] md:w-[72px] shrink-0 rounded-xl object-cover border border-slate-200 bg-white"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <h3 className="truncate text-sm font-black text-slate-900">{store.name}</h3>
+                              <span className={`inline-flex h-1.5 w-1.5 rounded-full ${store.isOpen ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                              {!store.isOpen && <span className="text-[10px] font-semibold text-slate-500">Fechada</span>}
+                            </div>
+                            {(store as any).sponsored && (
+                              <p className="mt-0.5 text-[10px] text-slate-400 font-semibold">Patrocinado</p>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              toggleFavoriteStore(store.slug);
+                            }}
+                            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:text-rose-500"
+                            aria-label={`Favoritar ${store.name}`}
+                            title={`Favoritar ${store.name}`}
+                          >
+                            <Heart
+                              size={15}
+                              weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'}
+                              className={favoriteStoreSlugs.includes(store.slug) ? 'text-rose-500' : ''}
+                            />
+                          </button>
+                        </div>
+                        <p className="mt-0.5 truncate text-[11px] font-medium text-slate-600">
+                          {store.etaMin}-{store.etaMax} min • {distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)} • {store.freeShipping ? 'Grátis' : 'Taxa'}
+                        </p>
+                        {!store.isOpen && (
+                          <p className="mt-0.5 truncate text-[10px] text-slate-500">
+                            {store.nextOpeningLabel || 'Sem horário cadastrado'}
+                          </p>
+                        )}
+                        <div className="mt-1.5 flex flex-wrap items-center gap-1">
+                          {store.freeShipping && (
+                            <span className="inline-flex rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">
+                              Frete grátis
+                            </span>
+                          )}
+                          {store.rating >= 4.8 && (
+                            <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">
+                              <Star size={10} weight="fill" className="text-emerald-600" />
+                              Mais bem avaliadas
+                            </span>
+                          )}
+                          {store.supportsDelivery && (
+                            <span className="inline-flex rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">
+                              Entrega
+                            </span>
+                          )}
+                          {store.supportsPickup && (
+                            <span className="inline-flex rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">
+                              Retirada
+                            </span>
+                          )}
+                          {store.supportsTable && (
+                            <span className="inline-flex rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">
+                              Mesa
+                          </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className="pb-6 space-y-2">
+            <p className="text-center text-xs font-semibold text-slate-500">Conectando você aos melhores lojistas da região.</p>
+            <PlatformTrustFooter mode="minimal" align="center" compact />
+          </section>
+        </main>
       </div>
 
       <nav
@@ -1287,6 +1223,3 @@ export function MarketplacePage() {
     </div>
   );
 }
-
-
-

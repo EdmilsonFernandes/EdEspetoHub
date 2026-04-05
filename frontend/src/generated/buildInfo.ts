@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.040152.1eb9efad",
-  "buildId": "0.1.9+20260405.040152.1eb9efad-20260405.040152-1eb9efad",
-  "builtAt": "2026-04-05T04:01:52.954Z",
-  "commitHash": "1eb9efadccc0f79440d1b79ecc6145b06cd9e5a8",
-  "shortHash": "1eb9efad",
+  "versionInternal": "0.1.9+20260405.041702.23f3231e",
+  "buildId": "0.1.9+20260405.041702.23f3231e-20260405.041702-23f3231e",
+  "builtAt": "2026-04-05T04:17:02.315Z",
+  "commitHash": "23f3231e6e90f8db4ab8e318823c757113b828aa",
+  "shortHash": "23f3231e",
   "branch": "main",
   "commits": [
+    {
+      "hash": "23f3231e6e90f8db4ab8e318823c757113b828aa",
+      "shortHash": "23f3231e",
+      "dateIso": "2026-04-05T01:03:57-03:00",
+      "subject": "fix: Marketplace 'Limpar' button now resets search query correctly"
+    },
     {
       "hash": "1eb9efadccc0f79440d1b79ecc6145b06cd9e5a8",
       "shortHash": "1eb9efad",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "9ef8c6fc",
       "dateIso": "2026-04-04T19:42:21-03:00",
       "subject": "feat(hub/customer): unify auth flow, profile photo, push toggle, legal fallback and whatsapp apk fallback"
-    },
-    {
-      "hash": "2e82fe74bf837603b21debbf1c4f18666058fb82",
-      "shortHash": "2e82fe74",
-      "dateIso": "2026-04-04T18:31:11-03:00",
-      "subject": "fix(frontend): resolve syntax error in store hours summary"
     }
   ]
 } as const;
