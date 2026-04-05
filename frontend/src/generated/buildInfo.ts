@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.002306.c8fffee9",
-  "buildId": "0.1.9+20260405.002306.c8fffee9-20260405.002306-c8fffee9",
-  "builtAt": "2026-04-05T00:23:06.118Z",
-  "commitHash": "c8fffee9f9bde27f8b6e9aedb52e897d06fc3423",
-  "shortHash": "c8fffee9",
+  "versionInternal": "0.1.9+20260405.002523.7140386f",
+  "buildId": "0.1.9+20260405.002523.7140386f-20260405.002523-7140386f",
+  "builtAt": "2026-04-05T00:25:23.558Z",
+  "commitHash": "7140386f0c5957d9440e976656557e2f68e3f88f",
+  "shortHash": "7140386f",
   "branch": "main",
   "commits": [
+    {
+      "hash": "7140386f0c5957d9440e976656557e2f68e3f88f",
+      "shortHash": "7140386f",
+      "dateIso": "2026-04-04T21:24:08-03:00",
+      "subject": "fix(mobile): robust file selection for profile photo and premium logo tweaks"
+    },
     {
       "hash": "c8fffee9f9bde27f8b6e9aedb52e897d06fc3423",
       "shortHash": "c8fffee9",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "6f9fb35d",
       "dateIso": "2026-04-04T17:15:27-03:00",
       "subject": "feat(mobile): make hub the fixed home and improve native webview navigation"
-    },
-    {
-      "hash": "c2a5c9205f39f881562a40b4b75ea5456b4b39bf",
-      "shortHash": "c2a5c920",
-      "dateIso": "2026-04-04T17:04:10-03:00",
-      "subject": "docs(ops): add production handoff and config backup runbook"
     }
   ]
 } as const;

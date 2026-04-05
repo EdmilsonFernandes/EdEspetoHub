@@ -807,12 +807,6 @@ export function MarketplacePage() {
                 <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 opacity-0 transition-opacity group-hover:opacity-100" />
                 <img
                   src="/logo.svg"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    if (!target.src.endsWith('.png')) {
-                      target.src = '/janocaminho-logo.png';
-                    }
-                  }}
                   alt="Já no Caminho"
                   className="relative z-10 h-full w-auto object-contain brightness-[1.02]"
                 />
