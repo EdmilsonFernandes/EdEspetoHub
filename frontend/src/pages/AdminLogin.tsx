@@ -87,14 +87,19 @@ export function AdminLogin() {
       sessionStorage.removeItem('admin:redirectTab');
       sessionStorage.removeItem('admin:redirectSlug');
       const loginRole = String(session?.user?.role || '').toUpperCase();
-      if (loginRole === 'ADMIN') {
-        // No mobile, prefere ir direto para a fila/pedidos
+      if (loginRole === 'ADMIN' || loginRole === 'OPERATOR') {
+        // No mobile, se ele é admin/operador da loja, leva para a loja dele
         const isMobile = window.matchMedia('(max-width: 767px)').matches;
-        if (isMobile) {
-          navigate('/admin/queue');
+        if (isMobile && session.store?.slug) {
+          navigate(`/${session.store.slug}`);
           return;
         }
-        navigate('/admin/dashboard', { state: { activeTab: 'resumo' } });
+        
+        if (loginRole === 'ADMIN') {
+          navigate('/admin/dashboard', { state: { activeTab: 'resumo' } });
+          return;
+        }
+        navigate('/admin/queue');
         return;
       }
       navigate('/admin/queue');

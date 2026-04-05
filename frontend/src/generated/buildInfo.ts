@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.022901.4e3e1fa9",
-  "buildId": "0.1.9+20260405.022901.4e3e1fa9-20260405.022901-4e3e1fa9",
-  "builtAt": "2026-04-05T02:29:01.559Z",
-  "commitHash": "4e3e1fa9c90e625d4a709fdea1489d7d61b4dd63",
-  "shortHash": "4e3e1fa9",
+  "versionInternal": "0.1.9+20260405.023921.0da51fd5",
+  "buildId": "0.1.9+20260405.023921.0da51fd5-20260405.023921-0da51fd5",
+  "builtAt": "2026-04-05T02:39:21.516Z",
+  "commitHash": "0da51fd573537f96d63a0e6dee387aa1b69efcce",
+  "shortHash": "0da51fd5",
   "branch": "main",
   "commits": [
+    {
+      "hash": "0da51fd573537f96d63a0e6dee387aa1b69efcce",
+      "shortHash": "0da51fd5",
+      "dateIso": "2026-04-04T23:38:18-03:00",
+      "subject": "feat(mobile): restore last visited URL on start and improve admin mobile redirect"
+    },
     {
       "hash": "4e3e1fa9c90e625d4a709fdea1489d7d61b4dd63",
       "shortHash": "4e3e1fa9",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "97df2358",
       "dateIso": "2026-04-04T17:30:01-03:00",
       "subject": "refactor(superadmin): responsive profile menu and scrollable tabs"
-    },
-    {
-      "hash": "d18aec9a5497726d070ebec300372fcead703155",
-      "shortHash": "d18aec9a",
-      "dateIso": "2026-04-04T17:21:35-03:00",
-      "subject": "feat(hub): redesign hero banner with visual store carousel and cleaner branding"
     }
   ]
 } as const;

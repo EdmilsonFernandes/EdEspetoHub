@@ -100,6 +100,12 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        restoreLastVisitedUrl();
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
         saveLastVisitedUrl();
