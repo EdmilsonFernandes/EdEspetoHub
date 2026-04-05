@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.002020.03c64649",
-  "buildId": "0.1.9+20260405.002020.03c64649-20260405.002020-03c64649",
-  "builtAt": "2026-04-05T00:20:20.139Z",
-  "commitHash": "03c64649a228d38e42ad0303d05c8cb7377ef3e6",
-  "shortHash": "03c64649",
+  "versionInternal": "0.1.9+20260405.002306.c8fffee9",
+  "buildId": "0.1.9+20260405.002306.c8fffee9-20260405.002306-c8fffee9",
+  "builtAt": "2026-04-05T00:23:06.118Z",
+  "commitHash": "c8fffee9f9bde27f8b6e9aedb52e897d06fc3423",
+  "shortHash": "c8fffee9",
   "branch": "main",
   "commits": [
+    {
+      "hash": "c8fffee9f9bde27f8b6e9aedb52e897d06fc3423",
+      "shortHash": "c8fffee9",
+      "dateIso": "2026-04-04T21:21:02-03:00",
+      "subject": "style: premium logo container with glassmorphism and SVG support"
+    },
     {
       "hash": "03c64649a228d38e42ad0303d05c8cb7377ef3e6",
       "shortHash": "03c64649",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "c2a5c920",
       "dateIso": "2026-04-04T17:04:10-03:00",
       "subject": "docs(ops): add production handoff and config backup runbook"
-    },
-    {
-      "hash": "860372616d1238d8dad105eb36784fb026309311",
-      "shortHash": "86037261",
-      "dateIso": "2026-04-04T17:00:55-03:00",
-      "subject": "feat(hub): refine premium hero and curated marketplace visuals"
     }
   ]
 } as const;

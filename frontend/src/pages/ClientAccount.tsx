@@ -283,15 +283,28 @@ export function ClientAccount() {
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <label className="inline-flex cursor-pointer rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-700">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const input = document.getElementById('profile-upload-input');
+                      if (input) (input as HTMLInputElement).click();
+                    }}
+                    className="inline-flex cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2 text-[11px] font-black uppercase tracking-widest text-slate-700 active:scale-95 transition-all shadow-sm"
+                  >
                     Trocar foto
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => handleProfileImageUpload(e.target.files?.[0] || null)}
-                    />
-                  </label>
+                  </button>
+                  <input
+                    id="profile-upload-input"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleProfileImageUpload(file);
+                      // Reset value to allow same file selection
+                      e.target.value = '';
+                    }}
+                  />
                 </div>
               </div>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
