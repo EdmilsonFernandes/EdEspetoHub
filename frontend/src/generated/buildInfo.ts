@@ -5,13 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.141651.95d41c49",
-  "buildId": "0.1.9+20260405.141651.95d41c49-20260405.141651-95d41c49",
-  "builtAt": "2026-04-05T14:16:51.902Z",
-  "commitHash": "95d41c49e3403bc3dc369b4165828e1f734762ac",
-  "shortHash": "95d41c49",
+  "versionInternal": "0.1.9+20260405.144609.7321de38",
+  "buildId": "0.1.9+20260405.144609.7321de38-20260405.144609-7321de38",
+  "builtAt": "2026-04-05T14:46:09.103Z",
+  "commitHash": "7321de38bac642c4f56e05fa795447c8dc64ed06",
+  "shortHash": "7321de38",
   "branch": "main",
   "commits": [
+    {
+      "hash": "7321de38bac642c4f56e05fa795447c8dc64ed06",
+      "shortHash": "7321de38",
+      "dateIso": "2026-04-05T11:27:53-03:00",
+      "subject": "style: replace logo with high-quality jnc.png and update footer logo"
+    },
+    {
+      "hash": "c71a2646e49d187965470e000be69cdb97a0aa1d",
+      "shortHash": "c71a2646",
+      "dateIso": "2026-04-05T11:18:56-03:00",
+      "subject": "style: replace logo with high-quality jnc.png and update footer logo"
+    },
     {
       "hash": "95d41c49e3403bc3dc369b4165828e1f734762ac",
       "shortHash": "95d41c49",
@@ -179,18 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "0684da92",
       "dateIso": "2026-04-04T20:54:41-03:00",
       "subject": "m"
-    },
-    {
-      "hash": "d0ad42f7783471b9ffd3b9b6d1907bd8ebc1378c",
-      "shortHash": "d0ad42f7",
-      "dateIso": "2026-04-04T20:51:54-03:00",
-      "subject": "feat: melhorias no marketplace e perfil (HeaderAvatar, ProfileDrawer, ClientAccount)"
-    },
-    {
-      "hash": "8a41b531cb491ebf6a73d1e4442a748daf77ec28",
-      "shortHash": "8a41b531",
-      "dateIso": "2026-04-04T20:33:35-03:00",
-      "subject": "fix(frontend): change autocomplete to autoComplete to fix TS build error"
     }
   ]
 } as const;

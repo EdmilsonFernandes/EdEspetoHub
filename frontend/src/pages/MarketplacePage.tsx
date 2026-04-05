@@ -839,7 +839,7 @@ export function MarketplacePage() {
                 <img
                   src="/jnc.png"
                   alt="Logo"
-                  className="h-[80%] w-[80%] object-contain"
+                  className="h-full w-full rounded-full object-contain p-0.5"
                 />
               </button>
             </div>
