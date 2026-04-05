@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.023921.0da51fd5",
-  "buildId": "0.1.9+20260405.023921.0da51fd5-20260405.023921-0da51fd5",
-  "builtAt": "2026-04-05T02:39:21.516Z",
-  "commitHash": "0da51fd573537f96d63a0e6dee387aa1b69efcce",
-  "shortHash": "0da51fd5",
+  "versionInternal": "0.1.9+20260405.024235.a6a60b04",
+  "buildId": "0.1.9+20260405.024235.a6a60b04-20260405.024235-a6a60b04",
+  "builtAt": "2026-04-05T02:42:35.795Z",
+  "commitHash": "a6a60b0458a1f4b62730a10ce2571342486aa55d",
+  "shortHash": "a6a60b04",
   "branch": "main",
   "commits": [
+    {
+      "hash": "a6a60b0458a1f4b62730a10ce2571342486aa55d",
+      "shortHash": "a6a60b04",
+      "dateIso": "2026-04-04T23:40:18-03:00",
+      "subject": "feat(mobile): improve session stability on screen lock and direct admin store redirect"
+    },
     {
       "hash": "0da51fd573537f96d63a0e6dee387aa1b69efcce",
       "shortHash": "0da51fd5",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "eec22ac7",
       "dateIso": "2026-04-04T17:37:32-03:00",
       "subject": "feat(hub): add profile drawer with avatar trigger and location row"
-    },
-    {
-      "hash": "97df2358be82d415b2fd098ce281a8f3d69e9768",
-      "shortHash": "97df2358",
-      "dateIso": "2026-04-04T17:30:01-03:00",
-      "subject": "refactor(superadmin): responsive profile menu and scrollable tabs"
     }
   ]
 } as const;

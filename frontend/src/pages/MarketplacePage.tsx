@@ -799,16 +799,16 @@ export function MarketplacePage() {
               </div>
               <button
                 type="button"
-                className="group relative inline-flex h-11 w-auto shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/40 bg-white/45 px-3 py-2 shadow-[0_8px_16px_-6px_rgba(0,0,0,0.05)] backdrop-blur-md transition-all hover:border-white/60 hover:bg-white/60 hover:shadow-lg active:scale-95"
+                className="group relative inline-flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/40 bg-white/45 p-1 shadow-[0_8px_16px_-6px_rgba(0,0,0,0.05)] backdrop-blur-md transition-all hover:border-white/60 hover:bg-white/60 hover:shadow-lg active:scale-95"
                 aria-label="Já no Caminho"
                 title="Já no Caminho"
                 onClick={() => navigate('/hub')}
               >
                 <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 opacity-0 transition-opacity group-hover:opacity-100" />
                 <img
-                  src="/logo.svg"
+                  src="/icons/pwa-512x512.png"
                   alt="Já no Caminho"
-                  className="relative z-10 h-full w-auto object-contain brightness-[1.02]"
+                  className="relative z-10 h-full w-full object-contain"
                 />
               </button>
             </div>
