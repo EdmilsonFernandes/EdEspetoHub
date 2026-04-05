@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.025053.b4f223e3",
-  "buildId": "0.1.9+20260405.025053.b4f223e3-20260405.025053-b4f223e3",
-  "builtAt": "2026-04-05T02:50:53.333Z",
-  "commitHash": "b4f223e36a515c8019f35268391d4f7418da77da",
-  "shortHash": "b4f223e3",
+  "versionInternal": "0.1.9+20260405.025255.69671120",
+  "buildId": "0.1.9+20260405.025255.69671120-20260405.025255-69671120",
+  "builtAt": "2026-04-05T02:52:55.602Z",
+  "commitHash": "696711207655eb8d04a2bbe66441e15517cad203",
+  "shortHash": "69671120",
   "branch": "main",
   "commits": [
+    {
+      "hash": "696711207655eb8d04a2bbe66441e15517cad203",
+      "shortHash": "69671120",
+      "dateIso": "2026-04-04T23:51:48-03:00",
+      "subject": "style: premium circular logo-datony.svg in hub header"
+    },
     {
       "hash": "b4f223e36a515c8019f35268391d4f7418da77da",
       "shortHash": "b4f223e3",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "fa910fe2",
       "dateIso": "2026-04-04T17:43:47-03:00",
       "subject": "refactor(hub): simplify top store carousel banner and add privacy action"
-    },
-    {
-      "hash": "eda2d5fdc9fe9d14622b3d8038fea6a3c6cd6112",
-      "shortHash": "eda2d5fd",
-      "dateIso": "2026-04-04T17:40:57-03:00",
-      "subject": "feat(hub): add terms/help actions and app version in profile drawer"
     }
   ]
 } as const;
