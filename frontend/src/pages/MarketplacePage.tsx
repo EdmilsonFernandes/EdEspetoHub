@@ -126,8 +126,6 @@ const readCustomerSession = () => {
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== 'object') return null;
     
-    // Check if token is potentially expired (client-side hint)
-    // Most tokens here are now 30d, but we can check if it exists
     if (parsed.token && parsed.user) {
       return parsed as {
         token?: string;
@@ -766,6 +764,11 @@ export function MarketplacePage() {
     return () => window.clearInterval(interval);
   }, [loadActiveOrders]);
 
+  useEffect(() => {
+    const raf = window.requestAnimationFrame(() => setHasEntered(true));
+    return () => window.cancelAnimationFrame(raf);
+  }, []);
+
   return (
     <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-slate-50 pb-28 sm:pb-20 text-slate-900 pt-[max(1rem,env(safe-area-inset-top))]">
       {/* Elemento Decorativo de Fundo (Premium Look) */}
@@ -804,10 +807,11 @@ export function MarketplacePage() {
           hasEntered ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}
       >
-        <header className={`sticky top-0 z-[60] border-b border-slate-200/40 bg-slate-50/80 px-4 pb-3 pt-5 backdrop-blur-xl transition-all duration-300 ${isHeaderElevated ? 'shadow-[0_8px_30px_-12px_rgba(0,0,0,0.08)]' : 'shadow-none'}`}>
-          <div className="mx-auto max-w-[1200px] space-y-3">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex min-w-0 items-center gap-3">
+        <header className={`sticky top-0 z-[60] transition-all duration-500 ${isHeaderElevated ? 'bg-white/90 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.1)] backdrop-blur-xl' : 'bg-transparent'}`}>
+          <div className="mx-auto max-w-[1200px] px-4 pb-4 pt-[max(1.2rem,calc(env(safe-area-inset-top)+0.5rem))] space-y-5">
+            {/* Linha 1: Perfil e Logo */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
                 <HeaderAvatarTrigger
                   displayName={customerDisplayName}
                   profileImageUrl={customerProfileImage}
@@ -815,62 +819,63 @@ export function MarketplacePage() {
                   onClick={() => setProfileDrawerOpen(true)}
                 />
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-black text-slate-900 tracking-tight">Olá, {customerDisplayName || 'Anônimo'}</p>
+                  <p className="truncate text-xs font-bold uppercase tracking-widest text-slate-400">Entregar em</p>
                   <button
                     type="button"
-                    className="inline-flex min-w-0 items-center gap-1.5 text-[11px] font-bold text-slate-500 transition-colors hover:text-sky-700"
+                    className="inline-flex min-w-0 items-center gap-1 text-[14px] font-black text-slate-900 transition-colors hover:text-sky-700"
                     onClick={() => setQuickFilter((prev) => (prev === 'nearby' ? 'all' : 'nearby'))}
                   >
-                    <MapPin size={13} weight="duotone" className="shrink-0 text-sky-500" />
-                    <span className="truncate text-left">{displayLocationLabel}</span>
-                    <CaretDown size={10} className="shrink-0 text-slate-400" />
+                    <span className="truncate">{displayLocationLabel}</span>
+                    <CaretDown size={14} weight="bold" className="shrink-0 text-sky-500" />
                   </button>
                 </div>
               </div>
+              
               <button
                 type="button"
-                className="group relative inline-flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white bg-white shadow-[0_4px_12px_-4px_rgba(0,0,0,0.1)] transition-all hover:scale-105 active:scale-95"
-                aria-label="Já no Caminho"
                 onClick={() => navigate('/hub')}
+                className="relative shrink-0 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-[0_8px_20px_-6px_rgba(0,0,0,0.15)] border border-slate-100 transition-transform active:scale-90"
               >
                 <img
                   src="/janocaminho-logov1.svg"
                   alt="Logo"
-                  className="h-[75%] w-[75%] object-contain"
+                  className="h-[70%] w-[70%] object-contain"
                 />
               </button>
             </div>
 
+            {/* Linha 2: Busca Premium */}
             <div className="relative group">
-              <div className="absolute inset-0 bg-sky-100/50 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity rounded-2xl" />
-              <MagnifyingGlass size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10" />
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <MagnifyingGlass size={20} weight="bold" className="text-slate-400 group-focus-within:text-slate-900 transition-colors" />
+              </div>
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="O que você quer pedir agora?"
-                className="relative z-10 h-11 w-full rounded-2xl border border-slate-200 bg-white/90 px-11 text-sm text-slate-700 placeholder:text-slate-400 shadow-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 transition-all"
+                className="h-12 w-full rounded-2xl border-none bg-white px-12 text-[15px] font-medium text-slate-700 shadow-[0_10px_25px_-8px_rgba(0,0,0,0.08)] ring-1 ring-slate-200/50 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/5 transition-all"
               />
             </div>
 
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+            {/* Linha 3: Filtros Minimalistas (Pílulas) */}
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar scrollbar-hide pb-1">
               {['all', 'free_shipping', 'nearby', 'open_now', 'favorites'].map((filter) => {
                 const label =
-                  filter === 'all' ? 'Todos' :
-                  filter === 'free_shipping' ? 'Frete grátis' :
-                  filter === 'nearby' ? 'Próximos' :
-                  filter === 'favorites' ? 'Favoritos' : 'Abertos';
+                  filter === 'all' ? 'Ver Todos' :
+                  filter === 'free_shipping' ? 'Frete Grátis' :
+                  filter === 'nearby' ? 'Perto de Você' :
+                  filter === 'favorites' ? 'Favoritos' : 'Abertos Agora';
                 const active = quickFilter === filter;
                 return (
                   <button
                     key={filter}
                     type="button"
                     onClick={() => setQuickFilter(filter as any)}
-                    className={`rounded-xl border px-4 py-1.5 text-[10px] font-black uppercase tracking-wider whitespace-nowrap transition-all duration-300 active:scale-95 ${
+                    className={`rounded-full border px-5 py-2 text-[11px] font-black uppercase tracking-widest whitespace-nowrap transition-all active:scale-95 ${
                       active
-                        ? 'text-white border-transparent shadow-lg'
-                        : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
+                        ? 'bg-slate-900 border-slate-900 text-white shadow-xl shadow-slate-900/20'
+                        : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300'
                     }`}
-                    style={active ? { backgroundColor: theme.primary, boxShadow: `0 8px 20px -8px ${theme.primary}80` } : undefined}
                   >
                     {label}
                   </button>
@@ -884,7 +889,7 @@ export function MarketplacePage() {
                   setSegmentFilter('all');
                   setQuickFilter('all');
                 }}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-1.5 text-[10px] font-black uppercase tracking-wider whitespace-nowrap text-slate-500 hover:bg-slate-50"
+                className="rounded-full border border-slate-200 bg-white px-5 py-2 text-[11px] font-black uppercase tracking-widest whitespace-nowrap text-slate-500 hover:border-slate-300"
               >
                 Limpar
               </button>
@@ -892,10 +897,10 @@ export function MarketplacePage() {
           </div>
         </header>
 
-        <main className="max-w-[1200px] mx-auto px-4 pt-4 space-y-8">
+        <main className="max-w-[1200px] mx-auto px-4 pt-4 space-y-10">
           {activeOrders.length > 0 && (
             <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-              <div className="relative overflow-hidden rounded-[2rem] border border-emerald-200/50 bg-emerald-50/90 backdrop-blur-md p-5 shadow-[0_20px_40px_-15px_rgba(16,185,129,0.25)]">
+              <div className="relative overflow-hidden rounded-[2.5rem] border border-emerald-200/50 bg-emerald-50/90 backdrop-blur-md p-5 shadow-[0_20px_40px_-15px_rgba(16,185,129,0.2)]">
                 <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-emerald-200/20 blur-2xl" />
                 <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex-1 space-y-2">
@@ -932,20 +937,20 @@ export function MarketplacePage() {
             </div>
           )}
 
-          {/* Seção Categorias */}
+          {/* Seção Categorias Premium Squircle */}
           <section className="relative px-1" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
-            <div className="flex items-center gap-4 overflow-x-auto no-scrollbar py-2 snap-x snap-mandatory">
+            <div className="flex items-center gap-5 overflow-x-auto no-scrollbar py-2 snap-x snap-mandatory">
               <button
                 type="button"
                 className="flex-shrink-0 snap-start group"
                 onClick={() => setSegmentFilter('all')}
               >
-                <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border-2 transition-all duration-300 ${
-                  segmentFilter === 'all' ? 'border-sky-500 bg-sky-50 shadow-lg shadow-sky-500/10 scale-110' : 'border-white bg-white shadow-sm'
+                <div className={`mx-auto flex h-16 w-16 items-center justify-center rounded-[1.5rem] border-2 transition-all duration-500 ${
+                  segmentFilter === 'all' ? 'border-sky-500 bg-sky-50 shadow-2xl shadow-sky-500/20 -translate-y-1' : 'border-white bg-white shadow-[0_8px_20px_-10px_rgba(0,0,0,0.1)]'
                 }`}>
-                  <List size={24} weight="duotone" className={segmentFilter === 'all' ? 'text-sky-600' : 'text-slate-400'} />
+                  <List size={28} weight="duotone" className={segmentFilter === 'all' ? 'text-sky-600' : 'text-slate-400'} />
                 </div>
-                <span className={`mt-2 block text-center text-[10px] font-black uppercase tracking-widest ${
+                <span className={`mt-3 block text-center text-[10px] font-black uppercase tracking-[0.15em] ${
                   segmentFilter === 'all' ? 'text-slate-900' : 'text-slate-400'
                 }`}>Todos</span>
               </button>
@@ -959,12 +964,12 @@ export function MarketplacePage() {
                     className="flex-shrink-0 snap-start group"
                     onClick={() => setSegmentFilter(prev => prev === item.label ? 'all' : item.label)}
                   >
-                    <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border-2 transition-all duration-300 ${
-                      active ? 'border-sky-500 bg-sky-50 shadow-lg shadow-sky-500/10 scale-110' : 'border-white bg-white shadow-sm'
+                    <div className={`mx-auto flex h-16 w-16 items-center justify-center rounded-[1.5rem] border-2 transition-all duration-500 ${
+                      active ? 'border-sky-500 bg-sky-50 shadow-2xl shadow-sky-500/20 -translate-y-1' : 'border-white bg-white shadow-[0_8px_20px_-10px_rgba(0,0,0,0.1)]'
                     }`}>
-                      <span className="text-2xl">{item.emoji}</span>
+                      <span className="text-3xl transition-transform duration-500 group-hover:scale-110">{item.emoji}</span>
                     </div>
-                    <span className={`mt-2 block text-center text-[10px] font-black uppercase tracking-widest ${
+                    <span className={`mt-3 block text-center text-[10px] font-black uppercase tracking-[0.15em] ${
                       active ? 'text-slate-900' : 'text-slate-400'
                     }`}>{item.label}</span>
                   </button>
@@ -987,38 +992,38 @@ export function MarketplacePage() {
             <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 snap-x snap-mandatory px-1">
               {featuredLoading ? (
                 Array.from({ length: 3 }).map((_, idx) => (
-                  <div key={idx} className="min-w-[260px] h-[180px] rounded-[2.5rem] bg-white border border-slate-100 animate-pulse" />
+                  <div key={idx} className="min-w-[260px] h-[140px] rounded-[2rem] bg-white border border-slate-100 animate-pulse" />
                 ))
               ) : (
                 displayedFeaturedProducts.map((item) => (
                   <Link
                     key={`${item.storeSlug}-${item.id}`}
                     to={`/${item.storeSlug}`}
-                    className="group relative min-w-[280px] h-[160px] overflow-hidden rounded-[2.5rem] bg-white shadow-[0_15px_35px_-12px_rgba(0,0,0,0.1)] transition-all hover:scale-[1.02] active:scale-[0.98] snap-start border border-slate-100"
+                    className="group relative min-w-[260px] h-[140px] overflow-hidden rounded-[2.25rem] bg-white shadow-[0_12px_30px_-10px_rgba(0,0,0,0.1)] transition-all hover:scale-[1.02] active:scale-[0.98] snap-start border border-slate-100"
                   >
                     <img src={item.imageUrl} alt={item.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/10 to-transparent" />
                     
-                    <div className="absolute top-4 left-4">
+                    <div className="absolute top-3.5 left-4">
                       {item.sponsored ? (
-                        <span className="flex items-center gap-1.5 rounded-full bg-amber-400/90 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-slate-900 backdrop-blur-md shadow-lg">
-                          <Star size={10} weight="fill" /> Patrocinado
+                        <span className="flex items-center gap-1.5 rounded-full bg-amber-400/90 px-2.5 py-1 text-[8px] font-black uppercase tracking-wider text-slate-900 backdrop-blur-md shadow-lg">
+                          <Star size={10} weight="fill" /> Promo
                         </span>
                       ) : (
-                        <span className="rounded-full bg-white/20 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-white backdrop-blur-md border border-white/30">
-                          Destaque
+                        <span className="rounded-full bg-white/20 px-2.5 py-1 text-[8px] font-black uppercase tracking-wider text-white backdrop-blur-md border border-white/30">
+                          Sugestão
                         </span>
                       )}
                     </div>
 
-                    <div className="absolute bottom-4 left-4 right-4 text-white">
-                      <p className="text-sm font-black tracking-tight line-clamp-1">{item.name}</p>
+                    <div className="absolute bottom-3.5 left-4 right-4 text-white">
+                      <p className="text-[13px] font-black tracking-tight line-clamp-1 drop-shadow-sm">{item.name}</p>
                       <div className="mt-1 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <img src={item.storeLogo} alt={item.storeName} className="h-5 w-5 rounded-full border border-white/50" />
-                          <span className="text-[10px] font-bold opacity-90">{item.storeName}</span>
+                          <img src={item.storeLogo} alt={item.storeName} className="h-4.5 w-4.5 rounded-full border border-white/50 shadow-sm" />
+                          <span className="text-[9px] font-bold opacity-90">{item.storeName}</span>
                         </div>
-                        <span className="rounded-xl bg-white px-2.5 py-1 text-xs font-black text-slate-900 shadow-lg">
+                        <span className="rounded-lg bg-white px-2 py-0.5 text-[11px] font-black text-slate-900 shadow-lg">
                           {currency.format(item.price)}
                         </span>
                       </div>

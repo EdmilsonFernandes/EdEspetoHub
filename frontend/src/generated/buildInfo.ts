@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.041702.23f3231e",
-  "buildId": "0.1.9+20260405.041702.23f3231e-20260405.041702-23f3231e",
-  "builtAt": "2026-04-05T04:17:02.315Z",
-  "commitHash": "23f3231e6e90f8db4ab8e318823c757113b828aa",
-  "shortHash": "23f3231e",
+  "versionInternal": "0.1.9+20260405.120249.359e13bb",
+  "buildId": "0.1.9+20260405.120249.359e13bb-20260405.120249-359e13bb",
+  "builtAt": "2026-04-05T12:02:49.716Z",
+  "commitHash": "359e13bb4018bc1af64c3311f43af6b4280a6a95",
+  "shortHash": "359e13bb",
   "branch": "main",
   "commits": [
+    {
+      "hash": "359e13bb4018bc1af64c3311f43af6b4280a6a95",
+      "shortHash": "359e13bb",
+      "dateIso": "2026-04-05T01:20:31-03:00",
+      "subject": "style: premium lux minimalist overhaul for marketplace top section"
+    },
     {
       "hash": "23f3231e6e90f8db4ab8e318823c757113b828aa",
       "shortHash": "23f3231e",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "665fade7",
       "dateIso": "2026-04-04T19:49:27-03:00",
       "subject": "feat(hub): persist store favorites, simplify filters, and remove redundant menu entries"
-    },
-    {
-      "hash": "9ef8c6fc2cf938a1eca00c6d5a5ff400b06d4520",
-      "shortHash": "9ef8c6fc",
-      "dateIso": "2026-04-04T19:42:21-03:00",
-      "subject": "feat(hub/customer): unify auth flow, profile photo, push toggle, legal fallback and whatsapp apk fallback"
     }
   ]
 } as const;

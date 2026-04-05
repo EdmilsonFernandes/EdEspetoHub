@@ -1,164 +1,216 @@
 // @ts-nocheck
-import { useMemo, useState } from 'react';
-import { GoogleMapView } from '../components/GoogleMapView';
-import { mapsService } from '../services/mapsService';
-
-const DEFAULT_ORIGIN = {
-  lat: Number(import.meta.env.VITE_STORE_ORIGIN_LAT || -23.55052),
-  lng: Number(import.meta.env.VITE_STORE_ORIGIN_LNG || -46.633308),
-  label: import.meta.env.VITE_STORE_ORIGIN_LABEL || 'Loja',
-};
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, MapPinLine, Plus, Trash, House, Suitcase, MapPin, CaretRight, CheckCircle } from '@phosphor-icons/react';
+import { customerAccountService } from '../services/customerAccountService';
+import { useToast } from '../contexts/ToastContext';
 
 export function AddressDistance() {
-  const [address, setAddress] = useState('');
-  const [originMode, setOriginMode] = useState<'default' | 'custom'>('default');
-  const [customOrigin, setCustomOrigin] = useState({ lat: '', lng: '' });
-  const [result, setResult] = useState<{ distanceKm?: number; durationMin?: number | null } | null>(null);
-  const [destination, setDestination] = useState<{ lat: number; lng: number; formatted?: string } | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+  const [addresses, setAddresses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [isSubmitting, setIsAddSubmitting] = useState(false);
 
-  const origin = useMemo(() => {
-    if (originMode === 'custom') {
-      const lat = Number(customOrigin.lat);
-      const lng = Number(customOrigin.lng);
-      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-      return { lat, lng, label: 'Origem' };
-    }
-    return DEFAULT_ORIGIN;
-  }, [originMode, customOrigin]);
+  const [form, setForm] = useState({
+    label: 'Casa',
+    street: '',
+    number: '',
+    complement: '',
+    neighborhood: '',
+    city: '',
+    state: '',
+    cep: '',
+    recipientName: '',
+    phone: '',
+  });
 
-  const markers = useMemo(() => {
-    const list = [];
-    if (origin) list.push({ lat: origin.lat, lng: origin.lng, label: 'O' });
-    if (destination) list.push({ lat: destination.lat, lng: destination.lng, label: 'D' });
-    return list;
-  }, [origin, destination]);
-
-  const handleCalculate = async () => {
-    setError('');
-    setResult(null);
-    setDestination(null);
-    if (!address || address.trim().length < 5) {
-      setError('Informe um endereço completo para calcular.');
-      return;
-    }
-    if (!origin) {
-      setError('Defina uma origem válida.');
-      return;
-    }
-
-    setLoading(true);
+  const loadAddresses = async () => {
     try {
-      const geo = await mapsService.geocode(address);
-      setDestination({ lat: geo.lat, lng: geo.lng, formatted: geo.formattedAddress });
-      const route = await mapsService.route(
-        { lat: origin.lat, lng: origin.lng },
-        { lat: geo.lat, lng: geo.lng }
-      );
-      setResult(route);
-    } catch (err: any) {
-      setError(err?.message || 'Não foi possível calcular a rota.');
+      const data = await customerAccountService.listAddresses();
+      setAddresses(Array.isArray(data) ? data : []);
+    } catch (err) {
+      showToast('Erro ao carregar endereços', 'error');
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    loadAddresses();
+  }, []);
+
+  const handleAddAddress = async (e) => {
+    e.preventDefault();
+    if (!form.street || !form.number || !form.neighborhood) {
+      showToast('Preencha os campos obrigatórios', 'warning');
+      return;
+    }
+    setIsAddSubmitting(true);
+    try {
+      await customerAccountService.createAddress(form);
+      showToast('Endereço adicionado!', 'success');
+      setShowAddForm(false);
+      setForm({
+        label: 'Casa', street: '', number: '', complement: '',
+        neighborhood: '', city: '', state: '', cep: '', recipientName: '', phone: ''
+      });
+      loadAddresses();
+    } catch (err) {
+      showToast(err.message || 'Erro ao salvar endereço', 'error');
+    } finally {
+      setIsAddSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Excluir este endereço?')) return;
+    try {
+      await customerAccountService.deleteAddress(id);
+      showToast('Endereço removido');
+      loadAddresses();
+    } catch (err) {
+      showToast('Erro ao remover endereço', 'error');
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="max-w-5xl mx-auto px-4 py-10 space-y-8">
-        <header className="space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900">Distância por endereço</h1>
-          <p className="text-sm text-slate-600">
-            Informe o endereço do cliente e calcule distância + tempo estimado.
-          </p>
+    <div className="min-h-screen bg-slate-50 pb-12 pt-[env(safe-area-inset-top)]">
+      <div className="mx-auto max-w-2xl">
+        <header className="sticky top-0 z-20 flex items-center gap-4 border-b border-slate-200 bg-white/80 px-4 py-4 backdrop-blur-md">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 active:scale-90 transition-all"
+          >
+            <ArrowLeft size={20} weight="bold" />
+          </button>
+          <div>
+            <h1 className="text-lg font-black text-slate-900 leading-tight">Meus Endereços</h1>
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Locais de entrega</p>
+          </div>
         </header>
 
-        <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
-          <div className="space-y-5 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">Endereço do cliente</label>
-              <input
-                value={address}
-                onChange={(event) => setAddress(event.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-primary"
-                placeholder="Rua, número, bairro, cidade - UF"
-              />
-            </div>
+        <div className="p-4 space-y-4">
+          {!showAddForm && (
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="flex w-full items-center justify-center gap-2 rounded-[1.5rem] bg-slate-900 py-4 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-slate-900/20 active:scale-[0.98] transition-all"
+            >
+              <Plus size={16} weight="bold" />
+              Novo Endereço
+            </button>
+          )}
 
-            <div className="space-y-3">
-              <p className="text-sm font-semibold text-slate-700">Origem</p>
-              <div className="flex gap-2 text-xs font-semibold">
-                <button
-                  type="button"
-                  onClick={() => setOriginMode('default')}
-                  className={`px-3 py-1.5 rounded-full border ${
-                    originMode === 'default'
-                      ? 'bg-brand-primary text-white border-brand-primary'
-                      : 'bg-white text-slate-600 border-slate-200'
-                  }`}
-                >
-                  Usar loja
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setOriginMode('custom')}
-                  className={`px-3 py-1.5 rounded-full border ${
-                    originMode === 'custom'
-                      ? 'bg-brand-primary text-white border-brand-primary'
-                      : 'bg-white text-slate-600 border-slate-200'
-                  }`}
-                >
-                  Origem manual
-                </button>
+          {showAddForm && (
+            <div className="animate-in fade-in slide-in-from-top-4 duration-300 rounded-[2.5rem] bg-white border border-slate-200 p-6 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-black uppercase tracking-widest text-slate-900">Cadastrar Endereço</h2>
+                <button onClick={() => setShowAddForm(false)} className="text-xs font-bold text-slate-400">Cancelar</button>
               </div>
-              {originMode === 'custom' && (
-                <div className="grid grid-cols-2 gap-3">
+
+              <form onSubmit={handleAddAddress} className="space-y-3">
+                <div className="grid grid-cols-3 gap-2">
+                  {['Casa', 'Trabalho', 'Outro'].map(l => (
+                    <button
+                      key={l}
+                      type="button"
+                      onClick={() => setForm({...form, label: l})}
+                      className={`py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
+                        form.label === l ? 'bg-slate-900 border-slate-900 text-white shadow-md' : 'bg-white border-slate-200 text-slate-500'
+                      }`}
+                    >
+                      {l}
+                    </button>
+                  ))}
+                </div>
+
+                <input
+                  placeholder="Nome do Recebedor"
+                  value={form.recipientName}
+                  onChange={e => setForm({...form, recipientName: e.target.value})}
+                  className="w-full rounded-2xl bg-slate-50 border-none px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-slate-900/5 transition-all"
+                />
+
+                <div className="grid grid-cols-[1fr_80px] gap-2">
                   <input
-                    value={customOrigin.lat}
-                    onChange={(event) => setCustomOrigin((prev) => ({ ...prev, lat: event.target.value }))}
-                    className="w-full rounded-xl border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-primary"
-                    placeholder="Latitude"
+                    placeholder="Rua / Logradouro"
+                    value={form.street}
+                    onChange={e => setForm({...form, street: e.target.value})}
+                    className="rounded-2xl bg-slate-50 border-none px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-slate-900/5 transition-all"
                   />
                   <input
-                    value={customOrigin.lng}
-                    onChange={(event) => setCustomOrigin((prev) => ({ ...prev, lng: event.target.value }))}
-                    className="w-full rounded-xl border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-primary"
-                    placeholder="Longitude"
+                    placeholder="Nº"
+                    value={form.number}
+                    onChange={e => setForm({...form, number: e.target.value})}
+                    className="rounded-2xl bg-slate-50 border-none px-2 py-3 text-center text-sm font-bold text-slate-700 focus:ring-2 focus:ring-slate-900/5 transition-all"
                   />
                 </div>
-              )}
-              {originMode === 'default' && (
-                <p className="text-xs text-slate-500">
-                  Origem fixa: {DEFAULT_ORIGIN.lat}, {DEFAULT_ORIGIN.lng}
-                </p>
-              )}
+
+                <input
+                  placeholder="Bairro"
+                  value={form.neighborhood}
+                  onChange={e => setForm({...form, neighborhood: e.target.value})}
+                  className="w-full rounded-2xl bg-slate-50 border-none px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-slate-900/5 transition-all"
+                />
+
+                <input
+                  placeholder="Cidade"
+                  value={form.city}
+                  onChange={e => setForm({...form, city: e.target.value})}
+                  className="w-full rounded-2xl bg-slate-50 border-none px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-slate-900/5 transition-all"
+                />
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full rounded-[1.5rem] bg-emerald-600 py-4 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-emerald-600/20 active:scale-95 transition-all disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Salvando...' : 'Salvar Endereço'}
+                </button>
+              </form>
             </div>
+          )}
 
-            <button
-              type="button"
-              onClick={handleCalculate}
-              disabled={loading}
-              className="w-full rounded-xl bg-brand-primary text-white py-2.5 font-semibold hover:brightness-95 disabled:opacity-60"
-            >
-              {loading ? 'Calculando...' : 'Calcular'}
-            </button>
-
-            {error && <p className="text-sm text-red-600">{error}</p>}
-            {result && (
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 space-y-1">
-                <p>Distância: <strong>{result.distanceKm} km</strong></p>
-                <p>
-                  Duração: <strong>{result.durationMin ?? '-'} min</strong>
-                </p>
-                {destination?.formatted && (
-                  <p className="text-xs text-emerald-700/80">Destino: {destination.formatted}</p>
-                )}
+          <div className="space-y-3">
+            {loading ? (
+              <div className="flex justify-center p-8">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-200 border-t-slate-900" />
               </div>
+            ) : addresses.length === 0 ? (
+              <div className="rounded-[2.5rem] border border-dashed border-slate-300 bg-white p-12 text-center">
+                <MapPinLine size={48} weight="thin" className="mx-auto text-slate-200 mb-4" />
+                <p className="text-sm font-bold text-slate-400">Você ainda não tem endereços salvos.</p>
+              </div>
+            ) : (
+              addresses.map(addr => (
+                <div key={addr.id} className="group relative overflow-hidden rounded-[2rem] bg-white border border-slate-100 p-5 shadow-sm transition-all hover:shadow-md">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className={`grid h-12 w-12 place-items-center rounded-2xl ${
+                        addr.label === 'Casa' ? 'bg-sky-50 text-sky-600' : 
+                        addr.label === 'Trabalho' ? 'bg-amber-50 text-amber-600' : 'bg-slate-50 text-slate-600'
+                      }`}>
+                        {addr.label === 'Casa' ? <House size={24} weight="duotone" /> : 
+                         addr.label === 'Trabalho' ? <Suitcase size={24} weight="duotone" /> : <MapPin size={24} weight="duotone" />}
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-black text-slate-900">{addr.label || 'Endereço'}</h3>
+                        <p className="truncate text-xs font-bold text-slate-500 mt-0.5">{addr.street}, {addr.number}</p>
+                        <p className="truncate text-[10px] font-medium text-slate-400">{addr.neighborhood} • {addr.city}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleDelete(addr.id)}
+                      className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white border border-slate-100 text-rose-500 active:bg-rose-50 transition-colors"
+                    >
+                      <Trash size={18} weight="bold" />
+                    </button>
+                  </div>
+                </div>
+              ))
             )}
           </div>
-
-          <GoogleMapView markers={markers} />
         </div>
       </div>
     </div>
