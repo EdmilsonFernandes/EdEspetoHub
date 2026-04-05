@@ -10,10 +10,7 @@ import {
   UserCircle,
   UserRectangle,
   House,
-  CaretRight,
-  MapPin,
-  CreditCard,
-  Gift
+  CaretRight
 } from '@phosphor-icons/react';
 
 type DrawerAction = {
