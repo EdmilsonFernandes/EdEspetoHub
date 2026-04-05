@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.025255.69671120",
-  "buildId": "0.1.9+20260405.025255.69671120-20260405.025255-69671120",
-  "builtAt": "2026-04-05T02:52:55.602Z",
-  "commitHash": "696711207655eb8d04a2bbe66441e15517cad203",
-  "shortHash": "69671120",
+  "versionInternal": "0.1.9+20260405.025543.5dd62f0c",
+  "buildId": "0.1.9+20260405.025543.5dd62f0c-20260405.025543-5dd62f0c",
+  "builtAt": "2026-04-05T02:55:43.368Z",
+  "commitHash": "5dd62f0c1d1394a49be27dca8d0b3b3fbf6f77c0",
+  "shortHash": "5dd62f0c",
   "branch": "main",
   "commits": [
+    {
+      "hash": "5dd62f0c1d1394a49be27dca8d0b3b3fbf6f77c0",
+      "shortHash": "5dd62f0c",
+      "dateIso": "2026-04-04T23:54:20-03:00",
+      "subject": "docs: add robust terms of use and privacy policy to protect platform"
+    },
     {
       "hash": "696711207655eb8d04a2bbe66441e15517cad203",
       "shortHash": "69671120",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "4777fe56",
       "dateIso": "2026-04-04T17:46:56-03:00",
       "subject": "feat(hub): add touch swipe navigation for top banner carousel"
-    },
-    {
-      "hash": "fa910fe2f428ae0d65ff9e481aea44947bb09a39",
-      "shortHash": "fa910fe2",
-      "dateIso": "2026-04-04T17:43:47-03:00",
-      "subject": "refactor(hub): simplify top store carousel banner and add privacy action"
     }
   ]
 } as const;

@@ -192,6 +192,48 @@ public class MainActivity extends BridgeActivity {
         WebView webView = bridge.getWebView();
         webView.setWebViewClient(new WebViewClient() {
             @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if (url == null) return false;
+
+                // Trata e-mail
+                if (url.startsWith("mailto:")) {
+                    try {
+                        android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_SENDTO, android.net.Uri.parse(url));
+                        startActivity(intent);
+                        return true;
+                    } catch (Exception e) {
+                        return false;
+                    }
+                }
+
+                // Trata impressão térmica (RawBT)
+                if (url.startsWith("rawbt:")) {
+                    try {
+                        android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url));
+                        startActivity(intent);
+                        return true;
+                    } catch (Exception e) {
+                        return false;
+                    }
+                }
+
+                // URLs internas do sistema
+                if (isTrustedUrl(url)) {
+                    saveLastVisitedUrl();
+                    return false;
+                }
+
+                // Outras URLs externas (WhatsApp, etc.)
+                try {
+                    android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url));
+                    startActivity(intent);
+                    return true;
+                } catch (Exception e) {
+                    return false;
+                }
+            }
+
+            @Override
             public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
                 if (!isTrustedUrl(url)) return;

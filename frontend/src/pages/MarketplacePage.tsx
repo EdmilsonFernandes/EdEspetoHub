@@ -805,9 +805,9 @@ export function MarketplacePage() {
                 onClick={() => navigate('/hub')}
               >
                 <img
-                  src="/logo-datony.svg"
+                  src="/logo.svg"
                   alt="Já no Caminho"
-                  className="h-[85%] w-[85%] object-contain p-0.5"
+                  className="h-[80%] w-[80%] object-contain"
                 />
               </button>
             </div>
