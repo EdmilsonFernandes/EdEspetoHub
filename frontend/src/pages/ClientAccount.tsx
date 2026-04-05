@@ -179,6 +179,9 @@ export function ClientAccount() {
         localStorage.setItem('customerSession', JSON.stringify(next));
       }
       setProfileMessage('Foto de perfil atualizada.');
+      // Force a slight delay to allow the user to see the success message
+      // and maybe trigger a re-render in Hub when they go back
+      window.dispatchEvent(new Event('storage'));
     } catch (e: any) {
       if (e.status === 413) {
         setProfileMessage('A imagem excedeu o limite do servidor. Tente uma foto menor.');

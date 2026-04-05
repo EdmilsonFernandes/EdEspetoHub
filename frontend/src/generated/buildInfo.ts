@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260404.235212.d0ad42f7",
-  "buildId": "0.1.9+20260404.235212.d0ad42f7-20260404.235212-d0ad42f7",
-  "builtAt": "2026-04-04T23:52:12.309Z",
-  "commitHash": "d0ad42f7783471b9ffd3b9b6d1907bd8ebc1378c",
-  "shortHash": "d0ad42f7",
+  "versionInternal": "0.1.9+20260405.000300.0684da92",
+  "buildId": "0.1.9+20260405.000300.0684da92-20260405.000300-0684da92",
+  "builtAt": "2026-04-05T00:03:00.899Z",
+  "commitHash": "0684da925a25edc62b8e163a7599a3ad8a21e43a",
+  "shortHash": "0684da92",
   "branch": "main",
   "commits": [
+    {
+      "hash": "0684da925a25edc62b8e163a7599a3ad8a21e43a",
+      "shortHash": "0684da92",
+      "dateIso": "2026-04-04T20:54:41-03:00",
+      "subject": "m"
+    },
     {
       "hash": "d0ad42f7783471b9ffd3b9b6d1907bd8ebc1378c",
       "shortHash": "d0ad42f7",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "08f0cc9d",
       "dateIso": "2026-04-04T16:41:14-03:00",
       "subject": "feat(push): include store name in order status notification body"
-    },
-    {
-      "hash": "852d4863f2af41402b35e033497f62f4ab7a9a7b",
-      "shortHash": "852d4863",
-      "dateIso": "2026-04-04T16:24:59-03:00",
-      "subject": "feat(push): migrate delivery to Firebase FCM HTTP v1"
     }
   ]
 } as const;

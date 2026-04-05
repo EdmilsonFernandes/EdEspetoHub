@@ -126,7 +126,7 @@ const readCustomerSession = () => {
     if (!parsed || typeof parsed !== 'object') return null;
     return parsed as {
       token?: string;
-      user?: { fullName?: string; name?: string; email?: string };
+      user?: { fullName?: string; name?: string; email?: string; profileImageUrl?: string | null };
     };
   } catch {
     return null;
