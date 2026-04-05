@@ -59,7 +59,6 @@ public class MainActivity extends BridgeActivity {
             set.start();
         });
         super.onCreate(savedInstanceState);
-        checkAndRequestMediaPermissionsOnce();
     }
 
     private void checkAndRequestMediaPermissionsOnce() {

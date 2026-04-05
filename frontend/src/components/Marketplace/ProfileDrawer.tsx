@@ -1,33 +1,32 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import {
   ArrowsClockwise,
   BellSimple,
-  ChatCenteredDots,
   CookingPot,
   Lifebuoy,
-  MapPin,
   ShieldCheck,
   SignOut,
   Truck,
   UserCircle,
   UserRectangle,
+  House,
+  CaretRight
 } from '@phosphor-icons/react';
 
 type DrawerAction = {
   id: string;
   label: string;
   icon: ReactNode;
-  tone?: 'default' | 'danger';
   onClick: () => void;
+  tone?: 'default' | 'danger';
 };
 
 type ProfileDrawerProps = {
   isOpen: boolean;
   isLogged: boolean;
-  userName: string;
+  userName?: string;
   userEmail?: string;
   profileImageUrl?: string | null;
-  locationLabel?: string;
   onClose: () => void;
   onLogin: () => void;
   onOpenAdminLogin: () => void;
@@ -40,40 +39,12 @@ type ProfileDrawerProps = {
   versionLabel?: string;
 };
 
-const ItemButton = ({
-  label,
-  icon,
-  onClick,
-  tone = 'default',
-}: {
-  label: string;
-  icon: React.ReactNode;
-  onClick: () => void;
-  tone?: 'default' | 'danger';
-}) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold transition ${
-      tone === 'danger'
-        ? 'text-rose-700 hover:bg-rose-50'
-        : 'text-slate-700 hover:bg-slate-100'
-    }`}
-  >
-    <span className="grid h-8 w-8 place-items-center rounded-lg border border-slate-200 bg-gradient-to-b from-white to-slate-100 text-slate-700 shadow-sm">
-      {icon}
-    </span>
-    <span>{label}</span>
-  </button>
-);
-
 export function ProfileDrawer({
   isOpen,
   isLogged,
   userName,
   userEmail,
   profileImageUrl,
-  locationLabel,
   onClose,
   onLogin,
   onOpenAdminLogin,
@@ -85,122 +56,184 @@ export function ProfileDrawer({
   onLogout,
   versionLabel,
 }: ProfileDrawerProps) {
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [storeSlug, setStoreSlug] = useState<string | null>(null);
+
   useEffect(() => {
     if (!isOpen) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => {
-      document.body.style.overflow = previous;
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [isOpen, onClose]);
+    try {
+      const adminRaw = localStorage.getItem('auth_session');
+      if (adminRaw) {
+        const parsed = JSON.parse(adminRaw);
+        if (parsed?.token && parsed?.user) {
+          setIsAdmin(true);
+          setStoreSlug(parsed?.store?.slug || null);
+        } else {
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false);
+      }
+    } catch {
+      setIsAdmin(false);
+    }
+  }, [isOpen]);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   const actions: DrawerAction[] = isLogged
     ? [
-        { id: 'account', label: 'Minha conta', icon: <UserRectangle size={18} weight="duotone" />, onClick: onOpenAccount },
-        { id: 'orders', label: 'Meus pedidos', icon: <BellSimple size={18} weight="duotone" />, onClick: onOpenAccount },
-        { id: 'security', label: 'Central de segurança', icon: <ShieldCheck size={18} weight="duotone" />, onClick: onOpenAccount },
-        { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={18} weight="duotone" />, onClick: onOpenHelp },
-        { id: 'terms', label: 'Termos de uso', icon: <UserRectangle size={18} weight="duotone" />, onClick: onOpenTerms },
-        { id: 'privacy', label: 'Política de privacidade', icon: <ShieldCheck size={18} weight="duotone" />, onClick: onOpenPrivacy },
-        { id: 'messages', label: 'Mensagens', icon: <ChatCenteredDots size={18} weight="duotone" />, onClick: onOpenAccount },
-        { id: 'logout', label: 'Sair', icon: <SignOut size={18} weight="duotone" />, onClick: onLogout, tone: 'danger' },
+        { id: 'account', label: 'Dados do perfil', icon: <UserRectangle size={20} weight="duotone" />, onClick: onOpenAccount },
+        { id: 'orders', label: 'Meus pedidos', icon: <BellSimple size={20} weight="duotone" />, onClick: onOpenAccount },
+        { id: 'security', label: 'Segurança', icon: <ShieldCheck size={20} weight="duotone" />, onClick: onOpenAccount },
+        { id: 'help', label: 'Central de ajuda', icon: <Lifebuoy size={20} weight="duotone" />, onClick: onOpenHelp },
+        { id: 'logout', label: 'Sair da conta', icon: <SignOut size={20} weight="duotone" />, onClick: onLogout, tone: 'danger' },
       ]
     : [
-        { id: 'security', label: 'Central de segurança', icon: <ShieldCheck size={18} weight="duotone" />, onClick: onLogin },
-        { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={18} weight="duotone" />, onClick: onOpenHelp },
-        { id: 'terms', label: 'Termos de uso', icon: <UserRectangle size={18} weight="duotone" />, onClick: onOpenTerms },
-        { id: 'privacy', label: 'Política de privacidade', icon: <ShieldCheck size={18} weight="duotone" />, onClick: onOpenPrivacy },
+        { id: 'help', label: 'Central de ajuda', icon: <Lifebuoy size={20} weight="duotone" />, onClick: onOpenHelp },
+        { id: 'terms', label: 'Termos de uso', icon: <UserRectangle size={20} weight="duotone" />, onClick: onOpenTerms },
+        { id: 'privacy', label: 'Privacidade', icon: <ShieldCheck size={20} weight="duotone" />, onClick: onOpenPrivacy },
       ];
 
   return (
-    <div className="fixed inset-0 z-[130]">
-      <button
-        type="button"
-        onClick={onClose}
-        className="absolute inset-0 bg-black/50 backdrop-blur-[1px]"
-        aria-label="Fechar menu"
-      />
+    <div
+      className={`fixed inset-0 z-[200] transition-opacity duration-300 ${
+        isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
+      }`}
+    >
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
 
-      <aside className="absolute left-0 top-0 z-[140] h-full w-[82%] max-w-[360px] overflow-y-auto rounded-r-3xl bg-white shadow-[0_24px_60px_-28px_rgba(15,23,42,0.55)]">
-        <div className="relative border-b border-slate-200 bg-slate-50/90 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))]">
-          <div className="flex items-start justify-between gap-3 pt-2">
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <h3 className="truncate text-base font-black text-slate-900">{userName || 'Anônimo'}</h3>
-                <ShieldCheck size={14} weight="fill" className="text-amber-500" />
-              </div>
-              <button
-                type="button"
-                onClick={isLogged ? onOpenAccount : onLogin}
-                className="mt-1 text-xs font-semibold text-sky-700 hover:text-sky-800"
-              >
-                {isLogged ? 'Editar minhas informações >' : 'Entrar para salvar seus dados >'}
-              </button>
-              {userEmail ? (
-                <p className="mt-1 truncate text-[11px] text-slate-500">{userEmail}</p>
-              ) : null}
-            </div>
-            <div className="relative">
-              <span className="grid h-12 w-12 place-items-center overflow-hidden rounded-full border border-white bg-slate-900 text-sm font-black text-white shadow">
-                {profileImageUrl ? (
-                  <img src={profileImageUrl} alt={userName} className="h-full w-full object-cover" />
-                ) : (userName || 'AN').slice(0, 2).toUpperCase()}
-              </span>
-            </div>
-          </div>
-          <div className="mt-3 flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600">
-            <MapPin size={14} weight="duotone" className="text-sky-500" />
-            <span className="truncate">Entregar em: {locationLabel || 'Sua região'}</span>
-          </div>
-        </div>
-
-        <div className="px-3 py-3">
-          {!isLogged ? (
-            <div className="mb-3 rounded-2xl border border-slate-200 bg-slate-50 px-2.5 py-2.5">
-              <p className="mb-2 px-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">Entrar como</p>
-              <div className="space-y-1">
-                <ItemButton label="Cliente" icon={<UserCircle size={18} weight="duotone" />} onClick={() => { onClose(); onLogin(); }} />
-                <ItemButton label="Operacional (Admin/Operador)" icon={<CookingPot size={18} weight="duotone" />} onClick={() => { onClose(); onOpenAdminLogin(); }} />
-                <ItemButton label="Entregador" icon={<Truck size={18} weight="duotone" />} onClick={() => { onClose(); onOpenMotoboyLogin(); }} />
+      <aside
+        className={`absolute inset-y-0 left-0 w-[280px] max-w-[85vw] transform bg-white shadow-2xl transition-transform duration-500 ease-out ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        } flex flex-col pt-[env(safe-area-inset-top)]`}
+      >
+        <div className="p-6 pb-4">
+          {isLogged ? (
+            <div className="flex items-center gap-4">
+              {profileImageUrl ? (
+                <img
+                  src={profileImageUrl}
+                  alt={userName}
+                  className="h-14 w-14 rounded-2xl border-2 border-white object-cover shadow-md ring-1 ring-slate-100"
+                />
+              ) : (
+                <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400 shadow-inner">
+                  <UserCircle size={32} weight="duotone" />
+                </div>
+              )}
+              <div className="min-w-0">
+                <p className="truncate text-[15px] font-black text-slate-900">{userName}</p>
+                <p className="truncate text-xs font-bold text-slate-400">{userEmail}</p>
               </div>
             </div>
-          ) : null}
-          {actions.map((item) => (
-            <ItemButton
-              key={item.id}
-              label={item.label}
-              icon={item.icon}
-              onClick={() => {
-                onClose();
-                item.onClick();
-              }}
-              tone={item.tone}
-            />
-          ))}
-          {!isLogged ? (
+          ) : (
             <button
-              type="button"
-              onClick={() => {
-                onClose();
-                window.location.reload();
-              }}
-              className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+              onClick={onLogin}
+              className="flex w-full items-center justify-between rounded-2xl bg-slate-900 p-4 text-white shadow-lg transition-all active:scale-95"
             >
-              <ArrowsClockwise size={14} weight="bold" />
-              Atualizar sessão
+              <div className="flex items-center gap-3">
+                <UserCircle size={24} weight="duotone" className="text-slate-400" />
+                <div className="text-left">
+                  <p className="text-sm font-black">Entrar ou cadastrar</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Minha conta</p>
+                </div>
+              </div>
+              <CaretRight size={16} weight="bold" className="text-slate-500" />
             </button>
-          ) : null}
+          )}
         </div>
-        <div className="border-t border-slate-200 px-4 py-3 text-[11px] text-slate-500">
-          <p className="font-semibold">Já no Caminho</p>
-          <p className="mt-0.5">Versão {versionLabel || 'v0.0.0'}</p>
+
+        <div className="flex-1 overflow-y-auto px-3 py-2 space-y-6">
+          {isAdmin && (
+            <section className="space-y-2 px-3">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Minha Operação</p>
+              <div className="grid gap-2">
+                <button
+                  onClick={() => {
+                    if (storeSlug) window.location.href = `/${storeSlug}`;
+                    onClose();
+                  }}
+                  className="flex w-full items-center gap-3 rounded-xl border border-sky-100 bg-sky-50/50 p-3 text-sky-900 transition-all active:scale-95"
+                >
+                  <CookingPot size={20} weight="duotone" className="text-sky-600" />
+                  <span className="text-[13px] font-black">Gerenciar Loja</span>
+                </button>
+                <button
+                  onClick={() => {
+                    window.location.href = '/hub';
+                    onClose();
+                  }}
+                  className="flex w-full items-center gap-3 rounded-xl border border-emerald-100 bg-emerald-50/50 p-3 text-emerald-900 transition-all active:scale-95"
+                >
+                  <House size={20} weight="duotone" className="text-emerald-600" />
+                  <span className="text-[13px] font-black">Voltar ao Hub</span>
+                </button>
+              </div>
+            </section>
+          )}
+
+          <nav className="space-y-1 px-3">
+            <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-3">Menu</p>
+            {actions.map((action) => (
+              <button
+                key={action.id}
+                onClick={() => {
+                  action.onClick();
+                  onClose();
+                }}
+                className={`flex w-full items-center gap-4 rounded-xl px-3 py-3.5 transition-all active:scale-[0.98] ${
+                  action.tone === 'danger'
+                    ? 'text-rose-600 hover:bg-rose-50 active:bg-rose-100'
+                    : 'text-slate-700 hover:bg-slate-50 active:bg-slate-100'
+                }`}
+              >
+                <span className={action.tone === 'danger' ? 'text-rose-500' : 'text-slate-400'}>
+                  {action.icon}
+                </span>
+                <span className="text-[14px] font-bold">{action.label}</span>
+              </button>
+            ))}
+          </nav>
+
+          <section className="px-3 pt-2">
+            <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-3">Acesso Profissional</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={onOpenAdminLogin}
+                className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-100 bg-slate-50/50 p-4 transition-all active:scale-95"
+              >
+                <Truck size={24} weight="duotone" className="text-slate-400" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 text-center">Sou Lojista</span>
+              </button>
+              <button
+                onClick={onOpenMotoboyLogin}
+                className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-100 bg-slate-50/50 p-4 transition-all active:scale-95"
+              >
+                <ArrowsClockwise size={24} weight="duotone" className="text-slate-400" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 text-center">Entregador</span>
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <div className="border-t border-slate-100 bg-slate-50 p-6 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <p className="text-[11px] font-black text-slate-900">Já no Caminho</p>
+              <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Versão {versionLabel || 'v0.0.0'}</p>
+            </div>
+            <img src="/janocaminho-logov1.svg" alt="Logo" className="h-6 w-auto opacity-30 grayscale" />
+          </div>
         </div>
       </aside>
     </div>

@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.034040.ebb0b668",
-  "buildId": "0.1.9+20260405.034040.ebb0b668-20260405.034040-ebb0b668",
-  "builtAt": "2026-04-05T03:40:40.967Z",
-  "commitHash": "ebb0b6687b34dd4146fd13dba34ba6d6b98515b9",
-  "shortHash": "ebb0b668",
+  "versionInternal": "0.1.9+20260405.034917.89d87ddb",
+  "buildId": "0.1.9+20260405.034917.89d87ddb-20260405.034917-89d87ddb",
+  "builtAt": "2026-04-05T03:49:17.667Z",
+  "commitHash": "89d87ddb4e6612c87ead56a7eb9cf1afe8d1ac27",
+  "shortHash": "89d87ddb",
   "branch": "main",
   "commits": [
+    {
+      "hash": "89d87ddb4e6612c87ead56a7eb9cf1afe8d1ac27",
+      "shortHash": "89d87ddb",
+      "dateIso": "2026-04-05T00:41:51-03:00",
+      "subject": "feat: premium active order trackers on hub and store pages with safe-area fixes"
+    },
     {
       "hash": "ebb0b6687b34dd4146fd13dba34ba6d6b98515b9",
       "shortHash": "ebb0b668",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "8ba9be23",
       "dateIso": "2026-04-04T18:25:43-03:00",
       "subject": "feat(hub): add role-based login shortcuts in profile drawer"
-    },
-    {
-      "hash": "eb3ecfc5dc2ff99d3dacc0bc2185ac64d9bb814d",
-      "shortHash": "eb3ecfc5",
-      "dateIso": "2026-04-04T18:23:42-03:00",
-      "subject": "fix(hours): align hub open status with backend and robust day/tz handling"
     }
   ]
 } as const;

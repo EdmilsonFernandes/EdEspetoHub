@@ -782,7 +782,6 @@ export function MarketplacePage() {
         userName={customerDisplayName || 'Anônimo'}
         userEmail={customerEmail}
         profileImageUrl={customerProfileImage}
-        locationLabel={displayLocationLabel}
         onClose={() => setProfileDrawerOpen(false)}
         onLogin={openCustomerLogin}
         onOpenAdminLogin={openAdminLogin}
