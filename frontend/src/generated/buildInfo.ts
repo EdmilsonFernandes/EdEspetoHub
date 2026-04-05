@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.001404.a6d9e109",
-  "buildId": "0.1.9+20260405.001404.a6d9e109-20260405.001404-a6d9e109",
-  "builtAt": "2026-04-05T00:14:04.920Z",
-  "commitHash": "a6d9e1094e84bda505f7221735296168e0ef1531",
-  "shortHash": "a6d9e109",
+  "versionInternal": "0.1.9+20260405.002020.03c64649",
+  "buildId": "0.1.9+20260405.002020.03c64649-20260405.002020-03c64649",
+  "builtAt": "2026-04-05T00:20:20.139Z",
+  "commitHash": "03c64649a228d38e42ad0303d05c8cb7377ef3e6",
+  "shortHash": "03c64649",
   "branch": "main",
   "commits": [
+    {
+      "hash": "03c64649a228d38e42ad0303d05c8cb7377ef3e6",
+      "shortHash": "03c64649",
+      "dateIso": "2026-04-04T21:15:01-03:00",
+      "subject": "feat(mobile): add native permission request, fix webview file picker and extend session to 30d"
+    },
     {
       "hash": "a6d9e1094e84bda505f7221735296168e0ef1531",
       "shortHash": "a6d9e109",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "86037261",
       "dateIso": "2026-04-04T17:00:55-03:00",
       "subject": "feat(hub): refine premium hero and curated marketplace visuals"
-    },
-    {
-      "hash": "2588441236b35f9d7eb908048705b41298ccf858",
-      "shortHash": "25884412",
-      "dateIso": "2026-04-04T16:56:42-03:00",
-      "subject": "feat(superadmin): add global push broadcast tab"
     }
   ]
 } as const;
