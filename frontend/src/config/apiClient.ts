@@ -143,12 +143,22 @@ const request = async (path: string, options: any = {}) =>
     finalOptions.body = JSON.stringify(finalOptions.body);
   }
 
-  const response = await fetch(url, finalOptions);
-  const adminRole = getAdminRole();
-  const isOperator = adminRole === 'OPERATOR' || adminRole === 'CHURRASQUEIRO';
-  const hasPrivilegedSession = isMotoboyRoute ? Boolean(motoboyToken) : Boolean(adminToken);
-  const canAutoLogout = hasPrivilegedSession && !(response.status === 403 && isOperator && !isMotoboyRoute);
-  return handleResponse(response, isMotoboyRoute ? 'motoboy' : 'admin', canAutoLogout); // ⬅️ NÃO mascarar erro
+  try {
+    const response = await fetch(url, finalOptions);
+    const adminRole = getAdminRole();
+    const isOperator = adminRole === 'OPERATOR' || adminRole === 'CHURRASQUEIRO';
+    const hasPrivilegedSession = isMotoboyRoute ? Boolean(motoboyToken) : Boolean(adminToken);
+    const canAutoLogout = hasPrivilegedSession && !(response.status === 403 && isOperator && !isMotoboyRoute);
+    return handleResponse(response, isMotoboyRoute ? 'motoboy' : 'admin', canAutoLogout);
+  } catch (error: any) {
+    if (error instanceof TypeError && (error.message.includes('fetch') || error.message.includes('NetworkError'))) {
+      const netError: any = new Error('Falha na conexão com o servidor. Verifique sua internet.');
+      netError.status = 0;
+      netError.code = 'NETWORK_ERROR';
+      throw netError;
+    }
+    throw error;
+  }
 };
 
 // RAW (para download/export etc)

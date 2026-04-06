@@ -9,6 +9,7 @@ import { MotoboyRoute } from './components/Motoboy/MotoboyRoute';
 import { AdminLayout } from './layouts/AdminLayout';
 import { AppErrorBoundary } from './components/common/AppErrorBoundary';
 import { NativePushPermissionBanner } from './components/common/NativePushPermissionBanner';
+import { OfflineAlert } from './components/common/OfflineAlert';
 import './index.css';
 import { MotoboyLayout } from './layouts/MotoboyLayout';
 
@@ -17,6 +18,7 @@ function App() {
     <ThemeProvider>
       <ToastProvider>
         <Router>
+          <OfflineAlert />
           <NativePushPermissionBanner />
           <Routes>
             <Route path="/" element={<LandingPage />} />
