@@ -58,11 +58,11 @@ export function PlatformTrustFooter({
                   desenvolvido por
                 </p>
                 <div className={`mt-0.5 inline-flex items-center gap-1.5 ${isLeft ? '' : isRight ? 'justify-end w-full' : 'justify-center sm:justify-start w-full'}`}>
-                  <span className="h-5 w-5 overflow-hidden rounded-md border border-slate-300/60 bg-white transition-all grayscale opacity-65 group-hover:grayscale-0 group-hover:opacity-100">
-                    <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-full w-full object-cover" />
+                  <span className="h-5 w-5 overflow-hidden rounded-md border border-slate-300/60 bg-white transition-all group-hover:scale-110">
+                    <img src="/jnc.png" alt="JNC" className="h-full w-full object-cover" />
                   </span>
                   <span className={`${compact ? 'text-[10px]' : 'text-[11px]'} uppercase tracking-[0.14em] font-bold ${minimalBrand}`}>
-                    Já no Caminho
+                    Jano Caminho
                   </span>
                 </div>
               </div>
@@ -87,13 +87,13 @@ export function PlatformTrustFooter({
           target="_blank"
           rel="noreferrer"
           className={`group inline-flex items-center gap-2.5 rounded-2xl px-3 py-2 transition-colors hover:border-slate-300 hover:text-slate-900 ${shellClass}`}
-          aria-label="Plataforma Já no Caminho"
+          aria-label="Plataforma Jano Caminho"
         >
           <span className="h-7 w-7 rounded-lg overflow-hidden border border-slate-200/70 shadow-sm bg-white">
-            <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-full w-full object-cover" />
+            <img src="/jnc.png" alt="JNC" className="h-full w-full object-cover" />
           </span>
-          <span className="flex min-w-0 flex-col">
-            <span className={`font-semibold leading-tight ${compact ? 'text-[11px]' : 'text-xs'}`}>Desenvolvido por Já no Caminho</span>
+          <span className="flex min-w-0 flex-col text-left">
+            <span className={`font-semibold leading-tight ${compact ? 'text-[11px]' : 'text-xs'}`}>Desenvolvido por Jano Caminho</span>
             <span className={`mt-0.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${badgeClass}`}>
               <ShieldCheck size={12} weight="bold" />
               Plataforma segura
