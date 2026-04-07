@@ -786,6 +786,12 @@ export function MarketplacePage() {
   }, []);
 
   useEffect(() => {
+    loadActiveOrders();
+    const interval = window.setInterval(loadActiveOrders, 30000);
+    return () => window.clearInterval(interval);
+  }, [loadActiveOrders]);
+
+  useEffect(() => {
     const raf = window.requestAnimationFrame(() => setHasEntered(true));
     return () => window.cancelAnimationFrame(raf);
   }, []);
@@ -920,6 +926,45 @@ export function MarketplacePage() {
         </header>
 
         <main className="max-w-[1200px] mx-auto px-4 pt-4 space-y-10">
+          {activeOrders.length > 0 && (
+            <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+              <div className="relative overflow-hidden rounded-[2.5rem] border border-emerald-200/50 bg-emerald-50/90 backdrop-blur-md p-5 shadow-[0_20px_40px_-15px_rgba(16,185,129,0.2)]">
+                <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-emerald-200/20 blur-2xl" />
+                <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="relative flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                      </span>
+                      <span className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-700">
+                        Pedido em Andamento
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {activeOrders.map((order) => (
+                        <button
+                          key={order.id}
+                          onClick={() => navigate(`/pedido/${order.id}`)}
+                          className="rounded-xl bg-white px-3 py-2 text-[11px] font-bold text-emerald-900 border border-emerald-100 shadow-sm active:scale-95"
+                        >
+                          #{String(order.id).slice(-6).toUpperCase()} • {order.store?.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => navigate(`/pedido/${activeOrders[0].id}`)}
+                    className="group inline-flex items-center justify-center gap-3 rounded-2xl bg-emerald-600 px-6 py-3 text-sm font-black text-white shadow-xl transition-all hover:bg-emerald-700 active:scale-95"
+                  >
+                    Acompanhar Agora
+                    <CaretRight size={16} weight="bold" className="group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Seção Categorias Premium Squircle */}
           <section className="relative px-1" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
             <div className="flex items-center gap-5 overflow-x-auto no-scrollbar py-2 snap-x snap-mandatory">
