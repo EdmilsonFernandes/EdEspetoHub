@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260407.131419.72a5a79e",
-  "buildId": "0.1.9+20260407.131419.72a5a79e-20260407.131419-72a5a79e",
-  "builtAt": "2026-04-07T13:14:19.236Z",
-  "commitHash": "72a5a79e85a0c8c9afb7c55f713312c31958ca7b",
-  "shortHash": "72a5a79e",
+  "versionInternal": "0.1.9+20260407.133903.e96fd920",
+  "buildId": "0.1.9+20260407.133903.e96fd920-20260407.133903-e96fd920",
+  "builtAt": "2026-04-07T13:39:03.884Z",
+  "commitHash": "e96fd9203c2549a25361b35c2bc01a4f43ed7215",
+  "shortHash": "e96fd920",
   "branch": "main",
   "commits": [
+    {
+      "hash": "e96fd9203c2549a25361b35c2bc01a4f43ed7215",
+      "shortHash": "e96fd920",
+      "dateIso": "2026-04-07T10:15:48-03:00",
+      "subject": "fix(frontend): remove unused React import and finalize icons"
+    },
     {
       "hash": "72a5a79e85a0c8c9afb7c55f713312c31958ca7b",
       "shortHash": "72a5a79e",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "c8fffee9",
       "dateIso": "2026-04-04T21:21:02-03:00",
       "subject": "style: premium logo container with glassmorphism and SVG support"
-    },
-    {
-      "hash": "03c64649a228d38e42ad0303d05c8cb7377ef3e6",
-      "shortHash": "03c64649",
-      "dateIso": "2026-04-04T21:15:01-03:00",
-      "subject": "feat(mobile): add native permission request, fix webview file picker and extend session to 30d"
     }
   ]
 } as const;
