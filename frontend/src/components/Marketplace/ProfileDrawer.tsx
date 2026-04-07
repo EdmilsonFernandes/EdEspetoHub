@@ -38,6 +38,7 @@ type ProfileDrawerProps = {
   onOpenPrivacy: () => void;
   onOpenHelp: () => void;
   onLogout: () => void;
+  onDeactivateAccount: () => void; // Nova prop
   versionLabel?: string;
 };
 
@@ -56,6 +57,7 @@ export function ProfileDrawer({
   onOpenPrivacy,
   onOpenHelp,
   onLogout,
+  onDeactivateAccount, // Nova prop
   versionLabel,
 }: ProfileDrawerProps) {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -98,6 +100,7 @@ export function ProfileDrawer({
         { id: 'orders', label: 'Meus pedidos', icon: <BellSimple size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-amber-600', bgColor: 'bg-amber-50' },
         { id: 'security', label: 'Segurança', icon: <ShieldCheck size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-indigo-600', bgColor: 'bg-indigo-50' },
         { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={22} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
+        { id: 'deactivate', label: 'Excluir conta', icon: <SignOut size={22} weight="duotone" />, onClick: onDeactivateAccount, tone: 'danger' },
         { id: 'logout', label: 'Sair da conta', icon: <SignOut size={22} weight="duotone" />, onClick: onLogout, tone: 'danger' },
       ]
     : [

@@ -149,6 +149,10 @@ async login(input: { email: string; password: string }) {
     const user = await userRepo.findOne({ where: { email } });
     if (!user) throw new AppError('AUTH-004', 401);
 
+    if (user.isActive === false) {
+      throw new AppError('AUTH-004', 401, { message: 'Esta conta foi desativada.' });
+    }
+
     const valid = await bcrypt.compare(password, String(user.password || ''));
     if (!valid) throw new AppError('AUTH-004', 401);
 
@@ -221,6 +225,21 @@ async changePassword(userId: string, currentPassword: string, newPassword: strin
     }
 
     user.password = await bcrypt.hash(next, 10);
+    await repo.save(user);
+    return { ok: true };
+  }
+
+  /**
+   * Deactivates the customer account (soft delete).
+   * 
+   * @author Edmilson Lopes
+   */
+  async deactivate(userId: string) {
+    const repo = AppDataSource.getRepository(User);
+    const user = await repo.findOne({ where: { id: userId } });
+    if (!user) throw new AppError('AUTH-004', 401);
+
+    user.isActive = false;
     await repo.save(user);
     return { ok: true };
   }

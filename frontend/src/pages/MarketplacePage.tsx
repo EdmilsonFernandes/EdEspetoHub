@@ -740,6 +740,16 @@ export function MarketplacePage() {
     navigate('/hub');
   }, [navigate]);
 
+  const handleDeactivateAccount = useCallback(async () => {
+    if (!window.confirm('Tem certeza que deseja desativar sua conta? Esta ação é irreversível.')) return;
+    try {
+      await customerAccountService.deactivate();
+      handleCustomerLogout();
+    } catch (e: any) {
+      alert(e?.message || 'Erro ao desativar conta.');
+    }
+  }, [handleCustomerLogout]);
+
   const toggleFavoriteStore = useCallback((slug: string) => {
     const normalized = String(slug || '').trim();
     if (!normalized) return;
@@ -810,6 +820,7 @@ export function MarketplacePage() {
         onOpenPrivacy={openPrivacy}
         onOpenHelp={openHelp}
         onLogout={handleCustomerLogout}
+        onDeactivateAccount={handleDeactivateAccount}
         versionLabel={APP_BUILD_INFO.versionLabel}
       />
 

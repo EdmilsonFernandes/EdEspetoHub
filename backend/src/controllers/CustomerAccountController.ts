@@ -85,6 +85,21 @@ static async changePassword(req: Request, res: Response) {
     }
   }
 
+  /**
+   * Deactivates the customer account.
+   * 
+   * @author Edmilson Lopes
+   */
+  static async deactivate(req: Request, res: Response) {
+    try {
+      if (!req.auth?.sub) throw new AppError('AUTH-001', 401);
+      const result = await service.deactivate(req.auth.sub);
+      return res.json(result);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
     /**
    * Lists records for list addresses.
    *

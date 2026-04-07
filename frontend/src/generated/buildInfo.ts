@@ -5,13 +5,43 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260407.141112.f36eced1",
-  "buildId": "0.1.9+20260407.141112.f36eced1-20260407.141112-f36eced1",
-  "builtAt": "2026-04-07T14:11:12.942Z",
-  "commitHash": "f36eced11e56c4d611bd57bbe9f5b0ce89ba823d",
-  "shortHash": "f36eced1",
+  "versionInternal": "0.1.9+20260407.153908.c97af1b4",
+  "buildId": "0.1.9+20260407.153908.c97af1b4-20260407.153908-c97af1b4",
+  "builtAt": "2026-04-07T15:39:08.057Z",
+  "commitHash": "c97af1b4545a790a43f8d1f9e075e4739224b8a2",
+  "shortHash": "c97af1b4",
   "branch": "main",
   "commits": [
+    {
+      "hash": "c97af1b4545a790a43f8d1f9e075e4739224b8a2",
+      "shortHash": "c97af1b4",
+      "dateIso": "2026-04-07T12:38:23-03:00",
+      "subject": "fix(mobile): force non-www domain for assets to prevent 404 in apk"
+    },
+    {
+      "hash": "474fabc4bfc439faf76dd53a6ffd0e69e3e20caa",
+      "shortHash": "474fabc4",
+      "dateIso": "2026-04-07T12:27:22-03:00",
+      "subject": "debug(mobile): add logs to investigate hub store image issues in apk"
+    },
+    {
+      "hash": "0feebe317cf8ff61ee304a622f1e4350be4ceef1",
+      "shortHash": "0feebe31",
+      "dateIso": "2026-04-07T12:20:26-03:00",
+      "subject": "fix(mobile): force https and resolve domain for assets in apk"
+    },
+    {
+      "hash": "90c048983023b9a99932fc35046a285c2bb73e1d",
+      "shortHash": "90c04898",
+      "dateIso": "2026-04-07T12:15:05-03:00",
+      "subject": "fix(mobile): robust asset url resolution for apk and webview"
+    },
+    {
+      "hash": "457b2f3d7e0a2946c05e5c97d7178965067766a3",
+      "shortHash": "457b2f3d",
+      "dateIso": "2026-04-07T11:39:44-03:00",
+      "subject": "fix(mobile): force exact naked domain for images based on web logs"
+    },
     {
       "hash": "f36eced11e56c4d611bd57bbe9f5b0ce89ba823d",
       "shortHash": "f36eced1",
@@ -161,36 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "46c39cb9",
       "dateIso": "2026-04-05T00:03:24-03:00",
       "subject": "fix(mobile): request permissions only on create to avoid repeated prompts"
-    },
-    {
-      "hash": "f3aa0e93bea9dc14cce9b82005d18ea58962f38d",
-      "shortHash": "f3aa0e93",
-      "dateIso": "2026-04-05T00:00:59-03:00",
-      "subject": "fix(mobile): resolve ERR_UNKNOWN_URL_SCHEME by using BridgeWebViewClient correctly"
-    },
-    {
-      "hash": "5473287c4d61b0a337450ac936ae72c9c778be9e",
-      "shortHash": "5473287c",
-      "dateIso": "2026-04-04T23:56:47-03:00",
-      "subject": "fix(mobile): handle rawbt and mailto links in webview and restore official platform logo"
-    },
-    {
-      "hash": "5dd62f0c1d1394a49be27dca8d0b3b3fbf6f77c0",
-      "shortHash": "5dd62f0c",
-      "dateIso": "2026-04-04T23:54:20-03:00",
-      "subject": "docs: add robust terms of use and privacy policy to protect platform"
-    },
-    {
-      "hash": "696711207655eb8d04a2bbe66441e15517cad203",
-      "shortHash": "69671120",
-      "dateIso": "2026-04-04T23:51:48-03:00",
-      "subject": "style: premium circular logo-datony.svg in hub header"
-    },
-    {
-      "hash": "b4f223e36a515c8019f35268391d4f7418da77da",
-      "shortHash": "b4f223e3",
-      "dateIso": "2026-04-04T23:43:30-03:00",
-      "subject": "style: use original high-res PWA icon in header for premium look"
     }
   ]
 } as const;

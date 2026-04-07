@@ -21,6 +21,10 @@ export const customerAccountService = {
     return apiClient.post('/customer/me/change-password', payload);
   },
 
+  deactivate() {
+    return apiClient.patch('/customer/me/deactivate', {});
+  },
+
   forgotPassword(email: string) {
     return apiClient.post('/auth/forgot-password', { email });
   },

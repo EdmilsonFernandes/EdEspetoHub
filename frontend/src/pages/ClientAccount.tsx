@@ -200,6 +200,17 @@ export function ClientAccount() {
     }
   };
 
+  const handleDeactivate = async () => {
+    if (!window.confirm('Tem certeza que deseja desativar sua conta? Esta ação é irreversível e você será desconectado.')) return;
+    
+    try {
+      await customerAccountService.deactivate();
+      logout();
+    } catch (e: any) {
+      alert(e?.message || 'Falha ao desativar conta.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
@@ -410,6 +421,19 @@ export function ClientAccount() {
                 ))
               )}
             </div>
+          </section>
+
+          {/* Seção 5: Exclusão de Conta */}
+          <section className="pt-4">
+            <button
+              onClick={handleDeactivate}
+              className="w-full rounded-2xl border border-rose-100 bg-rose-50/50 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-rose-600 transition-all active:scale-95"
+            >
+              Excluir minha conta permanentemente
+            </button>
+            <p className="mt-3 text-center text-[10px] font-bold text-slate-400 px-6">
+              Ao excluir sua conta, todos os seus dados pessoais serão desativados de nossa base, conforme a LGPD.
+            </p>
           </section>
         </div>
       </div>

@@ -34,38 +34,27 @@ const FALLBACK_TERMS = `
 
 const FALLBACK_LGPD = `
 <h2>Política de Privacidade e Proteção de Dados (LGPD)</h2>
-<p>Esta Política de Privacidade descreve como a Plataforma coleta, utiliza e protege os dados pessoais dos Usuários, em conformidade estrita com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 - LGPD).</p>
+<p>Esta Política de Privacidade descreve como o aplicativo <strong>Já no Caminho</strong>, desenvolvido por <strong>Datony</strong>, coleta, utiliza e protege os dados pessoais dos Usuários, em conformidade com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 - LGPD).</p>
 
 <h3>1. Dados Coletados</h3>
-<p>Coletamos os dados estritamente necessários para a execução e viabilização dos serviços contratados: Nome, E-mail, Telefone, Endereço de Entrega, Histórico de Pedidos, Informações de Dispositivo (IP, modelo, etc.) e Tokens de Notificações Push.</p>
+<p>Coletamos os dados estritamente necessários para a execução dos serviços: Nome, E-mail (identificador de login), Telefone, Endereço de Entrega, Histórico de Pedidos e Informações de Dispositivo.</p>
 
-<h3>2. Finalidade do Tratamento</h3>
-<p>Os dados são utilizados exclusivamente para:</p>
+<h3>2. Finalidade e Exclusão de Dados</h3>
+<p>Os dados são utilizados exclusivamente para processar pedidos e facilitar a entrega. 
+<strong>O Usuário possui o direito de solicitar a exclusão de sua conta e seus dados a qualquer momento.</strong></p>
+
+<h3>3. Como solicitar a exclusão da conta</h3>
+<p>O usuário pode solicitar a exclusão de seus dados de duas formas:</p>
 <ul>
-  <li>Processar, encaminhar e facilitar a entrega de pedidos às Lojas parceiras;</li>
-  <li>Processamento e validação de pagamentos através de parceiros financeiros;</li>
-  <li>Envio de comunicações transacionais e atualizações sobre o status de pedidos (via WhatsApp, Push, E-mail);</li>
-  <li>Prevenção à fraude, garantia de segurança da plataforma e suporte ao cliente.</li>
+  <li><strong>Pelo Aplicativo:</strong> Acesse o menu "Minha Conta" e clique no botão "Excluir minha conta permanentemente".</li>
+  <li><strong>Pela Web/E-mail:</strong> Envie uma solicitação para <strong>contato@janocaminho.com.br</strong> com o assunto "Exclusão de Dados".</li>
 </ul>
 
-<h3>3. Compartilhamento com Terceiros</h3>
-<p>O Usuário consente, de forma livre e inequívoca, que seus dados pessoais (como Nome, Telefone e Endereço) sejam compartilhados com:</p>
-<ul>
-  <li><strong>As Lojas/Restaurantes:</strong> Para que possam preparar, processar e faturar o pedido;</li>
-  <li><strong>Entregadores (Motoboys):</strong> Para possibilitar a logística e a entrega física no endereço solicitado;</li>
-  <li><strong>Processadores de Pagamento:</strong> Como Mercado Pago e outros, para a efetivação segura da cobrança;</li>
-  <li><strong>Provedores de Infraestrutura:</strong> Como AWS, Google Firebase e sistemas de roteamento de mapas (ViaCEP, Mapas).</li>
-</ul>
-<p><strong>Atenção:</strong> A Plataforma atua com zelo, mas exime-se de qualquer responsabilidade civil ou criminal pelo uso indevido, vazamento ou tratamento inadequado de dados pessoais cometido isoladamente pelas Lojas Parceiras, Entregadores ou Processadores de Pagamento após o compartilhamento necessário para a execução do serviço.</p>
+<h3>4. Dados Mantidos e Período de Armazenamento</h3>
+<p>Ao solicitar a exclusão, os dados de perfil são desativados e anonimizados. Contudo, em conformidade com as leis fiscais e regulatórias brasileiras, dados referentes a transações financeiras e histórico de pedidos podem ser mantidos por até 5 anos para fins de auditoria e cumprimento legal.</p>
 
-<h3>4. Armazenamento e Segurança</h3>
-<p>Empregamos medidas técnicas e organizacionais condizentes com os padrões de mercado para proteger seus dados contra acessos não autorizados. Contudo, o Usuário reconhece expressamente que nenhum sistema digital é totalmente imune a violações, isentando a Plataforma de responsabilidades por danos decorrentes de vazamentos causados por ataques cibernéticos de terceiros ou falhas estruturais da internet fora de nosso controle razoável.</p>
-
-<h3>5. Direitos do Titular (LGPD)</h3>
-<p>O Usuário tem o direito garantido por lei de solicitar acesso, correção, atualização, portabilidade ou exclusão de seus dados pessoais. A exclusão de dados fundamentais poderá inviabilizar permanentemente o uso da Plataforma. Ressalta-se que determinados dados poderão ser retidos em nossas bases mesmo após o pedido de exclusão, para o estrito cumprimento de obrigações legais, regulatórias ou fiscais.</p>
-
-<h3>6. Canal de Contato</h3>
-<p>Para dúvidas jurídicas ou exercício de direitos referentes aos seus dados, contate nosso Encarregado de Proteção de Dados (DPO) através do e-mail: <strong>contato@janocaminho.com.br</strong></p>
+<h3>5. Canal de Contato</h3>
+<p>Para dúvidas sobre privacidade, contate nosso DPO em: <strong>contato@janocaminho.com.br</strong></p>
 `;
 
 export function TermsOfUse() {

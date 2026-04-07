@@ -52,6 +52,9 @@ export class User {
   @Column({ name: 'profile_image_url', nullable: true })
   profileImageUrl?: string;
 
+  @Column({ name: 'is_active', default: true })
+  isActive!: boolean;
+
   @Column({ name: 'terms_accepted_at', type: 'timestamptz', nullable: true })
   termsAcceptedAt?: Date;
 
