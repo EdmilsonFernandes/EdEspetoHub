@@ -5,13 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260407.135057.7d4f1719",
-  "buildId": "0.1.9+20260407.135057.7d4f1719-20260407.135057-7d4f1719",
-  "builtAt": "2026-04-07T13:50:57.103Z",
-  "commitHash": "7d4f17197d26a5cdf095f8d4bb0c7b338607ecb4",
-  "shortHash": "7d4f1719",
+  "versionInternal": "0.1.9+20260407.135440.d6dc4a2e",
+  "buildId": "0.1.9+20260407.135440.d6dc4a2e-20260407.135440-d6dc4a2e",
+  "builtAt": "2026-04-07T13:54:40.712Z",
+  "commitHash": "d6dc4a2ed4eb6aafe900aaaf13c70f81dce47c4d",
+  "shortHash": "d6dc4a2e",
   "branch": "main",
   "commits": [
+    {
+      "hash": "d6dc4a2ed4eb6aafe900aaaf13c70f81dce47c4d",
+      "shortHash": "d6dc4a2e",
+      "dateIso": "2026-04-07T10:53:26-03:00",
+      "subject": "fix(mobile): robust image mapping and absolute URL fallback"
+    },
+    {
+      "hash": "305c459c25f319334afa140d0a22f1a5f8bfbc82",
+      "shortHash": "305c459c",
+      "dateIso": "2026-04-07T10:51:23-03:00",
+      "subject": "fix(mobile): robust store logo mapping and absolute URL fallback"
+    },
     {
       "hash": "7d4f17197d26a5cdf095f8d4bb0c7b338607ecb4",
       "shortHash": "7d4f1719",
@@ -179,18 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "a6a60b04",
       "dateIso": "2026-04-04T23:40:18-03:00",
       "subject": "feat(mobile): improve session stability on screen lock and direct admin store redirect"
-    },
-    {
-      "hash": "0da51fd573537f96d63a0e6dee387aa1b69efcce",
-      "shortHash": "0da51fd5",
-      "dateIso": "2026-04-04T23:38:18-03:00",
-      "subject": "feat(mobile): restore last visited URL on start and improve admin mobile redirect"
-    },
-    {
-      "hash": "4e3e1fa9c90e625d4a709fdea1489d7d61b4dd63",
-      "shortHash": "4e3e1fa9",
-      "dateIso": "2026-04-04T21:26:12-03:00",
-      "subject": "style: use premium logo.svg in header and fix photo picker compatibility"
     }
   ]
 } as const;

@@ -7,14 +7,13 @@ export const resolveAssetUrl = (value?: string) => {
 
   const normalized = value.startsWith('/') ? value : `/${value}`;
   
-  // Se for um upload, PRECISA de domínio no APK
   if (normalized.startsWith('/uploads/')) {
-    // Tenta pegar de VITE_API_BASE_URL, se não existir tenta janocaminho.com.br direto
+    // Prioriza o domínio www que está no seu env.docker
     const apiBase = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'https://www.janocaminho.com.br';
     
     let base = apiBase.endsWith('/') ? apiBase.slice(0, -1) : apiBase;
     
-    // Se a base termina com /api, removemos para pegar os uploads na raiz do domínio
+    // Remove o sufixo /api para pegar os uploads na raiz do domínio (como configurado no Nginx)
     base = base.replace(/\/api$/, '');
     
     return `${base}${normalized}`;
