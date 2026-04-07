@@ -559,6 +559,10 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS profile_image_url TEXT;
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS users
+    ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;
+  `);
+  await AppDataSource.query(`
     UPDATE users
     SET user_role = 'STORE_OWNER'
     WHERE user_role IS NULL
