@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260407.174525.8dc286d2",
-  "buildId": "0.1.9+20260407.174525.8dc286d2-20260407.174525-8dc286d2",
-  "builtAt": "2026-04-07T17:45:25.938Z",
-  "commitHash": "8dc286d20d6122e9f941a77c36d53919f2779851",
-  "shortHash": "8dc286d2",
+  "versionInternal": "0.1.9+20260407.205002.d8725f5e",
+  "buildId": "0.1.9+20260407.205002.d8725f5e-20260407.205002-d8725f5e",
+  "builtAt": "2026-04-07T20:50:02.837Z",
+  "commitHash": "d8725f5e85a5d9b9be6924e140ee550ce074d517",
+  "shortHash": "d8725f5e",
   "branch": "main",
   "commits": [
+    {
+      "hash": "d8725f5e85a5d9b9be6924e140ee550ce074d517",
+      "shortHash": "d8725f5e",
+      "dateIso": "2026-04-07T14:46:26-03:00",
+      "subject": "fix(legal): correct company info and add Terms link to vertical menu"
+    },
     {
       "hash": "8dc286d20d6122e9f941a77c36d53919f2779851",
       "shortHash": "8dc286d2",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "359e13bb",
       "dateIso": "2026-04-05T01:20:31-03:00",
       "subject": "style: premium lux minimalist overhaul for marketplace top section"
-    },
-    {
-      "hash": "23f3231e6e90f8db4ab8e318823c757113b828aa",
-      "shortHash": "23f3231e",
-      "dateIso": "2026-04-05T01:03:57-03:00",
-      "subject": "fix: Marketplace 'Limpar' button now resets search query correctly"
     }
   ]
 } as const;
