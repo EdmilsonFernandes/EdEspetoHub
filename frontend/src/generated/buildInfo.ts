@@ -5,13 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260407.133903.e96fd920",
-  "buildId": "0.1.9+20260407.133903.e96fd920-20260407.133903-e96fd920",
-  "builtAt": "2026-04-07T13:39:03.884Z",
-  "commitHash": "e96fd9203c2549a25361b35c2bc01a4f43ed7215",
-  "shortHash": "e96fd920",
+  "versionInternal": "0.1.9+20260407.135057.7d4f1719",
+  "buildId": "0.1.9+20260407.135057.7d4f1719-20260407.135057-7d4f1719",
+  "builtAt": "2026-04-07T13:50:57.103Z",
+  "commitHash": "7d4f17197d26a5cdf095f8d4bb0c7b338607ecb4",
+  "shortHash": "7d4f1719",
   "branch": "main",
   "commits": [
+    {
+      "hash": "7d4f17197d26a5cdf095f8d4bb0c7b338607ecb4",
+      "shortHash": "7d4f1719",
+      "dateIso": "2026-04-07T10:43:39-03:00",
+      "subject": "chore: ignore APK files in git"
+    },
+    {
+      "hash": "57b9be5b02fc3965cddbea390b60e8f06bca38d2",
+      "shortHash": "57b9be5b",
+      "dateIso": "2026-04-07T10:42:05-03:00",
+      "subject": "fix(mobile): force absolute image URLs and fix adaptive icon persistence"
+    },
     {
       "hash": "e96fd9203c2549a25361b35c2bc01a4f43ed7215",
       "shortHash": "e96fd920",
@@ -179,18 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "4e3e1fa9",
       "dateIso": "2026-04-04T21:26:12-03:00",
       "subject": "style: use premium logo.svg in header and fix photo picker compatibility"
-    },
-    {
-      "hash": "7140386f0c5957d9440e976656557e2f68e3f88f",
-      "shortHash": "7140386f",
-      "dateIso": "2026-04-04T21:24:08-03:00",
-      "subject": "fix(mobile): robust file selection for profile photo and premium logo tweaks"
-    },
-    {
-      "hash": "c8fffee9f9bde27f8b6e9aedb52e897d06fc3423",
-      "shortHash": "c8fffee9",
-      "dateIso": "2026-04-04T21:21:02-03:00",
-      "subject": "style: premium logo container with glassmorphism and SVG support"
     }
   ]
 } as const;

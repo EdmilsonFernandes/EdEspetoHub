@@ -411,8 +411,11 @@ export function MarketplacePage() {
                   ? isStoreOpenNow(normalizeOpeningHours(rawHours as any) as any)
                   : true)
           );
-        const logo = resolveAssetUrl(store?.settings?.logoUrl || undefined) || '/janocaminho-logo.png';
-        const banner = resolveAssetUrl(store?.settings?.bannerUrl || undefined) || logo;
+        const rawLogo = store?.settings?.logoUrl || store?.settings?.logo_url || (store as any)?.logoUrl || (store as any)?.logo_url;
+        const logo = resolveAssetUrl(rawLogo || undefined) || '/janocaminho-logo.png';
+        
+        const rawBanner = store?.settings?.bannerUrl || store?.settings?.banner_url || (store as any)?.bannerUrl || (store as any)?.banner_url;
+        const banner = resolveAssetUrl(rawBanner || undefined) || logo;
         const searchIndex = [store?.name, slug, segment, city, state].filter(Boolean).join(' ').toLowerCase();
         return {
           id: String(store?.id || slug || index),
