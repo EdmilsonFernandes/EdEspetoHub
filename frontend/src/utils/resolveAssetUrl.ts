@@ -1,8 +1,6 @@
 const isAbsoluteUrl = (value: string) =>
   /^https?:\/\//i.test(value) || /^data:|^blob:/i.test(value);
 
-const stripApiSuffix = (url: string) => url.replace(/\/api\/?$/, '');
-
 /**
  * Resolve a URL de um asset (imagem, upload, etc) para garantir que funcione
  * tanto na Web quanto no APK (Android/iOS).
