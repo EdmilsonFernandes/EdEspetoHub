@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260407.173457.b0fa06c6",
-  "buildId": "0.1.9+20260407.173457.b0fa06c6-20260407.173457-b0fa06c6",
-  "builtAt": "2026-04-07T17:34:57.758Z",
-  "commitHash": "b0fa06c6928c80d38289f92038d31da1f34bf046",
-  "shortHash": "b0fa06c6",
+  "versionInternal": "0.1.9+20260407.174525.8dc286d2",
+  "buildId": "0.1.9+20260407.174525.8dc286d2-20260407.174525-8dc286d2",
+  "builtAt": "2026-04-07T17:45:25.938Z",
+  "commitHash": "8dc286d20d6122e9f941a77c36d53919f2779851",
+  "shortHash": "8dc286d2",
   "branch": "main",
   "commits": [
+    {
+      "hash": "8dc286d20d6122e9f941a77c36d53919f2779851",
+      "shortHash": "8dc286d2",
+      "dateIso": "2026-04-07T14:36:34-03:00",
+      "subject": "fix(legal): ensure correct terms are displayed and cleanup code"
+    },
     {
       "hash": "b0fa06c6928c80d38289f92038d31da1f34bf046",
       "shortHash": "b0fa06c6",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "23f3231e",
       "dateIso": "2026-04-05T01:03:57-03:00",
       "subject": "fix: Marketplace 'Limpar' button now resets search query correctly"
-    },
-    {
-      "hash": "1eb9efadccc0f79440d1b79ecc6145b06cd9e5a8",
-      "shortHash": "1eb9efad",
-      "dateIso": "2026-04-05T00:59:42-03:00",
-      "subject": "feat: premium client account redesign with address management and native camera integration"
     }
   ]
 } as const;

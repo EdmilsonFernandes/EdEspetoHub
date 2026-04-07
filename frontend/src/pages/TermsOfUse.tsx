@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 const FALLBACK_TERMS = `
 <h2>Termos e Condições de Uso da Plataforma</h2>
-<p>Bem-vindo à plataforma <strong>Já no Caminho / Datony</strong> (doravante "Plataforma"). Ao acessar ou utilizar nossa Plataforma, você ("Usuário") concorda expressamente com estes Termos de Uso. Caso não concorde, não utilize nossos serviços.</p>
+<p>Bem-vindo à plataforma <strong>Já no Caminho</strong>, desenvolvida por <strong>Edmilson Tecnologia da Informação • CNPJ 44.771.427/0001-69</strong> (doravante "Plataforma"). Ao acessar ou utilizar nossa Plataforma, você ("Usuário") concorda expressamente com estes Termos de Uso. Caso não concorde, não utilize nossos serviços.</p>
 
 <h3>1. Natureza do Serviço</h3>
 <p>A Plataforma atua exclusivamente como um <strong>intermediador tecnológico</strong> de soluções, disponibilizando um ambiente virtual para que estabelecimentos parceiros ("Lojas/Restaurantes") ofereçam seus produtos aos Usuários. <strong>Não preparamos, embalamos, vendemos ou entregamos os produtos físicos.</strong></p>
@@ -32,7 +32,7 @@ const FALLBACK_TERMS = `
 
 const FALLBACK_LGPD = `
 <h2>Política de Privacidade e Proteção de Dados (LGPD)</h2>
-<p>Esta Política de Privacidade descreve como o aplicativo <strong>Já no Caminho</strong>, desenvolvido por <strong>Datony</strong>, coleta, utiliza e protege os dados pessoais dos Usuários, em conformidade com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 - LGPD).</p>
+<p>Esta Política de Privacidade descreve como o aplicativo <strong>Já no Caminho</strong>, desenvolvido por <strong>Edmilson Tecnologia da Informação • CNPJ 44.771.427/0001-69</strong>, coleta, utiliza e protege os dados pessoais dos Usuários, em conformidade com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 - LGPD).</p>
 
 <h3>1. Dados Coletados</h3>
 <p>Coletamos os dados estritamente necessários para a execução dos serviços: Nome, E-mail (identificador de login), Telefone, Endereço de Entrega, Histórico de Pedidos e Informações de Dispositivo.</p>
