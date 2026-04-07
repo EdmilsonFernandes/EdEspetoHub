@@ -96,7 +96,7 @@ export function ProfileDrawer({
 
   const actions: DrawerAction[] = isLogged
     ? [
-        { id: 'account', label: 'Dados do perfil', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-sky-600', bgColor: 'bg-sky-50' },
+        { id: 'account', label: 'Minha Conta', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-sky-600', bgColor: 'bg-sky-50' },
         { id: 'orders', label: 'Meus pedidos', icon: <BellSimple size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-amber-600', bgColor: 'bg-amber-50' },
         { id: 'security', label: 'Segurança', icon: <ShieldCheck size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-indigo-600', bgColor: 'bg-indigo-50' },
         { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={22} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
