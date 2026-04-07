@@ -7,17 +7,17 @@ export const resolveAssetUrl = (value?: string) => {
 
   const normalized = value.startsWith('/') ? value : `/${value}`;
   
+  // Se for um upload, PRECISA de domínio no APK
   if (normalized.startsWith('/uploads/')) {
-    // Tenta pegar a URL de várias fontes para não errar
-    const apiBase = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'https://api.janocaminho.com.br';
+    // Tenta pegar de VITE_API_BASE_URL, se não existir tenta janocaminho.com.br direto
+    const apiBase = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'https://www.janocaminho.com.br';
     
     let base = apiBase.endsWith('/') ? apiBase.slice(0, -1) : apiBase;
     
-    // Remove o sufixo /api se ele existir na base, pois o /uploads costuma ser na raiz do domínio da API
+    // Se a base termina com /api, removemos para pegar os uploads na raiz do domínio
     base = base.replace(/\/api$/, '');
     
-    const finalUrl = `${base}${normalized}`;
-    return finalUrl;
+    return `${base}${normalized}`;
   }
 
   return normalized;
