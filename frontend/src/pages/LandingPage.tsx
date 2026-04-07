@@ -22,6 +22,7 @@ import { platformService } from '../services/platformService';
 import { storeService } from '../services/storeService';
 import { customerAccountService } from '../services/customerAccountService';
 import { formatCurrency } from '../utils/format';
+import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { SocialProofMarquee } from '../components/Landing/SocialProofMarquee';
 
 const Counter = ({ value, duration = 2000, prefix = '', suffix = '', formatter }: { value: number; duration?: number; prefix?: string; suffix?: string; formatter?: (v: number) => string }) => {
