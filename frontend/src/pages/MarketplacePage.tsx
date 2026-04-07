@@ -416,6 +416,14 @@ export function MarketplacePage() {
         
         const rawBanner = (store?.settings as any)?.bannerUrl || (store?.settings as any)?.banner_url || (store as any)?.bannerUrl || (store as any)?.banner_url;
         const banner = resolveAssetUrl(rawBanner || undefined) || logo;
+
+        // DEBUG LOG PARA HUB NO APK
+        const isMobileDebug = typeof window !== 'undefined' && 
+          (window.location.origin.includes('localhost') || window.location.origin.startsWith('capacitor://'));
+        if (isMobileDebug && index < 5) {
+          console.log(`[HubStore] ${store?.name || slug}: RawLogo=${rawLogo}, Resolved=${logo}`);
+        }
+
         const searchIndex = [store?.name, slug, segment, city, state].filter(Boolean).join(' ').toLowerCase();
         return {
           id: String(store?.id || slug || index),
