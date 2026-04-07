@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { WifiSlash, WifiHigh } from '@phosphor-icons/react';
 
 export function OfflineAlert() {

@@ -5,13 +5,31 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260405.144609.7321de38",
-  "buildId": "0.1.9+20260405.144609.7321de38-20260405.144609-7321de38",
-  "builtAt": "2026-04-05T14:46:09.103Z",
-  "commitHash": "7321de38bac642c4f56e05fa795447c8dc64ed06",
-  "shortHash": "7321de38",
+  "versionInternal": "0.1.9+20260407.131419.72a5a79e",
+  "buildId": "0.1.9+20260407.131419.72a5a79e-20260407.131419-72a5a79e",
+  "builtAt": "2026-04-07T13:14:19.236Z",
+  "commitHash": "72a5a79e85a0c8c9afb7c55f713312c31958ca7b",
+  "shortHash": "72a5a79e",
   "branch": "main",
   "commits": [
+    {
+      "hash": "72a5a79e85a0c8c9afb7c55f713312c31958ca7b",
+      "shortHash": "72a5a79e",
+      "dateIso": "2026-04-06T09:17:47-03:00",
+      "subject": "feat: add user-friendly offline handling and network error messages"
+    },
+    {
+      "hash": "31f56acece3de0f16e00b60340a37548e5f3365a",
+      "shortHash": "31f56ace",
+      "dateIso": "2026-04-06T09:12:33-03:00",
+      "subject": "feat: make JNC footer logo evident and update to jnc.png"
+    },
+    {
+      "hash": "f7142e00354d3a1746e7403beec6089a7fd48c25",
+      "shortHash": "f7142e00",
+      "dateIso": "2026-04-05T11:55:12-03:00",
+      "subject": "fix: ensure jnc.png logo is perfectly rounded in header"
+    },
     {
       "hash": "7321de38bac642c4f56e05fa795447c8dc64ed06",
       "shortHash": "7321de38",
@@ -173,24 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "03c64649",
       "dateIso": "2026-04-04T21:15:01-03:00",
       "subject": "feat(mobile): add native permission request, fix webview file picker and extend session to 30d"
-    },
-    {
-      "hash": "a6d9e1094e84bda505f7221735296168e0ef1531",
-      "shortHash": "a6d9e109",
-      "dateIso": "2026-04-04T21:08:49-03:00",
-      "subject": "style: improve platform logo appearance across hub and login pages"
-    },
-    {
-      "hash": "7e3c08a4d5c680e2646bdc2da5252f1da560f889",
-      "shortHash": "7e3c08a4",
-      "dateIso": "2026-04-04T21:04:52-03:00",
-      "subject": "fix(mobile): add camera/gallery permissions and fix profile avatar sync on hub"
-    },
-    {
-      "hash": "0684da925a25edc62b8e163a7599a3ad8a21e43a",
-      "shortHash": "0684da92",
-      "dateIso": "2026-04-04T20:54:41-03:00",
-      "subject": "m"
     }
   ]
 } as const;
