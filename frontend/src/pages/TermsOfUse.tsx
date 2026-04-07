@@ -1,6 +1,4 @@
-import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { apiClient } from '../config/apiClient';
 
 const FALLBACK_TERMS = `
 <h2>Termos e Condições de Uso da Plataforma</h2>
@@ -61,28 +59,7 @@ export function TermsOfUse() {
   const navigate = useNavigate();
   const location = useLocation();
   const platformLogo = '/janocaminho-logo.png';
-  const [termsContent, setTermsContent] = useState('');
-  const [lgpdContent, setLgpdContent] = useState('');
-  const [loading, setLoading] = useState(true);
   const fromHub = new URLSearchParams(location.search || '').get('from') === 'hub';
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const [terms, lgpd] = await Promise.all([
-          apiClient.get('/legal/terms'),
-          apiClient.get('/legal/lgpd'),
-        ]);
-        setTermsContent(terms?.content || '');
-        setLgpdContent(lgpd?.content || '');
-      } catch {
-        // ignore
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -115,29 +92,11 @@ export function TermsOfUse() {
             </p>
           </div>
 
-          {loading ? (
-            <p className="text-sm text-slate-500">Carregando termos...</p>
-          ) : termsContent ? (
-            <div
-              className="prose prose-slate max-w-none text-sm"
-              dangerouslySetInnerHTML={{ __html: termsContent }}
-            />
-          ) : (
-            <div className="prose prose-slate max-w-none text-sm" dangerouslySetInnerHTML={{ __html: FALLBACK_TERMS }} />
-          )}
+          <div className="prose prose-slate max-w-none text-sm" dangerouslySetInnerHTML={{ __html: FALLBACK_TERMS }} />
 
           <div className="border-t border-slate-200 pt-6">
             <h2 id="lgpd" className="text-base font-semibold text-slate-900 mb-3">LGPD</h2>
-            {loading ? (
-              <p className="text-sm text-slate-500">Carregando política de dados...</p>
-            ) : lgpdContent ? (
-              <div
-                className="prose prose-slate max-w-none text-sm"
-                dangerouslySetInnerHTML={{ __html: lgpdContent }}
-              />
-            ) : (
-              <div className="prose prose-slate max-w-none text-sm" dangerouslySetInnerHTML={{ __html: FALLBACK_LGPD }} />
-            )}
+            <div className="prose prose-slate max-w-none text-sm" dangerouslySetInnerHTML={{ __html: FALLBACK_LGPD }} />
           </div>
         </div>
       </main>

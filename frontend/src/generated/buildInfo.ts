@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260407.171638.5f4f3ce2",
-  "buildId": "0.1.9+20260407.171638.5f4f3ce2-20260407.171638-5f4f3ce2",
-  "builtAt": "2026-04-07T17:16:38.801Z",
-  "commitHash": "5f4f3ce2afc9bb47c23047fc4581c9a4652c9a0b",
-  "shortHash": "5f4f3ce2",
+  "versionInternal": "0.1.9+20260407.173457.b0fa06c6",
+  "buildId": "0.1.9+20260407.173457.b0fa06c6-20260407.173457-b0fa06c6",
+  "builtAt": "2026-04-07T17:34:57.758Z",
+  "commitHash": "b0fa06c6928c80d38289f92038d31da1f34bf046",
+  "shortHash": "b0fa06c6",
   "branch": "main",
   "commits": [
+    {
+      "hash": "b0fa06c6928c80d38289f92038d31da1f34bf046",
+      "shortHash": "b0fa06c6",
+      "dateIso": "2026-04-07T14:23:27-03:00",
+      "subject": "fix: explicitly add missing ConfirmationModal and update build info"
+    },
     {
       "hash": "5f4f3ce2afc9bb47c23047fc4581c9a4652c9a0b",
       "shortHash": "5f4f3ce2",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "1eb9efad",
       "dateIso": "2026-04-05T00:59:42-03:00",
       "subject": "feat: premium client account redesign with address management and native camera integration"
-    },
-    {
-      "hash": "8e4753503c7427e9d00f0dd164a82d61ecf2c3e9",
-      "shortHash": "8e475350",
-      "dateIso": "2026-04-05T00:51:06-03:00",
-      "subject": "feat: premium drawer with smart lojista shortcuts and improved back button UX"
     }
   ]
 } as const;
