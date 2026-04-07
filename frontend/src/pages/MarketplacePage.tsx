@@ -140,6 +140,7 @@ const readCustomerSession = () => {
 };
 
 const FAVORITES_STORAGE_KEY = 'hub:favorites:stores';
+const DEFAULT_STORE_LOGO = '/janocaminho.jpg';
 
 export function MarketplacePage() {
   const navigate = useNavigate();
@@ -415,7 +416,7 @@ export function MarketplacePage() {
                   : true)
           );
         const rawLogo = (store?.settings as any)?.logoUrl || (store?.settings as any)?.logo_url || (store as any)?.logoUrl || (store as any)?.logo_url;
-        const logo = resolveAssetUrl(rawLogo || undefined) || '/janocaminho-logo.png';
+        const logo = resolveAssetUrl(rawLogo || undefined) || DEFAULT_STORE_LOGO;
         
         const rawBanner = (store?.settings as any)?.bannerUrl || (store?.settings as any)?.banner_url || (store as any)?.bannerUrl || (store as any)?.banner_url;
         const banner = resolveAssetUrl(rawBanner || undefined) || logo;
@@ -592,7 +593,7 @@ export function MarketplacePage() {
             storeName: String(item?.storeName || 'Loja'),
             name: String(item?.productName || 'Produto em destaque'),
             storeLogo: resolveAssetUrl(item?.storeLogoUrl || undefined) || '/janocaminho-logo.png',
-            imageUrl: resolveAssetUrl(item?.imageUrl || undefined) || resolveAssetUrl(item?.storeLogoUrl || undefined) || '/janocaminho-logo.png',
+            imageUrl: resolveAssetUrl(item?.imageUrl || undefined) || resolveAssetUrl(item?.storeLogoUrl || undefined) || DEFAULT_STORE_LOGO,
             price: Number(item?.price || 0),
             sponsored: true,
           }))
@@ -1048,7 +1049,12 @@ export function MarketplacePage() {
                       <p className="text-[13px] font-black tracking-tight line-clamp-1 drop-shadow-sm">{item.name}</p>
                       <div className="mt-1 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <img src={item.storeLogo} alt={item.storeName} className="h-5 w-5 rounded-full border border-white/50 shadow-sm" />
+                          <img 
+                            src={item.storeLogo} 
+                            alt={item.storeName} 
+                            className="h-5 w-5 rounded-full border border-white/50 shadow-sm" 
+                            onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_STORE_LOGO; }}
+                          />
                           <span className="text-[9px] font-bold opacity-90">{item.storeName}</span>
                         </div>
                         <span className="rounded-lg bg-white px-2 py-0.5 text-[11px] font-black text-slate-900 shadow-lg">
@@ -1081,7 +1087,13 @@ export function MarketplacePage() {
                     to={`/${store.slug}`}
                     className="min-w-[168px] sm:min-w-[186px] rounded-2xl border border-slate-200 bg-white p-2 shadow-sm transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-lg"
                   >
-                    <img src={store.banner || store.logo} alt={store.name} loading="lazy" className="h-20 w-full rounded-xl object-cover border border-slate-200" />
+                    <img 
+                      src={store.banner || store.logo} 
+                      alt={store.name} 
+                      loading="lazy" 
+                      className="h-20 w-full rounded-xl object-cover border border-slate-200" 
+                      onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_STORE_LOGO; }}
+                    />
                     <div className="mt-1.5 flex items-center justify-between gap-2">
                       <p className="line-clamp-1 text-sm font-black text-slate-900">{store.name}</p>
                       <Heart size={14} weight="fill" className="text-rose-500 shrink-0" />
@@ -1146,6 +1158,7 @@ export function MarketplacePage() {
                         src={store.logo}
                         alt={store.name}
                         className="h-16 w-16 md:h-[72px] md:w-[72px] shrink-0 rounded-xl object-cover border border-slate-200 bg-white"
+                        onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_STORE_LOGO; }}
                       />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2">

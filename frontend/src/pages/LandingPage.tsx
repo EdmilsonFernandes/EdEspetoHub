@@ -231,7 +231,7 @@ export function LandingPage() {
                 id: String(store?.id || store?.slug || `store-${index}`),
                 name: String(store?.name || 'Loja ativa'),
                 slug: String(store?.slug || ''),
-                logoUrl: store?.settings?.logoUrl || null,
+                logoUrl: resolveAssetUrl(store?.settings?.logoUrl || undefined) || '/janocaminho.jpg',
               }))
               .filter((store: any) => Boolean(store.slug))
           : [];

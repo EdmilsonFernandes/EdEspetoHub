@@ -379,7 +379,7 @@ export function StorePage() {
     if (!store) return;
     const name = store.name || store.slug || 'Já no Caminho';
     const description = `Vitrine online e pedidos da loja ${name}.`;
-    const logo = resolveAssetUrl(store.settings?.logoUrl) || '/janocaminho-logo.png';
+    const logo = resolveAssetUrl(store.settings?.logoUrl) || '/janocaminho.jpg';
     const url = typeof window !== 'undefined' ? window.location.href : '';
 
     const upsertMeta = (key: string, value: string, attr: 'name' | 'property' = 'name') => {
@@ -1961,7 +1961,12 @@ export function StorePage() {
             style={{ borderColor: branding?.primaryColor, color: branding?.primaryColor }}
           >
             {branding?.logoUrl ? (
-              <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" />
+              <img 
+                src={branding.logoUrl} 
+                alt={branding.brandName} 
+                className="w-full h-full object-cover" 
+                onError={(e) => { (e.target as HTMLImageElement).src = '/janocaminho.jpg'; }}
+              />
             ) : (
               <span className="font-bold text-sm sm:text-lg">{branding?.brandName?.slice(0, 2)?.toUpperCase() || 'ES'}</span>
             )}
@@ -2073,9 +2078,10 @@ export function StorePage() {
                     <div className="flex items-center gap-4 min-w-0">
                       <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl overflow-hidden bg-slate-100 shrink-0">
                         <img
-                          src={branding?.logoUrl || '/janocaminho-logo.png'}
+                          src={branding?.logoUrl || '/janocaminho.jpg'}
                           alt={closedStateStoreName}
                           className="w-full h-full object-cover"
+                          onError={(e) => { (e.target as HTMLImageElement).src = '/janocaminho.jpg'; }}
                         />
                       </div>
                       <div className="min-w-0">
