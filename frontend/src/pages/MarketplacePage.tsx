@@ -11,6 +11,7 @@ import { isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { HeaderAvatarTrigger } from '../components/Marketplace/HeaderAvatarTrigger';
 import { ProfileDrawer } from '../components/Marketplace/ProfileDrawer';
+import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { APP_BUILD_INFO } from '../generated/buildInfo';
 
 type MarketplaceStore = {
@@ -161,6 +162,8 @@ export function MarketplacePage() {
   const [locationLabel, setLocationLabel] = useState('Sua região');
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [customerSession, setCustomerSession] = useState(() => readCustomerSession());
+  const [showDeactivateModal, setShowDeactivateModal] = useState(false);
+  const [deactivating, setDeactivating] = useState(false);
   const [distanceByStore, setDistanceByStore] = useState<Record<string, number>>({});
   const [distanceLoading, setDistanceLoading] = useState(false);
   const [favoriteStoreSlugs, setFavoriteStoreSlugs] = useState<string[]>(() => {
@@ -741,12 +744,15 @@ export function MarketplacePage() {
   }, [navigate]);
 
   const handleDeactivateAccount = useCallback(async () => {
-    if (!window.confirm('Tem certeza que deseja desativar sua conta? Esta ação é irreversível.')) return;
+    setDeactivating(true);
     try {
       await customerAccountService.deactivate();
+      setShowDeactivateModal(false);
       handleCustomerLogout();
     } catch (e: any) {
       alert(e?.message || 'Erro ao desativar conta.');
+    } finally {
+      setDeactivating(false);
     }
   }, [handleCustomerLogout]);
 
@@ -820,7 +826,7 @@ export function MarketplacePage() {
         onOpenPrivacy={openPrivacy}
         onOpenHelp={openHelp}
         onLogout={handleCustomerLogout}
-        onDeactivateAccount={handleDeactivateAccount}
+        onDeactivateAccount={() => setShowDeactivateModal(true)}
         versionLabel={APP_BUILD_INFO.versionLabel}
       />
 
@@ -1246,6 +1252,18 @@ export function MarketplacePage() {
           </button>
         </div>
       </nav>
+
+      <ConfirmationModal
+        isOpen={showDeactivateModal}
+        onClose={() => setShowDeactivateModal(false)}
+        onConfirm={handleDeactivateAccount}
+        isLoading={deactivating}
+        title="Excluir minha conta?"
+        description="Esta ação é irreversível. Seus dados de perfil serão desativados e você será desconectado imediatamente."
+        confirmLabel="Sim, excluir conta"
+        cancelLabel="Não, manter conta"
+        variant="danger"
+      />
     </div>
   );
 }

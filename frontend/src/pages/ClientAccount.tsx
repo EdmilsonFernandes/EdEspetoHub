@@ -22,10 +22,13 @@ import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { App as CapacitorApp } from '@capacitor/app';
 import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { ConfirmationModal } from '../components/common/ConfirmationModal';
 
 export function ClientAccount() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [deactivating, setDeactivating] = useState(false);
+  const [showDeactivateModal, setShowDeactivateModal] = useState(false);
   const [error, setError] = useState('');
   const [me, setMe] = useState<any | null>(null);
   const [addresses, setAddresses] = useState<any[]>([]);
@@ -201,13 +204,15 @@ export function ClientAccount() {
   };
 
   const handleDeactivate = async () => {
-    if (!window.confirm('Tem certeza que deseja desativar sua conta? Esta ação é irreversível e você será desconectado.')) return;
-    
+    setDeactivating(true);
     try {
       await customerAccountService.deactivate();
+      setShowDeactivateModal(false);
       logout();
     } catch (e: any) {
       alert(e?.message || 'Falha ao desativar conta.');
+    } finally {
+      setDeactivating(false);
     }
   };
 
@@ -426,7 +431,7 @@ export function ClientAccount() {
           {/* Seção 5: Exclusão de Conta */}
           <section className="pt-4">
             <button
-              onClick={handleDeactivate}
+              onClick={() => setShowDeactivateModal(true)}
               className="w-full rounded-2xl border border-rose-100 bg-rose-50/50 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-rose-600 transition-all active:scale-95"
             >
               Excluir minha conta permanentemente
@@ -437,6 +442,18 @@ export function ClientAccount() {
           </section>
         </div>
       </div>
+
+      <ConfirmationModal
+        isOpen={showDeactivateModal}
+        onClose={() => setShowDeactivateModal(false)}
+        onConfirm={handleDeactivate}
+        isLoading={deactivating}
+        title="Excluir minha conta?"
+        description="Esta ação é irreversível. Seus dados de perfil serão desativados e você será desconectado imediatamente."
+        confirmLabel="Sim, excluir conta"
+        cancelLabel="Não, manter conta"
+        variant="danger"
+      />
     </main>
   );
 }

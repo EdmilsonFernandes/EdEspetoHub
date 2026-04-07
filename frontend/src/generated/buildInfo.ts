@@ -5,13 +5,31 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260407.153908.c97af1b4",
-  "buildId": "0.1.9+20260407.153908.c97af1b4-20260407.153908-c97af1b4",
-  "builtAt": "2026-04-07T15:39:08.057Z",
-  "commitHash": "c97af1b4545a790a43f8d1f9e075e4739224b8a2",
-  "shortHash": "c97af1b4",
+  "versionInternal": "0.1.9+20260407.164242.000ae878",
+  "buildId": "0.1.9+20260407.164242.000ae878-20260407.164242-000ae878",
+  "builtAt": "2026-04-07T16:42:42.742Z",
+  "commitHash": "000ae878a01c2c57fc838093bed4f89e99110c0a",
+  "shortHash": "000ae878",
   "branch": "main",
   "commits": [
+    {
+      "hash": "000ae878a01c2c57fc838093bed4f89e99110c0a",
+      "shortHash": "000ae878",
+      "dateIso": "2026-04-07T13:42:31-03:00",
+      "subject": "style: rename 'Dados do perfil' to 'Minha Conta' for consistency"
+    },
+    {
+      "hash": "1f45ce92d53093cdbccc2d0a8bdb4520377a5dec",
+      "shortHash": "1f45ce92",
+      "dateIso": "2026-04-07T13:40:03-03:00",
+      "subject": "feat(privacy): add account deactivation to menu and update policy for google play"
+    },
+    {
+      "hash": "c5463a8e9f014d6e36d800928a74181d38c9b7e5",
+      "shortHash": "c5463a8e",
+      "dateIso": "2026-04-07T12:43:45-03:00",
+      "subject": "fix: remove unused variable to fix production build"
+    },
     {
       "hash": "c97af1b4545a790a43f8d1f9e075e4739224b8a2",
       "shortHash": "c97af1b4",
@@ -173,24 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "ebb0b668",
       "dateIso": "2026-04-05T00:23:24-03:00",
       "subject": "style: use new janocaminho-logov1.svg in header and final tweaks"
-    },
-    {
-      "hash": "caadfa13c5e9fb8646f92e2f5910bb2299932d36",
-      "shortHash": "caadfa13",
-      "dateIso": "2026-04-05T00:19:59-03:00",
-      "subject": "fix: remove drawer redundancy and implement native Capacitor Camera for profile photos"
-    },
-    {
-      "hash": "c858f1a8b067bb41a21d753211809efe9788b7ec",
-      "shortHash": "c858f1a8",
-      "dateIso": "2026-04-05T00:10:39-03:00",
-      "subject": "fix: store opening logic, respect manual toggle and fix day resolution overlaps"
-    },
-    {
-      "hash": "46c39cb99348d7149de60e4d8e2abd096c367e7f",
-      "shortHash": "46c39cb9",
-      "dateIso": "2026-04-05T00:03:24-03:00",
-      "subject": "fix(mobile): request permissions only on create to avoid repeated prompts"
     }
   ]
 } as const;
