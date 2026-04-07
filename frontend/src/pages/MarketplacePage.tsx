@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MagnifyingGlass, Star, Storefront, House, List, CaretDown, Heart } from '@phosphor-icons/react';
+import { MagnifyingGlass, Star, Storefront, House, List, CaretDown, Heart, CaretRight } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { productService } from '../services/productService';
 import { customerAccountService } from '../services/customerAccountService';
