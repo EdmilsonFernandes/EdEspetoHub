@@ -5,13 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260407.164242.000ae878",
-  "buildId": "0.1.9+20260407.164242.000ae878-20260407.164242-000ae878",
-  "builtAt": "2026-04-07T16:42:42.742Z",
-  "commitHash": "000ae878a01c2c57fc838093bed4f89e99110c0a",
-  "shortHash": "000ae878",
+  "versionInternal": "0.1.9+20260407.171638.5f4f3ce2",
+  "buildId": "0.1.9+20260407.171638.5f4f3ce2-20260407.171638-5f4f3ce2",
+  "builtAt": "2026-04-07T17:16:38.801Z",
+  "commitHash": "5f4f3ce2afc9bb47c23047fc4581c9a4652c9a0b",
+  "shortHash": "5f4f3ce2",
   "branch": "main",
   "commits": [
+    {
+      "hash": "5f4f3ce2afc9bb47c23047fc4581c9a4652c9a0b",
+      "shortHash": "5f4f3ce2",
+      "dateIso": "2026-04-07T14:14:31-03:00",
+      "subject": "feat(ui): replace native prompts with modern ConfirmationModal and standardize menu labels"
+    },
+    {
+      "hash": "90e410fb0d759f8ae27f9a6488c7f3e9e9fce15c",
+      "shortHash": "90e410fb",
+      "dateIso": "2026-04-07T13:54:22-03:00",
+      "subject": "fix(db): ensure is_active column exists on startup"
+    },
     {
       "hash": "000ae878a01c2c57fc838093bed4f89e99110c0a",
       "shortHash": "000ae878",
@@ -179,18 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "8e475350",
       "dateIso": "2026-04-05T00:51:06-03:00",
       "subject": "feat: premium drawer with smart lojista shortcuts and improved back button UX"
-    },
-    {
-      "hash": "89d87ddb4e6612c87ead56a7eb9cf1afe8d1ac27",
-      "shortHash": "89d87ddb",
-      "dateIso": "2026-04-05T00:41:51-03:00",
-      "subject": "feat: premium active order trackers on hub and store pages with safe-area fixes"
-    },
-    {
-      "hash": "ebb0b6687b34dd4146fd13dba34ba6d6b98515b9",
-      "shortHash": "ebb0b668",
-      "dateIso": "2026-04-05T00:23:24-03:00",
-      "subject": "style: use new janocaminho-logov1.svg in header and final tweaks"
     }
   ]
 } as const;
