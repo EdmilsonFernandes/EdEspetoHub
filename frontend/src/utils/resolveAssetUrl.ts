@@ -13,50 +13,42 @@ export const resolveAssetUrl = (value?: string) => {
   // Se for base64 ou blob, retorna direto
   if (/^data:|^blob:/i.test(value)) return value;
 
+  // IMPORTANTE: Usamos sem 'www.' para garantir consistência com a configuração que você informou
   const productionDomain = 'https://janocaminho.com.br';
-  let normalized = value;
-
+  
   // LOG PARA DEBUG NO APK
   const isMobile = typeof window !== 'undefined' && 
     (window.location.origin.includes('localhost') || window.location.origin.startsWith('capacitor://'));
 
-  // Se for uma URL absoluta, verificamos se precisa de upgrade para https ou troca de domínio
+  // 1. Se for uma URL absoluta
   if (isAbsoluteUrl(value)) {
+    // Se for um dos nossos domínios, garante HTTPS, domínio novo e REMOVE 'www.'
     if (value.includes('janocaminho.com.br') || value.includes('chamanoespeto.com.br')) {
-      normalized = value.replace(/^http:\/\//i, 'https://');
+      let normalized = value.replace(/^http:\/\//i, 'https://');
+      normalized = normalized.replace('www.janocaminho.com.br', 'janocaminho.com.br');
       normalized = normalized.replace('chamanoespeto.com.br', 'janocaminho.com.br');
-      if (isMobile) console.log(`[AssetRes] Absolute Fixed: ${value} -> ${normalized}`);
       return normalized;
     }
     return value;
   }
 
-  // Se chegamos aqui, a URL é relativa (ex: /uploads/...)
+  // 2. Se chegamos aqui, a URL é relativa (ex: /uploads/... ou /imagem.jpg)
   const path = value.startsWith('/') ? value : `/${value}`;
   
-  if (path.startsWith('/uploads/')) {
-    const apiBase = import.meta.env.VITE_API_BASE_URL || '/api';
-    
-    try {
-      let origin = typeof window !== 'undefined' ? window.location.origin : productionDomain;
-      
-      if (origin.includes('localhost') || origin.startsWith('capacitor://') || origin.startsWith('http://')) {
-        origin = productionDomain;
-      }
+  // Lista de arquivos que sabemos que são LOCAIS do App (estão na pasta public)
+  const isLocalAsset = path.startsWith('/icons/') || 
+                       path.startsWith('/marketing/') || 
+                       path === '/favicon.svg' || 
+                       path === '/logo.svg' || 
+                       path === '/janocaminho-logo.png' ||
+                       path === '/jnc.png';
 
-      const parsed = new URL(apiBase, origin);
-      const base = stripApiSuffix(`${parsed.origin}${parsed.pathname}`);
-      const finalBase = base.endsWith('/') ? base.slice(0, -1) : base;
-      
-      const finalUrl = `${finalBase}${path}`;
-      if (isMobile) console.log(`[AssetRes] Relative Resolved: ${value} -> ${finalUrl} (Origin: ${window.location.origin}, ApiBase: ${apiBase})`);
-      return finalUrl;
-    } catch (err) {
-      const fallback = `${productionDomain}${path}`;
-      if (isMobile) console.error(`[AssetRes] Error resolving ${value}, fallback to ${fallback}`, err);
-      return fallback;
-    }
+  // Se estivermos no APK e NÃO for um asset local, forçamos a resolução contra o servidor
+  if (isMobile && !isLocalAsset) {
+    // Usamos o domínio fixo sem 'www' no APK para evitar problemas de Nginx
+    return `${productionDomain}${path}`;
   }
 
+  // Na Web ou para assets locais no APK, mantém o comportamento padrão (relativo ao origin atual)
   return path;
 };
