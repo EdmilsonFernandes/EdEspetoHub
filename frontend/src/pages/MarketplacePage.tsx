@@ -1023,7 +1023,7 @@ export function MarketplacePage() {
                       <p className="text-[13px] font-black tracking-tight line-clamp-1 drop-shadow-sm">{item.name}</p>
                       <div className="mt-1 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <img src={item.storeLogo} alt={item.storeName} className="h-4.5 w-4.5 rounded-full border border-white/50 shadow-sm" />
+                          <img src={item.storeLogo} alt={item.storeName} className="h-5 w-5 rounded-full border border-white/50 shadow-sm" />
                           <span className="text-[9px] font-bold opacity-90">{item.storeName}</span>
                         </div>
                         <span className="rounded-lg bg-white px-2 py-0.5 text-[11px] font-black text-slate-900 shadow-lg">
@@ -1118,9 +1118,8 @@ export function MarketplacePage() {
                   >
                     <div className="flex items-center gap-3">
                       <img
-                        src={store.banner || store.logo}
+                        src={store.logo}
                         alt={store.name}
-                        loading="lazy"
                         className="h-16 w-16 md:h-[72px] md:w-[72px] shrink-0 rounded-xl object-cover border border-slate-200 bg-white"
                       />
                       <div className="min-w-0 flex-1">

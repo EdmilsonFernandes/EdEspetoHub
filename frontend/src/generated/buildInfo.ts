@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260407.135440.d6dc4a2e",
-  "buildId": "0.1.9+20260407.135440.d6dc4a2e-20260407.135440-d6dc4a2e",
-  "builtAt": "2026-04-07T13:54:40.712Z",
-  "commitHash": "d6dc4a2ed4eb6aafe900aaaf13c70f81dce47c4d",
-  "shortHash": "d6dc4a2e",
+  "versionInternal": "0.1.9+20260407.141112.f36eced1",
+  "buildId": "0.1.9+20260407.141112.f36eced1-20260407.141112-f36eced1",
+  "builtAt": "2026-04-07T14:11:12.942Z",
+  "commitHash": "f36eced11e56c4d611bd57bbe9f5b0ce89ba823d",
+  "shortHash": "f36eced1",
   "branch": "main",
   "commits": [
+    {
+      "hash": "f36eced11e56c4d611bd57bbe9f5b0ce89ba823d",
+      "shortHash": "f36eced1",
+      "dateIso": "2026-04-07T11:10:40-03:00",
+      "subject": "fix(mobile): update image resolution to use www domain as fallback"
+    },
     {
       "hash": "d6dc4a2ed4eb6aafe900aaaf13c70f81dce47c4d",
       "shortHash": "d6dc4a2e",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "b4f223e3",
       "dateIso": "2026-04-04T23:43:30-03:00",
       "subject": "style: use original high-res PWA icon in header for premium look"
-    },
-    {
-      "hash": "a6a60b0458a1f4b62730a10ce2571342486aa55d",
-      "shortHash": "a6a60b04",
-      "dateIso": "2026-04-04T23:40:18-03:00",
-      "subject": "feat(mobile): improve session stability on screen lock and direct admin store redirect"
     }
   ]
 } as const;
