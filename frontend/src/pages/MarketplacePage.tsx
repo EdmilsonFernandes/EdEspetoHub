@@ -217,7 +217,7 @@ export function MarketplacePage() {
   const [activeAnonymousOrders, setActiveAnonymousOrders] = useState<ActiveAnonymousOrder[]>([]);
   const [dismissedCustomerOrderIds, setDismissedCustomerOrderIds] = useState<string[]>(() => {
     try {
-      const raw = localStorage.getItem(DISMISSED_CUSTOMER_ORDERS_KEY);
+      const raw = localStorage.getItem(DISMISSED_CUSTOMER_ORDERS_KEY) || sessionStorage.getItem(DISMISSED_CUSTOMER_ORDERS_KEY);
       const parsed = raw ? JSON.parse(raw) : [];
       return Array.isArray(parsed) ? parsed.map((item) => String(item || '').trim()).filter(Boolean) : [];
     } catch {
@@ -226,7 +226,7 @@ export function MarketplacePage() {
   });
   const [dismissedAnonymousOrderIds, setDismissedAnonymousOrderIds] = useState<string[]>(() => {
     try {
-      const raw = localStorage.getItem(DISMISSED_ANONYMOUS_ORDERS_KEY);
+      const raw = localStorage.getItem(DISMISSED_ANONYMOUS_ORDERS_KEY) || sessionStorage.getItem(DISMISSED_ANONYMOUS_ORDERS_KEY);
       const parsed = raw ? JSON.parse(raw) : [];
       return Array.isArray(parsed) ? parsed.map((item) => String(item || '').trim()).filter(Boolean) : [];
     } catch {
@@ -347,6 +347,7 @@ export function MarketplacePage() {
   useEffect(() => {
     try {
       localStorage.setItem(DISMISSED_CUSTOMER_ORDERS_KEY, JSON.stringify(dismissedCustomerOrderIds));
+      sessionStorage.setItem(DISMISSED_CUSTOMER_ORDERS_KEY, JSON.stringify(dismissedCustomerOrderIds));
     } catch {
       // ignore
     }
@@ -355,6 +356,7 @@ export function MarketplacePage() {
   useEffect(() => {
     try {
       localStorage.setItem(DISMISSED_ANONYMOUS_ORDERS_KEY, JSON.stringify(dismissedAnonymousOrderIds));
+      sessionStorage.setItem(DISMISSED_ANONYMOUS_ORDERS_KEY, JSON.stringify(dismissedAnonymousOrderIds));
     } catch {
       // ignore
     }
@@ -1143,7 +1145,17 @@ export function MarketplacePage() {
                 <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-emerald-200/20 blur-2xl" />
                 <button
                   type="button"
-                  onClick={() => setDismissedCustomerOrderIds((prev) => Array.from(new Set([ ...prev, ...visibleActiveOrders.map((order) => String(order?.id || '').trim()).filter(Boolean) ])))}
+                  onClick={() => {
+                    const ids = visibleActiveOrders.map((order) => String(order?.id || '').trim()).filter(Boolean);
+                    const next = Array.from(new Set([ ...dismissedCustomerOrderIds, ...ids ]));
+                    try {
+                      localStorage.setItem(DISMISSED_CUSTOMER_ORDERS_KEY, JSON.stringify(next));
+                      sessionStorage.setItem(DISMISSED_CUSTOMER_ORDERS_KEY, JSON.stringify(next));
+                    } catch {
+                      // ignore
+                    }
+                    setDismissedCustomerOrderIds(next);
+                  }}
                   className="absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200 bg-white/80 text-emerald-700 shadow-sm transition-colors hover:bg-white"
                   aria-label="Fechar aviso de pedidos em andamento"
                   title="Fechar aviso"
@@ -1203,7 +1215,14 @@ export function MarketplacePage() {
                   type="button"
                   onClick={() => {
                     const ids = visibleActiveAnonymousOrders.map((order) => String(order?.id || '').trim()).filter(Boolean);
-                    setDismissedAnonymousOrderIds((prev) => Array.from(new Set([ ...prev, ...ids ])));
+                    const next = Array.from(new Set([ ...dismissedAnonymousOrderIds, ...ids ]));
+                    try {
+                      localStorage.setItem(DISMISSED_ANONYMOUS_ORDERS_KEY, JSON.stringify(next));
+                      sessionStorage.setItem(DISMISSED_ANONYMOUS_ORDERS_KEY, JSON.stringify(next));
+                    } catch {
+                      // ignore
+                    }
+                    setDismissedAnonymousOrderIds(next);
                     clearAnonymousOrderCache(ids);
                     setActiveAnonymousOrders([]);
                   }}

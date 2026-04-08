@@ -114,7 +114,7 @@ export function SegmentPromoCarousel({
               src={slide.image}
               alt={slide.imageAlt}
               loading="lazy"
-              className="h-[102px] w-full object-cover object-center"
+              className="h-[102px] w-full bg-white/80 p-1.5 object-contain object-center"
             />
           </div>
         </div>
@@ -170,7 +170,7 @@ export function SegmentPromoCarousel({
                       src={item.image}
                       alt={item.imageAlt}
                       loading="lazy"
-                      className="h-[108px] w-full object-cover"
+                      className="h-[108px] w-full bg-white/80 p-1.5 object-contain object-center"
                     />
                   </div>
                 ))}

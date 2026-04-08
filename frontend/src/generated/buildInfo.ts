@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260408.203814.a03467ea",
-  "buildId": "0.1.9+20260408.203814.a03467ea-20260408.203814-a03467ea",
-  "builtAt": "2026-04-08T20:38:14.833Z",
-  "commitHash": "a03467eab4d97f23790885daaa39d78721e6a6ad",
-  "shortHash": "a03467ea",
+  "versionInternal": "0.1.9+20260408.205353.bcad7009",
+  "buildId": "0.1.9+20260408.205353.bcad7009-20260408.205353-bcad7009",
+  "builtAt": "2026-04-08T20:53:53.702Z",
+  "commitHash": "bcad70098ab35d58ce8108226ac607d4aaf94982",
+  "shortHash": "bcad7009",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "bcad70098ab35d58ce8108226ac607d4aaf94982",
+      "shortHash": "bcad7009",
+      "dateIso": "2026-04-08T17:39:49-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "refactor(hub): soften promo carousel and clear anonymous order cache",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/bcad70098ab35d58ce8108226ac607d4aaf94982"
+    },
     {
       "hash": "a03467eab4d97f23790885daaa39d78721e6a6ad",
       "shortHash": "a03467ea",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(legal): correct company info and add Terms link to vertical menu",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d8725f5e85a5d9b9be6924e140ee550ce074d517"
-    },
-    {
-      "hash": "8dc286d20d6122e9f941a77c36d53919f2779851",
-      "shortHash": "8dc286d2",
-      "dateIso": "2026-04-07T14:36:34-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(legal): ensure correct terms are displayed and cleanup code",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8dc286d20d6122e9f941a77c36d53919f2779851"
     }
   ]
 } as const;
