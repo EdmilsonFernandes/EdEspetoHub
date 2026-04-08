@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260408.205353.bcad7009",
-  "buildId": "0.1.9+20260408.205353.bcad7009-20260408.205353-bcad7009",
-  "builtAt": "2026-04-08T20:53:53.702Z",
-  "commitHash": "bcad70098ab35d58ce8108226ac607d4aaf94982",
-  "shortHash": "bcad7009",
+  "versionInternal": "0.1.9+20260408.210354.c15b310b",
+  "buildId": "0.1.9+20260408.210354.c15b310b-20260408.210354-c15b310b",
+  "builtAt": "2026-04-08T21:03:54.209Z",
+  "commitHash": "c15b310b83808bb9262ec117e70bd10054d5ce84",
+  "shortHash": "c15b310b",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "c15b310b83808bb9262ec117e70bd10054d5ce84",
+      "shortHash": "c15b310b",
+      "dateIso": "2026-04-08T17:55:38-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(hub): preserve promo artwork and persist order tracking dismissals",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c15b310b83808bb9262ec117e70bd10054d5ce84"
+    },
     {
       "hash": "bcad70098ab35d58ce8108226ac607d4aaf94982",
       "shortHash": "bcad7009",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(cleanup): remove active orders polling and fix build errors",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/52ebcfd74b74cfc54025e8690fc1b75c621a390f"
-    },
-    {
-      "hash": "d8725f5e85a5d9b9be6924e140ee550ce074d517",
-      "shortHash": "d8725f5e",
-      "dateIso": "2026-04-07T14:46:26-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(legal): correct company info and add Terms link to vertical menu",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d8725f5e85a5d9b9be6924e140ee550ce074d517"
     }
   ]
 } as const;

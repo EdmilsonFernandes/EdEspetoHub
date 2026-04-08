@@ -1005,8 +1005,9 @@ export function MarketplacePage() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[linear-gradient(180deg,#f8fafc_0%,#f8fafc_42%,#f1f5f9_100%)] pb-32 sm:pb-24 text-slate-900 pt-[max(1rem,env(safe-area-inset-top))]">
+    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[linear-gradient(180deg,#f8fafc_0%,#f8fafc_42%,#f1f5f9_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] sm:pb-24 text-slate-900">
       {/* Elemento Decorativo de Fundo (Premium Look) */}
+      <div className="fixed inset-x-0 top-0 z-[55] h-[max(env(safe-area-inset-top),0.75rem)] bg-[#f8fafc] pointer-events-none" />
       <div className="fixed inset-x-0 top-0 h-[320px] bg-gradient-to-b from-sky-100/50 via-white/30 to-transparent pointer-events-none -z-10" />
       <div className="fixed left-[-8%] top-[10%] h-[28%] w-[38%] rounded-full bg-white/80 blur-[120px] pointer-events-none -z-10" />
       <div className="fixed top-[-10%] right-[-10%] h-[40%] w-[50%] bg-sky-200/20 blur-[120px] rounded-full pointer-events-none -z-10 animate-pulse" />
@@ -1046,7 +1047,7 @@ export function MarketplacePage() {
         }`}
       >
         <header className={`sticky top-0 z-[60] transition-all duration-500 ${isHeaderElevated ? 'bg-white/80 shadow-[0_18px_45px_-30px_rgba(15,23,42,0.3)] backdrop-blur-2xl' : 'bg-transparent'}`}>
-          <div className="mx-auto max-w-[1200px] px-4 pb-4 pt-[max(1.2rem,calc(env(safe-area-inset-top)+0.5rem))]">
+          <div className="mx-auto max-w-[1200px] px-4 pb-4 pt-[max(0.85rem,calc(env(safe-area-inset-top)+0.2rem))]">
             <div className="space-y-5 rounded-[2rem] border border-white/60 bg-white/70 px-4 py-4 shadow-[0_18px_40px_-28px_rgba(15,23,42,0.28)] backdrop-blur-xl">
             {/* Linha 1: Perfil e Logo */}
             <div className="flex items-center justify-between">
@@ -1570,7 +1571,7 @@ export function MarketplacePage() {
             )}
           </section>
 
-          <section className="pb-6 space-y-2">
+          <section className="pb-2 space-y-2 sm:pb-4">
             <p className="text-center text-xs font-semibold text-slate-500">Conectando você aos melhores lojistas da região.</p>
             <PlatformTrustFooter mode="minimal" align="center" compact />
           </section>
