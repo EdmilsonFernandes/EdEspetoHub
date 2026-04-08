@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260408.211956.501652aa",
-  "buildId": "0.1.9+20260408.211956.501652aa-20260408.211956-501652aa",
-  "builtAt": "2026-04-08T21:19:56.256Z",
-  "commitHash": "501652aaf608c5ae9809c4f19b4df2165fe6bee7",
-  "shortHash": "501652aa",
+  "versionInternal": "0.1.9+20260408.212614.3708652c",
+  "buildId": "0.1.9+20260408.212614.3708652c-20260408.212614-3708652c",
+  "builtAt": "2026-04-08T21:26:14.139Z",
+  "commitHash": "3708652c3adf04ae3244c4df0555e9a7600ecebe",
+  "shortHash": "3708652c",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "3708652c3adf04ae3244c4df0555e9a7600ecebe",
+      "shortHash": "3708652c",
+      "dateIso": "2026-04-08T18:21:04-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(hub): soften sidebars for contained promo artwork",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3708652c3adf04ae3244c4df0555e9a7600ecebe"
+    },
     {
       "hash": "501652aaf608c5ae9809c4f19b4df2165fe6bee7",
       "shortHash": "501652aa",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(ui): add store logo fallback to /janocaminho.jpg and handle 404 errors",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1ccd6054a734e35f988b42b08e1ffa4315737104"
-    },
-    {
-      "hash": "d9340e57f7a4cdea67e01c533bdc16f61c814d95",
-      "shortHash": "d9340e57",
-      "dateIso": "2026-04-07T18:15:15-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Revert \"fix(cleanup): remove active orders polling and fix build errors\"",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d9340e57f7a4cdea67e01c533bdc16f61c814d95"
     }
   ]
 } as const;

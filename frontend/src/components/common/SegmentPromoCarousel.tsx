@@ -53,7 +53,7 @@ export function SegmentPromoCarousel({
       aria-label="Criar loja no Ja no Caminho"
       className={`group relative block overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)] active:scale-[0.995] ${className}`}
     >
-      <div className={`relative ${compact ? 'aspect-[16/8.6]' : 'aspect-[16/7.6] sm:aspect-[16/7.4]'}`}>
+      <div className={`relative ${compact ? 'aspect-[16/8.1]' : 'aspect-[16/7.1] sm:aspect-[16/6.9]'}`}>
         {PROMO_SLIDES.map((slide, index) => (
           <div
             key={slide.id}
@@ -82,7 +82,7 @@ export function SegmentPromoCarousel({
         ))}
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 flex justify-center pb-2.5 sm:pb-3">
+      <div className="absolute inset-x-0 bottom-0 flex justify-center pb-2 sm:pb-2.5">
         <div className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-slate-950/18 px-2.5 py-1 backdrop-blur-md">
           {PROMO_SLIDES.map((slide, index) => (
             <span
