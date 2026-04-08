@@ -4,6 +4,7 @@ type PromoSlide = {
   id: string;
   image: string;
   imageAlt: string;
+  fit?: 'contain' | 'cover';
 };
 
 const PROMO_SLIDES: PromoSlide[] = [
@@ -11,16 +12,19 @@ const PROMO_SLIDES: PromoSlide[] = [
     id: 'beleza',
     image: '/marketing/promo-beleza.png',
     imageAlt: 'Banner institucional do Ja no Caminho para o segmento de beleza',
+    fit: 'contain',
   },
   {
     id: 'termica',
     image: '/marketing/promo-termica.png',
     imageAlt: 'Banner institucional do Ja no Caminho com operacao e impressao termica',
+    fit: 'cover',
   },
   {
     id: 'adega',
     image: '/marketing/promo-adega.png',
     imageAlt: 'Banner institucional do Ja no Caminho para o segmento de adega',
+    fit: 'contain',
   },
 ];
 
@@ -61,7 +65,7 @@ export function SegmentPromoCarousel({
               src={slide.image}
               alt={slide.imageAlt}
               loading="lazy"
-              className="h-full w-full object-contain object-center"
+              className={`h-full w-full object-center ${slide.fit === 'cover' ? 'object-cover' : 'object-contain'}`}
             />
           </div>
         ))}

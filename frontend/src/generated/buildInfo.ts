@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260408.211114.c06233ae",
-  "buildId": "0.1.9+20260408.211114.c06233ae-20260408.211114-c06233ae",
-  "builtAt": "2026-04-08T21:11:14.874Z",
-  "commitHash": "c06233aee3602877580520e556a0e94c5f62cc78",
-  "shortHash": "c06233ae",
+  "versionInternal": "0.1.9+20260408.211736.84c75c20",
+  "buildId": "0.1.9+20260408.211736.84c75c20-20260408.211736-84c75c20",
+  "builtAt": "2026-04-08T21:17:36.032Z",
+  "commitHash": "84c75c204f1fb614deb60484449818cb79a1ab6e",
+  "shortHash": "84c75c20",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "84c75c204f1fb614deb60484449818cb79a1ab6e",
+      "shortHash": "84c75c20",
+      "dateIso": "2026-04-08T18:12:40-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(hub): avoid cropping text inside promo artwork",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/84c75c204f1fb614deb60484449818cb79a1ab6e"
+    },
     {
       "hash": "c06233aee3602877580520e556a0e94c5f62cc78",
       "shortHash": "c06233ae",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Revert \"fix(performance): remove unused orders polling logic and clean up MarketplacePage\"",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/684412ee53aee576621577e17698547671862e49"
-    },
-    {
-      "hash": "693c26dafbefe562fbb0901304f4ffc2235a0674",
-      "shortHash": "693c26da",
-      "dateIso": "2026-04-07T17:59:03-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(performance): remove unused orders polling logic and clean up MarketplacePage",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/693c26dafbefe562fbb0901304f4ffc2235a0674"
     }
   ]
 } as const;
