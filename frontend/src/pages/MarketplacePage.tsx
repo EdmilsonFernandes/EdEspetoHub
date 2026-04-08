@@ -1345,9 +1345,9 @@ export function MarketplacePage() {
           </section>
 
           {/* Banner de Destaques Premium */}
-          <section className="space-y-4 mb-8" style={{ transition: 'all .45s ease', transitionDelay: '200ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
+          <section className="space-y-3 mb-7" style={{ transition: 'all .45s ease', transitionDelay: '200ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
             <div className="flex items-center justify-between px-1">
-              <h2 className="text-lg font-black text-slate-900 tracking-tight">{genericHighlightLabel}</h2>
+              <h2 className="text-base font-black text-slate-900 tracking-tight">{genericHighlightLabel}</h2>
               <div className="flex gap-1">
                 <div className="h-1 w-4 rounded-full bg-sky-500" />
                 <div className="h-1 w-1 rounded-full bg-slate-300" />
@@ -1355,22 +1355,22 @@ export function MarketplacePage() {
               </div>
             </div>
             
-            <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 snap-x snap-mandatory px-1">
+            <div className="flex gap-3 overflow-x-auto no-scrollbar pb-3 snap-x snap-mandatory px-1">
               {featuredLoading ? (
                 Array.from({ length: 3 }).map((_, idx) => (
-                  <div key={idx} className="min-w-[260px] h-[140px] rounded-[2rem] bg-white border border-slate-100 shadow-sm animate-pulse" />
+                  <div key={idx} className="min-w-[236px] h-[128px] rounded-[1.8rem] bg-white border border-slate-100 shadow-sm animate-pulse" />
                 ))
               ) : (
                 displayedFeaturedProducts.map((item) => (
                   <Link
                     key={`${item.storeSlug}-${item.id}`}
                     to={`/${item.storeSlug}`}
-                    className="group relative min-w-[260px] h-[140px] overflow-hidden rounded-2xl bg-white border border-slate-100 shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] snap-start"
+                    className="group relative min-w-[236px] h-[128px] overflow-hidden rounded-[1.6rem] bg-white border border-slate-100 shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] snap-start"
                   >
                     <img src={item.imageUrl} alt={item.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                    <div className="absolute inset-0 rounded-[1.6rem] bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                     
-                    <div className="absolute top-3.5 left-4">
+                    <div className="absolute top-3 left-3.5">
                       {item.sponsored ? (
                         <span className="flex items-center gap-1.5 rounded-full bg-amber-400/90 px-2.5 py-1 text-[8px] font-black uppercase tracking-wider text-slate-900 backdrop-blur-md shadow-lg">
                           <Star size={10} weight="fill" /> Promo
@@ -1382,8 +1382,8 @@ export function MarketplacePage() {
                       )}
                     </div>
 
-                    <div className="absolute bottom-3.5 left-4 right-4 text-white">
-                      <p className="text-[13px] font-black tracking-tight line-clamp-1 drop-shadow-sm">{item.name}</p>
+                    <div className="absolute bottom-3 left-3.5 right-3.5 text-white">
+                      <p className="text-[12px] font-black tracking-tight line-clamp-1 drop-shadow-sm">{item.name}</p>
                       <div className="mt-1 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <img 
@@ -1392,9 +1392,9 @@ export function MarketplacePage() {
                             className="h-5 w-5 rounded-full border border-white/50 shadow-sm" 
                             onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_STORE_LOGO; }}
                           />
-                          <span className="text-[9px] font-bold opacity-90">{item.storeName}</span>
+                          <span className="text-[8px] font-bold opacity-90">{item.storeName}</span>
                         </div>
-                        <span className="rounded-lg bg-white px-2 py-0.5 text-[11px] font-black text-slate-900 shadow-lg">
+                        <span className="rounded-lg bg-white px-2 py-0.5 text-[10px] font-black text-slate-900 shadow-lg">
                           {currency.format(item.price)}
                         </span>
                       </div>

@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260408.212614.3708652c",
-  "buildId": "0.1.9+20260408.212614.3708652c-20260408.212614-3708652c",
-  "builtAt": "2026-04-08T21:26:14.139Z",
-  "commitHash": "3708652c3adf04ae3244c4df0555e9a7600ecebe",
-  "shortHash": "3708652c",
+  "versionInternal": "0.1.9+20260408.213127.341965c9",
+  "buildId": "0.1.9+20260408.213127.341965c9-20260408.213127-341965c9",
+  "builtAt": "2026-04-08T21:31:27.898Z",
+  "commitHash": "341965c9212e6ce9b0c39548b960c87084b0a635",
+  "shortHash": "341965c9",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "341965c9212e6ce9b0c39548b960c87084b0a635",
+      "shortHash": "341965c9",
+      "dateIso": "2026-04-08T18:27:04-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(hub): reduce promo banner footprint",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/341965c9212e6ce9b0c39548b960c87084b0a635"
+    },
     {
       "hash": "3708652c3adf04ae3244c4df0555e9a7600ecebe",
       "shortHash": "3708652c",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(build): add missing import of resolveAssetUrl in LandingPage.tsx",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/22fe39920b9602aae4eb42342476eee49ba77c93"
-    },
-    {
-      "hash": "1ccd6054a734e35f988b42b08e1ffa4315737104",
-      "shortHash": "1ccd6054",
-      "dateIso": "2026-04-07T19:58:28-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(ui): add store logo fallback to /janocaminho.jpg and handle 404 errors",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1ccd6054a734e35f988b42b08e1ffa4315737104"
     }
   ]
 } as const;
