@@ -30,7 +30,7 @@ services:
     env_file:
       - ./backend/.env.docker
     volumes:
-      - ./backend/uploads:/app/uploads
+      - edespetohub_uploads:/app/uploads
       - ./backend/keys:/app/keys:ro
     ports:
       - "4000:4000"
@@ -94,3 +94,5 @@ volumes:
     # Pin volume name to avoid accidental "new empty DB" when compose project name/path changes.
     # Default matches the common compose-derived name for this repo.
     name: "${POSTGRES_VOLUME_NAME:-edespetohub_postgres-data}"
+  edespetohub_uploads:
+    name: "${UPLOADS_VOLUME_NAME:-edespetohub_uploads_data}"
