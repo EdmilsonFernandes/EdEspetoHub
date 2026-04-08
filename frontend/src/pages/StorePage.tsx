@@ -1377,7 +1377,7 @@ export function StorePage() {
 
     const order = {
       customerName: effectiveCustomerName,
-      guestPushId: customerSession?.token ? undefined : getOrCreateGuestPushId(),
+      guestPushId: getOrCreateGuestPushId(),
       phone: customer.phone,
       address: deliveryAddress || customer.address,
       table: customer.table,

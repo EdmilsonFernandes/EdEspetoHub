@@ -100,9 +100,10 @@ export class OrderService
     };
     if (userId) {
       void this.pushService.notifyCustomerOrderUpdate(userId, payload);
-      return;
     }
-    void this.pushService.notifyGuestOrderUpdate(guestId, payload);
+    if (guestId) {
+      void this.pushService.notifyGuestOrderUpdate(guestId, payload);
+    }
   }
 
   /**
