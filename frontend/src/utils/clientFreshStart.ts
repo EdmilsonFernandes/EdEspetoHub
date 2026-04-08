@@ -10,6 +10,7 @@ type ClientFreshStartOptions = {
 const PRESERVED_LOCAL_STORAGE_KEYS = new Set([
   'theme',
   'jnk_cookie_consent',
+  'jnk_cookie_consent_v1',
   'jnk_cookie_consent_meta',
   'motoboy:last_email',
   'signupEmail',

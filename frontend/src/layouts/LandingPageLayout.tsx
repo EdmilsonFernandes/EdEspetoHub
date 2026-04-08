@@ -53,8 +53,22 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const stored = String(localStorage.getItem(COOKIE_CONSENT_KEY) || '').toLowerCase();
-    if (stored === 'accepted' || stored === 'rejected') {
-      setCookieConsent(stored as 'accepted' | 'rejected');
+    const cookieStored = String(
+      document.cookie
+        .split('; ')
+        .find((item) => item.startsWith('jnk_cookie_consent='))
+        ?.split('=')[1] || ''
+    ).toLowerCase();
+    const resolved = stored || cookieStored;
+    if (resolved === 'accepted' || resolved === 'rejected') {
+      if (resolved !== stored) {
+        try {
+          localStorage.setItem(COOKIE_CONSENT_KEY, resolved);
+        } catch {
+          // no-op
+        }
+      }
+      setCookieConsent(resolved as 'accepted' | 'rejected');
       return;
     }
     setCookieConsent('unknown');
