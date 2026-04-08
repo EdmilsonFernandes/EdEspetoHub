@@ -24,6 +24,7 @@ import { customerAccountService } from '../services/customerAccountService';
 import { formatCurrency } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { SocialProofMarquee } from '../components/Landing/SocialProofMarquee';
+import { SegmentPromoCarousel } from '../components/common/SegmentPromoCarousel';
 
 const Counter = ({ value, duration = 2000, prefix = '', suffix = '', formatter }: { value: number; duration?: number; prefix?: string; suffix?: string; formatter?: (v: number) => string }) => {
   const [count, setCount] = useState(0);
@@ -383,6 +384,12 @@ export function LandingPage() {
       </section>
 
       {featuredStores.length > 0 && <SocialProofMarquee clients={featuredStores} />}
+
+      <section className="bg-[linear-gradient(180deg,#edf6ff_0%,#ffffff_100%)] py-14 sm:py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <SegmentPromoCarousel />
+        </div>
+      </section>
 
       <section className="bg-slate-950 py-24 sm:py-32 relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
