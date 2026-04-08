@@ -28,6 +28,7 @@ import { getCartPricing } from '../utils/orderPricing';
 import { printReceiptAsImage } from '../utils/printReceiptImage';
 
 const WEEKDAY_LABELS = [ 'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado' ];
+const PUBLIC_ORDER_ALERT_TTL_MS = 3 * 60 * 60 * 1000;
 
 const getOrderStatusTone = (status?: string) => {
   const normalized = String(status || '').trim().toLowerCase();
@@ -44,6 +45,15 @@ const getOrderStatusTone = (status?: string) => {
     cancelled: 'bg-rose-100 text-rose-700 border-rose-200',
   };
   return tones[normalized] || 'bg-slate-100 text-slate-700 border-slate-200';
+};
+
+const isTerminalRecentOrder = (entry?: { status?: string; paymentStatus?: string }) => {
+  const status = String(entry?.status || '').trim().toLowerCase();
+  const paymentStatus = String(entry?.paymentStatus || '').trim().toUpperCase();
+  if ([ 'done', 'delivered', 'finished', 'cancelled', 'rejected' ].includes(status)) return true;
+  if (!status && paymentStatus === 'PAID') return true;
+  if (paymentStatus === 'PAID' && [ 'ready', 'dispatched' ].includes(status)) return true;
+  return false;
 };
 
 export function StorePage() {
@@ -125,7 +135,7 @@ export function StorePage() {
   const autoTrackRef = useRef(false);
   const staffDefaultTypeAppliedRef = useRef(false);
   const reorderTtlMs = 30 * 24 * 60 * 60 * 1000;
-  const publicOrderTtlMs = 24 * 60 * 60 * 1000;
+  const publicOrderTtlMs = PUBLIC_ORDER_ALERT_TTL_MS;
   const [lastPublicOrderId, setLastPublicOrderId] = useState('');
   const [recentPublicOrders, setRecentPublicOrders] = useState([]);
   const [lastOrderItems, setLastOrderItems] = useState([]);
@@ -430,7 +440,7 @@ export function StorePage() {
   const normalizeRecentPublicEntries = (entries: any[]) => {
     const now = Date.now();
     const unique = new Set<string>();
-    const normalized: Array<{ id: string; createdAt: number; type?: string; accessToken?: string }> = [];
+    const normalized: Array<{ id: string; createdAt: number; type?: string; accessToken?: string; status?: string; paymentStatus?: string }> = [];
     (Array.isArray(entries) ? entries : []).forEach((entry) => {
       const id = String(entry?.id || '').trim();
       const createdAt = Number(entry?.createdAt || 0);
@@ -443,6 +453,8 @@ export function StorePage() {
         createdAt,
         type: entry?.type,
         accessToken: entry?.accessToken ? String(entry.accessToken) : undefined,
+        status: entry?.status ? String(entry.status) : undefined,
+        paymentStatus: entry?.paymentStatus ? String(entry.paymentStatus) : undefined,
       });
     });
     return normalized.slice(0, 3);
@@ -692,6 +704,7 @@ export function StorePage() {
         .then((items) => setTopProducts(items || []))
         .catch(() => setTopProducts([]));
     }
+    let recentOrdersInterval: number | null = null;
     if (storeSlug) {
       const hydrateRecentPublicOrders = async () => {
         let lastEntry: any = null;
@@ -727,14 +740,19 @@ export function StorePage() {
         const checked = await Promise.all(
           candidates.map(async (entry) => {
             try {
-              await orderService.getPublicById(entry.id);
-              return entry;
+              const data = await orderService.getPublicById(entry.id);
+              return {
+                ...entry,
+                status: String(data?.status || entry?.status || '').trim() || undefined,
+                type: String(data?.type || entry?.type || '').trim() || undefined,
+                paymentStatus: String(data?.paymentStatus || entry?.paymentStatus || '').trim() || undefined,
+              };
             } catch {
               return null;
             }
           })
         );
-        const valid = checked.filter(Boolean);
+        const valid = checked.filter((entry) => Boolean(entry) && !isTerminalRecentOrder(entry as any));
         if (cancelledRecentLoad) return;
 
         setRecentPublicOrders(valid);
@@ -749,7 +767,10 @@ export function StorePage() {
         }
       };
 
-      hydrateRecentPublicOrders();
+      void hydrateRecentPublicOrders();
+      recentOrdersInterval = window.setInterval(() => {
+        void hydrateRecentPublicOrders();
+      }, 60000);
 
       try {
         const rawItems = localStorage.getItem(`lastOrderItems:${storeSlug}`);
@@ -782,6 +803,9 @@ export function StorePage() {
 
     return () => {
       cancelledRecentLoad = true;
+      if (recentOrdersInterval) {
+        window.clearInterval(recentOrdersInterval);
+      }
       document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [storeSlug, customersStorageKey, checkoutCustomerStorageKey, customerSessionStorageKey]);
@@ -1649,6 +1673,8 @@ export function StorePage() {
         id: createdOrder.id,
         createdAt: Date.now(),
         type: customer.type,
+        status: String(createdOrder?.status || 'pending'),
+        paymentStatus: String(createdOrder?.paymentStatus || 'PENDING'),
         accessToken: createdOrder?.accessToken ? String(createdOrder.accessToken) : undefined,
       };
       localStorage.setItem(`lastOrder:${storeSlug}`, JSON.stringify(entry));

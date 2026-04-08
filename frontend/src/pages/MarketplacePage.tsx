@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { MagnifyingGlass, Star, Storefront, House, List, CaretDown, Heart, CaretRight } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { productService } from '../services/productService';
+import { orderService } from '../services/orderService';
 import { customerAccountService } from '../services/customerAccountService';
 import { featuredService } from '../services/featuredService';
 import { mapsService } from '../services/mapsService';
@@ -142,7 +143,7 @@ const readCustomerSession = () => {
 
 const FAVORITES_STORAGE_KEY = 'hub:favorites:stores';
 const DEFAULT_STORE_LOGO = '/janocaminho.jpg';
-const ORDER_EXPIRATION_MS = 5 * 60 * 60 * 1000; // 5 horas
+const ORDER_EXPIRATION_MS = 3 * 60 * 60 * 1000; // 3 horas
 
 const getOrderStatusTone = (status?: string) => {
   const normalized = String(status || '').trim().toLowerCase();
@@ -169,6 +170,20 @@ type ActiveAnonymousOrder = {
   status?: string;
   storeName?: string;
   accessToken?: string;
+  type?: string;
+  paymentStatus?: string;
+};
+
+const isTerminalRecentOrder = (entry?: {
+  status?: string;
+  paymentStatus?: string;
+}) => {
+  const status = String(entry?.status || '').trim().toLowerCase();
+  const paymentStatus = String(entry?.paymentStatus || '').trim().toUpperCase();
+  if ([ 'done', 'delivered', 'finished', 'cancelled', 'rejected' ].includes(status)) return true;
+  if (!status && paymentStatus === 'PAID') return true;
+  if (paymentStatus === 'PAID' && [ 'ready', 'dispatched' ].includes(status)) return true;
+  return false;
 };
 
 export function MarketplacePage() {
@@ -224,9 +239,10 @@ export function MarketplacePage() {
     };
   }, []);
 
-  // Carregar pedidos anônimos do localStorage (expiração de 5h)
+  // Carregar pedidos anônimos do localStorage e reconciliar status real
   useEffect(() => {
-    const hydrateOrders = () => {
+    let cancelled = false;
+    const hydrateOrders = async () => {
       const now = Date.now();
       const found: ActiveAnonymousOrder[] = [];
       
@@ -250,25 +266,53 @@ export function MarketplacePage() {
                     id: orderId,
                     storeSlug: slug,
                     createdAt,
+                    status: order?.status ? String(order.status) : undefined,
                     accessToken: persistedAccessToken || undefined,
+                    type: order?.type ? String(order.type) : undefined,
+                    paymentStatus: order?.paymentStatus ? String(order.paymentStatus) : undefined,
                   });
                 }
               });
             }
           }
         });
-        
-        // Ordenar por mais recente
-        const sorted = found.sort((a, b) => b.createdAt - a.createdAt).slice(0, 3);
-        setActiveAnonymousOrders(sorted);
+
+        const checked = await Promise.all(
+          found
+            .sort((a, b) => b.createdAt - a.createdAt)
+            .slice(0, 3)
+            .map(async (entry) => {
+              try {
+                const data = await orderService.getPublicById(entry.id);
+                return {
+                  ...entry,
+                  status: String(data?.status || entry.status || '').trim() || undefined,
+                  type: String(data?.type || entry.type || '').trim() || undefined,
+                  paymentStatus: String(data?.paymentStatus || entry.paymentStatus || '').trim() || undefined,
+                };
+              } catch {
+                return entry;
+              }
+            })
+        );
+
+        const active = checked.filter((entry) => !isTerminalRecentOrder(entry));
+        if (!cancelled) {
+          setActiveAnonymousOrders(active);
+        }
       } catch (e) {
         console.error('Erro ao carregar pedidos anônimos', e);
       }
     };
 
-    hydrateOrders();
-    const interval = setInterval(hydrateOrders, 60000); // Check every minute
-    return () => clearInterval(interval);
+    void hydrateOrders();
+    const interval = window.setInterval(() => {
+      void hydrateOrders();
+    }, 60000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
   }, []);
 
   useEffect(() => {
