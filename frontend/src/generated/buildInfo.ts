@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260408.195644.10be2729",
-  "buildId": "0.1.9+20260408.195644.10be2729-20260408.195644-10be2729",
-  "builtAt": "2026-04-08T19:56:44.410Z",
-  "commitHash": "10be27294b6be3d156298a57a98d7cd549f1df90",
-  "shortHash": "10be2729",
+  "versionInternal": "0.1.9+20260408.201419.97886031",
+  "buildId": "0.1.9+20260408.201419.97886031-20260408.201419-97886031",
+  "builtAt": "2026-04-08T20:14:19.833Z",
+  "commitHash": "9788603135d229162ccaf47c47d665b1d0141c55",
+  "shortHash": "97886031",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "9788603135d229162ccaf47c47d665b1d0141c55",
+      "shortHash": "97886031",
+      "dateIso": "2026-04-08T16:59:12-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "refactor(marketing): simplify promo banner and allow dismissing active order alerts",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9788603135d229162ccaf47c47d665b1d0141c55"
+    },
     {
       "hash": "10be27294b6be3d156298a57a98d7cd549f1df90",
       "shortHash": "10be2729",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix: explicitly add missing ConfirmationModal and update build info",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b0fa06c6928c80d38289f92038d31da1f34bf046"
-    },
-    {
-      "hash": "5f4f3ce2afc9bb47c23047fc4581c9a4652c9a0b",
-      "shortHash": "5f4f3ce2",
-      "dateIso": "2026-04-07T14:14:31-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(ui): replace native prompts with modern ConfirmationModal and standardize menu labels",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5f4f3ce2afc9bb47c23047fc4581c9a4652c9a0b"
     }
   ]
 } as const;

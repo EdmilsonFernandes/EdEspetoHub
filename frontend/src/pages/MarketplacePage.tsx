@@ -927,6 +927,29 @@ export function MarketplacePage() {
 
   const [activeOrders, setActiveOrders] = useState<any[]>([]);
 
+  const clearAnonymousOrderCache = useCallback((orderIds: string[]) => {
+    const ids = orderIds.map((item) => String(item || '').trim()).filter(Boolean);
+    if (!ids.length) return;
+    try {
+      Object.keys(localStorage).forEach((key) => {
+        if (!key.startsWith('lastOrders:')) return;
+        const raw = localStorage.getItem(key);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return;
+        const next = parsed.filter((entry) => !ids.includes(String(entry?.id || '').trim()));
+        if (next.length > 0) {
+          localStorage.setItem(key, JSON.stringify(next));
+        } else {
+          localStorage.removeItem(key);
+        }
+      });
+      ids.forEach((id) => localStorage.removeItem(`orderAccess:${id}`));
+    } catch {
+      // ignore
+    }
+  }, []);
+
   const visibleActiveOrders = useMemo(
     () => activeOrders.filter((order) => !dismissedCustomerOrderIds.includes(String(order?.id || '').trim())),
     [activeOrders, dismissedCustomerOrderIds]
@@ -1175,7 +1198,12 @@ export function MarketplacePage() {
                 <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-amber-200/20 blur-2xl" />
                 <button
                   type="button"
-                  onClick={() => setDismissedAnonymousOrderIds((prev) => Array.from(new Set([ ...prev, ...visibleActiveAnonymousOrders.map((order) => String(order?.id || '').trim()).filter(Boolean) ])))}
+                  onClick={() => {
+                    const ids = visibleActiveAnonymousOrders.map((order) => String(order?.id || '').trim()).filter(Boolean);
+                    setDismissedAnonymousOrderIds((prev) => Array.from(new Set([ ...prev, ...ids ])));
+                    clearAnonymousOrderCache(ids);
+                    setActiveAnonymousOrders([]);
+                  }}
                   className="absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full border border-amber-200 bg-white/80 text-amber-700 shadow-sm transition-colors hover:bg-white"
                   aria-label="Fechar aviso de pedido em andamento"
                   title="Fechar aviso"
