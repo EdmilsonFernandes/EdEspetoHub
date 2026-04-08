@@ -759,6 +759,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     error: "",
   });
   const previousIdsRef = useRef<string[]>([]);
+  const queueRef = useRef<any[]>([]);
+  const queuePollTimerRef = useRef<number | null>(null);
+  const queueRequestInFlightRef = useRef(false);
+  const queueRequestSeqRef = useRef(0);
+  const queueAppliedSeqRef = useRef(0);
+  const queueRetryDelayRef = useRef(3000);
   const audioContextRef = useRef<AudioContext | null>(null);
   const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
   const lastNotificationAudioSrcRef = useRef<string>('');
@@ -1261,16 +1267,44 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     }
   };
 
-  const loadQueue = async () => {
+  useEffect(() => {
+    queueRef.current = Array.isArray(queue) ? queue : [];
+  }, [queue]);
+
+  const clearQueuePollTimer = useCallback(() => {
+    if (queuePollTimerRef.current != null) {
+      window.clearTimeout(queuePollTimerRef.current);
+      queuePollTimerRef.current = null;
+    }
+  }, []);
+
+  const loadQueue = useCallback(async ({ silent = false }: { silent?: boolean } = {}) => {
     if (!storeIdentifier) {
       setLoading(false);
       return;
     }
-    setLoading(true);
-    setError('');
+    if (queueRequestInFlightRef.current) {
+      return;
+    }
+
+    const shouldShowLoading = !silent && queueRef.current.length === 0;
+    if (shouldShowLoading) {
+      setLoading(true);
+    }
+    if (!silent) {
+      setError('');
+    }
+
+    queueRequestInFlightRef.current = true;
+    const requestSeq = ++queueRequestSeqRef.current;
 
     try {
       const data = await orderService.fetchQueue(storeIdentifier);
+      if (requestSeq < queueAppliedSeqRef.current) {
+        return;
+      }
+      queueAppliedSeqRef.current = requestSeq;
+      queueRetryDelayRef.current = 3000;
       const nextIds = (data || []).map((order) => order.id);
       const previousIds = previousIdsRef.current;
       const incoming = nextIds.filter((id) => !previousIds.includes(id));
@@ -1284,31 +1318,60 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       setQueue(data);
     } catch (err) {
       console.error('Erro ao buscar fila', err);
-      setError('Não foi possível carregar os pedidos agora. Faça login novamente.');
+      queueRetryDelayRef.current = Math.min(queueRetryDelayRef.current * 2, 15000);
+      if (!silent || queueRef.current.length === 0) {
+        setError('Não foi possível carregar os pedidos agora. Tentando reconectar...');
+      }
     } finally {
-      setLoading(false);
+      queueRequestInFlightRef.current = false;
+      if (shouldShowLoading) {
+        setLoading(false);
+      }
     }
-  };
+  }, [storeIdentifier]);
+
+  const scheduleQueuePoll = useCallback((immediate = false) => {
+    clearQueuePollTimer();
+    const delay = immediate
+      ? 0
+      : (typeof document !== 'undefined' && document.visibilityState === 'visible'
+          ? queueRetryDelayRef.current
+          : Math.max(queueRetryDelayRef.current, 10000));
+
+    queuePollTimerRef.current = window.setTimeout(async () => {
+      await loadQueue({ silent: true });
+      scheduleQueuePoll(false);
+    }, delay);
+  }, [clearQueuePollTimer, loadQueue]);
 
   useEffect(() => {
     if (!storeIdentifier) return;
-    loadQueue();
-    const interval = window.setInterval(loadQueue, 3000);
+    void loadQueue();
+    scheduleQueuePoll(false);
     const handleFocusRefresh = () => {
-      void loadQueue();
+      void loadQueue({ silent: true });
+      scheduleQueuePoll(false);
+    };
+    const handleVisibilityRefresh = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        void loadQueue({ silent: true });
+        scheduleQueuePoll(false);
+      }
     };
     window.addEventListener('focus', handleFocusRefresh);
     window.addEventListener('pageshow', handleFocusRefresh);
+    document.addEventListener('visibilitychange', handleVisibilityRefresh);
 
     const unsubProducts = productService.subscribe(setProducts);
 
     return () => {
-      clearInterval(interval);
+      clearQueuePollTimer();
       window.removeEventListener('focus', handleFocusRefresh);
       window.removeEventListener('pageshow', handleFocusRefresh);
+      document.removeEventListener('visibilitychange', handleVisibilityRefresh);
       unsubProducts();
     };
-  }, [storeIdentifier]);
+  }, [clearQueuePollTimer, loadQueue, scheduleQueuePoll, storeIdentifier]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
