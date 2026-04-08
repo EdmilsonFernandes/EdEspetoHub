@@ -459,14 +459,11 @@ export function MarketplacePage() {
         const supportsPostal = supportsDelivery && Boolean(store?.settings?.postalEnabled);
         const rawHours = Array.isArray(store?.settings?.openingHours) ? (store?.settings?.openingHours as any[]) : [];
         const isOpen =
-          (store?.settings?.isOrderingEnabled ?? true) !== false &&
-          (
-            typeof store?.openNow === 'boolean'
-              ? store.openNow
-              : (rawHours.length > 0
-                  ? isStoreOpenNow(normalizeOpeningHours(rawHours as any) as any)
-                  : true)
-          );
+          typeof store?.openNow === 'boolean'
+            ? store.openNow
+            : (rawHours.length > 0
+                ? isStoreOpenNow(normalizeOpeningHours(rawHours as any) as any)
+                : true);
         const rawLogo = (store?.settings as any)?.logoUrl || (store?.settings as any)?.logo_url || (store as any)?.logoUrl || (store as any)?.logo_url;
         const logo = resolveAssetUrl(rawLogo || undefined) || DEFAULT_STORE_LOGO;
         

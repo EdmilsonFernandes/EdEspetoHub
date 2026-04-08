@@ -357,7 +357,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
             subscriptionStatus: subscription?.status || null,
           });
           const isOrderingEnabled = store.settings?.isOrderingEnabled !== false;
-          const openNow = isOrderingEnabled && StoreController.isStoreOpenNow(store);
+          const openNow = StoreController.isStoreOpenNow(store);
           const nextOpeningLabel = openNow ? null : StoreController.getNextOpeningLabel(store);
           return {
             id: store.id,
@@ -436,9 +436,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
             address: store.owner.address,
           }
           : null,
-        openNow:
-          (store?.settings?.isOrderingEnabled !== false) &&
-          StoreController.isStoreOpenNow(store),
+        openNow: StoreController.isStoreOpenNow(store),
       };
       return res.json({ ...sanitizedStore, subscription });
     } catch (error: any) {
