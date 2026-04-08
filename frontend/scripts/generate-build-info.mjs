@@ -6,6 +6,20 @@ const projectRoot = resolve(process.cwd());
 const packageJsonPath = resolve(projectRoot, 'package.json');
 const outputPath = resolve(projectRoot, 'src/generated/buildInfo.ts');
 
+const resolveGithubRepoUrl = () => {
+  const raw =
+    String(process.env.BUILD_GIT_REMOTE_URL || '').trim() ||
+    safeExecFile('git', ['remote', 'get-url', 'origin']);
+  if (!raw) return '';
+  if (raw.startsWith('git@github.com:')) {
+    return `https://github.com/${raw.replace('git@github.com:', '').replace(/\.git$/i, '')}`;
+  }
+  if (raw.startsWith('https://github.com/')) {
+    return raw.replace(/\.git$/i, '');
+  }
+  return '';
+};
+
 const safeExecFile = (bin, args) => {
   try {
     return execFileSync(bin, args, { cwd: projectRoot, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
@@ -66,19 +80,23 @@ const buildMeta = envBuildVersion.includes('+')
 const versionInternal = `${version}+${buildMeta}`;
 const buildId = `${versionInternal}-${datePart}.${timePart}-${shortHash}`;
 
-const commitsRaw = safeExecFile('git', ['log', '-n', '30', '--date=iso-strict', '--pretty=format:%H|%h|%cI|%s']);
+const repositoryUrl = resolveGithubRepoUrl();
+const commitsRaw = safeExecFile('git', ['log', '-n', '30', '--date=iso-strict', '--pretty=format:%H|%h|%cI|%an|%ae|%s']);
 const commitsFromGit = commitsRaw
   ? commitsRaw
       .split('\n')
       .map((line) => line.trim())
       .filter(Boolean)
       .map((line) => {
-        const [hash, short, dateIso, ...subjectParts] = line.split('|');
+        const [hash, short, dateIso, authorName, authorEmail, ...subjectParts] = line.split('|');
         return {
           hash: hash || '',
           shortHash: short || '',
           dateIso: dateIso || '',
+          authorName: authorName || '',
+          authorEmail: authorEmail || '',
           subject: subjectParts.join('|').trim() || '',
+          commitUrl: repositoryUrl && hash ? `${repositoryUrl}/commit/${hash}` : '',
         };
       })
   : [];
@@ -96,6 +114,7 @@ const payload = {
   commitHash: commitHash || '',
   shortHash,
   branch,
+  repositoryUrl,
   commits,
 };
 

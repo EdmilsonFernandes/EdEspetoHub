@@ -122,6 +122,18 @@ const faceScoreLabel = (score: unknown) => {
   return `${pct.toFixed(1)}%`;
 };
 
+const getAttributionLabel = (store: any) => {
+  const attribution = store?.settings?.acquisitionAttribution;
+  if (!attribution || typeof attribution !== 'object') return 'Direto / não informado';
+  const source = String(attribution.utm_source || '').trim();
+  const medium = String(attribution.utm_medium || '').trim();
+  const campaign = String(attribution.utm_campaign || '').trim();
+  const referrer = String(attribution.referrer || '').trim();
+  const primary = source || (referrer ? 'referrer' : 'direto');
+  const secondary = campaign || medium || referrer || '';
+  return secondary ? `${primary} · ${secondary}` : primary;
+};
+
 const KycAvatar = ({ name, profileImageUrl }: { name?: string; profileImageUrl?: string }) => {
   return (
     <AdaptiveAvatar
@@ -1775,6 +1787,7 @@ export function SuperAdmin() {
                 <thead className="text-xs uppercase text-slate-500 border-b bg-slate-50">
                   <tr>
                     <th className="py-2 pr-4 text-left">Loja</th>
+                    <th className="py-2 pr-4 text-left">Aquisição</th>
                     <th className="py-2 pr-4 text-left">Plano</th>
                     <th className="py-2 pr-4 text-left">VIP</th>
                     <th className="py-2 pr-4 text-left">Status</th>
@@ -1809,6 +1822,12 @@ export function SuperAdmin() {
                             )}
                           </div>
                           <div className="text-xs text-slate-400">{store.slug}</div>
+                        </td>
+                        <td className="py-3 pr-4">
+                          <div className="text-sm text-slate-700">{getAttributionLabel(store)}</div>
+                          <div className="text-xs text-slate-400">
+                            {String(store?.settings?.acquisitionAttribution?.landingPath || '').trim() || '-'}
+                          </div>
                         </td>
                         <td className="py-3 pr-4 capitalize">{planName}</td>
                         <td className="py-3 pr-4">
@@ -2759,6 +2778,9 @@ export function SuperAdmin() {
         >
           {activeSection === 'versions' && (
             <div className="space-y-4">
+              {(() => {
+                const latestCommit = APP_BUILD_INFO.commits?.[0];
+                return (
               <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3">
                 <div className="rounded-2xl border border-slate-200 bg-white p-3">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">Versão</p>
@@ -2777,7 +2799,29 @@ export function SuperAdmin() {
                   <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">Gerado em</p>
                   <p className="mt-1 text-sm font-bold text-slate-900">{buildDate}</p>
                 </div>
+                <div className="rounded-2xl border border-slate-200 bg-white p-3">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">Autor</p>
+                  <p className="mt-1 text-sm font-bold text-slate-900">{latestCommit?.authorName || '-'}</p>
+                  <p className="text-[11px] text-slate-500 mt-1">{latestCommit?.authorEmail || '-'}</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-white p-3">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">GitHub</p>
+                  {latestCommit?.commitUrl ? (
+                    <a
+                      href={latestCommit.commitUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-1 inline-flex text-sm font-bold text-sky-700 hover:text-sky-800 underline break-all"
+                    >
+                      Abrir commit {latestCommit.shortHash}
+                    </a>
+                  ) : (
+                    <p className="mt-1 text-sm font-bold text-slate-900">Link indisponível</p>
+                  )}
+                </div>
               </div>
+                );
+              })()}
 
               <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
                 <div className="px-4 py-3 border-b border-slate-200 bg-slate-50">
@@ -2793,7 +2837,9 @@ export function SuperAdmin() {
                         <tr>
                           <th className="text-left">Data</th>
                           <th className="text-left">Hash</th>
+                          <th className="text-left">Autor</th>
                           <th className="text-left">Descrição</th>
+                          <th className="text-left">GitHub</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -2803,7 +2849,22 @@ export function SuperAdmin() {
                               {commit.dateIso ? new Date(commit.dateIso).toLocaleString('pt-BR') : '-'}
                             </td>
                             <td className="text-xs font-bold text-slate-800 whitespace-nowrap">{commit.shortHash || '-'}</td>
+                            <td className="text-xs text-slate-600 whitespace-nowrap">{commit.authorName || '-'}</td>
                             <td className="text-sm text-slate-700">{commit.subject || '-'}</td>
+                            <td className="text-xs whitespace-nowrap">
+                              {commit.commitUrl ? (
+                                <a
+                                  href={commit.commitUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="font-bold text-sky-700 hover:text-sky-800 underline"
+                                >
+                                  abrir
+                                </a>
+                              ) : (
+                                <span className="text-slate-400">-</span>
+                              )}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
