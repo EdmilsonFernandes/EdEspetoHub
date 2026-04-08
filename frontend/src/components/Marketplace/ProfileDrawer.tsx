@@ -35,8 +35,8 @@ type ProfileDrawerProps = {
   onOpenAdminLogin: () => void;
   onOpenMotoboyLogin: () => void;
   onOpenAccount: () => void;
+  onOpenOrders: () => void;
   onOpenTerms: () => void;
-  onOpenPrivacy: () => void;
   onOpenHelp: () => void;
   onLogout: () => void;
   onDeactivateAccount: () => void; // Nova prop
@@ -54,8 +54,8 @@ export function ProfileDrawer({
   onOpenAdminLogin,
   onOpenMotoboyLogin,
   onOpenAccount,
+  onOpenOrders,
   onOpenTerms,
-  onOpenPrivacy,
   onOpenHelp,
   onLogout,
   onDeactivateAccount, // Nova prop
@@ -98,18 +98,15 @@ export function ProfileDrawer({
   const actions: DrawerAction[] = isLogged
     ? [
         { id: 'account', label: 'Minha Conta', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-sky-600', bgColor: 'bg-sky-50' },
-        { id: 'orders', label: 'Meus pedidos', icon: <BellSimple size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-amber-600', bgColor: 'bg-amber-50' },
-        { id: 'security', label: 'Segurança', icon: <ShieldCheck size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-indigo-600', bgColor: 'bg-indigo-50' },
-        { id: 'terms', label: 'Termos de Uso', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
-        { id: 'privacy', label: 'Privacidade', icon: <ShieldCheck size={22} weight="duotone" />, onClick: onOpenPrivacy, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
+        { id: 'orders', label: 'Meus pedidos', icon: <BellSimple size={22} weight="duotone" />, onClick: onOpenOrders, iconColor: 'text-amber-600', bgColor: 'bg-amber-50' },
+        { id: 'terms', label: 'Termos e Privacidade', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
         { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={22} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
-        { id: 'deactivate', label: 'Excluir conta', icon: <SignOut size={22} weight="duotone" />, onClick: onDeactivateAccount, tone: 'danger' },
+        { id: 'deactivate', label: 'Excluir conta', icon: <SignOut size={22} weight="danger" />, onClick: onDeactivateAccount, tone: 'danger' },
         { id: 'logout', label: 'Sair da conta', icon: <SignOut size={22} weight="duotone" />, onClick: onLogout, tone: 'danger' },
       ]
     : [
         { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={22} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
-        { id: 'terms', label: 'Termos de uso', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
-        { id: 'privacy', label: 'Privacidade', icon: <ShieldCheck size={22} weight="duotone" />, onClick: onOpenPrivacy, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
+        { id: 'terms', label: 'Termos e Privacidade', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
       ];
 
   return (
@@ -118,14 +115,14 @@ export function ProfileDrawer({
         isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
       }`}
     >
-      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-slate-950/55 backdrop-blur-md" onClick={onClose} />
 
       <aside
-        className={`absolute inset-y-0 left-0 w-[300px] max-w-[85vw] transform bg-white shadow-2xl transition-transform duration-500 ease-out ${
+        className={`absolute inset-y-0 left-0 w-[300px] max-w-[85vw] transform border-r border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(248,250,252,0.98)_100%)] shadow-[0_30px_70px_-35px_rgba(15,23,42,0.45)] backdrop-blur-2xl transition-transform duration-500 ease-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } flex flex-col pt-[env(safe-area-inset-top)]`}
       >
-        <div className="p-6 pb-4">
+        <div className="border-b border-slate-100/80 bg-white/50 p-6 pb-4">
           {isLogged ? (
             <div className="flex items-center gap-4">
               {profileImageUrl ? (
@@ -133,12 +130,12 @@ export function ProfileDrawer({
                   <img
                     src={profileImageUrl}
                     alt={userName}
-                    className="h-16 w-16 rounded-2xl border-2 border-white object-cover shadow-lg ring-2 ring-sky-100"
+                    className="h-16 w-16 rounded-2xl border-2 border-white object-cover shadow-[0_18px_30px_-18px_rgba(14,165,233,0.45)] ring-2 ring-sky-100"
                   />
                   <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-500 shadow-sm" />
                 </div>
               ) : (
-                <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400 shadow-inner ring-2 ring-slate-50">
+                <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-white to-slate-100 text-slate-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_18px_32px_-24px_rgba(15,23,42,0.35)] ring-1 ring-slate-100">
                   <UserCircle size={36} weight="duotone" />
                 </div>
               )}
@@ -150,7 +147,7 @@ export function ProfileDrawer({
           ) : (
             <button
               onClick={onLogin}
-              className="flex w-full items-center justify-between rounded-2xl bg-slate-900 p-4 text-white shadow-lg transition-all active:scale-95"
+              className="flex w-full items-center justify-between rounded-[1.5rem] bg-slate-900 p-4 text-white shadow-[0_24px_40px_-24px_rgba(15,23,42,0.65)] transition-all active:scale-95"
             >
               <div className="flex items-center gap-3">
                 <UserCircle size={24} weight="duotone" className="text-slate-400" />
@@ -164,7 +161,7 @@ export function ProfileDrawer({
           )}
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-2 space-y-8">
+        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-8">
           {isAdmin && (
             <section className="space-y-3">
               <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 px-1">Minha Operação</p>
@@ -174,9 +171,9 @@ export function ProfileDrawer({
                     if (storeSlug) window.location.href = `/${storeSlug}`;
                     onClose();
                   }}
-                  className="flex w-full items-center gap-3 rounded-2xl border border-sky-100 bg-sky-50/50 p-3.5 text-sky-900 transition-all active:scale-95"
+                  className="flex w-full items-center gap-3 rounded-[1.5rem] border border-sky-100 bg-white/80 p-3.5 text-sky-900 shadow-[0_14px_28px_-24px_rgba(14,165,233,0.5)] transition-all active:scale-95"
                 >
-                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-white shadow-sm text-sky-600">
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-sky-50 shadow-sm text-sky-600">
                     <CookingPot size={22} weight="duotone" />
                   </div>
                   <span className="text-[14px] font-black">Gerenciar Loja</span>
@@ -186,9 +183,9 @@ export function ProfileDrawer({
                     window.location.href = '/hub';
                     onClose();
                   }}
-                  className="flex w-full items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/50 p-3.5 text-emerald-900 transition-all active:scale-95"
+                  className="flex w-full items-center gap-3 rounded-[1.5rem] border border-emerald-100 bg-white/80 p-3.5 text-emerald-900 shadow-[0_14px_28px_-24px_rgba(16,185,129,0.45)] transition-all active:scale-95"
                 >
-                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-white shadow-sm text-emerald-600">
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-50 shadow-sm text-emerald-600">
                     <House size={22} weight="duotone" />
                   </div>
                   <span className="text-[14px] font-black">Página Inicial (Hub)</span>
@@ -206,13 +203,13 @@ export function ProfileDrawer({
                   action.onClick();
                   onClose();
                 }}
-                className={`flex w-full items-center gap-4 rounded-2xl px-3 py-3 transition-all active:scale-[0.97] ${
+                className={`flex w-full items-center gap-4 rounded-[1.35rem] px-3 py-3 transition-all active:scale-[0.97] ${
                   action.tone === 'danger'
-                    ? 'text-rose-600 hover:bg-rose-50'
-                    : 'text-slate-700 hover:bg-slate-50'
+                    ? 'text-rose-600 hover:bg-rose-50/90'
+                    : 'text-slate-700 hover:bg-white/80'
                 }`}
               >
-                <div className={`grid h-10 w-10 place-items-center rounded-xl shrink-0 transition-colors ${action.bgColor || 'bg-slate-100'} ${action.iconColor || 'text-slate-500'}`}>
+                <div className={`grid h-10 w-10 place-items-center rounded-xl shrink-0 border border-white/60 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.28)] transition-colors ${action.bgColor || 'bg-slate-100'} ${action.iconColor || 'text-slate-500'}`}>
                   {action.icon}
                 </div>
                 <span className="text-[15px] font-bold">{action.label}</span>
@@ -225,7 +222,7 @@ export function ProfileDrawer({
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={onOpenAdminLogin}
-                className="flex flex-col items-center justify-center gap-3 rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm transition-all active:scale-95"
+                className="flex flex-col items-center justify-center gap-3 rounded-[2rem] border border-slate-100 bg-white/90 p-5 shadow-[0_18px_30px_-24px_rgba(15,23,42,0.35)] transition-all active:scale-95"
               >
                 <div className="grid h-12 w-12 place-items-center rounded-2xl bg-sky-50 text-sky-600">
                   <Truck size={28} weight="duotone" />
@@ -234,7 +231,7 @@ export function ProfileDrawer({
               </button>
               <button
                 onClick={onOpenMotoboyLogin}
-                className="flex flex-col items-center justify-center gap-3 rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm transition-all active:scale-95"
+                className="flex flex-col items-center justify-center gap-3 rounded-[2rem] border border-slate-100 bg-white/90 p-5 shadow-[0_18px_30px_-24px_rgba(15,23,42,0.35)] transition-all active:scale-95"
               >
                 <div className="grid h-12 w-12 place-items-center rounded-2xl bg-amber-50 text-amber-600">
                   <ArrowsClockwise size={28} weight="duotone" />
@@ -245,7 +242,7 @@ export function ProfileDrawer({
           </section>
         </div>
 
-        <div className="border-t border-slate-100 bg-slate-50 p-6 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+        <div className="border-t border-slate-100/90 bg-white/70 p-6 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] backdrop-blur-xl">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <p className="text-[11px] font-black text-slate-900 uppercase tracking-tighter">Já no Caminho</p>
