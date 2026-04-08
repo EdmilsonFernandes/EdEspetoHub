@@ -10,3 +10,6 @@ volumes:
   postgres-data:
     external: true
     name: "${POSTGRES_VOLUME_NAME:-edespetohub_postgres-data}"
+  edespetohub_uploads:
+    external: true
+    name: "${UPLOADS_VOLUME_NAME:-edespetohub_uploads_data}"
