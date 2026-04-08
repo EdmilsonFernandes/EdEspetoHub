@@ -385,9 +385,9 @@ export function LandingPage() {
 
       {featuredStores.length > 0 && <SocialProofMarquee clients={featuredStores} />}
 
-      <section className="bg-[linear-gradient(180deg,#edf6ff_0%,#ffffff_100%)] py-14 sm:py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <SegmentPromoCarousel />
+      <section className="bg-[linear-gradient(180deg,#edf6ff_0%,#ffffff_100%)] py-12 sm:py-14">
+        <div className="max-w-6xl mx-auto px-4">
+          <SegmentPromoCarousel className="shadow-[0_22px_46px_-34px_rgba(15,23,42,0.42)]" />
         </div>
       </section>
 

@@ -5,192 +5,283 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260408.164002.56f5d2d3",
-  "buildId": "0.1.9+20260408.164002.56f5d2d3-20260408.164002-56f5d2d3",
-  "builtAt": "2026-04-08T16:40:02.368Z",
-  "commitHash": "56f5d2d376541baa4d1f680448d725049af18c63",
-  "shortHash": "56f5d2d3",
+  "versionInternal": "0.1.9+20260408.195644.10be2729",
+  "buildId": "0.1.9+20260408.195644.10be2729-20260408.195644-10be2729",
+  "builtAt": "2026-04-08T19:56:44.410Z",
+  "commitHash": "10be27294b6be3d156298a57a98d7cd549f1df90",
+  "shortHash": "10be2729",
   "branch": "main",
+  "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "10be27294b6be3d156298a57a98d7cd549f1df90",
+      "shortHash": "10be2729",
+      "dateIso": "2026-04-08T16:45:09-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(versions): normalize author and commit links in build metadata",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/10be27294b6be3d156298a57a98d7cd549f1df90"
+    },
+    {
+      "hash": "64abc4e811709e4c7e13f410c6d6a8b84a2a5fc8",
+      "shortHash": "64abc4e8",
+      "dateIso": "2026-04-08T16:40:39-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(marketing): include shared promo carousel assets",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/64abc4e811709e4c7e13f410c6d6a8b84a2a5fc8"
+    },
+    {
+      "hash": "9decc97c606098f98e9c62e20f5e0c2c01c62348",
+      "shortHash": "9decc97c",
+      "dateIso": "2026-04-08T16:40:05-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(marketing): add rotating segment promo banners to hub and landing",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9decc97c606098f98e9c62e20f5e0c2c01c62348"
+    },
+    {
+      "hash": "affd952216282729da0af92653a611f1c95024d6",
+      "shortHash": "affd9522",
+      "dateIso": "2026-04-08T16:31:54-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(superadmin): show acquisition source and commit metadata",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/affd952216282729da0af92653a611f1c95024d6"
+    },
+    {
+      "hash": "648476cd501236c27a45e712d378bc145fa74acb",
+      "shortHash": "648476cd",
+      "dateIso": "2026-04-08T16:25:25-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(attribution): persist landing acquisition data on store signup",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/648476cd501236c27a45e712d378bc145fa74acb"
+    },
+    {
+      "hash": "84f61566b538b4527ae2570374eae7c5ba9c7424",
+      "shortHash": "84f61566",
+      "dateIso": "2026-04-08T16:21:04-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(landing): preserve cookie consent across client refresh",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/84f61566b538b4527ae2570374eae7c5ba9c7424"
+    },
+    {
+      "hash": "5a8b011db1169fbb1e2f2752380259ab6ba12127",
+      "shortHash": "5a8b011d",
+      "dateIso": "2026-04-08T15:50:51-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(orders): refresh recent alerts and expire stale entries",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5a8b011db1169fbb1e2f2752380259ab6ba12127"
+    },
+    {
+      "hash": "5cee6d1d4df18802265d653836fa2e7affd3d8c4",
+      "shortHash": "5cee6d1d",
+      "dateIso": "2026-04-08T15:40:59-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(orders): polish active order status cards",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5cee6d1d4df18802265d653836fa2e7affd3d8c4"
+    },
+    {
+      "hash": "607e5120493fabd8c1ea96cfaf79d55d5d6532fd",
+      "shortHash": "607e5120",
+      "dateIso": "2026-04-08T15:37:34-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "refactor(orders): unify active order tracking entry points",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/607e5120493fabd8c1ea96cfaf79d55d5d6532fd"
+    },
+    {
+      "hash": "2afad53c1e0aedcf1f4062717c90f0846368bd1b",
+      "shortHash": "2afad53c",
+      "dateIso": "2026-04-08T15:30:56-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(push): keep guest fallback for customer order updates",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2afad53c1e0aedcf1f4062717c90f0846368bd1b"
+    },
+    {
+      "hash": "4cc4e030449021d48475dc91f105881c6302a11f",
+      "shortHash": "4cc4e030",
+      "dateIso": "2026-04-08T14:34:35-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(storefront): separate store open state from ordering flag",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4cc4e030449021d48475dc91f105881c6302a11f"
+    },
+    {
+      "hash": "d163c10d7e8963181a020613df4f49d4c6329744",
+      "shortHash": "d163c10d",
+      "dateIso": "2026-04-08T14:23:21-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(queue): import useCallback in grill queue",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d163c10d7e8963181a020613df4f49d4c6329744"
+    },
+    {
+      "hash": "94acd48615ed1faabe2dfcee0c86335bbae3690b",
+      "shortHash": "94acd486",
+      "dateIso": "2026-04-08T13:53:12-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "perf(queue): make admin queue polling resilient",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/94acd48615ed1faabe2dfcee0c86335bbae3690b"
+    },
+    {
+      "hash": "5c35594cff71dfc7ad86335d1b850e1b755cf2d3",
+      "shortHash": "5c35594c",
+      "dateIso": "2026-04-08T13:48:04-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(frontend): import client orders route component",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5c35594cff71dfc7ad86335d1b850e1b755cf2d3"
+    },
+    {
+      "hash": "9cae41b6f05d54812619bf1c69ed631540ab763d",
+      "shortHash": "9cae41b6",
+      "dateIso": "2026-04-08T13:40:55-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(ux): implement anonymous order tracking with 5h expiry and normalize client area",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9cae41b6f05d54812619bf1c69ed631540ab763d"
+    },
     {
       "hash": "56f5d2d376541baa4d1f680448d725049af18c63",
       "shortHash": "56f5d2d3",
       "dateIso": "2026-04-08T12:55:31-03:00",
-      "subject": "fix(frontend): align profile drawer types and client orders route"
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(frontend): align profile drawer types and client orders route",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/56f5d2d376541baa4d1f680448d725049af18c63"
     },
     {
       "hash": "1f68416b03b175824390dfc38f90edf786638d79",
       "shortHash": "1f68416b",
       "dateIso": "2026-04-08T12:51:17-03:00",
-      "subject": "style(hub): refine marketplace drawer and avatar"
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(hub): refine marketplace drawer and avatar",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1f68416b03b175824390dfc38f90edf786638d79"
     },
     {
       "hash": "c5c1447f14ac224aa345996c5819e2db87ada3eb",
       "shortHash": "c5c1447f",
       "dateIso": "2026-04-08T12:46:47-03:00",
-      "subject": "style(hub): premiumize marketplace layout safely"
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(hub): premiumize marketplace layout safely",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c5c1447f14ac224aa345996c5819e2db87ada3eb"
     },
     {
       "hash": "d96844ffb36747f6c8d53da3e7b59c3d0185e15b",
       "shortHash": "d96844ff",
       "dateIso": "2026-04-08T12:07:37-03:00",
-      "subject": "infra: mark uploads volume as external in prod to prevent data loss on rebuild"
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "infra: mark uploads volume as external in prod to prevent data loss on rebuild",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d96844ffb36747f6c8d53da3e7b59c3d0185e15b"
     },
     {
       "hash": "a311e419690e3a77727294d10b20945e2cdef29f",
       "shortHash": "a311e419",
       "dateIso": "2026-04-08T12:01:26-03:00",
-      "subject": "infra: change api uploads to named volume for better persistence"
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "infra: change api uploads to named volume for better persistence",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a311e419690e3a77727294d10b20945e2cdef29f"
     },
     {
       "hash": "22fe39920b9602aae4eb42342476eee49ba77c93",
       "shortHash": "22fe3992",
       "dateIso": "2026-04-07T20:04:02-03:00",
-      "subject": "fix(build): add missing import of resolveAssetUrl in LandingPage.tsx"
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(build): add missing import of resolveAssetUrl in LandingPage.tsx",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/22fe39920b9602aae4eb42342476eee49ba77c93"
     },
     {
       "hash": "1ccd6054a734e35f988b42b08e1ffa4315737104",
       "shortHash": "1ccd6054",
       "dateIso": "2026-04-07T19:58:28-03:00",
-      "subject": "fix(ui): add store logo fallback to /janocaminho.jpg and handle 404 errors"
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(ui): add store logo fallback to /janocaminho.jpg and handle 404 errors",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1ccd6054a734e35f988b42b08e1ffa4315737104"
     },
     {
       "hash": "d9340e57f7a4cdea67e01c533bdc16f61c814d95",
       "shortHash": "d9340e57",
       "dateIso": "2026-04-07T18:15:15-03:00",
-      "subject": "Revert \"fix(cleanup): remove active orders polling and fix build errors\""
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Revert \"fix(cleanup): remove active orders polling and fix build errors\"",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d9340e57f7a4cdea67e01c533bdc16f61c814d95"
     },
     {
       "hash": "684412ee53aee576621577e17698547671862e49",
       "shortHash": "684412ee",
       "dateIso": "2026-04-07T18:15:13-03:00",
-      "subject": "Revert \"fix(performance): remove unused orders polling logic and clean up MarketplacePage\""
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Revert \"fix(performance): remove unused orders polling logic and clean up MarketplacePage\"",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/684412ee53aee576621577e17698547671862e49"
     },
     {
       "hash": "693c26dafbefe562fbb0901304f4ffc2235a0674",
       "shortHash": "693c26da",
       "dateIso": "2026-04-07T17:59:03-03:00",
-      "subject": "fix(performance): remove unused orders polling logic and clean up MarketplacePage"
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(performance): remove unused orders polling logic and clean up MarketplacePage",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/693c26dafbefe562fbb0901304f4ffc2235a0674"
     },
     {
       "hash": "52ebcfd74b74cfc54025e8690fc1b75c621a390f",
       "shortHash": "52ebcfd7",
       "dateIso": "2026-04-07T17:56:52-03:00",
-      "subject": "fix(cleanup): remove active orders polling and fix build errors"
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(cleanup): remove active orders polling and fix build errors",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/52ebcfd74b74cfc54025e8690fc1b75c621a390f"
     },
     {
       "hash": "d8725f5e85a5d9b9be6924e140ee550ce074d517",
       "shortHash": "d8725f5e",
       "dateIso": "2026-04-07T14:46:26-03:00",
-      "subject": "fix(legal): correct company info and add Terms link to vertical menu"
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(legal): correct company info and add Terms link to vertical menu",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d8725f5e85a5d9b9be6924e140ee550ce074d517"
     },
     {
       "hash": "8dc286d20d6122e9f941a77c36d53919f2779851",
       "shortHash": "8dc286d2",
       "dateIso": "2026-04-07T14:36:34-03:00",
-      "subject": "fix(legal): ensure correct terms are displayed and cleanup code"
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(legal): ensure correct terms are displayed and cleanup code",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8dc286d20d6122e9f941a77c36d53919f2779851"
     },
     {
       "hash": "b0fa06c6928c80d38289f92038d31da1f34bf046",
       "shortHash": "b0fa06c6",
       "dateIso": "2026-04-07T14:23:27-03:00",
-      "subject": "fix: explicitly add missing ConfirmationModal and update build info"
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix: explicitly add missing ConfirmationModal and update build info",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b0fa06c6928c80d38289f92038d31da1f34bf046"
     },
     {
       "hash": "5f4f3ce2afc9bb47c23047fc4581c9a4652c9a0b",
       "shortHash": "5f4f3ce2",
       "dateIso": "2026-04-07T14:14:31-03:00",
-      "subject": "feat(ui): replace native prompts with modern ConfirmationModal and standardize menu labels"
-    },
-    {
-      "hash": "90e410fb0d759f8ae27f9a6488c7f3e9e9fce15c",
-      "shortHash": "90e410fb",
-      "dateIso": "2026-04-07T13:54:22-03:00",
-      "subject": "fix(db): ensure is_active column exists on startup"
-    },
-    {
-      "hash": "000ae878a01c2c57fc838093bed4f89e99110c0a",
-      "shortHash": "000ae878",
-      "dateIso": "2026-04-07T13:42:31-03:00",
-      "subject": "style: rename 'Dados do perfil' to 'Minha Conta' for consistency"
-    },
-    {
-      "hash": "1f45ce92d53093cdbccc2d0a8bdb4520377a5dec",
-      "shortHash": "1f45ce92",
-      "dateIso": "2026-04-07T13:40:03-03:00",
-      "subject": "feat(privacy): add account deactivation to menu and update policy for google play"
-    },
-    {
-      "hash": "c5463a8e9f014d6e36d800928a74181d38c9b7e5",
-      "shortHash": "c5463a8e",
-      "dateIso": "2026-04-07T12:43:45-03:00",
-      "subject": "fix: remove unused variable to fix production build"
-    },
-    {
-      "hash": "c97af1b4545a790a43f8d1f9e075e4739224b8a2",
-      "shortHash": "c97af1b4",
-      "dateIso": "2026-04-07T12:38:23-03:00",
-      "subject": "fix(mobile): force non-www domain for assets to prevent 404 in apk"
-    },
-    {
-      "hash": "474fabc4bfc439faf76dd53a6ffd0e69e3e20caa",
-      "shortHash": "474fabc4",
-      "dateIso": "2026-04-07T12:27:22-03:00",
-      "subject": "debug(mobile): add logs to investigate hub store image issues in apk"
-    },
-    {
-      "hash": "0feebe317cf8ff61ee304a622f1e4350be4ceef1",
-      "shortHash": "0feebe31",
-      "dateIso": "2026-04-07T12:20:26-03:00",
-      "subject": "fix(mobile): force https and resolve domain for assets in apk"
-    },
-    {
-      "hash": "90c048983023b9a99932fc35046a285c2bb73e1d",
-      "shortHash": "90c04898",
-      "dateIso": "2026-04-07T12:15:05-03:00",
-      "subject": "fix(mobile): robust asset url resolution for apk and webview"
-    },
-    {
-      "hash": "457b2f3d7e0a2946c05e5c97d7178965067766a3",
-      "shortHash": "457b2f3d",
-      "dateIso": "2026-04-07T11:39:44-03:00",
-      "subject": "fix(mobile): force exact naked domain for images based on web logs"
-    },
-    {
-      "hash": "f36eced11e56c4d611bd57bbe9f5b0ce89ba823d",
-      "shortHash": "f36eced1",
-      "dateIso": "2026-04-07T11:10:40-03:00",
-      "subject": "fix(mobile): update image resolution to use www domain as fallback"
-    },
-    {
-      "hash": "d6dc4a2ed4eb6aafe900aaaf13c70f81dce47c4d",
-      "shortHash": "d6dc4a2e",
-      "dateIso": "2026-04-07T10:53:26-03:00",
-      "subject": "fix(mobile): robust image mapping and absolute URL fallback"
-    },
-    {
-      "hash": "305c459c25f319334afa140d0a22f1a5f8bfbc82",
-      "shortHash": "305c459c",
-      "dateIso": "2026-04-07T10:51:23-03:00",
-      "subject": "fix(mobile): robust store logo mapping and absolute URL fallback"
-    },
-    {
-      "hash": "7d4f17197d26a5cdf095f8d4bb0c7b338607ecb4",
-      "shortHash": "7d4f1719",
-      "dateIso": "2026-04-07T10:43:39-03:00",
-      "subject": "chore: ignore APK files in git"
-    },
-    {
-      "hash": "57b9be5b02fc3965cddbea390b60e8f06bca38d2",
-      "shortHash": "57b9be5b",
-      "dateIso": "2026-04-07T10:42:05-03:00",
-      "subject": "fix(mobile): force absolute image URLs and fix adaptive icon persistence"
-    },
-    {
-      "hash": "e96fd9203c2549a25361b35c2bc01a4f43ed7215",
-      "shortHash": "e96fd920",
-      "dateIso": "2026-04-07T10:15:48-03:00",
-      "subject": "fix(frontend): remove unused React import and finalize icons"
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(ui): replace native prompts with modern ConfirmationModal and standardize menu labels",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5f4f3ce2afc9bb47c23047fc4581c9a4652c9a0b"
     }
   ]
 } as const;

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MagnifyingGlass, Star, Storefront, House, List, CaretDown, Heart, CaretRight } from '@phosphor-icons/react';
+import { MagnifyingGlass, Star, Storefront, House, List, CaretDown, Heart, CaretRight, X } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
@@ -143,6 +143,8 @@ const readCustomerSession = () => {
 };
 
 const FAVORITES_STORAGE_KEY = 'hub:favorites:stores';
+const DISMISSED_CUSTOMER_ORDERS_KEY = 'hub:dismissed-customer-orders';
+const DISMISSED_ANONYMOUS_ORDERS_KEY = 'hub:dismissed-anonymous-orders';
 const DEFAULT_STORE_LOGO = '/janocaminho.jpg';
 const ORDER_EXPIRATION_MS = 3 * 60 * 60 * 1000; // 3 horas
 
@@ -213,6 +215,24 @@ export function MarketplacePage() {
   const [distanceByStore, setDistanceByStore] = useState<Record<string, number>>({});
   const [distanceLoading, setDistanceLoading] = useState(false);
   const [activeAnonymousOrders, setActiveAnonymousOrders] = useState<ActiveAnonymousOrder[]>([]);
+  const [dismissedCustomerOrderIds, setDismissedCustomerOrderIds] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem(DISMISSED_CUSTOMER_ORDERS_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed.map((item) => String(item || '').trim()).filter(Boolean) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [dismissedAnonymousOrderIds, setDismissedAnonymousOrderIds] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem(DISMISSED_ANONYMOUS_ORDERS_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed.map((item) => String(item || '').trim()).filter(Boolean) : [];
+    } catch {
+      return [];
+    }
+  });
   const [favoriteStoreSlugs, setFavoriteStoreSlugs] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
@@ -323,6 +343,22 @@ export function MarketplacePage() {
       // ignore
     }
   }, [favoriteStoreSlugs]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(DISMISSED_CUSTOMER_ORDERS_KEY, JSON.stringify(dismissedCustomerOrderIds));
+    } catch {
+      // ignore
+    }
+  }, [dismissedCustomerOrderIds]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(DISMISSED_ANONYMOUS_ORDERS_KEY, JSON.stringify(dismissedAnonymousOrderIds));
+    } catch {
+      // ignore
+    }
+  }, [dismissedAnonymousOrderIds]);
 
   useEffect(() => {
     let cancelled = false;
@@ -891,6 +927,16 @@ export function MarketplacePage() {
 
   const [activeOrders, setActiveOrders] = useState<any[]>([]);
 
+  const visibleActiveOrders = useMemo(
+    () => activeOrders.filter((order) => !dismissedCustomerOrderIds.includes(String(order?.id || '').trim())),
+    [activeOrders, dismissedCustomerOrderIds]
+  );
+
+  const visibleActiveAnonymousOrders = useMemo(
+    () => activeAnonymousOrders.filter((order) => !dismissedAnonymousOrderIds.includes(String(order?.id || '').trim())),
+    [activeAnonymousOrders, dismissedAnonymousOrderIds]
+  );
+
   const loadActiveOrders = useCallback(async () => {
     const session = readCustomerSession();
     if (!session?.token) {
@@ -914,6 +960,16 @@ export function MarketplacePage() {
     const interval = window.setInterval(loadActiveOrders, 30000);
     return () => window.clearInterval(interval);
   }, [loadActiveOrders]);
+
+  useEffect(() => {
+    const activeIds = activeOrders.map((order) => String(order?.id || '').trim()).filter(Boolean);
+    setDismissedCustomerOrderIds((prev) => prev.filter((id) => activeIds.includes(id)));
+  }, [activeOrders]);
+
+  useEffect(() => {
+    const activeIds = activeAnonymousOrders.map((order) => String(order?.id || '').trim()).filter(Boolean);
+    setDismissedAnonymousOrderIds((prev) => prev.filter((id) => activeIds.includes(id)));
+  }, [activeAnonymousOrders]);
 
   useEffect(() => {
     const raf = window.requestAnimationFrame(() => setHasEntered(true));
@@ -1055,23 +1111,32 @@ export function MarketplacePage() {
 
         <main className="max-w-[1200px] mx-auto px-4 pt-5 space-y-8">
           {/* Acompanhamento de Pedidos (Logados ou Anônimos Cache) */}
-          {(isCustomerLogged && activeOrders.length > 0) ? (
+          {(isCustomerLogged && visibleActiveOrders.length > 0) ? (
             <div className="animate-in fade-in slide-in-from-top-4 duration-500">
               <div className="relative overflow-hidden rounded-[2.5rem] border border-emerald-200/50 bg-emerald-50/90 backdrop-blur-md p-5 shadow-[0_20px_40px_-15px_rgba(16,185,129,0.2)]">
                 <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-emerald-200/20 blur-2xl" />
+                <button
+                  type="button"
+                  onClick={() => setDismissedCustomerOrderIds((prev) => Array.from(new Set([ ...prev, ...visibleActiveOrders.map((order) => String(order?.id || '').trim()).filter(Boolean) ])))}
+                  className="absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200 bg-white/80 text-emerald-700 shadow-sm transition-colors hover:bg-white"
+                  aria-label="Fechar aviso de pedidos em andamento"
+                  title="Fechar aviso"
+                >
+                  <X size={14} weight="bold" />
+                </button>
                 <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2">
                       <span className="relative flex h-2.5 w-2.5">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                       </span>
                       <span className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-700">
-                        {activeOrders.length === 1 ? 'Pedido em Andamento' : 'Pedidos em Andamento'}
+                        {visibleActiveOrders.length === 1 ? 'Pedido em Andamento' : 'Pedidos em Andamento'}
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {activeOrders.map((order) => (
+                      {visibleActiveOrders.map((order) => (
                         <button
                           key={order.id}
                           onClick={() => navigate(`/pedido/${order.id}`)}
@@ -1104,10 +1169,19 @@ export function MarketplacePage() {
                 </div>
               </div>
             </div>
-          ) : (!isCustomerLogged && activeAnonymousOrders.length > 0) && (
+          ) : (!isCustomerLogged && visibleActiveAnonymousOrders.length > 0) && (
             <div className="animate-in fade-in slide-in-from-top-4 duration-500">
               <div className="relative overflow-hidden rounded-[2.5rem] border border-amber-200/50 bg-amber-50/90 backdrop-blur-md p-5 shadow-[0_20px_40px_-15px_rgba(245,158,11,0.15)]">
                 <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-amber-200/20 blur-2xl" />
+                <button
+                  type="button"
+                  onClick={() => setDismissedAnonymousOrderIds((prev) => Array.from(new Set([ ...prev, ...visibleActiveAnonymousOrders.map((order) => String(order?.id || '').trim()).filter(Boolean) ])))}
+                  className="absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full border border-amber-200 bg-white/80 text-amber-700 shadow-sm transition-colors hover:bg-white"
+                  aria-label="Fechar aviso de pedido em andamento"
+                  title="Fechar aviso"
+                >
+                  <X size={14} weight="bold" />
+                </button>
                 <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2">
@@ -1120,7 +1194,7 @@ export function MarketplacePage() {
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {activeAnonymousOrders.map((order) => (
+                      {visibleActiveAnonymousOrders.map((order) => (
                         <button
                           key={order.id}
                           onClick={() =>
@@ -1152,9 +1226,9 @@ export function MarketplacePage() {
                       type="button"
                       onClick={() =>
                         navigate(
-                          activeAnonymousOrders[0]?.accessToken
-                            ? `/pedido/${activeAnonymousOrders[0].id}?ot=${encodeURIComponent(activeAnonymousOrders[0].accessToken)}`
-                            : `/pedido/${activeAnonymousOrders[0].id}`
+                          visibleActiveAnonymousOrders[0]?.accessToken
+                            ? `/pedido/${visibleActiveAnonymousOrders[0].id}?ot=${encodeURIComponent(visibleActiveAnonymousOrders[0].accessToken)}`
+                            : `/pedido/${visibleActiveAnonymousOrders[0].id}`
                         )
                       }
                       className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-black text-white shadow-[0_14px_28px_-16px_rgba(245,158,11,0.55)] transition-all hover:bg-amber-600 active:scale-95"
@@ -1163,7 +1237,7 @@ export function MarketplacePage() {
                       <CaretRight size={15} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
                     </button>
                     <p className="text-[10px] font-bold text-amber-600/70 italic">
-                      Disponível por 5 horas neste navegador
+                      Disponível por 3 horas neste navegador
                     </p>
                   </div>
                 </div>
@@ -1175,7 +1249,7 @@ export function MarketplacePage() {
             className="animate-in fade-in slide-in-from-top-4 duration-500"
             style={{ animationDelay: '80ms' }}
           >
-            <SegmentPromoCarousel mode="hub" />
+            <SegmentPromoCarousel mode="hub" className="mx-1" />
           </div>
 
           {/* Seção Categorias Premium Squircle */}
