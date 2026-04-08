@@ -14,7 +14,7 @@ import { SuccessView } from '../components/Client/SuccessView';
 import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { useToast } from '../contexts/ToastContext';
-import { formatCurrency, formatOrderDisplayId, formatOrderType, formatPaymentMethod } from '../utils/format';
+import { formatCurrency, formatOrderDisplayId, formatOrderStatus, formatOrderType, formatPaymentMethod } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getPersistedBranding, brandingStorageKey, defaultBranding, initialCustomer, defaultPaymentMethod, WHATSAPP_NUMBER, PIX_KEY } from '../constants';
 import { isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
@@ -28,6 +28,23 @@ import { getCartPricing } from '../utils/orderPricing';
 import { printReceiptAsImage } from '../utils/printReceiptImage';
 
 const WEEKDAY_LABELS = [ 'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado' ];
+
+const getOrderStatusTone = (status?: string) => {
+  const normalized = String(status || '').trim().toLowerCase();
+  const tones: Record<string, string> = {
+    pending: 'bg-amber-100 text-amber-700 border-amber-200',
+    preparing: 'bg-sky-100 text-sky-700 border-sky-200',
+    ready: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    ready_for_delivery: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    waiting_for_motoboy: 'bg-violet-100 text-violet-700 border-violet-200',
+    in_delivery: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+    dispatched: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+    delivered: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    finished: 'bg-slate-100 text-slate-700 border-slate-200',
+    cancelled: 'bg-rose-100 text-rose-700 border-rose-200',
+  };
+  return tones[normalized] || 'bg-slate-100 text-slate-700 border-slate-200';
+};
 
 export function StorePage() {
   const { storeSlug } = useParams();
@@ -2225,9 +2242,18 @@ export function StorePage() {
                     <p className="truncate text-[11px] font-black uppercase tracking-[0.2em] text-emerald-700">
                       Pedido em andamento
                     </p>
-                    <p className="truncate text-sm font-black text-slate-900">
-                      #{formatOrderDisplayId(recentPublicOrders[0]?.id, storeSlug)}
-                    </p>
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                      <p className="truncate text-sm font-black text-slate-900">
+                        #{formatOrderDisplayId(recentPublicOrders[0]?.id, storeSlug)}
+                      </p>
+                      <span
+                        className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] ${
+                          getOrderStatusTone(recentPublicOrders[0]?.status)
+                        }`}
+                      >
+                        {formatOrderStatus(recentPublicOrders[0]?.status, recentPublicOrders[0]?.type)}
+                      </span>
+                    </div>
                   </div>
                 </button>
                 <button

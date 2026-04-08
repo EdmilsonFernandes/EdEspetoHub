@@ -8,6 +8,7 @@ import { featuredService } from '../services/featuredService';
 import { mapsService } from '../services/mapsService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
+import { formatOrderStatus } from '../utils/format';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { HeaderAvatarTrigger } from '../components/Marketplace/HeaderAvatarTrigger';
 import { ProfileDrawer } from '../components/Marketplace/ProfileDrawer';
@@ -142,6 +143,23 @@ const readCustomerSession = () => {
 const FAVORITES_STORAGE_KEY = 'hub:favorites:stores';
 const DEFAULT_STORE_LOGO = '/janocaminho.jpg';
 const ORDER_EXPIRATION_MS = 5 * 60 * 60 * 1000; // 5 horas
+
+const getOrderStatusTone = (status?: string) => {
+  const normalized = String(status || '').trim().toLowerCase();
+  const tones: Record<string, string> = {
+    pending: 'bg-amber-100 text-amber-700 ring-1 ring-amber-200',
+    preparing: 'bg-sky-100 text-sky-700 ring-1 ring-sky-200',
+    ready: 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200',
+    ready_for_delivery: 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200',
+    waiting_for_motoboy: 'bg-violet-100 text-violet-700 ring-1 ring-violet-200',
+    in_delivery: 'bg-indigo-100 text-indigo-700 ring-1 ring-indigo-200',
+    dispatched: 'bg-indigo-100 text-indigo-700 ring-1 ring-indigo-200',
+    delivered: 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200',
+    finished: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+    cancelled: 'bg-rose-100 text-rose-700 ring-1 ring-rose-200',
+  };
+  return tones[normalized] || 'bg-slate-100 text-slate-700 ring-1 ring-slate-200';
+};
 
 // Interface para pedidos em andamento (cache anônimo)
 type ActiveAnonymousOrder = {
@@ -1012,9 +1030,21 @@ export function MarketplacePage() {
                         <button
                           key={order.id}
                           onClick={() => navigate(`/pedido/${order.id}`)}
-                          className="rounded-xl bg-white px-3 py-2 text-[11px] font-bold text-emerald-900 border border-emerald-100 shadow-sm active:scale-95"
+                          className="min-w-[210px] rounded-[1.4rem] border border-white/70 bg-white/95 px-3.5 py-3 text-left shadow-[0_12px_26px_-18px_rgba(16,185,129,0.35)] transition-all active:scale-95"
                         >
-                          #{String(order.id).slice(-6).toUpperCase()} • {order.store?.name}
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="truncate text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
+                                {order.store?.name || 'Loja'}
+                              </p>
+                              <p className="mt-1 text-sm font-black text-slate-900">
+                                #{String(order.id).slice(-6).toUpperCase()}
+                              </p>
+                            </div>
+                            <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] ${getOrderStatusTone(order.status)}`}>
+                              {formatOrderStatus(order.status, order.type)}
+                            </span>
+                          </div>
                         </button>
                       ))}
                     </div>
@@ -1055,9 +1085,19 @@ export function MarketplacePage() {
                                 : `/pedido/${order.id}`
                             )
                           }
-                          className="rounded-xl bg-white px-3 py-2 text-[11px] font-bold text-amber-900 border border-amber-100 shadow-sm active:scale-95"
+                          className="min-w-[180px] rounded-[1.4rem] border border-white/70 bg-white/95 px-3.5 py-3 text-left shadow-[0_12px_26px_-18px_rgba(245,158,11,0.28)] transition-all active:scale-95"
                         >
-                          #{String(order.id).slice(-6).toUpperCase()}
+                          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
+                            Pedido salvo
+                          </p>
+                          <div className="mt-1 flex items-center justify-between gap-3">
+                            <p className="text-sm font-black text-slate-900">
+                              #{String(order.id).slice(-6).toUpperCase()}
+                            </p>
+                            <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-amber-700 ring-1 ring-amber-200">
+                              Em andamento
+                            </span>
+                          </div>
                         </button>
                       ))}
                     </div>
