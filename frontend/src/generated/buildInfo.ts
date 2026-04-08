@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260408.210354.c15b310b",
-  "buildId": "0.1.9+20260408.210354.c15b310b-20260408.210354-c15b310b",
-  "builtAt": "2026-04-08T21:03:54.209Z",
-  "commitHash": "c15b310b83808bb9262ec117e70bd10054d5ce84",
-  "shortHash": "c15b310b",
+  "versionInternal": "0.1.9+20260408.211114.c06233ae",
+  "buildId": "0.1.9+20260408.211114.c06233ae-20260408.211114-c06233ae",
+  "builtAt": "2026-04-08T21:11:14.874Z",
+  "commitHash": "c06233aee3602877580520e556a0e94c5f62cc78",
+  "shortHash": "c06233ae",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "c06233aee3602877580520e556a0e94c5f62cc78",
+      "shortHash": "c06233ae",
+      "dateIso": "2026-04-08T18:05:39-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(hub): simplify promo banner and tighten mobile chrome spacing",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c06233aee3602877580520e556a0e94c5f62cc78"
+    },
     {
       "hash": "c15b310b83808bb9262ec117e70bd10054d5ce84",
       "shortHash": "c15b310b",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(performance): remove unused orders polling logic and clean up MarketplacePage",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/693c26dafbefe562fbb0901304f4ffc2235a0674"
-    },
-    {
-      "hash": "52ebcfd74b74cfc54025e8690fc1b75c621a390f",
-      "shortHash": "52ebcfd7",
-      "dateIso": "2026-04-07T17:56:52-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(cleanup): remove active orders polling and fix build errors",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/52ebcfd74b74cfc54025e8690fc1b75c621a390f"
     }
   ]
 } as const;

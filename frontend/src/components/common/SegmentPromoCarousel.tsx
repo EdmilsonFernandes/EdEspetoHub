@@ -51,15 +51,19 @@ export function SegmentPromoCarousel({
     >
       <div className={`relative ${compact ? 'aspect-[16/8.6]' : 'aspect-[16/7.6] sm:aspect-[16/7.4]'}`}>
         {PROMO_SLIDES.map((slide, index) => (
-          <img
+          <div
             key={slide.id}
-            src={slide.image}
-            alt={slide.imageAlt}
-            loading="lazy"
-            className={`absolute inset-0 h-full w-full object-cover object-center transition-all duration-700 ${
+            className={`absolute inset-0 flex items-center justify-center bg-slate-950/4 transition-all duration-700 ${
               index === activeIndex ? 'opacity-100' : 'pointer-events-none opacity-0'
             }`}
-          />
+          >
+            <img
+              src={slide.image}
+              alt={slide.imageAlt}
+              loading="lazy"
+              className="h-full w-full object-contain object-center"
+            />
+          </div>
         ))}
       </div>
 
