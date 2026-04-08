@@ -1098,7 +1098,7 @@ export function MarketplacePage() {
             </div>
 
             {/* Linha 3: Filtros Minimalistas (Pílulas) */}
-            <div className="-mx-4 flex overflow-x-auto no-scrollbar scrollbar-hide gap-2 px-4 py-1 mb-4">
+            <div className="flex overflow-x-auto no-scrollbar scrollbar-hide gap-2 px-0 py-1 mb-4">
               {['all', 'free_shipping', 'nearby', 'open_now', 'favorites'].map((filter) => {
                 const label =
                   filter === 'all' ? 'Ver Todos' :
@@ -1111,7 +1111,7 @@ export function MarketplacePage() {
                     key={filter}
                     type="button"
                     onClick={() => setQuickFilter(filter as any)}
-                    className={`whitespace-nowrap rounded-full px-4 py-2 text-sm transition-all active:scale-95 ${
+                    className={`whitespace-nowrap rounded-full px-3.5 py-1.5 text-[13px] transition-all active:scale-95 ${
                       active
                         ? 'bg-slate-900 text-white shadow-md font-semibold'
                         : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 font-medium'
@@ -1129,7 +1129,7 @@ export function MarketplacePage() {
                   setSegmentFilter('all');
                   setQuickFilter('all');
                 }}
-                className="whitespace-nowrap rounded-full bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 px-4 py-2 text-sm font-medium transition-colors"
+                className="whitespace-nowrap rounded-full bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 px-3.5 py-1.5 text-[13px] font-medium transition-colors"
               >
                 Limpar
               </button>
@@ -1305,18 +1305,18 @@ export function MarketplacePage() {
 
           {/* Seção Categorias Premium Squircle */}
           <section className="relative mb-8" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
-            <div className="-mx-4 flex overflow-x-auto no-scrollbar gap-4 px-4 mb-8 py-1 snap-x snap-mandatory">
+            <div className="-mx-4 flex overflow-x-auto no-scrollbar gap-3 px-4 mb-8 py-1 snap-x snap-mandatory">
               <button
                 type="button"
-                className="flex min-w-[72px] shrink-0 snap-start cursor-pointer flex-col items-center gap-2 group"
+                className="flex min-w-[66px] shrink-0 snap-start cursor-pointer flex-col items-center gap-1.5 group"
                 onClick={() => setSegmentFilter('all')}
               >
-                <div className={`flex h-16 w-16 items-center justify-center rounded-[20px] transition-all duration-200 ${
+                <div className={`flex h-14 w-14 items-center justify-center rounded-[18px] transition-all duration-200 ${
                   segmentFilter === 'all' ? 'bg-slate-900 shadow-lg scale-105' : 'bg-slate-50 border border-slate-100 shadow-sm group-hover:bg-slate-100'
                 }`}>
-                  <List size={24} weight="duotone" className={segmentFilter === 'all' ? 'text-white scale-[0.95]' : 'text-slate-500'} />
+                  <List size={21} weight="duotone" className={segmentFilter === 'all' ? 'text-white scale-[0.95]' : 'text-slate-500'} />
                 </div>
-                <span className={`text-center text-[11px] font-semibold uppercase tracking-wide transition-colors ${
+                <span className={`text-center text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors ${
                   segmentFilter === 'all' ? 'text-slate-900' : 'text-slate-500'
                 }`}>Todos</span>
               </button>
@@ -1327,15 +1327,15 @@ export function MarketplacePage() {
                   <button
                     key={`${item.label}-${index}`}
                     type="button"
-                    className="flex min-w-[72px] shrink-0 snap-start cursor-pointer flex-col items-center gap-2 group"
+                    className="flex min-w-[66px] shrink-0 snap-start cursor-pointer flex-col items-center gap-1.5 group"
                     onClick={() => setSegmentFilter(prev => prev === item.label ? 'all' : item.label)}
                   >
-                    <div className={`flex h-16 w-16 items-center justify-center rounded-[20px] transition-all duration-200 ${
+                    <div className={`flex h-14 w-14 items-center justify-center rounded-[18px] transition-all duration-200 ${
                       active ? 'bg-slate-900 shadow-lg scale-105' : 'bg-slate-50 border border-slate-100 shadow-sm group-hover:bg-slate-100'
                     }`}>
-                      <span className={`text-[28px] transition-all duration-200 ${active ? 'scale-[0.94]' : 'group-hover:scale-105'}`}>{item.emoji}</span>
+                      <span className={`text-[24px] transition-all duration-200 ${active ? 'scale-[0.94]' : 'group-hover:scale-105'}`}>{item.emoji}</span>
                     </div>
-                    <span className={`text-center text-[11px] font-semibold uppercase tracking-wide transition-colors ${
+                    <span className={`text-center text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors ${
                       active ? 'text-slate-900' : 'text-slate-500'
                     }`}>{item.label}</span>
                   </button>

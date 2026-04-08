@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260408.213501.9d6fcc18",
-  "buildId": "0.1.9+20260408.213501.9d6fcc18-20260408.213501-9d6fcc18",
-  "builtAt": "2026-04-08T21:35:01.667Z",
-  "commitHash": "9d6fcc183845bf66abd337b8d1f938252e53e77d",
-  "shortHash": "9d6fcc18",
+  "versionInternal": "0.1.9+20260408.214529.17e9ee6d",
+  "buildId": "0.1.9+20260408.214529.17e9ee6d-20260408.214529-17e9ee6d",
+  "builtAt": "2026-04-08T21:45:29.347Z",
+  "commitHash": "17e9ee6d45f886f0c351bd347657e291a96bbe2a",
+  "shortHash": "17e9ee6d",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "17e9ee6d45f886f0c351bd347657e291a96bbe2a",
+      "shortHash": "17e9ee6d",
+      "dateIso": "2026-04-08T18:35:56-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(hub): refine filter pills and category chips",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/17e9ee6d45f886f0c351bd347657e291a96bbe2a"
+    },
     {
       "hash": "9d6fcc183845bf66abd337b8d1f938252e53e77d",
       "shortHash": "9d6fcc18",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "infra: mark uploads volume as external in prod to prevent data loss on rebuild",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d96844ffb36747f6c8d53da3e7b59c3d0185e15b"
-    },
-    {
-      "hash": "a311e419690e3a77727294d10b20945e2cdef29f",
-      "shortHash": "a311e419",
-      "dateIso": "2026-04-08T12:01:26-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "infra: change api uploads to named volume for better persistence",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a311e419690e3a77727294d10b20945e2cdef29f"
     }
   ]
 } as const;
