@@ -1098,7 +1098,7 @@ export function MarketplacePage() {
             </div>
 
             {/* Linha 3: Filtros Minimalistas (Pílulas) */}
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar scrollbar-hide pb-1">
+            <div className="-mx-4 flex overflow-x-auto no-scrollbar scrollbar-hide gap-2 px-4 py-1 mb-4">
               {['all', 'free_shipping', 'nearby', 'open_now', 'favorites'].map((filter) => {
                 const label =
                   filter === 'all' ? 'Ver Todos' :
@@ -1111,10 +1111,10 @@ export function MarketplacePage() {
                     key={filter}
                     type="button"
                     onClick={() => setQuickFilter(filter as any)}
-                    className={`rounded-full border px-5 py-2 text-[11px] font-black uppercase tracking-widest whitespace-nowrap transition-all active:scale-95 ${
+                    className={`whitespace-nowrap rounded-full px-4 py-2 text-sm transition-all active:scale-95 ${
                       active
-                        ? 'border-slate-900 bg-slate-900 text-white shadow-md'
-                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300'
+                        ? 'bg-slate-900 text-white shadow-md font-semibold'
+                        : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 font-medium'
                     }`}
                   >
                     {label}
@@ -1129,7 +1129,7 @@ export function MarketplacePage() {
                   setSegmentFilter('all');
                   setQuickFilter('all');
                 }}
-                className="rounded-full border border-slate-200 bg-white px-5 py-2 text-[11px] font-black uppercase tracking-widest whitespace-nowrap text-slate-600 hover:bg-slate-50 hover:border-slate-300"
+                className="whitespace-nowrap rounded-full bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 px-4 py-2 text-sm font-medium transition-colors"
               >
                 Limpar
               </button>
@@ -1304,20 +1304,20 @@ export function MarketplacePage() {
           </div>
 
           {/* Seção Categorias Premium Squircle */}
-          <section className="relative px-1 mb-8" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
-            <div className="flex items-center gap-5 overflow-x-auto no-scrollbar py-2 snap-x snap-mandatory">
+          <section className="relative mb-8" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
+            <div className="-mx-4 flex overflow-x-auto no-scrollbar gap-4 px-4 mb-8 py-1 snap-x snap-mandatory">
               <button
                 type="button"
-                className="flex-shrink-0 snap-start group"
+                className="flex min-w-[72px] shrink-0 snap-start cursor-pointer flex-col items-center gap-2 group"
                 onClick={() => setSegmentFilter('all')}
               >
-                <div className={`mx-auto flex h-16 w-16 items-center justify-center rounded-[1.5rem] border-2 transition-all duration-500 ${
-                  segmentFilter === 'all' ? 'border-sky-500 bg-sky-50 shadow-2xl shadow-sky-500/20 -translate-y-1' : 'border-white bg-white shadow-[0_8px_20px_-10px_rgba(0,0,0,0.1)]'
+                <div className={`flex h-16 w-16 items-center justify-center rounded-[20px] transition-all duration-200 ${
+                  segmentFilter === 'all' ? 'bg-slate-900 shadow-lg scale-105' : 'bg-slate-50 border border-slate-100 shadow-sm group-hover:bg-slate-100'
                 }`}>
-                  <List size={28} weight="duotone" className={segmentFilter === 'all' ? 'text-sky-600' : 'text-slate-400'} />
+                  <List size={24} weight="duotone" className={segmentFilter === 'all' ? 'text-white scale-[0.95]' : 'text-slate-500'} />
                 </div>
-                <span className={`mt-3 block text-center text-[10px] font-black uppercase tracking-[0.15em] ${
-                  segmentFilter === 'all' ? 'text-slate-900' : 'text-slate-400'
+                <span className={`text-center text-[11px] font-semibold uppercase tracking-wide transition-colors ${
+                  segmentFilter === 'all' ? 'text-slate-900' : 'text-slate-500'
                 }`}>Todos</span>
               </button>
               
@@ -1327,16 +1327,16 @@ export function MarketplacePage() {
                   <button
                     key={`${item.label}-${index}`}
                     type="button"
-                    className="flex-shrink-0 snap-start group"
+                    className="flex min-w-[72px] shrink-0 snap-start cursor-pointer flex-col items-center gap-2 group"
                     onClick={() => setSegmentFilter(prev => prev === item.label ? 'all' : item.label)}
                   >
-                    <div className={`mx-auto flex h-16 w-16 items-center justify-center rounded-[1.5rem] border-2 transition-all duration-500 ${
-                      active ? 'border-sky-500 bg-sky-50 shadow-2xl shadow-sky-500/20 -translate-y-1' : 'border-white bg-white shadow-[0_8px_20px_-10px_rgba(0,0,0,0.1)]'
+                    <div className={`flex h-16 w-16 items-center justify-center rounded-[20px] transition-all duration-200 ${
+                      active ? 'bg-slate-900 shadow-lg scale-105' : 'bg-slate-50 border border-slate-100 shadow-sm group-hover:bg-slate-100'
                     }`}>
-                      <span className="text-3xl transition-transform duration-500 group-hover:scale-110">{item.emoji}</span>
+                      <span className={`text-[28px] transition-all duration-200 ${active ? 'scale-[0.94]' : 'group-hover:scale-105'}`}>{item.emoji}</span>
                     </div>
-                    <span className={`mt-3 block text-center text-[10px] font-black uppercase tracking-[0.15em] ${
-                      active ? 'text-slate-900' : 'text-slate-400'
+                    <span className={`text-center text-[11px] font-semibold uppercase tracking-wide transition-colors ${
+                      active ? 'text-slate-900' : 'text-slate-500'
                     }`}>{item.label}</span>
                   </button>
                 );

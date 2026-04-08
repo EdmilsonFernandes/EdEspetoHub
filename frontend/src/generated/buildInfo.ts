@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260408.213127.341965c9",
-  "buildId": "0.1.9+20260408.213127.341965c9-20260408.213127-341965c9",
-  "builtAt": "2026-04-08T21:31:27.898Z",
-  "commitHash": "341965c9212e6ce9b0c39548b960c87084b0a635",
-  "shortHash": "341965c9",
+  "versionInternal": "0.1.9+20260408.213501.9d6fcc18",
+  "buildId": "0.1.9+20260408.213501.9d6fcc18-20260408.213501-9d6fcc18",
+  "builtAt": "2026-04-08T21:35:01.667Z",
+  "commitHash": "9d6fcc183845bf66abd337b8d1f938252e53e77d",
+  "shortHash": "9d6fcc18",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "9d6fcc183845bf66abd337b8d1f938252e53e77d",
+      "shortHash": "9d6fcc18",
+      "dateIso": "2026-04-08T18:32:32-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(hub): further reduce promo and featured highlights",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9d6fcc183845bf66abd337b8d1f938252e53e77d"
+    },
     {
       "hash": "341965c9212e6ce9b0c39548b960c87084b0a635",
       "shortHash": "341965c9",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "infra: change api uploads to named volume for better persistence",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a311e419690e3a77727294d10b20945e2cdef29f"
-    },
-    {
-      "hash": "22fe39920b9602aae4eb42342476eee49ba77c93",
-      "shortHash": "22fe3992",
-      "dateIso": "2026-04-07T20:04:02-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(build): add missing import of resolveAssetUrl in LandingPage.tsx",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/22fe39920b9602aae4eb42342476eee49ba77c93"
     }
   ]
 } as const;
