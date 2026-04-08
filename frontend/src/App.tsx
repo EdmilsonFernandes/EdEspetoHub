@@ -34,6 +34,7 @@ function App() {
             <Route path="/cliente/login" element={<Navigate to="/cliente?mode=login" replace />} />
             <Route path="/cliente/cadastro" element={<Navigate to="/cliente?mode=register" replace />} />
             <Route path="/cliente/conta" element={<ClientAccount />} />
+            <Route path="/cliente/pedidos" element={<ClientOrders />} />
             <Route path="/cliente/enderecos" element={<AddressDistance />} />
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

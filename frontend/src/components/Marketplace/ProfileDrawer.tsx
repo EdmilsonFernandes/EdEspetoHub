@@ -4,7 +4,6 @@ import {
   BellSimple,
   CookingPot,
   Lifebuoy,
-  ShieldCheck,
   SignOut,
   Truck,
   UserCircle,
@@ -35,8 +34,9 @@ type ProfileDrawerProps = {
   onOpenAdminLogin: () => void;
   onOpenMotoboyLogin: () => void;
   onOpenAccount: () => void;
-  onOpenOrders: () => void;
+  onOpenOrders?: () => void;
   onOpenTerms: () => void;
+  onOpenPrivacy: () => void;
   onOpenHelp: () => void;
   onLogout: () => void;
   onDeactivateAccount: () => void; // Nova prop
@@ -56,6 +56,7 @@ export function ProfileDrawer({
   onOpenAccount,
   onOpenOrders,
   onOpenTerms,
+  onOpenPrivacy,
   onOpenHelp,
   onLogout,
   onDeactivateAccount, // Nova prop
@@ -98,15 +99,17 @@ export function ProfileDrawer({
   const actions: DrawerAction[] = isLogged
     ? [
         { id: 'account', label: 'Minha Conta', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-sky-600', bgColor: 'bg-sky-50' },
-        { id: 'orders', label: 'Meus pedidos', icon: <BellSimple size={22} weight="duotone" />, onClick: onOpenOrders, iconColor: 'text-amber-600', bgColor: 'bg-amber-50' },
-        { id: 'terms', label: 'Termos e Privacidade', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
+        { id: 'orders', label: 'Meus pedidos', icon: <BellSimple size={22} weight="duotone" />, onClick: onOpenOrders || onOpenAccount, iconColor: 'text-amber-600', bgColor: 'bg-amber-50' },
+        { id: 'terms', label: 'Termos de Uso', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
+        { id: 'privacy', label: 'Privacidade', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenPrivacy, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
         { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={22} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
-        { id: 'deactivate', label: 'Excluir conta', icon: <SignOut size={22} weight="danger" />, onClick: onDeactivateAccount, tone: 'danger' },
+        { id: 'deactivate', label: 'Excluir conta', icon: <SignOut size={22} weight="duotone" />, onClick: onDeactivateAccount, tone: 'danger' },
         { id: 'logout', label: 'Sair da conta', icon: <SignOut size={22} weight="duotone" />, onClick: onLogout, tone: 'danger' },
       ]
     : [
         { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={22} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
-        { id: 'terms', label: 'Termos e Privacidade', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
+        { id: 'terms', label: 'Termos de Uso', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
+        { id: 'privacy', label: 'Privacidade', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenPrivacy, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
       ];
 
   return (

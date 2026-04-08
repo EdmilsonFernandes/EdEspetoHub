@@ -31,6 +31,7 @@ export { ArchitecturePage } from './ArchitecturePage';
 export { InstallAppPage } from './InstallAppPage';
 export { ClientAuth } from './ClientAuth';
 export { ClientAccount } from './ClientAccount';
+export { ClientOrders } from './ClientOrders';
 export { MarketplacePage } from './MarketplacePage';
 export { AdminHighlights } from './AdminHighlights';
 export { SuperAdminHighlights } from './SuperAdminHighlights';
