@@ -150,6 +150,7 @@ type ActiveAnonymousOrder = {
   createdAt: number;
   status?: string;
   storeName?: string;
+  accessToken?: string;
 };
 
 export function MarketplacePage() {
@@ -222,10 +223,16 @@ export function MarketplacePage() {
               parsed.forEach(order => {
                 const createdAt = Number(order.createdAt || 0);
                 if (createdAt && now - createdAt < ORDER_EXPIRATION_MS) {
+                  const orderId = String(order?.id || '').trim();
+                  if (!orderId) return;
+                  const persistedAccessToken = String(
+                    order?.accessToken || localStorage.getItem(`orderAccess:${orderId}`) || ''
+                  ).trim();
                   found.push({
-                    id: order.id,
+                    id: orderId,
                     storeSlug: slug,
-                    createdAt: createdAt
+                    createdAt,
+                    accessToken: persistedAccessToken || undefined,
                   });
                 }
               });
@@ -1034,14 +1041,20 @@ export function MarketplacePage() {
                         <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
                       </span>
                       <span className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-700">
-                        Acompanhar Pedido Recente
+                        Pedido em andamento
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {activeAnonymousOrders.map((order) => (
                         <button
                           key={order.id}
-                          onClick={() => navigate(`/${order.storeSlug}?orderId=${order.id}`)}
+                          onClick={() =>
+                            navigate(
+                              order.accessToken
+                                ? `/pedido/${order.id}?ot=${encodeURIComponent(order.accessToken)}`
+                                : `/pedido/${order.id}`
+                            )
+                          }
                           className="rounded-xl bg-white px-3 py-2 text-[11px] font-bold text-amber-900 border border-amber-100 shadow-sm active:scale-95"
                         >
                           #{String(order.id).slice(-6).toUpperCase()}
@@ -1049,9 +1062,25 @@ export function MarketplacePage() {
                       ))}
                     </div>
                   </div>
-                  <p className="text-[10px] font-bold text-amber-600/70 italic sm:text-right">
-                    Disponível por 5 horas neste navegador
-                  </p>
+                  <div className="sm:text-right space-y-1">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate(
+                          activeAnonymousOrders[0]?.accessToken
+                            ? `/pedido/${activeAnonymousOrders[0].id}?ot=${encodeURIComponent(activeAnonymousOrders[0].accessToken)}`
+                            : `/pedido/${activeAnonymousOrders[0].id}`
+                        )
+                      }
+                      className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-black text-white shadow-[0_14px_28px_-16px_rgba(245,158,11,0.55)] transition-all hover:bg-amber-600 active:scale-95"
+                    >
+                      Acompanhar agora
+                      <CaretRight size={15} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
+                    </button>
+                    <p className="text-[10px] font-bold text-amber-600/70 italic">
+                      Disponível por 5 horas neste navegador
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

@@ -2202,35 +2202,34 @@ export function StorePage() {
         ) : !showInactiveState && !showClosedState && view === 'menu' && products.length > 0 && (
           <div className="space-y-4">
               {!user?.token && recentPublicOrders.length > 0 && (
-              <div className="fixed bottom-20 left-4 right-4 z-[110] sm:relative sm:bottom-0 sm:left-0 sm:right-0 sm:mx-6 rounded-[2rem] border border-emerald-200/50 bg-emerald-50/95 backdrop-blur-md px-5 py-4 shadow-[0_20px_50px_-20px_rgba(16,185,129,0.4)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="relative flex h-2 w-2">
+              <div className="fixed bottom-20 left-4 right-4 z-[110] sm:relative sm:bottom-0 sm:left-0 sm:right-0 sm:mx-6 rounded-[1.75rem] border border-emerald-200/60 bg-white/92 backdrop-blur-xl px-4 py-3 shadow-[0_18px_42px_-22px_rgba(16,185,129,0.35)] flex items-center justify-between gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate(
+                      recentPublicOrders[0]?.accessToken
+                        ? `/pedido/${recentPublicOrders[0].id}?ot=${encodeURIComponent(recentPublicOrders[0].accessToken)}`
+                        : `/pedido/${recentPublicOrders[0].id}`
+                    )
+                  }
+                  className="min-w-0 flex flex-1 items-center gap-3 text-left active:scale-[0.99]"
+                >
+                  <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 shadow-sm">
+                    <span className="absolute inset-0 rounded-2xl border border-emerald-100" />
+                    <span className="relative flex h-2.5 w-2.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                     </span>
-                    <span className="text-[11px] uppercase tracking-[0.25em] text-emerald-700 font-black">
-                      Acompanhar pedidos ativos
-                    </span>
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-[11px] font-black uppercase tracking-[0.2em] text-emerald-700">
+                      Pedido em andamento
+                    </p>
+                    <p className="truncate text-sm font-black text-slate-900">
+                      #{formatOrderDisplayId(recentPublicOrders[0]?.id, storeSlug)}
+                    </p>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {recentPublicOrders.map((entry) => (
-                      <button
-                        key={entry.id}
-                        onClick={() =>
-                          navigate(
-                            entry.accessToken
-                              ? `/pedido/${entry.id}?ot=${encodeURIComponent(entry.accessToken)}`
-                              : `/pedido/${entry.id}`
-                          )
-                        }
-                        className="btn-press px-3.5 py-2 rounded-xl bg-white text-emerald-900 text-[11px] font-black border border-emerald-100 shadow-sm transition-all hover:border-emerald-300"
-                      >
-                        #{formatOrderDisplayId(entry.id, storeSlug)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                </button>
                 <button
                   onClick={() =>
                     navigate(
@@ -2239,9 +2238,9 @@ export function StorePage() {
                         : `/pedido/${recentPublicOrders[0].id}`
                     )
                   }
-                  className="btn-press w-full sm:w-auto px-6 py-3 rounded-2xl bg-emerald-600 text-white text-[13px] font-black shadow-[0_12px_24px_-12px_rgba(5,150,105,0.5)] transition-all hover:bg-emerald-700 active:scale-95"
+                  className="btn-press shrink-0 rounded-2xl bg-emerald-600 px-4 py-2.5 text-[12px] font-black text-white shadow-[0_12px_24px_-12px_rgba(5,150,105,0.5)] transition-all hover:bg-emerald-700 active:scale-95"
                 >
-                  Ver Status Agora
+                  Acompanhar
                 </button>
               </div>
             )}
