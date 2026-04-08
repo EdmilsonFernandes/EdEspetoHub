@@ -57,15 +57,26 @@ export function SegmentPromoCarousel({
         {PROMO_SLIDES.map((slide, index) => (
           <div
             key={slide.id}
-            className={`absolute inset-0 flex items-center justify-center bg-slate-950/4 transition-all duration-700 ${
+            className={`absolute inset-0 flex items-center justify-center bg-slate-950/6 transition-all duration-700 ${
               index === activeIndex ? 'opacity-100' : 'pointer-events-none opacity-0'
             }`}
           >
+            {slide.fit !== 'cover' && (
+              <>
+                <img
+                  src={slide.image}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 h-full w-full scale-110 object-cover object-center opacity-28 blur-xl"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/10 via-transparent to-slate-950/10" />
+              </>
+            )}
             <img
               src={slide.image}
               alt={slide.imageAlt}
               loading="lazy"
-              className={`h-full w-full object-center ${slide.fit === 'cover' ? 'object-cover' : 'object-contain'}`}
+              className={`relative z-[1] h-full w-full object-center ${slide.fit === 'cover' ? 'object-cover' : 'object-contain'}`}
             />
           </div>
         ))}

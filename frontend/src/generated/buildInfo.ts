@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260408.211736.84c75c20",
-  "buildId": "0.1.9+20260408.211736.84c75c20-20260408.211736-84c75c20",
-  "builtAt": "2026-04-08T21:17:36.032Z",
-  "commitHash": "84c75c204f1fb614deb60484449818cb79a1ab6e",
-  "shortHash": "84c75c20",
+  "versionInternal": "0.1.9+20260408.211956.501652aa",
+  "buildId": "0.1.9+20260408.211956.501652aa-20260408.211956-501652aa",
+  "builtAt": "2026-04-08T21:19:56.256Z",
+  "commitHash": "501652aaf608c5ae9809c4f19b4df2165fe6bee7",
+  "shortHash": "501652aa",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "501652aaf608c5ae9809c4f19b4df2165fe6bee7",
+      "shortHash": "501652aa",
+      "dateIso": "2026-04-08T18:18:25-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(hub): restore cover fit for thermal promo artwork",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/501652aaf608c5ae9809c4f19b4df2165fe6bee7"
+    },
     {
       "hash": "84c75c204f1fb614deb60484449818cb79a1ab6e",
       "shortHash": "84c75c20",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Revert \"fix(cleanup): remove active orders polling and fix build errors\"",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d9340e57f7a4cdea67e01c533bdc16f61c814d95"
-    },
-    {
-      "hash": "684412ee53aee576621577e17698547671862e49",
-      "shortHash": "684412ee",
-      "dateIso": "2026-04-07T18:15:13-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Revert \"fix(performance): remove unused orders polling logic and clean up MarketplacePage\"",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/684412ee53aee576621577e17698547671862e49"
     }
   ]
 } as const;
