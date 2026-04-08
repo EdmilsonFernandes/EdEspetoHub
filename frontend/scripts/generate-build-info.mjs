@@ -39,13 +39,32 @@ const readExistingBuildInfo = () => {
   }
 };
 
-const parseEnvCommits = () => {
+const normalizeCommitEntries = (entries, repositoryUrl) => {
+  if (!Array.isArray(entries)) return [];
+  return entries.map((entry) => {
+    const hash = String(entry?.hash || '').trim();
+    const shortHash = String(entry?.shortHash || '').trim() || (hash ? hash.slice(0, 8) : '');
+    return {
+      hash,
+      shortHash,
+      dateIso: String(entry?.dateIso || '').trim(),
+      authorName: String(entry?.authorName || entry?.author || '').trim(),
+      authorEmail: String(entry?.authorEmail || '').trim(),
+      subject: String(entry?.subject || '').trim(),
+      commitUrl:
+        String(entry?.commitUrl || '').trim() ||
+        (repositoryUrl && hash ? `${repositoryUrl}/commit/${hash}` : ''),
+    };
+  });
+};
+
+const parseEnvCommits = (repositoryUrl) => {
   const raw = String(process.env.BUILD_COMMITS_JSON || '').trim();
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return null;
-    return parsed;
+    return normalizeCommitEntries(parsed, repositoryUrl);
   } catch {
     return null;
   }
@@ -101,8 +120,10 @@ const commitsFromGit = commitsRaw
       })
   : [];
 const commits =
-  parseEnvCommits() ||
-  (commitsFromGit.length ? commitsFromGit : Array.isArray(existing?.commits) ? existing.commits : []);
+  parseEnvCommits(repositoryUrl) ||
+  (commitsFromGit.length
+    ? commitsFromGit
+    : normalizeCommitEntries(Array.isArray(existing?.commits) ? existing.commits : [], repositoryUrl));
 
 const payload = {
   appName: 'Já no Caminho',

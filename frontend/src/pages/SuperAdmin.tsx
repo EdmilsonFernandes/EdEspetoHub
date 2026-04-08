@@ -2792,7 +2792,18 @@ export function SuperAdmin() {
                 </div>
                 <div className="rounded-2xl border border-slate-200 bg-white p-3">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">Commit</p>
-                  <p className="mt-1 text-sm font-bold text-slate-900 break-all">{APP_BUILD_INFO.shortHash}</p>
+                  {APP_BUILD_INFO.commitHash && APP_BUILD_INFO.repositoryUrl ? (
+                    <a
+                      href={`${APP_BUILD_INFO.repositoryUrl}/commit/${APP_BUILD_INFO.commitHash}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-1 inline-flex text-sm font-bold text-sky-700 hover:text-sky-800 underline break-all"
+                    >
+                      {APP_BUILD_INFO.shortHash}
+                    </a>
+                  ) : (
+                    <p className="mt-1 text-sm font-bold text-slate-900 break-all">{APP_BUILD_INFO.shortHash}</p>
+                  )}
                   <p className="text-[11px] text-slate-500 mt-1">{APP_BUILD_INFO.branch}</p>
                 </div>
                 <div className="rounded-2xl border border-slate-200 bg-white p-3">
