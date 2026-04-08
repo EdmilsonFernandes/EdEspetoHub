@@ -209,6 +209,25 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     }
   }
 
+  private sanitizeAttribution(input: any) {
+    if (!input || typeof input !== 'object') return null;
+    const raw = input as Record<string, unknown>;
+    const normalized = {
+      ts: Number(raw.ts || 0) || null,
+      landingPath: String(raw.landingPath || '').trim() || null,
+      referrer: String(raw.referrer || '').trim() || null,
+      utm_source: String(raw.utm_source || '').trim() || null,
+      utm_medium: String(raw.utm_medium || '').trim() || null,
+      utm_campaign: String(raw.utm_campaign || '').trim() || null,
+      utm_content: String(raw.utm_content || '').trim() || null,
+      utm_term: String(raw.utm_term || '').trim() || null,
+      gclid: String(raw.gclid || '').trim() || null,
+      fbclid: String(raw.fbclid || '').trim() || null,
+    };
+    const hasUsefulData = Object.entries(normalized).some(([key, value]) => key !== 'ts' && Boolean(value));
+    return hasUsefulData ? normalized : null;
+  }
+
   /**
    * Executes super admin login logic.
    *
@@ -388,6 +407,8 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     };
 
     const paymentMethod = ((input.paymentMethod as PaymentMethod) || 'PIX').toUpperCase();
+    const acquisitionAttribution = this.sanitizeAttribution(input?.acquisitionAttribution);
+
     if (paymentMethod !== 'PIX' && paymentMethod !== 'CREDIT_CARD' && paymentMethod !== 'BOLETO')
     {
       throw new AppError('AUTH-014', 400);
@@ -481,6 +502,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
         socialLinks: sanitizeSocialLinks(storePayload.socialLinks),
         openingHours: storePayload.openingHours ?? [],
         orderTypes: storePayload.orderTypes ?? segmentPreset.orderTypes,
+        acquisitionAttribution,
       });
 
       const store = storeRepo.create({
@@ -532,7 +554,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     });
 
     await this.sendVerificationEmail(result.user, meta?.ipAddress);
-    await this.notifySignup(result.user, result.store);
+      await this.notifySignup(result.user, result.store, acquisitionAttribution);
     this.log.info('Register success', { userId: result.user.id, storeId: result.store.id });
 
     const token = jwt.sign(
@@ -1209,7 +1231,7 @@ async changePassword(userId: string, currentPassword: string, newPassword: strin
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
-  private async notifySignup(user: User, store: Store) {
+  private async notifySignup(user: User, store: Store, acquisitionAttribution?: Record<string, unknown> | null) {
     const raw = env.email.notifyOnSignup || '';
     const emails = raw
       .split(',')
@@ -1223,6 +1245,7 @@ async changePassword(userId: string, currentPassword: string, newPassword: strin
       ownerEmail: user.email,
       slug: store.slug,
       createdAt: new Date(),
+      acquisitionAttribution: acquisitionAttribution || null,
     });
   }
 

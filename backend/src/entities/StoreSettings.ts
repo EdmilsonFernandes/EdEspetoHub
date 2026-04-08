@@ -156,6 +156,17 @@ export class StoreSettings
   })
   orderTypes?: string[];
 
+  @Column({
+    name: 'acquisition_attribution',
+    type: 'jsonb',
+    nullable: true,
+    transformer: {
+      to: (value?: Record<string, unknown> | null) => (value && typeof value === 'object' ? value : null),
+      from: (value: Record<string, unknown> | null) => (value && typeof value === 'object' ? value : null),
+    },
+  })
+  acquisitionAttribution?: Record<string, unknown> | null;
+
   @OneToOne(() => Store, (store) => store.settings, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'store_id' })
   store!: Store;

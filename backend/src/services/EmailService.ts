@@ -390,16 +390,44 @@ async sendCustomerWelcome(email: string, fullName: string) {
     ownerEmail: string;
     slug: string;
     createdAt: Date;
+    acquisitionAttribution?: Record<string, unknown> | null;
   }) {
     if (!payload.emails.length) return;
     const subject = 'Novo cadastro - Jano Caminho';
+    const attribution = payload.acquisitionAttribution && typeof payload.acquisitionAttribution === 'object'
+      ? payload.acquisitionAttribution
+      : null;
+    const attributionLines = attribution
+      ? [
+          `Origem: ${String(attribution.utm_source || 'direto')}`,
+          `Meio: ${String(attribution.utm_medium || '-')}`,
+          `Campanha: ${String(attribution.utm_campaign || '-')}`,
+          `Landing: ${String(attribution.landingPath || '-')}`,
+          `Referrer: ${String(attribution.referrer || '-')}`,
+          `gclid: ${String(attribution.gclid || '-')}`,
+          `fbclid: ${String(attribution.fbclid || '-')}`,
+        ]
+      : [ 'Origem: não informada' ];
     const text = [
       'Novo cadastro recebido.',
       `Loja: ${payload.storeName}`,
       `Slug: ${payload.slug}`,
       `Cliente: ${payload.ownerName} (${payload.ownerEmail})`,
       `Criado em: ${payload.createdAt.toISOString()}`,
+      '',
+      ...attributionLines,
     ].join('\n');
+    const attributionHtml = attribution
+      ? `
+          <li><strong>Origem:</strong> ${String(attribution.utm_source || 'direto')}</li>
+          <li><strong>Meio:</strong> ${String(attribution.utm_medium || '-')}</li>
+          <li><strong>Campanha:</strong> ${String(attribution.utm_campaign || '-')}</li>
+          <li><strong>Landing:</strong> ${String(attribution.landingPath || '-')}</li>
+          <li><strong>Referrer:</strong> ${String(attribution.referrer || '-')}</li>
+          <li><strong>gclid:</strong> ${String(attribution.gclid || '-')}</li>
+          <li><strong>fbclid:</strong> ${String(attribution.fbclid || '-')}</li>
+        `
+      : '<li><strong>Origem:</strong> não informada</li>';
     const html = `
       <div style="font-family: Arial, sans-serif; background: #f8fafc; padding: 24px;">
         <div style="max-width: 520px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px;">
@@ -410,6 +438,7 @@ async sendCustomerWelcome(email: string, fullName: string) {
             <li><strong>Slug:</strong> ${payload.slug}</li>
             <li><strong>Cliente:</strong> ${payload.ownerName} (${payload.ownerEmail})</li>
             <li><strong>Criado em:</strong> ${payload.createdAt.toISOString()}</li>
+            ${attributionHtml}
           </ul>
         </div>
       </div>

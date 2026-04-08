@@ -42,4 +42,5 @@ export interface CreateStoreDto {
   socialLinks?: { type: string; value: string }[];
   openingHours?: any[];
   orderTypes?: string[];
+  acquisitionAttribution?: Record<string, unknown> | null;
 }

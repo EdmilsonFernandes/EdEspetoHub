@@ -168,6 +168,7 @@ const formatLocalPhoneNumber = (value = '') => {
 };
 
 export function CreateStore() {
+  const ATTRIBUTION_KEY = 'jnk_attribution_v1';
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const planIdFromUrl = searchParams.get('planId');
@@ -624,6 +625,15 @@ export function CreateStore() {
         return;
       }
 
+      let acquisitionAttribution = null;
+      try {
+        const rawAttribution = localStorage.getItem(ATTRIBUTION_KEY);
+        const parsedAttribution = rawAttribution ? JSON.parse(rawAttribution) : null;
+        acquisitionAttribution = parsedAttribution && typeof parsedAttribution === 'object' ? parsedAttribution : null;
+      } catch {
+        acquisitionAttribution = null;
+      }
+
       const payload = {
         user: {
           fullName: registerForm.fullName,
@@ -658,6 +668,7 @@ export function CreateStore() {
         paymentMethod,
         termsAccepted,
         lgpdAccepted,
+        acquisitionAttribution,
       };
 
       const result = await storeService.create(payload);
