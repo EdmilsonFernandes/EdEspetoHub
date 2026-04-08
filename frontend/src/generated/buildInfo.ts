@@ -5,13 +5,85 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260407.174525.8dc286d2",
-  "buildId": "0.1.9+20260407.174525.8dc286d2-20260407.174525-8dc286d2",
-  "builtAt": "2026-04-07T17:45:25.938Z",
-  "commitHash": "8dc286d20d6122e9f941a77c36d53919f2779851",
-  "shortHash": "8dc286d2",
+  "versionInternal": "0.1.9+20260408.164002.56f5d2d3",
+  "buildId": "0.1.9+20260408.164002.56f5d2d3-20260408.164002-56f5d2d3",
+  "builtAt": "2026-04-08T16:40:02.368Z",
+  "commitHash": "56f5d2d376541baa4d1f680448d725049af18c63",
+  "shortHash": "56f5d2d3",
   "branch": "main",
   "commits": [
+    {
+      "hash": "56f5d2d376541baa4d1f680448d725049af18c63",
+      "shortHash": "56f5d2d3",
+      "dateIso": "2026-04-08T12:55:31-03:00",
+      "subject": "fix(frontend): align profile drawer types and client orders route"
+    },
+    {
+      "hash": "1f68416b03b175824390dfc38f90edf786638d79",
+      "shortHash": "1f68416b",
+      "dateIso": "2026-04-08T12:51:17-03:00",
+      "subject": "style(hub): refine marketplace drawer and avatar"
+    },
+    {
+      "hash": "c5c1447f14ac224aa345996c5819e2db87ada3eb",
+      "shortHash": "c5c1447f",
+      "dateIso": "2026-04-08T12:46:47-03:00",
+      "subject": "style(hub): premiumize marketplace layout safely"
+    },
+    {
+      "hash": "d96844ffb36747f6c8d53da3e7b59c3d0185e15b",
+      "shortHash": "d96844ff",
+      "dateIso": "2026-04-08T12:07:37-03:00",
+      "subject": "infra: mark uploads volume as external in prod to prevent data loss on rebuild"
+    },
+    {
+      "hash": "a311e419690e3a77727294d10b20945e2cdef29f",
+      "shortHash": "a311e419",
+      "dateIso": "2026-04-08T12:01:26-03:00",
+      "subject": "infra: change api uploads to named volume for better persistence"
+    },
+    {
+      "hash": "22fe39920b9602aae4eb42342476eee49ba77c93",
+      "shortHash": "22fe3992",
+      "dateIso": "2026-04-07T20:04:02-03:00",
+      "subject": "fix(build): add missing import of resolveAssetUrl in LandingPage.tsx"
+    },
+    {
+      "hash": "1ccd6054a734e35f988b42b08e1ffa4315737104",
+      "shortHash": "1ccd6054",
+      "dateIso": "2026-04-07T19:58:28-03:00",
+      "subject": "fix(ui): add store logo fallback to /janocaminho.jpg and handle 404 errors"
+    },
+    {
+      "hash": "d9340e57f7a4cdea67e01c533bdc16f61c814d95",
+      "shortHash": "d9340e57",
+      "dateIso": "2026-04-07T18:15:15-03:00",
+      "subject": "Revert \"fix(cleanup): remove active orders polling and fix build errors\""
+    },
+    {
+      "hash": "684412ee53aee576621577e17698547671862e49",
+      "shortHash": "684412ee",
+      "dateIso": "2026-04-07T18:15:13-03:00",
+      "subject": "Revert \"fix(performance): remove unused orders polling logic and clean up MarketplacePage\""
+    },
+    {
+      "hash": "693c26dafbefe562fbb0901304f4ffc2235a0674",
+      "shortHash": "693c26da",
+      "dateIso": "2026-04-07T17:59:03-03:00",
+      "subject": "fix(performance): remove unused orders polling logic and clean up MarketplacePage"
+    },
+    {
+      "hash": "52ebcfd74b74cfc54025e8690fc1b75c621a390f",
+      "shortHash": "52ebcfd7",
+      "dateIso": "2026-04-07T17:56:52-03:00",
+      "subject": "fix(cleanup): remove active orders polling and fix build errors"
+    },
+    {
+      "hash": "d8725f5e85a5d9b9be6924e140ee550ce074d517",
+      "shortHash": "d8725f5e",
+      "dateIso": "2026-04-07T14:46:26-03:00",
+      "subject": "fix(legal): correct company info and add Terms link to vertical menu"
+    },
     {
       "hash": "8dc286d20d6122e9f941a77c36d53919f2779851",
       "shortHash": "8dc286d2",
@@ -119,78 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "e96fd920",
       "dateIso": "2026-04-07T10:15:48-03:00",
       "subject": "fix(frontend): remove unused React import and finalize icons"
-    },
-    {
-      "hash": "72a5a79e85a0c8c9afb7c55f713312c31958ca7b",
-      "shortHash": "72a5a79e",
-      "dateIso": "2026-04-06T09:17:47-03:00",
-      "subject": "feat: add user-friendly offline handling and network error messages"
-    },
-    {
-      "hash": "31f56acece3de0f16e00b60340a37548e5f3365a",
-      "shortHash": "31f56ace",
-      "dateIso": "2026-04-06T09:12:33-03:00",
-      "subject": "feat: make JNC footer logo evident and update to jnc.png"
-    },
-    {
-      "hash": "f7142e00354d3a1746e7403beec6089a7fd48c25",
-      "shortHash": "f7142e00",
-      "dateIso": "2026-04-05T11:55:12-03:00",
-      "subject": "fix: ensure jnc.png logo is perfectly rounded in header"
-    },
-    {
-      "hash": "7321de38bac642c4f56e05fa795447c8dc64ed06",
-      "shortHash": "7321de38",
-      "dateIso": "2026-04-05T11:27:53-03:00",
-      "subject": "style: replace logo with high-quality jnc.png and update footer logo"
-    },
-    {
-      "hash": "c71a2646e49d187965470e000be69cdb97a0aa1d",
-      "shortHash": "c71a2646",
-      "dateIso": "2026-04-05T11:18:56-03:00",
-      "subject": "style: replace logo with high-quality jnc.png and update footer logo"
-    },
-    {
-      "hash": "95d41c49e3403bc3dc369b4165828e1f734762ac",
-      "shortHash": "95d41c49",
-      "dateIso": "2026-04-05T11:11:56-03:00",
-      "subject": "feat: complete client address management and final premium UI refinements for Marketplace"
-    },
-    {
-      "hash": "5daace36d472d3182415336bcafa52e3c8d1b3b4",
-      "shortHash": "5daace36",
-      "dateIso": "2026-04-05T09:45:41-03:00",
-      "subject": "style: premium lux minimalist overhaul for marketplace top section"
-    },
-    {
-      "hash": "4716a36bab9dd837fd423e7d82609563396f44e1",
-      "shortHash": "4716a36b",
-      "dateIso": "2026-04-05T09:34:46-03:00",
-      "subject": "feat: complete client address management and final premium UI refinements for Marketplace"
-    },
-    {
-      "hash": "1ba9d52888086e0aa897c43b5ff9aea140406a81",
-      "shortHash": "1ba9d528",
-      "dateIso": "2026-04-05T09:09:17-03:00",
-      "subject": "style: premium drawer with colorful icons and final Marketplace UI refinements"
-    },
-    {
-      "hash": "68e4eb1803e07256d4529f800ecedaaa93a1d7ab",
-      "shortHash": "68e4eb18",
-      "dateIso": "2026-04-05T09:05:27-03:00",
-      "subject": "feat: functional client address management and premium UI refinements for Marketplace (circular logo, smaller banners)"
-    },
-    {
-      "hash": "359e13bb4018bc1af64c3311f43af6b4280a6a95",
-      "shortHash": "359e13bb",
-      "dateIso": "2026-04-05T01:20:31-03:00",
-      "subject": "style: premium lux minimalist overhaul for marketplace top section"
-    },
-    {
-      "hash": "23f3231e6e90f8db4ab8e318823c757113b828aa",
-      "shortHash": "23f3231e",
-      "dateIso": "2026-04-05T01:03:57-03:00",
-      "subject": "fix: Marketplace 'Limpar' button now resets search query correctly"
     }
   ]
 } as const;

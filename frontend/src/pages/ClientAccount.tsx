@@ -347,7 +347,7 @@ export function ClientAccount() {
             </div>
           </section>
 
-          {/* Seção 3: Segurança e Notificações */}
+          {/* Seção 3: Segurança e Configurações */}
           <section className="grid gap-4 sm:grid-cols-2">
             {/* Segurança */}
             <div className="rounded-[2rem] bg-white p-5 border border-slate-100 shadow-sm space-y-4">
@@ -373,14 +373,17 @@ export function ClientAccount() {
               </div>
             </div>
 
-            {/* Notificações */}
+            {/* Configurações */}
             <div className="rounded-[2rem] bg-white p-5 border border-slate-100 shadow-sm flex flex-col justify-between">
               <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
                 <BellRinging size={16} weight="duotone" className="text-amber-500" />
-                Notificações
+                Configurações
               </h3>
               <div className="mt-4 flex items-center justify-between gap-3">
-                <p className="text-[11px] font-bold text-slate-500 leading-tight">Receber avisos sobre meus pedidos</p>
+                <div className="min-w-0">
+                  <p className="text-[11px] font-bold text-slate-700">Notificações Push</p>
+                  <p className="text-[9px] font-bold text-slate-400 leading-tight">Receber avisos sobre meus pedidos</p>
+                </div>
                 <button
                   onClick={handleTogglePush}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${pushEnabled ? 'bg-emerald-500' : 'bg-slate-200'}`}
@@ -388,43 +391,6 @@ export function ClientAccount() {
                   <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${pushEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
                 </button>
               </div>
-            </div>
-          </section>
-
-          {/* Seção 4: Pedidos Recentes */}
-          <section className="space-y-3">
-            <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2 px-2">
-              <Package size={16} weight="duotone" className="text-emerald-500" />
-              Pedidos Recentes
-            </h3>
-            <div className="space-y-2">
-              {orders.length === 0 ? (
-                <div className="rounded-3xl bg-white p-8 text-center border border-slate-100 shadow-sm">
-                  <p className="text-sm font-bold text-slate-400">Nenhum pedido realizado</p>
-                </div>
-              ) : (
-                orders.slice(0, 5).map(order => (
-                  <button
-                    key={order.id}
-                    onClick={() => navigate(`/pedido/${order.id}`)}
-                    className="flex w-full items-center justify-between rounded-3xl bg-white p-4 border border-slate-100 shadow-sm active:scale-[0.98] transition-all"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="grid h-10 w-10 place-items-center rounded-2xl bg-emerald-50 text-emerald-600">
-                        <Package size={20} weight="duotone" />
-                      </div>
-                      <div className="text-left">
-                        <p className="text-sm font-black text-slate-900">#{formatOrderDisplayId(order.id, order.store?.slug)}</p>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase">{order.status}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-black text-slate-900">{formatCurrency(order.total || 0)}</p>
-                      <p className="text-[10px] font-bold text-slate-400">{new Date(order.createdAt).toLocaleDateString('pt-BR')}</p>
-                    </div>
-                  </button>
-                ))
-              )}
             </div>
           </section>
 

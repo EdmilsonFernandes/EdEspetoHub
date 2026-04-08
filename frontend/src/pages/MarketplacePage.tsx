@@ -141,6 +141,16 @@ const readCustomerSession = () => {
 
 const FAVORITES_STORAGE_KEY = 'hub:favorites:stores';
 const DEFAULT_STORE_LOGO = '/janocaminho.jpg';
+const ORDER_EXPIRATION_MS = 5 * 60 * 60 * 1000; // 5 horas
+
+// Interface para pedidos em andamento (cache anônimo)
+type ActiveAnonymousOrder = {
+  id: string;
+  storeSlug: string;
+  createdAt: number;
+  status?: string;
+  storeName?: string;
+};
 
 export function MarketplacePage() {
   const navigate = useNavigate();
@@ -167,6 +177,7 @@ export function MarketplacePage() {
   const [deactivating, setDeactivating] = useState(false);
   const [distanceByStore, setDistanceByStore] = useState<Record<string, number>>({});
   const [distanceLoading, setDistanceLoading] = useState(false);
+  const [activeAnonymousOrders, setActiveAnonymousOrders] = useState<ActiveAnonymousOrder[]>([]);
   const [favoriteStoreSlugs, setFavoriteStoreSlugs] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
@@ -192,6 +203,47 @@ export function MarketplacePage() {
       window.removeEventListener('storage', syncSession);
       window.removeEventListener('focus', syncSession);
     };
+  }, []);
+
+  // Carregar pedidos anônimos do localStorage (expiração de 5h)
+  useEffect(() => {
+    const hydrateOrders = () => {
+      const now = Date.now();
+      const found: ActiveAnonymousOrder[] = [];
+      
+      try {
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('lastOrders:')) {
+            const slug = key.replace('lastOrders:', '');
+            const raw = localStorage.getItem(key);
+            if (!raw) return;
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+              parsed.forEach(order => {
+                const createdAt = Number(order.createdAt || 0);
+                if (createdAt && now - createdAt < ORDER_EXPIRATION_MS) {
+                  found.push({
+                    id: order.id,
+                    storeSlug: slug,
+                    createdAt: createdAt
+                  });
+                }
+              });
+            }
+          }
+        });
+        
+        // Ordenar por mais recente
+        const sorted = found.sort((a, b) => b.createdAt - a.createdAt).slice(0, 3);
+        setActiveAnonymousOrders(sorted);
+      } catch (e) {
+        console.error('Erro ao carregar pedidos anônimos', e);
+      }
+    };
+
+    hydrateOrders();
+    const interval = setInterval(hydrateOrders, 60000); // Check every minute
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -711,6 +763,10 @@ export function MarketplacePage() {
     navigate('/cliente/conta');
   }, [navigate]);
 
+  const openCustomerOrders = useCallback(() => {
+    navigate('/cliente/pedidos');
+  }, [navigate]);
+
   const openCustomerLogin = useCallback(() => {
     navigate('/cliente?mode=login&next=/hub&hub=1');
   }, [navigate]);
@@ -824,6 +880,7 @@ export function MarketplacePage() {
         onOpenAdminLogin={openAdminLogin}
         onOpenMotoboyLogin={openMotoboyLogin}
         onOpenAccount={openCustomerAccount}
+        onOpenOrders={openCustomerOrders}
         onOpenTerms={openTerms}
         onOpenPrivacy={openPrivacy}
         onOpenHelp={openHelp}
@@ -930,7 +987,8 @@ export function MarketplacePage() {
         </header>
 
         <main className="max-w-[1200px] mx-auto px-4 pt-5 space-y-8">
-          {activeOrders.length > 0 && (
+          {/* Acompanhamento de Pedidos (Logados ou Anônimos Cache) */}
+          {(isCustomerLogged && activeOrders.length > 0) ? (
             <div className="animate-in fade-in slide-in-from-top-4 duration-500">
               <div className="relative overflow-hidden rounded-[2.5rem] border border-emerald-200/50 bg-emerald-50/90 backdrop-blur-md p-5 shadow-[0_20px_40px_-15px_rgba(16,185,129,0.2)]">
                 <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-emerald-200/20 blur-2xl" />
@@ -942,7 +1000,7 @@ export function MarketplacePage() {
                         <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                       </span>
                       <span className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-700">
-                        Pedido em Andamento
+                        {activeOrders.length === 1 ? 'Pedido em Andamento' : 'Pedidos em Andamento'}
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -958,12 +1016,45 @@ export function MarketplacePage() {
                     </div>
                   </div>
                   <button
-                    onClick={() => navigate(`/pedido/${activeOrders[0].id}`)}
+                    onClick={openCustomerOrders}
                     className="group inline-flex items-center justify-center gap-3 rounded-2xl bg-emerald-600 px-6 py-3 text-sm font-black text-white shadow-xl transition-all hover:bg-emerald-700 active:scale-95"
                   >
-                    Acompanhar Agora
+                    Ver Meus Pedidos
                     <CaretRight size={16} weight="bold" className="group-hover:translate-x-1 transition-transform" />
                   </button>
+                </div>
+              </div>
+            </div>
+          ) : (!isCustomerLogged && activeAnonymousOrders.length > 0) && (
+            <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+              <div className="relative overflow-hidden rounded-[2.5rem] border border-amber-200/50 bg-amber-50/90 backdrop-blur-md p-5 shadow-[0_20px_40px_-15px_rgba(245,158,11,0.15)]">
+                <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-amber-200/20 blur-2xl" />
+                <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="relative flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                      </span>
+                      <span className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-700">
+                        Acompanhar Pedido Recente
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {activeAnonymousOrders.map((order) => (
+                        <button
+                          key={order.id}
+                          onClick={() => navigate(`/${order.storeSlug}?orderId=${order.id}`)}
+                          className="rounded-xl bg-white px-3 py-2 text-[11px] font-bold text-amber-900 border border-amber-100 shadow-sm active:scale-95"
+                        >
+                          #{String(order.id).slice(-6).toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-[10px] font-bold text-amber-600/70 italic sm:text-right">
+                    Disponível por 5 horas neste navegador
+                  </p>
                 </div>
               </div>
             </div>
