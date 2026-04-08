@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260408.201419.97886031",
-  "buildId": "0.1.9+20260408.201419.97886031-20260408.201419-97886031",
-  "builtAt": "2026-04-08T20:14:19.833Z",
-  "commitHash": "9788603135d229162ccaf47c47d665b1d0141c55",
-  "shortHash": "97886031",
+  "versionInternal": "0.1.9+20260408.203814.a03467ea",
+  "buildId": "0.1.9+20260408.203814.a03467ea-20260408.203814-a03467ea",
+  "builtAt": "2026-04-08T20:38:14.833Z",
+  "commitHash": "a03467eab4d97f23790885daaa39d78721e6a6ad",
+  "shortHash": "a03467ea",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "a03467eab4d97f23790885daaa39d78721e6a6ad",
+      "shortHash": "a03467ea",
+      "dateIso": "2026-04-08T17:17:54-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "refactor(hub): polish promo banner and clear dismissed anonymous order cache",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a03467eab4d97f23790885daaa39d78721e6a6ad"
+    },
     {
       "hash": "9788603135d229162ccaf47c47d665b1d0141c55",
       "shortHash": "97886031",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(legal): ensure correct terms are displayed and cleanup code",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8dc286d20d6122e9f941a77c36d53919f2779851"
-    },
-    {
-      "hash": "b0fa06c6928c80d38289f92038d31da1f34bf046",
-      "shortHash": "b0fa06c6",
-      "dateIso": "2026-04-07T14:23:27-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix: explicitly add missing ConfirmationModal and update build info",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b0fa06c6928c80d38289f92038d31da1f34bf046"
     }
   ]
 } as const;

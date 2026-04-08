@@ -945,6 +945,9 @@ export function MarketplacePage() {
         }
       });
       ids.forEach((id) => localStorage.removeItem(`orderAccess:${id}`));
+      ids.forEach((id) => sessionStorage.removeItem(`orderAccess:${id}`));
+      localStorage.removeItem(DISMISSED_ANONYMOUS_ORDERS_KEY);
+      sessionStorage.removeItem(DISMISSED_ANONYMOUS_ORDERS_KEY);
     } catch {
       // ignore
     }
