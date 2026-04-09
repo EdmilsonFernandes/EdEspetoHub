@@ -1,5 +1,6 @@
 ﻿// @ts-nocheck
 import React, { useEffect, useMemo, useState } from "react";
+import { Capacitor } from "@capacitor/core";
 import { Drawer } from "vaul";
 import {
   SquaresFour,
@@ -37,6 +38,25 @@ const normalizeWhatsApp = (value) => {
   const digits = value.toString().replace(/\D/g, "");
   if (!digits) return "";
   return digits.startsWith("55") ? digits : `55${digits}`;
+};
+
+const openWhatsAppContact = (value, event) => {
+  const phone = normalizeWhatsApp(value);
+  if (!phone) return;
+
+  const nativeUrl = `whatsapp://send?phone=${phone}`;
+  const webUrl = `https://wa.me/${phone}`;
+
+  if (event) {
+    event.preventDefault();
+  }
+
+  if (Capacitor.isNativePlatform()) {
+    window.location.href = nativeUrl;
+    return;
+  }
+
+  window.open(webUrl, "_blank", "noopener,noreferrer");
 };
 
 const isEspetoCategory = (category) => {
@@ -417,6 +437,7 @@ const Header = ({
                       href={`https://wa.me/${normalizeWhatsApp(whatsappNumber)}`}
                       target="_blank"
                       rel="noreferrer"
+                      onClick={(event) => openWhatsAppContact(whatsappNumber, event)}
                       className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-600 hover:bg-emerald-100 transition"
                     >
                       <img src="/whatspp.jpg" alt="WhatsApp" className="h-3.5 w-3.5 rounded-full" />
@@ -1681,6 +1702,7 @@ export const MenuView = ({
                         href={`https://wa.me/${normalizeWhatsApp(whatsappNumber)}`}
                         target="_blank"
                         rel="noreferrer"
+                        onClick={(event) => openWhatsAppContact(whatsappNumber, event)}
                         className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm"
                       >
                         <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">

@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft, Eye, EyeSlash } from '@phosphor-icons/react';
 import { productService } from '../services/productService';
@@ -188,6 +189,24 @@ export function StorePage() {
     if (!digits) return '';
     return digits.startsWith('55') ? digits : `55${digits}`;
   }, [storePhone]);
+
+  const openWhatsAppUrl = (phoneValue: string, message?: string) => {
+    const phone = String(phoneValue || '').replace(/\D/g, '');
+    if (!phone) return;
+    const nativeUrl = message
+      ? `whatsapp://send?phone=${phone}&text=${encodeURIComponent(message)}`
+      : `whatsapp://send?phone=${phone}`;
+    const webUrl = message
+      ? `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`
+      : `https://api.whatsapp.com/send?phone=${phone}`;
+
+    if (Capacitor.isNativePlatform()) {
+      window.location.href = nativeUrl;
+      return;
+    }
+
+    window.open(webUrl, '_blank', 'noopener,noreferrer');
+  };
 
   const getNumeric = (value) => {
     if (value === null || value === undefined) return null;
@@ -1657,13 +1676,7 @@ export function StorePage() {
 
       const targetNumber = resolvedWhatsApp || WHATSAPP_NUMBER;
       const phone = String(targetNumber || '').replace(/\D/g, '');
-      const text = encodeURIComponent(messageLines.join('\n'));
-      const whatsappUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${text}`;
-      try {
-        window.location.href = whatsappUrl;
-      } catch {
-        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-      }
+      openWhatsAppUrl(phone, messageLines.join('\n'));
     }
     // Evita abrir uma segunda janela do WhatsApp automaticamente.
     // O acompanhamento fica no botão da tela de sucesso e no histórico recente.
@@ -2142,12 +2155,7 @@ export function StorePage() {
                     type="button"
                     onClick={() => {
                       const phone = String(storePhone || '').replace(/\D/g, '');
-                      const whatsappUrl = `https://api.whatsapp.com/send?phone=${phone}`;
-                      try {
-                        window.location.href = whatsappUrl;
-                      } catch {
-                        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-                      }
+                      openWhatsAppUrl(phone);
                     }}
                     className="px-6 py-3 rounded-lg bg-green-600 text-white font-semibold hover:opacity-90 transition-all"
                   >
