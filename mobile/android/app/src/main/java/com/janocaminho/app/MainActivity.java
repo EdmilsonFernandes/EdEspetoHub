@@ -5,12 +5,15 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.graphics.Color;
 import android.net.Uri;
 import android.content.pm.PackageManager;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.webkit.CookieManager;
 import android.webkit.GeolocationPermissions;
 import android.webkit.WebChromeClient;
@@ -34,12 +37,17 @@ public class MainActivity extends BridgeActivity {
     private static final String PREFS_NAME = "jnk_mobile_prefs";
     private static final String LAST_URL_KEY = "last_url";
     private static final long NAV_ANIM_DURATION_MS = 220L;
+    private static final long LAUNCH_OVERLAY_FADE_MS = 260L;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 4401;
     private static final int MEDIA_PERMISSION_REQUEST_CODE = 4402;
 
     private String lastKnownUrl = HUB_URL;
     private GeolocationPermissions.Callback pendingGeoCallback = null;
     private String pendingGeoOrigin = null;
+    private View launchOverlay;
+    private ImageView launchLogo;
+    private ProgressBar launchProgress;
+    private boolean launchOverlayDismissed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +71,7 @@ public class MainActivity extends BridgeActivity {
             set.start();
         });
         super.onCreate(savedInstanceState);
+        initializeLaunchOverlay();
     }
 
     private void checkAndRequestMediaPermissionsOnce() {
@@ -131,6 +140,7 @@ public class MainActivity extends BridgeActivity {
     private void configureWebViewPersistence() {
         if (bridge == null || bridge.getWebView() == null) return;
         WebView webView = bridge.getWebView();
+        webView.setBackgroundColor(Color.parseColor("#0B1220"));
         WebSettings settings = webView.getSettings();
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
@@ -257,10 +267,59 @@ public class MainActivity extends BridgeActivity {
                     String trustedUrl = normalizeTrustedWebUrl(url);
                     if (trustedUrl != null) {
                         lastKnownUrl = trustedUrl;
+                        dismissLaunchOverlay();
                     }
                 }
             });
         }
+    }
+
+    private void initializeLaunchOverlay() {
+        launchOverlay = findViewById(R.id.launch_overlay);
+        launchLogo = findViewById(R.id.launch_logo);
+        launchProgress = findViewById(R.id.launch_progress);
+
+        View root = findViewById(R.id.main_root);
+        if (root != null) {
+            root.setBackgroundColor(Color.parseColor("#0B1220"));
+        }
+
+        if (launchOverlay != null) {
+            launchOverlay.setAlpha(1f);
+            launchOverlay.setVisibility(View.VISIBLE);
+        }
+        if (launchLogo != null) {
+            launchLogo.setScaleX(0.92f);
+            launchLogo.setScaleY(0.92f);
+            launchLogo.animate()
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(420L)
+                .setInterpolator(new DecelerateInterpolator())
+                .start();
+        }
+        if (launchProgress != null) {
+            launchProgress.setAlpha(0f);
+            launchProgress.animate()
+                .alpha(1f)
+                .setStartDelay(130L)
+                .setDuration(260L)
+                .start();
+        }
+    }
+
+    private void dismissLaunchOverlay() {
+        if (launchOverlayDismissed || launchOverlay == null) return;
+        launchOverlayDismissed = true;
+        launchOverlay.animate()
+            .alpha(0f)
+            .setDuration(LAUNCH_OVERLAY_FADE_MS)
+            .setInterpolator(new DecelerateInterpolator())
+            .withEndAction(() -> {
+                launchOverlay.setVisibility(View.GONE);
+                launchOverlay.setAlpha(1f);
+            })
+            .start();
     }
 
     private void animateSlideInFromRight(View view) {

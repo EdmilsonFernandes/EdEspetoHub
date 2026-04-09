@@ -4,4 +4,5 @@
     <string name="title_activity_main">Já no Caminho</string>
     <string name="package_name">com.janocaminho.app</string>
     <string name="custom_url_scheme">com.janocaminho.app</string>
+    <string name="launch_subtitle">Abrindo o Hub com mais rapidez</string>
 </resources>
