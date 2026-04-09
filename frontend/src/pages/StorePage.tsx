@@ -871,6 +871,29 @@ export function StorePage() {
   }, [storeSlug, customersStorageKey, checkoutCustomerStorageKey, customerSessionStorageKey]);
 
   useEffect(() => {
+    const sessionName = String(customerSession?.user?.fullName || '').trim();
+    const sessionPhone = String(customerSession?.user?.phone || '').trim();
+    if (!sessionName && !sessionPhone) return;
+
+    setCustomer((prev: any) => {
+      const prevName = String(prev?.name || '').trim();
+      const prevPhone = String(prev?.phone || '').trim();
+      const nextName = prevName || sessionName;
+      const nextPhone = prevPhone || sessionPhone;
+
+      if (nextName === prevName && nextPhone === prevPhone) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        name: nextName,
+        phone: nextPhone,
+      };
+    });
+  }, [customerSession?.user?.fullName, customerSession?.user?.phone]);
+
+  useEffect(() => {
     if (!customerSession?.token) {
       setCustomerAddresses([]);
       setCustomerOrders([]);
