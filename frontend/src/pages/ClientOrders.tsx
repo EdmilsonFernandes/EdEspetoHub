@@ -17,8 +17,10 @@ import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 const TERMINAL_STATUSES = [ 'DELIVERED', 'CANCELLED', 'FINISHED', 'REJECTED', 'DONE' ];
 
+const normalizeStatus = (status?: string) => String(status || '').trim().toUpperCase();
+
 const getStatusMeta = (status: string) => {
-  switch (status) {
+  switch (normalizeStatus(status)) {
     case 'PENDING':
       return {
         label: 'Aguardando confirmação',
@@ -257,15 +259,7 @@ function OrderCard({
           >
             Ajuda
           </button>
-          {isActive ? (
-            <button
-              type="button"
-              onClick={() => onOpenOrder(order.id)}
-              className="rounded-xl bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
-            >
-              Acompanhar
-            </button>
-          ) : (
+          {!isActive ? (
             <button
               type="button"
               onClick={() => onOpenStore(order.store?.slug)}
@@ -273,7 +267,7 @@ function OrderCard({
             >
               Pedir novamente
             </button>
-          )}
+          ) : null}
         </div>
       </div>
     </article>
@@ -318,11 +312,11 @@ export function ClientOrders() {
   }, [navigate]);
 
   const activeOrders = useMemo(
-    () => orders.filter((order) => !TERMINAL_STATUSES.includes(order.status)),
+    () => orders.filter((order) => !TERMINAL_STATUSES.includes(normalizeStatus(order.status))),
     [orders]
   );
   const pastOrders = useMemo(
-    () => orders.filter((order) => TERMINAL_STATUSES.includes(order.status)),
+    () => orders.filter((order) => TERMINAL_STATUSES.includes(normalizeStatus(order.status))),
     [orders]
   );
   const groupedPastOrders = useMemo(() => groupOrdersByDate(pastOrders), [pastOrders]);
