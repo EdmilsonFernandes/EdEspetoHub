@@ -1433,10 +1433,7 @@ export function MarketplacePage() {
                     />
                     <div className="mt-1.5 flex items-center justify-between gap-2">
                       <p className="line-clamp-1 text-sm font-black text-slate-900">{store.name}</p>
-                      <div className="flex items-center gap-1.5">
-                        <Heart size={14} weight="fill" className="text-rose-500 shrink-0" />
-                        <CaretRight size={14} weight="bold" className="shrink-0 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-500" />
-                      </div>
+                      <Heart size={14} weight="fill" className="text-rose-500 shrink-0" />
                     </div>
                     <p className="mt-0.5 text-[11px] text-slate-600">
                       {distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)} • {store.etaMin}-{store.etaMax} min
