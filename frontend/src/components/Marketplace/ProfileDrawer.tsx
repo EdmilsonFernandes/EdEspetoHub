@@ -2,10 +2,10 @@ import { useEffect, useState, type ReactNode } from 'react';
 import {
   ArrowsClockwise,
   BellSimple,
+  Storefront,
   CookingPot,
   Lifebuoy,
   SignOut,
-  Truck,
   UserCircle,
   UserRectangle,
   House,
@@ -56,7 +56,7 @@ export function ProfileDrawer({
   onOpenAccount,
   onOpenOrders,
   onOpenTerms,
-  onOpenPrivacy,
+  onOpenPrivacy: _onOpenPrivacy,
   onOpenHelp,
   onLogout,
   onDeactivateAccount, // Nova prop
@@ -100,16 +100,14 @@ export function ProfileDrawer({
     ? [
         { id: 'account', label: 'Minha Conta', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-sky-600', bgColor: 'bg-sky-50' },
         { id: 'orders', label: 'Meus pedidos', icon: <BellSimple size={22} weight="duotone" />, onClick: onOpenOrders || onOpenAccount, iconColor: 'text-amber-600', bgColor: 'bg-amber-50' },
-        { id: 'terms', label: 'Termos de Uso', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
-        { id: 'privacy', label: 'Privacidade', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenPrivacy, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
+        { id: 'legal', label: 'Termos e privacidade', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
         { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={22} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
         { id: 'deactivate', label: 'Excluir conta', icon: <SignOut size={22} weight="duotone" />, onClick: onDeactivateAccount, tone: 'danger' },
         { id: 'logout', label: 'Sair da conta', icon: <SignOut size={22} weight="duotone" />, onClick: onLogout, tone: 'danger' },
       ]
     : [
         { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={22} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
-        { id: 'terms', label: 'Termos de Uso', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
-        { id: 'privacy', label: 'Privacidade', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenPrivacy, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
+        { id: 'legal', label: 'Termos e privacidade', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
       ];
 
   return (
@@ -155,8 +153,8 @@ export function ProfileDrawer({
               <div className="flex items-center gap-3">
                 <UserCircle size={24} weight="duotone" className="text-slate-400" />
                 <div className="text-left">
-                  <p className="text-sm font-black">Entrar ou cadastrar</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Minha conta</p>
+                  <p className="text-sm font-black">Entrar como cliente</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Pedidos, conta e endereços</p>
                 </div>
               </div>
               <CaretRight size={16} weight="bold" className="text-slate-500" />
@@ -198,7 +196,7 @@ export function ProfileDrawer({
           )}
 
           <nav className="space-y-1">
-            <p className="mb-3 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 px-1">Menu do Cliente</p>
+            <p className="mb-3 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 px-1">Área do Cliente</p>
             {actions.map((action) => (
               <button
                 key={action.id}
@@ -221,16 +219,19 @@ export function ProfileDrawer({
           </nav>
 
           <section className="pt-2">
-            <p className="mb-3 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 px-1">Serviços Profissionais</p>
+            <div className="mb-3 px-1">
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Acessos Profissionais</p>
+              <p className="mt-1 text-[11px] font-medium text-slate-500">Lojista e entregador entram por aqui.</p>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={onOpenAdminLogin}
                 className="flex flex-col items-center justify-center gap-3 rounded-[2rem] border border-slate-100 bg-white/90 p-5 shadow-[0_18px_30px_-24px_rgba(15,23,42,0.35)] transition-all active:scale-95"
               >
                 <div className="grid h-12 w-12 place-items-center rounded-2xl bg-sky-50 text-sky-600">
-                  <Truck size={28} weight="duotone" />
+                  <Storefront size={28} weight="duotone" />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 text-center">Sou Lojista</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 text-center">Painel da Loja</span>
               </button>
               <button
                 onClick={onOpenMotoboyLogin}
@@ -248,10 +249,10 @@ export function ProfileDrawer({
         <div className="border-t border-slate-100/90 bg-white/70 p-6 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] backdrop-blur-xl">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <p className="text-[11px] font-black text-slate-900 uppercase tracking-tighter">Já no Caminho</p>
+              <p className="text-[11px] font-black text-slate-900 uppercase tracking-tighter">JNC Hub</p>
               <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Versão {versionLabel || 'v0.0.0'}</p>
             </div>
-            <img src="/jnc.png" alt="Logo" className="h-8 w-auto grayscale opacity-50" />
+            <img src="/jnc.png" alt="Logo" className="h-8 w-auto opacity-95" />
           </div>
         </div>
       </aside>

@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft } from '@phosphor-icons/react';
+import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft, Eye, EyeSlash } from '@phosphor-icons/react';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import { customerService } from '../services/customerService';
@@ -29,6 +29,7 @@ import { printReceiptAsImage } from '../utils/printReceiptImage';
 
 const WEEKDAY_LABELS = [ 'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado' ];
 const PUBLIC_ORDER_ALERT_TTL_MS = 3 * 60 * 60 * 1000;
+const CUSTOMER_REMEMBER_EMAIL_KEY = 'jnk_customer_auth_email';
 
 const getOrderStatusTone = (status?: string) => {
   const normalized = String(status || '').trim().toLowerCase();
@@ -74,6 +75,14 @@ export function StorePage() {
     phone: '',
     password: '',
   });
+  const [rememberCustomerEmail, setRememberCustomerEmail] = useState(() => {
+    try {
+      return Boolean(localStorage.getItem(CUSTOMER_REMEMBER_EMAIL_KEY));
+    } catch {
+      return false;
+    }
+  });
+  const [showCustomerPassword, setShowCustomerPassword] = useState(false);
   const [newAddressForm, setNewAddressForm] = useState({
     label: 'Casa',
     recipientName: '',
@@ -87,6 +96,17 @@ export function StorePage() {
     state: '',
   });
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+
+  useEffect(() => {
+    try {
+      const rememberedEmail = localStorage.getItem(CUSTOMER_REMEMBER_EMAIL_KEY);
+      if (rememberedEmail) {
+        setCustomerAuthForm((prev) => ({ ...prev, email: rememberedEmail }));
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const formatPhoneBr = (value: string) => {
     const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
@@ -1766,8 +1786,19 @@ export function StorePage() {
       if (!response?.token) {
         throw new Error('Falha ao autenticar cliente.');
       }
+      try {
+        const email = String(customerAuthForm.email || '').trim().toLowerCase();
+        if (rememberCustomerEmail && email) {
+          localStorage.setItem(CUSTOMER_REMEMBER_EMAIL_KEY, email);
+        } else {
+          localStorage.removeItem(CUSTOMER_REMEMBER_EMAIL_KEY);
+        }
+      } catch {
+        // ignore
+      }
       persistCustomerSession(response);
       setCustomerAuthForm((prev) => ({ ...prev, password: '' }));
+      setShowCustomerPassword(false);
       await refreshCustomerData();
       showToast(customerAuthMode === 'register' ? 'Cadastro concluído.' : 'Login realizado.', 'success');
     } catch (error: any) {
@@ -2447,6 +2478,7 @@ export function StorePage() {
                     value={customerAuthForm.fullName}
                     onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, fullName: e.target.value }))}
                     placeholder="Nome completo"
+                    autoComplete="name"
                     className="w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
                   />
                 )}
@@ -2455,6 +2487,7 @@ export function StorePage() {
                     value={customerAuthForm.phone}
                     onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, phone: formatPhoneBr(e.target.value) }))}
                     placeholder="Telefone (opcional)"
+                    autoComplete="tel"
                     className="w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
                   />
                 )}
@@ -2462,15 +2495,38 @@ export function StorePage() {
                   value={customerAuthForm.email}
                   onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, email: e.target.value }))}
                   placeholder="E-mail"
+                  autoComplete="email"
+                  inputMode="email"
                   className="w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
                 />
-                <input
-                  type="password"
-                  value={customerAuthForm.password}
-                  onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, password: e.target.value }))}
-                  placeholder="Senha"
-                  className="w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
-                />
+                <div className="relative">
+                  <input
+                    type={showCustomerPassword ? 'text' : 'password'}
+                    value={customerAuthForm.password}
+                    onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, password: e.target.value }))}
+                    placeholder="Senha"
+                    autoComplete={customerAuthMode === 'register' ? 'new-password' : 'current-password'}
+                    className="w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCustomerPassword((prev) => !prev)}
+                    className="absolute inset-y-0 right-0 inline-flex w-11 items-center justify-center text-slate-400 transition-colors hover:text-slate-700"
+                    aria-label={showCustomerPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                    title={showCustomerPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  >
+                    {showCustomerPassword ? <EyeSlash size={18} weight="bold" /> : <Eye size={18} weight="bold" />}
+                  </button>
+                </div>
+                <label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-xs font-medium text-slate-600">
+                  <input
+                    type="checkbox"
+                    checked={rememberCustomerEmail}
+                    onChange={(e) => setRememberCustomerEmail(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/20"
+                  />
+                  Lembrar meu e-mail neste aparelho
+                </label>
                 {customerAccountError ? (
                   <p className="text-sm text-rose-600">{customerAccountError}</p>
                 ) : null}
