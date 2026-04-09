@@ -359,14 +359,6 @@ export class PlatformAdminController {
         store.settings.planExempt = planExempt;
         store.settings.planExemptLabel = planExempt ? (label || 'Cliente VIP') : null;
 
-        if (planExempt) {
-          store.open = true;
-        }
-
-        await storeSettingsRepo.save(store.settings);
-        await storeRepo.save(store);
-
-        // If VIP was removed, ensure the store gets a trial subscription (7 days default) if it has no active plan.
         let subscription = planExempt
           ? null
           : await subscriptionRepo.findOne({
@@ -374,43 +366,13 @@ export class PlatformAdminController {
               order: { endDate: 'DESC' } as any,
               relations: ['store', 'store.settings', 'plan'],
             });
-        const now = new Date();
-        const hasValidPlan =
-          !!subscription &&
-          new Date(subscription.endDate).getTime() >= now.getTime() &&
-          subscription.status !== 'PENDING' &&
-          subscription.status !== 'EXPIRED' &&
-          subscription.status !== 'CANCELLED';
+        const hasValidPlan = planExempt
+          ? true
+          : subscriptionService.isActiveSubscription(subscription as any);
 
-        if (!planExempt && !hasValidPlan) {
-          let plan = await planRepo.findOne({ where: { name: 'basic_monthly', enabled: true } as any });
-          if (!plan) {
-            plan = await planRepo.findOne({ where: { enabled: true } as any, order: { price: 'ASC' } as any });
-          }
-          if (plan) {
-            const trialDays = await settingsService.getNumber('trial_days', env.trialDays);
-            const trialEnd = new Date(now);
-            trialEnd.setDate(trialEnd.getDate() + trialDays);
-
-            const created = subscriptionRepo.create({
-              store,
-              plan,
-              startDate: now,
-              endDate: trialEnd,
-              status: 'TRIAL',
-              autoRenew: false,
-              paymentMethod: 'PIX',
-            } as any);
-            await subscriptionRepo.save(created);
-            subscription = created as any;
-            store.open = true;
-            await storeRepo.save(store);
-          } else {
-            // Keep the VIP removal successful even when there is no enabled plan configured.
-            // Super admin can then direct the store to renewal flow.
-            subscription = null as any;
-          }
-        }
+        store.open = planExempt ? true : hasValidPlan;
+        await storeSettingsRepo.save(store.settings);
+        await storeRepo.save(store);
 
         const finalSub = planExempt ? null : subscription;
         const finalHasValidPlan = planExempt
