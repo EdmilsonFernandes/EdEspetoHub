@@ -82,12 +82,12 @@ export function NativeAppNavigator() {
   };
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+5.2rem)] z-[80] flex justify-center px-4 sm:bottom-6">
-      <div className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/92 p-1.5 shadow-[0_18px_44px_-24px_rgba(15,23,42,0.35)] backdrop-blur-xl">
+    <nav className="pointer-events-none fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+4.35rem)] z-[95] px-3 lg:hidden">
+      <div className="pointer-events-auto mx-auto flex max-w-md items-center justify-center gap-2 rounded-2xl border border-slate-200/70 bg-white/82 p-1.5 shadow-[0_16px_36px_-22px_rgba(15,23,42,0.35)] backdrop-blur-2xl">
         <button
           type="button"
           onClick={handleBack}
-          className="inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm font-semibold text-slate-700 transition-colors active:scale-95"
+          className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition-colors active:scale-95"
         >
           <ArrowLeft size={16} weight="bold" />
           Voltar
@@ -96,12 +96,12 @@ export function NativeAppNavigator() {
         <button
           type="button"
           onClick={handleHome}
-          className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white transition-colors active:scale-95"
+          className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm font-semibold text-white transition-colors active:scale-95"
         >
           <House size={16} weight="fill" />
           Hub
         </button>
       </div>
-    </div>
+    </nav>
   );
 }

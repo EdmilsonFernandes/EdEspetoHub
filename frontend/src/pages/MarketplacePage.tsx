@@ -147,6 +147,7 @@ const DISMISSED_CUSTOMER_ORDERS_KEY = 'hub:dismissed-customer-orders';
 const DISMISSED_ANONYMOUS_ORDERS_KEY = 'hub:dismissed-anonymous-orders';
 const DEFAULT_STORE_LOGO = '/janocaminho.jpg';
 const ORDER_EXPIRATION_MS = 3 * 60 * 60 * 1000; // 3 horas
+const ACTIVE_ORDER_ALERT_MAX_AGE_MS = 6 * 60 * 60 * 1000; // 6 horas
 
 const getOrderStatusTone = (status?: string) => {
   const normalized = String(status || '').trim().toLowerCase();
@@ -948,8 +949,6 @@ export function MarketplacePage() {
       });
       ids.forEach((id) => localStorage.removeItem(`orderAccess:${id}`));
       ids.forEach((id) => sessionStorage.removeItem(`orderAccess:${id}`));
-      localStorage.removeItem(DISMISSED_ANONYMOUS_ORDERS_KEY);
-      sessionStorage.removeItem(DISMISSED_ANONYMOUS_ORDERS_KEY);
     } catch {
       // ignore
     }
@@ -975,7 +974,9 @@ export function MarketplacePage() {
       const orders = await customerAccountService.listOrders();
       const active = (orders || []).filter((o: any) => {
         const status = String(o.status || '').toLowerCase();
-        return !['done', 'delivered', 'finished', 'cancelled', 'rejected'].includes(status);
+        const createdAt = new Date(o?.createdAt || 0).getTime();
+        const isRecentEnough = Number.isFinite(createdAt) ? (Date.now() - createdAt) < ACTIVE_ORDER_ALERT_MAX_AGE_MS : true;
+        return isRecentEnough && !['done', 'delivered', 'finished', 'cancelled', 'rejected'].includes(status);
       });
       setActiveOrders(active.slice(0, 3));
     } catch {
@@ -988,16 +989,6 @@ export function MarketplacePage() {
     const interval = window.setInterval(loadActiveOrders, 30000);
     return () => window.clearInterval(interval);
   }, [loadActiveOrders]);
-
-  useEffect(() => {
-    const activeIds = activeOrders.map((order) => String(order?.id || '').trim()).filter(Boolean);
-    setDismissedCustomerOrderIds((prev) => prev.filter((id) => activeIds.includes(id)));
-  }, [activeOrders]);
-
-  useEffect(() => {
-    const activeIds = activeAnonymousOrders.map((order) => String(order?.id || '').trim()).filter(Boolean);
-    setDismissedAnonymousOrderIds((prev) => prev.filter((id) => activeIds.includes(id)));
-  }, [activeAnonymousOrders]);
 
   useEffect(() => {
     const raf = window.requestAnimationFrame(() => setHasEntered(true));
@@ -1479,95 +1470,93 @@ export function MarketplacePage() {
             )}
 
             {!loading && !error && filteredStores.length > 0 && (
-              <div className="grid grid-cols-1 gap-3 md:gap-3 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2 lg:grid-cols-3">
                 {filteredStores.map((store) => (
                   <Link
                     key={store.id}
                     to={`/${store.slug}`}
-                    className={`group rounded-2xl bg-white p-3 transition-all duration-300 active:scale-95 ${
+                    className={`group rounded-[26px] border border-slate-200/70 bg-white px-3.5 py-3.5 transition-all duration-300 active:scale-[0.985] ${
                       store.isOpen
-                        ? 'shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] md:hover:-translate-y-0.5 md:hover:shadow-[0_18px_28px_-22px_rgba(15,23,42,0.3)]'
-                        : 'opacity-90 saturate-90 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.08)]'
+                        ? 'shadow-[0_14px_28px_-24px_rgba(15,23,42,0.22)] md:hover:-translate-y-0.5 md:hover:shadow-[0_24px_34px_-26px_rgba(15,23,42,0.28)]'
+                        : 'opacity-90 saturate-90 shadow-[0_12px_24px_-24px_rgba(15,23,42,0.18)]'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-start gap-3.5">
                       <img
                         src={store.logo}
                         alt={store.name}
-                        className="h-16 w-16 md:h-[72px] md:w-[72px] shrink-0 rounded-xl object-cover border border-slate-100 bg-white"
+                        className="h-16 w-16 shrink-0 rounded-[18px] object-cover border border-slate-100 bg-slate-50 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.4)]"
                         onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_STORE_LOGO; }}
                       />
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
+                        <div className="flex items-start justify-between gap-2.5">
+                          <div className="min-w-0 pr-1">
                             <div className="flex items-center gap-1.5">
-                              <h3 className="truncate text-sm font-black text-slate-900">{store.name}</h3>
+                              <h3 className="truncate text-[14px] font-black text-slate-900">{store.name}</h3>
                               <span className={`inline-flex h-1.5 w-1.5 rounded-full ${store.isOpen ? 'bg-emerald-500' : 'bg-slate-400'}`} />
                               {!store.isOpen && <span className="text-[10px] font-semibold text-slate-500">Fechada</span>}
                             </div>
                             {(store as any).sponsored && (
-                              <p className="mt-0.5 text-[10px] text-slate-400 font-semibold">Patrocinado</p>
+                              <p className="mt-0.5 text-[10px] font-semibold text-slate-400">Patrocinado</p>
                             )}
                           </div>
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.preventDefault();
-                              event.stopPropagation();
-                              toggleFavoriteStore(store.slug);
-                            }}
-                            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-100 bg-white text-slate-500 hover:text-rose-500"
-                            aria-label={`Favoritar ${store.name}`}
-                            title={`Favoritar ${store.name}`}
-                          >
-                            <Heart
-                              size={15}
-                              weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'}
-                              className={favoriteStoreSlugs.includes(store.slug) ? 'text-rose-500' : ''}
-                            />
-                          </button>
+                          <div className="flex shrink-0 items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                toggleFavoriteStore(store.slug);
+                              }}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-100 bg-white text-slate-400 transition-colors hover:text-rose-500"
+                              aria-label={`Favoritar ${store.name}`}
+                              title={`Favoritar ${store.name}`}
+                            >
+                              <Heart
+                                size={15}
+                                weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'}
+                                className={favoriteStoreSlugs.includes(store.slug) ? 'text-rose-500' : ''}
+                              />
+                            </button>
+                            <CaretRight size={15} weight="bold" className="text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-500" />
+                          </div>
                         </div>
-                        <p className="mt-0.5 truncate text-[11px] font-medium text-slate-600">
+                        <p className="mt-1 truncate text-[11px] font-medium text-slate-600">
+                          {store.rating > 0 ? `${store.rating.toFixed(1)} • ` : ''}
                           {store.etaMin}-{store.etaMax} min • {distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)} • {store.freeShipping ? 'Grátis' : 'Taxa'}
                         </p>
                         {!store.isOpen && (
-                          <p className="mt-0.5 truncate text-[10px] text-slate-500">
+                          <p className="mt-1 truncate text-[10px] text-slate-500">
                             {store.nextOpeningLabel || 'Sem horário cadastrado'}
                           </p>
                         )}
-                        <div className="mt-1.5 flex flex-wrap items-center gap-1">
+                        <div className="mt-2 flex flex-wrap items-center gap-1.5">
                           {store.freeShipping && (
-                            <span className="inline-flex rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-medium text-emerald-700">
+                            <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700">
                               Frete grátis
                             </span>
                           )}
                           {store.rating >= 4.8 && (
-                            <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-medium text-emerald-700">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700">
                               <Star size={10} weight="fill" className="text-emerald-600" />
                               Mais bem avaliadas
                             </span>
                           )}
                           {store.supportsDelivery && (
-                            <span className="inline-flex rounded-md bg-slate-100 px-2 py-1 text-[10px] font-medium text-slate-600">
+                            <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-600">
                               Entrega
                             </span>
                           )}
                           {store.supportsPickup && (
-                            <span className="inline-flex rounded-md bg-slate-100 px-2 py-1 text-[10px] font-medium text-slate-600">
+                            <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-600">
                               Retirada
                             </span>
                           )}
                           {store.supportsTable && (
-                            <span className="inline-flex rounded-md bg-slate-100 px-2 py-1 text-[10px] font-medium text-slate-600">
+                            <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-600">
                               Mesa
-                          </span>
+                            </span>
                           )}
-                        </div>
-                        <div className="mt-2 flex items-center justify-end">
-                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 transition-colors group-hover:bg-slate-100 group-hover:text-slate-700">
-                            Abrir
-                            <CaretRight size={12} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
-                          </span>
                         </div>
                       </div>
                     </div>
