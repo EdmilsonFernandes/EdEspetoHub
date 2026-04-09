@@ -120,6 +120,12 @@ const getStoreInitials = (name?: string) => {
   return parts.map((part) => part[0]?.toUpperCase() || '').join('');
 };
 
+const buildWhatsappLink = (phone?: string | null) => {
+  const normalized = String(phone || '').replace(/\D/g, '').replace(/^55/, '');
+  if (!normalized) return '';
+  return `https://wa.me/55${normalized}`;
+};
+
 const groupOrdersByDate = (orders: any[]) => {
   const groups: Array<{ key: string; label: string; orders: any[] }> = [];
   const byKey = new Map<string, { key: string; label: string; orders: any[] }>();
@@ -165,6 +171,7 @@ function OrderCard({
   const logoUrl = resolveAssetUrl(order.store?.settings?.logoUrl || '');
   const storeName = order.store?.name || 'Loja parceira';
   const orderDate = formatTime(order.createdAt);
+  const whatsappLink = buildWhatsappLink(order.store?.phone);
 
   return (
     <article className="rounded-[28px] border border-slate-200 bg-white p-4 shadow-[0_12px_30px_-28px_rgba(15,23,42,0.4)]">
@@ -196,10 +203,7 @@ function OrderCard({
               {statusMeta.icon}
               <span className="font-medium text-slate-500">{statusMeta.label}</span>
             </div>
-            <p className="mt-1 text-[11px] text-slate-500">
-              {orderDate ? `${orderDate} • ` : ''}
-              #{String(order.id || '').slice(0, 8)}
-            </p>
+            <p className="mt-1 text-[11px] text-slate-500">{orderDate || formatGroupDate(order.createdAt)}</p>
           </button>
         </div>
         <div className="shrink-0 pt-0.5 text-right">
@@ -252,13 +256,24 @@ function OrderCard({
           )}
         </div>
         <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => onOpenOrder(order.id)}
-            className="rounded-xl px-3 py-2 text-sm font-semibold text-rose-500 transition-colors hover:bg-rose-50"
-          >
-            Ajuda
-          </button>
+          {whatsappLink ? (
+            <a
+              href={whatsappLink}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-xl px-3 py-2 text-sm font-semibold text-rose-500 transition-colors hover:bg-rose-50"
+            >
+              Ajuda
+            </a>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onOpenStore(order.store?.slug)}
+              className="rounded-xl px-3 py-2 text-sm font-semibold text-rose-500 transition-colors hover:bg-rose-50"
+            >
+              Ajuda
+            </button>
+          )}
           {!isActive ? (
             <button
               type="button"
