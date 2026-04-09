@@ -22,11 +22,62 @@ fi
 GIT_SHA="$(git -C "$ROOT_DIR" rev-parse HEAD)"
 GIT_SHORT_SHA="$(git -C "$ROOT_DIR" rev-parse --short HEAD)"
 GIT_BRANCH="$(git -C "$ROOT_DIR" rev-parse --abbrev-ref HEAD)"
+GIT_REMOTE_URL="$(git -C "$ROOT_DIR" remote get-url origin)"
 BUILD_TIME="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 BUILD_STAMP="$(date -u +"%Y%m%d.%H%M%S")"
 FORCE_MIN_VERSION="0.1.9"
 PKG_VERSION="$(awk -F'"' '/"version"/{print $4; exit}' "$ROOT_DIR/frontend/package.json")"
 CURRENT_ENV_VERSION="$(grep '^FRONTEND_BUILD_VERSION=' "$ENV_FILE" | tail -n1 | cut -d= -f2- || true)"
+
+PYTHON_BIN=""
+if command -v python3 >/dev/null 2>&1; then
+  PYTHON_BIN="python3"
+elif command -v python >/dev/null 2>&1; then
+  PYTHON_BIN="python"
+fi
+
+COMMITS_JSON=""
+if [ -n "$PYTHON_BIN" ]; then
+  COMMITS_JSON="$(
+    ROOT_DIR="$ROOT_DIR" "$PYTHON_BIN" - <<'PY'
+import json
+import os
+import subprocess
+
+root = os.environ["ROOT_DIR"]
+cmd = [
+    "git",
+    "-C",
+    root,
+    "log",
+    "-n",
+    "30",
+    "--date=iso-strict",
+    "--pretty=format:%H%x1f%h%x1f%cI%x1f%an%x1f%ae%x1f%s",
+]
+try:
+    raw = subprocess.check_output(cmd, text=True, stderr=subprocess.DEVNULL)
+except Exception:
+    raw = ""
+
+rows = []
+for line in raw.splitlines():
+    parts = line.split("\x1f")
+    rows.append(
+        {
+            "hash": parts[0] if len(parts) > 0 else "",
+            "shortHash": parts[1] if len(parts) > 1 else "",
+            "dateIso": parts[2] if len(parts) > 2 else "",
+            "authorName": parts[3] if len(parts) > 3 else "",
+            "authorEmail": parts[4] if len(parts) > 4 else "",
+            "subject": parts[5] if len(parts) > 5 else "",
+        }
+    )
+
+print(json.dumps(rows, ensure_ascii=True, separators=(",", ":")))
+PY
+  )"
+fi
 
 normalize_semver() {
   printf '%s' "$1" | sed -E 's/^v//; s/\+.*$//'
@@ -86,6 +137,8 @@ awk '
   !/^FRONTEND_BUILD_GIT_SHA=/ &&
   !/^FRONTEND_BUILD_GIT_SHORT_SHA=/ &&
   !/^FRONTEND_BUILD_GIT_BRANCH=/ &&
+  !/^FRONTEND_BUILD_GIT_REMOTE_URL=/ &&
+  !/^FRONTEND_BUILD_COMMITS_JSON=/ &&
   !/^FRONTEND_BUILD_TIME_ISO=/
 ' "$ENV_FILE" > "$tmp_file"
 
@@ -95,6 +148,8 @@ awk '
   printf 'FRONTEND_BUILD_GIT_SHA=%s\n' "$GIT_SHA"
   printf 'FRONTEND_BUILD_GIT_SHORT_SHA=%s\n' "$GIT_SHORT_SHA"
   printf 'FRONTEND_BUILD_GIT_BRANCH=%s\n' "$GIT_BRANCH"
+  printf 'FRONTEND_BUILD_GIT_REMOTE_URL=%s\n' "$GIT_REMOTE_URL"
+  printf 'FRONTEND_BUILD_COMMITS_JSON=%s\n' "$COMMITS_JSON"
   printf 'FRONTEND_BUILD_TIME_ISO=%s\n' "$BUILD_TIME"
 } > "$ENV_FILE"
 

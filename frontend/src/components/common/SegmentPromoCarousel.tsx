@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type PromoSlide = {
   id: string;
@@ -26,6 +26,12 @@ const PROMO_SLIDES: PromoSlide[] = [
     imageAlt: 'Banner institucional do Ja no Caminho para o segmento de adega',
     fit: 'contain',
   },
+  {
+    id: 'marketing',
+    image: '/marketing/promo-marketing-lite.jpg',
+    imageAlt: 'Banner institucional do Ja no Caminho com divulgacao multissetorial',
+    fit: 'contain',
+  },
 ];
 
 type SegmentPromoCarouselProps = {
@@ -38,19 +44,56 @@ export function SegmentPromoCarousel({
   className = '',
 }: SegmentPromoCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const touchStartXRef = useRef<number | null>(null);
+  const suppressClickRef = useRef(false);
   const compact = mode === 'hub';
 
   useEffect(() => {
     const interval = window.setInterval(() => {
       setActiveIndex((current) => (current + 1) % PROMO_SLIDES.length);
-    }, 5000);
+    }, 3000);
     return () => window.clearInterval(interval);
   }, []);
+
+  const goToSlide = (index: number) => {
+    const total = PROMO_SLIDES.length;
+    setActiveIndex(((index % total) + total) % total);
+  };
+
+  const handleTouchStart = (event: React.TouchEvent<HTMLAnchorElement>) => {
+    touchStartXRef.current = event.touches[0]?.clientX ?? null;
+    suppressClickRef.current = false;
+  };
+
+  const handleTouchEnd = (event: React.TouchEvent<HTMLAnchorElement>) => {
+    const startX = touchStartXRef.current;
+    const endX = event.changedTouches[0]?.clientX ?? null;
+    touchStartXRef.current = null;
+    if (startX == null || endX == null) return;
+    const delta = endX - startX;
+    if (Math.abs(delta) < 36) return;
+    suppressClickRef.current = true;
+    if (delta < 0) {
+      goToSlide(activeIndex + 1);
+    } else {
+      goToSlide(activeIndex - 1);
+    }
+    window.setTimeout(() => {
+      suppressClickRef.current = false;
+    }, 220);
+  };
 
   return (
     <a
       href="/create?plan=trial"
       aria-label="Criar loja no Ja no Caminho"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onClick={(event) => {
+        if (suppressClickRef.current) {
+          event.preventDefault();
+        }
+      }}
       className={`group relative block overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)] active:scale-[0.995] ${className}`}
     >
       <div className={`relative ${compact ? 'aspect-[16/7.8]' : 'aspect-[16/6.8] sm:aspect-[16/6.6]'}`}>
@@ -85,12 +128,18 @@ export function SegmentPromoCarousel({
       <div className="absolute inset-x-0 bottom-0 flex justify-center pb-1.5 sm:pb-2">
         <div className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-slate-950/18 px-2 py-0.5 backdrop-blur-md">
           {PROMO_SLIDES.map((slide, index) => (
-            <span
+            <button
+              type="button"
               key={slide.id}
+              aria-label={`Ir para banner ${index + 1}`}
+              onClick={(event) => {
+                event.preventDefault();
+                goToSlide(index);
+              }}
               className={`rounded-full transition-all ${
                 index === activeIndex ? 'h-1.5 w-5 bg-white' : 'h-1.5 w-1.5 bg-white/65'
               }`}
-            />
+            ></button>
           ))}
         </div>
       </div>
