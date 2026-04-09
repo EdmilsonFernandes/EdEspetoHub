@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { ArrowLeft, House } from '@phosphor-icons/react';
+import { ArrowLeft } from '@phosphor-icons/react';
 
 const STACK_KEY = 'jnk_native_route_stack_v1';
 const MAX_STACK = 24;
@@ -82,24 +82,28 @@ export function NativeAppNavigator() {
   };
 
   return (
-    <nav className="pointer-events-none fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+4.35rem)] z-[95] px-3 lg:hidden">
-      <div className="pointer-events-auto mx-auto flex max-w-md items-center justify-center gap-2 rounded-2xl border border-slate-200/70 bg-white/82 p-1.5 shadow-[0_16px_36px_-22px_rgba(15,23,42,0.35)] backdrop-blur-2xl">
+    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-[130] transition-transform duration-300 ease-in-out lg:hidden">
+      <div className="pointer-events-auto mx-auto grid max-w-none grid-cols-2 gap-1 border-t border-slate-200/40 bg-white/72 p-1.5 pb-[max(env(safe-area-inset-bottom),4px)] shadow-[0_-12px_24px_-20px_rgba(15,23,42,0.35)] backdrop-blur-2xl">
         <button
           type="button"
           onClick={handleBack}
-          className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition-colors active:scale-95"
+          className="flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl py-1 text-[8px] font-black uppercase tracking-[0.1em] text-slate-600 transition active:scale-95"
         >
-          <ArrowLeft size={16} weight="bold" />
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-700">
+            <ArrowLeft size={17} weight="bold" />
+          </span>
           Voltar
         </button>
-        <div className="h-6 w-px bg-slate-200" />
         <button
           type="button"
           onClick={handleHome}
-          className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm font-semibold text-white transition-colors active:scale-95"
+          className="flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl py-1 text-[8px] font-black uppercase tracking-[0.1em] text-white shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)] transition active:scale-95"
+          style={{ backgroundColor: '#0f172a' }}
         >
-          <House size={16} weight="fill" />
-          Hub
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/14 p-0.5">
+            <img src="/jnc.png" alt="JNC" className="h-full w-full rounded-full object-contain" />
+          </span>
+          JNC
         </button>
       </div>
     </nav>

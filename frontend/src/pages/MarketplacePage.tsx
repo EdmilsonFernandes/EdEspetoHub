@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MagnifyingGlass, Star, Storefront, House, List, CaretDown, Heart, CaretRight, X } from '@phosphor-icons/react';
+import { MagnifyingGlass, Star, Storefront, House, List, CaretDown, Heart, CaretRight, X, Bicycle } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
@@ -1437,8 +1437,7 @@ export function MarketplacePage() {
 
           <section className="space-y-4 mb-8" style={{ transition: 'all .45s ease', transitionDelay: '400ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
             <div className="flex items-center justify-between gap-2">
-              <h2 className="text-base sm:text-lg font-black text-slate-900">Lojas da região</h2>
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">{filteredStores.length} resultados</p>
+              <h2 className="text-base sm:text-lg font-black text-slate-900">Lojas</h2>
             </div>
 
             {loading && (
@@ -1475,7 +1474,7 @@ export function MarketplacePage() {
                   <Link
                     key={store.id}
                     to={`/${store.slug}`}
-                    className={`group rounded-[26px] border border-slate-200/70 bg-white px-3.5 py-3.5 transition-all duration-300 active:scale-[0.985] ${
+                    className={`group rounded-[26px] border border-slate-200/70 bg-white px-3.5 py-3 transition-all duration-300 active:scale-[0.985] ${
                       store.isOpen
                         ? 'shadow-[0_14px_28px_-24px_rgba(15,23,42,0.22)] md:hover:-translate-y-0.5 md:hover:shadow-[0_24px_34px_-26px_rgba(15,23,42,0.28)]'
                         : 'opacity-90 saturate-90 shadow-[0_12px_24px_-24px_rgba(15,23,42,0.18)]'
@@ -1496,9 +1495,6 @@ export function MarketplacePage() {
                               <span className={`inline-flex h-1.5 w-1.5 rounded-full ${store.isOpen ? 'bg-emerald-500' : 'bg-slate-400'}`} />
                               {!store.isOpen && <span className="text-[10px] font-semibold text-slate-500">Fechada</span>}
                             </div>
-                            {(store as any).sponsored && (
-                              <p className="mt-0.5 text-[10px] font-semibold text-slate-400">Patrocinado</p>
-                            )}
                           </div>
                           <div className="flex shrink-0 items-center gap-1.5">
                             <button
@@ -1521,40 +1517,41 @@ export function MarketplacePage() {
                             <CaretRight size={15} weight="bold" className="text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-500" />
                           </div>
                         </div>
-                        <p className="mt-1 truncate text-[11px] font-medium text-slate-600">
-                          {store.rating > 0 ? `${store.rating.toFixed(1)} • ` : ''}
-                          {store.etaMin}-{store.etaMax} min • {distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)} • {store.freeShipping ? 'Grátis' : 'Taxa'}
-                        </p>
+                        <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] font-medium text-slate-600">
+                          {store.rating > 0 ? (
+                            <span className="inline-flex items-center gap-1 text-amber-600">
+                              <Star size={11} weight="fill" className="text-amber-500" />
+                              <span className="font-semibold text-slate-700">{store.rating.toFixed(1)}</span>
+                            </span>
+                          ) : null}
+                          <span>{store.etaMin}-{store.etaMax} min</span>
+                          <span>•</span>
+                          <span>{distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)}</span>
+                          {store.freeShipping ? (
+                            <>
+                              <span>•</span>
+                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                                <Bicycle size={11} weight="fill" className="text-emerald-600" />
+                                Gratis
+                              </span>
+                            </>
+                          ) : null}
+                        </div>
                         {!store.isOpen && (
                           <p className="mt-1 truncate text-[10px] text-slate-500">
                             {store.nextOpeningLabel || 'Sem horário cadastrado'}
                           </p>
                         )}
                         <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                          {store.freeShipping && (
-                            <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700">
-                              Frete grátis
-                            </span>
-                          )}
                           {store.rating >= 4.8 && (
                             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700">
                               <Star size={10} weight="fill" className="text-emerald-600" />
                               Mais bem avaliadas
                             </span>
                           )}
-                          {store.supportsDelivery && (
+                          {(store as any).sponsored && (
                             <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-600">
-                              Entrega
-                            </span>
-                          )}
-                          {store.supportsPickup && (
-                            <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-600">
-                              Retirada
-                            </span>
-                          )}
-                          {store.supportsTable && (
-                            <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-600">
-                              Mesa
+                              Patrocinado
                             </span>
                           )}
                         </div>
