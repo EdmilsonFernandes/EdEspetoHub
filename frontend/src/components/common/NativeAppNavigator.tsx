@@ -82,8 +82,8 @@ export function NativeAppNavigator() {
   };
 
   return (
-    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-[130] transition-transform duration-300 ease-in-out lg:hidden">
-      <div className="pointer-events-auto mx-auto grid max-w-none grid-cols-2 gap-1 border-t border-slate-200/40 bg-white/72 p-1.5 pb-[max(env(safe-area-inset-bottom),4px)] shadow-[0_-12px_24px_-20px_rgba(15,23,42,0.35)] backdrop-blur-2xl">
+    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-[45] transition-transform duration-300 ease-in-out lg:hidden">
+      <div className="pointer-events-auto mx-auto grid max-w-none grid-cols-2 gap-1 border-t border-slate-200/40 bg-white/72 p-1.5 pb-[max(env(safe-area-inset-bottom),4px)] shadow-[0_-12px_24px_-20px_rgba(15,23,42,0.25)] backdrop-blur-2xl">
         <button
           type="button"
           onClick={handleBack}
@@ -97,10 +97,10 @@ export function NativeAppNavigator() {
         <button
           type="button"
           onClick={handleHome}
-          className="flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl py-1 text-[8px] font-black uppercase tracking-[0.1em] text-white shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)] transition active:scale-95"
-          style={{ backgroundColor: '#0f172a' }}
+          className="flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl py-1 text-[8px] font-black uppercase tracking-[0.1em] text-slate-700 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.18)] transition active:scale-95"
+          style={{ backgroundColor: 'rgba(241,245,249,0.92)' }}
         >
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/14 p-0.5">
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white p-0.5 ring-1 ring-slate-200">
             <img src="/jnc.png" alt="JNC" className="h-full w-full rounded-full object-contain" />
           </span>
           JNC
