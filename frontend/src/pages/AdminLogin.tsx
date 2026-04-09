@@ -50,6 +50,32 @@ export function AdminLogin() {
     });
   };
 
+  const redirectToPendingPayment = (paymentUrl?: string | null, paymentLink?: string | null) => {
+    const target = String(paymentUrl || '').trim();
+    if (target) {
+      try {
+        const parsed = new URL(target, window.location.origin);
+        if (parsed.origin === window.location.origin) {
+          navigate(`${parsed.pathname}${parsed.search}${parsed.hash}`);
+          return;
+        }
+      } catch {
+        if (target.startsWith('/')) {
+          navigate(target);
+          return;
+        }
+      }
+      window.location.href = target;
+      return;
+    }
+
+    const external = String(paymentLink || '').trim();
+    if (external) {
+      window.location.href = external;
+      return;
+    }
+  };
+
   const handleLogin = async event => {
     event?.preventDefault();
     setLoginError('');
@@ -106,10 +132,15 @@ export function AdminLogin() {
     } catch (error: any) {
       const message = error.message || 'Não foi possível autenticar agora.';
       if (error?.code === 'PAY-010') {
+        const paymentUrl = error?.details?.paymentUrl;
+        const paymentLink = error?.details?.paymentLink;
         setPendingPayment({
-          paymentUrl: error?.details?.paymentUrl,
-          paymentLink: error?.details?.paymentLink,
+          paymentUrl,
+          paymentLink,
         });
+        setLoginError('Pagamento pendente. Redirecionando para regularizar sua assinatura...');
+        window.setTimeout(() => redirectToPendingPayment(paymentUrl, paymentLink), 350);
+        return;
       }
       if (error?.code === 'AUTH-005') {
         const targetEmail = error?.details?.email;
