@@ -14,6 +14,8 @@ if ! command -v docker >/dev/null 2>&1; then
   exit 1
 fi
 
+sh "$ROOT_DIR/scripts/docker-clean-build-cache.sh" || true
+
 docker compose \
   -f "$ROOT_DIR/docker-compose.yml" \
   -f "$ROOT_DIR/docker-compose.prod.yml" \

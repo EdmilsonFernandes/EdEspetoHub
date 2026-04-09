@@ -2,16 +2,19 @@
 set -eu
 
 # Safe Docker cleanup for deploy hosts:
-# - removes dangling images/layers from rebuilds
-# - prunes old BuildKit cache to keep disk under control
-# - keeps running containers/images untouched
+# - removes stopped containers and anonymous volumes from rebuilds
+# - prunes dangling and old unused images
+# - prunes BuildKit cache aggressively by default to avoid disk growth
+# - keeps running containers/attached volumes untouched
 #
 # Tunables:
-#   DOCKER_BUILDER_CACHE_TTL=168h   # default: keep last 7 days of builder cache
-#   DOCKER_PRUNE_AGGRESSIVE=false   # true => also prune unused (non-dangling) images older than TTL
+#   DOCKER_BUILDER_CACHE_TTL=24h    # default: keep only the last 24h of unused images
+#   DOCKER_PRUNE_AGGRESSIVE=true    # true => also prune unused (non-dangling) images older than TTL
+#   DOCKER_PRUNE_VOLUMES=true       # true => prune anonymous/unattached volumes
 
-TTL="${DOCKER_BUILDER_CACHE_TTL:-168h}"
-AGGRESSIVE="${DOCKER_PRUNE_AGGRESSIVE:-false}"
+TTL="${DOCKER_BUILDER_CACHE_TTL:-24h}"
+AGGRESSIVE="${DOCKER_PRUNE_AGGRESSIVE:-true}"
+PRUNE_VOLUMES="${DOCKER_PRUNE_VOLUMES:-true}"
 
 if ! command -v docker >/dev/null 2>&1; then
   echo "[cleanup] docker not found in PATH. Skipping cleanup." >&2
@@ -29,8 +32,12 @@ if [ "$AGGRESSIVE" = "true" ]; then
   docker image prune -a -f --filter "until=$TTL" >/dev/null 2>&1 || true
 fi
 
-echo "[cleanup] Pruning builder cache (until=$TTL)..."
-docker builder prune -f --filter "until=$TTL" >/dev/null 2>&1 || true
+if [ "$PRUNE_VOLUMES" = "true" ]; then
+  echo "[cleanup] Pruning unused volumes..."
+  docker volume prune -f >/dev/null 2>&1 || true
+fi
+
+echo "[cleanup] Pruning builder cache..."
+docker builder prune -af >/dev/null 2>&1 || true
 
 echo "[cleanup] Done."
-

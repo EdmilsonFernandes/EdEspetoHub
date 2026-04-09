@@ -103,6 +103,8 @@ rm -f "$tmp_file"
 echo "Frontend build metadata updated in .env.prod:"
 grep '^FRONTEND_BUILD_' "$ENV_FILE" || true
 
+sh "$ROOT_DIR/scripts/docker-clean-build-cache.sh" || true
+
 docker compose \
   -f "$ROOT_DIR/docker-compose.yml" \
   -f "$ROOT_DIR/docker-compose.prod.yml" \
