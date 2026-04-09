@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   ArrowLeft, 
   SignOut, 
@@ -9,11 +9,12 @@ import {
   ShieldCheck, 
   BellRinging, 
   UserCircle, 
-  Package, 
+  Package,
   CaretRight,
   Phone,
   EnvelopeSimple,
-  Camera
+  Camera,
+  ImagesSquare
 } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
 import { formatCurrency, formatOrderDisplayId } from '../utils/format';
@@ -26,6 +27,7 @@ import { ConfirmationModal } from '../components/common/ConfirmationModal';
 
 export function ClientAccount() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [deactivating, setDeactivating] = useState(false);
   const [showDeactivateModal, setShowDeactivateModal] = useState(false);
@@ -42,6 +44,7 @@ export function ClientAccount() {
   const [pushLoading, setPushLoading] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
   const [phoneDraft, setPhoneDraft] = useState('');
+  const settingsSectionRef = useRef<HTMLElement | null>(null);
 
   const syncCustomerSession = (nextUser: any, options?: { bustProfileImage?: boolean }) => {
     try {
@@ -122,6 +125,14 @@ export function ClientAccount() {
     void loadPush();
   }, []);
 
+  useEffect(() => {
+    if (loading) return;
+    if (searchParams.get('section') !== 'settings') return;
+    window.setTimeout(() => {
+      settingsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 120);
+  }, [loading, searchParams]);
+
   const logout = () => {
     const token = String(localStorage.getItem('jnk_mobile_push_token') || '').trim();
     if (token) {
@@ -189,6 +200,11 @@ export function ClientAccount() {
     } finally {
       setPushLoading(false);
     }
+  };
+
+  const handleReviewPhotoAccess = async () => {
+    setProfileMessage('');
+    await pickProfileImageNative();
   };
 
   const handleChangePassword = async () => {
@@ -353,10 +369,9 @@ export function ClientAccount() {
             </div>
           </section>
 
-          {/* Seção 3: Segurança e Configurações */}
-          <section className="grid gap-4 sm:grid-cols-2">
-            {/* Segurança */}
-            <div className="rounded-[2rem] bg-white p-5 border border-slate-100 shadow-sm space-y-4">
+          {/* Seção 3: Segurança */}
+          <section className="rounded-[2rem] bg-white p-5 border border-slate-100 shadow-sm space-y-4">
+            <div className="space-y-4">
               <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
                 <ShieldCheck size={16} weight="duotone" className="text-indigo-500" />
                 Segurança
@@ -378,23 +393,61 @@ export function ClientAccount() {
                 </button>
               </div>
             </div>
+          </section>
 
-            {/* Configurações */}
-            <div className="rounded-[2rem] bg-white p-5 border border-slate-100 shadow-sm flex flex-col justify-between">
-              <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                <BellRinging size={16} weight="duotone" className="text-amber-500" />
-                Configurações
-              </h3>
-              <div className="mt-4 flex items-center justify-between gap-3">
+          <section
+            ref={settingsSectionRef}
+            className={`rounded-[2rem] border bg-white p-5 shadow-sm transition-all ${
+              searchParams.get('section') === 'settings'
+                ? 'border-violet-200 shadow-[0_22px_50px_-36px_rgba(139,92,246,0.42)] ring-2 ring-violet-100'
+                : 'border-slate-100'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                  <BellRinging size={16} weight="duotone" className="text-violet-500" />
+                  Configurações
+                </h3>
+                <p className="mt-2 text-sm font-bold text-slate-800">Permissões e acessos do app</p>
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-3">
+              <div className="flex items-center justify-between gap-3 rounded-[1.4rem] border border-slate-100 bg-slate-50/80 px-4 py-3">
                 <div className="min-w-0">
-                  <p className="text-[11px] font-bold text-slate-700">Notificações Push</p>
-                  <p className="text-[9px] font-bold text-slate-400 leading-tight">Receber avisos sobre meus pedidos</p>
+                  <p className="text-[12px] font-black text-slate-800">Notificações Push</p>
+                  <p className="text-[10px] font-bold text-slate-400 leading-tight">Receba avisos de status e pedidos direto no aplicativo.</p>
                 </div>
                 <button
                   onClick={handleTogglePush}
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${pushEnabled ? 'bg-emerald-500' : 'bg-slate-200'}`}
+                  disabled={pushLoading}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${pushEnabled ? 'bg-emerald-500' : 'bg-slate-200'} ${pushLoading ? 'opacity-60' : ''}`}
+                  aria-label={pushEnabled ? 'Push ativado' : 'Ativar push'}
                 >
                   <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${pushEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                </button>
+              </div>
+
+              <div className="rounded-[1.4rem] border border-slate-100 bg-slate-50/80 px-4 py-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[12px] font-black text-slate-800">Foto e camera</p>
+                    <p className="text-[10px] font-bold text-slate-400 leading-tight">
+                      Se voce negou o acesso antes, tente novamente por aqui para trocar sua foto de perfil.
+                    </p>
+                  </div>
+                  <div className="grid h-10 w-10 place-items-center rounded-2xl bg-white text-violet-600 shadow-sm">
+                    <ImagesSquare size={18} weight="duotone" />
+                  </div>
+                </div>
+                <button
+                  onClick={handleReviewPhotoAccess}
+                  disabled={profileSaving}
+                  className="mt-3 inline-flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700 shadow-sm ring-1 ring-slate-200 transition-all active:scale-95 disabled:opacity-60"
+                >
+                  <Camera size={14} weight="fill" />
+                  Revisar acesso a foto
                 </button>
               </div>
             </div>

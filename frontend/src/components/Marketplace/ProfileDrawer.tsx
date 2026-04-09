@@ -36,6 +36,7 @@ type ProfileDrawerProps = {
   onOpenAdminLogin: () => void;
   onOpenMotoboyLogin: () => void;
   onOpenAccount: () => void;
+  onOpenSettings: () => void;
   onOpenOrders?: () => void;
   onOpenTerms: () => void;
   onOpenPrivacy: () => void;
@@ -56,6 +57,7 @@ export function ProfileDrawer({
   onOpenAdminLogin,
   onOpenMotoboyLogin,
   onOpenAccount,
+  onOpenSettings,
   onOpenOrders,
   onOpenTerms,
   onOpenPrivacy: _onOpenPrivacy,
@@ -102,6 +104,7 @@ export function ProfileDrawer({
     ? [
         { id: 'account', label: 'Minha Conta', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-sky-600', bgColor: 'bg-sky-50' },
         { id: 'orders', label: 'Meus pedidos', icon: <BellSimple size={22} weight="duotone" />, onClick: onOpenOrders || onOpenAccount, iconColor: 'text-amber-600', bgColor: 'bg-amber-50' },
+        { id: 'settings', label: 'Configurações', icon: <ArrowsClockwise size={22} weight="duotone" />, onClick: onOpenSettings, iconColor: 'text-violet-600', bgColor: 'bg-violet-50' },
         { id: 'legal', label: 'Termos e privacidade', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
         { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={22} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
         { id: 'deactivate', label: 'Excluir conta', icon: <Trash size={22} weight="duotone" />, onClick: onDeactivateAccount, tone: 'danger' },

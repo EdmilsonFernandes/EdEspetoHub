@@ -894,6 +894,10 @@ export function MarketplacePage() {
     navigate('/cliente/conta');
   }, [navigate]);
 
+  const openCustomerSettings = useCallback(() => {
+    navigate('/cliente/conta?section=settings');
+  }, [navigate]);
+
   const openCustomerOrders = useCallback(() => {
     navigate('/cliente/pedidos');
   }, [navigate]);
@@ -1048,6 +1052,7 @@ export function MarketplacePage() {
         onOpenAdminLogin={openAdminLogin}
         onOpenMotoboyLogin={openMotoboyLogin}
         onOpenAccount={openCustomerAccount}
+        onOpenSettings={openCustomerSettings}
         onOpenOrders={openCustomerOrders}
         onOpenTerms={openTerms}
         onOpenPrivacy={openPrivacy}
