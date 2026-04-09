@@ -2349,6 +2349,16 @@ export function StorePage() {
               todayHoursLabel={todayHoursLabel}
               storeAddress={storeAddress}
               storeCoords={storeCoords}
+              storeDescription={storeDescription}
+              reviewSummary={storeReviewSummary}
+              deliveryFeeLabel={
+                orderTypes.includes('delivery')
+                  ? (getNumeric(deliveryFee) && Number(getNumeric(deliveryFee)) > 0
+                      ? `Taxa ${formatCurrency(Number(getNumeric(deliveryFee)))}`
+                      : 'Entrega grátis')
+                  : ''
+              }
+              orderTypes={orderTypes}
               compactHeader={isMobile}
               staffView={Boolean(canUseAdminPrintFlow)}
               isOrderingEnabled={storeOrderingEnabled || Boolean(user?.token)}

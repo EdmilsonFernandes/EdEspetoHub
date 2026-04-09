@@ -8,6 +8,9 @@ import {
   SignOut,
   MagnifyingGlass,
   MapPin,
+  Phone,
+  Star,
+  Clock,
   ChefHat,
   Sparkle,
   ShoppingCart,
@@ -92,7 +95,11 @@ const Header = ({
   isAuthenticated,
   compact,
   isOpenNow,
-  todayHoursLabel
+  todayHoursLabel,
+  onOpenStoreDetails,
+  reviewSummary,
+  deliveryFeeLabel,
+  orderTypes
 }) => {
   const normalizedRole = String(userRole || "").toLowerCase();
   const isAdminUser = normalizedRole === "admin";
@@ -128,6 +135,16 @@ const Header = ({
   const segmentLabel = segmentLabelMap[String(segment || "").toLowerCase()] || "Comércio";
   const headerBanner = resolveAssetUrl(branding?.bannerUrl || "");
   const headerPrimaryColor = branding?.primaryColor || "#0f172a";
+  const avgRating = Number(reviewSummary?.avgStoreRating || 0);
+  const totalReviews = Number(reviewSummary?.totalReviews || 0);
+  const deliveryModes = Array.isArray(orderTypes)
+    ? orderTypes
+        .map((type) => String(type || "").toLowerCase())
+        .filter(Boolean)
+        .map((type) =>
+          type === "delivery" ? "Entrega" : type === "pickup" ? "Retirada" : type === "table" ? "Mesa" : type
+        )
+    : [];
   const closingHour = todayHoursLabel
     ? todayHoursLabel
         .split("-")
@@ -281,16 +298,20 @@ const Header = ({
             </div>
             {compact && !mobileCollapsedStable && (
               <div className="sm:hidden absolute inset-x-0 bottom-0 px-4 pb-3">
-                <div className="pr-14">
+                <button
+                  type="button"
+                  onClick={onOpenStoreDetails}
+                  className="pr-14 text-left"
+                >
                   <h1 className="text-base font-black text-white truncate">{branding?.brandName || "Sua Loja"}</h1>
                   <div className="mt-0.5 inline-flex items-center gap-1.5 text-[11px] text-white/95 font-semibold">
                     <span className={`h-2 w-2 rounded-full ${isOpenNow ? "bg-emerald-400 animate-pulse" : "bg-amber-300"}`} />
                     <span>
-                      {isOpenNow ? "Aberto" : "Fechado"}
+                      {isOpenNow ? "Aberto agora" : "Fechado agora"}
                       {closingHour ? ` · ${isOpenNow ? "Fecha" : "Hoje até"} ${closingHour}` : ""}
                     </span>
                   </div>
-                </div>
+                </button>
                 <div className="absolute right-4 top-1 h-11 w-11 rounded-full overflow-hidden border-2 border-white bg-white shadow-lg flex items-center justify-center">
                   {branding?.logoUrl ? (
                     <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" />
@@ -311,23 +332,59 @@ const Header = ({
               )}
             </div>
 
-            <div className="sm:pl-32 flex flex-col items-center text-center sm:items-start sm:text-left">
-              <h1 className={`${compact ? 'text-lg' : 'text-xl sm:text-2xl'} font-black text-slate-900 truncate max-w-full`}>
-                {branding?.brandName || "Sua Loja"}
-              </h1>
-              <div className="mt-1.5 flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                {segmentLabel !== "Comércio" && (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-700">
-                    {segmentLabel}
-                  </span>
-                )}
-                <div className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-slate-600 font-semibold">
-                  <span className={`h-2 w-2 rounded-full ${isOpenNow ? "bg-emerald-500 animate-pulse" : "bg-orange-500"}`} />
-                  <span>
-                    {isOpenNow ? "Aberto" : "Fechado"}
-                    {closingHour ? `  ${isOpenNow ? "Fecha às" : "Hoje até"} ${closingHour}` : ""}
+            <div className="sm:pl-32 flex w-full flex-col items-center text-center sm:items-start sm:text-left">
+              <button
+                type="button"
+                onClick={onOpenStoreDetails}
+                className="w-full text-center sm:text-left"
+              >
+                <div className="flex w-full items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h1 className={`${compact ? 'text-lg' : 'text-xl sm:text-2xl'} font-black text-slate-900 truncate max-w-full`}>
+                      {branding?.brandName || "Sua Loja"}
+                    </h1>
+                    <div className="mt-1.5 flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                      {segmentLabel !== "Comércio" && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-700">
+                          {segmentLabel}
+                        </span>
+                      )}
+                      <div className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-slate-600 font-semibold">
+                        <span className={`h-2 w-2 rounded-full ${isOpenNow ? "bg-emerald-500 animate-pulse" : "bg-orange-500"}`} />
+                        <span>
+                          {isOpenNow ? "Aberto agora" : "Fechado agora"}
+                          {closingHour ? `  ${isOpenNow ? "Fecha às" : "Hoje até"} ${closingHour}` : ""}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="hidden sm:inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-bold text-slate-600">
+                    Ver loja
                   </span>
                 </div>
+              </button>
+
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                {avgRating > 0 && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
+                    <Star size={11} weight="fill" className="text-amber-500" />
+                    {avgRating.toFixed(1)} {totalReviews > 0 ? `(${totalReviews})` : ''}
+                  </span>
+                )}
+                {deliveryFeeLabel && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                    <ShoppingCart size={11} weight="duotone" />
+                    {deliveryFeeLabel}
+                  </span>
+                )}
+                {deliveryModes.slice(0, 2).map((label) => (
+                  <span
+                    key={label}
+                    className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600"
+                  >
+                    {label}
+                  </span>
+                ))}
               </div>
 
               {!compact && (
@@ -452,6 +509,10 @@ export const MenuView = ({
   isAuthenticated = false,
   onOpenCustomerAccount,
   isCustomerAuthenticated = false,
+  storeDescription,
+  reviewSummary,
+  deliveryFeeLabel,
+  orderTypes = [],
 }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -500,6 +561,19 @@ export const MenuView = ({
     return { line1, line2, cep };
   };
   const formattedAddress = formatStoreAddress(storeAddress);
+  const storeSegmentLabel =
+    {
+      restaurante: "Restaurante",
+      hamburgueria: "Hamburgueria",
+      lanchonete: "Lanchonete",
+      pizzaria: "Pizzaria",
+      adega: "Adega",
+      mercado: "Mercado",
+      hortifruti: "Hortifruti",
+      farmacia: "Farmácia",
+      confeitaria: "Confeitaria",
+      outros: "Comércio",
+    }[String(segment || "").toLowerCase()] || "Comércio";
   const mapQuery = storeAddress ? encodeURIComponent(storeAddress) : "";
   const googleMapsUrl = mapQuery
     ? `https://www.google.com/maps/search/?api=1&query=${mapQuery}`
@@ -924,6 +998,10 @@ export const MenuView = ({
           compact={effectiveCompactHeader}
           isOpenNow={isOpenNow}
           todayHoursLabel={todayHoursLabel}
+          onOpenStoreDetails={() => setShowStoreDetails(true)}
+          reviewSummary={reviewSummary}
+          deliveryFeeLabel={deliveryFeeLabel}
+          orderTypes={orderTypes}
         />
       )}
 
@@ -1002,75 +1080,6 @@ export const MenuView = ({
                 <h2 className="text-lg sm:text-xl font-black text-slate-900 mt-1">
                   {branding?.brandName || "Seu Espeto"}
                 </h2>
-              </div>
-            )}
-
-            {!effectiveCompactHeader && storeAddress && (
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowStoreDetails((prev) => !prev)}
-                  className="px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
-                >
-                  {showStoreDetails ? "Ocultar detalhes" : "Detalhes da loja"}
-                </button>
-              </div>
-            )}
-
-            {!effectiveCompactHeader && showStoreDetails && storeAddress && (
-              <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-                <div className="flex flex-col gap-4 sm:grid sm:grid-cols-[1.1fr_0.9fr] sm:items-start">
-                  <div className="space-y-3">
-                    <a
-                      href={googleMapsUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-start gap-3 hover:opacity-90 transition"
-                    >
-                      <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
-                        <MapPin size={18} weight="duotone" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                          Endereço da loja
-                        </p>
-                        <div className="text-sm font-semibold text-slate-900">
-                          <p>{formattedAddress.line1}</p>
-                          {formattedAddress.line2 && (
-                            <p className="text-xs font-medium text-slate-600">{formattedAddress.line2}</p>
-                          )}
-                          {formattedAddress.cep && (
-                            <p className="text-xs text-slate-500">CEP {formattedAddress.cep}</p>
-                          )}
-                        </div>
-                        <p className="text-xs text-slate-500">Toque para abrir no mapa</p>
-                      </div>
-                    </a>
-                    <div className="flex flex-wrap gap-2">
-                      <a
-                        href={googleMapsUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
-                      >
-                        Abrir no Google Maps
-                      </a>
-                      <a
-                        href={wazeUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
-                      >
-                        Abrir no Waze
-                      </a>
-                    </div>
-                  </div>
-                  {mapMarkers.length > 0 && (
-                    <div className="rounded-2xl border border-slate-100 bg-white p-2 shadow-sm">
-                      <GoogleMapView markers={mapMarkers} zoom={15} />
-                    </div>
-                  )}
-                </div>
               </div>
             )}
 
@@ -1560,6 +1569,192 @@ export const MenuView = ({
                   </button>
                 );
               })}
+            </div>
+          </Drawer.Content>
+        </Drawer.Portal>
+      </Drawer.Root>
+
+      <Drawer.Root open={showStoreDetails} onOpenChange={setShowStoreDetails}>
+        <Drawer.Portal>
+          <Drawer.Overlay className="fixed inset-0 z-[70] bg-slate-950/65 backdrop-blur-[2px]" />
+          <Drawer.Content className="fixed inset-x-0 bottom-0 z-[80] mt-24 h-[92vh] rounded-t-[32px] bg-slate-50 outline-none shadow-[0_-24px_64px_-38px_rgba(15,23,42,0.55)]">
+            <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/10 to-transparent pointer-events-none" />
+            <div className="sticky top-0 z-10 flex items-center justify-between px-4 pt-3">
+              <button
+                type="button"
+                onClick={() => setShowStoreDetails(false)}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/92 text-slate-700 shadow-sm ring-1 ring-slate-200"
+                aria-label="Voltar ao cardápio"
+              >
+                <ArrowLeft size={18} weight="bold" />
+              </button>
+              <div className="rounded-full bg-white/92 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500 ring-1 ring-slate-200">
+                Loja
+              </div>
+            </div>
+
+            <div className="h-full overflow-y-auto pb-8">
+              <div className="mx-4 mt-3 overflow-hidden rounded-[30px] border border-slate-200 bg-white shadow-[0_24px_48px_-32px_rgba(15,23,42,0.28)]">
+                <div
+                  className="relative h-44 bg-slate-900"
+                  style={
+                    resolveAssetUrl(branding?.bannerUrl || "")
+                      ? {
+                          backgroundImage: `url(${resolveAssetUrl(branding?.bannerUrl || "" )})`,
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
+                        }
+                      : { background: `linear-gradient(135deg, ${catalogPrimaryColor}, ${catalogSecondaryColor})` }
+                  }
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                </div>
+
+                <div className="relative px-4 pb-5 pt-0">
+                  <div className="-mt-10 flex items-end gap-3">
+                    <div className="h-20 w-20 overflow-hidden rounded-[24px] border-4 border-white bg-white shadow-lg">
+                      {branding?.logoUrl ? (
+                        <img src={branding.logoUrl} alt={branding?.brandName} className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-xl font-black text-slate-700">
+                          {String(branding?.brandName || "JC").slice(0, 2).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1 pb-1">
+                      <h3 className="truncate text-xl font-black text-slate-900">{branding?.brandName || "Sua Loja"}</h3>
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
+                        <span>{storeSegmentLabel}</span>
+                        {avgRating > 0 && (
+                          <>
+                            <span className="text-slate-300">•</span>
+                            <span className="inline-flex items-center gap-1 text-amber-700">
+                              <Star size={12} weight="fill" className="text-amber-400" />
+                              {avgRating.toFixed(1)} {totalReviews > 0 ? `(${totalReviews})` : ""}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <div className="rounded-2xl bg-slate-50 px-3 py-3">
+                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Status</p>
+                      <p className="mt-1 text-sm font-bold text-slate-900">{isOpenNow ? "Aberto agora" : "Fechado agora"}</p>
+                      {todayHoursLabel ? <p className="mt-1 text-xs text-slate-500">{todayHoursLabel}</p> : null}
+                    </div>
+                    <div className="rounded-2xl bg-slate-50 px-3 py-3">
+                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Atendimento</p>
+                      <p className="mt-1 text-sm font-bold text-slate-900">
+                        {deliveryModes.length ? deliveryModes.join(" • ") : "Consulte a loja"}
+                      </p>
+                      {deliveryFeeLabel ? <p className="mt-1 text-xs text-emerald-600">{deliveryFeeLabel}</p> : null}
+                    </div>
+                  </div>
+
+                  {storeDescription ? (
+                    <div className="mt-4 rounded-2xl border border-slate-100 bg-white px-4 py-3">
+                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Sobre a loja</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">{storeDescription}</p>
+                    </div>
+                  ) : null}
+
+                  <div className="mt-4 space-y-3">
+                    {normalizeWhatsApp(whatsappNumber) ? (
+                      <a
+                        href={`https://wa.me/${normalizeWhatsApp(whatsappNumber)}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm"
+                      >
+                        <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+                          <Phone size={18} weight="duotone" />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block text-sm font-bold text-slate-900">Falar com a loja</span>
+                          <span className="mt-1 block text-xs text-slate-500">{whatsappNumber}</span>
+                        </span>
+                      </a>
+                    ) : null}
+
+                    {storeAddress ? (
+                      <a
+                        href={googleMapsUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm"
+                      >
+                        <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
+                          <MapPin size={18} weight="duotone" />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block text-sm font-bold text-slate-900">Endereço</span>
+                          <span className="mt-1 block text-xs leading-5 text-slate-500">
+                            {formattedAddress.line1}
+                            {formattedAddress.line2 ? `, ${formattedAddress.line2}` : ""}
+                            {formattedAddress.cep ? ` • CEP ${formattedAddress.cep}` : ""}
+                          </span>
+                        </span>
+                      </a>
+                    ) : null}
+
+                    {mapMarkers.length > 0 ? (
+                      <div className="overflow-hidden rounded-[24px] border border-slate-100 bg-white p-2 shadow-sm">
+                        <GoogleMapView markers={mapMarkers} zoom={15} />
+                      </div>
+                    ) : null}
+
+                    {(googleMapsUrl || wazeUrl) ? (
+                      <div className="flex flex-wrap gap-2">
+                        {googleMapsUrl ? (
+                          <a
+                            href={googleMapsUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600"
+                          >
+                            Abrir no Google Maps
+                          </a>
+                        ) : null}
+                        {wazeUrl ? (
+                          <a
+                            href={wazeUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600"
+                          >
+                            Abrir no Waze
+                          </a>
+                        ) : null}
+                      </div>
+                    ) : null}
+
+                    {todayHoursLabel ? (
+                      <div className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+                        <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
+                          <Clock size={18} weight="duotone" />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block text-sm font-bold text-slate-900">Horário de hoje</span>
+                          <span className="mt-1 block text-xs text-slate-500">{todayHoursLabel}</span>
+                        </span>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowStoreDetails(false)}
+                  className="w-full rounded-full px-4 py-3 text-sm font-black text-white shadow-[0_16px_30px_-18px_rgba(15,23,42,0.45)]"
+                  style={{ backgroundColor: catalogPrimaryColor, color: catalogPrimaryText }}
+                >
+                  Ver cardápio
+                </button>
+              </div>
             </div>
           </Drawer.Content>
         </Drawer.Portal>
