@@ -8,6 +8,7 @@ import { customerAccountService } from '../services/customerAccountService';
 import { featuredService } from '../services/featuredService';
 import { mapsService } from '../services/mapsService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { getStoreAvatarUrl } from '../utils/storeAvatar';
 import { isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
 import { formatOrderStatus } from '../utils/format';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
@@ -133,7 +134,13 @@ const readCustomerSession = () => {
     if (parsed.token && parsed.user) {
       return parsed as {
         token?: string;
-        user?: { fullName?: string; name?: string; email?: string; profileImageUrl?: string | null };
+        user?: {
+          fullName?: string;
+          name?: string;
+          email?: string;
+          profileImageUrl?: string | null;
+          profileImageVersion?: number;
+        };
       };
     }
     return null;
@@ -145,7 +152,6 @@ const readCustomerSession = () => {
 const FAVORITES_STORAGE_KEY = 'hub:favorites:stores';
 const DISMISSED_CUSTOMER_ORDERS_KEY = 'hub:dismissed-customer-orders';
 const DISMISSED_ANONYMOUS_ORDERS_KEY = 'hub:dismissed-anonymous-orders';
-const DEFAULT_STORE_LOGO = '/janocaminho.jpg';
 const ORDER_EXPIRATION_MS = 3 * 60 * 60 * 1000; // 3 horas
 const ACTIVE_ORDER_ALERT_MAX_AGE_MS = 6 * 60 * 60 * 1000; // 6 horas
 
@@ -253,11 +259,21 @@ export function MarketplacePage() {
 
   useEffect(() => {
     const syncSession = () => setCustomerSession(readCustomerSession());
+    const syncCustomSession = (event: Event) => {
+      const nextSession = (event as CustomEvent<any>)?.detail;
+      if (nextSession?.token && nextSession?.user) {
+        setCustomerSession(nextSession);
+        return;
+      }
+      syncSession();
+    };
     window.addEventListener('storage', syncSession);
     window.addEventListener('focus', syncSession);
+    window.addEventListener('jnc:customer-session-updated', syncCustomSession as EventListener);
     return () => {
       window.removeEventListener('storage', syncSession);
       window.removeEventListener('focus', syncSession);
+      window.removeEventListener('jnc:customer-session-updated', syncCustomSession as EventListener);
     };
   }, []);
 
@@ -574,7 +590,7 @@ export function MarketplacePage() {
                 ? isStoreOpenNow(normalizeOpeningHours(rawHours as any) as any)
                 : true);
         const rawLogo = (store?.settings as any)?.logoUrl || (store?.settings as any)?.logo_url || (store as any)?.logoUrl || (store as any)?.logo_url;
-        const logo = resolveAssetUrl(rawLogo || undefined) || DEFAULT_STORE_LOGO;
+        const logo = resolveAssetUrl(rawLogo || undefined) || getStoreAvatarUrl(store?.slug, store?.name);
         
         const rawBanner = (store?.settings as any)?.bannerUrl || (store?.settings as any)?.banner_url || (store as any)?.bannerUrl || (store as any)?.banner_url;
         const banner = resolveAssetUrl(rawBanner || undefined) || logo;
@@ -751,7 +767,10 @@ export function MarketplacePage() {
             storeName: String(item?.storeName || 'Loja'),
             name: String(item?.productName || 'Produto em destaque'),
             storeLogo: resolveAssetUrl(item?.storeLogoUrl || undefined) || '/janocaminho-logo.png',
-            imageUrl: resolveAssetUrl(item?.imageUrl || undefined) || resolveAssetUrl(item?.storeLogoUrl || undefined) || DEFAULT_STORE_LOGO,
+            imageUrl:
+              resolveAssetUrl(item?.imageUrl || undefined) ||
+              resolveAssetUrl(item?.storeLogoUrl || undefined) ||
+              getStoreAvatarUrl(item?.storeSlug, item?.storeName),
             price: Number(item?.price || 0),
             sponsored: true,
           }))
@@ -862,7 +881,13 @@ export function MarketplacePage() {
     customerSession?.user?.fullName || customerSession?.user?.name || (isCustomerLogged ? 'Cliente' : 'Anônimo')
   ).trim();
   const customerEmail = String(customerSession?.user?.email || '').trim();
-  const customerProfileImage = resolveAssetUrl(customerSession?.user?.profileImageUrl || undefined);
+  const customerProfileImage = useMemo(() => {
+    const baseUrl = resolveAssetUrl(customerSession?.user?.profileImageUrl || undefined);
+    const version = Number(customerSession?.user?.profileImageVersion || 0);
+    if (!baseUrl) return undefined;
+    if (!version) return baseUrl;
+    return `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}v=${version}`;
+  }, [customerSession?.user?.profileImageUrl, customerSession?.user?.profileImageVersion]);
   const displayLocationLabel = locationLabel === 'Sua região' && fallbackRegionLabel ? fallbackRegionLabel : locationLabel;
 
   const openCustomerAccount = useCallback(() => {
@@ -1381,7 +1406,7 @@ export function MarketplacePage() {
                             src={item.storeLogo} 
                             alt={item.storeName} 
                             className="h-5 w-5 rounded-full border border-white/50 shadow-sm" 
-                            onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_STORE_LOGO; }}
+                            onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(item.storeSlug, item.storeName); }}
                           />
                           <span className="text-[8px] font-bold opacity-90">{item.storeName}</span>
                         </div>
@@ -1420,7 +1445,7 @@ export function MarketplacePage() {
                       alt={store.name} 
                       loading="lazy" 
                       className="h-20 w-full rounded-xl object-cover border border-slate-200" 
-                      onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_STORE_LOGO; }}
+                      onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
                     />
                     <div className="mt-1.5 flex items-center justify-between gap-2">
                       <p className="line-clamp-1 text-sm font-black text-slate-900">{store.name}</p>
@@ -1485,7 +1510,7 @@ export function MarketplacePage() {
                         src={store.logo}
                         alt={store.name}
                         className="h-16 w-16 shrink-0 rounded-full object-cover border border-slate-100 bg-slate-50 shadow-[0_8px_16px_-12px_rgba(15,23,42,0.2)]"
-                        onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_STORE_LOGO; }}
+                        onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
                       />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2.5">

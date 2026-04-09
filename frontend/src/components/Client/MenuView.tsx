@@ -24,6 +24,7 @@ import {
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
+import { getStoreAvatarUrl } from "../../utils/storeAvatar";
 import { ProductModal } from "../Cart/ProductModal";
 import { GoogleMapView } from "../GoogleMapView";
 import { PlatformTrustFooter } from "../common/PlatformTrustFooter";
@@ -315,7 +316,7 @@ const Header = ({
                 </button>
                 <div className="absolute right-4 top-1 h-11 w-11 rounded-full overflow-hidden border-2 border-white bg-white shadow-lg flex items-center justify-center">
                   {branding?.logoUrl ? (
-                    <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" />
+                    <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(branding?.espetoId, branding?.brandName); }} />
                   ) : (
                     <span className="font-black text-xs text-slate-700">{previewInitials || "JC"}</span>
                   )}
@@ -327,7 +328,7 @@ const Header = ({
           <div className={`relative -mt-7 sm:-mt-10 mx-3 sm:mx-4 rounded-3xl border border-slate-100 bg-white px-4 sm:px-6 pb-4 pt-11 sm:pt-4 shadow-[0_20px_40px_-30px_rgba(15,23,42,0.5)] ${compact ? "hidden sm:block" : ""}`}>
             <div className="absolute -top-10 sm:-top-12 left-1/2 -translate-x-1/2 sm:left-6 sm:translate-x-0 h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden border-4 border-white bg-white shadow-xl flex items-center justify-center">
               {branding?.logoUrl ? (
-                <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" />
+                <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(branding?.espetoId, branding?.brandName); }} />
               ) : (
                 <span className="font-black text-xl text-slate-700">{previewInitials || "JC"}</span>
               )}
@@ -1628,7 +1629,7 @@ export const MenuView = ({
                   <div className="-mt-10 flex items-end gap-3">
                     <div className="h-20 w-20 overflow-hidden rounded-[24px] border-4 border-white bg-white shadow-lg">
                       {branding?.logoUrl ? (
-                        <img src={branding.logoUrl} alt={branding?.brandName} className="h-full w-full object-cover" />
+                        <img src={branding.logoUrl} alt={branding?.brandName} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(branding?.espetoId, branding?.brandName); }} />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-xl font-black text-slate-700">
                           {String(branding?.brandName || "JC").slice(0, 2).toUpperCase()}

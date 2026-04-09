@@ -16,6 +16,7 @@ import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { useToast } from '../contexts/ToastContext';
 import { formatCurrency, formatOrderDisplayId, formatOrderStatus, formatOrderType, formatPaymentMethod } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { getStoreAvatarUrl } from '../utils/storeAvatar';
 import { getPersistedBranding, brandingStorageKey, defaultBranding, initialCustomer, defaultPaymentMethod, WHATSAPP_NUMBER, PIX_KEY } from '../constants';
 import { isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
 import {
@@ -446,7 +447,7 @@ export function StorePage() {
     if (!store) return;
     const name = store.name || store.slug || 'Já no Caminho';
     const description = `Vitrine online e pedidos da loja ${name}.`;
-    const logo = resolveAssetUrl(store.settings?.logoUrl) || '/janocaminho.jpg';
+    const logo = resolveAssetUrl(store.settings?.logoUrl) || getStoreAvatarUrl(store.slug, store.name);
     const url = typeof window !== 'undefined' ? window.location.href : '';
 
     const upsertMeta = (key: string, value: string, attr: 'name' | 'property' = 'name') => {
@@ -677,7 +678,7 @@ export function StorePage() {
             ...prev,
             espetoId: data.slug || prev.espetoId,
             brandName: data.name || prev.brandName,
-            logoUrl: resolveAssetUrl(data.settings?.logoUrl) || prev.logoUrl,
+            logoUrl: resolveAssetUrl(data.settings?.logoUrl) || getStoreAvatarUrl(data.slug, data.name),
             bannerUrl: resolveAssetUrl(data.settings?.bannerUrl) || prev.bannerUrl,
             primaryColor: data.settings?.primaryColor || prev.primaryColor,
             accentColor: data.settings?.secondaryColor || prev.accentColor,
@@ -2059,7 +2060,7 @@ export function StorePage() {
                 src={branding.logoUrl} 
                 alt={branding.brandName} 
                 className="w-full h-full object-cover" 
-                onError={(e) => { (e.target as HTMLImageElement).src = '/janocaminho.jpg'; }}
+                onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(storeSlug, branding?.brandName); }}
               />
             ) : (
               <span className="font-bold text-sm sm:text-lg">{branding?.brandName?.slice(0, 2)?.toUpperCase() || 'ES'}</span>
@@ -2175,7 +2176,7 @@ export function StorePage() {
                           src={branding?.logoUrl || '/janocaminho.jpg'}
                           alt={closedStateStoreName}
                           className="w-full h-full object-cover"
-                          onError={(e) => { (e.target as HTMLImageElement).src = '/janocaminho.jpg'; }}
+                          onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(storeSlug, branding?.brandName); }}
                         />
                       </div>
                       <div className="min-w-0">

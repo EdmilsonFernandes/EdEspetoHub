@@ -43,6 +43,26 @@ export function ClientAccount() {
   const [nameDraft, setNameDraft] = useState('');
   const [phoneDraft, setPhoneDraft] = useState('');
 
+  const syncCustomerSession = (nextUser: any, options?: { bustProfileImage?: boolean }) => {
+    try {
+      const raw = localStorage.getItem('customerSession');
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      const next = {
+        ...parsed,
+        user: {
+          ...(parsed?.user || {}),
+          ...(nextUser || {}),
+          ...(options?.bustProfileImage ? { profileImageVersion: Date.now() } : {}),
+        },
+      };
+      localStorage.setItem('customerSession', JSON.stringify(next));
+      window.dispatchEvent(new CustomEvent('jnc:customer-session-updated', { detail: next }));
+    } catch {
+      // ignore
+    }
+  };
+
   useEffect(() => {
     document.title = 'Minha Conta | Já no Caminho';
   }, []);
@@ -69,22 +89,7 @@ export function ClientAccount() {
         setOrders(Array.isArray(ordersData) ? ordersData : []);
 
         if (meData) {
-          try {
-            const raw = localStorage.getItem('customerSession');
-            if (raw) {
-              const parsed = JSON.parse(raw);
-              const next = {
-                ...parsed,
-                user: {
-                  ...(parsed?.user || {}),
-                  ...meData,
-                },
-              };
-              localStorage.setItem('customerSession', JSON.stringify(next));
-            }
-          } catch {
-            // ignore
-          }
+          syncCustomerSession(meData);
         }
       })
       .catch((e: any) => {
@@ -136,6 +141,7 @@ export function ClientAccount() {
         phone: String(phoneDraft || '').trim(),
       });
       setMe(updated || null);
+      syncCustomerSession(updated || null);
       setProfileMessage('Perfil atualizado com sucesso.');
     } catch (e: any) {
       setProfileMessage(e?.message || 'Erro ao salvar perfil.');
@@ -161,7 +167,7 @@ export function ClientAccount() {
         setProfileSaving(true);
         const updated = await customerAccountService.updateMe({ profileImageFile: dataUrl });
         setMe(updated || null);
-        window.dispatchEvent(new Event('storage'));
+        syncCustomerSession(updated || null, { bustProfileImage: true });
         setProfileMessage('Foto atualizada!');
         setProfileSaving(false);
       }
