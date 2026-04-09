@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MagnifyingGlass, Star, Storefront, House, List, CaretDown, Heart, CaretRight, X, Bicycle } from '@phosphor-icons/react';
+import { MagnifyingGlass, Star, Storefront, House, List, CaretDown, Heart, CaretRight, X, Bicycle, Sparkle } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
@@ -1397,7 +1397,8 @@ export function MarketplacePage() {
                           <Star size={10} weight="fill" /> Promo
                         </span>
                       ) : (
-                        <span className="rounded-full bg-white/20 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white backdrop-blur-md border border-white/20">
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-900/10 bg-white/88 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-slate-900 shadow-[0_10px_18px_-14px_rgba(15,23,42,0.45)] backdrop-blur-md">
+                          <Sparkle size={9} weight="fill" className="text-sky-500" />
                           Sugestão
                         </span>
                       )}
