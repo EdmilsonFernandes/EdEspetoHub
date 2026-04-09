@@ -15,7 +15,7 @@ import { customerAccountService } from '../services/customerAccountService';
 import { formatCurrency } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
-const TERMINAL_STATUSES = [ 'DELIVERED', 'CANCELLED', 'FINISHED', 'REJECTED' ];
+const TERMINAL_STATUSES = [ 'DELIVERED', 'CANCELLED', 'FINISHED', 'REJECTED', 'DONE' ];
 
 const getStatusMeta = (status: string) => {
   switch (status) {
@@ -50,6 +50,12 @@ const getStatusMeta = (status: string) => {
         badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200',
       };
     case 'DELIVERED':
+      return {
+        label: 'Pedido concluido',
+        icon: <CheckCircle size={15} weight="fill" className="text-emerald-500" />,
+        badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      };
+    case 'DONE':
       return {
         label: 'Pedido concluido',
         icon: <CheckCircle size={15} weight="fill" className="text-emerald-500" />,
@@ -160,62 +166,70 @@ function OrderCard({
 
   return (
     <article className="rounded-[28px] border border-slate-200 bg-white p-4 shadow-[0_12px_30px_-28px_rgba(15,23,42,0.4)]">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <button
+            type="button"
+            onClick={() => onOpenStore(order.store?.slug)}
+            className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-slate-100 transition-transform active:scale-95"
+            aria-label={`Abrir loja ${storeName}`}
+          >
+            {logoUrl ? (
+              <img src={logoUrl} alt={storeName} className="h-full w-full object-cover" />
+            ) : (
+              <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#0f172a,#334155)] text-sm font-bold text-white">
+                {getStoreInitials(storeName)}
+              </div>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => onOpenOrder(order.id)}
+            className="min-w-0 flex-1 text-left"
+          >
+            <div className="flex items-center gap-2">
+              <h3 className="truncate text-[15px] font-semibold text-slate-900">{storeName}</h3>
+            </div>
+            <div className="mt-1 flex items-center gap-1.5 text-[12px] text-slate-500">
+              {statusMeta.icon}
+              <span className="font-medium text-slate-500">{statusMeta.label}</span>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-500">
+              {orderDate ? `${orderDate} • ` : ''}
+              #{String(order.id || '').slice(0, 8)}
+            </p>
+          </button>
+        </div>
+        <div className="shrink-0 pt-0.5 text-right">
+          <p className="text-sm font-semibold text-slate-900">{formatCurrency(order.total || 0)}</p>
+        </div>
+      </div>
+
       <button
         type="button"
         onClick={() => onOpenOrder(order.id)}
-        className="block w-full text-left"
+        className="mt-3 block w-full text-left"
       >
-        <div className="flex items-start justify-between gap-3">
+        <div className="rounded-2xl bg-slate-50/90 px-3 py-2.5">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-slate-100">
-              {logoUrl ? (
-                <img src={logoUrl} alt={storeName} className="h-full w-full object-cover" />
-              ) : (
-                <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#0f172a,#334155)] text-sm font-bold text-white">
-                  {getStoreInitials(storeName)}
+            <div className="w-full space-y-2">
+              {visibleItems.map((item: any) => (
+                <div key={item.id} className="flex items-center gap-2.5">
+                  <span className="inline-flex min-w-6 justify-center rounded-md bg-white px-1.5 py-0.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">
+                    {item.quantity}
+                  </span>
+                  <span className="min-w-0 truncate text-sm text-slate-700">{item.name || 'Item do pedido'}</span>
                 </div>
-              )}
+              ))}
+              {extraItems > 0 ? (
+                <p className="pl-8 text-xs font-medium text-slate-500">+{extraItems} itens</p>
+              ) : null}
             </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="truncate text-[15px] font-semibold text-slate-900">{storeName}</h3>
-                <span className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusMeta.badgeClass}`}>
-                  {statusMeta.icon}
-                  {statusMeta.label}
-                </span>
-              </div>
-              <p className="mt-1 text-[11px] text-slate-500">
-                {orderDate ? `${orderDate} • ` : ''}
-                #{String(order.id || '').slice(0, 8)}
-              </p>
-            </div>
-          </div>
-          <div className="shrink-0 text-right">
-            <p className="text-sm font-semibold text-slate-900">{formatCurrency(order.total || 0)}</p>
-            <p className="mt-1 text-[11px] text-slate-400">
-              {isActive ? 'Em andamento' : 'Concluido'}
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-3 rounded-2xl bg-slate-50/90 px-3 py-2.5">
-          <div className="space-y-2">
-            {visibleItems.map((item: any) => (
-              <div key={item.id} className="flex items-center gap-2.5">
-                <span className="inline-flex min-w-6 justify-center rounded-md bg-white px-1.5 py-0.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">
-                  {item.quantity}
-                </span>
-                <span className="min-w-0 truncate text-sm text-slate-700">{item.name || 'Item do pedido'}</span>
-              </div>
-            ))}
-            {extraItems > 0 ? (
-              <p className="pl-8 text-xs font-medium text-slate-500">+{extraItems} itens</p>
-            ) : null}
           </div>
         </div>
       </button>
 
-      <div className="mt-3 flex items-center justify-between gap-3">
+      <div className="mt-3 flex items-center justify-between gap-3 border-t border-slate-100 pt-3">
         <div className="flex min-h-10 items-center">
           {thumbnails.length > 0 ? (
             <div className="flex items-center">
@@ -238,18 +252,28 @@ function OrderCard({
         <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
           <button
             type="button"
-            onClick={() => onOpenStore(order.store?.slug)}
+            onClick={() => onOpenOrder(order.id)}
             className="rounded-xl px-3 py-2 text-sm font-semibold text-rose-500 transition-colors hover:bg-rose-50"
           >
-            {isActive ? 'Ver loja' : 'Ajuda'}
+            Ajuda
           </button>
-          <button
-            type="button"
-            onClick={() => (isActive ? onOpenOrder(order.id) : onOpenStore(order.store?.slug))}
-            className="rounded-xl bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
-          >
-            {isActive ? 'Acompanhar' : 'Pedir novamente'}
-          </button>
+          {isActive ? (
+            <button
+              type="button"
+              onClick={() => onOpenOrder(order.id)}
+              className="rounded-xl bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+            >
+              Acompanhar
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onOpenStore(order.store?.slug)}
+              className="rounded-xl bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+            >
+              Pedir novamente
+            </button>
+          )}
         </div>
       </div>
     </article>
