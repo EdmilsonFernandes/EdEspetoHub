@@ -5,6 +5,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.net.Uri;
 import android.content.pm.PackageManager;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -26,9 +27,12 @@ import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
 
     private static final String HUB_URL = "https://janocaminho.com.br/hub";
+    private static final String TRUSTED_SCHEME = "https";
+    private static final String TRUSTED_HOST = "janocaminho.com.br";
+    private static final String TRUSTED_WWW_HOST = "www.janocaminho.com.br";
+    private static final String APP_SCHEME = "janocaminho";
     private static final String PREFS_NAME = "jnk_mobile_prefs";
     private static final String LAST_URL_KEY = "last_url";
-    private static final String ROOT_DOMAIN = "janocaminho.com.br";
     private static final long NAV_ANIM_DURATION_MS = 220L;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 4401;
     private static final int MEDIA_PERMISSION_REQUEST_CODE = 4402;
@@ -132,6 +136,10 @@ public class MainActivity extends BridgeActivity {
         settings.setDatabaseEnabled(true);
         settings.setGeolocationEnabled(true);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        settings.setAllowFileAccess(false);
+        settings.setAllowContentAccess(false);
+        settings.setAllowFileAccessFromFileURLs(false);
+        settings.setAllowUniversalAccessFromFileURLs(false);
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
@@ -212,12 +220,13 @@ public class MainActivity extends BridgeActivity {
                         }
                     }
 
-                    if (isTrustedUrl(url)) {
+                    String trustedUrl = normalizeTrustedWebUrl(url);
+                    if (trustedUrl != null) {
                         saveLastVisitedUrl();
-                        return super.shouldOverrideUrlLoading(view, url);
+                        return super.shouldOverrideUrlLoading(view, trustedUrl);
                     }
 
-                    return super.shouldOverrideUrlLoading(view, url);
+                    return true;
                 }
 
                 @Override
@@ -229,7 +238,7 @@ public class MainActivity extends BridgeActivity {
                 @Override
                 public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
                     super.onPageStarted(view, url, favicon);
-                    if (!isTrustedUrl(url)) return;
+                    if (normalizeTrustedWebUrl(url) == null) return;
 
                     String previous = lastKnownUrl == null ? HUB_URL : lastKnownUrl;
                     boolean fromHub = previous.contains("/hub");
@@ -245,8 +254,9 @@ public class MainActivity extends BridgeActivity {
                 @Override
                 public void onPageFinished(WebView view, String url) {
                     super.onPageFinished(view, url);
-                    if (isTrustedUrl(url)) {
-                        lastKnownUrl = url;
+                    String trustedUrl = normalizeTrustedWebUrl(url);
+                    if (trustedUrl != null) {
+                        lastKnownUrl = trustedUrl;
                     }
                 }
             });
@@ -295,24 +305,83 @@ public class MainActivity extends BridgeActivity {
     private void saveLastVisitedUrl() {
         if (bridge == null || bridge.getWebView() == null) return;
         String currentUrl = bridge.getWebView().getUrl();
-        if (currentUrl == null || !isTrustedUrl(currentUrl)) return;
+        String trustedUrl = normalizeTrustedWebUrl(currentUrl);
+        if (trustedUrl == null) return;
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        prefs.edit().putString(LAST_URL_KEY, currentUrl).apply();
+        prefs.edit().putString(LAST_URL_KEY, trustedUrl).apply();
     }
 
     private void openDeepLinkIfAny() {
         if (bridge == null || bridge.getWebView() == null) return;
         if (getIntent() == null || getIntent().getData() == null) return;
         String incoming = getIntent().getDataString();
-        if (!isTrustedUrl(incoming)) return;
-        bridge.getWebView().loadUrl(incoming);
-        lastKnownUrl = incoming;
+        String trustedUrl = normalizeTrustedWebUrl(incoming);
+        if (trustedUrl == null) return;
+        bridge.getWebView().loadUrl(trustedUrl);
+        lastKnownUrl = trustedUrl;
     }
 
-    private boolean isTrustedUrl(String value) {
-        if (value == null || value.isEmpty()) return false;
-        String normalized = value.toLowerCase();
-        if (normalized.startsWith("janocaminho://")) return true;
-        return normalized.contains(ROOT_DOMAIN);
+    private String normalizeTrustedWebUrl(String value) {
+        if (value == null || value.isEmpty()) return null;
+        try {
+            Uri uri = Uri.parse(value);
+            String scheme = uri.getScheme();
+            if (scheme == null) return null;
+
+            if (TRUSTED_SCHEME.equalsIgnoreCase(scheme)) {
+                String host = uri.getHost();
+                if (!isTrustedHost(host)) return null;
+                return uri.buildUpon()
+                    .scheme(TRUSTED_SCHEME)
+                    .encodedAuthority(TRUSTED_HOST)
+                    .build()
+                    .toString();
+            }
+
+            if (APP_SCHEME.equalsIgnoreCase(scheme)) {
+                String internalPath = buildInternalPathFromAppUri(uri);
+                if (internalPath == null) return null;
+                return TRUSTED_SCHEME + "://" + TRUSTED_HOST + internalPath;
+            }
+        } catch (Exception ignored) {
+            return null;
+        }
+        return null;
+    }
+
+    private boolean isTrustedHost(String host) {
+        if (host == null || host.isEmpty()) return false;
+        return TRUSTED_HOST.equalsIgnoreCase(host) || TRUSTED_WWW_HOST.equalsIgnoreCase(host);
+    }
+
+    private String buildInternalPathFromAppUri(Uri uri) {
+        String host = uri.getHost();
+        String path = uri.getEncodedPath();
+        StringBuilder builder = new StringBuilder("/");
+
+        if (host != null && !host.isEmpty()) {
+            builder.append(host);
+        }
+
+        if (path != null && !path.isEmpty()) {
+            if (builder.charAt(builder.length() - 1) == '/' && path.startsWith("/")) {
+                builder.append(path.substring(1));
+            } else {
+                builder.append(path);
+            }
+        }
+
+        String internalPath = builder.toString();
+        if (!internalPath.matches("^/[A-Za-z0-9/_\\-\\.]*$")) return null;
+
+        String query = uri.getEncodedQuery();
+        String fragment = uri.getEncodedFragment();
+        if (query != null && !query.isEmpty()) {
+            internalPath = internalPath + "?" + query;
+        }
+        if (fragment != null && !fragment.isEmpty()) {
+            internalPath = internalPath + "#" + fragment;
+        }
+        return internalPath;
     }
 }

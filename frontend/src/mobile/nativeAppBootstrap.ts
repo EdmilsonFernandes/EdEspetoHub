@@ -17,7 +17,10 @@ const normalizeInternalUrl = (rawUrl: string): string | null => {
   try {
     const parsed = new URL(rawUrl);
     const host = String(parsed.host || '').toLowerCase();
-    if (host === 'janocaminho.com.br' || host.endsWith('.janocaminho.com.br')) {
+    if (
+      parsed.protocol === 'https:' &&
+      (host === 'janocaminho.com.br' || host === 'www.janocaminho.com.br')
+    ) {
       return `${parsed.pathname || '/'}${parsed.search || ''}${parsed.hash || ''}`;
     }
   } catch {
@@ -27,7 +30,9 @@ const normalizeInternalUrl = (rawUrl: string): string | null => {
   if (rawUrl.startsWith('janocaminho://')) {
     const value = rawUrl.replace('janocaminho://', '').trim();
     if (!value) return '/hub';
-    return value.startsWith('/') ? value : `/${value}`;
+    const normalized = value.startsWith('/') ? value : `/${value}`;
+    if (!/^\/[A-Za-z0-9/_?=&%#.-]*$/.test(normalized)) return null;
+    return normalized;
   }
   return null;
 };

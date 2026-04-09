@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260408.214529.17e9ee6d",
-  "buildId": "0.1.9+20260408.214529.17e9ee6d-20260408.214529-17e9ee6d",
-  "builtAt": "2026-04-08T21:45:29.347Z",
-  "commitHash": "17e9ee6d45f886f0c351bd347657e291a96bbe2a",
-  "shortHash": "17e9ee6d",
+  "versionInternal": "0.1.9+20260409.113206.d1d401e6",
+  "buildId": "0.1.9+20260409.113206.d1d401e6-20260409.113206-d1d401e6",
+  "builtAt": "2026-04-09T11:32:06.781Z",
+  "commitHash": "d1d401e6e4acc0c5b8a07accb914c3010faf2f73",
+  "shortHash": "d1d401e6",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "d1d401e6e4acc0c5b8a07accb914c3010faf2f73",
+      "shortHash": "d1d401e6",
+      "dateIso": "2026-04-08T18:46:23-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(hub): tighten filter bar and shrink category chips",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d1d401e6e4acc0c5b8a07accb914c3010faf2f73"
+    },
     {
       "hash": "17e9ee6d45f886f0c351bd347657e291a96bbe2a",
       "shortHash": "17e9ee6d",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style(hub): premiumize marketplace layout safely",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c5c1447f14ac224aa345996c5819e2db87ada3eb"
-    },
-    {
-      "hash": "d96844ffb36747f6c8d53da3e7b59c3d0185e15b",
-      "shortHash": "d96844ff",
-      "dateIso": "2026-04-08T12:07:37-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "infra: mark uploads volume as external in prod to prevent data loss on rebuild",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d96844ffb36747f6c8d53da3e7b59c3d0185e15b"
     }
   ]
 } as const;

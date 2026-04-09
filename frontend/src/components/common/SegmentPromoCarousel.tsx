@@ -10,19 +10,19 @@ type PromoSlide = {
 const PROMO_SLIDES: PromoSlide[] = [
   {
     id: 'beleza',
-    image: '/marketing/promo-beleza.png',
+    image: '/marketing/promo-beleza-lite.jpg',
     imageAlt: 'Banner institucional do Ja no Caminho para o segmento de beleza',
     fit: 'contain',
   },
   {
     id: 'termica',
-    image: '/marketing/promo-termica.png',
+    image: '/marketing/promo-termica-lite.jpg',
     imageAlt: 'Banner institucional do Ja no Caminho com operacao e impressao termica',
     fit: 'cover',
   },
   {
     id: 'adega',
-    image: '/marketing/promo-adega.png',
+    image: '/marketing/promo-adega-lite.jpg',
     imageAlt: 'Banner institucional do Ja no Caminho para o segmento de adega',
     fit: 'contain',
   },
