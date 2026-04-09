@@ -575,6 +575,16 @@ export const MenuView = ({
       confeitaria: "Confeitaria",
       outros: "Comércio",
     }[String(segment || "").toLowerCase()] || "Comércio";
+  const avgRating = Number(reviewSummary?.avgStoreRating || 0);
+  const totalReviews = Number(reviewSummary?.totalReviews || 0);
+  const deliveryModes = Array.isArray(orderTypes)
+    ? orderTypes
+        .map((type) => String(type || "").toLowerCase())
+        .filter(Boolean)
+        .map((type) =>
+          type === "delivery" ? "Entrega" : type === "pickup" ? "Retirada" : type === "table" ? "Mesa" : type
+        )
+    : [];
   const mapQuery = storeAddress ? encodeURIComponent(storeAddress) : "";
   const googleMapsUrl = mapQuery
     ? `https://www.google.com/maps/search/?api=1&query=${mapQuery}`
