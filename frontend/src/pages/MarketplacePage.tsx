@@ -1469,34 +1469,33 @@ export function MarketplacePage() {
             )}
 
             {!loading && !error && filteredStores.length > 0 && (
-              <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                 {filteredStores.map((store) => (
                   <Link
                     key={store.id}
                     to={`/${store.slug}`}
-                    className={`group rounded-[26px] border border-slate-200/70 bg-white px-3.5 py-3 transition-all duration-300 active:scale-[0.985] ${
+                    className={`group rounded-[24px] bg-white px-4 py-3.5 transition-all duration-300 active:scale-[0.985] ${
                       store.isOpen
-                        ? 'shadow-[0_14px_28px_-24px_rgba(15,23,42,0.22)] md:hover:-translate-y-0.5 md:hover:shadow-[0_24px_34px_-26px_rgba(15,23,42,0.28)]'
-                        : 'opacity-90 saturate-90 shadow-[0_12px_24px_-24px_rgba(15,23,42,0.18)]'
+                        ? 'shadow-[0_8px_24px_-18px_rgba(15,23,42,0.12)] md:hover:-translate-y-0.5 md:hover:shadow-[0_18px_32px_-22px_rgba(15,23,42,0.16)]'
+                        : 'opacity-90 saturate-90 shadow-[0_8px_20px_-18px_rgba(15,23,42,0.1)]'
                     }`}
                   >
                     <div className="flex items-start gap-3.5">
                       <img
                         src={store.logo}
                         alt={store.name}
-                        className="h-16 w-16 shrink-0 rounded-[18px] object-cover border border-slate-100 bg-slate-50 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.4)]"
+                        className="h-16 w-16 shrink-0 rounded-full object-cover border border-slate-100 bg-slate-50 shadow-[0_8px_16px_-12px_rgba(15,23,42,0.2)]"
                         onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_STORE_LOGO; }}
                       />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2.5">
                           <div className="min-w-0 pr-1">
-                            <div className="flex items-center gap-1.5">
-                              <h3 className="truncate text-[14px] font-black text-slate-900">{store.name}</h3>
-                              <span className={`inline-flex h-1.5 w-1.5 rounded-full ${store.isOpen ? 'bg-emerald-500' : 'bg-slate-400'}`} />
-                              {!store.isOpen && <span className="text-[10px] font-semibold text-slate-500">Fechada</span>}
+                            <div className="flex items-center gap-2">
+                              <h3 className="truncate text-[15px] font-bold text-slate-900">{store.name}</h3>
+                              <span className={`inline-flex h-2 w-2 rounded-full ${store.isOpen ? 'bg-emerald-500' : 'bg-slate-400'}`} />
                             </div>
                           </div>
-                          <div className="flex shrink-0 items-center gap-1.5">
+                          <div className="flex shrink-0 items-center">
                             <button
                               type="button"
                               onClick={(event) => {
@@ -1504,7 +1503,7 @@ export function MarketplacePage() {
                                 event.stopPropagation();
                                 toggleFavoriteStore(store.slug);
                               }}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-100 bg-white text-slate-400 transition-colors hover:text-rose-500"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-300 transition-colors hover:text-rose-500"
                               aria-label={`Favoritar ${store.name}`}
                               title={`Favoritar ${store.name}`}
                             >
@@ -1514,43 +1513,40 @@ export function MarketplacePage() {
                                 className={favoriteStoreSlugs.includes(store.slug) ? 'text-rose-500' : ''}
                               />
                             </button>
-                            <CaretRight size={15} weight="bold" className="text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-500" />
                           </div>
                         </div>
-                        <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] font-medium text-slate-600">
+                        <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-slate-500">
                           {store.rating > 0 ? (
-                            <span className="inline-flex items-center gap-1 text-amber-600">
-                              <Star size={11} weight="fill" className="text-amber-500" />
-                              <span className="font-semibold text-slate-700">{store.rating.toFixed(1)}</span>
+                            <span className="inline-flex items-center gap-1">
+                              <Star size={11} weight="fill" className="text-amber-400" />
+                              <span className="font-bold text-slate-700">{store.rating.toFixed(1)}</span>
                             </span>
                           ) : null}
+                          {store.rating > 0 ? <span className="text-slate-300">•</span> : null}
                           <span>{store.etaMin}-{store.etaMax} min</span>
-                          <span>•</span>
+                          <span className="text-slate-300">•</span>
                           <span>{distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)}</span>
-                          {store.freeShipping ? (
-                            <>
-                              <span>•</span>
-                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-                                <Bicycle size={11} weight="fill" className="text-emerald-600" />
-                                Gratis
-                              </span>
-                            </>
-                          ) : null}
                         </div>
                         {!store.isOpen && (
                           <p className="mt-1 truncate text-[10px] text-slate-500">
                             {store.nextOpeningLabel || 'Sem horário cadastrado'}
                           </p>
                         )}
-                        <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                          {store.freeShipping ? (
+                            <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
+                              <Bicycle size={10} weight="fill" className="text-emerald-600" />
+                              Gratis
+                            </span>
+                          ) : null}
                           {store.rating >= 4.8 && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700">
-                              <Star size={10} weight="fill" className="text-emerald-600" />
+                            <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700">
+                              <Star size={10} weight="fill" className="text-amber-500" />
                               Mais bem avaliadas
                             </span>
                           )}
                           {(store as any).sponsored && (
-                            <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-600">
+                            <span className="inline-flex rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">
                               Patrocinado
                             </span>
                           )}
