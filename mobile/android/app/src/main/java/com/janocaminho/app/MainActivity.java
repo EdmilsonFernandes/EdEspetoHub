@@ -20,6 +20,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebViewClient;
 import android.webkit.WebView;
+import android.os.Build;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -140,6 +141,9 @@ public class MainActivity extends BridgeActivity {
     private void configureWebViewPersistence() {
         if (bridge == null || bridge.getWebView() == null) return;
         WebView webView = bridge.getWebView();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            webView.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_YES);
+        }
         webView.setBackgroundColor(Color.parseColor("#0B1220"));
         WebSettings settings = webView.getSettings();
         settings.setDomStorageEnabled(true);

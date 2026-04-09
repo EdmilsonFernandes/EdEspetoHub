@@ -248,12 +248,17 @@ export function MotoboyLogin() {
                   <input
                     id="motoboy-email"
                     name="email"
-                    autoComplete="username"
+                    autoComplete="email"
                     type="email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                     className="floating-input"
                     placeholder=" "
+                    inputMode="email"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    enterKeyHint="next"
                   />
                   <label htmlFor="motoboy-email" className="floating-label">Seu e-mail</label>
                 </div>
@@ -268,6 +273,10 @@ export function MotoboyLogin() {
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
                     className="floating-input"
                     placeholder=" "
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    enterKeyHint="done"
                   />
                   <label htmlFor="motoboy-password" className="floating-label">Sua senha secreta</label>
                   <button

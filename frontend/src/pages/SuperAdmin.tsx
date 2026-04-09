@@ -229,6 +229,28 @@ export function SuperAdmin() {
   const [dateRange, setDateRange] = useState(() => readFilters().dateRange || '30');
   const [minAmount, setMinAmount] = useState(() => readFilters().minAmount || '');
   const [maxAmount, setMaxAmount] = useState(() => readFilters().maxAmount || '');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!rememberDevice) return;
+    const rememberedUser = localStorage.getItem(STORAGE_USER_KEY) || '';
+    if (rememberedUser && !loginForm.email) {
+      setLoginForm((prev) => ({ ...prev, email: rememberedUser }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const normalizedUser = String(loginForm.email || '').trim();
+    if (rememberDevice && normalizedUser) {
+      localStorage.setItem(STORAGE_USER_KEY, normalizedUser);
+      return;
+    }
+    if (!rememberDevice) {
+      localStorage.removeItem(STORAGE_USER_KEY);
+    }
+  }, [loginForm.email, rememberDevice]);
   const [paymentsPage, setPaymentsPage] = useState(1);
   const [eventsPage, setEventsPage] = useState(1);
   const [eventsLoading, setEventsLoading] = useState(false);
@@ -1053,22 +1075,34 @@ export function SuperAdmin() {
             <div className="floating-field">
               <input
                 id="superadmin-user"
+                name="username"
+                autoComplete="username"
                 type="text"
                 value={loginForm.email}
                 onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
                 className="floating-input"
                 placeholder=" "
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                enterKeyHint="next"
               />
               <label htmlFor="superadmin-user" className="floating-label">Usuário</label>
             </div>
             <div className="floating-field">
               <input
                 id="superadmin-password"
+                name="password"
+                autoComplete="current-password"
                 type={showPassword ? 'text' : 'password'}
                 value={loginForm.password}
                 onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
                 className="floating-input"
                 placeholder=" "
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                enterKeyHint="done"
               />
               <label htmlFor="superadmin-password" className="floating-label">Senha</label>
               <button

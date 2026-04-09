@@ -10,6 +10,8 @@ import { runClientFreshStart } from '../utils/clientFreshStart';
 import { APP_BUILD_INFO } from '../generated/buildInfo';
 import { ArrowLeft, Check, Eye, EyeSlash, LockKey, ShieldCheck, WarningCircle, WhatsappLogo } from '@phosphor-icons/react';
 
+const ADMIN_REMEMBER_IDENTIFIER_KEY = 'auth:last-admin-identifier';
+
 export function AdminLogin() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -32,6 +34,26 @@ export function AdminLogin() {
     if (typeof window === 'undefined') return false;
     return localStorage.getItem('auth:superadmin-unlocked') === 'true';
   });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!rememberDevice) return;
+    const rememberedIdentifier = localStorage.getItem(ADMIN_REMEMBER_IDENTIFIER_KEY);
+    if (rememberedIdentifier && !loginForm.identifier) {
+      setLoginForm((prev) => ({ ...prev, identifier: rememberedIdentifier }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const normalizedIdentifier = String(loginForm.identifier || '').trim();
+    if (rememberDevice && normalizedIdentifier) {
+      localStorage.setItem(ADMIN_REMEMBER_IDENTIFIER_KEY, normalizedIdentifier);
+      return;
+    }
+    localStorage.removeItem(ADMIN_REMEMBER_IDENTIFIER_KEY);
+  }, [loginForm.identifier, rememberDevice]);
 
   const handleLogoTap = () => {
     if (superAdminUnlocked) return;
@@ -235,7 +257,7 @@ export function AdminLogin() {
           ) : null}
         </div>
 
-        <form onSubmit={handleLogin} className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40">
+        <form onSubmit={handleLogin} autoComplete="on" className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40">
           {verifyPrompt && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 text-amber-900 text-xs space-y-3 backdrop-blur-sm">
               <div className="flex items-center gap-2">
@@ -279,6 +301,9 @@ export function AdminLogin() {
                 className="floating-input"
                 placeholder=" "
                 autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                enterKeyHint="next"
               />
               <label htmlFor="admin-identifier" className="floating-label">E-mail ou usuário</label>
             </div>
@@ -293,6 +318,10 @@ export function AdminLogin() {
                 onChange={e => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
                 className="floating-input"
                 placeholder=" "
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                enterKeyHint="done"
               />
               <label htmlFor="admin-password" className="floating-label">Sua senha secreta</label>
               <button

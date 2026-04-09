@@ -151,6 +151,7 @@ export function ClientAuth() {
               <input
                 name="fullName"
                 autoComplete="name"
+                autoCapitalize="words"
                 value={form.fullName}
                 onChange={(e) => setForm((p) => ({ ...p, fullName: e.target.value }))}
                 placeholder="Nome completo"
@@ -161,6 +162,7 @@ export function ClientAuth() {
               <input
                 name="phone"
                 autoComplete="tel"
+                inputMode="tel"
                 value={form.phone}
                 onChange={(e) => setForm((p) => ({ ...p, phone: formatPhoneBr(e.target.value) }))}
                 placeholder="Telefone (opcional)"
@@ -169,11 +171,16 @@ export function ClientAuth() {
             )}
             <input
               name="email"
-              autoComplete="username"
+              autoComplete="email"
               type="email"
               value={form.email}
               onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
               placeholder="E-mail"
+              inputMode="email"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              enterKeyHint={mode === 'register' ? 'next' : 'done'}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
             />
             <input
@@ -183,6 +190,10 @@ export function ClientAuth() {
               value={form.password}
               onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
               placeholder="Senha"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              enterKeyHint="done"
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
             />
 
