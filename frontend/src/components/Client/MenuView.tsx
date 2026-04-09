@@ -1574,27 +1574,30 @@ export const MenuView = ({
         </Drawer.Portal>
       </Drawer.Root>
 
-      <Drawer.Root open={showStoreDetails} onOpenChange={setShowStoreDetails}>
-        <Drawer.Portal>
-          <Drawer.Overlay className="fixed inset-0 z-[70] bg-slate-950/65 backdrop-blur-[2px]" />
-          <Drawer.Content className="fixed inset-x-0 bottom-0 z-[80] mt-24 h-[92vh] rounded-t-[32px] bg-slate-50 outline-none shadow-[0_-24px_64px_-38px_rgba(15,23,42,0.55)]">
-            <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/10 to-transparent pointer-events-none" />
-            <div className="sticky top-0 z-10 flex items-center justify-between px-4 pt-3">
-              <button
-                type="button"
-                onClick={() => setShowStoreDetails(false)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/92 text-slate-700 shadow-sm ring-1 ring-slate-200"
-                aria-label="Voltar ao cardápio"
-              >
-                <ArrowLeft size={18} weight="bold" />
-              </button>
-              <div className="rounded-full bg-white/92 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500 ring-1 ring-slate-200">
-                Loja
-              </div>
+      <div
+        className={`fixed inset-0 z-[75] bg-slate-50 transition-transform duration-300 ease-out ${
+          showStoreDetails ? "translate-x-0" : "translate-x-full pointer-events-none"
+        }`}
+      >
+        <div className="absolute inset-x-0 top-0 z-10 bg-gradient-to-b from-slate-100 via-slate-50 to-transparent px-4 pb-3 pt-[max(env(safe-area-inset-top),0.75rem)]">
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => setShowStoreDetails(false)}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-slate-200"
+              aria-label="Voltar ao cardápio"
+            >
+              <ArrowLeft size={18} weight="bold" />
+            </button>
+            <div className="rounded-full bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500 ring-1 ring-slate-200">
+              Loja
             </div>
+          </div>
+        </div>
 
-            <div className="h-full overflow-y-auto pb-8">
-              <div className="mx-4 mt-3 overflow-hidden rounded-[30px] border border-slate-200 bg-white shadow-[0_24px_48px_-32px_rgba(15,23,42,0.28)]">
+        <div className="h-full overflow-y-auto pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[calc(env(safe-area-inset-top)+3.8rem)]">
+          <div className="mx-auto max-w-3xl px-4 pb-8">
+            <div className="overflow-hidden rounded-[30px] border border-slate-200 bg-white shadow-[0_24px_48px_-32px_rgba(15,23,42,0.28)]">
                 <div
                   className="relative h-44 bg-slate-900"
                   style={
@@ -1745,7 +1748,8 @@ export const MenuView = ({
                 </div>
               </div>
 
-              <div className="px-4 pt-4">
+            <div className="sticky bottom-0 mt-4">
+              <div className="rounded-[28px] border border-slate-200/80 bg-white/92 p-3 shadow-[0_18px_36px_-28px_rgba(15,23,42,0.38)] backdrop-blur-xl">
                 <button
                   type="button"
                   onClick={() => setShowStoreDetails(false)}
@@ -1756,9 +1760,9 @@ export const MenuView = ({
                 </button>
               </div>
             </div>
-          </Drawer.Content>
-        </Drawer.Portal>
-      </Drawer.Root>
+          </div>
+        </div>
+      </div>
 
       <ProductModal
         product={selectedProduct}
