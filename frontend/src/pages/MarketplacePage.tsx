@@ -1422,7 +1422,7 @@ export function MarketplacePage() {
                   <Link
                     key={`favorite-${store.id}`}
                     to={`/${store.slug}`}
-                    className="min-w-[168px] sm:min-w-[186px] rounded-2xl border border-slate-100 bg-white p-2 shadow-[0_8px_24px_-18px_rgba(15,23,42,0.28)] transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-lg"
+                    className="group min-w-[168px] sm:min-w-[186px] rounded-2xl border border-slate-100 bg-white p-2 shadow-[0_8px_24px_-18px_rgba(15,23,42,0.28)] transition-all duration-300 md:hover:-translate-y-0.5 md:hover:shadow-lg"
                   >
                     <img 
                       src={store.banner || store.logo} 
@@ -1433,7 +1433,10 @@ export function MarketplacePage() {
                     />
                     <div className="mt-1.5 flex items-center justify-between gap-2">
                       <p className="line-clamp-1 text-sm font-black text-slate-900">{store.name}</p>
-                      <Heart size={14} weight="fill" className="text-rose-500 shrink-0" />
+                      <div className="flex items-center gap-1.5">
+                        <Heart size={14} weight="fill" className="text-rose-500 shrink-0" />
+                        <CaretRight size={14} weight="bold" className="shrink-0 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-500" />
+                      </div>
                     </div>
                     <p className="mt-0.5 text-[11px] text-slate-600">
                       {distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)} • {store.etaMin}-{store.etaMax} min
@@ -1562,6 +1565,12 @@ export function MarketplacePage() {
                               Mesa
                           </span>
                           )}
+                        </div>
+                        <div className="mt-2 flex items-center justify-end">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 transition-colors group-hover:bg-slate-100 group-hover:text-slate-700">
+                            Abrir
+                            <CaretRight size={12} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
+                          </span>
                         </div>
                       </div>
                     </div>
