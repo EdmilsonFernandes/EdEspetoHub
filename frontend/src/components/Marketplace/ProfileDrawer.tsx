@@ -6,11 +6,13 @@ import {
   CookingPot,
   Lifebuoy,
   SignOut,
+  Trash,
   UserCircle,
   UserRectangle,
   House,
   CaretRight,
-  Scroll
+  Scroll,
+  Sparkle
 } from '@phosphor-icons/react';
 
 type DrawerAction = {
@@ -102,7 +104,7 @@ export function ProfileDrawer({
         { id: 'orders', label: 'Meus pedidos', icon: <BellSimple size={22} weight="duotone" />, onClick: onOpenOrders || onOpenAccount, iconColor: 'text-amber-600', bgColor: 'bg-amber-50' },
         { id: 'legal', label: 'Termos e privacidade', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
         { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={22} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
-        { id: 'deactivate', label: 'Excluir conta', icon: <SignOut size={22} weight="duotone" />, onClick: onDeactivateAccount, tone: 'danger' },
+        { id: 'deactivate', label: 'Excluir conta', icon: <Trash size={22} weight="duotone" />, onClick: onDeactivateAccount, tone: 'danger' },
         { id: 'logout', label: 'Sair da conta', icon: <SignOut size={22} weight="duotone" />, onClick: onLogout, tone: 'danger' },
       ]
     : [
@@ -116,13 +118,17 @@ export function ProfileDrawer({
         isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
       }`}
     >
-      <div className="absolute inset-0 bg-slate-950/55 backdrop-blur-md" onClick={onClose} />
+      <div className="absolute inset-0 bg-slate-950/45 backdrop-blur-md" onClick={onClose} />
 
       <aside
         className={`absolute inset-y-0 left-0 w-[300px] max-w-[85vw] transform border-r border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(248,250,252,0.98)_100%)] shadow-[0_30px_70px_-35px_rgba(15,23,42,0.45)] backdrop-blur-2xl transition-transform duration-500 ease-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } flex flex-col pt-[env(safe-area-inset-top)]`}
       >
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -left-12 top-8 h-28 w-28 rounded-full bg-sky-100/55 blur-3xl" />
+          <div className="absolute right-0 top-24 h-36 w-36 rounded-full bg-emerald-100/50 blur-3xl" />
+        </div>
         <div className="border-b border-slate-100/80 bg-white/50 p-6 pb-4">
           {isLogged ? (
             <div className="flex items-center gap-4">
@@ -163,6 +169,18 @@ export function ProfileDrawer({
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-3 space-y-8">
+          <section className="rounded-[1.65rem] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(248,250,252,0.82))] p-3 shadow-[0_20px_40px_-32px_rgba(15,23,42,0.45)] ring-1 ring-slate-100/80">
+            <div className="flex items-center gap-3">
+              <div className="grid h-10 w-10 place-items-center rounded-2xl bg-slate-900 text-white shadow-[0_18px_28px_-22px_rgba(15,23,42,0.65)]">
+                <Sparkle size={18} weight="fill" />
+              </div>
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">Acesso rápido</p>
+                <p className="text-sm font-bold text-slate-800">Tudo da sua conta em um só lugar</p>
+              </div>
+            </div>
+          </section>
+
           {isAdmin && (
             <section className="space-y-3">
               <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 px-1">Minha Operação</p>
@@ -204,16 +222,25 @@ export function ProfileDrawer({
                   action.onClick();
                   onClose();
                 }}
-                className={`flex w-full items-center gap-4 rounded-[1.35rem] px-3 py-3 transition-all active:scale-[0.97] ${
+                className={`flex w-full items-center gap-4 rounded-[1.35rem] border px-3 py-3 transition-all active:scale-[0.97] ${
                   action.tone === 'danger'
-                    ? 'text-rose-600 hover:bg-rose-50/90'
-                    : 'text-slate-700 hover:bg-white/80'
+                    ? action.id === 'deactivate'
+                      ? 'border-rose-100 bg-rose-50/70 text-rose-700 hover:bg-rose-50'
+                      : 'border-transparent text-rose-600 hover:bg-rose-50/90'
+                    : 'border-transparent text-slate-700 hover:border-white/80 hover:bg-white/85'
                 }`}
               >
-                <div className={`grid h-10 w-10 place-items-center rounded-xl shrink-0 border border-white/60 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.28)] transition-colors ${action.bgColor || 'bg-slate-100'} ${action.iconColor || 'text-slate-500'}`}>
+                <div className={`grid h-10 w-10 place-items-center rounded-xl shrink-0 border border-white/60 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.28)] transition-colors ${action.tone === 'danger' && action.id === 'deactivate' ? 'bg-rose-100 text-rose-600' : action.bgColor || 'bg-slate-100'} ${action.tone === 'danger' && action.id === 'deactivate' ? '' : action.iconColor || 'text-slate-500'}`}>
                   {action.icon}
                 </div>
-                <span className="text-[15px] font-bold">{action.label}</span>
+                <div className="min-w-0 flex-1 text-left">
+                  <span className="block text-[15px] font-bold">{action.label}</span>
+                  {action.id === 'deactivate' ? (
+                    <span className="block text-[11px] font-medium text-rose-500">Remove seu acesso e dados da conta</span>
+                  ) : action.id === 'logout' ? (
+                    <span className="block text-[11px] font-medium text-slate-400">Encerra somente a sessão neste aparelho</span>
+                  ) : null}
+                </div>
               </button>
             ))}
           </nav>
@@ -249,7 +276,7 @@ export function ProfileDrawer({
         <div className="border-t border-slate-100/90 bg-white/70 p-6 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] backdrop-blur-xl">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <p className="text-[11px] font-black text-slate-900 uppercase tracking-tighter">JNC Hub</p>
+              <p className="text-[11px] font-black text-slate-900 tracking-tight">Ja no Caminho</p>
               <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Versão {versionLabel || 'v0.0.0'}</p>
             </div>
             <img src="/jnc.png" alt="Logo" className="h-8 w-auto opacity-95" />
