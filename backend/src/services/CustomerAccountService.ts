@@ -388,10 +388,10 @@ async setDefaultAddress(userId: string, addressId: string) {
    *
    * @author Edmilson Lopes
    */
-async listOrders(userId: string) {
+  async listOrders(userId: string) {
     const rows = await AppDataSource.getRepository(Order).find({
       where: { customerUserId: userId },
-      relations: [ 'store', 'items', 'items.product', 'shipment' ],
+      relations: [ 'store', 'store.settings', 'items', 'items.product', 'shipment' ],
       order: { createdAt: 'DESC' },
       take: 100,
     });
@@ -416,6 +416,11 @@ async listOrders(userId: string) {
             id: order.store.id,
             name: order.store.name,
             slug: order.store.slug,
+            settings: order.store.settings
+              ? {
+                  logoUrl: order.store.settings.logoUrl || null,
+                }
+              : null,
           }
         : null,
       shipment: order.shipment
@@ -436,6 +441,7 @@ async listOrders(userId: string) {
         name: item.product?.name || '',
         quantity: Number(item.quantity || 0),
         price: Number(item.price || 0),
+        imageUrl: item.product?.imageUrl || null,
       })),
     }));
   }
