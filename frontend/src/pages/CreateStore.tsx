@@ -520,12 +520,12 @@ export function CreateStore() {
         }
 
         if ((planFromUrl === 'basic' || planFromUrl === 'pro') && Array.isArray(response) && response.length) {
-          const resolvedBilling = billingFromUrl === 'yearly' ? 'yearly' : 'monthly';
+          const resolvedBilling = 'monthly';
           const planName = getPlanName(planFromUrl, resolvedBilling);
           const matchedPlan = response.find((plan) => plan.name === planName);
           if (matchedPlan?.id) {
             setSelectedPlanId(matchedPlan.id);
-            setIsAnnual(resolvedBilling === 'yearly');
+            setIsAnnual(false);
             return;
           }
         }
@@ -562,7 +562,7 @@ export function CreateStore() {
     loadCitiesByState(uf);
   }, [registerForm.state]);
 
-  const billingKey = isAnnual ? 'yearly' : 'monthly';
+  const billingKey = 'monthly';
   const billing = BILLING_OPTIONS[billingKey];
   const plansByName = plans.reduce((acc, plan) => {
     acc[plan.name] = plan;
@@ -1622,30 +1622,11 @@ export function CreateStore() {
                   </span>
                 }
               >
-              <div className="flex items-center justify-center gap-4 mb-6">
-                <span className={`text-sm font-semibold ${!isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>
-                  Mensal
+              <div className="mb-6 flex items-center justify-center gap-3">
+                <span className="text-sm font-semibold text-gray-900">Plano mensal ativo</span>
+                <span className="inline-block rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
+                  Cobranca mensal
                 </span>
-                <button
-                  type="button"
-                  onClick={() => setIsAnnual(!isAnnual)}
-                  className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors ${isAnnual ? 'bg-red-500' : 'bg-gray-300'
-                    }`}
-                >
-                  <span
-                    className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${isAnnual ? 'translate-x-9' : 'translate-x-1'
-                      }`}
-                  />
-                </button>
-                <span className={`text-sm font-semibold ${isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>
-                  Anual
-                </span>
-             <span className={`ml-2 inline-block px-3 py-1 rounded-full text-sm font-semibold transition-colors ${isAnnual
-                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
-                }`}>
-                Economize 15%
-              </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <button

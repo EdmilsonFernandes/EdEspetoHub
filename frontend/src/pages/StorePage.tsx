@@ -30,6 +30,7 @@ import { printReceiptAsImage } from '../utils/printReceiptImage';
 const WEEKDAY_LABELS = [ 'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado' ];
 const PUBLIC_ORDER_ALERT_TTL_MS = 3 * 60 * 60 * 1000;
 const CUSTOMER_REMEMBER_EMAIL_KEY = 'jnk_customer_auth_email';
+const NATIVE_NAV_VISIBILITY_EVENT = 'jnc:native-nav-visibility';
 
 const getOrderStatusTone = (status?: string) => {
   const normalized = String(status || '').trim().toLowerCase();
@@ -325,6 +326,25 @@ export function StorePage() {
     () => cartItemsTotal + deliveryFeeValue,
     [cartItemsTotal, deliveryFeeValue]
   );
+
+  useEffect(() => {
+    const shouldHideNativeNav =
+      view === 'cart' ||
+      view === 'success' ||
+      (view === 'menu' && cartItemsCount > 0);
+    window.dispatchEvent(
+      new CustomEvent(NATIVE_NAV_VISIBILITY_EVENT, {
+        detail: { hidden: shouldHideNativeNav },
+      })
+    );
+    return () => {
+      window.dispatchEvent(
+        new CustomEvent(NATIVE_NAV_VISIBILITY_EVENT, {
+          detail: { hidden: false },
+        })
+      );
+    };
+  }, [cartItemsCount, view]);
   const instagramHandle = useMemo(() => (branding.instagram ? `@${branding.instagram.replace('@', '')}` : ''), [branding.instagram]);
   const subscriptionStatus = storeSubscription?.status;
   const isSubscriptionKnown = storeSubscription !== null && storeSubscription !== undefined;

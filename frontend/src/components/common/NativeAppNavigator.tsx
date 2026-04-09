@@ -1,9 +1,10 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { ArrowLeft } from '@phosphor-icons/react';
 
 const STACK_KEY = 'jnk_native_route_stack_v1';
+const HIDDEN_KEY = 'jnk_native_nav_hidden_v1';
 const MAX_STACK = 24;
 
 const getCurrentPath = (location: ReturnType<typeof useLocation>) =>
@@ -43,6 +44,7 @@ export function NativeAppNavigator() {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = getCurrentPath(location);
+  const [isHidden, setIsHidden] = useState(false);
 
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
@@ -50,6 +52,33 @@ export function NativeAppNavigator() {
     if (stack[stack.length - 1] === currentPath) return;
     writeStack([ ...stack, currentPath ]);
   }, [currentPath]);
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    const syncHiddenState = () => {
+      try {
+        setIsHidden(sessionStorage.getItem(HIDDEN_KEY) === '1');
+      } catch {
+        setIsHidden(false);
+      }
+    };
+    syncHiddenState();
+    const handleVisibility = (event: Event) => {
+      const hidden = Boolean((event as CustomEvent<{ hidden?: boolean }>).detail?.hidden);
+      try {
+        sessionStorage.setItem(HIDDEN_KEY, hidden ? '1' : '0');
+      } catch {
+        // no-op
+      }
+      setIsHidden(hidden);
+    };
+    window.addEventListener('jnc:native-nav-visibility', handleVisibility as EventListener);
+    window.addEventListener('storage', syncHiddenState);
+    return () => {
+      window.removeEventListener('jnc:native-nav-visibility', handleVisibility as EventListener);
+      window.removeEventListener('storage', syncHiddenState);
+    };
+  }, []);
 
   const previousPath = useMemo(() => {
     const stack = readStack();
@@ -59,11 +88,15 @@ export function NativeAppNavigator() {
     return '';
   }, [currentPath]);
 
-  if (!Capacitor.isNativePlatform() || !isEligiblePath(location.pathname)) {
+  if (!Capacitor.isNativePlatform() || !isEligiblePath(location.pathname) || isHidden) {
     return null;
   }
 
   const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
     const stack = readStack();
     const trimmed = stack.filter((_, index) => index < stack.length - 1);
     writeStack(trimmed);
@@ -82,7 +115,7 @@ export function NativeAppNavigator() {
   };
 
   return (
-    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-[45] transition-transform duration-300 ease-in-out lg:hidden">
+    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-[35] transition-transform duration-300 ease-in-out lg:hidden">
       <div className="pointer-events-auto mx-auto grid max-w-none grid-cols-2 gap-1 border-t border-slate-200/40 bg-white/72 p-1.5 pb-[max(env(safe-area-inset-bottom),4px)] shadow-[0_-12px_24px_-20px_rgba(15,23,42,0.25)] backdrop-blur-2xl">
         <button
           type="button"

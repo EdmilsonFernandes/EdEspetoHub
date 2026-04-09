@@ -93,9 +93,7 @@ export function PaymentPage() {
         if (currentPlanId) {
           setSelectedPlanId(currentPlanId);
           const currentPlan = planList.find((plan) => plan.id === currentPlanId);
-          if (currentPlan?.name?.includes('_yearly')) {
-            setIsAnnual(true);
-          }
+          setIsAnnual(false);
           return;
         }
         const defaultPlan = planList.find((plan) => plan.name === getPlanName('basic', 'monthly'));
@@ -135,7 +133,7 @@ export function PaymentPage() {
   const adminUrl = storeSlug ? `${baseUrl}/admin?slug=${encodeURIComponent(storeSlug)}` : `${baseUrl}/admin`;
   const methodMeta = getPaymentMethodMeta(payment?.method);
   const providerMeta = getPaymentProviderMeta(payment?.provider);
-  const billingKey = isAnnual ? 'yearly' : 'monthly';
+  const billingKey = 'monthly';
   const billing = BILLING_OPTIONS[billingKey];
   const plansByName = plans.reduce((acc, plan) => {
     acc[plan.name] = plan;
@@ -321,17 +319,9 @@ export function PaymentPage() {
                       <div className="w-full space-y-3">
                         <div className="flex items-center justify-between w-full gap-2">
                           <p className="text-sm font-semibold text-gray-700">Escolha um plano</p>
-                          <div className="flex items-center gap-2">
-                            <span className={`text-xs font-semibold ${!isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>Mensal</span>
-                            <button
-                              type="button"
-                              onClick={() => setIsAnnual(!isAnnual)}
-                              className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors ${isAnnual ? 'bg-red-500' : 'bg-gray-300'}`}
-                            >
-                              <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${isAnnual ? 'translate-x-8' : 'translate-x-1'}`} />
-                            </button>
-                            <span className={`text-xs font-semibold ${isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>Anual</span>
-                          </div>
+                          <span className="rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                            Renovacao mensal
+                          </span>
                         </div>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {PLAN_TIERS.map((tier) => {

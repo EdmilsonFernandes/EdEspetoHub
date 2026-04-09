@@ -77,7 +77,7 @@ export function AdminRenewal() {
     fetchPlans();
   }, [allowedTierKeys, currentTier, preferredTier]);
 
-  const billingKey = isAnnual ? 'yearly' : 'monthly';
+  const billingKey = 'monthly';
   const billing = BILLING_OPTIONS[billingKey];
   const plansByName = plans.reduce((acc, plan) => {
     acc[plan.name] = plan;
@@ -187,30 +187,13 @@ export function AdminRenewal() {
             <h3 className="text-lg font-black text-slate-800">Escolha um plano</h3>
             <p className="text-xs text-slate-500">
               {showOnlyProUpgrade
-                ? 'Seu plano atual é Basic. Para liberar entregadores, faça upgrade para o plano Pro.'
+                ? 'Seu plano atual e Basic. Para liberar entregadores, faca upgrade para o plano Pro mensal.'
                 : currentTier === 'basic'
-                ? 'Seu plano atual é Basic. Você pode manter o Basic (mensal/anual) ou fazer upgrade para Pro.'
-                : 'Seu plano atual é Pro. Você pode alternar entre mensal e anual ou mudar de plano.'}
+                ? 'Seu plano atual e Basic. No momento estamos renovando apenas no ciclo mensal.'
+                : 'Seu plano atual e Pro. No momento estamos renovando apenas no ciclo mensal.'}
             </p>
-            <div className="mx-auto w-full max-w-sm rounded-full border border-slate-200 bg-slate-100 p-1 grid grid-cols-2 gap-1">
-              <button
-                type="button"
-                onClick={() => setIsAnnual(false)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  !isAnnual ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                Mensal
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsAnnual(true)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  isAnnual ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                Anual {billing.savings ? `· ${billing.savings}` : ''}
-              </button>
+            <div className="mx-auto w-full max-w-sm rounded-full border border-emerald-100 bg-emerald-50 px-4 py-2 text-center text-sm font-semibold text-emerald-700">
+              Renovacao mensal ativa
             </div>
 
             <div className={`grid grid-cols-1 ${showOnlyProUpgrade ? 'sm:grid-cols-1 max-w-md mx-auto' : 'sm:grid-cols-3'} gap-4`}>

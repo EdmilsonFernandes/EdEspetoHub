@@ -528,6 +528,14 @@ export async function runMigrations() {
       ('pro_yearly', 'Pro Anual', 958.80, 815.98, 365, true)
     ON CONFLICT (name) DO UPDATE
     SET display_name = EXCLUDED.display_name,
+        price = CASE
+          WHEN EXCLUDED.name IN ('basic_monthly', 'pro_monthly') THEN EXCLUDED.price
+          ELSE plans.price
+        END,
+        promo_price = CASE
+          WHEN EXCLUDED.name IN ('basic_monthly', 'pro_monthly') THEN EXCLUDED.promo_price
+          ELSE plans.promo_price
+        END,
         duration_days = EXCLUDED.duration_days,
         enabled = EXCLUDED.enabled;
   `);
