@@ -3,6 +3,9 @@ set -eu
 
 ROOT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 ENV_FILE="$ROOT_DIR/.env.prod"
+export HOME="${HOME:-/home/ec2-user}"
+export DOCKER_CONFIG="${DOCKER_CONFIG:-$HOME/.docker}"
+export PATH="/usr/local/bin:$PATH"
 
 if [ ! -f "$ENV_FILE" ]; then
   echo "Missing $ENV_FILE. Create it from .env.prod.example." >&2
@@ -14,14 +17,14 @@ if ! command -v docker >/dev/null 2>&1; then
   exit 1
 fi
 
-if docker compose version >/dev/null 2>&1; then
-  COMPOSE_CMD="docker compose"
-elif sudo docker compose version >/dev/null 2>&1; then
-  COMPOSE_CMD="sudo docker compose"
-elif command -v docker-compose >/dev/null 2>&1; then
+if command -v docker-compose >/dev/null 2>&1 && docker-compose version >/dev/null 2>&1; then
   COMPOSE_CMD="docker-compose"
-elif sudo docker-compose version >/dev/null 2>&1; then
-  COMPOSE_CMD="sudo docker-compose"
+elif docker compose version >/dev/null 2>&1; then
+  COMPOSE_CMD="docker compose"
+elif command -v sudo >/dev/null 2>&1 && sudo docker-compose version >/dev/null 2>&1; then
+  COMPOSE_CMD="sudo -E docker-compose"
+elif command -v sudo >/dev/null 2>&1 && sudo docker compose version >/dev/null 2>&1; then
+  COMPOSE_CMD="sudo -E docker compose"
 else
   echo "Neither 'docker compose' nor 'docker-compose' is available." >&2
   exit 1
