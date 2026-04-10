@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPinLine, Plus, Trash, House, Suitcase, MapPin, CaretRight, CheckCircle } from '@phosphor-icons/react';
+import { ArrowLeft, MapPinLine, Plus, Trash, House, Suitcase, MapPin, CheckCircle, User, Phone, HashStraight } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
 import { useToast } from '../contexts/ToastContext';
 
@@ -31,6 +31,14 @@ export function AddressDistance() {
     const digits = String(value || '').replace(/\D/g, '').slice(0, 8);
     if (digits.length <= 5) return digits;
     return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+  };
+
+  const formatPhoneBr = (value: string) => {
+    const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
   };
 
   const loadAddresses = useCallback(async () => {
@@ -185,12 +193,15 @@ export function AddressDistance() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Recebedor</label>
-                    <input
-                      placeholder="Nome do recebedor"
-                      value={form.recipientName}
-                      onChange={e => setForm({...form, recipientName: e.target.value})}
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
-                    />
+                    <div className="relative">
+                      <User size={16} weight="duotone" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        placeholder="Nome do recebedor"
+                        value={form.recipientName}
+                        onChange={e => setForm({...form, recipientName: e.target.value})}
+                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -233,26 +244,37 @@ export function AddressDistance() {
                   ) : null}
                 </div>
 
-                <input
-                  placeholder="Telefone do recebedor"
-                  value={form.phone}
-                  onChange={e => setForm({...form, phone: e.target.value})}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
-                />
+                <div className="relative">
+                  <Phone size={16} weight="duotone" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    placeholder="Telefone do recebedor"
+                    value={form.phone}
+                    onChange={e => setForm({...form, phone: formatPhoneBr(e.target.value)})}
+                    inputMode="tel"
+                    autoComplete="tel"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
+                  />
+                </div>
 
                 <div className="grid grid-cols-[1fr_92px] gap-2">
-                  <input
-                    placeholder="Rua / Logradouro"
-                    value={form.street}
-                    onChange={e => setForm({...form, street: e.target.value})}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
-                  />
-                  <input
-                    placeholder="Nº"
-                    value={form.number}
-                    onChange={e => setForm({...form, number: e.target.value})}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 px-2 py-3 text-center text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
-                  />
+                  <div className="relative">
+                    <MapPinLine size={16} weight="duotone" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      placeholder="Rua / Logradouro"
+                      value={form.street}
+                      onChange={e => setForm({...form, street: e.target.value})}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
+                    />
+                  </div>
+                  <div className="relative">
+                    <HashStraight size={16} weight="duotone" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      placeholder="Nº"
+                      value={form.number}
+                      onChange={e => setForm({...form, number: e.target.value})}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-8 pr-2 text-center text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_0.92fr_110px]">
@@ -333,7 +355,7 @@ export function AddressDistance() {
                         <p className="truncate text-[10px] font-medium text-slate-400">{addr.neighborhood} • {addr.city}/{addr.state}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col items-end gap-2">
                       {addr.isDefault ? null : (
                         <button
                           type="button"
@@ -342,7 +364,7 @@ export function AddressDistance() {
                             showToast('Endereço principal atualizado.', 'success');
                             loadAddresses();
                           }}
-                          className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600"
+                          className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-slate-600"
                         >
                           Principal
                         </button>
