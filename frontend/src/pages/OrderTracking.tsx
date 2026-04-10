@@ -759,6 +759,12 @@ export function OrderTracking() {
   }, [isDelivery, order?.address, order?.id, order?.store?.settings?.address, order?.store?.owner?.address]);
 
   const steps = useMemo(() => {
+    if (normalizedStatus === 'cancelled') {
+      return [
+        { id: 'pending', label: 'Pedido Recebido' },
+        { id: 'cancelled', label: 'Pedido Cancelado' },
+      ];
+    }
     if (isDelivery) {
       if (isPostalDelivery) {
         return [
@@ -790,8 +796,9 @@ export function OrderTracking() {
       { id: 'preparing', label: 'Em Preparação' },
       { id: 'done', label: order?.type === 'table' ? 'Pedido Pronto' : 'Pronto' },
     ];
-  }, [isDelivery, isPostalDelivery, order?.type]);
+  }, [isDelivery, isPostalDelivery, order?.type, normalizedStatus]);
   const currentStep = (() => {
+    if (normalizedStatus === 'cancelled') return 'cancelled';
     if (!isDelivery) {
       const st = normalizedStatus;
       const known = new Set(steps.map((item) => item.id));
@@ -1038,7 +1045,7 @@ export function OrderTracking() {
                 <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
                   <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 font-bold">Linha do pedido</p>
                   <div className="relative mt-2 pl-0.5">
-                    <span className="pointer-events-none absolute left-[9px] top-2 bottom-2 w-px bg-slate-200" />
+                    <span className={`pointer-events-none absolute left-[9px] top-2 bottom-2 w-px ${isCancelled ? 'bg-rose-200' : 'bg-slate-200'}`} />
                     <div className="space-y-2">
                     {steps.map((step) => {
                       const stepIndex = steps.findIndex((item) => item.id === step.id);
@@ -1049,15 +1056,29 @@ export function OrderTracking() {
                           <span
                             className={`h-5 w-5 rounded-full border grid place-items-center ${
                               isCurrent
-                                ? 'border-orange-500 bg-orange-500 text-white animate-pulse'
+                                ? isCancelled
+                                  ? 'border-rose-500 bg-rose-500 text-white'
+                                  : 'border-orange-500 bg-orange-500 text-white animate-pulse'
                                 : isCompleted
-                                  ? 'border-slate-300 bg-slate-200 text-slate-700'
+                                  ? isCancelled
+                                    ? 'border-rose-200 bg-rose-100 text-rose-700'
+                                    : 'border-slate-300 bg-slate-200 text-slate-700'
                                   : 'border-slate-200 bg-slate-50 text-slate-400'
                             }`}
                           >
                             {isCompleted ? <CheckCircle size={12} weight="fill" /> : <span className="text-[9px] font-bold">{stepIndex + 1}</span>}
                           </span>
-                          <span className={`text-[12px] ${isCurrent ? 'font-extrabold text-orange-600' : isCompleted ? 'font-semibold text-slate-700' : 'text-slate-400'}`}>
+                          <span className={`text-[12px] ${
+                            isCurrent
+                              ? isCancelled
+                                ? 'font-extrabold text-rose-600'
+                                : 'font-extrabold text-orange-600'
+                              : isCompleted
+                                ? isCancelled
+                                  ? 'font-semibold text-rose-700'
+                                  : 'font-semibold text-slate-700'
+                                : 'text-slate-400'
+                          }`}>
                             {step.label}
                           </span>
                         </div>

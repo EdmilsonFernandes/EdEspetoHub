@@ -684,7 +684,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     if (typeof window === "undefined") return false;
     return localStorage.getItem("queueTvMode") === "true";
   });
-  const [queueFilter, setQueueFilter] = useState<'all' | 'pending' | 'preparing' | 'ready' | 'late' | 'finalized'>('all');
+  const [queueFilter, setQueueFilter] = useState<'all' | 'pending' | 'preparing' | 'ready' | 'late' | 'cancelled' | 'finalized'>('all');
   const [reportRange, setReportRange] = useState<'today' | 'yesterday' | 'last7' | 'custom'>('today');
   const [reportFrom, setReportFrom] = useState(() => getNowKeyInSaoPaulo());
   const [reportTo, setReportTo] = useState(() => getNowKeyInSaoPaulo());
@@ -2223,13 +2223,18 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     const preparing = withAges.filter((o) => normalizeQueueStage(o) === 'preparing').length;
     const ready = withAges.filter((o) => normalizeQueueStage(o) === 'ready').length;
     const late = withAges.filter((o) => o.ageMs > PREP_SLA_MS).length;
+    const todayKey = getNowKeyInSaoPaulo();
+    const cancelled = queue.filter((order) => {
+      const status = String(order?.status || '').toLowerCase();
+      return status === 'cancelled' && getDayKeyInSaoPaulo(order.createdAt) === todayKey;
+    }).length;
     const avgMs =
       withAges.length > 0
         ? withAges.reduce((acc, cur) => acc + cur.ageMs, 0) / withAges.length
         : 0;
     const oldest = withAges.reduce((acc, cur) => (cur.ageMs > acc ? cur.ageMs : acc), 0);
-    return { pending, preparing, ready, late, avgMs, oldest };
-  }, [productionQueue, currentTime, PREP_SLA_MS]);
+    return { pending, preparing, ready, late, cancelled, avgMs, oldest };
+  }, [productionQueue, queue, currentTime, PREP_SLA_MS]);
 
   const allActiveQueue = useMemo(() => {
     const activeStatuses = new Set([ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ]);
@@ -2252,8 +2257,15 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         return ageMs > PREP_SLA_MS;
       });
     }
+    if (queueFilter === 'cancelled') {
+      const todayKey = getNowKeyInSaoPaulo();
+      return completedOrders.filter((order) => {
+        const status = String(order?.status || '').toLowerCase();
+        return status === 'cancelled' && getDayKeyInSaoPaulo(order.createdAt) === todayKey;
+      });
+    }
     return allActiveQueue;
-  }, [allActiveQueue, queueFilter, currentTime, PREP_SLA_MS]);
+  }, [allActiveQueue, completedOrders, queueFilter, currentTime, PREP_SLA_MS]);
 
   const bulkFinalizeCandidates = useMemo(() => {
     const merged = [ ...productionQueue ];
@@ -2752,6 +2764,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     { id: 'preparing', label: 'Em Preparação', value: queueMetrics.preparing },
                     { id: 'ready', label: 'Prontos', value: queueMetrics.ready },
                     { id: 'late', label: 'Atrasados', value: queueMetrics.late },
+                    { id: 'cancelled', label: 'Cancelados', value: queueMetrics.cancelled },
                   ].map((kpi) => (
                     <button
                       key={kpi.id}
