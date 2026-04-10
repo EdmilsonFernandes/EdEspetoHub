@@ -296,6 +296,11 @@ function OrderCard({
               {extraItems > 0 ? (
                 <p className="pl-8 text-xs font-medium text-slate-500">+{extraItems} itens</p>
               ) : null}
+              {normalizeStatus(order.status) === 'CANCELLED' && String(order.canceledReason || '').trim() ? (
+                <div className="rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-xs text-rose-700">
+                  <span className="font-semibold">Motivo:</span> {order.canceledReason}
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
