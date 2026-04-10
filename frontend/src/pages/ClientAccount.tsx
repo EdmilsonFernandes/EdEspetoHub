@@ -14,7 +14,9 @@ import {
   Phone,
   EnvelopeSimple,
   Camera,
-  ImagesSquare
+  ImagesSquare,
+  CheckCircle,
+  XCircle
 } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
 import { formatCurrency, formatOrderDisplayId } from '../utils/format';
@@ -42,6 +44,8 @@ export function ClientAccount() {
   const [profileMessage, setProfileMessage] = useState('');
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushLoading, setPushLoading] = useState(false);
+  const [photoPermission, setPhotoPermission] = useState<'granted' | 'denied' | 'unknown'>('unknown');
+  const [cameraPermission, setCameraPermission] = useState<'granted' | 'denied' | 'unknown'>('unknown');
   const [nameDraft, setNameDraft] = useState('');
   const [phoneDraft, setPhoneDraft] = useState('');
   const settingsSectionRef = useRef<HTMLElement | null>(null);
@@ -111,19 +115,41 @@ export function ClientAccount() {
   }, [navigate]);
 
   useEffect(() => {
-    const loadPush = async () => {
-      if (!Capacitor.isNativePlatform() || !Capacitor.isPluginAvailable('PushNotifications')) {
+    const loadPermissions = async () => {
+      if (!Capacitor.isNativePlatform()) {
         setPushEnabled(false);
+        setPhotoPermission('unknown');
+        setCameraPermission('unknown');
         return;
       }
       try {
-        const status = await PushNotifications.checkPermissions();
-        setPushEnabled(status.receive === 'granted');
+        if (Capacitor.isPluginAvailable('PushNotifications')) {
+          const status = await PushNotifications.checkPermissions();
+          setPushEnabled(status.receive === 'granted');
+        } else {
+          setPushEnabled(false);
+        }
       } catch {
         setPushEnabled(false);
       }
+
+      try {
+        if (Capacitor.isPluginAvailable('Camera')) {
+          const status = await CapCamera.checkPermissions();
+          const photosStatus = status?.photos === 'granted' || status?.photos === 'limited' ? 'granted' : status?.photos === 'denied' ? 'denied' : 'unknown';
+          const cameraStatus = status?.camera === 'granted' ? 'granted' : status?.camera === 'denied' ? 'denied' : 'unknown';
+          setPhotoPermission(photosStatus);
+          setCameraPermission(cameraStatus);
+        } else {
+          setPhotoPermission('unknown');
+          setCameraPermission('unknown');
+        }
+      } catch {
+        setPhotoPermission('unknown');
+        setCameraPermission('unknown');
+      }
     };
-    void loadPush();
+    void loadPermissions();
   }, []);
 
   useEffect(() => {
@@ -182,6 +208,8 @@ export function ClientAccount() {
         syncCustomerSession(updated || null, { bustProfileImage: true });
         setProfileMessage('Foto atualizada!');
         setProfileSaving(false);
+        setPhotoPermission('granted');
+        setCameraPermission('granted');
       }
     } catch {
       setProfileSaving(false);
@@ -206,6 +234,31 @@ export function ClientAccount() {
   const handleReviewPhotoAccess = async () => {
     setProfileMessage('');
     await pickProfileImageNative();
+  };
+
+  const permissionMeta = (value: 'granted' | 'denied' | 'unknown') => {
+    if (value === 'granted') {
+      return {
+        label: 'Permitido',
+        tone: 'text-emerald-700',
+        bg: 'bg-emerald-50 border-emerald-100',
+        icon: <CheckCircle size={16} weight="fill" className="text-emerald-500" />,
+      };
+    }
+    if (value === 'denied') {
+      return {
+        label: 'Bloqueado',
+        tone: 'text-rose-700',
+        bg: 'bg-rose-50 border-rose-100',
+        icon: <XCircle size={16} weight="fill" className="text-rose-500" />,
+      };
+    }
+    return {
+      label: 'Nao verificado',
+      tone: 'text-slate-600',
+      bg: 'bg-slate-50 border-slate-100',
+      icon: <XCircle size={16} weight="duotone" className="text-slate-400" />,
+    };
   };
 
   const handleChangePassword = async () => {
@@ -400,6 +453,7 @@ export function ClientAccount() {
             </>
           )}
 
+          {settingsOnly ? (
           <section
             ref={settingsSectionRef}
             className={`rounded-[2rem] border bg-white p-5 shadow-sm transition-all ${
@@ -424,39 +478,65 @@ export function ClientAccount() {
                   <p className="text-[12px] font-black text-slate-800">Notificações Push</p>
                   <p className="text-[10px] font-bold text-slate-400 leading-tight">Receba avisos de status e pedidos direto no aplicativo.</p>
                 </div>
-                <button
-                  onClick={handleTogglePush}
-                  disabled={pushLoading}
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${pushEnabled ? 'bg-emerald-500' : 'bg-slate-200'} ${pushLoading ? 'opacity-60' : ''}`}
-                  aria-label={pushEnabled ? 'Push ativado' : 'Ativar push'}
-                >
-                  <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${pushEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
-                </button>
+                <div className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] ${pushEnabled ? 'border-emerald-100 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-500'}`}>
+                  {pushEnabled ? <CheckCircle size={14} weight="fill" className="text-emerald-500" /> : <XCircle size={14} weight="fill" className="text-slate-300" />}
+                  {pushEnabled ? 'Ativo' : 'Desligado'}
+                </div>
               </div>
 
               <div className="rounded-[1.4rem] border border-slate-100 bg-slate-50/80 px-4 py-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-[12px] font-black text-slate-800">Foto e camera</p>
+                    <p className="text-[12px] font-black text-slate-800">Galeria e camera</p>
                     <p className="text-[10px] font-bold text-slate-400 leading-tight">
-                      Se voce negou o acesso antes, tente novamente por aqui para trocar sua foto de perfil.
+                      Veja rapidamente se o app tem permissao para escolher foto da galeria ou tirar uma nova foto.
                     </p>
                   </div>
                   <div className="grid h-10 w-10 place-items-center rounded-2xl bg-white text-violet-600 shadow-sm">
                     <ImagesSquare size={18} weight="duotone" />
                   </div>
                 </div>
-                <button
-                  onClick={handleReviewPhotoAccess}
-                  disabled={profileSaving}
-                  className="mt-3 inline-flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700 shadow-sm ring-1 ring-slate-200 transition-all active:scale-95 disabled:opacity-60"
-                >
-                  <Camera size={14} weight="fill" />
-                  Revisar acesso a foto
-                </button>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  {[
+                    { label: 'Galeria', state: permissionMeta(photoPermission), icon: <ImagesSquare size={16} weight="duotone" className="text-violet-500" /> },
+                    { label: 'Camera', state: permissionMeta(cameraPermission), icon: <Camera size={16} weight="duotone" className="text-violet-500" /> },
+                  ].map((item) => (
+                    <div key={item.label} className={`flex items-center justify-between rounded-2xl border px-3 py-3 ${item.state.bg}`}>
+                      <div className="flex items-center gap-2">
+                        <span className="grid h-8 w-8 place-items-center rounded-xl bg-white text-violet-600 shadow-sm">
+                          {item.icon}
+                        </span>
+                        <div>
+                          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-700">{item.label}</p>
+                          <p className={`text-[11px] font-bold ${item.state.tone}`}>{item.state.label}</p>
+                        </div>
+                      </div>
+                      {item.state.icon}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    onClick={handleTogglePush}
+                    disabled={pushLoading}
+                    className="inline-flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700 shadow-sm ring-1 ring-slate-200 transition-all active:scale-95 disabled:opacity-60"
+                  >
+                    <BellRinging size={14} weight="fill" />
+                    Atualizar push
+                  </button>
+                  <button
+                    onClick={handleReviewPhotoAccess}
+                    disabled={profileSaving}
+                    className="inline-flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700 shadow-sm ring-1 ring-slate-200 transition-all active:scale-95 disabled:opacity-60"
+                  >
+                    <Camera size={14} weight="fill" />
+                    Atualizar foto ou camera
+                  </button>
+                </div>
               </div>
             </div>
           </section>
+          ) : null}
 
           {!settingsOnly && (
             <section className="pt-4">

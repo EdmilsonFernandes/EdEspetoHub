@@ -247,24 +247,30 @@ export function ProfileDrawer({
               <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Acessos Profissionais</p>
               <p className="mt-1 text-[11px] font-medium text-slate-500">Lojista e entregador entram por aqui.</p>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2.5">
               <button
                 onClick={onOpenAdminLogin}
-                className="flex flex-col items-center justify-center gap-3 rounded-[2rem] border border-slate-100 bg-white/90 p-5 shadow-[0_18px_30px_-24px_rgba(15,23,42,0.35)] transition-all active:scale-95"
+                className="flex items-center gap-3 rounded-[1.55rem] border border-slate-100 bg-white/90 px-3 py-3.5 shadow-[0_18px_30px_-24px_rgba(15,23,42,0.35)] transition-all active:scale-95"
               >
-                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-sky-50 text-sky-600">
-                  <Storefront size={28} weight="duotone" />
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-sky-50 text-sky-600">
+                  <Storefront size={22} weight="duotone" />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 text-center">Painel da Loja</span>
+                <div className="min-w-0 text-left">
+                  <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Lojista</span>
+                  <span className="block text-[12px] font-bold leading-tight text-slate-700">Painel da loja</span>
+                </div>
               </button>
               <button
                 onClick={onOpenMotoboyLogin}
-                className="flex flex-col items-center justify-center gap-3 rounded-[2rem] border border-slate-100 bg-white/90 p-5 shadow-[0_18px_30px_-24px_rgba(15,23,42,0.35)] transition-all active:scale-95"
+                className="flex items-center gap-3 rounded-[1.55rem] border border-slate-100 bg-white/90 px-3 py-3.5 shadow-[0_18px_30px_-24px_rgba(15,23,42,0.35)] transition-all active:scale-95"
               >
-                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-amber-50 text-amber-600">
-                  <ArrowsClockwise size={28} weight="duotone" />
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-amber-50 text-amber-600">
+                  <ArrowsClockwise size={22} weight="duotone" />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 text-center">Entregador</span>
+                <div className="min-w-0 text-left">
+                  <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Entregador</span>
+                  <span className="block text-[12px] font-bold leading-tight text-slate-700">Area de entregas</span>
+                </div>
               </button>
             </div>
           </section>
