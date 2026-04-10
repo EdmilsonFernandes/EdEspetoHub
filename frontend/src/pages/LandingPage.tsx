@@ -21,7 +21,6 @@ import { LandingPageLayout } from '../layouts/LandingPageLayout';
 import { platformService } from '../services/platformService';
 import { storeService } from '../services/storeService';
 import { customerAccountService } from '../services/customerAccountService';
-import { formatCurrency } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { SocialProofMarquee } from '../components/Landing/SocialProofMarquee';
 import { SegmentPromoCarousel } from '../components/common/SegmentPromoCarousel';
@@ -367,12 +366,6 @@ export function LandingPage() {
                       <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Pedidos Processados</p>
                       <p className="text-4xl font-black text-white">
                         {metrics ? <Counter value={metrics.totalOrders || 0} /> : '---'}
-                      </p>
-                    </div>
-                    <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20">
-                      <p className="text-xs font-bold text-emerald-500/80 uppercase tracking-widest">Receita Movimentada</p>
-                      <p className="text-2xl font-black text-emerald-400">
-                        {metrics ? <Counter value={metrics.totalRevenue || 0} formatter={formatCurrency} /> : '---'}
                       </p>
                     </div>
                   </div>
