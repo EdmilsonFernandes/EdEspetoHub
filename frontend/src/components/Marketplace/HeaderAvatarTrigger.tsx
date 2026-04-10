@@ -33,6 +33,9 @@ export function HeaderAvatarTrigger({
         <img
           src={profileImageUrl}
           alt={displayName || 'Perfil'}
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
           className="h-full w-full object-cover"
         />
       ) : displayName ? (

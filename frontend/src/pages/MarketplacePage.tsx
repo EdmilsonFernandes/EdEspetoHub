@@ -1097,9 +1097,12 @@ export function MarketplacePage() {
                 className="relative shrink-0 flex h-12 w-12 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 shadow-[0_10px_24px_-14px_rgba(15,23,42,0.35)] transition-transform active:scale-90"
               >
                 <img
-                  src="/jnc.png"
+                  src="/janocaminho.jpg"
                   alt="Logo"
-                  className="h-full w-full rounded-full object-contain p-0.5"
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  className="h-full w-full rounded-full object-cover"
                 />
               </button>
             </div>

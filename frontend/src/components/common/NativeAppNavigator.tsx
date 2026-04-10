@@ -134,7 +134,7 @@ export function NativeAppNavigator() {
           style={{ backgroundColor: 'rgba(241,245,249,0.92)' }}
         >
           <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white p-0.5 ring-1 ring-slate-200">
-            <img src="/jnc.png" alt="JNC" className="h-full w-full rounded-full object-contain" />
+            <img src="/janocaminho.jpg" alt="JNC" loading="eager" fetchPriority="high" decoding="async" className="h-full w-full rounded-full object-cover" />
           </span>
           JNC
         </button>

@@ -622,83 +622,6 @@ export const CartView = ({
         </div>
 
         <div className="space-y-4 sm:space-y-5">
-          {isLoggedAssistedFlow ? (
-            <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white shadow-[0_18px_45px_-28px_rgba(15,23,42,0.65)]">
-              <div className="border-b border-white/10 px-4 py-3 sm:px-5">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-300">
-                      {isLoggedDeliveryFlow ? "Entregar em" : "Retirada para"}
-                    </p>
-                    <p className="mt-1 text-base font-semibold text-white">
-                      {isLoggedDeliveryFlow
-                        ? hasSavedAddress
-                          ? activeSavedAddress?.label || "Endereço principal"
-                          : "Defina um endereço para entrega"
-                        : loggedDeliveryName || "Cliente cadastrado"}
-                    </p>
-                  </div>
-                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-white">
-                    {isLoggedDeliveryFlow ? <MapPinLine size={20} weight="duotone" /> : <House size={20} weight="duotone" />}
-                  </span>
-                </div>
-              </div>
-              <div className="space-y-4 px-4 py-4 sm:px-5">
-                <div className="rounded-2xl border border-white/10 bg-white/8 p-4 backdrop-blur-sm">
-                  {isLoggedDeliveryFlow ? (
-                    hasSavedAddress ? (
-                      <>
-                        <p className="text-sm font-semibold text-white">Seu pedido sera entregue no endereco salvo da conta.</p>
-                        {loggedDeliveryAddressSummary ? (
-                          <p className="mt-2 text-sm leading-relaxed text-slate-200">{loggedDeliveryAddressSummary}</p>
-                        ) : null}
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-sm font-semibold text-white">Cadastre um endereco para continuar com a entrega.</p>
-                        <p className="mt-2 text-xs leading-relaxed text-slate-300">
-                          Assim o frete e o tempo de entrega sao calculados automaticamente.
-                        </p>
-                      </>
-                    )
-                  ) : (
-                    <>
-                      <p className="text-sm font-semibold text-white">Vamos preparar a retirada para o cadastro da sua conta.</p>
-                      <p className="mt-2 text-sm leading-relaxed text-slate-200">
-                        Confira seus dados abaixo antes de concluir o pedido.
-                      </p>
-                    </>
-                  )}
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-white/10 bg-white/8 p-3 backdrop-blur-sm">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-300">Nome</p>
-                    <p className="mt-1 text-sm font-semibold text-white">{loggedDeliveryName || "Cliente cadastrado"}</p>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/8 p-3 backdrop-blur-sm">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-300">Telefone</p>
-                    <p className="mt-1 text-sm font-semibold text-white">{loggedDeliveryPhone || "Nao informado"}</p>
-                  </div>
-                </div>
-                {isLoggedDeliveryFlow ? (
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => onOpenAddressManager?.()}
-                      className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-100"
-                    >
-                      Gerenciar endereco
-                    </button>
-                    {hasSavedAddress ? (
-                      <span className="inline-flex min-h-11 items-center rounded-2xl border border-emerald-300/40 bg-emerald-400/10 px-4 py-2.5 text-sm font-semibold text-emerald-200">
-                        Endereco principal em uso
-                      </span>
-                    ) : null}
-                  </div>
-                ) : null}
-              </div>
-            </div>
-          ) : null}
           {/* Nome */}
           {!canUseLockedContactSummary && (
           <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
@@ -745,6 +668,23 @@ export const CartView = ({
           </div>
           )}
 
+          {canUseLockedContactSummary && (
+            <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                    {isLoggedDeliveryFlow ? "Cliente da entrega" : "Retirada para"}
+                  </p>
+                  <p className="mt-1 text-sm font-bold text-slate-900">{loggedDeliveryName || "Cliente cadastrado"}</p>
+                  <p className="mt-1 text-xs font-medium text-slate-500">{loggedDeliveryPhone || "Telefone não informado"}</p>
+                </div>
+                <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-slate-700 shadow-sm">
+                  {isLoggedDeliveryFlow ? <User size={18} weight="duotone" /> : <House size={18} weight="duotone" />}
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* WhatsApp */}
           {!isOptionalPhoneMode && !canUseLockedContactSummary && (
             <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
@@ -785,7 +725,7 @@ export const CartView = ({
             </div>
           )}
 
-          {isOptionalPhoneMode && !showOptionalPhoneFields && (
+          {isOptionalPhoneMode && !showOptionalPhoneFields && !canUseLockedContactSummary && (
             <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
               <button
                 type="button"
@@ -798,7 +738,7 @@ export const CartView = ({
             </div>
           )}
 
-          {isOptionalPhoneMode && showOptionalPhoneFields && (
+          {isOptionalPhoneMode && showOptionalPhoneFields && !canUseLockedContactSummary && (
             <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
               <div className="flex items-center justify-between gap-2">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
@@ -919,7 +859,7 @@ export const CartView = ({
                   </button>
                 </div>
               )}
-              {isCustomerLogged && (
+              {isCustomerLogged && !isLoggedDeliveryFlow && (
                 <div className="mb-3 space-y-2">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 font-bold">Endereços salvos</p>
@@ -994,19 +934,41 @@ export const CartView = ({
               <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-4">
                 <div className="space-y-4">
                   {isLoggedDeliveryFlow ? (
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50/70 px-3 py-3 text-sm text-slate-600">
+                    <div className="rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-4 text-sm text-slate-600 shadow-sm">
                       {hasSavedAddress ? (
                         <>
-                          <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 mb-1">Endereco confirmado</p>
-                          <p className="font-semibold text-slate-800">Usaremos o endereco principal da sua conta para frete e entrega.</p>
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 mb-1">Entregar em</p>
+                              <p className="font-semibold text-slate-800">{activeSavedAddress?.label || 'Endereço principal'}</p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => onOpenAddressManager?.()}
+                              className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-semibold text-slate-700 shadow-sm"
+                            >
+                              Trocar
+                            </button>
+                          </div>
                           {loggedDeliveryAddressSummary ? (
                             <p className="mt-2 text-xs leading-relaxed text-slate-500">{loggedDeliveryAddressSummary}</p>
                           ) : null}
                         </>
                       ) : (
                         <>
-                          <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-700 mb-1">Endereco obrigatorio</p>
-                          <p className="font-semibold text-slate-800">Cadastre um endereco para continuar com entrega.</p>
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-700 mb-1">Endereço obrigatório</p>
+                              <p className="font-semibold text-slate-800">Cadastre um endereço para continuar com entrega.</p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => onOpenAddressManager?.()}
+                              className="shrink-0 rounded-xl border border-amber-200 bg-white px-3 py-2 text-[11px] font-semibold text-amber-700 shadow-sm"
+                            >
+                              Cadastrar
+                            </button>
+                          </div>
                         </>
                       )}
                     </div>

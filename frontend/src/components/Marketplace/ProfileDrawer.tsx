@@ -136,6 +136,9 @@ export function ProfileDrawer({
                   <img
                     src={profileImageUrl}
                     alt={userName}
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
                     className="h-16 w-16 rounded-2xl border-2 border-white object-cover shadow-[0_18px_30px_-18px_rgba(14,165,233,0.45)] ring-2 ring-sky-100"
                   />
                   <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-500 shadow-sm" />
@@ -282,7 +285,7 @@ export function ProfileDrawer({
               <p className="text-[11px] font-black text-slate-900 tracking-tight">Ja no Caminho</p>
               <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Versão {versionLabel || 'v0.0.0'}</p>
             </div>
-            <img src="/jnc.png" alt="Logo" className="h-8 w-auto opacity-95" />
+            <img src="/janocaminho.jpg" alt="Logo" loading="eager" fetchPriority="high" decoding="async" className="h-8 w-auto rounded-full object-cover opacity-95" />
           </div>
         </div>
       </aside>
