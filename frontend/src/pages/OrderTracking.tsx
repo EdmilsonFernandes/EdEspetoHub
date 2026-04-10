@@ -153,6 +153,7 @@ export function OrderTracking() {
           orderStatus === 'done' ||
           orderStatus === 'delivered' ||
           orderStatus === 'finished' ||
+          orderStatus === 'cancelled' ||
           deliveryStatus === 'DELIVERED';
         if (isTerminal) {
           setPolling(false);
@@ -196,6 +197,7 @@ export function OrderTracking() {
       orderStatus === 'done' ||
       orderStatus === 'delivered' ||
       orderStatus === 'finished' ||
+      orderStatus === 'cancelled' ||
       dStatus === 'DELIVERED';
     if (polling && !terminal) {
       timer = window.setInterval(() => loadTracking(true), 15000);
@@ -245,6 +247,7 @@ export function OrderTracking() {
     resolveAssetUrl(order?.store?.settings?.logoUrl) || '/janocaminho-logo.png';
   const isPostalDelivery = isDelivery && String((order as any)?.fulfillmentMode || '').toLowerCase() === 'postal';
   const statusLabel = useMemo(() => {
+    if (normalizedStatus === 'cancelled') return 'Cancelado';
     if (isPostalDelivery && (normalizedStatus === 'delivered' || normalizedStatus === 'finished')) return 'Entregue';
     if (isPostalDelivery && (normalizedStatus === 'dispatched' || normalizedStatus === 'waiting_for_motoboy' || normalizedStatus === 'in_delivery')) return 'Despachado';
     if (isPostalDelivery && (normalizedStatus === 'ready' || normalizedStatus === 'ready_for_delivery')) return 'Pronto para postagem';
@@ -261,11 +264,13 @@ export function OrderTracking() {
     if (order?.type === 'pickup' && (normalizedStatus === 'ready' || normalizedStatus === 'ready_for_pickup')) return 'Disponível para Coleta';
     return statusLabels[normalizedStatus] || statusLabels[status] || status;
   }, [isDelivery, isPostalDelivery, order?.type, status, normalizedStatus, (order as any)?.delivery?.status]);
+  const isCancelled = normalizedStatus === 'cancelled';
   const isReady =
     status === 'done' ||
     status === 'delivered' ||
     status === 'finished' ||
     String((order as any)?.delivery?.status || '').toUpperCase() === 'DELIVERED';
+  const isTerminal = isReady || isCancelled;
   const canRateDelivery = Boolean(reviewState?.features?.deliveryFeedbackEnabled ?? reviewState?.isDelivery ?? isDelivery);
   const canUseTipFlow = Boolean(reviewState?.features?.tipEnabled ?? canRateDelivery);
   const storePhone = order?.store?.phone;
@@ -889,17 +894,25 @@ export function OrderTracking() {
                       )}
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-                          isReady
-                            ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
-                            : 'bg-orange-50 text-orange-600 border-orange-200'
+                          isCancelled
+                            ? 'bg-rose-50 text-rose-600 border-rose-200'
+                            : isReady
+                              ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                              : 'bg-orange-50 text-orange-600 border-orange-200'
                         }`}
                       >
-                      {isReady ? 'Finalizado' : 'Em andamento'}
+                      {isCancelled ? 'Cancelado' : isReady ? 'Finalizado' : 'Em andamento'}
                     </span>
                     </div>
                     <p className="text-sm text-slate-500 mt-1.5">{typeLabel}</p>
+                    {isCancelled && order?.canceledReason ? (
+                      <div className="mt-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3">
+                        <p className="text-xs font-bold uppercase tracking-[0.16em] text-rose-700">Motivo do cancelamento</p>
+                        <p className="mt-1 text-sm text-rose-900">{order.canceledReason}</p>
+                      </div>
+                    ) : null}
 
-                    {estimatedReadyAt && !isReady ? (
+                    {estimatedReadyAt && !isTerminal ? (
                       <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
                         <p className="text-xs uppercase tracking-[0.16em] text-slate-500 font-semibold">{etaForecastLabel}</p>
                         <p className="mt-1 text-xl font-extrabold text-slate-900">
@@ -984,9 +997,9 @@ export function OrderTracking() {
                   <div className="mt-2 text-xs text-slate-500">{progress}% completo</div>
                 </div>
                 {(isReady && elapsedMs > 0) ||
-                (remainingEstimateMinutes !== null && !isReady) ||
-                (!isPostalDelivery && etaWindowMin && etaWindowMax && !isReady) ||
-                (isPostalDelivery && !isReady && (postalRemainingDays !== null || Boolean(postalExpectedDeliveryDate))) ||
+                (remainingEstimateMinutes !== null && !isTerminal) ||
+                (!isPostalDelivery && etaWindowMin && etaWindowMax && !isTerminal) ||
+                (isPostalDelivery && !isTerminal && (postalRemainingDays !== null || Boolean(postalExpectedDeliveryDate))) ||
                 isEstimateDelayed ? (
                   <div className="mb-4 space-y-1.5">
                     {isReady && elapsedMs > 0 && (

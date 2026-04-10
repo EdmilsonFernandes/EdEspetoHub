@@ -983,6 +983,14 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS orders
+    ADD COLUMN IF NOT EXISTS canceled_at TIMESTAMPTZ;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS orders
+    ADD COLUMN IF NOT EXISTS canceled_reason TEXT;
+  `);
+  await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS delivery_events (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       delivery_id UUID NOT NULL REFERENCES order_deliveries(order_id) ON DELETE CASCADE,

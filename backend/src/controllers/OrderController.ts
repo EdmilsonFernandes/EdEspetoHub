@@ -185,10 +185,10 @@ export class OrderController {
    * @date 2025-12-17
    */
   static async updateStatus(req: Request, res: Response) {
-    const { status } = req.body;
+    const { status, reason } = req.body;
     try {
       log.info('Order status update request', { orderId: req.params.orderId, status });
-      const order = await orderService.updateStatus(req.params.orderId, status, req.auth?.storeId);
+      const order = await orderService.updateStatus(req.params.orderId, status, req.auth?.storeId, reason);
       log.info('Order status updated', { orderId: req.params.orderId, status });
       return res.json(order);
     } catch (error: any) {

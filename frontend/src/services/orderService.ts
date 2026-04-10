@@ -250,9 +250,9 @@ export const orderService = {
     };
   },
 
-  async updateStatus(id: string, status: string)
+  async updateStatus(id: string, status: string, payload?: { reason?: string })
   {
-    await apiClient.patch(`/orders/${id}/status`, { status });
+    await apiClient.patch(`/orders/${id}/status`, { status, ...(payload || {}) });
   },
 
   async updateFulfillmentMode(id: string, fulfillmentMode: 'distance' | 'postal') {

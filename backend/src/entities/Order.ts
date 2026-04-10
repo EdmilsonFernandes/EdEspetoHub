@@ -69,6 +69,12 @@ export class Order {
   @Column({ default: 'pending' })
   status!: string;
 
+  @Column({ name: 'canceled_at', type: 'timestamptz', nullable: true })
+  canceledAt?: Date | null;
+
+  @Column({ name: 'canceled_reason', type: 'text', nullable: true })
+  canceledReason?: string | null;
+
   @Column({ name: 'payment_method', nullable: true })
   paymentMethod?: string;
 

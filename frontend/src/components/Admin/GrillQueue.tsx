@@ -721,6 +721,19 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     loading: false,
     error: '',
   });
+  const [cancelOrderModal, setCancelOrderModal] = useState<{
+    open: boolean;
+    order: any | null;
+    reason: string;
+    loading: boolean;
+    error: string;
+  }>({
+    open: false,
+    order: null,
+    reason: '',
+    loading: false,
+    error: '',
+  });
   const [printSelectionModal, setPrintSelectionModal] = useState<{
     open: boolean;
     order: any | null;
@@ -1419,7 +1432,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     return () => clearInterval(timer);
   }, []);
 
-  const handleAdvance = async (orderId, status) => {
+  const handleAdvance = async (orderId, status, payload?: { reason?: string }) => {
     const previousQueue = queue;
     try {
       setUpdating(orderId);
@@ -1444,7 +1457,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             }
           : prev
       );
-      await orderService.updateStatus(orderId, status);
+      await orderService.updateStatus(orderId, status, payload);
       setError('');
       // Não bloqueia a UI aguardando a recarga total da fila.
       void loadQueue();
@@ -1456,6 +1469,50 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       return false;
     } finally {
       setUpdating(null);
+    }
+  };
+
+  const openCancelOrderModal = (order: any) => {
+    setCancelOrderModal({
+      open: true,
+      order,
+      reason: '',
+      loading: false,
+      error: '',
+    });
+  };
+
+  const closeCancelOrderModal = () => {
+    if (cancelOrderModal.loading) return;
+    setCancelOrderModal({
+      open: false,
+      order: null,
+      reason: '',
+      loading: false,
+      error: '',
+    });
+  };
+
+  const handleConfirmCancelOrder = async () => {
+    if (!cancelOrderModal.order?.id) return;
+    const reason = String(cancelOrderModal.reason || '').trim();
+    if (!reason) {
+      setCancelOrderModal((prev) => ({ ...prev, error: 'Informe o motivo do cancelamento.' }));
+      return;
+    }
+    setCancelOrderModal((prev) => ({ ...prev, loading: true, error: '' }));
+    const success = await handleAdvance(cancelOrderModal.order.id, 'cancelled', { reason });
+    if (success) {
+      setSelectedOrder((prev: any) => (prev?.id === cancelOrderModal.order?.id ? null : prev));
+      setCancelOrderModal({
+        open: false,
+        order: null,
+        reason: '',
+        loading: false,
+        error: '',
+      });
+    } else {
+      setCancelOrderModal((prev) => ({ ...prev, loading: false, error: 'Não foi possível cancelar o pedido agora.' }));
     }
   };
 
@@ -2404,6 +2461,16 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
   const renderOrderFooterActions = (order: any) => (
     <div className="w-full flex flex-wrap gap-2 md:justify-end">
+      {[ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ].includes(String(order?.status || '').toLowerCase()) && (
+        <button
+          type="button"
+          onClick={() => openCancelOrderModal(order)}
+          disabled={updating === order.id}
+          className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition-all hover:bg-rose-100 disabled:opacity-50"
+        >
+          Cancelar pedido
+        </button>
+      )}
       {updating === order.id && (
         <div className="w-full rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700 inline-flex items-center gap-2">
           <ArrowsClockwise size={14} weight="duotone" className="animate-spin" />
@@ -4278,6 +4345,74 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   className="h-10 rounded-xl bg-amber-500 px-3 text-xs font-semibold text-white hover:bg-amber-600 disabled:opacity-60"
                 >
                   {reopenModal.loading ? 'Reabrindo...' : 'Confirmar reabertura'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+      {cancelOrderModal.open && createPortal(
+        <div className="fixed inset-0 z-[10029]">
+          <div
+            className="absolute inset-0 bg-slate-900/45 backdrop-blur-sm"
+            onClick={closeCancelOrderModal}
+          />
+          <div className="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-3 sm:p-4">
+            <div className="w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-black text-slate-900">Cancelar pedido</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Pedido #{formatOrderDisplayId(cancelOrderModal.order?.id, storeSlug)} será removido da fila operacional.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeCancelOrderModal}
+                  disabled={cancelOrderModal.loading}
+                  className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                  aria-label="Fechar cancelamento"
+                >
+                  <X size={16} weight="bold" />
+                </button>
+              </div>
+              <div className="p-4 space-y-3">
+                <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
+                  Use quando o pedido não puder seguir. O cliente verá o pedido como cancelado no acompanhamento.
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600">Motivo do cancelamento</label>
+                  <textarea
+                    value={cancelOrderModal.reason}
+                    onChange={(event) => setCancelOrderModal((prev) => ({ ...prev, reason: event.target.value, error: '' }))}
+                    placeholder="Ex.: item indisponível, pagamento não confirmado ou solicitação do cliente"
+                    rows={4}
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-rose-200"
+                  />
+                </div>
+                {cancelOrderModal.error && (
+                  <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                    {cancelOrderModal.error}
+                  </div>
+                )}
+              </div>
+              <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={closeCancelOrderModal}
+                  disabled={cancelOrderModal.loading}
+                  className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  Fechar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmCancelOrder}
+                  disabled={cancelOrderModal.loading}
+                  className="h-10 rounded-xl bg-rose-600 px-3 text-xs font-semibold text-white hover:bg-rose-700 disabled:opacity-60"
+                >
+                  {cancelOrderModal.loading ? 'Cancelando...' : 'Confirmar cancelamento'}
                 </button>
               </div>
             </div>

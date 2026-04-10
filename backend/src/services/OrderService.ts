@@ -819,7 +819,7 @@ private async seedPostalShipmentFromCheckoutTx(
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
    */
-  async updateStatus(orderId: string, status: string, authStoreId?: string)
+  async updateStatus(orderId: string, status: string, authStoreId?: string, reason?: string | null)
   {
     const order = await this.orderRepository.findById(orderId);
     if (!order) throw new AppError('ORDER-001', 404);
@@ -852,10 +852,10 @@ private async seedPostalShipmentFromCheckoutTx(
     }
     if (order.type === 'delivery' && !isPostalFlow && deliveryStatuses.has(nextStatus)) {
       const transitions: Record<string, string[]> = {
-        pending: [ 'preparing' ],
-        preparing: [ 'ready_for_delivery', 'waiting_for_motoboy' ],
-        ready_for_delivery: [ 'waiting_for_motoboy', 'in_delivery' ],
-        waiting_for_motoboy: [ 'in_delivery' ],
+        pending: [ 'preparing', 'cancelled' ],
+        preparing: [ 'ready_for_delivery', 'waiting_for_motoboy', 'cancelled' ],
+        ready_for_delivery: [ 'waiting_for_motoboy', 'in_delivery', 'cancelled' ],
+        waiting_for_motoboy: [ 'in_delivery', 'cancelled' ],
         in_delivery: [ 'delivered', 'finished' ],
         delivered: [ 'finished' ],
       };
@@ -913,6 +913,25 @@ private async seedPostalShipmentFromCheckoutTx(
       }
 
       lockedOrder.status = nextStatus;
+      if (nextStatus === 'cancelled') {
+        lockedOrder.canceledAt = new Date();
+        lockedOrder.canceledReason = String(reason || '').trim() || null;
+      } else if (lockedOrder.status !== 'cancelled') {
+        lockedOrder.canceledAt = null;
+        lockedOrder.canceledReason = null;
+      }
+      if (nextStatus === 'cancelled' && lockedOrder.type === 'delivery') {
+        await manager.query(
+          `
+            UPDATE order_deliveries
+               SET status = 'CANCELED',
+                   canceled_at = NOW(),
+                   canceled_reason = COALESCE($2, canceled_reason)
+             WHERE order_id = $1
+          `,
+          [lockedOrder.id, String(reason || '').trim() || null]
+        );
+      }
       return repo.save(lockedOrder);
     });
 
