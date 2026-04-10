@@ -259,7 +259,6 @@ export function ProfileDrawer({
                   <Storefront size={22} weight="duotone" />
                 </div>
                 <div className="min-w-0 text-left">
-                  <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Lojista</span>
                   <span className="block text-[12px] font-bold leading-tight text-slate-700">Painel da loja</span>
                 </div>
               </button>
@@ -271,7 +270,6 @@ export function ProfileDrawer({
                   <ArrowsClockwise size={22} weight="duotone" />
                 </div>
                 <div className="min-w-0 text-left">
-                  <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Entregador</span>
                   <span className="block text-[12px] font-bold leading-tight text-slate-700">Area de entregas</span>
                 </div>
               </button>

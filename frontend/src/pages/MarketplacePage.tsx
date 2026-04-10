@@ -1384,13 +1384,20 @@ export function MarketplacePage() {
                   <div key={idx} className="min-w-[236px] h-[128px] rounded-[1.8rem] bg-white border border-slate-100 shadow-sm animate-pulse" />
                 ))
               ) : (
-                displayedFeaturedProducts.map((item) => (
+                displayedFeaturedProducts.map((item, index) => (
                   <Link
                     key={`${item.storeSlug}-${item.id}`}
                     to={`/${item.storeSlug}`}
                     className="group relative min-w-[236px] h-[128px] overflow-hidden rounded-[1.6rem] bg-white border border-slate-100 shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] snap-start"
                   >
-                    <img src={item.imageUrl} alt={item.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <img
+                      src={item.imageUrl}
+                      alt={item.name}
+                      loading={index < 2 ? 'eager' : 'lazy'}
+                      fetchPriority={index < 2 ? 'high' : 'auto'}
+                      decoding="async"
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
                     <div className="absolute inset-0 rounded-[1.6rem] bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                     
                     <div className="absolute top-3 left-3.5">
@@ -1413,6 +1420,9 @@ export function MarketplacePage() {
                           <img 
                             src={item.storeLogo} 
                             alt={item.storeName} 
+                            loading={index < 2 ? 'eager' : 'lazy'}
+                            fetchPriority={index < 2 ? 'high' : 'auto'}
+                            decoding="async"
                             className="h-5 w-5 rounded-full border border-white/50 shadow-sm" 
                             onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(item.storeSlug, item.storeName); }}
                           />
