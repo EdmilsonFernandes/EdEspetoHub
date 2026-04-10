@@ -197,13 +197,20 @@ export function AddressDistance() {
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">CEP</label>
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
-                    <input
-                      placeholder="00000-000"
-                      value={form.cep}
-                      onChange={e => setForm({...form, cep: formatCepBr(e.target.value)})}
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
-                      disabled={isGeocoding}
-                    />
+                    <div className="relative">
+                      <input
+                        placeholder="00000-000"
+                        value={form.cep}
+                        onChange={e => setForm({...form, cep: formatCepBr(e.target.value)})}
+                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
+                        disabled={isGeocoding}
+                      />
+                      {isGeocoding ? (
+                        <span className="pointer-events-none absolute inset-y-0 right-4 inline-flex items-center">
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-sky-200 border-t-sky-600" />
+                        </span>
+                      ) : null}
+                    </div>
                     <button
                       type="button"
                       onClick={() => setForm((prev) => ({ ...prev }))}
@@ -213,6 +220,17 @@ export function AddressDistance() {
                       {isGeocoding ? 'Buscando...' : 'Busca auto'}
                     </button>
                   </div>
+                  {isGeocoding ? (
+                    <div className="rounded-2xl border border-sky-100 bg-sky-50/80 px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-sky-200 border-t-sky-600" />
+                        <div>
+                          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-sky-700">Preenchendo endereco</p>
+                          <p className="text-xs font-medium text-sky-600">O CEP esta completando rua, bairro, cidade e UF...</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
 
                 <input
