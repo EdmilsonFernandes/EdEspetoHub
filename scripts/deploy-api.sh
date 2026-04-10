@@ -3,7 +3,12 @@ set -eu
 
 ROOT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 ENV_FILE="$ROOT_DIR/.env.prod"
-export HOME="${HOME:-/home/ec2-user}"
+CURRENT_USER="$(id -un 2>/dev/null || printf '%s' "${USER:-ec2-user}")"
+CURRENT_HOME="$(getent passwd "$CURRENT_USER" 2>/dev/null | awk -F: '{print $6}' || true)"
+if [ -z "$CURRENT_HOME" ]; then
+  CURRENT_HOME="/home/$CURRENT_USER"
+fi
+export HOME="$CURRENT_HOME"
 export DOCKER_CONFIG="${DOCKER_CONFIG:-$HOME/.docker}"
 export PATH="/usr/local/bin:$PATH"
 
