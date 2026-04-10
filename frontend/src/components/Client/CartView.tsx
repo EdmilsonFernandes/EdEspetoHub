@@ -518,6 +518,35 @@ export const CartView = ({
   );
   const isLoggedDeliveryFlow = Boolean(isCustomerLogged && isDelivery);
   const hasSavedAddress = savedDeliveryAddresses.length > 0;
+  const activeSavedAddress = useMemo(
+    () =>
+      (Array.isArray(savedAddresses) ? savedAddresses : []).find((address: any) => {
+        return (
+          String(address?.cep || '').replace(/\D/g, '') === String(customer?.cep || '').replace(/\D/g, '') &&
+          String(address?.street || '').trim().toLowerCase() === String(customer?.street || '').trim().toLowerCase() &&
+          String(address?.number || '').trim() === String(customer?.number || '').trim()
+        );
+      }) ||
+      savedDeliveryAddresses.find((address: any) => Boolean(address?.isDefault)) ||
+      savedDeliveryAddresses[0] ||
+      null,
+    [customer?.cep, customer?.number, customer?.street, savedAddresses, savedDeliveryAddresses]
+  );
+  const loggedDeliveryName = String(customer?.name || '').trim();
+  const loggedDeliveryPhone = String(customer?.phone || '').trim();
+  const loggedDeliveryAddressSummary = useMemo(() => {
+    if (!activeSavedAddress) return normalizedCustomerAddress;
+    const street = [activeSavedAddress?.street, activeSavedAddress?.number].filter(Boolean).join(', ');
+    return [
+      street,
+      activeSavedAddress?.complement,
+      activeSavedAddress?.neighborhood,
+      activeSavedAddress?.city && activeSavedAddress?.state
+        ? `${activeSavedAddress.city} - ${activeSavedAddress.state}`
+        : activeSavedAddress?.city,
+      activeSavedAddress?.cep && `CEP ${activeSavedAddress.cep}`,
+    ].filter(Boolean).join(' | ');
+  }, [activeSavedAddress, normalizedCustomerAddress]);
 
   const showRouteMap = !isPostalDelivery && Boolean(storeCoords?.lat && deliveryCoords?.lat);
   const showDeliveryStatus = isPostalDelivery
@@ -594,43 +623,52 @@ export const CartView = ({
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               Seu Nome
             </label>
-            <div className="relative mt-2">
-              <input
-                ref={nameInputRef}
-                value={customer.name}
-                onChange={(e) => handleNameChange(e.target.value)}
-                onFocus={() =>
-                  allowCustomerAutocomplete &&
-                  filteredCustomers.length &&
-                  setSuggestionsOpen(true)
-                }
-                onBlur={() =>
-                  allowCustomerAutocomplete && setTimeout(() => setSuggestionsOpen(false), 150)
-                }
-                placeholder="Nome completo"
-                className="w-full rounded-2xl bg-slate-100 py-3 pl-10 pr-4 text-base sm:text-lg text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all"
-              />
-              <MagnifyingGlass size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              {allowCustomerAutocomplete && suggestionsOpen && filteredCustomers.length > 0 && (
-                <div className="absolute z-10 mt-2 w-full bg-white border border-gray-100 rounded-xl shadow-lg overflow-hidden">
-                  {filteredCustomers.slice(0, 6).map((entry) => (
-                    <button
-                      key={entry.id || entry.name}
-                      type="button"
-                      onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => handleSelectCustomer(entry)}
-                      className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between"
-                    >
-                      <span className="font-semibold text-gray-800 flex items-center gap-2">
-                        <User size={14} weight="duotone" className="text-gray-400" />
-                        {entry.name}
-                      </span>
-                      <span className="text-xs text-gray-500">{entry.phone || "Sem telefone"}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            {isLoggedDeliveryFlow ? (
+              <div className="mt-2 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                <p className="text-sm font-bold text-slate-900">{loggedDeliveryName || 'Cliente cadastrado'}</p>
+                {loggedDeliveryPhone ? (
+                  <p className="mt-1 text-xs font-medium text-slate-500">{loggedDeliveryPhone}</p>
+                ) : null}
+              </div>
+            ) : (
+              <div className="relative mt-2">
+                <input
+                  ref={nameInputRef}
+                  value={customer.name}
+                  onChange={(e) => handleNameChange(e.target.value)}
+                  onFocus={() =>
+                    allowCustomerAutocomplete &&
+                    filteredCustomers.length &&
+                    setSuggestionsOpen(true)
+                  }
+                  onBlur={() =>
+                    allowCustomerAutocomplete && setTimeout(() => setSuggestionsOpen(false), 150)
+                  }
+                  placeholder="Nome completo"
+                  className="w-full rounded-2xl bg-slate-100 py-3 pl-10 pr-4 text-base sm:text-lg text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all"
+                />
+                <MagnifyingGlass size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                {allowCustomerAutocomplete && suggestionsOpen && filteredCustomers.length > 0 && (
+                  <div className="absolute z-10 mt-2 w-full bg-white border border-gray-100 rounded-xl shadow-lg overflow-hidden">
+                    {filteredCustomers.slice(0, 6).map((entry) => (
+                      <button
+                        key={entry.id || entry.name}
+                        type="button"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => handleSelectCustomer(entry)}
+                        className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between"
+                      >
+                        <span className="font-semibold text-gray-800 flex items-center gap-2">
+                          <User size={14} weight="duotone" className="text-gray-400" />
+                          {entry.name}
+                        </span>
+                        <span className="text-xs text-gray-500">{entry.phone || "Sem telefone"}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* WhatsApp */}
@@ -807,7 +845,7 @@ export const CartView = ({
                   </button>
                 </div>
               )}
-              {isCustomerLogged && !isPostalDelivery && (
+              {isCustomerLogged && (
                 <div className="mb-3 space-y-2">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 font-bold">Endereços salvos</p>
@@ -887,6 +925,9 @@ export const CartView = ({
                         <>
                           <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 mb-1">Entrega vinculada</p>
                           <p className="font-semibold text-slate-800">Usaremos seu endereço salvo para calcular frete e validar entrega.</p>
+                          {loggedDeliveryAddressSummary ? (
+                            <p className="mt-2 text-xs leading-relaxed text-slate-500">{loggedDeliveryAddressSummary}</p>
+                          ) : null}
                         </>
                       ) : (
                         <>

@@ -3,7 +3,6 @@ import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPinLine, Plus, Trash, House, Suitcase, MapPin, CaretRight, CheckCircle } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
-import { mapsService } from '../services/mapsService'; // Importar mapsService
 import { useToast } from '../contexts/ToastContext';
 
 export function AddressDistance() {
@@ -28,6 +27,12 @@ export function AddressDistance() {
     phone: '',
   });
 
+  const formatCepBr = (value: string) => {
+    const digits = String(value || '').replace(/\D/g, '').slice(0, 8);
+    if (digits.length <= 5) return digits;
+    return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+  };
+
   const loadAddresses = useCallback(async () => {
     try {
       const data = await customerAccountService.listAddresses();
@@ -43,7 +48,6 @@ export function AddressDistance() {
     loadAddresses();
   }, [loadAddresses]);
 
-  // Efeito para preencher endereço automaticamente pelo CEP
   useEffect(() => {
     const fetchAddressByCep = async () => {
       const cleanedCep = String(form.cep || '').replace(/\D/g, '');
@@ -51,26 +55,28 @@ export function AddressDistance() {
 
       setIsGeocoding(true);
       try {
-        const addressData = await mapsService.geocode(cleanedCep);
-        if (addressData) {
+        const response = await fetch(`https://viacep.com.br/ws/${cleanedCep}/json/`);
+        const addressData = await response.json();
+        if (!addressData?.erro) {
           setForm(prev => ({
             ...prev,
-            street: addressData.street || prev.street,
-            neighborhood: addressData.neighborhood || prev.neighborhood,
-            city: addressData.city || prev.city,
-            state: addressData.state || prev.state,
-            complement: addressData.complement || prev.complement,
+            cep: formatCepBr(cleanedCep),
+            street: String(addressData?.logradouro || prev.street || ''),
+            neighborhood: String(addressData?.bairro || prev.neighborhood || ''),
+            city: String(addressData?.localidade || prev.city || ''),
+            state: String(addressData?.uf || prev.state || '').toUpperCase().slice(0, 2),
+            complement: prev.complement || String(addressData?.complemento || ''),
           }));
         }
       } catch (err) {
-        // showToast('CEP não encontrado ou inválido', 'warning');
+        // silent
       } finally {
         setIsGeocoding(false);
       }
     };
-    const timer = setTimeout(fetchAddressByCep, 500); // Debounce
+    const timer = setTimeout(fetchAddressByCep, 500);
     return () => clearTimeout(timer);
-  }, [form.cep]); // Dispara quando o CEP muda
+  }, [form.cep]);
 
   const handleAddAddress = async (e) => {
     e.preventDefault();
@@ -144,7 +150,7 @@ export function AddressDistance() {
                 <input
                   placeholder="CEP"
                   value={form.cep}
-                  onChange={e => setForm({...form, cep: e.target.value})}
+                  onChange={e => setForm({...form, cep: formatCepBr(e.target.value)})}
                   className="w-full rounded-2xl bg-slate-50 border-none px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-slate-900/5 transition-all"
                   disabled={isGeocoding}
                 />
@@ -182,6 +188,20 @@ export function AddressDistance() {
                   placeholder="Cidade"
                   value={form.city}
                   onChange={e => setForm({...form, city: e.target.value})}
+                  className="w-full rounded-2xl bg-slate-50 border-none px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-slate-900/5 transition-all"
+                />
+
+                <input
+                  placeholder="UF"
+                  value={form.state}
+                  onChange={e => setForm({...form, state: String(e.target.value || '').toUpperCase().slice(0, 2)})}
+                  className="w-full rounded-2xl bg-slate-50 border-none px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-slate-900/5 transition-all"
+                />
+
+                <input
+                  placeholder="Complemento"
+                  value={form.complement}
+                  onChange={e => setForm({...form, complement: e.target.value})}
                   className="w-full rounded-2xl bg-slate-50 border-none px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-slate-900/5 transition-all"
                 />
 
