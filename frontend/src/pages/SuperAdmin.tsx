@@ -134,6 +134,13 @@ const getAttributionLabel = (store: any) => {
   return secondary ? `${primary} · ${secondary}` : primary;
 };
 
+const getSuperAdminRoleLabel = (role?: string) => {
+  const normalized = String(role || '').trim().toUpperCase();
+  if (normalized === 'SUPER_ADMIN') return 'Gestor da plataforma';
+  if (normalized === 'ADMIN') return 'Administrador';
+  return 'Equipe Ja no Caminho';
+};
+
 const KycAvatar = ({ name, profileImageUrl }: { name?: string; profileImageUrl?: string }) => {
   return (
     <AdaptiveAvatar
@@ -1159,7 +1166,7 @@ export function SuperAdmin() {
 
   return (
     <AdminLayout contextLabel="Plataforma" showHeader={false}>
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white/80 backdrop-blur px-4 py-4 sm:px-6 sm:py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="relative z-20 overflow-visible rounded-3xl border border-slate-200 bg-white/80 backdrop-blur px-4 py-4 sm:px-6 sm:py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="absolute -right-20 -top-16 w-64 h-64 rounded-full bg-brand-primary/10 blur-3xl" />
         <div className="absolute right-24 -bottom-20 w-56 h-56 rounded-full bg-emerald-400/10 blur-3xl" />
         <div className="relative flex items-center gap-4">
@@ -1190,12 +1197,12 @@ export function SuperAdmin() {
             </div>
             <div className="hidden sm:block text-left text-xs leading-tight">
               <div className="font-semibold text-slate-800">{superAdminUser || 'Admin Já no Caminho'}</div>
-              <div className="text-slate-500">SUPER_ADMIN</div>
+              <div className="text-slate-500">{getSuperAdminRoleLabel('SUPER_ADMIN')}</div>
             </div>
             <CaretDown size={14} className={`text-slate-500 transition-transform ${profileMenuOpen ? 'rotate-180' : ''}`} />
           </button>
           {profileMenuOpen && (
-            <div className="absolute right-0 top-[calc(100%+8px)] z-30 w-[260px] rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_24px_40px_-24px_rgba(15,23,42,0.45)]">
+            <div className="absolute right-0 top-[calc(100%+8px)] z-[70] w-[260px] rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_24px_40px_-24px_rgba(15,23,42,0.45)]">
               <div className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
                 <span className="text-xs font-semibold text-slate-600">Auto-refresh</span>
                 <button
