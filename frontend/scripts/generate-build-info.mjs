@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
+import { Buffer } from 'node:buffer';
 
 const projectRoot = resolve(process.cwd());
 const packageJsonPath = resolve(projectRoot, 'package.json');
@@ -59,7 +60,17 @@ const normalizeCommitEntries = (entries, repositoryUrl) => {
 };
 
 const parseEnvCommits = (repositoryUrl) => {
-  const raw = String(process.env.BUILD_COMMITS_JSON || '').trim();
+  const rawBase64 = String(process.env.BUILD_COMMITS_B64 || '').trim();
+  const rawJson = String(process.env.BUILD_COMMITS_JSON || '').trim();
+  const raw = rawBase64
+    ? (() => {
+        try {
+          return Buffer.from(rawBase64, 'base64').toString('utf8');
+        } catch {
+          return '';
+        }
+      })()
+    : rawJson;
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw);

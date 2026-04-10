@@ -37,6 +37,7 @@ elif command -v python >/dev/null 2>&1; then
 fi
 
 COMMITS_JSON=""
+COMMITS_JSON_B64=""
 if [ -n "$PYTHON_BIN" ]; then
   COMMITS_JSON="$(
     ROOT_DIR="$ROOT_DIR" "$PYTHON_BIN" - <<'PY'
@@ -77,6 +78,17 @@ for line in raw.splitlines():
 print(json.dumps(rows, ensure_ascii=True, separators=(",", ":")))
 PY
   )"
+  if [ -n "$COMMITS_JSON" ]; then
+    COMMITS_JSON_B64="$(
+      COMMITS_JSON_PAYLOAD="$COMMITS_JSON" "$PYTHON_BIN" - <<'PY'
+import base64
+import os
+
+payload = os.environ.get("COMMITS_JSON_PAYLOAD", "")
+print(base64.b64encode(payload.encode('utf-8')).decode('ascii'))
+PY
+    )"
+  fi
 fi
 
 normalize_semver() {
@@ -139,6 +151,7 @@ awk '
   !/^FRONTEND_BUILD_GIT_BRANCH=/ &&
   !/^FRONTEND_BUILD_GIT_REMOTE_URL=/ &&
   !/^FRONTEND_BUILD_COMMITS_JSON=/ &&
+  !/^FRONTEND_BUILD_COMMITS_B64=/ &&
   !/^FRONTEND_BUILD_TIME_ISO=/
 ' "$ENV_FILE" > "$tmp_file"
 
@@ -149,7 +162,7 @@ awk '
   printf 'FRONTEND_BUILD_GIT_SHORT_SHA=%s\n' "$GIT_SHORT_SHA"
   printf 'FRONTEND_BUILD_GIT_BRANCH=%s\n' "$GIT_BRANCH"
   printf 'FRONTEND_BUILD_GIT_REMOTE_URL=%s\n' "$GIT_REMOTE_URL"
-  printf 'FRONTEND_BUILD_COMMITS_JSON=%s\n' "$COMMITS_JSON"
+  printf 'FRONTEND_BUILD_COMMITS_B64=%s\n' "$COMMITS_JSON_B64"
   printf 'FRONTEND_BUILD_TIME_ISO=%s\n' "$BUILD_TIME"
 } > "$ENV_FILE"
 
