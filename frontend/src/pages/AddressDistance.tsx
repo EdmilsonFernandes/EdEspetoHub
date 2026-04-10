@@ -113,26 +113,42 @@ export function AddressDistance() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-12 pt-[env(safe-area-inset-top)]">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.08),_transparent_32%),linear-gradient(180deg,#f8fbff_0%,#f8fafc_40%,#f8fafc_100%)] pb-16 pt-[env(safe-area-inset-top)]">
       <div className="mx-auto max-w-2xl">
-        <header className="sticky top-0 z-20 flex items-center gap-4 border-b border-slate-200 bg-white/80 px-4 py-4 backdrop-blur-md">
+        <header className="sticky top-0 z-20 flex items-center gap-4 border-b border-slate-200/70 bg-white/85 px-4 py-4 backdrop-blur-xl">
           <button
             onClick={() => navigate(-1)}
-            className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 active:scale-90 transition-all"
+            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 shadow-sm active:scale-90 transition-all"
           >
             <ArrowLeft size={20} weight="bold" />
           </button>
           <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-sky-600">Minha conta</p>
             <h1 className="text-lg font-black text-slate-900 leading-tight">Meus Endereços</h1>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Locais de entrega</p>
+            <p className="text-[11px] font-medium text-slate-500">Organize seus locais de entrega com rapidez.</p>
           </div>
         </header>
 
         <div className="p-4 space-y-4">
+          <section className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white px-5 py-5 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.3)]">
+            <div className="flex items-start gap-4">
+              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-[1.5rem] bg-sky-50 text-sky-600 shadow-inner">
+                <MapPinLine size={26} weight="duotone" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Entrega inteligente</p>
+                <h2 className="mt-1 text-lg font-black text-slate-900">Salve seus endereços favoritos</h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  O app usa seu endereço principal para acelerar o checkout de entrega.
+                </p>
+              </div>
+            </div>
+          </section>
+
           {!showAddForm && (
             <button
               onClick={() => setShowAddForm(true)}
-              className="flex w-full items-center justify-center gap-2 rounded-[1.5rem] bg-slate-900 py-4 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-slate-900/20 active:scale-[0.98] transition-all"
+              className="flex w-full items-center justify-center gap-2 rounded-[1.6rem] bg-[linear-gradient(135deg,#0f172a,#1e293b)] py-4 text-xs font-black uppercase tracking-[0.22em] text-white shadow-[0_20px_45px_-28px_rgba(15,23,42,0.7)] active:scale-[0.98] transition-all"
             >
               <Plus size={16} weight="bold" />
               Novo Endereço
@@ -140,75 +156,121 @@ export function AddressDistance() {
           )}
 
           {showAddForm && (
-            <div className="animate-in fade-in slide-in-from-top-4 duration-300 rounded-[2.5rem] bg-white border border-slate-200 p-6 shadow-sm space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm font-black uppercase tracking-widest text-slate-900">Cadastrar Endereço</h2>
-                <button onClick={() => setShowAddForm(false)} className="text-xs font-bold text-slate-400">Cancelar</button>
+            <div className="animate-in fade-in slide-in-from-top-4 duration-300 overflow-hidden rounded-[2.2rem] border border-slate-200 bg-white shadow-[0_30px_70px_-44px_rgba(15,23,42,0.34)]">
+              <div className="border-b border-slate-100 bg-[linear-gradient(180deg,#f8fbff_0%,#ffffff_100%)] px-6 py-5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Novo endereço</p>
+                    <h2 className="mt-1 text-lg font-black text-slate-900">Cadastrar endereço de entrega</h2>
+                  </div>
+                  <button
+                    onClick={() => setShowAddForm(false)}
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500 shadow-sm"
+                  >
+                    Cancelar
+                  </button>
+                </div>
               </div>
 
-              <form onSubmit={handleAddAddress} className="space-y-3">
-                <input
-                  placeholder="CEP"
-                  value={form.cep}
-                  onChange={e => setForm({...form, cep: formatCepBr(e.target.value)})}
-                  className="w-full rounded-2xl bg-slate-50 border-none px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-slate-900/5 transition-all"
-                  disabled={isGeocoding}
-                />
+              <form onSubmit={handleAddAddress} className="space-y-4 p-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Apelido</label>
+                    <input
+                      placeholder="Casa, trabalho, mãe..."
+                      value={form.label}
+                      onChange={e => setForm({...form, label: e.target.value})}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Recebedor</label>
+                    <input
+                      placeholder="Nome do recebedor"
+                      value={form.recipientName}
+                      onChange={e => setForm({...form, recipientName: e.target.value})}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">CEP</label>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
+                    <input
+                      placeholder="00000-000"
+                      value={form.cep}
+                      onChange={e => setForm({...form, cep: formatCepBr(e.target.value)})}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
+                      disabled={isGeocoding}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setForm((prev) => ({ ...prev }))}
+                      className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-[11px] font-black uppercase tracking-[0.16em] text-slate-600 shadow-sm"
+                      disabled
+                    >
+                      {isGeocoding ? 'Buscando...' : 'Busca auto'}
+                    </button>
+                  </div>
+                </div>
 
                 <input
-                  placeholder="Nome do Recebedor"
-                  value={form.recipientName}
-                  onChange={e => setForm({...form, recipientName: e.target.value})}
-                  className="w-full rounded-2xl bg-slate-50 border-none px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-slate-900/5 transition-all"
+                  placeholder="Telefone do recebedor"
+                  value={form.phone}
+                  onChange={e => setForm({...form, phone: e.target.value})}
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
                 />
 
-                <div className="grid grid-cols-[1fr_80px] gap-2">
+                <div className="grid grid-cols-[1fr_92px] gap-2">
                   <input
                     placeholder="Rua / Logradouro"
                     value={form.street}
                     onChange={e => setForm({...form, street: e.target.value})}
-                    className="rounded-2xl bg-slate-50 border-none px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-slate-900/5 transition-all"
+                    className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
                   />
                   <input
                     placeholder="Nº"
                     value={form.number}
                     onChange={e => setForm({...form, number: e.target.value})}
-                    className="rounded-2xl bg-slate-50 border-none px-2 py-3 text-center text-sm font-bold text-slate-700 focus:ring-2 focus:ring-slate-900/5 transition-all"
+                    className="rounded-2xl border border-slate-200 bg-slate-50 px-2 py-3 text-center text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
                   />
                 </div>
 
-                <input
-                  placeholder="Bairro"
-                  value={form.neighborhood}
-                  onChange={e => setForm({...form, neighborhood: e.target.value})}
-                  className="w-full rounded-2xl bg-slate-50 border-none px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-slate-900/5 transition-all"
-                />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_0.92fr_110px]">
+                  <input
+                    placeholder="Bairro"
+                    value={form.neighborhood}
+                    onChange={e => setForm({...form, neighborhood: e.target.value})}
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
+                  />
 
-                <input
-                  placeholder="Cidade"
-                  value={form.city}
-                  onChange={e => setForm({...form, city: e.target.value})}
-                  className="w-full rounded-2xl bg-slate-50 border-none px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-slate-900/5 transition-all"
-                />
+                  <input
+                    placeholder="Cidade"
+                    value={form.city}
+                    onChange={e => setForm({...form, city: e.target.value})}
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
+                  />
 
-                <input
-                  placeholder="UF"
-                  value={form.state}
-                  onChange={e => setForm({...form, state: String(e.target.value || '').toUpperCase().slice(0, 2)})}
-                  className="w-full rounded-2xl bg-slate-50 border-none px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-slate-900/5 transition-all"
-                />
+                  <input
+                    placeholder="UF"
+                    value={form.state}
+                    onChange={e => setForm({...form, state: String(e.target.value || '').toUpperCase().slice(0, 2)})}
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
+                  />
+                </div>
 
                 <input
                   placeholder="Complemento"
                   value={form.complement}
                   onChange={e => setForm({...form, complement: e.target.value})}
-                  className="w-full rounded-2xl bg-slate-50 border-none px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-slate-900/5 transition-all"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
                 />
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full rounded-[1.5rem] bg-emerald-600 py-4 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-emerald-600/20 active:scale-95 transition-all disabled:opacity-50"
+                  className="w-full rounded-[1.5rem] bg-[linear-gradient(135deg,#0f172a,#1e293b)] py-4 text-xs font-black uppercase tracking-[0.22em] text-white shadow-[0_20px_45px_-28px_rgba(15,23,42,0.7)] active:scale-95 transition-all disabled:opacity-50"
                 >
                   {isSubmitting ? 'Salvando...' : 'Salvar Endereço'}
                 </button>
@@ -228,7 +290,8 @@ export function AddressDistance() {
               </div>
             ) : (
               addresses.map(addr => (
-                <div key={addr.id} className="group relative overflow-hidden rounded-[2rem] bg-white border border-slate-100 p-5 shadow-sm transition-all hover:shadow-md">
+                <div key={addr.id} className="group relative overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white p-5 shadow-[0_22px_45px_-36px_rgba(15,23,42,0.28)] transition-all hover:-translate-y-0.5 hover:shadow-[0_28px_55px_-36px_rgba(15,23,42,0.34)]">
+                  <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#0ea5e9,#38bdf8,#ffffff)] opacity-80" />
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-4">
                       <div className={`grid h-12 w-12 place-items-center rounded-2xl ${
@@ -239,17 +302,40 @@ export function AddressDistance() {
                          addr.label === 'Trabalho' ? <Suitcase size={24} weight="duotone" /> : <MapPin size={24} weight="duotone" />}
                       </div>
                       <div className="min-w-0">
-                        <h3 className="text-sm font-black text-slate-900">{addr.label || 'Endereço'}</h3>
-                        <p className="truncate text-xs font-bold text-slate-500 mt-0.5">{addr.street}, {addr.number}</p>
-                        <p className="truncate text-[10px] font-medium text-slate-400">{addr.neighborhood} • {addr.city}</p>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-sm font-black text-slate-900">{addr.label || 'Endereço'}</h3>
+                          {addr.isDefault ? (
+                            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700">
+                              <CheckCircle size={11} weight="fill" />
+                              Principal
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="mt-0.5 truncate text-xs font-bold text-slate-600">{addr.street}, {addr.number || 's/n'}</p>
+                        <p className="truncate text-[10px] font-medium text-slate-400">{addr.neighborhood} • {addr.city}/{addr.state}</p>
                       </div>
                     </div>
-                    <button
-                      onClick={() => handleDelete(addr.id)}
-                      className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white border border-slate-100 text-rose-500 active:bg-rose-50 transition-colors"
-                    >
-                      <Trash size={18} weight="bold" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {addr.isDefault ? null : (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            await customerAccountService.setDefaultAddress(addr.id);
+                            showToast('Endereço principal atualizado.', 'success');
+                            loadAddresses();
+                          }}
+                          className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600"
+                        >
+                          Principal
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDelete(addr.id)}
+                        className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-100 bg-white text-rose-500 active:bg-rose-50 transition-colors"
+                      >
+                        <Trash size={18} weight="bold" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))
