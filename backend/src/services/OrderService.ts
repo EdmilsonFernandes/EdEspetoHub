@@ -50,6 +50,20 @@ export class OrderService
   private tz = process.env.APP_TZ || 'America/Sao_Paulo';
 
   /**
+   * Ensures store queue payload keeps cancellation metadata explicit for admin screens.
+   *
+   * @author Edmilson Lopes
+   */
+  private attachCancellationSnapshot<T extends Record<string, any>>(orders: T[]) {
+    if (!Array.isArray(orders)) return [] as T[];
+    return orders.map((order) => ({
+      ...order,
+      canceledAt: order?.canceledAt || null,
+      canceledReason: order?.canceledReason || null,
+    })) as T[];
+  }
+
+  /**
    * Maps internal order status into customer-friendly push copy.
    *
    * @author Edmilson Lopes
@@ -746,7 +760,8 @@ private async seedPostalShipmentFromCheckoutTx(
     await this.reconcileDeliveredOrdersByStore(store!.id);
     const orders = await this.orderRepository.findByStoreId(store!.id);
     const withDelivery = await this.attachDeliverySnapshot(orders as any[]);
-    return this.attachShipmentSnapshot(withDelivery as any[]);
+    const withShipment = await this.attachShipmentSnapshot(withDelivery as any[]);
+    return this.attachCancellationSnapshot(withShipment as any[]);
   }
 
 
@@ -765,7 +780,8 @@ private async seedPostalShipmentFromCheckoutTx(
     await this.reconcileDeliveredOrdersByStore(store!.id);
     const orders = await this.orderRepository.findByStoreId(store!.id);
     const withDelivery = await this.attachDeliverySnapshot(orders as any[]);
-    return this.attachShipmentSnapshot(withDelivery as any[]);
+    const withShipment = await this.attachShipmentSnapshot(withDelivery as any[]);
+    return this.attachCancellationSnapshot(withShipment as any[]);
   }
 
 
