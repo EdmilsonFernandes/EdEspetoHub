@@ -2355,6 +2355,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const getStatusStyles = (status, orderType, order?: any) => {
     const normalizedStatus = String(status || '').toLowerCase();
     const postal = isPostalOrder(order);
+    if (normalizedStatus === "cancelled" || normalizedStatus === "rejected") {
+      return { label: "Cancelado", className: "bg-rose-50 text-rose-700 border-rose-100" };
+    }
     if (normalizedStatus === "done" || normalizedStatus === "delivered" || normalizedStatus === "finished") {
       const label = orderType === "delivery" ? "Finalizado" : "Finalizado";
       return { label, className: "bg-emerald-50 text-emerald-700 border-emerald-100" };
@@ -2403,6 +2406,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     preparing: { dot: "bg-sky-500", text: "text-sky-700" },
     ready: { dot: "bg-violet-500", text: "text-violet-700" },
     done: { dot: "bg-emerald-500", text: "text-emerald-700" },
+    cancelled: { dot: "bg-rose-500", text: "text-rose-700" },
   };
 
   const renderTimeline = (status, orderType, order?: any) => {
@@ -2412,6 +2416,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       if (orderType === 'delivery' && !postal && (raw === 'ready_for_delivery' || raw === 'waiting_for_motoboy')) return 'ready';
       if (postal && (raw === 'dispatched' || raw === 'waiting_for_motoboy')) return 'done';
       if (orderType === 'delivery' && raw === 'in_delivery') return 'done';
+      if (raw === 'cancelled' || raw === 'rejected') return 'cancelled';
       if (raw === 'delivered' || raw === 'finished') return 'done';
       return raw;
     })();
@@ -2436,6 +2441,33 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             { key: "ready", label: "Pedido Pronto" },
             { key: "done", label: "Finalizado" },
           ];
+
+    if (normalizedStatus === "cancelled") {
+      const steps = [
+        { key: "pending", label: "Pedido Recebido" },
+        { key: "cancelled", label: "Pedido Cancelado" },
+      ];
+      return (
+        <div className="mt-4 space-y-2 text-xs text-gray-500">
+          <div className="flex items-center gap-2">
+            {steps.map((step, index) => (
+              <div key={step.key} className="flex items-center gap-2">
+                <div className={`w-2.5 h-2.5 rounded-full ${timelineStyles[step.key]?.dot || "bg-gray-300"}`} />
+                <span className={`${timelineStyles[step.key]?.text || "text-gray-700"} font-semibold`}>
+                  {step.label}
+                </span>
+                {index < steps.length - 1 && <span className="text-gray-300">•</span>}
+              </div>
+            ))}
+          </div>
+          {String(order?.canceledReason || '').trim() ? (
+            <div className="rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-xs text-rose-700">
+              Motivo: {order.canceledReason}
+            </div>
+          ) : null}
+        </div>
+      );
+    }
 
     const isActive = (key) => {
       if (normalizedStatus === "pending") return key === "pending";
