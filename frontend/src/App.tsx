@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, AdminRenewal, AdminDemo, PaymentPage, SuperAdmin, ForgotPassword, ResetPassword, VerifyEmail, TermsOfUse, OrderTracking, AddressDistance, AdminMotoboys, MotoboyAvailable, MotoboyCurrent, MotoboyHistory, MotoboyProfile, MotoboyDone, MotoboyLogin, MotoboyRegister, MotoboyHome, MotoboyEarnings, ArchitecturePage, InstallAppPage, ClientAuth, ClientAccount, ClientOrders, MarketplacePage, AdminHighlights, SuperAdminHighlights } from './pages';
+import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, AdminRenewal, AdminDemo, PaymentPage, SuperAdmin, ForgotPassword, ResetPassword, VerifyEmail, TermsOfUse, OrderTracking, AddressDistance, AdminMotoboys, MotoboyAvailable, MotoboyCurrent, MotoboyHistory, MotoboyProfile, MotoboyDone, MotoboyLogin, MotoboyRegister, MotoboyHome, MotoboyEarnings, ArchitecturePage, InstallAppPage, ClientAuth, ClientAccount, ClientOrders, MarketplacePage, AdminHighlights, SuperAdminHighlights, SystemGuidePage } from './pages';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { AdminRoute } from './components/Admin/AdminRoute';
@@ -31,6 +31,8 @@ function App() {
             <Route path="/portfolio" element={<Navigate to="/hub" replace />} />
             <Route path="/arquitetura" element={<ArchitecturePage />} />
             <Route path="/instalar" element={<InstallAppPage />} />
+            <Route path="/guia" element={<SystemGuidePage />} />
+            <Route path="/docs" element={<Navigate to="/guia" replace />} />
             <Route path="/create" element={<CreateStore />} />
             <Route path="/cliente" element={<ClientAuth />} />
             <Route path="/cliente/login" element={<Navigate to="/cliente?mode=login" replace />} />

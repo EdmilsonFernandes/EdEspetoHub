@@ -35,3 +35,4 @@ export { ClientOrders } from './ClientOrders';
 export { MarketplacePage } from './MarketplacePage';
 export { AdminHighlights } from './AdminHighlights';
 export { SuperAdminHighlights } from './SuperAdminHighlights';
+export { SystemGuidePage } from './SystemGuidePage';

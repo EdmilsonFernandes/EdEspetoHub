@@ -167,6 +167,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
       },
     },
     { id: 'marketplace', label: 'Já no Caminho', onClick: () => navigate('/hub') },
+    { id: 'guide', label: 'Guia', onClick: () => navigate('/guia') },
     { id: 'architecture', label: 'Arquitetura', onClick: () => navigate('/arquitetura') },
     { id: 'install', label: 'Instalar app', onClick: () => navigate('/instalar') },
   ];

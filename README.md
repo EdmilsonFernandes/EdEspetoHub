@@ -1,4 +1,4 @@
-# Chama no espeto
+# Ja no Caminho
 
 Aplicação web para pedidos e gestão de lojas/restaurantes (cardápio, checkout, fila e pagamentos), com módulo de entrega via motoboy.
 
@@ -14,7 +14,7 @@ O projeto traz quatro experiências principais:
 
 ## Guia do usuario
 
-- docs/user-guide.md
+- Guia funcional web: `/guia`
 
 ## Estrutura de pastas
 
@@ -148,7 +148,7 @@ Backup/rotação (SQL gz) via script:
 Exemplo (cron a cada 4h, mantendo apenas 1 arquivo):
 
 ```bash
-BACKUP_DIR=/home/ec2-user/backups/chamanoespeto MIN_INTERVAL_HOURS=4 KEEP_LATEST=1 bash /home/ec2-user/EdEspetoHub/scripts/pg-backup-rotate.sh
+BACKUP_DIR=/home/ec2-user/backups/janocaminho MIN_INTERVAL_HOURS=4 KEEP_LATEST=1 bash /home/ec2-user/EdEspetoHub/scripts/pg-backup-rotate.sh
 ```
 
 ## Rodar local sem Docker
@@ -177,7 +177,7 @@ Edite `backend/.env` e ajuste `PG*`, `PORT` e `JWT_SECRET`.
 Opcional: `LOG_LEVEL=debug|info|warn|error`, `LOG_TO_FILE=true` e `LOG_DIR=logs` para controlar logs e salvar em arquivo.
 
 Opcional (producao): usar AWS SSM Parameter Store (SecureString) com um JSON unico. Configure:
-- `SSM_PARAMETER_NAME` (ex: `/chamanoespeto/prod`)
+- `SSM_PARAMETER_NAME` (ex: `/janocaminho/prod`)
 - `AWS_REGION` (ex: `us-east-1`)
 - `SSM_OVERRIDE=true` para sobrescrever variaveis locais
 Opcional (dev local): se o SSM vier com `PGHOST=postgres`, defina `SSM_LOCAL_DB_HOST=localhost` para sobrescrever apenas no host (fora do Docker).
@@ -188,7 +188,7 @@ Exemplo de JSON no SSM:
 ```
 
 Verificacao rapida:
-- `aws ssm get-parameter --name /chamanoespeto/prod --with-decryption --region us-east-2`
+- `aws ssm get-parameter --name /janocaminho/prod --with-decryption --region us-east-2`
 - Ao subir a API, procure o log `SSM env loaded` (mostra o nome do parametro e a quantidade de chaves).
 {
   "JWT_SECRET": "secret",
@@ -268,8 +268,8 @@ Produção (Docker):
 ```
 server/.env.docker:
 PORT=5050
-CORS_ORIGIN=https://www.chamanoespeto.com.br
-SSM_PARAMETER_NAME=/chamanoespeto/prod
+CORS_ORIGIN=https://www.janocaminho.com.br
+SSM_PARAMETER_NAME=/janocaminho/prod
 AWS_REGION=us-east-2
 SSM_OVERRIDE=true
 GOOGLE_MAPS_API_KEY=
@@ -466,7 +466,7 @@ Configurações (admin):
 - Canais de pagamento (chave Pix) e e-mail de contato da loja.
 
 Demo:
-- Vitrine demo em `/chamanoespeto/demo`.
+- Alias legado de vitrine em `/chamanoespeto/:storeSlug` ainda existe para compatibilidade, mas o dominio e marca oficiais sao Ja no Caminho.
 - Admin demo em `/admin/demo` com dados locais.
 
 ## Super admin
@@ -474,8 +474,8 @@ Demo:
 - Tela: `http://localhost:3000/superadmin`
 - Autenticacao usa a tabela `platform_admins` (nao usa mais variavel de ambiente).
 - Usuario seed (criado em `schema.sql` e `runMigrations`):
-  - usuario: `chamanoespetoadmin`
-  - senha: `chamanoespeto2026#!`
+  - usuario: `janocaminhoadmin`
+  - senha: `janocaminho2026#!`
 - Troque a senha direto no banco se precisar.
 
 ```mermaid
@@ -597,27 +597,27 @@ Exemplo de cron (executa a cada 4h, faz dump quando vencida a janela e remove o 
 ```bash
 sudo crontab -e
 # adicionar:
-# 0 */4 * * * BACKUP_DIR=/var/backups/chamanoespeto MIN_INTERVAL_HOURS=4 KEEP_LATEST=1 sh /caminho/para/repo/scripts/pg-backup-rotate.sh >> /var/log/pg-backup.log 2>&1
+# 0 */4 * * * BACKUP_DIR=/var/backups/janocaminho MIN_INTERVAL_HOURS=4 KEEP_LATEST=1 sh /caminho/para/repo/scripts/pg-backup-rotate.sh >> /var/log/pg-backup.log 2>&1
 ```
 
 Verificar crontab e ultimos backups:
 ```bash
 sudo crontab -l
-ls -lah /var/backups/chamanoespeto
+ls -lah /var/backups/janocaminho
 ```
 
 4) Verificacao rapida:
 
 ```bash
 docker ps
-docker exec -it chamanoespeto-api env | grep -E '^(MP_|SMTP_|EMAIL_FROM|APP_BASE_URL)'
-curl -s https://www.chamanoespeto.com.br/api/docs.json | head -n 1
+docker exec -it janocaminho-api env | grep -E '^(MP_|SMTP_|EMAIL_FROM|APP_BASE_URL)'
+curl -s https://www.janocaminho.com.br/api/docs.json | head -n 1
 ```
 
 5) Teste de e-mail (reset de senha):
 
 ```bash
-curl -X POST https://www.chamanoespeto.com.br/api/auth/forgot-password \
+curl -X POST https://www.janocaminho.com.br/api/auth/forgot-password \
   -H "Content-Type: application/json" \
   -d '{"email":"seu-email@gmail.com"}'
 ```
@@ -625,7 +625,7 @@ curl -X POST https://www.chamanoespeto.com.br/api/auth/forgot-password \
 6) Webhook MP (checagem rapida):
 
 ```bash
-docker logs chamanoespeto-api --tail 200 | grep -i "mercadopago\\|webhook"
+docker logs janocaminho-api --tail 200 | grep -i "mercadopago\\|webhook"
 ```
 
 ## Versionamento e Release
@@ -664,7 +664,7 @@ sh scripts/test-flow.sh
 
 Nginx como reverse proxy:
 
-- Use `docs/nginx/chamanoespeto.conf`
+- Use `docs/nginx/janocaminho.conf` ou o arquivo equivalente atual do ambiente
 - `/` -> `http://127.0.0.1:8080`
 - `/api/` -> `http://127.0.0.1:4000/api/`
 - `/uploads/` -> `http://127.0.0.1:4000/uploads/`
@@ -673,7 +673,7 @@ Nginx como reverse proxy:
 HTTPS:
 
 ```bash
-sudo certbot --nginx -d chamanoespeto.com.br -d www.chamanoespeto.com.br
+sudo certbot --nginx -d janocaminho.com.br -d www.janocaminho.com.br
 ```
 
 Mercado Pago (producao):
@@ -682,7 +682,7 @@ Mercado Pago (producao):
   - `MP_ACCESS_TOKEN`
   - `MP_PUBLIC_KEY`
   - `MP_WEBHOOK_SECRET`
-  - `MP_WEBHOOK_URL=https://www.chamanoespeto.com.br/api/webhooks/mercadopago`
+  - `MP_WEBHOOK_URL=https://www.janocaminho.com.br/api/webhooks/mercadopago`
 - O webhook exige HTTPS valido.
 
 6) SMTP (exemplo Zoho):
@@ -707,7 +707,7 @@ ngrok cria um túnel público temporário para seu servidor local. Isso permite 
 
 ```bash
 cp backend/.env.example backend/.env
-docker start chamanoespeto-postgres
+docker start janocaminho-postgres
 cd backend && npm run dev
 ```
 
@@ -1014,7 +1014,7 @@ ADD COLUMN IF NOT EXISTS opening_hours JSONB DEFAULT '[]';
 Com Docker:
 
 ```bash
-docker exec -i chamanoespeto-postgres psql -U postgres -d espetinho <<'SQL'
+docker exec -i janocaminho-postgres psql -U postgres -d espetinho <<'SQL'
 ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS opening_hours JSONB DEFAULT '[]';
 SQL
@@ -1062,7 +1062,7 @@ Para um banco vazio, continue usando o `backend/schema.sql` (já contém a colun
 
 ## BPMN do fluxo da aplicação
 
-Um diagrama BPMN resumindo o fluxo do "Chama no espeto" está disponível em `docs/bpmn/chama-no-espeto.bpmn`. O arquivo segue o padrão BPMN 2.0 (pode ser aberto no Camunda Modeler, Draw.io ou semelhantes) e destaca:
+Um diagrama BPMN resumindo o fluxo do "Ja no Caminho" esta disponivel em `docs/bpmn/chama-no-espeto.bpmn`. O arquivo segue o padrao BPMN 2.0 (pode ser aberto no Camunda Modeler, Draw.io ou semelhantes) e destaca:
 
 - Jornada do cliente na loja pública (montagem e envio do pedido com Pix).
 - Validação e criação do pedido pela API.
