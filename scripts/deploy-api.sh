@@ -14,13 +14,22 @@ if ! command -v docker >/dev/null 2>&1; then
   exit 1
 fi
 
+if docker compose version >/dev/null 2>&1; then
+  COMPOSE_CMD="docker compose"
+elif command -v docker-compose >/dev/null 2>&1; then
+  COMPOSE_CMD="docker-compose"
+else
+  echo "Neither 'docker compose' nor 'docker-compose' is available." >&2
+  exit 1
+fi
+
 tmp_file="$(mktemp)"
 awk '!/^FRONTEND_BUILD_COMMITS_JSON=/' "$ENV_FILE" > "$tmp_file"
 mv "$tmp_file" "$ENV_FILE"
 
 sh "$ROOT_DIR/scripts/docker-clean-build-cache.sh" || true
 
-docker compose \
+$COMPOSE_CMD \
   -f "$ROOT_DIR/docker-compose.yml" \
   -f "$ROOT_DIR/docker-compose.prod.yml" \
   --env-file "$ENV_FILE" \
