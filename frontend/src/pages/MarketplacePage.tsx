@@ -1058,7 +1058,6 @@ export function MarketplacePage() {
         onOpenPrivacy={openPrivacy}
         onOpenHelp={openHelp}
         onLogout={handleCustomerLogout}
-        onDeactivateAccount={() => setShowDeactivateModal(true)}
         versionLabel={APP_BUILD_INFO.versionLabel}
       />
 

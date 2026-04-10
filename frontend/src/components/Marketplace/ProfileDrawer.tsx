@@ -6,7 +6,6 @@ import {
   CookingPot,
   Lifebuoy,
   SignOut,
-  Trash,
   UserCircle,
   UserRectangle,
   House,
@@ -42,7 +41,6 @@ type ProfileDrawerProps = {
   onOpenPrivacy: () => void;
   onOpenHelp: () => void;
   onLogout: () => void;
-  onDeactivateAccount: () => void; // Nova prop
   versionLabel?: string;
 };
 
@@ -63,7 +61,6 @@ export function ProfileDrawer({
   onOpenPrivacy: _onOpenPrivacy,
   onOpenHelp,
   onLogout,
-  onDeactivateAccount, // Nova prop
   versionLabel,
 }: ProfileDrawerProps) {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -107,7 +104,6 @@ export function ProfileDrawer({
         { id: 'settings', label: 'Configurações', icon: <ArrowsClockwise size={22} weight="duotone" />, onClick: onOpenSettings, iconColor: 'text-violet-600', bgColor: 'bg-violet-50' },
         { id: 'legal', label: 'Termos e privacidade', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
         { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={22} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
-        { id: 'deactivate', label: 'Excluir conta', icon: <Trash size={22} weight="duotone" />, onClick: onDeactivateAccount, tone: 'danger' },
         { id: 'logout', label: 'Sair da conta', icon: <SignOut size={22} weight="duotone" />, onClick: onLogout, tone: 'danger' },
       ]
     : [
@@ -238,9 +234,7 @@ export function ProfileDrawer({
                 </div>
                 <div className="min-w-0 flex-1 text-left">
                   <span className="block text-[15px] font-bold">{action.label}</span>
-                  {action.id === 'deactivate' ? (
-                    <span className="block text-[11px] font-medium text-rose-500">Remove seu acesso e dados da conta</span>
-                  ) : action.id === 'logout' ? (
+                  {action.id === 'logout' ? (
                     <span className="block text-[11px] font-medium text-slate-400">Encerra somente a sessão neste aparelho</span>
                   ) : null}
                 </div>

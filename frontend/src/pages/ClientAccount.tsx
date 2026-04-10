@@ -45,6 +45,7 @@ export function ClientAccount() {
   const [nameDraft, setNameDraft] = useState('');
   const [phoneDraft, setPhoneDraft] = useState('');
   const settingsSectionRef = useRef<HTMLElement | null>(null);
+  const settingsOnly = searchParams.get('section') === 'settings';
 
   const syncCustomerSession = (nextUser: any, options?: { bustProfileImage?: boolean }) => {
     try {
@@ -257,7 +258,7 @@ export function ClientAccount() {
           >
             <ArrowLeft size={20} weight="bold" />
           </button>
-          <h1 className="text-base font-black text-slate-900 uppercase tracking-widest">Minha Conta</h1>
+          <h1 className="text-base font-black text-slate-900 uppercase tracking-widest">{settingsOnly ? 'Configurações' : 'Minha Conta'}</h1>
           <button
             onClick={logout}
             className="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 transition-all active:scale-90"
@@ -267,133 +268,137 @@ export function ClientAccount() {
         </header>
 
         <div className="px-4 py-6 space-y-6">
-          {/* Seção 1: Avatar e Dados Básicos */}
-          <section className="relative overflow-hidden rounded-[2.5rem] bg-white p-6 shadow-sm border border-slate-100">
-            <div className="flex flex-col items-center text-center space-y-4">
-              <div className="relative">
-                <div className="h-24 w-24 overflow-hidden rounded-[2rem] border-4 border-slate-50 shadow-md">
-                  {me?.profileImageUrl ? (
-                    <img src={resolveAssetUrl(me.profileImageUrl)} alt={me.fullName} className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="grid h-full w-full place-items-center bg-slate-100 text-2xl font-black text-slate-400">
-                      {String(me?.fullName || 'U').slice(0, 1).toUpperCase()}
+          {!settingsOnly && (
+            <>
+              {/* Seção 1: Avatar e Dados Básicos */}
+              <section className="relative overflow-hidden rounded-[2.5rem] bg-white p-6 shadow-sm border border-slate-100">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="relative">
+                    <div className="h-24 w-24 overflow-hidden rounded-[2rem] border-4 border-slate-50 shadow-md">
+                      {me?.profileImageUrl ? (
+                        <img src={resolveAssetUrl(me.profileImageUrl)} alt={me.fullName} className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="grid h-full w-full place-items-center bg-slate-100 text-2xl font-black text-slate-400">
+                          {String(me?.fullName || 'U').slice(0, 1).toUpperCase()}
+                        </div>
+                      )}
                     </div>
+                    <button 
+                      onClick={pickProfileImageNative}
+                      className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-white shadow-lg active:scale-90 transition-transform"
+                    >
+                      <Camera size={16} weight="fill" />
+                    </button>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-black text-slate-900">{me?.fullName || 'Usuário'}</h2>
+                    <p className="text-sm font-bold text-slate-400">{me?.email}</p>
+                  </div>
+                </div>
+
+                <div className="mt-8 space-y-3">
+                  <div className="grid gap-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Nome Completo</label>
+                    <div className="relative">
+                      <UserCircle size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        value={nameDraft}
+                        onChange={e => setNameDraft(e.target.value)}
+                        className="w-full rounded-2xl border border-slate-100 bg-slate-50 py-3 pl-11 pr-4 text-sm font-bold text-slate-700 focus:border-slate-900/20 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid gap-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Telefone para Contato</label>
+                    <div className="relative">
+                      <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        value={phoneDraft}
+                        onChange={e => setPhoneDraft(e.target.value)}
+                        className="w-full rounded-2xl border border-slate-100 bg-slate-50 py-3 pl-11 pr-4 text-sm font-bold text-slate-700 focus:border-slate-900/20 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleSaveProfile}
+                    disabled={profileSaving}
+                    className="w-full rounded-2xl bg-slate-900 py-3.5 text-xs font-black uppercase tracking-[0.2em] text-white shadow-lg shadow-slate-900/20 active:scale-95 transition-all disabled:opacity-50"
+                  >
+                    {profileSaving ? 'Salvando...' : 'Salvar Alterações'}
+                  </button>
+                  {profileMessage && (
+                    <p className="text-center text-[11px] font-bold text-emerald-600">{profileMessage}</p>
                   )}
                 </div>
-                <button 
-                  onClick={pickProfileImageNative}
-                  className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-white shadow-lg active:scale-90 transition-transform"
-                >
-                  <Camera size={16} weight="fill" />
-                </button>
-              </div>
-              <div>
-                <h2 className="text-xl font-black text-slate-900">{me?.fullName || 'Usuário'}</h2>
-                <p className="text-sm font-bold text-slate-400">{me?.email}</p>
-              </div>
-            </div>
+              </section>
 
-            <div className="mt-8 space-y-3">
-              <div className="grid gap-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Nome Completo</label>
-                <div className="relative">
-                  <UserCircle size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    value={nameDraft}
-                    onChange={e => setNameDraft(e.target.value)}
-                    className="w-full rounded-2xl border border-slate-100 bg-slate-50 py-3 pl-11 pr-4 text-sm font-bold text-slate-700 focus:border-slate-900/20 focus:outline-none"
-                  />
+              {/* Seção 2: Endereços */}
+              <section className="space-y-3">
+                <div className="flex items-center justify-between px-2">
+                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                    <MapPinLine size={16} weight="duotone" className="text-sky-500" />
+                    Meus Endereços
+                  </h3>
+                  <button 
+                    onClick={() => navigate('/cliente/enderecos')}
+                    className="flex items-center gap-1.5 rounded-xl bg-sky-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-sky-700 active:scale-95"
+                  >
+                    <Plus size={12} weight="bold" />
+                    Cadastrar
+                  </button>
                 </div>
-              </div>
-              <div className="grid gap-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Telefone para Contato</label>
-                <div className="relative">
-                  <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    value={phoneDraft}
-                    onChange={e => setPhoneDraft(e.target.value)}
-                    className="w-full rounded-2xl border border-slate-100 bg-slate-50 py-3 pl-11 pr-4 text-sm font-bold text-slate-700 focus:border-slate-900/20 focus:outline-none"
-                  />
-                </div>
-              </div>
-              <button
-                onClick={handleSaveProfile}
-                disabled={profileSaving}
-                className="w-full rounded-2xl bg-slate-900 py-3.5 text-xs font-black uppercase tracking-[0.2em] text-white shadow-lg shadow-slate-900/20 active:scale-95 transition-all disabled:opacity-50"
-              >
-                {profileSaving ? 'Salvando...' : 'Salvar Alterações'}
-              </button>
-              {profileMessage && (
-                <p className="text-center text-[11px] font-bold text-emerald-600">{profileMessage}</p>
-              )}
-            </div>
-          </section>
-
-          {/* Seção 2: Endereços */}
-          <section className="space-y-3">
-            <div className="flex items-center justify-between px-2">
-              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                <MapPinLine size={16} weight="duotone" className="text-sky-500" />
-                Meus Endereços
-              </h3>
-              <button 
-                onClick={() => navigate('/cliente/enderecos')}
-                className="flex items-center gap-1.5 rounded-xl bg-sky-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-sky-700 active:scale-95"
-              >
-                <Plus size={12} weight="bold" />
-                Cadastrar
-              </button>
-            </div>
-            
-            <div className="space-y-2">
-              {addresses.length === 0 ? (
-                <div className="rounded-3xl border border-dashed border-slate-200 bg-white p-8 text-center">
-                  <p className="text-sm font-bold text-slate-400">Nenhum endereço cadastrado</p>
-                </div>
-              ) : (
-                addresses.map(addr => (
-                  <div key={addr.id} className="group flex items-center justify-between rounded-3xl bg-white p-4 shadow-sm border border-slate-100">
-                    <div className="flex items-center gap-3">
-                      <div className="grid h-10 w-10 place-items-center rounded-2xl bg-slate-50 text-slate-400 group-hover:bg-sky-50 group-hover:text-sky-600 transition-colors">
-                        <MapPinLine size={20} weight="duotone" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-black text-slate-900">{addr.label || 'Casa'}</p>
-                        <p className="truncate text-[11px] font-bold text-slate-400">{addr.street}, {addr.number}</p>
-                      </div>
+                
+                <div className="space-y-2">
+                  {addresses.length === 0 ? (
+                    <div className="rounded-3xl border border-dashed border-slate-200 bg-white p-8 text-center">
+                      <p className="text-sm font-bold text-slate-400">Nenhum endereço cadastrado</p>
                     </div>
-                    <CaretRight size={16} className="text-slate-300" />
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
+                  ) : (
+                    addresses.map(addr => (
+                      <div key={addr.id} className="group flex items-center justify-between rounded-3xl bg-white p-4 shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-3">
+                          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-slate-50 text-slate-400 group-hover:bg-sky-50 group-hover:text-sky-600 transition-colors">
+                            <MapPinLine size={20} weight="duotone" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-black text-slate-900">{addr.label || 'Casa'}</p>
+                            <p className="truncate text-[11px] font-bold text-slate-400">{addr.street}, {addr.number}</p>
+                          </div>
+                        </div>
+                        <CaretRight size={16} className="text-slate-300" />
+                      </div>
+                    ))
+                  )}
+                </div>
+              </section>
 
-          {/* Seção 3: Segurança */}
-          <section className="rounded-[2rem] bg-white p-5 border border-slate-100 shadow-sm space-y-4">
-            <div className="space-y-4">
-              <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                <ShieldCheck size={16} weight="duotone" className="text-indigo-500" />
-                Segurança
-              </h3>
-              <div className="space-y-2">
-                <input
-                  type="password"
-                  placeholder="Nova senha"
-                  value={pwdForm.newPassword}
-                  onChange={e => setPwdForm(p => ({...p, newPassword: e.target.value}))}
-                  className="w-full rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-[13px] font-bold focus:outline-none"
-                />
-                <button
-                  onClick={handleChangePassword}
-                  disabled={pwdLoading}
-                  className="w-full rounded-xl bg-slate-100 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 active:scale-95 transition-all"
-                >
-                  Trocar Senha
-                </button>
-              </div>
-            </div>
-          </section>
+              {/* Seção 3: Segurança */}
+              <section className="rounded-[2rem] bg-white p-5 border border-slate-100 shadow-sm space-y-4">
+                <div className="space-y-4">
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                    <ShieldCheck size={16} weight="duotone" className="text-indigo-500" />
+                    Segurança
+                  </h3>
+                  <div className="space-y-2">
+                    <input
+                      type="password"
+                      placeholder="Nova senha"
+                      value={pwdForm.newPassword}
+                      onChange={e => setPwdForm(p => ({...p, newPassword: e.target.value}))}
+                      className="w-full rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-[13px] font-bold focus:outline-none"
+                    />
+                    <button
+                      onClick={handleChangePassword}
+                      disabled={pwdLoading}
+                      className="w-full rounded-xl bg-slate-100 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 active:scale-95 transition-all"
+                    >
+                      Trocar Senha
+                    </button>
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
 
           <section
             ref={settingsSectionRef}
@@ -453,18 +458,19 @@ export function ClientAccount() {
             </div>
           </section>
 
-          {/* Seção 5: Exclusão de Conta */}
-          <section className="pt-4">
-            <button
-              onClick={() => setShowDeactivateModal(true)}
-              className="w-full rounded-2xl border border-rose-100 bg-rose-50/50 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-rose-600 transition-all active:scale-95"
-            >
-              Excluir minha conta permanentemente
-            </button>
-            <p className="mt-3 text-center text-[10px] font-bold text-slate-400 px-6">
-              Ao excluir sua conta, todos os seus dados pessoais serão desativados de nossa base, conforme a LGPD.
-            </p>
-          </section>
+          {!settingsOnly && (
+            <section className="pt-4">
+              <button
+                onClick={() => setShowDeactivateModal(true)}
+                className="w-full rounded-2xl border border-rose-100 bg-rose-50/50 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-rose-600 transition-all active:scale-95"
+              >
+                Excluir minha conta permanentemente
+              </button>
+              <p className="mt-3 text-center text-[10px] font-bold text-slate-400 px-6">
+                Ao excluir sua conta, todos os seus dados pessoais serão desativados de nossa base, conforme a LGPD.
+              </p>
+            </section>
+          )}
         </div>
       </div>
 
