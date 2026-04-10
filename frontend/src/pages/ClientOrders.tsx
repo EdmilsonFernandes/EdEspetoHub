@@ -1,94 +1,30 @@
 // @ts-nocheck
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   CalendarBlank,
   CheckCircle,
   Clock,
-  CookingPot,
   Package,
+  SpinnerGap,
   Storefront,
+  Timer,
   Truck,
+  XCircle,
 } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
+import { orderService } from '../services/orderService';
+import { useToast } from '../contexts/ToastContext';
 import { formatCurrency } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 const TERMINAL_STATUSES = [ 'DELIVERED', 'CANCELLED', 'FINISHED', 'REJECTED', 'DONE' ];
+const ACTIVE_REFRESH_MS = 10_000;
+const DELAY_GRACE_MS = 15 * 60 * 1000;
 
 const normalizeStatus = (status?: string) => String(status || '').trim().toUpperCase();
-
-const getStatusMeta = (status: string) => {
-  switch (normalizeStatus(status)) {
-    case 'PENDING':
-      return {
-        label: 'Aguardando confirmação',
-        icon: <Clock size={15} weight="duotone" className="text-amber-500" />,
-        badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
-      };
-    case 'ACCEPTED':
-      return {
-        label: 'Pedido aceito',
-        icon: <CookingPot size={15} weight="duotone" className="text-sky-600" />,
-        badgeClass: 'bg-sky-50 text-sky-700 border-sky-200',
-      };
-    case 'PREPARING':
-      return {
-        label: 'Em preparo',
-        icon: <CookingPot size={15} weight="duotone" className="text-sky-600" />,
-        badgeClass: 'bg-sky-50 text-sky-700 border-sky-200',
-      };
-    case 'READY':
-      return {
-        label: 'Pronto para retirada',
-        icon: <Package size={15} weight="duotone" className="text-emerald-600" />,
-        badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-      };
-    case 'DELIVERING':
-      return {
-        label: 'Saiu para entrega',
-        icon: <Truck size={15} weight="duotone" className="text-indigo-600" />,
-        badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-      };
-    case 'DELIVERED':
-      return {
-        label: 'Pedido concluido',
-        icon: <CheckCircle size={15} weight="fill" className="text-emerald-500" />,
-        badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-      };
-    case 'DONE':
-      return {
-        label: 'Pedido concluido',
-        icon: <CheckCircle size={15} weight="fill" className="text-emerald-500" />,
-        badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-      };
-    case 'FINISHED':
-      return {
-        label: 'Pedido finalizado',
-        icon: <CheckCircle size={15} weight="fill" className="text-emerald-500" />,
-        badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-      };
-    case 'CANCELLED':
-      return {
-        label: 'Pedido cancelado',
-        icon: <Package size={15} weight="duotone" className="text-rose-500" />,
-        badgeClass: 'bg-rose-50 text-rose-700 border-rose-200',
-      };
-    case 'REJECTED':
-      return {
-        label: 'Pedido recusado',
-        icon: <Package size={15} weight="duotone" className="text-rose-500" />,
-        badgeClass: 'bg-rose-50 text-rose-700 border-rose-200',
-      };
-    default:
-      return {
-        label: status || 'Pedido',
-        icon: <Package size={15} weight="duotone" className="text-slate-400" />,
-        badgeClass: 'bg-slate-100 text-slate-600 border-slate-200',
-      };
-  }
-};
 
 const formatGroupDate = (value?: string) => {
   if (!value) return '';
@@ -120,9 +56,29 @@ const getStoreInitials = (name?: string) => {
   return parts.map((part) => part[0]?.toUpperCase() || '').join('');
 };
 
-const buildWhatsappLink = (phone?: string | null) => {
+const getEtaWindowLabel = (eta?: { windowMin?: number; windowMax?: number; totalMinutes?: number } | null) => {
+  const min = Number(eta?.windowMin || 0);
+  const max = Number(eta?.windowMax || 0);
+  const total = Number(eta?.totalMinutes || 0);
+  if (min > 0 && max > 0) return `${min}-${max} min`;
+  if (total > 0) return `${total} min`;
+  return '';
+};
+
+const getEtaDeadlineMs = (order: any, details?: any) => {
+  const createdAt = new Date(order?.createdAt || '').getTime();
+  const etaMinutes = Number(details?.eta?.windowMax || details?.eta?.totalMinutes || details?.eta?.windowMin || 0);
+  if (!createdAt || !(etaMinutes > 0)) return null;
+  return createdAt + etaMinutes * 60 * 1000;
+};
+
+const isCustomerCancelableStatus = (status?: string) =>
+  [ 'PENDING', 'ACCEPTED', 'PREPARING', 'READY', 'READY_FOR_DELIVERY', 'WAITING_FOR_MOTOBOY' ].includes(normalizeStatus(status));
+
+const buildWhatsappLink = (phone?: string | null, native = false) => {
   const normalized = String(phone || '').replace(/\D/g, '').replace(/^55/, '');
   if (!normalized) return '';
+  if (native) return `whatsapp://send?phone=55${normalized}`;
   return `https://wa.me/55${normalized}`;
 };
 
@@ -149,18 +105,83 @@ const groupOrdersByDate = (orders: any[]) => {
   return groups;
 };
 
+const getStatusMeta = (status: string, orderType?: string) => {
+  const normalized = normalizeStatus(status);
+  const normalizedType = String(orderType || '').trim().toLowerCase();
+
+  if (normalized === 'READY' && normalizedType === 'PICKUP') {
+    return {
+      label: 'Disponível para retirada',
+      icon: <Package size={15} weight="duotone" className="text-emerald-600" />,
+      toneClass: 'text-emerald-600',
+    };
+  }
+
+  if ([ 'DELIVERING', 'IN_DELIVERY', 'DISPATCHED' ].includes(normalized) && normalizedType === 'DELIVERY') {
+    return {
+      label: 'Em rota',
+      icon: <Truck size={15} weight="duotone" className="text-indigo-600" />,
+      toneClass: 'text-indigo-600',
+    };
+  }
+
+  switch (normalized) {
+    case 'PENDING':
+    case 'ACCEPTED':
+      return {
+        label: 'Recebido',
+        icon: <Clock size={15} weight="duotone" className="text-amber-500" />,
+        toneClass: 'text-amber-600',
+      };
+    case 'PREPARING':
+    case 'READY':
+    case 'READY_FOR_DELIVERY':
+    case 'WAITING_FOR_MOTOBOY':
+      return {
+        label: 'Em andamento',
+        icon: <SpinnerGap size={15} weight="duotone" className="text-sky-600" />,
+        toneClass: 'text-sky-600',
+      };
+    case 'DELIVERED':
+    case 'DONE':
+    case 'FINISHED':
+      return {
+        label: 'Finalizado',
+        icon: <CheckCircle size={15} weight="fill" className="text-emerald-500" />,
+        toneClass: 'text-emerald-600',
+      };
+    case 'CANCELLED':
+    case 'REJECTED':
+      return {
+        label: 'Cancelado',
+        icon: <XCircle size={15} weight="duotone" className="text-rose-500" />,
+        toneClass: 'text-rose-600',
+      };
+    default:
+      return {
+        label: 'Pedido',
+        icon: <Package size={15} weight="duotone" className="text-slate-400" />,
+        toneClass: 'text-slate-500',
+      };
+  }
+};
+
 function OrderCard({
   order,
   isActive,
+  details,
+  onCancelRequest,
   onOpenOrder,
   onOpenStore,
 }: {
   order: any;
   isActive: boolean;
+  details?: any;
+  onCancelRequest: (order: any) => void;
   onOpenOrder: (orderId: string) => void;
   onOpenStore: (slug?: string) => void;
 }) {
-  const statusMeta = getStatusMeta(order.status);
+  const statusMeta = getStatusMeta(order.status, order.type);
   const items = Array.isArray(order.items) ? order.items : [];
   const visibleItems = items.slice(0, 2);
   const extraItems = Math.max(0, items.length - visibleItems.length);
@@ -171,7 +192,30 @@ function OrderCard({
   const logoUrl = resolveAssetUrl(order.store?.settings?.logoUrl || '');
   const storeName = order.store?.name || 'Loja parceira';
   const orderDate = formatTime(order.createdAt);
-  const whatsappLink = buildWhatsappLink(order.store?.phone);
+  const etaWindowLabel = getEtaWindowLabel(details?.eta);
+  const etaDeadlineMs = getEtaDeadlineMs(order, details);
+  const isDelayed = Boolean(etaDeadlineMs && Date.now() > etaDeadlineMs);
+  const canCancel = Boolean(
+    isActive &&
+    isDelayed &&
+    isCustomerCancelableStatus(order.status) &&
+    etaDeadlineMs &&
+    Date.now() > etaDeadlineMs + DELAY_GRACE_MS
+  );
+
+  const handleHelp = () => {
+    const nativeUrl = buildWhatsappLink(order.store?.phone, true);
+    const webUrl = buildWhatsappLink(order.store?.phone, false);
+    if (!webUrl) {
+      onOpenStore(order.store?.slug);
+      return;
+    }
+    if (Capacitor.isNativePlatform() && nativeUrl) {
+      window.location.href = nativeUrl;
+      return;
+    }
+    window.open(webUrl, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <article className="rounded-[28px] border border-slate-200 bg-white p-4 shadow-[0_12px_30px_-28px_rgba(15,23,42,0.4)]">
@@ -199,9 +243,15 @@ function OrderCard({
             <div className="flex items-center gap-2">
               <h3 className="truncate text-[15px] font-semibold text-slate-900">{storeName}</h3>
             </div>
-            <div className="mt-1 flex items-center gap-1.5 text-[12px] text-slate-500">
+            <div className="mt-1 flex items-center gap-1.5 text-[12px]">
+              {isActive ? (
+                <span className="relative inline-flex h-2.5 w-2.5 shrink-0">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                </span>
+              ) : null}
               {statusMeta.icon}
-              <span className="font-medium text-slate-500">{statusMeta.label}</span>
+              <span className={`font-medium ${statusMeta.toneClass}`}>{statusMeta.label}</span>
             </div>
             <p className="mt-1 text-[11px] text-slate-500">{orderDate || formatGroupDate(order.createdAt)}</p>
           </button>
@@ -217,6 +267,22 @@ function OrderCard({
         className="mt-3 block w-full text-left"
       >
         <div className="rounded-2xl bg-slate-50/90 px-3 py-2.5">
+          {isActive && (etaWindowLabel || isDelayed) ? (
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              {etaWindowLabel ? (
+                <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${isDelayed ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'}`}>
+                  <Timer size={12} weight="duotone" />
+                  {isDelayed ? 'Atrasado' : `Previsão ${etaWindowLabel}`}
+                </span>
+              ) : null}
+              {details?.queuePosition ? (
+                <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-500">
+                  Fila {details.queuePosition}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
+
           <div className="flex min-w-0 items-center gap-3">
             <div className="w-full space-y-2">
               {visibleItems.map((item: any) => (
@@ -256,24 +322,32 @@ function OrderCard({
           )}
         </div>
         <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
-          {whatsappLink ? (
-            <a
-              href={whatsappLink}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-xl px-3 py-2 text-sm font-semibold text-rose-500 transition-colors hover:bg-rose-50"
-            >
-              Ajuda
-            </a>
-          ) : (
+          {isActive && isDelayed ? (
             <button
               type="button"
-              onClick={() => onOpenStore(order.store?.slug)}
+              onClick={handleHelp}
+              className="rounded-xl px-3 py-2 text-sm font-semibold text-rose-500 transition-colors hover:bg-rose-50"
+            >
+              Falar com a loja
+            </button>
+          ) : !isActive ? (
+            <button
+              type="button"
+              onClick={handleHelp}
               className="rounded-xl px-3 py-2 text-sm font-semibold text-rose-500 transition-colors hover:bg-rose-50"
             >
               Ajuda
             </button>
-          )}
+          ) : null}
+          {canCancel ? (
+            <button
+              type="button"
+              onClick={() => onCancelRequest(order)}
+              className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-100"
+            >
+              Solicitar cancelamento
+            </button>
+          ) : null}
           {!isActive ? (
             <button
               type="button"
@@ -291,9 +365,75 @@ function OrderCard({
 
 export function ClientOrders() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [orders, setOrders] = useState<any[]>([]);
+  const [orderDetails, setOrderDetails] = useState<Record<string, any>>({});
+  const [cancelModal, setCancelModal] = useState<{ order: any | null; reason: string; submitting: boolean }>({
+    order: null,
+    reason: '',
+    submitting: false,
+  });
+  const requestIdRef = useRef(0);
+  const inFlightRef = useRef(false);
+
+  const refreshActiveOrderDetails = useCallback(async (targetOrders: any[]) => {
+    const active = (Array.isArray(targetOrders) ? targetOrders : []).filter(
+      (order) => !TERMINAL_STATUSES.includes(normalizeStatus(order.status))
+    );
+    if (!active.length) {
+      setOrderDetails({});
+      return;
+    }
+
+    const entries = await Promise.all(
+      active.map(async (order) => {
+        try {
+          const data = await orderService.getPublicById(order.id);
+          return [ order.id, data ];
+        } catch {
+          return [ order.id, null ];
+        }
+      })
+    );
+
+    setOrderDetails((prev) => {
+      const next: Record<string, any> = {};
+      for (const [ orderId, payload ] of entries) {
+        if (payload) next[String(orderId)] = payload;
+      }
+      return Object.keys(next).length ? next : prev;
+    });
+  }, []);
+
+  const loadOrders = useCallback(async (options?: { silent?: boolean }) => {
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
+    const requestId = ++requestIdRef.current;
+
+    if (!options?.silent) {
+      setError('');
+      setLoading(true);
+    }
+
+    try {
+      const ordersData = await customerAccountService.listOrders();
+      if (requestId !== requestIdRef.current) return;
+      const normalized = Array.isArray(ordersData) ? ordersData : [];
+      setOrders(normalized);
+      await refreshActiveOrderDetails(normalized);
+    } catch (e: any) {
+      if (requestId !== requestIdRef.current) return;
+      setError(e?.message || 'Falha ao carregar pedidos.');
+      if (!options?.silent) showToast(e?.message || 'Falha ao carregar pedidos.', 'error');
+    } finally {
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+      }
+      inFlightRef.current = false;
+    }
+  }, [refreshActiveOrderDetails, showToast]);
 
   useEffect(() => {
     document.title = 'Meus Pedidos | Já no Caminho';
@@ -306,25 +446,8 @@ export function ClientOrders() {
       return;
     }
 
-    let mounted = true;
-    customerAccountService.listOrders()
-      .then((ordersData) => {
-        if (!mounted) return;
-        setOrders(Array.isArray(ordersData) ? ordersData : []);
-      })
-      .catch((e: any) => {
-        if (!mounted) return;
-        setError(e?.message || 'Falha ao carregar pedidos.');
-      })
-      .finally(() => {
-        if (!mounted) return;
-        setLoading(false);
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, [navigate]);
+    void loadOrders();
+  }, [loadOrders, navigate]);
 
   const activeOrders = useMemo(
     () => orders.filter((order) => !TERMINAL_STATUSES.includes(normalizeStatus(order.status))),
@@ -335,6 +458,25 @@ export function ClientOrders() {
     [orders]
   );
   const groupedPastOrders = useMemo(() => groupOrdersByDate(pastOrders), [pastOrders]);
+  const activeOrderIds = useMemo(() => activeOrders.map((order) => String(order.id)).join('|'), [activeOrders]);
+
+  useEffect(() => {
+    if (!activeOrders.length) return;
+
+    const refreshIfVisible = () => {
+      if (typeof document !== 'undefined' && document.hidden) return;
+      void loadOrders({ silent: true });
+    };
+
+    const timer = window.setInterval(refreshIfVisible, ACTIVE_REFRESH_MS);
+    window.addEventListener('focus', refreshIfVisible);
+    document.addEventListener('visibilitychange', refreshIfVisible);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('focus', refreshIfVisible);
+      document.removeEventListener('visibilitychange', refreshIfVisible);
+    };
+  }, [activeOrderIds, activeOrders.length, loadOrders]);
 
   const openStore = (slug?: string) => {
     if (!slug) {
@@ -342,6 +484,26 @@ export function ClientOrders() {
       return;
     }
     navigate(`/${slug}`);
+  };
+
+  const submitCustomerCancellation = async () => {
+    if (!cancelModal.order || cancelModal.submitting) return;
+    const reason = String(cancelModal.reason || '').trim();
+    if (reason.length < 3) {
+      showToast('Informe um motivo para a loja entender o cancelamento.', 'warning');
+      return;
+    }
+
+    try {
+      setCancelModal((prev) => ({ ...prev, submitting: true }));
+      await customerAccountService.cancelOrder(cancelModal.order.id, { reason });
+      showToast('Pedido cancelado com sucesso.', 'success');
+      setCancelModal({ order: null, reason: '', submitting: false });
+      await loadOrders({ silent: true });
+    } catch (error: any) {
+      setCancelModal((prev) => ({ ...prev, submitting: false }));
+      showToast(error?.message || 'Não foi possível cancelar o pedido agora.', 'error');
+    }
   };
 
   if (loading) {
@@ -379,7 +541,10 @@ export function ClientOrders() {
           {activeOrders.length > 0 ? (
             <section className="mb-7">
               <div className="mb-3 flex items-center gap-2 px-1">
-                <Clock size={15} weight="duotone" className="text-slate-500" />
+                <span className="relative inline-flex h-2.5 w-2.5 shrink-0">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                </span>
                 <h2 className="text-sm font-semibold text-slate-800">Em andamento</h2>
               </div>
               <div className="space-y-3">
@@ -388,6 +553,8 @@ export function ClientOrders() {
                     key={order.id}
                     order={order}
                     isActive
+                    details={orderDetails[order.id]}
+                    onCancelRequest={(selectedOrder) => setCancelModal({ order: selectedOrder, reason: '', submitting: false })}
                     onOpenOrder={(orderId) => navigate(`/pedido/${orderId}`)}
                     onOpenStore={openStore}
                   />
@@ -427,6 +594,8 @@ export function ClientOrders() {
                           key={order.id}
                           order={order}
                           isActive={false}
+                          details={orderDetails[order.id]}
+                          onCancelRequest={() => {}}
                           onOpenOrder={(orderId) => navigate(`/pedido/${orderId}`)}
                           onOpenStore={openStore}
                         />
@@ -439,6 +608,60 @@ export function ClientOrders() {
           </section>
         </div>
       </div>
+
+      {cancelModal.order ? (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 p-4 sm:items-center">
+          <div className="w-full max-w-md rounded-[28px] bg-white p-5 shadow-2xl">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-rose-400">Cancelamento</p>
+                <h3 className="mt-1 text-lg font-semibold text-slate-900">Conte o motivo para a loja</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCancelModal({ order: null, reason: '', submitting: false })}
+                className="rounded-2xl p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+              >
+                <XCircle size={20} weight="duotone" />
+              </button>
+            </div>
+
+            <p className="mt-3 text-sm text-slate-500">
+              Esse pedido já passou do prazo previsto. Se quiser, você pode enviar um motivo e cancelar pelo app.
+            </p>
+
+            <div className="mt-3 rounded-2xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+              A loja recebe esse motivo para entender o cancelamento.
+            </div>
+
+            <textarea
+              value={cancelModal.reason}
+              onChange={(event) => setCancelModal((prev) => ({ ...prev, reason: event.target.value }))}
+              rows={4}
+              placeholder="Ex.: o prazo passou bastante e eu não consigo mais receber agora."
+              className="mt-4 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-rose-300 focus:bg-white"
+            />
+
+            <div className="mt-4 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setCancelModal({ order: null, reason: '', submitting: false })}
+                className="rounded-xl px-3 py-2 text-sm font-semibold text-slate-500 transition-colors hover:bg-slate-100"
+              >
+                Agora nao
+              </button>
+              <button
+                type="button"
+                onClick={submitCustomerCancellation}
+                disabled={cancelModal.submitting}
+                className="rounded-xl bg-rose-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {cancelModal.submitting ? 'Cancelando...' : 'Confirmar cancelamento'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }

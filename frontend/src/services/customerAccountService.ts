@@ -33,6 +33,10 @@ export const customerAccountService = {
     return apiClient.get('/customer/orders');
   },
 
+  cancelOrder(orderId: string, payload: { reason: string }) {
+    return apiClient.post(`/customer/orders/${orderId}/cancel`, payload);
+  },
+
   listAddresses() {
     return apiClient.get('/customer/addresses');
   },

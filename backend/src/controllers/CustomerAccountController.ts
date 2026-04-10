@@ -190,6 +190,21 @@ static async listOrders(req: Request, res: Response) {
     }
   }
 
+  /**
+   * Cancels a delayed customer order.
+   *
+   * @author Edmilson Lopes
+   */
+  static async cancelOrder(req: Request, res: Response) {
+    try {
+      if (!req.auth?.sub) throw new AppError('AUTH-001', 401);
+      const result = await service.cancelOrder(req.auth.sub, req.params.orderId, req.body || {});
+      return res.json(result);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
     /**
    * Registers customer mobile push token.
    *

@@ -9,6 +9,8 @@ import { Order } from '../entities/Order';
 import { EmailService } from './EmailService';
 import { PushNotificationService } from './PushNotificationService';
 import { saveBase64Image } from '../utils/imageStorage';
+import { OrderService } from './OrderService';
+import { OrderEtaServiceV2 } from './OrderEtaServiceV2';
 
 type AddressInput = {
   label?: string;
@@ -27,6 +29,8 @@ type AddressInput = {
 export class CustomerAccountService {
   private emailService = new EmailService();
   private pushService = new PushNotificationService();
+  private orderService = new OrderService();
+  private orderEtaService = new OrderEtaServiceV2();
     /**
    * Executes normalize email business logic.
    *
@@ -391,7 +395,7 @@ async setDefaultAddress(userId: string, addressId: string) {
   async listOrders(userId: string) {
     const rows = await AppDataSource.getRepository(Order).find({
       where: { customerUserId: userId },
-      relations: [ 'store', 'store.settings', 'items', 'items.product', 'shipment' ],
+      relations: [ 'store', 'store.settings', 'store.owner', 'items', 'items.product', 'shipment' ],
       order: { createdAt: 'DESC' },
       take: 100,
     });
@@ -401,6 +405,8 @@ async setDefaultAddress(userId: string, addressId: string) {
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
       status: order.status,
+      canceledAt: order.canceledAt || null,
+      canceledReason: order.canceledReason || null,
       type: order.type,
       fulfillmentMode: order.fulfillmentMode,
       paymentMethod: order.paymentMethod || null,
@@ -445,6 +451,62 @@ async setDefaultAddress(userId: string, addressId: string) {
         imageUrl: item.product?.imageUrl || null,
       })),
     }));
+  }
+
+  /**
+   * Cancels a delayed customer order with a user-provided reason.
+   *
+   * @author Edmilson Lopes
+   */
+  async cancelOrder(userId: string, orderId: string, input: { reason?: string | null }) {
+    const repo = AppDataSource.getRepository(Order);
+    const order = await repo.findOne({
+      where: { id: orderId, customerUserId: userId },
+      relations: [ 'store', 'store.settings', 'items', 'items.product', 'shipment' ],
+    });
+    if (!order) {
+      throw new AppError('ORDER-001', 404, { message: 'Pedido não encontrado.' });
+    }
+
+    const normalizedStatus = String(order.status || '').trim().toLowerCase();
+    const cancellableStatuses = new Set([ 'pending', 'accepted', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ]);
+    if (!cancellableStatuses.has(normalizedStatus)) {
+      throw new AppError('ORDER-004', 400, { message: 'Este pedido não pode mais ser cancelado pelo app.' });
+    }
+
+    const reason = String(input?.reason || '').trim();
+    if (reason.length < 3) {
+      throw new AppError('GEN-002', 400, { message: 'Informe um motivo curto para o cancelamento.' });
+    }
+
+    const publicPayload = await this.orderService.getPublicById(order.id);
+    if (!publicPayload?.order) {
+      throw new AppError('ORDER-001', 404, { message: 'Pedido não encontrado.' });
+    }
+
+    const eta = await this.orderEtaService.calculateForOrder(publicPayload.order, publicPayload.queuePosition, undefined);
+    const etaMinutes = Number(eta?.windowMax || eta?.totalMinutes || eta?.windowMin || 0);
+    if (!(etaMinutes > 0)) {
+      throw new AppError('ORDER-004', 400, { message: 'Ainda não foi possível validar o prazo do pedido.' });
+    }
+
+    const createdAtMs = new Date(order.createdAt).getTime();
+    const graceMs = 15 * 60 * 1000;
+    const unlockAt = createdAtMs + etaMinutes * 60 * 1000 + graceMs;
+    if (Date.now() < unlockAt) {
+      throw new AppError('ORDER-004', 400, {
+        message: 'O cancelamento pelo app fica disponível apenas quando o pedido ultrapassa o prazo estimado.',
+      });
+    }
+
+    const saved = await this.orderService.updateStatus(order.id, 'cancelled', undefined, reason);
+    return {
+      ok: true,
+      orderId: saved.id,
+      status: saved.status,
+      canceledAt: saved.canceledAt || null,
+      canceledReason: saved.canceledReason || null,
+    };
   }
 
   /**
