@@ -1066,12 +1066,12 @@ export function MarketplacePage() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.08),transparent_30%),linear-gradient(180deg,#F8F9FB_0%,#FFFFFF_46%,#F8F9FB_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
+    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[radial-gradient(circle_at_top_right,rgba(47,157,247,0.09),transparent_30%),linear-gradient(180deg,#F8F9FB_0%,#FFFFFF_46%,#F8F9FB_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
       {/* Elemento Decorativo de Fundo (Premium Look) */}
       <div className="pointer-events-none fixed inset-x-0 top-0 z-[55] h-[max(env(safe-area-inset-top),0.75rem)] bg-[#F8F9FB]" />
-      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[320px] bg-gradient-to-b from-emerald-50/80 via-white/30 to-transparent" />
+      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[320px] bg-gradient-to-b from-sky-50/90 via-white/30 to-transparent" />
       <div className="fixed left-[-8%] top-[10%] h-[28%] w-[38%] rounded-full bg-white/80 blur-[120px] pointer-events-none -z-10" />
-      <div className="fixed top-[-10%] right-[-10%] h-[40%] w-[50%] bg-emerald-200/18 blur-[120px] rounded-full pointer-events-none -z-10" />
+      <div className="fixed top-[-10%] right-[-10%] h-[40%] w-[50%] bg-sky-200/20 blur-[120px] rounded-full pointer-events-none -z-10" />
 
       <div
         className={`pointer-events-none fixed left-1/2 z-[120] -translate-x-1/2 rounded-full border border-slate-200 bg-white/95 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm transition-all duration-200 ${
@@ -1162,11 +1162,11 @@ export function MarketplacePage() {
                   <p className="truncate text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Entregar em</p>
                   <button
                     type="button"
-                    className="inline-flex min-w-0 items-center gap-1 text-[14px] font-black text-slate-950 transition-colors duration-150 ease-out hover:text-emerald-700 active:scale-[0.99]"
+                    className="inline-flex min-w-0 items-center gap-1 text-[14px] font-black text-slate-950 transition-colors duration-150 ease-out hover:text-sky-700 active:scale-[0.99]"
                     onClick={() => setQuickFilter((prev) => (prev === 'nearby' ? 'all' : 'nearby'))}
                   >
                     <span className="truncate">{displayLocationLabel}</span>
-                    <CaretDown size={14} weight="bold" className="shrink-0 text-emerald-600" />
+                    <CaretDown size={14} weight="bold" className="shrink-0 text-sky-500" />
                   </button>
                 </div>
               </div>
@@ -1190,14 +1190,14 @@ export function MarketplacePage() {
             {/* Linha 2: Busca Premium */}
             <div className="relative group px-0.5">
               <div className="pointer-events-none absolute inset-y-0 left-4 z-10 flex items-center">
-                <MagnifyingGlass size={19} weight="bold" className="text-slate-400 transition-colors duration-150 ease-out group-focus-within:text-emerald-700" />
+                <MagnifyingGlass size={19} weight="bold" className="text-slate-400 transition-colors duration-150 ease-out group-focus-within:text-sky-600" />
               </div>
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="O que você quer pedir agora?"
                 autoComplete="off"
-                className="block h-12 min-h-12 w-full appearance-none rounded-[20px] border border-slate-100 bg-white px-12 text-[14px] font-semibold text-slate-950 opacity-100 shadow-[0_8px_24px_rgba(15,23,42,0.06)] outline-none transition-all duration-200 ease-out placeholder:text-slate-400 focus:border-emerald-200 focus:bg-white focus:ring-4 focus:ring-emerald-700/10 focus:shadow-[0_14px_32px_rgba(15,23,42,0.1)]"
+                className="block h-12 min-h-12 w-full appearance-none rounded-[20px] border border-slate-100 bg-white px-12 text-[14px] font-semibold text-slate-950 opacity-100 shadow-[0_8px_24px_rgba(15,23,42,0.06)] outline-none transition-all duration-200 ease-out placeholder:text-slate-400 focus:border-sky-200 focus:bg-white focus:ring-4 focus:ring-sky-500/10 focus:shadow-[0_14px_32px_rgba(15,23,42,0.1)]"
               />
             </div>
 
@@ -1217,7 +1217,7 @@ export function MarketplacePage() {
                     onClick={() => setQuickFilter(filter as any)}
                     className={`whitespace-nowrap rounded-full px-3.5 py-1.5 text-[12px] transition-all duration-150 ease-out active:scale-[0.97] ${
                       active
-                        ? 'bg-emerald-800 text-white shadow-[0_10px_24px_-14px_rgba(4,120,87,0.55)] font-black'
+                        ? 'bg-sky-600 text-white shadow-[0_10px_24px_-14px_rgba(47,157,247,0.62)] font-black'
                         : 'bg-white/90 text-slate-600 border border-slate-100 hover:bg-white font-bold shadow-[0_6px_16px_-14px_rgba(15,23,42,0.28)]'
                     }`}
                   >
@@ -1416,12 +1416,12 @@ export function MarketplacePage() {
                 onClick={() => setSegmentFilter('all')}
               >
                 <div className={`flex h-11 w-11 items-center justify-center rounded-[16px] transition-all duration-200 ease-out ${
-                  segmentFilter === 'all' ? 'bg-emerald-800 shadow-[0_12px_26px_-14px_rgba(4,120,87,0.55)] scale-[1.04]' : 'border border-slate-100 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.045)] group-hover:bg-slate-50'
+                  segmentFilter === 'all' ? 'bg-sky-600 shadow-[0_12px_26px_-14px_rgba(47,157,247,0.62)] scale-[1.04]' : 'border border-slate-100 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.045)] group-hover:bg-slate-50'
                 }`}>
                   <List size={18} weight="duotone" className={segmentFilter === 'all' ? 'text-white scale-[0.95]' : 'text-slate-500'} />
                 </div>
                 <span className={`text-center text-[9.5px] font-bold uppercase tracking-[0.08em] transition-colors ${
-                  segmentFilter === 'all' ? 'text-emerald-800' : 'text-slate-500'
+                  segmentFilter === 'all' ? 'text-sky-700' : 'text-slate-500'
                 }`}>Todos</span>
               </button>
               
@@ -1436,7 +1436,7 @@ export function MarketplacePage() {
                     onClick={() => setSegmentFilter(prev => prev === item.label ? 'all' : item.label)}
                   >
                     <div className={`flex h-11 w-11 items-center justify-center rounded-[16px] transition-all duration-200 ease-out ${
-                      active ? 'bg-emerald-800 shadow-[0_12px_26px_-14px_rgba(4,120,87,0.55)] scale-[1.04]' : 'border border-slate-100 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.045)] group-hover:bg-slate-50'
+                      active ? 'bg-sky-600 shadow-[0_12px_26px_-14px_rgba(47,157,247,0.62)] scale-[1.04]' : 'border border-slate-100 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.045)] group-hover:bg-slate-50'
                     }`}>
                       <CategoryIcon
                         size={20}
@@ -1445,7 +1445,7 @@ export function MarketplacePage() {
                       />
                     </div>
                     <span className={`text-center text-[9.5px] font-bold uppercase tracking-[0.08em] transition-colors ${
-                      active ? 'text-emerald-800' : 'text-slate-500'
+                      active ? 'text-sky-700' : 'text-slate-500'
                     }`}>{item.label}</span>
                   </button>
                 );
@@ -1458,7 +1458,7 @@ export function MarketplacePage() {
             <div className="flex items-center justify-between px-1">
               <h2 className="text-[15px] font-black tracking-tight text-slate-950">{genericHighlightLabel}</h2>
               <div className="flex gap-1">
-                <div className="h-1 w-4 rounded-full bg-emerald-500" />
+                <div className="h-1 w-4 rounded-full bg-sky-500" />
                 <div className="h-1 w-1 rounded-full bg-slate-300" />
                 <div className="h-1 w-1 rounded-full bg-slate-300" />
               </div>
@@ -1492,7 +1492,7 @@ export function MarketplacePage() {
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/94 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md ring-1 ring-black/5">
-                            <Sparkle size={9} weight="fill" className="text-emerald-600" />
+                            <Sparkle size={9} weight="fill" className="text-sky-500" />
                             Sugestão
                           </span>
                         )}
@@ -1514,7 +1514,7 @@ export function MarketplacePage() {
                           />
                           <span className="max-w-[82px] truncate text-[9px] font-bold text-slate-500">{item.storeName}</span>
                         </div>
-                        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-black text-emerald-800">
+                        <span className="rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-black text-sky-700">
                           {currency.format(item.price)}
                         </span>
                       </div>
@@ -1711,7 +1711,7 @@ export function MarketplacePage() {
             <House size={18} />
             <span className="text-[9px] font-black uppercase">Início</span>
           </button>
-          <button type="button" className="flex flex-col items-center justify-center rounded-2xl bg-emerald-50/90 py-1 font-bold text-emerald-700 shadow-[0_8px_18px_-16px_rgba(16,185,129,0.55)] ring-1 ring-emerald-100/70 transition-all duration-150 ease-out active:scale-[0.94]">
+          <button type="button" className="flex flex-col items-center justify-center rounded-2xl bg-sky-50/90 py-1 font-bold text-sky-700 shadow-[0_8px_18px_-16px_rgba(47,157,247,0.6)] ring-1 ring-sky-100/70 transition-all duration-150 ease-out active:scale-[0.94]">
             <Storefront size={18} weight="fill" />
             <span className="text-[9px] font-black uppercase">Hub</span>
           </button>
@@ -1719,7 +1719,7 @@ export function MarketplacePage() {
             type="button"
             onClick={() => setQuickFilter((prev) => (prev === 'favorites' ? 'all' : 'favorites'))}
             className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]"
-            style={quickFilter === 'favorites' ? { color: '#047857' } : undefined}
+            style={quickFilter === 'favorites' ? { color: '#2f9df7' } : undefined}
           >
             <Heart size={18} weight={quickFilter === 'favorites' ? 'fill' : 'regular'} />
             <span className="text-[9px] font-black uppercase">Favoritos</span>
