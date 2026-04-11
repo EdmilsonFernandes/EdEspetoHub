@@ -152,8 +152,10 @@ const readCustomerSession = () => {
 const FAVORITES_STORAGE_KEY = 'hub:favorites:stores';
 const DISMISSED_CUSTOMER_ORDERS_KEY = 'hub:dismissed-customer-orders';
 const DISMISSED_ANONYMOUS_ORDERS_KEY = 'hub:dismissed-anonymous-orders';
+const STORE_PROMO_POPUP_DISMISSED_UNTIL_KEY = 'hub:store-promo-popup-dismissed-until';
 const ORDER_EXPIRATION_MS = 3 * 60 * 60 * 1000; // 3 horas
 const ACTIVE_ORDER_ALERT_MAX_AGE_MS = 6 * 60 * 60 * 1000; // 6 horas
+const STORE_PROMO_POPUP_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 horas
 
 const getOrderStatusTone = (status?: string) => {
   const normalized = String(status || '').trim().toLowerCase();
@@ -210,6 +212,7 @@ export function MarketplacePage() {
   const [pullDistance, setPullDistance] = useState(0);
   const [isHeaderElevated, setIsHeaderElevated] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
+  const [showStorePromoPopup, setShowStorePromoPopup] = useState(false);
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
   const [featuredLoading, setFeaturedLoading] = useState(false);
   const [featuredOffset, setFeaturedOffset] = useState(0);
@@ -1024,6 +1027,28 @@ export function MarketplacePage() {
     return () => window.cancelAnimationFrame(raf);
   }, []);
 
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      try {
+        const dismissedUntil = Number(localStorage.getItem(STORE_PROMO_POPUP_DISMISSED_UNTIL_KEY) || 0);
+        if (Number.isFinite(dismissedUntil) && dismissedUntil > Date.now()) return;
+      } catch {
+        // ignore
+      }
+      setShowStorePromoPopup(true);
+    }, 1100);
+    return () => window.clearTimeout(timeout);
+  }, []);
+
+  const dismissStorePromoPopup = useCallback(() => {
+    setShowStorePromoPopup(false);
+    try {
+      localStorage.setItem(STORE_PROMO_POPUP_DISMISSED_UNTIL_KEY, String(Date.now() + STORE_PROMO_POPUP_COOLDOWN_MS));
+    } catch {
+      // ignore
+    }
+  }, []);
+
   return (
     <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[linear-gradient(180deg,#F8F9FB_0%,#F8F9FB_58%,#f1f5f9_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] sm:pb-24 text-slate-900">
       {/* Elemento Decorativo de Fundo (Premium Look) */}
@@ -1040,6 +1065,45 @@ export function MarketplacePage() {
       >
         {isRefreshing ? 'Atualizando...' : pullDistance >= 68 ? 'Solte para atualizar' : 'Puxe para atualizar'}
       </div>
+
+      {showStorePromoPopup && !profileDrawerOpen && (
+        <div
+          className="fixed inset-0 z-[140] flex items-center justify-center bg-slate-950/48 px-4 py-[max(1rem,env(safe-area-inset-top))] backdrop-blur-md animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Criar loja no Já no Caminho"
+        >
+          <div className="relative w-full max-w-[430px] animate-in zoom-in-95 slide-in-from-bottom-3 duration-200">
+            <button
+              type="button"
+              onClick={dismissStorePromoPopup}
+              className="absolute -right-2 -top-2 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/80 bg-white text-slate-900 shadow-[0_14px_30px_-14px_rgba(15,23,42,0.45)] transition-all duration-150 ease-out hover:bg-slate-50 active:scale-95"
+              aria-label="Fechar propaganda"
+              title="Fechar"
+            >
+              <X size={19} weight="bold" />
+            </button>
+            <Link
+              to="/create?plan=trial"
+              onClick={dismissStorePromoPopup}
+              className="group block overflow-hidden rounded-[1.85rem] border border-white/80 bg-white shadow-[0_28px_70px_-32px_rgba(15,23,42,0.72)] transition-all duration-200 ease-out active:scale-[0.985]"
+              aria-label="Criar minha loja no Já no Caminho"
+            >
+              <div className="relative aspect-[16/9] bg-slate-950">
+                <img
+                  src="/marketing/promo-marketing-lite.jpg"
+                  alt="Planos para criar loja no Já no Caminho"
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/35 to-transparent opacity-80 transition-opacity duration-200 group-active:opacity-100" />
+              </div>
+            </Link>
+          </div>
+        </div>
+      )}
       
       <ProfileDrawer
         isOpen={profileDrawerOpen}
