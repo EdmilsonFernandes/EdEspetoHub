@@ -18,6 +18,8 @@ const getModeFromSearch = (search: string) => {
   return mode === 'register' || mode === 'cadastro' ? 'register' : 'login';
 };
 
+const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(String(value || '').trim());
+
 export function ClientAuth() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -30,6 +32,8 @@ export function ClientAuth() {
     email: '',
     phone: '',
     password: '',
+    termsAccepted: false,
+    lgpdAccepted: false,
   });
 
   const nextPath = useMemo(() => {
@@ -54,11 +58,19 @@ export function ClientAuth() {
     try {
       let result: any;
       if (mode === 'register') {
+        if (!isValidEmail(form.email)) {
+          throw new Error('Informe um e-mail válido.');
+        }
+        if (!form.termsAccepted || !form.lgpdAccepted) {
+          throw new Error('Aceite os termos de uso e a política de privacidade para criar sua conta.');
+        }
         result = await customerAccountService.register({
           fullName: String(form.fullName || '').trim(),
           email: String(form.email || '').trim(),
           phone: String(form.phone || '').trim(),
           password: String(form.password || ''),
+          termsAccepted: Boolean(form.termsAccepted),
+          lgpdAccepted: Boolean(form.lgpdAccepted),
         });
       } else {
         result = await customerAccountService.login({
@@ -196,6 +208,33 @@ export function ClientAuth() {
               enterKeyHint="done"
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
             />
+
+            {mode === 'register' && (
+              <div className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50/80 p-3">
+                <label className="flex items-start gap-2 text-[11px] font-semibold leading-relaxed text-slate-600">
+                  <input
+                    type="checkbox"
+                    checked={form.termsAccepted}
+                    onChange={(e) => setForm((p) => ({ ...p, termsAccepted: e.target.checked }))}
+                    className="mt-0.5 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/20"
+                  />
+                  <span>
+                    Li e aceito os <a href="/terms" target="_blank" rel="noreferrer" className="font-black text-slate-900 underline underline-offset-2">Termos de Uso</a>.
+                  </span>
+                </label>
+                <label className="flex items-start gap-2 text-[11px] font-semibold leading-relaxed text-slate-600">
+                  <input
+                    type="checkbox"
+                    checked={form.lgpdAccepted}
+                    onChange={(e) => setForm((p) => ({ ...p, lgpdAccepted: e.target.checked }))}
+                    className="mt-0.5 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/20"
+                  />
+                  <span>
+                    Autorizo o uso dos meus dados conforme a <a href="/terms#lgpd" target="_blank" rel="noreferrer" className="font-black text-slate-900 underline underline-offset-2">Política de Privacidade e LGPD</a>.
+                  </span>
+                </label>
+              </div>
+            )}
 
             {error ? <p className="text-sm text-rose-300">{error}</p> : null}
             {message ? <p className="text-sm text-emerald-300">{message}</p> : null}

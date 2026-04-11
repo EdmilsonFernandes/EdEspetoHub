@@ -330,10 +330,10 @@ export function AddressDistance() {
               </div>
             ) : (
               addresses.map(addr => (
-                <div key={addr.id} className="group relative overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white p-5 shadow-[0_22px_45px_-36px_rgba(15,23,42,0.28)] transition-all hover:-translate-y-0.5 hover:shadow-[0_28px_55px_-36px_rgba(15,23,42,0.34)]">
+                <div key={addr.id} className="group relative overflow-hidden rounded-[1.8rem] border border-slate-200/70 bg-white p-4 shadow-[0_22px_45px_-36px_rgba(15,23,42,0.28)] transition-all hover:-translate-y-0.5 hover:shadow-[0_28px_55px_-36px_rgba(15,23,42,0.34)]">
                   <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#0ea5e9,#38bdf8,#ffffff)] opacity-80" />
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-start gap-3">
                       <div className={`grid h-12 w-12 place-items-center rounded-2xl ${
                         addr.label === 'Casa' ? 'bg-sky-50 text-sky-600' : 
                         addr.label === 'Trabalho' ? 'bg-amber-50 text-amber-600' : 'bg-slate-50 text-slate-600'
@@ -341,11 +341,11 @@ export function AddressDistance() {
                         {addr.label === 'Casa' ? <House size={24} weight="duotone" /> : 
                          addr.label === 'Trabalho' ? <Suitcase size={24} weight="duotone" /> : <MapPin size={24} weight="duotone" />}
                       </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-sm font-black text-slate-900">{addr.label || 'Endereço'}</h3>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                          <h3 className="max-w-full truncate text-sm font-black text-slate-900">{addr.label || 'Endereço'}</h3>
                           {addr.isDefault ? (
-                            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700">
+                            <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-emerald-700">
                               <CheckCircle size={11} weight="fill" />
                               Principal
                             </span>
@@ -355,7 +355,7 @@ export function AddressDistance() {
                         <p className="truncate text-[10px] font-medium text-slate-400">{addr.neighborhood} • {addr.city}/{addr.state}</p>
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-2">
+                    <div className="flex shrink-0 flex-col items-end gap-2">
                       {addr.isDefault ? null : (
                         <button
                           type="button"
@@ -364,16 +364,16 @@ export function AddressDistance() {
                             showToast('Endereço principal atualizado.', 'success');
                             loadAddresses();
                           }}
-                          className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-slate-600"
+                          className="rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-[8px] font-black uppercase tracking-[0.08em] text-slate-600 active:scale-95"
                         >
                           Principal
                         </button>
                       )}
                       <button
                         onClick={() => handleDelete(addr.id)}
-                        className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-100 bg-white text-rose-500 active:bg-rose-50 transition-colors"
+                        className="flex h-9 w-9 items-center justify-center rounded-2xl border border-slate-100 bg-white text-rose-500 active:bg-rose-50 transition-colors"
                       >
-                        <Trash size={18} weight="bold" />
+                        <Trash size={16} weight="bold" />
                       </button>
                     </div>
                   </div>

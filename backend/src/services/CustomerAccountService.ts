@@ -61,6 +61,9 @@ private sanitizeUser(user: User) {
       email: user.email,
       phone: user.phone || null,
       profileImageUrl: user.profileImageUrl || null,
+      emailVerified: Boolean(user.emailVerified),
+      termsAcceptedAt: user.termsAcceptedAt || null,
+      lgpdAcceptedAt: user.lgpdAcceptedAt || null,
       role: 'CUSTOMER',
       createdAt: user.createdAt,
     };
@@ -95,17 +98,25 @@ private mapAddress(entity: CustomerAddress) {
    *
    * @author Edmilson Lopes
    */
-async register(input: { fullName: string; email: string; password: string; phone?: string | null }) {
+async register(input: { fullName: string; email: string; password: string; phone?: string | null; termsAccepted?: boolean; lgpdAccepted?: boolean }) {
     const fullName = String(input?.fullName || '').trim();
     const email = this.normalizeEmail(input?.email || '');
     const password = String(input?.password || '');
     const phone = this.sanitizePhone(input?.phone || null) || undefined;
+    const termsAccepted = input?.termsAccepted === true;
+    const lgpdAccepted = input?.lgpdAccepted === true;
 
     if (!fullName || !email || !password) {
       throw new AppError('GEN-002', 400, { message: 'Nome, e-mail e senha são obrigatórios.' });
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(email)) {
+      throw new AppError('GEN-002', 400, { message: 'Informe um e-mail válido.' });
+    }
     if (password.length < 6) {
       throw new AppError('GEN-002', 400, { message: 'A senha precisa ter ao menos 6 caracteres.' });
+    }
+    if (!termsAccepted || !lgpdAccepted) {
+      throw new AppError('GEN-002', 400, { message: 'Aceite os termos de uso e a política de privacidade para criar sua conta.' });
     }
 
     const userRepo = AppDataSource.getRepository(User);
@@ -119,6 +130,8 @@ async register(input: { fullName: string; email: string; password: string; phone
       phone,
       emailVerified: true,
       userRole: 'CUSTOMER',
+      termsAcceptedAt: new Date(),
+      lgpdAcceptedAt: new Date(),
     } as Partial<User>);
     const saved = await userRepo.save(user);
     try {

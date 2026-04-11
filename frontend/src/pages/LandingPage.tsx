@@ -95,6 +95,8 @@ export function LandingPage() {
     email: '',
     phone: '',
     password: '',
+    termsAccepted: false,
+    lgpdAccepted: false,
   });
   const [customerAuthLoading, setCustomerAuthLoading] = useState(false);
   const [customerAuthError, setCustomerAuthError] = useState('');
@@ -141,11 +143,16 @@ export function LandingPage() {
     try {
       let result: any;
       if (customerAuthMode === 'register') {
+        if (!customerAuthForm.termsAccepted || !customerAuthForm.lgpdAccepted) {
+          throw new Error('Aceite os termos de uso e a política de privacidade para criar sua conta.');
+        }
         result = await customerAccountService.register({
           fullName: String(customerAuthForm.fullName || '').trim(),
           email: String(customerAuthForm.email || '').trim(),
           phone: String(customerAuthForm.phone || '').trim(),
           password: String(customerAuthForm.password || ''),
+          termsAccepted: Boolean(customerAuthForm.termsAccepted),
+          lgpdAccepted: Boolean(customerAuthForm.lgpdAccepted),
         });
       } else {
         result = await customerAccountService.login({
@@ -554,6 +561,29 @@ export function LandingPage() {
                 placeholder="Senha"
                 className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
               />
+
+              {customerAuthMode === 'register' && (
+                <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+                  <label className="flex items-start gap-2 text-[11px] font-semibold leading-relaxed text-slate-600">
+                    <input
+                      type="checkbox"
+                      checked={customerAuthForm.termsAccepted}
+                      onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, termsAccepted: e.target.checked }))}
+                      className="mt-0.5 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/20"
+                    />
+                    <span>Li e aceito os <a href="/terms" target="_blank" rel="noreferrer" className="font-black text-slate-900 underline underline-offset-2">Termos de Uso</a>.</span>
+                  </label>
+                  <label className="flex items-start gap-2 text-[11px] font-semibold leading-relaxed text-slate-600">
+                    <input
+                      type="checkbox"
+                      checked={customerAuthForm.lgpdAccepted}
+                      onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, lgpdAccepted: e.target.checked }))}
+                      className="mt-0.5 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/20"
+                    />
+                    <span>Autorizo o uso dos meus dados conforme a <a href="/terms#lgpd" target="_blank" rel="noreferrer" className="font-black text-slate-900 underline underline-offset-2">Política de Privacidade e LGPD</a>.</span>
+                  </label>
+                </div>
+              )}
 
               <div className="space-y-1">
                 <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Ir para loja</label>

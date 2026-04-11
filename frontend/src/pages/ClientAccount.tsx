@@ -362,6 +362,18 @@ export function ClientAccount() {
                     </div>
                   </div>
                   <div className="grid gap-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">E-mail da conta</label>
+                    <div className="relative">
+                      <EnvelopeSimple size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        value={me?.email || ''}
+                        readOnly
+                        className="w-full cursor-not-allowed rounded-2xl border border-slate-100 bg-slate-100/80 py-3 pl-11 pr-4 text-sm font-bold text-slate-500 outline-none"
+                      />
+                    </div>
+                    <p className="ml-2 text-[10px] font-semibold text-slate-400">Por segurança, a alteração de e-mail será liberada em fluxo validado.</p>
+                  </div>
+                  <div className="grid gap-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Telefone para Contato</label>
                     <div className="relative">
                       <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />

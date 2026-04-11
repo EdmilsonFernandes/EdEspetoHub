@@ -1,7 +1,7 @@
 import { apiClient } from '../config/apiClient';
 
 export const customerAccountService = {
-  register(payload: { fullName: string; email: string; password: string; phone?: string }) {
+  register(payload: { fullName: string; email: string; password: string; phone?: string; termsAccepted?: boolean; lgpdAccepted?: boolean }) {
     return apiClient.post('/customer/auth/register', payload);
   },
 
