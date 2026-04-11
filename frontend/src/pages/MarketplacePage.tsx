@@ -1,6 +1,26 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MagnifyingGlass, Star, Storefront, House, List, CaretDown, Heart, CaretRight, X, Bicycle, Sparkle } from '@phosphor-icons/react';
+import {
+  MagnifyingGlass,
+  Star,
+  Storefront,
+  House,
+  List,
+  CaretDown,
+  Heart,
+  CaretRight,
+  X,
+  Bicycle,
+  Sparkle,
+  ForkKnife,
+  Hamburger,
+  Pizza,
+  Wine,
+  ShoppingCart,
+  Pill,
+  Cookie,
+  Buildings,
+} from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
@@ -101,16 +121,16 @@ const hashFrom = (value: string) => {
   return Math.abs(hash);
 };
 
-const categoryVisuals: Record<string, { emoji: string; label: string }> = {
-  Restaurante: { emoji: '🍽️', label: 'Restaurante' },
-  Hamburguer: { emoji: '🍔', label: 'Hamburguer' },
-  Lanche: { emoji: '🥪', label: 'Lanche' },
-  Pizza: { emoji: '🍕', label: 'Pizza' },
-  Bebidas: { emoji: '🍷', label: 'Bebidas' },
-  Mercado: { emoji: '🛒', label: 'Mercado' },
-  Farmacia: { emoji: '💊', label: 'Farmacia' },
-  Doces: { emoji: '🧁', label: 'Doces' },
-  'Loja Local': { emoji: '🏬', label: 'Loja Local' },
+const categoryVisuals: Record<string, { icon: typeof Storefront; label: string }> = {
+  Restaurante: { icon: ForkKnife, label: 'Restaurante' },
+  Hamburguer: { icon: Hamburger, label: 'Hamburguer' },
+  Lanche: { icon: Hamburger, label: 'Lanche' },
+  Pizza: { icon: Pizza, label: 'Pizza' },
+  Bebidas: { icon: Wine, label: 'Bebidas' },
+  Mercado: { icon: ShoppingCart, label: 'Mercado' },
+  Farmacia: { icon: Pill, label: 'Farmacia' },
+  Doces: { icon: Cookie, label: 'Doces' },
+  'Loja Local': { icon: Buildings, label: 'Loja Local' },
 };
 
 type FeaturedProduct = {
@@ -694,7 +714,7 @@ export function MarketplacePage() {
   }, [enrichedStores, debouncedQuery, segmentFilter, quickFilter, favoriteStoreSlugs]);
 
   const categoryTiles = useMemo(() => {
-    return segmentOptions.map((segment) => categoryVisuals[segment] || { emoji: '🏪', label: segment });
+    return segmentOptions.map((segment) => categoryVisuals[segment] || { icon: Storefront, label: segment });
   }, [segmentOptions]);
 
   const favoriteStores = useMemo(() => {
@@ -1396,11 +1416,11 @@ export function MarketplacePage() {
             <div className="-mx-4 flex overflow-x-auto no-scrollbar gap-3 px-4 mb-7 py-1.5 snap-x snap-mandatory">
               <button
                 type="button"
-                className="flex min-w-[60px] shrink-0 snap-start cursor-pointer flex-col items-center gap-1.5 group"
+                className="flex min-w-[62px] shrink-0 snap-start cursor-pointer flex-col items-center gap-1.5 group"
                 onClick={() => setSegmentFilter('all')}
               >
                 <div className={`flex h-12 w-12 items-center justify-center rounded-[17px] transition-all duration-150 ease-out ${
-                  segmentFilter === 'all' ? 'bg-slate-900 shadow-[0_10px_22px_-14px_rgba(15,23,42,0.55)] scale-[1.04]' : 'bg-white border border-white shadow-[0_8px_24px_rgba(0,0,0,0.055)] group-hover:bg-slate-50'
+                  segmentFilter === 'all' ? 'bg-slate-900 shadow-[0_10px_22px_-14px_rgba(15,23,42,0.55)] scale-[1.04]' : 'border border-slate-100 bg-[#F8F9FB] shadow-[0_8px_24px_rgba(0,0,0,0.045)] group-hover:bg-white'
                 }`}>
                   <List size={19} weight="duotone" className={segmentFilter === 'all' ? 'text-white scale-[0.95]' : 'text-slate-500'} />
                 </div>
@@ -1411,17 +1431,22 @@ export function MarketplacePage() {
               
               {categoryTiles.map((item, index) => {
                 const active = segmentFilter === item.label;
+                const CategoryIcon = item.icon;
                 return (
                   <button
                     key={`${item.label}-${index}`}
                     type="button"
-                    className="flex min-w-[60px] shrink-0 snap-start cursor-pointer flex-col items-center gap-1.5 group"
+                    className="flex min-w-[62px] shrink-0 snap-start cursor-pointer flex-col items-center gap-1.5 group"
                     onClick={() => setSegmentFilter(prev => prev === item.label ? 'all' : item.label)}
                   >
                     <div className={`flex h-12 w-12 items-center justify-center rounded-[17px] transition-all duration-150 ease-out ${
-                      active ? 'bg-slate-900 shadow-[0_10px_22px_-14px_rgba(15,23,42,0.55)] scale-[1.04]' : 'bg-white border border-white shadow-[0_8px_24px_rgba(0,0,0,0.055)] group-hover:bg-slate-50'
+                      active ? 'bg-slate-900 shadow-[0_10px_22px_-14px_rgba(15,23,42,0.55)] scale-[1.04]' : 'border border-slate-100 bg-[#F8F9FB] shadow-[0_8px_24px_rgba(0,0,0,0.045)] group-hover:bg-white'
                     }`}>
-                      <span className={`text-[21px] transition-all duration-150 ease-out ${active ? 'scale-[0.94]' : 'group-hover:scale-105'}`}>{item.emoji}</span>
+                      <CategoryIcon
+                        size={21}
+                        weight={active ? 'fill' : 'duotone'}
+                        className={`transition-all duration-150 ease-out ${active ? 'scale-[0.94] text-white' : 'text-slate-500 group-hover:scale-105 group-hover:text-slate-700'}`}
+                      />
                     </div>
                     <span className={`text-center text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors ${
                       active ? 'text-slate-900' : 'text-slate-500'
@@ -1600,7 +1625,7 @@ export function MarketplacePage() {
                           <div className="min-w-0 pr-1">
                             <div className="flex items-center gap-2">
                               <h3 className="truncate text-[15px] font-extrabold text-slate-900">{store.name}</h3>
-                              <span className={`inline-flex h-2 w-2 rounded-full ${store.isOpen ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                              <span className={`inline-flex h-2 w-2 rounded-full ${store.isOpen ? 'bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.14),0_0_14px_rgba(16,185,129,0.55)]' : 'bg-slate-400'}`} />
                             </div>
                           </div>
                           <div className="flex shrink-0 items-center">
@@ -1642,19 +1667,19 @@ export function MarketplacePage() {
                         )}
                         <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
                           {store.freeShipping ? (
-                            <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
+                            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700">
                               <Bicycle size={10} weight="fill" className="text-emerald-600" />
                               Gratis
                             </span>
                           ) : null}
                           {store.rating >= 4.8 && (
-                            <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700">
+                            <span className="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700">
                               <Star size={10} weight="fill" className="text-amber-500" />
                               Mais bem avaliadas
                             </span>
                           )}
                           {(store as any).sponsored && (
-                            <span className="inline-flex rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">
+                            <span className="inline-flex rounded-full border border-slate-100 bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-500">
                               Patrocinado
                             </span>
                           )}

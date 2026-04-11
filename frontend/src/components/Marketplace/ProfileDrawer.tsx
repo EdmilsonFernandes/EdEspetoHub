@@ -4,6 +4,7 @@ import {
   BellSimple,
   Storefront,
   CookingPot,
+  Motorcycle,
   Lifebuoy,
   SignOut,
   UserCircle,
@@ -11,7 +12,8 @@ import {
   House,
   CaretRight,
   Scroll,
-  Sparkle
+  Sparkle,
+  X
 } from '@phosphor-icons/react';
 
 type DrawerAction = {
@@ -65,6 +67,7 @@ export function ProfileDrawer({
 }: ProfileDrawerProps) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [storeSlug, setStoreSlug] = useState<string | null>(null);
+  const [accessPickerOpen, setAccessPickerOpen] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -91,6 +94,7 @@ export function ProfileDrawer({
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
+      setAccessPickerOpen(false);
     }
     return () => {
       document.body.style.overflow = '';
@@ -155,14 +159,14 @@ export function ProfileDrawer({
             </div>
           ) : (
             <button
-              onClick={onLogin}
-              className="flex w-full items-center justify-between rounded-[1.5rem] bg-slate-900 p-4 text-white shadow-[0_24px_40px_-24px_rgba(15,23,42,0.65)] transition-all active:scale-95"
+              onClick={() => setAccessPickerOpen(true)}
+              className="flex w-full items-center justify-between rounded-[1.5rem] bg-slate-900 p-4 text-white shadow-[0_24px_40px_-24px_rgba(15,23,42,0.65)] transition-all active:scale-[0.97]"
             >
               <div className="flex items-center gap-3">
                 <UserCircle size={24} weight="duotone" className="text-slate-400" />
                 <div className="text-left">
-                  <p className="text-sm font-black">Entrar como cliente</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Pedidos, conta e endereços</p>
+                  <p className="text-sm font-black">Entrar</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Cliente, lojista ou entregador</p>
                 </div>
               </div>
               <CaretRight size={16} weight="bold" className="text-slate-500" />
@@ -245,36 +249,14 @@ export function ProfileDrawer({
             ))}
           </nav>
 
-          <section className="pt-2">
-            <div className="mb-3 px-1">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Acessos Profissionais</p>
-              <p className="mt-1 text-[11px] font-medium text-slate-500">Lojista e entregador entram por aqui.</p>
-            </div>
-            <div className="grid grid-cols-2 gap-2.5">
-              <button
-                onClick={onOpenAdminLogin}
-                className="flex items-center gap-3 rounded-[1.55rem] border border-slate-100 bg-white/90 px-3 py-3.5 shadow-[0_18px_30px_-24px_rgba(15,23,42,0.35)] transition-all active:scale-95"
-              >
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-sky-50 text-sky-600">
-                  <Storefront size={22} weight="duotone" />
-                </div>
-                <div className="min-w-0 text-left">
-                  <span className="block text-[12px] font-bold leading-tight text-slate-700">Painel da loja</span>
-                </div>
-              </button>
-              <button
-                onClick={onOpenMotoboyLogin}
-                className="flex items-center gap-3 rounded-[1.55rem] border border-slate-100 bg-white/90 px-3 py-3.5 shadow-[0_18px_30px_-24px_rgba(15,23,42,0.35)] transition-all active:scale-95"
-              >
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-amber-50 text-amber-600">
-                  <ArrowsClockwise size={22} weight="duotone" />
-                </div>
-                <div className="min-w-0 text-left">
-                  <span className="block text-[12px] font-bold leading-tight text-slate-700">Area de entregas</span>
-                </div>
-              </button>
-            </div>
-          </section>
+          {!isLogged && (
+            <section className="rounded-[1.65rem] border border-slate-100 bg-white/72 p-4 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.35)]">
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Acesso unificado</p>
+              <p className="mt-1 text-[12px] font-semibold leading-relaxed text-slate-600">
+                Toque em Entrar para escolher se você é cliente, lojista ou entregador.
+              </p>
+            </section>
+          )}
         </div>
 
         <div className="border-t border-slate-100/90 bg-white/70 p-6 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] backdrop-blur-xl">
@@ -287,6 +269,81 @@ export function ProfileDrawer({
           </div>
         </div>
       </aside>
+
+      {accessPickerOpen && (
+        <div className="absolute inset-0 z-[10] flex items-end bg-slate-950/30 backdrop-blur-[2px] sm:items-center sm:justify-center" onClick={() => setAccessPickerOpen(false)}>
+          <div
+            className="w-full rounded-t-[2rem] border border-white/80 bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[0_-26px_70px_-36px_rgba(15,23,42,0.65)] animate-in slide-in-from-bottom-4 fade-in duration-200 sm:max-w-[420px] sm:rounded-[2rem]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-slate-200" />
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">Escolha seu acesso</p>
+                <h3 className="mt-1 text-xl font-black text-slate-950">Como você quer entrar?</h3>
+                <p className="mt-1 text-sm font-medium text-slate-500">Cada perfil abre a área certa do app.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAccessPickerOpen(false)}
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all active:scale-95"
+                aria-label="Fechar escolha de acesso"
+              >
+                <X size={18} weight="bold" />
+              </button>
+            </div>
+
+            <div className="grid gap-3">
+              {[
+                {
+                  id: 'client',
+                  title: 'Cliente',
+                  description: 'Pedir produtos, acompanhar pedidos e salvar endereços.',
+                  icon: <UserCircle size={24} weight="duotone" />,
+                  tone: 'bg-sky-50 text-sky-700',
+                  action: onLogin,
+                },
+                {
+                  id: 'store',
+                  title: 'Lojista',
+                  description: 'Gerenciar loja, cardápio, fila e impressora.',
+                  icon: <Storefront size={24} weight="duotone" />,
+                  tone: 'bg-emerald-50 text-emerald-700',
+                  action: onOpenAdminLogin,
+                },
+                {
+                  id: 'motoboy',
+                  title: 'Entregador',
+                  description: 'Receber entregas, rotas e histórico de ganhos.',
+                  icon: <Motorcycle size={24} weight="duotone" />,
+                  tone: 'bg-amber-50 text-amber-700',
+                  action: onOpenMotoboyLogin,
+                },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    setAccessPickerOpen(false);
+                    item.action();
+                    onClose();
+                  }}
+                  className="group flex w-full items-center gap-4 rounded-[1.45rem] border border-slate-100 bg-white p-4 text-left shadow-[0_8px_24px_rgba(0,0,0,0.055)] transition-all duration-150 ease-out active:scale-[0.97] sm:hover:-translate-y-0.5"
+                >
+                  <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${item.tone} shadow-inner`}>
+                    {item.icon}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[15px] font-black text-slate-900">{item.title}</p>
+                    <p className="mt-0.5 text-xs font-medium leading-snug text-slate-500">{item.description}</p>
+                  </div>
+                  <CaretRight size={17} weight="bold" className="text-slate-300 transition-transform group-active:translate-x-0.5" />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
