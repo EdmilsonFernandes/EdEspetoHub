@@ -94,13 +94,13 @@ export function SegmentPromoCarousel({
           event.preventDefault();
         }
       }}
-      className={`group relative block overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)] active:scale-[0.995] ${className}`}
+      className={`group relative block overflow-hidden rounded-[1.65rem] border border-white bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out active:scale-[0.985] ${className}`}
     >
       <div className={`relative ${compact ? 'aspect-[16/7.8]' : 'aspect-[16/6.8] sm:aspect-[16/6.6]'}`}>
         {PROMO_SLIDES.map((slide, index) => (
           <div
             key={slide.id}
-            className={`absolute inset-0 flex items-center justify-center bg-slate-950/6 transition-all duration-700 ${
+            className={`absolute inset-0 flex items-center justify-center bg-slate-950/5 transition-all duration-700 ${
               index === activeIndex ? 'opacity-100' : 'pointer-events-none opacity-0'
             }`}
           >
@@ -126,7 +126,7 @@ export function SegmentPromoCarousel({
       </div>
 
       <div className="absolute inset-x-0 bottom-0 flex justify-center pb-1.5 sm:pb-2">
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-slate-950/18 px-2 py-0.5 backdrop-blur-md">
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-slate-950/20 px-2 py-0.5 backdrop-blur-md">
           {PROMO_SLIDES.map((slide, index) => (
             <button
               type="button"
