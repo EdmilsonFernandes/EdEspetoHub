@@ -35,7 +35,6 @@ import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { HeaderAvatarTrigger } from '../components/Marketplace/HeaderAvatarTrigger';
 import { ProfileDrawer } from '../components/Marketplace/ProfileDrawer';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
-import { SegmentPromoCarousel } from '../components/common/SegmentPromoCarousel';
 import { APP_BUILD_INFO } from '../generated/buildInfo';
 
 type MarketplaceStore = {
@@ -1217,7 +1216,7 @@ export function MarketplacePage() {
                     onClick={() => setQuickFilter(filter as any)}
                     className={`whitespace-nowrap rounded-full px-3.5 py-1.5 text-[12px] transition-all duration-150 ease-out active:scale-[0.97] ${
                       active
-                        ? 'bg-slate-950 text-white shadow-[0_10px_24px_-14px_rgba(15,23,42,0.5)] font-black'
+                        ? 'bg-emerald-800 text-white shadow-[0_10px_24px_-14px_rgba(4,120,87,0.55)] font-black'
                         : 'bg-white/90 text-slate-600 border border-slate-100 hover:bg-white font-bold shadow-[0_6px_16px_-14px_rgba(15,23,42,0.28)]'
                     }`}
                   >
@@ -1400,13 +1399,6 @@ export function MarketplacePage() {
             </div>
           )}
 
-          <div
-            className="animate-in fade-in slide-in-from-top-4 duration-500"
-            style={{ animationDelay: '80ms' }}
-          >
-            <SegmentPromoCarousel mode="hub" className="mx-0" />
-          </div>
-
           {/* Seção Categorias Premium Squircle */}
           <section className="relative mb-6" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
             <div className="-mx-4 mb-6 flex snap-x snap-mandatory gap-3 overflow-x-auto no-scrollbar px-4 py-1.5">
@@ -1416,12 +1408,12 @@ export function MarketplacePage() {
                 onClick={() => setSegmentFilter('all')}
               >
                 <div className={`flex h-11 w-11 items-center justify-center rounded-[16px] transition-all duration-200 ease-out ${
-                  segmentFilter === 'all' ? 'bg-slate-950 shadow-[0_12px_26px_-14px_rgba(15,23,42,0.55)] scale-[1.04]' : 'border border-slate-100 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.045)] group-hover:bg-slate-50'
+                  segmentFilter === 'all' ? 'bg-emerald-800 shadow-[0_12px_26px_-14px_rgba(4,120,87,0.55)] scale-[1.04]' : 'border border-slate-100 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.045)] group-hover:bg-slate-50'
                 }`}>
                   <List size={18} weight="duotone" className={segmentFilter === 'all' ? 'text-white scale-[0.95]' : 'text-slate-500'} />
                 </div>
                 <span className={`text-center text-[9.5px] font-bold uppercase tracking-[0.08em] transition-colors ${
-                  segmentFilter === 'all' ? 'text-slate-950' : 'text-slate-500'
+                  segmentFilter === 'all' ? 'text-emerald-800' : 'text-slate-500'
                 }`}>Todos</span>
               </button>
               
@@ -1436,7 +1428,7 @@ export function MarketplacePage() {
                     onClick={() => setSegmentFilter(prev => prev === item.label ? 'all' : item.label)}
                   >
                     <div className={`flex h-11 w-11 items-center justify-center rounded-[16px] transition-all duration-200 ease-out ${
-                      active ? 'bg-slate-950 shadow-[0_12px_26px_-14px_rgba(15,23,42,0.55)] scale-[1.04]' : 'border border-slate-100 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.045)] group-hover:bg-slate-50'
+                      active ? 'bg-emerald-800 shadow-[0_12px_26px_-14px_rgba(4,120,87,0.55)] scale-[1.04]' : 'border border-slate-100 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.045)] group-hover:bg-slate-50'
                     }`}>
                       <CategoryIcon
                         size={20}
@@ -1445,7 +1437,7 @@ export function MarketplacePage() {
                       />
                     </div>
                     <span className={`text-center text-[9.5px] font-bold uppercase tracking-[0.08em] transition-colors ${
-                      active ? 'text-slate-950' : 'text-slate-500'
+                      active ? 'text-emerald-800' : 'text-slate-500'
                     }`}>{item.label}</span>
                   </button>
                 );
@@ -1467,41 +1459,41 @@ export function MarketplacePage() {
             <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto no-scrollbar px-1 pb-3">
               {featuredLoading ? (
                 Array.from({ length: 3 }).map((_, idx) => (
-                  <div key={idx} className="h-[108px] min-w-[204px] animate-pulse rounded-[1.45rem] border border-white bg-white shadow-[0_8px_24px_rgba(15,23,42,0.055)]" />
+                  <div key={idx} className="h-[168px] min-w-[184px] animate-pulse rounded-[1.45rem] border border-white bg-white shadow-[0_8px_24px_rgba(15,23,42,0.055)]" />
                 ))
               ) : (
                 displayedFeaturedProducts.map((item, index) => (
                   <Link
                     key={`${item.storeSlug}-${item.id}`}
                     to={`/${item.storeSlug}`}
-                    className="group relative h-[108px] min-w-[204px] snap-start overflow-hidden rounded-[1.45rem] border border-white bg-white shadow-[0_8px_24px_rgba(15,23,42,0.06)] transition-all duration-200 ease-out hover:scale-[1.015] hover:shadow-[0_14px_30px_rgba(15,23,42,0.09)] active:scale-[0.97]"
+                    className="group min-w-[184px] snap-start overflow-hidden rounded-[1.45rem] border border-white bg-white shadow-[0_8px_24px_rgba(15,23,42,0.06)] transition-all duration-200 ease-out hover:scale-[1.015] hover:shadow-[0_14px_30px_rgba(15,23,42,0.09)] active:scale-[0.97]"
                   >
-                    <img
-                      src={item.imageUrl}
-                      alt={item.name}
-                      loading={index < 2 ? 'eager' : 'lazy'}
-                      fetchPriority={index < 2 ? 'high' : 'auto'}
-                      decoding="async"
-                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 rounded-[1.45rem] bg-gradient-to-t from-black/68 via-black/18 to-transparent" />
-                    
-                    <div className="absolute left-3 top-3">
-                      {item.sponsored ? (
-                        <span className="flex items-center gap-1.5 rounded-full border border-white/55 bg-amber-300/95 px-2.5 py-1 text-[8px] font-black uppercase tracking-wider text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md">
-                          <Star size={10} weight="fill" /> Promo
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/92 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md ring-1 ring-black/5">
-                          <Sparkle size={9} weight="fill" className="text-emerald-600" />
-                          Sugestão
-                        </span>
-                      )}
+                    <div className="relative h-[100px] overflow-hidden bg-slate-100">
+                      <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        loading={index < 2 ? 'eager' : 'lazy'}
+                        fetchPriority={index < 2 ? 'high' : 'auto'}
+                        decoding="async"
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute left-3 top-3">
+                        {item.sponsored ? (
+                          <span className="flex items-center gap-1.5 rounded-full border border-white/70 bg-amber-300/95 px-2.5 py-1 text-[8px] font-black uppercase tracking-wider text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md">
+                            <Star size={10} weight="fill" /> Promo
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/94 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md ring-1 ring-black/5">
+                            <Sparkle size={9} weight="fill" className="text-emerald-600" />
+                            Sugestão
+                          </span>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="absolute bottom-3 left-3 right-3 text-white">
-                      <p className="line-clamp-1 text-[12px] font-black tracking-tight drop-shadow-sm">{item.name}</p>
-                      <div className="mt-1 flex items-center justify-between">
+                    <div className="bg-white p-3">
+                      <p className="line-clamp-1 text-[12px] font-black tracking-tight text-slate-950">{item.name}</p>
+                      <div className="mt-2 flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                           <img 
                             src={item.storeLogo} 
@@ -1512,9 +1504,9 @@ export function MarketplacePage() {
                             className="h-5 w-5 rounded-full border border-white/70 object-cover shadow-sm" 
                             onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(item.storeSlug, item.storeName); }}
                           />
-                          <span className="max-w-[92px] truncate text-[8px] font-bold opacity-95">{item.storeName}</span>
+                          <span className="max-w-[82px] truncate text-[9px] font-bold text-slate-500">{item.storeName}</span>
                         </div>
-                        <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-black text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.45)]">
+                        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-black text-emerald-800">
                           {currency.format(item.price)}
                         </span>
                       </div>
