@@ -1066,9 +1066,9 @@ export function MarketplacePage() {
           hasEntered ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}
       >
-        <header className={`sticky top-0 z-[60] transition-all duration-500 ${isHeaderElevated ? 'bg-white/80 shadow-[0_18px_45px_-34px_rgba(15,23,42,0.34)] backdrop-blur-2xl' : 'bg-transparent'}`}>
-          <div className="mx-auto max-w-[1200px] px-4 pb-4 pt-[max(0.85rem,calc(env(safe-area-inset-top)+0.2rem))]">
-            <div className="space-y-4 rounded-[1.75rem] border border-white/80 bg-white/90 px-4 py-4 shadow-[0_8px_24px_rgba(0,0,0,0.055)] backdrop-blur-xl">
+        <header className={`sticky top-0 z-[60] transition-all duration-500 ${isHeaderElevated ? 'bg-[#F8F9FB]/95 shadow-[0_16px_38px_-34px_rgba(15,23,42,0.38)] backdrop-blur-2xl' : 'bg-transparent'}`}>
+          <div className="mx-auto max-w-[1200px] px-4 pb-3 pt-[max(0.85rem,calc(env(safe-area-inset-top)+0.2rem))]">
+            <div className="space-y-3 rounded-[1.55rem] border border-white/60 bg-white/50 px-1.5 py-2.5 backdrop-blur-xl">
             {/* Linha 1: Perfil e Logo */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -1094,7 +1094,7 @@ export function MarketplacePage() {
               <button
                 type="button"
                 onClick={() => navigate('/hub')}
-                className="relative shrink-0 flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white/95 shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-transform duration-150 ease-out active:scale-95"
+                className="relative shrink-0 flex h-11 w-11 items-center justify-center rounded-full border border-white bg-white shadow-[0_8px_24px_rgba(0,0,0,0.065)] transition-transform duration-150 ease-out active:scale-95"
               >
                 <img
                   src="/janocaminho.jpg"
@@ -1108,20 +1108,21 @@ export function MarketplacePage() {
             </div>
 
             {/* Linha 2: Busca Premium */}
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                <MagnifyingGlass size={19} weight="bold" className="text-slate-400 group-focus-within:text-slate-700 transition-colors duration-150 ease-out" />
+            <div className="relative group px-0.5">
+              <div className="pointer-events-none absolute inset-y-0 left-4 z-10 flex items-center">
+                <MagnifyingGlass size={19} weight="bold" className="text-slate-400 transition-colors duration-150 ease-out group-focus-within:text-slate-700" />
               </div>
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="O que você quer pedir agora?"
-                className="h-12 w-full rounded-[18px] border border-white bg-white px-12 text-[14px] font-medium text-slate-700 shadow-[0_8px_24px_rgba(0,0,0,0.055)] placeholder:text-slate-400 transition-all duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-sky-500/10 focus:shadow-[0_12px_28px_rgba(15,23,42,0.08)]"
+                autoComplete="off"
+                className="block h-12 min-h-12 w-full appearance-none rounded-[18px] border border-slate-100 bg-white px-12 text-[14px] font-medium text-slate-900 opacity-100 shadow-[0_8px_24px_rgba(0,0,0,0.075)] placeholder:text-slate-500 transition-all duration-150 ease-out focus:border-sky-100 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/10 focus:shadow-[0_12px_28px_rgba(15,23,42,0.1)]"
               />
             </div>
 
             {/* Linha 3: Filtros Minimalistas (Pílulas) */}
-            <div className="-mx-1 flex overflow-x-auto no-scrollbar scrollbar-hide gap-1.5 px-1 py-1">
+            <div className="-mx-1 flex overflow-x-auto no-scrollbar scrollbar-hide gap-1.5 px-1 py-1.5">
               {['all', 'free_shipping', 'nearby', 'open_now', 'favorites'].map((filter) => {
                 const label =
                   filter === 'all' ? 'Ver Todos' :
