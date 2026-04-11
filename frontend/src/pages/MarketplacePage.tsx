@@ -35,6 +35,7 @@ import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { HeaderAvatarTrigger } from '../components/Marketplace/HeaderAvatarTrigger';
 import { ProfileDrawer } from '../components/Marketplace/ProfileDrawer';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
+import { SegmentPromoCarousel } from '../components/common/SegmentPromoCarousel';
 import { APP_BUILD_INFO } from '../generated/buildInfo';
 
 type MarketplaceStore = {
@@ -1398,6 +1399,13 @@ export function MarketplacePage() {
               </div>
             </div>
           )}
+
+          <div
+            className="animate-in fade-in slide-in-from-top-4 duration-500"
+            style={{ animationDelay: '80ms' }}
+          >
+            <SegmentPromoCarousel mode="hub" className="mx-0" />
+          </div>
 
           {/* Seção Categorias Premium Squircle */}
           <section className="relative mb-6" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
