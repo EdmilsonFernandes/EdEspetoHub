@@ -439,18 +439,21 @@ export function MarketplacePage() {
 
   useEffect(() => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setUserLocation({
-          lat: Number(position.coords.latitude),
-          lng: Number(position.coords.longitude),
-        });
-      },
-      () => {
-        setUserLocation(null);
-      },
-      { enableHighAccuracy: false, timeout: 6000, maximumAge: 10 * 60 * 1000 }
-    );
+    const timer = window.setTimeout(() => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: Number(position.coords.latitude),
+            lng: Number(position.coords.longitude),
+          });
+        },
+        () => {
+          setUserLocation(null);
+        },
+        { enableHighAccuracy: false, timeout: 4500, maximumAge: 10 * 60 * 1000 }
+      );
+    }, 1400);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const loadPortfolio = useCallback(async () => {
@@ -744,7 +747,7 @@ export function MarketplacePage() {
       if (!userLocation || enrichedStores.length === 0) return;
       setDistanceLoading(true);
       try {
-        const targets = enrichedStores.slice(0, 18).filter((store) => store.addressText.length >= 8);
+        const targets = enrichedStores.slice(0, 8).filter((store) => store.addressText.length >= 8);
         const settled = await Promise.allSettled(
           targets.map(async (store) => {
             const geo = await mapsService.geocode(store.addressText);
@@ -766,9 +769,10 @@ export function MarketplacePage() {
         if (!cancelled) setDistanceLoading(false);
       }
     };
-    loadApproxDistances();
+    const timer = window.setTimeout(loadApproxDistances, 1800);
     return () => {
       cancelled = true;
+      window.clearTimeout(timer);
     };
   }, [userLocation, enrichedStores]);
 
@@ -781,7 +785,7 @@ export function MarketplacePage() {
       }
       setFeaturedLoading(true);
       try {
-        const sponsored = await featuredService.listPublicFeatured(18).catch(() => []);
+        const sponsored = await featuredService.listPublicFeatured(10).catch(() => []);
         const sponsoredEntries = (Array.isArray(sponsored) ? sponsored : [])
           .filter((item: any) => String(item?.storeSlug || '').trim())
           .map((item: any) => ({
@@ -799,7 +803,7 @@ export function MarketplacePage() {
           }))
           .filter((item: any) => item.storeSlug && item.price > 0);
 
-        const candidates = enrichedStores.slice(0, 6);
+        const candidates = enrichedStores.slice(0, 4);
         const responses = await Promise.allSettled(
           candidates.map(async (store) => {
             const products = await productService.listPublicBySlug(store.slug);
@@ -843,9 +847,10 @@ export function MarketplacePage() {
         if (!cancelled) setFeaturedLoading(false);
       }
     };
-    loadFeaturedProducts();
+    const timer = window.setTimeout(loadFeaturedProducts, 900);
     return () => {
       cancelled = true;
+      window.clearTimeout(timer);
     };
   }, [enrichedStores]);
 
@@ -1037,17 +1042,16 @@ export function MarketplacePage() {
   }, []);
 
   useEffect(() => {
-    loadActiveOrders();
+    const timer = window.setTimeout(loadActiveOrders, 1200);
     const interval = window.setInterval(loadActiveOrders, 30000);
-    return () => window.clearInterval(interval);
+    return () => {
+      window.clearTimeout(timer);
+      window.clearInterval(interval);
+    };
   }, [loadActiveOrders]);
 
   useEffect(() => {
-    const raf = window.requestAnimationFrame(() => setHasEntered(true));
-    return () => window.cancelAnimationFrame(raf);
-  }, []);
-
-  useEffect(() => {
+    if (loading) return;
     const timeout = window.setTimeout(() => {
       try {
         const dismissedUntil = Number(localStorage.getItem(STORE_PROMO_POPUP_DISMISSED_UNTIL_KEY) || 0);
@@ -1056,9 +1060,9 @@ export function MarketplacePage() {
         // ignore
       }
       setShowStorePromoPopup(true);
-    }, 1100);
+    }, 5200);
     return () => window.clearTimeout(timeout);
-  }, []);
+  }, [loading]);
 
   const dismissStorePromoPopup = useCallback(() => {
     setShowStorePromoPopup(false);
