@@ -139,10 +139,11 @@ The next implementation stage should make the condominium mode affect checkout, 
 Checkout/order context:
 
 - Store page and checkout must know when the customer came from a condominium.
-- Checkout must ask for block/tower and apartment when condominium context is active.
+- Checkout must support residents and visitors; condominium ordering is not restricted to residents.
+- Checkout must ask for block/tower and apartment when apartment delivery is selected.
 - Checkout must offer "retirar na barraca" when the store allows pickup at the fair stand.
 - Checkout must offer "entregar no apartamento" when the store/condominium allows internal apartment delivery.
-- Orders must persist condominium, block/tower, apartment, and condominium fulfillment mode.
+- Orders must persist condominium, customer type, block/tower, apartment, and condominium fulfillment mode.
 - Store admin/order queue must clearly show when an order came from Campo Azuli or another condominium.
 - Public tracking and receipt/print should include condominium context where relevant.
 - Condominium-specific fair hours must appear intelligently in Hub/store UI.
@@ -227,6 +228,7 @@ Suggested schedule JSON:
 ```text
 condominium_id uuid null references condominiums(id)
 condominium_name text null
+condominium_customer_type text null
 condominium_block text null
 condominium_apartment text null
 condominium_fulfillment text null
@@ -316,6 +318,7 @@ Pickup at stall:
 ```text
 Name
 Phone
+Resident/visitor optional
 Block/Tower optional
 Apartment optional
 Observation optional
@@ -326,6 +329,7 @@ Apartment delivery:
 ```text
 Name
 Phone
+Resident/visitor
 Block/Tower
 Apartment
 Observation optional
@@ -333,12 +337,23 @@ Observation optional
 
 Do not ask full street/CEP because the condominium already contains the macro address.
 
+Condominium orders must allow visitors, guests, workers, and event attendees. The system should not assume that every condominium order is from a resident.
+
+Suggested customer type values:
+
+```text
+resident
+visitor
+unspecified
+```
+
 ## Admin Queue UX
 
 Order card should show:
 
 ```text
 Condominio Jardim Veneza
+Morador
 Torre B - Apto 1204
 Retirar na barraca
 ```
@@ -347,6 +362,7 @@ or:
 
 ```text
 Condominio Jardim Veneza
+Visitante
 Torre B - Apto 1204
 Entrega no apartamento
 ```
