@@ -2969,8 +2969,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 onClick={closeOrderOverlays}
               />
               <div className="fixed right-0 top-0 h-full w-full md:w-[450px] z-[10000] bg-white shadow-2xl flex flex-col animate-[drawerIn_220ms_ease-out]">
-                <div className="shrink-0 flex justify-between items-center px-4 py-3 border-b border-slate-200 bg-white">
-                  <p className="text-sm font-bold text-slate-900">
+                <div className="shrink-0 flex justify-between items-center px-4 pt-[max(env(safe-area-inset-top),1.25rem)] pb-4 border-b border-slate-200 bg-white shadow-sm">
+                  <p className="text-sm font-black text-slate-900 tracking-tight">
                     {(() => {
                       const drawerLocation = resolveLocationIdentifier(selectedOrder || {});
                       const drawerMesa = parseMesaIdentifier(drawerLocation);
@@ -2979,8 +2979,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       return (
                         <span className="inline-flex items-center gap-1.5">
                           <span>Pedido</span>
-                          <span className="text-[10px] font-semibold tracking-[0.08em] text-[#E65100]">MESA</span>
-                          <span className="text-base font-black text-[#E65100] leading-none">{drawerMesa.number}</span>
+                          <span className="text-[10px] font-black tracking-[0.08em] text-[#E65100]">MESA</span>
+                          <span className="text-lg font-black text-[#E65100] leading-none">{drawerMesa.number}</span>
                         </span>
                       );
                     })()}
@@ -2992,22 +2992,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                           type="button"
                           onClick={() => handlePrintOrder(selectedOrder, selectedOrderRank)}
                           disabled={isGeneratingPrint}
-                          className="inline-flex h-9 px-3 items-center justify-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 text-amber-700 shadow-sm hover:bg-amber-100 hover:text-amber-900 transition-all no-print disabled:opacity-60"
+                          className="inline-flex h-10 px-3 items-center justify-center gap-2 rounded-xl border border-amber-300 bg-amber-50 text-amber-700 shadow-sm hover:bg-amber-100 hover:text-amber-900 transition-all no-print disabled:opacity-60"
                           aria-label="Imprimir pedido"
                           title="Imprimir pedido"
                         >
-                          <Printer size={16} weight="duotone" />
-                          <span className="text-xs font-semibold">{isGeneratingPrint ? 'Gerando cupom...' : 'Imprimir'}</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleMarkAllPrinted(selectedOrder)}
-                          disabled={isGeneratingPrint}
-                          className="inline-flex h-9 px-3 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 shadow-sm hover:bg-slate-50 transition-all no-print disabled:opacity-60"
-                          aria-label="Marcar todos como impressos"
-                          title="Marcar todos como impressos"
-                        >
-                          <span className="text-xs font-semibold">Marcar impressos</span>
+                          <Printer size={18} weight="duotone" />
+                          <span className="text-xs font-black uppercase tracking-wider">{isGeneratingPrint ? 'Gerando...' : 'Imprimir'}</span>
                         </button>
                       </>
                     )}
