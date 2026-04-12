@@ -527,8 +527,8 @@ const OrderSummaryCard = ({
             </span>
           </div>
 
-          {/* Centro: Status (Esconde se for apertado) */}
-          <div className="hidden sm:flex justify-center min-w-0">
+          {/* Centro: Status (Agora visível em todas as telas) */}
+          <div className="flex justify-center min-w-0">
             <span className={`truncate text-[9px] font-black uppercase tracking-wider px-2 py-1 rounded-lg border border-transparent bg-slate-50 ${statusToneClass}`}>
               {archived ? 'Finalizado' : statusMeta.label}
             </span>
