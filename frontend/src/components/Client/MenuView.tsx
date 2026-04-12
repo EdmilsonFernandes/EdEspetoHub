@@ -1025,6 +1025,16 @@ export const MenuView = ({
     };
   }, [showHeader]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const isVisible = cartItemsCount > 0 && canOrder;
+    window.dispatchEvent(
+      new CustomEvent("jnk:cart-visibility", {
+        detail: { visible: isVisible },
+      })
+    );
+  }, [cartItemsCount, canOrder]);
+
   return (
     <div className="bg-slate-50 overflow-x-clip">
 
@@ -1763,9 +1773,9 @@ export const MenuView = ({
 
       {/* BOTÃO FLUTUANTE DA SACOLA E LIMPAR */}
       <div
-        className={`fixed left-1/2 z-[200] w-[94%] max-w-md -translate-x-1/2 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+        className={`fixed bottom-8 left-1/2 z-[200] w-[94%] max-w-md -translate-x-1/2 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
           cartItemsCount > 0 && canOrder ? "translate-y-0 opacity-100 scale-100" : "translate-y-12 opacity-0 scale-90 pointer-events-none"
-        } ${isAuthenticated || userRole ? 'bottom-24 sm:bottom-8' : 'bottom-8'}`}
+        }`}
       >
         <div className="relative group">
           {/* Botão de Limpar (Lixeira Premium) */}

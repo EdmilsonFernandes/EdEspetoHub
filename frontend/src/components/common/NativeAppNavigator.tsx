@@ -47,6 +47,15 @@ export function NativeAppNavigator() {
   const { auth } = useAuth();
   const currentPath = getCurrentPath(location);
   const [isHidden, setIsHidden] = useState(false);
+  const [hiddenByCart, setHiddenByCart] = useState(false);
+
+  useEffect(() => {
+    const handleCartVisibility = (e: any) => {
+      setHiddenByCart(!!e.detail?.visible);
+    };
+    window.addEventListener('jnk:cart-visibility', handleCartVisibility);
+    return () => window.removeEventListener('jnk:cart-visibility', handleCartVisibility);
+  }, []);
 
   const isStoreAdmin = useMemo(() => {
     const role = String(auth?.user?.role || '').toUpperCase();
@@ -95,7 +104,7 @@ export function NativeAppNavigator() {
     return '';
   }, [currentPath]);
 
-  if (!Capacitor.isNativePlatform() || !isEligiblePath(location.pathname) || isHidden || isStoreAdmin) {
+  if (!Capacitor.isNativePlatform() || !isEligiblePath(location.pathname) || isHidden || isStoreAdmin || hiddenByCart) {
     return null;
   }
 

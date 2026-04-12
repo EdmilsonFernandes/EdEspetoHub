@@ -29,6 +29,17 @@ export function AdminMobileBottomNav() {
   const [monitorCount, setMonitorCount] = useState(0);
   const [hiddenByOverlay, setHiddenByOverlay] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const [hiddenByCart, setHiddenByCart] = useState(false);
+
+  useEffect(() => {
+    const handleCartVisibility = (e: any) => {
+      setHiddenByCart(!!e.detail?.visible);
+    };
+    window.addEventListener('jnk:cart-visibility', handleCartVisibility);
+    return () => window.removeEventListener('jnk:cart-visibility', handleCartVisibility);
+  }, []);
+
+  const effectiveVisibility = isVisible && !hiddenByCart;
   const storeSlug = useMemo(() => {
     const fromAuth = String(auth?.store?.slug || '').trim();
     if (fromAuth) return fromAuth;
@@ -238,7 +249,7 @@ export function AdminMobileBottomNav() {
     <nav
       className="fixed inset-x-0 bottom-0 z-[220] pointer-events-none transition-transform duration-300 ease-in-out flex justify-center"
       style={{
-        transform: isVisible ? 'translateY(0)' : 'translateY(calc(100% - 4px))',
+        transform: effectiveVisibility ? 'translateY(0)' : 'translateY(calc(100% - 4px))',
       }}
     >
       <ul className={`pointer-events-auto mx-auto grid ${navItems.length <= 2 ? 'grid-cols-2' : navItems.length === 3 ? 'grid-cols-3' : navItems.length === 4 ? 'grid-cols-4' : 'grid-cols-5'} gap-1 w-full max-w-lg sm:max-w-xl md:max-w-2xl rounded-t-3xl border-t border-x border-slate-200/40 bg-white/72 p-1.5 pb-[max(env(safe-area-inset-bottom),4px)] shadow-[0_-12px_48px_-20px_rgba(15,23,42,0.45)] backdrop-blur-2xl`}>
