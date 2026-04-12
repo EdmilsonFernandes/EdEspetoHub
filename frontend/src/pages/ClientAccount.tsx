@@ -113,42 +113,43 @@ export function ClientAccount() {
     };
   }, [navigate]);
 
-  useEffect(() => {
-    const loadPermissions = async () => {
-      if (!Capacitor.isNativePlatform()) {
-        setPushEnabled(false);
-        setPhotoPermission('unknown');
-        setCameraPermission('unknown');
-        return;
-      }
-      try {
-        if (Capacitor.isPluginAvailable('PushNotifications')) {
-          const status = await PushNotifications.checkPermissions();
-          setPushEnabled(status.receive === 'granted');
-        } else {
-          setPushEnabled(false);
-        }
-      } catch {
+  const refreshNativePermissions = async () => {
+    if (!Capacitor.isNativePlatform()) {
+      setPushEnabled(false);
+      setPhotoPermission('unknown');
+      setCameraPermission('unknown');
+      return;
+    }
+    try {
+      if (Capacitor.isPluginAvailable('PushNotifications')) {
+        const status = await PushNotifications.checkPermissions();
+        setPushEnabled(status.receive === 'granted');
+      } else {
         setPushEnabled(false);
       }
+    } catch {
+      setPushEnabled(false);
+    }
 
-      try {
-        if (Capacitor.isPluginAvailable('Camera')) {
-          const status = await CapCamera.checkPermissions();
-          const photosStatus = status?.photos === 'granted' || status?.photos === 'limited' ? 'granted' : status?.photos === 'denied' ? 'denied' : 'unknown';
-          const cameraStatus = status?.camera === 'granted' ? 'granted' : status?.camera === 'denied' ? 'denied' : 'unknown';
-          setPhotoPermission(photosStatus);
-          setCameraPermission(cameraStatus);
-        } else {
-          setPhotoPermission('unknown');
-          setCameraPermission('unknown');
-        }
-      } catch {
+    try {
+      if (Capacitor.isPluginAvailable('Camera')) {
+        const status = await CapCamera.checkPermissions();
+        const photosStatus = status?.photos === 'granted' || status?.photos === 'limited' ? 'granted' : status?.photos === 'denied' ? 'denied' : 'unknown';
+        const cameraStatus = status?.camera === 'granted' ? 'granted' : status?.camera === 'denied' ? 'denied' : 'unknown';
+        setPhotoPermission(photosStatus);
+        setCameraPermission(cameraStatus);
+      } else {
         setPhotoPermission('unknown');
         setCameraPermission('unknown');
       }
-    };
-    void loadPermissions();
+    } catch {
+      setPhotoPermission('unknown');
+      setCameraPermission('unknown');
+    }
+  };
+
+  useEffect(() => {
+    void refreshNativePermissions();
   }, []);
 
   useEffect(() => {
@@ -238,6 +239,46 @@ export function ClientAccount() {
       bg: 'bg-slate-50 border-slate-100',
       icon: <XCircle size={16} weight="duotone" className="text-slate-400" />,
     };
+  };
+
+  const openAppSettings = async () => {
+    const openSettings = (CapacitorApp as any)?.openSettings;
+    if (typeof openSettings === 'function') {
+      await openSettings();
+      window.setTimeout(() => void refreshNativePermissions(), 800);
+      return;
+    }
+    setProfileMessage('Abra as permissões do aplicativo nas configurações do celular para alterar este acesso.');
+  };
+
+  const handlePermissionAction = async (type: 'push' | 'photos' | 'camera', isGranted: boolean) => {
+    setProfileMessage('');
+    if (!Capacitor.isNativePlatform()) {
+      setProfileMessage('Permissões do aplicativo só podem ser gerenciadas no celular.');
+      return;
+    }
+
+    if (isGranted) {
+      await openAppSettings();
+      return;
+    }
+
+    try {
+      if (type === 'push' && Capacitor.isPluginAvailable('PushNotifications')) {
+        const requested = await PushNotifications.requestPermissions();
+        if (requested.receive === 'granted') {
+          await PushNotifications.register();
+        }
+      }
+      if ((type === 'photos' || type === 'camera') && Capacitor.isPluginAvailable('Camera')) {
+        await CapCamera.requestPermissions({ permissions: [type] });
+      }
+    } catch {
+      await openAppSettings();
+      return;
+    }
+
+    await refreshNativePermissions();
   };
 
   const handleChangePassword = async () => {
@@ -453,16 +494,16 @@ export function ClientAccount() {
                 : 'border-slate-100 shadow-sm'
             }`}
           >
-            <div className="pointer-events-none absolute -right-12 -top-14 h-32 w-32 rounded-full bg-sky-100/80 blur-3xl" />
+            <div className="pointer-events-none absolute -right-12 -top-14 h-32 w-32 rounded-full bg-[#336886]/12 blur-3xl" />
             <div className="relative flex items-start justify-between gap-3">
               <div>
                 <h3 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  <ShieldCheck size={16} weight="duotone" className="text-sky-500" />
+                  <ShieldCheck size={16} weight="duotone" className="text-[#336886]" />
                   Configurações
                 </h3>
                 <p className="mt-2 text-base font-black text-slate-900">Permissões do aplicativo</p>
                 <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">
-                  Veja o que está liberado neste aparelho. Para alterar, use as permissões do sistema.
+                  Toque em gerenciar para abrir o controle do aparelho. O app consegue solicitar acesso, mas quem desliga a permissão é o sistema.
                 </p>
               </div>
             </div>
@@ -475,24 +516,30 @@ export function ClientAccount() {
                   state: pushEnabled
                     ? { label: 'Permitido', tone: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-100', icon: <CheckCircle size={18} weight="fill" className="text-emerald-500" /> }
                     : { label: 'Não permitido', tone: 'text-slate-500', bg: 'bg-slate-50 border-slate-100', icon: <XCircle size={18} weight="fill" className="text-slate-300" /> },
-                  icon: <BellSimpleRinging size={18} weight="duotone" className="text-sky-600" />,
+                  icon: <BellSimpleRinging size={18} weight="duotone" className="text-[#336886]" />,
+                  action: () => handlePermissionAction('push', pushEnabled),
+                  actionLabel: pushEnabled ? 'Gerenciar' : 'Ativar',
                 },
                 {
                   label: 'Galeria',
                   description: 'Escolher uma imagem salva no celular.',
                   state: permissionMeta(photoPermission),
-                  icon: <ImagesSquare size={18} weight="duotone" className="text-sky-600" />,
+                  icon: <ImagesSquare size={18} weight="duotone" className="text-[#336886]" />,
+                  action: () => handlePermissionAction('photos', photoPermission === 'granted'),
+                  actionLabel: photoPermission === 'granted' ? 'Gerenciar' : 'Ativar',
                 },
                 {
                   label: 'Câmera',
                   description: 'Tirar uma nova foto pelo aplicativo.',
                   state: permissionMeta(cameraPermission),
-                  icon: <Camera size={18} weight="duotone" className="text-sky-600" />,
+                  icon: <Camera size={18} weight="duotone" className="text-[#336886]" />,
+                  action: () => handlePermissionAction('camera', cameraPermission === 'granted'),
+                  actionLabel: cameraPermission === 'granted' ? 'Gerenciar' : 'Ativar',
                 },
               ].map((item) => (
-                <div key={item.label} className={`flex items-center justify-between gap-3 rounded-[1.45rem] border px-4 py-3.5 ${item.state.bg}`}>
+                <div key={item.label} className={`flex flex-col gap-3 rounded-[1.45rem] border px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between ${item.state.bg}`}>
                   <div className="flex min-w-0 items-center gap-3">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-sky-600 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.28)]">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-[#336886] shadow-[0_10px_22px_-18px_rgba(15,23,42,0.28)]">
                       {item.icon}
                     </span>
                     <div className="min-w-0">
@@ -500,11 +547,18 @@ export function ClientAccount() {
                       <p className="mt-0.5 text-[10px] font-bold leading-tight text-slate-400">{item.description}</p>
                     </div>
                   </div>
-                  <div className="flex shrink-0 items-center gap-2">
-                    <span className={`hidden text-[10px] font-black uppercase tracking-[0.14em] sm:inline ${item.state.tone}`}>
+                  <div className="flex shrink-0 items-center justify-end gap-2">
+                    <span className={`text-[10px] font-black uppercase tracking-[0.14em] ${item.state.tone}`}>
                       {item.state.label}
                     </span>
                     {item.state.icon}
+                    <button
+                      type="button"
+                      onClick={item.action}
+                      className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm transition-all active:scale-95"
+                    >
+                      {item.actionLabel}
+                    </button>
                   </div>
                 </div>
               ))}

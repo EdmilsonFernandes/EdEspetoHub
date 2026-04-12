@@ -1634,24 +1634,26 @@ export function MarketplacePage() {
                   <Link
                     key={store.id}
                     to={`/${store.slug}`}
-                    className={`group rounded-[1.65rem] border border-white/90 bg-white px-3.5 py-3.5 transition-all duration-200 ease-out active:scale-[0.985] ${
+                    className={`group rounded-[1.65rem] border bg-white px-3.5 py-3.5 transition-all duration-200 ease-out active:scale-[0.985] ${
                       store.isOpen
-                        ? 'shadow-[0_8px_24px_rgba(15,23,42,0.06)] md:hover:-translate-y-0.5 md:hover:shadow-[0_14px_30px_rgba(15,23,42,0.09)]'
-                        : 'opacity-90 saturate-90 shadow-[0_8px_20px_rgba(15,23,42,0.045)]'
+                        ? 'border-white/90 shadow-[0_8px_24px_rgba(15,23,42,0.06)] md:hover:-translate-y-0.5 md:hover:shadow-[0_14px_30px_rgba(15,23,42,0.09)]'
+                        : 'border-slate-200/80 bg-slate-50/80 shadow-[0_8px_20px_rgba(15,23,42,0.035)]'
                     }`}
                   >
                     <div className="flex items-start gap-3.5">
                       <img
                         src={store.logo}
                         alt={store.name}
-                        className="h-16 w-16 shrink-0 rounded-full border border-slate-100 bg-slate-50 object-cover shadow-[0_10px_22px_-14px_rgba(15,23,42,0.3)] ring-2 ring-white"
+                        className={`h-16 w-16 shrink-0 rounded-full border border-slate-100 bg-slate-50 object-cover shadow-[0_10px_22px_-14px_rgba(15,23,42,0.3)] ring-2 ring-white transition-all duration-200 ${
+                          store.isOpen ? '' : 'grayscale opacity-70'
+                        }`}
                         onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
                       />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2.5">
                           <div className="min-w-0 pr-1">
                             <div className="flex items-center gap-2">
-                              <h3 className="truncate text-[15px] font-black text-slate-950">{store.name}</h3>
+                              <h3 className={`truncate text-[15px] font-black ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>{store.name}</h3>
                               <span className={`inline-flex h-2 w-2 rounded-full ${store.isOpen ? 'bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.14),0_0_14px_rgba(16,185,129,0.55)]' : 'bg-slate-400'}`} />
                             </div>
                           </div>
@@ -1688,7 +1690,7 @@ export function MarketplacePage() {
                           <span>{distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)}</span>
                         </div>
                         {!store.isOpen && (
-                          <p className="mt-1 truncate text-[10px] text-slate-500">
+                          <p className="mt-1 inline-flex max-w-full items-center rounded-full bg-slate-200/70 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">
                             {store.nextOpeningLabel || 'Sem horário cadastrado'}
                           </p>
                         )}
