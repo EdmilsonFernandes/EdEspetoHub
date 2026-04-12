@@ -1377,6 +1377,10 @@ export function StorePage() {
     });
   };
 
+  const clearCart = () => {
+    setCart({});
+  };
+
   const formatItemOptions = (item) => {
     const labels = [];
     if (item?.cookingPoint) labels.push(item.cookingPoint);
@@ -2396,6 +2400,7 @@ export function StorePage() {
               segment={storeSegment}
               instagramHandle={instagramHandle}
               onUpdateCart={updateCart}
+              onClearCart={clearCart}
               onProceed={() => setView('cart')}
               onOpenQueue={isStoreAdmin ? requireAdminSession : undefined}
               onOpenAdmin={isStoreAdmin && normalizedRole === 'admin' ? () => navigate('/admin/dashboard') : undefined}

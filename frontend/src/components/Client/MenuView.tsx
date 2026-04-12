@@ -511,6 +511,7 @@ export const MenuView = ({
   cart,
   topProducts,
   onUpdateCart,
+  onClearCart,
   branding,
   segment,
   instagramHandle,
@@ -1748,43 +1749,59 @@ export const MenuView = ({
         readOnlyMessage={!canOrder ? "Pedidos apenas no balcão/mesa." : "Produto esgotado no momento."}
       />
 
+      {/* BOTÃO FLUTUANTE DA SACOLA E LIMPAR */}
       <div
-        className={`fixed bottom-8 left-1/2 z-40 w-[94%] max-w-md -translate-x-1/2 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+        className={`fixed bottom-8 left-1/2 z-[200] w-[94%] max-w-md -translate-x-1/2 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
           cartItemsCount > 0 && canOrder ? "translate-y-0 opacity-100 scale-100" : "translate-y-12 opacity-0 scale-90 pointer-events-none"
         }`}
       >
-        {canOrder && (
-          <button
-            ref={cartButtonRef}
-            onClick={() => onProceed?.()}
-            className={`group w-full px-5 py-4 rounded-[2rem] flex justify-between items-center active:scale-[0.97] transition-all duration-300 ${
-              cartPulse ? "scale-[1.04] shadow-[0_20px_48px_-12px_rgba(15,23,42,0.4)]" : "shadow-[0_16px_40px_-14px_rgba(15,23,42,0.3)]"
-            }`}
-            style={{
-              backgroundColor: catalogPrimaryColor,
-              color: catalogPrimaryText,
-            }}
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="relative">
-                <span
-                  className="h-8 w-8 rounded-xl text-[13px] font-black inline-flex items-center justify-center shadow-sm transition-transform group-hover:scale-110"
-                  style={{ color: catalogPrimaryColor, backgroundColor: "#ffffff" }}
-                >
-                  {cartItemsCount}
-                </span>
-                {cartPulse && (
-                  <span className="absolute inset-0 animate-ping rounded-xl bg-white/40" />
-                )}
+        <div className="flex flex-col items-center gap-3">
+          {onClearCart && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClearCart();
+              }}
+              className="px-4 py-1.5 rounded-full bg-white/90 border border-slate-200 text-slate-500 text-[10px] font-black uppercase tracking-wider shadow-sm backdrop-blur-md active:scale-95 transition-all"
+            >
+              Limpar minha sacola
+            </button>
+          )}
+
+          {canOrder && (
+            <button
+              ref={cartButtonRef}
+              onClick={() => onProceed?.()}
+              className={`group w-full px-5 py-4 rounded-[2rem] flex justify-between items-center active:scale-[0.97] transition-all duration-300 ${
+                cartPulse ? "scale-[1.04] shadow-[0_20px_48px_-12px_rgba(15,23,42,0.4)]" : "shadow-[0_16px_40px_-14px_rgba(15,23,42,0.3)]"
+              }`}
+              style={{
+                backgroundColor: catalogPrimaryColor,
+                color: catalogPrimaryText,
+              }}
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="relative">
+                  <span
+                    className="h-8 w-8 rounded-xl text-[13px] font-black inline-flex items-center justify-center shadow-sm transition-transform group-hover:scale-110"
+                    style={{ color: catalogPrimaryColor, backgroundColor: "#ffffff" }}
+                  >
+                    {cartItemsCount}
+                  </span>
+                  {cartPulse && (
+                    <span className="absolute inset-0 animate-ping rounded-xl bg-white/40" />
+                  )}
+                </div>
+                <span className="font-black text-[15px] uppercase tracking-wider">Ver minha sacola</span>
               </div>
-              <span className="font-black text-[15px] uppercase tracking-wider">Ver minha sacola</span>
-            </div>
-            <div className="flex flex-col items-end leading-none">
-              <span className="text-[10px] font-bold opacity-80 uppercase tracking-tight">Total</span>
-              <span className="font-black text-lg sm:text-xl tracking-tighter">{formatCurrency(cartTotalValue)}</span>
-            </div>
-          </button>
-        )}
+              <div className="flex flex-col items-end leading-none">
+                <span className="text-[10px] font-bold opacity-80 uppercase tracking-tight">Total</span>
+                <span className="font-black text-lg sm:text-xl tracking-tighter">{formatCurrency(cartTotalValue)}</span>
+              </div>
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="pointer-events-none fixed inset-0 z-[70]">
