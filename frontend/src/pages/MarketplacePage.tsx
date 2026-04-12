@@ -1486,16 +1486,20 @@ export function MarketplacePage() {
             </div>
 
             {/* Linha 2: Busca Premium */}
-            <div className="relative group px-0.5">
-              <div className="pointer-events-none absolute inset-y-0 left-4 z-10 flex items-center">
-                <MagnifyingGlass size={19} weight="bold" className="text-slate-400 transition-colors duration-150 ease-out group-focus-within:text-[#336886]" />
+            <div className="relative z-20 px-0.5">
+              <div className="pointer-events-none absolute inset-y-0 left-4 z-30 flex items-center">
+                <MagnifyingGlass size={19} weight="bold" className="text-slate-400" />
               </div>
               <input
+                type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="O que você quer pedir agora?"
                 autoComplete="off"
-                className="block h-12 min-h-12 w-full appearance-none rounded-[20px] border border-slate-100 bg-white px-12 text-[14px] font-semibold text-slate-950 opacity-100 shadow-[0_8px_24px_rgba(15,23,42,0.06)] outline-none transition-all duration-200 ease-out placeholder:text-slate-400 focus:border-[#336886]/25 focus:bg-white focus:ring-4 focus:ring-[#336886]/10 focus:shadow-[0_14px_32px_rgba(15,23,42,0.1)]"
+                inputMode="search"
+                enterKeyHint="search"
+                className="relative z-20 block h-12 min-h-12 w-full appearance-none rounded-[20px] border border-slate-100 bg-white px-12 text-[14px] font-semibold text-slate-950 opacity-100 shadow-[0_8px_24px_rgba(15,23,42,0.06)] outline-none transition-[border-color,box-shadow,background-color] duration-200 ease-out placeholder:text-slate-400 focus:border-[#336886]/25 focus:bg-white focus:ring-4 focus:ring-[#336886]/10 focus:shadow-[0_14px_32px_rgba(15,23,42,0.1)]"
+                style={{ WebkitAppearance: 'none', visibility: 'visible' }}
               />
             </div>
 
