@@ -31,6 +31,7 @@ import { StoreUserController } from '../controllers/StoreUserController';
 import { ShippingController } from '../controllers/ShippingController';
 import { CustomerAccountController } from '../controllers/CustomerAccountController';
 import { FeaturedProductController } from '../controllers/FeaturedProductController';
+import { CondominiumController } from '../controllers/CondominiumController';
 
 import { hydrateAuthOptional, requireAuth, requireRole } from '../middleware/authGuard';
 import { requireActiveSubscription } from '../middleware/subscriptionGuard';
@@ -115,6 +116,9 @@ routes.post(
 // Store public
 routes.get('/public/platform/metrics', PlatformPublicController.metrics);
 routes.get('/public/stores', StoreController.listPortfolio);
+routes.get('/public/condominiums', CondominiumController.listPublic);
+routes.get('/public/condominiums/:slug', CondominiumController.getPublicBySlug);
+routes.get('/public/condominiums/:slug/stores', CondominiumController.listPublicStoresBySlug);
 routes.get('/public/featured-products', FeaturedProductController.listPublic);
 routes.post('/public/stores/slug/:slug/track', StoreController.trackLink);
 routes.get('/stores/slug/:slug', StoreController.getBySlug);

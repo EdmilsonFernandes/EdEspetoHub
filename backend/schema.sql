@@ -546,3 +546,49 @@ CREATE TABLE IF NOT EXISTS store_link_hits (
 CREATE INDEX IF NOT EXISTS idx_access_logs_created_at ON access_logs(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_access_logs_role ON access_logs(role);
 CREATE INDEX IF NOT EXISTS idx_access_logs_store_id ON access_logs(store_id);
+
+CREATE TABLE IF NOT EXISTS condominiums (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  description TEXT,
+  address TEXT,
+  city TEXT,
+  state TEXT,
+  zip_code TEXT,
+  lat NUMERIC(10,7),
+  lng NUMERIC(10,7),
+  logo_url TEXT,
+  banner_url TEXT,
+  active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_condominiums_active
+ON condominiums(active);
+
+CREATE TABLE IF NOT EXISTS store_condominiums (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  condominium_id UUID NOT NULL REFERENCES condominiums(id) ON DELETE CASCADE,
+  active BOOLEAN NOT NULL DEFAULT TRUE,
+  schedule JSONB DEFAULT '[]'::jsonb,
+  pickup_instructions TEXT,
+  allow_pickup_at_stall BOOLEAN NOT NULL DEFAULT TRUE,
+  allow_apartment_delivery BOOLEAN NOT NULL DEFAULT FALSE,
+  apartment_delivery_fee NUMERIC(10,2),
+  notes TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT uq_store_condominiums_store_condominium UNIQUE (store_id, condominium_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_store_condominiums_condominium
+ON store_condominiums(condominium_id);
+
+CREATE INDEX IF NOT EXISTS idx_store_condominiums_store
+ON store_condominiums(store_id);
+
+CREATE INDEX IF NOT EXISTS idx_store_condominiums_active
+ON store_condominiums(active);
