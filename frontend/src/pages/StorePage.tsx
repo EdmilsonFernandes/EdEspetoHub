@@ -2512,37 +2512,6 @@ export function StorePage() {
 
       {isStoreAdmin && view === 'menu' && <AdminMobileBottomNav />}
 
-      {showAdminWebReturnBar && (
-        <div className="lg:hidden fixed inset-x-3 bottom-[96px] z-[140] rounded-[1.35rem] border border-slate-200/70 bg-white/92 p-1.5 shadow-[0_18px_42px_-26px_rgba(15,23,42,0.45)] backdrop-blur-2xl">
-          <div className="grid grid-cols-3 gap-1">
-            <button
-              type="button"
-              onClick={() => setView('menu')}
-              className="flex min-h-11 items-center justify-center gap-1.5 rounded-2xl px-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 transition-all active:scale-95"
-            >
-              <ArrowLeft size={16} weight="bold" />
-              Loja
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/admin/dashboard', { state: { activeTab: 'resumo' } })}
-              className="flex min-h-11 items-center justify-center gap-1.5 rounded-2xl bg-slate-900 px-2 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-[0_12px_26px_-18px_rgba(15,23,42,0.55)] transition-all active:scale-95"
-            >
-              <ShoppingCart size={16} weight="duotone" />
-              Admin
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/admin/queue')}
-              className="flex min-h-11 items-center justify-center gap-1.5 rounded-2xl bg-[#336886]/10 px-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] ring-1 ring-[#336886]/15 transition-all active:scale-95"
-            >
-              <ClipboardText size={16} weight="duotone" />
-              Fila
-            </button>
-          </div>
-        </div>
-      )}
-
       {showCustomerAccount && !isStoreAdmin && (
         <div className="fixed inset-0 z-[9998] bg-slate-950/65 backdrop-blur-sm flex items-center justify-center px-3 py-5">
           <div className="w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-[2rem] bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] border border-slate-200/80 shadow-[0_28px_80px_-42px_rgba(15,23,42,0.75)] p-4 sm:p-5">
