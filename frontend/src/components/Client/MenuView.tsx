@@ -22,6 +22,7 @@ import {
   HeartStraight,
   List,
   UserCircle,
+  Trash,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
@@ -1764,17 +1765,21 @@ export const MenuView = ({
           cartItemsCount > 0 && canOrder ? "translate-y-0 opacity-100 scale-100" : "translate-y-12 opacity-0 scale-90 pointer-events-none"
         } ${isAuthenticated || userRole ? 'bottom-24 sm:bottom-8' : 'bottom-8'}`}
       >
-        <div className="flex flex-col items-center gap-3">
+        <div className="relative group">
+          {/* Botão de Limpar (Lixeira Premium) */}
           {onClearCart && (
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                onClearCart();
+                if (window.confirm("Deseja realmente limpar sua sacola?")) {
+                  onClearCart();
+                }
               }}
-              className="px-4 py-1.5 rounded-full bg-white/90 border border-slate-200 text-slate-500 text-[10px] font-black uppercase tracking-wider shadow-sm backdrop-blur-md active:scale-95 transition-all"
+              className="absolute -top-12 right-2 flex h-10 w-10 items-center justify-center rounded-2xl border border-white/40 bg-white/30 text-rose-500 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-xl transition-all duration-300 hover:bg-rose-50 hover:text-rose-600 active:scale-90"
+              title="Limpar sacola"
             >
-              Limpar minha sacola
+              <Trash size={18} weight="fill" />
             </button>
           )}
 
@@ -1782,8 +1787,8 @@ export const MenuView = ({
             <button
               ref={cartButtonRef}
               onClick={() => onProceed?.()}
-              className={`group w-full px-5 py-4 rounded-[2rem] flex justify-between items-center active:scale-[0.97] transition-all duration-300 ${
-                cartPulse ? "scale-[1.04] shadow-[0_20px_48px_-12px_rgba(15,23,42,0.4)]" : "shadow-[0_16px_40px_-14px_rgba(15,23,42,0.3)]"
+              className={`group w-full px-5 py-4 rounded-[2.2rem] flex justify-between items-center active:scale-[0.97] transition-all duration-300 ${
+                cartPulse ? "scale-[1.04] shadow-[0_24px_50px_-12px_rgba(15,23,42,0.45)]" : "shadow-[0_20px_48px_-14px_rgba(15,23,42,0.35)]"
               }`}
               style={{
                 backgroundColor: catalogPrimaryColor,
