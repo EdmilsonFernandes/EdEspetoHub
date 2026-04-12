@@ -6,6 +6,7 @@ import {
   Storefront,
   House,
   Receipt,
+  BellRinging,
   List,
   CaretDown,
   Heart,
@@ -1014,6 +1015,25 @@ export function MarketplacePage() {
     [activeAnonymousOrders, dismissedAnonymousOrderIds]
   );
 
+  const hubNotificationCount = visibleActiveOrders.length + visibleActiveAnonymousOrders.length;
+
+  const handleHubNotificationClick = useCallback(() => {
+    if (visibleActiveOrders.length > 0) {
+      openCustomerOrders();
+      return;
+    }
+    const anonymousOrderId = String(visibleActiveAnonymousOrders[0]?.id || '').trim();
+    if (anonymousOrderId) {
+      navigate(`/pedido/${anonymousOrderId}`);
+      return;
+    }
+    if (isCustomerLogged) {
+      openCustomerOrders();
+      return;
+    }
+    openCustomerLogin();
+  }, [isCustomerLogged, navigate, openCustomerLogin, openCustomerOrders, visibleActiveAnonymousOrders, visibleActiveOrders]);
+
   const loadActiveOrders = useCallback(async () => {
     const session = readCustomerSession();
     if (!session?.token) {
@@ -1174,17 +1194,20 @@ export function MarketplacePage() {
               
               <button
                 type="button"
-                onClick={() => navigate('/hub')}
-                className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white bg-white shadow-[0_10px_28px_rgba(15,23,42,0.08)] ring-1 ring-slate-950/5 transition-transform duration-150 ease-out active:scale-95"
+                onClick={handleHubNotificationClick}
+                className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/80 bg-white/92 text-slate-700 shadow-[0_12px_28px_-18px_rgba(15,23,42,0.42)] ring-1 ring-slate-950/5 backdrop-blur-sm transition-all duration-150 ease-out hover:text-sky-700 active:scale-95"
+                aria-label={hubNotificationCount > 0 ? `${hubNotificationCount} notificação de pedido` : 'Abrir notificações'}
+                title={hubNotificationCount > 0 ? 'Pedidos em andamento' : 'Notificações'}
               >
-                <img
-                  src="/janocaminho.jpg"
-                  alt="Logo"
-                  loading="eager"
-                  fetchPriority="high"
-                  decoding="async"
-                  className="h-full w-full rounded-full object-cover"
-                />
+                <BellRinging size={20} weight={hubNotificationCount > 0 ? 'fill' : 'duotone'} />
+                {hubNotificationCount > 0 ? (
+                  <span className="absolute -right-0.5 -top-0.5 flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-sky-600 px-1 text-[10px] font-black leading-none text-white ring-2 ring-white shadow-[0_8px_18px_-10px_rgba(47,157,247,0.9)]">
+                    {hubNotificationCount > 9 ? '9+' : hubNotificationCount}
+                  </span>
+                ) : null}
+                {hubNotificationCount > 0 ? (
+                  <span className="absolute inset-0 rounded-full border border-sky-300/70 animate-ping" />
+                ) : null}
               </button>
             </div>
 
