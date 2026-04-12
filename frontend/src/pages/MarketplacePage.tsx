@@ -1691,9 +1691,11 @@ export function MarketplacePage() {
             >
               <div className="mb-3 flex items-center justify-between gap-3 px-1">
                 <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">Feira no condomínio</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">
+                    {selectedCondominium ? 'Feira selecionada' : 'Feira no condomínio'}
+                  </p>
                   <h2 className="truncate text-[15px] font-black tracking-tight text-slate-950 sm:text-base">
-                    Escolha onde você está
+                    {selectedCondominium ? String(selectedCondominium.name || 'Condomínio') : 'Escolha onde você está'}
                   </h2>
                 </div>
                 {selectedCondominium ? (
@@ -1702,78 +1704,78 @@ export function MarketplacePage() {
                     onClick={clearCondominiumSelection}
                     className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-[0_8px_20px_rgba(15,23,42,0.04)] active:scale-95"
                   >
-                    Hub geral
+                    Ver todas
                   </button>
                 ) : null}
               </div>
 
-              <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto no-scrollbar px-4 pb-1">
-                {condominiums.map((condominium) => {
-                  const slug = String(condominium?.slug || '').trim();
-                  if (!slug) return null;
-                  const name = String(condominium?.name || 'Condomínio').trim();
-                  const active = selectedCondominiumSlug === slug;
-                  const imageUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
-                  const region = [condominium.city, condominium.state].map((item) => String(item || '').trim()).filter(Boolean).join(' - ');
-                  return (
-                    <button
-                      key={slug}
-                      type="button"
-                      onClick={() => selectCondominium(slug)}
-                      className={`group flex min-w-[274px] max-w-[86vw] snap-start items-center gap-3 rounded-[1.35rem] border bg-white p-3 text-left transition-all duration-200 active:scale-[0.985] sm:min-w-[320px] ${
-                        active
-                          ? 'border-[#336886]/30 shadow-[0_12px_30px_rgba(51,104,134,0.14)] ring-2 ring-[#336886]/10'
-                          : 'border-white/90 shadow-[0_8px_24px_rgba(15,23,42,0.055)]'
-                      }`}
-                    >
-                      <img
-                        src={imageUrl}
-                        alt={name}
-                        loading="lazy"
-                        decoding="async"
-                        className="h-14 w-14 shrink-0 rounded-[1rem] border border-slate-100 bg-slate-50 object-cover shadow-[0_10px_22px_-16px_rgba(15,23,42,0.35)]"
-                        onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
-                          <Buildings size={14} weight="duotone" className={active ? 'text-[#336886]' : 'text-slate-400'} />
-                          <p className="truncate text-sm font-black text-slate-950">{name}</p>
-                        </div>
-                        <p className="mt-0.5 line-clamp-1 text-[11px] font-semibold text-slate-500">
-                          {region || condominium.description || 'Lojas do condomínio'}
-                        </p>
-                        <span className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${
-                          active ? 'bg-[#336886]/10 text-[#336886]' : 'bg-slate-100 text-slate-500'
-                        }`}>
-                          {active ? (condominiumStoresLoading ? 'Carregando lojas' : 'Selecionado') : 'Ver lojas'}
-                        </span>
-                      </div>
-                      <CaretRight
-                        size={16}
-                        weight="bold"
-                        className={`shrink-0 transition-transform group-hover:translate-x-0.5 ${active ? 'text-[#336886]' : 'text-slate-300'}`}
-                      />
-                    </button>
-                  );
-                })}
-              </div>
-
               {selectedCondominium ? (
-                <div className="mt-3 flex items-center justify-between gap-3 rounded-[1.25rem] border border-[#336886]/10 bg-[#336886]/10 px-3 py-2.5">
-                  <p className="min-w-0 truncate text-[11px] font-bold text-[#28536C]">
-                    Lojas de {String(selectedCondominium.name || 'condomínio')}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={clearCondominiumSelection}
-                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white text-slate-500 shadow-[0_8px_18px_rgba(15,23,42,0.06)] active:scale-95"
-                    aria-label="Limpar condomínio"
-                    title="Limpar condomínio"
-                  >
-                    <X size={14} weight="bold" />
-                  </button>
+                <div className="flex items-center gap-3 rounded-[1.35rem] border border-[#336886]/15 bg-white p-3 shadow-[0_10px_28px_rgba(15,23,42,0.055)]">
+                  <img
+                    src={resolveAssetUrl(selectedCondominium.logoUrl || selectedCondominium.bannerUrl || undefined) || getStoreAvatarUrl(String(selectedCondominium.slug || ''), String(selectedCondominium.name || 'Condomínio'))}
+                    alt={String(selectedCondominium.name || 'Condomínio')}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-12 w-12 shrink-0 rounded-[1rem] border border-slate-100 bg-slate-50 object-cover shadow-[0_10px_22px_-16px_rgba(15,23,42,0.35)]"
+                    onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(String(selectedCondominium.slug || ''), String(selectedCondominium.name || 'Condomínio')); }}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-black text-slate-950">
+                      Lojas deste condomínio
+                    </p>
+                    <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-500">
+                      {condominiumStoresLoading ? 'Carregando lojas...' : `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} disponível${filteredStores.length === 1 ? '' : 's'}`}
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-[#336886]/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]">
+                    Ativo
+                  </span>
                 </div>
-              ) : null}
+              ) : (
+                <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto no-scrollbar px-4 pb-1">
+                  {condominiums.map((condominium) => {
+                    const slug = String(condominium?.slug || '').trim();
+                    if (!slug) return null;
+                    const name = String(condominium?.name || 'Condomínio').trim();
+                    const imageUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
+                    const region = [condominium.city, condominium.state].map((item) => String(item || '').trim()).filter(Boolean).join(' - ');
+                    return (
+                      <button
+                        key={slug}
+                        type="button"
+                        onClick={() => selectCondominium(slug)}
+                        className="group flex min-w-[274px] max-w-[86vw] snap-start items-center gap-3 rounded-[1.35rem] border border-white/90 bg-white p-3 text-left shadow-[0_8px_24px_rgba(15,23,42,0.055)] transition-all duration-200 active:scale-[0.985] sm:min-w-[320px]"
+                      >
+                        <img
+                          src={imageUrl}
+                          alt={name}
+                          loading="lazy"
+                          decoding="async"
+                          className="h-14 w-14 shrink-0 rounded-[1rem] border border-slate-100 bg-slate-50 object-cover shadow-[0_10px_22px_-16px_rgba(15,23,42,0.35)]"
+                          onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5">
+                            <Buildings size={14} weight="duotone" className="text-slate-400" />
+                            <p className="truncate text-sm font-black text-slate-950">{name}</p>
+                          </div>
+                          <p className="mt-0.5 line-clamp-1 text-[11px] font-semibold text-slate-500">
+                            {region || condominium.description || 'Lojas do condomínio'}
+                          </p>
+                          <span className="mt-2 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">
+                            Ver lojas
+                          </span>
+                        </div>
+                        <CaretRight
+                          size={16}
+                          weight="bold"
+                          className="shrink-0 text-slate-300 transition-transform group-hover:translate-x-0.5"
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </section>
           )}
 
