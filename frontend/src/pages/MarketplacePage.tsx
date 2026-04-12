@@ -1557,12 +1557,12 @@ export function MarketplacePage() {
             </div>
           )}
 
-          <div
-            className="animate-in fade-in slide-in-from-top-4 duration-500"
-            style={{ animationDelay: '80ms' }}
-          >
-            <SegmentPromoCarousel mode="hub" className="mx-0" />
-          </div>
+          {/* Carrossel de Banners - Esconde na busca para focar no resultado */}
+          {debouncedQuery.length < 2 && (
+            <div className="animate-in fade-in slide-in-from-top-4 duration-500" style={{ animationDelay: '80ms' }}>
+              <SegmentPromoCarousel mode="hub" className="mx-0" />
+            </div>
+          )}
 
           {/* Seção Categorias Premium Squircle */}
           <section className="relative mb-6" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
@@ -1610,79 +1610,81 @@ export function MarketplacePage() {
             </div>
           </section>
 
-          {/* Banner de Destaques Premium */}
-          <section className="mb-7 space-y-3" style={{ transition: 'all .45s ease', transitionDelay: '200ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
-            <div className="flex items-center justify-between px-1">
-              <h2 className="text-[15px] font-black tracking-tight text-slate-950">{genericHighlightLabel}</h2>
-              <div className="flex gap-1">
-                <div className="h-1 w-4 rounded-full bg-[#336886]" />
-                <div className="h-1 w-1 rounded-full bg-slate-300" />
-                <div className="h-1 w-1 rounded-full bg-slate-300" />
+          {/* Banner de Destaques Premium - Esconde na busca para focar no resultado */}
+          {debouncedQuery.length < 2 && (
+            <section className="mb-7 space-y-3" style={{ transition: 'all .45s ease', transitionDelay: '200ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
+              <div className="flex items-center justify-between px-1">
+                <h2 className="text-[15px] font-black tracking-tight text-slate-950">{genericHighlightLabel}</h2>
+                <div className="flex gap-1">
+                  <div className="h-1 w-4 rounded-full bg-[#336886]" />
+                  <div className="h-1 w-1 rounded-full bg-slate-300" />
+                  <div className="h-1 w-1 rounded-full bg-slate-300" />
+                </div>
               </div>
-            </div>
-            
-            <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto no-scrollbar px-1 pb-3">
-              {featuredLoading ? (
-                Array.from({ length: 3 }).map((_, idx) => (
-                  <div key={idx} className="h-[168px] min-w-[184px] animate-pulse rounded-[1.45rem] border border-white bg-white shadow-[0_8px_24px_rgba(15,23,42,0.055)]" />
-                ))
-              ) : (
-                displayedFeaturedProducts.map((item, index) => (
-                  <Link
-                    key={`${item.storeSlug}-${item.id}`}
-                    to={`/${item.storeSlug}`}
-                    className="group min-w-[184px] snap-start overflow-hidden rounded-[1.45rem] border border-white bg-white shadow-[0_8px_24px_rgba(15,23,42,0.06)] transition-all duration-200 ease-out hover:scale-[1.015] hover:shadow-[0_14px_30px_rgba(15,23,42,0.09)] active:scale-[0.97]"
-                  >
-                    <div className="relative h-[100px] overflow-hidden bg-slate-100">
-                      <img
-                        src={item.imageUrl}
-                        alt={item.name}
-                        loading={index < 2 ? 'eager' : 'lazy'}
-                        fetchPriority={index < 2 ? 'high' : 'auto'}
-                        decoding="async"
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                      <div className="absolute left-3 top-3">
-                        {item.sponsored ? (
-                          <span className="flex items-center gap-1.5 rounded-full border border-white/70 bg-amber-300/95 px-2.5 py-1 text-[8px] font-black uppercase tracking-wider text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md">
-                            <Star size={10} weight="fill" /> Promo
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/94 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md ring-1 ring-black/5">
-                            <Sparkle size={9} weight="fill" className="text-[#336886]" />
-                            Sugestão
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="bg-white p-3">
-                      <p className="line-clamp-1 text-[12px] font-black tracking-tight text-slate-950">{item.name}</p>
-                      <div className="mt-2 flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          <img 
-                            src={item.storeLogo} 
-                            alt={item.storeName} 
-                            loading={index < 2 ? 'eager' : 'lazy'}
-                            fetchPriority={index < 2 ? 'high' : 'auto'}
-                            decoding="async"
-                            className="h-5 w-5 rounded-full border border-white/70 object-cover shadow-sm" 
-                            onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(item.storeSlug, item.storeName); }}
-                          />
-                          <span className="max-w-[82px] truncate text-[9px] font-bold text-slate-500">{item.storeName}</span>
+              
+              <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto no-scrollbar px-1 pb-3">
+                {featuredLoading ? (
+                  Array.from({ length: 3 }).map((_, idx) => (
+                    <div key={idx} className="h-[168px] min-w-[184px] animate-pulse rounded-[1.45rem] border border-white bg-white shadow-[0_8px_24px_rgba(15,23,42,0.055)]" />
+                  ))
+                ) : (
+                  displayedFeaturedProducts.map((item, index) => (
+                    <Link
+                      key={`${item.storeSlug}-${item.id}`}
+                      to={`/${item.storeSlug}`}
+                      className="group min-w-[184px] snap-start overflow-hidden rounded-[1.45rem] border border-white bg-white shadow-[0_8px_24px_rgba(15,23,42,0.06)] transition-all duration-200 ease-out hover:scale-[1.015] hover:shadow-[0_14px_30px_rgba(15,23,42,0.09)] active:scale-[0.97]"
+                    >
+                      <div className="relative h-[100px] overflow-hidden bg-slate-100">
+                        <img
+                          src={item.imageUrl}
+                          alt={item.name}
+                          loading={index < 2 ? 'eager' : 'lazy'}
+                          fetchPriority={index < 2 ? 'high' : 'auto'}
+                          decoding="async"
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                        <div className="absolute left-3 top-3">
+                          {item.sponsored ? (
+                            <span className="flex items-center gap-1.5 rounded-full border border-white/70 bg-amber-300/95 px-2.5 py-1 text-[8px] font-black uppercase tracking-wider text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md">
+                              <Star size={10} weight="fill" /> Promo
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/94 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md ring-1 ring-black/5">
+                              <Sparkle size={9} weight="fill" className="text-[#336886]" />
+                              Sugestão
+                            </span>
+                          )}
                         </div>
-                        <span className="rounded-full bg-[#336886]/10 px-2 py-0.5 text-[10px] font-black text-[#336886]">
-                          {currency.format(item.price)}
-                        </span>
                       </div>
-                    </div>
-                  </Link>
-                ))
-              )}
-            </div>
-          </section>
 
-          {favoriteStores.length > 0 && (
+                      <div className="bg-white p-3">
+                        <p className="line-clamp-1 text-[12px] font-black tracking-tight text-slate-950">{item.name}</p>
+                        <div className="mt-2 flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <img 
+                              src={item.storeLogo} 
+                              alt={item.storeName} 
+                              loading={index < 2 ? 'eager' : 'lazy'}
+                              fetchPriority={index < 2 ? 'high' : 'auto'}
+                              decoding="async"
+                              className="h-5 w-5 rounded-full border border-white/70 object-cover shadow-sm" 
+                              onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(item.storeSlug, item.storeName); }}
+                            />
+                            <span className="max-w-[82px] truncate text-[9px] font-bold text-slate-500">{item.storeName}</span>
+                          </div>
+                          <span className="rounded-full bg-[#336886]/10 px-2 py-0.5 text-[10px] font-black text-[#336886]">
+                            {currency.format(item.price)}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))
+                )}
+              </div>
+            </section>
+          )}
+
+          {favoriteStores.length > 0 && debouncedQuery.length < 2 && (
             <section className="space-y-3 mb-8" style={{ transition: 'all .45s ease', transitionDelay: '300ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
               <div className="flex items-center justify-between">
                 <h2 className="text-base sm:text-lg font-black text-slate-900">Minhas favoritas</h2>
@@ -1835,16 +1837,22 @@ export function MarketplacePage() {
                           </p>
                         )}
                         <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                          {store.isOpen && store.rating >= 4.9 && (
+                             <span className="inline-flex items-center gap-1 rounded-full border border-rose-100 bg-rose-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-rose-600 shadow-[0_8px_18px_-16px_rgba(225,29,72,0.4)]">
+                               <Sparkle size={10} weight="fill" className="text-rose-500" />
+                               Bombando agora
+                             </span>
+                          )}
                           {store.freeShipping ? (
                             <span className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700 shadow-[0_8px_18px_-16px_rgba(16,185,129,0.5)]">
                               <Bicycle size={10} weight="fill" className="text-emerald-600" />
                               Grátis
                             </span>
                           ) : null}
-                          {store.rating >= 4.8 && (
+                          {store.rating >= 4.7 && !favoriteStoreSlugs.includes(store.slug) && (
                             <span className="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700 shadow-[0_8px_18px_-16px_rgba(245,158,11,0.45)]">
                               <Star size={10} weight="fill" className="text-amber-500" />
-                              Mais bem avaliadas
+                              Favorita da região
                             </span>
                           )}
                           {(store as any).sponsored && (
