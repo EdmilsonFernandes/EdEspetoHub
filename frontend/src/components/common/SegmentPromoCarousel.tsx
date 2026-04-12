@@ -51,7 +51,7 @@ export function SegmentPromoCarousel({
   useEffect(() => {
     const interval = window.setInterval(() => {
       setActiveIndex((current) => (current + 1) % PROMO_SLIDES.length);
-    }, 3000);
+    }, 8000);
     return () => window.clearInterval(interval);
   }, []);
 

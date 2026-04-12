@@ -5,6 +5,7 @@ import {
   Star,
   Storefront,
   House,
+  Receipt,
   List,
   CaretDown,
   Heart,
@@ -503,7 +504,7 @@ export function MarketplacePage() {
     }
     const timer = window.setInterval(() => {
       setFeaturedOffset((prev) => (prev + 1) % featuredProducts.length);
-    }, 5 * 60 * 1000);
+    }, 8000);
     return () => window.clearInterval(timer);
   }, [featuredProducts]);
 
@@ -1707,13 +1708,13 @@ export function MarketplacePage() {
         style={{ transform: isBottomNavVisible ? 'translateY(0)' : 'translateY(100%)' }}
       >
         <div className="grid h-[4.5rem] grid-cols-3 items-center px-6 pt-2 pb-[max(env(safe-area-inset-bottom),0px)]">
-          <button type="button" onClick={() => navigate('/')} className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]">
-            <House size={18} />
+          <button type="button" onClick={() => navigate('/hub')} className="flex flex-col items-center justify-center rounded-2xl bg-sky-50/90 py-1 font-bold text-sky-700 shadow-[0_8px_18px_-16px_rgba(47,157,247,0.6)] ring-1 ring-sky-100/70 transition-all duration-150 ease-out active:scale-[0.94]">
+            <House size={18} weight="fill" />
             <span className="text-[9px] font-black uppercase">Início</span>
           </button>
-          <button type="button" className="flex flex-col items-center justify-center rounded-2xl bg-sky-50/90 py-1 font-bold text-sky-700 shadow-[0_8px_18px_-16px_rgba(47,157,247,0.6)] ring-1 ring-sky-100/70 transition-all duration-150 ease-out active:scale-[0.94]">
-            <Storefront size={18} weight="fill" />
-            <span className="text-[9px] font-black uppercase">Hub</span>
+          <button type="button" onClick={() => navigate('/cliente/pedidos')} className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]">
+            <Receipt size={18} weight="duotone" />
+            <span className="text-[9px] font-black uppercase">Pedidos</span>
           </button>
           <button
             type="button"
