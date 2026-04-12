@@ -357,7 +357,7 @@ R. Sebastiao Sorato, 50 - Jardim Paraiso
 Sao Jose dos Campos - SP
 CEP 12235-431
 Fair day: Friday
-Logo: /downloads/azuli.png
+Logo: /uploads/condominiums/azuli.png
 ```
 
 Seed command:

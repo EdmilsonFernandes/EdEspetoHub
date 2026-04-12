@@ -76,7 +76,7 @@ const seed = async () => {
       'Sao Jose dos Campos',
       'SP',
       '12235431',
-      '/downloads/azuli.png',
+      '/uploads/condominiums/azuli.png',
     ]
   );
 
