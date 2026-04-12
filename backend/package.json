@@ -7,6 +7,7 @@
     "start": "node dist/app.js",
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
     "db:reset": "ts-node src/scripts/resetDatabase.ts",
+    "seed:condominium:azuli": "ts-node src/scripts/seedCondominiumAzuli.ts",
     "test": "ts-node src/utils/productAvailability.test.ts && ts-node src/services/OrderEtaServiceV2.test.ts && ts-node src/services/DeliveryService.transitions.test.ts && ts-node src/services/AuthService.emailVerification.test.ts && ts-node src/services/DeliveryService.integration.test.ts"
   },
   "dependencies": {

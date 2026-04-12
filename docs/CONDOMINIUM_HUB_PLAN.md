@@ -347,6 +347,39 @@ This should appear in admin queue, order details, tracking, and receipt/print wh
 8. Add schedule.
 9. Add organizer/admin workflows.
 
+## Test Seed - Campo Azuli
+
+The first real validation condominium is:
+
+```text
+Condominio Spazio Campo Azuli
+R. Sebastiao Sorato, 50 - Jardim Paraiso
+Sao Jose dos Campos - SP
+CEP 12235-431
+Fair day: Friday
+Logo: /downloads/azuli.png
+```
+
+Seed command:
+
+```bash
+npm --prefix backend run seed:condominium:azuli
+```
+
+To also link one existing store by slug:
+
+```bash
+STORE_SLUG=minha-loja npm --prefix backend run seed:condominium:azuli
+```
+
+On Windows PowerShell:
+
+```powershell
+$env:STORE_SLUG='minha-loja'
+npm --prefix backend run seed:condominium:azuli
+Remove-Item Env:\STORE_SLUG
+```
+
 ## Test Checklist
 
 Existing flows must continue to pass:
