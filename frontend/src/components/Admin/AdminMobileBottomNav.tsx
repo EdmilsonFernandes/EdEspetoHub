@@ -236,12 +236,12 @@ export function AdminMobileBottomNav() {
 
   return (
     <nav
-      className="lg:hidden fixed inset-x-0 bottom-0 z-[220] pointer-events-none transition-transform duration-300 ease-in-out"
+      className="fixed inset-x-0 bottom-0 z-[220] pointer-events-none transition-transform duration-300 ease-in-out flex justify-center"
       style={{
         transform: isVisible ? 'translateY(0)' : 'translateY(calc(100% - 4px))',
       }}
     >
-      <ul className={`pointer-events-auto mx-auto grid ${navItems.length <= 2 ? 'grid-cols-2' : navItems.length === 3 ? 'grid-cols-3' : navItems.length === 4 ? 'grid-cols-4' : 'grid-cols-5'} gap-1 max-w-none rounded-none border-t border-slate-200/40 bg-white/72 p-1.5 pb-[max(env(safe-area-inset-bottom),4px)] shadow-[0_-12px_24px_-20px_rgba(15,23,42,0.35)] backdrop-blur-2xl`}>
+      <ul className={`pointer-events-auto mx-auto grid ${navItems.length <= 2 ? 'grid-cols-2' : navItems.length === 3 ? 'grid-cols-3' : navItems.length === 4 ? 'grid-cols-4' : 'grid-cols-5'} gap-1 w-full max-w-lg sm:max-w-xl md:max-w-2xl rounded-t-3xl border-t border-x border-slate-200/40 bg-white/72 p-1.5 pb-[max(env(safe-area-inset-bottom),4px)] shadow-[0_-12px_48px_-20px_rgba(15,23,42,0.45)] backdrop-blur-2xl`}>
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
