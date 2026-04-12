@@ -123,6 +123,13 @@ const hashFrom = (value: string) => {
   return Math.abs(hash);
 };
 
+const normalizeSearchText = (value?: string | null) =>
+  String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+
 const categoryVisuals: Record<string, { icon: typeof Storefront; label: string }> = {
   Restaurante: { icon: ForkKnife, label: 'Restaurante' },
   Hamburguer: { icon: Hamburger, label: 'Hamburguer' },
@@ -227,6 +234,8 @@ export function MarketplacePage() {
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [productSearchBySlug, setProductSearchBySlug] = useState<Record<string, string>>({});
+  const [productSearchLoading, setProductSearchLoading] = useState(false);
   const [segmentFilter, setSegmentFilter] = useState('all');
   const [quickFilter, setQuickFilter] = useState<'all' | 'free_shipping' | 'nearby' | 'open_now' | 'favorites'>('all');
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
@@ -494,7 +503,7 @@ export function MarketplacePage() {
   }, [loadPortfolio]);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setDebouncedQuery(query.trim().toLowerCase()), 180);
+    const timer = window.setTimeout(() => setDebouncedQuery(normalizeSearchText(query)), 180);
     return () => window.clearTimeout(timer);
   }, [query]);
 
@@ -630,7 +639,8 @@ export function MarketplacePage() {
           console.log(`[HubStore] ${store?.name || slug}: RawLogo=${rawLogo}, Resolved=${logo}`);
         }
 
-        const searchIndex = [store?.name, slug, segment, city, state].filter(Boolean).join(' ').toLowerCase();
+        const searchIndex = normalizeSearchText([store?.name, slug, segment, city, state].filter(Boolean).join(' '));
+        const productSearchIndex = productSearchBySlug[slug] || '';
         return {
           id: String(store?.id || slug || index),
           name: String(store?.name || 'Loja'),
@@ -661,6 +671,7 @@ export function MarketplacePage() {
           logo,
           banner,
           searchIndex,
+          productSearchIndex,
         };
       })
       .filter(Boolean) as Array<{
@@ -687,8 +698,63 @@ export function MarketplacePage() {
       logo: string;
       banner: string;
       searchIndex: string;
+      productSearchIndex: string;
     }>;
-  }, [stores]);
+  }, [productSearchBySlug, stores]);
+
+  useEffect(() => {
+    if (debouncedQuery.length < 2 || enrichedStores.length === 0) return;
+    const missingStores = enrichedStores.filter((store) => !Object.prototype.hasOwnProperty.call(productSearchBySlug, store.slug));
+    if (missingStores.length === 0) return;
+
+    let cancelled = false;
+    const loadProductIndexes = async () => {
+      setProductSearchLoading(true);
+      const batchSize = 4;
+      try {
+        for (let start = 0; start < missingStores.length && !cancelled; start += batchSize) {
+          const batch = missingStores.slice(start, start + batchSize);
+          const results = await Promise.all(
+            batch.map(async (store) => {
+              try {
+                const products = await productService.listPublicBySlug(store.slug);
+                const index = normalizeSearchText(
+                  (Array.isArray(products) ? products : [])
+                    .map((product: any) =>
+                      [
+                        product?.name,
+                        product?.description,
+                        product?.desc,
+                        product?.category,
+                      ]
+                        .filter(Boolean)
+                        .join(' ')
+                    )
+                    .join(' ')
+                );
+                return [store.slug, index] as const;
+              } catch {
+                return [store.slug, ''] as const;
+              }
+            })
+          );
+          if (!cancelled) {
+            setProductSearchBySlug((prev) => ({
+              ...prev,
+              ...Object.fromEntries(results),
+            }));
+          }
+        }
+      } finally {
+        if (!cancelled) setProductSearchLoading(false);
+      }
+    };
+
+    void loadProductIndexes();
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedQuery, enrichedStores, productSearchBySlug]);
 
   const segmentOptions = useMemo(() => {
     return Array.from(new Set(enrichedStores.map((item) => item.segment))).sort((a, b) => a.localeCompare(b, 'pt-BR'));
@@ -703,7 +769,7 @@ export function MarketplacePage() {
   const filteredStores = useMemo(() => {
     return enrichedStores
       .filter((store) => {
-        if (debouncedQuery && !store.searchIndex.includes(debouncedQuery)) return false;
+        if (debouncedQuery && !store.searchIndex.includes(debouncedQuery) && !store.productSearchIndex.includes(debouncedQuery)) return false;
         if (segmentFilter !== 'all' && store.segment !== segmentFilter) return false;
         if (quickFilter === 'free_shipping' && !store.freeShipping) return false;
         if (quickFilter === 'nearby' && store.distanceKm > 2.5) return false;
@@ -1594,7 +1660,7 @@ export function MarketplacePage() {
                 <h2 className="text-base font-black text-slate-950 sm:text-lg">Lojas</h2>
                 {!loading && !error && filteredStores.length > 0 ? (
                   <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
-                    {filteredStores.length} resultado{filteredStores.length === 1 ? '' : 's'} perto de você
+                    {productSearchLoading && debouncedQuery ? 'Buscando também nos cardápios...' : `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} perto de você`}
                   </p>
                 ) : null}
               </div>
@@ -1610,7 +1676,14 @@ export function MarketplacePage() {
 
             {!loading && error && <div className="rounded-2xl border border-rose-900/60 bg-rose-950/50 p-4 text-sm text-rose-200">{error}</div>}
 
-            {!loading && !error && filteredStores.length === 0 && (
+            {!loading && !error && filteredStores.length === 0 && productSearchLoading && debouncedQuery && (
+              <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
+                <p className="text-slate-700 font-semibold">Buscando lojas com esse item no cardápio...</p>
+                <p className="mt-1 text-xs font-bold text-slate-400">A busca agora considera produtos, descrições e categorias.</p>
+              </div>
+            )}
+
+            {!loading && !error && filteredStores.length === 0 && !(productSearchLoading && debouncedQuery) && (
               <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
                 <p className="text-slate-700 font-semibold">Nenhuma loja encontrada com esses filtros.</p>
                 <button
