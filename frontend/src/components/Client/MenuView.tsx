@@ -1068,9 +1068,10 @@ export const MenuView = ({
                   ? "flex-1 overflow-x-auto whitespace-nowrap no-scrollbar scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                   : "flex-1 grid grid-cols-2 gap-2"
               }`}>
-                <div className={`${filteredGrouped.length > 2 ? "inline-flex items-center gap-2 pr-6" : "contents"}`}>
+                <div className={`${filteredGrouped.length > 2 ? "inline-flex items-center gap-2.5 pr-8" : "contents"}`}>
                 {filteredGrouped.map((category) => {
                   const isActive = activeCategoryKey === category.key;
+                  const glyph = categoryGlyph(category.key);
                   return (
                     <button
                       key={category.key}
@@ -1082,16 +1083,17 @@ export const MenuView = ({
                         setActiveCategoryKey(category.key);
                         scrollToCategory(category.key);
                       }}
-                      className={`inline-flex items-center justify-center px-4 py-2 rounded-lg border text-sm font-bold transition-colors snap-start ${
+                      className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-2xl border text-[13px] font-black transition-all duration-300 snap-start active:scale-95 ${
                         filteredGrouped.length <= 2 ? "w-full min-w-0" : ""
-                      }`}
+                      } ${isActive ? 'shadow-[0_8px_20px_-8px_rgba(15,23,42,0.15)]' : 'shadow-none'}`}
                       style={
                         isActive
                           ? { backgroundColor: catalogPrimaryColor, color: catalogPrimaryText, borderColor: catalogPrimaryColor }
-                          : { backgroundColor: "#f8fafc", color: "#475569", borderColor: "#e2e8f0" }
+                          : { backgroundColor: "#ffffff", color: "#64748b", borderColor: "#f1f5f9" }
                       }
                     >
-                      <span className="whitespace-nowrap">{category.label}</span>
+                      <span className="text-base leading-none">{glyph}</span>
+                      <span className="whitespace-nowrap uppercase tracking-wider">{category.label}</span>
                     </button>
                   );
                 })}
@@ -1323,72 +1325,13 @@ export const MenuView = ({
                 return (
                 <div
                   key={item.id}
-                  className={`group bg-white rounded-3xl border border-transparent shadow-sm p-3.5 sm:p-4 grid grid-cols-[1fr_auto] gap-3 md:hover:scale-[1.01] md:hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] transition ${!staffView ? "cursor-pointer" : "cursor-default"}`}
+                  className={`group bg-white rounded-[2rem] border border-slate-100/50 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.08)] p-3.5 sm:p-4 grid grid-cols-[1fr_auto] gap-4 md:hover:scale-[1.015] md:hover:shadow-[0_12px_30px_-10px_rgba(15,23,42,0.12)] active:scale-[0.98] transition-all duration-300 ${!staffView ? "cursor-pointer" : "cursor-default"}`}
                   onClick={() => {
                     if (!staffView) openProductModal(item);
                   }}
                 >
-                  <div className="flex-1 min-w-0 space-y-1.5">
-                    <button
-                      type="button"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        if (!staffView || allowStaffModal) {
-                          openProductModal(item);
-                        }
-                      }}
-                      className={`text-left font-bold text-gray-900 text-base sm:text-lg leading-tight line-clamp-2 ${(!staffView || allowStaffModal) ? 'cursor-pointer hover:text-gray-700' : 'cursor-default'}`}
-                    >
-                      {item.name}
-                    </button>
-                    {item.description && (
-                      <p className="text-sm sm:text-[15px] text-gray-500 leading-relaxed line-clamp-2">{item.description}</p>
-                    )}
-                    {item.isFeatured && (
-                      <span className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
-                        <Sparkle size={10} weight="fill" />
-                        Promo do dia
-                      </span>
-                    )}
-                    {hasConfigurableOptions && (
-                      <button
-                        type="button"
-                        onClick={handleOpenOptions}
-                        className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-600 bg-white border border-slate-200 px-3.5 py-1.5 rounded-full hover:bg-slate-50 transition cursor-pointer"
-                      >
-                        <SlidersHorizontal size={12} weight="bold" />
-                        {isEspetoCategory(item?.category) ? "Customizar espeto" : "Ver opções"}
-                      </button>
-                    )}
-                    {stockState.soldOut && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                        ESGOTADO
-                      </span>
-                    )}
-                    {!stockState.soldOut && stockState.lowStock && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                        Apenas {stockState.stockQuantity} unidade{stockState.stockQuantity === 1 ? '' : 's'}
-                      </span>
-                    )}
-                    {staffView && !hasConfigurableOptions && hasAnyDescription && (
-                      <button
-                        type="button"
-                        onClick={handleOpenDetails}
-                        className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full hover:bg-slate-200 transition cursor-pointer"
-                      >
-                        {hasLongDescription ? 'Ver descrição completa' : 'Ver detalhes'}
-                      </button>
-                    )}
-                    {item?.bundlePromoActive && Number(item?.bundlePromoQty) >= 2 && Number(item?.bundlePromoPrice) > 0 && (
-                      <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full">
-                        <Sparkle size={12} weight="duotone" />
-                        {item.bundlePromoQty} por {formatCurrency(Number(item.bundlePromoPrice))}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className={`flex flex-col items-end gap-2 flex-shrink-0 ${staffView ? "min-w-[132px]" : "min-w-[118px]"}`}>
-                    <div data-menu-item-media className={`relative h-[108px] w-[108px] sm:h-[116px] sm:w-[116px] ${staffView ? "md:h-[120px] md:w-[120px]" : ""}`}>
+                  <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                    <div>
                       <button
                         type="button"
                         onClick={(event) => {
@@ -1397,139 +1340,136 @@ export const MenuView = ({
                             openProductModal(item);
                           }
                         }}
-                        className={`h-full w-full rounded-3xl overflow-hidden bg-gray-100 border border-slate-100 shadow-sm ${(!staffView || allowStaffModal) ? 'cursor-pointer' : 'cursor-default'}`}
+                        className={`text-left font-black text-slate-900 text-[15px] sm:text-[17px] leading-tight line-clamp-2 transition-colors ${(!staffView || allowStaffModal) ? 'cursor-pointer hover:text-slate-700' : 'cursor-default'}`}
                       >
-                      {stockState.soldOut && (
-                        <span className="absolute z-10 top-2 left-2 rounded-full bg-rose-600 text-white text-[10px] font-bold px-2 py-1">
-                          ESGOTADO
-                        </span>
-                      )}
-                      {item.imageUrl ? (
-                        <img
-                          src={resolveAssetUrl(item.imageUrl)}
-                          alt={item.name}
-                          loading="lazy"
-                          decoding="async"
-                          className="w-full h-full object-cover object-center transition duration-300 group-hover:scale-[1.03]"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-slate-300">
-                          <ForkKnife size={18} weight="duotone" />
-                        </div>
-                      )}
+                        {item.name}
                       </button>
-                      {canOrder && (
-                        <>
-                          {itemQty <= 0 && (
-                            <button
-                              type="button"
-                              onClick={handleIncrement}
-                              title={stockState.soldOut ? "Esgotado" : "Adicionar"}
-                              disabled={stockState.soldOut}
-                              className="absolute bottom-1 right-1 h-9 w-9 rounded-full border shadow-md ring-2 ring-white inline-flex items-center justify-center transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                              style={{ backgroundColor: catalogPrimaryColor, borderColor: catalogPrimaryColor, color: catalogPrimaryText }}
-                              aria-label={`Adicionar ${item.name}`}
-                            >
-                              <Plus size={17} weight="bold" />
-                            </button>
-                          )}
-                          {itemQty > 0 && !isQtyControlExpanded && (
-                            <button
-                              type="button"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                openQtyControl(itemId);
-                              }}
-                              className="absolute bottom-1 right-1 h-10 min-w-[42px] rounded-full border shadow-md ring-2 ring-white inline-flex items-center justify-center px-2.5 transition-all duration-300 active:scale-95"
-                              style={{ backgroundColor: catalogPrimaryColor, borderColor: catalogPrimaryColor, color: catalogPrimaryText }}
-                              aria-label={`Quantidade ${itemQty} de ${item.name}`}
-                            >
-                              <span className="text-base font-black leading-none tracking-tight">{itemQty}</span>
-                            </button>
-                          )}
-                          {itemQty > 0 && isQtyControlExpanded && (
-                            <div
-                              className="absolute bottom-1 right-1 h-10 rounded-full border border-slate-200 bg-white shadow-md ring-2 ring-white inline-flex items-center gap-1.5 px-2 transition-all duration-300"
-                              onClick={(event) => event.stopPropagation()}
-                            >
-                              <button
-                                type="button"
-                                onClick={handleDecrement}
-                                className="h-7 w-7 rounded-full border transition inline-flex items-center justify-center"
-                                style={{ borderColor: `${catalogPrimaryColor}33`, color: catalogSecondaryColor, backgroundColor: "#ffffff" }}
-                                aria-label={`Remover uma unidade de ${item.name}`}
-                              >
-                                <Minus size={13} weight="bold" />
-                              </button>
-                              <span
-                                className={`min-w-[26px] text-center text-base font-black leading-none ${
-                                  qtyPulseId === itemId ? "scale-110" : ""
-                                }`}
-                                style={{ color: qtyPulseId === itemId ? catalogPrimaryColor : catalogSecondaryColor }}
-                              >
-                                {itemQty}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={handleIncrement}
-                                disabled={stockState.soldOut}
-                                className="h-7 w-7 rounded-full transition inline-flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
-                                style={{ backgroundColor: catalogPrimaryColor, color: catalogPrimaryText }}
-                                aria-label={`Adicionar uma unidade de ${item.name}`}
-                              >
-                                <Plus size={13} weight="bold" />
-                              </button>
-                            </div>
-                          )}
-                        </>
+                      {item.description && (
+                        <p className="mt-1.5 text-[13px] sm:text-sm text-slate-500 leading-relaxed line-clamp-2 font-medium">{item.description}</p>
                       )}
                     </div>
-                    {(() => {
-                      const priceNode = (
-                        <div className="flex flex-col items-end leading-none">
-                          {resolvePromoPrice(item) ? (
-                            <>
-                              <span className="text-[11px] font-semibold text-slate-400 line-through">
+
+                    <div className="mt-3 flex flex-col items-start gap-2.5">
+                      {(() => {
+                        const priceNode = (
+                          <div className="flex items-baseline gap-1.5 leading-none">
+                            {resolvePromoPrice(item) ? (
+                              <>
+                                <span className="text-lg sm:text-xl font-black tracking-tight text-[#336886]">
+                                  {formatCurrency(resolvePromoPrice(item))}
+                                </span>
+                                <span className="text-[11px] font-bold text-slate-300 line-through">
+                                  {formatCurrency(item.price)}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-lg sm:text-xl font-black tracking-tight text-slate-900">
                                 {formatCurrency(item.price)}
-                              </span>
-                              <span className="text-xl font-bold tracking-tight text-slate-900">
-                                {formatCurrency(resolvePromoPrice(item))}
-                              </span>
-                            </>
-                          ) : (
-                            <span className="text-xl font-bold tracking-tight text-slate-900">
-                              {formatCurrency(item.price)}
-                            </span>
-                          )}
-                        </div>
-                      );
-
-                      if (!canOrder) {
-                        return (
-                          <div className="w-full flex flex-col items-end gap-2">
-                            {priceNode}
-                            <span className="text-[11px] font-semibold text-slate-500 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1">
-                              Pedidos só no balcão
-                            </span>
-                          </div>
-                        );
-                      }
-
-                      if (itemQty <= 0) {
-                        return (
-                          <div className="w-full flex items-center justify-end gap-2">
-                            {priceNode}
-                            {stockState.soldOut && (
-                              <span className="text-[11px] font-semibold text-slate-500 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1">
-                                Esgotado
                               </span>
                             )}
                           </div>
                         );
-                      }
 
-                      return <div className="w-full flex items-center justify-end">{priceNode}</div>;
-                    })()}
+                        return priceNode;
+                      })()}
+
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {item.isFeatured && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-100/50">
+                            <Sparkle size={10} weight="fill" />
+                            Destaque
+                          </span>
+                        )}
+                        {hasConfigurableOptions && (
+                          <span className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-full">
+                            Customizável
+                          </span>
+                        )}
+                        {stockState.soldOut && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-rose-50 text-rose-600 border border-rose-100">
+                            Esgotado
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={`flex flex-col items-end justify-center flex-shrink-0 ${staffView ? "min-w-[124px]" : "min-w-[110px]"}`}>
+                    <div data-menu-item-media className="relative h-[110px] w-[110px] sm:h-[124px] sm:w-[124px]">
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          if (!staffView || allowStaffModal) {
+                            openProductModal(item);
+                          }
+                        }}
+                        className={`h-full w-full rounded-[2rem] overflow-hidden bg-slate-50 border border-slate-100/50 shadow-sm ${(!staffView || allowStaffModal) ? 'cursor-pointer' : 'cursor-default'}`}
+                      >
+                        {item.imageUrl ? (
+                          <img
+                            src={resolveAssetUrl(item.imageUrl)}
+                            alt={item.name}
+                            loading="lazy"
+                            decoding="async"
+                            className="w-full h-full object-cover object-center transition duration-500 group-hover:scale-110"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-slate-200">
+                            <ForkKnife size={24} weight="duotone" />
+                          </div>
+                        )}
+                      </button>
+
+                      {canOrder && !stockState.soldOut && (
+                        <div className="absolute -bottom-1 -right-1">
+                          {itemQty <= 0 ? (
+                            <button
+                              type="button"
+                              onClick={handleIncrement}
+                              className="h-10 w-10 rounded-2xl shadow-[0_8px_16px_-4px_rgba(15,23,42,0.25)] border-2 border-white inline-flex items-center justify-center transition-all duration-300 active:scale-90 hover:scale-105"
+                              style={{ backgroundColor: catalogPrimaryColor, color: catalogPrimaryText }}
+                            >
+                              <Plus size={18} weight="bold" />
+                            </button>
+                          ) : (
+                            <div
+                              className={`h-10 rounded-2xl border-2 border-white bg-white shadow-[0_8px_16px_-4px_rgba(15,23,42,0.25)] inline-flex items-center gap-2 px-1.5 transition-all duration-300 ${isQtyControlExpanded ? 'w-auto' : 'w-10 justify-center'}`}
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              {isQtyControlExpanded ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={handleDecrement}
+                                    className="h-7 w-7 rounded-xl border border-slate-100 flex items-center justify-center bg-slate-50 text-slate-600 active:bg-slate-100"
+                                  >
+                                    <Minus size={12} weight="bold" />
+                                  </button>
+                                  <span className="min-w-[20px] text-center text-sm font-black text-slate-900">{itemQty}</span>
+                                  <button
+                                    type="button"
+                                    onClick={handleIncrement}
+                                    className="h-7 w-7 rounded-xl flex items-center justify-center active:opacity-90"
+                                    style={{ backgroundColor: catalogPrimaryColor, color: catalogPrimaryText }}
+                                  >
+                                    <Plus size={12} weight="bold" />
+                                  </button>
+                                </>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => openQtyControl(itemId)}
+                                  className="h-full w-full flex items-center justify-center"
+                                >
+                                  <span className="text-sm font-black" style={{ color: catalogPrimaryColor }}>{itemQty}</span>
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )})}
@@ -1809,33 +1749,40 @@ export const MenuView = ({
       />
 
       <div
-        className={`fixed bottom-6 left-1/2 z-40 w-[92%] max-w-md -translate-x-1/2 transition-all duration-300 ${
-          cartItemsCount > 0 && canOrder ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0 pointer-events-none"
+        className={`fixed bottom-8 left-1/2 z-40 w-[94%] max-w-md -translate-x-1/2 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+          cartItemsCount > 0 && canOrder ? "translate-y-0 opacity-100 scale-100" : "translate-y-12 opacity-0 scale-90 pointer-events-none"
         }`}
       >
         {canOrder && (
           <button
             ref={cartButtonRef}
             onClick={() => onProceed?.()}
-            className={`w-full px-4 py-3 rounded-full flex justify-between items-center active:scale-[0.99] transition-all text-sm sm:text-base ${
-              cartPulse ? "scale-[1.03]" : "scale-100"
+            className={`group w-full px-5 py-4 rounded-[2rem] flex justify-between items-center active:scale-[0.97] transition-all duration-300 ${
+              cartPulse ? "scale-[1.04] shadow-[0_20px_48px_-12px_rgba(15,23,42,0.4)]" : "shadow-[0_16px_40px_-14px_rgba(15,23,42,0.3)]"
             }`}
             style={{
               backgroundColor: catalogPrimaryColor,
               color: catalogPrimaryText,
-              boxShadow: `0 16px 32px -18px ${catalogPrimaryColor}80`,
             }}
           >
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <span
-                className="h-7 min-w-7 px-2 rounded-full text-xs font-extrabold inline-flex items-center justify-center"
-                style={{ color: catalogPrimaryColor, backgroundColor: "#ffffff" }}
-              >
-                {cartItemsCount}
-              </span>
-              <span className="font-bold truncate">Ver sacola</span>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="relative">
+                <span
+                  className="h-8 w-8 rounded-xl text-[13px] font-black inline-flex items-center justify-center shadow-sm transition-transform group-hover:scale-110"
+                  style={{ color: catalogPrimaryColor, backgroundColor: "#ffffff" }}
+                >
+                  {cartItemsCount}
+                </span>
+                {cartPulse && (
+                  <span className="absolute inset-0 animate-ping rounded-xl bg-white/40" />
+                )}
+              </div>
+              <span className="font-black text-[15px] uppercase tracking-wider">Ver minha sacola</span>
             </div>
-            <span className="font-bold text-base sm:text-lg ml-2 flex-shrink-0">{formatCurrency(cartTotalValue)}</span>
+            <div className="flex flex-col items-end leading-none">
+              <span className="text-[10px] font-bold opacity-80 uppercase tracking-tight">Total</span>
+              <span className="font-black text-lg sm:text-xl tracking-tighter">{formatCurrency(cartTotalValue)}</span>
+            </div>
           </button>
         )}
       </div>
