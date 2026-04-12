@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { UserCircle, ArrowLeft } from '@phosphor-icons/react';
+import { UserCircle, ArrowLeft, Eye, EyeSlash } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
 
 const formatPhoneBr = (value: string) => {
@@ -27,6 +27,7 @@ export function ClientAuth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -195,19 +196,28 @@ export function ClientAuth() {
               enterKeyHint={mode === 'register' ? 'next' : 'done'}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
             />
-            <input
-              name="password"
-              autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
-              type="password"
-              value={form.password}
-              onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
-              placeholder="Senha"
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              enterKeyHint="done"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
-            />
+            <div className="relative">
+              <input
+                name="password"
+                autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
+                type={showPassword ? 'text' : 'password'}
+                value={form.password}
+                onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
+                placeholder="Senha"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                enterKeyHint="done"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 pr-12 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                {showPassword ? <EyeSlash size={18} weight="bold" /> : <Eye size={18} weight="bold" />}
+              </button>
+            </div>
 
             {mode === 'register' && (
               <div className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50/80 p-3">

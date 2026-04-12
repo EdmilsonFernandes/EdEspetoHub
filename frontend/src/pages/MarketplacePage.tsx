@@ -1334,12 +1334,12 @@ export function MarketplacePage() {
               >
                 <BellRinging size={20} weight={hubNotificationCount > 0 ? 'fill' : 'duotone'} />
                 {hubNotificationCount > 0 ? (
-                  <span className="absolute -right-0.5 -top-0.5 flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#336886] px-1 text-[10px] font-black leading-none text-white ring-2 ring-white shadow-[0_8px_18px_-10px_rgba(51,104,134,0.9)]">
+                  <span className="absolute -right-0.5 -top-0.5 flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-black leading-none text-white ring-2 ring-white shadow-[0_8px_18px_-10px_rgba(225,29,72,0.9)]">
                     {hubNotificationCount > 9 ? '9+' : hubNotificationCount}
                   </span>
                 ) : null}
                 {hubNotificationCount > 0 ? (
-                  <span className="absolute inset-0 rounded-full border border-[#336886]/35 animate-ping" />
+                  <span className="absolute inset-0 rounded-full border border-rose-600/35 animate-ping" />
                 ) : null}
               </button>
             </div>
