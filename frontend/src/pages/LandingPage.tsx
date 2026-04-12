@@ -15,6 +15,7 @@ import {
   GooglePlayLogo,
   CopySimple,
   QrCode,
+  Buildings,
 } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { LandingPageLayout } from '../layouts/LandingPageLayout';
@@ -388,6 +389,115 @@ export function LandingPage() {
       <section className="bg-[linear-gradient(180deg,#edf6ff_0%,#ffffff_100%)] py-12 sm:py-14">
         <div className="max-w-6xl mx-auto px-4">
           <SegmentPromoCarousel className="shadow-[0_22px_46px_-34px_rgba(15,23,42,0.42)]" />
+        </div>
+      </section>
+
+      <section className="bg-white py-20 sm:py-28 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+            <div className="space-y-6">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-emerald-700">
+                <Buildings size={14} weight="duotone" />
+                Comércio hiperlocal
+              </div>
+              <div className="space-y-4">
+                <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-slate-950 leading-tight">
+                  Sua loja também pode vender dentro de condomínios.
+                </h2>
+                <p className="text-base sm:text-lg text-slate-600 font-medium leading-relaxed">
+                  Feiras, eventos internos e comércios de bairro ganham uma vitrine própria dentro do Hub. O cliente escolhe o condomínio, vê as lojas disponíveis e faz o pedido pelo mesmo fluxo profissional.
+                </p>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[
+                  'Lojas por condomínio',
+                  'Feiras com curadoria',
+                  'Retirada na barraca',
+                  'Entrega no apartamento',
+                ].map((item) => (
+                  <div key={item} className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+                    <CheckCircle size={17} weight="fill" className="shrink-0 text-emerald-500" />
+                    <span className="text-sm font-black text-slate-800">{item}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <a
+                  href={ctaPrimaryHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center rounded-2xl bg-slate-950 px-6 py-3.5 text-sm font-black text-white shadow-[0_18px_34px_-18px_rgba(15,23,42,0.8)] transition-all hover:scale-[1.01] active:scale-[0.98]"
+                >
+                  Quero levar para meu condomínio
+                </a>
+                <button
+                  type="button"
+                  onClick={() => navigate('/hub')}
+                  className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-black text-slate-800 transition-all hover:bg-slate-50 active:scale-[0.98]"
+                >
+                  Ver Hub
+                </button>
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="rounded-[2.25rem] border border-slate-200 bg-[linear-gradient(145deg,#f8fafc,#ffffff)] p-4 sm:p-5 shadow-[0_28px_60px_-36px_rgba(15,23,42,0.45)]">
+                <div className="rounded-[1.7rem] border border-slate-200 bg-white p-4 shadow-sm">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Comprando na feira</p>
+                      <p className="mt-1 text-lg font-black text-slate-950">Condomínio Spazio Campo Azuli</p>
+                    </div>
+                    <span className="rounded-xl bg-[#336886]/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]">Trocar</span>
+                  </div>
+
+                  <div className="mt-4 flex items-center gap-3 rounded-[1.25rem] border border-[#336886]/15 bg-white p-3 shadow-[0_10px_24px_rgba(15,23,42,0.05)]">
+                    <img
+                      src="/uploads/condominiums/azuli.png"
+                      alt="Condomínio Spazio Campo Azuli"
+                      loading="lazy"
+                      className="h-12 w-12 rounded-[1rem] border border-slate-100 object-cover"
+                      onError={(event) => { (event.target as HTMLImageElement).src = '/janocaminho-logo.png'; }}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-black text-slate-950">Lojas deste condomínio</p>
+                      <p className="mt-0.5 text-[11px] font-semibold text-slate-500">Feira aberta, pedidos pelo app</p>
+                    </div>
+                    <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-black text-emerald-700">Ativo</span>
+                  </div>
+
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    {[
+                      { title: 'Churrasquinho', desc: 'Retirar na barraca' },
+                      { title: 'Queijos artesanais', desc: 'Entrega no apartamento' },
+                      { title: 'Verduras frescas', desc: 'Pedido antecipado' },
+                      { title: 'Brechó da Brisa', desc: 'Compra local' },
+                    ].map((item) => (
+                      <div key={item.title} className="rounded-[1.2rem] border border-slate-100 bg-slate-50 p-3">
+                        <p className="text-sm font-black text-slate-900">{item.title}</p>
+                        <p className="mt-1 text-[11px] font-semibold text-slate-500">{item.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                  {[
+                    { value: '1 app', label: 'Hub geral e condomínio' },
+                    { value: '0 atrito', label: 'Cliente escolhe onde está' },
+                    { value: '+vendas', label: 'Comunidade perto da loja' },
+                  ].map((item) => (
+                    <div key={item.label} className="rounded-2xl bg-slate-950 px-4 py-3 text-white">
+                      <p className="text-lg font-black">{item.value}</p>
+                      <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{item.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
