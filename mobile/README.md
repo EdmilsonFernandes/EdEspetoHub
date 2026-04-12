@@ -121,6 +121,175 @@ Artifacts:
 - APK debug: `mobile/android/app/build/outputs/apk/debug/app-debug.apk`
 - AAB release: `mobile/android/app/build/outputs/bundle/release/app-release.aab`
 
+## Gerar APK Android assinado manualmente
+
+Use este fluxo quando precisar gerar o APK instalado fora da Play Store, por exemplo para disponibilizar em:
+
+`frontend/public/downloads/ja-no-caminho-android-latest.apk`
+
+Para Google Play, o arquivo recomendado e obrigatorio na maioria dos casos e o **AAB**. Veja a secao "Gerar AAB para Google Play" abaixo.
+
+### 1. Conferir requisitos
+
+No Windows/PowerShell, a partir da raiz do projeto:
+
+```powershell
+node -v
+npm -v
+java -version
+```
+
+Requisitos esperados:
+
+- Node.js 20+
+- Java 17
+- Android Studio instalado com SDK Android
+- Dependencias instaladas em `frontend/` e `mobile/`
+
+Se precisar instalar dependencias:
+
+```powershell
+npm --prefix frontend install
+npm --prefix mobile install
+```
+
+### 2. Configurar a chave de assinatura
+
+O Gradle le a assinatura em:
+
+`mobile/android/keystore.properties`
+
+Esse arquivo **nao deve ser commitado**. Ele deve ficar apenas na maquina que gera o release.
+
+Formato esperado:
+
+```properties
+storeFile=../../janocaminho-upload-key.jks
+storePassword=SUA_SENHA_DO_KEYSTORE
+keyAlias=SEU_ALIAS
+keyPassword=SUA_SENHA_DA_CHAVE
+```
+
+Notas:
+
+- `storeFile` e relativo a `mobile/android/app/build.gradle`.
+- Se a chave estiver na raiz do repo como `janocaminho-upload-key.jks`, use `../../janocaminho-upload-key.jks`.
+- Nao compartilhe `storePassword`, `keyPassword` nem o arquivo `.jks`.
+- O `.gitignore` ja ignora `*.jks`, `*.apk` e `*.aab`.
+
+Para conferir se o Gradle encontrou a assinatura, rode:
+
+```powershell
+cd mobile/android
+.\gradlew.bat signingReport
+```
+
+### 3. Atualizar versao Android
+
+Antes de gerar um release novo, atualize em:
+
+`mobile/android/app/build.gradle`
+
+Campos:
+
+```gradle
+versionCode 7
+versionName "1.0.7"
+```
+
+Regras:
+
+- `versionCode` precisa sempre aumentar a cada release enviado para a Play Store.
+- `versionName` e o numero visivel para usuario.
+
+### 4. Buildar o frontend
+
+A partir da raiz do projeto:
+
+```powershell
+npm --prefix frontend run build
+```
+
+Esse comando gera os arquivos web atualizados em `frontend/dist`.
+
+### 5. Sincronizar Capacitor
+
+Ainda na raiz:
+
+```powershell
+npm --prefix mobile run android:sync
+```
+
+Esse comando copia a build web e plugins para o projeto Android.
+
+### 6. Gerar APK assinado
+
+No Windows/PowerShell:
+
+```powershell
+cd mobile/android
+.\gradlew.bat clean assembleRelease
+```
+
+Saida esperada:
+
+`mobile/android/app/build/outputs/apk/release/app-release.apk`
+
+Esse e o APK de release assinado quando `keystore.properties` esta correto.
+
+Para conferir assinatura do APK:
+
+```powershell
+.\gradlew.bat signingReport
+```
+
+Ou, pelo Android SDK:
+
+```powershell
+apksigner verify --verbose app/build/outputs/apk/release/app-release.apk
+```
+
+### 7. Publicar APK no download da landing
+
+Se o objetivo for atualizar o APK baixado pelo site, copie o APK assinado para:
+
+`frontend/public/downloads/ja-no-caminho-android-latest.apk`
+
+PowerShell:
+
+```powershell
+Copy-Item mobile/android/app/build/outputs/apk/release/app-release.apk frontend/public/downloads/ja-no-caminho-android-latest.apk -Force
+```
+
+Depois rode o build do frontend novamente se for publicar a landing com esse APK embutido no artefato web:
+
+```powershell
+npm --prefix frontend run build
+```
+
+## Gerar AAB para Google Play
+
+Para enviar para a Play Store, use AAB:
+
+```powershell
+npm --prefix frontend run build
+npm --prefix mobile run android:sync
+cd mobile/android
+.\gradlew.bat clean bundleRelease
+```
+
+Saida esperada:
+
+`mobile/android/app/build/outputs/bundle/release/app-release.aab`
+
+Checklist antes de subir no Play Console:
+
+- `versionCode` aumentou.
+- `versionName` foi atualizado.
+- `keystore.properties` aponta para a chave correta.
+- `app-release.aab` foi gerado sem erro.
+- Teste interno feito em celular real.
+
 ## Google Play Store publication checklist
 
 1. **Create app in Play Console**
