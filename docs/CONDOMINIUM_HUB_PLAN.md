@@ -124,10 +124,38 @@ Admin:
 Future:
 
 - Condominium organizer account.
+- Condominium/fair registration UI.
+- Store request flow to join one or more condominiums.
+- Organizer approval flow before a store appears in a condominium.
 - QR code for condominium fair.
 - Store invitations.
 - Reports by event/condominium.
 - Sponsored placement inside a condominium.
+
+## Next TODO
+
+The next implementation stage should make the condominium mode affect checkout, orders, and management workflows.
+
+Checkout/order context:
+
+- Store page and checkout must know when the customer came from a condominium.
+- Checkout must ask for block/tower and apartment when condominium context is active.
+- Checkout must offer "retirar na barraca" when the store allows pickup at the fair stand.
+- Checkout must offer "entregar no apartamento" when the store/condominium allows internal apartment delivery.
+- Orders must persist condominium, block/tower, apartment, and condominium fulfillment mode.
+- Store admin/order queue must clearly show when an order came from Campo Azuli or another condominium.
+- Public tracking and receipt/print should include condominium context where relevant.
+- Condominium-specific fair hours must appear intelligently in Hub/store UI.
+
+Condominium management:
+
+- Build a frontend for creating and editing condominiums.
+- Build a frontend for linking stores to condominiums.
+- Stores should be able to request association with one or more condominiums.
+- A condominium/fair responsible person must approve or reject association requests.
+- The responsible person can be a fair organizer, condominium contact, or the central operator who manages the relationship with condominiums.
+- Only approved stores should appear in the public condominium Hub.
+- Keep super-admin override for support, moderation, and manual corrections.
 
 ## Proposed Data Model
 
@@ -234,6 +262,18 @@ GET /api/stores/:storeId/condominiums
 POST /api/stores/:storeId/condominium-requests
 ```
 
+Organizer/admin future:
+
+```text
+GET /api/admin/condominium-requests
+PATCH /api/admin/condominium-requests/:id/approve
+PATCH /api/admin/condominium-requests/:id/reject
+GET /api/organizer/condominiums
+GET /api/organizer/condominiums/:id/requests
+PATCH /api/organizer/condominiums/:id/requests/:requestId/approve
+PATCH /api/organizer/condominiums/:id/requests/:requestId/reject
+```
+
 ## Hub UX
 
 The Hub should keep the general marketplace first.
@@ -334,6 +374,8 @@ This should appear in admin queue, order details, tracking, and receipt/print wh
 5. Data governance
    - Avoid letting any merchant create public condominiums freely.
    - Start with super-admin managed condominiums.
+   - Then add store association requests with approval by organizer/responsible person.
+   - Keep audit fields for who approved/rejected store participation.
 
 ## Suggested Implementation Order
 
@@ -346,6 +388,7 @@ This should appear in admin queue, order details, tracking, and receipt/print wh
 7. Add admin/queue/tracking display.
 8. Add schedule.
 9. Add organizer/admin workflows.
+10. Add store request and organizer approval workflow.
 
 ## Test Seed - Campo Azuli
 
