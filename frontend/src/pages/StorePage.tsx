@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft, Eye, EyeSlash } from '@phosphor-icons/react';
+import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft, Eye, EyeSlash, ClipboardText } from '@phosphor-icons/react';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import { customerService } from '../services/customerService';
@@ -288,6 +288,8 @@ export function StorePage() {
     Boolean(user?.store?.slug) &&
     Boolean(storeSlug) &&
     user.store.slug === storeSlug;
+  const isNativeRuntime = Capacitor.isNativePlatform();
+  const showAdminWebReturnBar = isStoreAdmin && !isNativeRuntime && view !== 'menu';
   const normalizedRole = String(user?.role || '').toLowerCase();
   const hasAdminPrintAccess = normalizedRole === 'admin';
   const canUseAdminPrintFlow = hasAdminPrintAccess || isStoreAdmin;
@@ -2504,6 +2506,37 @@ export function StorePage() {
       </main>
 
       {isStoreAdmin && view === 'menu' && <AdminMobileBottomNav />}
+
+      {showAdminWebReturnBar && (
+        <div className="lg:hidden fixed inset-x-3 bottom-[96px] z-[140] rounded-[1.35rem] border border-slate-200/70 bg-white/92 p-1.5 shadow-[0_18px_42px_-26px_rgba(15,23,42,0.45)] backdrop-blur-2xl">
+          <div className="grid grid-cols-3 gap-1">
+            <button
+              type="button"
+              onClick={() => setView('menu')}
+              className="flex min-h-11 items-center justify-center gap-1.5 rounded-2xl px-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 transition-all active:scale-95"
+            >
+              <ArrowLeft size={16} weight="bold" />
+              Loja
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/admin/dashboard', { state: { activeTab: 'resumo' } })}
+              className="flex min-h-11 items-center justify-center gap-1.5 rounded-2xl bg-slate-900 px-2 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-[0_12px_26px_-18px_rgba(15,23,42,0.55)] transition-all active:scale-95"
+            >
+              <ShoppingCart size={16} weight="duotone" />
+              Admin
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/admin/queue')}
+              className="flex min-h-11 items-center justify-center gap-1.5 rounded-2xl bg-[#336886]/10 px-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] ring-1 ring-[#336886]/15 transition-all active:scale-95"
+            >
+              <ClipboardText size={16} weight="duotone" />
+              Fila
+            </button>
+          </div>
+        </div>
+      )}
 
       {showCustomerAccount && !isStoreAdmin && (
         <div className="fixed inset-0 z-[9998] bg-slate-950/65 backdrop-blur-sm flex items-center justify-center px-3 py-5">
