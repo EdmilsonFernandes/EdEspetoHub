@@ -24,6 +24,7 @@ import {
   Buildings,
 } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
+import { condominiumService } from '../services/condominiumService';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import { customerAccountService } from '../services/customerAccountService';
@@ -68,6 +69,19 @@ type MarketplaceStore = {
   } | null;
   openNow?: boolean;
   nextOpeningLabel?: string | null;
+};
+
+type HubCondominium = {
+  id?: string;
+  name?: string;
+  slug?: string;
+  description?: string | null;
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  logoUrl?: string | null;
+  bannerUrl?: string | null;
+  active?: boolean;
 };
 
 const normalizeSegment = (segment?: string | null) =>
@@ -179,12 +193,21 @@ const readCustomerSession = () => {
 };
 
 const FAVORITES_STORAGE_KEY = 'hub:favorites:stores';
+const SELECTED_CONDOMINIUM_STORAGE_KEY = 'hub:selected-condominium';
 const DISMISSED_CUSTOMER_ORDERS_KEY = 'hub:dismissed-customer-orders';
 const DISMISSED_ANONYMOUS_ORDERS_KEY = 'hub:dismissed-anonymous-orders';
 const STORE_PROMO_POPUP_DISMISSED_UNTIL_KEY = 'hub:store-promo-popup-dismissed-until';
 const ORDER_EXPIRATION_MS = 3 * 60 * 60 * 1000; // 3 horas
 const ACTIVE_ORDER_ALERT_MAX_AGE_MS = 6 * 60 * 60 * 1000; // 6 horas
 const STORE_PROMO_POPUP_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 horas
+
+const readSelectedCondominiumSlug = () => {
+  try {
+    return String(localStorage.getItem(SELECTED_CONDOMINIUM_STORAGE_KEY) || '').trim();
+  } catch {
+    return '';
+  }
+};
 
 const getOrderStatusTone = (status?: string) => {
   const normalized = String(status || '').trim().toLowerCase();
@@ -239,6 +262,10 @@ export function MarketplacePage() {
   const [searchedProducts, setSearchedProducts] = useState<FeaturedProduct[]>([]);
   const [segmentFilter, setSegmentFilter] = useState('all');
   const [quickFilter, setQuickFilter] = useState<'all' | 'free_shipping' | 'nearby' | 'open_now' | 'favorites'>('all');
+  const [condominiums, setCondominiums] = useState<HubCondominium[]>([]);
+  const [selectedCondominiumSlug, setSelectedCondominiumSlug] = useState(() => readSelectedCondominiumSlug());
+  const [condominiumStoreSlugs, setCondominiumStoreSlugs] = useState<string[]>([]);
+  const [condominiumStoresLoading, setCondominiumStoresLoading] = useState(false);
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
@@ -504,6 +531,69 @@ export function MarketplacePage() {
   }, [loadPortfolio]);
 
   useEffect(() => {
+    let active = true;
+    condominiumService
+      .listPublic()
+      .then((data) => {
+        if (!active) return;
+        const items = Array.isArray(data) ? data : [];
+        setCondominiums(items);
+      })
+      .catch(() => {
+        if (!active) return;
+        setCondominiums([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const slug = String(selectedCondominiumSlug || '').trim();
+    try {
+      if (slug) {
+        localStorage.setItem(SELECTED_CONDOMINIUM_STORAGE_KEY, slug);
+      } else {
+        localStorage.removeItem(SELECTED_CONDOMINIUM_STORAGE_KEY);
+      }
+    } catch {
+      // ignore
+    }
+
+    if (!slug) {
+      setCondominiumStoreSlugs([]);
+      setCondominiumStoresLoading(false);
+      return;
+    }
+
+    let active = true;
+    setCondominiumStoresLoading(true);
+    condominiumService
+      .listStores(slug)
+      .then((data) => {
+        if (!active) return;
+        const storesFromCondo = Array.isArray(data?.stores) ? data.stores : [];
+        setCondominiumStoreSlugs(
+          storesFromCondo
+            .map((store: any) => String(store?.slug || '').trim())
+            .filter(Boolean)
+        );
+      })
+      .catch(() => {
+        if (!active) return;
+        setCondominiumStoreSlugs([]);
+      })
+      .finally(() => {
+        if (!active) return;
+        setCondominiumStoresLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [selectedCondominiumSlug]);
+
+  useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedQuery(normalizeSearchText(query)), 180);
     return () => window.clearTimeout(timer);
   }, [query]);
@@ -703,14 +793,20 @@ export function MarketplacePage() {
     }>;
   }, [productSearchBySlug, stores]);
 
+  const scopedEnrichedStores = useMemo(() => {
+    if (!selectedCondominiumSlug) return enrichedStores;
+    const condominiumSlugSet = new Set(condominiumStoreSlugs);
+    return enrichedStores.filter((store) => condominiumSlugSet.has(store.slug));
+  }, [enrichedStores, condominiumStoreSlugs, selectedCondominiumSlug]);
+
   useEffect(() => {
     if (debouncedQuery.length < 2) {
       setSearchedProducts([]);
       return;
     }
-    if (enrichedStores.length === 0) return;
+    if (scopedEnrichedStores.length === 0) return;
     
-    const missingStores = enrichedStores.filter((store) => !Object.prototype.hasOwnProperty.call(productSearchBySlug, store.slug));
+    const missingStores = scopedEnrichedStores.filter((store) => !Object.prototype.hasOwnProperty.call(productSearchBySlug, store.slug));
     
     let cancelled = false;
     const loadProductIndexes = async () => {
@@ -722,7 +818,7 @@ export function MarketplacePage() {
         // Se já temos índices carregados para algumas lojas, vamos filtrar nelas primeiro
         const existingSlugs = Object.keys(productSearchBySlug);
         for (const slug of existingSlugs) {
-          const store = enrichedStores.find(s => s.slug === slug);
+          const store = scopedEnrichedStores.find(s => s.slug === slug);
           if (!store) continue;
           
           // Como não temos os objetos de produto no índice (apenas texto), 
@@ -821,20 +917,26 @@ export function MarketplacePage() {
     return () => {
       cancelled = true;
     };
-  }, [debouncedQuery, enrichedStores]);
+  }, [debouncedQuery, scopedEnrichedStores]);
 
   const segmentOptions = useMemo(() => {
-    return Array.from(new Set(enrichedStores.map((item) => item.segment))).sort((a, b) => a.localeCompare(b, 'pt-BR'));
-  }, [enrichedStores]);
+    return Array.from(new Set(scopedEnrichedStores.map((item) => item.segment))).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  }, [scopedEnrichedStores]);
 
   const fallbackRegionLabel = useMemo(() => {
-    const firstWithLocation = enrichedStores.find((store) => String(store.city || '').trim() && String(store.state || '').trim());
+    const firstWithLocation = scopedEnrichedStores.find((store) => String(store.city || '').trim() && String(store.state || '').trim());
     if (!firstWithLocation) return '';
     return `${firstWithLocation.city} - ${firstWithLocation.state}`;
-  }, [enrichedStores]);
+  }, [scopedEnrichedStores]);
+
+  const selectedCondominium = useMemo(() => {
+    const slug = String(selectedCondominiumSlug || '').trim();
+    if (!slug) return null;
+    return condominiums.find((item) => String(item?.slug || '').trim() === slug) || null;
+  }, [condominiums, selectedCondominiumSlug]);
 
   const filteredStores = useMemo(() => {
-    return enrichedStores
+    return scopedEnrichedStores
       .filter((store) => {
         if (debouncedQuery && !store.searchIndex.includes(debouncedQuery) && !store.productSearchIndex.includes(debouncedQuery)) return false;
         if (segmentFilter !== 'all' && store.segment !== segmentFilter) return false;
@@ -849,7 +951,7 @@ export function MarketplacePage() {
         if (favoritesDelta !== 0) return favoritesDelta;
         return Number(b.isOpen) - Number(a.isOpen);
       });
-  }, [enrichedStores, debouncedQuery, segmentFilter, quickFilter, favoriteStoreSlugs]);
+  }, [scopedEnrichedStores, debouncedQuery, segmentFilter, quickFilter, favoriteStoreSlugs]);
 
   const categoryTiles = useMemo(() => {
     return segmentOptions.map((segment) => categoryVisuals[segment] || { icon: Storefront, label: segment });
@@ -857,10 +959,10 @@ export function MarketplacePage() {
 
   const favoriteStores = useMemo(() => {
     if (!favoriteStoreSlugs.length) return [];
-    return enrichedStores
+    return scopedEnrichedStores
       .filter((store) => favoriteStoreSlugs.includes(store.slug))
       .sort((a, b) => Number(b.isOpen) - Number(a.isOpen) || b.rating - a.rating);
-  }, [enrichedStores, favoriteStoreSlugs]);
+  }, [scopedEnrichedStores, favoriteStoreSlugs]);
 
   useEffect(() => {
     let cancelled = false;
@@ -879,10 +981,10 @@ export function MarketplacePage() {
     };
 
     const loadApproxDistances = async () => {
-      if (!userLocation || enrichedStores.length === 0) return;
+      if (!userLocation || scopedEnrichedStores.length === 0) return;
       setDistanceLoading(true);
       try {
-        const targets = enrichedStores.slice(0, 8).filter((store) => store.addressText.length >= 8);
+        const targets = scopedEnrichedStores.slice(0, 8).filter((store) => store.addressText.length >= 8);
         const settled = await Promise.allSettled(
           targets.map(async (store) => {
             const geo = await mapsService.geocode(store.addressText);
@@ -909,12 +1011,12 @@ export function MarketplacePage() {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [userLocation, enrichedStores]);
+  }, [userLocation, scopedEnrichedStores]);
 
   useEffect(() => {
     let cancelled = false;
     const loadFeaturedProducts = async () => {
-      if (enrichedStores.length === 0) {
+      if (scopedEnrichedStores.length === 0) {
         setFeaturedProducts([]);
         return;
       }
@@ -938,7 +1040,7 @@ export function MarketplacePage() {
           }))
           .filter((item: any) => item.storeSlug && item.price > 0);
 
-        const candidates = enrichedStores.slice(0, 4);
+        const candidates = scopedEnrichedStores.slice(0, 4);
         const responses = await Promise.allSettled(
           candidates.map(async (store) => {
             const products = await productService.listPublicBySlug(store.slug);
@@ -987,7 +1089,7 @@ export function MarketplacePage() {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [enrichedStores]);
+  }, [scopedEnrichedStores]);
 
   const currency = useMemo(
     () =>
@@ -999,11 +1101,11 @@ export function MarketplacePage() {
   );
 
   const genericHighlightLabel = useMemo(() => {
-    const hasFoodHeavy = enrichedStores.some((store) =>
+    const hasFoodHeavy = scopedEnrichedStores.some((store) =>
       [ 'Restaurante', 'Hamburguer', 'Lanche', 'Pizza', 'Doces' ].includes(store.segment)
     );
     return hasFoodHeavy ? 'Itens em destaque' : 'Produtos em destaque';
-  }, [enrichedStores]);
+  }, [scopedEnrichedStores]);
 
   const formatDistance = (km: number) => {
     if (!Number.isFinite(km) || km <= 0) return 'Região';
@@ -1111,6 +1213,24 @@ export function MarketplacePage() {
       return [normalized, ...prev].slice(0, 200);
     });
   }, []);
+
+  const resetMarketplaceFilters = useCallback(() => {
+    setQuery('');
+    setDebouncedQuery('');
+    setQuickFilter('all');
+    setSegmentFilter('all');
+  }, []);
+
+  const selectCondominium = useCallback((slug: string) => {
+    const normalized = String(slug || '').trim();
+    setSelectedCondominiumSlug((current) => (current === normalized ? '' : normalized));
+    resetMarketplaceFilters();
+  }, [resetMarketplaceFilters]);
+
+  const clearCondominiumSelection = useCallback(() => {
+    setSelectedCondominiumSlug('');
+    resetMarketplaceFilters();
+  }, [resetMarketplaceFilters]);
 
   const [activeOrders, setActiveOrders] = useState<any[]>([]);
 
@@ -1564,6 +1684,99 @@ export function MarketplacePage() {
             </div>
           )}
 
+          {debouncedQuery.length < 2 && condominiums.length > 0 && (
+            <section
+              className="mb-6"
+              style={{ transition: 'all .45s ease', transitionDelay: '95ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
+            >
+              <div className="mb-3 flex items-center justify-between gap-3 px-1">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">Feira no condomínio</p>
+                  <h2 className="truncate text-[15px] font-black tracking-tight text-slate-950 sm:text-base">
+                    Escolha onde você está
+                  </h2>
+                </div>
+                {selectedCondominium ? (
+                  <button
+                    type="button"
+                    onClick={clearCondominiumSelection}
+                    className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-[0_8px_20px_rgba(15,23,42,0.04)] active:scale-95"
+                  >
+                    Hub geral
+                  </button>
+                ) : null}
+              </div>
+
+              <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto no-scrollbar px-4 pb-1">
+                {condominiums.map((condominium) => {
+                  const slug = String(condominium?.slug || '').trim();
+                  if (!slug) return null;
+                  const name = String(condominium?.name || 'Condomínio').trim();
+                  const active = selectedCondominiumSlug === slug;
+                  const imageUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
+                  const region = [condominium.city, condominium.state].map((item) => String(item || '').trim()).filter(Boolean).join(' - ');
+                  return (
+                    <button
+                      key={slug}
+                      type="button"
+                      onClick={() => selectCondominium(slug)}
+                      className={`group flex min-w-[274px] max-w-[86vw] snap-start items-center gap-3 rounded-[1.35rem] border bg-white p-3 text-left transition-all duration-200 active:scale-[0.985] sm:min-w-[320px] ${
+                        active
+                          ? 'border-[#336886]/30 shadow-[0_12px_30px_rgba(51,104,134,0.14)] ring-2 ring-[#336886]/10'
+                          : 'border-white/90 shadow-[0_8px_24px_rgba(15,23,42,0.055)]'
+                      }`}
+                    >
+                      <img
+                        src={imageUrl}
+                        alt={name}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-14 w-14 shrink-0 rounded-[1rem] border border-slate-100 bg-slate-50 object-cover shadow-[0_10px_22px_-16px_rgba(15,23,42,0.35)]"
+                        onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <Buildings size={14} weight="duotone" className={active ? 'text-[#336886]' : 'text-slate-400'} />
+                          <p className="truncate text-sm font-black text-slate-950">{name}</p>
+                        </div>
+                        <p className="mt-0.5 line-clamp-1 text-[11px] font-semibold text-slate-500">
+                          {region || condominium.description || 'Lojas do condomínio'}
+                        </p>
+                        <span className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${
+                          active ? 'bg-[#336886]/10 text-[#336886]' : 'bg-slate-100 text-slate-500'
+                        }`}>
+                          {active ? (condominiumStoresLoading ? 'Carregando lojas' : 'Selecionado') : 'Ver lojas'}
+                        </span>
+                      </div>
+                      <CaretRight
+                        size={16}
+                        weight="bold"
+                        className={`shrink-0 transition-transform group-hover:translate-x-0.5 ${active ? 'text-[#336886]' : 'text-slate-300'}`}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+
+              {selectedCondominium ? (
+                <div className="mt-3 flex items-center justify-between gap-3 rounded-[1.25rem] border border-[#336886]/10 bg-[#336886]/10 px-3 py-2.5">
+                  <p className="min-w-0 truncate text-[11px] font-bold text-[#28536C]">
+                    Lojas de {String(selectedCondominium.name || 'condomínio')}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={clearCondominiumSelection}
+                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white text-slate-500 shadow-[0_8px_18px_rgba(15,23,42,0.06)] active:scale-95"
+                    aria-label="Limpar condomínio"
+                    title="Limpar condomínio"
+                  >
+                    <X size={14} weight="bold" />
+                  </button>
+                </div>
+              ) : null}
+            </section>
+          )}
+
           {/* Seção Categorias Premium Squircle */}
           <section className="relative mb-6" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
             <div className="-mx-4 mb-6 flex snap-x snap-mandatory gap-3 overflow-x-auto no-scrollbar px-4 py-1.5">
@@ -1729,7 +1942,9 @@ export function MarketplacePage() {
                 <h2 className="text-base font-black text-slate-950 sm:text-lg">Lojas</h2>
                 {!loading && !error && filteredStores.length > 0 ? (
                   <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
-                    {productSearchLoading && debouncedQuery ? 'Buscando também nos cardápios...' : `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} perto de você`}
+                    {productSearchLoading && debouncedQuery
+                      ? 'Buscando também nos cardápios...'
+                      : `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} ${selectedCondominium ? 'no condomínio' : 'perto de você'}`}
                   </p>
                 ) : null}
               </div>
@@ -1762,6 +1977,7 @@ export function MarketplacePage() {
                     setDebouncedQuery('');
                     setQuickFilter('all');
                     setSegmentFilter('all');
+                    setSelectedCondominiumSlug('');
                   }}
                   className="mt-3 rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600"
                 >
@@ -1775,7 +1991,7 @@ export function MarketplacePage() {
                 {filteredStores.map((store) => (
                   <Link
                     key={store.id}
-                    to={`/${store.slug}`}
+                    to={selectedCondominiumSlug ? `/${store.slug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}` : `/${store.slug}`}
                     className={`group rounded-[1.65rem] border bg-white px-3.5 py-3.5 transition-all duration-200 ease-out active:scale-[0.985] ${
                       store.isOpen
                         ? 'border-white/90 shadow-[0_8px_24px_rgba(15,23,42,0.06)] md:hover:-translate-y-0.5 md:hover:shadow-[0_14px_30px_rgba(15,23,42,0.09)]'
