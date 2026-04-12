@@ -501,18 +501,20 @@ const OrderSummaryCard = ({
         </div>
 
         {/* Footer do Card */}
-        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400 leading-none mb-1">Total</span>
-            <span className="text-[1.1rem] font-black text-slate-900 tracking-tight leading-none">{totalLabel}</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className={`hidden sm:inline-flex text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg border border-transparent bg-slate-50 ${statusToneClass}`}>
+        <div className="mt-4 pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center justify-between sm:justify-start gap-4 flex-1">
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400 leading-none mb-1">Total</span>
+              <span className="text-[1.1rem] font-black text-slate-900 tracking-tight leading-none">{totalLabel}</span>
+            </div>
+            
+            <span className={`inline-flex text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg border border-transparent bg-slate-50 ${statusToneClass}`}>
               {archived ? 'Finalizado' : statusMeta.label}
             </span>
+          </div>
 
-            <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-2 w-full justify-end">
               {canPrint && (
                 <button
                   type="button"
@@ -521,10 +523,10 @@ const OrderSummaryCard = ({
                     onPrint();
                   }}
                   disabled={printBusy}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-amber-200 bg-amber-50 text-amber-600 shadow-sm hover:bg-amber-100 transition-all active:scale-90 disabled:opacity-50 shrink-0"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-amber-200 bg-amber-50 text-amber-600 shadow-sm hover:bg-amber-100 transition-all active:scale-90 disabled:opacity-50 shrink-0"
                   title="Imprimir"
                 >
-                  <Printer size={18} weight="duotone" />
+                  <Printer size={20} weight="duotone" />
                 </button>
               )}
 
@@ -535,10 +537,10 @@ const OrderSummaryCard = ({
                     event.stopPropagation();
                     onQuickStart();
                   }}
-                  className="inline-flex h-11 px-4 items-center justify-center gap-2 rounded-2xl bg-orange-500 text-white font-black text-xs uppercase tracking-wider shadow-[0_12px_24px_-10px_rgba(249,115,22,0.5)] hover:bg-orange-600 hover:shadow-orange-200 transition-all active:scale-95"
+                  className="inline-flex h-11 flex-1 sm:flex-initial px-5 items-center justify-center gap-2 rounded-2xl bg-orange-500 text-white font-black text-xs uppercase tracking-widest shadow-[0_12px_24px_-10px_rgba(249,115,22,0.5)] hover:bg-orange-600 hover:shadow-orange-200 transition-all active:scale-95 whitespace-nowrap"
                 >
-                  <Play size={16} weight="fill" />
-                  Atender
+                  <Play size={16} weight="fill" className="shrink-0" />
+                  <span>Atender</span>
                 </button>
               )}
 
@@ -549,10 +551,10 @@ const OrderSummaryCard = ({
                     event.stopPropagation();
                     onQuickFinalize();
                   }}
-                  className="inline-flex h-11 px-4 items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-white font-black text-xs uppercase tracking-wider shadow-[0_12px_24px_-10px_rgba(5,150,105,0.5)] hover:bg-emerald-700 hover:shadow-emerald-200 transition-all active:scale-95"
+                  className="inline-flex h-11 flex-1 sm:flex-initial px-5 items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-white font-black text-xs uppercase tracking-widest shadow-[0_12px_24px_-10px_rgba(5,150,105,0.5)] hover:bg-emerald-700 hover:shadow-emerald-200 transition-all active:scale-95 whitespace-nowrap"
                 >
-                  <Check size={18} weight="bold" />
-                  Pronto
+                  <Check size={18} weight="bold" className="shrink-0" />
+                  <span>Pronto</span>
                 </button>
               )}
 
@@ -563,7 +565,7 @@ const OrderSummaryCard = ({
                     event.stopPropagation();
                     onReopen();
                   }}
-                  className="px-3 h-8 inline-flex items-center justify-center rounded-xl border border-amber-300 bg-amber-50 text-[10px] font-black uppercase tracking-wider text-amber-700 hover:bg-amber-100 transition-all active:scale-95"
+                  className="px-4 h-10 inline-flex items-center justify-center rounded-2xl border border-amber-300 bg-amber-50 text-xs font-black uppercase tracking-wider text-amber-700 hover:bg-amber-100 transition-all active:scale-95"
                 >
                   Reabrir
                 </button>
