@@ -571,10 +571,9 @@ const OrderSummaryCard = ({
                   event.stopPropagation();
                   onReopen();
                 }}
-                className="h-10 w-10 inline-flex items-center justify-center rounded-xl border border-amber-300 bg-amber-50 text-amber-700 active:scale-90 transition-all"
-                title="Reabrir"
+                className="px-3 h-9 inline-flex items-center justify-center rounded-xl border border-amber-300 bg-amber-50 text-[10px] font-black uppercase tracking-wider text-amber-700 hover:bg-amber-100 transition-all active:scale-95 whitespace-nowrap"
               >
-                <ArrowsClockwise size={18} weight="bold" />
+                Reabrir
               </button>
             )}
           </div>
