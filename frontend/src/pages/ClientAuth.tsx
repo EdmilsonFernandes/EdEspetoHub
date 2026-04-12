@@ -183,6 +183,7 @@ export function ClientAuth() {
               />
             )}
             <input
+              id="email"
               name="email"
               autoComplete="email"
               type="email"
@@ -198,6 +199,7 @@ export function ClientAuth() {
             />
             <div className="relative">
               <input
+                id="password"
                 name="password"
                 autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
                 type={showPassword ? 'text' : 'password'}
