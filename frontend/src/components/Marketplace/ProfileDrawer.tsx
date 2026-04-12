@@ -102,7 +102,7 @@ export function ProfileDrawer({
 
   const actions: DrawerAction[] = isLogged
     ? [
-        { id: 'account', label: 'Minha Conta', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-sky-600', bgColor: 'bg-sky-50' },
+        { id: 'account', label: 'Minha Conta', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-[#336886]', bgColor: 'bg-[#336886]/10' },
         { id: 'orders', label: 'Meus pedidos', icon: <BellSimple size={22} weight="duotone" />, onClick: onOpenOrders || onOpenAccount, iconColor: 'text-amber-600', bgColor: 'bg-amber-50' },
         { id: 'settings', label: 'Configurações', icon: <ArrowsClockwise size={22} weight="duotone" />, onClick: onOpenSettings, iconColor: 'text-violet-600', bgColor: 'bg-violet-50' },
         { id: 'legal', label: 'Termos e privacidade', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
@@ -128,7 +128,7 @@ export function ProfileDrawer({
         } flex flex-col pt-[env(safe-area-inset-top)]`}
       >
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -left-12 top-8 h-28 w-28 rounded-full bg-sky-100/55 blur-3xl" />
+          <div className="absolute -left-12 top-8 h-28 w-28 rounded-full bg-[#336886]/12 blur-3xl" />
           <div className="absolute right-0 top-24 h-36 w-36 rounded-full bg-emerald-100/50 blur-3xl" />
         </div>
         <div className="border-b border-slate-100/80 bg-white/50 p-6 pb-4">
@@ -142,7 +142,7 @@ export function ProfileDrawer({
                     loading="eager"
                     fetchPriority="high"
                     decoding="async"
-                    className="h-16 w-16 rounded-2xl border-2 border-white object-cover shadow-[0_18px_30px_-18px_rgba(14,165,233,0.45)] ring-2 ring-sky-100"
+                    className="h-16 w-16 rounded-2xl border-2 border-white object-cover shadow-[0_18px_30px_-18px_rgba(51,104,134,0.45)] ring-2 ring-[#336886]/15"
                   />
                   <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-500 shadow-sm" />
                 </div>
@@ -183,9 +183,9 @@ export function ProfileDrawer({
                     if (storeSlug) window.location.href = `/${storeSlug}`;
                     onClose();
                   }}
-                  className="flex w-full items-center gap-3 rounded-[1.5rem] border border-sky-100 bg-white/80 p-3.5 text-sky-900 shadow-[0_14px_28px_-24px_rgba(14,165,233,0.5)] transition-all active:scale-95"
+                  className="flex w-full items-center gap-3 rounded-[1.5rem] border border-[#336886]/15 bg-white/80 p-3.5 text-[#336886] shadow-[0_14px_28px_-24px_rgba(51,104,134,0.5)] transition-all active:scale-95"
                 >
-                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-sky-50 shadow-sm text-sky-600">
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#336886]/10 shadow-sm text-[#336886]">
                     <CookingPot size={22} weight="duotone" />
                   </div>
                   <span className="text-[14px] font-black">Gerenciar Loja</span>
@@ -287,7 +287,7 @@ export function ProfileDrawer({
                   title: 'Cliente',
                   description: 'Pedir produtos, acompanhar pedidos e salvar endereços.',
                   icon: <UserCircle size={24} weight="duotone" />,
-                  tone: 'bg-sky-50 text-sky-700',
+                  tone: 'bg-[#336886]/10 text-[#336886]',
                   action: onLogin,
                 },
                 {

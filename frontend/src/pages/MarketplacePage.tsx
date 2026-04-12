@@ -183,7 +183,7 @@ const getOrderStatusTone = (status?: string) => {
   const normalized = String(status || '').trim().toLowerCase();
   const tones: Record<string, string> = {
     pending: 'bg-amber-100 text-amber-700 ring-1 ring-amber-200',
-    preparing: 'bg-sky-100 text-sky-700 ring-1 ring-sky-200',
+    preparing: 'bg-[#336886]/10 text-[#336886] ring-1 ring-[#336886]/20',
     ready: 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200',
     ready_for_delivery: 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200',
     waiting_for_motoboy: 'bg-violet-100 text-violet-700 ring-1 ring-violet-200',
@@ -1087,12 +1087,12 @@ export function MarketplacePage() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[radial-gradient(circle_at_top_right,rgba(47,157,247,0.09),transparent_30%),linear-gradient(180deg,#F8F9FB_0%,#FFFFFF_46%,#F8F9FB_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
+    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[radial-gradient(circle_at_top_right,rgba(51,104,134,0.10),transparent_30%),linear-gradient(180deg,#F8F9FB_0%,#FFFFFF_46%,#F8F9FB_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
       {/* Elemento Decorativo de Fundo (Premium Look) */}
       <div className="pointer-events-none fixed inset-x-0 top-0 z-[55] h-[max(env(safe-area-inset-top),0.75rem)] bg-[#F8F9FB]" />
-      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[320px] bg-gradient-to-b from-sky-50/90 via-white/30 to-transparent" />
+      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[320px] bg-gradient-to-b from-[#336886]/8 via-white/30 to-transparent" />
       <div className="fixed left-[-8%] top-[10%] h-[28%] w-[38%] rounded-full bg-white/80 blur-[120px] pointer-events-none -z-10" />
-      <div className="fixed top-[-10%] right-[-10%] h-[40%] w-[50%] bg-sky-200/20 blur-[120px] rounded-full pointer-events-none -z-10" />
+      <div className="fixed top-[-10%] right-[-10%] h-[40%] w-[50%] bg-[#336886]/14 blur-[120px] rounded-full pointer-events-none -z-10" />
 
       <div
         className={`pointer-events-none fixed left-1/2 z-[120] -translate-x-1/2 rounded-full border border-slate-200 bg-white/95 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm transition-all duration-200 ${
@@ -1183,11 +1183,11 @@ export function MarketplacePage() {
                   <p className="truncate text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Entregar em</p>
                   <button
                     type="button"
-                    className="inline-flex min-w-0 items-center gap-1 text-[14px] font-black text-slate-950 transition-colors duration-150 ease-out hover:text-sky-700 active:scale-[0.99]"
+                    className="inline-flex min-w-0 items-center gap-1 text-[14px] font-black text-slate-950 transition-colors duration-150 ease-out hover:text-[#336886] active:scale-[0.99]"
                     onClick={() => setQuickFilter((prev) => (prev === 'nearby' ? 'all' : 'nearby'))}
                   >
                     <span className="truncate">{displayLocationLabel}</span>
-                    <CaretDown size={14} weight="bold" className="shrink-0 text-sky-500" />
+                    <CaretDown size={14} weight="bold" className="shrink-0 text-[#336886]" />
                   </button>
                 </div>
               </div>
@@ -1195,18 +1195,18 @@ export function MarketplacePage() {
               <button
                 type="button"
                 onClick={handleHubNotificationClick}
-                className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/80 bg-white/92 text-slate-700 shadow-[0_12px_28px_-18px_rgba(15,23,42,0.42)] ring-1 ring-slate-950/5 backdrop-blur-sm transition-all duration-150 ease-out hover:text-sky-700 active:scale-95"
+                className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/80 bg-white/92 text-slate-700 shadow-[0_12px_28px_-18px_rgba(15,23,42,0.42)] ring-1 ring-slate-950/5 backdrop-blur-sm transition-all duration-150 ease-out hover:text-[#336886] active:scale-95"
                 aria-label={hubNotificationCount > 0 ? `${hubNotificationCount} notificação de pedido` : 'Abrir notificações'}
                 title={hubNotificationCount > 0 ? 'Pedidos em andamento' : 'Notificações'}
               >
                 <BellRinging size={20} weight={hubNotificationCount > 0 ? 'fill' : 'duotone'} />
                 {hubNotificationCount > 0 ? (
-                  <span className="absolute -right-0.5 -top-0.5 flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-sky-600 px-1 text-[10px] font-black leading-none text-white ring-2 ring-white shadow-[0_8px_18px_-10px_rgba(47,157,247,0.9)]">
+                  <span className="absolute -right-0.5 -top-0.5 flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#336886] px-1 text-[10px] font-black leading-none text-white ring-2 ring-white shadow-[0_8px_18px_-10px_rgba(51,104,134,0.9)]">
                     {hubNotificationCount > 9 ? '9+' : hubNotificationCount}
                   </span>
                 ) : null}
                 {hubNotificationCount > 0 ? (
-                  <span className="absolute inset-0 rounded-full border border-sky-300/70 animate-ping" />
+                  <span className="absolute inset-0 rounded-full border border-[#336886]/35 animate-ping" />
                 ) : null}
               </button>
             </div>
@@ -1214,14 +1214,14 @@ export function MarketplacePage() {
             {/* Linha 2: Busca Premium */}
             <div className="relative group px-0.5">
               <div className="pointer-events-none absolute inset-y-0 left-4 z-10 flex items-center">
-                <MagnifyingGlass size={19} weight="bold" className="text-slate-400 transition-colors duration-150 ease-out group-focus-within:text-sky-600" />
+                <MagnifyingGlass size={19} weight="bold" className="text-slate-400 transition-colors duration-150 ease-out group-focus-within:text-[#336886]" />
               </div>
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="O que você quer pedir agora?"
                 autoComplete="off"
-                className="block h-12 min-h-12 w-full appearance-none rounded-[20px] border border-slate-100 bg-white px-12 text-[14px] font-semibold text-slate-950 opacity-100 shadow-[0_8px_24px_rgba(15,23,42,0.06)] outline-none transition-all duration-200 ease-out placeholder:text-slate-400 focus:border-sky-200 focus:bg-white focus:ring-4 focus:ring-sky-500/10 focus:shadow-[0_14px_32px_rgba(15,23,42,0.1)]"
+                className="block h-12 min-h-12 w-full appearance-none rounded-[20px] border border-slate-100 bg-white px-12 text-[14px] font-semibold text-slate-950 opacity-100 shadow-[0_8px_24px_rgba(15,23,42,0.06)] outline-none transition-all duration-200 ease-out placeholder:text-slate-400 focus:border-[#336886]/25 focus:bg-white focus:ring-4 focus:ring-[#336886]/10 focus:shadow-[0_14px_32px_rgba(15,23,42,0.1)]"
               />
             </div>
 
@@ -1241,7 +1241,7 @@ export function MarketplacePage() {
                     onClick={() => setQuickFilter(filter as any)}
                     className={`whitespace-nowrap rounded-full px-3.5 py-1.5 text-[12px] transition-all duration-150 ease-out active:scale-[0.97] ${
                       active
-                        ? 'bg-sky-600 text-white shadow-[0_10px_24px_-14px_rgba(47,157,247,0.62)] font-black'
+                        ? 'bg-[#336886] text-white shadow-[0_10px_24px_-14px_rgba(51,104,134,0.68)] font-black'
                         : 'bg-white/90 text-slate-600 border border-slate-100 hover:bg-white font-bold shadow-[0_6px_16px_-14px_rgba(15,23,42,0.28)]'
                     }`}
                   >
@@ -1440,12 +1440,12 @@ export function MarketplacePage() {
                 onClick={() => setSegmentFilter('all')}
               >
                 <div className={`flex h-11 w-11 items-center justify-center rounded-[16px] transition-all duration-200 ease-out ${
-                  segmentFilter === 'all' ? 'bg-sky-600 shadow-[0_12px_26px_-14px_rgba(47,157,247,0.62)] scale-[1.04]' : 'border border-slate-100 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.045)] group-hover:bg-slate-50'
+                  segmentFilter === 'all' ? 'bg-[#336886] shadow-[0_12px_26px_-14px_rgba(51,104,134,0.68)] scale-[1.04]' : 'border border-slate-100 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.045)] group-hover:bg-slate-50'
                 }`}>
                   <List size={18} weight="duotone" className={segmentFilter === 'all' ? 'text-white scale-[0.95]' : 'text-slate-500'} />
                 </div>
                 <span className={`text-center text-[9.5px] font-bold uppercase tracking-[0.08em] transition-colors ${
-                  segmentFilter === 'all' ? 'text-sky-700' : 'text-slate-500'
+                  segmentFilter === 'all' ? 'text-[#336886]' : 'text-slate-500'
                 }`}>Todos</span>
               </button>
               
@@ -1460,7 +1460,7 @@ export function MarketplacePage() {
                     onClick={() => setSegmentFilter(prev => prev === item.label ? 'all' : item.label)}
                   >
                     <div className={`flex h-11 w-11 items-center justify-center rounded-[16px] transition-all duration-200 ease-out ${
-                      active ? 'bg-sky-600 shadow-[0_12px_26px_-14px_rgba(47,157,247,0.62)] scale-[1.04]' : 'border border-slate-100 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.045)] group-hover:bg-slate-50'
+                      active ? 'bg-[#336886] shadow-[0_12px_26px_-14px_rgba(51,104,134,0.68)] scale-[1.04]' : 'border border-slate-100 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.045)] group-hover:bg-slate-50'
                     }`}>
                       <CategoryIcon
                         size={20}
@@ -1469,7 +1469,7 @@ export function MarketplacePage() {
                       />
                     </div>
                     <span className={`text-center text-[9.5px] font-bold uppercase tracking-[0.08em] transition-colors ${
-                      active ? 'text-sky-700' : 'text-slate-500'
+                      active ? 'text-[#336886]' : 'text-slate-500'
                     }`}>{item.label}</span>
                   </button>
                 );
@@ -1482,7 +1482,7 @@ export function MarketplacePage() {
             <div className="flex items-center justify-between px-1">
               <h2 className="text-[15px] font-black tracking-tight text-slate-950">{genericHighlightLabel}</h2>
               <div className="flex gap-1">
-                <div className="h-1 w-4 rounded-full bg-sky-500" />
+                <div className="h-1 w-4 rounded-full bg-[#336886]" />
                 <div className="h-1 w-1 rounded-full bg-slate-300" />
                 <div className="h-1 w-1 rounded-full bg-slate-300" />
               </div>
@@ -1516,7 +1516,7 @@ export function MarketplacePage() {
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/94 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md ring-1 ring-black/5">
-                            <Sparkle size={9} weight="fill" className="text-sky-500" />
+                            <Sparkle size={9} weight="fill" className="text-[#336886]" />
                             Sugestão
                           </span>
                         )}
@@ -1538,7 +1538,7 @@ export function MarketplacePage() {
                           />
                           <span className="max-w-[82px] truncate text-[9px] font-bold text-slate-500">{item.storeName}</span>
                         </div>
-                        <span className="rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-black text-sky-700">
+                        <span className="rounded-full bg-[#336886]/10 px-2 py-0.5 text-[10px] font-black text-[#336886]">
                           {currency.format(item.price)}
                         </span>
                       </div>
@@ -1731,7 +1731,7 @@ export function MarketplacePage() {
         style={{ transform: isBottomNavVisible ? 'translateY(0)' : 'translateY(100%)' }}
       >
         <div className="grid h-[4.5rem] grid-cols-3 items-center px-6 pt-2 pb-[max(env(safe-area-inset-bottom),0px)]">
-          <button type="button" onClick={() => navigate('/hub')} className="flex flex-col items-center justify-center rounded-2xl bg-sky-50/90 py-1 font-bold text-sky-700 shadow-[0_8px_18px_-16px_rgba(47,157,247,0.6)] ring-1 ring-sky-100/70 transition-all duration-150 ease-out active:scale-[0.94]">
+          <button type="button" onClick={() => navigate('/hub')} className="flex flex-col items-center justify-center rounded-2xl bg-[#336886]/10 py-1 font-bold text-[#336886] shadow-[0_8px_18px_-16px_rgba(51,104,134,0.7)] ring-1 ring-[#336886]/15 transition-all duration-150 ease-out active:scale-[0.94]">
             <House size={18} weight="fill" />
             <span className="text-[9px] font-black uppercase">Início</span>
           </button>
@@ -1743,7 +1743,7 @@ export function MarketplacePage() {
             type="button"
             onClick={() => setQuickFilter((prev) => (prev === 'favorites' ? 'all' : 'favorites'))}
             className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]"
-            style={quickFilter === 'favorites' ? { color: '#2f9df7' } : undefined}
+            style={quickFilter === 'favorites' ? { color: '#336886' } : undefined}
           >
             <Heart size={18} weight={quickFilter === 'favorites' ? 'fill' : 'regular'} />
             <span className="text-[9px] font-black uppercase">Favoritos</span>
