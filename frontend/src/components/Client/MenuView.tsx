@@ -30,6 +30,7 @@ import { getStoreAvatarUrl } from "../../utils/storeAvatar";
 import { ProductModal } from "../Cart/ProductModal";
 import { GoogleMapView } from "../GoogleMapView";
 import { PlatformTrustFooter } from "../common/PlatformTrustFooter";
+import { ConfirmationModal } from "../common/ConfirmationModal";
 
 // =======================================
 // HEADER PREMIUM COM LOGO OFICIAL
@@ -554,6 +555,7 @@ export const MenuView = ({
   const [showStoreDetails, setShowStoreDetails] = useState(false);
   const [activeCategoryKey, setActiveCategoryKey] = useState("");
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
+  const [showClearCartModal, setShowClearCartModal] = useState(false);
   const [qtyPulseId, setQtyPulseId] = useState<string | null>(null);
   const [activeQtyControlId, setActiveQtyControlId] = useState<string | null>(null);
   const [flyToCartItems, setFlyToCartItems] = useState<
@@ -1772,9 +1774,7 @@ export const MenuView = ({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                if (window.confirm("Deseja realmente limpar sua sacola?")) {
-                  onClearCart();
-                }
+                setShowClearCartModal(true);
               }}
               className="absolute -top-12 right-2 flex h-10 w-10 items-center justify-center rounded-2xl border border-white/40 bg-white/30 text-rose-500 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-xl transition-all duration-300 hover:bg-rose-50 hover:text-rose-600 active:scale-90"
               title="Limpar sacola"
@@ -1847,6 +1847,21 @@ export const MenuView = ({
           </div>
         ))}
       </div>
+
+      <ConfirmationModal
+        isOpen={showClearCartModal}
+        onClose={() => setShowClearCartModal(false)}
+        onConfirm={() => {
+          onClearCart?.();
+          setShowClearCartModal(false);
+        }}
+        title="Limpar sacola?"
+        description="Todos os itens adicionados serão removidos da sua sacola. Deseja continuar?"
+        confirmLabel="Sim, limpar sacola"
+        cancelLabel="Não, manter itens"
+        variant="danger"
+        icon={<Trash size={32} weight="duotone" className="text-rose-500" />}
+      />
     </div>
   );
 };
