@@ -1019,46 +1019,65 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     return { fee: safeFee, total, itemsTotal, itemsVolume };
   };
 
+  const renderTimeline = (status: string, type: string, order?: any) => {
+    const steps = [
+      { id: 'pending', label: 'Pendente', icon: <Clock size={16} weight="fill" />, color: 'bg-amber-500' },
+      { id: 'preparing', label: 'Preparando', icon: <Play size={16} weight="fill" />, color: 'bg-orange-500' },
+      { id: 'ready', label: 'Pronto', icon: <Check size={16} weight="bold" />, color: 'bg-emerald-500' },
+      { id: 'delivered', label: 'Entregue', icon: <CheckCircle size={16} weight="fill" />, color: 'bg-[#336886]' },
+    ];
+
+    const currentIdx = steps.findIndex(s => s.id === status.toLowerCase());
+
+    return (
+      <div className="relative flex items-center justify-between px-2 py-6">
+        <div className="absolute left-0 right-0 top-1/2 h-0.5 -translate-y-1/2 bg-slate-100" />
+        {steps.map((step, idx) => {
+          const isPast = idx < currentIdx;
+          const isCurrent = idx === currentIdx;
+          
+          return (
+            <div key={step.id} className="relative z-10 flex flex-col items-center gap-2">
+              <div 
+                className={`flex h-9 w-9 items-center justify-center rounded-full border-4 border-white shadow-sm transition-all duration-500 ${
+                  isCurrent ? `${step.color} text-white scale-110 shadow-lg ring-4 ring-slate-50` : isPast ? 'bg-slate-900 text-white' : 'bg-white text-slate-300 border-slate-50'
+                }`}
+              >
+                {step.icon}
+              </div>
+              <span className={`text-[9px] font-black uppercase tracking-widest ${isCurrent ? 'text-slate-900' : 'text-slate-400'}`}>
+                {step.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   const renderMoneyBreakdown = (order: any, alignRight = false) => {
     const { fee, total, itemsVolume } = calcMoney(order);
-    if (fee <= 0) {
-      return (
-        <div
-          className={[
-            'grid w-full min-w-0 grid-cols-1 gap-2 text-[10px] sm:grid-cols-2 sm:text-[11px] font-semibold',
-            alignRight ? 'sm:ml-auto' : '',
-          ].join(' ')}
-        >
-          <span className="flex min-w-0 flex-col rounded-xl border border-slate-200 bg-white px-2.5 py-1.5">
-            <span className="text-slate-500 font-semibold text-[10px]">Volume</span>
-            <span className="truncate">{itemsVolume} {itemsVolume === 1 ? 'item' : 'itens'}</span>
-          </span>
-          <span className="flex min-w-0 flex-col rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-emerald-700">
-            <span className="text-emerald-600 font-semibold text-[10px]">Total a pagar</span>
-            <span className="truncate">{formatCurrency(total)}</span>
-          </span>
-        </div>
-      );
-    }
     return (
       <div
         className={[
-          'grid w-full min-w-0 grid-cols-1 gap-2 text-[10px] sm:grid-cols-3 sm:text-[11px] font-semibold',
+          'grid w-full min-w-0 grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3',
           alignRight ? 'sm:ml-auto' : '',
         ].join(' ')}
       >
-        <span className="flex min-w-0 flex-col rounded-xl border border-slate-200 bg-white/70 px-2.5 py-1.5">
-          <span className="text-slate-500 font-semibold text-[10px]">Volume</span>
-          <span className="truncate">{itemsVolume} {itemsVolume === 1 ? 'item' : 'itens'}</span>
-        </span>
-        <span className="flex min-w-0 flex-col rounded-xl border border-slate-200 bg-slate-100 px-2.5 py-1.5">
-          <span className="text-slate-500 font-semibold text-[10px]">Frete</span>
-          <span className="truncate">{fee > 0 ? formatCurrency(fee) : '—'}</span>
-        </span>
-        <span className="flex min-w-0 flex-col rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-emerald-700">
-          <span className="text-emerald-600 font-semibold text-[10px]">Total a pagar</span>
-          <span className="truncate">{formatCurrency(total)}</span>
-        </span>
+        <div className="flex min-w-0 items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/50 px-3 py-2 shadow-sm">
+          <span className="text-slate-400 font-black text-[9px] uppercase tracking-wider">Volume</span>
+          <span className="text-xs font-black text-slate-700">{itemsVolume} {itemsVolume === 1 ? 'item' : 'itens'}</span>
+        </div>
+        {fee > 0 && (
+          <div className="flex min-w-0 items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/50 px-3 py-2 shadow-sm">
+            <span className="text-slate-400 font-black text-[9px] uppercase tracking-wider">Frete</span>
+            <span className="text-xs font-black text-slate-700">{formatCurrency(fee)}</span>
+          </div>
+        )}
+        <div className="flex min-w-0 items-center justify-between rounded-2xl border border-emerald-100 bg-emerald-50 px-3 py-2 shadow-sm">
+          <span className="text-emerald-600 font-black text-[9px] uppercase tracking-wider">Total</span>
+          <span className="text-xs font-black text-emerald-700">{formatCurrency(total)}</span>
+        </div>
       </div>
     );
   };
