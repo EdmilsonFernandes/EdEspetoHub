@@ -424,132 +424,152 @@ const OrderSummaryCard = ({
         onClick();
       }
     }}
-    className={`relative w-full min-h-[132px] rounded-2xl border border-slate-200 ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-4 text-left flex items-stretch gap-3 transition-all duration-200 hover:border-slate-300 hover:shadow-[0_10px_24px_-18px_rgba(15,23,42,0.55)] cursor-pointer`}
+    className={`relative w-full min-h-[140px] rounded-[1.8rem] border transition-all duration-300 cursor-pointer overflow-hidden ${
+      archived 
+        ? 'bg-slate-50/80 border-slate-200/60 opacity-80' 
+        : 'bg-white border-slate-200 shadow-[0_8px_20px_-12px_rgba(15,23,42,0.12)] hover:border-[#336886]/30 hover:shadow-[0_20px_40px_-20px_rgba(15,23,42,0.18)] hover:-translate-y-0.5'
+    }`}
   >
-    {showSelector && (
-      <div className={`ml-0.5 shrink-0 w-12 rounded-xl border ${selectorToneClass} flex flex-col items-center justify-center gap-2 px-1.5 transition-all duration-200 ${selected ? 'shadow-[0_10px_20px_-16px_rgba(16,185,129,0.95)] ring-1 ring-emerald-200/70 scale-[1.01]' : 'hover:shadow-sm'}`}>
-        <PremiumCheckToggle
-          selected={selected}
-          disabled={!showQuickFinalize}
-          onToggle={onToggleSelect}
-          ariaLabel={selected ? "Desmarcar pedido" : "Selecionar pedido"}
-          title={
-            showQuickFinalize
-              ? (selected ? "Desmarcar pedido" : "Selecionar pedido")
-              : "Ação em lote indisponível neste status"
-          }
-        />
-        <div className={`flex items-center justify-center transition-all duration-200 ${selected ? 'opacity-100 translate-y-0' : 'opacity-90 translate-y-[1px]'}`}>
-          <selectorMeta.icon size={16} weight="duotone" />
+    <div className="flex items-stretch h-full">
+      {showSelector && (
+        <div className={`shrink-0 w-14 border-r transition-all duration-300 flex flex-col items-center justify-center gap-3 ${selectorToneClass} ${selected ? 'bg-opacity-100' : 'bg-opacity-40'}`}>
+          <PremiumCheckToggle
+            selected={selected}
+            disabled={!showQuickFinalize}
+            onToggle={onToggleSelect}
+            ariaLabel={selected ? "Desmarcar pedido" : "Selecionar pedido"}
+          />
+          <div className={`p-2 rounded-xl bg-white/50 shadow-sm transition-transform duration-300 ${selected ? 'scale-110' : 'scale-100'}`}>
+            <selectorMeta.icon size={18} weight="duotone" />
+          </div>
         </div>
-      </div>
-    )}
-    <div className="min-w-0 flex-1 space-y-3">
-    <div className="space-y-2 text-xs">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <span className="text-base sm:text-lg font-black text-slate-800 leading-none">
-            #{String(queueRank).padStart(2, '0')}
-          </span>
-          {hasLocationIdentifier ? (
-            <span className={`inline-flex shrink-0 min-w-0 max-w-full items-center rounded-full border px-2.5 py-0.5 whitespace-nowrap ${locationBadgeTone}`}>
-              {isMesaLocation ? (
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="text-[10px] font-semibold tracking-[0.06em]">MESA</span>
-                  <span className="text-[14px] leading-none font-black">{mesaMeta.number}</span>
-                </span>
-              ) : (
-                <span className="truncate text-[11px] font-semibold">{locationIdentifier}</span>
+      )}
+
+      <div className="flex-1 p-4 flex flex-col justify-between min-w-0">
+        <div className="space-y-3">
+          {/* Header do Card */}
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <div className={`flex items-center justify-center h-9 px-3 rounded-2xl font-black text-sm tracking-tight shadow-sm ${
+                archived ? 'bg-slate-200 text-slate-500' : 'bg-slate-900 text-white shadow-slate-900/20'
+              }`}>
+                #{String(queueRank).padStart(2, '0')}
+              </div>
+              
+              {hasLocationIdentifier && (
+                <div className={`inline-flex items-center gap-1.5 rounded-2xl border px-3 py-1.5 shadow-sm transition-colors ${locationBadgeTone}`}>
+                  {isMesaLocation ? (
+                    <>
+                      <Monitor size={14} weight="duotone" />
+                      <span className="text-[10px] font-black uppercase tracking-wider">Mesa</span>
+                      <span className="text-sm font-black leading-none">{mesaMeta.number}</span>
+                    </>
+                  ) : (
+                    <>
+                      {orderType === 'delivery' ? <Truck size={14} weight="duotone" /> : <Storefront size={14} weight="duotone" />}
+                      <span className="truncate text-[11px] font-black uppercase tracking-wider">{locationIdentifier}</span>
+                    </>
+                  )}
+                </div>
               )}
-            </span>
-          ) : (
-            <span className="rounded-full border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700">
-              {formatOrderType(order?.type)}
-            </span>
-          )}
+            </div>
+
+            <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-100 bg-slate-50/50 transition-colors ${timerToneClass}`}>
+              <Clock size={14} weight="fill" className={timerIconToneClass} />
+              <span className="text-[11px] font-black tabular-nums tracking-tight">
+                {archived ? (closedAtLabel || '--:--') : elapsedLabel}
+              </span>
+            </div>
+          </div>
+
+          {/* Nome do Cliente */}
+          <div className="min-w-0">
+            <h3 className="text-[1.15rem] font-black text-slate-900 leading-tight truncate">
+              {order.customerName || order.name || 'Cliente'}
+            </h3>
+            <p className="mt-1 text-[12px] font-bold text-slate-400 flex items-center gap-1.5">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-200" />
+              {itemsCount} {itemsCount === 1 ? 'item' : 'itens'}
+              {itemsSummary && (
+                <>
+                  <span className="text-slate-200">|</span>
+                  <span className="truncate">{itemsSummary}</span>
+                </>
+              )}
+            </p>
+          </div>
         </div>
-        <span className={`inline-flex items-center gap-1 text-[11px] font-medium whitespace-nowrap ${timerToneClass}`}>
-          <Clock size={12} weight="duotone" className={timerIconToneClass} />
-          {archived ? (closedAtLabel || '--:--') : elapsedLabel}
-        </span>
-      </div>
-    </div>
 
-    <div className="flex items-center justify-between gap-2 min-w-0">
-      <div className="min-w-0 flex-1">
-      <h3 className="text-[1.1rem] sm:text-xl font-black text-slate-900 line-clamp-1">{order.customerName || order.name || 'Cliente'}</h3>
-      </div>
-    </div>
+        {/* Footer do Card */}
+        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400 leading-none mb-1">Total</span>
+            <span className="text-[1.1rem] font-black text-slate-900 tracking-tight leading-none">{totalLabel}</span>
+          </div>
 
-    <div className="text-[12px] text-slate-500 line-clamp-1">
-      {itemsCount} {itemsCount === 1 ? 'item' : 'itens'}{itemsSummary ? ` • ${itemsSummary}` : ''}
-    </div>
+          <div className="flex items-center gap-2">
+            <span className={`hidden sm:inline-flex text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg border border-transparent bg-slate-50 ${statusToneClass}`}>
+              {archived ? 'Finalizado' : statusMeta.label}
+            </span>
 
-    <div className="border-t border-slate-100 pt-2 mt-0.5 flex flex-wrap items-end justify-between gap-2">
-      <div className="flex min-w-0 items-center gap-2">
-        <span className="text-base font-black text-slate-900 whitespace-nowrap">{totalLabel}</span>
-      </div>
-      <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
-        <span className={`text-[10px] font-black uppercase tracking-[0.06em] ${statusToneClass} whitespace-nowrap`}>
-          {archived ? 'Finalizado' : statusMeta.label}
-        </span>
-          {canPrint && (
-            <button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation();
-                onPrint();
-              }}
-              disabled={printBusy}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-amber-300 bg-amber-50 text-amber-700 shadow-sm hover:bg-amber-100 hover:text-amber-900 transition-all no-print disabled:opacity-60 disabled:hover:bg-amber-50 shrink-0"
-              aria-label={`Imprimir pedido ${orderDisplayId}`}
-              title="Imprimir pedido"
-            >
-              <Printer size={15} weight="duotone" />
-            </button>
-          )}
-        {!archived && showQuickStart && typeof onQuickStart === 'function' && (
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              onQuickStart();
-            }}
-            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-500 text-white shadow-[0_14px_24px_-14px_rgba(249,115,22,0.92)] ring-2 ring-orange-100 hover:bg-orange-600 hover:scale-105 transition-all"
-            aria-label={`Iniciar atendimento do pedido ${orderDisplayId}`}
-            title="Iniciar atendimento"
-          >
-            <Play size={18} weight="fill" />
-          </button>
-        )}
-        {!archived && showQuickFinalize && typeof onQuickFinalize === 'function' && (
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              onQuickFinalize();
-            }}
-            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-700 text-white shadow-[0_14px_24px_-14px_rgba(4,120,87,0.95)] ring-2 ring-emerald-100 hover:bg-emerald-800 hover:scale-105 transition-all"
-            aria-label={`Finalizar agora o pedido ${orderDisplayId}`}
-            title="Finalizar agora"
-          >
-            <Check size={18} weight="bold" />
-          </button>
-        )}
-        {archived && typeof onReopen === 'function' && (
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              onReopen();
-            }}
-            className="inline-flex h-7 items-center justify-center rounded-md border border-amber-300 bg-amber-50 px-2 text-[10px] font-semibold text-amber-700 hover:bg-amber-100 transition-all"
-            aria-label={`Reabrir pedido ${orderDisplayId}`}
-            title="Reabrir pedido"
-          >
-            Reabrir
-          </button>
-        )}
+            <div className="flex items-center gap-1.5">
+              {canPrint && (
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onPrint();
+                  }}
+                  disabled={printBusy}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-amber-200 bg-amber-50 text-amber-600 shadow-sm hover:bg-amber-100 transition-all active:scale-90 disabled:opacity-50 shrink-0"
+                  title="Imprimir"
+                >
+                  <Printer size={18} weight="duotone" />
+                </button>
+              )}
+
+              {!archived && showQuickStart && (
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onQuickStart();
+                  }}
+                  className="inline-flex h-11 px-4 items-center justify-center gap-2 rounded-2xl bg-orange-500 text-white font-black text-xs uppercase tracking-wider shadow-[0_12px_24px_-10px_rgba(249,115,22,0.5)] hover:bg-orange-600 hover:shadow-orange-200 transition-all active:scale-95"
+                >
+                  <Play size={16} weight="fill" />
+                  Atender
+                </button>
+              )}
+
+              {!archived && showQuickFinalize && (
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onQuickFinalize();
+                  }}
+                  className="inline-flex h-11 px-4 items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-white font-black text-xs uppercase tracking-wider shadow-[0_12px_24px_-10px_rgba(5,150,105,0.5)] hover:bg-emerald-700 hover:shadow-emerald-200 transition-all active:scale-95"
+                >
+                  <Check size={18} weight="bold" />
+                  Pronto
+                </button>
+              )}
+
+              {archived && typeof onReopen === 'function' && (
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onReopen();
+                  }}
+                  className="px-3 h-8 inline-flex items-center justify-center rounded-xl border border-amber-300 bg-amber-50 text-[10px] font-black uppercase tracking-wider text-amber-700 hover:bg-amber-100 transition-all active:scale-95"
+                >
+                  Reabrir
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
