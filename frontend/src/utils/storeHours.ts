@@ -110,8 +110,6 @@ export const isStoreOpenNow = (openingHours?: OpeningDay[]) => {
   const { day, minutes } = getSaoPauloNowParts();
   const todayEntries = resolveDayEntries(openingHours, day).filter(e => e.enabled !== false);
   
-  if (!todayEntries.length) return isOpenFromPreviousDayOvernight(openingHours, day, minutes);
-
   const openByToday = todayEntries.some((entry) => {
     const intervals = Array.isArray(entry?.intervals) ? entry.intervals : [];
     // Habilitado mas sem intervalos = aberto o dia todo
@@ -123,8 +121,10 @@ export const isStoreOpenNow = (openingHours?: OpeningDay[]) => {
       return isInsideInterval(minutes, start, end);
     });
   });
+
   if (openByToday) return true;
 
+  // Se não abriu pelo dia de hoje, SEMPRE checa se o dia anterior ainda está no período overnight
   return isOpenFromPreviousDayOvernight(openingHours, day, minutes);
 };
 

@@ -253,24 +253,11 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
     if (!Array.isArray(openingHours) || openingHours.length === 0) return true;
 
     const { day, minutes } = StoreController.getSaoPauloNowParts();
-    /**
-     * Handles day entry.
-     *
-     * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-     * @date 2025-12-17
-     */
+    
     const dayEntries = StoreController.resolveDayEntries(openingHours, day).filter(
       (entry: any) => entry?.enabled !== false
     );
     
-    // Se hoje está explicitamente desativado (enabled: false para o match exato), dayEntries virá vazio
-    // e o código cairá no overnight. Se o overnight também falhar, retornará falso.
-    // O problema antes era que o candidato da segunda-feira (day: 1) batia no domingo (jsDay: 0)
-    // se o domingo não estivesse no DB.
-    if (!dayEntries.length) {
-      return StoreController.isOpenFromPreviousDayOvernight(openingHours, day, minutes);
-    }
-
     const openByTodayInterval = dayEntries.some((dayEntry: any) => {
       const intervals = Array.isArray(dayEntry.intervals) ? dayEntry.intervals : [];
       // Se não tem intervalos mas está habilitado, considera aberto o dia todo
@@ -283,7 +270,10 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
         return StoreController.isInsideInterval(minutes, start, end);
       });
     });
+
     if (openByTodayInterval) return true;
+
+    // Se não abriu pelo horário de hoje, SEMPRE checa se o dia anterior ainda está no período overnight
     return StoreController.isOpenFromPreviousDayOvernight(openingHours, day, minutes);
   }
 
