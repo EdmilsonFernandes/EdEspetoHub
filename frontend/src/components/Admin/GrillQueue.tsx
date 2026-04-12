@@ -518,19 +518,24 @@ const OrderSummaryCard = ({
         </div>
 
         {/* Footer do Card */}
-        <div className="mt-4 pt-3 border-t border-slate-100 flex flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="flex flex-col shrink-0">
-              <span className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400 leading-none mb-1">Total</span>
-              <span className="text-[1.1rem] font-black text-slate-900 tracking-tight leading-none">{totalLabel}</span>
-            </div>
-            
-            <span className={`hidden xs:inline-flex text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg border border-transparent bg-slate-50 ${statusToneClass}`}>
+        <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-[auto_1fr_auto] items-center gap-3">
+          {/* Lado Esquerdo: Preço (Nunca encolhe) */}
+          <div className="flex flex-col shrink-0">
+            <span className="text-[9px] font-black uppercase tracking-[0.12em] text-slate-400 leading-none mb-1">Total</span>
+            <span className="text-[1.05rem] font-black text-slate-900 tracking-tight leading-none whitespace-nowrap">
+              {totalLabel}
+            </span>
+          </div>
+
+          {/* Centro: Status (Esconde se for apertado) */}
+          <div className="hidden sm:flex justify-center min-w-0">
+            <span className={`truncate text-[9px] font-black uppercase tracking-wider px-2 py-1 rounded-lg border border-transparent bg-slate-50 ${statusToneClass}`}>
               {archived ? 'Finalizado' : statusMeta.label}
             </span>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0 ml-auto">
+          {/* Lado Direito: Ações (Sempre à direita) */}
+          <div className="flex items-center gap-1.5 justify-end shrink-0">
             {!archived && showQuickStart && (
               <button
                 type="button"
@@ -538,10 +543,10 @@ const OrderSummaryCard = ({
                   event.stopPropagation();
                   onQuickStart();
                 }}
-                className="inline-flex h-11 px-5 items-center justify-center gap-2 rounded-2xl bg-orange-500 text-white font-black text-[11px] sm:text-xs uppercase tracking-widest shadow-[0_12px_24px_-10px_rgba(249,115,22,0.5)] hover:bg-orange-600 hover:shadow-orange-200 transition-all active:scale-95 whitespace-nowrap"
+                className="inline-flex h-11 min-w-[44px] px-3 sm:px-5 items-center justify-center gap-2 rounded-2xl bg-orange-500 text-white font-black text-xs uppercase tracking-widest shadow-[0_8px_20px_-8px_rgba(249,115,22,0.5)] hover:bg-orange-600 transition-all active:scale-95"
               >
                 <Play size={16} weight="fill" className="shrink-0" />
-                <span>Atender</span>
+                <span className="hidden xs:inline">Atender</span>
               </button>
             )}
 
@@ -552,10 +557,10 @@ const OrderSummaryCard = ({
                   event.stopPropagation();
                   onQuickFinalize();
                 }}
-                className="inline-flex h-11 px-5 items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-white font-black text-[11px] sm:text-xs uppercase tracking-widest shadow-[0_12px_24px_-10px_rgba(5,150,105,0.5)] hover:bg-emerald-700 hover:shadow-emerald-200 transition-all active:scale-95 whitespace-nowrap"
+                className="inline-flex h-11 min-w-[44px] px-3 sm:px-5 items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-white font-black text-xs uppercase tracking-widest shadow-[0_8px_20px_-8px_rgba(5,150,105,0.5)] hover:bg-emerald-700 transition-all active:scale-95"
               >
                 <Check size={18} weight="bold" className="shrink-0" />
-                <span>Pronto</span>
+                <span className="hidden xs:inline">Pronto</span>
               </button>
             )}
 
@@ -566,7 +571,7 @@ const OrderSummaryCard = ({
                   event.stopPropagation();
                   onReopen();
                 }}
-                className="px-4 h-9 inline-flex items-center justify-center rounded-xl border border-amber-300 bg-amber-50 text-[10px] font-black uppercase tracking-wider text-amber-700 hover:bg-amber-100 transition-all active:scale-95 whitespace-nowrap"
+                className="px-3 h-9 inline-flex items-center justify-center rounded-xl border border-amber-300 bg-amber-50 text-[10px] font-black uppercase tracking-wider text-amber-700 active:scale-95"
               >
                 Reabrir
               </button>
