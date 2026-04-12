@@ -12,7 +12,6 @@ import {
   House,
   CaretRight,
   Scroll,
-  Sparkle,
   X
 } from '@phosphor-icons/react';
 
@@ -174,19 +173,7 @@ export function ProfileDrawer({
           )}
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-8">
-          <section className="rounded-[1.65rem] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(248,250,252,0.82))] p-3 shadow-[0_20px_40px_-32px_rgba(15,23,42,0.45)] ring-1 ring-slate-100/80">
-            <div className="flex items-center gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-2xl bg-slate-900 text-white shadow-[0_18px_28px_-22px_rgba(15,23,42,0.65)]">
-                <Sparkle size={18} weight="fill" />
-              </div>
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">Acesso rápido</p>
-                <p className="text-sm font-bold text-slate-800">Tudo da sua conta em um só lugar</p>
-              </div>
-            </div>
-          </section>
-
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
           {isAdmin && (
             <section className="space-y-3">
               <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 px-1">Minha Operação</p>

@@ -7,7 +7,6 @@ import {
   MapPinLine, 
   Plus, 
   ShieldCheck, 
-  BellRinging, 
   UserCircle, 
   Package,
   CaretRight,
@@ -16,7 +15,8 @@ import {
   Camera,
   ImagesSquare,
   CheckCircle,
-  XCircle
+  XCircle,
+  BellSimpleRinging
 } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
 import { formatCurrency, formatOrderDisplayId } from '../utils/format';
@@ -43,7 +43,6 @@ export function ClientAccount() {
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileMessage, setProfileMessage] = useState('');
   const [pushEnabled, setPushEnabled] = useState(false);
-  const [pushLoading, setPushLoading] = useState(false);
   const [photoPermission, setPhotoPermission] = useState<'granted' | 'denied' | 'unknown'>('unknown');
   const [cameraPermission, setCameraPermission] = useState<'granted' | 'denied' | 'unknown'>('unknown');
   const [nameDraft, setNameDraft] = useState('');
@@ -216,26 +215,6 @@ export function ClientAccount() {
     }
   };
 
-  const handleTogglePush = async () => {
-    if (pushLoading) return;
-    setPushLoading(true);
-    try {
-      if (!Capacitor.isNativePlatform()) return;
-      const requested = await PushNotifications.requestPermissions();
-      if (requested.receive === 'granted') {
-        await PushNotifications.register();
-        setPushEnabled(true);
-      }
-    } finally {
-      setPushLoading(false);
-    }
-  };
-
-  const handleReviewPhotoAccess = async () => {
-    setProfileMessage('');
-    await pickProfileImageNative();
-  };
-
   const permissionMeta = (value: 'granted' | 'denied' | 'unknown') => {
     if (value === 'granted') {
       return {
@@ -254,7 +233,7 @@ export function ClientAccount() {
       };
     }
     return {
-      label: 'Nao verificado',
+      label: 'Não verificado',
       tone: 'text-slate-600',
       bg: 'bg-slate-50 border-slate-100',
       icon: <XCircle size={16} weight="duotone" className="text-slate-400" />,
@@ -468,84 +447,67 @@ export function ClientAccount() {
           {settingsOnly ? (
           <section
             ref={settingsSectionRef}
-            className={`rounded-[2rem] border bg-white p-5 shadow-sm transition-all ${
+            className={`relative overflow-hidden rounded-[2rem] border bg-white p-5 transition-all ${
               searchParams.get('section') === 'settings'
-                ? 'border-violet-200 shadow-[0_22px_50px_-36px_rgba(139,92,246,0.42)] ring-2 ring-violet-100'
-                : 'border-slate-100'
+                ? 'border-sky-200 shadow-[0_22px_50px_-36px_rgba(47,157,247,0.42)] ring-2 ring-sky-100'
+                : 'border-slate-100 shadow-sm'
             }`}
           >
-            <div className="flex items-center justify-between gap-3">
+            <div className="pointer-events-none absolute -right-12 -top-14 h-32 w-32 rounded-full bg-sky-100/80 blur-3xl" />
+            <div className="relative flex items-start justify-between gap-3">
               <div>
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                  <BellRinging size={16} weight="duotone" className="text-violet-500" />
+                <h3 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <ShieldCheck size={16} weight="duotone" className="text-sky-500" />
                   Configurações
                 </h3>
-                <p className="mt-2 text-sm font-bold text-slate-800">Permissões e acessos do app</p>
+                <p className="mt-2 text-base font-black text-slate-900">Permissões do aplicativo</p>
+                <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">
+                  Veja o que está liberado neste aparelho. Para alterar, use as permissões do sistema.
+                </p>
               </div>
             </div>
 
-            <div className="mt-5 grid gap-3">
-              <div className="flex items-center justify-between gap-3 rounded-[1.4rem] border border-slate-100 bg-slate-50/80 px-4 py-3">
-                <div className="min-w-0">
-                  <p className="text-[12px] font-black text-slate-800">Notificações Push</p>
-                  <p className="text-[10px] font-bold text-slate-400 leading-tight">Receba avisos de status e pedidos direto no aplicativo.</p>
-                </div>
-                <div className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] ${pushEnabled ? 'border-emerald-100 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-500'}`}>
-                  {pushEnabled ? <CheckCircle size={14} weight="fill" className="text-emerald-500" /> : <XCircle size={14} weight="fill" className="text-slate-300" />}
-                  {pushEnabled ? 'Ativo' : 'Desligado'}
-                </div>
-              </div>
-
-              <div className="rounded-[1.4rem] border border-slate-100 bg-slate-50/80 px-4 py-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-[12px] font-black text-slate-800">Galeria e camera</p>
-                    <p className="text-[10px] font-bold text-slate-400 leading-tight">
-                      Veja rapidamente se o app tem permissao para escolher foto da galeria ou tirar uma nova foto.
-                    </p>
-                  </div>
-                  <div className="grid h-10 w-10 place-items-center rounded-2xl bg-white text-violet-600 shadow-sm">
-                    <ImagesSquare size={18} weight="duotone" />
-                  </div>
-                </div>
-                <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                  {[
-                    { label: 'Galeria', state: permissionMeta(photoPermission), icon: <ImagesSquare size={16} weight="duotone" className="text-violet-500" /> },
-                    { label: 'Camera', state: permissionMeta(cameraPermission), icon: <Camera size={16} weight="duotone" className="text-violet-500" /> },
-                  ].map((item) => (
-                    <div key={item.label} className={`flex items-center justify-between rounded-2xl border px-3 py-3 ${item.state.bg}`}>
-                      <div className="flex items-center gap-2">
-                        <span className="grid h-8 w-8 place-items-center rounded-xl bg-white text-violet-600 shadow-sm">
-                          {item.icon}
-                        </span>
-                        <div>
-                          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-700">{item.label}</p>
-                          <p className={`text-[11px] font-bold ${item.state.tone}`}>{item.state.label}</p>
-                        </div>
-                      </div>
-                      {item.state.icon}
+            <div className="relative mt-5 grid gap-3">
+              {[
+                {
+                  label: 'Push',
+                  description: 'Avisos de status e acompanhamento.',
+                  state: pushEnabled
+                    ? { label: 'Permitido', tone: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-100', icon: <CheckCircle size={18} weight="fill" className="text-emerald-500" /> }
+                    : { label: 'Não permitido', tone: 'text-slate-500', bg: 'bg-slate-50 border-slate-100', icon: <XCircle size={18} weight="fill" className="text-slate-300" /> },
+                  icon: <BellSimpleRinging size={18} weight="duotone" className="text-sky-600" />,
+                },
+                {
+                  label: 'Galeria',
+                  description: 'Escolher uma imagem salva no celular.',
+                  state: permissionMeta(photoPermission),
+                  icon: <ImagesSquare size={18} weight="duotone" className="text-sky-600" />,
+                },
+                {
+                  label: 'Câmera',
+                  description: 'Tirar uma nova foto pelo aplicativo.',
+                  state: permissionMeta(cameraPermission),
+                  icon: <Camera size={18} weight="duotone" className="text-sky-600" />,
+                },
+              ].map((item) => (
+                <div key={item.label} className={`flex items-center justify-between gap-3 rounded-[1.45rem] border px-4 py-3.5 ${item.state.bg}`}>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-sky-600 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.28)]">
+                      {item.icon}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-[12px] font-black uppercase tracking-[0.14em] text-slate-800">{item.label}</p>
+                      <p className="mt-0.5 text-[10px] font-bold leading-tight text-slate-400">{item.description}</p>
                     </div>
-                  ))}
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <span className={`hidden text-[10px] font-black uppercase tracking-[0.14em] sm:inline ${item.state.tone}`}>
+                      {item.state.label}
+                    </span>
+                    {item.state.icon}
+                  </div>
                 </div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <button
-                    onClick={handleTogglePush}
-                    disabled={pushLoading}
-                    className="inline-flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700 shadow-sm ring-1 ring-slate-200 transition-all active:scale-95 disabled:opacity-60"
-                  >
-                    <BellRinging size={14} weight="fill" />
-                    Atualizar push
-                  </button>
-                  <button
-                    onClick={handleReviewPhotoAccess}
-                    disabled={profileSaving}
-                    className="inline-flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700 shadow-sm ring-1 ring-slate-200 transition-all active:scale-95 disabled:opacity-60"
-                  >
-                    <Camera size={14} weight="fill" />
-                    Atualizar foto ou camera
-                  </button>
-                </div>
-              </div>
+              ))}
             </div>
           </section>
           ) : null}
