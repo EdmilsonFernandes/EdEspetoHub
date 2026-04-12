@@ -266,6 +266,8 @@ export function MarketplacePage() {
   const [selectedCondominiumSlug, setSelectedCondominiumSlug] = useState(() => readSelectedCondominiumSlug());
   const [condominiumStoreSlugs, setCondominiumStoreSlugs] = useState<string[]>([]);
   const [condominiumStoresLoading, setCondominiumStoresLoading] = useState(false);
+  const [condominiumPickerOpen, setCondominiumPickerOpen] = useState(false);
+  const [condominiumSearch, setCondominiumSearch] = useState('');
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
@@ -935,6 +937,22 @@ export function MarketplacePage() {
     return condominiums.find((item) => String(item?.slug || '').trim() === slug) || null;
   }, [condominiums, selectedCondominiumSlug]);
 
+  const filteredCondominiums = useMemo(() => {
+    const search = normalizeSearchText(condominiumSearch);
+    const items = condominiums
+      .map((condominium) => {
+        const slug = String(condominium?.slug || '').trim();
+        const name = String(condominium?.name || 'Condomínio').trim();
+        const region = [condominium.city, condominium.state].map((item) => String(item || '').trim()).filter(Boolean).join(' - ');
+        const index = normalizeSearchText([name, slug, region, condominium.address, condominium.description].filter(Boolean).join(' '));
+        return { condominium, slug, name, region, index };
+      })
+      .filter((item) => item.slug);
+
+    if (!search) return items;
+    return items.filter((item) => item.index.includes(search));
+  }, [condominiums, condominiumSearch]);
+
   const filteredStores = useMemo(() => {
     return scopedEnrichedStores
       .filter((store) => {
@@ -1224,11 +1242,14 @@ export function MarketplacePage() {
   const selectCondominium = useCallback((slug: string) => {
     const normalized = String(slug || '').trim();
     setSelectedCondominiumSlug((current) => (current === normalized ? '' : normalized));
+    setCondominiumPickerOpen(false);
+    setCondominiumSearch('');
     resetMarketplaceFilters();
   }, [resetMarketplaceFilters]);
 
   const clearCondominiumSelection = useCallback(() => {
     setSelectedCondominiumSlug('');
+    setCondominiumSearch('');
     resetMarketplaceFilters();
   }, [resetMarketplaceFilters]);
 
@@ -1692,10 +1713,10 @@ export function MarketplacePage() {
               <div className="mb-3 flex items-center justify-between gap-3 px-1">
                 <div className="min-w-0">
                   <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">
-                    {selectedCondominium ? 'Feira selecionada' : 'Feira no condomínio'}
+                    {selectedCondominium ? 'Comprando na feira' : 'Feiras e condomínios'}
                   </p>
                   <h2 className="truncate text-[15px] font-black tracking-tight text-slate-950 sm:text-base">
-                    {selectedCondominium ? String(selectedCondominium.name || 'Condomínio') : 'Escolha onde você está'}
+                    {selectedCondominium ? String(selectedCondominium.name || 'Condomínio') : 'Encontre lojas dentro do seu condomínio'}
                   </h2>
                 </div>
                 {selectedCondominium ? (
@@ -1704,7 +1725,7 @@ export function MarketplacePage() {
                     onClick={clearCondominiumSelection}
                     className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-[0_8px_20px_rgba(15,23,42,0.04)] active:scale-95"
                   >
-                    Ver todas
+                    Lojas da região
                   </button>
                 ) : null}
               </div>
@@ -1727,54 +1748,36 @@ export function MarketplacePage() {
                       {condominiumStoresLoading ? 'Carregando lojas...' : `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} disponível${filteredStores.length === 1 ? '' : 's'}`}
                     </p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-[#336886]/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]">
-                    Ativo
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setCondominiumPickerOpen(true)}
+                    className="shrink-0 rounded-xl bg-[#336886]/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] active:scale-95"
+                  >
+                    Trocar
+                  </button>
                 </div>
               ) : (
-                <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto no-scrollbar px-4 pb-1">
-                  {condominiums.map((condominium) => {
-                    const slug = String(condominium?.slug || '').trim();
-                    if (!slug) return null;
-                    const name = String(condominium?.name || 'Condomínio').trim();
-                    const imageUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
-                    const region = [condominium.city, condominium.state].map((item) => String(item || '').trim()).filter(Boolean).join(' - ');
-                    return (
-                      <button
-                        key={slug}
-                        type="button"
-                        onClick={() => selectCondominium(slug)}
-                        className="group flex min-w-[274px] max-w-[86vw] snap-start items-center gap-3 rounded-[1.35rem] border border-white/90 bg-white p-3 text-left shadow-[0_8px_24px_rgba(15,23,42,0.055)] transition-all duration-200 active:scale-[0.985] sm:min-w-[320px]"
-                      >
-                        <img
-                          src={imageUrl}
-                          alt={name}
-                          loading="lazy"
-                          decoding="async"
-                          className="h-14 w-14 shrink-0 rounded-[1rem] border border-slate-100 bg-slate-50 object-cover shadow-[0_10px_22px_-16px_rgba(15,23,42,0.35)]"
-                          onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-1.5">
-                            <Buildings size={14} weight="duotone" className="text-slate-400" />
-                            <p className="truncate text-sm font-black text-slate-950">{name}</p>
-                          </div>
-                          <p className="mt-0.5 line-clamp-1 text-[11px] font-semibold text-slate-500">
-                            {region || condominium.description || 'Lojas do condomínio'}
-                          </p>
-                          <span className="mt-2 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">
-                            Ver lojas
-                          </span>
-                        </div>
-                        <CaretRight
-                          size={16}
-                          weight="bold"
-                          className="shrink-0 text-slate-300 transition-transform group-hover:translate-x-0.5"
-                        />
-                      </button>
-                    );
-                  })}
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setCondominiumPickerOpen(true)}
+                  className="group flex w-full items-center gap-3 rounded-[1.35rem] border border-white/90 bg-white p-3 text-left shadow-[0_8px_24px_rgba(15,23,42,0.055)] transition-all duration-200 active:scale-[0.985]"
+                >
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1rem] bg-[#336886]/10 text-[#336886]">
+                    <Buildings size={22} weight="duotone" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-black text-slate-950">
+                      Escolher feira ou condomínio
+                    </p>
+                    <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-500">
+                      {condominiums.length} local{condominiums.length === 1 ? '' : 'is'} disponível{condominiums.length === 1 ? '' : 'is'}
+                    </p>
+                  </div>
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-xl bg-slate-100 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600">
+                    Abrir
+                    <CaretRight size={13} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
+                  </span>
+                </button>
               )}
             </section>
           )}
@@ -2173,6 +2176,107 @@ export function MarketplacePage() {
           </button>
         </div>
       </nav>
+
+      {condominiumPickerOpen && (
+        <div className="fixed inset-0 z-[220] flex items-end bg-slate-950/45 px-0 pt-10 backdrop-blur-sm sm:items-center sm:justify-center sm:px-4">
+          <div className="max-h-[86vh] w-full overflow-hidden rounded-t-[1.75rem] bg-white shadow-[0_-20px_60px_rgba(15,23,42,0.25)] sm:max-w-lg sm:rounded-[1.75rem]">
+            <div className="border-b border-slate-100 px-4 pb-3 pt-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">Feiras e condomínios</p>
+                  <h2 className="mt-1 text-lg font-black tracking-tight text-slate-950">Onde você está?</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCondominiumPickerOpen(false);
+                    setCondominiumSearch('');
+                  }}
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 active:scale-95"
+                  aria-label="Fechar seleção de condomínio"
+                  title="Fechar seleção de condomínio"
+                >
+                  <X size={15} weight="bold" />
+                </button>
+              </div>
+
+              <div className="mt-4 flex items-center gap-2 rounded-[1rem] border border-slate-200 bg-slate-50 px-3 py-2.5">
+                <MagnifyingGlass size={17} weight="bold" className="shrink-0 text-slate-400" />
+                <input
+                  value={condominiumSearch}
+                  onChange={(event) => setCondominiumSearch(event.target.value)}
+                  placeholder="Buscar por nome ou cidade"
+                  className="min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-800 outline-none placeholder:text-slate-400"
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            <div className="max-h-[58vh] overflow-y-auto px-4 py-3">
+              {selectedCondominium ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearCondominiumSelection();
+                    setCondominiumPickerOpen(false);
+                  }}
+                  className="mb-3 flex w-full items-center justify-between gap-3 rounded-[1.15rem] border border-slate-200 bg-slate-50 px-3 py-3 text-left active:scale-[0.985]"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-black text-slate-950">Ver lojas da região</p>
+                    <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-500">Sair da feira selecionada</p>
+                  </div>
+                  <CaretRight size={15} weight="bold" className="shrink-0 text-slate-400" />
+                </button>
+              ) : null}
+
+              <div className="space-y-2">
+                {filteredCondominiums.map(({ condominium, slug, name, region }) => {
+                  const active = selectedCondominiumSlug === slug;
+                  const imageUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
+                  return (
+                    <button
+                      key={slug}
+                      type="button"
+                      onClick={() => selectCondominium(slug)}
+                      className={`flex w-full items-center gap-3 rounded-[1.15rem] border px-3 py-3 text-left transition-all active:scale-[0.985] ${
+                        active ? 'border-[#336886]/25 bg-[#336886]/10' : 'border-slate-100 bg-white'
+                      }`}
+                    >
+                      <img
+                        src={imageUrl}
+                        alt={name}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-12 w-12 shrink-0 rounded-[0.9rem] border border-slate-100 bg-slate-50 object-cover"
+                        onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-black text-slate-950">{name}</p>
+                        <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-500">
+                          {region || condominium.description || 'Lojas do condomínio'}
+                        </p>
+                      </div>
+                      <span className={`shrink-0 rounded-xl px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] ${
+                        active ? 'bg-white text-[#336886]' : 'bg-slate-100 text-slate-500'
+                      }`}>
+                        {active ? 'Ativo' : 'Entrar'}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {filteredCondominiums.length === 0 && (
+                <div className="py-8 text-center">
+                  <p className="text-sm font-black text-slate-800">Nenhum condomínio encontrado.</p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">Tente buscar pelo nome ou pela cidade.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <ConfirmationModal
         isOpen={showDeactivateModal}
