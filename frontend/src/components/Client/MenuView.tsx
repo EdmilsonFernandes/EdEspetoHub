@@ -450,22 +450,31 @@ const Header = ({
 
             {isLogged && (
               <div className="mt-3 sm:mt-0 sm:absolute sm:right-6 sm:bottom-4 flex flex-row items-center justify-center sm:justify-end gap-2">
-              {isAdminUser && onOpenAdmin && (
+              {(isAdminUser || isOperatorUser) && onOpenAdmin && (
                 <button
                   onClick={onOpenAdmin}
-                  className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition flex items-center gap-1 whitespace-nowrap"
+                  className="px-3 py-2 rounded-full text-xs font-black border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 whitespace-nowrap shadow-sm active:scale-95"
                 >
-                  <SquaresFour size={12} weight="duotone" />
-                  {!compact && <span className="hidden sm:inline">Painel</span>}
+                  <SquaresFour size={14} weight="duotone" />
+                  <span>Painel Admin</span>
+                </button>
+              )}
+              {isOperatorUser && onOpenQueue && (
+                <button
+                  onClick={onOpenQueue}
+                  className="px-3 py-2 rounded-full text-xs font-black border border-[#336886] bg-[#336886] text-white hover:bg-[#2a5670] transition flex items-center gap-1.5 whitespace-nowrap shadow-sm active:scale-95"
+                >
+                  <List size={14} weight="bold" />
+                  <span>Fila de Pedidos</span>
                 </button>
               )}
               {isOperatorUser && onLogout && (
                 <button
                   type="button"
                   onClick={onLogout}
-                  className="px-3 py-2 rounded-full text-xs font-semibold border border-rose-200 bg-white text-rose-700 hover:bg-rose-50 transition inline-flex items-center gap-1 whitespace-nowrap"
+                  className="px-3 py-2 rounded-full text-xs font-black border border-rose-100 bg-rose-50 text-rose-600 hover:bg-rose-100 transition inline-flex items-center gap-1.5 whitespace-nowrap active:scale-95"
                 >
-                  <SignOut size={12} weight="bold" />
+                  <SignOut size={14} weight="bold" />
                   Sair
                 </button>
               )}
