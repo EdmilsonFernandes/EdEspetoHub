@@ -246,7 +246,7 @@ export function MotoboyLogin() {
               <div className="space-y-4">
                 <div className="floating-field">
                   <input
-                    id="motoboy-email"
+                    id="email"
                     name="email"
                     autoComplete="email"
                     type="email"
@@ -260,12 +260,12 @@ export function MotoboyLogin() {
                     spellCheck={false}
                     enterKeyHint="next"
                   />
-                  <label htmlFor="motoboy-email" className="floating-label">Seu e-mail</label>
+                  <label htmlFor="email" className="floating-label">Seu e-mail</label>
                 </div>
 
                 <div className="floating-field">
                   <input
-                    id="motoboy-password"
+                    id="password"
                     name="password"
                     autoComplete="current-password"
                     type={showPassword ? 'text' : 'password'}
@@ -278,7 +278,7 @@ export function MotoboyLogin() {
                     spellCheck={false}
                     enterKeyHint="done"
                   />
-                  <label htmlFor="motoboy-password" className="floating-label">Sua senha secreta</label>
+                  <label htmlFor="password" className="floating-label">Sua senha secreta</label>
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}

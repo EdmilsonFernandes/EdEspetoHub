@@ -292,10 +292,10 @@ export function AdminLogin() {
           <div className="space-y-4">
             <div className="floating-field">
               <input
-                id="admin-identifier"
-                name="identifier"
-                autoComplete="username"
-                type="text"
+                id="email"
+                name="email"
+                autoComplete="email"
+                type="email"
                 value={loginForm.identifier}
                 onChange={e => setLoginForm(prev => ({ ...prev, identifier: e.target.value }))}
                 className="floating-input"
@@ -305,12 +305,12 @@ export function AdminLogin() {
                 spellCheck={false}
                 enterKeyHint="next"
               />
-              <label htmlFor="admin-identifier" className="floating-label">E-mail ou usuário</label>
+              <label htmlFor="email" className="floating-label">E-mail ou usuário</label>
             </div>
 
             <div className="floating-field">
               <input
-                id="admin-password"
+                id="password"
                 name="password"
                 autoComplete="current-password"
                 type={showPassword ? 'text' : 'password'}
@@ -323,7 +323,7 @@ export function AdminLogin() {
                 spellCheck={false}
                 enterKeyHint="done"
               />
-              <label htmlFor="admin-password" className="floating-label">Sua senha secreta</label>
+              <label htmlFor="password" className="floating-label">Sua senha secreta</label>
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
