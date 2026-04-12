@@ -534,8 +534,8 @@ const OrderSummaryCard = ({
             </span>
           </div>
 
-          {/* Lado Direito: Ações (Sempre à direita) */}
-          <div className="flex items-center gap-1.5 justify-end shrink-0">
+          {/* Lado Direito: Ações (Ícones Apenas para mais respiro) */}
+          <div className="flex items-center gap-2 justify-end shrink-0">
             {!archived && showQuickStart && (
               <button
                 type="button"
@@ -543,10 +543,10 @@ const OrderSummaryCard = ({
                   event.stopPropagation();
                   onQuickStart();
                 }}
-                className="inline-flex h-11 min-w-[44px] px-3 sm:px-5 items-center justify-center gap-2 rounded-2xl bg-orange-500 text-white font-black text-xs uppercase tracking-widest shadow-[0_8px_20px_-8px_rgba(249,115,22,0.5)] hover:bg-orange-600 transition-all active:scale-95"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-500 text-white shadow-[0_8px_20px_-8px_rgba(249,115,22,0.5)] hover:bg-orange-600 transition-all active:scale-90"
+                title="Atender"
               >
-                <Play size={16} weight="fill" className="shrink-0" />
-                <span className="hidden xs:inline">Atender</span>
+                <Play size={20} weight="fill" />
               </button>
             )}
 
@@ -557,10 +557,10 @@ const OrderSummaryCard = ({
                   event.stopPropagation();
                   onQuickFinalize();
                 }}
-                className="inline-flex h-11 min-w-[44px] px-3 sm:px-5 items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-white font-black text-xs uppercase tracking-widest shadow-[0_8px_20px_-8px_rgba(5,150,105,0.5)] hover:bg-emerald-700 transition-all active:scale-95"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-[0_8px_20px_-8px_rgba(5,150,105,0.5)] hover:bg-emerald-700 transition-all active:scale-90"
+                title="Pronto"
               >
-                <Check size={18} weight="bold" className="shrink-0" />
-                <span className="hidden xs:inline">Pronto</span>
+                <Check size={22} weight="bold" />
               </button>
             )}
 
@@ -571,9 +571,10 @@ const OrderSummaryCard = ({
                   event.stopPropagation();
                   onReopen();
                 }}
-                className="px-3 h-9 inline-flex items-center justify-center rounded-xl border border-amber-300 bg-amber-50 text-[10px] font-black uppercase tracking-wider text-amber-700 active:scale-95"
+                className="h-10 w-10 inline-flex items-center justify-center rounded-xl border border-amber-300 bg-amber-50 text-amber-700 active:scale-90 transition-all"
+                title="Reabrir"
               >
-                Reabrir
+                <ArrowsClockwise size={18} weight="bold" />
               </button>
             )}
           </div>
