@@ -1814,12 +1814,9 @@ export function StorePage() {
       localStorage.removeItem('adminSession');
     } catch {}
     setUser(null);
-    if (storeSlug) {
-      navigate(`/${storeSlug}`, { replace: true });
-      return;
-    }
     navigate('/', { replace: true });
   };
+
   const handleCustomerLogout = () => {
     persistCustomerSession(null);
     setCustomerAddresses([]);

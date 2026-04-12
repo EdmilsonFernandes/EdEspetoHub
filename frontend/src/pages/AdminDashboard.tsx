@@ -2420,8 +2420,9 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           onSelect={handleNavSelect}
           onLogout={() => {
             logout();
-            navigate('/admin');
+            navigate('/');
           }}
+
         />
 
         <div className="min-w-0 space-y-4 flex-1">

@@ -10,6 +10,7 @@ import { AppErrorBoundary } from './components/common/AppErrorBoundary';
 import { NativePushPermissionBanner } from './components/common/NativePushPermissionBanner';
 import { NativeAppNavigator } from './components/common/NativeAppNavigator';
 import { OfflineAlert } from './components/common/OfflineAlert';
+import { PremiumSplashScreen } from './components/common/PremiumSplashScreen';
 import './index.css';
 import { MotoboyLayout } from './layouts/MotoboyLayout';
 
@@ -75,6 +76,7 @@ const AppRouteFallback = () => (
 function App() {
   return (
     <ThemeProvider>
+      <PremiumSplashScreen />
       <ToastProvider>
         <Router>
           <OfflineAlert />

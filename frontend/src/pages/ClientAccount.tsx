@@ -187,9 +187,8 @@ export function ClientAccount() {
       void customerAccountService.unregisterPushToken({ token });
     }
     localStorage.removeItem('customerSession');
-    navigate('/hub', { replace: true });
+    navigate('/', { replace: true });
   };
-
   const handleSaveProfile = async () => {
     if (profileSaving) return;
     setProfileSaving(true);
