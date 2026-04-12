@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { ArrowLeft } from '@phosphor-icons/react';
+import { useAuth } from '../../contexts/AuthContext';
 
 const STACK_KEY = 'jnk_native_route_stack_v1';
 const HIDDEN_KEY = 'jnk_native_nav_hidden_v1';
@@ -43,8 +44,14 @@ const isEligiblePath = (pathname: string) => {
 export function NativeAppNavigator() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { auth } = useAuth();
   const currentPath = getCurrentPath(location);
   const [isHidden, setIsHidden] = useState(false);
+
+  const isStoreAdmin = useMemo(() => {
+    const role = String(auth?.user?.role || '').toUpperCase();
+    return role === 'ADMIN' || role === 'OPERATOR' || role === 'CHURRASQUEIRO';
+  }, [auth?.user?.role]);
 
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
@@ -88,7 +95,7 @@ export function NativeAppNavigator() {
     return '';
   }, [currentPath]);
 
-  if (!Capacitor.isNativePlatform() || !isEligiblePath(location.pathname) || isHidden) {
+  if (!Capacitor.isNativePlatform() || !isEligiblePath(location.pathname) || isHidden || isStoreAdmin) {
     return null;
   }
 
