@@ -248,19 +248,18 @@ export function MotoboyLogin() {
                   <input
                     id="email"
                     name="email"
-                    autoComplete="email"
-                    type="email"
+                    autoComplete="username"
+                    type="text"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                     className="floating-input"
                     placeholder=" "
-                    inputMode="email"
                     autoCapitalize="none"
                     autoCorrect="off"
                     spellCheck={false}
                     enterKeyHint="next"
                   />
-                  <label htmlFor="email" className="floating-label">Seu e-mail</label>
+                  <label htmlFor="email" className="floating-label">Seu e-mail ou usuário</label>
                 </div>
 
                 <div className="floating-field">

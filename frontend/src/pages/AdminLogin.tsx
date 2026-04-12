@@ -294,8 +294,8 @@ export function AdminLogin() {
               <input
                 id="email"
                 name="email"
-                autoComplete="email"
-                type="email"
+                autoComplete="username"
+                type="text"
                 value={loginForm.identifier}
                 onChange={e => setLoginForm(prev => ({ ...prev, identifier: e.target.value }))}
                 className="floating-input"
