@@ -27,6 +27,27 @@ import { App as CapacitorApp } from '@capacitor/app';
 import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 
+// Componente Switch Simples
+function Switch({ checked, onChange, disabled }: { checked: boolean; onChange: () => void; disabled?: boolean }) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onChange}
+      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#336886] focus:ring-offset-2 ${
+        checked ? 'bg-[#336886]' : 'bg-slate-200'
+      } ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}
+    >
+      <span
+        aria-hidden="true"
+        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+          checked ? 'translate-x-5' : 'translate-x-0'
+        }`}
+      />
+    </button>
+  );
+}
+
 export function ClientAccount() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -258,20 +279,40 @@ export function ClientAccount() {
       return;
     }
 
+    // Se já estiver permitido e o usuário clicar na chave para DESLIGAR
     if (isGranted) {
+      if (type === 'push') {
+        try {
+          const token = String(localStorage.getItem('jnk_mobile_push_token') || '').trim();
+          if (token) {
+            await customerAccountService.unregisterPushToken({ token });
+            localStorage.removeItem('jnk_mobile_push_token');
+          }
+        } catch (e) {
+          console.error('Falha ao desregistrar push token:', e);
+        }
+      }
+      
+      // Abre as configurações do sistema para o usuário remover a permissão manualmente
       await openAppSettings();
       return;
     }
 
+    // Se estiver desligado e o usuário clicar para LIGAR
     try {
       if (type === 'push' && Capacitor.isPluginAvailable('PushNotifications')) {
         const requested = await PushNotifications.requestPermissions();
         if (requested.receive === 'granted') {
           await PushNotifications.register();
+        } else {
+          await openAppSettings();
         }
       }
       if ((type === 'photos' || type === 'camera') && Capacitor.isPluginAvailable('Camera')) {
-        await CapCamera.requestPermissions({ permissions: [type] });
+        const requested = await CapCamera.requestPermissions({ permissions: [type] });
+        if (requested[type] !== 'granted') {
+          await openAppSettings();
+        }
       }
     } catch {
       await openAppSettings();
@@ -511,30 +552,33 @@ export function ClientAccount() {
             <div className="relative mt-5 grid gap-3">
               {[
                 {
+                  id: 'push',
                   label: 'Push',
                   description: 'Avisos de status e acompanhamento.',
                   state: pushEnabled
-                    ? { label: 'Permitido', tone: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-100', icon: <CheckCircle size={18} weight="fill" className="text-emerald-500" /> }
-                    : { label: 'Não permitido', tone: 'text-slate-500', bg: 'bg-slate-50 border-slate-100', icon: <XCircle size={18} weight="fill" className="text-slate-300" /> },
+                    ? { label: 'Permitido', tone: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-100' }
+                    : { label: 'Bloqueado', tone: 'text-slate-500', bg: 'bg-slate-50 border-slate-100' },
                   icon: <BellSimpleRinging size={18} weight="duotone" className="text-[#336886]" />,
+                  checked: pushEnabled,
                   action: () => handlePermissionAction('push', pushEnabled),
-                  actionLabel: pushEnabled ? 'Gerenciar' : 'Ativar',
                 },
                 {
+                  id: 'photos',
                   label: 'Galeria',
                   description: 'Escolher uma imagem salva no celular.',
                   state: permissionMeta(photoPermission),
                   icon: <ImagesSquare size={18} weight="duotone" className="text-[#336886]" />,
+                  checked: photoPermission === 'granted',
                   action: () => handlePermissionAction('photos', photoPermission === 'granted'),
-                  actionLabel: photoPermission === 'granted' ? 'Gerenciar' : 'Ativar',
                 },
                 {
+                  id: 'camera',
                   label: 'Câmera',
                   description: 'Tirar uma nova foto pelo aplicativo.',
                   state: permissionMeta(cameraPermission),
                   icon: <Camera size={18} weight="duotone" className="text-[#336886]" />,
+                  checked: cameraPermission === 'granted',
                   action: () => handlePermissionAction('camera', cameraPermission === 'granted'),
-                  actionLabel: cameraPermission === 'granted' ? 'Gerenciar' : 'Ativar',
                 },
               ].map((item) => (
                 <div key={item.label} className={`flex flex-col gap-3 rounded-[1.45rem] border px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between ${item.state.bg}`}>
@@ -547,18 +591,14 @@ export function ClientAccount() {
                       <p className="mt-0.5 text-[10px] font-bold leading-tight text-slate-400">{item.description}</p>
                     </div>
                   </div>
-                  <div className="flex shrink-0 items-center justify-end gap-2">
+                  <div className="flex shrink-0 items-center justify-end gap-3">
                     <span className={`text-[10px] font-black uppercase tracking-[0.14em] ${item.state.tone}`}>
                       {item.state.label}
                     </span>
-                    {item.state.icon}
-                    <button
-                      type="button"
-                      onClick={item.action}
-                      className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm transition-all active:scale-95"
-                    >
-                      {item.actionLabel}
-                    </button>
+                    <Switch 
+                      checked={item.checked} 
+                      onChange={item.action}
+                    />
                   </div>
                 </div>
               ))}
