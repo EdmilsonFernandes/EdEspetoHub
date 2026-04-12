@@ -164,7 +164,7 @@ Esse arquivo **nao deve ser commitado**. Ele deve ficar apenas na maquina que ge
 Formato esperado:
 
 ```properties
-storeFile=../../janocaminho-upload-key.jks
+storeFile=../../../janocaminho-upload-key.jks
 storePassword=SUA_SENHA_DO_KEYSTORE
 keyAlias=SEU_ALIAS
 keyPassword=SUA_SENHA_DA_CHAVE
@@ -172,8 +172,8 @@ keyPassword=SUA_SENHA_DA_CHAVE
 
 Notas:
 
-- `storeFile` e relativo a `mobile/android/app/build.gradle`.
-- Se a chave estiver na raiz do repo como `janocaminho-upload-key.jks`, use `../../janocaminho-upload-key.jks`.
+- `storeFile` e resolvido a partir de `mobile/android/app`.
+- Se a chave estiver na raiz do repo como `janocaminho-upload-key.jks`, use `../../../janocaminho-upload-key.jks`.
 - Nao compartilhe `storePassword`, `keyPassword` nem o arquivo `.jks`.
 - O `.gitignore` ja ignora `*.jks`, `*.apk` e `*.aab`.
 
