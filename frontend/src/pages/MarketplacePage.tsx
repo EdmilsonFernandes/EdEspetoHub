@@ -236,6 +236,7 @@ export function MarketplacePage() {
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [productSearchBySlug, setProductSearchBySlug] = useState<Record<string, string>>({});
   const [productSearchLoading, setProductSearchLoading] = useState(false);
+  const [searchedProducts, setSearchedProducts] = useState<FeaturedProduct[]>([]);
   const [segmentFilter, setSegmentFilter] = useState('all');
   const [quickFilter, setQuickFilter] = useState<'all' | 'free_shipping' | 'nearby' | 'open_now' | 'favorites'>('all');
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
@@ -703,23 +704,89 @@ export function MarketplacePage() {
   }, [productSearchBySlug, stores]);
 
   useEffect(() => {
-    if (debouncedQuery.length < 2 || enrichedStores.length === 0) return;
+    if (debouncedQuery.length < 2) {
+      setSearchedProducts([]);
+      return;
+    }
+    if (enrichedStores.length === 0) return;
+    
     const missingStores = enrichedStores.filter((store) => !Object.prototype.hasOwnProperty.call(productSearchBySlug, store.slug));
-    if (missingStores.length === 0) return;
-
+    
     let cancelled = false;
     const loadProductIndexes = async () => {
       setProductSearchLoading(true);
       const batchSize = 4;
       try {
+        const allMatchedProducts: FeaturedProduct[] = [];
+        
+        // Se já temos índices carregados para algumas lojas, vamos filtrar nelas primeiro
+        const existingSlugs = Object.keys(productSearchBySlug);
+        for (const slug of existingSlugs) {
+          const store = enrichedStores.find(s => s.slug === slug);
+          if (!store) continue;
+          
+          // Como não temos os objetos de produto no índice (apenas texto), 
+          // precisamos buscar novamente ou teríamos que mudar a estrutura do índice.
+          // Para ser fiel ao pedido, vamos buscar os produtos das lojas que deram match no índice.
+          if (productSearchBySlug[slug].includes(debouncedQuery)) {
+             try {
+               const products = await productService.listPublicBySlug(slug);
+               const matches = (Array.isArray(products) ? products : [])
+                 .filter((p: any) => 
+                   normalizeSearchText(p.name).includes(debouncedQuery) || 
+                   normalizeSearchText(p.description || p.desc).includes(debouncedQuery)
+                 )
+                 .map((p: any) => ({
+                   id: String(p.id || `${slug}-${p.name}`),
+                   storeSlug: slug,
+                   storeName: store.name,
+                   name: String(p.name || 'Produto'),
+                   storeLogo: store.logo,
+                   imageUrl: resolveAssetUrl(p.imageUrl || undefined) || store.logo,
+                   price: Number((p.promoActive && p.promoPrice != null ? p.promoPrice : p.price) || 0),
+                   sponsored: false,
+                 }));
+               allMatchedProducts.push(...matches);
+             } catch (e) {
+               console.error(`Erro ao buscar produtos da loja ${slug}`, e);
+             }
+          }
+        }
+
+        if (!cancelled) setSearchedProducts(allMatchedProducts.slice(0, 20));
+
+        // Agora carrega para as lojas que ainda não têm índice
         for (let start = 0; start < missingStores.length && !cancelled; start += batchSize) {
           const batch = missingStores.slice(start, start + batchSize);
           const results = await Promise.all(
             batch.map(async (store) => {
               try {
                 const products = await productService.listPublicBySlug(store.slug);
+                const productList = Array.isArray(products) ? products : [];
+                
+                // Captura produtos que dão match
+                const matches = productList
+                  .filter((p: any) => 
+                    normalizeSearchText(p.name).includes(debouncedQuery) || 
+                    normalizeSearchText(p.description || p.desc).includes(debouncedQuery)
+                  )
+                  .map((p: any) => ({
+                    id: String(p.id || `${store.slug}-${p.name}`),
+                    storeSlug: store.slug,
+                    storeName: store.name,
+                    name: String(p.name || 'Produto'),
+                    storeLogo: store.logo,
+                    imageUrl: resolveAssetUrl(p.imageUrl || undefined) || store.logo,
+                    price: Number((p.promoActive && p.promoPrice != null ? p.promoPrice : p.price) || 0),
+                    sponsored: false,
+                  }));
+                
+                if (matches.length > 0 && !cancelled) {
+                  setSearchedProducts(prev => [...prev, ...matches].slice(0, 24));
+                }
+
                 const index = normalizeSearchText(
-                  (Array.isArray(products) ? products : [])
+                  productList
                     .map((product: any) =>
                       [
                         product?.name,
@@ -754,7 +821,7 @@ export function MarketplacePage() {
     return () => {
       cancelled = true;
     };
-  }, [debouncedQuery, enrichedStores, productSearchBySlug]);
+  }, [debouncedQuery, enrichedStores]);
 
   const segmentOptions = useMemo(() => {
     return Array.from(new Set(enrichedStores.map((item) => item.segment))).sort((a, b) => a.localeCompare(b, 'pt-BR'));
@@ -1793,6 +1860,61 @@ export function MarketplacePage() {
               </div>
             )}
           </section>
+
+          {/* Nova Seção: Itens encontrados na busca */}
+          {debouncedQuery.length >= 2 && searchedProducts.length > 0 && (
+            <section className="mb-8 space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="flex items-center justify-between px-1">
+                <h2 className="text-[15px] font-black tracking-tight text-slate-950">
+                  Itens encontrados que você busca
+                </h2>
+                <div className="flex gap-1">
+                  <span className="text-[10px] font-bold text-[#336886] uppercase tracking-wider">
+                    {searchedProducts.length} itens
+                  </span>
+                </div>
+              </div>
+              
+              <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto no-scrollbar px-1 pb-3">
+                {searchedProducts.map((item) => (
+                  <Link
+                    key={`search-res-${item.storeSlug}-${item.id}`}
+                    to={`/${item.storeSlug}`}
+                    className="group min-w-[160px] snap-start overflow-hidden rounded-[1.45rem] border border-white bg-white shadow-[0_8px_24px_rgba(15,23,42,0.06)] transition-all duration-200 ease-out hover:scale-[1.015] active:scale-[0.97]"
+                  >
+                    <div className="relative h-[90px] overflow-hidden bg-slate-100">
+                      <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        onError={(e) => { (e.target as HTMLImageElement).src = item.storeLogo; }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    </div>
+
+                    <div className="bg-white p-2.5">
+                      <p className="line-clamp-1 text-[11px] font-black tracking-tight text-slate-950">{item.name}</p>
+                      <div className="mt-1.5 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <img 
+                            src={item.storeLogo} 
+                            alt={item.storeName} 
+                            className="h-4 w-4 rounded-full border border-slate-100 object-cover" 
+                            onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(item.storeSlug, item.storeName); }}
+                          />
+                          <span className="truncate text-[9px] font-bold text-slate-400">{item.storeName}</span>
+                        </div>
+                        <span className="shrink-0 text-[10px] font-black text-[#336886]">
+                          {currency.format(item.price)}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
 
           <section className="pb-2 space-y-2 sm:pb-4">
             <p className="text-center text-xs font-semibold text-slate-500">Conectando você aos melhores lojistas da região.</p>

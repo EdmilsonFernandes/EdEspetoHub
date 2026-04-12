@@ -274,12 +274,13 @@ export function ClientAccount() {
 
   const handlePermissionAction = async (type: 'push' | 'photos' | 'camera', isGranted: boolean) => {
     setProfileMessage('');
+    
     if (!Capacitor.isNativePlatform()) {
-      setProfileMessage('Permissões do aplicativo só podem ser gerenciadas no celular.');
+      setProfileMessage('As permissões só podem ser alteradas no aplicativo para celular.');
       return;
     }
 
-    // Se já estiver permitido e o usuário clicar na chave para DESLIGAR
+    // Se o usuário quer DESLIGAR uma permissão já concedida
     if (isGranted) {
       if (type === 'push') {
         try {
@@ -289,16 +290,21 @@ export function ClientAccount() {
             localStorage.removeItem('jnk_mobile_push_token');
           }
         } catch (e) {
-          console.error('Falha ao desregistrar push token:', e);
+          console.error('Erro ao desativar push no servidor:', e);
         }
       }
       
-      // Abre as configurações do sistema para o usuário remover a permissão manualmente
-      await openAppSettings();
+      // Mensagem explicativa pois o app não pode desligar permissão de sistema sozinho
+      setProfileMessage(`Para desativar a ${type === 'push' ? 'notificação' : type === 'camera' ? 'câmera' : 'galeria'}, você deve desmarcá-la nas configurações do sistema que vamos abrir agora.`);
+      
+      // Pequeno delay para o usuário ler a mensagem antes de abrir as configurações
+      setTimeout(async () => {
+        await openAppSettings();
+      }, 1500);
       return;
     }
 
-    // Se estiver desligado e o usuário clicar para LIGAR
+    // Se o usuário quer LIGAR uma permissão
     try {
       if (type === 'push' && Capacitor.isPluginAvailable('PushNotifications')) {
         const requested = await PushNotifications.requestPermissions();
@@ -307,19 +313,19 @@ export function ClientAccount() {
         } else {
           await openAppSettings();
         }
-      }
-      if ((type === 'photos' || type === 'camera') && Capacitor.isPluginAvailable('Camera')) {
+      } else if ((type === 'photos' || type === 'camera') && Capacitor.isPluginAvailable('Camera')) {
         const requested = await CapCamera.requestPermissions({ permissions: [type] });
         if (requested[type] !== 'granted') {
           await openAppSettings();
         }
       }
-    } catch {
+    } catch (err) {
+      console.error('Erro ao solicitar permissão:', err);
       await openAppSettings();
-      return;
     }
 
-    await refreshNativePermissions();
+    // Atualiza o estado visual das chaves
+    setTimeout(() => void refreshNativePermissions(), 1000);
   };
 
   const handleChangePassword = async () => {
