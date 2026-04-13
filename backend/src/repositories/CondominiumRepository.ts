@@ -66,6 +66,14 @@ export class CondominiumRepository {
     });
   }
 
+  listStoreLinksByCondominiumId(condominiumId: string) {
+    return this.storeCondominiumRepository.find({
+      where: { condominiumId, active: true },
+      relations: [ 'store', 'store.settings' ],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   /**
    * Finds an active condominium by slug.
    *
@@ -294,6 +302,35 @@ export class CondominiumRepository {
           updated_at = NOW();
       `,
       [storeId, condominiumId, active]
+    );
+  }
+
+  async updateStoreCondominiumSettings(
+    condominiumId: string,
+    storeId: string,
+    payload: {
+      allowPickupAtStall?: boolean;
+      allowApartmentDelivery?: boolean;
+      apartmentDeliveryFee?: number | null;
+    }
+  ) {
+    await AppDataSource.query(
+      `
+        UPDATE store_condominiums
+        SET allow_pickup_at_stall = COALESCE($3, allow_pickup_at_stall),
+            allow_apartment_delivery = COALESCE($4, allow_apartment_delivery),
+            apartment_delivery_fee = $5,
+            updated_at = NOW()
+        WHERE condominium_id = $1
+          AND store_id = $2;
+      `,
+      [
+        condominiumId,
+        storeId,
+        typeof payload.allowPickupAtStall === 'boolean' ? payload.allowPickupAtStall : null,
+        typeof payload.allowApartmentDelivery === 'boolean' ? payload.allowApartmentDelivery : null,
+        payload.apartmentDeliveryFee ?? null,
+      ]
     );
   }
 

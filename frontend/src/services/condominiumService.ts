@@ -67,6 +67,21 @@ export const condominiumService = {
     return adminRequest(`/admin/condominiums/${encodeURIComponent(condominiumId)}/stores`, { method: 'POST', body: { storeId } });
   },
 
+  adminUpdateStoreSettings(
+    condominiumId: string,
+    storeId: string,
+    payload: {
+      allowPickupAtStall?: boolean;
+      allowApartmentDelivery?: boolean;
+      apartmentDeliveryFee?: number | string | null;
+    }
+  ) {
+    return adminRequest(`/admin/condominiums/${encodeURIComponent(condominiumId)}/stores/${encodeURIComponent(storeId)}/settings`, {
+      method: 'PATCH',
+      body: payload,
+    });
+  },
+
   adminAddStoreToEvent(eventId: string, storeId: string) {
     return adminRequest(`/admin/condominium-events/${encodeURIComponent(eventId)}/stores`, { method: 'POST', body: { storeId } });
   },

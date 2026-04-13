@@ -98,6 +98,7 @@ routes.post('/admin/condominiums/:condominiumId/events', requireAuth, requireRol
 routes.patch('/admin/condominium-events/:eventId', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminUpdateEvent);
 routes.patch('/admin/condominium-events/:eventId/deactivate', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminDeactivateEvent);
 routes.post('/admin/condominiums/:condominiumId/stores', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminApproveStore);
+routes.patch('/admin/condominiums/:condominiumId/stores/:storeId/settings', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminUpdateStoreSettings);
 routes.post('/admin/condominium-events/:eventId/stores', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminAddStoreToEvent);
 routes.patch('/admin/condominium-requests/:requestId/review', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminReviewRequest);
  routes.post('/admin/payments/:paymentId/reprocess', requireAuth, requireRole('SUPER_ADMIN'), PaymentController.reprocess);

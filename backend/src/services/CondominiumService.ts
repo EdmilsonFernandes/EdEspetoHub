@@ -42,12 +42,20 @@ export class CondominiumService {
         events: await this.condominiumRepository.listEventsByCondominiumId(condominium.id, new Date(Date.now() - 24 * 60 * 60 * 1000)),
       }))
     );
+    const storeLinkGroups = await Promise.all(
+      condominiums.map(async (condominium) => ({
+        condominiumId: condominium.id,
+        storeLinks: await this.condominiumRepository.listStoreLinksByCondominiumId(condominium.id),
+      }))
+    );
     const eventsByCondominium = new Map(eventGroups.map((group) => [group.condominiumId, group.events]));
+    const storeLinksByCondominium = new Map(storeLinkGroups.map((group) => [group.condominiumId, group.storeLinks]));
 
     return {
       condominiums: condominiums.map((condominium) => ({
         ...this.toPublicCondominium(condominium, null),
         events: (eventsByCondominium.get(condominium.id) || []).map((event) => this.toPublicEvent(event)),
+        approvedStores: (storeLinksByCondominium.get(condominium.id) || []).map((link: any) => this.toPublicStoreLink(link)),
       })),
       stores: stores.map((store: any) => ({
         id: store.id,
@@ -199,6 +207,25 @@ export class CondominiumService {
   async adminAddStoreToEvent(eventId: string, storeId: string) {
     await this.condominiumRepository.upsertEventStore(eventId, storeId);
     return { ok: true };
+  }
+
+  async adminUpdateStoreSettings(condominiumId: string, storeId: string, payload: any) {
+    const condominium = await this.condominiumRepository.findById(condominiumId);
+    if (!condominium) throw new AppError('CONDO-001', 404, { message: 'Condominio nao encontrado.' });
+
+    await this.condominiumRepository.updateStoreCondominiumSettings(condominiumId, storeId, {
+      allowPickupAtStall: payload?.allowPickupAtStall,
+      allowApartmentDelivery: payload?.allowApartmentDelivery,
+      apartmentDeliveryFee:
+        payload?.apartmentDeliveryFee === '' || payload?.apartmentDeliveryFee === null || payload?.apartmentDeliveryFee === undefined
+          ? null
+          : Number(payload.apartmentDeliveryFee),
+    });
+
+    const links = await this.condominiumRepository.listStoreLinksByCondominiumId(condominiumId);
+    const updated = links.find((link: any) => link.storeId === storeId);
+    if (!updated) throw new AppError('CONDO-010', 404, { message: 'Vinculo da loja com o condominio nao encontrado.' });
+    return this.toPublicStoreLink(updated);
   }
 
   async adminReviewRequest(requestId: string, payload: any, reviewedBy?: string) {
@@ -519,6 +546,27 @@ export class CondominiumService {
       condominium: request.condominium ? this.toPublicCondominium(request.condominium, null) : null,
       storeId: request.storeId,
       condominiumId: request.condominiumId,
+    };
+  }
+
+  private toPublicStoreLink(link: any) {
+    return {
+      id: link.id,
+      storeId: link.storeId,
+      condominiumId: link.condominiumId,
+      active: link.active !== false,
+      allowPickupAtStall: link.allowPickupAtStall !== false,
+      allowApartmentDelivery: link.allowApartmentDelivery === true,
+      apartmentDeliveryFee: link.apartmentDeliveryFee != null ? Number(link.apartmentDeliveryFee) : null,
+      store: link.store
+        ? {
+            id: link.store.id,
+            name: link.store.name,
+            slug: link.store.slug,
+            logoUrl: link.store.settings?.logoUrl || null,
+            bannerUrl: link.store.settings?.bannerUrl || null,
+          }
+        : null,
     };
   }
 

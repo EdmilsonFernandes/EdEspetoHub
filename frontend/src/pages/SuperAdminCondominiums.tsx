@@ -87,6 +87,7 @@ export function SuperAdminCondominiums() {
     eventId: '',
     storeId: '',
   });
+  const [storeRuleDrafts, setStoreRuleDrafts] = useState<Record<string, { allowPickupAtStall: boolean; allowApartmentDelivery: boolean; apartmentDeliveryFee: string }>>({});
 
   const load = async () => {
     if (!localStorage.getItem('superAdminToken')) {
@@ -360,6 +361,51 @@ export function SuperAdminCondominiums() {
   const logoPreview = condominiumForm.logoFile || resolveAssetUrl(condominiumForm.logoUrl) || '';
   const bannerPreview = condominiumForm.bannerFile || resolveAssetUrl(condominiumForm.bannerUrl) || '';
 
+  const getStoreRuleDraft = (condominiumId: string, storeLink: any) => {
+    const key = `${condominiumId}:${storeLink.storeId}`;
+    return storeRuleDrafts[key] || {
+      allowPickupAtStall: storeLink.allowPickupAtStall !== false,
+      allowApartmentDelivery: storeLink.allowApartmentDelivery === true,
+      apartmentDeliveryFee: storeLink.apartmentDeliveryFee != null ? String(storeLink.apartmentDeliveryFee) : '',
+    };
+  };
+
+  const updateStoreRuleDraft = (condominiumId: string, storeId: string, patch: Partial<{ allowPickupAtStall: boolean; allowApartmentDelivery: boolean; apartmentDeliveryFee: string }>, fallback?: any) => {
+    const key = `${condominiumId}:${storeId}`;
+    setStoreRuleDrafts((prev) => {
+      const base = prev[key] || {
+        allowPickupAtStall: fallback?.allowPickupAtStall !== false,
+        allowApartmentDelivery: fallback?.allowApartmentDelivery === true,
+        apartmentDeliveryFee: fallback?.apartmentDeliveryFee != null ? String(fallback.apartmentDeliveryFee) : '',
+      };
+      return {
+        ...prev,
+        [key]: {
+          ...base,
+          ...patch,
+        },
+      };
+    });
+  };
+
+  const saveStoreRule = async (condominiumId: string, storeLink: any) => {
+    const draft = getStoreRuleDraft(condominiumId, storeLink);
+    setSaving(true);
+    setError('');
+    try {
+      await condominiumService.adminUpdateStoreSettings(condominiumId, storeLink.storeId, {
+        allowPickupAtStall: draft.allowPickupAtStall,
+        allowApartmentDelivery: draft.allowApartmentDelivery,
+        apartmentDeliveryFee: draft.allowApartmentDelivery ? (draft.apartmentDeliveryFee || null) : null,
+      });
+      await load();
+    } catch (err: any) {
+      setError(err?.message || 'Falha ao salvar regras da loja no condomínio.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <AdminLayout contextLabel="Condomínios" showHeader={false}>
       <div className="space-y-6">
@@ -584,6 +630,72 @@ export function SuperAdminCondominiums() {
                       <Trash size={14} weight="bold" />
                       Desativar
                     </button>
+                  </div>
+                  <div className="mt-4 rounded-[1.3rem] border border-slate-100 bg-slate-50/80 p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Regras por loja</p>
+                        <p className="mt-1 text-xs font-semibold text-slate-500">Defina se a loja aceita retirada e entrega em apartamento nesse condomínio.</p>
+                      </div>
+                      <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500 ring-1 ring-slate-200">
+                        {(condominium.approvedStores || []).length} loja{(condominium.approvedStores || []).length === 1 ? '' : 's'}
+                      </span>
+                    </div>
+                    <div className="mt-3 space-y-3">
+                      {(condominium.approvedStores || []).length === 0 ? (
+                        <p className="rounded-2xl bg-white px-3 py-3 text-xs font-semibold text-slate-500 ring-1 ring-slate-100">Nenhuma loja aprovada nesse condomínio ainda.</p>
+                      ) : (condominium.approvedStores || []).map((storeLink: any) => {
+                        const draft = getStoreRuleDraft(condominium.id, storeLink);
+                        const storeLogo = resolveAssetUrl(storeLink.store?.logoUrl || storeLink.store?.bannerUrl || '') || getStoreAvatarUrl(storeLink.store?.slug || storeLink.storeId, storeLink.store?.name || 'Loja');
+                        return (
+                          <div key={storeLink.storeId} className="rounded-[1.15rem] border border-slate-200 bg-white p-3 shadow-sm">
+                            <div className="flex items-start gap-3">
+                              <img src={storeLogo} alt={storeLink.store?.name || 'Loja'} className="h-12 w-12 rounded-2xl border border-slate-100 object-cover" />
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-black text-slate-950">{storeLink.store?.name || 'Loja'}</p>
+                                <p className="truncate text-[11px] font-semibold text-slate-500">{storeLink.store?.slug || storeLink.storeId}</p>
+                              </div>
+                            </div>
+                            <div className="mt-3 grid gap-3 md:grid-cols-2">
+                              <label className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-black text-slate-700">
+                                Retirada na barraca
+                                <input
+                                  type="checkbox"
+                                  checked={draft.allowPickupAtStall}
+                                  onChange={(event) => updateStoreRuleDraft(condominium.id, storeLink.storeId, { allowPickupAtStall: event.target.checked }, storeLink)}
+                                  className="h-4 w-4"
+                                />
+                              </label>
+                              <label className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-black text-slate-700">
+                                Entrega em apartamento
+                                <input
+                                  type="checkbox"
+                                  checked={draft.allowApartmentDelivery}
+                                  onChange={(event) => updateStoreRuleDraft(condominium.id, storeLink.storeId, { allowApartmentDelivery: event.target.checked }, storeLink)}
+                                  className="h-4 w-4"
+                                />
+                              </label>
+                            </div>
+                            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                              <input
+                                value={draft.apartmentDeliveryFee}
+                                onChange={(event) => updateStoreRuleDraft(condominium.id, storeLink.storeId, { apartmentDeliveryFee: event.target.value }, storeLink)}
+                                placeholder="Taxa apartamento ex: 5.00"
+                                disabled={!draft.allowApartmentDelivery}
+                                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white disabled:opacity-50"
+                              />
+                              <button
+                                onClick={() => saveStoreRule(condominium.id, storeLink)}
+                                disabled={saving}
+                                className="w-full rounded-2xl bg-slate-950 px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 sm:max-w-[160px]"
+                              >
+                                Salvar regras
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               );

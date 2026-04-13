@@ -1987,11 +1987,11 @@ export function MarketplacePage() {
           {/* Banner de Destaques Premium - Esconde na busca para focar no resultado */}
           {debouncedQuery.length < 2 && (
             <section
-              className="mb-7 overflow-hidden rounded-[2rem] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.98)_52%,rgba(239,246,255,0.96)_100%)] px-3 py-3 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.16)]"
+              className="mb-6 overflow-hidden rounded-[1.8rem] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.98)_52%,rgba(239,246,255,0.96)_100%)] px-3 py-2.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.16)]"
               style={{ transition: 'all .45s ease', transitionDelay: '200ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
             >
               <div className="flex items-center justify-between gap-3 px-1">
-                <h2 className="text-[15px] font-black tracking-tight text-slate-950">{genericHighlightLabel}</h2>
+                <h2 className="text-[14px] font-black tracking-tight text-slate-950">{genericHighlightLabel}</h2>
                 <div className="flex gap-1 pt-2">
                   <div className="h-1 w-4 rounded-full bg-[#336886]" />
                   <div className="h-1 w-1 rounded-full bg-sky-200" />
@@ -1999,19 +1999,19 @@ export function MarketplacePage() {
                 </div>
               </div>
               
-              <div className="mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto no-scrollbar px-1 pb-1">
+              <div className="mt-2.5 flex snap-x snap-mandatory gap-2.5 overflow-x-auto no-scrollbar px-1 pb-1">
                 {featuredLoading ? (
                   Array.from({ length: 3 }).map((_, idx) => (
-                    <div key={idx} className="h-[186px] min-w-[200px] animate-pulse rounded-[1.55rem] border border-white/90 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.055)]" />
+                    <div key={idx} className="h-[152px] min-w-[168px] animate-pulse rounded-[1.35rem] border border-white/90 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.055)]" />
                   ))
                 ) : (
                   displayedFeaturedProducts.map((item, index) => (
                     <Link
                       key={`${item.storeSlug}-${item.id}`}
                       to={`/${item.storeSlug}`}
-                      className="group min-w-[200px] snap-start overflow-hidden rounded-[1.55rem] border border-white/90 bg-white shadow-[0_10px_28px_rgba(15,23,42,0.075)] ring-1 ring-slate-100/70 transition-all duration-200 ease-out hover:scale-[1.015] hover:shadow-[0_16px_34px_rgba(15,23,42,0.11)] active:scale-[0.97]"
+                      className="group min-w-[168px] snap-start overflow-hidden rounded-[1.35rem] border border-white/90 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.072)] ring-1 ring-slate-100/70 transition-all duration-200 ease-out hover:scale-[1.012] hover:shadow-[0_14px_28px_rgba(15,23,42,0.1)] active:scale-[0.97]"
                     >
-                      <div className="relative h-[108px] overflow-hidden bg-slate-100">
+                      <div className="relative h-[84px] overflow-hidden bg-slate-100">
                         <img
                           src={item.imageUrl}
                           alt={item.name}
@@ -2020,28 +2020,28 @@ export function MarketplacePage() {
                           decoding="async"
                           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
-                        <div className="absolute left-3 top-3">
+                        <div className="absolute left-2.5 top-2.5">
                           {item.sponsored ? (
-                            <span className="flex items-center gap-1.5 rounded-full border border-white/70 bg-amber-300/95 px-2.5 py-1 text-[8px] font-black uppercase tracking-wider text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md">
+                            <span className="flex items-center gap-1 rounded-full border border-white/70 bg-amber-300/95 px-2 py-0.5 text-[7px] font-black uppercase tracking-wider text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md">
                               <Star size={10} weight="fill" /> Promo
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/94 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md ring-1 ring-black/5">
-                              <Sparkle size={9} weight="fill" className="text-[#336886]" />
-                              Destaque
+                            <span className="inline-flex items-center gap-1 rounded-full border border-white/70 bg-white/94 px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.16em] text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md ring-1 ring-black/5">
+                              <Sparkle size={8} weight="fill" className="text-[#336886]" />
+                              Seleção
                             </span>
                           )}
                         </div>
                       </div>
 
-                      <div className="bg-white p-3">
+                      <div className="bg-white p-2.5">
                         <div className="flex items-start justify-between gap-2">
-                          <p className="line-clamp-2 text-[13px] font-black leading-4 tracking-tight text-slate-950">{item.name}</p>
-                          <span className="shrink-0 rounded-full bg-[#336886]/10 px-2 py-0.5 text-[10px] font-black text-[#336886]">
+                          <p className="line-clamp-1 text-[12px] font-black leading-4 tracking-tight text-slate-950">{item.name}</p>
+                          <span className="shrink-0 rounded-full bg-[#336886]/10 px-1.5 py-0.5 text-[9px] font-black text-[#336886]">
                             {currency.format(item.price)}
                           </span>
                         </div>
-                        <div className="mt-2 flex items-center justify-between gap-2 rounded-[1rem] bg-slate-50 px-2.5 py-2">
+                        <div className="mt-1.5 flex items-center justify-between gap-2 rounded-[0.95rem] bg-slate-50 px-2 py-1.5">
                           <div className="flex min-w-0 items-center gap-2">
                             <img 
                               src={item.storeLogo} 
@@ -2049,12 +2049,12 @@ export function MarketplacePage() {
                               loading={index < 2 ? 'eager' : 'lazy'}
                               fetchPriority={index < 2 ? 'high' : 'auto'}
                               decoding="async"
-                              className="h-5 w-5 rounded-full border border-white/70 object-cover shadow-sm" 
+                              className="h-4 w-4 rounded-full border border-white/70 object-cover shadow-sm" 
                               onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(item.storeSlug, item.storeName); }}
                             />
-                            <span className="block max-w-[112px] truncate text-[10px] font-bold text-slate-700">{item.storeName}</span>
+                            <span className="block max-w-[92px] truncate text-[9px] font-bold text-slate-700">{item.storeName}</span>
                           </div>
-                          <CaretRight size={14} weight="bold" className="shrink-0 text-slate-300 transition-transform duration-200 group-hover:translate-x-0.5" />
+                          <CaretRight size={12} weight="bold" className="shrink-0 text-slate-300 transition-transform duration-200 group-hover:translate-x-0.5" />
                         </div>
                       </div>
                     </Link>
@@ -2505,7 +2505,7 @@ export function MarketplacePage() {
                     ? 'Aberta agora'
                     : eventState === 'upcoming'
                       ? 'Próxima feira'
-                      : 'Agenda em breve';
+                      : 'Sem agenda ativa';
                   const eventTime = formatCondominiumEventTime(event);
                   return (
                     <button
@@ -2552,7 +2552,7 @@ export function MarketplacePage() {
                                 ? 'border-emerald-200 bg-emerald-100 text-emerald-700'
                                 : eventState === 'upcoming'
                                   ? 'border-sky-200 bg-sky-50 text-[#336886]'
-                                  : 'border-slate-200 bg-white text-slate-500'
+                                  : 'border-slate-200 bg-slate-50 text-slate-500'
                           }`}>
                             {active ? 'Selecionado' : eventBadge}
                           </span>
@@ -2568,7 +2568,7 @@ export function MarketplacePage() {
                         <CalendarBlank size={12} weight="fill" className="mt-0.5 shrink-0" />
                         <div className="min-w-0">
                           <p className="text-[10px] font-black uppercase tracking-[0.1em]">
-                            {eventState === 'live' ? 'Agenda ativa' : eventState === 'upcoming' ? 'Próxima agenda' : 'Agenda'}
+                            {eventState === 'live' ? 'Agenda ativa' : eventState === 'upcoming' ? 'Próxima agenda' : 'Disponibilidade'}
                           </p>
                           <p className="mt-0.5 break-words text-[11px] font-bold leading-4">
                             {formatCondominiumPickerEventTime(event) || eventTime || eventBadge}

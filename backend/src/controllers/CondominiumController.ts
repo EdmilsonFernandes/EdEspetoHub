@@ -98,6 +98,19 @@ export class CondominiumController {
     }
   }
 
+  static async adminUpdateStoreSettings(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.adminUpdateStoreSettings(
+        String(req.params.condominiumId || ''),
+        String(req.params.storeId || ''),
+        req.body || {}
+      );
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
   static async adminAddStoreToEvent(req: Request, res: Response) {
     try {
       const payload = await condominiumService.adminAddStoreToEvent(String(req.params.eventId || ''), String(req.body?.storeId || ''));
