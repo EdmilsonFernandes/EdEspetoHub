@@ -985,6 +985,19 @@ export function MarketplacePage() {
   const isCondominiumEventLive = activeCondominiumEvent?.state === 'live';
   const hasUpcomingCondominiumEvent = activeCondominiumEvent?.state === 'upcoming';
   const condominiumEventTimeLabel = formatCondominiumEventTime(activeCondominiumEvent);
+  const selectedCondominiumLogoUrl = selectedCondominium
+    ? resolveAssetUrl(selectedCondominium.logoUrl || selectedCondominium.bannerUrl || undefined) || getStoreAvatarUrl(selectedCondominium.slug || 'condominio', selectedCondominium.name || 'Condomínio')
+    : '';
+  const selectedCondominiumBannerUrl = selectedCondominium
+    ? resolveAssetUrl(selectedCondominium.bannerUrl || selectedCondominium.logoUrl || undefined) || ''
+    : '';
+  const condominiumPreviewLogos = useMemo(() => {
+    return condominiums.slice(0, 3).map((condominium) => {
+      const slug = String(condominium?.slug || 'condominio');
+      const name = String(condominium?.name || 'Condomínio');
+      return resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
+    });
+  }, [condominiums]);
 
   const filteredCondominiums = useMemo(() => {
     const search = normalizeSearchText(condominiumSearch);
@@ -1764,25 +1777,51 @@ export function MarketplacePage() {
               style={{ transition: 'all .45s ease', transitionDelay: '95ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
             >
               {selectedCondominium ? (
-                <div className="flex items-center justify-between gap-3 rounded-2xl bg-emerald-950/95 px-3.5 py-3 text-white shadow-[0_16px_34px_-22px_rgba(6,78,59,0.72)] ring-1 ring-white/10 backdrop-blur-md">
+                <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_42px_-28px_rgba(15,23,42,0.45)] ring-1 ring-white/80 backdrop-blur-md">
+                  <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-r from-emerald-50 via-sky-50 to-white">
+                    {selectedCondominiumBannerUrl ? (
+                      <img
+                        src={selectedCondominiumBannerUrl}
+                        alt={String(selectedCondominium.name || 'Condomínio')}
+                        className="h-full w-full object-cover opacity-75"
+                      />
+                    ) : null}
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/80 via-white/60 to-white/90" />
+                  </div>
+                  <div className="relative flex items-center justify-between gap-3 px-3.5 py-3">
                   <button
                     type="button"
                     onClick={() => setCondominiumPickerOpen(true)}
-                    className="flex min-w-0 flex-1 items-center gap-2.5 text-left active:scale-[0.99]"
+                    className="flex min-w-0 flex-1 items-center gap-3 text-left active:scale-[0.99]"
                     aria-label="Escolher outro condomínio"
                     title="Escolher outro condomínio"
                   >
-                    <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/12 text-sm ring-1 ring-white/10">
-                      <Buildings size={17} weight="duotone" />
+                    <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white p-1.5 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.6)] ring-1 ring-slate-200">
+                      {selectedCondominiumLogoUrl ? (
+                        <img
+                          src={selectedCondominiumLogoUrl}
+                          alt={String(selectedCondominium.name || 'Condomínio')}
+                          className="h-full w-full object-contain"
+                        />
+                      ) : (
+                        <Buildings size={21} weight="duotone" className="text-[#336886]" />
+                      )}
                     </span>
                     <span className="min-w-0">
-                      <span className="block text-[9px] font-black uppercase tracking-[0.16em] text-emerald-200/85">
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] ${
+                        isCondominiumEventLive
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : hasUpcomingCondominiumEvent
+                            ? 'bg-sky-50 text-[#336886] ring-1 ring-sky-100'
+                            : 'bg-slate-100 text-slate-500'
+                      }`}>
+                        {isCondominiumEventLive ? <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.14)]" /> : null}
                         {isCondominiumEventLive ? 'Feira acontecendo' : hasUpcomingCondominiumEvent ? 'Próxima feira' : 'Feira no condomínio'}
                       </span>
-                      <span className="mt-0.5 block truncate text-sm font-black leading-tight text-white">
+                      <span className="mt-1 block truncate text-sm font-black leading-tight text-slate-950">
                         {String(selectedCondominium.name || 'Condomínio')}
                       </span>
-                      <span className="mt-0.5 block truncate text-[10px] font-semibold text-white/60">
+                      <span className="mt-0.5 block truncate text-[10px] font-semibold text-slate-500">
                         {condominiumStoresLoading
                           ? 'Carregando lojas...'
                           : isCondominiumEventLive
@@ -1794,12 +1833,13 @@ export function MarketplacePage() {
                   <button
                     type="button"
                     onClick={clearCondominiumSelection}
-                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/10 text-emerald-100 ring-1 ring-white/10 transition-colors hover:bg-white/15 hover:text-white active:scale-95"
+                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-500 ring-1 ring-slate-200 transition-colors hover:bg-slate-100 hover:text-slate-800 active:scale-95"
                     aria-label="Sair da feira e voltar ao Hub"
                     title="Sair da feira"
                   >
                     <X size={15} weight="bold" />
                   </button>
+                  </div>
                 </div>
               ) : (
                 <>
@@ -1810,12 +1850,26 @@ export function MarketplacePage() {
                   <button
                     type="button"
                     onClick={() => setCondominiumPickerOpen(true)}
-                    className="group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-white to-white p-3.5 text-left shadow-sm transition-all duration-200 hover:border-emerald-200 hover:shadow-[0_14px_30px_-20px_rgba(16,185,129,0.45)] active:scale-[0.985]"
+                    className="group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-slate-200 bg-white p-3.5 text-left shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)] transition-all duration-200 hover:border-emerald-200 hover:shadow-[0_20px_42px_-28px_rgba(16,185,129,0.45)] active:scale-[0.985]"
                   >
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white p-3 text-emerald-600 shadow-sm ring-1 ring-emerald-100">
-                      <Buildings size={24} weight="duotone" />
+                    <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-emerald-50 to-transparent" />
+                    <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white text-emerald-600 shadow-sm ring-1 ring-emerald-100">
+                      {condominiumPreviewLogos.length > 0 ? (
+                        <div className="flex -space-x-4">
+                          {condominiumPreviewLogos.map((logo, index) => (
+                            <img
+                              key={`${logo}-${index}`}
+                              src={logo}
+                              alt="Condomínio"
+                              className="h-9 w-9 rounded-full border-2 border-white bg-white object-contain p-1 shadow-sm"
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <Buildings size={24} weight="duotone" />
+                      )}
                     </div>
-                    <div className="min-w-0 flex-1">
+                    <div className="relative min-w-0 flex-1">
                       <div className="mb-1 flex flex-wrap items-center gap-2">
                         <span className="inline-flex items-center gap-1 text-xs font-bold text-red-500">
                           <span className="h-2 w-2 rounded-full bg-red-500 shadow-[0_0_0_4px_rgba(239,68,68,0.12)] animate-pulse" />
