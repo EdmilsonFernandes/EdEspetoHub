@@ -104,6 +104,11 @@ export const CartViewCondominium = ({
     "w-full rounded-2xl bg-slate-100 px-4 py-3 text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all shadow-sm";
 
   // Lógica de condomínio
+  const condominiumLogo = resolveAssetUrl(
+    condominiumCheckoutContext?.condominium?.logoUrl ||
+    condominiumCheckoutContext?.condominium?.bannerUrl ||
+    ""
+  );
   const isApartmentDelivery = customer.condominiumFulfillmentMode === 'apartment_delivery';
   const apartmentDeliveryAllowed = condominiumCheckoutContext?.link?.allowApartmentDelivery !== false;
   const condominiumFeeValue = isApartmentDelivery ? (normalizeNumber(condominiumCheckoutContext?.feeValue) || 0) : 0;
@@ -209,9 +214,18 @@ export const CartViewCondominium = ({
       {/* Dados do cliente */}
       <div className="relative overflow-hidden bg-white rounded-3xl border border-slate-100 p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <div>
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
+              {condominiumLogo ? (
+                <img src={condominiumLogo} alt={condominiumCheckoutContext?.condominium?.name || 'Condomínio'} className="h-full w-full object-contain p-1.5" />
+              ) : (
+                <Building size={22} weight="duotone" className="text-slate-500" />
+              )}
+            </div>
+            <div className="min-w-0">
             <h2 className="font-black text-slate-900 text-base sm:text-lg tracking-tight">Checkout Condomínio</h2>
-            <p className="text-xs text-slate-500">{condominiumCheckoutContext?.condominium?.name || 'Seja bem-vindo!'}</p>
+            <p className="truncate text-xs text-slate-500">{condominiumCheckoutContext?.condominium?.name || 'Seja bem-vindo!'}</p>
+            </div>
           </div>
           <span className="text-[11px] font-extrabold text-brand-primary bg-brand-primary-soft px-3 py-1 rounded-full border border-brand-primary/20">
             {isApartmentDelivery ? 'Morador' : 'Visitante'}
@@ -338,17 +352,31 @@ export const CartViewCondominium = ({
       <div className="bg-white rounded-2xl border border-slate-100 p-4 sm:p-6 mb-4 shadow-sm">
         <h2 className="font-black text-slate-900 mb-4 text-base tracking-tight">Resumo do Pedido</h2>
         {cartItems.map((item) => (
-          <div key={item.key || item.id} className="flex justify-between items-center py-2 border-b border-slate-50 last:border-0">
-            <div className="flex items-center gap-3">
+          <div key={item.key || item.id} className="flex justify-between items-center gap-2 py-2 border-b border-slate-50 last:border-0">
+            <div className="flex min-w-0 items-center gap-3">
               <span className="h-7 w-7 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600">
                 {item.qty}x
               </span>
-              <div className="flex flex-col">
-                <span className="text-slate-800 font-semibold text-sm">{item.name}</span>
-                {formatItemOptions(item) && <span className="text-[11px] text-slate-500">{formatItemOptions(item)}</span>}
+              <div className="h-11 w-11 overflow-hidden rounded-xl border border-gray-200 bg-gray-100 shrink-0">
+                {item.imageUrl ? (
+                  <img
+                    src={resolveAssetUrl(item.imageUrl)}
+                    alt={item.name}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-[10px] text-gray-400">
+                    🍖
+                  </div>
+                )}
+              </div>
+              <div className="flex min-w-0 flex-col">
+                <span className="truncate text-slate-800 font-semibold text-sm">{item.name}</span>
+                {formatItemOptions(item) && <span className="truncate text-[11px] text-slate-500">{formatItemOptions(item)}</span>}
               </div>
             </div>
-            <span className="font-bold text-slate-900 text-sm">{formatCurrency(item.price * item.qty)}</span>
+            <span className="shrink-0 font-bold text-slate-900 text-sm">{formatCurrency(item.price * item.qty)}</span>
           </div>
         ))}
         
