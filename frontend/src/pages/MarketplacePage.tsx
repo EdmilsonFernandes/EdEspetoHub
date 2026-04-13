@@ -2185,41 +2185,21 @@ export function MarketplacePage() {
       </nav>
 
       {condominiumPickerOpen && (
-        <div className="fixed inset-0 z-[220] flex items-end bg-slate-950/45 px-0 pt-10 backdrop-blur-sm sm:items-center sm:justify-center sm:px-4">
-          <div className="max-h-[86vh] w-full overflow-hidden rounded-t-[1.75rem] bg-white shadow-[0_-20px_60px_rgba(15,23,42,0.25)] sm:max-w-lg sm:rounded-[1.75rem]">
-            <div className="border-b border-slate-100 px-4 pb-3 pt-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">Feiras e condomínios</p>
-                  <h2 className="mt-1 text-lg font-black tracking-tight text-slate-950">Onde você está?</h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCondominiumPickerOpen(false);
-                    setCondominiumSearch('');
-                  }}
-                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 active:scale-95"
-                  aria-label="Fechar seleção de condomínio"
-                  title="Fechar seleção de condomínio"
-                >
-                  <X size={15} weight="bold" />
-                </button>
-              </div>
-
-              <div className="mt-4 flex items-center gap-2 rounded-[1rem] border border-slate-200 bg-slate-50 px-3 py-2.5">
-                <MagnifyingGlass size={17} weight="bold" className="shrink-0 text-slate-400" />
-                <input
-                  value={condominiumSearch}
-                  onChange={(event) => setCondominiumSearch(event.target.value)}
-                  placeholder="Buscar por nome ou cidade"
-                  className="min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-800 outline-none placeholder:text-slate-400"
-                  autoFocus
-                />
-              </div>
-            </div>
-
-            <div className="max-h-[58vh] overflow-y-auto px-4 py-3">
+        <div className="fixed inset-0 z-[220] overflow-y-auto bg-[#050505] text-white">
+          <div className="mx-auto min-h-screen max-w-[760px] px-5 pb-10 pt-[max(env(safe-area-inset-top),1rem)]">
+            <div className="sticky top-0 z-10 -mx-5 flex items-center justify-between bg-[#050505]/92 px-5 py-3 backdrop-blur-xl">
+              <button
+                type="button"
+                onClick={() => {
+                  setCondominiumPickerOpen(false);
+                  setCondominiumSearch('');
+                }}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/8 text-white ring-1 ring-white/10 active:scale-95"
+                aria-label="Voltar para o Hub"
+                title="Voltar para o Hub"
+              >
+                <CaretRight size={18} weight="bold" className="rotate-180" />
+              </button>
               {selectedCondominium ? (
                 <button
                   type="button"
@@ -2227,17 +2207,47 @@ export function MarketplacePage() {
                     clearCondominiumSelection();
                     setCondominiumPickerOpen(false);
                   }}
-                  className="mb-3 flex w-full items-center justify-between gap-3 rounded-[1.15rem] border border-slate-200 bg-slate-50 px-3 py-3 text-left active:scale-[0.985]"
+                  className="rounded-full bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-950 active:scale-95"
                 >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-black text-slate-950">Ver lojas da região</p>
-                    <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-500">Sair da feira selecionada</p>
-                  </div>
-                  <CaretRight size={15} weight="bold" className="shrink-0 text-slate-400" />
+                  Lojas da região
                 </button>
-              ) : null}
+              ) : (
+                <span className="h-10 w-10" />
+              )}
+            </div>
 
-              <div className="space-y-2">
+            <div className="pt-6 text-center">
+              <div className="mx-auto flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-white p-2 shadow-[0_18px_36px_-22px_rgba(255,255,255,0.7)] ring-1 ring-white/15">
+                <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
+              </div>
+              <p className="mt-4 text-xs font-black uppercase tracking-[0.22em] text-emerald-300">Já no Caminho</p>
+              <h2 className="mt-5 text-2xl font-black tracking-tight text-white">Onde você está agora?</h2>
+              <p className="mx-auto mt-2 max-w-sm text-sm font-medium leading-relaxed text-white/58">
+                Escolha uma feira ou condomínio e veja as lojas atendendo nesse local.
+              </p>
+            </div>
+
+            <div className="mt-7 flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3">
+              <MagnifyingGlass size={17} weight="bold" className="shrink-0 text-white/45" />
+              <input
+                value={condominiumSearch}
+                onChange={(event) => setCondominiumSearch(event.target.value)}
+                placeholder="Filtrar por nome ou cidade"
+                autoComplete="off"
+                className="min-w-0 flex-1 bg-transparent text-sm font-bold text-white outline-none placeholder:text-white/38"
+                autoFocus
+              />
+            </div>
+
+            <div className="mt-9">
+              <div className="mb-5 flex items-center justify-between gap-3">
+                <h3 className="text-lg font-black text-white">Eventos e condomínios</h3>
+                <span className="rounded-full bg-emerald-400/12 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-300">
+                  {filteredCondominiums.length} disponível{filteredCondominiums.length === 1 ? '' : 'is'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-x-5 gap-y-8 sm:grid-cols-4">
                 {filteredCondominiums.map(({ condominium, slug, name, region }) => {
                   const active = selectedCondominiumSlug === slug;
                   const imageUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
@@ -2246,38 +2256,36 @@ export function MarketplacePage() {
                       key={slug}
                       type="button"
                       onClick={() => selectCondominium(slug)}
-                      className={`flex w-full items-center gap-3 rounded-[1.15rem] border px-3 py-3 text-left transition-all active:scale-[0.985] ${
-                        active ? 'border-[#336886]/25 bg-[#336886]/10' : 'border-slate-100 bg-white'
-                      }`}
+                      className="group min-w-0 text-center active:scale-[0.97]"
                     >
-                      <img
-                        src={imageUrl}
-                        alt={name}
-                        loading="lazy"
-                        decoding="async"
-                        className="h-12 w-12 shrink-0 rounded-[0.9rem] border border-slate-100 bg-slate-50 object-cover"
-                        onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-black text-slate-950">{name}</p>
-                        <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-500">
-                          {region || condominium.description || 'Lojas do condomínio'}
-                        </p>
-                      </div>
-                      <span className={`shrink-0 rounded-xl px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] ${
-                        active ? 'bg-white text-[#336886]' : 'bg-slate-100 text-slate-500'
+                      <div className={`relative mx-auto h-20 w-20 rounded-full p-1 transition-all duration-200 group-hover:scale-105 sm:h-24 sm:w-24 ${
+                        active ? 'bg-emerald-400 shadow-[0_18px_32px_-20px_rgba(52,211,153,0.9)]' : 'bg-white/10 shadow-sm'
                       }`}>
-                        {active ? 'Ativo' : 'Entrar'}
-                      </span>
+                        <img
+                          src={imageUrl}
+                          alt={name}
+                          loading="lazy"
+                          decoding="async"
+                          className="h-full w-full rounded-full bg-white object-cover"
+                          onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }}
+                        />
+                        {active ? (
+                          <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full bg-emerald-400 px-2 py-0.5 text-[9px] font-black uppercase text-slate-950">
+                            Ativo
+                          </span>
+                        ) : null}
+                      </div>
+                      <p className="mt-3 line-clamp-2 text-[12px] font-black leading-tight text-white">{name}</p>
+                      <p className="mt-1 truncate text-[10px] font-semibold text-white/42">{region || 'Feira local'}</p>
                     </button>
                   );
                 })}
               </div>
 
               {filteredCondominiums.length === 0 && (
-                <div className="py-8 text-center">
-                  <p className="text-sm font-black text-slate-800">Nenhum condomínio encontrado.</p>
-                  <p className="mt-1 text-xs font-semibold text-slate-500">Tente buscar pelo nome ou pela cidade.</p>
+                <div className="py-14 text-center">
+                  <p className="text-sm font-black text-white">Nenhum condomínio encontrado.</p>
+                  <p className="mt-1 text-xs font-semibold text-white/48">Tente buscar pelo nome ou pela cidade.</p>
                 </div>
               )}
             </div>
