@@ -22,6 +22,7 @@ import {
   Pill,
   Cookie,
   Buildings,
+  CalendarBlank,
 } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { condominiumService } from '../services/condominiumService';
@@ -2373,9 +2374,12 @@ export function MarketplacePage() {
 
             <div className="mt-9">
               <div className="mb-7 flex items-center justify-between gap-3">
-                <h3 className="text-lg font-black text-slate-950">Eventos e condomínios</h3>
-                <span className="rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700">
-                  {filteredCondominiums.length} disponível{filteredCondominiums.length === 1 ? '' : 'is'}
+                <div>
+                  <h3 className="text-lg font-black text-slate-950">Eventos e condomínios</h3>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">Veja quando abre e escolha onde quer retirar.</p>
+                </div>
+                <span className="shrink-0 rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700">
+                  {filteredCondominiums.length} local{filteredCondominiums.length === 1 ? '' : 'is'}
                 </span>
               </div>
 
@@ -2387,8 +2391,9 @@ export function MarketplacePage() {
                   const eventBadge = eventState === 'live'
                     ? 'Aberta agora'
                     : eventState === 'upcoming'
-                      ? formatCondominiumEventTime(event) || 'Próxima feira'
+                      ? 'Próxima feira'
                       : 'Agenda em breve';
+                  const eventTime = formatCondominiumEventTime(event);
                   return (
                     <button
                       key={slug}
@@ -2396,8 +2401,8 @@ export function MarketplacePage() {
                       onClick={() => selectCondominium(slug)}
                       className="group min-w-0 text-center active:scale-[0.97]"
                     >
-                      <div className={`relative mx-auto h-20 w-20 rounded-full border border-gray-100 bg-white p-1 shadow-sm transition-all duration-200 group-hover:scale-105 sm:h-24 sm:w-24 ${
-                        active ? 'ring-2 ring-emerald-100' : 'ring-1 ring-slate-950/5'
+                      <div className={`relative mx-auto h-20 w-20 rounded-full border border-gray-100 bg-white p-1 shadow-[0_18px_34px_-24px_rgba(15,23,42,0.45)] transition-all duration-200 group-hover:scale-105 sm:h-24 sm:w-24 ${
+                        active ? 'ring-2 ring-emerald-300' : 'ring-1 ring-slate-950/5'
                       }`}>
                         <img
                           src={imageUrl}
@@ -2407,18 +2412,23 @@ export function MarketplacePage() {
                           className="h-full w-full rounded-full bg-white object-contain p-2"
                           onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }}
                         />
-                        {active ? (
-                          <span className="absolute -right-2 -top-2 rounded-full border border-emerald-200 bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700 shadow-sm">
-                            Ativo
-                          </span>
-                        ) : null}
+                        <span className={`absolute -bottom-1 left-1/2 inline-flex -translate-x-1/2 whitespace-nowrap rounded-full border px-2 py-0.5 text-[9px] font-black shadow-sm ${
+                          eventState === 'live'
+                            ? 'border-emerald-200 bg-emerald-100 text-emerald-700'
+                            : eventState === 'upcoming'
+                              ? 'border-sky-200 bg-sky-50 text-[#336886]'
+                              : 'border-slate-200 bg-white text-slate-500'
+                        }`}>
+                          {active ? 'Selecionado' : eventBadge}
+                        </span>
                       </div>
                       <p className="mt-3 line-clamp-2 text-[12px] font-black leading-tight text-slate-950">{name}</p>
                       <p className="mt-1 truncate text-xs font-semibold text-gray-400">{region || 'Feira local'}</p>
-                      <p className={`mt-1 truncate text-[10px] font-black ${
+                      <p className={`mx-auto mt-1 flex max-w-[105px] items-center justify-center gap-1 truncate text-[10px] font-black ${
                         eventState === 'live' ? 'text-emerald-600' : eventState === 'upcoming' ? 'text-[#336886]' : 'text-slate-400'
                       }`}>
-                        {eventBadge}
+                        <CalendarBlank size={10} weight="fill" className="shrink-0" />
+                        <span className="truncate">{eventTime || eventBadge}</span>
                       </p>
                     </button>
                   );

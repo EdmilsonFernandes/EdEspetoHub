@@ -14,6 +14,7 @@
 import { resolvePlanFeatures } from '../config/planFeatures';
 import { AppError } from '../errors/AppError';
 import { CondominiumRepository } from '../repositories/CondominiumRepository';
+import { saveBase64Image } from '../utils/imageStorage';
 import { OrderReviewService } from './OrderReviewService';
 import { SubscriptionService } from './SubscriptionService';
 
@@ -52,6 +53,8 @@ export class CondominiumService {
         id: store.id,
         name: store.name,
         slug: store.slug,
+        logoUrl: store.settings?.logoUrl || null,
+        bannerUrl: store.settings?.bannerUrl || null,
         segment: store.settings?.segment || 'outros',
         city: store.settings?.city || null,
         state: store.settings?.state || null,
@@ -64,6 +67,9 @@ export class CondominiumService {
     const name = String(payload?.name || '').trim();
     const slug = String(payload?.slug || this.slugify(name)).trim();
     if (!name || !slug) throw new AppError('CONDO-002', 400, { message: 'Nome e slug sao obrigatorios.' });
+    const safeSlug = this.slugify(slug || name) || 'condominio';
+    const uploadedLogo = await saveBase64Image(payload?.logoFile, `condominium-logo-${safeSlug}`, 'condominiums');
+    const uploadedBanner = await saveBase64Image(payload?.bannerFile, `condominium-banner-${safeSlug}`, 'condominiums');
     const condominium = await this.condominiumRepository.saveCondominium({
       name,
       slug,
@@ -72,8 +78,8 @@ export class CondominiumService {
       city: payload?.city || null,
       state: payload?.state || null,
       zipCode: payload?.zipCode || null,
-      logoUrl: payload?.logoUrl || null,
-      bannerUrl: payload?.bannerUrl || null,
+      logoUrl: uploadedLogo || payload?.logoUrl || null,
+      bannerUrl: uploadedBanner || payload?.bannerUrl || null,
       active: payload?.active !== false,
     });
     return this.toPublicCondominium(condominium, null);
@@ -138,13 +144,14 @@ export class CondominiumService {
       this.condominiumRepository.listRequests(undefined, storeId),
       this.condominiumRepository.listStoreLinksByStoreId(storeId),
     ]);
+    const summaries = await this.condominiumRepository.getEventSummaryByCondominiumIds(condominiums.map((condominium) => condominium.id));
     const requestByCondominium = new Map(requests.map((request) => [request.condominiumId, request]));
     const linkByCondominium = new Map(links.map((link) => [link.condominiumId, link]));
     return condominiums.map((condominium) => {
       const link = linkByCondominium.get(condominium.id);
       const request = requestByCondominium.get(condominium.id);
       return {
-        condominium: this.toPublicCondominium(condominium, null),
+        condominium: this.toPublicCondominium(condominium, summaries.get(condominium.id) || null),
         status: link?.active ? 'approved' : request?.status || 'available',
         request: request ? this.toPublicRequest(request) : null,
       };
@@ -355,6 +362,7 @@ export class CondominiumService {
   }
 
   private toPublicEvent(event: any) {
+    const storeLinks = Array.isArray(event?.storeLinks) ? event.storeLinks : [];
     return {
       id: event.id,
       title: event.title,
@@ -364,6 +372,16 @@ export class CondominiumService {
       endsAt: event.endsAt instanceof Date ? event.endsAt.toISOString() : event.endsAt,
       pickupLocation: event.pickupLocation || null,
       notes: event.notes || null,
+      stores: storeLinks
+        .filter((link: any) => link?.active !== false && link?.store)
+        .map((link: any) => ({
+          id: link.store.id,
+          name: link.store.name,
+          slug: link.store.slug,
+          logoUrl: link.store.settings?.logoUrl || null,
+          bannerUrl: link.store.settings?.bannerUrl || null,
+          segment: link.store.settings?.segment || null,
+        })),
     };
   }
 
@@ -380,6 +398,8 @@ export class CondominiumService {
             id: request.store.id,
             name: request.store.name,
             slug: request.store.slug,
+            logoUrl: request.store.settings?.logoUrl || null,
+            bannerUrl: request.store.settings?.bannerUrl || null,
           }
         : null,
       condominium: request.condominium ? this.toPublicCondominium(request.condominium, null) : null,

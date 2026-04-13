@@ -121,6 +121,9 @@ export class CondominiumRepository {
   listEventsByCondominiumId(condominiumId: string, from?: Date) {
     const qb = this.condominiumEventRepository
       .createQueryBuilder('event')
+      .leftJoinAndSelect('event.storeLinks', 'storeLinks')
+      .leftJoinAndSelect('storeLinks.store', 'store')
+      .leftJoinAndSelect('store.settings', 'settings')
       .where('event.condominium_id = :condominiumId', { condominiumId })
       .andWhere('event.active = true')
       .orderBy('event.starts_at', 'ASC');

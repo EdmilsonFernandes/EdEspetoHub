@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Buildings, CalendarBlank, CaretRight, CheckCircle, Storefront } from '@phosphor-icons/react';
+import { Buildings, CalendarBlank, CaretRight, CheckCircle, Clock, ImageSquare, Storefront, UploadSimple } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { condominiumService } from '../services/condominiumService';
+import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { getStoreAvatarUrl } from '../utils/storeAvatar';
 
 const formatDateTimeLocal = (value?: string) => {
   if (!value) return '';
@@ -18,6 +20,22 @@ const formatDateTimeLocal = (value?: string) => {
   }).format(date).replace('.', '');
 };
 
+const readFileAsDataUrl = (file: File) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+
+const statusCopy: Record<string, { label: string; tone: string }> = {
+  pending: { label: 'Em análise', tone: 'bg-amber-100 text-amber-800 ring-amber-200' },
+  approved: { label: 'Aprovado', tone: 'bg-emerald-100 text-emerald-800 ring-emerald-200' },
+  rejected: { label: 'Recusado', tone: 'bg-rose-100 text-rose-700 ring-rose-200' },
+  cancelled: { label: 'Cancelado', tone: 'bg-slate-100 text-slate-600 ring-slate-200' },
+  blocked: { label: 'Bloqueado', tone: 'bg-slate-200 text-slate-700 ring-slate-300' },
+};
+
 export function SuperAdminCondominiums() {
   const [data, setData] = useState<any>({ condominiums: [], stores: [], requests: [] });
   const [loading, setLoading] = useState(true);
@@ -30,6 +48,9 @@ export function SuperAdminCondominiums() {
     state: 'SP',
     address: '',
     logoUrl: '',
+    bannerUrl: '',
+    logoFile: '',
+    bannerFile: '',
   });
   const [eventForm, setEventForm] = useState({
     condominiumId: '',
@@ -74,12 +95,22 @@ export function SuperAdminCondominiums() {
     setError('');
     try {
       await condominiumService.adminCreate(condominiumForm);
-      setCondominiumForm({ name: '', slug: '', city: '', state: 'SP', address: '', logoUrl: '' });
+      setCondominiumForm({ name: '', slug: '', city: '', state: 'SP', address: '', logoUrl: '', bannerUrl: '', logoFile: '', bannerFile: '' });
       await load();
     } catch (err: any) {
       setError(err?.message || 'Falha ao criar condomínio.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleAssetUpload = async (field: 'logoFile' | 'bannerFile', file?: File | null) => {
+    if (!file) return;
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      setCondominiumForm((prev) => ({ ...prev, [field]: dataUrl }));
+    } catch {
+      setError('Não foi possível carregar a imagem selecionada.');
     }
   };
 
@@ -135,6 +166,9 @@ export function SuperAdminCondominiums() {
     }
   };
 
+  const logoPreview = condominiumForm.logoFile || resolveAssetUrl(condominiumForm.logoUrl) || '';
+  const bannerPreview = condominiumForm.bannerFile || resolveAssetUrl(condominiumForm.bannerUrl) || '';
+
   return (
     <AdminLayout contextLabel="Condomínios" showHeader={false}>
       <div className="space-y-5">
@@ -158,14 +192,45 @@ export function SuperAdminCondominiums() {
               <Buildings size={20} weight="duotone" className="text-[#336886]" />
               <h2 className="text-base font-black text-slate-950">Novo condomínio</h2>
             </div>
-            <div className="mt-4 space-y-2">
+            <div className="mt-4 space-y-3">
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                <div className="relative h-24 bg-gradient-to-br from-emerald-50 via-white to-sky-50">
+                  {bannerPreview ? (
+                    <img src={bannerPreview} alt="Banner do condomínio" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-slate-300">
+                      <ImageSquare size={28} weight="duotone" />
+                    </div>
+                  )}
+                  <div className="absolute -bottom-7 left-4 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border-4 border-white bg-white shadow-sm">
+                    {logoPreview ? (
+                      <img src={logoPreview} alt="Logo do condomínio" className="h-full w-full object-contain p-1.5" />
+                    ) : (
+                      <Buildings size={26} weight="duotone" className="text-[#336886]" />
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 px-4 pb-3 pt-10">
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-white px-3 py-2 text-xs font-black text-slate-700 ring-1 ring-slate-200">
+                    <UploadSimple size={14} weight="bold" />
+                    Upload logo
+                    <input type="file" accept="image/*" className="hidden" onChange={(event) => handleAssetUpload('logoFile', event.target.files?.[0])} />
+                  </label>
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-white px-3 py-2 text-xs font-black text-slate-700 ring-1 ring-slate-200">
+                    <UploadSimple size={14} weight="bold" />
+                    Upload banner
+                    <input type="file" accept="image/*" className="hidden" onChange={(event) => handleAssetUpload('bannerFile', event.target.files?.[0])} />
+                  </label>
+                </div>
+              </div>
               {[
                 ['name', 'Nome'],
                 ['slug', 'Slug'],
                 ['city', 'Cidade'],
                 ['state', 'UF'],
                 ['address', 'Endereço'],
-                ['logoUrl', 'Logo URL'],
+                ['logoUrl', 'Logo URL opcional'],
+                ['bannerUrl', 'Banner URL opcional'],
               ].map(([key, label]) => (
                 <input
                   key={key}
@@ -226,13 +291,25 @@ export function SuperAdminCondominiums() {
           <div className="mt-4 grid gap-3">
             {(data.requests || []).length === 0 ? (
               <p className="rounded-2xl bg-slate-50 px-4 py-5 text-sm font-semibold text-slate-500">Nenhuma solicitação por enquanto.</p>
-            ) : (data.requests || []).map((request: any) => (
-              <div key={request.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+            ) : (data.requests || []).map((request: any) => {
+              const storeLogo = resolveAssetUrl(request.store?.logoUrl || request.store?.bannerUrl || '') || getStoreAvatarUrl(request.store?.slug || request.storeId, request.store?.name || 'Loja');
+              const condominiumLogo = resolveAssetUrl(request.condominium?.logoUrl || request.condominium?.bannerUrl || '') || '';
+              const status = statusCopy[String(request.status || 'pending')] || statusCopy.pending;
+              return (
+              <div key={request.id} className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-white p-3 shadow-sm">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-sm font-black text-slate-950">{request.store?.name || 'Loja'} <CaretRight size={12} className="inline" /> {request.condominium?.name || 'Condomínio'}</p>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex -space-x-3">
+                      <img src={storeLogo} alt={request.store?.name || 'Loja'} className="h-12 w-12 rounded-2xl border-2 border-white bg-white object-cover shadow-sm" />
+                      <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border-2 border-white bg-white shadow-sm">
+                        {condominiumLogo ? <img src={condominiumLogo} alt={request.condominium?.name || 'Condomínio'} className="h-full w-full object-contain p-1" /> : <Buildings size={22} weight="duotone" className="text-[#336886]" />}
+                      </div>
+                    </div>
+                    <div className="min-w-0">
+                    <p className="truncate text-sm font-black text-slate-950">{request.store?.name || 'Loja'} <CaretRight size={12} className="inline" /> {request.condominium?.name || 'Condomínio'}</p>
                     <p className="mt-1 text-xs font-semibold text-slate-500">{request.message || 'Sem mensagem da loja.'}</p>
-                    <p className="mt-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">{request.status}</p>
+                    <span className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ring-1 ${status.tone}`}>{status.label}</span>
+                    </div>
                   </div>
                   {request.status === 'pending' ? (
                     <div className="flex gap-2">
@@ -247,20 +324,51 @@ export function SuperAdminCondominiums() {
                   )}
                 </div>
               </div>
-            ))}
+            );})}
           </div>
         </section>
 
         <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
           <h2 className="text-base font-black text-slate-950">Agenda cadastrada</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {loading ? <p className="text-sm font-semibold text-slate-500">Carregando...</p> : events.map((event: any) => (
-              <div key={event.id} className="rounded-2xl border border-slate-200 p-3">
-                <p className="text-sm font-black text-slate-950">{event.condominium.name}</p>
-                <p className="mt-1 text-xs font-bold text-[#336886]">{formatDateTimeLocal(event.startsAt)} até {formatDateTimeLocal(event.endsAt)}</p>
-                <p className="mt-1 text-xs font-semibold text-slate-500">{event.pickupLocation || 'Local de retirada não informado'}</p>
+            {loading ? <p className="text-sm font-semibold text-slate-500">Carregando...</p> : events.map((event: any) => {
+              const condominiumLogo = resolveAssetUrl(event.condominium?.logoUrl || event.condominium?.bannerUrl || '') || '';
+              const eventStores = Array.isArray(event.stores) ? event.stores : [];
+              return (
+              <div key={event.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div className="flex items-center gap-3 bg-gradient-to-r from-slate-50 to-white p-3">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
+                    {condominiumLogo ? <img src={condominiumLogo} alt={event.condominium.name} className="h-full w-full object-contain p-1.5" /> : <Buildings size={24} weight="duotone" className="text-[#336886]" />}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-black text-slate-950">{event.condominium.name}</p>
+                    <p className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-[#336886]">
+                      <Clock size={13} weight="fill" />
+                      {formatDateTimeLocal(event.startsAt)} até {formatDateTimeLocal(event.endsAt)}
+                    </p>
+                    <p className="mt-1 truncate text-xs font-semibold text-slate-500">{event.pickupLocation || 'Local de retirada não informado'}</p>
+                  </div>
+                </div>
+                <div className="border-t border-slate-100 p-3">
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Lojas confirmadas</p>
+                  {eventStores.length > 0 ? (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {eventStores.slice(0, 8).map((store: any) => {
+                        const logo = resolveAssetUrl(store.logoUrl || store.bannerUrl || '') || getStoreAvatarUrl(store.slug, store.name);
+                        return (
+                          <span key={store.id} className="inline-flex max-w-full items-center gap-2 rounded-full bg-slate-50 py-1 pl-1 pr-2 text-xs font-bold text-slate-700 ring-1 ring-slate-100">
+                            <img src={logo} alt={store.name} className="h-6 w-6 rounded-full object-cover" />
+                            <span className="max-w-[140px] truncate">{store.name}</span>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="mt-2 rounded-2xl bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-500">Nenhuma loja confirmada nessa data.</p>
+                  )}
+                </div>
               </div>
-            ))}
+            );})}
           </div>
         </section>
       </div>

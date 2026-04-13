@@ -1,6 +1,25 @@
 import { useEffect, useState } from 'react';
-import { Buildings, CheckCircle, Clock } from '@phosphor-icons/react';
+import { Buildings, CalendarBlank, CheckCircle, Clock } from '@phosphor-icons/react';
 import { condominiumService } from '../../services/condominiumService';
+import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
+
+const formatEventTime = (event?: any) => {
+  if (!event?.startsAt) return '';
+  const startsAt = new Date(event.startsAt);
+  const endsAt = event.endsAt ? new Date(event.endsAt) : null;
+  if (Number.isNaN(startsAt.getTime())) return '';
+  const date = new Intl.DateTimeFormat('pt-BR', {
+    weekday: 'short',
+    day: '2-digit',
+    month: '2-digit',
+    timeZone: 'America/Sao_Paulo',
+  }).format(startsAt).replace('.', '');
+  const start = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' }).format(startsAt);
+  const end = endsAt && !Number.isNaN(endsAt.getTime())
+    ? new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' }).format(endsAt)
+    : '';
+  return end ? `${date}, ${start}-${end}` : `${date}, ${start}`;
+};
 
 type Props = {
   storeId?: string;
@@ -96,9 +115,18 @@ export function StoreCondominiumPanel({ storeId }: Props) {
           const status = String(item.status || 'available');
           const meta = statusCopy[status] || statusCopy.available;
           const canRequest = status === 'available' || status === 'rejected' || status === 'cancelled';
+          const logo = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || '');
+          const event = condominium.eventSummary || null;
+          const eventLabel = event?.state === 'live' ? 'Feira acontecendo agora' : formatEventTime(event) || 'Agenda em breve';
           return (
-            <div key={condominium.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div key={condominium.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="h-1.5 bg-gradient-to-r from-emerald-500 via-[#336886] to-sky-400" />
+              <div className="p-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex min-w-0 gap-3">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 shadow-sm ring-1 ring-slate-100">
+                    {logo ? <img src={logo} alt={condominium.name || 'Condomínio'} className="h-full w-full object-contain p-1.5" /> : <Buildings size={24} weight="duotone" className="text-[#336886]" />}
+                  </div>
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="truncate text-sm font-black text-slate-950">{condominium.name}</h3>
@@ -108,6 +136,10 @@ export function StoreCondominiumPanel({ storeId }: Props) {
                   </div>
                   <p className="mt-1 text-xs font-semibold text-slate-500">
                     {[condominium.city, condominium.state].filter(Boolean).join(' - ') || 'Feira local'}
+                  </p>
+                  <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-600 ring-1 ring-slate-100">
+                    <CalendarBlank size={13} weight="duotone" />
+                    {eventLabel}
                   </p>
                   {status === 'approved' ? (
                     <p className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-emerald-700">
@@ -120,6 +152,7 @@ export function StoreCondominiumPanel({ storeId }: Props) {
                       A plataforma está analisando sua solicitação.
                     </p>
                   ) : null}
+                </div>
                 </div>
                 {canRequest ? (
                   <div className="w-full space-y-2 sm:max-w-[260px]">
@@ -150,6 +183,7 @@ export function StoreCondominiumPanel({ storeId }: Props) {
                     </button>
                   </div>
                 ) : null}
+              </div>
               </div>
             </div>
           );

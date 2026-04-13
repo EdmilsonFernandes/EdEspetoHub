@@ -17,7 +17,8 @@ import {
   Play,
   CaretDown,
   Check,
-  Package
+  Package,
+  Buildings
 } from "@phosphor-icons/react";
 import { orderService } from "../../services/orderService";
 import { storeService } from "../../services/storeService";
@@ -111,6 +112,8 @@ const parseMesaIdentifier = (value: any) => {
 const isPostalOrder = (order: any) =>
   String(order?.type || "").toLowerCase() === "delivery" &&
   String(order?.fulfillmentMode || "").toLowerCase() === "postal";
+
+const isCondominiumOrder = (order: any) => Boolean(order?.condominiumId || order?.condominiumName);
 
 const PremiumCheckToggle = ({
   selected = false,
@@ -385,8 +388,11 @@ const OrderSummaryCard = ({
     const hasLocationIdentifier = Boolean(locationIdentifier);
     const mesaMeta = parseMesaIdentifier(locationIdentifier);
     const isMesaLocation = mesaMeta.isMesa;
+    const isCondo = isCondominiumOrder(order);
     const locationBadgeTone = isMesaLocation
       ? 'bg-[#FFF3E0] text-[#E65100] border-[#E65100]'
+      : isCondo
+        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
       : 'bg-slate-100 text-slate-900 border-slate-200';
     const closedAtLabel = (() => {
       if (!archived) return '';
@@ -485,7 +491,7 @@ const OrderSummaryCard = ({
                     </>
                   ) : (
                     <>
-                      {orderType === 'delivery' ? <Truck size={14} weight="duotone" /> : <Storefront size={14} weight="duotone" />}
+                      {isCondo ? <Buildings size={14} weight="duotone" /> : orderType === 'delivery' ? <Truck size={14} weight="duotone" /> : <Storefront size={14} weight="duotone" />}
                       <span className="truncate text-[11px] font-black uppercase tracking-wider">{locationIdentifier}</span>
                     </>
                   )}
@@ -730,7 +736,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     if (typeof window === "undefined") return false;
     return localStorage.getItem("queueTvMode") === "true";
   });
-  const [queueFilter, setQueueFilter] = useState<'all' | 'pending' | 'preparing' | 'ready' | 'late' | 'cancelled' | 'finalized'>('all');
+  const [queueFilter, setQueueFilter] = useState<'all' | 'condominium' | 'pending' | 'preparing' | 'ready' | 'late' | 'cancelled' | 'finalized'>('all');
   const [reportRange, setReportRange] = useState<'today' | 'yesterday' | 'last7' | 'custom'>('today');
   const [reportFrom, setReportFrom] = useState(() => getNowKeyInSaoPaulo());
   const [reportTo, setReportTo] = useState(() => getNowKeyInSaoPaulo());
@@ -2303,6 +2309,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     const pending = withAges.filter((o) => normalizeQueueStage(o) === 'pending').length;
     const preparing = withAges.filter((o) => normalizeQueueStage(o) === 'preparing').length;
     const ready = withAges.filter((o) => normalizeQueueStage(o) === 'ready').length;
+    const activeStatuses = new Set([ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ]);
+    const condominium = queue.filter((o) => activeStatuses.has(String(o?.status || '').toLowerCase()) && isCondominiumOrder(o)).length;
     const late = withAges.filter((o) => o.ageMs > PREP_SLA_MS).length;
     const todayKey = getNowKeyInSaoPaulo();
     const cancelled = queue.filter((order) => {
@@ -2314,7 +2322,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         ? withAges.reduce((acc, cur) => acc + cur.ageMs, 0) / withAges.length
         : 0;
     const oldest = withAges.reduce((acc, cur) => (cur.ageMs > acc ? cur.ageMs : acc), 0);
-    return { pending, preparing, ready, late, cancelled, avgMs, oldest };
+    return { pending, preparing, ready, condominium, late, cancelled, avgMs, oldest };
   }, [productionQueue, queue, currentTime, PREP_SLA_MS]);
 
   const allActiveQueue = useMemo(() => {
@@ -2329,6 +2337,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     if (queueFilter === 'preparing') return allActiveQueue.filter((order) => normalizeQueueStage(order) === 'preparing');
     if (queueFilter === 'ready') {
       return allActiveQueue.filter((order) => normalizeQueueStage(order) === 'ready');
+    }
+    if (queueFilter === 'condominium') {
+      return allActiveQueue.filter((order) => isCondominiumOrder(order));
     }
     if (queueFilter === 'late') {
       const now = Date.now();
@@ -2779,6 +2790,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   <div className="flex flex-nowrap items-center gap-2 overflow-x-auto snap-x snap-mandatory pb-1.5 pr-2 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
                   {[
                     { id: 'all', label: 'Todos', value: allActiveQueue.length },
+                    { id: 'condominium', label: 'Condomínio', value: queueMetrics.condominium },
                     { id: 'pending', label: 'Pendentes', value: queueMetrics.pending },
                     { id: 'preparing', label: 'Em Preparação', value: queueMetrics.preparing },
                     { id: 'ready', label: 'Prontos', value: queueMetrics.ready },
