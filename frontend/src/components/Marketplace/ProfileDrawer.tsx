@@ -258,29 +258,32 @@ export function ProfileDrawer({
       </aside>
 
       {accessPickerOpen && (
-        <div className="absolute inset-0 z-[10] flex items-end bg-slate-950/30 backdrop-blur-[2px] sm:items-center sm:justify-center" onClick={() => setAccessPickerOpen(false)}>
+        <div className="absolute inset-0 z-[10] flex items-center justify-center bg-slate-950/42 px-4 py-[max(1rem,env(safe-area-inset-top))] backdrop-blur-md animate-in fade-in duration-200" onClick={() => setAccessPickerOpen(false)}>
           <div
-            className="w-full rounded-t-[2rem] border border-white/80 bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[0_-26px_70px_-36px_rgba(15,23,42,0.65)] animate-in slide-in-from-bottom-4 fade-in duration-200 sm:max-w-[420px] sm:rounded-[2rem]"
+            className="relative w-full max-w-[430px] overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.98)_100%)] p-5 shadow-[0_28px_70px_-32px_rgba(15,23,42,0.72)] animate-in zoom-in-95 slide-in-from-bottom-3 duration-200"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-slate-200" />
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+              <div className="absolute -left-10 top-8 h-28 w-28 rounded-full bg-[#336886]/10 blur-3xl" />
+              <div className="absolute -right-8 bottom-10 h-24 w-24 rounded-full bg-emerald-200/35 blur-3xl" />
+            </div>
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">Escolha seu acesso</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">Escolha seu acesso</p>
                 <h3 className="mt-1 text-xl font-black text-slate-950">Como você quer entrar?</h3>
                 <p className="mt-1 text-sm font-medium text-slate-500">Cada perfil abre a área certa do app.</p>
               </div>
               <button
                 type="button"
                 onClick={() => setAccessPickerOpen(false)}
-                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all active:scale-95"
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/80 bg-white text-slate-600 shadow-[0_12px_26px_-18px_rgba(15,23,42,0.38)] transition-all active:scale-95"
                 aria-label="Fechar escolha de acesso"
               >
                 <X size={18} weight="bold" />
               </button>
             </div>
 
-            <div className="grid gap-3">
+            <div className="grid gap-3 relative">
               {[
                 {
                   id: 'client',
@@ -315,16 +318,16 @@ export function ProfileDrawer({
                     item.action();
                     onClose();
                   }}
-                  className="group flex w-full items-center gap-4 rounded-[1.45rem] border border-slate-100 bg-white p-4 text-left shadow-[0_8px_24px_rgba(0,0,0,0.055)] transition-all duration-150 ease-out active:scale-[0.97] sm:hover:-translate-y-0.5"
+                  className="group flex w-full items-center gap-4 rounded-[1.55rem] border border-white/90 bg-white/95 p-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.08)] ring-1 ring-slate-100/70 transition-all duration-150 ease-out active:scale-[0.97] sm:hover:-translate-y-0.5 sm:hover:shadow-[0_18px_32px_rgba(15,23,42,0.11)]"
                 >
-                  <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${item.tone} shadow-inner`}>
+                  <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${item.tone} shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]`}>
                     {item.icon}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[15px] font-black text-slate-900">{item.title}</p>
                     <p className="mt-0.5 text-xs font-medium leading-snug text-slate-500">{item.description}</p>
                   </div>
-                  <CaretRight size={17} weight="bold" className="text-slate-300 transition-transform group-active:translate-x-0.5" />
+                  <CaretRight size={17} weight="bold" className="text-slate-300 transition-transform group-hover:translate-x-0.5 group-active:translate-x-0.5" />
                 </button>
               ))}
             </div>
