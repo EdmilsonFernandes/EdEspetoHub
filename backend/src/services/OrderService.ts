@@ -1340,7 +1340,7 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
         await this.adjustManagedStockTx(txManager as EntityManager, {
           storeId: store!.id,
           productId: product.id,
-          orderId: orderRefId || null,
+          orderId: null,
           delta: qty,
           movementType: 'sale',
           reason: `Pedido ${String(orderRefId || '')} (${String(input.type || 'order')})`,
@@ -1452,7 +1452,7 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
          AND ces.active = TRUE
         JOIN stores s
           ON s.id = ces.store_id
-        LEFT JOIN settings ss
+        LEFT JOIN store_settings ss
           ON ss.store_id = s.id
         LEFT JOIN store_condominiums sc
           ON sc.condominium_id = c.id

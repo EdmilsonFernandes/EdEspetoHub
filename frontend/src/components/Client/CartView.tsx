@@ -585,7 +585,7 @@ export const CartView = ({
   }, []);
 
   return (
-    <div className="animate-in slide-in-from-right pb-24 pt-[max(env(safe-area-inset-top),0.85rem)] relative overflow-x-hidden no-x-scroll bg-slate-50">
+    <div className="animate-in slide-in-from-right pb-24 pt-[max(calc(env(safe-area-inset-top)+0.9rem),1.35rem)] relative overflow-x-hidden no-x-scroll bg-slate-50">
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       {/* voltar */}
       <button
@@ -596,7 +596,7 @@ export const CartView = ({
       </button>
 
       {/* Resumo compacto (mobile) */}
-      <div className={`sm:hidden mb-4 rounded-2xl border border-slate-100 bg-white px-4 ${summaryCompact ? 'py-2' : 'py-2.5'} flex items-center justify-between sticky top-[max(env(safe-area-inset-top),0.5rem)] z-40 transition-all shadow-sm`}>
+      <div className={`sm:hidden mb-4 rounded-2xl border border-slate-100 bg-white px-4 ${summaryCompact ? 'py-2' : 'py-2.5'} flex items-center justify-between sticky top-[max(calc(env(safe-area-inset-top)+0.45rem),0.9rem)] z-40 transition-all shadow-sm`}>
         <div>
           <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Resumo rápido</p>
           <p className="text-sm font-semibold text-slate-800">
