@@ -1716,10 +1716,10 @@ export function MarketplacePage() {
             >
               <div className="mb-3 flex items-center justify-between gap-3 px-1">
                 <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">
+                  <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">
                     {selectedCondominium ? 'Comprando na feira' : 'Feiras e condomínios'}
                   </p>
-                  <h2 className="truncate text-[15px] font-black tracking-tight text-slate-950 sm:text-base">
+                  <h2 className="truncate text-lg font-semibold text-gray-800">
                     {selectedCondominium ? String(selectedCondominium.name || 'Condomínio') : 'Encontre lojas dentro do seu condomínio'}
                   </h2>
                 </div>
@@ -1764,22 +1764,25 @@ export function MarketplacePage() {
                 <button
                   type="button"
                   onClick={() => setCondominiumPickerOpen(true)}
-                  className="group flex w-full items-center gap-3 rounded-[1.35rem] border border-white/90 bg-white p-3 text-left shadow-[0_8px_24px_rgba(15,23,42,0.055)] transition-all duration-200 active:scale-[0.985]"
+                  className="group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-white to-white p-3.5 text-left shadow-sm transition-all duration-200 hover:border-emerald-200 hover:shadow-[0_14px_30px_-20px_rgba(16,185,129,0.45)] active:scale-[0.985]"
                 >
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1rem] bg-[#336886]/10 text-[#336886]">
-                    <Buildings size={22} weight="duotone" />
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white p-3 text-emerald-600 shadow-sm ring-1 ring-emerald-100">
+                    <Buildings size={24} weight="duotone" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-black text-slate-950">
-                      Escolher feira ou condomínio
-                    </p>
-                    <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-500">
-                      {condominiums.length} local{condominiums.length === 1 ? '' : 'is'} disponível{condominiums.length === 1 ? '' : 'is'}
+                    <div className="mb-1 flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-1 text-xs font-bold text-red-500">
+                        <span className="h-2 w-2 rounded-full bg-red-500 shadow-[0_0_0_4px_rgba(239,68,68,0.12)] animate-pulse" />
+                        Feiras disponíveis
+                      </span>
+                    </div>
+                    <p className="truncate text-base font-bold text-gray-900">Feiras próximas a você</p>
+                    <p className="mt-0.5 truncate text-sm text-gray-500">
+                      {condominiums.length} local{condominiums.length === 1 ? '' : 'is'} disponível{condominiums.length === 1 ? '' : 'is'} para retirada
                     </p>
                   </div>
-                  <span className="inline-flex shrink-0 items-center gap-1 rounded-xl bg-slate-100 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600">
-                    Abrir
-                    <CaretRight size={13} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
+                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-emerald-700 shadow-sm ring-1 ring-emerald-100">
+                    <CaretRight size={15} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
                   </span>
                 </button>
               )}
