@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { apiClient } from '../config/apiClient';
+import { apiClient } from '../../config/apiClient';
 
 const toJson = async (response: any) => {
   if (!response.ok) {
