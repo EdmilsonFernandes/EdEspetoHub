@@ -43,8 +43,24 @@ export const condominiumService = {
     return adminRequest('/admin/condominiums', { method: 'POST', body: payload });
   },
 
+  adminUpdate(condominiumId: string, payload: any) {
+    return adminRequest(`/admin/condominiums/${encodeURIComponent(condominiumId)}`, { method: 'PATCH', body: payload });
+  },
+
+  adminDeactivate(condominiumId: string) {
+    return adminRequest(`/admin/condominiums/${encodeURIComponent(condominiumId)}/deactivate`, { method: 'PATCH' });
+  },
+
   adminCreateEvent(condominiumId: string, payload: any) {
     return adminRequest(`/admin/condominiums/${encodeURIComponent(condominiumId)}/events`, { method: 'POST', body: payload });
+  },
+
+  adminUpdateEvent(eventId: string, payload: any) {
+    return adminRequest(`/admin/condominium-events/${encodeURIComponent(eventId)}`, { method: 'PATCH', body: payload });
+  },
+
+  adminDeactivateEvent(eventId: string) {
+    return adminRequest(`/admin/condominium-events/${encodeURIComponent(eventId)}/deactivate`, { method: 'PATCH' });
   },
 
   adminApproveStore(condominiumId: string, storeId: string) {
@@ -55,7 +71,7 @@ export const condominiumService = {
     return adminRequest(`/admin/condominium-events/${encodeURIComponent(eventId)}/stores`, { method: 'POST', body: { storeId } });
   },
 
-  adminReviewRequest(requestId: string, payload: { status: 'approved' | 'rejected' | 'blocked'; reviewNote?: string }) {
+  adminReviewRequest(requestId: string, payload: { status: 'pending' | 'approved' | 'rejected' | 'blocked' | 'cancelled'; reviewNote?: string }) {
     return adminRequest(`/admin/condominium-requests/${encodeURIComponent(requestId)}/review`, { method: 'PATCH', body: payload });
   },
 

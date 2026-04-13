@@ -92,7 +92,11 @@ routes.get('/admin/access-logs', requireAuth, requireRole('SUPER_ADMIN'), Platfo
 routes.post('/admin/push/broadcast', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.broadcastPush);
 routes.get('/admin/condominiums/manage', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminOverview);
 routes.post('/admin/condominiums', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminCreate);
+routes.patch('/admin/condominiums/:condominiumId', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminUpdate);
+routes.patch('/admin/condominiums/:condominiumId/deactivate', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminDeactivate);
 routes.post('/admin/condominiums/:condominiumId/events', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminCreateEvent);
+routes.patch('/admin/condominium-events/:eventId', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminUpdateEvent);
+routes.patch('/admin/condominium-events/:eventId/deactivate', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminDeactivateEvent);
 routes.post('/admin/condominiums/:condominiumId/stores', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminApproveStore);
 routes.post('/admin/condominium-events/:eventId/stores', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminAddStoreToEvent);
 routes.patch('/admin/condominium-requests/:requestId/review', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminReviewRequest);

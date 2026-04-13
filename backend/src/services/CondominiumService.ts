@@ -85,6 +85,40 @@ export class CondominiumService {
     return this.toPublicCondominium(condominium, null);
   }
 
+  async adminUpdateCondominium(condominiumId: string, payload: any) {
+    const condominium = await this.condominiumRepository.findById(condominiumId);
+    if (!condominium) throw new AppError('CONDO-001', 404, { message: 'Condominio nao encontrado.' });
+
+    const name = String(payload?.name || condominium.name || '').trim();
+    const slugInput = String(payload?.slug || condominium.slug || this.slugify(name)).trim();
+    if (!name || !slugInput) throw new AppError('CONDO-002', 400, { message: 'Nome e slug sao obrigatorios.' });
+
+    const safeSlug = this.slugify(slugInput || name) || 'condominio';
+    const uploadedLogo = await saveBase64Image(payload?.logoFile, `condominium-logo-${safeSlug}`, 'condominiums');
+    const uploadedBanner = await saveBase64Image(payload?.bannerFile, `condominium-banner-${safeSlug}`, 'condominiums');
+    const saved = await this.condominiumRepository.saveCondominium({
+      ...condominium,
+      name,
+      slug: this.slugify(slugInput),
+      description: payload?.description ?? condominium.description ?? null,
+      address: payload?.address ?? condominium.address ?? null,
+      city: payload?.city ?? condominium.city ?? null,
+      state: payload?.state ?? condominium.state ?? null,
+      zipCode: payload?.zipCode ?? condominium.zipCode ?? null,
+      logoUrl: uploadedLogo || payload?.logoUrl || condominium.logoUrl || null,
+      bannerUrl: uploadedBanner || payload?.bannerUrl || condominium.bannerUrl || null,
+      active: payload?.active !== false,
+    });
+    return this.toPublicCondominium(saved, null);
+  }
+
+  async adminDeactivateCondominium(condominiumId: string) {
+    const condominium = await this.condominiumRepository.findById(condominiumId);
+    if (!condominium) throw new AppError('CONDO-001', 404, { message: 'Condominio nao encontrado.' });
+    await this.condominiumRepository.deactivateCondominium(condominiumId);
+    return { ok: true };
+  }
+
   async adminCreateEvent(condominiumId: string, payload: any) {
     const condominium = await this.condominiumRepository.findById(condominiumId);
     if (!condominium) throw new AppError('CONDO-001', 404, { message: 'Condominio nao encontrado.' });
@@ -93,6 +127,14 @@ export class CondominiumService {
     const endsAt = new Date(payload?.endsAt);
     if (!title || Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime()) || endsAt <= startsAt) {
       throw new AppError('CONDO-003', 400, { message: 'Informe titulo, inicio e fim validos para a feira.' });
+    }
+    const sameDayEvent = await this.condominiumRepository.findSameDayEventForCondominium(condominiumId, startsAt);
+    if (sameDayEvent) {
+      throw new AppError('CONDO-009', 400, { message: 'Ja existe uma feira cadastrada para esse condominio nesse dia.' });
+    }
+    const conflictingEvent = await this.condominiumRepository.findOverlappingEventForCondominium(condominiumId, startsAt, endsAt);
+    if (conflictingEvent) {
+      throw new AppError('CONDO-008', 400, { message: 'Ja existe uma feira ativa nesse horario para o condominio.' });
     }
     const event = await this.condominiumRepository.saveEvent({
       condominiumId,
@@ -105,6 +147,46 @@ export class CondominiumService {
       active: payload?.active !== false,
     });
     return this.toPublicEvent(event);
+  }
+
+  async adminUpdateEvent(eventId: string, payload: any) {
+    const event = await this.condominiumRepository.findEventById(eventId);
+    if (!event) throw new AppError('CONDO-007', 404, { message: 'Feira nao encontrada.' });
+
+    const title = String(payload?.title || event.title || '').trim();
+    const startsAt = new Date(payload?.startsAt || event.startsAt);
+    const endsAt = new Date(payload?.endsAt || event.endsAt);
+    if (!title || Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime()) || endsAt <= startsAt) {
+      throw new AppError('CONDO-003', 400, { message: 'Informe titulo, inicio e fim validos para a feira.' });
+    }
+    const sameDayEvent = await this.condominiumRepository.findSameDayEventForCondominium(event.condominiumId, startsAt, eventId);
+    if (sameDayEvent) {
+      throw new AppError('CONDO-009', 400, { message: 'Ja existe outra feira cadastrada para esse condominio nesse dia.' });
+    }
+    const conflictingEvent = await this.condominiumRepository.findOverlappingEventForCondominium(event.condominiumId, startsAt, endsAt, eventId);
+    if (conflictingEvent) {
+      throw new AppError('CONDO-008', 400, { message: 'Ja existe outra feira ativa nesse horario para o condominio.' });
+    }
+
+    const saved = await this.condominiumRepository.saveEvent({
+      ...event,
+      title,
+      startsAt,
+      endsAt,
+      status: String(payload?.status || event.status || 'scheduled').trim() || 'scheduled',
+      pickupLocation: payload?.pickupLocation ?? event.pickupLocation ?? null,
+      notes: payload?.notes ?? event.notes ?? null,
+      active: payload?.active !== false,
+    });
+    const refreshed = await this.condominiumRepository.findEventById(saved.id);
+    return this.toPublicEvent(refreshed || saved);
+  }
+
+  async adminDeactivateEvent(eventId: string) {
+    const event = await this.condominiumRepository.findEventById(eventId);
+    if (!event) throw new AppError('CONDO-007', 404, { message: 'Feira nao encontrada.' });
+    await this.condominiumRepository.deactivateEvent(eventId);
+    return { ok: true };
   }
 
   async adminApproveStore(condominiumId: string, storeId: string) {
@@ -123,16 +205,18 @@ export class CondominiumService {
     const request = await this.condominiumRepository.findRequestById(requestId);
     if (!request) throw new AppError('CONDO-004', 404, { message: 'Solicitacao nao encontrada.' });
     const status = String(payload?.status || '').trim().toLowerCase();
-    if (![ 'approved', 'rejected', 'blocked' ].includes(status)) {
+    if (![ 'pending', 'approved', 'rejected', 'blocked', 'cancelled' ].includes(status)) {
       throw new AppError('CONDO-005', 400, { message: 'Status de revisao invalido.' });
     }
     request.status = status;
     request.reviewNote = payload?.reviewNote || null;
-    request.reviewedBy = reviewedBy || null;
-    request.reviewedAt = new Date();
+    request.reviewedBy = status === 'pending' ? null : reviewedBy || null;
+    request.reviewedAt = status === 'pending' ? null : new Date();
     const saved = await this.condominiumRepository.saveRequest(request);
     if (status === 'approved') {
       await this.condominiumRepository.upsertStoreCondominium(request.condominiumId, request.storeId, true);
+    } else {
+      await this.condominiumRepository.upsertStoreCondominium(request.condominiumId, request.storeId, false);
     }
     return this.toPublicRequest(saved);
   }
@@ -208,7 +292,13 @@ export class CondominiumService {
    */
   async listPublic() {
     const rows = await this.condominiumRepository.listActive();
-    const summaries = await this.condominiumRepository.getEventSummaryByCondominiumIds(rows.map((row) => row.id));
+    const eventGroups = await Promise.all(
+      rows.map(async (condominium) => ({
+        condominiumId: condominium.id,
+        event: this.pickCurrentOrNextEvent(await this.condominiumRepository.listActiveEventsBySlug(condominium.slug)),
+      }))
+    );
+    const summaries = new Map(eventGroups.map((group) => [group.condominiumId, group.event || null]));
     return rows.map((condominium) => this.toPublicCondominium(condominium, summaries.get(condominium.id) || null));
   }
 
@@ -222,7 +312,7 @@ export class CondominiumService {
     const condominium = await this.condominiumRepository.findActiveBySlug(slug);
     if (!condominium) throw new AppError('CONDO-001', 404, { message: 'Condominio nao encontrado.' });
     const events = await this.condominiumRepository.listActiveEventsBySlug(slug);
-    return this.toPublicCondominium(condominium, events[0] || null);
+    return this.toPublicCondominium(condominium, this.pickCurrentOrNextEvent(events) || null);
   }
 
   /**
@@ -352,8 +442,28 @@ export class CondominiumService {
 
   private pickCurrentOrNextEvent(events: any[]) {
     if (!Array.isArray(events) || events.length === 0) return null;
-    const live = events.find((event) => this.getEventState(event) === 'live');
-    return live || events[0] || null;
+    const sorted = [...events].sort((left, right) => {
+      const stateRank = (event: any) => {
+        const state = this.getEventState(event);
+        const hasStores = this.getActiveStoreCount(event) > 0;
+        if (state === 'live' && hasStores) return 0;
+        if (state === 'live') return 1;
+        if (state === 'upcoming' && hasStores) return 2;
+        if (state === 'upcoming') return 3;
+        if (hasStores) return 4;
+        return 5;
+      };
+
+      const rankDelta = stateRank(left) - stateRank(right);
+      if (rankDelta !== 0) return rankDelta;
+      return new Date(left?.startsAt || 0).getTime() - new Date(right?.startsAt || 0).getTime();
+    });
+    return sorted[0] || null;
+  }
+
+  private getActiveStoreCount(event: any) {
+    const storeLinks = Array.isArray(event?.storeLinks) ? event.storeLinks : [];
+    return storeLinks.filter((link: any) => link?.active !== false && link?.store).length;
   }
 
   private getEventState(event: any) {

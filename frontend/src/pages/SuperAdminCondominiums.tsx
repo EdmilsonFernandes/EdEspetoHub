@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Buildings, CalendarBlank, CaretRight, CheckCircle, Clock, ImageSquare, Storefront, UploadSimple } from '@phosphor-icons/react';
+import { Buildings, CalendarBlank, CaretRight, Clock, ImageSquare, PencilSimple, Storefront, Trash, UploadSimple } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { condominiumService } from '../services/condominiumService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
@@ -45,17 +45,29 @@ const addHoursToLocalDateTime = (value: string, hours: number) => {
   return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
 };
 
+const toDateTimeLocalInput = (value?: string) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const offsetMs = date.getTimezoneOffset() * 60 * 1000;
+  return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
+};
+
 export function SuperAdminCondominiums() {
   const [data, setData] = useState<any>({ condominiums: [], stores: [], requests: [] });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [editingCondominiumId, setEditingCondominiumId] = useState('');
+  const [editingEventId, setEditingEventId] = useState('');
   const [condominiumForm, setCondominiumForm] = useState({
     name: '',
     slug: '',
     city: '',
     state: 'SP',
     address: '',
+    description: '',
+    zipCode: '',
     logoUrl: '',
     bannerUrl: '',
     logoFile: '',
@@ -63,9 +75,12 @@ export function SuperAdminCondominiums() {
   });
   const [eventForm, setEventForm] = useState({
     condominiumId: '',
+    title: '',
     startsAt: '',
     endsAt: '',
     pickupLocation: '',
+    status: 'scheduled',
+    notes: '',
   });
   const [eventFormError, setEventFormError] = useState('');
   const [eventStoreForm, setEventStoreForm] = useState({
@@ -117,11 +132,77 @@ export function SuperAdminCondominiums() {
     setSaving(true);
     setError('');
     try {
-      await condominiumService.adminCreate(condominiumForm);
-      setCondominiumForm({ name: '', slug: '', city: '', state: 'SP', address: '', logoUrl: '', bannerUrl: '', logoFile: '', bannerFile: '' });
+      if (editingCondominiumId) {
+        await condominiumService.adminUpdate(editingCondominiumId, condominiumForm);
+      } else {
+        await condominiumService.adminCreate(condominiumForm);
+      }
+      setEditingCondominiumId('');
+      setCondominiumForm({
+        name: '',
+        slug: '',
+        city: '',
+        state: 'SP',
+        address: '',
+        description: '',
+        zipCode: '',
+        logoUrl: '',
+        bannerUrl: '',
+        logoFile: '',
+        bannerFile: '',
+      });
       await load();
     } catch (err: any) {
-      setError(err?.message || 'Falha ao criar condomínio.');
+      setError(err?.message || 'Falha ao salvar condomínio.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const editCondominium = (condominium: any) => {
+    setEditingCondominiumId(condominium.id);
+    setCondominiumForm({
+      name: condominium.name || '',
+      slug: condominium.slug || '',
+      city: condominium.city || '',
+      state: condominium.state || 'SP',
+      address: condominium.address || '',
+      description: condominium.description || '',
+      zipCode: condominium.zipCode || '',
+      logoUrl: condominium.logoUrl || '',
+      bannerUrl: condominium.bannerUrl || '',
+      logoFile: '',
+      bannerFile: '',
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelCondominiumEdit = () => {
+    setEditingCondominiumId('');
+    setCondominiumForm({
+      name: '',
+      slug: '',
+      city: '',
+      state: 'SP',
+      address: '',
+      description: '',
+      zipCode: '',
+      logoUrl: '',
+      bannerUrl: '',
+      logoFile: '',
+      bannerFile: '',
+    });
+  };
+
+  const deactivateCondominium = async (condominiumId: string) => {
+    setSaving(true);
+    setError('');
+    try {
+      await condominiumService.adminDeactivate(condominiumId);
+      if (editingCondominiumId === condominiumId) cancelCondominiumEdit();
+      await load();
+    } catch (err: any) {
+      setError(err?.message || 'Falha ao desativar condomínio.');
     } finally {
       setSaving(false);
     }
@@ -137,9 +218,9 @@ export function SuperAdminCondominiums() {
     }
   };
 
-  const createEvent = async () => {
+  const saveEvent = async () => {
     if (!eventForm.condominiumId) {
-      setEventFormError('Escolha o condomínio antes de criar a feira.');
+      setEventFormError('Escolha o condomínio antes de salvar a feira.');
       return;
     }
     const startsAt = new Date(eventForm.startsAt);
@@ -149,23 +230,65 @@ export function SuperAdminCondominiums() {
       return;
     }
     if (endsAt <= startsAt) {
-      setEventFormError('O horário de término precisa ser depois do início. Exemplo: começa 15:00 e termina 22:00.');
+      setEventFormError('O horário de término precisa ser depois do início.');
       return;
     }
     setSaving(true);
     setError('');
     setEventFormError('');
     try {
-      await condominiumService.adminCreateEvent(eventForm.condominiumId, {
-        title: `Feira do ${(data.condominiums || []).find((item: any) => item.id === eventForm.condominiumId)?.name || 'condomínio'}`,
-        startsAt: eventForm.startsAt,
-        endsAt: eventForm.endsAt,
-        pickupLocation: eventForm.pickupLocation,
-      });
-      setEventForm({ condominiumId: eventForm.condominiumId, startsAt: '', endsAt: '', pickupLocation: '' });
+      if (editingEventId) {
+        await condominiumService.adminUpdateEvent(editingEventId, eventForm);
+      } else {
+        await condominiumService.adminCreateEvent(eventForm.condominiumId, {
+          title: eventForm.title || `Feira do ${(data.condominiums || []).find((item: any) => item.id === eventForm.condominiumId)?.name || 'condomínio'}`,
+          startsAt: eventForm.startsAt,
+          endsAt: eventForm.endsAt,
+          pickupLocation: eventForm.pickupLocation,
+          status: eventForm.status,
+          notes: eventForm.notes,
+        });
+      }
+      setEditingEventId('');
+      setEventForm({ condominiumId: eventForm.condominiumId, title: '', startsAt: '', endsAt: '', pickupLocation: '', status: 'scheduled', notes: '' });
       await load();
     } catch (err: any) {
-      setEventFormError(err?.message || 'Falha ao criar feira.');
+      setEventFormError(err?.message || 'Falha ao salvar feira.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const editEvent = (event: any) => {
+    setEditingEventId(event.id);
+    setEventForm({
+      condominiumId: event.condominium?.id || '',
+      title: event.title || '',
+      startsAt: toDateTimeLocalInput(event.startsAt),
+      endsAt: toDateTimeLocalInput(event.endsAt),
+      pickupLocation: event.pickupLocation || '',
+      status: event.status || 'scheduled',
+      notes: event.notes || '',
+    });
+    setEventFormError('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEventEdit = () => {
+    setEditingEventId('');
+    setEventForm({ condominiumId: '', title: '', startsAt: '', endsAt: '', pickupLocation: '', status: 'scheduled', notes: '' });
+    setEventFormError('');
+  };
+
+  const deactivateEvent = async (eventId: string) => {
+    setSaving(true);
+    setError('');
+    try {
+      await condominiumService.adminDeactivateEvent(eventId);
+      if (editingEventId === eventId) cancelEventEdit();
+      await load();
+    } catch (err: any) {
+      setError(err?.message || 'Falha ao encerrar feira.');
     } finally {
       setSaving(false);
     }
@@ -221,7 +344,7 @@ export function SuperAdminCondominiums() {
     }
   };
 
-  const reviewRequest = async (requestId: string, status: 'approved' | 'rejected') => {
+  const reviewRequest = async (requestId: string, status: 'pending' | 'approved' | 'rejected' | 'blocked' | 'cancelled') => {
     setSaving(true);
     setError('');
     try {
@@ -330,6 +453,8 @@ export function SuperAdminCondominiums() {
                 ['city', 'Cidade'],
                 ['state', 'UF'],
                 ['address', 'Endereço'],
+                ['description', 'Descrição'],
+                ['zipCode', 'CEP'],
                 ['logoUrl', 'Logo URL opcional'],
                 ['bannerUrl', 'Banner URL opcional'],
               ].map(([key, label]) => (
@@ -345,9 +470,16 @@ export function SuperAdminCondominiums() {
                 </label>
               ))}
               </div>
-              <button onClick={createCondominium} disabled={saving || !condominiumForm.name} className="w-full rounded-2xl bg-[#336886] px-4 py-3.5 text-sm font-black text-white shadow-[0_18px_34px_-22px_rgba(51,104,134,0.8)] disabled:opacity-50">
-                Criar condomínio
-              </button>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <button onClick={createCondominium} disabled={saving || !condominiumForm.name} className="w-full rounded-2xl bg-[#336886] px-4 py-3.5 text-sm font-black text-white shadow-[0_18px_34px_-22px_rgba(51,104,134,0.8)] disabled:opacity-50">
+                  {editingCondominiumId ? 'Salvar condomínio' : 'Criar condomínio'}
+                </button>
+                {editingCondominiumId ? (
+                  <button onClick={cancelCondominiumEdit} type="button" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-black text-slate-700">
+                    Cancelar edição
+                  </button>
+                ) : null}
+              </div>
             </div>
           </section>
 
@@ -368,14 +500,29 @@ export function SuperAdminCondominiums() {
                 {(data.condominiums || []).map((item: any) => <option key={item.id} value={item.id}>{item.name}</option>)}
               </select>
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+                <input value={eventForm.title} onChange={(event) => setEventForm((prev) => ({ ...prev, title: event.target.value }))} placeholder="Título da feira" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white sm:col-span-2 xl:col-span-1 2xl:col-span-2" />
                 <input type="datetime-local" value={eventForm.startsAt} onChange={(event) => handleEventStartsAtChange(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
                 <input type="datetime-local" value={eventForm.endsAt} onChange={(event) => handleEventEndsAtChange(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
               </div>
               <input value={eventForm.pickupLocation} onChange={(event) => handleEventPickupLocationChange(event.target.value)} placeholder="Ex: praça central, entrada social, lounge gourmet" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
+              <select value={eventForm.status} onChange={(event) => setEventForm((prev) => ({ ...prev, status: event.target.value }))} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold">
+                <option value="scheduled">Agendada</option>
+                <option value="live">Ao vivo</option>
+                <option value="finished">Finalizada</option>
+                <option value="cancelled">Cancelada</option>
+              </select>
+              <textarea value={eventForm.notes} onChange={(event) => setEventForm((prev) => ({ ...prev, notes: event.target.value }))} placeholder="Observações da agenda" className="min-h-[96px] w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
               {eventFormError ? <p className="rounded-2xl border border-rose-100 bg-rose-50 px-3 py-2.5 text-xs font-bold text-rose-700">{eventFormError}</p> : null}
-              <button onClick={createEvent} disabled={saving || !eventForm.condominiumId || !eventForm.startsAt || !eventForm.endsAt} className="w-full rounded-2xl bg-emerald-600 px-4 py-3.5 text-sm font-black text-white shadow-[0_18px_34px_-22px_rgba(5,150,105,0.75)] disabled:opacity-50">
-                Criar feira
-              </button>
+              <div className="flex flex-col gap-2">
+                <button onClick={saveEvent} disabled={saving || !eventForm.condominiumId || !eventForm.startsAt || !eventForm.endsAt} className="w-full rounded-2xl bg-emerald-600 px-4 py-3.5 text-sm font-black text-white shadow-[0_18px_34px_-22px_rgba(5,150,105,0.75)] disabled:opacity-50">
+                  {editingEventId ? 'Salvar feira' : 'Criar feira'}
+                </button>
+                {editingEventId ? (
+                  <button onClick={cancelEventEdit} type="button" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-black text-slate-700">
+                    Cancelar edição
+                  </button>
+                ) : null}
+              </div>
             </div>
           </section>
 
@@ -405,6 +552,44 @@ export function SuperAdminCondominiums() {
           </section>
           </div>
         </div>
+
+        <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-black tracking-tight text-slate-950">Condomínios cadastrados</h2>
+              <p className="text-sm font-medium text-slate-500">Edite dados principais ou retire um condomínio de operação sem apagar histórico.</p>
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-2 2xl:grid-cols-3">
+            {(data.condominiums || []).map((condominium: any) => {
+              const preview = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || '') || '';
+              return (
+                <div key={condominium.id} className="rounded-[1.6rem] border border-slate-200 bg-white p-4 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.45)]">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[1.2rem] bg-slate-50 ring-1 ring-slate-100">
+                      {preview ? <img src={preview} alt={condominium.name} className="h-full w-full object-contain p-1.5" /> : <Buildings size={24} weight="duotone" className="text-[#336886]" />}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-base font-black text-slate-950">{condominium.name}</p>
+                      <p className="truncate text-xs font-semibold text-slate-500">{condominium.slug}</p>
+                      <p className="mt-2 text-xs font-semibold text-slate-500">{condominium.city || 'Cidade não informada'}{condominium.state ? `, ${condominium.state}` : ''}</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex gap-2">
+                    <button onClick={() => editCondominium(condominium)} className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700">
+                      <PencilSimple size={14} weight="bold" />
+                      Editar
+                    </button>
+                    <button onClick={() => deactivateCondominium(condominium.id)} disabled={saving} className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-rose-50 px-3 py-2 text-xs font-black text-rose-700 ring-1 ring-rose-100 disabled:opacity-50">
+                      <Trash size={14} weight="bold" />
+                      Desativar
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
 
         <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -439,17 +624,13 @@ export function SuperAdminCondominiums() {
                     <span className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ring-1 ${status.tone}`}>{status.label}</span>
                     </div>
                   </div>
-                  {request.status === 'pending' ? (
-                    <div className="flex flex-wrap gap-2">
-                      <button onClick={() => reviewRequest(request.id, 'approved')} disabled={saving} className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white shadow-[0_16px_30px_-22px_rgba(5,150,105,0.85)]">Aprovar</button>
-                      <button onClick={() => reviewRequest(request.id, 'rejected')} disabled={saving} className="rounded-xl bg-white px-3 py-2 text-xs font-black text-rose-700 ring-1 ring-rose-100">Recusar</button>
-                    </div>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 rounded-xl bg-slate-50 px-3 py-2 text-xs font-black text-emerald-700">
-                      <CheckCircle size={14} weight="fill" />
-                      Revisada
-                    </span>
-                  )}
+                  <div className="flex flex-wrap gap-2">
+                    <button onClick={() => reviewRequest(request.id, 'approved')} disabled={saving || request.status === 'approved'} className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white shadow-[0_16px_30px_-22px_rgba(5,150,105,0.85)] disabled:opacity-50">Aprovar</button>
+                    <button onClick={() => reviewRequest(request.id, 'rejected')} disabled={saving || request.status === 'rejected'} className="rounded-xl bg-white px-3 py-2 text-xs font-black text-rose-700 ring-1 ring-rose-100 disabled:opacity-50">Recusar</button>
+                    <button onClick={() => reviewRequest(request.id, 'blocked')} disabled={saving || request.status === 'blocked'} className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-black text-white disabled:opacity-50">Bloquear</button>
+                    <button onClick={() => reviewRequest(request.id, 'pending')} disabled={saving || request.status === 'pending'} className="rounded-xl bg-amber-50 px-3 py-2 text-xs font-black text-amber-700 ring-1 ring-amber-100 disabled:opacity-50">Voltar p/ análise</button>
+                    <button onClick={() => reviewRequest(request.id, 'cancelled')} disabled={saving || request.status === 'cancelled'} className="rounded-xl bg-slate-50 px-3 py-2 text-xs font-black text-slate-600 ring-1 ring-slate-200 disabled:opacity-50">Revogar</button>
+                  </div>
                 </div>
               </div>
             );})}
@@ -491,6 +672,16 @@ export function SuperAdminCondominiums() {
                     <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">
                       {eventStores.length} lojas
                     </span>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <button onClick={() => editEvent(event)} className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700">
+                      <PencilSimple size={14} weight="bold" />
+                      Editar agenda
+                    </button>
+                    <button onClick={() => deactivateEvent(event.id)} disabled={saving} className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-rose-50 px-3 py-2 text-xs font-black text-rose-700 ring-1 ring-rose-100 disabled:opacity-50">
+                      <Trash size={14} weight="bold" />
+                      Encerrar
+                    </button>
                   </div>
                   {eventStores.length > 0 ? (
                     <div className="mt-2 flex flex-wrap gap-2">

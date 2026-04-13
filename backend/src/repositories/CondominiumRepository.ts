@@ -82,6 +82,13 @@ export class CondominiumRepository {
     return this.condominiumRepository.findOne({ where: { id } });
   }
 
+  findEventById(id: string) {
+    return this.condominiumEventRepository.findOne({
+      where: { id },
+      relations: [ 'storeLinks', 'storeLinks.store', 'storeLinks.store.settings', 'condominium' ],
+    });
+  }
+
   saveCondominium(payload: Partial<Condominium>) {
     return this.condominiumRepository.save(this.condominiumRepository.create(payload));
   }
@@ -109,6 +116,9 @@ export class CondominiumRepository {
     return this.condominiumEventRepository
       .createQueryBuilder('event')
       .innerJoinAndSelect('event.condominium', 'condominium')
+      .leftJoinAndSelect('event.storeLinks', 'storeLinks')
+      .leftJoinAndSelect('storeLinks.store', 'store')
+      .leftJoinAndSelect('store.settings', 'settings')
       .where('condominium.slug = :slug', { slug })
       .andWhere('condominium.active = true')
       .andWhere('event.active = true')
@@ -166,6 +176,112 @@ export class CondominiumRepository {
 
   saveEvent(payload: Partial<CondominiumEvent>) {
     return this.condominiumEventRepository.save(this.condominiumEventRepository.create(payload));
+  }
+
+  async findOverlappingEventForCondominium(condominiumId: string, startsAt: Date, endsAt: Date, excludeEventId?: string) {
+    const qb = this.condominiumEventRepository
+      .createQueryBuilder('event')
+      .where('event.condominium_id = :condominiumId', { condominiumId })
+      .andWhere('event.active = true')
+      .andWhere("event.status NOT IN ('cancelled')")
+      .andWhere('event.starts_at < :endsAt', { endsAt })
+      .andWhere('event.ends_at > :startsAt', { startsAt });
+
+    if (excludeEventId) {
+      qb.andWhere('event.id <> :excludeEventId', { excludeEventId });
+    }
+
+    return qb.orderBy('event.starts_at', 'ASC').getOne();
+  }
+
+  async findSameDayEventForCondominium(condominiumId: string, startsAt: Date, excludeEventId?: string) {
+    const year = startsAt.getUTCFullYear();
+    const month = startsAt.getUTCMonth();
+    const day = startsAt.getUTCDate();
+    const dayStart = new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
+    const dayEnd = new Date(Date.UTC(year, month, day + 1, 0, 0, 0, 0));
+
+    const qb = this.condominiumEventRepository
+      .createQueryBuilder('event')
+      .where('event.condominium_id = :condominiumId', { condominiumId })
+      .andWhere('event.active = true')
+      .andWhere("event.status NOT IN ('cancelled')")
+      .andWhere('event.starts_at >= :dayStart', { dayStart })
+      .andWhere('event.starts_at < :dayEnd', { dayEnd });
+
+    if (excludeEventId) {
+      qb.andWhere('event.id <> :excludeEventId', { excludeEventId });
+    }
+
+    return qb.orderBy('event.starts_at', 'ASC').getOne();
+  }
+
+  async deactivateCondominium(condominiumId: string) {
+    await AppDataSource.query(
+      `
+        UPDATE condominiums
+        SET active = FALSE,
+            updated_at = NOW()
+        WHERE id = $1;
+      `,
+      [condominiumId]
+    );
+
+    await AppDataSource.query(
+      `
+        UPDATE condominium_events
+        SET active = FALSE,
+            status = 'cancelled',
+            updated_at = NOW()
+        WHERE condominium_id = $1;
+      `,
+      [condominiumId]
+    );
+
+    await AppDataSource.query(
+      `
+        UPDATE store_condominiums
+        SET active = FALSE,
+            updated_at = NOW()
+        WHERE condominium_id = $1;
+      `,
+      [condominiumId]
+    );
+
+    await AppDataSource.query(
+      `
+        UPDATE condominium_event_stores ces
+        SET active = FALSE,
+            updated_at = NOW()
+        FROM condominium_events ce
+        WHERE ces.event_id = ce.id
+          AND ce.condominium_id = $1;
+      `,
+      [condominiumId]
+    );
+  }
+
+  async deactivateEvent(eventId: string) {
+    await AppDataSource.query(
+      `
+        UPDATE condominium_events
+        SET active = FALSE,
+            status = 'cancelled',
+            updated_at = NOW()
+        WHERE id = $1;
+      `,
+      [eventId]
+    );
+
+    await AppDataSource.query(
+      `
+        UPDATE condominium_event_stores
+        SET active = FALSE,
+            updated_at = NOW()
+        WHERE event_id = $1;
+      `,
+      [eventId]
+    );
   }
 
   async upsertStoreCondominium(condominiumId: string, storeId: string, active = true) {

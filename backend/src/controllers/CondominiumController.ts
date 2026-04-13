@@ -44,10 +44,46 @@ export class CondominiumController {
     }
   }
 
+  static async adminUpdate(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.adminUpdateCondominium(String(req.params.condominiumId || ''), req.body || {});
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async adminDeactivate(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.adminDeactivateCondominium(String(req.params.condominiumId || ''));
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
   static async adminCreateEvent(req: Request, res: Response) {
     try {
       const payload = await condominiumService.adminCreateEvent(String(req.params.condominiumId || ''), req.body || {});
       return res.status(201).json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async adminUpdateEvent(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.adminUpdateEvent(String(req.params.eventId || ''), req.body || {});
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async adminDeactivateEvent(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.adminDeactivateEvent(String(req.params.eventId || ''));
+      return res.json(payload);
     } catch (error: any) {
       return respondWithError(req, res, error, 400);
     }
