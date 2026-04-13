@@ -196,7 +196,7 @@ export const CartViewCondominium = ({
   const validationError = validateFields();
 
   return (
-    <div className="animate-in slide-in-from-right pb-24 relative overflow-x-hidden no-x-scroll bg-slate-50">
+    <div className="animate-in slide-in-from-right pb-24 pt-[max(env(safe-area-inset-top),0.85rem)] relative overflow-x-hidden no-x-scroll bg-slate-50">
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       
       <button

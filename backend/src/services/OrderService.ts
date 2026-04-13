@@ -1435,6 +1435,7 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
           ce.starts_at,
           ce.ends_at,
           ce.pickup_location,
+          ss.order_types,
           COALESCE(ces.allow_pickup_at_stall, sc.allow_pickup_at_stall, TRUE) AS allow_pickup_at_stall,
           COALESCE(ces.allow_apartment_delivery, sc.allow_apartment_delivery, FALSE) AS allow_apartment_delivery,
           COALESCE(ces.apartment_delivery_fee, sc.apartment_delivery_fee, 0) AS apartment_delivery_fee
@@ -1449,6 +1450,10 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
           ON ces.event_id = ce.id
          AND ces.store_id = $1
          AND ces.active = TRUE
+        JOIN stores s
+          ON s.id = ces.store_id
+        LEFT JOIN settings ss
+          ON ss.store_id = s.id
         LEFT JOIN store_condominiums sc
           ON sc.condominium_id = c.id
          AND sc.store_id = $1
@@ -1466,10 +1471,14 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
       throw new AppError('CONDO-007', 400, { message: 'Esta loja nao esta confirmada em uma feira ativa deste condominio.' });
     }
 
+    const orderTypes = Array.isArray(row.order_types) ? row.order_types : [];
+    const supportsStoreDelivery = orderTypes.some((type: any) => String(type || '').toLowerCase() === 'delivery');
+    const allowApartmentDelivery = row.allow_apartment_delivery === true || supportsStoreDelivery;
+
     if (fulfillmentMode === 'pickup_at_stall' && row.allow_pickup_at_stall === false) {
       throw new AppError('CONDO-008', 400, { message: 'Retirada na barraca nao esta disponivel para esta feira.' });
     }
-    if (fulfillmentMode === 'apartment_delivery' && row.allow_apartment_delivery === false) {
+    if (fulfillmentMode === 'apartment_delivery' && !allowApartmentDelivery) {
       throw new AppError('CONDO-009', 400, { message: 'Entrega no apartamento nao esta disponivel para esta feira.' });
     }
 

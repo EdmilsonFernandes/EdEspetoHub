@@ -262,6 +262,10 @@ export class CondominiumService {
         const orderTypes = features.deliveryMode
           ? baseOrderTypes
           : baseOrderTypes.filter((type) => String(type || '').toLowerCase() !== 'delivery');
+        const supportsStoreDelivery = orderTypes.some((type) => String(type || '').toLowerCase() === 'delivery');
+        const allowApartmentDelivery =
+          (link as any).allowApartmentDelivery === true ||
+          (Boolean(selectedEvent) && supportsStoreDelivery);
 
         return {
           id: store.id,
@@ -277,7 +281,7 @@ export class CondominiumService {
             schedule: Array.isArray((link as any).schedule) ? (link as any).schedule : [],
             pickupInstructions: (link as any).pickupInstructions || null,
             allowPickupAtStall: (link as any).allowPickupAtStall !== false,
-            allowApartmentDelivery: Boolean((link as any).allowApartmentDelivery),
+            allowApartmentDelivery,
             apartmentDeliveryFee: (link as any).apartmentDeliveryFee != null ? Number((link as any).apartmentDeliveryFee) : null,
             notes: link.notes || null,
           },

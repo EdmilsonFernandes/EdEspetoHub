@@ -1368,6 +1368,15 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS condominium_unit JSONB;
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS orders
+    DROP CONSTRAINT IF EXISTS chk_orders_fulfillment_mode;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS orders
+    ADD CONSTRAINT chk_orders_fulfillment_mode
+    CHECK (fulfillment_mode IN ('distance', 'postal', 'condominium_pickup', 'condominium_apartment'));
+  `);
+  await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_orders_condominium_id
     ON orders(condominium_id);
   `);

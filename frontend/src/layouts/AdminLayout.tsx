@@ -168,7 +168,7 @@ export function AdminLayout({
   };
 
   return (
-    <div className="ds-admin-bg overflow-x-clip pb-24 lg:pb-0">
+    <div className="ds-admin-bg overflow-x-clip pb-[calc(7.5rem+env(safe-area-inset-bottom))] lg:pb-0">
       <div
         key={location.pathname}
         className={
