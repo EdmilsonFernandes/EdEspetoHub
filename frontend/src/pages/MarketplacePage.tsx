@@ -2185,16 +2185,16 @@ export function MarketplacePage() {
       </nav>
 
       {condominiumPickerOpen && (
-        <div className="fixed inset-0 z-[220] overflow-y-auto bg-[#050505] text-white">
+        <div className="fixed inset-0 z-[220] overflow-y-auto bg-[linear-gradient(180deg,#F8F9FB_0%,#FFFFFF_48%,#F4F8F6_100%)] text-slate-950">
           <div className="mx-auto min-h-screen max-w-[760px] px-5 pb-10 pt-[max(env(safe-area-inset-top),1rem)]">
-            <div className="sticky top-0 z-10 -mx-5 flex items-center justify-between bg-[#050505]/92 px-5 py-3 backdrop-blur-xl">
+            <div className="sticky top-0 z-10 -mx-5 flex items-center justify-between bg-[#F8F9FB]/92 px-5 py-3 backdrop-blur-xl">
               <button
                 type="button"
                 onClick={() => {
                   setCondominiumPickerOpen(false);
                   setCondominiumSearch('');
                 }}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/8 text-white ring-1 ring-white/10 active:scale-95"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-700 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.45)] ring-1 ring-slate-950/5 active:scale-95"
                 aria-label="Voltar para o Hub"
                 title="Voltar para o Hub"
               >
@@ -2207,7 +2207,7 @@ export function MarketplacePage() {
                     clearCondominiumSelection();
                     setCondominiumPickerOpen(false);
                   }}
-                  className="rounded-full bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-950 active:scale-95"
+                  className="rounded-full bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-700 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.45)] ring-1 ring-slate-950/5 active:scale-95"
                 >
                   Lojas da região
                 </button>
@@ -2217,32 +2217,32 @@ export function MarketplacePage() {
             </div>
 
             <div className="pt-6 text-center">
-              <div className="mx-auto flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-white p-2 shadow-[0_18px_36px_-22px_rgba(255,255,255,0.7)] ring-1 ring-white/15">
+              <div className="mx-auto flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-white p-2 shadow-[0_18px_36px_-24px_rgba(15,23,42,0.32)] ring-1 ring-slate-950/5">
                 <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
               </div>
-              <p className="mt-4 text-xs font-black uppercase tracking-[0.22em] text-emerald-300">Já no Caminho</p>
-              <h2 className="mt-5 text-2xl font-black tracking-tight text-white">Onde você está agora?</h2>
-              <p className="mx-auto mt-2 max-w-sm text-sm font-medium leading-relaxed text-white/58">
+              <p className="mt-4 text-xs font-black uppercase tracking-[0.22em] text-[#336886]">Já no Caminho</p>
+              <h2 className="mt-5 text-2xl font-black tracking-tight text-slate-950">Onde você está agora?</h2>
+              <p className="mx-auto mt-2 max-w-sm text-sm font-medium leading-relaxed text-slate-500">
                 Escolha uma feira ou condomínio e veja as lojas atendendo nesse local.
               </p>
             </div>
 
-            <div className="mt-7 flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3">
-              <MagnifyingGlass size={17} weight="bold" className="shrink-0 text-white/45" />
+            <div className="mt-7 flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.35)]">
+              <MagnifyingGlass size={17} weight="bold" className="shrink-0 text-slate-400" />
               <input
                 value={condominiumSearch}
                 onChange={(event) => setCondominiumSearch(event.target.value)}
                 placeholder="Filtrar por nome ou cidade"
                 autoComplete="off"
-                className="min-w-0 flex-1 bg-transparent text-sm font-bold text-white outline-none placeholder:text-white/38"
+                className="min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-800 outline-none placeholder:text-slate-400"
                 autoFocus
               />
             </div>
 
             <div className="mt-9">
               <div className="mb-5 flex items-center justify-between gap-3">
-                <h3 className="text-lg font-black text-white">Eventos e condomínios</h3>
-                <span className="rounded-full bg-emerald-400/12 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-300">
+                <h3 className="text-lg font-black text-slate-950">Eventos e condomínios</h3>
+                <span className="rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700">
                   {filteredCondominiums.length} disponível{filteredCondominiums.length === 1 ? '' : 'is'}
                 </span>
               </div>
@@ -2259,7 +2259,7 @@ export function MarketplacePage() {
                       className="group min-w-0 text-center active:scale-[0.97]"
                     >
                       <div className={`relative mx-auto h-20 w-20 rounded-full p-1 transition-all duration-200 group-hover:scale-105 sm:h-24 sm:w-24 ${
-                        active ? 'bg-emerald-400 shadow-[0_18px_32px_-20px_rgba(52,211,153,0.9)]' : 'bg-white/10 shadow-sm'
+                        active ? 'bg-emerald-400 shadow-[0_18px_32px_-20px_rgba(52,211,153,0.9)]' : 'bg-white shadow-[0_12px_26px_-20px_rgba(15,23,42,0.38)] ring-1 ring-slate-950/5'
                       }`}>
                         <img
                           src={imageUrl}
@@ -2275,8 +2275,8 @@ export function MarketplacePage() {
                           </span>
                         ) : null}
                       </div>
-                      <p className="mt-3 line-clamp-2 text-[12px] font-black leading-tight text-white">{name}</p>
-                      <p className="mt-1 truncate text-[10px] font-semibold text-white/42">{region || 'Feira local'}</p>
+                      <p className="mt-3 line-clamp-2 text-[12px] font-black leading-tight text-slate-950">{name}</p>
+                      <p className="mt-1 truncate text-[10px] font-semibold text-slate-400">{region || 'Feira local'}</p>
                     </button>
                   );
                 })}
@@ -2284,8 +2284,8 @@ export function MarketplacePage() {
 
               {filteredCondominiums.length === 0 && (
                 <div className="py-14 text-center">
-                  <p className="text-sm font-black text-white">Nenhum condomínio encontrado.</p>
-                  <p className="mt-1 text-xs font-semibold text-white/48">Tente buscar pelo nome ou pela cidade.</p>
+                  <p className="text-sm font-black text-slate-800">Nenhum condomínio encontrado.</p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">Tente buscar pelo nome ou pela cidade.</p>
                 </div>
               )}
             </div>
