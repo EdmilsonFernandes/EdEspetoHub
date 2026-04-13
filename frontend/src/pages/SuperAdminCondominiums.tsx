@@ -58,6 +58,7 @@ export function SuperAdminCondominiums() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [activeWorkspace, setActiveWorkspace] = useState<'overview' | 'setup' | 'operations' | 'agenda'>('overview');
   const [editingCondominiumId, setEditingCondominiumId] = useState('');
   const [editingEventId, setEditingEventId] = useState('');
   const [condominiumForm, setCondominiumForm] = useState({
@@ -360,6 +361,12 @@ export function SuperAdminCondominiums() {
 
   const logoPreview = condominiumForm.logoFile || resolveAssetUrl(condominiumForm.logoUrl) || '';
   const bannerPreview = condominiumForm.bannerFile || resolveAssetUrl(condominiumForm.bannerUrl) || '';
+  const workspaceTabs = [
+    { id: 'overview', label: 'Visão geral', helper: 'Resumo e atalhos' },
+    { id: 'setup', label: 'Cadastros', helper: 'Condomínio e feira' },
+    { id: 'operations', label: 'Operação', helper: 'Lojas e solicitações' },
+    { id: 'agenda', label: 'Agenda', helper: 'Eventos cadastrados' },
+  ] as const;
 
   const getStoreRuleDraft = (condominiumId: string, storeLink: any) => {
     const key = `${condominiumId}:${storeLink.storeId}`;
@@ -445,10 +452,31 @@ export function SuperAdminCondominiums() {
                 </div>
               ))}
             </div>
+            <div className="grid gap-2 md:grid-cols-4">
+              {workspaceTabs.map((tab) => {
+                const active = activeWorkspace === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveWorkspace(tab.id)}
+                    className={`rounded-[1.4rem] border px-4 py-3 text-left transition-all ${
+                      active
+                        ? 'border-slate-900 bg-slate-950 text-white shadow-[0_20px_34px_-24px_rgba(15,23,42,0.65)]'
+                        : 'border-white/70 bg-white/75 text-slate-700 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.35)]'
+                    }`}
+                  >
+                    <p className={`text-[11px] font-black uppercase tracking-[0.16em] ${active ? 'text-white/70' : 'text-slate-400'}`}>{tab.label}</p>
+                    <p className={`mt-1 text-sm font-bold ${active ? 'text-white' : 'text-slate-600'}`}>{tab.helper}</p>
+                  </button>
+                );
+              })}
+            </div>
           </div>
           {error ? <p className="relative mt-5 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
         </section>
 
+        {(activeWorkspace === 'overview' || activeWorkspace === 'setup') ? (
         <div className="grid gap-4 xl:grid-cols-[1.25fr_0.95fr_0.95fr]">
           <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
             <div className="flex items-center gap-3">
@@ -598,12 +626,14 @@ export function SuperAdminCondominiums() {
           </section>
           </div>
         </div>
+        ) : null}
 
+        {(activeWorkspace === 'overview' || activeWorkspace === 'operations') ? (
         <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-black tracking-tight text-slate-950">Condomínios cadastrados</h2>
-              <p className="text-sm font-medium text-slate-500">Edite dados principais ou retire um condomínio de operação sem apagar histórico.</p>
+              <p className="text-sm font-medium text-slate-500">Edite dados principais e configure as regras operacionais por loja.</p>
             </div>
           </div>
           <div className="mt-4 grid gap-3 lg:grid-cols-2 2xl:grid-cols-3">
@@ -702,7 +732,9 @@ export function SuperAdminCondominiums() {
             })}
           </div>
         </section>
+        ) : null}
 
+        {(activeWorkspace === 'overview' || activeWorkspace === 'operations') ? (
         <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -748,12 +780,14 @@ export function SuperAdminCondominiums() {
             );})}
           </div>
         </section>
+        ) : null}
 
+        {(activeWorkspace === 'overview' || activeWorkspace === 'agenda') ? (
         <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-black tracking-tight text-slate-950">Agenda cadastrada</h2>
-              <p className="text-sm font-medium text-slate-500">Visualize os eventos ativos e a densidade de lojas confirmadas.</p>
+              <p className="text-sm font-medium text-slate-500">Visualize os eventos ativos e faça manutenção da agenda sem disputar atenção com os cadastros.</p>
             </div>
             <div className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">
               {metrics.events} feiras
@@ -815,6 +849,7 @@ export function SuperAdminCondominiums() {
             );})}
           </div>
         </section>
+        ) : null}
       </div>
     </AdminLayout>
   );
