@@ -1576,20 +1576,36 @@ export function MarketplacePage() {
 
             {/* Linha 2: Busca Premium */}
             <div className="relative z-20 px-0.5">
-              <div className="pointer-events-none absolute inset-y-0 left-4 z-30 flex items-center">
-                <MagnifyingGlass size={19} weight="bold" className="text-slate-400" />
+              <div className="group flex h-13 min-h-[52px] items-center gap-3 rounded-[22px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.98)_100%)] px-4 shadow-[0_12px_28px_-20px_rgba(15,23,42,0.18)] ring-1 ring-slate-100/80 transition-[border-color,box-shadow,transform] duration-200 ease-out focus-within:border-[#336886]/25 focus-within:shadow-[0_18px_36px_-22px_rgba(51,104,134,0.22)] focus-within:ring-2 focus-within:ring-[#336886]/10">
+                <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#336886]/8 text-[#336886]">
+                  <MagnifyingGlass size={18} weight="bold" />
+                </div>
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Buscar loja, categoria ou produto"
+                  autoComplete="off"
+                  inputMode="search"
+                  enterKeyHint="search"
+                  className="block h-full min-w-0 flex-1 appearance-none bg-transparent pr-1 text-[14px] font-semibold text-slate-950 outline-none placeholder:text-slate-400"
+                  style={{ WebkitAppearance: 'none', visibility: 'visible' }}
+                />
+                {query ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuery('');
+                      setDebouncedQuery('');
+                    }}
+                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-700 active:scale-95"
+                    aria-label="Limpar busca"
+                    title="Limpar"
+                  >
+                    <X size={14} weight="bold" />
+                  </button>
+                ) : null}
               </div>
-              <input
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="O que você quer pedir agora?"
-                autoComplete="off"
-                inputMode="search"
-                enterKeyHint="search"
-                className="relative z-20 block h-12 min-h-12 w-full appearance-none rounded-[20px] border border-slate-100 bg-white px-12 text-[14px] font-semibold text-slate-950 opacity-100 shadow-[0_8px_24px_rgba(15,23,42,0.06)] outline-none transition-[border-color,box-shadow,background-color] duration-200 ease-out placeholder:text-slate-400 focus:border-[#336886]/25 focus:bg-white focus:ring-4 focus:ring-[#336886]/10 focus:shadow-[0_14px_32px_rgba(15,23,42,0.1)]"
-                style={{ WebkitAppearance: 'none', visibility: 'visible' }}
-              />
             </div>
 
             {/* Linha 3: Filtros Minimalistas (Pílulas) */}
@@ -1804,18 +1820,19 @@ export function MarketplacePage() {
               style={{ transition: 'all .45s ease', transitionDelay: '95ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
             >
               {selectedCondominium ? (
-                <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_42px_-28px_rgba(15,23,42,0.45)] ring-1 ring-white/80 backdrop-blur-md">
-                  <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-r from-emerald-50 via-sky-50 to-white">
+                <div className="relative overflow-hidden rounded-[1.9rem] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.98)_58%,rgba(239,246,255,0.96)_100%)] shadow-[0_20px_46px_-28px_rgba(15,23,42,0.24)] ring-1 ring-slate-100/80 backdrop-blur-md">
+                  <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-r from-[#336886]/8 via-sky-50 to-white">
                     {selectedCondominiumBannerUrl ? (
                       <img
                         src={selectedCondominiumBannerUrl}
                         alt={String(selectedCondominium.name || 'Condomínio')}
-                        className="h-full w-full object-cover opacity-75"
+                        className="h-full w-full object-cover opacity-60"
                       />
                     ) : null}
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/80 via-white/60 to-white/90" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/92 via-white/78 to-white/94" />
                   </div>
-                  <div className="relative flex items-center justify-between gap-3 px-3.5 py-3">
+                  <div className="pointer-events-none absolute -right-8 top-8 h-24 w-24 rounded-full bg-[#336886]/8 blur-3xl" />
+                  <div className="relative flex items-center justify-between gap-3 px-4 py-4">
                   <button
                     type="button"
                     onClick={() => setCondominiumPickerOpen(true)}
@@ -1823,7 +1840,7 @@ export function MarketplacePage() {
                     aria-label="Escolher outro condomínio"
                     title="Escolher outro condomínio"
                   >
-                    <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white p-1.5 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.6)] ring-1 ring-slate-200">
+                    <span className="inline-flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[1.2rem] bg-white p-2 shadow-[0_16px_28px_-18px_rgba(15,23,42,0.34)] ring-1 ring-slate-200/80">
                       {selectedCondominiumLogoUrl ? (
                         <img
                           src={selectedCondominiumLogoUrl}
@@ -1835,7 +1852,21 @@ export function MarketplacePage() {
                       )}
                     </span>
                     <span className="min-w-0">
-                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] ${
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[#336886]/8 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-[#336886]">
+                        <Buildings size={10} weight="fill" />
+                        Condomínio
+                      </span>
+                      <span className="mt-2 block truncate text-[15px] font-black leading-tight text-slate-950">
+                        {String(selectedCondominium.name || 'Condomínio')}
+                      </span>
+                      <span className="mt-1 block truncate text-[11px] font-semibold text-slate-500">
+                        {condominiumStoresLoading
+                          ? 'Carregando lojas...'
+                          : isCondominiumEventLive
+                            ? `${filteredStores.length} loja${filteredStores.length === 1 ? '' : 's'} atendendo agora`
+                            : condominiumEventTimeLabel || `${filteredStores.length} loja${filteredStores.length === 1 ? '' : 's'} vinculada${filteredStores.length === 1 ? '' : 's'}`}
+                      </span>
+                      <span className={`mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] ${
                         isCondominiumEventLive
                           ? 'bg-emerald-100 text-emerald-700'
                           : hasUpcomingCondominiumEvent
@@ -1843,24 +1874,14 @@ export function MarketplacePage() {
                             : 'bg-slate-100 text-slate-500'
                       }`}>
                         {isCondominiumEventLive ? <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.14)]" /> : null}
-                        {isCondominiumEventLive ? 'Feira acontecendo' : hasUpcomingCondominiumEvent ? 'Próxima feira' : 'Feira no condomínio'}
-                      </span>
-                      <span className="mt-1 block truncate text-sm font-black leading-tight text-slate-950">
-                        {String(selectedCondominium.name || 'Condomínio')}
-                      </span>
-                      <span className="mt-0.5 block truncate text-[10px] font-semibold text-slate-500">
-                        {condominiumStoresLoading
-                          ? 'Carregando lojas...'
-                          : isCondominiumEventLive
-                            ? `${filteredStores.length} loja${filteredStores.length === 1 ? '' : 's'} atendendo agora`
-                            : condominiumEventTimeLabel || `${filteredStores.length} loja${filteredStores.length === 1 ? '' : 's'} vinculada${filteredStores.length === 1 ? '' : 's'}`}
+                        {isCondominiumEventLive ? 'Agenda ativa' : hasUpcomingCondominiumEvent ? 'Próxima agenda' : 'Agenda do local'}
                       </span>
                     </span>
                   </button>
                   <button
                     type="button"
                     onClick={clearCondominiumSelection}
-                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-500 ring-1 ring-slate-200 transition-colors hover:bg-slate-100 hover:text-slate-800 active:scale-95"
+                    className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-slate-500 ring-1 ring-slate-200/80 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.22)] transition-colors hover:bg-slate-50 hover:text-slate-800 active:scale-95"
                     aria-label="Sair da feira e voltar ao Hub"
                     title="Sair da feira"
                   >
