@@ -1703,7 +1703,7 @@ export function MarketplacePage() {
           )}
 
           {/* Carrossel de Banners - Esconde na busca para focar no resultado */}
-          {debouncedQuery.length < 2 && (
+          {debouncedQuery.length < 2 && !selectedCondominium && (
             <div className="animate-in fade-in slide-in-from-top-4 duration-500" style={{ animationDelay: '80ms' }}>
               <SegmentPromoCarousel mode="hub" className="mx-0" />
             </div>
@@ -1714,77 +1714,76 @@ export function MarketplacePage() {
               className="mb-6"
               style={{ transition: 'all .45s ease', transitionDelay: '95ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
             >
-              <div className="mb-3 flex items-center justify-between gap-3 px-1">
-                <div className="min-w-0">
-                  <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">
-                    {selectedCondominium ? 'Comprando na feira' : 'Feiras e condomínios'}
-                  </p>
-                  <h2 className="truncate text-lg font-semibold text-gray-800">
-                    {selectedCondominium ? String(selectedCondominium.name || 'Condomínio') : 'Encontre lojas dentro do seu condomínio'}
-                  </h2>
-                </div>
-                {selectedCondominium ? (
-                  <button
-                    type="button"
-                    onClick={clearCondominiumSelection}
-                    className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-[0_8px_20px_rgba(15,23,42,0.04)] active:scale-95"
-                  >
-                    Lojas da região
-                  </button>
-                ) : null}
-              </div>
-
               {selectedCondominium ? (
-                <div className="flex items-center gap-3 rounded-[1.35rem] border border-[#336886]/15 bg-white p-3 shadow-[0_10px_28px_rgba(15,23,42,0.055)]">
-                  <img
-                    src={resolveAssetUrl(selectedCondominium.logoUrl || selectedCondominium.bannerUrl || undefined) || getStoreAvatarUrl(String(selectedCondominium.slug || ''), String(selectedCondominium.name || 'Condomínio'))}
-                    alt={String(selectedCondominium.name || 'Condomínio')}
-                    loading="lazy"
-                    decoding="async"
-                    className="h-12 w-12 shrink-0 rounded-[1rem] border border-slate-100 bg-slate-50 object-cover shadow-[0_10px_22px_-16px_rgba(15,23,42,0.35)]"
-                    onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(String(selectedCondominium.slug || ''), String(selectedCondominium.name || 'Condomínio')); }}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-black text-slate-950">
-                      Lojas deste condomínio
-                    </p>
-                    <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-500">
-                      {condominiumStoresLoading ? 'Carregando lojas...' : `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} disponível${filteredStores.length === 1 ? '' : 's'}`}
-                    </p>
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-900 via-emerald-800 to-[#336886] p-5 text-white shadow-[0_20px_42px_-24px_rgba(6,78,59,0.7)]">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_34%)]" />
+                  <div className="relative flex items-start gap-4">
+                    <img
+                      src={resolveAssetUrl(selectedCondominium.logoUrl || selectedCondominium.bannerUrl || undefined) || getStoreAvatarUrl(String(selectedCondominium.slug || ''), String(selectedCondominium.name || 'Condomínio'))}
+                      alt={String(selectedCondominium.name || 'Condomínio')}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-14 w-14 shrink-0 rounded-2xl border border-white/30 bg-white object-contain p-1 shadow-[0_14px_28px_-16px_rgba(0,0,0,0.45)]"
+                      onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(String(selectedCondominium.slug || ''), String(selectedCondominium.name || 'Condomínio')); }}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-100">Atendendo agora em</p>
+                      <h2 className="mt-1 line-clamp-2 text-xl font-black leading-tight text-white">
+                        {String(selectedCondominium.name || 'Condomínio')}
+                      </h2>
+                      <p className="mt-2 text-xs font-semibold text-white/75">
+                        {condominiumStoresLoading ? 'Carregando lojas...' : `${filteredStores.length} loja${filteredStores.length === 1 ? '' : 's'} para retirada na feira`}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="relative mt-4 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setCondominiumPickerOpen(true)}
+                      className="rounded-full bg-white/15 px-3 py-2 text-[11px] font-black text-white ring-1 ring-white/18 active:scale-95"
+                    >
+                      Trocar local
+                    </button>
+                    <button
+                      type="button"
+                      onClick={clearCondominiumSelection}
+                      className="rounded-full bg-white px-3 py-2 text-[11px] font-black text-emerald-900 active:scale-95"
+                    >
+                      Lojas da região
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-3 px-1">
+                    <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">Feiras e condomínios</p>
+                    <h2 className="truncate text-lg font-semibold text-gray-800">Encontre lojas dentro do seu condomínio</h2>
                   </div>
                   <button
                     type="button"
                     onClick={() => setCondominiumPickerOpen(true)}
-                    className="shrink-0 rounded-xl bg-[#336886]/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] active:scale-95"
+                    className="group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-white to-white p-3.5 text-left shadow-sm transition-all duration-200 hover:border-emerald-200 hover:shadow-[0_14px_30px_-20px_rgba(16,185,129,0.45)] active:scale-[0.985]"
                   >
-                    Trocar
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setCondominiumPickerOpen(true)}
-                  className="group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-white to-white p-3.5 text-left shadow-sm transition-all duration-200 hover:border-emerald-200 hover:shadow-[0_14px_30px_-20px_rgba(16,185,129,0.45)] active:scale-[0.985]"
-                >
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white p-3 text-emerald-600 shadow-sm ring-1 ring-emerald-100">
-                    <Buildings size={24} weight="duotone" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="mb-1 flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1 text-xs font-bold text-red-500">
-                        <span className="h-2 w-2 rounded-full bg-red-500 shadow-[0_0_0_4px_rgba(239,68,68,0.12)] animate-pulse" />
-                        Feiras disponíveis
-                      </span>
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white p-3 text-emerald-600 shadow-sm ring-1 ring-emerald-100">
+                      <Buildings size={24} weight="duotone" />
                     </div>
-                    <p className="truncate text-base font-bold text-gray-900">Feiras próximas a você</p>
-                    <p className="mt-0.5 truncate text-sm text-gray-500">
-                      {condominiums.length} local{condominiums.length === 1 ? '' : 'is'} disponível{condominiums.length === 1 ? '' : 'is'} para retirada
-                    </p>
-                  </div>
-                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-emerald-700 shadow-sm ring-1 ring-emerald-100">
-                    <CaretRight size={15} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
-                  </span>
-                </button>
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-1 flex flex-wrap items-center gap-2">
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-red-500">
+                          <span className="h-2 w-2 rounded-full bg-red-500 shadow-[0_0_0_4px_rgba(239,68,68,0.12)] animate-pulse" />
+                          Feiras disponíveis
+                        </span>
+                      </div>
+                      <p className="truncate text-base font-bold text-gray-900">Feiras próximas a você</p>
+                      <p className="mt-0.5 truncate text-sm text-gray-500">
+                        {condominiums.length} local{condominiums.length === 1 ? '' : 'is'} disponível{condominiums.length === 1 ? '' : 'is'} para retirada
+                      </p>
+                    </div>
+                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-emerald-700 shadow-sm ring-1 ring-emerald-100">
+                      <CaretRight size={15} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
+                    </span>
+                  </button>
+                </>
               )}
             </section>
           )}
@@ -1999,100 +1998,193 @@ export function MarketplacePage() {
             )}
 
             {!loading && !error && filteredStores.length > 0 && (
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-                {filteredStores.map((store) => (
-                  <Link
-                    key={store.id}
-                    to={selectedCondominiumSlug ? `/${store.slug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}` : `/${store.slug}`}
-                    className={`group rounded-[1.65rem] border bg-white px-3.5 py-3.5 transition-all duration-200 ease-out active:scale-[0.985] ${
-                      store.isOpen
-                        ? 'border-white/90 shadow-[0_8px_24px_rgba(15,23,42,0.06)] md:hover:-translate-y-0.5 md:hover:shadow-[0_14px_30px_rgba(15,23,42,0.09)]'
-                        : 'border-slate-200/80 bg-slate-50/80 shadow-[0_8px_20px_rgba(15,23,42,0.035)]'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3.5">
-                      <img
-                        src={store.logo}
-                        alt={store.name}
-                        className={`h-16 w-16 shrink-0 rounded-full border border-slate-100 bg-slate-50 object-cover shadow-[0_10px_22px_-14px_rgba(15,23,42,0.3)] ring-2 ring-white transition-all duration-200 ${
-                          store.isOpen ? '' : 'grayscale opacity-70'
+              <div className={selectedCondominium ? 'grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4' : 'grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3'}>
+                {filteredStores.map((store) => {
+                  const storePath = selectedCondominiumSlug ? `/${store.slug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}` : `/${store.slug}`;
+
+                  if (selectedCondominium) {
+                    return (
+                      <Link
+                        key={store.id}
+                        to={storePath}
+                        className={`group overflow-hidden rounded-[1.45rem] border bg-white transition-all duration-200 ease-out active:scale-[0.985] ${
+                          store.isOpen
+                            ? 'border-white shadow-[0_12px_30px_rgba(15,23,42,0.075)] md:hover:-translate-y-0.5 md:hover:shadow-[0_18px_38px_rgba(15,23,42,0.11)]'
+                            : 'border-slate-200/80 bg-slate-50/90 shadow-[0_8px_20px_rgba(15,23,42,0.04)]'
                         }`}
-                        onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-2.5">
-                          <div className="min-w-0 pr-1">
-                            <div className="flex items-center gap-2">
-                              <h3 className={`truncate text-[15px] font-black ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>{store.name}</h3>
-                              <span className={`inline-flex h-2 w-2 rounded-full ${store.isOpen ? 'bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.14),0_0_14px_rgba(16,185,129,0.55)]' : 'bg-slate-400'}`} />
+                      >
+                        <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
+                          <img
+                            src={store.banner || store.logo}
+                            alt={store.name}
+                            loading="lazy"
+                            decoding="async"
+                            className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 ${store.isOpen ? '' : 'grayscale opacity-70'}`}
+                            onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/42 via-transparent to-transparent" />
+                          <span className={`absolute left-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-1 text-[9px] font-black uppercase tracking-[0.1em] shadow-sm ${
+                            store.isOpen ? 'bg-white text-emerald-700' : 'bg-white/90 text-slate-500'
+                          }`}>
+                            <span className={`h-1.5 w-1.5 rounded-full ${store.isOpen ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                            {store.isOpen ? 'Aberta' : 'Fechada'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              toggleFavoriteStore(store.slug);
+                            }}
+                            className="absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/92 text-slate-300 shadow-sm transition-all duration-150 ease-out hover:text-rose-500 active:scale-90"
+                            aria-label={`Favoritar ${store.name}`}
+                            title={`Favoritar ${store.name}`}
+                          >
+                            <Heart
+                              size={15}
+                              weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'}
+                              className={favoriteStoreSlugs.includes(store.slug) ? 'text-rose-500' : ''}
+                            />
+                          </button>
+                          <img
+                            src={store.logo}
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                            className="absolute -bottom-5 left-3 h-11 w-11 rounded-full border-2 border-white bg-white object-cover shadow-[0_10px_20px_-12px_rgba(15,23,42,0.45)]"
+                            onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
+                          />
+                        </div>
+                        <div className="px-3 pb-3 pt-7">
+                          <h3 className={`line-clamp-1 text-sm font-black leading-tight ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>
+                            {store.name}
+                          </h3>
+                          <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[10px] font-bold text-slate-500">
+                            {store.rating > 0 ? (
+                              <span className="inline-flex items-center gap-1">
+                                <Star size={10} weight="fill" className="text-amber-400" />
+                                <span className="text-slate-700">{store.rating.toFixed(1)}</span>
+                              </span>
+                            ) : null}
+                            {store.rating > 0 ? <span className="text-slate-300">•</span> : null}
+                            <span>{store.etaMin}-{store.etaMax} min</span>
+                          </div>
+                          {!store.isOpen ? (
+                            <p className="mt-2 line-clamp-1 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">
+                              {store.nextOpeningLabel || 'Sem horário cadastrado'}
+                            </p>
+                          ) : (
+                            <div className="mt-2 flex flex-wrap gap-1">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[9px] font-black uppercase tracking-[0.1em] text-emerald-700">
+                                <Storefront size={10} weight="fill" />
+                                Retirada
+                              </span>
+                              {store.freeShipping ? (
+                                <span className="inline-flex rounded-full bg-sky-50 px-2 py-1 text-[9px] font-black uppercase tracking-[0.1em] text-[#336886]">
+                                  Grátis
+                                </span>
+                              ) : null}
+                            </div>
+                          )}
+                        </div>
+                      </Link>
+                    );
+                  }
+
+                  return (
+                    <Link
+                      key={store.id}
+                      to={storePath}
+                      className={`group rounded-[1.65rem] border bg-white px-3.5 py-3.5 transition-all duration-200 ease-out active:scale-[0.985] ${
+                        store.isOpen
+                          ? 'border-white/90 shadow-[0_8px_24px_rgba(15,23,42,0.06)] md:hover:-translate-y-0.5 md:hover:shadow-[0_14px_30px_rgba(15,23,42,0.09)]'
+                          : 'border-slate-200/80 bg-slate-50/80 shadow-[0_8px_20px_rgba(15,23,42,0.035)]'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3.5">
+                        <img
+                          src={store.logo}
+                          alt={store.name}
+                          className={`h-16 w-16 shrink-0 rounded-full border border-slate-100 bg-slate-50 object-cover shadow-[0_10px_22px_-14px_rgba(15,23,42,0.3)] ring-2 ring-white transition-all duration-200 ${
+                            store.isOpen ? '' : 'grayscale opacity-70'
+                          }`}
+                          onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-2.5">
+                            <div className="min-w-0 pr-1">
+                              <div className="flex items-center gap-2">
+                                <h3 className={`truncate text-[15px] font-black ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>{store.name}</h3>
+                                <span className={`inline-flex h-2 w-2 rounded-full ${store.isOpen ? 'bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.14),0_0_14px_rgba(16,185,129,0.55)]' : 'bg-slate-400'}`} />
+                              </div>
+                            </div>
+                            <div className="flex shrink-0 items-center">
+                              <button
+                                type="button"
+                                onClick={(event) => {
+                                  event.preventDefault();
+                                  event.stopPropagation();
+                                  toggleFavoriteStore(store.slug);
+                                }}
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-300 transition-all duration-150 ease-out hover:bg-rose-50 hover:text-rose-500 active:scale-90"
+                                aria-label={`Favoritar ${store.name}`}
+                                title={`Favoritar ${store.name}`}
+                              >
+                                <Heart
+                                  size={15}
+                                  weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'}
+                                  className={favoriteStoreSlugs.includes(store.slug) ? 'text-rose-500' : ''}
+                                />
+                              </button>
                             </div>
                           </div>
-                          <div className="flex shrink-0 items-center">
-                            <button
-                              type="button"
-                              onClick={(event) => {
-                                event.preventDefault();
-                                event.stopPropagation();
-                                toggleFavoriteStore(store.slug);
-                              }}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-300 transition-all duration-150 ease-out hover:bg-rose-50 hover:text-rose-500 active:scale-90"
-                              aria-label={`Favoritar ${store.name}`}
-                              title={`Favoritar ${store.name}`}
-                            >
-                              <Heart
-                                size={15}
-                                weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'}
-                                className={favoriteStoreSlugs.includes(store.slug) ? 'text-rose-500' : ''}
-                              />
-                            </button>
+                          <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] font-medium text-slate-500">
+                            {store.rating > 0 ? (
+                              <span className="inline-flex items-center gap-1">
+                                <Star size={11} weight="fill" className="text-amber-400" />
+                                <span className="font-bold text-slate-700">{store.rating.toFixed(1)}</span>
+                              </span>
+                            ) : null}
+                            {store.rating > 0 ? <span className="text-slate-300">•</span> : null}
+                            <span>{store.etaMin}-{store.etaMax} min</span>
+                            <span className="text-slate-300">•</span>
+                            <span>{distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)}</span>
+                          </div>
+                          {!store.isOpen && (
+                            <p className="mt-1 inline-flex max-w-full items-center rounded-full bg-slate-200/70 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">
+                              {store.nextOpeningLabel || 'Sem horário cadastrado'}
+                            </p>
+                          )}
+                          <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                            {store.isOpen && store.rating >= 4.9 && (
+                               <span className="inline-flex items-center gap-1 rounded-full border border-rose-100 bg-rose-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-rose-600 shadow-[0_8px_18px_-16px_rgba(225,29,72,0.4)]">
+                                 <Sparkle size={10} weight="fill" className="text-rose-500" />
+                                 Bombando agora
+                               </span>
+                            )}
+                            {store.freeShipping ? (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700 shadow-[0_8px_18px_-16px_rgba(16,185,129,0.5)]">
+                                <Bicycle size={10} weight="fill" className="text-emerald-600" />
+                                Grátis
+                              </span>
+                            ) : null}
+                            {store.rating >= 4.7 && !favoriteStoreSlugs.includes(store.slug) && (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700 shadow-[0_8px_18px_-16px_rgba(245,158,11,0.45)]">
+                                <Star size={10} weight="fill" className="text-amber-500" />
+                                Favorita da região
+                              </span>
+                            )}
+                            {(store as any).sponsored && (
+                              <span className="inline-flex rounded-full border border-slate-100 bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-500">
+                                Patrocinado
+                              </span>
+                            )}
                           </div>
                         </div>
-                        <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] font-medium text-slate-500">
-                          {store.rating > 0 ? (
-                            <span className="inline-flex items-center gap-1">
-                              <Star size={11} weight="fill" className="text-amber-400" />
-                              <span className="font-bold text-slate-700">{store.rating.toFixed(1)}</span>
-                            </span>
-                          ) : null}
-                          {store.rating > 0 ? <span className="text-slate-300">•</span> : null}
-                          <span>{store.etaMin}-{store.etaMax} min</span>
-                          <span className="text-slate-300">•</span>
-                          <span>{distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)}</span>
-                        </div>
-                        {!store.isOpen && (
-                          <p className="mt-1 inline-flex max-w-full items-center rounded-full bg-slate-200/70 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">
-                            {store.nextOpeningLabel || 'Sem horário cadastrado'}
-                          </p>
-                        )}
-                        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-                          {store.isOpen && store.rating >= 4.9 && (
-                             <span className="inline-flex items-center gap-1 rounded-full border border-rose-100 bg-rose-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-rose-600 shadow-[0_8px_18px_-16px_rgba(225,29,72,0.4)]">
-                               <Sparkle size={10} weight="fill" className="text-rose-500" />
-                               Bombando agora
-                             </span>
-                          )}
-                          {store.freeShipping ? (
-                            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700 shadow-[0_8px_18px_-16px_rgba(16,185,129,0.5)]">
-                              <Bicycle size={10} weight="fill" className="text-emerald-600" />
-                              Grátis
-                            </span>
-                          ) : null}
-                          {store.rating >= 4.7 && !favoriteStoreSlugs.includes(store.slug) && (
-                            <span className="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700 shadow-[0_8px_18px_-16px_rgba(245,158,11,0.45)]">
-                              <Star size={10} weight="fill" className="text-amber-500" />
-                              Favorita da região
-                            </span>
-                          )}
-                          {(store as any).sponsored && (
-                            <span className="inline-flex rounded-full border border-slate-100 bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-500">
-                              Patrocinado
-                            </span>
-                          )}
-                        </div>
                       </div>
-                    </div>
-                  </Link>
-                ))}
+                    </Link>
+                  );
+                })}
               </div>
             )}
           </section>
@@ -2217,7 +2309,7 @@ export function MarketplacePage() {
             </div>
 
             <div className="pt-6 text-center">
-              <div className="mx-auto flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-white p-2 shadow-[0_18px_36px_-24px_rgba(15,23,42,0.32)] ring-1 ring-slate-950/5">
+              <div className="mx-auto flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-white p-2 shadow-lg shadow-emerald-900/10 ring-1 ring-slate-950/5">
                 <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
               </div>
               <p className="mt-4 text-xs font-black uppercase tracking-[0.22em] text-[#336886]">Já no Caminho</p>
@@ -2227,14 +2319,14 @@ export function MarketplacePage() {
               </p>
             </div>
 
-            <div className="mt-7 flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.35)]">
+            <div className="mt-7 flex items-center gap-2 rounded-full border border-transparent bg-gray-100 px-5 py-3 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.35)] transition-all focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-200">
               <MagnifyingGlass size={17} weight="bold" className="shrink-0 text-slate-400" />
               <input
                 value={condominiumSearch}
                 onChange={(event) => setCondominiumSearch(event.target.value)}
                 placeholder="Filtrar por nome ou cidade"
                 autoComplete="off"
-                className="min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-800 outline-none placeholder:text-slate-400"
+                className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400"
                 autoFocus
               />
             </div>
@@ -2266,7 +2358,7 @@ export function MarketplacePage() {
                           alt={name}
                           loading="lazy"
                           decoding="async"
-                          className="h-full w-full rounded-full bg-white object-cover"
+                          className="h-full w-full rounded-full bg-white object-contain p-2"
                           onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }}
                         />
                         {active ? (
@@ -2276,7 +2368,7 @@ export function MarketplacePage() {
                         ) : null}
                       </div>
                       <p className="mt-3 line-clamp-2 text-[12px] font-black leading-tight text-slate-950">{name}</p>
-                      <p className="mt-1 truncate text-[10px] font-semibold text-slate-400">{region || 'Feira local'}</p>
+                      <p className="mt-1 truncate text-xs font-semibold text-gray-400">{region || 'Feira local'}</p>
                     </button>
                   );
                 })}
