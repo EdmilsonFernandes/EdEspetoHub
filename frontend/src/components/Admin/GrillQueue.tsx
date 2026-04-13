@@ -79,7 +79,7 @@ const resolveLocationIdentifier = (order: any) => {
   // Lógica para condomínios
   if (order?.condominiumId) {
     let condoDetails = `COND. ${order.condominiumName || ''}`;
-    if (fulfillmentMode === 'apartment_delivery' && order.condominiumUnit) {
+    if ((fulfillmentMode === 'condominium_apartment' || fulfillmentMode === 'apartment_delivery') && order.condominiumUnit) {
       const { block, tower, apartment, reference } = order.condominiumUnit;
       let unitDetails = [];
       if (block) unitDetails.push(`Bl. ${block}`);

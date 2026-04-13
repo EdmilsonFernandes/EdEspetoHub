@@ -12,6 +12,7 @@ import { mapsService } from '../services/mapsService';
 import { condominiumService } from '../services/condominiumService';
 import { MenuView } from '../components/Client/MenuView';
 import { CartView } from '../components/Client/CartView';
+import { CartViewCondominium } from '../components/Client/CartViewCondominium';
 import { SuccessView } from '../components/Client/SuccessView';
 import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
@@ -895,6 +896,58 @@ export function StorePage() {
   }, [storeSlug, customersStorageKey, checkoutCustomerStorageKey, customerSessionStorageKey]);
 
   useEffect(() => {
+    let active = true;
+    const slug = String(condominiumSlugFromQuery || '').trim();
+    if (!slug || !storeSlug) {
+      setCondominiumCheckoutContext(null);
+      return () => {
+        active = false;
+      };
+    }
+
+    setCondominiumCheckoutLoading(true);
+    condominiumService
+      .listStores(slug)
+      .then((payload) => {
+        if (!active) return;
+        const storeContext = (Array.isArray(payload?.stores) ? payload.stores : []).find(
+          (item: any) => String(item?.slug || '').trim() === String(storeSlug || '').trim()
+        );
+        const event = payload?.event || payload?.condominium?.eventSummary || storeContext?.condominiumEvent || null;
+        const canOrder = Boolean(event?.canOrderInCondominium);
+        if (!storeContext || !canOrder) {
+          setCondominiumCheckoutContext(null);
+          return;
+        }
+
+        const link = storeContext?.condominiumLink || {};
+        const feeValue = Number(link?.apartmentDeliveryFee || 0);
+        setCondominiumCheckoutContext({
+          condominium: payload?.condominium || storeContext?.condominium || null,
+          event,
+          store: storeContext,
+          link,
+          feeValue: Number.isFinite(feeValue) && feeValue > 0 ? feeValue : 0,
+        });
+        setCustomer((prev: any) => ({
+          ...prev,
+          type: 'pickup',
+          condominiumFulfillmentMode: prev?.condominiumFulfillmentMode || 'pickup_at_stall',
+        }));
+      })
+      .catch(() => {
+        if (active) setCondominiumCheckoutContext(null);
+      })
+      .finally(() => {
+        if (active) setCondominiumCheckoutLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [condominiumSlugFromQuery, storeSlug]);
+
+  useEffect(() => {
     const sessionName = String(customerSession?.user?.fullName || '').trim();
     const sessionPhone = String(customerSession?.user?.phone || '').trim();
     if (!sessionName && !sessionPhone) return;
@@ -1445,7 +1498,7 @@ export function StorePage() {
     window.setTimeout(() => setTableNotice(null), 4000);
   };
 
-  const checkout = async (extra?: { cashTendered?: number | null } | null) => {
+  const checkout = async (extra?: { cashTendered?: number | null; condominiumOrder?: any } | null) => {
     if (checkoutLockRef.current || checkoutLoading) return;
     checkoutLockRef.current = true;
     setCheckoutLoading(true);
@@ -1458,8 +1511,14 @@ export function StorePage() {
       showToast('Loja com assinatura inativa. Tente novamente mais tarde.', 'warning');
       return;
     }
-    if (!storeOpenNow) {
+    const condominiumOrderPayload = extra?.condominiumOrder || null;
+    const isCondominiumOrder = Boolean(condominiumOrderPayload && condominiumCheckoutContext?.condominium?.slug);
+    if (!storeOpenNow && !isCondominiumOrder) {
       showToast('Loja fechada no momento. Tente novamente durante o horário de atendimento.', 'warning');
+      return;
+    }
+    if (isCondominiumOrder && !condominiumCheckoutContext?.event?.canOrderInCondominium) {
+      showToast('A feira deste condomínio não está aceitando pedidos agora.', 'warning');
       return;
     }
     const isStaffTableOrder = customer.type === 'table' && canUseAdminPrintFlow;
@@ -1472,26 +1531,26 @@ export function StorePage() {
       return;
     }
 
-    const requiresPhone = customer.type === 'delivery';
+    const requiresPhone = customer.type === 'delivery' || isCondominiumOrder;
     if (!effectiveCustomerName || (requiresPhone && !customer.phone)) {
       showToast(requiresPhone ? 'Preencha nome e telefone para continuar.' : 'Preencha seu nome para continuar.', 'warning');
       return;
     }
 
-    if (customer.type === 'delivery' && !customer.address) {
+    if (!isCondominiumOrder && customer.type === 'delivery' && !customer.address) {
       showToast('Informe o endereço completo para entrega.', 'warning');
       return;
     }
-    if (customer.type === 'delivery' && !String(customer.number || '').trim()) {
+    if (!isCondominiumOrder && customer.type === 'delivery' && !String(customer.number || '').trim()) {
       showToast('Informe o número da casa para entrega.', 'warning');
       return;
     }
 
-    if (customer.type === 'table' && !customer.table) {
+    if (!isCondominiumOrder && customer.type === 'table' && !customer.table) {
       showToast('Informe o número da mesa.', 'warning');
       return;
     }
-    if (customer.type === 'delivery' && isPostalDelivery) {
+    if (!isCondominiumOrder && customer.type === 'delivery' && isPostalDelivery) {
       const cepDigits = String(customer.cep || '').replace(/\D/g, '');
       if (cepDigits.length !== 8) {
         showErrorNotice('Informe um CEP válido para cotar envio postal.');
@@ -1502,7 +1561,7 @@ export function StorePage() {
         return;
       }
     }
-    if (customer.type === 'delivery' && !isPostalDelivery && deliveryRadiusValue) {
+    if (!isCondominiumOrder && customer.type === 'delivery' && !isPostalDelivery && deliveryRadiusValue) {
       if (deliveryCheck.status === 'loading') {
         showErrorNotice('Validando distância de entrega. Aguarde um instante.');
         return;
@@ -1526,15 +1585,43 @@ export function StorePage() {
     const sanitizedPhone = customer.phone.replace(/\D/g, '');
     const sanitizedPhoneKey = sanitizedPhone.length >= 10 ? `+55${sanitizedPhone}` : '';
     const pixKey = storePixKey || PIX_KEY || sanitizedPhoneKey;
+    const condominiumMode = String(condominiumOrderPayload?.fulfillmentMode || 'pickup_at_stall').toLowerCase();
+    const isApartmentCondominiumDelivery = isCondominiumOrder && condominiumMode === 'apartment_delivery';
+    const condominiumAddress = isCondominiumOrder
+      ? [
+          condominiumCheckoutContext?.condominium?.name,
+          isApartmentCondominiumDelivery
+            ? [
+                customer.block && `Bloco/Torre ${customer.block}`,
+                customer.apartment && `Apto ${customer.apartment}`,
+                customer.reference,
+              ].filter(Boolean).join(' | ')
+            : (condominiumCheckoutContext?.link?.pickupInstructions || condominiumCheckoutContext?.event?.pickupLocation || 'Retirada na barraca'),
+        ].filter(Boolean).join(' | ')
+      : '';
 
     const order = {
       customerName: effectiveCustomerName,
       guestPushId: getOrCreateGuestPushId(),
       phone: customer.phone,
-      address: deliveryAddress || customer.address,
-      table: customer.table,
-      type: customer.type,
-      fulfillmentMode: customer.type === 'delivery' ? (isPostalDelivery ? 'postal' : 'distance') : undefined,
+      address: isCondominiumOrder ? condominiumAddress : (deliveryAddress || customer.address),
+      table: isCondominiumOrder ? undefined : customer.table,
+      type: isCondominiumOrder ? 'pickup' : customer.type,
+      fulfillmentMode: isCondominiumOrder
+        ? (isApartmentCondominiumDelivery ? 'condominium_apartment' : 'condominium_pickup')
+        : customer.type === 'delivery' ? (isPostalDelivery ? 'postal' : 'distance') : undefined,
+      condominiumOrder: isCondominiumOrder
+        ? {
+            condominiumId: condominiumCheckoutContext?.condominium?.id || condominiumOrderPayload?.condominiumId,
+            condominiumSlug: condominiumCheckoutContext?.condominium?.slug || condominiumSlugFromQuery,
+            eventId: condominiumCheckoutContext?.event?.id || condominiumOrderPayload?.eventId,
+            fulfillmentMode: isApartmentCondominiumDelivery ? 'apartment_delivery' : 'pickup_at_stall',
+            block: customer.block || condominiumOrderPayload?.block || '',
+            tower: customer.tower || condominiumOrderPayload?.tower || '',
+            apartment: customer.apartment || condominiumOrderPayload?.apartment || '',
+            reference: customer.reference || condominiumOrderPayload?.reference || '',
+          }
+        : undefined,
       postalShipment:
         customer.type === 'delivery' && isPostalDelivery && selectedPostalService
           ? {
@@ -1549,7 +1636,9 @@ export function StorePage() {
             }
           : undefined,
       paymentMethod: payment,
-      deliveryFee: customer.type === 'delivery' && deliveryFeeValue > 0 ? deliveryFeeValue : undefined,
+      deliveryFee: isCondominiumOrder && condominiumFeeValue > 0
+        ? condominiumFeeValue
+        : customer.type === 'delivery' && deliveryFeeValue > 0 ? deliveryFeeValue : undefined,
       cashTendered: cashTendered !== null ? cashTendered : undefined,
       items: validCartItems.map((item: any) => ({
         productId: item.id,
@@ -2448,7 +2537,35 @@ export function StorePage() {
             />
           </div>
         )}
-        {view === 'cart' && (
+        {view === 'cart' && isCondominiumCheckout ? (
+          <CartViewCondominium
+            cart={cart}
+            customer={customer}
+            customers={customers}
+            paymentMethod={paymentMethod}
+            condominiumCheckoutContext={condominiumCheckoutContext}
+            allowCustomerAutocomplete={Boolean(user?.token)}
+            checkoutDisabled={!cartItemsCount || condominiumCheckoutLoading}
+            checkoutDisabledReason={
+              !cartItemsCount
+                ? 'Adicione pelo menos 1 item para continuar.'
+                : condominiumCheckoutLoading
+                ? 'Carregando dados da feira.'
+                : ''
+            }
+            pricingSummary={{
+              subtotal: cartPricing.subtotal,
+              discountTotal: cartDiscountTotal,
+              total: cartItemsTotal,
+            }}
+            onChangeCustomer={handleCustomerChange}
+            onChangePayment={setPaymentMethod}
+            onUpdateCart={updateCart}
+            onCheckout={checkout}
+            checkoutLoading={checkoutLoading}
+            onBack={() => setView('menu')}
+          />
+        ) : view === 'cart' && (
           <CartView
             cart={cart}
             customer={customer}

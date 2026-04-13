@@ -194,6 +194,16 @@ function OrderCard({
   const orderDate = formatTime(order.createdAt);
   const etaWindowLabel = getEtaWindowLabel(details?.eta);
   const etaDeadlineMs = getEtaDeadlineMs(order, details);
+  const condominiumOrder = order?.condominiumOrder || (order?.condominiumId ? {
+    condominiumName: order?.condominiumName,
+    fulfillmentMode: order?.condominiumFulfillmentMode,
+    unit: order?.condominiumUnit,
+  } : null);
+  const condominiumFulfillment = String(condominiumOrder?.fulfillmentMode || '').toLowerCase();
+  const condominiumLabel =
+    condominiumFulfillment === 'apartment_delivery' || condominiumFulfillment === 'condominium_apartment'
+      ? 'Entrega no apartamento'
+      : 'Retirada na feira';
   const isDelayed = Boolean(etaDeadlineMs && Date.now() > etaDeadlineMs);
   const canCancel = Boolean(
     isActive &&
@@ -254,6 +264,11 @@ function OrderCard({
               <span className={`font-medium ${statusMeta.toneClass}`}>{statusMeta.label}</span>
             </div>
             <p className="mt-1 text-[11px] text-slate-500">{orderDate || formatGroupDate(order.createdAt)}</p>
+            {condominiumOrder?.condominiumName ? (
+              <p className="mt-1 inline-flex max-w-full rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">
+                <span className="truncate">{condominiumLabel} • {condominiumOrder.condominiumName}</span>
+              </p>
+            ) : null}
           </button>
         </div>
         <div className="shrink-0 pt-0.5 text-right">

@@ -1369,15 +1369,15 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
         : null;
     const normalizedPaymentStatus = (input.paymentStatus || '').toString().trim().toUpperCase();
     const paymentStatus = normalizedPaymentStatus === 'PAID' ? 'PAID' : 'PENDING';
+    const condominiumContext = await this.resolveCondominiumOrderContext(input, store!.id);
     const deliveryFee =
-      input.type === 'delivery' && input.deliveryFee !== undefined && input.deliveryFee !== null
+      (input.type === 'delivery' || Boolean(condominiumContext)) && input.deliveryFee !== undefined && input.deliveryFee !== null
         ? Number(input.deliveryFee)
         : null;
     const deliveryFeeValue = !Number.isNaN(Number(deliveryFee)) && Number(deliveryFee) > 0
       ? Number(deliveryFee)
       : 0;
 
-    const condominiumContext = await this.resolveCondominiumOrderContext(input, store!.id);
     const condominiumFulfillmentMode = String(condominiumContext?.fulfillmentMode || '').toLowerCase();
     const normalizedFulfillmentMode = condominiumContext
       ? (condominiumFulfillmentMode === 'apartment_delivery' ? 'condominium_apartment' : 'condominium_pickup')

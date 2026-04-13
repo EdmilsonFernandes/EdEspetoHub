@@ -211,6 +211,18 @@ export function OrderTracking() {
   const status = order?.status || 'pending';
   const normalizedStatus = String(status || '').toLowerCase().trim();
   const normalizedOrderType = String(order?.type || '').toLowerCase();
+  const condominiumOrder = (order as any)?.condominiumOrder || ((order as any)?.condominiumId ? {
+    condominiumName: (order as any)?.condominiumName,
+    fulfillmentMode: (order as any)?.condominiumFulfillmentMode,
+    unit: (order as any)?.condominiumUnit,
+  } : null);
+  const isCondominiumOrder = Boolean(condominiumOrder?.condominiumName || (order as any)?.condominiumName);
+  const condominiumUnit = condominiumOrder?.unit || (order as any)?.condominiumUnit || {};
+  const condominiumFulfillment = String(condominiumOrder?.fulfillmentMode || (order as any)?.condominiumFulfillmentMode || '').toLowerCase();
+  const condominiumFulfillmentLabel =
+    condominiumFulfillment === 'apartment_delivery' || condominiumFulfillment === 'condominium_apartment'
+      ? 'Entrega no apartamento'
+      : 'Retirada na barraca';
   const isDelivery = normalizedOrderType === 'delivery' || Boolean((order as any)?.delivery);
   const typeLabel = typeLabels[normalizedOrderType] || (isDelivery ? 'Entrega' : 'Pedido');
   const deliveryStatus = String((order as any)?.delivery?.status || '').toUpperCase();
@@ -1224,6 +1236,18 @@ export function OrderTracking() {
                       <p>
                         <span className="font-semibold">Mesa:</span> {order.table || '-'}
                       </p>
+                    )}
+                    {isCondominiumOrder && (
+                      <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-3 text-sm text-emerald-900">
+                        <p className="text-[11px] font-black uppercase tracking-[0.14em] text-emerald-700">Feira no condomínio</p>
+                        <p className="mt-1 font-bold">{condominiumOrder?.condominiumName || (order as any)?.condominiumName}</p>
+                        <p className="mt-1 text-xs font-semibold text-emerald-800">{condominiumFulfillmentLabel}</p>
+                        {(condominiumUnit?.block || condominiumUnit?.tower || condominiumUnit?.apartment || condominiumUnit?.reference) && (
+                          <p className="mt-1 text-xs text-emerald-800">
+                            {[condominiumUnit?.block && `Bloco/Torre ${condominiumUnit.block}`, condominiumUnit?.apartment && `Apto ${condominiumUnit.apartment}`, condominiumUnit?.reference].filter(Boolean).join(' | ')}
+                          </p>
+                        )}
+                      </div>
                     )}
                     {isDelivery && formatAddress(order.address || order.deliveryAddress) && (
                       <p className="flex items-start gap-2">

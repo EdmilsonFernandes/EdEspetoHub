@@ -1,0 +1,462 @@
+// @ts-nocheck
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  ArrowLeft,
+  Phone,
+  House,
+  PaperPlaneTilt,
+  Wallet,
+  CreditCard,
+  MagnifyingGlass,
+  User,
+  Storefront,
+  Building
+} from "@phosphor-icons/react";
+import { formatCurrency } from "../../utils/format";
+import { getPaymentMethodMeta } from "../../utils/paymentAssets";
+import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
+import { formatSelectedModifiers, getModifiersTotal } from "../../utils/productModifiers";
+import { getBundleDiscountForCartItem, getCartPricing } from "../../utils/orderPricing";
+
+const BRAZIL_DDDS = [
+  "11", "12", "13", "14", "15", "16", "17", "18", "19",
+  "21", "22", "24", "27", "28",
+  "31", "32", "33", "34", "35", "37", "38",
+  "41", "42", "43", "44", "45", "46", "47", "48", "49",
+  "51", "53", "54", "55",
+  "61", "62", "63", "64", "65", "66", "67", "68", "69",
+  "71", "73", "74", "75", "77", "79",
+  "81", "82", "83", "84", "85", "86", "87", "88", "89",
+  "91", "92", "93", "94", "95", "96", "97", "98", "99",
+];
+
+const extractPhoneParts = (value = "") => {
+  const raw = String(value || "").trim();
+  const digits = raw.replace(/\D/g, "");
+  const hasPrefixedDdd = /^\(\d{2}\)/.test(raw);
+  const ddd = hasPrefixedDdd ? digits.slice(0, 2) : "";
+  const hasValidDdd = BRAZIL_DDDS.includes(ddd);
+  return {
+    ddd: hasValidDdd ? ddd : "",
+    localNumber: hasValidDdd ? digits.slice(2, 11) : digits.slice(0, 9),
+  };
+};
+
+const formatLocalPhoneNumber = (value = "") => {
+  const digits = value.replace(/\D/g, "").slice(0, 9);
+  if (digits.length <= 4) return digits;
+  if (digits.length <= 8) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+};
+
+const buildPhoneFromParts = (ddd = "", local = "") => {
+  const safeDdd = String(ddd || "").replace(/\D/g, "").slice(0, 2);
+  const localDigits = String(local || "").replace(/\D/g, "").slice(0, 9);
+  if (!safeDdd || !localDigits) return "";
+  return `(${safeDdd}) ${formatLocalPhoneNumber(localDigits)}`;
+};
+
+export const CartViewCondominium = ({
+  cart,
+  customer,
+  customers = [],
+  paymentMethod,
+  condominiumCheckoutContext = null,
+  allowCustomerAutocomplete = false,
+  checkoutDisabled = false,
+  checkoutDisabledReason = "",
+  checkoutLoading = false,
+  pricingSummary,
+  onChangeCustomer,
+  onChangePayment,
+  onUpdateCart,
+  onCheckout,
+  onBack
+}) => {
+  const cartItems = Object.values(cart);
+  const fallbackPricing = getCartPricing(cart);
+  const subtotal = pricingSummary?.subtotal ?? fallbackPricing.subtotal;
+  const discountTotal = pricingSummary?.discountTotal ?? fallbackPricing.discountTotal;
+  const total = pricingSummary?.total ?? fallbackPricing.discountedSubtotal;
+  
+  const buildCartOptions = (entry: any) => ({
+    cookingPoint: entry?.cookingPoint || "",
+    passSkewer: Boolean(entry?.passSkewer),
+    selectedModifiers: Array.isArray(entry?.selectedModifiers) ? entry.selectedModifiers : [],
+  });
+
+  const normalizeNumber = (value) => {
+    if (value === null || value === undefined) return null;
+    const raw = value.toString().trim();
+    if (!raw) return null;
+    const parsed = Number(raw.replace(",", "."));
+    return Number.isNaN(parsed) ? null : parsed;
+  };
+
+  const [ctaPulse, setCtaPulse] = useState(false);
+  const [cashNeedsChange, setCashNeedsChange] = useState(false);
+  const [cashTenderedInput, setCashTenderedInput] = useState("");
+  const [hasTriedCheckout, setHasTriedCheckout] = useState(false);
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
+
+  const premiumInputClass =
+    "w-full rounded-2xl bg-slate-100 px-4 py-3 text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all shadow-sm";
+
+  // Lógica de condomínio
+  const isApartmentDelivery = customer.condominiumFulfillmentMode === 'apartment_delivery';
+  const apartmentDeliveryAllowed = condominiumCheckoutContext?.link?.allowApartmentDelivery !== false;
+  const condominiumFeeValue = isApartmentDelivery ? (normalizeNumber(condominiumCheckoutContext?.feeValue) || 0) : 0;
+  const totalWithFee = total + condominiumFeeValue;
+
+  useEffect(() => {
+    if (!apartmentDeliveryAllowed && isApartmentDelivery) {
+      onChangeCustomer({ ...customer, condominiumFulfillmentMode: 'pickup_at_stall', type: 'pickup' });
+    }
+  }, [apartmentDeliveryAllowed, isApartmentDelivery]);
+
+  const isPix = paymentMethod === "pix";
+  const isCash = paymentMethod === "dinheiro";
+  const cashTenderedValue = isCash ? normalizeNumber(cashTenderedInput) : null;
+  const cashChangeDue = isCash && cashTenderedValue !== null ? Number(cashTenderedValue) - Number(totalWithFee || 0) : null;
+
+  const [selectedDdd, setSelectedDdd] = useState(() => extractPhoneParts(customer.phone || "").ddd);
+  const [localPhoneDigits, setLocalPhoneDigits] = useState(() => extractPhoneParts(customer.phone || "").localNumber);
+
+  useEffect(() => {
+    const parsed = extractPhoneParts(customer.phone || "");
+    if (parsed.ddd !== selectedDdd) setSelectedDdd(parsed.ddd);
+    if (parsed.localNumber !== localPhoneDigits) setLocalPhoneDigits(parsed.localNumber);
+  }, [customer.phone]);
+
+  const syncPhone = (nextDdd: string, nextLocal: string) => {
+    const safeDdd = BRAZIL_DDDS.includes(nextDdd) ? nextDdd : "";
+    const localDigits = (nextLocal || "").replace(/\D/g, "").slice(0, 9);
+    const formatted = buildPhoneFromParts(safeDdd, localDigits);
+    onChangeCustomer({ ...customer, phone: formatted });
+  };
+
+  const handlePhoneLocalNumberChange = (nextValue) => {
+    const localDigits = nextValue.replace(/\D/g, "").slice(0, 9);
+    setLocalPhoneDigits(localDigits);
+    syncPhone(selectedDdd, localDigits);
+  };
+
+  const handleDddChange = (nextDdd) => {
+    const safeDdd = BRAZIL_DDDS.includes(nextDdd) ? nextDdd : "";
+    setSelectedDdd(safeDdd);
+    syncPhone(safeDdd, localPhoneDigits);
+  };
+
+  const handleNameChange = (value) => {
+    onChangeCustomer({ ...customer, name: value });
+    if (allowCustomerAutocomplete) setSuggestionsOpen(true);
+  };
+
+  const handleSelectCustomer = (entry) => {
+    const parts = extractPhoneParts(entry.phone || "");
+    const safeDdd = BRAZIL_DDDS.includes(parts.ddd) ? parts.ddd : "";
+    const safeLocal = String(parts.localNumber || "").replace(/\D/g, "").slice(0, 9);
+    setSelectedDdd(safeDdd);
+    setLocalPhoneDigits(safeLocal);
+    onChangeCustomer({
+      ...customer,
+      name: entry.name,
+      phone: buildPhoneFromParts(safeDdd, safeLocal),
+    });
+    setSuggestionsOpen(false);
+  };
+
+  const formatItemOptions = (item) => {
+    const labels = [];
+    if (item?.cookingPoint) labels.push(item.cookingPoint);
+    if (item?.passSkewer) labels.push('passar farinha');
+    const modifiers = formatSelectedModifiers(item?.selectedModifiers || []);
+    if (modifiers.length) labels.push(`+ ${modifiers.join(', ')}`);
+    return labels.length ? labels.join(' • ') : '';
+  };
+
+  const cashValidation = useMemo(() => {
+    if (!isCash || !cashNeedsChange) return { blocked: false, reason: "" };
+    if (cashTenderedValue === null) return { blocked: true, reason: "Informe com quanto vai pagar." };
+    if (cashTenderedValue < totalWithFee) return { blocked: true, reason: "Valor insuficiente para troco." };
+    return { blocked: false, reason: "" };
+  }, [isCash, cashNeedsChange, cashTenderedValue, totalWithFee]);
+
+  const validateFields = () => {
+    if (!customer.name?.trim()) return "Informe seu nome.";
+    if (!customer.phone?.trim() || customer.phone.length < 10) return "Informe um WhatsApp válido.";
+    if (isApartmentDelivery) {
+      if (!customer.block?.trim()) return "Informe o bloco/torre.";
+      if (!customer.apartment?.trim()) return "Informe o apartamento.";
+    }
+    return null;
+  };
+
+  const validationError = validateFields();
+
+  return (
+    <div className="animate-in slide-in-from-right pb-24 relative overflow-x-hidden no-x-scroll bg-slate-50">
+      <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
+      
+      <button
+        onClick={onBack}
+        className="mb-4 sm:mb-6 flex items-center text-brand-primary font-semibold hover:opacity-80 text-sm sm:text-base"
+      >
+        <ArrowLeft size={20} weight="duotone" /> Voltar ao cardápio
+      </button>
+
+      {/* Dados do cliente */}
+      <div className="relative overflow-hidden bg-white rounded-3xl border border-slate-100 p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="font-black text-slate-900 text-base sm:text-lg tracking-tight">Checkout Condomínio</h2>
+            <p className="text-xs text-slate-500">{condominiumCheckoutContext?.condominium?.name || 'Seja bem-vindo!'}</p>
+          </div>
+          <span className="text-[11px] font-extrabold text-brand-primary bg-brand-primary-soft px-3 py-1 rounded-full border border-brand-primary/20">
+            {isApartmentDelivery ? 'Morador' : 'Visitante'}
+          </span>
+        </div>
+
+        <div className="space-y-4">
+          {/* Nome */}
+          <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Seu Nome</label>
+            <div className="relative mt-2">
+              <input
+                ref={nameInputRef}
+                value={customer.name || ""}
+                onChange={(e) => handleNameChange(e.target.value)}
+                placeholder="Nome completo"
+                className="w-full rounded-2xl bg-slate-100 py-3 pl-10 pr-4 text-base text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900"
+              />
+              <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            </div>
+          </div>
+
+          {/* WhatsApp */}
+          <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">WhatsApp</label>
+            <div className="mt-2 grid grid-cols-[80px_1fr] gap-3">
+              <select
+                value={selectedDdd || ""}
+                onChange={(e) => handleDddChange(e.target.value)}
+                className={premiumInputClass}
+              >
+                <option value="" disabled>DDD</option>
+                {BRAZIL_DDDS.map((ddd) => <option key={ddd} value={ddd}>{ddd}</option>)}
+              </select>
+              <input
+                type="tel"
+                inputMode="numeric"
+                value={formatLocalPhoneNumber(localPhoneDigits)}
+                onChange={(e) => handlePhoneLocalNumberChange(e.target.value)}
+                placeholder="90000-0000"
+                className={premiumInputClass}
+              />
+            </div>
+          </div>
+
+          {/* Modo de Entrega */}
+          <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Como deseja receber?</p>
+            <div className="flex gap-1 rounded-2xl bg-slate-100 p-1">
+              <button
+                onClick={() => onChangeCustomer({ ...customer, condominiumFulfillmentMode: 'pickup_at_stall', type: 'pickup' })}
+                className={`flex-1 py-3 rounded-xl flex flex-col items-center gap-1 transition-all ${
+                  !isApartmentDelivery ? "bg-slate-900 text-white shadow-sm" : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                <Storefront size={18} weight={!isApartmentDelivery ? "fill" : "duotone"} />
+                <span className="text-[10px] uppercase font-bold">Retirar na Barraca</span>
+              </button>
+              <button
+                onClick={() => {
+                  if (!apartmentDeliveryAllowed) return;
+                  onChangeCustomer({ ...customer, condominiumFulfillmentMode: 'apartment_delivery', type: 'pickup' });
+                }}
+                disabled={!apartmentDeliveryAllowed}
+                className={`flex-1 py-3 rounded-xl flex flex-col items-center gap-1 transition-all ${
+                  isApartmentDelivery ? "bg-slate-900 text-white shadow-sm" : "text-slate-500 hover:text-slate-700"
+                } disabled:cursor-not-allowed disabled:opacity-45`}
+              >
+                <Building size={18} weight={isApartmentDelivery ? "fill" : "duotone"} />
+                <span className="text-[10px] uppercase font-bold">No Apartamento</span>
+              </button>
+            </div>
+            {!apartmentDeliveryAllowed && (
+              <p className="mt-2 text-[11px] font-semibold text-slate-500">
+                Nesta feira, a loja está atendendo apenas retirada na barraca.
+              </p>
+            )}
+          </div>
+
+          {/* Campos de Morador */}
+          {isApartmentDelivery && (
+            <div className="animate-in fade-in slide-in-from-top-2 duration-300 space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-2xl border border-slate-100 p-3 bg-white">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Bloco/Torre</label>
+                  <input
+                    value={customer.block || ""}
+                    onChange={(e) => onChangeCustomer({ ...customer, block: e.target.value })}
+                    placeholder="Ex: A"
+                    className="w-full mt-1 bg-transparent text-lg font-bold outline-none"
+                  />
+                </div>
+                <div className="rounded-2xl border border-slate-100 p-3 bg-white">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Apartamento</label>
+                  <input
+                    value={customer.apartment || ""}
+                    onChange={(e) => onChangeCustomer({ ...customer, apartment: e.target.value })}
+                    placeholder="Ex: 101"
+                    className="w-full mt-1 bg-transparent text-lg font-bold outline-none"
+                  />
+                </div>
+              </div>
+              <div className="rounded-2xl border border-slate-100 p-3 bg-white">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Ponto de Referência</label>
+                <input
+                  value={customer.reference || ""}
+                  onChange={(e) => onChangeCustomer({ ...customer, reference: e.target.value })}
+                  placeholder="Ex: Próximo à piscina"
+                  className="w-full mt-1 bg-transparent text-sm font-medium outline-none"
+                />
+              </div>
+              {condominiumFeeValue > 0 && (
+                <div className="flex items-center justify-between px-2 py-1 bg-emerald-50 rounded-xl border border-emerald-100">
+                  <span className="text-xs font-bold text-emerald-700 uppercase">Taxa de entrega no apto</span>
+                  <span className="text-sm font-black text-emerald-700">{formatCurrency(condominiumFeeValue)}</span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Resumo */}
+      <div className="bg-white rounded-2xl border border-slate-100 p-4 sm:p-6 mb-4 shadow-sm">
+        <h2 className="font-black text-slate-900 mb-4 text-base tracking-tight">Resumo do Pedido</h2>
+        {cartItems.map((item) => (
+          <div key={item.key || item.id} className="flex justify-between items-center py-2 border-b border-slate-50 last:border-0">
+            <div className="flex items-center gap-3">
+              <span className="h-7 w-7 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600">
+                {item.qty}x
+              </span>
+              <div className="flex flex-col">
+                <span className="text-slate-800 font-semibold text-sm">{item.name}</span>
+                {formatItemOptions(item) && <span className="text-[11px] text-slate-500">{formatItemOptions(item)}</span>}
+              </div>
+            </div>
+            <span className="font-bold text-slate-900 text-sm">{formatCurrency(item.price * item.qty)}</span>
+          </div>
+        ))}
+        
+        <div className="mt-4 pt-4 border-t border-slate-100 space-y-2">
+          <div className="flex justify-between items-center text-xs text-slate-500">
+            <span>Subtotal</span>
+            <span>{formatCurrency(total)}</span>
+          </div>
+          {isApartmentDelivery && condominiumFeeValue > 0 && (
+            <div className="flex justify-between items-center text-xs text-emerald-600 font-bold">
+              <span>Taxa de Entrega</span>
+              <span>{formatCurrency(condominiumFeeValue)}</span>
+            </div>
+          )}
+          <div className="flex justify-between items-center pt-2">
+            <span className="font-bold text-slate-600">Total</span>
+            <span className="text-xl font-black text-slate-900">{formatCurrency(totalWithFee)}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Pagamento */}
+      <div className="bg-white rounded-2xl border border-slate-100 p-4 sm:p-6 mb-4 shadow-sm">
+        <h2 className="font-black text-slate-900 mb-4 text-base flex items-center gap-2">
+          <CreditCard size={18} className="text-brand-primary" /> Forma de Pagamento
+        </h2>
+        <div className="grid grid-cols-2 gap-2">
+          {["pix", "debito", "credito", "dinheiro"].map((method) => {
+            const meta = getPaymentMethodMeta(method);
+            const isSelected = paymentMethod === method;
+            return (
+              <button
+                key={method}
+                onClick={() => onChangePayment(method)}
+                className={`flex flex-col items-center gap-1 p-3 rounded-2xl border transition-all ${
+                  isSelected ? "border-brand-primary bg-brand-primary/5 ring-1 ring-brand-primary" : "border-slate-100 hover:border-slate-200"
+                }`}
+              >
+                <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${isSelected ? 'bg-brand-primary text-white' : 'bg-slate-50 text-slate-400'}`}>
+                  {meta.icon ? <img src={meta.icon} className="h-4 w-4 object-contain" /> : <CreditCard size={16} />}
+                </div>
+                <span className={`text-[10px] font-bold uppercase ${isSelected ? 'text-brand-primary' : 'text-slate-500'}`}>
+                  {method === 'pix' ? 'Pix' : method === 'debito' ? 'Débito' : method === 'credito' ? 'Crédito' : 'Dinheiro'}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {isCash && cashNeedsChange && (
+        <div className="bg-amber-50 rounded-2xl border border-amber-100 p-4 mb-4">
+          <label className="text-xs font-bold text-amber-800 uppercase">Troco para quanto?</label>
+          <input
+            value={cashTenderedInput}
+            onChange={(e) => setCashTenderedInput(e.target.value)}
+            inputMode="decimal"
+            placeholder="Ex: 50,00"
+            className="w-full mt-2 bg-white rounded-xl px-4 py-2.5 text-lg font-bold text-slate-800 outline-none border border-amber-200"
+          />
+        </div>
+      )}
+
+      {/* Botão Finalizar */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-slate-100 z-50">
+        <button
+          onClick={() => {
+            setHasTriedCheckout(true);
+            if (validationError) return;
+            setCtaPulse(true);
+            window.setTimeout(() => setCtaPulse(false), 200);
+            
+            // Payload específico de condomínio
+            const condominiumOrder = {
+              condominiumId: condominiumCheckoutContext?.condominium?.id,
+              eventId: condominiumCheckoutContext?.event?.id,
+              fulfillmentMode: customer.condominiumFulfillmentMode || 'pickup_at_stall',
+              block: customer.block,
+              tower: customer.tower,
+              apartment: customer.apartment,
+              reference: customer.reference,
+            };
+
+            onCheckout({
+              cashTendered: isCash && cashNeedsChange ? normalizeNumber(cashTenderedInput) : null,
+              condominiumOrder
+            });
+          }}
+          disabled={checkoutLoading || checkoutDisabled || cashValidation.blocked || (hasTriedCheckout && !!validationError)}
+          className={`w-full py-4 rounded-2xl font-black text-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${
+            checkoutLoading || checkoutDisabled || cashValidation.blocked || (hasTriedCheckout && !!validationError)
+              ? "bg-slate-300 text-slate-500"
+              : "bg-slate-900 text-white"
+          }`}
+          style={ctaPulse ? { animation: 'btnPop 200ms ease' } : undefined}
+        >
+          <PaperPlaneTilt size={20} weight="bold" />
+          {checkoutLoading ? 'Enviando...' : isApartmentDelivery ? 'Pedir no Apartamento' : 'Pedir e Retirar'}
+        </button>
+        {hasTriedCheckout && validationError && (
+          <p className="mt-2 text-center text-xs font-bold text-rose-600">{validationError}</p>
+        )}
+        {hasTriedCheckout && !validationError && (checkoutDisabledReason || cashValidation.reason) && (
+          <p className="mt-2 text-center text-xs font-bold text-rose-600">
+            {cashValidation.reason || checkoutDisabledReason}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};

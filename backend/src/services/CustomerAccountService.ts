@@ -422,6 +422,22 @@ async setDefaultAddress(userId: string, addressId: string) {
       canceledReason: order.canceledReason || null,
       type: order.type,
       fulfillmentMode: order.fulfillmentMode,
+      condominiumId: (order as any).condominiumId || null,
+      condominiumEventId: (order as any).condominiumEventId || null,
+      condominiumName: (order as any).condominiumName || null,
+      condominiumEventTitle: (order as any).condominiumEventTitle || null,
+      condominiumFulfillmentMode: (order as any).condominiumFulfillmentMode || null,
+      condominiumUnit: (order as any).condominiumUnit || null,
+      condominiumOrder: (order as any).condominiumId
+        ? {
+            condominiumId: (order as any).condominiumId || null,
+            eventId: (order as any).condominiumEventId || null,
+            condominiumName: (order as any).condominiumName || null,
+            eventTitle: (order as any).condominiumEventTitle || null,
+            fulfillmentMode: (order as any).condominiumFulfillmentMode || null,
+            unit: (order as any).condominiumUnit || null,
+          }
+        : null,
       paymentMethod: order.paymentMethod || null,
       paymentStatus: order.paymentStatus || null,
       total: Number(order.total || 0),
