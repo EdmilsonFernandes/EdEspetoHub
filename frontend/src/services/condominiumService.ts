@@ -65,4 +65,8 @@ export const condominiumService = {
   createStoreRequest(storeId: string, payload: { condominiumId: string; message?: string }) {
     return apiClient.post(`/stores/${encodeURIComponent(storeId)}/condominium-requests`, payload);
   },
+
+  removeStoreCondominium(storeId: string, condominiumId: string) {
+    return apiClient.delete(`/stores/${encodeURIComponent(storeId)}/condominiums/${encodeURIComponent(condominiumId)}`);
+  },
 };

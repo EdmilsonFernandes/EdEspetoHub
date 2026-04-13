@@ -176,6 +176,23 @@ export class CondominiumService {
     return this.toPublicRequest(saved);
   }
 
+  async removeStoreCondominium(storeId: string, condominiumId: string, authStoreId?: string) {
+    if (authStoreId && authStoreId !== storeId) throw new AppError('AUTH-003', 403);
+    if (!storeId || !condominiumId) throw new AppError('CONDO-006', 400, { message: 'Loja e condominio sao obrigatorios.' });
+
+    await this.condominiumRepository.deactivateStoreCondominium(condominiumId, storeId);
+
+    const request = await this.condominiumRepository.findRequestByStoreAndCondominium(storeId, condominiumId);
+    if (request && [ 'pending', 'approved' ].includes(String(request.status || '').toLowerCase())) {
+      request.status = 'cancelled';
+      request.reviewNote = 'Cancelado pela loja.';
+      request.reviewedAt = new Date();
+      await this.condominiumRepository.saveRequest(request);
+    }
+
+    return { ok: true };
+  }
+
   /**
    * Lists active condominiums for public Hub discovery.
    *

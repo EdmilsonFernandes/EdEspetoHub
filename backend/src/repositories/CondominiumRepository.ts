@@ -199,6 +199,33 @@ export class CondominiumRepository {
     );
   }
 
+  async deactivateStoreCondominium(condominiumId: string, storeId: string) {
+    await AppDataSource.query(
+      `
+        UPDATE store_condominiums
+        SET active = FALSE,
+            updated_at = NOW()
+        WHERE store_id = $1
+          AND condominium_id = $2;
+      `,
+      [storeId, condominiumId]
+    );
+
+    await AppDataSource.query(
+      `
+        UPDATE condominium_event_stores ces
+        SET active = FALSE,
+            updated_at = NOW()
+        FROM condominium_events ce
+        WHERE ces.event_id = ce.id
+          AND ces.store_id = $1
+          AND ce.condominium_id = $2
+          AND ce.ends_at >= NOW();
+      `,
+      [storeId, condominiumId]
+    );
+  }
+
   listAllStoresForAdmin() {
     return AppDataSource.getRepository(Store)
       .createQueryBuilder('store')

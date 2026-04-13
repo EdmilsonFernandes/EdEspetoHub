@@ -11,6 +11,7 @@ const statusCopy: Record<string, { label: string; tone: string }> = {
   pending: { label: 'Em análise', tone: 'bg-amber-100 text-amber-800' },
   approved: { label: 'Aprovado', tone: 'bg-emerald-100 text-emerald-800' },
   rejected: { label: 'Recusado', tone: 'bg-rose-100 text-rose-700' },
+  cancelled: { label: 'Cancelado', tone: 'bg-slate-100 text-slate-600' },
   blocked: { label: 'Bloqueado', tone: 'bg-slate-200 text-slate-700' },
 };
 
@@ -56,6 +57,22 @@ export function StoreCondominiumPanel({ storeId }: Props) {
     }
   };
 
+  const removeAssociation = async (condominiumId: string, status: string) => {
+    if (!storeId) return;
+    const label = status === 'approved' ? 'sair deste condomínio' : 'cancelar esta solicitação';
+    if (!window.confirm(`Deseja ${label}?`)) return;
+    setSavingId(condominiumId);
+    setError('');
+    try {
+      await condominiumService.removeStoreCondominium(storeId, condominiumId);
+      await load();
+    } catch (err: any) {
+      setError(err?.message || 'Não foi possível atualizar a participação.');
+    } finally {
+      setSavingId('');
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 px-4 py-3">
@@ -78,7 +95,7 @@ export function StoreCondominiumPanel({ storeId }: Props) {
           const condominium = item.condominium || {};
           const status = String(item.status || 'available');
           const meta = statusCopy[status] || statusCopy.available;
-          const canRequest = status === 'available' || status === 'rejected';
+          const canRequest = status === 'available' || status === 'rejected' || status === 'cancelled';
           return (
             <div key={condominium.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -119,6 +136,17 @@ export function StoreCondominiumPanel({ storeId }: Props) {
                       className="w-full rounded-xl bg-[#336886] px-3 py-2 text-xs font-black text-white disabled:opacity-50"
                     >
                       {savingId === condominium.id ? 'Enviando...' : 'Solicitar participação'}
+                    </button>
+                  </div>
+                ) : status === 'pending' || status === 'approved' ? (
+                  <div className="w-full sm:max-w-[220px]">
+                    <button
+                      type="button"
+                      onClick={() => removeAssociation(condominium.id, status)}
+                      disabled={savingId === condominium.id}
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                    >
+                      {status === 'approved' ? 'Sair do condomínio' : 'Cancelar solicitação'}
                     </button>
                   </div>
                 ) : null}

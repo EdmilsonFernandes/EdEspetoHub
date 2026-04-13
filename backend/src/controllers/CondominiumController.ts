@@ -98,6 +98,19 @@ export class CondominiumController {
     }
   }
 
+  static async removeStoreCondominium(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.removeStoreCondominium(
+        String(req.params.storeId || ''),
+        String(req.params.condominiumId || ''),
+        req.auth?.storeId
+      );
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
   /**
    * Lists public condominiums.
    *

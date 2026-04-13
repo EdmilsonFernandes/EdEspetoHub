@@ -154,6 +154,7 @@ routes.patch('/stores/:storeId/featured-requests/:requestId/cancel', requireAuth
 routes.patch('/stores/:storeId/featured-requests/:requestId/refresh-payment', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), FeaturedProductController.refreshPaymentByStore);
 routes.get('/stores/:storeId/condominiums', requireAuth, requireRole('ADMIN'), CondominiumController.listStoreOptions);
 routes.post('/stores/:storeId/condominium-requests', requireAuth, requireRole('ADMIN'), CondominiumController.createStoreRequest);
+routes.delete('/stores/:storeId/condominiums/:condominiumId', requireAuth, requireRole('ADMIN'), CondominiumController.removeStoreCondominium);
 
 // Products admin (cadastro não depende de assinatura)
 routes.post('/stores/:storeId/products', requireAuth, requireRole('ADMIN'), ProductController.create);
