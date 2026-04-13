@@ -28,6 +28,154 @@ export class CondominiumService {
   private subscriptionService = new SubscriptionService();
   private orderReviewService = new OrderReviewService();
 
+  async adminOverview() {
+    const [condominiums, stores, pendingRequests] = await Promise.all([
+      this.condominiumRepository.listAllForAdmin(),
+      this.condominiumRepository.listAllStoresForAdmin(),
+      this.condominiumRepository.listRequests(),
+    ]);
+
+    const eventGroups = await Promise.all(
+      condominiums.map(async (condominium) => ({
+        condominiumId: condominium.id,
+        events: await this.condominiumRepository.listEventsByCondominiumId(condominium.id, new Date(Date.now() - 24 * 60 * 60 * 1000)),
+      }))
+    );
+    const eventsByCondominium = new Map(eventGroups.map((group) => [group.condominiumId, group.events]));
+
+    return {
+      condominiums: condominiums.map((condominium) => ({
+        ...this.toPublicCondominium(condominium, null),
+        events: (eventsByCondominium.get(condominium.id) || []).map((event) => this.toPublicEvent(event)),
+      })),
+      stores: stores.map((store: any) => ({
+        id: store.id,
+        name: store.name,
+        slug: store.slug,
+        segment: store.settings?.segment || 'outros',
+        city: store.settings?.city || null,
+        state: store.settings?.state || null,
+      })),
+      requests: pendingRequests.map((request) => this.toPublicRequest(request)),
+    };
+  }
+
+  async adminCreateCondominium(payload: any) {
+    const name = String(payload?.name || '').trim();
+    const slug = String(payload?.slug || this.slugify(name)).trim();
+    if (!name || !slug) throw new AppError('CONDO-002', 400, { message: 'Nome e slug sao obrigatorios.' });
+    const condominium = await this.condominiumRepository.saveCondominium({
+      name,
+      slug,
+      description: payload?.description || null,
+      address: payload?.address || null,
+      city: payload?.city || null,
+      state: payload?.state || null,
+      zipCode: payload?.zipCode || null,
+      logoUrl: payload?.logoUrl || null,
+      bannerUrl: payload?.bannerUrl || null,
+      active: payload?.active !== false,
+    });
+    return this.toPublicCondominium(condominium, null);
+  }
+
+  async adminCreateEvent(condominiumId: string, payload: any) {
+    const condominium = await this.condominiumRepository.findById(condominiumId);
+    if (!condominium) throw new AppError('CONDO-001', 404, { message: 'Condominio nao encontrado.' });
+    const title = String(payload?.title || `Feira do ${condominium.name}`).trim();
+    const startsAt = new Date(payload?.startsAt);
+    const endsAt = new Date(payload?.endsAt);
+    if (!title || Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime()) || endsAt <= startsAt) {
+      throw new AppError('CONDO-003', 400, { message: 'Informe titulo, inicio e fim validos para a feira.' });
+    }
+    const event = await this.condominiumRepository.saveEvent({
+      condominiumId,
+      title,
+      startsAt,
+      endsAt,
+      status: String(payload?.status || 'scheduled').trim() || 'scheduled',
+      pickupLocation: payload?.pickupLocation || null,
+      notes: payload?.notes || null,
+      active: payload?.active !== false,
+    });
+    return this.toPublicEvent(event);
+  }
+
+  async adminApproveStore(condominiumId: string, storeId: string) {
+    const condominium = await this.condominiumRepository.findById(condominiumId);
+    if (!condominium) throw new AppError('CONDO-001', 404, { message: 'Condominio nao encontrado.' });
+    await this.condominiumRepository.upsertStoreCondominium(condominiumId, storeId, true);
+    return { ok: true };
+  }
+
+  async adminAddStoreToEvent(eventId: string, storeId: string) {
+    await this.condominiumRepository.upsertEventStore(eventId, storeId);
+    return { ok: true };
+  }
+
+  async adminReviewRequest(requestId: string, payload: any, reviewedBy?: string) {
+    const request = await this.condominiumRepository.findRequestById(requestId);
+    if (!request) throw new AppError('CONDO-004', 404, { message: 'Solicitacao nao encontrada.' });
+    const status = String(payload?.status || '').trim().toLowerCase();
+    if (![ 'approved', 'rejected', 'blocked' ].includes(status)) {
+      throw new AppError('CONDO-005', 400, { message: 'Status de revisao invalido.' });
+    }
+    request.status = status;
+    request.reviewNote = payload?.reviewNote || null;
+    request.reviewedBy = reviewedBy || null;
+    request.reviewedAt = new Date();
+    const saved = await this.condominiumRepository.saveRequest(request);
+    if (status === 'approved') {
+      await this.condominiumRepository.upsertStoreCondominium(request.condominiumId, request.storeId, true);
+    }
+    return this.toPublicRequest(saved);
+  }
+
+  async listStoreCondominiumOptions(storeId: string, authStoreId?: string) {
+    if (authStoreId && authStoreId !== storeId) throw new AppError('AUTH-003', 403);
+    const [condominiums, requests, links] = await Promise.all([
+      this.condominiumRepository.listActive(),
+      this.condominiumRepository.listRequests(undefined, storeId),
+      this.condominiumRepository.listStoreLinksByStoreId(storeId),
+    ]);
+    const requestByCondominium = new Map(requests.map((request) => [request.condominiumId, request]));
+    const linkByCondominium = new Map(links.map((link) => [link.condominiumId, link]));
+    return condominiums.map((condominium) => {
+      const link = linkByCondominium.get(condominium.id);
+      const request = requestByCondominium.get(condominium.id);
+      return {
+        condominium: this.toPublicCondominium(condominium, null),
+        status: link?.active ? 'approved' : request?.status || 'available',
+        request: request ? this.toPublicRequest(request) : null,
+      };
+    });
+  }
+
+  async createStoreRequest(storeId: string, payload: any, authStoreId?: string) {
+    if (authStoreId && authStoreId !== storeId) throw new AppError('AUTH-003', 403);
+    const condominiumId = String(payload?.condominiumId || '').trim();
+    if (!condominiumId) throw new AppError('CONDO-006', 400, { message: 'Condominio obrigatorio.' });
+    const condominium = await this.condominiumRepository.findById(condominiumId);
+    if (!condominium || condominium.active === false) throw new AppError('CONDO-001', 404, { message: 'Condominio nao encontrado.' });
+    const existing = await this.condominiumRepository.findRequestByStoreAndCondominium(storeId, condominiumId);
+    if (existing && [ 'pending', 'approved' ].includes(String(existing.status || '').toLowerCase())) {
+      return this.toPublicRequest(existing);
+    }
+    const request = existing || {
+      storeId,
+      condominiumId,
+    };
+    const saved = await this.condominiumRepository.saveRequest({
+      ...request,
+      status: 'pending',
+      message: payload?.message || null,
+      reviewNote: null,
+      reviewedBy: null,
+      reviewedAt: null,
+    });
+    return this.toPublicRequest(saved);
+  }
+
   /**
    * Lists active condominiums for public Hub discovery.
    *
@@ -200,5 +348,35 @@ export class CondominiumService {
       pickupLocation: event.pickupLocation || null,
       notes: event.notes || null,
     };
+  }
+
+  private toPublicRequest(request: any) {
+    return {
+      id: request.id,
+      status: request.status,
+      message: request.message || null,
+      reviewNote: request.reviewNote || null,
+      createdAt: request.createdAt instanceof Date ? request.createdAt.toISOString() : request.createdAt,
+      reviewedAt: request.reviewedAt instanceof Date ? request.reviewedAt.toISOString() : request.reviewedAt || null,
+      store: request.store
+        ? {
+            id: request.store.id,
+            name: request.store.name,
+            slug: request.store.slug,
+          }
+        : null,
+      condominium: request.condominium ? this.toPublicCondominium(request.condominium, null) : null,
+      storeId: request.storeId,
+      condominiumId: request.condominiumId,
+    };
+  }
+
+  private slugify(value: string) {
+    return String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
   }
 }

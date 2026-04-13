@@ -29,6 +29,7 @@ const AdminRenewal = lazyPage(() => import('./pages/AdminRenewal'), 'AdminRenewa
 const AdminDemo = lazyPage(() => import('./pages/AdminDemo'), 'AdminDemo');
 const PaymentPage = lazyPage(() => import('./pages/PaymentPage'), 'PaymentPage');
 const SuperAdmin = lazyPage(() => import('./pages/SuperAdmin'), 'SuperAdmin');
+const SuperAdminCondominiums = lazyPage(() => import('./pages/SuperAdminCondominiums'), 'SuperAdminCondominiums');
 const ForgotPassword = lazyPage(() => import('./pages/ForgotPassword'), 'ForgotPassword');
 const ResetPassword = lazyPage(() => import('./pages/ResetPassword'), 'ResetPassword');
 const VerifyEmail = lazyPage(() => import('./pages/VerifyEmail'), 'VerifyEmail');
@@ -196,6 +197,14 @@ function App() {
               <Route path="/pedido/:orderId" element={<OrderTracking />} />
               <Route path="/payment/:paymentId" element={<PaymentPage />} />
               <Route path="/superadmin" element={<SuperAdmin />} />
+              <Route
+                path="/superadmin/condominiums"
+                element={
+                  <AppErrorBoundary>
+                    <SuperAdminCondominiums />
+                  </AppErrorBoundary>
+                }
+              />
               <Route path="/superadmin/highlights" element={<SuperAdminHighlights />} />
               <Route path="/maps" element={<AddressDistance />} />
               <Route path="/motoboy/login" element={<MotoboyLogin />} />

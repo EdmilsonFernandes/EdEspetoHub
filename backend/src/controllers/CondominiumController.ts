@@ -26,6 +26,78 @@ const log = logger.child({ scope: 'CondominiumController' });
  * @date 2026-04-12
  */
 export class CondominiumController {
+  static async adminOverview(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.adminOverview();
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async adminCreate(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.adminCreateCondominium(req.body || {});
+      return res.status(201).json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async adminCreateEvent(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.adminCreateEvent(String(req.params.condominiumId || ''), req.body || {});
+      return res.status(201).json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async adminApproveStore(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.adminApproveStore(String(req.params.condominiumId || ''), String(req.body?.storeId || ''));
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async adminAddStoreToEvent(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.adminAddStoreToEvent(String(req.params.eventId || ''), String(req.body?.storeId || ''));
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async adminReviewRequest(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.adminReviewRequest(String(req.params.requestId || ''), req.body || {}, req.auth?.sub);
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async listStoreOptions(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.listStoreCondominiumOptions(String(req.params.storeId || ''), req.auth?.storeId);
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async createStoreRequest(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.createStoreRequest(String(req.params.storeId || ''), req.body || {}, req.auth?.storeId);
+      return res.status(201).json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
   /**
    * Lists public condominiums.
    *

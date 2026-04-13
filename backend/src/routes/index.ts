@@ -90,6 +90,12 @@ routes.get('/admin/queue-health', requireAuth, requireRole('SUPER_ADMIN'), Platf
 routes.get('/admin/payment-events', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.listPaymentEvents);
 routes.get('/admin/access-logs', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.listAccessLogs);
 routes.post('/admin/push/broadcast', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.broadcastPush);
+routes.get('/admin/condominiums/manage', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminOverview);
+routes.post('/admin/condominiums', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminCreate);
+routes.post('/admin/condominiums/:condominiumId/events', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminCreateEvent);
+routes.post('/admin/condominiums/:condominiumId/stores', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminApproveStore);
+routes.post('/admin/condominium-events/:eventId/stores', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminAddStoreToEvent);
+routes.patch('/admin/condominium-requests/:requestId/review', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminReviewRequest);
  routes.post('/admin/payments/:paymentId/reprocess', requireAuth, requireRole('SUPER_ADMIN'), PaymentController.reprocess);
  routes.patch('/admin/stores/:storeId/suspend', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.suspendStore);
  routes.patch('/admin/stores/:storeId/reactivate', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.reactivateStore);
@@ -146,6 +152,8 @@ routes.get('/stores/:storeId/featured-pricing', requireAuth, requireRole('ADMIN'
 routes.post('/stores/:storeId/featured-requests', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), FeaturedProductController.createStoreRequest);
 routes.patch('/stores/:storeId/featured-requests/:requestId/cancel', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), FeaturedProductController.cancelByStore);
 routes.patch('/stores/:storeId/featured-requests/:requestId/refresh-payment', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), FeaturedProductController.refreshPaymentByStore);
+routes.get('/stores/:storeId/condominiums', requireAuth, requireRole('ADMIN'), CondominiumController.listStoreOptions);
+routes.post('/stores/:storeId/condominium-requests', requireAuth, requireRole('ADMIN'), CondominiumController.createStoreRequest);
 
 // Products admin (cadastro não depende de assinatura)
 routes.post('/stores/:storeId/products', requireAuth, requireRole('ADMIN'), ProductController.create);

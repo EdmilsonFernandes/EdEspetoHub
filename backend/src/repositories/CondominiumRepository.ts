@@ -16,7 +16,9 @@ import { AppDataSource } from '../config/database';
 import { Condominium } from '../entities/Condominium';
 import { CondominiumEvent } from '../entities/CondominiumEvent';
 import { CondominiumEventStore } from '../entities/CondominiumEventStore';
+import { Store } from '../entities/Store';
 import { StoreCondominium } from '../entities/StoreCondominium';
+import { StoreCondominiumRequest } from '../entities/StoreCondominiumRequest';
 
 /**
  * Provides CondominiumRepository functionality.
@@ -29,6 +31,7 @@ export class CondominiumRepository {
   private storeCondominiumRepository: Repository<StoreCondominium>;
   private condominiumEventRepository: Repository<CondominiumEvent>;
   private condominiumEventStoreRepository: Repository<CondominiumEventStore>;
+  private storeCondominiumRequestRepository: Repository<StoreCondominiumRequest>;
 
   /**
    * Creates a new instance.
@@ -41,6 +44,7 @@ export class CondominiumRepository {
     this.storeCondominiumRepository = AppDataSource.getRepository(StoreCondominium);
     this.condominiumEventRepository = AppDataSource.getRepository(CondominiumEvent);
     this.condominiumEventStoreRepository = AppDataSource.getRepository(CondominiumEventStore);
+    this.storeCondominiumRequestRepository = AppDataSource.getRepository(StoreCondominiumRequest);
   }
 
   /**
@@ -56,6 +60,12 @@ export class CondominiumRepository {
     });
   }
 
+  listAllForAdmin() {
+    return this.condominiumRepository.find({
+      order: { name: 'ASC' },
+    });
+  }
+
   /**
    * Finds an active condominium by slug.
    *
@@ -66,6 +76,14 @@ export class CondominiumRepository {
     return this.condominiumRepository.findOne({
       where: { slug, active: true },
     });
+  }
+
+  findById(id: string) {
+    return this.condominiumRepository.findOne({ where: { id } });
+  }
+
+  saveCondominium(payload: Partial<Condominium>) {
+    return this.condominiumRepository.save(this.condominiumRepository.create(payload));
   }
 
   /**
@@ -100,6 +118,16 @@ export class CondominiumRepository {
       .getMany();
   }
 
+  listEventsByCondominiumId(condominiumId: string, from?: Date) {
+    const qb = this.condominiumEventRepository
+      .createQueryBuilder('event')
+      .where('event.condominium_id = :condominiumId', { condominiumId })
+      .andWhere('event.active = true')
+      .orderBy('event.starts_at', 'ASC');
+    if (from) qb.andWhere('event.ends_at >= :from', { from });
+    return qb.getMany();
+  }
+
   async getEventSummaryByCondominiumIds(condominiumIds: string[], from = new Date()) {
     if (!condominiumIds.length) return new Map<string, CondominiumEvent>();
 
@@ -131,5 +159,88 @@ export class CondominiumRepository {
       .andWhere('eventLink.active = true')
       .orderBy('store.name', 'ASC')
       .getMany();
+  }
+
+  saveEvent(payload: Partial<CondominiumEvent>) {
+    return this.condominiumEventRepository.save(this.condominiumEventRepository.create(payload));
+  }
+
+  async upsertStoreCondominium(condominiumId: string, storeId: string, active = true) {
+    await AppDataSource.query(
+      `
+        INSERT INTO store_condominiums (store_id, condominium_id, active, updated_at)
+        VALUES ($1, $2, $3, NOW())
+        ON CONFLICT (store_id, condominium_id) DO UPDATE SET
+          active = EXCLUDED.active,
+          updated_at = NOW();
+      `,
+      [storeId, condominiumId, active]
+    );
+  }
+
+  async upsertEventStore(eventId: string, storeId: string) {
+    await AppDataSource.query(
+      `
+        INSERT INTO condominium_event_stores (
+          event_id,
+          store_id,
+          active,
+          allow_pickup_at_stall,
+          allow_apartment_delivery,
+          updated_at
+        )
+        VALUES ($1, $2, TRUE, TRUE, FALSE, NOW())
+        ON CONFLICT (event_id, store_id) DO UPDATE SET
+          active = TRUE,
+          allow_pickup_at_stall = TRUE,
+          updated_at = NOW();
+      `,
+      [eventId, storeId]
+    );
+  }
+
+  listAllStoresForAdmin() {
+    return AppDataSource.getRepository(Store)
+      .createQueryBuilder('store')
+      .leftJoinAndSelect('store.settings', 'settings')
+      .orderBy('store.name', 'ASC')
+      .getMany();
+  }
+
+  listRequests(status?: string, storeId?: string) {
+    const qb = this.storeCondominiumRequestRepository
+      .createQueryBuilder('request')
+      .innerJoinAndSelect('request.store', 'store')
+      .leftJoinAndSelect('store.settings', 'settings')
+      .innerJoinAndSelect('request.condominium', 'condominium')
+      .orderBy('request.created_at', 'DESC');
+    if (status) qb.andWhere('request.status = :status', { status });
+    if (storeId) qb.andWhere('request.store_id = :storeId', { storeId });
+    return qb.getMany();
+  }
+
+  findRequestById(id: string) {
+    return this.storeCondominiumRequestRepository.findOne({
+      where: { id },
+      relations: [ 'store', 'condominium' ],
+    });
+  }
+
+  findRequestByStoreAndCondominium(storeId: string, condominiumId: string) {
+    return this.storeCondominiumRequestRepository.findOne({
+      where: { storeId, condominiumId },
+    });
+  }
+
+  saveRequest(payload: Partial<StoreCondominiumRequest>) {
+    return this.storeCondominiumRequestRepository.save(this.storeCondominiumRequestRepository.create(payload));
+  }
+
+  listStoreLinksByStoreId(storeId: string) {
+    return this.storeCondominiumRepository.find({
+      where: { storeId },
+      relations: [ 'condominium' ],
+      order: { createdAt: 'DESC' },
+    });
   }
 }

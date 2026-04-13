@@ -1183,7 +1183,14 @@ export function SuperAdmin() {
             <p className="text-sm text-slate-500">Visão executiva da plataforma</p>
           </div>
         </div>
-        <div className="relative" ref={profileMenuRef}>
+        <div className="relative flex items-center gap-2" ref={profileMenuRef}>
+          <button
+            type="button"
+            onClick={() => { window.location.href = '/superadmin/condominiums'; }}
+            className="hidden rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-2 text-sm font-black text-emerald-800 shadow-sm transition hover:bg-emerald-100 sm:inline-flex"
+          >
+            Condomínios
+          </button>
           <button
             type="button"
             onClick={() => setProfileMenuOpen((prev) => !prev)}

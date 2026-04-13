@@ -50,6 +50,7 @@ import { Condominium } from '../entities/Condominium';
 import { StoreCondominium } from '../entities/StoreCondominium';
 import { CondominiumEvent } from '../entities/CondominiumEvent';
 import { CondominiumEventStore } from '../entities/CondominiumEventStore';
+import { StoreCondominiumRequest } from '../entities/StoreCondominiumRequest';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -59,7 +60,7 @@ export const AppDataSource = new DataSource({
   password: env.database.password,
   database: env.database.database,
   synchronize: false,
-  entities: [ User, Store, StoreSettings, Product, Order, OrderShipment, OrderReview, OrderItem, OrderEtaEstimate, Motoboy, MotoboyStore, OrderDelivery, DeliveryEvent, MotoboyDocument, MotoboyStoreRequest, MotoboyAuditLog, DeliveryBillingCycle, DeliveryBillingCharge, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog, StoreLinkHit, StoreUser, InventoryMovement, CustomerAddress, FeaturedProductRequest, Condominium, StoreCondominium, CondominiumEvent, CondominiumEventStore ],
+  entities: [ User, Store, StoreSettings, Product, Order, OrderShipment, OrderReview, OrderItem, OrderEtaEstimate, Motoboy, MotoboyStore, OrderDelivery, DeliveryEvent, MotoboyDocument, MotoboyStoreRequest, MotoboyAuditLog, DeliveryBillingCycle, DeliveryBillingCharge, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog, StoreLinkHit, StoreUser, InventoryMovement, CustomerAddress, FeaturedProductRequest, Condominium, StoreCondominium, CondominiumEvent, CondominiumEventStore, StoreCondominiumRequest ],
   migrations: [],
   logging: [ 'error' ]
   //logging: [ 'error', 'query' ]

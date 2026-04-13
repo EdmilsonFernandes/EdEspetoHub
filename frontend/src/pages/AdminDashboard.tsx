@@ -6,6 +6,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { BrandingSettings } from '../components/Admin/BrandingSettings';
+import { StoreCondominiumPanel } from '../components/Admin/StoreCondominiumPanel';
 import DashboardView from '../components/Admin/DashboardView';
 import { GrillQueue } from '../components/Admin/GrillQueue';
 import { OpeningHoursCard } from '../components/Admin/OpeningHoursCard';
@@ -1613,6 +1614,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     branding: true,
     orderTypes: false,
     hours: false,
+    condominiums: false,
   });
 
   const updateAuthStore = (updates) => {
@@ -2744,6 +2746,31 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   </button>
                 </div>
               </div>
+
+              <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-[0_12px_28px_-24px_rgba(15,23,42,0.4)]">
+                <button
+                  type="button"
+                  onClick={() => setConfigPanels((prev) => ({ ...prev, condominiums: !prev.condominiums }))}
+                  className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-slate-50 transition"
+                >
+                  <div>
+                    <p className="text-sm font-bold text-slate-800">Condomínios e feiras</p>
+                    <p className="text-xs text-slate-500">Solicite participação em feiras de condomínios próximos.</p>
+                  </div>
+                  <span
+                    className={`inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-transform ${
+                      configPanels.condominiums ? 'rotate-180' : ''
+                    }`}
+                  >
+                    <CaretRight size={14} weight="bold" />
+                  </span>
+                </button>
+                {configPanels.condominiums && (
+                  <div className="border-t border-slate-100 p-4">
+                    <StoreCondominiumPanel storeId={storeId} />
+                  </div>
+                )}
+              </section>
 
               <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-[0_12px_28px_-24px_rgba(15,23,42,0.4)]">
                 <button
