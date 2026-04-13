@@ -50,6 +50,16 @@ export interface CreateOrderDto {
     originZip?: string;
     destinationZip?: string;
   };
+  condominiumOrder?: {
+    condominiumId?: string;
+    condominiumSlug?: string;
+    eventId?: string;
+    fulfillmentMode?: 'pickup_at_stall' | 'apartment_delivery' | string;
+    block?: string;
+    tower?: string;
+    apartment?: string;
+    reference?: string;
+  };
   items: CreateOrderItemInput[];
   storeId: string;
 }

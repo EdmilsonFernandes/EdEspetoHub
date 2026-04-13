@@ -1377,8 +1377,11 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
       ? Number(deliveryFee)
       : 0;
 
-    const normalizedFulfillmentMode =
-      input.type === 'delivery' && String((input as any).fulfillmentMode || '').toLowerCase() === 'postal'
+    const condominiumContext = await this.resolveCondominiumOrderContext(input, store!.id);
+    const condominiumFulfillmentMode = String(condominiumContext?.fulfillmentMode || '').toLowerCase();
+    const normalizedFulfillmentMode = condominiumContext
+      ? (condominiumFulfillmentMode === 'apartment_delivery' ? 'condominium_apartment' : 'condominium_pickup')
+      : input.type === 'delivery' && String((input as any).fulfillmentMode || '').toLowerCase() === 'postal'
         ? 'postal'
         : 'distance';
 
@@ -1392,6 +1395,12 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
       table: input.table,
       type: input.type,
       fulfillmentMode: normalizedFulfillmentMode,
+      condominiumId: condominiumContext?.condominiumId || null,
+      condominiumEventId: condominiumContext?.eventId || null,
+      condominiumName: condominiumContext?.condominiumName || null,
+      condominiumEventTitle: condominiumContext?.eventTitle || null,
+      condominiumFulfillmentMode: condominiumContext?.fulfillmentMode || null,
+      condominiumUnit: condominiumContext?.unit || null,
       paymentMethod: input.paymentMethod,
       paymentStatus,
       cashTendered,
@@ -1400,5 +1409,95 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
       total: total + deliveryFeeValue,
       store: store!,
     } as Order);
+  }
+
+  private async resolveCondominiumOrderContext(input: Omit<CreateOrderDto, 'storeId'>, storeId: string) {
+    const payload = (input as any)?.condominiumOrder;
+    if (!payload) return null;
+
+    const condominiumSlug = String(payload?.condominiumSlug || '').trim();
+    const condominiumId = String(payload?.condominiumId || '').trim();
+    const eventId = String(payload?.eventId || '').trim();
+    if (!condominiumSlug && !condominiumId) {
+      throw new AppError('CONDO-006', 400, { message: 'Condominio obrigatorio para pedido de feira.' });
+    }
+
+    const requestedMode = String(payload?.fulfillmentMode || 'pickup_at_stall').trim().toLowerCase();
+    const fulfillmentMode = requestedMode === 'apartment_delivery' ? 'apartment_delivery' : 'pickup_at_stall';
+    const rows: Array<any> = await AppDataSource.query(
+      `
+        SELECT
+          c.id AS condominium_id,
+          c.name AS condominium_name,
+          c.slug AS condominium_slug,
+          ce.id AS event_id,
+          ce.title AS event_title,
+          ce.starts_at,
+          ce.ends_at,
+          ce.pickup_location,
+          COALESCE(ces.allow_pickup_at_stall, sc.allow_pickup_at_stall, TRUE) AS allow_pickup_at_stall,
+          COALESCE(ces.allow_apartment_delivery, sc.allow_apartment_delivery, FALSE) AS allow_apartment_delivery,
+          COALESCE(ces.apartment_delivery_fee, sc.apartment_delivery_fee, 0) AS apartment_delivery_fee
+        FROM condominiums c
+        JOIN condominium_events ce
+          ON ce.condominium_id = c.id
+         AND ce.active = TRUE
+         AND ce.starts_at <= NOW()
+         AND ce.ends_at >= NOW()
+         AND COALESCE(ce.status, 'scheduled') <> 'cancelled'
+        JOIN condominium_event_stores ces
+          ON ces.event_id = ce.id
+         AND ces.store_id = $1
+         AND ces.active = TRUE
+        LEFT JOIN store_condominiums sc
+          ON sc.condominium_id = c.id
+         AND sc.store_id = $1
+        WHERE c.active = TRUE
+          AND ($2::text = '' OR c.slug = $2)
+          AND ($3::uuid IS NULL OR c.id = $3::uuid)
+          AND ($4::uuid IS NULL OR ce.id = $4::uuid)
+        ORDER BY ce.starts_at ASC
+        LIMIT 1
+      `,
+      [storeId, condominiumSlug, condominiumId || null, eventId || null]
+    );
+    const row = rows[0];
+    if (!row) {
+      throw new AppError('CONDO-007', 400, { message: 'Esta loja nao esta confirmada em uma feira ativa deste condominio.' });
+    }
+
+    if (fulfillmentMode === 'pickup_at_stall' && row.allow_pickup_at_stall === false) {
+      throw new AppError('CONDO-008', 400, { message: 'Retirada na barraca nao esta disponivel para esta feira.' });
+    }
+    if (fulfillmentMode === 'apartment_delivery' && row.allow_apartment_delivery === false) {
+      throw new AppError('CONDO-009', 400, { message: 'Entrega no apartamento nao esta disponivel para esta feira.' });
+    }
+
+    const unit = {
+      block: String(payload?.block || '').trim() || null,
+      tower: String(payload?.tower || '').trim() || null,
+      apartment: String(payload?.apartment || '').trim() || null,
+      reference: String(payload?.reference || '').trim() || null,
+      pickupLocation: String(row.pickup_location || '').trim() || null,
+      startsAt: row.starts_at || null,
+      endsAt: row.ends_at || null,
+      apartmentDeliveryFee:
+        row.apartment_delivery_fee !== null && row.apartment_delivery_fee !== undefined
+          ? Number(row.apartment_delivery_fee)
+          : null,
+    };
+    if (fulfillmentMode === 'apartment_delivery' && !unit.apartment) {
+      throw new AppError('CONDO-010', 400, { message: 'Informe o apartamento para entrega no condominio.' });
+    }
+
+    return {
+      condominiumId: row.condominium_id,
+      condominiumName: row.condominium_name,
+      condominiumSlug: row.condominium_slug,
+      eventId: row.event_id,
+      eventTitle: row.event_title,
+      fulfillmentMode,
+      unit,
+    };
   }
 }

@@ -66,6 +66,24 @@ export class Order {
   @Column({ name: 'fulfillment_mode', default: 'distance' })
   fulfillmentMode!: string;
 
+  @Column({ name: 'condominium_id', type: 'uuid', nullable: true })
+  condominiumId?: string | null;
+
+  @Column({ name: 'condominium_event_id', type: 'uuid', nullable: true })
+  condominiumEventId?: string | null;
+
+  @Column({ name: 'condominium_name', type: 'text', nullable: true })
+  condominiumName?: string | null;
+
+  @Column({ name: 'condominium_event_title', type: 'text', nullable: true })
+  condominiumEventTitle?: string | null;
+
+  @Column({ name: 'condominium_fulfillment_mode', type: 'text', nullable: true })
+  condominiumFulfillmentMode?: string | null;
+
+  @Column({ name: 'condominium_unit', type: 'jsonb', nullable: true })
+  condominiumUnit?: Record<string, any> | null;
+
   @Column({ default: 'pending' })
   status!: string;
 

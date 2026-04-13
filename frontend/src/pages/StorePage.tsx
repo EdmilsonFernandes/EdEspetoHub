@@ -9,6 +9,7 @@ import { customerService } from '../services/customerService';
 import { customerAccountService } from '../services/customerAccountService';
 import { storeService } from '../services/storeService';
 import { mapsService } from '../services/mapsService';
+import { condominiumService } from '../services/condominiumService';
 import { MenuView } from '../components/Client/MenuView';
 import { CartView } from '../components/Client/CartView';
 import { SuccessView } from '../components/Client/SuccessView';
@@ -172,6 +173,8 @@ export function StorePage() {
   const [deliveryCoords, setDeliveryCoords] = useState(null);
   const [manualDeliveryCoords, setManualDeliveryCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [deliveryCheck, setDeliveryCheck] = useState({ status: 'idle', distanceKm: null, durationMin: null });
+  const [condominiumCheckoutContext, setCondominiumCheckoutContext] = useState<any | null>(null);
+  const [condominiumCheckoutLoading, setCondominiumCheckoutLoading] = useState(false);
   const customersStorageKey = useMemo(
     () => `customers:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
@@ -185,6 +188,10 @@ export function StorePage() {
     [storeSlug]
   );
   const guestPushIdStorageKey = 'jnk_mobile_push_guest_id';
+  const condominiumSlugFromQuery = useMemo(() => {
+    if (typeof window === 'undefined') return '';
+    return String(new URLSearchParams(window.location.search).get('condominio') || '').trim();
+  }, [storeSlug]);
   const resolvedWhatsApp = useMemo(() => {
     const raw = storePhone || WHATSAPP_NUMBER;
     const digits = (raw || '').toString().replace(/\D/g, '');
@@ -332,6 +339,19 @@ export function StorePage() {
     if (!value || value <= 0) return 0;
     return value;
   }, [customer.type, deliveryFee, isPostalDelivery, selectedPostalService]);
+  const isCondominiumCheckout = Boolean(condominiumCheckoutContext?.condominium?.slug && condominiumCheckoutContext?.event?.canOrderInCondominium);
+  const condominiumFulfillmentMode = String(customer?.condominiumFulfillmentMode || 'pickup_at_stall');
+  const condominiumApartmentFee = useMemo(() => {
+    const value = Number(
+      condominiumCheckoutContext?.link?.apartmentDeliveryFee ??
+      condominiumCheckoutContext?.store?.condominiumLink?.apartmentDeliveryFee ??
+      0
+    );
+    return Number.isFinite(value) && value > 0 ? value : 0;
+  }, [condominiumCheckoutContext]);
+  const condominiumFeeValue = isCondominiumCheckout && condominiumFulfillmentMode === 'apartment_delivery'
+    ? condominiumApartmentFee
+    : 0;
   const deliveryAddress = useMemo(() => {
     if (customer.type !== 'delivery') return customer.address || '';
     const street = String(customer.street || '').trim();
@@ -347,8 +367,8 @@ export function StorePage() {
     return parts.join(' | ') || customer.address || '';
   }, [customer, customer.type]);
   const orderTotal = useMemo(
-    () => cartItemsTotal + deliveryFeeValue,
-    [cartItemsTotal, deliveryFeeValue]
+    () => cartItemsTotal + deliveryFeeValue + condominiumFeeValue,
+    [cartItemsTotal, deliveryFeeValue, condominiumFeeValue]
   );
 
   useEffect(() => {

@@ -74,6 +74,25 @@ const resolveLocationIdentifier = (order: any) => {
     return explicitIdentifier.toUpperCase();
   }
   const type = String(order?.type || "").toLowerCase();
+  const fulfillmentMode = String(order?.fulfillmentMode || "").toLowerCase();
+
+  // Lógica para condomínios
+  if (order?.condominiumId) {
+    let condoDetails = `COND. ${order.condominiumName || ''}`;
+    if (fulfillmentMode === 'apartment_delivery' && order.condominiumUnit) {
+      const { block, tower, apartment, reference } = order.condominiumUnit;
+      let unitDetails = [];
+      if (block) unitDetails.push(`Bl. ${block}`);
+      if (tower) unitDetails.push(`Tr. ${tower}`);
+      if (apartment) unitDetails.push(`Apto ${apartment}`);
+      if (reference) unitDetails.push(`Ref. ${reference}`);
+      if (unitDetails.length) {
+        condoDetails += ` (${unitDetails.join(', ')})`;
+      }
+    }
+    return condoDetails.toUpperCase();
+  }
+
   if (type === "pickup") return "RETIRADA";
   if (type === "table") {
     const formattedTable = formatTableIdentifier(order?.table);
@@ -983,7 +1002,23 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
   const orderTypeMeta = (order: any) => {
     const type = String(order?.type || '').toLowerCase();
+    const fulfillmentMode = String(order?.fulfillmentMode || '').toLowerCase();
+
     if (type === 'delivery') {
+      if (fulfillmentMode === 'apartment_delivery') {
+        return {
+          label: 'Entrega Condomínio',
+          pill: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+          icon: <House size={14} weight="duotone" />,
+        };
+      }
+      if (fulfillmentMode === 'pickup_at_stall') {
+        return {
+          label: 'Retirada Condomínio',
+          pill: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+          icon: <Storefront size={14} weight="duotone" />,
+        };
+      }
       return {
         label: 'Entrega',
         pill: 'bg-sky-100 text-sky-800 border-sky-200',

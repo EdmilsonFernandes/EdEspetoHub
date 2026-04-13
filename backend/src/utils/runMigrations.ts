@@ -1344,6 +1344,38 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS guest_push_id TEXT;
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS orders
+    ADD COLUMN IF NOT EXISTS condominium_id UUID;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS orders
+    ADD COLUMN IF NOT EXISTS condominium_event_id UUID;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS orders
+    ADD COLUMN IF NOT EXISTS condominium_name TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS orders
+    ADD COLUMN IF NOT EXISTS condominium_event_title TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS orders
+    ADD COLUMN IF NOT EXISTS condominium_fulfillment_mode TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS orders
+    ADD COLUMN IF NOT EXISTS condominium_unit JSONB;
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_orders_condominium_id
+    ON orders(condominium_id);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_orders_condominium_event_id
+    ON orders(condominium_event_id);
+  `);
+  await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS condominiums (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       name TEXT NOT NULL,

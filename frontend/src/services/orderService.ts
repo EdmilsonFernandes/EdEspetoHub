@@ -27,6 +27,24 @@ const normalizeOrder = (order: any) => ({
   deliveryFee: order.deliveryFee ?? order.delivery_fee ?? null,
   paymentStatus: order.paymentStatus ?? order.payment_status ?? 'PENDING',
   fulfillmentMode: order.fulfillmentMode ?? order.fulfillment_mode ?? 'distance',
+  condominiumOrder: order.condominiumOrder ?? order.condominium_order ?? (
+    order.condominiumId || order.condominium_id || order.condominiumName || order.condominium_name
+      ? {
+          condominiumId: order.condominiumId ?? order.condominium_id ?? null,
+          eventId: order.condominiumEventId ?? order.condominium_event_id ?? null,
+          condominiumName: order.condominiumName ?? order.condominium_name ?? null,
+          eventTitle: order.condominiumEventTitle ?? order.condominium_event_title ?? null,
+          fulfillmentMode: order.condominiumFulfillmentMode ?? order.condominium_fulfillment_mode ?? null,
+          unit: order.condominiumUnit ?? order.condominium_unit ?? null,
+        }
+      : null
+  ),
+  condominiumId: order.condominiumId ?? order.condominium_id ?? null,
+  condominiumEventId: order.condominiumEventId ?? order.condominium_event_id ?? null,
+  condominiumName: order.condominiumName ?? order.condominium_name ?? null,
+  condominiumEventTitle: order.condominiumEventTitle ?? order.condominium_event_title ?? null,
+  condominiumFulfillmentMode: order.condominiumFulfillmentMode ?? order.condominium_fulfillment_mode ?? null,
+  condominiumUnit: order.condominiumUnit ?? order.condominium_unit ?? null,
   shipment: order.shipment
     ? {
         provider: order.shipment.provider ?? null,

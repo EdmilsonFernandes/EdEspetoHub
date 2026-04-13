@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { apiClient } from '../config/apiClient';
 
 const toJson = async (response: any) => {
