@@ -1966,23 +1966,14 @@ export function MarketplacePage() {
           {/* Banner de Destaques Premium - Esconde na busca para focar no resultado */}
           {debouncedQuery.length < 2 && (
             <section
-              className="mb-7 overflow-hidden rounded-[2rem] border border-amber-100/70 bg-[linear-gradient(135deg,rgba(255,251,235,0.95)_0%,rgba(255,255,255,0.98)_45%,rgba(239,246,255,0.98)_100%)] px-3 py-3 shadow-[0_18px_42px_-34px_rgba(180,83,9,0.28)]"
+              className="mb-7 overflow-hidden rounded-[2rem] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.98)_52%,rgba(239,246,255,0.96)_100%)] px-3 py-3 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.16)]"
               style={{ transition: 'all .45s ease', transitionDelay: '200ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
             >
-              <div className="flex items-start justify-between gap-3 px-1">
-                <div>
-                  <div className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-white/80 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-amber-700">
-                    <Sparkle size={10} weight="fill" />
-                    Curadoria do hub
-                  </div>
-                  <h2 className="mt-2 text-[15px] font-black tracking-tight text-slate-950">{genericHighlightLabel}</h2>
-                  <p className="mt-1 text-[11px] font-semibold text-slate-500">
-                    Produtos em evidência. Abaixo ficam as lojas para você escolher de quem pedir.
-                  </p>
-                </div>
+              <div className="flex items-center justify-between gap-3 px-1">
+                <h2 className="text-[15px] font-black tracking-tight text-slate-950">{genericHighlightLabel}</h2>
                 <div className="flex gap-1 pt-2">
-                  <div className="h-1 w-4 rounded-full bg-amber-500" />
-                  <div className="h-1 w-1 rounded-full bg-amber-200" />
+                  <div className="h-1 w-4 rounded-full bg-[#336886]" />
+                  <div className="h-1 w-1 rounded-full bg-sky-200" />
                   <div className="h-1 w-1 rounded-full bg-slate-300" />
                 </div>
               </div>
@@ -1997,7 +1988,7 @@ export function MarketplacePage() {
                     <Link
                       key={`${item.storeSlug}-${item.id}`}
                       to={`/${item.storeSlug}`}
-                      className="group min-w-[200px] snap-start overflow-hidden rounded-[1.55rem] border border-white/90 bg-white shadow-[0_10px_28px_rgba(15,23,42,0.075)] ring-1 ring-amber-100/60 transition-all duration-200 ease-out hover:scale-[1.015] hover:shadow-[0_16px_34px_rgba(15,23,42,0.11)] active:scale-[0.97]"
+                      className="group min-w-[200px] snap-start overflow-hidden rounded-[1.55rem] border border-white/90 bg-white shadow-[0_10px_28px_rgba(15,23,42,0.075)] ring-1 ring-slate-100/70 transition-all duration-200 ease-out hover:scale-[1.015] hover:shadow-[0_16px_34px_rgba(15,23,42,0.11)] active:scale-[0.97]"
                     >
                       <div className="relative h-[108px] overflow-hidden bg-slate-100">
                         <img
@@ -2008,7 +1999,7 @@ export function MarketplacePage() {
                           decoding="async"
                           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
-                        <div className="absolute left-3 top-3 flex items-center gap-1.5">
+                        <div className="absolute left-3 top-3">
                           {item.sponsored ? (
                             <span className="flex items-center gap-1.5 rounded-full border border-white/70 bg-amber-300/95 px-2.5 py-1 text-[8px] font-black uppercase tracking-wider text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md">
                               <Star size={10} weight="fill" /> Promo
@@ -2016,12 +2007,9 @@ export function MarketplacePage() {
                           ) : (
                             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/94 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md ring-1 ring-black/5">
                               <Sparkle size={9} weight="fill" className="text-[#336886]" />
-                              Sugestão
+                              Destaque
                             </span>
                           )}
-                          <span className="inline-flex items-center rounded-full border border-white/70 bg-slate-950/78 px-2 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-white backdrop-blur-md">
-                            Item
-                          </span>
                         </div>
                       </div>
 
@@ -2043,10 +2031,7 @@ export function MarketplacePage() {
                               className="h-5 w-5 rounded-full border border-white/70 object-cover shadow-sm" 
                               onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(item.storeSlug, item.storeName); }}
                             />
-                            <div className="min-w-0">
-                              <p className="truncate text-[9px] font-black uppercase tracking-[0.12em] text-slate-400">Loja</p>
-                              <span className="block max-w-[112px] truncate text-[10px] font-bold text-slate-700">{item.storeName}</span>
-                            </div>
+                            <span className="block max-w-[112px] truncate text-[10px] font-bold text-slate-700">{item.storeName}</span>
                           </div>
                           <CaretRight size={14} weight="bold" className="shrink-0 text-slate-300 transition-transform duration-200 group-hover:translate-x-0.5" />
                         </div>
@@ -2525,23 +2510,21 @@ export function MarketplacePage() {
                           />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-start justify-between gap-2">
-                            <p className="line-clamp-2 text-[13px] font-black leading-tight text-slate-950">{name}</p>
-                            <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-black shadow-sm ${
-                              active
-                                ? 'border-emerald-200 bg-emerald-100 text-emerald-700'
-                                : eventState === 'live'
-                                  ? 'border-emerald-200 bg-emerald-100 text-emerald-700'
-                                  : eventState === 'upcoming'
-                                    ? 'border-sky-200 bg-sky-50 text-[#336886]'
-                                    : 'border-slate-200 bg-white text-slate-500'
-                            }`}>
-                              {active ? 'Selecionado' : eventBadge}
-                            </span>
-                          </div>
+                          <p className="line-clamp-2 text-[13px] font-black leading-tight text-slate-950">{name}</p>
                           <p className="mt-1 line-clamp-2 text-[11px] font-semibold leading-4 text-slate-500">
                             {region || 'Local com agenda própria'}
                           </p>
+                          <span className={`mt-2 inline-flex rounded-full border px-2 py-0.5 text-[9px] font-black shadow-sm ${
+                            active
+                              ? 'border-emerald-200 bg-emerald-100 text-emerald-700'
+                              : eventState === 'live'
+                                ? 'border-emerald-200 bg-emerald-100 text-emerald-700'
+                                : eventState === 'upcoming'
+                                  ? 'border-sky-200 bg-sky-50 text-[#336886]'
+                                  : 'border-slate-200 bg-white text-slate-500'
+                          }`}>
+                            {active ? 'Selecionado' : eventBadge}
+                          </span>
                         </div>
                       </div>
                       <div className={`mt-3 flex min-h-[44px] items-start gap-2 rounded-[1rem] px-2.5 py-2 ${
