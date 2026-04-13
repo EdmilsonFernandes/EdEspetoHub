@@ -19,6 +19,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { CondominiumEvent } from './CondominiumEvent';
 import { StoreCondominium } from './StoreCondominium';
 
 @Entity({ name: 'condominiums' })
@@ -70,6 +71,9 @@ export class Condominium {
 
   @OneToMany(() => StoreCondominium, (link) => link.condominium)
   storeLinks!: StoreCondominium[];
+
+  @OneToMany(() => CondominiumEvent, (event) => event.condominium)
+  events!: CondominiumEvent[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;

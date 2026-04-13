@@ -82,6 +82,19 @@ type HubCondominium = {
   logoUrl?: string | null;
   bannerUrl?: string | null;
   active?: boolean;
+  eventSummary?: CondominiumEventSummary | null;
+};
+
+type CondominiumEventSummary = {
+  id?: string;
+  title?: string;
+  status?: string;
+  state?: 'live' | 'upcoming' | 'finished' | 'none' | string;
+  startsAt?: string;
+  endsAt?: string;
+  pickupLocation?: string | null;
+  notes?: string | null;
+  canOrderInCondominium?: boolean;
 };
 
 const normalizeSegment = (segment?: string | null) =>
@@ -143,6 +156,32 @@ const normalizeSearchText = (value?: string | null) =>
     .replace(/[\u0300-\u036f]/g, '')
     .trim()
     .toLowerCase();
+
+const formatCondominiumEventTime = (event?: CondominiumEventSummary | null) => {
+  if (!event?.startsAt) return '';
+  const startsAt = new Date(event.startsAt);
+  const endsAt = event.endsAt ? new Date(event.endsAt) : null;
+  if (Number.isNaN(startsAt.getTime())) return '';
+  const date = new Intl.DateTimeFormat('pt-BR', {
+    weekday: 'short',
+    day: '2-digit',
+    month: '2-digit',
+    timeZone: 'America/Sao_Paulo',
+  }).format(startsAt).replace('.', '');
+  const start = new Intl.DateTimeFormat('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'America/Sao_Paulo',
+  }).format(startsAt);
+  const end = endsAt && !Number.isNaN(endsAt.getTime())
+    ? new Intl.DateTimeFormat('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'America/Sao_Paulo',
+      }).format(endsAt)
+    : '';
+  return end ? `${date}, ${start}-${end}` : `${date}, ${start}`;
+};
 
 const categoryVisuals: Record<string, { icon: typeof Storefront; label: string }> = {
   Restaurante: { icon: ForkKnife, label: 'Restaurante' },
@@ -265,6 +304,7 @@ export function MarketplacePage() {
   const [condominiums, setCondominiums] = useState<HubCondominium[]>([]);
   const [selectedCondominiumSlug, setSelectedCondominiumSlug] = useState(() => readSelectedCondominiumSlug());
   const [condominiumStoreSlugs, setCondominiumStoreSlugs] = useState<string[]>([]);
+  const [selectedCondominiumEvent, setSelectedCondominiumEvent] = useState<CondominiumEventSummary | null>(null);
   const [condominiumStoresLoading, setCondominiumStoresLoading] = useState(false);
   const [condominiumPickerOpen, setCondominiumPickerOpen] = useState(false);
   const [condominiumSearch, setCondominiumSearch] = useState('');
@@ -564,6 +604,7 @@ export function MarketplacePage() {
 
     if (!slug) {
       setCondominiumStoreSlugs([]);
+      setSelectedCondominiumEvent(null);
       setCondominiumStoresLoading(false);
       return;
     }
@@ -575,6 +616,7 @@ export function MarketplacePage() {
       .then((data) => {
         if (!active) return;
         const storesFromCondo = Array.isArray(data?.stores) ? data.stores : [];
+        setSelectedCondominiumEvent(data?.event || data?.condominium?.eventSummary || null);
         setCondominiumStoreSlugs(
           storesFromCondo
             .map((store: any) => String(store?.slug || '').trim())
@@ -584,6 +626,7 @@ export function MarketplacePage() {
       .catch(() => {
         if (!active) return;
         setCondominiumStoreSlugs([]);
+        setSelectedCondominiumEvent(null);
       })
       .finally(() => {
         if (!active) return;
@@ -937,6 +980,11 @@ export function MarketplacePage() {
     return condominiums.find((item) => String(item?.slug || '').trim() === slug) || null;
   }, [condominiums, selectedCondominiumSlug]);
 
+  const activeCondominiumEvent = selectedCondominiumEvent || selectedCondominium?.eventSummary || null;
+  const isCondominiumEventLive = activeCondominiumEvent?.state === 'live';
+  const hasUpcomingCondominiumEvent = activeCondominiumEvent?.state === 'upcoming';
+  const condominiumEventTimeLabel = formatCondominiumEventTime(activeCondominiumEvent);
+
   const filteredCondominiums = useMemo(() => {
     const search = normalizeSearchText(condominiumSearch);
     const items = condominiums
@@ -945,7 +993,7 @@ export function MarketplacePage() {
         const name = String(condominium?.name || 'Condomínio').trim();
         const region = [condominium.city, condominium.state].map((item) => String(item || '').trim()).filter(Boolean).join(' - ');
         const index = normalizeSearchText([name, slug, region, condominium.address, condominium.description].filter(Boolean).join(' '));
-        return { condominium, slug, name, region, index };
+        return { condominium, slug, name, region, index, event: condominium.eventSummary || null };
       })
       .filter((item) => item.slug);
 
@@ -1728,13 +1776,17 @@ export function MarketplacePage() {
                     </span>
                     <span className="min-w-0">
                       <span className="block text-[9px] font-black uppercase tracking-[0.16em] text-emerald-200/85">
-                        Feira no condomínio
+                        {isCondominiumEventLive ? 'Feira acontecendo' : hasUpcomingCondominiumEvent ? 'Próxima feira' : 'Feira no condomínio'}
                       </span>
                       <span className="mt-0.5 block truncate text-sm font-black leading-tight text-white">
                         {String(selectedCondominium.name || 'Condomínio')}
                       </span>
                       <span className="mt-0.5 block truncate text-[10px] font-semibold text-white/60">
-                        {condominiumStoresLoading ? 'Carregando lojas...' : `${filteredStores.length} loja${filteredStores.length === 1 ? '' : 's'} atendendo agora`}
+                        {condominiumStoresLoading
+                          ? 'Carregando lojas...'
+                          : isCondominiumEventLive
+                            ? `${filteredStores.length} loja${filteredStores.length === 1 ? '' : 's'} atendendo agora`
+                            : condominiumEventTimeLabel || `${filteredStores.length} loja${filteredStores.length === 1 ? '' : 's'} vinculada${filteredStores.length === 1 ? '' : 's'}`}
                       </span>
                     </span>
                   </button>
@@ -1995,7 +2047,9 @@ export function MarketplacePage() {
             {!loading && !error && filteredStores.length > 0 && (
               <div className={selectedCondominium ? 'grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4' : 'grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3'}>
                 {filteredStores.map((store) => {
-                  const storePath = selectedCondominiumSlug ? `/${store.slug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}` : `/${store.slug}`;
+                  const storePath = selectedCondominiumSlug && isCondominiumEventLive
+                    ? `/${store.slug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}`
+                    : `/${store.slug}`;
 
                   if (selectedCondominium) {
                     return (
@@ -2019,10 +2073,10 @@ export function MarketplacePage() {
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/42 via-transparent to-transparent" />
                           <span className={`absolute left-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-1 text-[9px] font-black uppercase tracking-[0.1em] shadow-sm ${
-                            store.isOpen ? 'bg-white text-emerald-700' : 'bg-white/90 text-slate-500'
+                            isCondominiumEventLive ? 'bg-white text-emerald-700' : 'bg-white/92 text-[#336886]'
                           }`}>
-                            <span className={`h-1.5 w-1.5 rounded-full ${store.isOpen ? 'bg-emerald-500' : 'bg-slate-400'}`} />
-                            {store.isOpen ? 'Aberta' : 'Fechada'}
+                            <span className={`h-1.5 w-1.5 rounded-full ${isCondominiumEventLive ? 'bg-emerald-500' : 'bg-[#336886]'}`} />
+                            {isCondominiumEventLive ? 'Atendendo' : hasUpcomingCondominiumEvent ? 'Confirmada' : 'Prévia'}
                           </span>
                           <button
                             type="button"
@@ -2064,7 +2118,11 @@ export function MarketplacePage() {
                             {store.rating > 0 ? <span className="text-slate-300">•</span> : null}
                             <span>{store.etaMin}-{store.etaMax} min</span>
                           </div>
-                          {!store.isOpen ? (
+                          {!isCondominiumEventLive ? (
+                            <p className="mt-2 line-clamp-1 text-[10px] font-black uppercase tracking-[0.08em] text-[#336886]">
+                              {hasUpcomingCondominiumEvent ? condominiumEventTimeLabel || 'Próxima feira' : 'Agenda em confirmação'}
+                            </p>
+                          ) : !store.isOpen ? (
                             <p className="mt-2 line-clamp-1 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">
                               {store.nextOpeningLabel || 'Sem horário cadastrado'}
                             </p>
@@ -2322,9 +2380,15 @@ export function MarketplacePage() {
               </div>
 
               <div className="grid grid-cols-3 gap-x-5 gap-y-8 sm:grid-cols-4">
-                {filteredCondominiums.map(({ condominium, slug, name, region }) => {
+                {filteredCondominiums.map(({ condominium, slug, name, region, event }) => {
                   const active = selectedCondominiumSlug === slug;
                   const imageUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
+                  const eventState = event?.state || 'none';
+                  const eventBadge = eventState === 'live'
+                    ? 'Aberta agora'
+                    : eventState === 'upcoming'
+                      ? formatCondominiumEventTime(event) || 'Próxima feira'
+                      : 'Agenda em breve';
                   return (
                     <button
                       key={slug}
@@ -2351,6 +2415,11 @@ export function MarketplacePage() {
                       </div>
                       <p className="mt-3 line-clamp-2 text-[12px] font-black leading-tight text-slate-950">{name}</p>
                       <p className="mt-1 truncate text-xs font-semibold text-gray-400">{region || 'Feira local'}</p>
+                      <p className={`mt-1 truncate text-[10px] font-black ${
+                        eventState === 'live' ? 'text-emerald-600' : eventState === 'upcoming' ? 'text-[#336886]' : 'text-slate-400'
+                      }`}>
+                        {eventBadge}
+                      </p>
                     </button>
                   );
                 })}

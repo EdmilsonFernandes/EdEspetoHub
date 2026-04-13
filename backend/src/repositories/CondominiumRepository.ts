@@ -14,6 +14,8 @@
 import { Repository } from 'typeorm';
 import { AppDataSource } from '../config/database';
 import { Condominium } from '../entities/Condominium';
+import { CondominiumEvent } from '../entities/CondominiumEvent';
+import { CondominiumEventStore } from '../entities/CondominiumEventStore';
 import { StoreCondominium } from '../entities/StoreCondominium';
 
 /**
@@ -25,6 +27,8 @@ import { StoreCondominium } from '../entities/StoreCondominium';
 export class CondominiumRepository {
   private condominiumRepository: Repository<Condominium>;
   private storeCondominiumRepository: Repository<StoreCondominium>;
+  private condominiumEventRepository: Repository<CondominiumEvent>;
+  private condominiumEventStoreRepository: Repository<CondominiumEventStore>;
 
   /**
    * Creates a new instance.
@@ -35,6 +39,8 @@ export class CondominiumRepository {
   constructor() {
     this.condominiumRepository = AppDataSource.getRepository(Condominium);
     this.storeCondominiumRepository = AppDataSource.getRepository(StoreCondominium);
+    this.condominiumEventRepository = AppDataSource.getRepository(CondominiumEvent);
+    this.condominiumEventStoreRepository = AppDataSource.getRepository(CondominiumEventStore);
   }
 
   /**
@@ -77,6 +83,52 @@ export class CondominiumRepository {
       .where('condominium.slug = :slug', { slug })
       .andWhere('condominium.active = true')
       .andWhere('link.active = true')
+      .orderBy('store.name', 'ASC')
+      .getMany();
+  }
+
+  listActiveEventsBySlug(slug: string, from = new Date()) {
+    return this.condominiumEventRepository
+      .createQueryBuilder('event')
+      .innerJoinAndSelect('event.condominium', 'condominium')
+      .where('condominium.slug = :slug', { slug })
+      .andWhere('condominium.active = true')
+      .andWhere('event.active = true')
+      .andWhere("event.status NOT IN ('cancelled')")
+      .andWhere('event.ends_at >= :from', { from })
+      .orderBy('event.starts_at', 'ASC')
+      .getMany();
+  }
+
+  async getEventSummaryByCondominiumIds(condominiumIds: string[], from = new Date()) {
+    if (!condominiumIds.length) return new Map<string, CondominiumEvent>();
+
+    const rows = await this.condominiumEventRepository
+      .createQueryBuilder('event')
+      .where('event.condominium_id IN (:...condominiumIds)', { condominiumIds })
+      .andWhere('event.active = true')
+      .andWhere("event.status NOT IN ('cancelled')")
+      .andWhere('event.ends_at >= :from', { from })
+      .orderBy('event.starts_at', 'ASC')
+      .getMany();
+
+    return rows.reduce((acc, event) => {
+      if (!acc.has(event.condominiumId)) {
+        acc.set(event.condominiumId, event);
+      }
+      return acc;
+    }, new Map<string, CondominiumEvent>());
+  }
+
+  listActiveStoreLinksByEventId(eventId: string) {
+    return this.condominiumEventStoreRepository
+      .createQueryBuilder('eventLink')
+      .innerJoinAndSelect('eventLink.event', 'event')
+      .innerJoinAndSelect('eventLink.store', 'store')
+      .leftJoinAndSelect('store.settings', 'settings')
+      .where('event.id = :eventId', { eventId })
+      .andWhere('event.active = true')
+      .andWhere('eventLink.active = true')
       .orderBy('store.name', 'ASC')
       .getMany();
   }

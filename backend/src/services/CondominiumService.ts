@@ -36,7 +36,8 @@ export class CondominiumService {
    */
   async listPublic() {
     const rows = await this.condominiumRepository.listActive();
-    return rows.map((condominium) => this.toPublicCondominium(condominium));
+    const summaries = await this.condominiumRepository.getEventSummaryByCondominiumIds(rows.map((row) => row.id));
+    return rows.map((condominium) => this.toPublicCondominium(condominium, summaries.get(condominium.id) || null));
   }
 
   /**
@@ -48,7 +49,8 @@ export class CondominiumService {
   async getPublicBySlug(slug: string) {
     const condominium = await this.condominiumRepository.findActiveBySlug(slug);
     if (!condominium) throw new AppError('CONDO-001', 404, { message: 'Condominio nao encontrado.' });
-    return this.toPublicCondominium(condominium);
+    const events = await this.condominiumRepository.listActiveEventsBySlug(slug);
+    return this.toPublicCondominium(condominium, events[0] || null);
   }
 
   /**
@@ -58,9 +60,14 @@ export class CondominiumService {
    * @date 2026-04-12
    */
   async listPublicStoresBySlug(slug: string) {
-    const links = await this.condominiumRepository.listActiveStoreLinksBySlug(slug);
-    const firstCondominium = links[0]?.condominium || await this.condominiumRepository.findActiveBySlug(slug);
+    const events = await this.condominiumRepository.listActiveEventsBySlug(slug);
+    const selectedEvent = this.pickCurrentOrNextEvent(events);
+    const eventLinks = selectedEvent ? await this.condominiumRepository.listActiveStoreLinksByEventId(selectedEvent.id) : [];
+    const links = eventLinks.length > 0 ? eventLinks : await this.condominiumRepository.listActiveStoreLinksBySlug(slug);
+    const firstCondominium = (links[0] as any)?.condominium || selectedEvent?.condominium || await this.condominiumRepository.findActiveBySlug(slug);
     if (!firstCondominium) throw new AppError('CONDO-001', 404, { message: 'Condominio nao encontrado.' });
+    const eventState = selectedEvent ? this.getEventState(selectedEvent) : 'none';
+    const canOrderInCondominium = eventState === 'live';
 
     const stores = await Promise.all(
       links.map(async (link) => {
@@ -95,13 +102,19 @@ export class CondominiumService {
             slug: firstCondominium.slug,
           },
           condominiumLink: {
-            schedule: Array.isArray(link.schedule) ? link.schedule : [],
-            pickupInstructions: link.pickupInstructions || null,
-            allowPickupAtStall: link.allowPickupAtStall !== false,
-            allowApartmentDelivery: Boolean(link.allowApartmentDelivery),
-            apartmentDeliveryFee: link.apartmentDeliveryFee != null ? Number(link.apartmentDeliveryFee) : null,
+            schedule: Array.isArray((link as any).schedule) ? (link as any).schedule : [],
+            pickupInstructions: (link as any).pickupInstructions || null,
+            allowPickupAtStall: (link as any).allowPickupAtStall !== false,
+            allowApartmentDelivery: Boolean((link as any).allowApartmentDelivery),
+            apartmentDeliveryFee: (link as any).apartmentDeliveryFee != null ? Number((link as any).apartmentDeliveryFee) : null,
             notes: link.notes || null,
           },
+          condominiumEvent: selectedEvent
+            ? {
+                ...this.toPublicEvent(selectedEvent),
+                canOrderInCondominium,
+              }
+            : null,
           reviewSummary: await this.orderReviewService.publicSummaryByStoreId(store.id),
           settings: store.settings
             ? {
@@ -125,7 +138,13 @@ export class CondominiumService {
     );
 
     return {
-      condominium: this.toPublicCondominium(firstCondominium),
+      condominium: this.toPublicCondominium(firstCondominium, selectedEvent || null),
+      event: selectedEvent
+        ? {
+            ...this.toPublicEvent(selectedEvent),
+            canOrderInCondominium,
+          }
+        : null,
       stores: stores.filter(Boolean),
     };
   }
@@ -136,7 +155,7 @@ export class CondominiumService {
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-04-12
    */
-  private toPublicCondominium(condominium: any) {
+  private toPublicCondominium(condominium: any, event?: any | null) {
     return {
       id: condominium.id,
       name: condominium.name,
@@ -151,6 +170,35 @@ export class CondominiumService {
       logoUrl: condominium.logoUrl || null,
       bannerUrl: condominium.bannerUrl || null,
       active: condominium.active !== false,
+      eventSummary: event ? this.toPublicEvent(event) : null,
+    };
+  }
+
+  private pickCurrentOrNextEvent(events: any[]) {
+    if (!Array.isArray(events) || events.length === 0) return null;
+    const live = events.find((event) => this.getEventState(event) === 'live');
+    return live || events[0] || null;
+  }
+
+  private getEventState(event: any) {
+    const now = Date.now();
+    const startsAt = new Date(event.startsAt).getTime();
+    const endsAt = new Date(event.endsAt).getTime();
+    if (Number.isFinite(startsAt) && Number.isFinite(endsAt) && startsAt <= now && endsAt >= now) return 'live';
+    if (Number.isFinite(startsAt) && startsAt > now) return 'upcoming';
+    return 'finished';
+  }
+
+  private toPublicEvent(event: any) {
+    return {
+      id: event.id,
+      title: event.title,
+      status: event.status || 'scheduled',
+      state: this.getEventState(event),
+      startsAt: event.startsAt instanceof Date ? event.startsAt.toISOString() : event.startsAt,
+      endsAt: event.endsAt instanceof Date ? event.endsAt.toISOString() : event.endsAt,
+      pickupLocation: event.pickupLocation || null,
+      notes: event.notes || null,
     };
   }
 }

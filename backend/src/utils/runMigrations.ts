@@ -1396,6 +1396,64 @@ export async function runMigrations() {
     ON store_condominiums(active);
   `);
   await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS condominium_events (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      condominium_id UUID NOT NULL REFERENCES condominiums(id) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'scheduled',
+      starts_at TIMESTAMPTZ NOT NULL,
+      ends_at TIMESTAMPTZ NOT NULL,
+      pickup_location TEXT,
+      notes TEXT,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_condominium_events_condominium
+    ON condominium_events(condominium_id);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_condominium_events_window
+    ON condominium_events(active, starts_at, ends_at);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_condominium_events_status
+    ON condominium_events(status);
+  `);
+  await AppDataSource.query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS uq_condominium_events_condominium_start
+    ON condominium_events(condominium_id, starts_at);
+  `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS condominium_event_stores (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      event_id UUID NOT NULL REFERENCES condominium_events(id) ON DELETE CASCADE,
+      store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      allow_pickup_at_stall BOOLEAN NOT NULL DEFAULT TRUE,
+      allow_apartment_delivery BOOLEAN NOT NULL DEFAULT FALSE,
+      apartment_delivery_fee NUMERIC(10,2),
+      notes TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      CONSTRAINT uq_condominium_event_stores_event_store UNIQUE (event_id, store_id)
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_condominium_event_stores_event
+    ON condominium_event_stores(event_id);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_condominium_event_stores_store
+    ON condominium_event_stores(store_id);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_condominium_event_stores_active
+    ON condominium_event_stores(active);
+  `);
+  await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS motoboy_push_tokens (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       motoboy_id UUID NOT NULL REFERENCES motoboys(id) ON DELETE CASCADE,
