@@ -1075,23 +1075,23 @@ export const MenuView = ({
         </div>
         {filteredGrouped.length > 1 && (
           <div ref={categoryTabsContainerRef} className="mx-auto w-full max-w-6xl px-4 pb-3">
-            <div className="w-full flex items-center gap-2">
+            <div className="flex w-full items-start gap-2">
               {filteredGrouped.length > 2 && (
                 <button
                   type="button"
                   aria-label="Abrir categorias"
                   onClick={() => setIsCategorySheetOpen(true)}
-                  className="h-10 w-10 shrink-0 rounded-lg bg-white border border-slate-200 text-slate-700 inline-flex items-center justify-center shadow-sm active:scale-95 transition-all"
+                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition-all active:scale-95"
                 >
                   <List size={18} weight="bold" />
                 </button>
               )}
               <div className={`${
                 filteredGrouped.length > 2
-                  ? "flex-1 overflow-x-auto whitespace-nowrap no-scrollbar scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                  ? "min-w-0 flex-1 overflow-x-auto whitespace-nowrap no-scrollbar scrollbar-hide sm:overflow-visible sm:whitespace-normal [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                   : "flex-1 grid grid-cols-2 gap-2"
               }`}>
-                <div className={`${filteredGrouped.length > 2 ? "inline-flex items-center gap-2.5 pr-8" : "contents"}`}>
+                <div className={`${filteredGrouped.length > 2 ? "inline-flex items-center gap-2.5 pr-8 sm:flex sm:flex-wrap sm:gap-2 sm:pr-0" : "contents"}`}>
                 {filteredGrouped.map((category) => {
                   const isActive = activeCategoryKey === category.key;
                   const glyph = categoryGlyph(category.key);
@@ -1106,8 +1106,8 @@ export const MenuView = ({
                         setActiveCategoryKey(category.key);
                         scrollToCategory(category.key);
                       }}
-                      className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-2xl border text-[13px] font-black transition-all duration-300 snap-start active:scale-95 ${
-                        filteredGrouped.length <= 2 ? "w-full min-w-0" : ""
+                      className={`inline-flex items-center justify-center gap-2 rounded-2xl border px-4 py-2 text-[13px] font-black transition-all duration-300 snap-start active:scale-95 ${
+                        filteredGrouped.length <= 2 ? "w-full min-w-0" : "max-w-full sm:min-w-0"
                       } ${isActive ? 'shadow-[0_8px_20px_-8px_rgba(15,23,42,0.15)]' : 'shadow-none'}`}
                       style={
                         isActive
@@ -1116,7 +1116,7 @@ export const MenuView = ({
                       }
                     >
                       <span className="text-base leading-none">{glyph}</span>
-                      <span className="whitespace-nowrap uppercase tracking-wider">{category.label}</span>
+                      <span className="truncate whitespace-nowrap uppercase tracking-wider">{category.label}</span>
                     </button>
                   );
                 })}

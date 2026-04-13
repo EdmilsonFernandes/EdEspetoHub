@@ -2499,6 +2499,7 @@ export function MarketplacePage() {
                 {filteredCondominiums.map(({ condominium, slug, name, region, event }) => {
                   const active = selectedCondominiumSlug === slug;
                   const imageUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
+                  const bannerUrl = resolveAssetUrl(condominium.bannerUrl || condominium.logoUrl || undefined) || imageUrl;
                   const eventState = event?.state || 'none';
                   const eventBadge = eventState === 'live'
                     ? 'Aberta agora'
@@ -2518,15 +2519,24 @@ export function MarketplacePage() {
                       }`}
                     >
                       <div className="flex items-start gap-3">
-                        <div className={`relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[1.2rem] border bg-white shadow-sm ${
+                        <div className={`relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[1.25rem] border shadow-sm ${
                           active ? 'border-emerald-200' : 'border-slate-100'
                         }`}>
+                          <img
+                            src={bannerUrl}
+                            alt=""
+                            aria-hidden="true"
+                            className="absolute inset-0 h-full w-full object-cover opacity-30"
+                            onError={(e) => { (e.target as HTMLImageElement).src = imageUrl; }}
+                          />
+                          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.88)_0%,rgba(248,250,252,0.82)_100%)]" />
+                          <div className="absolute inset-[5px] rounded-[0.95rem] border border-white/80 bg-white/72 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] backdrop-blur-sm" />
                           <img
                             src={imageUrl}
                             alt={name}
                             loading="lazy"
                             decoding="async"
-                            className="h-full w-full bg-white object-contain p-2"
+                            className="relative h-full w-full object-contain p-2.5"
                             onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }}
                           />
                         </div>
