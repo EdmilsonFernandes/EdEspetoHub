@@ -36,6 +36,15 @@ const statusCopy: Record<string, { label: string; tone: string }> = {
   blocked: { label: 'Bloqueado', tone: 'bg-slate-200 text-slate-700 ring-slate-300' },
 };
 
+const addHoursToLocalDateTime = (value: string, hours: number) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  date.setHours(date.getHours() + hours);
+  const offsetMs = date.getTimezoneOffset() * 60 * 1000;
+  return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
+};
+
 export function SuperAdminCondominiums() {
   const [data, setData] = useState<any>({ condominiums: [], stores: [], requests: [] });
   const [loading, setLoading] = useState(true);
@@ -58,6 +67,7 @@ export function SuperAdminCondominiums() {
     endsAt: '',
     pickupLocation: '',
   });
+  const [eventFormError, setEventFormError] = useState('');
   const [eventStoreForm, setEventStoreForm] = useState({
     eventId: '',
     storeId: '',
@@ -115,9 +125,23 @@ export function SuperAdminCondominiums() {
   };
 
   const createEvent = async () => {
-    if (!eventForm.condominiumId) return;
+    if (!eventForm.condominiumId) {
+      setEventFormError('Escolha o condomínio antes de criar a feira.');
+      return;
+    }
+    const startsAt = new Date(eventForm.startsAt);
+    const endsAt = new Date(eventForm.endsAt);
+    if (!eventForm.startsAt || !eventForm.endsAt || Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime())) {
+      setEventFormError('Informe a data e o horário de início e fim da feira.');
+      return;
+    }
+    if (endsAt <= startsAt) {
+      setEventFormError('O horário de término precisa ser depois do início. Exemplo: começa 15:00 e termina 22:00.');
+      return;
+    }
     setSaving(true);
     setError('');
+    setEventFormError('');
     try {
       await condominiumService.adminCreateEvent(eventForm.condominiumId, {
         title: `Feira do ${(data.condominiums || []).find((item: any) => item.id === eventForm.condominiumId)?.name || 'condomínio'}`,
@@ -128,10 +152,41 @@ export function SuperAdminCondominiums() {
       setEventForm({ condominiumId: eventForm.condominiumId, startsAt: '', endsAt: '', pickupLocation: '' });
       await load();
     } catch (err: any) {
-      setError(err?.message || 'Falha ao criar feira.');
+      setEventFormError(err?.message || 'Falha ao criar feira.');
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleEventStartsAtChange = (value: string) => {
+    setEventFormError('');
+    setEventForm((prev) => {
+      const currentEnd = prev.endsAt ? new Date(prev.endsAt) : null;
+      const nextStart = value ? new Date(value) : null;
+      const shouldSuggestEnd =
+        value &&
+        (!prev.endsAt || !currentEnd || Number.isNaN(currentEnd.getTime()) || (nextStart && currentEnd <= nextStart));
+      return {
+        ...prev,
+        startsAt: value,
+        endsAt: shouldSuggestEnd ? addHoursToLocalDateTime(value, 5) : prev.endsAt,
+      };
+    });
+  };
+
+  const handleEventEndsAtChange = (value: string) => {
+    setEventFormError('');
+    setEventForm((prev) => ({ ...prev, endsAt: value }));
+  };
+
+  const handleEventCondominiumChange = (value: string) => {
+    setEventFormError('');
+    setEventForm((prev) => ({ ...prev, condominiumId: value }));
+  };
+
+  const handleEventPickupLocationChange = (value: string) => {
+    setEventFormError('');
+    setEventForm((prev) => ({ ...prev, pickupLocation: value }));
   };
 
   const addStoreToEvent = async () => {
@@ -252,13 +307,14 @@ export function SuperAdminCondominiums() {
               <h2 className="text-base font-black text-slate-950">Nova feira</h2>
             </div>
             <div className="mt-4 space-y-2">
-              <select value={eventForm.condominiumId} onChange={(event) => setEventForm((prev) => ({ ...prev, condominiumId: event.target.value }))} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold">
+              <select value={eventForm.condominiumId} onChange={(event) => handleEventCondominiumChange(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold">
                 <option value="">Escolha o condomínio</option>
                 {(data.condominiums || []).map((item: any) => <option key={item.id} value={item.id}>{item.name}</option>)}
               </select>
-              <input type="datetime-local" value={eventForm.startsAt} onChange={(event) => setEventForm((prev) => ({ ...prev, startsAt: event.target.value }))} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold" />
-              <input type="datetime-local" value={eventForm.endsAt} onChange={(event) => setEventForm((prev) => ({ ...prev, endsAt: event.target.value }))} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold" />
-              <input value={eventForm.pickupLocation} onChange={(event) => setEventForm((prev) => ({ ...prev, pickupLocation: event.target.value }))} placeholder="Local de retirada" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold" />
+              <input type="datetime-local" value={eventForm.startsAt} onChange={(event) => handleEventStartsAtChange(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold" />
+              <input type="datetime-local" value={eventForm.endsAt} onChange={(event) => handleEventEndsAtChange(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold" />
+              <input value={eventForm.pickupLocation} onChange={(event) => handleEventPickupLocationChange(event.target.value)} placeholder="Local de retirada" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold" />
+              {eventFormError ? <p className="rounded-2xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700">{eventFormError}</p> : null}
               <button onClick={createEvent} disabled={saving || !eventForm.condominiumId || !eventForm.startsAt || !eventForm.endsAt} className="w-full rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-black text-white disabled:opacity-50">
                 Criar feira
               </button>
