@@ -1576,8 +1576,8 @@ export function MarketplacePage() {
 
             {/* Linha 2: Busca Premium */}
             <div className="relative z-20 px-0.5">
-              <div className="group flex h-13 min-h-[52px] items-center gap-3 rounded-[22px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.98)_100%)] px-4 shadow-[0_12px_28px_-20px_rgba(15,23,42,0.18)] ring-1 ring-slate-100/80 transition-[border-color,box-shadow,transform] duration-200 ease-out focus-within:border-[#336886]/25 focus-within:shadow-[0_18px_36px_-22px_rgba(51,104,134,0.22)] focus-within:ring-2 focus-within:ring-[#336886]/10">
-                <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#336886]/8 text-[#336886]">
+              <div className="group flex h-13 min-h-[52px] items-center gap-3 rounded-[22px] border border-slate-200/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(244,248,252,0.98)_100%)] px-4 shadow-[0_14px_28px_-20px_rgba(15,23,42,0.2)] ring-1 ring-white/80 transition-[border-color,box-shadow,transform,background-color] duration-200 ease-out hover:border-slate-300/80 hover:bg-white focus-within:border-[#336886]/25 focus-within:bg-white focus-within:shadow-[0_18px_36px_-22px_rgba(51,104,134,0.22)] focus-within:ring-2 focus-within:ring-[#336886]/10">
+                <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#336886]/10 bg-[#336886]/8 text-[#336886] shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
                   <MagnifyingGlass size={18} weight="bold" />
                 </div>
                 <input
