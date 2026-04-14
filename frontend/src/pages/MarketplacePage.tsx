@@ -342,7 +342,7 @@ export function MarketplacePage() {
   const [pullDistance, setPullDistance] = useState(0);
   const [isHeaderElevated, setIsHeaderElevated] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
-  const [searchBarRenderKey, setSearchBarRenderKey] = useState(0);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -685,11 +685,6 @@ export function MarketplacePage() {
   }, [query]);
 
   useEffect(() => {
-    if (selectedCondominiumSlug) return;
-    setSearchBarRenderKey((current) => current + 1);
-  }, [selectedCondominiumSlug]);
-
-  useEffect(() => {
     if (featuredProducts.length <= 8) {
       setFeaturedOffset(0);
       return;
@@ -709,7 +704,7 @@ export function MarketplacePage() {
     const restoreHubHeader = () => {
       setHasEntered(true);
       setIsHeaderElevated((window.scrollY || 0) > 6);
-      setSearchBarRenderKey((current) => current + 1);
+      setIsSearchFocused(false);
       if (searchInputRef.current) {
         searchInputRef.current.blur();
       }
@@ -1393,7 +1388,7 @@ export function MarketplacePage() {
   const handleHomeHubNavigation = useCallback(() => {
     clearCondominiumSelection();
     setCondominiumPickerOpen(false);
-    setSearchBarRenderKey((current) => current + 1);
+    setIsSearchFocused(false);
     navigate('/hub');
   }, [clearCondominiumSelection, navigate]);
 
@@ -1631,22 +1626,33 @@ export function MarketplacePage() {
 
             {/* Linha 2: Busca Premium */}
             <div className="relative z-20 px-0.5">
-              <div key={searchBarRenderKey} className="group relative isolate flex h-13 min-h-[52px] items-center gap-3 overflow-hidden rounded-[22px] border border-slate-200/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(244,248,252,0.98)_100%)] px-4 shadow-[0_14px_28px_-20px_rgba(15,23,42,0.2)] ring-1 ring-white/80 transition-[border-color,box-shadow,transform,background-color] duration-200 ease-out hover:border-slate-300/80 hover:bg-white focus-within:border-[#336886]/25 focus-within:bg-white focus-within:shadow-[0_18px_36px_-22px_rgba(51,104,134,0.22)] focus-within:ring-2 focus-within:ring-[#336886]/10 [transform:translateZ(0)]">
+              <div className="group relative flex min-h-[52px] items-center gap-3 rounded-[22px] border border-slate-200 bg-white px-4 shadow-[0_12px_26px_-20px_rgba(15,23,42,0.24)] transition-[border-color,box-shadow,background-color] duration-200 ease-out hover:border-slate-300 hover:bg-white focus-within:border-[#336886]/25 focus-within:shadow-[0_16px_34px_-22px_rgba(51,104,134,0.22)] focus-within:ring-2 focus-within:ring-[#336886]/10">
                 <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#336886]/10 bg-[#336886]/8 text-[#336886] shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
                   <MagnifyingGlass size={18} weight="bold" />
                 </div>
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Buscar loja, categoria ou produto"
-                  autoComplete="off"
-                  inputMode="search"
-                  enterKeyHint="search"
-                  className="block h-full min-w-0 flex-1 appearance-none bg-transparent pr-1 text-[14px] font-semibold text-slate-950 opacity-100 outline-none placeholder:text-slate-400"
-                  style={{ WebkitAppearance: 'none', WebkitTextFillColor: '#020617', visibility: 'visible' }}
-                />
+                <div className="relative min-w-0 flex-1">
+                  {!query ? (
+                    <span className={`pointer-events-none absolute inset-y-0 left-0 flex items-center pr-6 text-[14px] font-semibold transition-opacity ${
+                      isSearchFocused ? 'opacity-55 text-slate-400' : 'opacity-100 text-slate-400'
+                    }`}>
+                      Buscar loja, categoria ou produto
+                    </span>
+                  ) : null}
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    onFocus={() => setIsSearchFocused(true)}
+                    onBlur={() => setIsSearchFocused(false)}
+                    placeholder=""
+                    autoComplete="off"
+                    inputMode="search"
+                    enterKeyHint="search"
+                    className="block min-h-[52px] w-full min-w-0 appearance-none bg-transparent pr-1 text-[14px] font-semibold text-slate-950 outline-none"
+                    style={{ WebkitAppearance: 'none', WebkitTextFillColor: '#020617', caretColor: '#336886' }}
+                  />
+                </div>
                 {query ? (
                   <button
                     type="button"
@@ -1885,7 +1891,7 @@ export function MarketplacePage() {
                         className="h-full w-full object-cover opacity-[0.98] saturate-[1.03]"
                       />
                     ) : null}
-                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.42)_0%,rgba(2,6,23,0.46)_20%,rgba(2,6,23,0.58)_52%,rgba(2,6,23,0.84)_100%)]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.34)_0%,rgba(2,6,23,0.38)_20%,rgba(2,6,23,0.5)_52%,rgba(2,6,23,0.76)_100%)]" />
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_24%)]" />
                   </div>
                   <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/28 via-black/8 to-transparent" />
