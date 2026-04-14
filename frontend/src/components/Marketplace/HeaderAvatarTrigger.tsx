@@ -25,7 +25,7 @@ export function HeaderAvatarTrigger({
     <button
       type="button"
       onClick={onClick}
-      className="relative inline-flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-white/70 bg-white/90 text-slate-700 shadow-[0_12px_24px_-16px_rgba(15,23,42,0.35)] backdrop-blur-sm transition hover:bg-white active:scale-95"
+      className="relative inline-flex h-[3.05rem] w-[3.05rem] items-center justify-center overflow-hidden rounded-full border border-white/75 bg-white/92 text-slate-700 shadow-[0_14px_28px_-16px_rgba(15,23,42,0.35)] backdrop-blur-sm transition hover:bg-white active:scale-95"
       aria-label="Abrir menu de perfil"
       title="Abrir menu de perfil"
     >
@@ -39,11 +39,11 @@ export function HeaderAvatarTrigger({
           className="h-full w-full object-cover"
         />
       ) : displayName ? (
-        <span className="text-[11px] font-black uppercase tracking-[0.08em]">
+        <span className="text-[11.5px] font-black uppercase tracking-[0.08em]">
           {initialsFrom(displayName)}
         </span>
       ) : (
-        <UserCircle size={20} weight="duotone" />
+        <UserCircle size={21} weight="duotone" />
       )}
       {hasNotification ? (
         <span className="absolute right-0.5 top-0.5 h-2.5 w-2.5 rounded-full bg-rose-500 ring-2 ring-white" />

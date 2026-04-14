@@ -47,6 +47,7 @@ export function SegmentPromoCarousel({
   const touchStartXRef = useRef<number | null>(null);
   const suppressClickRef = useRef(false);
   const compact = mode === 'hub';
+  const interactive = mode !== 'hub';
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -83,19 +84,8 @@ export function SegmentPromoCarousel({
     }, 220);
   };
 
-  return (
-    <a
-      href="/create?plan=trial"
-      aria-label="Criar loja no Ja no Caminho"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onClick={(event) => {
-        if (suppressClickRef.current) {
-          event.preventDefault();
-        }
-      }}
-      className={`group relative block overflow-hidden rounded-[1.65rem] border border-white bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out active:scale-[0.985] ${className}`}
-    >
+  const content = (
+    <>
       <div className={`relative ${compact ? 'aspect-[16/7.8]' : 'aspect-[16/6.8] sm:aspect-[16/6.6]'}`}>
         {PROMO_SLIDES.map((slide, index) => (
           <div
@@ -126,9 +116,11 @@ export function SegmentPromoCarousel({
         ))}
       </div>
 
-      <div className="pointer-events-none absolute bottom-2 right-2 z-[3] inline-flex rounded-full border border-white/70 bg-white/92 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-slate-900 shadow-[0_10px_22px_-14px_rgba(15,23,42,0.5)] backdrop-blur-md sm:bottom-3 sm:right-3 sm:px-3 sm:py-1.5 sm:text-[10px]">
-        Criar loja
-      </div>
+      {interactive ? (
+        <div className="pointer-events-none absolute bottom-2 right-2 z-[3] inline-flex rounded-full border border-white/70 bg-white/92 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-slate-900 shadow-[0_10px_22px_-14px_rgba(15,23,42,0.5)] backdrop-blur-md sm:bottom-3 sm:right-3 sm:px-3 sm:py-1.5 sm:text-[10px]">
+          Criar loja
+        </div>
+      ) : null}
 
       <div className="absolute inset-x-0 bottom-0 flex justify-center pb-1.5 sm:pb-2">
         <div className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-slate-950/20 px-2 py-0.5 backdrop-blur-md">
@@ -148,6 +140,33 @@ export function SegmentPromoCarousel({
           ))}
         </div>
       </div>
+    </>
+  );
+
+  if (!interactive) {
+    return (
+      <div
+        className={`group relative block overflow-hidden rounded-[1.65rem] border border-white bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)] ${className}`}
+      >
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <a
+      href="/create?plan=trial"
+      aria-label="Criar loja no Ja no Caminho"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onClick={(event) => {
+        if (suppressClickRef.current) {
+          event.preventDefault();
+        }
+      }}
+      className={`group relative block overflow-hidden rounded-[1.65rem] border border-white bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out active:scale-[0.985] ${className}`}
+    >
+      {content}
     </a>
   );
 }

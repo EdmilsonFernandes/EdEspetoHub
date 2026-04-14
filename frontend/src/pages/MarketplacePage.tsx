@@ -699,6 +699,31 @@ export function MarketplacePage() {
   }, []);
 
   useEffect(() => {
+    const restoreHubHeader = () => {
+      setHasEntered(true);
+      setIsHeaderElevated((window.scrollY || 0) > 6);
+      window.requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      });
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        restoreHubHeader();
+      }
+    };
+
+    restoreHubHeader();
+    window.addEventListener('pageshow', restoreHubHeader);
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      window.removeEventListener('pageshow', restoreHubHeader);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, []);
+
+  useEffect(() => {
     let lastY = window.scrollY || 0;
     let ticking = false;
     const onScroll = () => {
@@ -1905,7 +1930,7 @@ export function MarketplacePage() {
               ) : (
                 <>
                   <div className="mb-3 px-1">
-                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Hub em condomínio</p>
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Exclusivo para você</p>
                     <h2 className="truncate text-lg font-black tracking-tight text-slate-900">Encontre lojas dentro do seu condomínio</h2>
                   </div>
                   <button
