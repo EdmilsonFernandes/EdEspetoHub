@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.Toast;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.webkit.CookieManager;
@@ -25,8 +26,17 @@ import android.os.Build;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.splashscreen.SplashScreen;
+import androidx.appcompat.app.AlertDialog;
 
 import com.getcapacitor.BridgeActivity;
+import com.google.android.play.core.appupdate.AppUpdateInfo;
+import com.google.android.play.core.appupdate.AppUpdateManager;
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
+import com.google.android.play.core.install.InstallStateUpdatedListener;
+import com.google.android.play.core.install.model.AppUpdateType;
+import com.google.android.play.core.install.model.InstallStatus;
+import com.google.android.play.core.install.model.UpdateAvailability;
+import com.google.android.play.core.appupdate.AppUpdateOptions;
 
 public class MainActivity extends BridgeActivity {
 
@@ -41,6 +51,7 @@ public class MainActivity extends BridgeActivity {
     private static final long LAUNCH_OVERLAY_FADE_MS = 260L;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 4401;
     private static final int MEDIA_PERMISSION_REQUEST_CODE = 4402;
+    private static final int APP_UPDATE_REQUEST_CODE = 4403;
 
     private String lastKnownUrl = HUB_URL;
     private GeolocationPermissions.Callback pendingGeoCallback = null;
@@ -49,6 +60,9 @@ public class MainActivity extends BridgeActivity {
     private ImageView launchLogo;
     private ProgressBar launchProgress;
     private boolean launchOverlayDismissed = false;
+    private AppUpdateManager appUpdateManager;
+    private InstallStateUpdatedListener installStateUpdatedListener;
+    private boolean flexibleUpdatePromptVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +86,7 @@ public class MainActivity extends BridgeActivity {
             set.start();
         });
         super.onCreate(savedInstanceState);
+        initializeInAppUpdates();
         initializeLaunchOverlay();
     }
 
@@ -107,6 +122,7 @@ public class MainActivity extends BridgeActivity {
     public void onResume() {
         super.onResume();
         restoreLastVisitedUrl();
+        checkForAppUpdates();
     }
 
     @Override
@@ -216,6 +232,7 @@ public class MainActivity extends BridgeActivity {
         configureNavigationTransitions();
         restoreLastVisitedUrl();
         openDeepLinkIfAny();
+        checkForAppUpdates();
         
         // Ajuste no WebView para aceitar intents de apps externos
         if (bridge != null && bridge.getWebView() != null) {
@@ -278,6 +295,14 @@ public class MainActivity extends BridgeActivity {
         }
     }
 
+    @Override
+    public void onDestroy() {
+        if (appUpdateManager != null && installStateUpdatedListener != null) {
+            appUpdateManager.unregisterListener(installStateUpdatedListener);
+        }
+        super.onDestroy();
+    }
+
     private void initializeLaunchOverlay() {
         launchOverlay = findViewById(R.id.launch_overlay);
         launchLogo = findViewById(R.id.launch_logo);
@@ -310,6 +335,84 @@ public class MainActivity extends BridgeActivity {
                 .setDuration(260L)
                 .start();
         }
+    }
+
+    private void initializeInAppUpdates() {
+        appUpdateManager = AppUpdateManagerFactory.create(this);
+        installStateUpdatedListener = state -> {
+            if (state.installStatus() == InstallStatus.DOWNLOADED) {
+                promptCompleteFlexibleUpdate();
+            }
+        };
+        appUpdateManager.registerListener(installStateUpdatedListener);
+    }
+
+    private void checkForAppUpdates() {
+        if (appUpdateManager == null) return;
+
+        appUpdateManager
+            .getAppUpdateInfo()
+            .addOnSuccessListener(this::handleAppUpdateInfo)
+            .addOnFailureListener(error ->
+                android.util.Log.w("JNC_UPDATE", "Nao foi possivel consultar atualizacao na Play", error)
+            );
+    }
+
+    private void handleAppUpdateInfo(AppUpdateInfo appUpdateInfo) {
+        if (appUpdateInfo == null) return;
+
+        if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
+            promptCompleteFlexibleUpdate();
+            return;
+        }
+
+        if (appUpdateInfo.updateAvailability() != UpdateAvailability.UPDATE_AVAILABLE) {
+            return;
+        }
+
+        if (!appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
+            return;
+        }
+
+        try {
+            appUpdateManager.startUpdateFlowForResult(
+                appUpdateInfo,
+                this,
+                AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build(),
+                APP_UPDATE_REQUEST_CODE
+            );
+        } catch (Exception error) {
+            android.util.Log.w("JNC_UPDATE", "Falha ao iniciar atualizacao flexivel", error);
+        }
+    }
+
+    private void promptCompleteFlexibleUpdate() {
+        if (flexibleUpdatePromptVisible || isFinishing()) return;
+
+        flexibleUpdatePromptVisible = true;
+        runOnUiThread(() -> {
+            if (isFinishing()) {
+                flexibleUpdatePromptVisible = false;
+                return;
+            }
+
+            new AlertDialog.Builder(this)
+                .setTitle("Atualização pronta")
+                .setMessage("Uma nova versão do Já no Caminho já foi baixada. Deseja reiniciar para aplicar agora?")
+                .setCancelable(true)
+                .setPositiveButton("Atualizar agora", (dialog, which) -> {
+                    flexibleUpdatePromptVisible = false;
+                    if (appUpdateManager != null) {
+                        appUpdateManager.completeUpdate();
+                    }
+                })
+                .setNegativeButton("Depois", (dialog, which) -> {
+                    flexibleUpdatePromptVisible = false;
+                    Toast.makeText(this, "Você pode concluir a atualização depois.", Toast.LENGTH_SHORT).show();
+                })
+                .setOnDismissListener(dialog -> flexibleUpdatePromptVisible = false)
+                .show();
+        });
     }
 
     private void dismissLaunchOverlay() {

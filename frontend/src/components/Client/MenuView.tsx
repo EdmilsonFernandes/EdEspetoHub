@@ -23,6 +23,7 @@ import {
   List,
   UserCircle,
   Trash,
+  CalendarBlank,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
@@ -548,6 +549,9 @@ export const MenuView = ({
   reviewSummary,
   deliveryFeeLabel,
   orderTypes = [],
+  preOrderBlocked = false,
+  preOrderBlockedTitle = "Pedidos em breve",
+  preOrderBlockedMessage = "",
 }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -556,6 +560,7 @@ export const MenuView = ({
   const [activeCategoryKey, setActiveCategoryKey] = useState("");
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
   const [showClearCartModal, setShowClearCartModal] = useState(false);
+  const [showPreOrderBlockedModal, setShowPreOrderBlockedModal] = useState(false);
   const [qtyPulseId, setQtyPulseId] = useState<string | null>(null);
   const [activeQtyControlId, setActiveQtyControlId] = useState<string | null>(null);
   const [flyToCartItems, setFlyToCartItems] = useState<
@@ -579,7 +584,7 @@ export const MenuView = ({
   const categoryTabRefs = React.useRef<Record<string, HTMLButtonElement | null>>({});
   const categorySyncLockRef = React.useRef(false);
   const categorySyncLockTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  const canOrder = isOrderingEnabled !== false;
+  const canOrder = isOrderingEnabled !== false && !preOrderBlocked;
   const effectiveCompactHeader = compactHeader || autoCompactHeader;
   const catalogPrimaryColor = branding?.primaryColor || "#f59e0b";
   const catalogSecondaryColor = branding?.secondaryColor || branding?.accentColor || "#0f172a";
@@ -1240,11 +1245,25 @@ export const MenuView = ({
             </div>
           </div>
         )}
-        {!canOrder && (
+        {preOrderBlocked ? (
+          <div className="rounded-[1.75rem] border border-sky-100 bg-[linear-gradient(135deg,rgba(240,249,255,0.96)_0%,rgba(255,255,255,0.98)_100%)] px-4 py-3.5 text-sm text-slate-700 shadow-[0_18px_34px_-28px_rgba(51,104,134,0.24)]">
+            <div className="flex items-start gap-3">
+              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-100 text-[#336886]">
+                <CalendarBlank size={18} weight="duotone" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-sm font-black text-slate-900">{preOrderBlockedTitle}</span>
+                <span className="mt-1 block text-xs font-medium leading-relaxed text-slate-500">
+                  {preOrderBlockedMessage || "Você pode ver o cardápio agora, mas os pedidos deste condomínio ainda não foram liberados."}
+                </span>
+              </span>
+            </div>
+          </div>
+        ) : !canOrder ? (
           <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
             Pedidos online desativados para esta loja. Consulte o cardápio e faça o pedido no balcão/mesa.
           </div>
-        )}
+        ) : null}
         {filteredGrouped.map((category, index) => {
           const accentColors = [
             "ds-accent-red",
@@ -1314,6 +1333,10 @@ export const MenuView = ({
                   const originButton = event.currentTarget as HTMLElement;
                   const imageOrigin = originButton.closest("[data-menu-item-media]") as HTMLElement | null;
                   event.stopPropagation();
+                  if (preOrderBlocked) {
+                    setShowPreOrderBlockedModal(true);
+                    return;
+                  }
                   openQtyControl(itemId);
                   if (!canIncrease) {
                     if (isEspetoCategory(item.category)) {
@@ -1768,7 +1791,13 @@ export const MenuView = ({
         onClose={closeProductModal}
         onAddToCart={onUpdateCart}
         readOnly={!canOrder || resolveStockState(selectedProduct).soldOut}
-        readOnlyMessage={!canOrder ? "Pedidos apenas no balcão/mesa." : "Produto esgotado no momento."}
+        readOnlyMessage={
+          preOrderBlocked
+            ? (preOrderBlockedMessage || "Os pedidos deste condomínio ainda não foram liberados.")
+            : !canOrder
+            ? "Pedidos apenas no balcão/mesa."
+            : "Produto esgotado no momento."
+        }
       />
 
       {/* BOTÃO FLUTUANTE DA SACOLA E LIMPAR */}
@@ -1793,10 +1822,16 @@ export const MenuView = ({
             </button>
           )}
 
-          {canOrder && (
+          {(canOrder || preOrderBlocked) && (
             <button
               ref={cartButtonRef}
-              onClick={() => onProceed?.()}
+              onClick={() => {
+                if (preOrderBlocked) {
+                  setShowPreOrderBlockedModal(true);
+                  return;
+                }
+                onProceed?.();
+              }}
               className={`group w-full px-5 py-4 rounded-[2.2rem] flex justify-between items-center active:scale-[0.97] transition-all duration-300 ${
                 cartPulse ? "scale-[1.04] shadow-[0_24px_50px_-12px_rgba(15,23,42,0.45)]" : "shadow-[0_20px_48px_-14px_rgba(15,23,42,0.35)]"
               }`}
@@ -1871,6 +1906,18 @@ export const MenuView = ({
         cancelLabel="Não, manter itens"
         variant="danger"
         icon={<Trash size={32} weight="duotone" className="text-rose-500" />}
+      />
+
+      <ConfirmationModal
+        isOpen={showPreOrderBlockedModal}
+        onClose={() => setShowPreOrderBlockedModal(false)}
+        onConfirm={() => setShowPreOrderBlockedModal(false)}
+        title={preOrderBlockedTitle}
+        description={preOrderBlockedMessage || "Você está vendo o cardápio antecipado. Os pedidos deste condomínio ainda não foram liberados."}
+        confirmLabel="Entendi"
+        cancelLabel="Fechar"
+        variant="info"
+        icon={<CalendarBlank size={32} weight="duotone" className="text-sky-600" />}
       />
     </div>
   );

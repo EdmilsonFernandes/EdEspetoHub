@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft, Eye, EyeSlash, ClipboardText } from '@phosphor-icons/react';
+import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft, Eye, EyeSlash, ClipboardText, House, Receipt, Buildings, Heart } from '@phosphor-icons/react';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import { customerService } from '../services/customerService';
@@ -298,6 +298,7 @@ export function StorePage() {
     user.store.slug === storeSlug;
   const isNativeRuntime = Capacitor.isNativePlatform();
   const showAdminWebReturnBar = isStoreAdmin && !isNativeRuntime && view !== 'menu';
+  const showClientWebBottomNav = !isNativeRuntime && !isStoreAdmin && view === 'menu';
   const normalizedRole = String(user?.role || '').toLowerCase();
   const hasAdminPrintAccess = normalizedRole === 'admin';
   const canUseAdminPrintFlow = hasAdminPrintAccess || isStoreAdmin;
@@ -353,6 +354,32 @@ export function StorePage() {
   const condominiumFeeValue = isCondominiumCheckout && condominiumFulfillmentMode === 'apartment_delivery'
     ? condominiumApartmentFee
     : 0;
+  const isCondominiumPreOrderPreview = Boolean(
+    isCondominiumCheckout &&
+    condominiumCheckoutContext?.event &&
+    !condominiumCheckoutContext?.event?.canOrderInCondominium
+  );
+  const condominiumPreOrderTitle = useMemo(() => {
+    if (!isCondominiumPreOrderPreview) return '';
+    return 'Agenda ainda não liberada';
+  }, [isCondominiumPreOrderPreview]);
+  const condominiumPreOrderMessage = useMemo(() => {
+    if (!isCondominiumPreOrderPreview) return '';
+    const startsAt = condominiumCheckoutContext?.event?.startsAt ? new Date(condominiumCheckoutContext.event.startsAt) : null;
+    const startsAtValid = startsAt && !Number.isNaN(startsAt.getTime());
+    const startsLabel = startsAtValid
+      ? new Intl.DateTimeFormat('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: 'America/Sao_Paulo',
+        }).format(startsAt)
+      : '';
+    return startsLabel
+      ? `Você pode explorar o cardápio agora, mas os pedidos desse condomínio abrem em ${startsLabel}.`
+      : 'Você pode explorar o cardápio agora, mas os pedidos desse condomínio ainda não foram liberados.';
+  }, [isCondominiumPreOrderPreview, condominiumCheckoutContext]);
   const deliveryAddress = useMemo(() => {
     if (customer.type !== 'delivery') return customer.address || '';
     const street = String(customer.street || '').trim();
@@ -2534,6 +2561,9 @@ export function StorePage() {
               compactHeader={isMobile}
               staffView={Boolean(canUseAdminPrintFlow)}
               isOrderingEnabled={storeOrderingEnabled || Boolean(user?.token)}
+              preOrderBlocked={isCondominiumPreOrderPreview}
+              preOrderBlockedTitle={condominiumPreOrderTitle}
+              preOrderBlockedMessage={condominiumPreOrderMessage}
             />
           </div>
         )}
@@ -2945,6 +2975,49 @@ export function StorePage() {
         >
           <PaperPlaneTilt size={20} weight="duotone" />
         </div>
+      )}
+
+      {showClientWebBottomNav && (
+        <nav className="fixed bottom-0 left-0 right-0 z-[100] border-t border-[#336886]/12 bg-[linear-gradient(180deg,rgba(235,244,250,0.94)_0%,rgba(225,238,247,0.92)_100%)] shadow-[0_-14px_34px_-26px_rgba(51,104,134,0.3)] backdrop-blur-2xl lg:hidden">
+          <div className="grid h-[4.75rem] grid-cols-4 items-center gap-2 px-4 pt-2 pb-[max(env(safe-area-inset-bottom),0px)]">
+            <button
+              type="button"
+              onClick={() => navigate('/hub')}
+              className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]"
+            >
+              <House size={18} weight="duotone" />
+              <span className="text-[9px] font-black uppercase">Início</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/cliente/pedidos')}
+              className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]"
+            >
+              <Receipt size={18} weight="duotone" />
+              <span className="text-[9px] font-black uppercase">Pedidos</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/hub?panel=condominios')}
+              className={`flex flex-col items-center justify-center rounded-2xl py-1 transition-all duration-150 ease-out active:scale-[0.94] ${
+                condominiumSlugFromQuery
+                  ? 'bg-[#336886]/10 text-[#336886] shadow-[0_8px_18px_-16px_rgba(51,104,134,0.7)] ring-1 ring-[#336886]/15'
+                  : 'text-slate-400'
+              }`}
+            >
+              <Buildings size={18} weight={condominiumSlugFromQuery ? 'fill' : 'duotone'} />
+              <span className="text-[9px] font-black uppercase">Condo</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/hub?favorites=1')}
+              className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]"
+            >
+              <Heart size={18} weight="regular" />
+              <span className="text-[9px] font-black uppercase">Favoritos</span>
+            </button>
+          </div>
+        </nav>
       )}
 
     </div>

@@ -211,29 +211,6 @@ const formatCondominiumPickerEventTime = (event?: CondominiumEventSummary | null
   return end ? `${date} • ${start}-${end}` : `${date} • ${start}`;
 };
 
-const toCalendarStamp = (value?: string) => {
-  if (!value) return '';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-  return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
-};
-
-const buildCondominiumCalendarLink = (event?: CondominiumEventSummary | null, condominium?: HubCondominium | null) => {
-  const start = toCalendarStamp(event?.startsAt);
-  const end = toCalendarStamp(event?.endsAt || event?.startsAt);
-  if (!start) return '';
-
-  const params = new URLSearchParams({
-    action: 'TEMPLATE',
-    text: String(event?.title || condominium?.name || 'Agenda do condomínio'),
-    dates: `${start}/${end || start}`,
-    details: String(event?.notes || 'Lembrete da agenda do condomínio no Já no Caminho.'),
-    location: String(event?.pickupLocation || condominium?.address || condominium?.name || ''),
-  });
-
-  return `https://calendar.google.com/calendar/render?${params.toString()}`;
-};
-
 const categoryVisuals: Record<string, { icon: typeof Storefront; label: string }> = {
   Restaurante: { icon: ForkKnife, label: 'Restaurante' },
   Hamburguer: { icon: Hamburger, label: 'Hamburguer' },
@@ -1075,10 +1052,6 @@ export function MarketplacePage() {
   const activeCondominiumEvent = selectedCondominiumEvent || selectedCondominium?.eventSummary || null;
   const isCondominiumEventLive = activeCondominiumEvent?.state === 'live';
   const hasUpcomingCondominiumEvent = activeCondominiumEvent?.state === 'upcoming';
-  const selectedCondominiumCalendarLink = useMemo(
-    () => buildCondominiumCalendarLink(activeCondominiumEvent, selectedCondominium),
-    [activeCondominiumEvent, selectedCondominium]
-  );
   const condominiumEventTimeLabel = formatCondominiumEventTime(activeCondominiumEvent);
   const selectedCondominiumLogoUrl = selectedCondominium
     ? resolveAssetUrl(selectedCondominium.logoUrl || selectedCondominium.bannerUrl || undefined) || getStoreAvatarUrl(selectedCondominium.slug || 'condominio', selectedCondominium.name || 'Condomínio')
@@ -1409,12 +1382,6 @@ export function MarketplacePage() {
     setCondominiumSearch('');
     resetMarketplaceFilters();
   }, [resetMarketplaceFilters]);
-
-  const handleOpenCalendar = useCallback((event?: CondominiumEventSummary | null, condominium?: HubCondominium | null) => {
-    const link = buildCondominiumCalendarLink(event, condominium);
-    if (!link) return;
-    window.open(link, '_blank', 'noopener,noreferrer');
-  }, []);
 
   const [activeOrders, setActiveOrders] = useState<any[]>([]);
 
@@ -1929,9 +1896,9 @@ export function MarketplacePage() {
                       )}
                     </span>
                     <span className="min-w-0">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-white/82 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-[#336886] shadow-[0_10px_24px_-18px_rgba(51,104,134,0.32)] ring-1 ring-[#336886]/10">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[#336886]/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-[#336886] shadow-[0_10px_24px_-18px_rgba(51,104,134,0.2)] ring-1 ring-[#336886]/10">
                         <Buildings size={10} weight="fill" />
-                        Condomínio
+                        Seu local
                       </span>
                       <span className="mt-2 block truncate text-[15px] font-black leading-tight text-slate-950">
                         {String(selectedCondominium.name || 'Condomínio')}
@@ -1953,21 +1920,6 @@ export function MarketplacePage() {
                         {isCondominiumEventLive ? <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.14)]" /> : null}
                         {isCondominiumEventLive ? 'Agenda ativa' : hasUpcomingCondominiumEvent ? 'Próxima agenda' : 'Agenda do local'}
                       </span>
-                      {selectedCondominiumCalendarLink && !isCondominiumEventLive ? (
-                        <button
-                          type="button"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            handleOpenCalendar(activeCondominiumEvent, selectedCondominium);
-                          }}
-                          className="mt-2 inline-flex items-center gap-1 rounded-full border border-[#336886]/12 bg-white/88 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-[#336886] shadow-[0_12px_26px_-18px_rgba(51,104,134,0.28)] transition hover:bg-white active:scale-[0.97]"
-                          aria-label="Adicionar próxima agenda ao calendário"
-                          title="Adicionar ao calendário"
-                        >
-                          <CalendarBlank size={11} weight="fill" />
-                          Lembrar
-                        </button>
-                      ) : null}
                     </span>
                   </button>
                   <button
@@ -2691,9 +2643,9 @@ export function MarketplacePage() {
                               onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }}
                             />
                           </div>
-                          <span className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.12em] shadow-sm ${
+                          <span className={`inline-flex shrink-0 items-center gap-1 self-start rounded-full border px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.12em] shadow-sm ${
                             active
-                              ? 'border-[#336886]/18 bg-[#336886]/10 text-[#336886]'
+                              ? 'border-[#336886]/16 bg-[#336886]/9 text-[#336886]'
                               : eventState === 'live'
                                 ? 'border-emerald-200 bg-emerald-100 text-emerald-700'
                                 : eventState === 'upcoming'
@@ -2709,7 +2661,7 @@ export function MarketplacePage() {
                             {!active && eventState === 'upcoming' ? (
                               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#336886] shadow-[0_0_0_4px_rgba(51,104,134,0.12)]" />
                             ) : null}
-                            {active ? 'Selecionado' : eventBadge}
+                            {active ? 'No momento' : eventBadge}
                           </span>
                         </div>
 
@@ -2739,23 +2691,7 @@ export function MarketplacePage() {
                               {formatCondominiumPickerEventTime(event) || eventTime || eventBadge}
                             </p>
                           </div>
-                          {eventState === 'upcoming' ? (
-                            <button
-                              type="button"
-                              onClick={(actionEvent) => {
-                                actionEvent.stopPropagation();
-                                handleOpenCalendar(event, condominium);
-                              }}
-                              className="relative z-[2] inline-flex h-7 shrink-0 items-center gap-1 rounded-full border border-[#336886]/12 bg-white/92 px-2 text-[8px] font-black uppercase tracking-[0.12em] text-[#336886] shadow-[0_10px_18px_-16px_rgba(51,104,134,0.3)] transition hover:bg-white active:scale-[0.96]"
-                              aria-label={`Adicionar agenda de ${name} ao calendário`}
-                              title="Adicionar ao calendário"
-                            >
-                              <CalendarBlank size={11} weight="fill" />
-                              Lembrar
-                            </button>
-                          ) : (
-                            <CaretRight size={12} weight="bold" className="mt-0.5 shrink-0 text-current/55 transition-transform duration-200 group-hover:translate-x-0.5" />
-                          )}
+                          <CaretRight size={12} weight="bold" className="mt-0.5 shrink-0 text-current/55 transition-transform duration-200 group-hover:translate-x-0.5" />
                         </div>
                       </div>
                     </button>
