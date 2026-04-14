@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260414.202741.fdbad9d5",
-  "buildId": "0.1.9+20260414.202741.fdbad9d5-20260414.202741-fdbad9d5",
-  "builtAt": "2026-04-14T20:27:41.444Z",
-  "commitHash": "fdbad9d56c356ee6a590d035434cc7bb85f80653",
-  "shortHash": "fdbad9d5",
+  "versionInternal": "0.1.9+20260414.203141.3f7ecbb0",
+  "buildId": "0.1.9+20260414.203141.3f7ecbb0-20260414.203141-3f7ecbb0",
+  "builtAt": "2026-04-14T20:31:41.647Z",
+  "commitHash": "3f7ecbb025c1ec8e4e8b67cca9faf484dcd2aeaa",
+  "shortHash": "3f7ecbb0",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "3f7ecbb025c1ec8e4e8b67cca9faf484dcd2aeaa",
+      "shortHash": "3f7ecbb0",
+      "dateIso": "2026-04-14T17:28:33-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(auth): preserve hub context across role login flows",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3f7ecbb025c1ec8e4e8b67cca9faf484dcd2aeaa"
+    },
     {
       "hash": "fdbad9d56c356ee6a590d035434cc7bb85f80653",
       "shortHash": "fdbad9d5",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(app): unify mobile nav and preserve condo checkout context",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/91bbc40d660603f6ba17bbff356310491f621201"
-    },
-    {
-      "hash": "743fa4e1aa333f1b89bd3ec89b0919591dbeffe3",
-      "shortHash": "743fa4e1",
-      "dateIso": "2026-04-13T21:06:48-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(hub): polish condominium UX and restore checkout context",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/743fa4e1aa333f1b89bd3ec89b0919591dbeffe3"
     }
   ]
 } as const;

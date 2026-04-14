@@ -14,6 +14,7 @@ import {
   Scroll,
   X
 } from '@phosphor-icons/react';
+import { nativeBiometricService } from '../../services/nativeBiometricService';
 
 type DrawerAction = {
   id: string;
@@ -45,6 +46,18 @@ type ProfileDrawerProps = {
   versionLabel?: string;
 };
 
+type AccessProfile = {
+  id: 'client' | 'store' | 'motoboy';
+  title: string;
+  description: string;
+  subtitle: string;
+  tone: string;
+  icon: ReactNode;
+  action: () => void;
+  current?: boolean;
+  ready?: boolean;
+};
+
 export function ProfileDrawer({
   isOpen,
   isLogged,
@@ -67,11 +80,20 @@ export function ProfileDrawer({
   const [isAdmin, setIsAdmin] = useState(false);
   const [storeSlug, setStoreSlug] = useState<string | null>(null);
   const [accessPickerOpen, setAccessPickerOpen] = useState(false);
+  const [savedAccessProfiles, setSavedAccessProfiles] = useState<{
+    customer: { name: string; email: string; biometric: boolean; hasSession: boolean };
+    admin: { name: string; email: string; biometric: boolean; hasSession: boolean };
+    motoboy: { name: string; email: string; biometric: boolean; hasSession: boolean };
+  }>({
+    customer: { name: '', email: '', biometric: false, hasSession: false },
+    admin: { name: '', email: '', biometric: false, hasSession: false },
+    motoboy: { name: '', email: '', biometric: false, hasSession: false },
+  });
 
   useEffect(() => {
     if (!isOpen) return;
     try {
-      const adminRaw = localStorage.getItem('auth_session');
+      const adminRaw = localStorage.getItem('adminSession');
       if (adminRaw) {
         const parsed = JSON.parse(adminRaw);
         if (parsed?.token && parsed?.user) {
@@ -85,6 +107,42 @@ export function ProfileDrawer({
       }
     } catch {
       setIsAdmin(false);
+    }
+
+    try {
+      const customerRaw = localStorage.getItem('customerSession');
+      const adminSessionRaw = localStorage.getItem('adminSession');
+      const motoboyRaw = localStorage.getItem('motoboySession');
+      const customerSession = customerRaw ? JSON.parse(customerRaw) : null;
+      const adminSession = adminSessionRaw ? JSON.parse(adminSessionRaw) : null;
+      const motoboySession = motoboyRaw ? JSON.parse(motoboyRaw) : null;
+
+      setSavedAccessProfiles({
+        customer: {
+          name: String(customerSession?.user?.fullName || customerSession?.user?.name || 'Cliente').trim(),
+          email: String(customerSession?.user?.email || '').trim(),
+          biometric: nativeBiometricService.hasValidStoredCustomerEnrollment(),
+          hasSession: Boolean(customerSession?.token && customerSession?.user),
+        },
+        admin: {
+          name: String(adminSession?.store?.name || adminSession?.user?.fullName || adminSession?.user?.name || 'Lojista').trim(),
+          email: String(adminSession?.user?.email || '').trim(),
+          biometric: nativeBiometricService.hasValidStoredAdminEnrollment(),
+          hasSession: Boolean(adminSession?.token && adminSession?.user),
+        },
+        motoboy: {
+          name: String(motoboySession?.user?.fullName || motoboySession?.user?.name || 'Entregador').trim(),
+          email: String(motoboySession?.user?.email || '').trim(),
+          biometric: nativeBiometricService.hasValidStoredMotoboyEnrollment(),
+          hasSession: Boolean(motoboySession?.token && motoboySession?.user),
+        },
+      });
+    } catch {
+      setSavedAccessProfiles({
+        customer: { name: '', email: '', biometric: false, hasSession: false },
+        admin: { name: '', email: '', biometric: false, hasSession: false },
+        motoboy: { name: '', email: '', biometric: false, hasSession: false },
+      });
     }
   }, [isOpen]);
 
@@ -114,6 +172,52 @@ export function ProfileDrawer({
         { id: 'legal', label: 'Termos e privacidade', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
       ];
 
+  const accessProfiles: AccessProfile[] = [
+    {
+      id: 'client',
+      title: 'Cliente',
+      description: 'Pedir produtos, acompanhar pedidos e salvar endereços.',
+      subtitle: savedAccessProfiles.customer.biometric
+        ? 'Biometria pronta neste aparelho'
+        : savedAccessProfiles.customer.hasSession
+          ? savedAccessProfiles.customer.email || savedAccessProfiles.customer.name
+          : 'Entrar na área do cliente',
+      icon: <UserCircle size={24} weight="duotone" />,
+      tone: 'bg-[#336886]/10 text-[#336886]',
+      action: onLogin,
+      current: isLogged,
+      ready: savedAccessProfiles.customer.biometric || savedAccessProfiles.customer.hasSession,
+    },
+    {
+      id: 'store',
+      title: 'Lojista',
+      description: 'Gerenciar loja, cardápio, fila e impressora.',
+      subtitle: savedAccessProfiles.admin.biometric
+        ? 'Biometria pronta neste aparelho'
+        : savedAccessProfiles.admin.hasSession
+          ? savedAccessProfiles.admin.email || savedAccessProfiles.admin.name
+          : 'Entrar na operação da loja',
+      icon: <Storefront size={24} weight="duotone" />,
+      tone: 'bg-emerald-50 text-emerald-700',
+      action: onOpenAdminLogin,
+      ready: savedAccessProfiles.admin.biometric || savedAccessProfiles.admin.hasSession,
+    },
+    {
+      id: 'motoboy',
+      title: 'Entregador',
+      description: 'Receber entregas, rotas e histórico de ganhos.',
+      subtitle: savedAccessProfiles.motoboy.biometric
+        ? 'Biometria pronta neste aparelho'
+        : savedAccessProfiles.motoboy.hasSession
+          ? savedAccessProfiles.motoboy.email || savedAccessProfiles.motoboy.name
+          : 'Entrar no painel de entregas',
+      icon: <Motorcycle size={24} weight="duotone" />,
+      tone: 'bg-amber-50 text-amber-700',
+      action: onOpenMotoboyLogin,
+      ready: savedAccessProfiles.motoboy.biometric || savedAccessProfiles.motoboy.hasSession,
+    },
+  ];
+
   return (
     <div
       className={`fixed inset-0 z-[200] transition-opacity duration-300 ${
@@ -133,28 +237,41 @@ export function ProfileDrawer({
         </div>
         <div className="border-b border-slate-100/80 bg-white/50 p-6 pb-4">
           {isLogged ? (
-            <div className="flex items-center gap-4">
-              {profileImageUrl ? (
-                <div className="relative">
-                  <img
-                    src={profileImageUrl}
-                    alt={userName}
-                    loading="eager"
-                    fetchPriority="high"
-                    decoding="async"
-                    className="h-16 w-16 rounded-2xl border-2 border-white object-cover shadow-[0_18px_30px_-18px_rgba(51,104,134,0.45)] ring-2 ring-[#336886]/15"
-                  />
-                  <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-500 shadow-sm" />
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                {profileImageUrl ? (
+                  <div className="relative">
+                    <img
+                      src={profileImageUrl}
+                      alt={userName}
+                      loading="eager"
+                      fetchPriority="high"
+                      decoding="async"
+                      className="h-16 w-16 rounded-2xl border-2 border-white object-cover shadow-[0_18px_30px_-18px_rgba(51,104,134,0.45)] ring-2 ring-[#336886]/15"
+                    />
+                    <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-500 shadow-sm" />
+                  </div>
+                ) : (
+                  <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-white to-slate-100 text-slate-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_18px_32px_-24px_rgba(15,23,42,0.35)] ring-1 ring-slate-100">
+                    <UserCircle size={36} weight="duotone" />
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-base font-black text-slate-900 leading-tight">{userName}</p>
+                  <p className="truncate text-xs font-bold text-slate-400 mt-0.5">{userEmail}</p>
                 </div>
-              ) : (
-                <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-white to-slate-100 text-slate-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_18px_32px_-24px_rgba(15,23,42,0.35)] ring-1 ring-slate-100">
-                  <UserCircle size={36} weight="duotone" />
-                </div>
-              )}
-              <div className="min-w-0">
-                <p className="truncate text-base font-black text-slate-900 leading-tight">{userName}</p>
-                <p className="truncate text-xs font-bold text-slate-400 mt-0.5">{userEmail}</p>
               </div>
+              <button
+                type="button"
+                onClick={() => setAccessPickerOpen(true)}
+                className="flex w-full items-center justify-between rounded-[1.35rem] border border-[#336886]/12 bg-white/88 px-4 py-3 text-left text-slate-700 shadow-[0_16px_30px_-24px_rgba(51,104,134,0.28)] transition-all active:scale-[0.98]"
+              >
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Trocar acesso</p>
+                  <p className="mt-1 text-sm font-bold text-slate-900">Usar outra conta salva</p>
+                </div>
+                <CaretRight size={16} weight="bold" className="text-slate-400" />
+              </button>
             </div>
           ) : (
             <button
@@ -284,32 +401,7 @@ export function ProfileDrawer({
             </div>
 
             <div className="grid gap-3 relative">
-              {[
-                {
-                  id: 'client',
-                  title: 'Cliente',
-                  description: 'Pedir produtos, acompanhar pedidos e salvar endereços.',
-                  icon: <UserCircle size={24} weight="duotone" />,
-                  tone: 'bg-[#336886]/10 text-[#336886]',
-                  action: onLogin,
-                },
-                {
-                  id: 'store',
-                  title: 'Lojista',
-                  description: 'Gerenciar loja, cardápio, fila e impressora.',
-                  icon: <Storefront size={24} weight="duotone" />,
-                  tone: 'bg-emerald-50 text-emerald-700',
-                  action: onOpenAdminLogin,
-                },
-                {
-                  id: 'motoboy',
-                  title: 'Entregador',
-                  description: 'Receber entregas, rotas e histórico de ganhos.',
-                  icon: <Motorcycle size={24} weight="duotone" />,
-                  tone: 'bg-amber-50 text-amber-700',
-                  action: onOpenMotoboyLogin,
-                },
-              ].map((item) => (
+              {accessProfiles.map((item) => (
                 <button
                   key={item.id}
                   type="button"
@@ -324,8 +416,21 @@ export function ProfileDrawer({
                     {item.icon}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[15px] font-black text-slate-900">{item.title}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-[15px] font-black text-slate-900">{item.title}</p>
+                      {item.current ? (
+                        <span className="inline-flex rounded-full bg-slate-900 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-white">
+                          Atual
+                        </span>
+                      ) : null}
+                      {item.ready && !item.current ? (
+                        <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-emerald-700">
+                          Pronto
+                        </span>
+                      ) : null}
+                    </div>
                     <p className="mt-0.5 text-xs font-medium leading-snug text-slate-500">{item.description}</p>
+                    <p className="mt-1 text-[11px] font-bold text-slate-400">{item.subtitle}</p>
                   </div>
                   <CaretRight size={17} weight="bold" className="text-slate-300 transition-transform group-hover:translate-x-0.5 group-active:translate-x-0.5" />
                 </button>

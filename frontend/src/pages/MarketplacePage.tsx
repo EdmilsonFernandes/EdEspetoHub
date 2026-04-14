@@ -280,6 +280,31 @@ const readSelectedCondominiumSlug = () => {
   }
 };
 
+const readAdminSession = () => {
+  try {
+    const raw = localStorage.getItem('adminSession');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed?.token || !parsed?.user) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
+const readMotoboySession = () => {
+  try {
+    const raw = localStorage.getItem('motoboySession');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const role = String(parsed?.user?.role || '').toUpperCase();
+    if (!parsed?.token || role !== 'MOTOBOY') return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
 const getOrderStatusTone = (status?: string) => {
   const normalized = String(status || '').trim().toLowerCase();
   const tones: Record<string, string> = {
@@ -1316,6 +1341,12 @@ export function MarketplacePage() {
   }, [navigate]);
 
   const openCustomerLogin = useCallback(async () => {
+    const savedSession = readCustomerSession();
+    if (savedSession?.token) {
+      setCustomerSession(savedSession);
+      navigate('/hub', { replace: true });
+      return;
+    }
     if (nativeBiometricService.hasValidStoredCustomerEnrollment()) {
       try {
         const session = await nativeBiometricService.loginCustomerWithBiometrics('Confirme sua identidade para entrar na sua conta');
@@ -1330,6 +1361,24 @@ export function MarketplacePage() {
   }, [navigate]);
 
   const openAdminLogin = useCallback(async () => {
+    const savedSession = readAdminSession();
+    if (savedSession?.token) {
+      const storeSettings = (savedSession as any)?.store?.settings || {};
+      setAuth(savedSession as any);
+      setBranding({
+        primaryColor: storeSettings?.primaryColor,
+        secondaryColor: storeSettings?.secondaryColor,
+        logoUrl: storeSettings?.logoUrl,
+        brandName: savedSession?.store?.name,
+      });
+      const savedRole = String(savedSession?.user?.role || '').toUpperCase();
+      if ((savedRole === 'ADMIN' || savedRole === 'OPERATOR') && window.matchMedia('(max-width: 767px)').matches && savedSession?.store?.slug) {
+        navigate(`/${savedSession.store.slug}`, { replace: true });
+        return;
+      }
+      navigate(savedRole === 'ADMIN' ? '/admin/dashboard' : '/admin/queue', { replace: true });
+      return;
+    }
     if (nativeBiometricService.hasValidStoredAdminEnrollment()) {
       try {
         const session = await nativeBiometricService.loginAdminWithBiometrics('Confirme sua identidade para acessar sua operação');
@@ -1356,6 +1405,13 @@ export function MarketplacePage() {
   }, [navigate, setAuth, setBranding]);
 
   const openMotoboyLogin = useCallback(async () => {
+    const savedSession = readMotoboySession();
+    if (savedSession?.token) {
+      setAuth(savedSession as any);
+      localStorage.setItem('motoboySession', JSON.stringify(savedSession));
+      navigate('/motoboy/home', { replace: true });
+      return;
+    }
     if (nativeBiometricService.hasValidStoredMotoboyEnrollment()) {
       try {
         const session = await nativeBiometricService.loginMotoboyWithBiometrics('Confirme sua identidade para acessar suas entregas');
