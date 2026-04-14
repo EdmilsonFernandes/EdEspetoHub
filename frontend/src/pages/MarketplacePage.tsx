@@ -1352,7 +1352,7 @@ export function MarketplacePage() {
         // fallback to login screen
       }
     }
-    navigate('/admin?bio=1');
+    navigate('/admin?bio=1&hub=1&next=/hub');
   }, [navigate, setAuth, setBranding]);
 
   const openMotoboyLogin = useCallback(async () => {
@@ -1367,7 +1367,7 @@ export function MarketplacePage() {
         // fallback to login screen
       }
     }
-    navigate('/motoboy/login?bio=1');
+    navigate('/motoboy/login?bio=1&hub=1&next=/hub');
   }, [navigate, setAuth]);
 
   const openTerms = useCallback(() => {

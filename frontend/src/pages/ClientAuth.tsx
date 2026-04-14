@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { UserCircle, Eye, EyeSlash, LockKey } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
@@ -36,7 +36,6 @@ export function ClientAuth() {
   const [autoBiometricTried, setAutoBiometricTried] = useState(false);
   const [enrollmentPromptOpen, setEnrollmentPromptOpen] = useState(false);
   const [pendingBiometricSession, setPendingBiometricSession] = useState<any | null>(null);
-  const [biometricFailureDiagnostics, setBiometricFailureDiagnostics] = useState<any | null>(null);
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -60,6 +59,13 @@ export function ClientAuth() {
     const params = new URLSearchParams(location.search || '');
     return String(params.get('bio') || '') === '1';
   }, [location.search]);
+
+  const hubSuffix = useMemo(() => {
+    const params = new URLSearchParams();
+    if (hubMode) params.set('hub', '1');
+    if (nextPath) params.set('next', nextPath);
+    return params.toString() ? `?${params.toString()}` : '';
+  }, [hubMode, nextPath]);
 
   useEffect(() => {
     document.title = 'Área do Cliente | Já no Caminho';
@@ -131,13 +137,11 @@ export function ClientAuth() {
     setBiometricLoading(true);
     setError('');
     setMessage('');
-    setBiometricFailureDiagnostics(null);
     try {
       const session = await nativeBiometricService.loginCustomerWithBiometrics('Confirme sua identidade para entrar na sua conta');
       finishLogin(session);
     } catch (e: any) {
       setError(e?.message || 'Não foi possível entrar com biometria.');
-      setBiometricFailureDiagnostics(nativeBiometricService.getCustomerDiagnostics());
     } finally {
       setBiometricLoading(false);
     }
@@ -247,9 +251,9 @@ export function ClientAuth() {
         </div>
 
         <div className="auth-segment">
-          <button type="button" onClick={() => navigate('/admin')} className="auth-segment-btn">Lojista</button>
+          <button type="button" onClick={() => navigate(`/admin${hubSuffix}`)} className="auth-segment-btn">Lojista</button>
           <button type="button" className="auth-segment-btn active">Cliente</button>
-          <button type="button" onClick={() => navigate('/motoboy/login')} className="auth-segment-btn">Entregador</button>
+          <button type="button" onClick={() => navigate(`/motoboy/login${hubSuffix}`)} className="auth-segment-btn">Entregador</button>
         </div>
 
         <div className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40">

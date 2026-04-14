@@ -65,6 +65,14 @@ export function AdminLogin() {
   }, []);
 
   const forceBiometric = String(searchParams.get('bio') || '') === '1';
+  const hubMode = String(searchParams.get('hub') || '') === '1';
+  const nextPath = String(searchParams.get('next') || '').trim();
+  const hubSuffix = (() => {
+    const params = new URLSearchParams();
+    if (hubMode) params.set('hub', '1');
+    if (nextPath) params.set('next', nextPath);
+    return params.toString() ? `?${params.toString()}` : '';
+  })();
 
   const finishAdminLogin = (sessionData: any) => {
     const redirectTab = sessionStorage.getItem('admin:redirectTab');
@@ -365,8 +373,8 @@ export function AdminLogin() {
 
         <div className="auth-segment">
           <button type="button" className="auth-segment-btn active">Lojista</button>
-          <button type="button" onClick={() => navigate('/cliente?mode=login')} className="auth-segment-btn">Cliente</button>
-          <button type="button" onClick={() => navigate('/motoboy/login')} className="auth-segment-btn">Entregador</button>
+          <button type="button" onClick={() => navigate(`/cliente?mode=login${hubMode ? '&hub=1' : ''}${nextPath ? `&next=${encodeURIComponent(nextPath)}` : ''}`)} className="auth-segment-btn">Cliente</button>
+          <button type="button" onClick={() => navigate(`/motoboy/login${hubSuffix}`)} className="auth-segment-btn">Entregador</button>
           {superAdminUnlocked ? (
             <button type="button" onClick={() => navigate('/superadmin')} className="auth-segment-btn">Master</button>
           ) : null}
@@ -518,11 +526,11 @@ export function AdminLogin() {
 
             <button
               type="button"
-              onClick={() => navigate('/')}
+              onClick={() => navigate(hubMode ? '/hub' : '/')}
               className="w-full h-12 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
               <ArrowLeft size={18} weight="duotone" />
-              Voltar ao início
+              {hubMode ? 'Voltar ao hub' : 'Voltar ao início'}
             </button>
           </div>
         </form>

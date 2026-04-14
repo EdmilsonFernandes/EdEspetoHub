@@ -5,14 +5,248 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260414.010045.856c6ba9",
-  "buildId": "0.1.9+20260414.010045.856c6ba9-20260414.010045-856c6ba9",
-  "builtAt": "2026-04-14T01:00:45.290Z",
-  "commitHash": "856c6ba982f1d5a32d7fae4c628b22206a150dd3",
-  "shortHash": "856c6ba9",
+  "versionInternal": "0.1.9+20260414.202741.fdbad9d5",
+  "buildId": "0.1.9+20260414.202741.fdbad9d5-20260414.202741-fdbad9d5",
+  "builtAt": "2026-04-14T20:27:41.444Z",
+  "commitHash": "fdbad9d56c356ee6a590d035434cc7bb85f80653",
+  "shortHash": "fdbad9d5",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "fdbad9d56c356ee6a590d035434cc7bb85f80653",
+      "shortHash": "fdbad9d5",
+      "dateIso": "2026-04-14T17:18:30-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(hub): deepen bottom nav contrast and remove auth debug",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/fdbad9d56c356ee6a590d035434cc7bb85f80653"
+    },
+    {
+      "hash": "3c1e0f8beb4d7d37a3c49ba849c71e52a0892f76",
+      "shortHash": "3c1e0f8b",
+      "dateIso": "2026-04-14T16:58:21-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(auth): trigger biometrics directly from role picker",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3c1e0f8beb4d7d37a3c49ba849c71e52a0892f76"
+    },
+    {
+      "hash": "866803823b8bd6e8aea7264f5c4532f146b2406e",
+      "shortHash": "86680382",
+      "dateIso": "2026-04-14T16:39:37-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(auth): bind native biometric bridge calls",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/866803823b8bd6e8aea7264f5c4532f146b2406e"
+    },
+    {
+      "hash": "6a735e5bdebdcfbc6ba150852be51035054bdeb8",
+      "shortHash": "6a735e5b",
+      "dateIso": "2026-04-14T16:14:22-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "debug(auth): show customer biometric failure state",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6a735e5bdebdcfbc6ba150852be51035054bdeb8"
+    },
+    {
+      "hash": "db9b618744f8d7681fef99a3da42cfaefdc80a9c",
+      "shortHash": "db9b6187",
+      "dateIso": "2026-04-14T15:58:13-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(auth): wait for native biometric bridge",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/db9b618744f8d7681fef99a3da42cfaefdc80a9c"
+    },
+    {
+      "hash": "690549cba59c4760d56d5add553df2354b061797",
+      "shortHash": "690549cb",
+      "dateIso": "2026-04-14T15:26:33-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "debug(auth): expose customer biometric diagnostics",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/690549cba59c4760d56d5add553df2354b061797"
+    },
+    {
+      "hash": "658f6b8d4542751d21b10835e80d22f8ac3a53dd",
+      "shortHash": "658f6b8d",
+      "dateIso": "2026-04-14T15:22:56-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(auth): harden biometric session recovery",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/658f6b8d4542751d21b10835e80d22f8ac3a53dd"
+    },
+    {
+      "hash": "1c54da99d5e5b97e6d3e2abcf48fc082bda97a1b",
+      "shortHash": "1c54da99",
+      "dateIso": "2026-04-14T14:38:41-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(auth): retry biometric bridge detection on login",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1c54da99d5e5b97e6d3e2abcf48fc082bda97a1b"
+    },
+    {
+      "hash": "3943bf163cb93dfdc990c99bab103d029936e61d",
+      "shortHash": "3943bf16",
+      "dateIso": "2026-04-14T14:21:06-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(auth): keep role picker transitions inside hub",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3943bf163cb93dfdc990c99bab103d029936e61d"
+    },
+    {
+      "hash": "31014c7e2e49179a8b00985b8f1e88a76f14bbf9",
+      "shortHash": "31014c7e",
+      "dateIso": "2026-04-14T13:45:10-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(auth): force biometric entry from role picker",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/31014c7e2e49179a8b00985b8f1e88a76f14bbf9"
+    },
+    {
+      "hash": "369b8ce6a0bd6aa56bd05e15ec1d2e8c90e14b9b",
+      "shortHash": "369b8ce6",
+      "dateIso": "2026-04-14T12:21:03-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(hub): elevate selected condo banner",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/369b8ce6a0bd6aa56bd05e15ec1d2e8c90e14b9b"
+    },
+    {
+      "hash": "5e8b5d6ee7298fa8401297b80e08dc0e89afbdc1",
+      "shortHash": "5e8b5d6e",
+      "dateIso": "2026-04-14T12:16:42-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(hub): avoid bottom-nav overlap and refine condo status",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5e8b5d6ee7298fa8401297b80e08dc0e89afbdc1"
+    },
+    {
+      "hash": "5c67752063a9e7abe4202c2574249c95ed721bce",
+      "shortHash": "5c677520",
+      "dateIso": "2026-04-14T12:08:06-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(android): bump release to 1.0.14",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5c67752063a9e7abe4202c2574249c95ed721bce"
+    },
+    {
+      "hash": "3670c470fce0c57b4cbe7c13160340381042db43",
+      "shortHash": "3670c470",
+      "dateIso": "2026-04-14T12:03:07-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(web): remove unused marketing demo video",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3670c470fce0c57b4cbe7c13160340381042db43"
+    },
+    {
+      "hash": "26778ac9bc2797432cd7ab5c0ffa725b6a45fe1f",
+      "shortHash": "26778ac9",
+      "dateIso": "2026-04-14T11:59:30-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(android): optimize bundled assets",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/26778ac9bc2797432cd7ab5c0ffa725b6a45fe1f"
+    },
+    {
+      "hash": "8f73a1e7d4ee910211521a3badc95dfe353e72d8",
+      "shortHash": "8f73a1e7",
+      "dateIso": "2026-04-14T11:47:42-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(auth): extend biometric login to admin and motoboy",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8f73a1e7d4ee910211521a3badc95dfe353e72d8"
+    },
+    {
+      "hash": "060cccaf5fe102a251eb4e3b01b28ee9a9f2f42a",
+      "shortHash": "060cccaf",
+      "dateIso": "2026-04-14T11:31:54-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(hub): stabilize search bar and soften condo banner",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/060cccaf5fe102a251eb4e3b01b28ee9a9f2f42a"
+    },
+    {
+      "hash": "c69d3ae74f79c0e54b23003b011af68a3b6cc7ad",
+      "shortHash": "c69d3ae7",
+      "dateIso": "2026-04-14T11:25:04-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(auth): add premium biometric enrollment prompt",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c69d3ae74f79c0e54b23003b011af68a3b6cc7ad"
+    },
+    {
+      "hash": "b2431eebe5ef2fddfe5c255717a9d968234629a3",
+      "shortHash": "b2431eeb",
+      "dateIso": "2026-04-14T11:08:43-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(hub): refine condo banner and dock bottom nav",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b2431eebe5ef2fddfe5c255717a9d968234629a3"
+    },
+    {
+      "hash": "2f70b06aa70bc301b6dfe6a3aa0b2cc66bc885b3",
+      "shortHash": "2f70b06a",
+      "dateIso": "2026-04-14T10:57:03-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(hub): refine condo banner and bump android release",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2f70b06aa70bc301b6dfe6a3aa0b2cc66bc885b3"
+    },
+    {
+      "hash": "89d75a6bfb068d6f36601c6b6bbcfbbd83930776",
+      "shortHash": "89d75a6b",
+      "dateIso": "2026-04-14T10:21:38-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(app): add customer biometric login for android",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/89d75a6bfb068d6f36601c6b6bbcfbbd83930776"
+    },
+    {
+      "hash": "7996177cfbc976e5f0d9d72fee6dfa11fa49d77e",
+      "shortHash": "7996177c",
+      "dateIso": "2026-04-14T10:00:07-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(hub): tighten bottom nav and restore search after condo",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7996177cfbc976e5f0d9d72fee6dfa11fa49d77e"
+    },
+    {
+      "hash": "b4b48b6da16e80d22675434c5a734e0c91f9e678",
+      "shortHash": "b4b48b6d",
+      "dateIso": "2026-04-13T23:28:18-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(hub): stabilize home search bar rendering",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b4b48b6da16e80d22675434c5a734e0c91f9e678"
+    },
+    {
+      "hash": "069ce39f3d7a7d0b96d79fcea13d6c3e6eaa316d",
+      "shortHash": "069ce39f",
+      "dateIso": "2026-04-13T23:21:32-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(hub): polish condo banner and rounded nav",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/069ce39f3d7a7d0b96d79fcea13d6c3e6eaa316d"
+    },
+    {
+      "hash": "e459ba0628cfbdbd154232ed12b9405408918c4d",
+      "shortHash": "e459ba06",
+      "dateIso": "2026-04-13T23:07:53-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(hub): clarify condo context and checkout header",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e459ba0628cfbdbd154232ed12b9405408918c4d"
+    },
+    {
+      "hash": "25d0ce09ca3714b42782ddcafee2ee1ce650d05a",
+      "shortHash": "25d0ce09",
+      "dateIso": "2026-04-13T22:48:29-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(app): improve condo preview and android update flow",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/25d0ce09ca3714b42782ddcafee2ee1ce650d05a"
+    },
     {
       "hash": "856c6ba982f1d5a32d7fae4c628b22206a150dd3",
       "shortHash": "856c6ba9",
@@ -48,240 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(hub): polish condominium UX and restore checkout context",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/743fa4e1aa333f1b89bd3ec89b0919591dbeffe3"
-    },
-    {
-      "hash": "c36e64865c67da9216823436b0986fe6e99e31d6",
-      "shortHash": "c36e6486",
-      "dateIso": "2026-04-13T20:45:58-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(superadmin): organize condominium workspace sections",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c36e64865c67da9216823436b0986fe6e99e31d6"
-    },
-    {
-      "hash": "02f787dab329e925641d963cd63fbe101282eaba",
-      "shortHash": "02f787da",
-      "dateIso": "2026-04-13T17:45:16-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(hub): strengthen default search field contrast",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/02f787dab329e925641d963cd63fbe101282eaba"
-    },
-    {
-      "hash": "6f70dc6fc979482902f5ef7e045ba5420c472624",
-      "shortHash": "6f70dc6f",
-      "dateIso": "2026-04-13T17:29:37-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(condominiums): add store rules and compact premium hub states",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6f70dc6fc979482902f5ef7e045ba5420c472624"
-    },
-    {
-      "hash": "458ebbc21ca194b86b806bb82380d258a98a51f3",
-      "shortHash": "458ebbc2",
-      "dateIso": "2026-04-13T17:18:55-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(hub): polish condominium cards and category rail",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/458ebbc21ca194b86b806bb82380d258a98a51f3"
-    },
-    {
-      "hash": "8375604f18e667978f761029efd31ce62348fdb0",
-      "shortHash": "8375604f",
-      "dateIso": "2026-04-13T17:13:06-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(hub): refine condominium header and search bar",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8375604f18e667978f761029efd31ce62348fdb0"
-    },
-    {
-      "hash": "57f49b534d53fcb00a17e01574b2e47e98c8b448",
-      "shortHash": "57f49b53",
-      "dateIso": "2026-04-13T17:08:57-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(hub): simplify featured rail and condominium picker",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/57f49b534d53fcb00a17e01574b2e47e98c8b448"
-    },
-    {
-      "hash": "f7266ed4b00c19eee24fa3132c6a227afb2a7573",
-      "shortHash": "f7266ed4",
-      "dateIso": "2026-04-13T16:51:59-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(auth): center access picker and refine account danger action",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f7266ed4b00c19eee24fa3132c6a227afb2a7573"
-    },
-    {
-      "hash": "2c29ca0debf2c654ef00ab6c39d12ba362ce5761",
-      "shortHash": "2c29ca0d",
-      "dateIso": "2026-04-13T16:44:28-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(condominiums): refine admin controls and hub event selection",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2c29ca0debf2c654ef00ab6c39d12ba362ce5761"
-    },
-    {
-      "hash": "85c2432d73d6bb40d26d50c34daf5373e5bc9d99",
-      "shortHash": "85c2432d",
-      "dateIso": "2026-04-13T16:20:27-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(checkout): resolve condominium order failures",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/85c2432d73d6bb40d26d50c34daf5373e5bc9d99"
-    },
-    {
-      "hash": "dbae761a3a13dcd23f1405df08d15e40ba479c52",
-      "shortHash": "dbae761a",
-      "dateIso": "2026-04-13T16:09:44-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(condominiums): enrich condominium checkout identity",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/dbae761a3a13dcd23f1405df08d15e40ba479c52"
-    },
-    {
-      "hash": "ccb6a2524aa7eb0203461f8f1a65c212321e8f0f",
-      "shortHash": "ccb6a252",
-      "dateIso": "2026-04-13T16:05:18-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(condominiums): stabilize checkout and admin hub",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ccb6a2524aa7eb0203461f8f1a65c212321e8f0f"
-    },
-    {
-      "hash": "8b46696701d6dc0c198e19d5ccae4afa059e6f0a",
-      "shortHash": "8b466967",
-      "dateIso": "2026-04-13T15:37:21-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(condominiums): finalize event form validation flow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8b46696701d6dc0c198e19d5ccae4afa059e6f0a"
-    },
-    {
-      "hash": "106cce868e4c0822727dac400efa363f2cdaceff",
-      "shortHash": "106cce86",
-      "dateIso": "2026-04-13T14:59:13-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(hub): premiumize selected condominium card",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/106cce868e4c0822727dac400efa363f2cdaceff"
-    },
-    {
-      "hash": "5f31f8fd8af4737fa6b610a42f50bfe986d73995",
-      "shortHash": "5f31f8fd",
-      "dateIso": "2026-04-13T14:54:47-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(condominiums): polish admin assets and queue filter",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5f31f8fd8af4737fa6b610a42f50bfe986d73995"
-    },
-    {
-      "hash": "faed772b5b2d257fbffd1753965fdd996486f2c8",
-      "shortHash": "faed772b",
-      "dateIso": "2026-04-13T14:44:02-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(condominiums): isolate condominium checkout flow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/faed772b5b2d257fbffd1753965fdd996486f2c8"
-    },
-    {
-      "hash": "a70bb399e005ef52a145b234716f8e29eb17118b",
-      "shortHash": "a70bb399",
-      "dateIso": "2026-04-13T14:08:06-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix: restaurando código original do CartView.tsx",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a70bb399e005ef52a145b234716f8e29eb17118b"
-    },
-    {
-      "hash": "ffe9edad2915a0033b2b148d1ecdd0609dde49aa",
-      "shortHash": "ffe9edad",
-      "dateIso": "2026-04-13T14:03:58-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(cart): corrige definitivamente o path do apiClient",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ffe9edad2915a0033b2b148d1ecdd0609dde49aa"
-    },
-    {
-      "hash": "4653e8e502aac1ef4ced55623f4e2e25b1658540",
-      "shortHash": "4653e8e5",
-      "dateIso": "2026-04-13T14:00:08-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix: revertendo alterações invasivas no CartView.tsx para restaurar checkout original",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4653e8e502aac1ef4ced55623f4e2e25b1658540"
-    },
-    {
-      "hash": "c09f9e152e5b12dda212a42148b09dc642034bf1",
-      "shortHash": "c09f9e15",
-      "dateIso": "2026-04-13T13:51:18-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(cart): corrige caminho de import do apiClient",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c09f9e152e5b12dda212a42148b09dc642034bf1"
-    },
-    {
-      "hash": "627f88ec066c4f157da8244f153c471dea86b4b1",
-      "shortHash": "627f88ec",
-      "dateIso": "2026-04-13T13:41:03-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(condominium): fechamento operacional com integração de checkout, pedido e fila do admin",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/627f88ec066c4f157da8244f153c471dea86b4b1"
-    },
-    {
-      "hash": "5b9204b27d69cb00c779f101e23cb64032bdcd0a",
-      "shortHash": "5b9204b2",
-      "dateIso": "2026-04-13T11:23:15-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(condominiums): allow stores to leave condominium flow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5b9204b27d69cb00c779f101e23cb64032bdcd0a"
-    },
-    {
-      "hash": "50a2bf68b6de3807746bd68489b72ad9ee036ce2",
-      "shortHash": "50a2bf68",
-      "dateIso": "2026-04-13T11:13:57-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(condominiums): add admin management workflow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/50a2bf68b6de3807746bd68489b72ad9ee036ce2"
-    },
-    {
-      "hash": "3ab530331ecd5b94efe5573e683509b472886a54",
-      "shortHash": "3ab53033",
-      "dateIso": "2026-04-13T10:52:37-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(condominiums): add event scheduling foundation",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3ab530331ecd5b94efe5573e683509b472886a54"
-    },
-    {
-      "hash": "b8a14374530a2da3dab6bd67e15e65e80af10cca",
-      "shortHash": "b8a14374",
-      "dateIso": "2026-04-13T10:37:55-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(hub): refine condominium mode UX",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b8a14374530a2da3dab6bd67e15e65e80af10cca"
-    },
-    {
-      "hash": "389ab5829ee79f141abc82a4be7767e230d9d73e",
-      "shortHash": "389ab582",
-      "dateIso": "2026-04-13T10:19:48-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(hub): add condominium event mode",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/389ab5829ee79f141abc82a4be7767e230d9d73e"
-    },
-    {
-      "hash": "56328496501776bc7d6bc96b26f945fca8eb03fa",
-      "shortHash": "56328496",
-      "dateIso": "2026-04-13T09:59:40-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(hub): align condominium directory with light theme",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/56328496501776bc7d6bc96b26f945fca8eb03fa"
     }
   ]
 } as const;

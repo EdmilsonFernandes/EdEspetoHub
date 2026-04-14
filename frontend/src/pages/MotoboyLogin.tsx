@@ -49,6 +49,14 @@ export function MotoboyLogin() {
   const sessionEmail = String(persistedSession?.user?.email || '').trim();
   const alreadyLoggedIn = Boolean(persistedSession?.token && sessionEmail);
   const forceBiometric = String(searchParams.get('bio') || '') === '1';
+  const hubMode = String(searchParams.get('hub') || '') === '1';
+  const nextPath = String(searchParams.get('next') || '').trim();
+  const hubSuffix = (() => {
+    const params = new URLSearchParams();
+    if (hubMode) params.set('hub', '1');
+    if (nextPath) params.set('next', nextPath);
+    return params.toString() ? `?${params.toString()}` : '';
+  })();
 
   useEffect(() => {
     const refreshBiometricAvailability = () => {
@@ -270,8 +278,8 @@ export function MotoboyLogin() {
         </div>
 
         <div className="auth-segment">
-          <button type="button" onClick={() => navigate('/admin')} className="auth-segment-btn">Lojista</button>
-          <button type="button" onClick={() => navigate('/cliente?mode=login')} className="auth-segment-btn">Cliente</button>
+          <button type="button" onClick={() => navigate(`/admin${hubSuffix}`)} className="auth-segment-btn">Lojista</button>
+          <button type="button" onClick={() => navigate(`/cliente?mode=login${hubMode ? '&hub=1' : ''}${nextPath ? `&next=${encodeURIComponent(nextPath)}` : ''}`)} className="auth-segment-btn">Cliente</button>
           <button type="button" className="auth-segment-btn active">Entregador</button>
           {superAdminUnlocked ? (
             <button type="button" onClick={() => navigate('/superadmin')} className="auth-segment-btn">Master</button>
@@ -471,10 +479,10 @@ export function MotoboyLogin() {
           <div className="pt-2 space-y-2">
             <button
               type="button"
-              onClick={() => navigate('/')}
+              onClick={() => navigate(hubMode ? '/hub' : '/')}
               className="w-full text-center text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest"
             >
-              Voltar para o site
+              {hubMode ? 'Voltar para o hub' : 'Voltar para o site'}
             </button>
 
             <button
