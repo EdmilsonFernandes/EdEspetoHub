@@ -685,6 +685,11 @@ export function MarketplacePage() {
   }, [query]);
 
   useEffect(() => {
+    if (selectedCondominiumSlug) return;
+    setSearchBarRenderKey((current) => current + 1);
+  }, [selectedCondominiumSlug]);
+
+  useEffect(() => {
     if (featuredProducts.length <= 8) {
       setFeaturedOffset(0);
       return;
@@ -2491,10 +2496,10 @@ export function MarketplacePage() {
       </div>
 
       <nav
-        className="fixed bottom-0 left-0 right-0 z-[100] px-3 pb-[max(env(safe-area-inset-bottom),0px)] transition-transform duration-300 lg:hidden"
+        className="fixed bottom-0 left-0 right-0 z-[100] px-2 pb-[env(safe-area-inset-bottom)] transition-transform duration-300 lg:hidden"
         style={{ transform: isBottomNavVisible ? 'translateY(0)' : 'translateY(100%)' }}
       >
-        <div className="grid h-[4.75rem] grid-cols-4 items-center gap-2 rounded-[1.9rem] border border-[#336886]/12 bg-[linear-gradient(180deg,rgba(235,244,250,0.94)_0%,rgba(225,238,247,0.92)_100%)] px-4 pt-2 shadow-[0_-14px_34px_-26px_rgba(51,104,134,0.3)] backdrop-blur-2xl">
+        <div className="grid h-[4.75rem] grid-cols-4 items-center gap-2 rounded-[1.75rem] border border-[#336886]/12 bg-[linear-gradient(180deg,rgba(235,244,250,0.94)_0%,rgba(225,238,247,0.92)_100%)] px-4 pt-2 shadow-[0_-14px_34px_-26px_rgba(51,104,134,0.3)] backdrop-blur-2xl">
           <button
             type="button"
             onClick={handleHomeHubNavigation}

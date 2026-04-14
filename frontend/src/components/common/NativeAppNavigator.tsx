@@ -113,8 +113,8 @@ export function NativeAppNavigator() {
   const isFavorites = location.pathname === '/hub' && location.search.includes('favorites=1');
 
   return (
-    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-[35] px-3 pb-[max(env(safe-area-inset-bottom),4px)] transition-transform duration-300 ease-in-out lg:hidden">
-      <div className="pointer-events-auto mx-auto grid max-w-none grid-cols-4 gap-1 rounded-[1.9rem] border border-[#336886]/12 bg-[linear-gradient(180deg,rgba(235,244,250,0.92)_0%,rgba(225,238,247,0.9)_100%)] p-1.5 shadow-[0_-12px_28px_-20px_rgba(51,104,134,0.24)] backdrop-blur-2xl">
+    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-[35] px-2 pb-[env(safe-area-inset-bottom)] transition-transform duration-300 ease-in-out lg:hidden">
+      <div className="pointer-events-auto mx-auto grid max-w-none grid-cols-4 gap-1 rounded-[1.75rem] border border-[#336886]/12 bg-[linear-gradient(180deg,rgba(235,244,250,0.92)_0%,rgba(225,238,247,0.9)_100%)] p-1.5 shadow-[0_-12px_28px_-20px_rgba(51,104,134,0.24)] backdrop-blur-2xl">
         <button
           type="button"
           onClick={handleHome}
