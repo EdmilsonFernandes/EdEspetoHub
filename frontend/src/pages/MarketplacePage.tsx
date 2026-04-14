@@ -42,6 +42,9 @@ import { ProfileDrawer } from '../components/Marketplace/ProfileDrawer';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { SegmentPromoCarousel } from '../components/common/SegmentPromoCarousel';
 import { APP_BUILD_INFO } from '../generated/buildInfo';
+import { nativeBiometricService } from '../services/nativeBiometricService';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 type MarketplaceStore = {
   id?: string;
@@ -321,6 +324,8 @@ const isTerminalRecentOrder = (entry?: {
 export function MarketplacePage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { setAuth } = useAuth();
+  const { setBranding } = useTheme();
   const [stores, setStores] = useState<MarketplaceStore[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -1310,17 +1315,60 @@ export function MarketplacePage() {
     navigate('/cliente/pedidos');
   }, [navigate]);
 
-  const openCustomerLogin = useCallback(() => {
+  const openCustomerLogin = useCallback(async () => {
+    if (nativeBiometricService.hasValidStoredCustomerEnrollment()) {
+      try {
+        const session = await nativeBiometricService.loginCustomerWithBiometrics('Confirme sua identidade para entrar na sua conta');
+        setCustomerSession(session);
+        navigate('/hub', { replace: true });
+        return;
+      } catch {
+        // fallback to login screen
+      }
+    }
     navigate('/cliente?mode=login&next=/hub&hub=1&bio=1');
   }, [navigate]);
 
-  const openAdminLogin = useCallback(() => {
+  const openAdminLogin = useCallback(async () => {
+    if (nativeBiometricService.hasValidStoredAdminEnrollment()) {
+      try {
+        const session = await nativeBiometricService.loginAdminWithBiometrics('Confirme sua identidade para acessar sua operação');
+        const storeSettings = (session as any)?.store?.settings || {};
+        setAuth(session as any);
+        setBranding({
+          primaryColor: storeSettings?.primaryColor,
+          secondaryColor: storeSettings?.secondaryColor,
+          logoUrl: storeSettings?.logoUrl,
+          brandName: session?.store?.name,
+        });
+        const role = String(session?.user?.role || '').toUpperCase();
+        if ((role === 'ADMIN' || role === 'OPERATOR') && window.matchMedia('(max-width: 767px)').matches && session?.store?.slug) {
+          navigate(`/${session.store.slug}`, { replace: true });
+          return;
+        }
+        navigate(role === 'ADMIN' ? '/admin/dashboard' : '/admin/queue', { replace: true });
+        return;
+      } catch {
+        // fallback to login screen
+      }
+    }
     navigate('/admin?bio=1');
-  }, [navigate]);
+  }, [navigate, setAuth, setBranding]);
 
-  const openMotoboyLogin = useCallback(() => {
+  const openMotoboyLogin = useCallback(async () => {
+    if (nativeBiometricService.hasValidStoredMotoboyEnrollment()) {
+      try {
+        const session = await nativeBiometricService.loginMotoboyWithBiometrics('Confirme sua identidade para acessar suas entregas');
+        setAuth(session as any);
+        localStorage.setItem('motoboySession', JSON.stringify(session));
+        navigate('/motoboy/home', { replace: true });
+        return;
+      } catch {
+        // fallback to login screen
+      }
+    }
     navigate('/motoboy/login?bio=1');
-  }, [navigate]);
+  }, [navigate, setAuth]);
 
   const openTerms = useCallback(() => {
     navigate('/terms?from=hub');
