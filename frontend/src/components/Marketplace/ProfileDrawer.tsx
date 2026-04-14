@@ -381,9 +381,13 @@ export function ProfileDrawer({
 
         <div className="border-t border-slate-100/90 bg-white/70 p-6 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] backdrop-blur-xl">
           <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               <p className="text-[11px] font-black text-slate-900 tracking-tight">Ja no Caminho</p>
-              <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Versão {versionLabel || 'v0.0.0'}</p>
+              <div className="inline-flex items-center rounded-full border border-[#336886]/12 bg-[#336886]/6 px-3 py-1.5 shadow-[0_10px_22px_-18px_rgba(51,104,134,0.28)]">
+                <span className="text-[11px] font-black uppercase tracking-[0.16em] text-[#336886]">
+                  Versão {versionLabel || 'v0.0.0'}
+                </span>
+              </div>
             </div>
             <img src="/janocaminho.jpg" alt="Logo" loading="eager" fetchPriority="high" decoding="async" className="h-8 w-auto rounded-full object-cover opacity-95" />
           </div>

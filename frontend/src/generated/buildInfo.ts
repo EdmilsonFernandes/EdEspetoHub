@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260414.204429.e5101361",
-  "buildId": "0.1.9+20260414.204429.e5101361-20260414.204429-e5101361",
-  "builtAt": "2026-04-14T20:44:29.911Z",
-  "commitHash": "e510136133b021d58ce4fd4e08ae5cd9126b60e6",
-  "shortHash": "e5101361",
+  "versionInternal": "0.1.9+20260414.204953.e78f2083",
+  "buildId": "0.1.9+20260414.204953.e78f2083-20260414.204953-e78f2083",
+  "builtAt": "2026-04-14T20:49:53.757Z",
+  "commitHash": "e78f2083497e672807e7b92852792a39f9a0921a",
+  "shortHash": "e78f2083",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "e78f2083497e672807e7b92852792a39f9a0921a",
+      "shortHash": "e78f2083",
+      "dateIso": "2026-04-14T17:45:14-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(hub): polish premium saved-account cards",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e78f2083497e672807e7b92852792a39f9a0921a"
+    },
     {
       "hash": "e510136133b021d58ce4fd4e08ae5cd9126b60e6",
       "shortHash": "e5101361",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(app): improve condo preview and android update flow",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/25d0ce09ca3714b42782ddcafee2ee1ce650d05a"
-    },
-    {
-      "hash": "856c6ba982f1d5a32d7fae4c628b22206a150dd3",
-      "shortHash": "856c6ba9",
-      "dateIso": "2026-04-13T21:57:48-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(hub): unify condo context and premium bottom nav",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/856c6ba982f1d5a32d7fae4c628b22206a150dd3"
     }
   ]
 } as const;
