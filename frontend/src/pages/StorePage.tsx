@@ -152,7 +152,7 @@ export function StorePage() {
   const [selectedPostalServiceCode, setSelectedPostalServiceCode] = useState('');
   const [promoMessage, setPromoMessage] = useState('');
   const [openingHours, setOpeningHours] = useState([]);
-  const [orderTypes, setOrderTypes] = useState([ 'delivery', 'pickup', 'table' ]);
+  const [orderTypes, setOrderTypes] = useState([ 'pickup', 'table' ]);
   const [storeSubscription, setStoreSubscription] = useState(null);
   const [storePlanExempt, setStorePlanExempt] = useState(false);
   const [storeReviewSummary, setStoreReviewSummary] = useState<any | null>(null);
@@ -340,7 +340,7 @@ export function StorePage() {
     if (!value || value <= 0) return 0;
     return value;
   }, [customer.type, deliveryFee, isPostalDelivery, selectedPostalService]);
-  const isCondominiumCheckout = Boolean(condominiumCheckoutContext?.condominium?.slug && condominiumCheckoutContext?.event?.canOrderInCondominium);
+  const isCondominiumCheckout = Boolean(condominiumCheckoutContext?.condominium?.slug);
   const condominiumFulfillmentMode = String(customer?.condominiumFulfillmentMode || 'pickup_at_stall');
   const condominiumApartmentFee = useMemo(() => {
     const value = Number(
@@ -732,7 +732,7 @@ export function StorePage() {
           setOpeningHours(normalizedHours);
           const baseTypes = Array.isArray(data.settings?.orderTypes) && data.settings.orderTypes.length > 0
             ? data.settings.orderTypes
-            : [ 'delivery', 'pickup', 'table' ];
+            : [ 'pickup', 'table' ];
           const deliveryEnabled = canUseDeliveryBySubscription(data.subscription, data.settings);
           const allowedTypes = deliveryEnabled
             ? baseTypes
@@ -914,8 +914,7 @@ export function StorePage() {
           (item: any) => String(item?.slug || '').trim() === String(storeSlug || '').trim()
         );
         const event = payload?.event || payload?.condominium?.eventSummary || storeContext?.condominiumEvent || null;
-        const canOrder = Boolean(event?.canOrderInCondominium);
-        if (!storeContext || !canOrder) {
+        if (!storeContext) {
           setCondominiumCheckoutContext(null);
           return;
         }
@@ -2525,9 +2524,10 @@ export function StorePage() {
               reviewSummary={storeReviewSummary}
               deliveryFeeLabel={
                 orderTypes.includes('delivery')
-                  ? (getNumeric(deliveryFee) && Number(getNumeric(deliveryFee)) > 0
-                      ? `Taxa ${formatCurrency(Number(getNumeric(deliveryFee)))}`
-                      : 'Entrega grátis')
+                  ? (() => {
+                      const feeValue = getNumeric(deliveryFee);
+                      return feeValue !== null && feeValue > 0 ? `Taxa ${formatCurrency(Number(feeValue))}` : 'Entrega grátis';
+                    })()
                   : ''
               }
               orderTypes={orderTypes}
@@ -2545,12 +2545,14 @@ export function StorePage() {
             paymentMethod={paymentMethod}
             condominiumCheckoutContext={condominiumCheckoutContext}
             allowCustomerAutocomplete={Boolean(user?.token)}
-            checkoutDisabled={!cartItemsCount || condominiumCheckoutLoading}
+            checkoutDisabled={!cartItemsCount || condominiumCheckoutLoading || !condominiumCheckoutContext?.event?.canOrderInCondominium}
             checkoutDisabledReason={
               !cartItemsCount
                 ? 'Adicione pelo menos 1 item para continuar.'
                 : condominiumCheckoutLoading
                 ? 'Carregando dados da feira.'
+                : !condominiumCheckoutContext?.event?.canOrderInCondominium
+                ? 'Esta agenda ainda nao esta aceitando pedidos.'
                 : ''
             }
             pricingSummary={{

@@ -1,8 +1,9 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { UserCircle, ArrowLeft, Eye, EyeSlash } from '@phosphor-icons/react';
+import { UserCircle, Eye, EyeSlash, LockKey } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
+import { AuthLayout } from '../layouts/AuthLayout';
 
 const formatPhoneBr = (value: string) => {
   const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
@@ -114,19 +115,27 @@ export function ClientAuth() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 px-4 py-8">
-      <div className="max-w-md mx-auto relative">
-        <button
-          type="button"
-          onClick={() => navigate(hubMode ? '/hub' : '/')}
-          className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-slate-500 hover:text-slate-900 mb-6"
-        >
-          <ArrowLeft size={14} />
-          Voltar
-        </button>
+    <AuthLayout>
+      <div className="space-y-4 ds-login-card-enter w-full">
+        <div className="text-center space-y-2.5">
+          <button type="button" onClick={() => navigate(hubMode ? '/hub' : '/')} className="mx-auto block hover:scale-105 transition-transform active:scale-95">
+            <img src="/janocaminho-logo.png" alt="Já no Caminho" className="mx-auto h-16 w-auto drop-shadow-md" />
+          </button>
+          <p className="text-[12px] font-bold uppercase tracking-[0.25em] text-slate-400">Acesso da plataforma</p>
+          <div className="flex items-center justify-center gap-3">
+            <LockKey size={32} weight="duotone" className="text-[#0d4f66]" />
+            <h2 className="text-[2rem] sm:text-[2.2rem] font-black text-slate-800 tracking-[-0.03em]">Login</h2>
+          </div>
+        </div>
 
-        <div className="relative rounded-[2rem] border border-slate-200 bg-white p-5 sm:p-6 shadow-[0_28px_80px_-45px_rgba(15,23,42,0.28)]">
-          <div className="flex items-center gap-3 mb-4">
+        <div className="auth-segment">
+          <button type="button" onClick={() => navigate('/admin')} className="auth-segment-btn">Lojista</button>
+          <button type="button" className="auth-segment-btn active">Cliente</button>
+          <button type="button" onClick={() => navigate('/motoboy/login')} className="auth-segment-btn">Entregador</button>
+        </div>
+
+        <div className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40">
+          <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-slate-100 inline-flex items-center justify-center shadow-inner">
               <UserCircle size={22} weight="duotone" />
             </div>
@@ -136,7 +145,7 @@ export function ClientAuth() {
             </div>
           </div>
 
-          <div className="flex gap-2 mb-4 rounded-xl bg-slate-100 p-1 border border-slate-200">
+          <div className="flex gap-2 rounded-xl bg-slate-100 p-1 border border-slate-200">
             <button
               type="button"
               onClick={() => setMode('login')}
@@ -248,8 +257,8 @@ export function ClientAuth() {
               </div>
             )}
 
-            {error ? <p className="text-sm text-rose-300">{error}</p> : null}
-            {message ? <p className="text-sm text-emerald-300">{message}</p> : null}
+            {error ? <p className="text-sm text-rose-600">{error}</p> : null}
+            {message ? <p className="text-sm text-emerald-600">{message}</p> : null}
 
             <button
               type="submit"
@@ -270,6 +279,6 @@ export function ClientAuth() {
           </form>
         </div>
       </div>
-    </main>
+    </AuthLayout>
   );
 }

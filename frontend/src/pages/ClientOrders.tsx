@@ -7,12 +7,16 @@ import {
   CalendarBlank,
   CheckCircle,
   Clock,
+  Heart,
+  House,
   Package,
+  Receipt,
   SpinnerGap,
   Storefront,
   Timer,
   Truck,
   XCircle,
+  Buildings,
 } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
 import { orderService } from '../services/orderService';
@@ -535,7 +539,7 @@ export function ClientOrders() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f8f8f6] pb-12 pt-[env(safe-area-inset-top)]">
+    <main className="min-h-screen bg-[#f8f8f6] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] pt-[env(safe-area-inset-top)]">
       <div className="mx-auto max-w-2xl">
         <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200/80 bg-[#f8f8f6]/95 px-4 py-4 backdrop-blur-md">
           <button
@@ -682,6 +686,42 @@ export function ClientOrders() {
           </div>
         </div>
       ) : null}
+
+      <nav className="fixed bottom-0 left-0 right-0 z-[100] border-t border-white/80 bg-white/92 shadow-[0_-14px_34px_-26px_rgba(15,23,42,0.38)] backdrop-blur-2xl lg:hidden">
+        <div className="grid h-[4.75rem] grid-cols-4 items-center gap-2 px-4 pt-2 pb-[max(env(safe-area-inset-bottom),0px)]">
+          <button
+            type="button"
+            onClick={() => navigate('/hub')}
+            className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]"
+          >
+            <House size={18} weight="duotone" />
+            <span className="text-[9px] font-black uppercase">Início</span>
+          </button>
+          <button
+            type="button"
+            className="flex flex-col items-center justify-center rounded-2xl bg-[#336886]/10 py-1 text-[#336886] shadow-[0_8px_18px_-16px_rgba(51,104,134,0.7)] ring-1 ring-[#336886]/15 transition-all duration-150 ease-out active:scale-[0.94]"
+          >
+            <Receipt size={18} weight="fill" />
+            <span className="text-[9px] font-black uppercase">Pedidos</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/hub?panel=condominios')}
+            className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]"
+          >
+            <Buildings size={18} weight="duotone" />
+            <span className="text-[9px] font-black uppercase">Condo</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/hub?favorites=1')}
+            className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]"
+          >
+            <Heart size={18} weight="regular" />
+            <span className="text-[9px] font-black uppercase">Favoritos</span>
+          </button>
+        </div>
+      </nav>
     </main>
   );
 }

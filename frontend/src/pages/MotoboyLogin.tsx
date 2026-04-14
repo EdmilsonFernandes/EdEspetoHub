@@ -170,7 +170,8 @@ export function MotoboyLogin() {
         </div>
 
         <div className="auth-segment">
-          <button type="button" onClick={() => navigate('/admin')} className="auth-segment-btn">Operacional</button>
+          <button type="button" onClick={() => navigate('/admin')} className="auth-segment-btn">Lojista</button>
+          <button type="button" onClick={() => navigate('/cliente?mode=login')} className="auth-segment-btn">Cliente</button>
           <button type="button" className="auth-segment-btn active">Entregador</button>
           {superAdminUnlocked ? (
             <button type="button" onClick={() => navigate('/superadmin')} className="auth-segment-btn">Master</button>

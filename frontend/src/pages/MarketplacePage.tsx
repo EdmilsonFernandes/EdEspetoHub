@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   MagnifyingGlass,
   Star,
@@ -319,6 +319,7 @@ const isTerminalRecentOrder = (entry?: {
 
 export function MarketplacePage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [stores, setStores] = useState<MarketplaceStore[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -341,6 +342,16 @@ export function MarketplacePage() {
   const [pullDistance, setPullDistance] = useState(0);
   const [isHeaderElevated, setIsHeaderElevated] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search || '');
+    if (params.get('panel') === 'condominios') {
+      setCondominiumPickerOpen(true);
+    }
+    if (params.get('favorites') === '1') {
+      setQuickFilter('favorites');
+    }
+  }, [location.search]);
   const [showStorePromoPopup, setShowStorePromoPopup] = useState(false);
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
   const [featuredLoading, setFeaturedLoading] = useState(false);
@@ -773,7 +784,6 @@ export function MarketplacePage() {
         const distanceKm = 0.8 + (seed % 52) / 10;
         const etaMin = 18 + (seed % 18);
         const etaMax = etaMin + 10;
-        const freeShipping = seed % 3 === 0;
         const rawOrderTypes = Array.isArray(store?.settings?.orderTypes)
           ? (store?.settings?.orderTypes as unknown[])
               .map((value) => String(value || '').trim().toLowerCase())
@@ -783,6 +793,8 @@ export function MarketplacePage() {
         const supportsPickup = rawOrderTypes.includes('pickup');
         const supportsTable = rawOrderTypes.includes('table');
         const supportsPostal = supportsDelivery && Boolean(store?.settings?.postalEnabled);
+        const deliveryFeeValue = Number((store?.settings as any)?.deliveryFee ?? (store?.settings as any)?.delivery_fee);
+        const freeShipping = supportsDelivery && Number.isFinite(deliveryFeeValue) && deliveryFeeValue <= 0;
         const rawHours = Array.isArray(store?.settings?.openingHours) ? (store?.settings?.openingHours as any[]) : [];
         const isOpen =
           typeof store?.openNow === 'boolean'
@@ -2259,7 +2271,7 @@ export function MarketplacePage() {
                                 <Storefront size={10} weight="fill" />
                                 Retirada
                               </span>
-                              {store.freeShipping ? (
+                              {store.supportsDelivery && store.freeShipping ? (
                                 <span className="inline-flex rounded-full bg-sky-50 px-2 py-1 text-[9px] font-black uppercase tracking-[0.1em] text-[#336886]">
                                   Grátis
                                 </span>
@@ -2556,7 +2568,7 @@ export function MarketplacePage() {
                   const eventBadge = eventState === 'live'
                     ? 'Aberta agora'
                     : eventState === 'upcoming'
-                      ? 'Próxima feira'
+                      ? 'Agenda'
                       : 'Sem agenda ativa';
                   const eventTime = formatCondominiumEventTime(event);
                   return (
@@ -2564,13 +2576,13 @@ export function MarketplacePage() {
                       key={slug}
                       type="button"
                       onClick={() => selectCondominium(slug)}
-                      className={`group relative min-w-0 overflow-hidden rounded-[1.75rem] border text-left shadow-[0_20px_40px_-28px_rgba(15,23,42,0.18)] transition-all duration-300 active:scale-[0.985] ${
+                      className={`group relative min-w-0 overflow-hidden rounded-[1.6rem] border text-left shadow-[0_18px_34px_-28px_rgba(15,23,42,0.16)] transition-all duration-300 active:scale-[0.985] ${
                         active
                           ? 'border-[#336886]/18 bg-[linear-gradient(180deg,rgba(248,252,255,0.98)_0%,rgba(240,249,255,0.98)_100%)] ring-2 ring-[#336886]/18'
                           : 'border-white/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.98)_100%)] hover:-translate-y-1 hover:shadow-[0_26px_44px_-30px_rgba(15,23,42,0.24)]'
                       }`}
                     >
-                      <div className="absolute inset-x-0 top-0 h-24 overflow-hidden">
+                      <div className="absolute inset-x-0 top-0 h-20 overflow-hidden">
                         <img
                           src={bannerUrl}
                           alt=""
@@ -2582,11 +2594,11 @@ export function MarketplacePage() {
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.48),transparent_38%)]" />
                       </div>
 
-                      <div className="pointer-events-none absolute -right-6 top-10 h-20 w-20 rounded-full bg-[#336886]/10 blur-3xl" />
+                      <div className="pointer-events-none absolute -right-6 top-8 h-16 w-16 rounded-full bg-[#336886]/10 blur-3xl" />
 
-                      <div className="relative px-3.5 pb-3.5 pt-3">
+                      <div className="relative px-3 pb-3 pt-2.5">
                         <div className="flex items-start justify-between gap-3">
-                          <div className={`relative flex h-[4.4rem] w-[4.4rem] shrink-0 items-center justify-center overflow-hidden rounded-[1.35rem] border bg-white/92 shadow-[0_16px_30px_-20px_rgba(15,23,42,0.32)] backdrop-blur-sm ${
+                          <div className={`relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[1.2rem] border bg-white/92 shadow-[0_16px_30px_-20px_rgba(15,23,42,0.32)] backdrop-blur-sm ${
                             active ? 'border-[#336886]/18' : 'border-white/90'
                           }`}>
                             <div className="absolute inset-[6px] rounded-[1rem] border border-slate-100/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.88)_100%)]" />
@@ -2599,7 +2611,7 @@ export function MarketplacePage() {
                               onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }}
                             />
                           </div>
-                          <span className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] shadow-sm ${
+                          <span className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.12em] shadow-sm ${
                             active
                               ? 'border-[#336886]/18 bg-[#336886]/10 text-[#336886]'
                               : eventState === 'live'
@@ -2621,14 +2633,14 @@ export function MarketplacePage() {
                           </span>
                         </div>
 
-                        <div className="mt-3 min-w-0">
+                        <div className="mt-2.5 min-w-0">
                           <p className="line-clamp-2 text-[13px] font-black leading-tight tracking-tight text-slate-950">{name}</p>
                           <p className="mt-1 line-clamp-2 text-[11px] font-semibold leading-4 text-slate-500">
                             {region || 'Local com agenda própria'}
                           </p>
                         </div>
 
-                        <div className={`relative mt-3 flex min-h-[48px] items-start gap-2 overflow-hidden rounded-[1.05rem] border px-3 py-2.5 ${
+                        <div className={`relative mt-2.5 flex min-h-[42px] items-start gap-2 overflow-hidden rounded-[1rem] border px-2.5 py-2 ${
                           eventState === 'live'
                             ? 'border-emerald-100 bg-emerald-50/90 text-emerald-700'
                             : eventState === 'upcoming'
