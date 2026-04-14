@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { UserCircle, Eye, EyeSlash, LockKey } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
 import { AuthLayout } from '../layouts/AuthLayout';
+import { nativeBiometricService } from '../services/nativeBiometricService';
 
 const formatPhoneBr = (value: string) => {
   const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
@@ -29,6 +30,8 @@ export function ClientAuth() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [biometricLoading, setBiometricLoading] = useState(false);
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -51,6 +54,35 @@ export function ClientAuth() {
   useEffect(() => {
     document.title = 'Área do Cliente | Já no Caminho';
   }, []);
+
+  useEffect(() => {
+    setBiometricAvailable(nativeBiometricService.isSupported() && nativeBiometricService.hasStoredCustomerProfile());
+  }, []);
+
+  const finishLogin = (result: any) => {
+    nativeBiometricService.syncCustomerSession(result);
+
+    if (nextPath) {
+      navigate(nextPath, { replace: true });
+      return;
+    }
+    navigate(hubMode ? '/hub' : '/cliente/conta', { replace: true });
+  };
+
+  const handleBiometricLogin = async () => {
+    if (biometricLoading) return;
+    setBiometricLoading(true);
+    setError('');
+    setMessage('');
+    try {
+      const session = await nativeBiometricService.loginCustomerWithBiometrics('Confirme sua identidade para entrar na sua conta');
+      finishLogin(session);
+    } catch (e: any) {
+      setError(e?.message || 'Não foi possível entrar com biometria.');
+    } finally {
+      setBiometricLoading(false);
+    }
+  };
 
   const submit = async () => {
     if (loading) return;
@@ -81,13 +113,16 @@ export function ClientAuth() {
         });
       }
       if (!result?.token) throw new Error('Falha ao autenticar.');
-      localStorage.setItem('customerSession', JSON.stringify(result));
+      nativeBiometricService.syncCustomerSession(result);
 
-      if (nextPath) {
-        navigate(nextPath, { replace: true });
-        return;
+      if (nativeBiometricService.shouldOfferEnrollment(result)) {
+        const shouldEnable = window.confirm('Deseja ativar biometria neste aparelho para entrar mais rápido na próxima vez?');
+        if (shouldEnable) {
+          nativeBiometricService.enableCustomer(result);
+          setBiometricAvailable(true);
+        }
       }
-      navigate(hubMode ? '/hub' : '/cliente/conta', { replace: true });
+      finishLogin(result);
     } catch (e: any) {
       setError(e?.message || 'Não foi possível autenticar.');
     } finally {
@@ -135,6 +170,18 @@ export function ClientAuth() {
         </div>
 
         <div className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40">
+          {mode === 'login' && biometricAvailable ? (
+            <button
+              type="button"
+              onClick={handleBiometricLogin}
+              disabled={biometricLoading || loading}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#336886]/12 bg-[#336886]/8 px-4 py-3 text-sm font-black text-[#336886] shadow-[0_18px_34px_-28px_rgba(51,104,134,0.35)] transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <LockKey size={18} weight="duotone" />
+              {biometricLoading ? 'Lendo biometria...' : 'Entrar com biometria'}
+            </button>
+          ) : null}
+
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-slate-100 inline-flex items-center justify-center shadow-inner">
               <UserCircle size={22} weight="duotone" />

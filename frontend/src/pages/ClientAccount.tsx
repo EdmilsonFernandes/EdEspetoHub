@@ -27,6 +27,7 @@ import { PushNotifications } from '@capacitor/push-notifications';
 import { App as CapacitorApp } from '@capacitor/app';
 import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
+import { nativeBiometricService } from '../services/nativeBiometricService';
 
 // Componente Switch Simples
 function Switch({ checked, onChange, disabled }: { checked: boolean; onChange: () => void; disabled?: boolean }) {
@@ -67,6 +68,10 @@ export function ClientAccount() {
   const [pushEnabled, setPushEnabled] = useState(false);
   const [photoPermission, setPhotoPermission] = useState<'granted' | 'denied' | 'unknown'>('unknown');
   const [cameraPermission, setCameraPermission] = useState<'granted' | 'denied' | 'unknown'>('unknown');
+  const [biometricSupported, setBiometricSupported] = useState(false);
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [biometricBusy, setBiometricBusy] = useState(false);
+  const [biometricMessage, setBiometricMessage] = useState('');
   const [nameDraft, setNameDraft] = useState('');
   const [phoneDraft, setPhoneDraft] = useState('');
   const settingsSectionRef = useRef<HTMLElement | null>(null);
@@ -87,6 +92,9 @@ export function ClientAccount() {
       };
       localStorage.setItem('customerSession', JSON.stringify(next));
       window.dispatchEvent(new CustomEvent('jnc:customer-session-updated', { detail: next }));
+      if (nativeBiometricService.hasStoredCustomerProfile()) {
+        nativeBiometricService.enableCustomer(next);
+      }
     } catch {
       // ignore
     }
@@ -175,6 +183,11 @@ export function ClientAccount() {
   }, []);
 
   useEffect(() => {
+    setBiometricSupported(nativeBiometricService.isSupported());
+    setBiometricEnabled(nativeBiometricService.hasStoredCustomerProfile());
+  }, []);
+
+  useEffect(() => {
     if (loading) return;
     if (searchParams.get('section') !== 'settings') return;
     window.setTimeout(() => {
@@ -189,6 +202,40 @@ export function ClientAccount() {
     }
     localStorage.removeItem('customerSession');
     navigate('/', { replace: true });
+  };
+
+  const handleToggleBiometricAccess = () => {
+    if (biometricBusy) return;
+    setBiometricBusy(true);
+    setBiometricMessage('');
+    try {
+      if (biometricEnabled) {
+        nativeBiometricService.disableCustomer();
+        setBiometricEnabled(false);
+        setBiometricMessage('Biometria desativada neste aparelho.');
+        return;
+      }
+
+      const raw = localStorage.getItem('customerSession');
+      const session = raw ? JSON.parse(raw) : null;
+      if (!session?.token) {
+        setBiometricMessage('Entre novamente para ativar a biometria.');
+        return;
+      }
+
+      const enabled = nativeBiometricService.enableCustomer(session);
+      if (!enabled) {
+        setBiometricMessage('Não foi possível ativar a biometria neste aparelho.');
+        return;
+      }
+
+      setBiometricEnabled(true);
+      setBiometricMessage('Biometria ativada com sucesso.');
+    } catch {
+      setBiometricMessage('Não foi possível atualizar a biometria agora.');
+    } finally {
+      setBiometricBusy(false);
+    }
   };
   const handleSaveProfile = async () => {
     if (profileSaving) return;
@@ -350,6 +397,7 @@ export function ClientAccount() {
     setDeactivating(true);
     try {
       await customerAccountService.deactivate();
+      nativeBiometricService.disableCustomer();
       setShowDeactivateModal(false);
       logout();
     } catch (e: any) {
@@ -556,6 +604,41 @@ export function ClientAccount() {
             </div>
 
             <div className="relative mt-5 grid gap-3">
+              {biometricSupported ? (
+                <div className={`flex flex-col gap-3 rounded-[1.45rem] border px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between ${
+                  biometricEnabled ? 'bg-[#336886]/[0.07] border-[#336886]/15' : 'bg-slate-50 border-slate-100'
+                }`}>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-[#336886] shadow-[0_10px_22px_-18px_rgba(15,23,42,0.28)]">
+                      <ShieldCheck size={18} weight="duotone" className="text-[#336886]" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-[12px] font-black uppercase tracking-[0.14em] text-slate-800">Biometria</p>
+                      <p className="mt-0.5 text-[10px] font-bold leading-tight text-slate-400">
+                        Use digital, rosto ou bloqueio do aparelho para entrar mais rápido no app instalado.
+                      </p>
+                      {biometricMessage ? (
+                        <p className="mt-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]">
+                          {biometricMessage}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 items-center justify-end gap-3">
+                    <span className={`text-[10px] font-black uppercase tracking-[0.14em] ${
+                      biometricEnabled ? 'text-emerald-700' : 'text-slate-500'
+                    }`}>
+                      {biometricEnabled ? 'Ativado' : 'Desativado'}
+                    </span>
+                    <Switch
+                      checked={biometricEnabled}
+                      onChange={handleToggleBiometricAccess}
+                      disabled={biometricBusy}
+                    />
+                  </div>
+                </div>
+              ) : null}
+
               {[
                 {
                   id: 'push',

@@ -69,8 +69,10 @@ repositories {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.biometric:biometric:1.1.0"
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation "androidx.security:security-crypto:1.0.0"
     implementation "com.google.android.play:app-update:2.1.0"
     implementation "com.google.android.play:app-update-ktx:2.1.0"
     implementation project(':capacitor-android')

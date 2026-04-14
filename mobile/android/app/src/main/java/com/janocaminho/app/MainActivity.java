@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.content.pm.PackageManager;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.webkit.JavascriptInterface;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Toast;
@@ -23,10 +24,15 @@ import android.webkit.WebViewClient;
 import android.webkit.WebView;
 import android.os.Build;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.splashscreen.SplashScreen;
 import androidx.appcompat.app.AlertDialog;
+import androidx.biometric.BiometricManager;
+import androidx.biometric.BiometricPrompt;
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKeys;
 
 import com.getcapacitor.BridgeActivity;
 import com.google.android.play.core.appupdate.AppUpdateInfo;
@@ -38,6 +44,8 @@ import com.google.android.play.core.install.model.InstallStatus;
 import com.google.android.play.core.install.model.UpdateAvailability;
 import com.google.android.play.core.appupdate.AppUpdateOptions;
 
+import org.json.JSONObject;
+
 public class MainActivity extends BridgeActivity {
 
     private static final String HUB_URL = "https://janocaminho.com.br/hub";
@@ -46,7 +54,11 @@ public class MainActivity extends BridgeActivity {
     private static final String TRUSTED_WWW_HOST = "www.janocaminho.com.br";
     private static final String APP_SCHEME = "janocaminho";
     private static final String PREFS_NAME = "jnk_mobile_prefs";
+    private static final String SECURE_PREFS_NAME = "jnk_secure_bio_prefs";
     private static final String LAST_URL_KEY = "last_url";
+    private static final String CUSTOMER_PROFILE_KEY = "customer_profile";
+    private static final String CUSTOMER_SESSION_KEY = "customer_session";
+    private static final String BIOMETRIC_RESULT_EVENT = "jnc:android-biometric-result";
     private static final long NAV_ANIM_DURATION_MS = 220L;
     private static final long LAUNCH_OVERLAY_FADE_MS = 260L;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 4401;
@@ -63,6 +75,7 @@ public class MainActivity extends BridgeActivity {
     private AppUpdateManager appUpdateManager;
     private InstallStateUpdatedListener installStateUpdatedListener;
     private boolean flexibleUpdatePromptVisible = false;
+    private boolean biometricBridgeInjected = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,6 +170,10 @@ public class MainActivity extends BridgeActivity {
     private void configureWebViewPersistence() {
         if (bridge == null || bridge.getWebView() == null) return;
         WebView webView = bridge.getWebView();
+        if (!biometricBridgeInjected) {
+            webView.addJavascriptInterface(new BiometricBridge(), "JNCBiometrics");
+            biometricBridgeInjected = true;
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             webView.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_YES);
         }
@@ -518,6 +535,150 @@ public class MainActivity extends BridgeActivity {
     private boolean isTrustedHost(String host) {
         if (host == null || host.isEmpty()) return false;
         return TRUSTED_HOST.equalsIgnoreCase(host) || TRUSTED_WWW_HOST.equalsIgnoreCase(host);
+    }
+
+    private SharedPreferences getSecurePreferences() {
+        try {
+            String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+            return EncryptedSharedPreferences.create(
+                SECURE_PREFS_NAME,
+                masterKeyAlias,
+                this,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            );
+        } catch (Exception error) {
+            android.util.Log.w("JNC_BIO", "Falha ao abrir storage seguro, usando fallback local", error);
+            return getSharedPreferences(SECURE_PREFS_NAME, MODE_PRIVATE);
+        }
+    }
+
+    private boolean isBiometricAvailableNative() {
+        int result = BiometricManager.from(this).canAuthenticate(
+            BiometricManager.Authenticators.BIOMETRIC_WEAK | BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        );
+        return result == BiometricManager.BIOMETRIC_SUCCESS;
+    }
+
+    private void dispatchBiometricResult(String requestId, boolean success, String message) {
+        if (bridge == null || bridge.getWebView() == null) return;
+        try {
+            JSONObject detail = new JSONObject();
+            detail.put("requestId", requestId == null ? "" : requestId);
+            detail.put("success", success);
+            detail.put("message", message == null ? "" : message);
+            String script =
+                "window.dispatchEvent(new CustomEvent('" + BIOMETRIC_RESULT_EVENT + "',{detail:" + detail.toString() + "}));";
+            bridge.getWebView().post(() -> bridge.getWebView().evaluateJavascript(script, null));
+        } catch (Exception error) {
+            android.util.Log.w("JNC_BIO", "Falha ao enviar evento biometrico ao app", error);
+        }
+    }
+
+    private class BiometricBridge {
+
+        @JavascriptInterface
+        public boolean isBiometricAvailable() {
+            return isBiometricAvailableNative();
+        }
+
+        @JavascriptInterface
+        public boolean hasCustomerProfile() {
+            SharedPreferences prefs = getSecurePreferences();
+            return prefs.contains(CUSTOMER_PROFILE_KEY) && prefs.contains(CUSTOMER_SESSION_KEY);
+        }
+
+        @JavascriptInterface
+        public String getCustomerProfile() {
+            SharedPreferences prefs = getSecurePreferences();
+            return prefs.getString(CUSTOMER_PROFILE_KEY, "");
+        }
+
+        @JavascriptInterface
+        public String getCustomerSession() {
+            SharedPreferences prefs = getSecurePreferences();
+            return prefs.getString(CUSTOMER_SESSION_KEY, "");
+        }
+
+        @JavascriptInterface
+        public boolean saveCustomerProfile(String profileJson, String sessionJson) {
+            if (profileJson == null || profileJson.trim().isEmpty() || sessionJson == null || sessionJson.trim().isEmpty()) {
+                return false;
+            }
+            try {
+                SharedPreferences prefs = getSecurePreferences();
+                prefs.edit()
+                    .putString(CUSTOMER_PROFILE_KEY, profileJson)
+                    .putString(CUSTOMER_SESSION_KEY, sessionJson)
+                    .apply();
+                return true;
+            } catch (Exception error) {
+                android.util.Log.w("JNC_BIO", "Falha ao salvar sessao biometrica", error);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public boolean clearCustomerProfile() {
+            try {
+                SharedPreferences prefs = getSecurePreferences();
+                prefs.edit()
+                    .remove(CUSTOMER_PROFILE_KEY)
+                    .remove(CUSTOMER_SESSION_KEY)
+                    .apply();
+                return true;
+            } catch (Exception error) {
+                android.util.Log.w("JNC_BIO", "Falha ao limpar sessao biometrica", error);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public void authenticateCustomer(String requestId, String reason) {
+            runOnUiThread(() -> {
+                if (!isBiometricAvailableNative()) {
+                    dispatchBiometricResult(requestId, false, "Biometria não disponível neste aparelho.");
+                    return;
+                }
+
+                BiometricPrompt biometricPrompt = new BiometricPrompt(
+                    MainActivity.this,
+                    ContextCompat.getMainExecutor(MainActivity.this),
+                    new BiometricPrompt.AuthenticationCallback() {
+                        @Override
+                        public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                            super.onAuthenticationSucceeded(result);
+                            dispatchBiometricResult(requestId, true, "");
+                        }
+
+                        @Override
+                        public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+                            super.onAuthenticationError(errorCode, errString);
+                            dispatchBiometricResult(requestId, false, errString == null ? "" : errString.toString());
+                        }
+
+                        @Override
+                        public void onAuthenticationFailed() {
+                            super.onAuthenticationFailed();
+                        }
+                    }
+                );
+
+                BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                    .setTitle("Entrar com biometria")
+                    .setSubtitle(
+                        reason == null || reason.trim().isEmpty()
+                            ? "Confirme sua identidade para acessar sua conta"
+                            : reason
+                    )
+                    .setAllowedAuthenticators(
+                        BiometricManager.Authenticators.BIOMETRIC_WEAK | BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                    )
+                    .build();
+
+                biometricPrompt.authenticate(promptInfo);
+            });
+        }
     }
 
     private String buildInternalPathFromAppUri(Uri uri) {
