@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260414.205321.e56276a2",
-  "buildId": "0.1.9+20260414.205321.e56276a2-20260414.205321-e56276a2",
-  "builtAt": "2026-04-14T20:53:21.188Z",
-  "commitHash": "e56276a298d1caca89691de99a98d15d01b7f87a",
-  "shortHash": "e56276a2",
+  "versionInternal": "0.1.9+20260414.210218.68b319f5",
+  "buildId": "0.1.9+20260414.210218.68b319f5-20260414.210218-68b319f5",
+  "builtAt": "2026-04-14T21:02:18.690Z",
+  "commitHash": "68b319f55d5a5056e35fbfda355cbd0f6ef25e44",
+  "shortHash": "68b319f5",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "68b319f55d5a5056e35fbfda355cbd0f6ef25e44",
+      "shortHash": "68b319f5",
+      "dateIso": "2026-04-14T17:53:55-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(hub): simplify role switcher and highlight current access",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/68b319f55d5a5056e35fbfda355cbd0f6ef25e44"
+    },
     {
       "hash": "e56276a298d1caca89691de99a98d15d01b7f87a",
       "shortHash": "e56276a2",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(hub): polish condo banner and rounded nav",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/069ce39f3d7a7d0b96d79fcea13d6c3e6eaa316d"
-    },
-    {
-      "hash": "e459ba0628cfbdbd154232ed12b9405408918c4d",
-      "shortHash": "e459ba06",
-      "dateIso": "2026-04-13T23:07:53-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(hub): clarify condo context and checkout header",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e459ba0628cfbdbd154232ed12b9405408918c4d"
     }
   ]
 } as const;

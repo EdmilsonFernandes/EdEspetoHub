@@ -288,7 +288,7 @@ export function ProfileDrawer({
               >
                 <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-[radial-gradient(circle_at_center,rgba(51,104,134,0.12),transparent_70%)]" />
                 <div className="min-w-0">
-                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Acesso atual</p>
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Trocar acesso</p>
                   <p className="mt-1 truncate text-sm font-black text-slate-900">
                     {currentAccessProfile ? currentAccessProfile.title : 'Escolher perfil'}
                   </p>

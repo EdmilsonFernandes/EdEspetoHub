@@ -373,7 +373,6 @@ export function MarketplacePage() {
   const [pullDistance, setPullDistance] = useState(0);
   const [isHeaderElevated, setIsHeaderElevated] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -1493,7 +1492,6 @@ export function MarketplacePage() {
   const handleHomeHubNavigation = useCallback(() => {
     clearCondominiumSelection();
     setCondominiumPickerOpen(false);
-    setIsSearchFocused(false);
     navigate('/hub');
   }, [clearCondominiumSelection, navigate]);
 
@@ -1731,30 +1729,21 @@ export function MarketplacePage() {
 
             {/* Linha 2: Busca Premium */}
             <div className="relative z-20 px-0.5">
-              <div className="group relative flex min-h-[52px] items-center gap-3 rounded-[22px] border border-slate-200 bg-white px-4 shadow-[0_12px_26px_-20px_rgba(15,23,42,0.24)] transition-[border-color,box-shadow,background-color] duration-200 ease-out hover:border-slate-300 hover:bg-white focus-within:border-[#336886]/25 focus-within:shadow-[0_16px_34px_-22px_rgba(51,104,134,0.22)] focus-within:ring-2 focus-within:ring-[#336886]/10">
+              <div className="group relative flex min-h-[52px] items-center gap-3 rounded-[22px] border border-slate-200/90 bg-white/96 px-4 shadow-[0_12px_26px_-20px_rgba(15,23,42,0.18)] transition-[border-color,box-shadow,background-color] duration-200 ease-out hover:border-slate-300 hover:bg-white focus-within:border-[#336886]/22 focus-within:shadow-[0_16px_34px_-22px_rgba(51,104,134,0.18)] focus-within:ring-2 focus-within:ring-[#336886]/8">
                 <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#336886]/10 bg-[#336886]/8 text-[#336886] shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
                   <MagnifyingGlass size={18} weight="bold" />
                 </div>
-                <div className="relative min-w-0 flex-1">
-                  {!query ? (
-                    <span className={`pointer-events-none absolute inset-y-0 left-0 flex items-center pr-6 text-[14px] font-semibold transition-opacity ${
-                      isSearchFocused ? 'opacity-55 text-slate-400' : 'opacity-100 text-slate-400'
-                    }`}>
-                      Buscar loja, categoria ou produto
-                    </span>
-                  ) : null}
+                <div className="min-w-0 flex-1">
                   <input
                     ref={searchInputRef}
                     type="text"
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
-                    onFocus={() => setIsSearchFocused(true)}
-                    onBlur={() => setIsSearchFocused(false)}
-                    placeholder=""
+                    placeholder="Buscar loja, categoria ou produto"
                     autoComplete="off"
                     inputMode="search"
                     enterKeyHint="search"
-                    className="block min-h-[52px] w-full min-w-0 appearance-none bg-transparent pr-1 text-[14px] font-semibold text-slate-950 outline-none"
+                    className="block min-h-[52px] w-full min-w-0 appearance-none bg-transparent pr-1 text-[14px] font-semibold text-slate-950 outline-none placeholder:text-slate-400"
                     style={{ WebkitAppearance: 'none', WebkitTextFillColor: '#020617', caretColor: '#336886' }}
                   />
                 </div>
@@ -1764,6 +1753,7 @@ export function MarketplacePage() {
                     onClick={() => {
                       setQuery('');
                       setDebouncedQuery('');
+                      window.requestAnimationFrame(() => searchInputRef.current?.focus());
                     }}
                     className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-700 active:scale-95"
                     aria-label="Limpar busca"
