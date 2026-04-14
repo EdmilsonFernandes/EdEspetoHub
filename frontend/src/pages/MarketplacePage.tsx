@@ -2570,7 +2570,7 @@ export function MarketplacePage() {
         className="fixed bottom-0 left-0 right-0 z-[100] px-0 pb-0 transition-transform duration-300 lg:hidden"
         style={{ transform: isBottomNavVisible && !condominiumPickerOpen ? 'translateY(0)' : 'translateY(100%)' }}
       >
-        <div className="grid min-h-[4.75rem] grid-cols-4 items-center gap-2 rounded-t-[1.75rem] border border-b-0 border-[#336886]/12 bg-[linear-gradient(180deg,rgba(235,244,250,0.96)_0%,rgba(225,238,247,0.94)_100%)] px-4 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 shadow-[0_-14px_34px_-26px_rgba(51,104,134,0.3)] backdrop-blur-2xl">
+        <div className="grid min-h-[4.75rem] grid-cols-4 items-center gap-2 rounded-t-[1.75rem] border border-b-0 border-[#2d5f7b]/16 bg-[linear-gradient(180deg,rgba(221,236,246,0.98)_0%,rgba(204,224,238,0.96)_100%)] px-4 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 shadow-[0_-14px_34px_-26px_rgba(45,95,123,0.34)] backdrop-blur-2xl">
           <button
             type="button"
             onClick={handleHomeHubNavigation}
@@ -2581,11 +2581,11 @@ export function MarketplacePage() {
             }`}
           >
             <House size={18} weight={quickFilter === 'all' && !condominiumPickerOpen && !selectedCondominium ? 'fill' : 'duotone'} />
-            <span className="text-[9px] font-black uppercase">Início</span>
+            <span className="text-[9px] font-extrabold uppercase tracking-[0.08em]">Início</span>
           </button>
           <button type="button" onClick={() => navigate('/cliente/pedidos')} className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]">
             <Receipt size={18} weight="duotone" />
-            <span className="text-[9px] font-black uppercase">Pedidos</span>
+            <span className="text-[9px] font-extrabold uppercase tracking-[0.08em]">Pedidos</span>
           </button>
           <button
             type="button"
@@ -2597,7 +2597,7 @@ export function MarketplacePage() {
             }`}
           >
             <Buildings size={18} weight={selectedCondominium || condominiumPickerOpen ? 'fill' : 'duotone'} />
-            <span className="text-[9px] font-black uppercase">Condo</span>
+            <span className="text-[9px] font-extrabold uppercase tracking-[0.08em]">Condo</span>
           </button>
           <button
             type="button"
@@ -2609,7 +2609,7 @@ export function MarketplacePage() {
             }`}
           >
             <Heart size={18} weight={quickFilter === 'favorites' ? 'fill' : 'regular'} />
-            <span className="text-[9px] font-black uppercase">Favoritos</span>
+            <span className="text-[9px] font-extrabold uppercase tracking-[0.08em]">Favoritos</span>
           </button>
         </div>
       </nav>

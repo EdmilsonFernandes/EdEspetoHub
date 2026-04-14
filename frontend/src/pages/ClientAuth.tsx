@@ -61,27 +61,6 @@ export function ClientAuth() {
     return String(params.get('bio') || '') === '1';
   }, [location.search]);
 
-  const biometricDebugMode = useMemo(() => {
-    const params = new URLSearchParams(location.search || '');
-    return String(params.get('debugbio') || '') === '1';
-  }, [location.search]);
-
-  const biometricDebug = useMemo(() => {
-    const supported = nativeBiometricService.isSupported();
-    const profile = nativeBiometricService.getStoredCustomerProfile();
-    const storedSession = nativeBiometricService.getStoredCustomerSession();
-    return {
-      supported,
-      profileUserId: String(profile?.userId || ''),
-      profileEmail: String(profile?.email || ''),
-      sessionToken: Boolean(storedSession?.token),
-      sessionEmail: String(storedSession?.user?.email || ''),
-      hasValidEnrollment: nativeBiometricService.hasValidStoredCustomerEnrollment(),
-      forceBiometric,
-      biometricAvailable,
-    };
-  }, [biometricAvailable, forceBiometric]);
-
   useEffect(() => {
     document.title = 'Área do Cliente | Já no Caminho';
   }, []);
@@ -274,22 +253,6 @@ export function ClientAuth() {
         </div>
 
         <div className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40">
-          {biometricDebugMode ? (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
-              <p className="font-black uppercase tracking-[0.18em] text-amber-700">Diagnóstico biometria</p>
-              <div className="mt-2 space-y-1 font-medium">
-                <p>Suporte nativo: {biometricDebug.supported ? 'sim' : 'nao'}</p>
-                <p>Perfil salvo: {biometricDebug.profileUserId ? 'sim' : 'nao'}</p>
-                <p>Perfil email: {biometricDebug.profileEmail || '-'}</p>
-                <p>Sessao salva: {biometricDebug.sessionToken ? 'sim' : 'nao'}</p>
-                <p>Sessao email: {biometricDebug.sessionEmail || '-'}</p>
-                <p>Enrollment valido: {biometricDebug.hasValidEnrollment ? 'sim' : 'nao'}</p>
-                <p>Bio forcada: {biometricDebug.forceBiometric ? 'sim' : 'nao'}</p>
-                <p>Disponivel na UI: {biometricDebug.biometricAvailable ? 'sim' : 'nao'}</p>
-              </div>
-            </div>
-          ) : null}
-
           {mode === 'login' && biometricAvailable ? (
             <button
               type="button"
@@ -300,20 +263,6 @@ export function ClientAuth() {
               <LockKey size={18} weight="duotone" />
               {biometricLoading ? 'Lendo biometria...' : 'Entrar com biometria'}
             </button>
-          ) : null}
-
-          {biometricFailureDiagnostics ? (
-            <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-900">
-              <p className="font-black uppercase tracking-[0.18em] text-rose-700">Falha biometria</p>
-              <div className="mt-2 space-y-1 font-medium">
-                <p>Suporte nativo: {biometricFailureDiagnostics.supported ? 'sim' : 'nao'}</p>
-                <p>Perfil salvo: {biometricFailureDiagnostics.profile?.userId ? 'sim' : 'nao'}</p>
-                <p>Perfil email: {String(biometricFailureDiagnostics.profile?.email || '-')}</p>
-                <p>Sessao salva: {biometricFailureDiagnostics.session?.token ? 'sim' : 'nao'}</p>
-                <p>Sessao email: {String(biometricFailureDiagnostics.session?.user?.email || '-')}</p>
-                <p>Enrollment valido: {biometricFailureDiagnostics.validEnrollment ? 'sim' : 'nao'}</p>
-              </div>
-            </div>
           ) : null}
 
           <div className="flex items-center gap-3">

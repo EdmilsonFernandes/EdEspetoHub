@@ -2979,7 +2979,7 @@ export function StorePage() {
       )}
 
       {showClientWebBottomNav && (
-        <nav className="fixed bottom-0 left-0 right-0 z-[100] border-t border-[#336886]/12 bg-[linear-gradient(180deg,rgba(235,244,250,0.94)_0%,rgba(225,238,247,0.92)_100%)] shadow-[0_-14px_34px_-26px_rgba(51,104,134,0.3)] backdrop-blur-2xl lg:hidden">
+        <nav className="fixed bottom-0 left-0 right-0 z-[100] border-t border-[#2d5f7b]/16 bg-[linear-gradient(180deg,rgba(221,236,246,0.98)_0%,rgba(204,224,238,0.96)_100%)] shadow-[0_-14px_34px_-26px_rgba(45,95,123,0.34)] backdrop-blur-2xl lg:hidden">
           <div className="grid h-[4.75rem] grid-cols-4 items-center gap-2 px-4 pt-2 pb-[max(env(safe-area-inset-bottom),0px)]">
             <button
               type="button"
@@ -2987,7 +2987,7 @@ export function StorePage() {
               className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]"
             >
               <House size={18} weight="duotone" />
-              <span className="text-[9px] font-black uppercase">Início</span>
+              <span className="text-[9px] font-extrabold uppercase tracking-[0.08em]">Início</span>
             </button>
             <button
               type="button"
@@ -2995,7 +2995,7 @@ export function StorePage() {
               className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]"
             >
               <Receipt size={18} weight="duotone" />
-              <span className="text-[9px] font-black uppercase">Pedidos</span>
+              <span className="text-[9px] font-extrabold uppercase tracking-[0.08em]">Pedidos</span>
             </button>
             <button
               type="button"
@@ -3007,7 +3007,7 @@ export function StorePage() {
               }`}
             >
               <Buildings size={18} weight={condominiumSlugFromQuery ? 'fill' : 'duotone'} />
-              <span className="text-[9px] font-black uppercase">Condo</span>
+              <span className="text-[9px] font-extrabold uppercase tracking-[0.08em]">Condo</span>
             </button>
             <button
               type="button"
@@ -3015,7 +3015,7 @@ export function StorePage() {
               className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]"
             >
               <Heart size={18} weight="regular" />
-              <span className="text-[9px] font-black uppercase">Favoritos</span>
+              <span className="text-[9px] font-extrabold uppercase tracking-[0.08em]">Favoritos</span>
             </button>
           </div>
         </nav>
