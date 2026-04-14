@@ -43,7 +43,25 @@ export function AdminLogin() {
   });
 
   useEffect(() => {
-    setBiometricAvailable(nativeBiometricService.isSupported() && nativeBiometricService.hasStoredAdminProfile());
+    const refreshBiometricAvailability = () => {
+      setBiometricAvailable(nativeBiometricService.isSupported() && nativeBiometricService.hasStoredAdminProfile());
+    };
+
+    refreshBiometricAvailability();
+    let attempts = 0;
+    const timer = window.setInterval(() => {
+      attempts += 1;
+      refreshBiometricAvailability();
+      if (attempts >= 12) {
+        window.clearInterval(timer);
+      }
+    }, 250);
+
+    window.addEventListener('focus', refreshBiometricAvailability);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('focus', refreshBiometricAvailability);
+    };
   }, []);
 
   const forceBiometric = String(searchParams.get('bio') || '') === '1';

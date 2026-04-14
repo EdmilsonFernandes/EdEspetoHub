@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { UserCircle, Eye, EyeSlash, LockKey } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
@@ -65,7 +65,25 @@ export function ClientAuth() {
   }, []);
 
   useEffect(() => {
-    setBiometricAvailable(nativeBiometricService.isSupported() && nativeBiometricService.hasStoredCustomerProfile());
+    const refreshBiometricAvailability = () => {
+      setBiometricAvailable(nativeBiometricService.isSupported() && nativeBiometricService.hasStoredCustomerProfile());
+    };
+
+    refreshBiometricAvailability();
+    let attempts = 0;
+    const timer = window.setInterval(() => {
+      attempts += 1;
+      refreshBiometricAvailability();
+      if (attempts >= 12) {
+        window.clearInterval(timer);
+      }
+    }, 250);
+
+    window.addEventListener('focus', refreshBiometricAvailability);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('focus', refreshBiometricAvailability);
+    };
   }, []);
 
   useEffect(() => {

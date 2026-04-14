@@ -51,7 +51,25 @@ export function MotoboyLogin() {
   const forceBiometric = String(searchParams.get('bio') || '') === '1';
 
   useEffect(() => {
-    setBiometricAvailable(nativeBiometricService.isSupported() && nativeBiometricService.hasStoredMotoboyProfile());
+    const refreshBiometricAvailability = () => {
+      setBiometricAvailable(nativeBiometricService.isSupported() && nativeBiometricService.hasStoredMotoboyProfile());
+    };
+
+    refreshBiometricAvailability();
+    let attempts = 0;
+    const timer = window.setInterval(() => {
+      attempts += 1;
+      refreshBiometricAvailability();
+      if (attempts >= 12) {
+        window.clearInterval(timer);
+      }
+    }, 250);
+
+    window.addEventListener('focus', refreshBiometricAvailability);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('focus', refreshBiometricAvailability);
+    };
   }, []);
 
   useEffect(() => {
