@@ -732,38 +732,48 @@ export function ClientOrders() {
       <nav className={`fixed bottom-0 left-0 right-0 z-[100] px-0 pb-0 transition-transform duration-300 lg:hidden ${
         cancelModal.order ? 'translate-y-[120%] pointer-events-none' : 'translate-y-0'
       }`}>
-        <div className="grid min-h-[4.75rem] grid-cols-4 items-center gap-2 rounded-t-[1.75rem] border border-b-0 border-[#2d5f7b]/16 bg-[linear-gradient(180deg,rgba(221,236,246,0.98)_0%,rgba(204,224,238,0.96)_100%)] px-4 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 shadow-[0_-14px_34px_-26px_rgba(45,95,123,0.34)] backdrop-blur-2xl">
+        <div className="mx-auto max-w-none rounded-none border border-b-0 border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-2 pt-2 shadow-[0_-18px_38px_-28px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
+          <div className="grid min-h-[4.75rem] grid-cols-4 items-center gap-1.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
           <button
             type="button"
             onClick={() => navigate('/hub')}
-            className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]"
+            className="group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
           >
-            <House size={18} weight="duotone" />
-            <span className="text-[9px] font-extrabold uppercase tracking-[0.08em]">Início</span>
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
+              <House size={18} weight="duotone" />
+            </span>
+            <span>Início</span>
           </button>
           <button
             type="button"
-            className="flex flex-col items-center justify-center rounded-2xl bg-[#336886]/10 py-1 text-[#336886] shadow-[0_8px_18px_-16px_rgba(51,104,134,0.7)] ring-1 ring-[#336886]/15 transition-all duration-150 ease-out active:scale-[0.94]"
+            className="group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] bg-[linear-gradient(180deg,rgba(51,104,134,0.12)_0%,rgba(51,104,134,0.06)_100%)] py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-[#2d5f7b] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/12 transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03]"
           >
-            <Receipt size={18} weight="fill" />
-            <span className="text-[9px] font-extrabold uppercase tracking-[0.08em]">Pedidos</span>
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]">
+              <Receipt size={18} weight="fill" />
+            </span>
+            <span>Pedidos</span>
           </button>
           <button
             type="button"
             onClick={() => navigate('/hub?panel=condominios')}
-            className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]"
+            className="group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
           >
-            <Buildings size={18} weight="duotone" />
-            <span className="text-[9px] font-extrabold uppercase tracking-[0.08em]">Condo</span>
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
+              <Buildings size={18} weight="duotone" />
+            </span>
+            <span>Condo</span>
           </button>
           <button
             type="button"
             onClick={() => navigate('/hub?favorites=1')}
-            className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]"
+            className="group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
           >
-            <Heart size={18} weight="regular" />
-            <span className="text-[9px] font-extrabold uppercase tracking-[0.08em]">Favoritos</span>
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
+              <Heart size={18} weight="regular" />
+            </span>
+            <span>Favoritos</span>
           </button>
+          </div>
         </div>
       </nav>
     </main>

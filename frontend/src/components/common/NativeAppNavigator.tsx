@@ -31,7 +31,6 @@ const writeStack = (stack: string[]) => {
 
 const isEligiblePath = (pathname: string) => {
   if (!pathname || pathname === '/hub') return false;
-  if (pathname.startsWith('/cliente/pedidos')) return false;
   if (
     pathname.startsWith('/admin') ||
     pathname.startsWith('/superadmin') ||
@@ -120,9 +119,9 @@ export function NativeAppNavigator() {
     'text-slate-500 hover:text-slate-700';
 
   return (
-    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-[35] px-3 pb-[calc(env(safe-area-inset-bottom)+0.55rem)] transition-transform duration-300 ease-in-out lg:hidden">
-      <div className="pointer-events-auto mx-auto max-w-[32rem] rounded-[2rem] border border-white/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.95)_0%,rgba(247,250,252,0.92)_100%)] p-2 shadow-[0_28px_52px_-30px_rgba(15,23,42,0.3)] ring-1 ring-slate-200/70 backdrop-blur-2xl">
-        <div className="grid grid-cols-4 gap-1.5">
+    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-[35] px-0 pb-0 transition-transform duration-300 ease-in-out lg:hidden">
+      <div className="pointer-events-auto mx-auto max-w-none rounded-none border border-b-0 border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-2 pt-2 shadow-[0_-18px_38px_-28px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
+        <div className="grid grid-cols-4 gap-1.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
         <button
           type="button"
           onClick={handleHome}

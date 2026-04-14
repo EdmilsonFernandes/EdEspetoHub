@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260414.213125.34fd43ff",
-  "buildId": "0.1.9+20260414.213125.34fd43ff-20260414.213125-34fd43ff",
-  "builtAt": "2026-04-14T21:31:25.838Z",
-  "commitHash": "34fd43ff83ad76ef7047802cd49bf75911779edc",
-  "shortHash": "34fd43ff",
+  "versionInternal": "0.1.9+20260414.214115.8609c5b3",
+  "buildId": "0.1.9+20260414.214115.8609c5b3-20260414.214115-8609c5b3",
+  "builtAt": "2026-04-14T21:41:15.552Z",
+  "commitHash": "8609c5b33a7665123eb6fdc43b7e84f00630d13e",
+  "shortHash": "8609c5b3",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "8609c5b33a7665123eb6fdc43b7e84f00630d13e",
+      "shortHash": "8609c5b3",
+      "dateIso": "2026-04-14T18:32:30-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(hub): refine navigation and role exit flows",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8609c5b33a7665123eb6fdc43b7e84f00630d13e"
+    },
     {
       "hash": "34fd43ff83ad76ef7047802cd49bf75911779edc",
       "shortHash": "34fd43ff",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(hub): refine condo banner and dock bottom nav",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b2431eebe5ef2fddfe5c255717a9d968234629a3"
-    },
-    {
-      "hash": "2f70b06aa70bc301b6dfe6a3aa0b2cc66bc885b3",
-      "shortHash": "2f70b06a",
-      "dateIso": "2026-04-14T10:57:03-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(hub): refine condo banner and bump android release",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2f70b06aa70bc301b6dfe6a3aa0b2cc66bc885b3"
     }
   ]
 } as const;
