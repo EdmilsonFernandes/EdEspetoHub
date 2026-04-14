@@ -2702,21 +2702,21 @@ export function MarketplacePage() {
               <span className="h-10 w-10" />
             </div>
 
-            <div className="pt-3 text-center">
-              <div className="mx-auto flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-white p-2 shadow-lg shadow-emerald-900/10 ring-1 ring-slate-950/5">
+            <div className="pt-2 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-white p-1.5 shadow-[0_16px_30px_-20px_rgba(15,23,42,0.2)] ring-1 ring-slate-950/5">
                 <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
               </div>
-              <p className="mt-4 text-xs font-black uppercase tracking-[0.22em] text-[#336886]">Já no Caminho</p>
-              <h2 className="mt-4 text-2xl font-black tracking-tight text-slate-950">Onde você está agora?</h2>
-              <p className="mx-auto mt-2 max-w-sm text-sm font-medium leading-relaxed text-slate-500">
+              <p className="mt-3 text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">Já no Caminho</p>
+              <h2 className="mt-2 text-[1.7rem] font-black tracking-tight text-slate-950">Onde você está agora?</h2>
+              <p className="mx-auto mt-1.5 max-w-sm text-[13px] font-medium leading-relaxed text-slate-500">
                 Escolha seu condomínio para ver a agenda ativa e as lojas atendendo nesse local.
               </p>
             </div>
 
-            <div className="mt-6 rounded-[1.7rem] border border-slate-200/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(244,248,252,0.98)_100%)] px-4 py-3 shadow-[0_16px_32px_-24px_rgba(15,23,42,0.22)] ring-1 ring-white/80 transition-all duration-200 focus-within:border-[#336886]/25 focus-within:bg-white focus-within:shadow-[0_18px_36px_-24px_rgba(51,104,134,0.24)] focus-within:ring-2 focus-within:ring-[#336886]/10">
-              <div className="flex items-center gap-3">
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#336886]/10 bg-[#336886]/8 text-[#336886] shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
-                  <MagnifyingGlass size={17} weight="bold" />
+            <div className="mt-4 rounded-full border border-slate-200/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(244,248,252,0.96)_100%)] px-3.5 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_14px_28px_-24px_rgba(15,23,42,0.18)] ring-1 ring-white/80 transition-all duration-200 focus-within:border-[#336886]/20 focus-within:bg-white focus-within:shadow-[inset_0_1px_0_rgba(255,255,255,0.76),0_16px_32px_-24px_rgba(51,104,134,0.22)] focus-within:ring-2 focus-within:ring-[#336886]/10">
+              <div className="flex items-center gap-2.5">
+                <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#336886]/10 bg-[#336886]/8 text-[#336886] shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
+                  <MagnifyingGlass size={15} weight="bold" />
                 </span>
                 <input
                   ref={condominiumSearchInputRef}
@@ -2725,34 +2725,34 @@ export function MarketplacePage() {
                   onChange={(event) => setCondominiumSearch(event.target.value)}
                   placeholder="Filtrar por nome do condomínio ou cidade"
                   autoComplete="off"
-                  className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-slate-800 outline-none placeholder:font-medium placeholder:text-slate-400"
+                  className="min-h-10 min-w-0 flex-1 bg-transparent text-[13px] font-semibold text-slate-800 outline-none placeholder:font-medium placeholder:text-slate-400"
                 />
                 {condominiumSearch ? (
                   <button
                     type="button"
                     onClick={() => setCondominiumSearch('')}
-                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-700 active:scale-95"
+                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-700 active:scale-95"
                     aria-label="Limpar busca"
                     title="Limpar busca"
                   >
-                    <X size={15} weight="bold" />
+                    <X size={14} weight="bold" />
                   </button>
                 ) : null}
               </div>
             </div>
 
-            <div className="mt-9">
-              <div className="mb-7 flex items-center justify-between gap-3">
+            <div className="mt-6">
+              <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-lg font-black text-slate-950">Condomínios disponíveis</h3>
-                  <p className="mt-1 text-xs font-semibold text-slate-500">Veja a próxima agenda de cada local e escolha onde pedir.</p>
+                  <h3 className="text-base font-black text-slate-950">Condomínios disponíveis</h3>
+                  <p className="mt-1 text-[11px] font-semibold text-slate-500">Escolha o local e veja a agenda disponível.</p>
                 </div>
-                <span className="shrink-0 rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700">
+                <span className="shrink-0 rounded-full bg-emerald-100 px-3 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-emerald-700">
                   {filteredCondominiums.length} condomínio{filteredCondominiums.length === 1 ? '' : 's'}
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3 pb-20 sm:grid-cols-3 lg:grid-cols-4">
                 {filteredCondominiums.map(({ condominium, slug, name, region, event }) => {
                   const active = selectedCondominiumSlug === slug;
                   const imageUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
@@ -2769,13 +2769,13 @@ export function MarketplacePage() {
                       key={slug}
                       type="button"
                       onClick={() => selectCondominium(slug)}
-                      className={`group relative min-w-0 overflow-hidden rounded-[1.6rem] border text-left shadow-[0_18px_34px_-28px_rgba(15,23,42,0.16)] transition-all duration-300 active:scale-[0.985] ${
+                      className={`group relative min-w-0 overflow-hidden rounded-[1.25rem] border text-left shadow-[0_18px_34px_-28px_rgba(15,23,42,0.16)] transition-all duration-300 active:scale-[0.985] ${
                         active
                           ? 'border-[#336886]/18 bg-[linear-gradient(180deg,rgba(248,252,255,0.98)_0%,rgba(240,249,255,0.98)_100%)] ring-2 ring-[#336886]/18'
                           : 'border-white/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.98)_100%)] hover:-translate-y-1 hover:shadow-[0_26px_44px_-30px_rgba(15,23,42,0.24)]'
                       }`}
                     >
-                      <div className="absolute inset-x-0 top-0 h-20 overflow-hidden">
+                      <div className="absolute inset-x-0 top-0 h-24 overflow-hidden">
                         <img
                           src={bannerUrl}
                           alt=""
@@ -2789,22 +2789,22 @@ export function MarketplacePage() {
 
                       <div className="pointer-events-none absolute -right-6 top-8 h-16 w-16 rounded-full bg-[#336886]/10 blur-3xl" />
 
-                      <div className="relative px-3 pb-3 pt-2.5">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className={`relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[1.2rem] border bg-white/92 shadow-[0_16px_30px_-20px_rgba(15,23,42,0.32)] backdrop-blur-sm ${
+                      <div className="relative p-2.5">
+                        <div className="flex items-start justify-between gap-2.5">
+                          <div className={`relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[1rem] border bg-white/92 shadow-[0_14px_28px_-20px_rgba(15,23,42,0.28)] backdrop-blur-sm ${
                             active ? 'border-[#336886]/18' : 'border-white/90'
                           }`}>
-                            <div className="absolute inset-[6px] rounded-[1rem] border border-slate-100/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.88)_100%)]" />
+                            <div className="absolute inset-[4px] rounded-[0.8rem] border border-slate-100/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.88)_100%)]" />
                             <img
                               src={imageUrl}
                               alt={name}
                               loading="lazy"
                               decoding="async"
-                              className="relative h-full w-full object-contain p-2.5"
+                              className="relative h-full w-full object-contain p-1.5"
                               onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }}
                             />
                           </div>
-                          <span className={`inline-flex max-w-[7.4rem] shrink-0 items-center justify-center gap-1 self-start rounded-full border px-2.5 py-1 text-center text-[8px] font-black uppercase tracking-[0.12em] shadow-sm ${
+                          <span className={`inline-flex max-w-[5.9rem] shrink-0 items-center justify-center gap-1 self-start rounded-full border px-2 py-1 text-center text-[8px] font-black uppercase tracking-[0.1em] shadow-sm ${
                             active
                               ? 'border-[#336886]/28 bg-[#336886]/14 text-[#2d5f7b] shadow-[0_12px_24px_-18px_rgba(51,104,134,0.38)]'
                               : eventState === 'live'
@@ -2826,14 +2826,14 @@ export function MarketplacePage() {
                           </span>
                         </div>
 
-                        <div className="mt-2.5 min-w-0">
-                          <p className="line-clamp-2 text-[13px] font-black leading-tight tracking-tight text-slate-950">{name}</p>
-                          <p className="mt-1 line-clamp-2 text-[11px] font-semibold leading-4 text-slate-500">
+                        <div className="mt-2 min-w-0">
+                          <p className="truncate text-sm font-black tracking-tight text-slate-950">{name}</p>
+                          <p className="mt-1 truncate text-[11px] font-semibold text-slate-500">
                             {region || 'Local com agenda própria'}
                           </p>
                         </div>
 
-                        <div className={`relative mt-2.5 flex min-h-[42px] items-start gap-2 overflow-hidden rounded-[1rem] border px-2.5 py-2 ${
+                        <div className={`relative mt-2 flex min-h-[40px] items-start gap-2 overflow-hidden rounded-[0.95rem] border px-2.5 py-2 ${
                           eventState === 'live'
                             ? 'border-emerald-100 bg-emerald-50/90 text-emerald-700'
                             : eventState === 'upcoming'
@@ -2843,12 +2843,12 @@ export function MarketplacePage() {
                           {eventState === 'upcoming' ? (
                             <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-white/55 via-white/20 to-transparent" />
                           ) : null}
-                          <CalendarBlank size={12} weight="fill" className="mt-0.5 shrink-0" />
+                          <CalendarBlank size={11} weight="fill" className="mt-0.5 shrink-0" />
                           <div className="min-w-0 flex-1">
-                            <p className="text-[10px] font-black uppercase tracking-[0.12em]">
-                              {eventState === 'live' ? 'Funcionando agora' : eventState === 'upcoming' ? 'Próxima agenda' : 'Disponibilidade'}
+                            <p className="text-[9px] font-black uppercase tracking-[0.1em]">
+                              {eventState === 'live' ? 'Ao vivo' : eventState === 'upcoming' ? 'Agendado' : 'Disponível'}
                             </p>
-                            <p className="mt-0.5 break-words text-[11px] font-bold leading-4">
+                            <p className="mt-0.5 break-words text-[10px] font-bold leading-4">
                               {formatCondominiumPickerEventTime(event) || eventTime || eventBadge}
                             </p>
                           </div>

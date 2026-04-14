@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260414.211235.91231008",
-  "buildId": "0.1.9+20260414.211235.91231008-20260414.211235-91231008",
-  "builtAt": "2026-04-14T21:12:35.395Z",
-  "commitHash": "9123100871cab18e6ff16d0c5fb0a4962767202d",
-  "shortHash": "91231008",
+  "versionInternal": "0.1.9+20260414.211701.8fcd1cab",
+  "buildId": "0.1.9+20260414.211701.8fcd1cab-20260414.211701-8fcd1cab",
+  "builtAt": "2026-04-14T21:17:01.380Z",
+  "commitHash": "8fcd1cab9b8a39511a0380de4e229f1691aa13f9",
+  "shortHash": "8fcd1cab",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "8fcd1cab9b8a39511a0380de4e229f1691aa13f9",
+      "shortHash": "8fcd1cab",
+      "dateIso": "2026-04-14T18:14:17-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(hub): stabilize search and order filters",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8fcd1cab9b8a39511a0380de4e229f1691aa13f9"
+    },
     {
       "hash": "9123100871cab18e6ff16d0c5fb0a4962767202d",
       "shortHash": "91231008",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(app): add customer biometric login for android",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/89d75a6bfb068d6f36601c6b6bbcfbbd83930776"
-    },
-    {
-      "hash": "7996177cfbc976e5f0d9d72fee6dfa11fa49d77e",
-      "shortHash": "7996177c",
-      "dateIso": "2026-04-14T10:00:07-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(hub): tighten bottom nav and restore search after condo",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7996177cfbc976e5f0d9d72fee6dfa11fa49d77e"
     }
   ]
 } as const;
