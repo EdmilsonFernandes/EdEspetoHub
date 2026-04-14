@@ -36,6 +36,7 @@ export function ClientAuth() {
   const [autoBiometricTried, setAutoBiometricTried] = useState(false);
   const [enrollmentPromptOpen, setEnrollmentPromptOpen] = useState(false);
   const [pendingBiometricSession, setPendingBiometricSession] = useState<any | null>(null);
+  const [biometricFailureDiagnostics, setBiometricFailureDiagnostics] = useState<any | null>(null);
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -151,11 +152,13 @@ export function ClientAuth() {
     setBiometricLoading(true);
     setError('');
     setMessage('');
+    setBiometricFailureDiagnostics(null);
     try {
       const session = await nativeBiometricService.loginCustomerWithBiometrics('Confirme sua identidade para entrar na sua conta');
       finishLogin(session);
     } catch (e: any) {
       setError(e?.message || 'Não foi possível entrar com biometria.');
+      setBiometricFailureDiagnostics(nativeBiometricService.getCustomerDiagnostics());
     } finally {
       setBiometricLoading(false);
     }
@@ -297,6 +300,20 @@ export function ClientAuth() {
               <LockKey size={18} weight="duotone" />
               {biometricLoading ? 'Lendo biometria...' : 'Entrar com biometria'}
             </button>
+          ) : null}
+
+          {biometricFailureDiagnostics ? (
+            <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-900">
+              <p className="font-black uppercase tracking-[0.18em] text-rose-700">Falha biometria</p>
+              <div className="mt-2 space-y-1 font-medium">
+                <p>Suporte nativo: {biometricFailureDiagnostics.supported ? 'sim' : 'nao'}</p>
+                <p>Perfil salvo: {biometricFailureDiagnostics.profile?.userId ? 'sim' : 'nao'}</p>
+                <p>Perfil email: {String(biometricFailureDiagnostics.profile?.email || '-')}</p>
+                <p>Sessao salva: {biometricFailureDiagnostics.session?.token ? 'sim' : 'nao'}</p>
+                <p>Sessao email: {String(biometricFailureDiagnostics.session?.user?.email || '-')}</p>
+                <p>Enrollment valido: {biometricFailureDiagnostics.validEnrollment ? 'sim' : 'nao'}</p>
+              </div>
+            </div>
           ) : null}
 
           <div className="flex items-center gap-3">

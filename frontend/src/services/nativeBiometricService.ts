@@ -322,6 +322,15 @@ export const nativeBiometricService = {
     return Boolean(this.getStoredMotoboyProfile()?.userId && this.getStoredMotoboySession()?.token);
   },
 
+  getCustomerDiagnostics() {
+    return {
+      supported: this.isSupported(),
+      profile: this.getStoredCustomerProfile(),
+      session: this.getStoredCustomerSession(),
+      validEnrollment: this.hasValidStoredCustomerEnrollment(),
+    };
+  },
+
   shouldOfferEnrollment(session: CustomerSession) {
     if (!this.isSupported()) return false;
     const profile = normalizeCustomerProfile(session);
