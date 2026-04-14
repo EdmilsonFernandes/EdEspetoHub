@@ -58,6 +58,10 @@ public class MainActivity extends BridgeActivity {
     private static final String LAST_URL_KEY = "last_url";
     private static final String CUSTOMER_PROFILE_KEY = "customer_profile";
     private static final String CUSTOMER_SESSION_KEY = "customer_session";
+    private static final String ADMIN_PROFILE_KEY = "admin_profile";
+    private static final String ADMIN_SESSION_KEY = "admin_session";
+    private static final String MOTOBOY_PROFILE_KEY = "motoboy_profile";
+    private static final String MOTOBOY_SESSION_KEY = "motoboy_session";
     private static final String BIOMETRIC_RESULT_EVENT = "jnc:android-biometric-result";
     private static final long NAV_ANIM_DURATION_MS = 220L;
     private static final long LAUNCH_OVERLAY_FADE_MS = 260L;
@@ -601,6 +605,42 @@ public class MainActivity extends BridgeActivity {
         }
 
         @JavascriptInterface
+        public boolean hasAdminProfile() {
+            SharedPreferences prefs = getSecurePreferences();
+            return prefs.contains(ADMIN_PROFILE_KEY) && prefs.contains(ADMIN_SESSION_KEY);
+        }
+
+        @JavascriptInterface
+        public String getAdminProfile() {
+            SharedPreferences prefs = getSecurePreferences();
+            return prefs.getString(ADMIN_PROFILE_KEY, "");
+        }
+
+        @JavascriptInterface
+        public String getAdminSession() {
+            SharedPreferences prefs = getSecurePreferences();
+            return prefs.getString(ADMIN_SESSION_KEY, "");
+        }
+
+        @JavascriptInterface
+        public boolean hasMotoboyProfile() {
+            SharedPreferences prefs = getSecurePreferences();
+            return prefs.contains(MOTOBOY_PROFILE_KEY) && prefs.contains(MOTOBOY_SESSION_KEY);
+        }
+
+        @JavascriptInterface
+        public String getMotoboyProfile() {
+            SharedPreferences prefs = getSecurePreferences();
+            return prefs.getString(MOTOBOY_PROFILE_KEY, "");
+        }
+
+        @JavascriptInterface
+        public String getMotoboySession() {
+            SharedPreferences prefs = getSecurePreferences();
+            return prefs.getString(MOTOBOY_SESSION_KEY, "");
+        }
+
+        @JavascriptInterface
         public boolean saveCustomerProfile(String profileJson, String sessionJson) {
             if (profileJson == null || profileJson.trim().isEmpty() || sessionJson == null || sessionJson.trim().isEmpty()) {
                 return false;
@@ -619,6 +659,42 @@ public class MainActivity extends BridgeActivity {
         }
 
         @JavascriptInterface
+        public boolean saveAdminProfile(String profileJson, String sessionJson) {
+            if (profileJson == null || profileJson.trim().isEmpty() || sessionJson == null || sessionJson.trim().isEmpty()) {
+                return false;
+            }
+            try {
+                SharedPreferences prefs = getSecurePreferences();
+                prefs.edit()
+                    .putString(ADMIN_PROFILE_KEY, profileJson)
+                    .putString(ADMIN_SESSION_KEY, sessionJson)
+                    .apply();
+                return true;
+            } catch (Exception error) {
+                android.util.Log.w("JNC_BIO", "Falha ao salvar sessao biometrica do admin", error);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public boolean saveMotoboyProfile(String profileJson, String sessionJson) {
+            if (profileJson == null || profileJson.trim().isEmpty() || sessionJson == null || sessionJson.trim().isEmpty()) {
+                return false;
+            }
+            try {
+                SharedPreferences prefs = getSecurePreferences();
+                prefs.edit()
+                    .putString(MOTOBOY_PROFILE_KEY, profileJson)
+                    .putString(MOTOBOY_SESSION_KEY, sessionJson)
+                    .apply();
+                return true;
+            } catch (Exception error) {
+                android.util.Log.w("JNC_BIO", "Falha ao salvar sessao biometrica do motoboy", error);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
         public boolean clearCustomerProfile() {
             try {
                 SharedPreferences prefs = getSecurePreferences();
@@ -629,6 +705,36 @@ public class MainActivity extends BridgeActivity {
                 return true;
             } catch (Exception error) {
                 android.util.Log.w("JNC_BIO", "Falha ao limpar sessao biometrica", error);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public boolean clearAdminProfile() {
+            try {
+                SharedPreferences prefs = getSecurePreferences();
+                prefs.edit()
+                    .remove(ADMIN_PROFILE_KEY)
+                    .remove(ADMIN_SESSION_KEY)
+                    .apply();
+                return true;
+            } catch (Exception error) {
+                android.util.Log.w("JNC_BIO", "Falha ao limpar sessao biometrica do admin", error);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public boolean clearMotoboyProfile() {
+            try {
+                SharedPreferences prefs = getSecurePreferences();
+                prefs.edit()
+                    .remove(MOTOBOY_PROFILE_KEY)
+                    .remove(MOTOBOY_SESSION_KEY)
+                    .apply();
+                return true;
+            } catch (Exception error) {
+                android.util.Log.w("JNC_BIO", "Falha ao limpar sessao biometrica do motoboy", error);
                 return false;
             }
         }
@@ -678,6 +784,16 @@ public class MainActivity extends BridgeActivity {
 
                 biometricPrompt.authenticate(promptInfo);
             });
+        }
+
+        @JavascriptInterface
+        public void authenticateAdmin(String requestId, String reason) {
+            authenticateCustomer(requestId, reason);
+        }
+
+        @JavascriptInterface
+        public void authenticateMotoboy(String requestId, String reason) {
+            authenticateCustomer(requestId, reason);
         }
     }
 

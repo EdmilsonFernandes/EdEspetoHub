@@ -6,6 +6,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { runClientFreshStart } from '../utils/clientFreshStart';
 import { APP_BUILD_INFO } from '../generated/buildInfo';
 import { AuthLayout } from '../layouts/AuthLayout';
+import { nativeBiometricService } from '../services/nativeBiometricService';
+import { ConfirmationModal } from '../components/common/ConfirmationModal';
 
 export function MotoboyLogin() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -15,6 +17,11 @@ export function MotoboyLogin() {
   const [verifyPrompt, setVerifyPrompt] = useState<{ email?: string; emailMasked?: string } | null>(null);
   const [resendLoading, setResendLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [biometricLoading, setBiometricLoading] = useState(false);
+  const [autoBiometricTried, setAutoBiometricTried] = useState(false);
+  const [enrollmentPromptOpen, setEnrollmentPromptOpen] = useState(false);
+  const [pendingBiometricSession, setPendingBiometricSession] = useState<any | null>(null);
   const [rememberDevice, setRememberDevice] = useState(() => {
     if (typeof window === 'undefined') return true;
     return localStorage.getItem('auth:remember-motoboy') !== 'false';
@@ -42,6 +49,10 @@ export function MotoboyLogin() {
   const alreadyLoggedIn = Boolean(persistedSession?.token && sessionEmail);
 
   useEffect(() => {
+    setBiometricAvailable(nativeBiometricService.isSupported() && nativeBiometricService.hasStoredMotoboyProfile());
+  }, []);
+
+  useEffect(() => {
     const raw = localStorage.getItem('motoboy:last_email');
     if (raw && !form.email) setForm((prev) => ({ ...prev, email: raw }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -54,6 +65,64 @@ export function MotoboyLogin() {
   const formValid = useMemo(() => {
     return Boolean(String(form.email || '').trim()) && Boolean(String(form.password || '').trim());
   }, [form.email, form.password]);
+
+  const finishMotoboyLogin = (sessionData: any) => {
+    nativeBiometricService.syncMotoboySession(sessionData);
+    localStorage.setItem('motoboySession', JSON.stringify(sessionData));
+    setAuth(sessionData);
+    setPersistedSession(sessionData);
+    navigate('/motoboy/home');
+  };
+
+  const handleEnableMotoboyBiometric = () => {
+    if (pendingBiometricSession?.token) {
+      nativeBiometricService.enableMotoboy(pendingBiometricSession);
+      setBiometricAvailable(true);
+    }
+    const session = pendingBiometricSession;
+    setEnrollmentPromptOpen(false);
+    setPendingBiometricSession(null);
+    if (session?.token) {
+      finishMotoboyLogin(session);
+    }
+  };
+
+  const handleSkipMotoboyBiometric = () => {
+    const session = pendingBiometricSession;
+    setEnrollmentPromptOpen(false);
+    setPendingBiometricSession(null);
+    if (session?.token) {
+      finishMotoboyLogin(session);
+    }
+  };
+
+  const handleBiometricLogin = async () => {
+    if (biometricLoading) return;
+    setBiometricLoading(true);
+    setError('');
+    setVerifyPrompt(null);
+    try {
+      const session = await nativeBiometricService.loginMotoboyWithBiometrics('Confirme sua identidade para acessar suas entregas');
+      finishMotoboyLogin(session);
+    } catch (err: any) {
+      setError(err?.message || 'Não foi possível entrar com biometria.');
+    } finally {
+      setBiometricLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!biometricAvailable || biometricLoading || autoBiometricTried || alreadyLoggedIn) return;
+    const hasTypedCredentials = Boolean(String(form.email || '').trim()) || Boolean(String(form.password || '').trim());
+    if (hasTypedCredentials) return;
+
+    setAutoBiometricTried(true);
+    const timer = window.setTimeout(() => {
+      void handleBiometricLogin();
+    }, 180);
+
+    return () => window.clearTimeout(timer);
+  }, [alreadyLoggedIn, autoBiometricTried, biometricAvailable, biometricLoading, form.email, form.password]);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -77,9 +146,13 @@ export function MotoboyLogin() {
         // no-op: login must continue even if client cleanup fails
       }
       const sessionData = { token: session.token, user: session.user, store: session.store };
-      localStorage.setItem('motoboySession', JSON.stringify(sessionData));
-      setAuth(sessionData);
-      navigate('/motoboy/home');
+      nativeBiometricService.syncMotoboySession(sessionData);
+      if (nativeBiometricService.shouldOfferMotoboyEnrollment(sessionData)) {
+        setPendingBiometricSession(sessionData);
+        setEnrollmentPromptOpen(true);
+        return;
+      }
+      finishMotoboyLogin(sessionData);
     } catch (err: any) {
       if (err?.code === 'AUTH-005') {
         const targetEmail = err?.details?.email || form.email;
@@ -130,6 +203,7 @@ export function MotoboyLogin() {
     } catch {
       // ignore
     }
+    nativeBiometricService.disableMotoboy();
     setPersistedSession(null);
   };
 
@@ -213,6 +287,18 @@ export function MotoboyLogin() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
+              {biometricAvailable ? (
+                <button
+                  type="button"
+                  onClick={handleBiometricLogin}
+                  disabled={biometricLoading || loading}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#336886]/12 bg-[#336886]/8 px-4 py-3 text-sm font-black text-[#336886] shadow-[0_18px_34px_-28px_rgba(51,104,134,0.35)] transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <LockKey size={18} weight="duotone" />
+                  {biometricLoading ? 'Lendo biometria...' : 'Entrar com biometria'}
+                </button>
+              ) : null}
+
               {verifyPrompt && (
                 <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 text-amber-900 text-xs space-y-3 backdrop-blur-sm">
                   <div className="flex items-center gap-2">
@@ -376,6 +462,17 @@ export function MotoboyLogin() {
           </div>
         </div>
       </div>
+      <ConfirmationModal
+        isOpen={enrollmentPromptOpen}
+        onClose={handleSkipMotoboyBiometric}
+        onConfirm={handleEnableMotoboyBiometric}
+        title="Acessar mais rápido?"
+        description="Ative a biometria neste aparelho para entrar nas suas entregas com digital, rosto ou bloqueio do celular nas próximas vezes."
+        confirmLabel="Ativar biometria"
+        cancelLabel="Agora não"
+        variant="info"
+        icon={<LockKey size={32} weight="duotone" />}
+      />
     </AuthLayout>
   );
 

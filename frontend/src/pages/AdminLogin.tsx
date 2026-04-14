@@ -9,6 +9,8 @@ import { AuthLayout } from '../layouts/AuthLayout';
 import { runClientFreshStart } from '../utils/clientFreshStart';
 import { APP_BUILD_INFO } from '../generated/buildInfo';
 import { ArrowLeft, Check, Eye, EyeSlash, LockKey, ShieldCheck, WarningCircle, WhatsappLogo } from '@phosphor-icons/react';
+import { nativeBiometricService } from '../services/nativeBiometricService';
+import { ConfirmationModal } from '../components/common/ConfirmationModal';
 
 const ADMIN_REMEMBER_IDENTIFIER_KEY = 'auth:last-admin-identifier';
 
@@ -25,6 +27,11 @@ export function AdminLogin() {
   const [verifyPrompt, setVerifyPrompt] = useState<{ email?: string; emailMasked?: string } | null>(null);
   const [resendLoading, setResendLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [biometricLoading, setBiometricLoading] = useState(false);
+  const [autoBiometricTried, setAutoBiometricTried] = useState(false);
+  const [enrollmentPromptOpen, setEnrollmentPromptOpen] = useState(false);
+  const [pendingBiometricSession, setPendingBiometricSession] = useState<any | null>(null);
   const [rememberDevice, setRememberDevice] = useState(() => {
     if (typeof window === 'undefined') return true;
     return localStorage.getItem('auth:remember-admin') !== 'false';
@@ -36,6 +43,87 @@ export function AdminLogin() {
   });
 
   useEffect(() => {
+    setBiometricAvailable(nativeBiometricService.isSupported() && nativeBiometricService.hasStoredAdminProfile());
+  }, []);
+
+  const finishAdminLogin = (sessionData: any) => {
+    const redirectTab = sessionStorage.getItem('admin:redirectTab');
+    const redirectSlug = sessionStorage.getItem('admin:redirectSlug');
+
+    nativeBiometricService.syncAdminSession(sessionData);
+    setAuth(sessionData);
+    setBranding({
+      primaryColor: sessionData.store?.settings?.primaryColor,
+      secondaryColor: sessionData.store?.settings?.secondaryColor,
+      logoUrl: sessionData.store?.settings?.logoUrl,
+      brandName: sessionData.store?.name,
+    });
+
+    if (redirectTab && (!redirectSlug || redirectSlug === sessionData.store?.slug)) {
+      sessionStorage.removeItem('admin:redirectTab');
+      sessionStorage.removeItem('admin:redirectSlug');
+      navigate('/admin/dashboard', { state: { activeTab: redirectTab } });
+      return;
+    }
+    sessionStorage.removeItem('admin:redirectTab');
+    sessionStorage.removeItem('admin:redirectSlug');
+    const loginRole = String(sessionData?.user?.role || '').toUpperCase();
+    if (loginRole === 'ADMIN' || loginRole === 'OPERATOR') {
+      const isMobile = window.matchMedia('(max-width: 767px)').matches;
+      if (isMobile && sessionData.store?.slug) {
+        navigate(`/${sessionData.store.slug}`);
+        return;
+      }
+
+      if (loginRole === 'ADMIN') {
+        navigate('/admin/dashboard', { state: { activeTab: 'resumo' } });
+        return;
+      }
+      navigate('/admin/queue');
+      return;
+    }
+    navigate('/admin/queue');
+  };
+
+  const handleEnableAdminBiometric = () => {
+    if (pendingBiometricSession?.token) {
+      nativeBiometricService.enableAdmin(pendingBiometricSession);
+      setBiometricAvailable(true);
+    }
+    const session = pendingBiometricSession;
+    setEnrollmentPromptOpen(false);
+    setPendingBiometricSession(null);
+    if (session?.token) {
+      finishAdminLogin(session);
+    }
+  };
+
+  const handleSkipAdminBiometric = () => {
+    const session = pendingBiometricSession;
+    setEnrollmentPromptOpen(false);
+    setPendingBiometricSession(null);
+    if (session?.token) {
+      finishAdminLogin(session);
+    }
+  };
+
+  const handleBiometricLogin = async () => {
+    if (biometricLoading) return;
+    setBiometricLoading(true);
+    setLoginError('');
+    setPendingPayment(null);
+    setVerifyPrompt(null);
+    try {
+      const session = await nativeBiometricService.loginAdminWithBiometrics('Confirme sua identidade para acessar sua operação');
+      finishAdminLogin(session);
+    } catch (error: any) {
+      setLoginError(error?.message || 'Não foi possível entrar com biometria.');
+    } finally {
+      setBiometricLoading(false);
+    }
+  };
+
+  useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!rememberDevice) return;
     const rememberedIdentifier = localStorage.getItem(ADMIN_REMEMBER_IDENTIFIER_KEY);
@@ -44,6 +132,30 @@ export function AdminLogin() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    setAutoBiometricTried(false);
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (!biometricAvailable || biometricLoading || autoBiometricTried) return;
+    const hasTypedCredentials =
+      Boolean(String(loginForm.identifier || '').trim()) || Boolean(String(loginForm.password || '').trim());
+    if (hasTypedCredentials) return;
+
+    setAutoBiometricTried(true);
+    const timer = window.setTimeout(() => {
+      void handleBiometricLogin();
+    }, 180);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    autoBiometricTried,
+    biometricAvailable,
+    biometricLoading,
+    loginForm.identifier,
+    loginForm.password,
+  ]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -119,38 +231,13 @@ export function AdminLogin() {
       if (redirectTab) sessionStorage.setItem('admin:redirectTab', redirectTab);
       if (redirectSlug) sessionStorage.setItem('admin:redirectSlug', redirectSlug);
       const sessionData = { token: session.token, user: session.user, store: session.store };
-      setAuth(sessionData);
-      setBranding({
-        primaryColor: session.store?.settings?.primaryColor,
-        secondaryColor: session.store?.settings?.secondaryColor,
-        logoUrl: session.store?.settings?.logoUrl,
-        brandName: session.store?.name,
-      });
-      if (redirectTab && (!redirectSlug || redirectSlug === session.store?.slug)) {
-        sessionStorage.removeItem('admin:redirectTab');
-        sessionStorage.removeItem('admin:redirectSlug');
-        navigate('/admin/dashboard', { state: { activeTab: redirectTab } });
+      nativeBiometricService.syncAdminSession(sessionData);
+      if (nativeBiometricService.shouldOfferAdminEnrollment(sessionData)) {
+        setPendingBiometricSession(sessionData);
+        setEnrollmentPromptOpen(true);
         return;
       }
-      sessionStorage.removeItem('admin:redirectTab');
-      sessionStorage.removeItem('admin:redirectSlug');
-      const loginRole = String(session?.user?.role || '').toUpperCase();
-      if (loginRole === 'ADMIN' || loginRole === 'OPERATOR') {
-        // No mobile, se ele é admin/operador da loja, leva para a loja dele
-        const isMobile = window.matchMedia('(max-width: 767px)').matches;
-        if (isMobile && session.store?.slug) {
-          navigate(`/${session.store.slug}`);
-          return;
-        }
-        
-        if (loginRole === 'ADMIN') {
-          navigate('/admin/dashboard', { state: { activeTab: 'resumo' } });
-          return;
-        }
-        navigate('/admin/queue');
-        return;
-      }
-      navigate('/admin/queue');
+      finishAdminLogin(sessionData);
     } catch (error: any) {
       const message = error.message || 'Não foi possível autenticar agora.';
       if (error?.code === 'PAY-010') {
@@ -259,6 +346,18 @@ export function AdminLogin() {
         </div>
 
         <form onSubmit={handleLogin} autoComplete="on" className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40">
+          {biometricAvailable ? (
+            <button
+              type="button"
+              onClick={handleBiometricLogin}
+              disabled={biometricLoading}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#336886]/12 bg-[#336886]/8 px-4 py-3 text-sm font-black text-[#336886] shadow-[0_18px_34px_-28px_rgba(51,104,134,0.35)] transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <LockKey size={18} weight="duotone" />
+              {biometricLoading ? 'Lendo biometria...' : 'Entrar com biometria'}
+            </button>
+          ) : null}
+
           {verifyPrompt && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 text-amber-900 text-xs space-y-3 backdrop-blur-sm">
               <div className="flex items-center gap-2">
@@ -410,6 +509,17 @@ export function AdminLogin() {
           Precisa de ajuda? Fale conosco
         </button>
       </div>
+      <ConfirmationModal
+        isOpen={enrollmentPromptOpen}
+        onClose={handleSkipAdminBiometric}
+        onConfirm={handleEnableAdminBiometric}
+        title="Acessar mais rápido?"
+        description="Ative a biometria neste aparelho para entrar na operação com digital, rosto ou bloqueio do celular nas próximas vezes."
+        confirmLabel="Ativar biometria"
+        cancelLabel="Agora não"
+        variant="info"
+        icon={<LockKey size={32} weight="duotone" />}
+      />
     </AuthLayout>
   );
 

@@ -13,13 +13,46 @@ type CustomerSession = {
   };
 };
 
-type StoredCustomerProfile = {
-  role: 'customer';
+type AdminSession = {
+  token: string;
+  user?: {
+    id?: string;
+    fullName?: string;
+    name?: string;
+    email?: string;
+    role?: string;
+  };
+  store?: {
+    id?: string;
+    slug?: string;
+    name?: string;
+  };
+};
+
+type MotoboySession = {
+  token: string;
+  user?: {
+    id?: string;
+    fullName?: string;
+    name?: string;
+    email?: string;
+    role?: string;
+  };
+  store?: any;
+};
+
+type BiometricRole = 'customer' | 'admin' | 'motoboy';
+
+type StoredBiometricProfile = {
+  role: BiometricRole;
   userId: string;
   displayName: string;
   email: string;
   enabledAt: string;
   lastLoginAt: string;
+  storeId?: string;
+  storeSlug?: string;
+  storeName?: string;
 };
 
 type NativeBiometricBridge = {
@@ -30,6 +63,18 @@ type NativeBiometricBridge = {
   saveCustomerProfile?: (profileJson: string, sessionJson: string) => boolean;
   clearCustomerProfile?: () => boolean;
   authenticateCustomer?: (requestId: string, reason: string) => void;
+  hasAdminProfile?: () => boolean;
+  getAdminProfile?: () => string;
+  getAdminSession?: () => string;
+  saveAdminProfile?: (profileJson: string, sessionJson: string) => boolean;
+  clearAdminProfile?: () => boolean;
+  authenticateAdmin?: (requestId: string, reason: string) => void;
+  hasMotoboyProfile?: () => boolean;
+  getMotoboyProfile?: () => string;
+  getMotoboySession?: () => string;
+  saveMotoboyProfile?: (profileJson: string, sessionJson: string) => boolean;
+  clearMotoboyProfile?: () => boolean;
+  authenticateMotoboy?: (requestId: string, reason: string) => void;
 };
 
 declare global {
@@ -65,7 +110,25 @@ const syncCustomerSession = (session: CustomerSession | null) => {
   window.dispatchEvent(new CustomEvent(CUSTOMER_SESSION_EVENT));
 };
 
-const normalizeCustomerProfile = (session: CustomerSession): StoredCustomerProfile | null => {
+const syncAdminSession = (session: AdminSession | null) => {
+  if (typeof window === 'undefined') return;
+  if (session?.token) {
+    localStorage.setItem('adminSession', JSON.stringify(session));
+    return;
+  }
+  localStorage.removeItem('adminSession');
+};
+
+const syncMotoboySession = (session: MotoboySession | null) => {
+  if (typeof window === 'undefined') return;
+  if (session?.token) {
+    localStorage.setItem('motoboySession', JSON.stringify(session));
+    return;
+  }
+  localStorage.removeItem('motoboySession');
+};
+
+const normalizeCustomerProfile = (session: CustomerSession): StoredBiometricProfile | null => {
   const userId = String(session?.user?.id || '').trim();
   const email = String(session?.user?.email || '').trim().toLowerCase();
   const displayName = String(session?.user?.fullName || session?.user?.name || '').trim();
@@ -81,6 +144,94 @@ const normalizeCustomerProfile = (session: CustomerSession): StoredCustomerProfi
   };
 };
 
+const normalizeAdminProfile = (session: AdminSession): StoredBiometricProfile | null => {
+  const userId = String(session?.user?.id || '').trim();
+  const email = String(session?.user?.email || '').trim().toLowerCase();
+  const displayName = String(session?.store?.name || session?.user?.fullName || session?.user?.name || '').trim();
+  if (!session?.token || !userId || !email) return null;
+  const now = new Date().toISOString();
+  return {
+    role: 'admin',
+    userId,
+    email,
+    displayName: displayName || 'Lojista',
+    enabledAt: now,
+    lastLoginAt: now,
+    storeId: String(session?.store?.id || '').trim() || undefined,
+    storeSlug: String(session?.store?.slug || '').trim() || undefined,
+    storeName: String(session?.store?.name || '').trim() || undefined,
+  };
+};
+
+const normalizeMotoboyProfile = (session: MotoboySession): StoredBiometricProfile | null => {
+  const userId = String(session?.user?.id || '').trim();
+  const email = String(session?.user?.email || '').trim().toLowerCase();
+  const displayName = String(session?.user?.fullName || session?.user?.name || '').trim();
+  if (!session?.token || !userId || !email) return null;
+  const now = new Date().toISOString();
+  return {
+    role: 'motoboy',
+    userId,
+    email,
+    displayName: displayName || 'Entregador',
+    enabledAt: now,
+    lastLoginAt: now,
+  };
+};
+
+const authenticateWithBridge = async (
+  authenticate: ((requestId: string, reason: string) => void) | undefined,
+  getSession: (() => string) | undefined,
+  reason: string,
+) => {
+  if (!authenticate || !getSession) {
+    throw new Error('Biometria não disponível neste aparelho.');
+  }
+
+  const requestId =
+    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `bio-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+  const result = await new Promise<{ success: boolean; message?: string }>((resolve, reject) => {
+    const timer = window.setTimeout(() => {
+      window.removeEventListener(BIOMETRIC_RESULT_EVENT, onResult as EventListener);
+      reject(new Error('A autenticação biométrica expirou. Tente novamente.'));
+    }, 45000);
+
+    const onResult = (event: Event) => {
+      const detail = (event as CustomEvent<any>)?.detail || {};
+      if (String(detail?.requestId || '') !== requestId) return;
+      window.clearTimeout(timer);
+      window.removeEventListener(BIOMETRIC_RESULT_EVENT, onResult as EventListener);
+      resolve({
+        success: Boolean(detail?.success),
+        message: String(detail?.message || '').trim(),
+      });
+    };
+
+    window.addEventListener(BIOMETRIC_RESULT_EVENT, onResult as EventListener);
+
+    try {
+      authenticate(requestId, reason);
+    } catch {
+      window.clearTimeout(timer);
+      window.removeEventListener(BIOMETRIC_RESULT_EVENT, onResult as EventListener);
+      reject(new Error('Não foi possível iniciar a biometria.'));
+    }
+  });
+
+  if (!result.success) {
+    throw new Error(result.message || 'Biometria não confirmada.');
+  }
+
+  const session = parseJson<any>(getSession());
+  if (!session?.token) {
+    throw new Error('Não encontramos uma sessão biométrica salva.');
+  }
+  return session;
+};
+
 export const nativeBiometricService = {
   isSupported() {
     const bridge = getBridge();
@@ -92,9 +243,29 @@ export const nativeBiometricService = {
     return Boolean(bridge?.hasCustomerProfile?.());
   },
 
+  hasStoredAdminProfile() {
+    const bridge = getBridge();
+    return Boolean(bridge?.hasAdminProfile?.());
+  },
+
+  hasStoredMotoboyProfile() {
+    const bridge = getBridge();
+    return Boolean(bridge?.hasMotoboyProfile?.());
+  },
+
   getStoredCustomerProfile() {
     const bridge = getBridge();
-    return parseJson<StoredCustomerProfile>(bridge?.getCustomerProfile?.() || '');
+    return parseJson<StoredBiometricProfile>(bridge?.getCustomerProfile?.() || '');
+  },
+
+  getStoredAdminProfile() {
+    const bridge = getBridge();
+    return parseJson<StoredBiometricProfile>(bridge?.getAdminProfile?.() || '');
+  },
+
+  getStoredMotoboyProfile() {
+    const bridge = getBridge();
+    return parseJson<StoredBiometricProfile>(bridge?.getMotoboyProfile?.() || '');
   },
 
   shouldOfferEnrollment(session: CustomerSession) {
@@ -106,6 +277,24 @@ export const nativeBiometricService = {
     return saved.userId !== profile.userId;
   },
 
+  shouldOfferAdminEnrollment(session: AdminSession) {
+    if (!this.isSupported()) return false;
+    const profile = normalizeAdminProfile(session);
+    if (!profile) return false;
+    const saved = this.getStoredAdminProfile();
+    if (!saved) return true;
+    return saved.userId !== profile.userId || saved.storeId !== profile.storeId;
+  },
+
+  shouldOfferMotoboyEnrollment(session: MotoboySession) {
+    if (!this.isSupported()) return false;
+    const profile = normalizeMotoboyProfile(session);
+    if (!profile) return false;
+    const saved = this.getStoredMotoboyProfile();
+    if (!saved) return true;
+    return saved.userId !== profile.userId;
+  },
+
   enableCustomer(session: CustomerSession) {
     const bridge = getBridge();
     const profile = normalizeCustomerProfile(session);
@@ -113,63 +302,69 @@ export const nativeBiometricService = {
     return Boolean(bridge.saveCustomerProfile(JSON.stringify(profile), JSON.stringify(session)));
   },
 
+  enableAdmin(session: AdminSession) {
+    const bridge = getBridge();
+    const profile = normalizeAdminProfile(session);
+    if (!bridge?.saveAdminProfile || !profile) return false;
+    return Boolean(bridge.saveAdminProfile(JSON.stringify(profile), JSON.stringify(session)));
+  },
+
+  enableMotoboy(session: MotoboySession) {
+    const bridge = getBridge();
+    const profile = normalizeMotoboyProfile(session);
+    if (!bridge?.saveMotoboyProfile || !profile) return false;
+    return Boolean(bridge.saveMotoboyProfile(JSON.stringify(profile), JSON.stringify(session)));
+  },
+
   disableCustomer() {
     const bridge = getBridge();
     return Boolean(bridge?.clearCustomerProfile?.());
   },
 
-  async loginCustomerWithBiometrics(reason = 'Confirme sua identidade para entrar'): Promise<CustomerSession> {
+  disableAdmin() {
     const bridge = getBridge();
-    if (!bridge?.authenticateCustomer || !bridge?.getCustomerSession) {
-      throw new Error('Biometria não disponível neste aparelho.');
-    }
+    return Boolean(bridge?.clearAdminProfile?.());
+  },
 
-    const requestId =
-      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-        ? crypto.randomUUID()
-        : `bio-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  disableMotoboy() {
+    const bridge = getBridge();
+    return Boolean(bridge?.clearMotoboyProfile?.());
+  },
 
-    const result = await new Promise<{ success: boolean; message?: string }>((resolve, reject) => {
-      const timer = window.setTimeout(() => {
-        window.removeEventListener(BIOMETRIC_RESULT_EVENT, onResult as EventListener);
-        reject(new Error('A autenticação biométrica expirou. Tente novamente.'));
-      }, 45000);
-
-      const onResult = (event: Event) => {
-        const detail = (event as CustomEvent<any>)?.detail || {};
-        if (String(detail?.requestId || '') !== requestId) return;
-        window.clearTimeout(timer);
-        window.removeEventListener(BIOMETRIC_RESULT_EVENT, onResult as EventListener);
-        resolve({
-          success: Boolean(detail?.success),
-          message: String(detail?.message || '').trim(),
-        });
-      };
-
-      window.addEventListener(BIOMETRIC_RESULT_EVENT, onResult as EventListener);
-
-      try {
-        bridge.authenticateCustomer?.(requestId, reason);
-      } catch {
-        window.clearTimeout(timer);
-        window.removeEventListener(BIOMETRIC_RESULT_EVENT, onResult as EventListener);
-        reject(new Error('Não foi possível iniciar a biometria.'));
-      }
-    });
-
-    if (!result.success) {
-      throw new Error(result.message || 'Biometria não confirmada.');
-    }
-
-    const session = parseJson<CustomerSession>(bridge.getCustomerSession());
-    if (!session?.token) {
-      throw new Error('Não encontramos uma sessão biométrica salva.');
-    }
-
+  async loginCustomerWithBiometrics(reason = 'Confirme sua identidade para entrar') {
+    const bridge = getBridge();
+    const session = await authenticateWithBridge(
+      bridge?.authenticateCustomer,
+      bridge?.getCustomerSession,
+      reason,
+    );
     syncCustomerSession(session);
-    return session;
+    return session as CustomerSession;
+  },
+
+  async loginAdminWithBiometrics(reason = 'Confirme sua identidade para acessar sua operação') {
+    const bridge = getBridge();
+    const session = await authenticateWithBridge(
+      bridge?.authenticateAdmin,
+      bridge?.getAdminSession,
+      reason,
+    );
+    syncAdminSession(session);
+    return session as AdminSession;
+  },
+
+  async loginMotoboyWithBiometrics(reason = 'Confirme sua identidade para acessar suas entregas') {
+    const bridge = getBridge();
+    const session = await authenticateWithBridge(
+      bridge?.authenticateMotoboy,
+      bridge?.getMotoboySession,
+      reason,
+    );
+    syncMotoboySession(session);
+    return session as MotoboySession;
   },
 
   syncCustomerSession,
+  syncAdminSession,
+  syncMotoboySession,
 };
-
