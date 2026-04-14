@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { ArrowLeft } from '@phosphor-icons/react';
+import { Buildings, Heart, House, Receipt } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const STACK_KEY = 'jnk_native_route_stack_v1';
@@ -97,32 +97,9 @@ export function NativeAppNavigator() {
     };
   }, []);
 
-  const previousPath = useMemo(() => {
-    const stack = readStack();
-    for (let i = stack.length - 2; i >= 0; i -= 1) {
-      if (stack[i] && stack[i] !== currentPath) return stack[i];
-    }
-    return '';
-  }, [currentPath]);
-
   if (!Capacitor.isNativePlatform() || !isEligiblePath(location.pathname) || isHidden || isStoreAdmin || hiddenByCart) {
     return null;
   }
-
-  const handleBack = () => {
-    if (window.history.length > 1) {
-      navigate(-1);
-      return;
-    }
-    const stack = readStack();
-    const trimmed = stack.filter((_, index) => index < stack.length - 1);
-    writeStack(trimmed);
-    if (previousPath) {
-      navigate(previousPath);
-      return;
-    }
-    navigate('/hub');
-  };
 
   const handleHome = () => {
     const stack = readStack();
@@ -131,29 +108,58 @@ export function NativeAppNavigator() {
     navigate('/hub');
   };
 
+  const isOrders = location.pathname.startsWith('/cliente/pedidos');
+  const isCondominium = location.pathname === '/hub' && location.search.includes('panel=condominios');
+  const isFavorites = location.pathname === '/hub' && location.search.includes('favorites=1');
+
   return (
     <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-[35] transition-transform duration-300 ease-in-out lg:hidden">
-      <div className="pointer-events-auto mx-auto grid max-w-none grid-cols-2 gap-1 border-t border-slate-200/40 bg-white/72 p-1.5 pb-[max(env(safe-area-inset-bottom),4px)] shadow-[0_-12px_24px_-20px_rgba(15,23,42,0.25)] backdrop-blur-2xl">
-        <button
-          type="button"
-          onClick={handleBack}
-          className="flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl py-1 text-[8px] font-black uppercase tracking-[0.1em] text-slate-600 transition active:scale-95"
-        >
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-700">
-            <ArrowLeft size={17} weight="bold" />
-          </span>
-          Voltar
-        </button>
+      <div className="pointer-events-auto mx-auto grid max-w-none grid-cols-4 gap-1 border-t border-[#336886]/12 bg-[linear-gradient(180deg,rgba(235,244,250,0.92)_0%,rgba(225,238,247,0.9)_100%)] p-1.5 pb-[max(env(safe-area-inset-bottom),4px)] shadow-[0_-12px_28px_-20px_rgba(51,104,134,0.24)] backdrop-blur-2xl">
         <button
           type="button"
           onClick={handleHome}
-          className="flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl py-1 text-[8px] font-black uppercase tracking-[0.1em] text-slate-700 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.18)] transition active:scale-95"
-          style={{ backgroundColor: 'rgba(241,245,249,0.92)' }}
+          className="flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl py-1 text-[8px] font-black uppercase tracking-[0.1em] text-[#336886] transition active:scale-95"
         >
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white p-0.5 ring-1 ring-slate-200">
-            <img src="/janocaminho.jpg" alt="JNC" loading="eager" fetchPriority="high" decoding="async" className="h-full w-full rounded-full object-cover" />
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#336886]/10 text-[#336886]">
+            <House size={17} weight="fill" />
           </span>
-          JNC
+          Início
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate('/cliente/pedidos')}
+          className={`flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl py-1 text-[8px] font-black uppercase tracking-[0.1em] transition active:scale-95 ${
+            isOrders ? 'bg-[#336886]/10 text-[#336886] shadow-[0_10px_20px_-18px_rgba(51,104,134,0.22)]' : 'text-slate-500'
+          }`}
+        >
+          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${isOrders ? 'bg-[#336886]/12 text-[#336886]' : 'bg-slate-100 text-slate-600'}`}>
+            <Receipt size={17} weight={isOrders ? 'fill' : 'duotone'} />
+          </span>
+          Pedidos
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate('/hub?panel=condominios')}
+          className={`flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl py-1 text-[8px] font-black uppercase tracking-[0.1em] transition active:scale-95 ${
+            isCondominium ? 'bg-[#336886]/10 text-[#336886] shadow-[0_10px_20px_-18px_rgba(51,104,134,0.22)]' : 'text-slate-500'
+          }`}
+        >
+          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${isCondominium ? 'bg-[#336886]/12 text-[#336886]' : 'bg-slate-100 text-slate-600'}`}>
+            <Buildings size={17} weight={isCondominium ? 'fill' : 'duotone'} />
+          </span>
+          Condo
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate('/hub?favorites=1')}
+          className={`flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl py-1 text-[8px] font-black uppercase tracking-[0.1em] transition active:scale-95 ${
+            isFavorites ? 'bg-[#336886]/10 text-[#336886] shadow-[0_10px_20px_-18px_rgba(51,104,134,0.22)]' : 'text-slate-500'
+          }`}
+        >
+          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${isFavorites ? 'bg-[#336886]/12 text-[#336886]' : 'bg-slate-100 text-slate-600'}`}>
+            <Heart size={17} weight={isFavorites ? 'fill' : 'regular'} />
+          </span>
+          Favoritos
         </button>
       </div>
     </nav>

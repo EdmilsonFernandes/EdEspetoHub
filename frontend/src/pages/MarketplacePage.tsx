@@ -211,6 +211,29 @@ const formatCondominiumPickerEventTime = (event?: CondominiumEventSummary | null
   return end ? `${date} • ${start}-${end}` : `${date} • ${start}`;
 };
 
+const toCalendarStamp = (value?: string) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+};
+
+const buildCondominiumCalendarLink = (event?: CondominiumEventSummary | null, condominium?: HubCondominium | null) => {
+  const start = toCalendarStamp(event?.startsAt);
+  const end = toCalendarStamp(event?.endsAt || event?.startsAt);
+  if (!start) return '';
+
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: String(event?.title || condominium?.name || 'Agenda do condomínio'),
+    dates: `${start}/${end || start}`,
+    details: String(event?.notes || 'Lembrete da agenda do condomínio no Já no Caminho.'),
+    location: String(event?.pickupLocation || condominium?.address || condominium?.name || ''),
+  });
+
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+};
+
 const categoryVisuals: Record<string, { icon: typeof Storefront; label: string }> = {
   Restaurante: { icon: ForkKnife, label: 'Restaurante' },
   Hamburguer: { icon: Hamburger, label: 'Hamburguer' },
@@ -342,6 +365,7 @@ export function MarketplacePage() {
   const [pullDistance, setPullDistance] = useState(0);
   const [isHeaderElevated, setIsHeaderElevated] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search || '');
@@ -702,6 +726,9 @@ export function MarketplacePage() {
     const restoreHubHeader = () => {
       setHasEntered(true);
       setIsHeaderElevated((window.scrollY || 0) > 6);
+      if (searchInputRef.current) {
+        searchInputRef.current.blur();
+      }
       window.requestAnimationFrame(() => {
         window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
       });
@@ -1048,6 +1075,10 @@ export function MarketplacePage() {
   const activeCondominiumEvent = selectedCondominiumEvent || selectedCondominium?.eventSummary || null;
   const isCondominiumEventLive = activeCondominiumEvent?.state === 'live';
   const hasUpcomingCondominiumEvent = activeCondominiumEvent?.state === 'upcoming';
+  const selectedCondominiumCalendarLink = useMemo(
+    () => buildCondominiumCalendarLink(activeCondominiumEvent, selectedCondominium),
+    [activeCondominiumEvent, selectedCondominium]
+  );
   const condominiumEventTimeLabel = formatCondominiumEventTime(activeCondominiumEvent);
   const selectedCondominiumLogoUrl = selectedCondominium
     ? resolveAssetUrl(selectedCondominium.logoUrl || selectedCondominium.bannerUrl || undefined) || getStoreAvatarUrl(selectedCondominium.slug || 'condominio', selectedCondominium.name || 'Condomínio')
@@ -1379,6 +1410,12 @@ export function MarketplacePage() {
     resetMarketplaceFilters();
   }, [resetMarketplaceFilters]);
 
+  const handleOpenCalendar = useCallback((event?: CondominiumEventSummary | null, condominium?: HubCondominium | null) => {
+    const link = buildCondominiumCalendarLink(event, condominium);
+    if (!link) return;
+    window.open(link, '_blank', 'noopener,noreferrer');
+  }, []);
+
   const [activeOrders, setActiveOrders] = useState<any[]>([]);
 
   const clearAnonymousOrderCache = useCallback((orderIds: string[]) => {
@@ -1618,7 +1655,8 @@ export function MarketplacePage() {
                   <MagnifyingGlass size={18} weight="bold" />
                 </div>
                 <input
-                  type="search"
+                  ref={searchInputRef}
+                  type="text"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Buscar loja, categoria ou produto"
@@ -1857,19 +1895,20 @@ export function MarketplacePage() {
               style={{ transition: 'all .45s ease', transitionDelay: '95ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
             >
               {selectedCondominium ? (
-                <div className="relative overflow-hidden rounded-[1.9rem] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.98)_58%,rgba(239,246,255,0.96)_100%)] shadow-[0_20px_46px_-28px_rgba(15,23,42,0.24)] ring-1 ring-slate-100/80 backdrop-blur-md">
-                  <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-r from-[#336886]/10 via-sky-50 to-white">
+                <div className="relative overflow-hidden rounded-[2rem] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.99)_0%,rgba(248,250,252,0.98)_45%,rgba(239,246,255,0.98)_100%)] shadow-[0_24px_52px_-30px_rgba(15,23,42,0.26)] ring-1 ring-slate-100/80 backdrop-blur-md">
+                  <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-r from-[#336886]/10 via-sky-50 to-white">
                     {selectedCondominiumBannerUrl ? (
                       <img
                         src={selectedCondominiumBannerUrl}
                         alt={String(selectedCondominium.name || 'Condomínio')}
-                        className="h-full w-full object-cover opacity-90 saturate-[1.05]"
+                        className="h-full w-full object-cover opacity-95 saturate-[1.14]"
                       />
                     ) : null}
-                    <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.82)_0%,rgba(255,255,255,0.58)_42%,rgba(255,255,255,0.88)_100%)]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(15,23,42,0.16)_0%,rgba(255,255,255,0.08)_32%,rgba(255,255,255,0.9)_100%)]" />
                   </div>
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#336886]/6 to-transparent" />
-                  <div className="pointer-events-none absolute -right-8 top-8 h-24 w-24 rounded-full bg-[#336886]/10 blur-3xl" />
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#336886]/10 to-transparent" />
+                  <div className="pointer-events-none absolute -right-8 top-8 h-24 w-24 rounded-full bg-[#336886]/12 blur-3xl" />
+                  <div className="pointer-events-none absolute -left-8 top-4 h-20 w-20 rounded-full bg-white/55 blur-3xl" />
                   <div className="relative flex items-center justify-between gap-3 px-4 py-4">
                   <button
                     type="button"
@@ -1878,7 +1917,7 @@ export function MarketplacePage() {
                     aria-label="Escolher outro condomínio"
                     title="Escolher outro condomínio"
                   >
-                    <span className="inline-flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[1.2rem] bg-white p-2 shadow-[0_16px_28px_-18px_rgba(15,23,42,0.34)] ring-1 ring-slate-200/80">
+                    <span className="inline-flex h-[3.85rem] w-[3.85rem] shrink-0 items-center justify-center overflow-hidden rounded-[1.35rem] bg-white/96 p-2.5 shadow-[0_20px_34px_-18px_rgba(15,23,42,0.36)] ring-1 ring-white/90">
                       {selectedCondominiumLogoUrl ? (
                         <img
                           src={selectedCondominiumLogoUrl}
@@ -1890,7 +1929,7 @@ export function MarketplacePage() {
                       )}
                     </span>
                     <span className="min-w-0">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-[#336886]/8 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-[#336886]">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-white/82 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-[#336886] shadow-[0_10px_24px_-18px_rgba(51,104,134,0.32)] ring-1 ring-[#336886]/10">
                         <Buildings size={10} weight="fill" />
                         Condomínio
                       </span>
@@ -1914,16 +1953,31 @@ export function MarketplacePage() {
                         {isCondominiumEventLive ? <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.14)]" /> : null}
                         {isCondominiumEventLive ? 'Agenda ativa' : hasUpcomingCondominiumEvent ? 'Próxima agenda' : 'Agenda do local'}
                       </span>
+                      {selectedCondominiumCalendarLink && !isCondominiumEventLive ? (
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleOpenCalendar(activeCondominiumEvent, selectedCondominium);
+                          }}
+                          className="mt-2 inline-flex items-center gap-1 rounded-full border border-[#336886]/12 bg-white/88 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-[#336886] shadow-[0_12px_26px_-18px_rgba(51,104,134,0.28)] transition hover:bg-white active:scale-[0.97]"
+                          aria-label="Adicionar próxima agenda ao calendário"
+                          title="Adicionar ao calendário"
+                        >
+                          <CalendarBlank size={11} weight="fill" />
+                          Lembrar
+                        </button>
+                      ) : null}
                     </span>
                   </button>
                   <button
                     type="button"
                     onClick={clearCondominiumSelection}
-                    className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-slate-500 ring-1 ring-slate-200/80 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.22)] transition-colors hover:bg-slate-50 hover:text-slate-800 active:scale-95"
+                    className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(241,245,249,0.98)_100%)] text-slate-500 ring-1 ring-slate-200/85 shadow-[0_18px_28px_-18px_rgba(15,23,42,0.25)] transition hover:-translate-y-0.5 hover:text-[#336886] hover:shadow-[0_22px_32px_-18px_rgba(51,104,134,0.25)] active:scale-95"
                     aria-label="Sair da feira e voltar ao Hub"
                     title="Sair da feira"
                   >
-                    <X size={15} weight="bold" />
+                    <X size={16} weight="bold" />
                   </button>
                   </div>
                 </div>
@@ -2051,7 +2105,7 @@ export function MarketplacePage() {
                 ) : (
                   displayedFeaturedProducts.map((item, index) => (
                     (() => {
-                      const featuredStorePath = selectedCondominiumSlug && isCondominiumEventLive
+                      const featuredStorePath = selectedCondominiumSlug
                         ? `/${item.storeSlug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}`
                         : `/${item.storeSlug}`;
                       return (
@@ -2211,7 +2265,7 @@ export function MarketplacePage() {
             {!loading && !error && filteredStores.length > 0 && (
               <div className={selectedCondominium ? 'grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4' : 'grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3'}>
                 {filteredStores.map((store) => {
-                  const storePath = selectedCondominiumSlug && isCondominiumEventLive
+                  const storePath = selectedCondominiumSlug
                     ? `/${store.slug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}`
                     : `/${store.slug}`;
 
@@ -2424,7 +2478,7 @@ export function MarketplacePage() {
                 {searchedProducts.map((item) => (
                   <Link
                     key={`search-res-${item.storeSlug}-${item.id}`}
-                    to={`/${item.storeSlug}`}
+                    to={selectedCondominiumSlug ? `/${item.storeSlug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}` : `/${item.storeSlug}`}
                     className="group min-w-[160px] snap-start overflow-hidden rounded-[1.45rem] border border-white bg-white shadow-[0_8px_24px_rgba(15,23,42,0.06)] transition-all duration-200 ease-out hover:scale-[1.015] active:scale-[0.97]"
                   >
                     <div className="relative h-[90px] overflow-hidden bg-slate-100">
@@ -2469,7 +2523,7 @@ export function MarketplacePage() {
       </div>
 
       <nav
-        className="fixed bottom-0 left-0 right-0 z-[100] border-t border-white/80 bg-white/92 shadow-[0_-14px_34px_-26px_rgba(15,23,42,0.38)] backdrop-blur-2xl transition-transform duration-300 lg:hidden"
+        className="fixed bottom-0 left-0 right-0 z-[100] border-t border-[#336886]/12 bg-[linear-gradient(180deg,rgba(235,244,250,0.94)_0%,rgba(225,238,247,0.92)_100%)] shadow-[0_-14px_34px_-26px_rgba(51,104,134,0.3)] backdrop-blur-2xl transition-transform duration-300 lg:hidden"
         style={{ transform: isBottomNavVisible ? 'translateY(0)' : 'translateY(100%)' }}
       >
         <div className="grid h-[4.75rem] grid-cols-4 items-center gap-2 px-4 pt-2 pb-[max(env(safe-area-inset-bottom),0px)]">
@@ -2518,7 +2572,7 @@ export function MarketplacePage() {
 
       {condominiumPickerOpen && (
         <div className="fixed inset-0 z-[220] overflow-y-auto bg-[linear-gradient(180deg,#F8F9FB_0%,#FFFFFF_48%,#F4F8F6_100%)] text-slate-950">
-          <div className="mx-auto min-h-screen max-w-[760px] px-5 pb-10 pt-[max(env(safe-area-inset-top),0.45rem)]">
+          <div className="mx-auto min-h-screen max-w-[760px] px-5 pb-28 pt-[max(env(safe-area-inset-top),0.45rem)]">
             <div className="sticky top-0 z-10 -mx-5 flex items-center justify-between bg-[#F8F9FB]/92 px-5 py-3 backdrop-blur-xl">
               <button
                 type="button"
@@ -2552,6 +2606,7 @@ export function MarketplacePage() {
                   <MagnifyingGlass size={17} weight="bold" />
                 </span>
                 <input
+                  type="text"
                   value={condominiumSearch}
                   onChange={(event) => setCondominiumSearch(event.target.value)}
                   placeholder="Filtrar por nome do condomínio ou cidade"
@@ -2684,7 +2739,23 @@ export function MarketplacePage() {
                               {formatCondominiumPickerEventTime(event) || eventTime || eventBadge}
                             </p>
                           </div>
-                          <CaretRight size={12} weight="bold" className="mt-0.5 shrink-0 text-current/55 transition-transform duration-200 group-hover:translate-x-0.5" />
+                          {eventState === 'upcoming' ? (
+                            <button
+                              type="button"
+                              onClick={(actionEvent) => {
+                                actionEvent.stopPropagation();
+                                handleOpenCalendar(event, condominium);
+                              }}
+                              className="relative z-[2] inline-flex h-7 shrink-0 items-center gap-1 rounded-full border border-[#336886]/12 bg-white/92 px-2 text-[8px] font-black uppercase tracking-[0.12em] text-[#336886] shadow-[0_10px_18px_-16px_rgba(51,104,134,0.3)] transition hover:bg-white active:scale-[0.96]"
+                              aria-label={`Adicionar agenda de ${name} ao calendário`}
+                              title="Adicionar ao calendário"
+                            >
+                              <CalendarBlank size={11} weight="fill" />
+                              Lembrar
+                            </button>
+                          ) : (
+                            <CaretRight size={12} weight="bold" className="mt-0.5 shrink-0 text-current/55 transition-transform duration-200 group-hover:translate-x-0.5" />
+                          )}
                         </div>
                       </div>
                     </button>
@@ -2699,6 +2770,51 @@ export function MarketplacePage() {
                 </div>
               )}
             </div>
+
+            <nav className="fixed bottom-0 left-0 right-0 z-[230] border-t border-[#336886]/12 bg-[linear-gradient(180deg,rgba(235,244,250,0.94)_0%,rgba(225,238,247,0.92)_100%)] shadow-[0_-14px_34px_-26px_rgba(51,104,134,0.3)] backdrop-blur-2xl lg:hidden">
+              <div className="mx-auto grid h-[4.75rem] max-w-[760px] grid-cols-4 items-center gap-2 px-4 pt-2 pb-[max(env(safe-area-inset-bottom),0px)]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCondominiumPickerOpen(false);
+                    navigate('/hub');
+                  }}
+                  className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]"
+                >
+                  <House size={18} weight="duotone" />
+                  <span className="text-[9px] font-black uppercase">Início</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCondominiumPickerOpen(false);
+                    navigate('/cliente/pedidos');
+                  }}
+                  className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]"
+                >
+                  <Receipt size={18} weight="duotone" />
+                  <span className="text-[9px] font-black uppercase">Pedidos</span>
+                </button>
+                <button
+                  type="button"
+                  className="flex flex-col items-center justify-center rounded-2xl bg-[#336886]/10 py-1 text-[#336886] shadow-[0_8px_18px_-16px_rgba(51,104,134,0.7)] ring-1 ring-[#336886]/15 transition-all duration-150 ease-out active:scale-[0.94]"
+                >
+                  <Buildings size={18} weight="fill" />
+                  <span className="text-[9px] font-black uppercase">Condo</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCondominiumPickerOpen(false);
+                    navigate('/hub?favorites=1');
+                  }}
+                  className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]"
+                >
+                  <Heart size={18} weight="regular" />
+                  <span className="text-[9px] font-black uppercase">Favoritos</span>
+                </button>
+              </div>
+            </nav>
           </div>
         </div>
       )}

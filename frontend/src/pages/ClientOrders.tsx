@@ -687,7 +687,7 @@ export function ClientOrders() {
         </div>
       ) : null}
 
-      <nav className="fixed bottom-0 left-0 right-0 z-[100] border-t border-white/80 bg-white/92 shadow-[0_-14px_34px_-26px_rgba(15,23,42,0.38)] backdrop-blur-2xl lg:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-[100] border-t border-[#336886]/12 bg-[linear-gradient(180deg,rgba(235,244,250,0.94)_0%,rgba(225,238,247,0.92)_100%)] shadow-[0_-14px_34px_-26px_rgba(51,104,134,0.3)] backdrop-blur-2xl lg:hidden">
         <div className="grid h-[4.75rem] grid-cols-4 items-center gap-2 px-4 pt-2 pb-[max(env(safe-area-inset-bottom),0px)]">
           <button
             type="button"
