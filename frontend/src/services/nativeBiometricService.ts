@@ -258,14 +258,41 @@ export const nativeBiometricService = {
     return parseJson<StoredBiometricProfile>(bridge?.getCustomerProfile?.() || '');
   },
 
+  getStoredCustomerSession() {
+    const bridge = getBridge();
+    return parseJson<CustomerSession>(bridge?.getCustomerSession?.() || '');
+  },
+
   getStoredAdminProfile() {
     const bridge = getBridge();
     return parseJson<StoredBiometricProfile>(bridge?.getAdminProfile?.() || '');
   },
 
+  getStoredAdminSession() {
+    const bridge = getBridge();
+    return parseJson<AdminSession>(bridge?.getAdminSession?.() || '');
+  },
+
   getStoredMotoboyProfile() {
     const bridge = getBridge();
     return parseJson<StoredBiometricProfile>(bridge?.getMotoboyProfile?.() || '');
+  },
+
+  getStoredMotoboySession() {
+    const bridge = getBridge();
+    return parseJson<MotoboySession>(bridge?.getMotoboySession?.() || '');
+  },
+
+  hasValidStoredCustomerEnrollment() {
+    return Boolean(this.getStoredCustomerProfile()?.userId && this.getStoredCustomerSession()?.token);
+  },
+
+  hasValidStoredAdminEnrollment() {
+    return Boolean(this.getStoredAdminProfile()?.userId && this.getStoredAdminSession()?.token);
+  },
+
+  hasValidStoredMotoboyEnrollment() {
+    return Boolean(this.getStoredMotoboyProfile()?.userId && this.getStoredMotoboySession()?.token);
   },
 
   shouldOfferEnrollment(session: CustomerSession) {

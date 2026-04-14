@@ -44,7 +44,7 @@ export function AdminLogin() {
 
   useEffect(() => {
     const refreshBiometricAvailability = () => {
-      setBiometricAvailable(nativeBiometricService.isSupported() && nativeBiometricService.hasStoredAdminProfile());
+      setBiometricAvailable(nativeBiometricService.isSupported() && nativeBiometricService.hasValidStoredAdminEnrollment());
     };
 
     refreshBiometricAvailability();
@@ -107,8 +107,11 @@ export function AdminLogin() {
 
   const handleEnableAdminBiometric = () => {
     if (pendingBiometricSession?.token) {
-      nativeBiometricService.enableAdmin(pendingBiometricSession);
-      setBiometricAvailable(true);
+      const enabled = nativeBiometricService.enableAdmin(pendingBiometricSession);
+      setBiometricAvailable(enabled);
+      if (!enabled) {
+        setLoginError('Não foi possível ativar a biometria neste aparelho.');
+      }
     }
     const session = pendingBiometricSession;
     setEnrollmentPromptOpen(false);
@@ -257,6 +260,9 @@ export function AdminLogin() {
         setPendingBiometricSession(sessionData);
         setEnrollmentPromptOpen(true);
         return;
+      }
+      if (nativeBiometricService.hasStoredAdminProfile()) {
+        nativeBiometricService.enableAdmin(sessionData);
       }
       finishAdminLogin(sessionData);
     } catch (error: any) {

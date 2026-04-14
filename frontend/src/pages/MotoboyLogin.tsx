@@ -52,7 +52,7 @@ export function MotoboyLogin() {
 
   useEffect(() => {
     const refreshBiometricAvailability = () => {
-      setBiometricAvailable(nativeBiometricService.isSupported() && nativeBiometricService.hasStoredMotoboyProfile());
+      setBiometricAvailable(nativeBiometricService.isSupported() && nativeBiometricService.hasValidStoredMotoboyEnrollment());
     };
 
     refreshBiometricAvailability();
@@ -96,8 +96,11 @@ export function MotoboyLogin() {
 
   const handleEnableMotoboyBiometric = () => {
     if (pendingBiometricSession?.token) {
-      nativeBiometricService.enableMotoboy(pendingBiometricSession);
-      setBiometricAvailable(true);
+      const enabled = nativeBiometricService.enableMotoboy(pendingBiometricSession);
+      setBiometricAvailable(enabled);
+      if (!enabled) {
+        setError('Não foi possível ativar a biometria neste aparelho.');
+      }
     }
     const session = pendingBiometricSession;
     setEnrollmentPromptOpen(false);
@@ -171,6 +174,9 @@ export function MotoboyLogin() {
         setPendingBiometricSession(sessionData);
         setEnrollmentPromptOpen(true);
         return;
+      }
+      if (nativeBiometricService.hasStoredMotoboyProfile()) {
+        nativeBiometricService.enableMotoboy(sessionData);
       }
       finishMotoboyLogin(sessionData);
     } catch (err: any) {

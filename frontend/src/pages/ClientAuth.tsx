@@ -66,7 +66,7 @@ export function ClientAuth() {
 
   useEffect(() => {
     const refreshBiometricAvailability = () => {
-      setBiometricAvailable(nativeBiometricService.isSupported() && nativeBiometricService.hasStoredCustomerProfile());
+      setBiometricAvailable(nativeBiometricService.isSupported() && nativeBiometricService.hasValidStoredCustomerEnrollment());
     };
 
     refreshBiometricAvailability();
@@ -103,8 +103,11 @@ export function ClientAuth() {
 
   const handleEnableBiometricEnrollment = () => {
     if (pendingBiometricSession?.token) {
-      nativeBiometricService.enableCustomer(pendingBiometricSession);
-      setBiometricAvailable(true);
+      const enabled = nativeBiometricService.enableCustomer(pendingBiometricSession);
+      setBiometricAvailable(enabled);
+      if (!enabled) {
+        setError('Não foi possível ativar a biometria neste aparelho.');
+      }
     }
     setEnrollmentPromptOpen(false);
     setPendingBiometricSession(null);
@@ -195,6 +198,9 @@ export function ClientAuth() {
         setPendingBiometricSession(result);
         setEnrollmentPromptOpen(true);
         return;
+      }
+      if (nativeBiometricService.hasStoredCustomerProfile()) {
+        nativeBiometricService.enableCustomer(result);
       }
       finishLogin(result);
     } catch (e: any) {
