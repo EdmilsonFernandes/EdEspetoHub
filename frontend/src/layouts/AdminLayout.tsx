@@ -282,7 +282,7 @@ export function AdminLayout({
               onClick={() => {
                 logout();
                 setMobileNavOpen(false);
-                navigate('/admin');
+                navigate('/hub', { replace: true });
               }}
               className="mt-3 w-full min-h-12 px-3 py-3 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 text-sm font-semibold flex items-center justify-center gap-2"
             >

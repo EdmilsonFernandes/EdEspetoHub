@@ -240,7 +240,7 @@ export function AdminMobileBottomNav() {
       onClick: () => {
         logout();
         if (typeof window !== 'undefined') sessionStorage.removeItem('admin:activeTab');
-        navigate('/admin');
+        navigate('/hub', { replace: true });
       },
     },
   ];

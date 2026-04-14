@@ -565,7 +565,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
                 onClick={() => {
                   setOpenUserMenu(false);
                   logout();
-                  navigate('/admin');
+                  navigate('/hub', { replace: true });
                 }}
                 className="w-full inline-flex items-center gap-2 rounded-md px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors"
               >

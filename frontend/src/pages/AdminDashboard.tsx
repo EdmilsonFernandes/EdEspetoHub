@@ -2422,7 +2422,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           onSelect={handleNavSelect}
           onLogout={() => {
             logout();
-            navigate('/');
+            navigate('/hub', { replace: true });
           }}
 
         />

@@ -373,6 +373,7 @@ export function MarketplacePage() {
   const [pullDistance, setPullDistance] = useState(0);
   const [isHeaderElevated, setIsHeaderElevated] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
+  const [isSearchEditing, setIsSearchEditing] = useState(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const condominiumSearchInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -731,6 +732,12 @@ export function MarketplacePage() {
   }, [query]);
 
   useEffect(() => {
+    if (!isSearchEditing) return;
+    const raf = window.requestAnimationFrame(() => searchInputRef.current?.focus());
+    return () => window.cancelAnimationFrame(raf);
+  }, [isSearchEditing]);
+
+  useEffect(() => {
     if (featuredProducts.length <= 8) {
       setFeaturedOffset(0);
       return;
@@ -750,6 +757,7 @@ export function MarketplacePage() {
     const restoreHubHeader = () => {
       setHasEntered(true);
       setIsHeaderElevated((window.scrollY || 0) > 6);
+      setIsSearchEditing(false);
       if (searchInputRef.current) {
         searchInputRef.current.blur();
       }
@@ -1746,29 +1754,58 @@ export function MarketplacePage() {
             <div className="relative z-20 px-0.5">
               <div
                 className="group relative flex min-h-[52px] items-center gap-3 rounded-[22px] border border-slate-200/90 bg-white/96 px-4 shadow-[0_12px_26px_-20px_rgba(15,23,42,0.18)] transition-[border-color,box-shadow,background-color] duration-200 ease-out hover:border-slate-300 hover:bg-white focus-within:border-[#336886]/22 focus-within:shadow-[0_16px_34px_-22px_rgba(51,104,134,0.18)] focus-within:ring-2 focus-within:ring-[#336886]/8"
-                onClick={() => searchInputRef.current?.focus()}
+                onClick={() => {
+                  if (!isSearchEditing && !query.trim()) {
+                    setIsSearchEditing(true);
+                    window.requestAnimationFrame(() => searchInputRef.current?.focus());
+                    return;
+                  }
+                  searchInputRef.current?.focus();
+                }}
               >
                 <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#336886]/10 bg-[#336886]/8 text-[#336886] shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
                   <MagnifyingGlass size={18} weight="bold" />
                 </div>
                 <div className="relative min-w-0 flex-1">
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    value={query}
-                    onChange={(event) => setQuery(event.target.value)}
-                    placeholder=""
-                    autoComplete="off"
-                    inputMode="search"
-                    enterKeyHint="search"
-                    className="block min-h-[52px] w-full min-w-0 appearance-none bg-transparent pr-1 text-[14px] font-semibold text-slate-950 outline-none placeholder:text-slate-400"
-                    style={{ WebkitAppearance: 'none', WebkitTextFillColor: '#020617', caretColor: '#336886' }}
-                  />
-                  {!query.trim() ? (
-                    <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pr-3 text-[14px] font-semibold text-slate-400">
+                  {isSearchEditing || query.trim() ? (
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      value={query}
+                      onChange={(event) => setQuery(event.target.value)}
+                      onFocus={() => setIsSearchEditing(true)}
+                      onBlur={() => {
+                        if (!query.trim()) {
+                          setIsSearchEditing(false);
+                        }
+                      }}
+                      placeholder=""
+                      autoComplete="off"
+                      inputMode="search"
+                      enterKeyHint="search"
+                      className="block min-h-[52px] w-full min-w-0 appearance-none bg-transparent pr-1 text-[14px] font-semibold text-slate-950 outline-none"
+                      style={{
+                        WebkitAppearance: 'none',
+                        WebkitTextFillColor: '#020617',
+                        caretColor: '#336886',
+                        backgroundColor: 'transparent',
+                        boxShadow: 'none',
+                      }}
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsSearchEditing(true);
+                        window.requestAnimationFrame(() => searchInputRef.current?.focus());
+                      }}
+                      className="flex min-h-[52px] w-full items-center pr-3 text-left text-[14px] font-semibold text-slate-400"
+                      aria-label="Buscar loja, categoria ou produto"
+                      title="Buscar loja, categoria ou produto"
+                    >
                       Buscar loja, categoria ou produto
-                    </span>
-                  ) : null}
+                    </button>
+                  )}
                 </div>
                 {query ? (
                   <button
@@ -1776,7 +1813,7 @@ export function MarketplacePage() {
                     onClick={() => {
                       setQuery('');
                       setDebouncedQuery('');
-                      window.requestAnimationFrame(() => searchInputRef.current?.focus());
+                      setIsSearchEditing(false);
                     }}
                     className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-700 active:scale-95"
                     aria-label="Limpar busca"
@@ -2000,31 +2037,30 @@ export function MarketplacePage() {
               style={{ transition: 'all .45s ease', transitionDelay: '95ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
             >
               {selectedCondominium ? (
-                <div className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-slate-950 shadow-[0_30px_64px_-32px_rgba(15,23,42,0.48)] ring-1 ring-slate-200/60">
+                <div className="relative overflow-hidden rounded-[1.8rem] border border-slate-200/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.99)_0%,rgba(247,250,252,0.98)_48%,rgba(239,246,255,0.9)_100%)] shadow-[0_24px_50px_-34px_rgba(15,23,42,0.22)] ring-1 ring-white/80">
                   <div className="absolute inset-0">
                     {selectedCondominiumBannerUrl ? (
                       <img
                         src={selectedCondominiumBannerUrl}
                         alt={String(selectedCondominium.name || 'Condomínio')}
-                        className="h-full w-full object-cover opacity-[0.98] saturate-[1.05]"
+                        className="h-full w-full object-cover opacity-[0.12] saturate-[0.92]"
                       />
                     ) : null}
-                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.26)_0%,rgba(2,6,23,0.3)_18%,rgba(2,6,23,0.46)_54%,rgba(2,6,23,0.72)_100%)]" />
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_24%)]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.96)_54%,rgba(239,246,255,0.76)_100%)]" />
+                    <div className="absolute inset-y-0 right-0 w-[42%] bg-[radial-gradient(circle_at_center,rgba(51,104,134,0.08),transparent_68%)]" />
                   </div>
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/24 via-black/8 to-transparent" />
-                  <div className="pointer-events-none absolute -right-12 top-3 h-24 w-24 rounded-full bg-white/12 blur-3xl" />
-                  <div className="pointer-events-none absolute -left-12 bottom-2 h-28 w-28 rounded-full bg-[#336886]/20 blur-3xl" />
-                  <div className="relative px-5 py-5 sm:px-6 sm:py-6">
-                    <div className="flex items-start justify-between gap-4">
+                  <div className="pointer-events-none absolute -right-8 top-4 h-20 w-20 rounded-full bg-[#336886]/10 blur-3xl" />
+                  <div className="pointer-events-none absolute -left-10 bottom-0 h-24 w-24 rounded-full bg-sky-100/70 blur-3xl" />
+                  <div className="relative px-4 py-4 sm:px-5 sm:py-4.5">
+                    <div className="flex items-start justify-between gap-3">
                       <button
                         type="button"
                         onClick={() => setCondominiumPickerOpen(true)}
-                        className="flex min-w-0 flex-1 items-start gap-3.5 text-left active:scale-[0.99]"
+                        className="flex min-w-0 flex-1 items-start gap-3 text-left active:scale-[0.99]"
                         aria-label="Escolher outro condomínio"
                         title="Escolher outro condomínio"
                       >
-                        <span className="inline-flex h-[3.95rem] w-[3.95rem] shrink-0 items-center justify-center overflow-hidden rounded-[1.45rem] bg-white/95 p-2.5 shadow-[0_22px_38px_-20px_rgba(2,6,23,0.58)] ring-1 ring-white/65 backdrop-blur-md sm:h-[4.15rem] sm:w-[4.15rem]">
+                        <span className="inline-flex h-[3.15rem] w-[3.15rem] shrink-0 items-center justify-center overflow-hidden rounded-[1.1rem] bg-white/94 p-2 shadow-[0_16px_30px_-20px_rgba(15,23,42,0.26)] ring-1 ring-slate-200/80 backdrop-blur-md">
                           {selectedCondominiumLogoUrl ? (
                             <img
                               src={selectedCondominiumLogoUrl}
@@ -2036,59 +2072,56 @@ export function MarketplacePage() {
                           )}
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className={`inline-flex min-h-[2rem] w-fit max-w-full items-center gap-1.5 self-start rounded-full px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.08em] shadow-[0_12px_28px_-20px_rgba(2,6,23,0.65)] backdrop-blur-md ${
-                            isCondominiumEventLive
-                              ? 'bg-emerald-50/96 text-emerald-700'
-                              : hasUpcomingCondominiumEvent
-                                ? 'bg-sky-50/96 text-sky-700'
-                                : 'bg-white/92 text-slate-600'
-                          }`}>
-                            <span className={`h-1.5 w-1.5 rounded-full ${
-                              isCondominiumEventLive
-                                ? 'bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.12)]'
-                                : hasUpcomingCondominiumEvent
-                                  ? 'bg-sky-500 shadow-[0_0_0_4px_rgba(14,165,233,0.12)]'
-                                  : 'bg-slate-400 shadow-[0_0_0_4px_rgba(148,163,184,0.12)]'
-                            }`} />
-                            <span className="block whitespace-nowrap">
-                              {isCondominiumEventLive ? 'Ao vivo' : hasUpcomingCondominiumEvent ? 'Agendado' : 'Sem agenda'}
-                            </span>
-                          </span>
-                          <span className="mt-3 block max-w-[15rem] text-[1.24rem] font-black leading-[1.02] tracking-[-0.035em] text-white drop-shadow-[0_10px_22px_rgba(2,6,23,0.48)] sm:max-w-[20rem] sm:text-[1.4rem]">
+                          <span className="block max-w-[15rem] text-[1.12rem] font-black leading-tight tracking-[-0.03em] text-slate-950 sm:max-w-[20rem] sm:text-[1.22rem]">
                             {String(selectedCondominium.name || 'Condomínio')}
                           </span>
-                          <span className="mt-1 block truncate text-[11px] font-semibold text-white/88 sm:text-[11.5px]">
+                          <span className="mt-0.5 block truncate text-[11px] font-semibold text-slate-500 sm:text-[11.5px]">
                             {selectedCondominium.city && selectedCondominium.state
                               ? `${selectedCondominium.city} - ${selectedCondominium.state}`
                               : selectedCondominium.city || selectedCondominium.state || 'Operação local'}
+                          </span>
+                          <span className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-[#336886]/12 bg-[#336886]/7 px-2.5 py-1 text-[10px] font-bold text-[#336886]">
+                            <span className={`h-1.5 w-1.5 rounded-full ${
+                              isCondominiumEventLive
+                                ? 'bg-emerald-500'
+                                : hasUpcomingCondominiumEvent
+                                  ? 'bg-sky-500'
+                                  : 'bg-slate-400'
+                            }`} />
+                            {isCondominiumEventLive ? 'Agenda ativa' : hasUpcomingCondominiumEvent ? 'Agendado' : 'Sem agenda'}
                           </span>
                         </span>
                       </button>
                       <button
                         type="button"
-                        onClick={clearCondominiumSelection}
-                        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black/34 text-white ring-1 ring-white/18 shadow-[0_16px_28px_-18px_rgba(2,6,23,0.75)] backdrop-blur-md transition hover:-translate-y-0.5 hover:bg-black/44 hover:text-white active:scale-95"
-                        aria-label="Sair da feira e voltar ao Hub"
-                        title="Sair da feira"
+                        onClick={() => setCondominiumPickerOpen(true)}
+                        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white/88 px-3 text-[11px] font-bold text-slate-600 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.22)] transition hover:border-[#336886]/18 hover:text-[#336886] active:scale-95"
+                        aria-label="Trocar condomínio"
+                        title="Trocar condomínio"
                       >
-                        <X size={16} weight="bold" />
+                        <Buildings size={13} weight="duotone" />
+                        Trocar
                       </button>
                     </div>
-                    <div className="mt-4 flex flex-wrap items-center gap-2.5">
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-white/14 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] text-white shadow-[0_10px_22px_-18px_rgba(2,6,23,0.7)] ring-1 ring-white/14 backdrop-blur-md">
-                        <CalendarBlank size={12} weight="fill" />
-                        {isCondominiumEventLive ? 'Funcionando agora' : hasUpcomingCondominiumEvent ? 'Próxima agenda' : 'Agenda local'}
+                    <div className="mt-3.5 flex flex-wrap items-center gap-2">
+                      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                        isCondominiumEventLive
+                          ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'
+                          : hasUpcomingCondominiumEvent
+                            ? 'bg-sky-50 text-sky-700 ring-1 ring-sky-100'
+                            : 'bg-slate-100 text-slate-600 ring-1 ring-slate-200/80'
+                      }`}>
+                        <CalendarBlank size={11} weight="fill" />
+                        {isCondominiumEventLive ? 'Ao vivo' : hasUpcomingCondominiumEvent ? 'Agendado' : 'Sem agenda'}
                       </span>
-                      <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-white/12 px-3 py-1.5 text-[10px] font-bold text-white/92 ring-1 ring-white/12 backdrop-blur-md">
-                        <Clock size={12} weight="fill" />
-                        <span className="max-w-[13rem] truncate sm:max-w-[18rem]">
-                          {condominiumStoresLoading
-                            ? 'Carregando operação...'
-                            : condominiumEventTimeLabel || 'Agenda em confirmação'}
+                      <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-slate-600 ring-1 ring-slate-200/80">
+                        <Clock size={11} weight="fill" />
+                        <span className="max-w-[11.5rem] truncate sm:max-w-[18rem]">
+                          {condominiumStoresLoading ? 'Carregando agenda' : condominiumEventTimeLabel || 'Agenda em confirmação'}
                         </span>
                       </span>
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-[#336886]/22 px-3 py-1.5 text-[10px] font-bold text-white ring-1 ring-[#7db2cf]/18 backdrop-blur-md">
-                        <Buildings size={12} weight="fill" />
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-[#336886]/8 px-2.5 py-1 text-[10px] font-bold text-[#336886] ring-1 ring-[#336886]/12">
+                        <Buildings size={11} weight="fill" />
                         {filteredStores.length} loja{filteredStores.length === 1 ? '' : 's'}
                       </span>
                     </div>
@@ -2636,50 +2669,76 @@ export function MarketplacePage() {
       </div>
 
       <nav
-        className="fixed bottom-0 left-0 right-0 z-[100] px-0 pb-0 transition-transform duration-300 lg:hidden"
+        className="fixed bottom-0 left-0 right-0 z-[100] px-3 pb-[calc(env(safe-area-inset-bottom)+0.55rem)] transition-transform duration-300 lg:hidden"
         style={{ transform: isBottomNavVisible && !condominiumPickerOpen ? 'translateY(0)' : 'translateY(100%)' }}
       >
-        <div className="grid min-h-[4.75rem] grid-cols-4 items-center gap-2 rounded-t-[1.75rem] border border-b-0 border-[#2d5f7b]/16 bg-[linear-gradient(180deg,rgba(221,236,246,0.98)_0%,rgba(204,224,238,0.96)_100%)] px-4 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 shadow-[0_-14px_34px_-26px_rgba(45,95,123,0.34)] backdrop-blur-2xl">
+        <div className="mx-auto max-w-[32rem] rounded-[2rem] border border-white/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.95)_0%,rgba(247,250,252,0.92)_100%)] p-2 shadow-[0_28px_52px_-30px_rgba(15,23,42,0.3)] ring-1 ring-slate-200/70 backdrop-blur-2xl">
+          <div className="grid min-h-[4.75rem] grid-cols-4 items-center gap-1.5">
           <button
             type="button"
             onClick={handleHomeHubNavigation}
-            className={`flex flex-col items-center justify-center rounded-2xl py-1 font-bold transition-all duration-150 ease-out active:scale-[0.94] ${
+            className={`group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] py-2 text-[9px] font-bold uppercase tracking-[0.12em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03] ${
               quickFilter === 'all' && !condominiumPickerOpen && !selectedCondominium
-                ? 'bg-[#336886]/10 text-[#336886] shadow-[0_8px_18px_-16px_rgba(51,104,134,0.7)] ring-1 ring-[#336886]/15'
-                : 'text-slate-400'
+                ? 'bg-[linear-gradient(180deg,rgba(51,104,134,0.12)_0%,rgba(51,104,134,0.06)_100%)] text-[#2d5f7b] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/12'
+                : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            <House size={18} weight={quickFilter === 'all' && !condominiumPickerOpen && !selectedCondominium ? 'fill' : 'duotone'} />
-            <span className="text-[9px] font-extrabold uppercase tracking-[0.08em]">Início</span>
+            <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ${
+              quickFilter === 'all' && !condominiumPickerOpen && !selectedCondominium
+                ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
+                : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
+            }`}>
+              <House size={18} weight={quickFilter === 'all' && !condominiumPickerOpen && !selectedCondominium ? 'fill' : 'duotone'} />
+            </span>
+            <span>Início</span>
           </button>
-          <button type="button" onClick={() => navigate('/cliente/pedidos')} className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]">
-            <Receipt size={18} weight="duotone" />
-            <span className="text-[9px] font-extrabold uppercase tracking-[0.08em]">Pedidos</span>
+          <button
+            type="button"
+            onClick={() => navigate('/cliente/pedidos')}
+            className="group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
+          >
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
+              <Receipt size={18} weight="duotone" />
+            </span>
+            <span>Pedidos</span>
           </button>
           <button
             type="button"
             onClick={() => setCondominiumPickerOpen(true)}
-            className={`flex flex-col items-center justify-center rounded-2xl py-1 transition-all duration-150 ease-out active:scale-[0.94] ${
+            className={`group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] py-2 text-[9px] font-bold uppercase tracking-[0.12em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03] ${
               selectedCondominium || condominiumPickerOpen
-                ? 'bg-[#336886]/10 text-[#336886] shadow-[0_8px_18px_-16px_rgba(51,104,134,0.7)] ring-1 ring-[#336886]/15'
-                : 'text-slate-400'
+                ? 'bg-[linear-gradient(180deg,rgba(51,104,134,0.12)_0%,rgba(51,104,134,0.06)_100%)] text-[#2d5f7b] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/12'
+                : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            <Buildings size={18} weight={selectedCondominium || condominiumPickerOpen ? 'fill' : 'duotone'} />
-            <span className="text-[9px] font-extrabold uppercase tracking-[0.08em]">Condo</span>
+            <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ${
+              selectedCondominium || condominiumPickerOpen
+                ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
+                : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
+            }`}>
+              <Buildings size={18} weight={selectedCondominium || condominiumPickerOpen ? 'fill' : 'duotone'} />
+            </span>
+            <span>Condo</span>
           </button>
           <button
             type="button"
             onClick={() => setQuickFilter((prev) => (prev === 'favorites' ? 'all' : 'favorites'))}
-            className={`flex flex-col items-center justify-center rounded-2xl py-1 transition-all duration-150 ease-out active:scale-[0.94] ${
+            className={`group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] py-2 text-[9px] font-bold uppercase tracking-[0.12em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03] ${
               quickFilter === 'favorites'
-                ? 'bg-[#336886]/10 text-[#336886] shadow-[0_8px_18px_-16px_rgba(51,104,134,0.7)] ring-1 ring-[#336886]/15'
-                : 'text-slate-400'
+                ? 'bg-[linear-gradient(180deg,rgba(51,104,134,0.12)_0%,rgba(51,104,134,0.06)_100%)] text-[#2d5f7b] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/12'
+                : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            <Heart size={18} weight={quickFilter === 'favorites' ? 'fill' : 'regular'} />
-            <span className="text-[9px] font-extrabold uppercase tracking-[0.08em]">Favoritos</span>
+            <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ${
+              quickFilter === 'favorites'
+                ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
+                : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
+            }`}>
+              <Heart size={18} weight={quickFilter === 'favorites' ? 'fill' : 'regular'} />
+            </span>
+            <span>Favoritos</span>
           </button>
+          </div>
         </div>
       </nav>
 

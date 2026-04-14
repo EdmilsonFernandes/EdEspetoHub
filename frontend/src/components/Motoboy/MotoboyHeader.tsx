@@ -84,7 +84,7 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
     } catch {
       // ignore
     }
-    navigate('/motoboy/login', { replace: true });
+    navigate('/hub', { replace: true });
   };
 
   return (

@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260414.211701.8fcd1cab",
-  "buildId": "0.1.9+20260414.211701.8fcd1cab-20260414.211701-8fcd1cab",
-  "builtAt": "2026-04-14T21:17:01.380Z",
-  "commitHash": "8fcd1cab9b8a39511a0380de4e229f1691aa13f9",
-  "shortHash": "8fcd1cab",
+  "versionInternal": "0.1.9+20260414.213125.34fd43ff",
+  "buildId": "0.1.9+20260414.213125.34fd43ff-20260414.213125-34fd43ff",
+  "builtAt": "2026-04-14T21:31:25.838Z",
+  "commitHash": "34fd43ff83ad76ef7047802cd49bf75911779edc",
+  "shortHash": "34fd43ff",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "34fd43ff83ad76ef7047802cd49bf75911779edc",
+      "shortHash": "34fd43ff",
+      "dateIso": "2026-04-14T18:18:02-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(hub): compact condominium picker layout",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/34fd43ff83ad76ef7047802cd49bf75911779edc"
+    },
     {
       "hash": "8fcd1cab9b8a39511a0380de4e229f1691aa13f9",
       "shortHash": "8fcd1cab",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(hub): refine condo banner and bump android release",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2f70b06aa70bc301b6dfe6a3aa0b2cc66bc885b3"
-    },
-    {
-      "hash": "89d75a6bfb068d6f36601c6b6bbcfbbd83930776",
-      "shortHash": "89d75a6b",
-      "dateIso": "2026-04-14T10:21:38-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(app): add customer biometric login for android",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/89d75a6bfb068d6f36601c6b6bbcfbbd83930776"
     }
   ]
 } as const;

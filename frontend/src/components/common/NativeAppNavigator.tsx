@@ -112,55 +112,74 @@ export function NativeAppNavigator() {
   const isCondominium = location.pathname === '/hub' && location.search.includes('panel=condominios');
   const isFavorites = location.pathname === '/hub' && location.search.includes('favorites=1');
 
+  const itemBaseClass =
+    'group flex min-h-[4.15rem] flex-col items-center justify-center gap-1 rounded-[1.3rem] px-1 py-2 text-[9px] font-bold uppercase tracking-[0.12em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03]';
+  const activeItemClass =
+    'bg-[linear-gradient(180deg,rgba(51,104,134,0.12)_0%,rgba(51,104,134,0.06)_100%)] text-[#2d5f7b] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/12';
+  const inactiveItemClass =
+    'text-slate-500 hover:text-slate-700';
+
   return (
-    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-[35] px-0 pb-0 transition-transform duration-300 ease-in-out lg:hidden">
-      <div className="pointer-events-auto mx-auto grid max-w-none grid-cols-4 gap-1 rounded-t-[1.75rem] border border-b-0 border-[#336886]/10 bg-[linear-gradient(180deg,rgba(247,250,253,0.98)_0%,rgba(238,245,250,0.97)_100%)] px-1.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-1.5 shadow-[0_-12px_28px_-20px_rgba(45,95,123,0.18)] backdrop-blur-2xl">
+    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-[35] px-3 pb-[calc(env(safe-area-inset-bottom)+0.55rem)] transition-transform duration-300 ease-in-out lg:hidden">
+      <div className="pointer-events-auto mx-auto max-w-[32rem] rounded-[2rem] border border-white/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.95)_0%,rgba(247,250,252,0.92)_100%)] p-2 shadow-[0_28px_52px_-30px_rgba(15,23,42,0.3)] ring-1 ring-slate-200/70 backdrop-blur-2xl">
+        <div className="grid grid-cols-4 gap-1.5">
         <button
           type="button"
           onClick={handleHome}
-          className="flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl py-1 text-[8px] font-extrabold uppercase tracking-[0.12em] text-slate-600 transition active:scale-95"
+          className={`${itemBaseClass} ${!isOrders && !isCondominium && !isFavorites ? activeItemClass : inactiveItemClass}`}
         >
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#336886]/8 text-[#336886]">
-            <House size={17} weight="fill" />
+          <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ${
+            !isOrders && !isCondominium && !isFavorites
+              ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
+              : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
+          }`}>
+            <House size={18} weight={!isOrders && !isCondominium && !isFavorites ? 'fill' : 'duotone'} />
           </span>
           Início
         </button>
         <button
           type="button"
           onClick={() => navigate('/cliente/pedidos')}
-          className={`flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl py-1 text-[8px] font-extrabold uppercase tracking-[0.12em] transition active:scale-95 ${
-            isOrders ? 'bg-[#336886]/8 text-[#336886] shadow-[0_10px_20px_-18px_rgba(51,104,134,0.14)]' : 'text-slate-500'
-          }`}
+          className={`${itemBaseClass} ${isOrders ? activeItemClass : inactiveItemClass}`}
         >
-          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${isOrders ? 'bg-[#336886]/10 text-[#336886]' : 'bg-slate-100 text-slate-600'}`}>
-            <Receipt size={17} weight={isOrders ? 'fill' : 'duotone'} />
+          <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ${
+            isOrders
+              ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
+              : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
+          }`}>
+            <Receipt size={18} weight={isOrders ? 'fill' : 'duotone'} />
           </span>
           Pedidos
         </button>
         <button
           type="button"
           onClick={() => navigate('/hub?panel=condominios')}
-          className={`flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl py-1 text-[8px] font-extrabold uppercase tracking-[0.12em] transition active:scale-95 ${
-            isCondominium ? 'bg-[#336886]/8 text-[#336886] shadow-[0_10px_20px_-18px_rgba(51,104,134,0.14)]' : 'text-slate-500'
-          }`}
+          className={`${itemBaseClass} ${isCondominium ? activeItemClass : inactiveItemClass}`}
         >
-          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${isCondominium ? 'bg-[#336886]/10 text-[#336886]' : 'bg-slate-100 text-slate-600'}`}>
-            <Buildings size={17} weight={isCondominium ? 'fill' : 'duotone'} />
+          <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ${
+            isCondominium
+              ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
+              : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
+          }`}>
+            <Buildings size={18} weight={isCondominium ? 'fill' : 'duotone'} />
           </span>
           Condo
         </button>
         <button
           type="button"
           onClick={() => navigate('/hub?favorites=1')}
-          className={`flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl py-1 text-[8px] font-extrabold uppercase tracking-[0.12em] transition active:scale-95 ${
-            isFavorites ? 'bg-[#336886]/8 text-[#336886] shadow-[0_10px_20px_-18px_rgba(51,104,134,0.14)]' : 'text-slate-500'
-          }`}
+          className={`${itemBaseClass} ${isFavorites ? activeItemClass : inactiveItemClass}`}
         >
-          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${isFavorites ? 'bg-[#336886]/10 text-[#336886]' : 'bg-slate-100 text-slate-600'}`}>
-            <Heart size={17} weight={isFavorites ? 'fill' : 'regular'} />
+          <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ${
+            isFavorites
+              ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
+              : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
+          }`}>
+            <Heart size={18} weight={isFavorites ? 'fill' : 'regular'} />
           </span>
           Favoritos
         </button>
+        </div>
       </div>
     </nav>
   );

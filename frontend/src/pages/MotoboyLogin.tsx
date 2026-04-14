@@ -239,6 +239,7 @@ export function MotoboyLogin() {
     }
     nativeBiometricService.disableMotoboy();
     setPersistedSession(null);
+    navigate('/hub', { replace: true });
   };
 
   const handleLogoTap = () => {
