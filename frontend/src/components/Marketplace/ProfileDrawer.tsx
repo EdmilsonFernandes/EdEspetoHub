@@ -52,6 +52,9 @@ export function ProfileDrawer({
   userEmail,
   profileImageUrl,
   onClose,
+  onLogin,
+  onOpenAdminLogin,
+  onOpenMotoboyLogin,
   onOpenAccount,
   onOpenSettings,
   onOpenOrders,
@@ -288,7 +291,7 @@ export function ProfileDrawer({
                   description: 'Pedir produtos, acompanhar pedidos e salvar endereços.',
                   icon: <UserCircle size={24} weight="duotone" />,
                   tone: 'bg-[#336886]/10 text-[#336886]',
-                  action: () => window.location.assign('/cliente?mode=login&bio=1'),
+                  action: onLogin,
                 },
                 {
                   id: 'store',
@@ -296,7 +299,7 @@ export function ProfileDrawer({
                   description: 'Gerenciar loja, cardápio, fila e impressora.',
                   icon: <Storefront size={24} weight="duotone" />,
                   tone: 'bg-emerald-50 text-emerald-700',
-                  action: () => window.location.assign('/admin?bio=1'),
+                  action: onOpenAdminLogin,
                 },
                 {
                   id: 'motoboy',
@@ -304,7 +307,7 @@ export function ProfileDrawer({
                   description: 'Receber entregas, rotas e histórico de ganhos.',
                   icon: <Motorcycle size={24} weight="duotone" />,
                   tone: 'bg-amber-50 text-amber-700',
-                  action: () => window.location.assign('/motoboy/login?bio=1'),
+                  action: onOpenMotoboyLogin,
                 },
               ].map((item) => (
                 <button

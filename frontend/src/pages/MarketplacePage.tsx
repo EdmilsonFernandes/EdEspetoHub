@@ -1311,15 +1311,15 @@ export function MarketplacePage() {
   }, [navigate]);
 
   const openCustomerLogin = useCallback(() => {
-    navigate('/cliente?mode=login&next=/hub&hub=1');
+    navigate('/cliente?mode=login&next=/hub&hub=1&bio=1');
   }, [navigate]);
 
   const openAdminLogin = useCallback(() => {
-    navigate('/admin');
+    navigate('/admin?bio=1');
   }, [navigate]);
 
   const openMotoboyLogin = useCallback(() => {
-    navigate('/motoboy/login');
+    navigate('/motoboy/login?bio=1');
   }, [navigate]);
 
   const openTerms = useCallback(() => {

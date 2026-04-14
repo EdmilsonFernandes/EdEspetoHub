@@ -201,7 +201,7 @@ export function ClientAccount() {
       void customerAccountService.unregisterPushToken({ token });
     }
     localStorage.removeItem('customerSession');
-    navigate('/', { replace: true });
+    navigate('/hub', { replace: true });
   };
 
   const handleToggleBiometricAccess = () => {
