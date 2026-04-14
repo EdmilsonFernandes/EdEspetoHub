@@ -734,7 +734,6 @@ export function MarketplacePage() {
     const restoreHubHeader = () => {
       setHasEntered(true);
       setIsHeaderElevated((window.scrollY || 0) > 6);
-      setIsSearchFocused(false);
       if (searchInputRef.current) {
         searchInputRef.current.blur();
       }
@@ -2702,7 +2701,6 @@ export function MarketplacePage() {
                   placeholder="Filtrar por nome do condomínio ou cidade"
                   autoComplete="off"
                   className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-slate-800 outline-none placeholder:font-medium placeholder:text-slate-400"
-                  autoFocus
                 />
                 {condominiumSearch ? (
                   <button

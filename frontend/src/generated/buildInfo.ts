@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260414.210218.68b319f5",
-  "buildId": "0.1.9+20260414.210218.68b319f5-20260414.210218-68b319f5",
-  "builtAt": "2026-04-14T21:02:18.690Z",
-  "commitHash": "68b319f55d5a5056e35fbfda355cbd0f6ef25e44",
-  "shortHash": "68b319f5",
+  "versionInternal": "0.1.9+20260414.210933.29601499",
+  "buildId": "0.1.9+20260414.210933.29601499-20260414.210933-29601499",
+  "builtAt": "2026-04-14T21:09:33.383Z",
+  "commitHash": "2960149926e898240e083e812eeb8078c43522af",
+  "shortHash": "29601499",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "2960149926e898240e083e812eeb8078c43522af",
+      "shortHash": "29601499",
+      "dateIso": "2026-04-14T18:02:42-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(hub): stabilize search and simplify role switcher",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2960149926e898240e083e812eeb8078c43522af"
+    },
     {
       "hash": "68b319f55d5a5056e35fbfda355cbd0f6ef25e44",
       "shortHash": "68b319f5",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(hub): stabilize home search bar rendering",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b4b48b6da16e80d22675434c5a734e0c91f9e678"
-    },
-    {
-      "hash": "069ce39f3d7a7d0b96d79fcea13d6c3e6eaa316d",
-      "shortHash": "069ce39f",
-      "dateIso": "2026-04-13T23:21:32-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(hub): polish condo banner and rounded nav",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/069ce39f3d7a7d0b96d79fcea13d6c3e6eaa316d"
     }
   ]
 } as const;

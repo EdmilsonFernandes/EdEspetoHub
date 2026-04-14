@@ -393,6 +393,7 @@ export function ClientOrders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [orders, setOrders] = useState<any[]>([]);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'finished' | 'cancelled'>('all');
   const [orderDetails, setOrderDetails] = useState<Record<string, any>>({});
   const [cancelModal, setCancelModal] = useState<{ order: any | null; reason: string; submitting: boolean }>({
     order: null,
@@ -483,6 +484,25 @@ export function ClientOrders() {
   );
   const groupedPastOrders = useMemo(() => groupOrdersByDate(pastOrders), [pastOrders]);
   const activeOrderIds = useMemo(() => activeOrders.map((order) => String(order.id)).join('|'), [activeOrders]);
+  const filteredOrders = useMemo(() => {
+    if (statusFilter === 'active') return activeOrders;
+    if (statusFilter === 'finished') {
+      return orders.filter((order) => [ 'DELIVERED', 'FINISHED', 'DONE' ].includes(normalizeStatus(order.status)));
+    }
+    if (statusFilter === 'cancelled') {
+      return orders.filter((order) => [ 'CANCELLED', 'REJECTED' ].includes(normalizeStatus(order.status)));
+    }
+    return orders;
+  }, [activeOrders, orders, statusFilter]);
+  const filteredPastOrders = useMemo(
+    () => filteredOrders.filter((order) => TERMINAL_STATUSES.includes(normalizeStatus(order.status))),
+    [filteredOrders]
+  );
+  const filteredActiveOrders = useMemo(
+    () => filteredOrders.filter((order) => !TERMINAL_STATUSES.includes(normalizeStatus(order.status))),
+    [filteredOrders]
+  );
+  const groupedFilteredPastOrders = useMemo(() => groupOrdersByDate(filteredPastOrders), [filteredPastOrders]);
 
   useEffect(() => {
     if (!activeOrders.length) return;
@@ -562,7 +582,29 @@ export function ClientOrders() {
             </div>
           ) : null}
 
-          {activeOrders.length > 0 ? (
+          <div className="mb-5 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Filtro</p>
+              <p className="mt-1 text-sm font-semibold text-slate-800">Mostrando {statusFilter === 'all' ? 'todos' : statusFilter === 'active' ? 'em andamento' : statusFilter === 'finished' ? 'finalizados' : 'cancelados'}</p>
+            </div>
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value as 'all' | 'active' | 'finished' | 'cancelled')}
+                className="min-h-10 appearance-none rounded-2xl border border-slate-200 bg-white px-4 py-2 pr-9 text-sm font-semibold text-slate-700 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.28)] outline-none transition focus:border-[#336886]/25 focus:ring-2 focus:ring-[#336886]/10"
+              >
+                <option value="all">Todos</option>
+                <option value="active">Em andamento</option>
+                <option value="finished">Finalizados</option>
+                <option value="cancelled">Cancelados</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-400">
+                <Package size={14} weight="duotone" />
+              </div>
+            </div>
+          </div>
+
+          {filteredActiveOrders.length > 0 ? (
             <section className="mb-7">
               <div className="mb-3 flex items-center gap-2 px-1">
                 <span className="relative inline-flex h-2.5 w-2.5 shrink-0">
@@ -572,7 +614,7 @@ export function ClientOrders() {
                 <h2 className="text-sm font-semibold text-slate-800">Em andamento</h2>
               </div>
               <div className="space-y-3">
-                {activeOrders.map((order) => (
+                {filteredActiveOrders.map((order) => (
                   <OrderCard
                     key={order.id}
                     order={order}
@@ -590,10 +632,10 @@ export function ClientOrders() {
           <section>
             <div className="mb-3 flex items-center gap-2 px-1">
               <Package size={15} weight="duotone" className="text-slate-500" />
-              <h2 className="text-sm font-semibold text-slate-800">Historico</h2>
+              <h2 className="text-sm font-semibold text-slate-800">Histórico</h2>
             </div>
 
-            {pastOrders.length === 0 && activeOrders.length === 0 ? (
+            {filteredPastOrders.length === 0 && filteredActiveOrders.length === 0 ? (
               <div className="rounded-[28px] border border-slate-200 bg-white px-6 py-12 text-center shadow-sm">
                 <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-slate-100 text-slate-400">
                   <Storefront size={28} weight="duotone" />
@@ -609,7 +651,7 @@ export function ClientOrders() {
               </div>
             ) : (
               <div className="space-y-6">
-                {groupedPastOrders.map((group) => (
+                {groupedFilteredPastOrders.map((group) => (
                   <section key={group.key}>
                     <p className="mb-3 px-1 text-sm font-medium text-slate-500">{group.label}</p>
                     <div className="space-y-3">
