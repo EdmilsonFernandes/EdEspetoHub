@@ -83,10 +83,37 @@ declare global {
   }
 }
 
+const hasWindowBridge = () =>
+  typeof window !== 'undefined' &&
+  typeof window.JNCBiometrics !== 'undefined' &&
+  window.JNCBiometrics !== null;
+
 const getBridge = (): NativeBiometricBridge | null => {
-  if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') return null;
   if (typeof window === 'undefined') return null;
+  if (hasWindowBridge()) return window.JNCBiometrics || null;
+  if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') return null;
   return window.JNCBiometrics || null;
+};
+
+const waitForBridge = async (timeoutMs = 2500, intervalMs = 120): Promise<NativeBiometricBridge | null> => {
+  const immediate = getBridge();
+  if (immediate) return immediate;
+
+  const startedAt = Date.now();
+  return new Promise((resolve) => {
+    const timer = window.setInterval(() => {
+      const bridge = getBridge();
+      if (bridge) {
+        window.clearInterval(timer);
+        resolve(bridge);
+        return;
+      }
+      if ((Date.now() - startedAt) >= timeoutMs) {
+        window.clearInterval(timer);
+        resolve(null);
+      }
+    }, intervalMs);
+  });
 };
 
 const parseJson = <T>(value?: string | null): T | null => {
@@ -359,7 +386,7 @@ export const nativeBiometricService = {
   },
 
   async loginCustomerWithBiometrics(reason = 'Confirme sua identidade para entrar') {
-    const bridge = getBridge();
+    const bridge = await waitForBridge();
     const session = await authenticateWithBridge(
       bridge?.authenticateCustomer,
       bridge?.getCustomerSession,
@@ -370,7 +397,7 @@ export const nativeBiometricService = {
   },
 
   async loginAdminWithBiometrics(reason = 'Confirme sua identidade para acessar sua operação') {
-    const bridge = getBridge();
+    const bridge = await waitForBridge();
     const session = await authenticateWithBridge(
       bridge?.authenticateAdmin,
       bridge?.getAdminSession,
@@ -381,7 +408,7 @@ export const nativeBiometricService = {
   },
 
   async loginMotoboyWithBiometrics(reason = 'Confirme sua identidade para acessar suas entregas') {
-    const bridge = getBridge();
+    const bridge = await waitForBridge();
     const session = await authenticateWithBridge(
       bridge?.authenticateMotoboy,
       bridge?.getMotoboySession,
