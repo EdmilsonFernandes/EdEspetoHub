@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260414.204953.e78f2083",
-  "buildId": "0.1.9+20260414.204953.e78f2083-20260414.204953-e78f2083",
-  "builtAt": "2026-04-14T20:49:53.757Z",
-  "commitHash": "e78f2083497e672807e7b92852792a39f9a0921a",
-  "shortHash": "e78f2083",
+  "versionInternal": "0.1.9+20260414.205321.e56276a2",
+  "buildId": "0.1.9+20260414.205321.e56276a2-20260414.205321-e56276a2",
+  "builtAt": "2026-04-14T20:53:21.188Z",
+  "commitHash": "e56276a298d1caca89691de99a98d15d01b7f87a",
+  "shortHash": "e56276a2",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "e56276a298d1caca89691de99a98d15d01b7f87a",
+      "shortHash": "e56276a2",
+      "dateIso": "2026-04-14T17:50:22-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(hub): improve app version visibility in drawer",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e56276a298d1caca89691de99a98d15d01b7f87a"
+    },
     {
       "hash": "e78f2083497e672807e7b92852792a39f9a0921a",
       "shortHash": "e78f2083",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(hub): clarify condo context and checkout header",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e459ba0628cfbdbd154232ed12b9405408918c4d"
-    },
-    {
-      "hash": "25d0ce09ca3714b42782ddcafee2ee1ce650d05a",
-      "shortHash": "25d0ce09",
-      "dateIso": "2026-04-13T22:48:29-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(app): improve condo preview and android update flow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/25d0ce09ca3714b42782ddcafee2ee1ce650d05a"
     }
   ]
 } as const;

@@ -49,7 +49,6 @@ type ProfileDrawerProps = {
 type AccessProfile = {
   id: 'client' | 'store' | 'motoboy';
   title: string;
-  description: string;
   subtitle: string;
   summary: string;
   tone: string;
@@ -187,7 +186,6 @@ export function ProfileDrawer({
     {
       id: 'client',
       title: 'Cliente',
-      description: 'Pedir produtos, acompanhar pedidos e salvar endereços.',
       subtitle: savedAccessProfiles.customer.biometric
         ? 'Biometria pronta neste aparelho'
         : savedAccessProfiles.customer.hasSession
@@ -203,7 +201,6 @@ export function ProfileDrawer({
     {
       id: 'store',
       title: 'Lojista',
-      description: 'Gerenciar loja, cardápio, fila e impressora.',
       subtitle: savedAccessProfiles.admin.biometric
         ? 'Biometria pronta neste aparelho'
         : savedAccessProfiles.admin.hasSession
@@ -218,7 +215,6 @@ export function ProfileDrawer({
     {
       id: 'motoboy',
       title: 'Entregador',
-      description: 'Receber entregas, rotas e histórico de ganhos.',
       subtitle: savedAccessProfiles.motoboy.biometric
         ? 'Biometria pronta neste aparelho'
         : savedAccessProfiles.motoboy.hasSession
@@ -231,6 +227,8 @@ export function ProfileDrawer({
       ready: savedAccessProfiles.motoboy.biometric || savedAccessProfiles.motoboy.hasSession,
     },
   ];
+
+  const currentAccessProfile = accessProfiles.find((item) => item.current) || null;
 
   return (
     <div
@@ -271,20 +269,29 @@ export function ProfileDrawer({
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-base font-black text-slate-900 leading-tight">{userName}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="truncate text-base font-black text-slate-900 leading-tight">{userName}</p>
+                    {currentAccessProfile ? (
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#336886]/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">
+                        {currentAccessProfile.icon}
+                        <span>{currentAccessProfile.title}</span>
+                      </span>
+                    ) : null}
+                  </div>
                   <p className="truncate text-xs font-bold text-slate-400 mt-0.5">{userEmail}</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setAccessPickerOpen(true)}
-                className="relative flex w-full items-center justify-between overflow-hidden rounded-[1.5rem] border border-[#336886]/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(239,246,255,0.92))] px-4 py-3.5 text-left text-slate-700 shadow-[0_18px_34px_-24px_rgba(51,104,134,0.28)] transition-all active:scale-[0.98]"
+                className="relative flex w-full items-center justify-between overflow-hidden rounded-[1.5rem] border border-[#336886]/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(239,246,255,0.92))] px-4 py-3 text-left text-slate-700 shadow-[0_18px_34px_-24px_rgba(51,104,134,0.28)] transition-all active:scale-[0.98]"
               >
                 <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-[radial-gradient(circle_at_center,rgba(51,104,134,0.12),transparent_70%)]" />
-                <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Trocar acesso</p>
-                  <p className="mt-1 text-sm font-black text-slate-900">Escolher outro perfil salvo</p>
-                  <p className="mt-1 text-[11px] font-semibold text-slate-500">Cliente, lojista ou entregador sem bagunçar as sessões</p>
+                <div className="min-w-0">
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Acesso atual</p>
+                  <p className="mt-1 truncate text-sm font-black text-slate-900">
+                    {currentAccessProfile ? currentAccessProfile.title : 'Escolher perfil'}
+                  </p>
                 </div>
                 <CaretRight size={16} weight="bold" className="text-slate-400" />
               </button>
@@ -409,18 +416,8 @@ export function ProfileDrawer({
               <div className="space-y-3">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">Escolha seu acesso</p>
-                  <h3 className="mt-1 text-[1.35rem] font-black tracking-[-0.03em] text-slate-950">Entrar do jeito certo</h3>
-                  <p className="mt-1 text-sm font-medium leading-relaxed text-slate-500">Cada perfil abre a área correta, mantendo as contas separadas e prontas para voltar quando precisar.</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#336886]/8 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#336886]" />
-                    Hub seguro
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                    Sessões separadas
-                  </span>
+                  <h3 className="mt-1 text-[1.35rem] font-black tracking-[-0.03em] text-slate-950">Trocar perfil</h3>
+                  <p className="mt-1 text-sm font-medium leading-relaxed text-slate-500">Cada opção abre a área certa do app.</p>
                 </div>
               </div>
               <button
@@ -431,42 +428,6 @@ export function ProfileDrawer({
               >
                 <X size={18} weight="bold" />
               </button>
-            </div>
-
-            <div className="mb-4 grid grid-cols-3 gap-2.5">
-              {accessProfiles.map((item) => (
-                <div
-                  key={`${item.id}-summary`}
-                  className={`rounded-[1.25rem] border px-3 py-3 text-left shadow-[0_14px_28px_-24px_rgba(15,23,42,0.28)] ${
-                    item.current
-                      ? 'border-slate-900/10 bg-slate-900 text-white'
-                      : item.ready
-                        ? 'border-white/90 bg-white/88 text-slate-900'
-                        : 'border-slate-200/70 bg-slate-50/88 text-slate-500'
-                  }`}
-                >
-                  <div className="mb-2 flex items-center gap-2">
-                    <div
-                      className={`grid h-8 w-8 place-items-center rounded-xl text-[11px] font-black shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] ${
-                        item.current
-                          ? 'bg-white/10 text-white'
-                          : item.id === 'client'
-                            ? 'bg-[#336886]/10 text-[#336886]'
-                            : item.id === 'store'
-                              ? 'bg-emerald-50 text-emerald-700'
-                              : 'bg-amber-50 text-amber-700'
-                      }`}
-                    >
-                      {getInitials(item.summary)}
-                    </div>
-                    <p className={`text-[10px] font-black uppercase tracking-[0.14em] ${item.current ? 'text-white/70' : 'text-slate-400'}`}>{item.title}</p>
-                  </div>
-                  <p className={`mt-1 line-clamp-1 text-[12px] font-black ${item.current ? 'text-white' : 'text-slate-900'}`}>{item.summary}</p>
-                  <p className={`mt-1 text-[10px] font-bold ${item.current ? 'text-white/70' : item.ready ? 'text-emerald-700' : 'text-slate-400'}`}>
-                    {item.current ? 'Em uso agora' : item.ready ? 'Pronto para entrar' : 'Sem sessão salva'}
-                  </p>
-                </div>
-              ))}
             </div>
 
             <div className="grid gap-3 relative">
@@ -514,8 +475,7 @@ export function ProfileDrawer({
                         </span>
                       ) : null}
                     </div>
-                    <p className={`mt-0.5 text-xs font-medium leading-snug ${item.current ? 'text-white/72' : 'text-slate-500'}`}>{item.description}</p>
-                    <p className={`mt-1 text-[11px] font-bold ${item.current ? 'text-white/65' : 'text-slate-400'}`}>{item.subtitle}</p>
+                    <p className={`mt-1 text-[11px] font-bold ${item.current ? 'text-white/65' : item.ready ? 'text-slate-500' : 'text-slate-400'}`}>{item.subtitle}</p>
                   </div>
                   <CaretRight size={17} weight="bold" className={`${item.current ? 'text-white/45' : 'text-slate-300'} transition-transform group-hover:translate-x-0.5 group-active:translate-x-0.5`} />
                 </button>
