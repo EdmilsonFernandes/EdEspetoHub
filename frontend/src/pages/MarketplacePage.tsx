@@ -1879,7 +1879,7 @@ export function MarketplacePage() {
                     ) : null}
                     <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(15,23,42,0.16)_0%,rgba(255,255,255,0.08)_32%,rgba(255,255,255,0.9)_100%)]" />
                   </div>
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#336886]/10 to-transparent" />
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-slate-950/12 via-white/10 to-transparent" />
                   <div className="pointer-events-none absolute -right-8 top-8 h-24 w-24 rounded-full bg-[#336886]/12 blur-3xl" />
                   <div className="pointer-events-none absolute -left-8 top-4 h-20 w-20 rounded-full bg-white/55 blur-3xl" />
                   <div className="relative flex items-start justify-between gap-3 px-4 py-4">
@@ -1901,21 +1901,19 @@ export function MarketplacePage() {
                         <Buildings size={21} weight="duotone" className="text-[#336886]" />
                       )}
                     </span>
-                    <span className="min-w-0 flex-1">
-                      <div className="rounded-[1.3rem] border border-white/80 bg-white/82 px-3 py-2.5 shadow-[0_18px_34px_-24px_rgba(15,23,42,0.24)] backdrop-blur-md">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-[#336886]/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-[#336886] ring-1 ring-[#336886]/10">
-                          <Buildings size={10} weight="fill" />
-                          Em condomínio
-                        </span>
-                        <span className="mt-2 block text-[15px] font-black leading-tight text-slate-950">
-                          {String(selectedCondominium.name || 'Condomínio')}
-                        </span>
-                        <span className="mt-1 block truncate text-[11px] font-semibold text-slate-500">
-                          {selectedCondominium.city && selectedCondominium.state
-                            ? `${selectedCondominium.city} - ${selectedCondominium.state}`
-                            : selectedCondominium.city || selectedCondominium.state || 'Operação local'}
-                        </span>
-                      </div>
+                    <span className="min-w-0 flex-1 pt-0.5">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-slate-950/70 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-white shadow-[0_10px_24px_-18px_rgba(15,23,42,0.42)] backdrop-blur-md">
+                        <Buildings size={10} weight="fill" />
+                        Em condomínio
+                      </span>
+                      <span className="mt-2 block text-[16px] font-black leading-tight tracking-tight text-slate-950">
+                        {String(selectedCondominium.name || 'Condomínio')}
+                      </span>
+                      <span className="mt-1 block truncate text-[11px] font-semibold text-slate-600">
+                        {selectedCondominium.city && selectedCondominium.state
+                          ? `${selectedCondominium.city} - ${selectedCondominium.state}`
+                          : selectedCondominium.city || selectedCondominium.state || 'Operação local'}
+                      </span>
                       <span className="mt-2 block truncate text-[11px] font-semibold text-slate-500">
                         {condominiumStoresLoading
                           ? 'Carregando lojas...'
@@ -1923,15 +1921,17 @@ export function MarketplacePage() {
                             ? `${filteredStores.length} loja${filteredStores.length === 1 ? '' : 's'} atendendo agora`
                             : condominiumEventTimeLabel || `${filteredStores.length} loja${filteredStores.length === 1 ? '' : 's'} vinculada${filteredStores.length === 1 ? '' : 's'}`}
                       </span>
-                      <span className={`mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] ${
+                      <span className={`mt-2 inline-flex min-h-[2rem] w-fit max-w-full items-center gap-1.5 rounded-full px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.1em] ${
                         isCondominiumEventLive
                           ? 'bg-emerald-100 text-emerald-700'
                           : hasUpcomingCondominiumEvent
-                            ? 'bg-sky-50 text-[#336886] ring-1 ring-sky-100'
+                            ? 'bg-sky-100 text-[#336886] ring-1 ring-sky-200'
                             : 'bg-slate-100 text-slate-500'
                       }`}>
                         {isCondominiumEventLive ? <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.14)]" /> : null}
-                        {isCondominiumEventLive ? 'Agenda ativa' : hasUpcomingCondominiumEvent ? 'Próxima agenda' : 'Agenda do local'}
+                        <span className="block whitespace-nowrap">
+                          {isCondominiumEventLive ? 'Agenda ativa' : hasUpcomingCondominiumEvent ? 'Próxima agenda' : 'Agenda do local'}
+                        </span>
                       </span>
                     </span>
                   </button>
@@ -2488,10 +2488,10 @@ export function MarketplacePage() {
       </div>
 
       <nav
-        className="fixed bottom-0 left-0 right-0 z-[100] border-t border-[#336886]/12 bg-[linear-gradient(180deg,rgba(235,244,250,0.94)_0%,rgba(225,238,247,0.92)_100%)] shadow-[0_-14px_34px_-26px_rgba(51,104,134,0.3)] backdrop-blur-2xl transition-transform duration-300 lg:hidden"
+        className="fixed bottom-0 left-0 right-0 z-[100] px-3 pb-[max(env(safe-area-inset-bottom),0px)] transition-transform duration-300 lg:hidden"
         style={{ transform: isBottomNavVisible ? 'translateY(0)' : 'translateY(100%)' }}
       >
-        <div className="grid h-[4.75rem] grid-cols-4 items-center gap-2 px-4 pt-2 pb-[max(env(safe-area-inset-bottom),0px)]">
+        <div className="grid h-[4.75rem] grid-cols-4 items-center gap-2 rounded-[1.9rem] border border-[#336886]/12 bg-[linear-gradient(180deg,rgba(235,244,250,0.94)_0%,rgba(225,238,247,0.92)_100%)] px-4 pt-2 shadow-[0_-14px_34px_-26px_rgba(51,104,134,0.3)] backdrop-blur-2xl">
           <button
             type="button"
             onClick={handleHomeHubNavigation}
@@ -2720,8 +2720,8 @@ export function MarketplacePage() {
               )}
             </div>
 
-            <nav className="fixed bottom-0 left-0 right-0 z-[230] border-t border-[#336886]/12 bg-[linear-gradient(180deg,rgba(235,244,250,0.94)_0%,rgba(225,238,247,0.92)_100%)] shadow-[0_-14px_34px_-26px_rgba(51,104,134,0.3)] backdrop-blur-2xl lg:hidden">
-              <div className="mx-auto grid h-[4.75rem] max-w-[760px] grid-cols-4 items-center gap-2 px-4 pt-2 pb-[max(env(safe-area-inset-bottom),0px)]">
+            <nav className="fixed bottom-0 left-0 right-0 z-[230] px-3 pb-[max(env(safe-area-inset-bottom),0px)] lg:hidden">
+              <div className="mx-auto grid h-[4.75rem] max-w-[760px] grid-cols-4 items-center gap-2 rounded-[1.9rem] border border-[#336886]/12 bg-[linear-gradient(180deg,rgba(235,244,250,0.94)_0%,rgba(225,238,247,0.92)_100%)] px-4 pt-2 shadow-[0_-14px_34px_-26px_rgba(51,104,134,0.3)] backdrop-blur-2xl">
                 <button
                   type="button"
                   onClick={() => {
