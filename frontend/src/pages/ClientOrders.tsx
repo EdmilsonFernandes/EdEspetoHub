@@ -634,7 +634,7 @@ export function ClientOrders() {
       </div>
 
       {cancelModal.order ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 p-4 sm:items-center">
+        <div className="fixed inset-0 z-[180] flex items-center justify-center bg-slate-950/45 p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:items-center">
           <div className="w-full max-w-md rounded-[28px] bg-white p-5 shadow-2xl">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -687,7 +687,9 @@ export function ClientOrders() {
         </div>
       ) : null}
 
-      <nav className="fixed bottom-0 left-0 right-0 z-[100] px-0 pb-0 lg:hidden">
+      <nav className={`fixed bottom-0 left-0 right-0 z-[100] px-0 pb-0 transition-transform duration-300 lg:hidden ${
+        cancelModal.order ? 'translate-y-[120%] pointer-events-none' : 'translate-y-0'
+      }`}>
         <div className="grid min-h-[4.75rem] grid-cols-4 items-center gap-2 rounded-t-[1.75rem] border border-b-0 border-[#336886]/12 bg-[linear-gradient(180deg,rgba(235,244,250,0.96)_0%,rgba(225,238,247,0.94)_100%)] px-4 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 shadow-[0_-14px_34px_-26px_rgba(51,104,134,0.3)] backdrop-blur-2xl">
           <button
             type="button"

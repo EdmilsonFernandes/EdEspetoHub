@@ -1917,7 +1917,7 @@ export function MarketplacePage() {
                       )}
                     </span>
                     <span className="min-w-0 flex-1 space-y-1.5">
-                      <span className={`inline-flex min-h-[2rem] w-fit max-w-full items-center gap-1.5 rounded-full px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.08em] shadow-[0_12px_28px_-20px_rgba(2,6,23,0.65)] backdrop-blur-md ${
+                      <span className={`inline-flex min-h-[2rem] w-fit max-w-full items-center gap-1.5 self-start rounded-full px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.08em] shadow-[0_12px_28px_-20px_rgba(2,6,23,0.65)] backdrop-blur-md ${
                         isCondominiumEventLive
                           ? 'bg-emerald-50/96 text-emerald-700'
                           : hasUpcomingCondominiumEvent
@@ -1932,7 +1932,7 @@ export function MarketplacePage() {
                               : 'bg-slate-400 shadow-[0_0_0_4px_rgba(148,163,184,0.12)]'
                         }`} />
                         <span className="block whitespace-nowrap">
-                          {isCondominiumEventLive ? 'Agenda ativa' : hasUpcomingCondominiumEvent ? 'Próxima agenda' : 'Agenda do local'}
+                          {isCondominiumEventLive ? 'Ao vivo' : hasUpcomingCondominiumEvent ? 'Agendado' : 'Sem agenda'}
                         </span>
                       </span>
                       <span className="block max-w-[15rem] text-[1.22rem] font-black leading-[1.03] tracking-[-0.03em] text-white drop-shadow-[0_10px_22px_rgba(2,6,23,0.48)] sm:max-w-[20rem] sm:text-[1.35rem]">
@@ -2506,7 +2506,7 @@ export function MarketplacePage() {
 
       <nav
         className="fixed bottom-0 left-0 right-0 z-[100] px-0 pb-0 transition-transform duration-300 lg:hidden"
-        style={{ transform: isBottomNavVisible ? 'translateY(0)' : 'translateY(100%)' }}
+        style={{ transform: isBottomNavVisible && !condominiumPickerOpen ? 'translateY(0)' : 'translateY(100%)' }}
       >
         <div className="grid min-h-[4.75rem] grid-cols-4 items-center gap-2 rounded-t-[1.75rem] border border-b-0 border-[#336886]/12 bg-[linear-gradient(180deg,rgba(235,244,250,0.96)_0%,rgba(225,238,247,0.94)_100%)] px-4 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 shadow-[0_-14px_34px_-26px_rgba(51,104,134,0.3)] backdrop-blur-2xl">
           <button
@@ -2628,10 +2628,10 @@ export function MarketplacePage() {
                   const bannerUrl = resolveAssetUrl(condominium.bannerUrl || condominium.logoUrl || undefined) || imageUrl;
                   const eventState = event?.state || 'none';
                   const eventBadge = eventState === 'live'
-                    ? 'Aberta agora'
+                    ? 'Ao vivo'
                     : eventState === 'upcoming'
-                      ? 'Agenda'
-                      : 'Sem agenda ativa';
+                      ? 'Agendado'
+                      : 'Sem agenda';
                   const eventTime = formatCondominiumEventTime(event);
                   return (
                     <button
@@ -2673,7 +2673,7 @@ export function MarketplacePage() {
                               onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }}
                             />
                           </div>
-                          <span className={`inline-flex shrink-0 items-center gap-1 self-start rounded-full border px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.12em] shadow-sm ${
+                          <span className={`inline-flex max-w-[7.4rem] shrink-0 items-center justify-center gap-1 self-start rounded-full border px-2.5 py-1 text-center text-[8px] font-black uppercase tracking-[0.12em] shadow-sm ${
                             active
                               ? 'border-[#336886]/28 bg-[#336886]/14 text-[#2d5f7b] shadow-[0_12px_24px_-18px_rgba(51,104,134,0.38)]'
                               : eventState === 'live'
@@ -2691,7 +2691,7 @@ export function MarketplacePage() {
                             {!active && eventState === 'upcoming' ? (
                               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#336886] shadow-[0_0_0_4px_rgba(51,104,134,0.12)]" />
                             ) : null}
-                            {active ? 'Selecionado' : eventBadge}
+                            <span className="truncate">{active ? 'Selecionado' : eventBadge}</span>
                           </span>
                         </div>
 
@@ -2715,7 +2715,7 @@ export function MarketplacePage() {
                           <CalendarBlank size={12} weight="fill" className="mt-0.5 shrink-0" />
                           <div className="min-w-0 flex-1">
                             <p className="text-[10px] font-black uppercase tracking-[0.12em]">
-                              {eventState === 'live' ? 'Agenda ativa' : eventState === 'upcoming' ? 'Próxima agenda' : 'Disponibilidade'}
+                              {eventState === 'live' ? 'Funcionando agora' : eventState === 'upcoming' ? 'Próxima agenda' : 'Disponibilidade'}
                             </p>
                             <p className="mt-0.5 break-words text-[11px] font-bold leading-4">
                               {formatCondominiumPickerEventTime(event) || eventTime || eventBadge}
