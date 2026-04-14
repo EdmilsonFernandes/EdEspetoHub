@@ -1876,29 +1876,30 @@ export function MarketplacePage() {
               style={{ transition: 'all .45s ease', transitionDelay: '95ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
             >
               {selectedCondominium ? (
-                <div className="relative overflow-hidden rounded-[2rem] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.99)_0%,rgba(248,250,252,0.98)_45%,rgba(239,246,255,0.98)_100%)] shadow-[0_24px_52px_-30px_rgba(15,23,42,0.26)] ring-1 ring-slate-100/80 backdrop-blur-md">
-                  <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-r from-[#336886]/10 via-sky-50 to-white">
+                <div className="relative overflow-hidden rounded-[2rem] border border-white/75 bg-slate-950 shadow-[0_28px_60px_-30px_rgba(15,23,42,0.42)] ring-1 ring-slate-200/70">
+                  <div className="absolute inset-0">
                     {selectedCondominiumBannerUrl ? (
                       <img
                         src={selectedCondominiumBannerUrl}
                         alt={String(selectedCondominium.name || 'Condomínio')}
-                        className="h-full w-full object-cover opacity-95 saturate-[1.14]"
+                        className="h-full w-full object-cover opacity-[0.98] saturate-[1.08]"
                       />
                     ) : null}
-                    <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(15,23,42,0.16)_0%,rgba(255,255,255,0.08)_32%,rgba(255,255,255,0.9)_100%)]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.16)_0%,rgba(2,6,23,0.28)_24%,rgba(2,6,23,0.44)_56%,rgba(2,6,23,0.76)_100%)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_28%)]" />
                   </div>
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-slate-950/12 via-white/10 to-transparent" />
-                  <div className="pointer-events-none absolute -right-8 top-8 h-24 w-24 rounded-full bg-[#336886]/12 blur-3xl" />
-                  <div className="pointer-events-none absolute -left-8 top-4 h-20 w-20 rounded-full bg-white/55 blur-3xl" />
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/18 via-black/5 to-transparent" />
+                  <div className="pointer-events-none absolute -right-10 top-5 h-28 w-28 rounded-full bg-white/16 blur-3xl" />
+                  <div className="pointer-events-none absolute -left-10 bottom-3 h-24 w-24 rounded-full bg-[#336886]/18 blur-3xl" />
                   <div className="relative flex items-start justify-between gap-3 px-4 py-4">
                   <button
                     type="button"
                     onClick={() => setCondominiumPickerOpen(true)}
-                    className="flex min-w-0 flex-1 items-start gap-3 text-left active:scale-[0.99]"
+                    className="flex min-w-0 flex-1 items-end gap-3 text-left active:scale-[0.99]"
                     aria-label="Escolher outro condomínio"
                     title="Escolher outro condomínio"
                   >
-                    <span className="inline-flex h-[3.85rem] w-[3.85rem] shrink-0 items-center justify-center overflow-hidden rounded-[1.35rem] bg-white/96 p-2.5 shadow-[0_20px_34px_-18px_rgba(15,23,42,0.36)] ring-1 ring-white/90">
+                    <span className="inline-flex h-[4.1rem] w-[4.1rem] shrink-0 items-center justify-center overflow-hidden rounded-[1.45rem] bg-white/95 p-2.5 shadow-[0_22px_38px_-20px_rgba(2,6,23,0.55)] ring-1 ring-white/70 backdrop-blur-md">
                       {selectedCondominiumLogoUrl ? (
                         <img
                           src={selectedCondominiumLogoUrl}
@@ -1909,44 +1910,46 @@ export function MarketplacePage() {
                         <Buildings size={21} weight="duotone" className="text-[#336886]" />
                       )}
                     </span>
-                    <span className="min-w-0 flex-1 pt-0.5">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-slate-950/70 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-white shadow-[0_10px_24px_-18px_rgba(15,23,42,0.42)] backdrop-blur-md">
-                        <Buildings size={10} weight="fill" />
-                        Em condomínio
+                    <span className="min-w-0 flex-1">
+                      <span className={`inline-flex min-h-[2rem] w-fit max-w-full items-center gap-1.5 rounded-full px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.1em] shadow-[0_12px_28px_-20px_rgba(2,6,23,0.65)] backdrop-blur-md ${
+                        isCondominiumEventLive
+                          ? 'bg-emerald-50/96 text-emerald-700'
+                          : hasUpcomingCondominiumEvent
+                            ? 'bg-sky-50/96 text-sky-700'
+                            : 'bg-white/92 text-slate-600'
+                      }`}>
+                        <span className={`h-1.5 w-1.5 rounded-full ${
+                          isCondominiumEventLive
+                            ? 'bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.12)]'
+                            : hasUpcomingCondominiumEvent
+                              ? 'bg-sky-500 shadow-[0_0_0_4px_rgba(14,165,233,0.12)]'
+                              : 'bg-slate-400 shadow-[0_0_0_4px_rgba(148,163,184,0.12)]'
+                        }`} />
+                        <span className="block whitespace-nowrap">
+                          {isCondominiumEventLive ? 'Agenda ativa' : hasUpcomingCondominiumEvent ? 'Próxima agenda' : 'Agenda do local'}
+                        </span>
                       </span>
-                      <span className="mt-2 block text-[16px] font-black leading-tight tracking-tight text-slate-950">
+                      <span className="mt-3 block max-w-[15rem] text-[1.1rem] font-black leading-[1.05] tracking-[-0.03em] text-white drop-shadow-[0_8px_18px_rgba(2,6,23,0.45)] sm:max-w-[20rem]">
                         {String(selectedCondominium.name || 'Condomínio')}
                       </span>
-                      <span className="mt-1 block truncate text-[11px] font-semibold text-slate-600">
+                      <span className="mt-1 block truncate text-[11px] font-semibold text-white/84">
                         {selectedCondominium.city && selectedCondominium.state
                           ? `${selectedCondominium.city} - ${selectedCondominium.state}`
                           : selectedCondominium.city || selectedCondominium.state || 'Operação local'}
                       </span>
-                      <span className="mt-2 block truncate text-[11px] font-semibold text-slate-500">
+                      <span className="mt-2 block max-w-[16rem] truncate text-[11px] font-semibold text-white/72 sm:max-w-[21rem]">
                         {condominiumStoresLoading
                           ? 'Carregando lojas...'
                           : isCondominiumEventLive
                             ? `${filteredStores.length} loja${filteredStores.length === 1 ? '' : 's'} atendendo agora`
                             : condominiumEventTimeLabel || `${filteredStores.length} loja${filteredStores.length === 1 ? '' : 's'} vinculada${filteredStores.length === 1 ? '' : 's'}`}
                       </span>
-                      <span className={`mt-2 inline-flex min-h-[2rem] w-fit max-w-full items-center gap-1.5 rounded-full px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.1em] ${
-                        isCondominiumEventLive
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : hasUpcomingCondominiumEvent
-                            ? 'bg-sky-100 text-[#336886] ring-1 ring-sky-200'
-                            : 'bg-slate-100 text-slate-500'
-                      }`}>
-                        {isCondominiumEventLive ? <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.14)]" /> : null}
-                        <span className="block whitespace-nowrap">
-                          {isCondominiumEventLive ? 'Agenda ativa' : hasUpcomingCondominiumEvent ? 'Próxima agenda' : 'Agenda do local'}
-                        </span>
-                      </span>
                     </span>
                   </button>
                   <button
                     type="button"
                     onClick={clearCondominiumSelection}
-                    className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(241,245,249,0.98)_100%)] text-slate-500 ring-1 ring-slate-200/85 shadow-[0_18px_28px_-18px_rgba(15,23,42,0.25)] transition hover:-translate-y-0.5 hover:text-[#336886] hover:shadow-[0_22px_32px_-18px_rgba(51,104,134,0.25)] active:scale-95"
+                    className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] bg-white/16 text-white ring-1 ring-white/24 shadow-[0_18px_28px_-18px_rgba(2,6,23,0.7)] backdrop-blur-md transition hover:-translate-y-0.5 hover:bg-white/22 hover:text-white active:scale-95"
                     aria-label="Sair da feira e voltar ao Hub"
                     title="Sair da feira"
                   >
