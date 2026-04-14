@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260414.203641.05f794f1",
-  "buildId": "0.1.9+20260414.203641.05f794f1-20260414.203641-05f794f1",
-  "builtAt": "2026-04-14T20:36:41.711Z",
-  "commitHash": "05f794f1c6c003bbeefb097042fba91b398f3189",
-  "shortHash": "05f794f1",
+  "versionInternal": "0.1.9+20260414.204429.e5101361",
+  "buildId": "0.1.9+20260414.204429.e5101361-20260414.204429-e5101361",
+  "builtAt": "2026-04-14T20:44:29.911Z",
+  "commitHash": "e510136133b021d58ce4fd4e08ae5cd9126b60e6",
+  "shortHash": "e5101361",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "e510136133b021d58ce4fd4e08ae5cd9126b60e6",
+      "shortHash": "e5101361",
+      "dateIso": "2026-04-14T17:37:16-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(hub): refine premium role access drawer",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e510136133b021d58ce4fd4e08ae5cd9126b60e6"
+    },
     {
       "hash": "05f794f1c6c003bbeefb097042fba91b398f3189",
       "shortHash": "05f794f1",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(hub): unify condo context and premium bottom nav",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/856c6ba982f1d5a32d7fae4c628b22206a150dd3"
-    },
-    {
-      "hash": "844552a1bc600461b174d540afcf93666cda81f8",
-      "shortHash": "844552a1",
-      "dateIso": "2026-04-13T21:37:19-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(hub): stabilize header search and hide store cta",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/844552a1bc600461b174d540afcf93666cda81f8"
     }
   ]
 } as const;

@@ -147,6 +147,16 @@ export function ProfileDrawer({
     }
   }, [isOpen]);
 
+  const getInitials = (value: string) => {
+    const parts = String(value || '')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2);
+    if (!parts.length) return 'JN';
+    return parts.map((part) => part.charAt(0).toUpperCase()).join('');
+  };
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -431,7 +441,22 @@ export function ProfileDrawer({
                         : 'border-slate-200/70 bg-slate-50/88 text-slate-500'
                   }`}
                 >
-                  <p className={`text-[10px] font-black uppercase tracking-[0.14em] ${item.current ? 'text-white/70' : 'text-slate-400'}`}>{item.title}</p>
+                  <div className="mb-2 flex items-center gap-2">
+                    <div
+                      className={`grid h-8 w-8 place-items-center rounded-xl text-[11px] font-black shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] ${
+                        item.current
+                          ? 'bg-white/10 text-white'
+                          : item.id === 'client'
+                            ? 'bg-[#336886]/10 text-[#336886]'
+                            : item.id === 'store'
+                              ? 'bg-emerald-50 text-emerald-700'
+                              : 'bg-amber-50 text-amber-700'
+                      }`}
+                    >
+                      {getInitials(item.summary)}
+                    </div>
+                    <p className={`text-[10px] font-black uppercase tracking-[0.14em] ${item.current ? 'text-white/70' : 'text-slate-400'}`}>{item.title}</p>
+                  </div>
                   <p className={`mt-1 line-clamp-1 text-[12px] font-black ${item.current ? 'text-white' : 'text-slate-900'}`}>{item.summary}</p>
                   <p className={`mt-1 text-[10px] font-bold ${item.current ? 'text-white/70' : item.ready ? 'text-emerald-700' : 'text-slate-400'}`}>
                     {item.current ? 'Em uso agora' : item.ready ? 'Pronto para entrar' : 'Sem sessão salva'}
@@ -464,7 +489,12 @@ export function ProfileDrawer({
                       : 'bg-[radial-gradient(circle_at_center,rgba(51,104,134,0.08),transparent_70%)]'
                   }`} />
                   <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${item.current ? 'bg-white/10 text-white' : item.tone} shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]`}>
-                    {item.icon}
+                    <div className="relative grid place-items-center">
+                      {item.icon}
+                      <span className={`absolute -bottom-4 text-[9px] font-black uppercase tracking-[0.12em] ${item.current ? 'text-white/55' : 'text-slate-300'}`}>
+                        {getInitials(item.summary)}
+                      </span>
+                    </div>
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
