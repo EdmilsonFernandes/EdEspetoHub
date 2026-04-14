@@ -1876,30 +1876,30 @@ export function MarketplacePage() {
               style={{ transition: 'all .45s ease', transitionDelay: '95ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
             >
               {selectedCondominium ? (
-                <div className="relative overflow-hidden rounded-[2rem] border border-white/75 bg-slate-950 shadow-[0_28px_60px_-30px_rgba(15,23,42,0.42)] ring-1 ring-slate-200/70">
+                <div className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-slate-950 shadow-[0_30px_64px_-32px_rgba(15,23,42,0.48)] ring-1 ring-slate-200/60">
                   <div className="absolute inset-0">
                     {selectedCondominiumBannerUrl ? (
                       <img
                         src={selectedCondominiumBannerUrl}
                         alt={String(selectedCondominium.name || 'Condomínio')}
-                        className="h-full w-full object-cover opacity-[0.98] saturate-[1.08]"
+                        className="h-full w-full object-cover opacity-[0.98] saturate-[1.03]"
                       />
                     ) : null}
-                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.16)_0%,rgba(2,6,23,0.28)_24%,rgba(2,6,23,0.44)_56%,rgba(2,6,23,0.76)_100%)]" />
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_28%)]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.42)_0%,rgba(2,6,23,0.46)_20%,rgba(2,6,23,0.58)_52%,rgba(2,6,23,0.84)_100%)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_24%)]" />
                   </div>
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/18 via-black/5 to-transparent" />
-                  <div className="pointer-events-none absolute -right-10 top-5 h-28 w-28 rounded-full bg-white/16 blur-3xl" />
-                  <div className="pointer-events-none absolute -left-10 bottom-3 h-24 w-24 rounded-full bg-[#336886]/18 blur-3xl" />
-                  <div className="relative flex items-start justify-between gap-3 px-4 py-4">
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/28 via-black/8 to-transparent" />
+                  <div className="pointer-events-none absolute -right-12 top-3 h-24 w-24 rounded-full bg-white/12 blur-3xl" />
+                  <div className="pointer-events-none absolute -left-12 bottom-2 h-28 w-28 rounded-full bg-[#336886]/16 blur-3xl" />
+                  <div className="relative flex items-start justify-between gap-4 px-5 py-5 sm:px-6 sm:py-6">
                   <button
                     type="button"
                     onClick={() => setCondominiumPickerOpen(true)}
-                    className="flex min-w-0 flex-1 items-end gap-3 text-left active:scale-[0.99]"
+                    className="flex min-w-0 flex-1 items-end gap-3.5 text-left active:scale-[0.99]"
                     aria-label="Escolher outro condomínio"
                     title="Escolher outro condomínio"
                   >
-                    <span className="inline-flex h-[4.1rem] w-[4.1rem] shrink-0 items-center justify-center overflow-hidden rounded-[1.45rem] bg-white/95 p-2.5 shadow-[0_22px_38px_-20px_rgba(2,6,23,0.55)] ring-1 ring-white/70 backdrop-blur-md">
+                    <span className="inline-flex h-[3.8rem] w-[3.8rem] shrink-0 items-center justify-center overflow-hidden rounded-[1.35rem] bg-white/95 p-2.5 shadow-[0_22px_38px_-20px_rgba(2,6,23,0.58)] ring-1 ring-white/65 backdrop-blur-md sm:h-[4rem] sm:w-[4rem]">
                       {selectedCondominiumLogoUrl ? (
                         <img
                           src={selectedCondominiumLogoUrl}
@@ -1910,8 +1910,8 @@ export function MarketplacePage() {
                         <Buildings size={21} weight="duotone" className="text-[#336886]" />
                       )}
                     </span>
-                    <span className="min-w-0 flex-1">
-                      <span className={`inline-flex min-h-[2rem] w-fit max-w-full items-center gap-1.5 rounded-full px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.1em] shadow-[0_12px_28px_-20px_rgba(2,6,23,0.65)] backdrop-blur-md ${
+                    <span className="min-w-0 flex-1 space-y-1.5">
+                      <span className={`inline-flex min-h-[2rem] w-fit max-w-full items-center gap-1.5 rounded-full px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.08em] shadow-[0_12px_28px_-20px_rgba(2,6,23,0.65)] backdrop-blur-md ${
                         isCondominiumEventLive
                           ? 'bg-emerald-50/96 text-emerald-700'
                           : hasUpcomingCondominiumEvent
@@ -1929,19 +1929,19 @@ export function MarketplacePage() {
                           {isCondominiumEventLive ? 'Agenda ativa' : hasUpcomingCondominiumEvent ? 'Próxima agenda' : 'Agenda do local'}
                         </span>
                       </span>
-                      <span className="mt-3 block max-w-[15rem] text-[1.1rem] font-black leading-[1.05] tracking-[-0.03em] text-white drop-shadow-[0_8px_18px_rgba(2,6,23,0.45)] sm:max-w-[20rem]">
+                      <span className="block max-w-[15rem] text-[1.22rem] font-black leading-[1.03] tracking-[-0.03em] text-white drop-shadow-[0_10px_22px_rgba(2,6,23,0.48)] sm:max-w-[20rem] sm:text-[1.35rem]">
                         {String(selectedCondominium.name || 'Condomínio')}
                       </span>
-                      <span className="mt-1 block truncate text-[11px] font-semibold text-white/84">
+                      <span className="block truncate text-[11px] font-semibold text-white/88 sm:text-[11.5px]">
                         {selectedCondominium.city && selectedCondominium.state
                           ? `${selectedCondominium.city} - ${selectedCondominium.state}`
                           : selectedCondominium.city || selectedCondominium.state || 'Operação local'}
                       </span>
-                      <span className="mt-2 block max-w-[16rem] truncate text-[11px] font-semibold text-white/72 sm:max-w-[21rem]">
+                      <span className="block max-w-[16rem] truncate text-[10px] font-semibold uppercase tracking-[0.08em] text-white/72 sm:max-w-[21rem]">
                         {condominiumStoresLoading
                           ? 'Carregando lojas...'
                           : isCondominiumEventLive
-                            ? `${filteredStores.length} loja${filteredStores.length === 1 ? '' : 's'} atendendo agora`
+                            ? `${filteredStores.length} loja${filteredStores.length === 1 ? '' : 's'} disponíveis`
                             : condominiumEventTimeLabel || `${filteredStores.length} loja${filteredStores.length === 1 ? '' : 's'} vinculada${filteredStores.length === 1 ? '' : 's'}`}
                       </span>
                     </span>
@@ -1949,7 +1949,7 @@ export function MarketplacePage() {
                   <button
                     type="button"
                     onClick={clearCondominiumSelection}
-                    className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] bg-white/16 text-white ring-1 ring-white/24 shadow-[0_18px_28px_-18px_rgba(2,6,23,0.7)] backdrop-blur-md transition hover:-translate-y-0.5 hover:bg-white/22 hover:text-white active:scale-95"
+                    className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black/38 text-white ring-1 ring-white/18 shadow-[0_16px_28px_-18px_rgba(2,6,23,0.75)] backdrop-blur-md transition hover:-translate-y-0.5 hover:bg-black/46 hover:text-white active:scale-95"
                     aria-label="Sair da feira e voltar ao Hub"
                     title="Sair da feira"
                   >
@@ -2499,10 +2499,10 @@ export function MarketplacePage() {
       </div>
 
       <nav
-        className="fixed bottom-0 left-0 right-0 z-[100] px-2 pb-[env(safe-area-inset-bottom)] transition-transform duration-300 lg:hidden"
+        className="fixed bottom-0 left-0 right-0 z-[100] px-0 pb-0 transition-transform duration-300 lg:hidden"
         style={{ transform: isBottomNavVisible ? 'translateY(0)' : 'translateY(100%)' }}
       >
-        <div className="grid h-[4.75rem] grid-cols-4 items-center gap-2 rounded-[1.75rem] border border-[#336886]/12 bg-[linear-gradient(180deg,rgba(235,244,250,0.94)_0%,rgba(225,238,247,0.92)_100%)] px-4 pt-2 shadow-[0_-14px_34px_-26px_rgba(51,104,134,0.3)] backdrop-blur-2xl">
+        <div className="grid min-h-[4.75rem] grid-cols-4 items-center gap-2 rounded-t-[1.75rem] border border-b-0 border-[#336886]/12 bg-[linear-gradient(180deg,rgba(235,244,250,0.96)_0%,rgba(225,238,247,0.94)_100%)] px-4 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 shadow-[0_-14px_34px_-26px_rgba(51,104,134,0.3)] backdrop-blur-2xl">
           <button
             type="button"
             onClick={handleHomeHubNavigation}
@@ -2731,8 +2731,8 @@ export function MarketplacePage() {
               )}
             </div>
 
-            <nav className="fixed bottom-0 left-0 right-0 z-[230] px-3 pb-[max(env(safe-area-inset-bottom),0px)] lg:hidden">
-              <div className="mx-auto grid h-[4.75rem] max-w-[760px] grid-cols-4 items-center gap-2 rounded-[1.9rem] border border-[#336886]/12 bg-[linear-gradient(180deg,rgba(235,244,250,0.94)_0%,rgba(225,238,247,0.92)_100%)] px-4 pt-2 shadow-[0_-14px_34px_-26px_rgba(51,104,134,0.3)] backdrop-blur-2xl">
+            <nav className="fixed bottom-0 left-0 right-0 z-[230] px-0 pb-0 lg:hidden">
+              <div className="mx-auto grid min-h-[4.75rem] max-w-[760px] grid-cols-4 items-center gap-2 rounded-t-[1.9rem] border border-b-0 border-[#336886]/12 bg-[linear-gradient(180deg,rgba(235,244,250,0.96)_0%,rgba(225,238,247,0.94)_100%)] px-4 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 shadow-[0_-14px_34px_-26px_rgba(51,104,134,0.3)] backdrop-blur-2xl">
                 <button
                   type="button"
                   onClick={() => {
