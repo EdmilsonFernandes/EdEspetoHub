@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260414.210933.29601499",
-  "buildId": "0.1.9+20260414.210933.29601499-20260414.210933-29601499",
-  "builtAt": "2026-04-14T21:09:33.383Z",
-  "commitHash": "2960149926e898240e083e812eeb8078c43522af",
-  "shortHash": "29601499",
+  "versionInternal": "0.1.9+20260414.211235.91231008",
+  "buildId": "0.1.9+20260414.211235.91231008-20260414.211235-91231008",
+  "builtAt": "2026-04-14T21:12:35.395Z",
+  "commitHash": "9123100871cab18e6ff16d0c5fb0a4962767202d",
+  "shortHash": "91231008",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "9123100871cab18e6ff16d0c5fb0a4962767202d",
+      "shortHash": "91231008",
+      "dateIso": "2026-04-14T18:10:06-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(hub): improve condominium search and order filters",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9123100871cab18e6ff16d0c5fb0a4962767202d"
+    },
     {
       "hash": "2960149926e898240e083e812eeb8078c43522af",
       "shortHash": "29601499",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(hub): tighten bottom nav and restore search after condo",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7996177cfbc976e5f0d9d72fee6dfa11fa49d77e"
-    },
-    {
-      "hash": "b4b48b6da16e80d22675434c5a734e0c91f9e678",
-      "shortHash": "b4b48b6d",
-      "dateIso": "2026-04-13T23:28:18-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(hub): stabilize home search bar rendering",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b4b48b6da16e80d22675434c5a734e0c91f9e678"
     }
   ]
 } as const;

@@ -374,6 +374,7 @@ export function MarketplacePage() {
   const [isHeaderElevated, setIsHeaderElevated] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const condominiumSearchInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search || '');
@@ -384,6 +385,21 @@ export function MarketplacePage() {
       setQuickFilter('favorites');
     }
   }, [location.search]);
+
+  useEffect(() => {
+    if (!condominiumPickerOpen) return;
+
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLElement) {
+      activeElement.blur();
+    }
+
+    const timer = window.setTimeout(() => {
+      condominiumSearchInputRef.current?.blur();
+    }, 40);
+
+    return () => window.clearTimeout(timer);
+  }, [condominiumPickerOpen]);
   const [showStorePromoPopup, setShowStorePromoPopup] = useState(false);
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
   const [featuredLoading, setFeaturedLoading] = useState(false);
@@ -1728,23 +1744,31 @@ export function MarketplacePage() {
 
             {/* Linha 2: Busca Premium */}
             <div className="relative z-20 px-0.5">
-              <div className="group relative flex min-h-[52px] items-center gap-3 rounded-[22px] border border-slate-200/90 bg-white/96 px-4 shadow-[0_12px_26px_-20px_rgba(15,23,42,0.18)] transition-[border-color,box-shadow,background-color] duration-200 ease-out hover:border-slate-300 hover:bg-white focus-within:border-[#336886]/22 focus-within:shadow-[0_16px_34px_-22px_rgba(51,104,134,0.18)] focus-within:ring-2 focus-within:ring-[#336886]/8">
+              <div
+                className="group relative flex min-h-[52px] items-center gap-3 rounded-[22px] border border-slate-200/90 bg-white/96 px-4 shadow-[0_12px_26px_-20px_rgba(15,23,42,0.18)] transition-[border-color,box-shadow,background-color] duration-200 ease-out hover:border-slate-300 hover:bg-white focus-within:border-[#336886]/22 focus-within:shadow-[0_16px_34px_-22px_rgba(51,104,134,0.18)] focus-within:ring-2 focus-within:ring-[#336886]/8"
+                onClick={() => searchInputRef.current?.focus()}
+              >
                 <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#336886]/10 bg-[#336886]/8 text-[#336886] shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
                   <MagnifyingGlass size={18} weight="bold" />
                 </div>
-                <div className="min-w-0 flex-1">
+                <div className="relative min-w-0 flex-1">
                   <input
                     ref={searchInputRef}
                     type="text"
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
-                    placeholder="Buscar loja, categoria ou produto"
+                    placeholder=""
                     autoComplete="off"
                     inputMode="search"
                     enterKeyHint="search"
                     className="block min-h-[52px] w-full min-w-0 appearance-none bg-transparent pr-1 text-[14px] font-semibold text-slate-950 outline-none placeholder:text-slate-400"
                     style={{ WebkitAppearance: 'none', WebkitTextFillColor: '#020617', caretColor: '#336886' }}
                   />
+                  {!query.trim() ? (
+                    <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pr-3 text-[14px] font-semibold text-slate-400">
+                      Buscar loja, categoria ou produto
+                    </span>
+                  ) : null}
                 </div>
                 {query ? (
                   <button
@@ -2695,6 +2719,7 @@ export function MarketplacePage() {
                   <MagnifyingGlass size={17} weight="bold" />
                 </span>
                 <input
+                  ref={condominiumSearchInputRef}
                   type="text"
                   value={condominiumSearch}
                   onChange={(event) => setCondominiumSearch(event.target.value)}

@@ -569,7 +569,7 @@ export function ClientOrders() {
             <ArrowLeft size={20} weight="bold" />
           </button>
           <div className="text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Historico</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Histórico</p>
             <h1 className="mt-0.5 text-lg font-semibold text-slate-900">Meus pedidos</h1>
           </div>
           <div className="w-10" />
@@ -640,8 +640,8 @@ export function ClientOrders() {
                 <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-slate-100 text-slate-400">
                   <Storefront size={28} weight="duotone" />
                 </div>
-                <p className="text-base font-semibold text-slate-900">Voce ainda nao fez pedidos</p>
-                <p className="mt-1 text-sm text-slate-500">Quando pedir pelo app, eles vao aparecer aqui.</p>
+                <p className="text-base font-semibold text-slate-900">Você ainda não fez pedidos</p>
+                <p className="mt-1 text-sm text-slate-500">Quando pedir pelo app, eles vão aparecer aqui.</p>
                 <button
                   onClick={() => navigate('/hub')}
                   className="mt-6 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
