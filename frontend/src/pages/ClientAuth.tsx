@@ -5,6 +5,7 @@ import { UserCircle, Eye, EyeSlash, LockKey } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { nativeBiometricService } from '../services/nativeBiometricService';
+import { ConfirmationModal } from '../components/common/ConfirmationModal';
 
 const formatPhoneBr = (value: string) => {
   const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
@@ -32,6 +33,9 @@ export function ClientAuth() {
   const [showPassword, setShowPassword] = useState(false);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricLoading, setBiometricLoading] = useState(false);
+  const [autoBiometricTried, setAutoBiometricTried] = useState(false);
+  const [enrollmentPromptOpen, setEnrollmentPromptOpen] = useState(false);
+  const [pendingBiometricSession, setPendingBiometricSession] = useState<any | null>(null);
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -59,6 +63,11 @@ export function ClientAuth() {
     setBiometricAvailable(nativeBiometricService.isSupported() && nativeBiometricService.hasStoredCustomerProfile());
   }, []);
 
+  useEffect(() => {
+    setMode(getModeFromSearch(location.search));
+    setAutoBiometricTried(false);
+  }, [location.search]);
+
   const finishLogin = (result: any) => {
     nativeBiometricService.syncCustomerSession(result);
 
@@ -67,6 +76,27 @@ export function ClientAuth() {
       return;
     }
     navigate(hubMode ? '/hub' : '/cliente/conta', { replace: true });
+  };
+
+  const handleEnableBiometricEnrollment = () => {
+    if (pendingBiometricSession?.token) {
+      nativeBiometricService.enableCustomer(pendingBiometricSession);
+      setBiometricAvailable(true);
+    }
+    setEnrollmentPromptOpen(false);
+    setPendingBiometricSession(null);
+    if (pendingBiometricSession?.token) {
+      finishLogin(pendingBiometricSession);
+    }
+  };
+
+  const handleSkipBiometricEnrollment = () => {
+    const session = pendingBiometricSession;
+    setEnrollmentPromptOpen(false);
+    setPendingBiometricSession(null);
+    if (session?.token) {
+      finishLogin(session);
+    }
   };
 
   const handleBiometricLogin = async () => {
@@ -83,6 +113,28 @@ export function ClientAuth() {
       setBiometricLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (mode !== 'login') return;
+    if (!biometricAvailable || biometricLoading || loading || autoBiometricTried) return;
+    const hasTypedCredentials = Boolean(String(form.email || '').trim()) || Boolean(String(form.password || '').trim());
+    if (hasTypedCredentials) return;
+
+    setAutoBiometricTried(true);
+    const timer = window.setTimeout(() => {
+      void handleBiometricLogin();
+    }, 180);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    autoBiometricTried,
+    biometricAvailable,
+    biometricLoading,
+    form.email,
+    form.password,
+    loading,
+    mode,
+  ]);
 
   const submit = async () => {
     if (loading) return;
@@ -116,11 +168,9 @@ export function ClientAuth() {
       nativeBiometricService.syncCustomerSession(result);
 
       if (nativeBiometricService.shouldOfferEnrollment(result)) {
-        const shouldEnable = window.confirm('Deseja ativar biometria neste aparelho para entrar mais rápido na próxima vez?');
-        if (shouldEnable) {
-          nativeBiometricService.enableCustomer(result);
-          setBiometricAvailable(true);
-        }
+        setPendingBiometricSession(result);
+        setEnrollmentPromptOpen(true);
+        return;
       }
       finishLogin(result);
     } catch (e: any) {
@@ -326,6 +376,17 @@ export function ClientAuth() {
           </form>
         </div>
       </div>
+      <ConfirmationModal
+        isOpen={enrollmentPromptOpen}
+        onClose={handleSkipBiometricEnrollment}
+        onConfirm={handleEnableBiometricEnrollment}
+        title="Entrar mais rápido?"
+        description="Ative a biometria neste aparelho para acessar sua conta com digital, rosto ou bloqueio do celular nas próximas vezes."
+        confirmLabel="Ativar biometria"
+        cancelLabel="Agora não"
+        variant="info"
+        icon={<LockKey size={32} weight="duotone" />}
+      />
     </AuthLayout>
   );
 }
