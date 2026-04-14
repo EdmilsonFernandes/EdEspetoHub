@@ -2649,6 +2649,7 @@ export function StorePage() {
             onCheckout={checkout}
             checkoutLoading={checkoutLoading}
             onBack={() => setView('menu')}
+            storeLabel={storeName || branding?.brandName || ''}
           />
         )}
         {view === 'success' && (

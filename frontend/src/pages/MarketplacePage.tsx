@@ -1383,6 +1383,12 @@ export function MarketplacePage() {
     resetMarketplaceFilters();
   }, [resetMarketplaceFilters]);
 
+  const handleHomeHubNavigation = useCallback(() => {
+    clearCondominiumSelection();
+    setCondominiumPickerOpen(false);
+    navigate('/hub');
+  }, [clearCondominiumSelection, navigate]);
+
   const [activeOrders, setActiveOrders] = useState<any[]>([]);
 
   const clearAnonymousOrderCache = useCallback((orderIds: string[]) => {
@@ -1876,11 +1882,11 @@ export function MarketplacePage() {
                   <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#336886]/10 to-transparent" />
                   <div className="pointer-events-none absolute -right-8 top-8 h-24 w-24 rounded-full bg-[#336886]/12 blur-3xl" />
                   <div className="pointer-events-none absolute -left-8 top-4 h-20 w-20 rounded-full bg-white/55 blur-3xl" />
-                  <div className="relative flex items-center justify-between gap-3 px-4 py-4">
+                  <div className="relative flex items-start justify-between gap-3 px-4 py-4">
                   <button
                     type="button"
                     onClick={() => setCondominiumPickerOpen(true)}
-                    className="flex min-w-0 flex-1 items-center gap-3 text-left active:scale-[0.99]"
+                    className="flex min-w-0 flex-1 items-start gap-3 text-left active:scale-[0.99]"
                     aria-label="Escolher outro condomínio"
                     title="Escolher outro condomínio"
                   >
@@ -1895,15 +1901,22 @@ export function MarketplacePage() {
                         <Buildings size={21} weight="duotone" className="text-[#336886]" />
                       )}
                     </span>
-                    <span className="min-w-0">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-[#336886]/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-[#336886] shadow-[0_10px_24px_-18px_rgba(51,104,134,0.2)] ring-1 ring-[#336886]/10">
-                        <Buildings size={10} weight="fill" />
-                        Seu local
-                      </span>
-                      <span className="mt-2 block truncate text-[15px] font-black leading-tight text-slate-950">
-                        {String(selectedCondominium.name || 'Condomínio')}
-                      </span>
-                      <span className="mt-1 block truncate text-[11px] font-semibold text-slate-500">
+                    <span className="min-w-0 flex-1">
+                      <div className="rounded-[1.3rem] border border-white/80 bg-white/82 px-3 py-2.5 shadow-[0_18px_34px_-24px_rgba(15,23,42,0.24)] backdrop-blur-md">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[#336886]/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-[#336886] ring-1 ring-[#336886]/10">
+                          <Buildings size={10} weight="fill" />
+                          Em condomínio
+                        </span>
+                        <span className="mt-2 block text-[15px] font-black leading-tight text-slate-950">
+                          {String(selectedCondominium.name || 'Condomínio')}
+                        </span>
+                        <span className="mt-1 block truncate text-[11px] font-semibold text-slate-500">
+                          {selectedCondominium.city && selectedCondominium.state
+                            ? `${selectedCondominium.city} - ${selectedCondominium.state}`
+                            : selectedCondominium.city || selectedCondominium.state || 'Operação local'}
+                        </span>
+                      </div>
+                      <span className="mt-2 block truncate text-[11px] font-semibold text-slate-500">
                         {condominiumStoresLoading
                           ? 'Carregando lojas...'
                           : isCondominiumEventLive
@@ -2481,14 +2494,14 @@ export function MarketplacePage() {
         <div className="grid h-[4.75rem] grid-cols-4 items-center gap-2 px-4 pt-2 pb-[max(env(safe-area-inset-bottom),0px)]">
           <button
             type="button"
-            onClick={() => navigate('/hub')}
+            onClick={handleHomeHubNavigation}
             className={`flex flex-col items-center justify-center rounded-2xl py-1 font-bold transition-all duration-150 ease-out active:scale-[0.94] ${
-              quickFilter === 'all' && !condominiumPickerOpen
+              quickFilter === 'all' && !condominiumPickerOpen && !selectedCondominium
                 ? 'bg-[#336886]/10 text-[#336886] shadow-[0_8px_18px_-16px_rgba(51,104,134,0.7)] ring-1 ring-[#336886]/15'
                 : 'text-slate-400'
             }`}
           >
-            <House size={18} weight={quickFilter === 'all' && !condominiumPickerOpen ? 'fill' : 'duotone'} />
+            <House size={18} weight={quickFilter === 'all' && !condominiumPickerOpen && !selectedCondominium ? 'fill' : 'duotone'} />
             <span className="text-[9px] font-black uppercase">Início</span>
           </button>
           <button type="button" onClick={() => navigate('/cliente/pedidos')} className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]">
@@ -2645,7 +2658,7 @@ export function MarketplacePage() {
                           </div>
                           <span className={`inline-flex shrink-0 items-center gap-1 self-start rounded-full border px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.12em] shadow-sm ${
                             active
-                              ? 'border-[#336886]/16 bg-[#336886]/9 text-[#336886]'
+                              ? 'border-[#336886]/28 bg-[#336886]/14 text-[#2d5f7b] shadow-[0_12px_24px_-18px_rgba(51,104,134,0.38)]'
                               : eventState === 'live'
                                 ? 'border-emerald-200 bg-emerald-100 text-emerald-700'
                                 : eventState === 'upcoming'
@@ -2661,7 +2674,7 @@ export function MarketplacePage() {
                             {!active && eventState === 'upcoming' ? (
                               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#336886] shadow-[0_0_0_4px_rgba(51,104,134,0.12)]" />
                             ) : null}
-                            {active ? 'No momento' : eventBadge}
+                            {active ? 'Selecionado' : eventBadge}
                           </span>
                         </div>
 
@@ -2713,7 +2726,7 @@ export function MarketplacePage() {
                   type="button"
                   onClick={() => {
                     setCondominiumPickerOpen(false);
-                    navigate('/hub');
+                    handleHomeHubNavigation();
                   }}
                   className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]"
                 >

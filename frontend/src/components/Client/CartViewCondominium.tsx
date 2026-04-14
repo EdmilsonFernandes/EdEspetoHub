@@ -201,15 +201,29 @@ export const CartViewCondominium = ({
   const validationError = validateFields();
 
   return (
-    <div className="animate-in slide-in-from-right pb-24 pt-[max(calc(env(safe-area-inset-top)+1.6rem),2rem)] relative overflow-x-hidden no-x-scroll bg-slate-50">
+    <div className="animate-in slide-in-from-right relative overflow-x-hidden no-x-scroll bg-slate-50 pb-24 pt-[max(calc(env(safe-area-inset-top)+0.6rem),0.9rem)]">
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
-      
-      <button
-        onClick={onBack}
-        className="mb-4 sm:mb-6 flex items-center text-brand-primary font-semibold hover:opacity-80 text-sm sm:text-base"
-      >
-        <ArrowLeft size={20} weight="duotone" /> Voltar ao cardápio
-      </button>
+      <div className="sticky top-[max(env(safe-area-inset-top),0px)] z-40 mb-4 sm:mb-6">
+        <div className="rounded-[1.85rem] border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.97)_0%,rgba(244,248,252,0.96)_100%)] px-3 py-3 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={onBack}
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] border border-slate-200/80 bg-white text-[#336886] shadow-[0_14px_28px_-18px_rgba(51,104,134,0.3)] transition hover:-translate-y-0.5 hover:bg-sky-50 active:scale-95"
+              aria-label="Voltar ao cardápio"
+              title="Voltar ao cardápio"
+            >
+              <ArrowLeft size={18} weight="bold" />
+            </button>
+            <div className="min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Checkout Condomínio</p>
+              <p className="truncate text-sm font-black tracking-tight text-slate-950">
+                {condominiumCheckoutContext?.condominium?.name || 'Finalizando seu pedido'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Dados do cliente */}
       <div className="relative overflow-hidden bg-white rounded-3xl border border-slate-100 p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
