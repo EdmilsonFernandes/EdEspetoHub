@@ -55,6 +55,11 @@ export function ClientAuth() {
     return String(params.get('hub') || '') === '1';
   }, [location.search]);
 
+  const forceBiometric = useMemo(() => {
+    const params = new URLSearchParams(location.search || '');
+    return String(params.get('bio') || '') === '1';
+  }, [location.search]);
+
   useEffect(() => {
     document.title = 'Área do Cliente | Já no Caminho';
   }, []);
@@ -117,7 +122,7 @@ export function ClientAuth() {
   useEffect(() => {
     if (mode !== 'login') return;
     if (!biometricAvailable || biometricLoading || loading || autoBiometricTried) return;
-    const hasTypedCredentials = Boolean(String(form.email || '').trim()) || Boolean(String(form.password || '').trim());
+    const hasTypedCredentials = !forceBiometric && (Boolean(String(form.email || '').trim()) || Boolean(String(form.password || '').trim()));
     if (hasTypedCredentials) return;
 
     setAutoBiometricTried(true);
@@ -132,6 +137,7 @@ export function ClientAuth() {
     biometricLoading,
     form.email,
     form.password,
+    forceBiometric,
     loading,
     mode,
   ]);

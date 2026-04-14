@@ -46,6 +46,8 @@ export function AdminLogin() {
     setBiometricAvailable(nativeBiometricService.isSupported() && nativeBiometricService.hasStoredAdminProfile());
   }, []);
 
+  const forceBiometric = String(searchParams.get('bio') || '') === '1';
+
   const finishAdminLogin = (sessionData: any) => {
     const redirectTab = sessionStorage.getItem('admin:redirectTab');
     const redirectSlug = sessionStorage.getItem('admin:redirectSlug');
@@ -140,7 +142,7 @@ export function AdminLogin() {
   useEffect(() => {
     if (!biometricAvailable || biometricLoading || autoBiometricTried) return;
     const hasTypedCredentials =
-      Boolean(String(loginForm.identifier || '').trim()) || Boolean(String(loginForm.password || '').trim());
+      !forceBiometric && (Boolean(String(loginForm.identifier || '').trim()) || Boolean(String(loginForm.password || '').trim()));
     if (hasTypedCredentials) return;
 
     setAutoBiometricTried(true);
@@ -153,6 +155,7 @@ export function AdminLogin() {
     autoBiometricTried,
     biometricAvailable,
     biometricLoading,
+    forceBiometric,
     loginForm.identifier,
     loginForm.password,
   ]);

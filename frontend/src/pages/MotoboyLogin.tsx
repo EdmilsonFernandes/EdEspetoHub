@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowSquareOut, Check, Eye, EyeSlash, LockKey, Scooter, ShieldCheck, SignOut, UserCircle, WarningCircle, WhatsappLogo } from '@phosphor-icons/react';
 import { authService } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
@@ -33,6 +33,7 @@ export function MotoboyLogin() {
   });
   const { setAuth } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [persistedSession, setPersistedSession] = useState(() => {
     try {
       const raw = localStorage.getItem('motoboySession');
@@ -47,6 +48,7 @@ export function MotoboyLogin() {
   const sessionName = String(persistedSession?.user?.fullName || persistedSession?.user?.name || '').trim();
   const sessionEmail = String(persistedSession?.user?.email || '').trim();
   const alreadyLoggedIn = Boolean(persistedSession?.token && sessionEmail);
+  const forceBiometric = String(searchParams.get('bio') || '') === '1';
 
   useEffect(() => {
     setBiometricAvailable(nativeBiometricService.isSupported() && nativeBiometricService.hasStoredMotoboyProfile());
@@ -113,7 +115,7 @@ export function MotoboyLogin() {
 
   useEffect(() => {
     if (!biometricAvailable || biometricLoading || autoBiometricTried || alreadyLoggedIn) return;
-    const hasTypedCredentials = Boolean(String(form.email || '').trim()) || Boolean(String(form.password || '').trim());
+    const hasTypedCredentials = !forceBiometric && (Boolean(String(form.email || '').trim()) || Boolean(String(form.password || '').trim()));
     if (hasTypedCredentials) return;
 
     setAutoBiometricTried(true);
@@ -122,7 +124,7 @@ export function MotoboyLogin() {
     }, 180);
 
     return () => window.clearTimeout(timer);
-  }, [alreadyLoggedIn, autoBiometricTried, biometricAvailable, biometricLoading, form.email, form.password]);
+  }, [alreadyLoggedIn, autoBiometricTried, biometricAvailable, biometricLoading, forceBiometric, form.email, form.password]);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
