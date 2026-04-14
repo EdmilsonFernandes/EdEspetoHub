@@ -236,7 +236,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 onClick={() => navigate('/admin')}
                 className="hidden sm:inline-flex text-xs font-black text-slate-400 hover:text-white uppercase tracking-widest transition-colors"
               >
-                Login Admin
+                Login
               </button>
               <button
                 onClick={() => navigate('/create?plan=trial')}

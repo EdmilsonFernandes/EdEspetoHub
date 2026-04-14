@@ -6,6 +6,7 @@ import { planService } from '../services/planService';
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, resolveMonthlyEquivalent } from '../constants/planCatalog';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { usePollingPaymentStatus } from '../hooks/usePollingPaymentStatus';
+import { normalizePixCode } from '../utils/pixPayload';
 
 export function PaymentPage() {
   const { paymentId } = useParams();
@@ -53,13 +54,14 @@ export function PaymentPage() {
   );
 
   const handleCopyPix = async (value: string) => {
-    if (!value) return;
+    const normalizedValue = normalizePixCode(value);
+    if (!normalizedValue) return;
     try {
       if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(value);
+        await navigator.clipboard.writeText(normalizedValue);
       } else {
         const textarea = document.createElement('textarea');
-        textarea.value = value;
+        textarea.value = normalizedValue;
         textarea.setAttribute('readonly', '');
         textarea.style.position = 'absolute';
         textarea.style.left = '-9999px';
@@ -475,7 +477,7 @@ export function PaymentPage() {
                       {payment.qrCodeText && (
                         <div className="w-full rounded-xl border border-slate-200 bg-white p-3 text-left space-y-2">
                           <p className="text-xs text-gray-500">Código copia e cola</p>
-                          <p className="text-xs text-gray-700 break-all">{payment.qrCodeText}</p>
+                          <p className="text-xs text-gray-700 break-all">{normalizePixCode(payment.qrCodeText)}</p>
                           <button
                             onClick={() => handleCopyPix(payment.qrCodeText)}
                             className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:opacity-90"

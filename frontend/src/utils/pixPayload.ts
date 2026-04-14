@@ -12,6 +12,26 @@
  */
 const pad2 = (value: number) => value.toString().padStart(2, '0');
 
+const normalizePixKey = (value: string) => {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+
+  const compact = raw.replace(/\s+/g, '');
+  const digits = compact.replace(/\D/g, '');
+
+  if (compact.includes('@')) return compact.toLowerCase();
+  if (/^[0-9a-fA-F-]{32,36}$/.test(compact)) return compact.toLowerCase();
+  if (digits.length === 11 || digits.length === 14) return digits;
+  if (digits.length >= 10 && digits.length <= 13) return digits.startsWith('55') ? `+${digits}` : `+55${digits}`;
+
+  return compact;
+};
+
+export const normalizePixCode = (value: string) =>
+  String(value || '')
+    .replace(/\s+/g, '')
+    .trim();
+
 const toAscii = (value: string) => {
   if (!value) return '';
   if (value.normalize) {
@@ -61,13 +81,16 @@ export const buildPixPayload = ({
   amount?: number;
   txid?: string;
 }) => {
+  const normalizedKey = normalizePixKey(key);
   const safeName = sanitizeText(name || 'CHAMA NO ESPETO', 25);
   const safeCity = sanitizeText(city || 'BRASIL', 15);
   const safeTxId = sanitizeText(txid || 'PEDIDO', 25) || 'PEDIDO';
   const amountValue = formatAmount(amount);
 
+  if (!normalizedKey) return '';
+
   const merchantAccount =
-    formatField('00', 'br.gov.bcb.pix') + formatField('01', key);
+    formatField('00', 'br.gov.bcb.pix') + formatField('01', normalizedKey);
 
   const payloadParts = [
     formatField('00', '01'),
@@ -84,5 +107,5 @@ export const buildPixPayload = ({
   const payload = payloadParts.join('');
   const checksum = crc16(`${payload}6304`);
 
-  return `${payload}6304${checksum}`;
+  return normalizePixCode(`${payload}6304${checksum}`);
 };

@@ -239,7 +239,7 @@ export function AdminLogin() {
           <p className="text-[12px] font-bold uppercase tracking-[0.25em] text-slate-400">Acesso da plataforma</p>
           <div className="flex items-center justify-center gap-3">
             <LockKey size={32} weight="duotone" className="text-[#0d4f66]" />
-            <h2 className="text-[2rem] sm:text-[2.2rem] font-black text-slate-800 tracking-[-0.03em]">Login Admin</h2>
+            <h2 className="text-[2rem] sm:text-[2.2rem] font-black text-slate-800 tracking-[-0.03em]">Login</h2>
           </div>
           {superAdminUnlocked ? (
             <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 rounded-full border border-emerald-100">
@@ -250,7 +250,8 @@ export function AdminLogin() {
         </div>
 
         <div className="auth-segment">
-          <button type="button" className="auth-segment-btn active">Operacional</button>
+          <button type="button" className="auth-segment-btn active">Lojista</button>
+          <button type="button" onClick={() => navigate('/cliente?mode=login')} className="auth-segment-btn">Cliente</button>
           <button type="button" onClick={() => navigate('/motoboy/login')} className="auth-segment-btn">Entregador</button>
           {superAdminUnlocked ? (
             <button type="button" onClick={() => navigate('/superadmin')} className="auth-segment-btn">Master</button>

@@ -6,6 +6,7 @@ import { planService } from '../services/planService';
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, resolveMonthlyEquivalent } from '../constants/planCatalog';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { formatPhoneInput } from '../utils/format';
+import { normalizePixCode } from '../utils/pixPayload';
 import { FormSection } from '../components/common/FormSection';
 import { Buildings, CheckCircle, CopySimple, CreditCard, GlobeHemisphereWest, MapPinLine, RocketLaunch, Storefront, UserCircle } from '@phosphor-icons/react';
 
@@ -287,13 +288,14 @@ export function CreateStore() {
   };
 
   const handleCopyPix = async (value: string) => {
-    if (!value) return;
+    const normalizedValue = normalizePixCode(value);
+    if (!normalizedValue) return;
     try {
       if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(value);
+        await navigator.clipboard.writeText(normalizedValue);
       } else {
         const textarea = document.createElement('textarea');
-        textarea.value = value;
+        textarea.value = normalizedValue;
         textarea.setAttribute('readonly', '');
         textarea.style.position = 'absolute';
         textarea.style.left = '-9999px';
@@ -1889,7 +1891,7 @@ export function CreateStore() {
                       <div className="rounded-xl border border-emerald-200 bg-white p-3 space-y-2">
                         <p className="text-xs text-gray-500">Código copia e cola</p>
                         <p className="text-xs text-gray-700 break-all">
-                          {paymentResult.payment.qrCodeText}
+                          {normalizePixCode(paymentResult.payment.qrCodeText)}
                         </p>
                         <button
                           type="button"

@@ -6,6 +6,7 @@ import { useToast } from '../contexts/ToastContext';
 import { productService } from '../services/productService';
 import { featuredService } from '../services/featuredService';
 import { formatCurrency, formatDateTime } from '../utils/format';
+import { normalizePixCode } from '../utils/pixPayload';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 type DurationUnit = 'DAY' | 'WEEK' | 'MONTH';
@@ -541,10 +542,10 @@ export function AdminHighlights() {
             {selectedRequest?.paymentQrCodeText && (
               <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">PIX copia e cola</p>
-                <p className="mt-1 break-all text-xs text-slate-700">{selectedRequest.paymentQrCodeText}</p>
+                <p className="mt-1 break-all text-xs text-slate-700">{normalizePixCode(String(selectedRequest.paymentQrCodeText || ''))}</p>
                 <button
                   type="button"
-                  onClick={() => copyText(String(selectedRequest.paymentQrCodeText || ''), 'Código PIX copiado.')}
+                  onClick={() => copyText(normalizePixCode(String(selectedRequest.paymentQrCodeText || '')), 'Código PIX copiado.')}
                   className="mt-2 inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700"
                 >
                   Copiar código PIX
