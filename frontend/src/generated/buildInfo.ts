@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260414.203141.3f7ecbb0",
-  "buildId": "0.1.9+20260414.203141.3f7ecbb0-20260414.203141-3f7ecbb0",
-  "builtAt": "2026-04-14T20:31:41.647Z",
-  "commitHash": "3f7ecbb025c1ec8e4e8b67cca9faf484dcd2aeaa",
-  "shortHash": "3f7ecbb0",
+  "versionInternal": "0.1.9+20260414.203641.05f794f1",
+  "buildId": "0.1.9+20260414.203641.05f794f1-20260414.203641-05f794f1",
+  "builtAt": "2026-04-14T20:36:41.711Z",
+  "commitHash": "05f794f1c6c003bbeefb097042fba91b398f3189",
+  "shortHash": "05f794f1",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "05f794f1c6c003bbeefb097042fba91b398f3189",
+      "shortHash": "05f794f1",
+      "dateIso": "2026-04-14T17:32:45-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(hub): add smart access switching across saved roles",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/05f794f1c6c003bbeefb097042fba91b398f3189"
+    },
     {
       "hash": "3f7ecbb025c1ec8e4e8b67cca9faf484dcd2aeaa",
       "shortHash": "3f7ecbb0",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(hub): stabilize header search and hide store cta",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/844552a1bc600461b174d540afcf93666cda81f8"
-    },
-    {
-      "hash": "91bbc40d660603f6ba17bbff356310491f621201",
-      "shortHash": "91bbc40d",
-      "dateIso": "2026-04-13T21:28:08-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(app): unify mobile nav and preserve condo checkout context",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/91bbc40d660603f6ba17bbff356310491f621201"
     }
   ]
 } as const;

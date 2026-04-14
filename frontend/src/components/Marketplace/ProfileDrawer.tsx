@@ -51,6 +51,7 @@ type AccessProfile = {
   title: string;
   description: string;
   subtitle: string;
+  summary: string;
   tone: string;
   icon: ReactNode;
   action: () => void;
@@ -182,6 +183,7 @@ export function ProfileDrawer({
         : savedAccessProfiles.customer.hasSession
           ? savedAccessProfiles.customer.email || savedAccessProfiles.customer.name
           : 'Entrar na área do cliente',
+      summary: savedAccessProfiles.customer.name || 'Conta pessoal',
       icon: <UserCircle size={24} weight="duotone" />,
       tone: 'bg-[#336886]/10 text-[#336886]',
       action: onLogin,
@@ -197,6 +199,7 @@ export function ProfileDrawer({
         : savedAccessProfiles.admin.hasSession
           ? savedAccessProfiles.admin.email || savedAccessProfiles.admin.name
           : 'Entrar na operação da loja',
+      summary: savedAccessProfiles.admin.name || 'Operação da loja',
       icon: <Storefront size={24} weight="duotone" />,
       tone: 'bg-emerald-50 text-emerald-700',
       action: onOpenAdminLogin,
@@ -211,6 +214,7 @@ export function ProfileDrawer({
         : savedAccessProfiles.motoboy.hasSession
           ? savedAccessProfiles.motoboy.email || savedAccessProfiles.motoboy.name
           : 'Entrar no painel de entregas',
+      summary: savedAccessProfiles.motoboy.name || 'Área do entregador',
       icon: <Motorcycle size={24} weight="duotone" />,
       tone: 'bg-amber-50 text-amber-700',
       action: onOpenMotoboyLogin,
@@ -264,11 +268,13 @@ export function ProfileDrawer({
               <button
                 type="button"
                 onClick={() => setAccessPickerOpen(true)}
-                className="flex w-full items-center justify-between rounded-[1.35rem] border border-[#336886]/12 bg-white/88 px-4 py-3 text-left text-slate-700 shadow-[0_16px_30px_-24px_rgba(51,104,134,0.28)] transition-all active:scale-[0.98]"
+                className="relative flex w-full items-center justify-between overflow-hidden rounded-[1.5rem] border border-[#336886]/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(239,246,255,0.92))] px-4 py-3.5 text-left text-slate-700 shadow-[0_18px_34px_-24px_rgba(51,104,134,0.28)] transition-all active:scale-[0.98]"
               >
+                <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-[radial-gradient(circle_at_center,rgba(51,104,134,0.12),transparent_70%)]" />
                 <div>
                   <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Trocar acesso</p>
-                  <p className="mt-1 text-sm font-bold text-slate-900">Usar outra conta salva</p>
+                  <p className="mt-1 text-sm font-black text-slate-900">Escolher outro perfil salvo</p>
+                  <p className="mt-1 text-[11px] font-semibold text-slate-500">Cliente, lojista ou entregador sem bagunçar as sessões</p>
                 </div>
                 <CaretRight size={16} weight="bold" className="text-slate-400" />
               </button>
@@ -354,7 +360,7 @@ export function ProfileDrawer({
           </nav>
 
           {!isLogged && (
-            <section className="rounded-[1.65rem] border border-slate-100 bg-white/72 p-4 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.35)]">
+            <section className="rounded-[1.65rem] border border-slate-100 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,250,252,0.86))] p-4 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.35)]">
               <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Acesso unificado</p>
               <p className="mt-1 text-[12px] font-semibold leading-relaxed text-slate-600">
                 Toque em Entrar para escolher se você é cliente, lojista ou entregador.
@@ -377,27 +383,61 @@ export function ProfileDrawer({
       {accessPickerOpen && (
         <div className="absolute inset-0 z-[10] flex items-center justify-center bg-slate-950/42 px-4 py-[max(1rem,env(safe-area-inset-top))] backdrop-blur-md animate-in fade-in duration-200" onClick={() => setAccessPickerOpen(false)}>
           <div
-            className="relative w-full max-w-[430px] overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.98)_100%)] p-5 shadow-[0_28px_70px_-32px_rgba(15,23,42,0.72)] animate-in zoom-in-95 slide-in-from-bottom-3 duration-200"
+            className="relative w-full max-w-[446px] overflow-hidden rounded-[2.15rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.985)_0%,rgba(248,250,252,0.98)_54%,rgba(244,247,251,0.98)_100%)] p-5 shadow-[0_28px_70px_-32px_rgba(15,23,42,0.72)] animate-in zoom-in-95 slide-in-from-bottom-3 duration-200"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
-              <div className="absolute -left-10 top-8 h-28 w-28 rounded-full bg-[#336886]/10 blur-3xl" />
+              <div className="absolute -left-10 top-8 h-28 w-28 rounded-full bg-[#336886]/12 blur-3xl" />
+              <div className="absolute left-16 top-0 h-20 w-40 rounded-full bg-sky-100/50 blur-3xl" />
               <div className="absolute -right-8 bottom-10 h-24 w-24 rounded-full bg-emerald-200/35 blur-3xl" />
             </div>
             <div className="mb-4 flex items-start justify-between gap-3">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">Escolha seu acesso</p>
-                <h3 className="mt-1 text-xl font-black text-slate-950">Como você quer entrar?</h3>
-                <p className="mt-1 text-sm font-medium text-slate-500">Cada perfil abre a área certa do app.</p>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">Escolha seu acesso</p>
+                  <h3 className="mt-1 text-[1.35rem] font-black tracking-[-0.03em] text-slate-950">Entrar do jeito certo</h3>
+                  <p className="mt-1 text-sm font-medium leading-relaxed text-slate-500">Cada perfil abre a área correta, mantendo as contas separadas e prontas para voltar quando precisar.</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#336886]/8 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#336886]" />
+                    Hub seguro
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    Sessões separadas
+                  </span>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => setAccessPickerOpen(false)}
-                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/80 bg-white text-slate-600 shadow-[0_12px_26px_-18px_rgba(15,23,42,0.38)] transition-all active:scale-95"
+                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/80 bg-white/92 text-slate-600 shadow-[0_12px_26px_-18px_rgba(15,23,42,0.38)] transition-all active:scale-95"
                 aria-label="Fechar escolha de acesso"
               >
                 <X size={18} weight="bold" />
               </button>
+            </div>
+
+            <div className="mb-4 grid grid-cols-3 gap-2.5">
+              {accessProfiles.map((item) => (
+                <div
+                  key={`${item.id}-summary`}
+                  className={`rounded-[1.25rem] border px-3 py-3 text-left shadow-[0_14px_28px_-24px_rgba(15,23,42,0.28)] ${
+                    item.current
+                      ? 'border-slate-900/10 bg-slate-900 text-white'
+                      : item.ready
+                        ? 'border-white/90 bg-white/88 text-slate-900'
+                        : 'border-slate-200/70 bg-slate-50/88 text-slate-500'
+                  }`}
+                >
+                  <p className={`text-[10px] font-black uppercase tracking-[0.14em] ${item.current ? 'text-white/70' : 'text-slate-400'}`}>{item.title}</p>
+                  <p className={`mt-1 line-clamp-1 text-[12px] font-black ${item.current ? 'text-white' : 'text-slate-900'}`}>{item.summary}</p>
+                  <p className={`mt-1 text-[10px] font-bold ${item.current ? 'text-white/70' : item.ready ? 'text-emerald-700' : 'text-slate-400'}`}>
+                    {item.current ? 'Em uso agora' : item.ready ? 'Pronto para entrar' : 'Sem sessão salva'}
+                  </p>
+                </div>
+              ))}
             </div>
 
             <div className="grid gap-3 relative">
@@ -410,16 +450,27 @@ export function ProfileDrawer({
                     item.action();
                     onClose();
                   }}
-                  className="group flex w-full items-center gap-4 rounded-[1.55rem] border border-white/90 bg-white/95 p-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.08)] ring-1 ring-slate-100/70 transition-all duration-150 ease-out active:scale-[0.97] sm:hover:-translate-y-0.5 sm:hover:shadow-[0_18px_32px_rgba(15,23,42,0.11)]"
+                  className={`group relative flex w-full items-center gap-4 overflow-hidden rounded-[1.65rem] border p-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.08)] ring-1 transition-all duration-150 ease-out active:scale-[0.97] sm:hover:-translate-y-0.5 sm:hover:shadow-[0_18px_32px_rgba(15,23,42,0.11)] ${
+                    item.current
+                      ? 'border-slate-900/10 bg-[linear-gradient(135deg,rgba(15,23,42,0.98),rgba(30,41,59,0.96))] ring-slate-900/5'
+                      : item.ready
+                        ? 'border-white/90 bg-white/95 ring-slate-100/70'
+                        : 'border-slate-200/80 bg-slate-50/92 ring-slate-200/70'
+                  }`}
                 >
-                  <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${item.tone} shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]`}>
+                  <div className={`pointer-events-none absolute inset-y-0 right-0 w-24 ${
+                    item.current
+                      ? 'bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),transparent_70%)]'
+                      : 'bg-[radial-gradient(circle_at_center,rgba(51,104,134,0.08),transparent_70%)]'
+                  }`} />
+                  <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${item.current ? 'bg-white/10 text-white' : item.tone} shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]`}>
                     {item.icon}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="text-[15px] font-black text-slate-900">{item.title}</p>
+                      <p className={`text-[15px] font-black ${item.current ? 'text-white' : 'text-slate-900'}`}>{item.title}</p>
                       {item.current ? (
-                        <span className="inline-flex rounded-full bg-slate-900 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-white">
+                        <span className="inline-flex rounded-full bg-white/12 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-white">
                           Atual
                         </span>
                       ) : null}
@@ -429,10 +480,10 @@ export function ProfileDrawer({
                         </span>
                       ) : null}
                     </div>
-                    <p className="mt-0.5 text-xs font-medium leading-snug text-slate-500">{item.description}</p>
-                    <p className="mt-1 text-[11px] font-bold text-slate-400">{item.subtitle}</p>
+                    <p className={`mt-0.5 text-xs font-medium leading-snug ${item.current ? 'text-white/72' : 'text-slate-500'}`}>{item.description}</p>
+                    <p className={`mt-1 text-[11px] font-bold ${item.current ? 'text-white/65' : 'text-slate-400'}`}>{item.subtitle}</p>
                   </div>
-                  <CaretRight size={17} weight="bold" className="text-slate-300 transition-transform group-hover:translate-x-0.5 group-active:translate-x-0.5" />
+                  <CaretRight size={17} weight="bold" className={`${item.current ? 'text-white/45' : 'text-slate-300'} transition-transform group-hover:translate-x-0.5 group-active:translate-x-0.5`} />
                 </button>
               ))}
             </div>
