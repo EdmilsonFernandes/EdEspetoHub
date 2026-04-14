@@ -397,8 +397,8 @@ export const nativeBiometricService = {
   async loginCustomerWithBiometrics(reason = 'Confirme sua identidade para entrar') {
     const bridge = await waitForBridge();
     const session = await authenticateWithBridge(
-      bridge?.authenticateCustomer,
-      bridge?.getCustomerSession,
+      bridge?.authenticateCustomer ? ((requestId: string, promptReason: string) => bridge.authenticateCustomer?.(requestId, promptReason)) : undefined,
+      bridge?.getCustomerSession ? (() => bridge.getCustomerSession?.() || '') : undefined,
       reason,
     );
     syncCustomerSession(session);
@@ -408,8 +408,8 @@ export const nativeBiometricService = {
   async loginAdminWithBiometrics(reason = 'Confirme sua identidade para acessar sua operação') {
     const bridge = await waitForBridge();
     const session = await authenticateWithBridge(
-      bridge?.authenticateAdmin,
-      bridge?.getAdminSession,
+      bridge?.authenticateAdmin ? ((requestId: string, promptReason: string) => bridge.authenticateAdmin?.(requestId, promptReason)) : undefined,
+      bridge?.getAdminSession ? (() => bridge.getAdminSession?.() || '') : undefined,
       reason,
     );
     syncAdminSession(session);
@@ -419,8 +419,8 @@ export const nativeBiometricService = {
   async loginMotoboyWithBiometrics(reason = 'Confirme sua identidade para acessar suas entregas') {
     const bridge = await waitForBridge();
     const session = await authenticateWithBridge(
-      bridge?.authenticateMotoboy,
-      bridge?.getMotoboySession,
+      bridge?.authenticateMotoboy ? ((requestId: string, promptReason: string) => bridge.authenticateMotoboy?.(requestId, promptReason)) : undefined,
+      bridge?.getMotoboySession ? (() => bridge.getMotoboySession?.() || '') : undefined,
       reason,
     );
     syncMotoboySession(session);
