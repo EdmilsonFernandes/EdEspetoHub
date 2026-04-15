@@ -48,6 +48,8 @@ export class OrderService
   private storeUserRepository = new StoreUserRepository();
   private pushService = new PushNotificationService();
   private tz = process.env.APP_TZ || 'America/Sao_Paulo';
+  private queueReconcileCooldownByStore = new Map<string, number>();
+  private readonly queueReconcileCooldownMs = 20000;
 
   /**
    * Ensures store queue payload keeps cancellation metadata explicit for admin screens.
@@ -193,6 +195,22 @@ private async reconcileDeliveredOrdersByStore(storeId: string) {
       `,
       [storeId]
     );
+  }
+
+  private async reconcileDeliveredOrdersByStoreForQueue(storeId: string) {
+    if (!storeId) return;
+    const now = Date.now();
+    const lastRun = Number(this.queueReconcileCooldownByStore.get(storeId) || 0);
+    if (lastRun && now - lastRun < this.queueReconcileCooldownMs) {
+      return;
+    }
+    this.queueReconcileCooldownByStore.set(storeId, now);
+    try {
+      await this.reconcileDeliveredOrdersByStore(storeId);
+    } catch (error) {
+      this.queueReconcileCooldownByStore.delete(storeId);
+      throw error;
+    }
   }
 
     /**
@@ -778,6 +796,28 @@ private async seedPostalShipmentFromCheckoutTx(
     const store = await this.storeRepository.findBySlug(slug);
     this.ensureStoreAccess(store, authStoreId);
     await this.reconcileDeliveredOrdersByStore(store!.id);
+    const orders = await this.orderRepository.findByStoreId(store!.id);
+    const withDelivery = await this.attachDeliverySnapshot(orders as any[]);
+    const withShipment = await this.attachShipmentSnapshot(withDelivery as any[]);
+    return this.attachCancellationSnapshot(withShipment as any[]);
+  }
+
+  async listQueueByStoreId(storeId: string, authStoreId?: string)
+  {
+    const store = await this.storeRepository.findById(storeId);
+    this.ensureStoreAccess(store, authStoreId);
+    await this.reconcileDeliveredOrdersByStoreForQueue(store!.id);
+    const orders = await this.orderRepository.findByStoreId(store!.id);
+    const withDelivery = await this.attachDeliverySnapshot(orders as any[]);
+    const withShipment = await this.attachShipmentSnapshot(withDelivery as any[]);
+    return this.attachCancellationSnapshot(withShipment as any[]);
+  }
+
+  async listQueueByStoreSlug(slug: string, authStoreId?: string)
+  {
+    const store = await this.storeRepository.findBySlug(slug);
+    this.ensureStoreAccess(store, authStoreId);
+    await this.reconcileDeliveredOrdersByStoreForQueue(store!.id);
     const orders = await this.orderRepository.findByStoreId(store!.id);
     const withDelivery = await this.attachDeliverySnapshot(orders as any[]);
     const withShipment = await this.attachShipmentSnapshot(withDelivery as any[]);

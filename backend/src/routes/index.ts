@@ -179,6 +179,8 @@ routes.post('/stores/:storeId/orders', hydrateAuthOptional, requireActiveSubscri
 routes.post('/stores/slug/:slug/orders', hydrateAuthOptional, requireActiveSubscription, OrderController.createBySlug);
 
 // Orders - staff vê fila/histórico (churrasqueiro + admin)
+routes.get('/stores/:storeId/orders/queue', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.listQueue);
+routes.get('/stores/slug/:slug/orders/queue', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.listQueueBySlug);
 routes.get('/stores/:storeId/orders', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.list);
 routes.get('/stores/slug/:slug/orders', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.listBySlug);
 routes.patch('/orders/:orderId/status', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.updateStatus);

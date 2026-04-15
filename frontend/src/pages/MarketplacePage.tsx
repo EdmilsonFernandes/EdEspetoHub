@@ -373,7 +373,7 @@ export function MarketplacePage() {
   const [pullDistance, setPullDistance] = useState(0);
   const [isHeaderElevated, setIsHeaderElevated] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
-  const [isSearchSheetOpen, setIsSearchSheetOpen] = useState(false);
+  const [isSearchEditing, setIsSearchEditing] = useState(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const condominiumSearchInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -732,10 +732,10 @@ export function MarketplacePage() {
   }, [query]);
 
   useEffect(() => {
-    if (!isSearchSheetOpen) return;
+    if (!isSearchEditing) return;
     const raf = window.requestAnimationFrame(() => searchInputRef.current?.focus());
     return () => window.cancelAnimationFrame(raf);
-  }, [isSearchSheetOpen]);
+  }, [isSearchEditing]);
 
   useEffect(() => {
     if (featuredProducts.length <= 8) {
@@ -757,7 +757,7 @@ export function MarketplacePage() {
     const restoreHubHeader = () => {
       setHasEntered(true);
       setIsHeaderElevated((window.scrollY || 0) > 6);
-      setIsSearchSheetOpen(false);
+      setIsSearchEditing(false);
       if (searchInputRef.current) {
         searchInputRef.current.blur();
       }
@@ -1704,75 +1704,6 @@ export function MarketplacePage() {
         versionLabel={APP_BUILD_INFO.versionLabel}
       />
 
-      {isSearchSheetOpen ? (
-        <div className="fixed inset-0 z-[210] bg-slate-950/26 backdrop-blur-[2px] lg:hidden">
-          <div className="mx-auto max-w-[1200px] px-4 pt-[max(0.75rem,calc(env(safe-area-inset-top)+0.15rem))]">
-            <div className="rounded-[1.8rem] border border-white/90 bg-white/96 p-3 shadow-[0_24px_60px_-34px_rgba(15,23,42,0.42)] ring-1 ring-slate-200/70 backdrop-blur-2xl">
-              <div className="flex items-center gap-2.5 rounded-[1.35rem] border border-slate-200/90 bg-slate-50/90 px-3.5 py-2.5 focus-within:border-[#336886]/22 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#336886]/8">
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#336886]/10 text-[#336886]">
-                  <MagnifyingGlass size={18} weight="bold" />
-                </span>
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Buscar loja, categoria ou produto"
-                  autoComplete="off"
-                  inputMode="search"
-                  enterKeyHint="search"
-                  className="block min-h-[44px] w-full min-w-0 appearance-none bg-transparent text-[15px] font-semibold text-slate-950 outline-none placeholder:text-slate-400"
-                  style={{
-                    WebkitAppearance: 'none',
-                    WebkitTextFillColor: '#020617',
-                    caretColor: '#336886',
-                    backgroundColor: 'transparent',
-                    boxShadow: 'none',
-                  }}
-                />
-                {query.trim() ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setQuery('');
-                      setDebouncedQuery('');
-                    }}
-                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200/80 text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-700 active:scale-95"
-                    aria-label="Limpar busca"
-                    title="Limpar busca"
-                  >
-                    <X size={14} weight="bold" />
-                  </button>
-                ) : null}
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!query.trim()) {
-                      setIsSearchSheetOpen(false);
-                    } else {
-                      searchInputRef.current?.blur();
-                      setIsSearchSheetOpen(false);
-                    }
-                  }}
-                  className="inline-flex h-9 shrink-0 items-center rounded-full px-3 text-[12px] font-bold text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 active:scale-95"
-                >
-                  Fechar
-                </button>
-              </div>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              searchInputRef.current?.blur();
-              setIsSearchSheetOpen(false);
-            }}
-            className="absolute inset-0 -z-10"
-            aria-label="Fechar busca"
-          />
-        </div>
-      ) : null}
-
       <div
         className={`relative transition-all duration-700 ${
           hasEntered ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
@@ -1824,28 +1755,68 @@ export function MarketplacePage() {
 
             {/* Linha 2: Busca Premium */}
             <div className="relative z-20 px-0.5">
-              <button
-                type="button"
-                onClick={() => setIsSearchSheetOpen(true)}
-                className="group relative flex min-h-[52px] w-full items-center gap-3 rounded-[22px] border border-slate-200/90 bg-white/96 px-4 text-left shadow-[0_12px_26px_-20px_rgba(15,23,42,0.18)] transition-[border-color,box-shadow,background-color,transform] duration-200 ease-out hover:border-slate-300 hover:bg-white active:scale-[0.995]"
-                aria-label="Buscar loja, categoria ou produto"
-                title="Buscar loja, categoria ou produto"
+              <div
+                className="group relative flex min-h-[52px] items-center gap-3 rounded-[22px] border border-slate-200/90 bg-white/96 px-4 shadow-[0_12px_26px_-20px_rgba(15,23,42,0.18)] transition-[border-color,box-shadow,background-color] duration-200 ease-out hover:border-slate-300 hover:bg-white focus-within:border-[#336886]/22 focus-within:shadow-[0_16px_34px_-22px_rgba(51,104,134,0.18)] focus-within:ring-2 focus-within:ring-[#336886]/8"
+                onClick={() => {
+                  if (!isSearchEditing && !query.trim()) {
+                    setIsSearchEditing(true);
+                    window.requestAnimationFrame(() => searchInputRef.current?.focus());
+                    return;
+                  }
+                  searchInputRef.current?.focus();
+                }}
               >
                 <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#336886]/10 bg-[#336886]/8 text-[#336886] shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
                   <MagnifyingGlass size={18} weight="bold" />
                 </div>
-                <div className="min-w-0 flex-1 pr-1">
-                  <span className={`block truncate text-[14px] font-semibold ${query.trim() ? 'text-slate-950' : 'text-slate-400'}`}>
-                    {query.trim() || 'Buscar loja, categoria ou produto'}
-                  </span>
+                <div className="relative min-w-0 flex-1">
+                  {isSearchEditing || query.trim() ? (
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      value={query}
+                      onChange={(event) => setQuery(event.target.value)}
+                      onFocus={() => setIsSearchEditing(true)}
+                      onBlur={() => {
+                        if (!query.trim()) {
+                          setIsSearchEditing(false);
+                        }
+                      }}
+                      placeholder=""
+                      autoComplete="off"
+                      inputMode="search"
+                      enterKeyHint="search"
+                      className="block min-h-[52px] w-full min-w-0 appearance-none bg-transparent pr-1 text-[14px] font-semibold text-slate-950 outline-none"
+                      style={{
+                        WebkitAppearance: 'none',
+                        WebkitTextFillColor: '#020617',
+                        caretColor: '#336886',
+                        backgroundColor: 'transparent',
+                        boxShadow: 'none',
+                      }}
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsSearchEditing(true);
+                        window.requestAnimationFrame(() => searchInputRef.current?.focus());
+                      }}
+                      className="flex min-h-[52px] w-full items-center pr-3 text-left text-[14px] font-semibold text-slate-400"
+                      aria-label="Buscar loja, categoria ou produto"
+                      title="Buscar loja, categoria ou produto"
+                    >
+                      Buscar loja, categoria ou produto
+                    </button>
+                  )}
                 </div>
                 {query ? (
                   <button
                     type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
+                    onClick={() => {
                       setQuery('');
                       setDebouncedQuery('');
+                      setIsSearchEditing(false);
                     }}
                     className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-700 active:scale-95"
                     aria-label="Limpar busca"
@@ -1853,12 +1824,8 @@ export function MarketplacePage() {
                   >
                     <X size={14} weight="bold" />
                   </button>
-                ) : (
-                  <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100/70 text-slate-400 transition-colors group-hover:bg-slate-200/80">
-                    <CaretDown size={14} weight="bold" className="-rotate-90" />
-                  </span>
-                )}
-              </button>
+                ) : null}
+              </div>
             </div>
 
             {/* Linha 3: Filtros Minimalistas (Pílulas) */}

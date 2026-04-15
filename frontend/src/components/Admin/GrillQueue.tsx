@@ -612,6 +612,8 @@ const OrderSummaryCard = ({
 
 export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inroute' | 'completed' }) => {
   const SAO_PAULO_TZ = 'America/Sao_Paulo';
+  const QUEUE_POLL_VISIBLE_MS = 1500;
+  const QUEUE_POLL_HIDDEN_MS = 10000;
   const getDayKeyInSaoPaulo = (value?: number | string | Date | null) => {
     if (!value) return '';
     try {
@@ -1409,7 +1411,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         return;
       }
       queueAppliedSeqRef.current = requestSeq;
-      queueRetryDelayRef.current = 3000;
+      queueRetryDelayRef.current = QUEUE_POLL_VISIBLE_MS;
       const nextIds = (data || []).map((order) => order.id);
       const previousIds = previousIdsRef.current;
       const incoming = nextIds.filter((id) => !previousIds.includes(id));
@@ -1433,21 +1435,22 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         setLoading(false);
       }
     }
-  }, [storeIdentifier]);
+  }, [QUEUE_POLL_VISIBLE_MS, storeIdentifier]);
 
-  const scheduleQueuePoll = useCallback((immediate = false) => {
+  const scheduleQueuePoll = useCallback((immediate = false, elapsedMs = 0) => {
     clearQueuePollTimer();
-    const delay = immediate
-      ? 0
-      : (typeof document !== 'undefined' && document.visibilityState === 'visible'
-          ? queueRetryDelayRef.current
-          : Math.max(queueRetryDelayRef.current, 10000));
+    const baseDelay =
+      typeof document !== 'undefined' && document.visibilityState === 'visible'
+        ? queueRetryDelayRef.current
+        : Math.max(queueRetryDelayRef.current, QUEUE_POLL_HIDDEN_MS);
+    const delay = immediate ? 0 : Math.max(250, baseDelay - elapsedMs);
 
     queuePollTimerRef.current = window.setTimeout(async () => {
+      const startedAt = Date.now();
       await loadQueue({ silent: true });
-      scheduleQueuePoll(false);
+      scheduleQueuePoll(false, Date.now() - startedAt);
     }, delay);
-  }, [clearQueuePollTimer, loadQueue]);
+  }, [QUEUE_POLL_HIDDEN_MS, clearQueuePollTimer, loadQueue]);
 
   const handleManualRefresh = useCallback(async () => {
     if (queueRequestInFlightRef.current) return;

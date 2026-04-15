@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260415.011903.0e8989da",
-  "buildId": "0.1.9+20260415.011903.0e8989da-20260415.011903-0e8989da",
-  "builtAt": "2026-04-15T01:19:03.158Z",
-  "commitHash": "0e8989da731ff561b0708d957a482991576ba7d8",
-  "shortHash": "0e8989da",
+  "versionInternal": "0.1.9+20260415.013226.79e67f2b",
+  "buildId": "0.1.9+20260415.013226.79e67f2b-20260415.013226-79e67f2b",
+  "builtAt": "2026-04-15T01:32:26.313Z",
+  "commitHash": "79e67f2bfb87e3b89bc16e77b0ef0f01e64dd9d2",
+  "shortHash": "79e67f2b",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "79e67f2bfb87e3b89bc16e77b0ef0f01e64dd9d2",
+      "shortHash": "79e67f2b",
+      "dateIso": "2026-04-14T22:20:28-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(hub): stabilize access flows and queue refresh",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/79e67f2bfb87e3b89bc16e77b0ef0f01e64dd9d2"
+    },
     {
       "hash": "0e8989da731ff561b0708d957a482991576ba7d8",
       "shortHash": "0e8989da",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(auth): extend biometric login to admin and motoboy",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8f73a1e7d4ee910211521a3badc95dfe353e72d8"
-    },
-    {
-      "hash": "060cccaf5fe102a251eb4e3b01b28ee9a9f2f42a",
-      "shortHash": "060cccaf",
-      "dateIso": "2026-04-14T11:31:54-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(hub): stabilize search bar and soften condo banner",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/060cccaf5fe102a251eb4e3b01b28ee9a9f2f42a"
     }
   ]
 } as const;

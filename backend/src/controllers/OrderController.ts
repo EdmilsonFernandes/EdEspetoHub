@@ -84,6 +84,17 @@ export class OrderController {
     }
   }
 
+  static async listQueue(req: Request, res: Response) {
+    try {
+      log.debug('Order queue request', { storeId: req.params.storeId });
+      const orders = await orderService.listQueueByStoreId(req.params.storeId, req.auth?.storeId);
+      return res.json(orders);
+    } catch (error: any) {
+      log.warn('Order queue failed', { storeId: req.params.storeId, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
 
 
 
@@ -134,6 +145,17 @@ export class OrderController {
       return res.json(orders);
     } catch (error: any) {
       log.warn('Order list by slug failed', { slug: req.params.slug, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async listQueueBySlug(req: Request, res: Response) {
+    try {
+      log.debug('Order queue by slug request', { slug: req.params.slug });
+      const orders = await orderService.listQueueByStoreSlug(req.params.slug, req.auth?.storeId);
+      return res.json(orders);
+    } catch (error: any) {
+      log.warn('Order queue by slug failed', { slug: req.params.slug, error });
       return respondWithError(req, res, error, 400);
     }
   }

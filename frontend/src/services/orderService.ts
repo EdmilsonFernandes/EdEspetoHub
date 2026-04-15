@@ -9,6 +9,11 @@ const buildOrdersPath = (identifier: string) =>
     ? `/stores/${identifier}/orders`
     : `/stores/slug/${identifier}/orders`;
 
+const buildQueuePath = (identifier: string) =>
+  isUuid(identifier)
+    ? `/stores/${identifier}/orders/queue`
+    : `/stores/slug/${identifier}/orders/queue`;
+
 const normalizeOrder = (order: any) => ({
   ...order,
   id: order.id ?? order.order_id ?? order.orderId,
@@ -198,7 +203,7 @@ export const orderService = {
     }
 
     try {
-      const data = await apiClient.get(buildOrdersPath(targetStore));
+      const data = await apiClient.get(buildQueuePath(targetStore));
       return data.map(normalizeOrder);
     } catch (error) {
       handleSessionError(error);
