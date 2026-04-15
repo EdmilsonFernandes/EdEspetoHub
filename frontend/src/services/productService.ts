@@ -13,6 +13,7 @@ const buildProductsPath = (identifier: string) =>
 const PRODUCT_CACHE_TTL_MS = 90 * 1000;
 const PRODUCT_CACHE_KEY_PREFIX = 'products:catalog:';
 const inMemoryProductCache = new Map<string, { ts: number; items: any[] }>();
+const publicSlugProductCache = new Map<string, { ts: number; items: any[] }>();
 
 const normalizeProduct = (product: any) => {
   const description = product.description ?? product.desc ?? "";
@@ -112,6 +113,53 @@ const invalidateProductCache = (storeIdentifier?: string | null) => {
   }
 };
 
+const getPublicProductCacheKey = (slug: string) => `${PRODUCT_CACHE_KEY_PREFIX}public:${String(slug || '').trim().toLowerCase()}`;
+
+const readPublicProductCache = (slug: string) => {
+  const normalizedSlug = String(slug || '').trim().toLowerCase();
+  if (!normalizedSlug) return null;
+  const now = Date.now();
+  const memory = publicSlugProductCache.get(normalizedSlug);
+  if (memory && now - Number(memory.ts || 0) <= PRODUCT_CACHE_TTL_MS) {
+    return memory.items;
+  }
+
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = sessionStorage.getItem(getPublicProductCacheKey(normalizedSlug));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const ts = Number(parsed?.ts || 0);
+    const items = Array.isArray(parsed?.items) ? parsed.items : [];
+    if (!ts || now - ts > PRODUCT_CACHE_TTL_MS) {
+      sessionStorage.removeItem(getPublicProductCacheKey(normalizedSlug));
+      publicSlugProductCache.delete(normalizedSlug);
+      return null;
+    }
+    publicSlugProductCache.set(normalizedSlug, { ts, items });
+    return items;
+  } catch {
+    return null;
+  }
+};
+
+const writePublicProductCache = (slug: string, items: any[]) => {
+  const normalizedSlug = String(slug || '').trim().toLowerCase();
+  if (!normalizedSlug) return items;
+  const payload = {
+    ts: Date.now(),
+    items: Array.isArray(items) ? items : [],
+  };
+  publicSlugProductCache.set(normalizedSlug, payload);
+  if (typeof window === 'undefined') return items;
+  try {
+    sessionStorage.setItem(getPublicProductCacheKey(normalizedSlug), JSON.stringify(payload));
+  } catch {
+    // ignore cache persistence failures
+  }
+  return items;
+};
+
 // 🔐 fonte única da loja (admin/produção)
 const getStoreIdentifierFromSession = (): string | null =>
 {
@@ -198,8 +246,11 @@ export const productService = {
 
   async listPublicBySlug(slug: string)
   {
+    const cached = readPublicProductCache(slug);
+    if (cached) return cached;
     const data = await apiClient.get(`/public/stores/slug/${slug}/products`);
-    return data.map(normalizeProduct);
+    const normalized = data.map(normalizeProduct);
+    return writePublicProductCache(slug, normalized);
   },
 
   async listCategories(storeId?: string) {

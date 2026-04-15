@@ -1,5 +1,51 @@
 import { apiClient } from '../config/apiClient';
 
+const PUBLIC_STORE_CACHE_TTL_MS = 60 * 1000;
+const publicStoreMemoryCache = new Map<string, { ts: number; data: any }>();
+
+const getStoreCacheKey = (slug: string) => `public:store:${String(slug || '').trim().toLowerCase()}`;
+
+const readPublicStoreCache = (slug: string) => {
+  const normalizedSlug = String(slug || '').trim().toLowerCase();
+  if (!normalizedSlug) return null;
+  const now = Date.now();
+  const memory = publicStoreMemoryCache.get(normalizedSlug);
+  if (memory && now - Number(memory.ts || 0) <= PUBLIC_STORE_CACHE_TTL_MS) {
+    return memory.data;
+  }
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = sessionStorage.getItem(getStoreCacheKey(normalizedSlug));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const ts = Number(parsed?.ts || 0);
+    if (!ts || now - ts > PUBLIC_STORE_CACHE_TTL_MS) {
+      sessionStorage.removeItem(getStoreCacheKey(normalizedSlug));
+      publicStoreMemoryCache.delete(normalizedSlug);
+      return null;
+    }
+    publicStoreMemoryCache.set(normalizedSlug, { ts, data: parsed?.data ?? null });
+    return parsed?.data ?? null;
+  } catch {
+    return null;
+  }
+};
+
+const writePublicStoreCache = (slug: string, data: any) => {
+  const normalizedSlug = String(slug || '').trim().toLowerCase();
+  if (!normalizedSlug) return data;
+  const payload = { ts: Date.now(), data };
+  publicStoreMemoryCache.set(normalizedSlug, payload);
+  if (typeof window !== 'undefined') {
+    try {
+      sessionStorage.setItem(getStoreCacheKey(normalizedSlug), JSON.stringify(payload));
+    } catch {
+      // ignore cache write failure
+    }
+  }
+  return data;
+};
+
 const toJson = async (response: any) => {
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
@@ -16,9 +62,12 @@ export const storeService = {
 
   async fetchBySlug(slug: any) {
     if (!slug) return null;
+    const cached = readPublicStoreCache(slug);
+    if (cached) return cached;
     const response = await apiClient.rawGet(`/stores/slug/${slug}`);
     if (response.status === 404) return null;
-    return toJson(response);
+    const data = await toJson(response);
+    return writePublicStoreCache(slug, data);
   },
 
   async listPortfolio() {
