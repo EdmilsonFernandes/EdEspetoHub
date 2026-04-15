@@ -614,6 +614,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const SAO_PAULO_TZ = 'America/Sao_Paulo';
   const QUEUE_POLL_VISIBLE_MS = 1500;
   const QUEUE_POLL_HIDDEN_MS = 10000;
+  const HISTORY_POLL_VISIBLE_MS = 30000;
+  const HISTORY_POLL_HIDDEN_MS = 120000;
   const getDayKeyInSaoPaulo = (value?: number | string | Date | null) => {
     if (!value) return '';
     try {
@@ -698,6 +700,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const PREP_SLA_MS = prepSlaMinutes * 60 * 1000;
   const PREP_ATTENTION_MS = prepAttentionMinutes * 60 * 1000;
   const [queue, setQueue] = useState([]);
+  const [historyOrders, setHistoryOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState({});
@@ -830,7 +833,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const previousIdsRef = useRef<string[]>([]);
   const queueRef = useRef<any[]>([]);
   const queuePollTimerRef = useRef<number | null>(null);
+  const historyPollTimerRef = useRef<number | null>(null);
   const queueRequestInFlightRef = useRef(false);
+  const historyRequestInFlightRef = useRef(false);
   const queueRequestSeqRef = useRef(0);
   const queueAppliedSeqRef = useRef(0);
   const queueRetryDelayRef = useRef(3000);
@@ -1385,6 +1390,13 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     }
   }, []);
 
+  const clearHistoryPollTimer = useCallback(() => {
+    if (historyPollTimerRef.current != null) {
+      window.clearTimeout(historyPollTimerRef.current);
+      historyPollTimerRef.current = null;
+    }
+  }, []);
+
   const loadQueue = useCallback(async ({ silent = false }: { silent?: boolean } = {}) => {
     if (!storeIdentifier) {
       setLoading(false);
@@ -1437,6 +1449,27 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     }
   }, [QUEUE_POLL_VISIBLE_MS, storeIdentifier]);
 
+  const loadHistory = useCallback(async ({ silent = true }: { silent?: boolean } = {}) => {
+    if (!storeIdentifier) return;
+    if (historyRequestInFlightRef.current) return;
+
+    historyRequestInFlightRef.current = true;
+    try {
+      const data = await orderService.fetchAll(storeIdentifier);
+      setHistoryOrders(Array.isArray(data) ? data : []);
+      if (!silent) {
+        setError('');
+      }
+    } catch (err) {
+      console.error('Erro ao buscar histórico de pedidos', err);
+      if (!silent) {
+        setError('Não foi possível carregar o histórico de vendas agora.');
+      }
+    } finally {
+      historyRequestInFlightRef.current = false;
+    }
+  }, [storeIdentifier]);
+
   const scheduleQueuePoll = useCallback((immediate = false, elapsedMs = 0) => {
     clearQueuePollTimer();
     const baseDelay =
@@ -1452,31 +1485,57 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     }, delay);
   }, [QUEUE_POLL_HIDDEN_MS, clearQueuePollTimer, loadQueue]);
 
+  const scheduleHistoryPoll = useCallback((immediate = false) => {
+    clearHistoryPollTimer();
+    const delay = immediate
+      ? 0
+      : (
+          typeof document !== 'undefined' && document.visibilityState === 'visible'
+            ? HISTORY_POLL_VISIBLE_MS
+            : HISTORY_POLL_HIDDEN_MS
+        );
+
+    historyPollTimerRef.current = window.setTimeout(async () => {
+      await loadHistory({ silent: true });
+      scheduleHistoryPoll(false);
+    }, delay);
+  }, [HISTORY_POLL_HIDDEN_MS, HISTORY_POLL_VISIBLE_MS, clearHistoryPollTimer, loadHistory]);
+
   const handleManualRefresh = useCallback(async () => {
     if (queueRequestInFlightRef.current) return;
     setIsPullRefreshing(true);
     try {
-      await loadQueue({ silent: true });
+      await Promise.all([
+        loadQueue({ silent: true }),
+        loadHistory({ silent: true }),
+      ]);
       scheduleQueuePoll(false);
+      scheduleHistoryPoll(false);
     } finally {
       setIsPullRefreshing(false);
       setPullDistance(0);
       pullDistanceRef.current = 0;
     }
-  }, [loadQueue, scheduleQueuePoll]);
+  }, [loadHistory, loadQueue, scheduleHistoryPoll, scheduleQueuePoll]);
 
   useEffect(() => {
     if (!storeIdentifier) return;
     void loadQueue();
+    void loadHistory({ silent: true });
     scheduleQueuePoll(false);
+    scheduleHistoryPoll(false);
     const handleFocusRefresh = () => {
       void loadQueue({ silent: true });
+      void loadHistory({ silent: true });
       scheduleQueuePoll(false);
+      scheduleHistoryPoll(false);
     };
     const handleVisibilityRefresh = () => {
       if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
         void loadQueue({ silent: true });
+        void loadHistory({ silent: true });
         scheduleQueuePoll(false);
+        scheduleHistoryPoll(false);
       }
     };
     window.addEventListener('focus', handleFocusRefresh);
@@ -1487,12 +1546,21 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
     return () => {
       clearQueuePollTimer();
+      clearHistoryPollTimer();
       window.removeEventListener('focus', handleFocusRefresh);
       window.removeEventListener('pageshow', handleFocusRefresh);
       document.removeEventListener('visibilitychange', handleVisibilityRefresh);
       unsubProducts();
     };
-  }, [clearQueuePollTimer, loadQueue, scheduleQueuePoll, storeIdentifier]);
+  }, [
+    clearHistoryPollTimer,
+    clearQueuePollTimer,
+    loadHistory,
+    loadQueue,
+    scheduleHistoryPoll,
+    scheduleQueuePoll,
+    storeIdentifier,
+  ]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -2118,10 +2186,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
   const completedOrders = useMemo(() => {
     const completedStatuses = new Set([ 'done', 'delivered', 'finished', 'cancelled' ]);
-    return [...queue]
+    return [...historyOrders]
       .filter((order) => completedStatuses.has(String(order?.status || '').toLowerCase()))
       .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-  }, [queue]);
+  }, [historyOrders]);
   const completedToday = useMemo(() => {
     const todayKey = getNowKeyInSaoPaulo();
     return completedOrders.filter((order) => getDayKeyInSaoPaulo(order.createdAt) === todayKey);
@@ -2224,7 +2292,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     const now = Date.now();
     const yesterdayKey = getDayKeyInSaoPaulo(now - 24 * 60 * 60 * 1000);
     const currentMinutes = getMinutesInSaoPaulo(now);
-    const yesterdayUntilNow = queue
+    const yesterdayUntilNow = historyOrders
       .filter((order) => {
         if (!completedStatuses.has(order.status)) return false;
         if (getDayKeyInSaoPaulo(order.createdAt) !== yesterdayKey) return false;
@@ -2244,7 +2312,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       positive: delta >= 0,
       hasBase: yesterdayUntilNow > 0,
     };
-  }, [queue, dailySalesSummary.total]);
+  }, [historyOrders, dailySalesSummary.total]);
   const reportComparison = useMemo(() => {
     const oneDay = 24 * 60 * 60 * 1000;
     const toDateMs = (dateKey: string, endOfDay = false) => {
