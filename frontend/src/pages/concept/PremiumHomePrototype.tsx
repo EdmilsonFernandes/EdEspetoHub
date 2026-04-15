@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { CaretRight, MagnifyingGlass, UserCircle, Buildings, House, Receipt, Heart, Storefront } from '@phosphor-icons/react';
 
 export function PremiumHomePrototype() {
