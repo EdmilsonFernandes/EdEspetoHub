@@ -1780,7 +1780,6 @@ export function MarketplacePage() {
                     className="block min-h-[52px] w-full min-w-0 appearance-none bg-transparent pr-1 text-[14px] font-semibold text-slate-950 placeholder:text-slate-400 outline-none"
                     style={{
                       WebkitAppearance: 'none',
-                      WebkitTextFillColor: query ? '#020617' : 'unset',
                       caretColor: '#336886',
                       backgroundColor: 'transparent',
                       boxShadow: 'none',
