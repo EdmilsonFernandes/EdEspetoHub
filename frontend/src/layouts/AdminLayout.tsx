@@ -103,6 +103,7 @@ export function AdminLayout({
     const persistedTab = typeof window !== 'undefined' ? String(sessionStorage.getItem('admin:activeTab') || '') : '';
     if (path.startsWith('/admin/queue')) return 'fila';
     if (path.startsWith('/admin/orders')) return 'vendas';
+    if (path.startsWith('/admin/highlights')) return 'destaques';
     if (path.startsWith('/admin/dashboard')) return String((location.state as any)?.activeTab || persistedTab || '');
     return '';
   }, [location.pathname, location.state]);

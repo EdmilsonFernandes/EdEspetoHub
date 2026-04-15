@@ -5,14 +5,32 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260415.210444.0c50014d",
-  "buildId": "0.1.9+20260415.210444.0c50014d-20260415.210444-0c50014d",
-  "builtAt": "2026-04-15T21:04:44.595Z",
-  "commitHash": "0c50014d3a45055d6a6ea6f5a78b6d99b62b70ce",
-  "shortHash": "0c50014d",
+  "versionInternal": "0.1.9+20260415.214658.408e203d",
+  "buildId": "0.1.9+20260415.214658.408e203d-20260415.214658-408e203d",
+  "builtAt": "2026-04-15T21:46:58.222Z",
+  "commitHash": "408e203dfa28cc4660874d296f1e7ff3e232838e",
+  "shortHash": "408e203d",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "408e203dfa28cc4660874d296f1e7ff3e232838e",
+      "shortHash": "408e203d",
+      "dateIso": "2026-04-15T18:16:59-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix: remove unused react import in premium home concept",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/408e203dfa28cc4660874d296f1e7ff3e232838e"
+    },
+    {
+      "hash": "3486441dadfb8f588cf1c2faacf0d2068d4932df",
+      "shortHash": "3486441d",
+      "dateIso": "2026-04-15T18:04:59-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix: resolve erro no payload do pix para chaves de telefone e txid",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3486441dadfb8f588cf1c2faacf0d2068d4932df"
+    },
     {
       "hash": "0c50014d3a45055d6a6ea6f5a78b6d99b62b70ce",
       "shortHash": "0c50014d",
@@ -264,24 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style(hub): deepen bottom nav contrast and remove auth debug",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/fdbad9d56c356ee6a590d035434cc7bb85f80653"
-    },
-    {
-      "hash": "3c1e0f8beb4d7d37a3c49ba849c71e52a0892f76",
-      "shortHash": "3c1e0f8b",
-      "dateIso": "2026-04-14T16:58:21-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(auth): trigger biometrics directly from role picker",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3c1e0f8beb4d7d37a3c49ba849c71e52a0892f76"
-    },
-    {
-      "hash": "866803823b8bd6e8aea7264f5c4532f146b2406e",
-      "shortHash": "86680382",
-      "dateIso": "2026-04-14T16:39:37-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(auth): bind native biometric bridge calls",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/866803823b8bd6e8aea7264f5c4532f146b2406e"
     }
   ]
 } as const;

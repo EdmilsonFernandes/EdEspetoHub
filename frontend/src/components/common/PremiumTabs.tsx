@@ -54,7 +54,7 @@ export function PremiumTabs({
               aria-current={isActive ? 'true' : 'false'}
               style={getButtonStyle ? getButtonStyle(item, isActive) : undefined}
               className={[
-                'rounded-xl border transition-all',
+                'rounded-xl border transition-all touch-manipulation',
                 item.icon ? 'px-3 py-2 text-[10px] sm:text-sm min-w-[108px] sm:min-w-[124px] min-h-[56px]' : 'px-3.5 py-2',
                 item.icon ? 'flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center active:scale-95' : '',
                 isActive

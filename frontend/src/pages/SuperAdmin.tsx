@@ -24,6 +24,11 @@ import {
   ShieldCheck,
   Megaphone,
   CaretDown,
+  Sparkle,
+  GitCommit,
+  RocketLaunch,
+  ShieldCheck,
+  Cpu,
 } from '@phosphor-icons/react';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { superAdminService } from '../services/superAdminService';
@@ -1254,7 +1259,30 @@ export function SuperAdmin() {
       </div>
 
       <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-white/90 backdrop-blur border-b border-slate-200">
+        <div className="sm:hidden">
+          <label className="block">
+            <span className="mb-1 block text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">
+              Seções
+            </span>
+            <select
+              value={activeSection}
+              onChange={(event) => setActiveSection(event.target.value)}
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-800 shadow-sm outline-none transition focus:border-slate-900"
+            >
+              <option value="executive">Resumo</option>
+              <option value="rankings">Rankings</option>
+              <option value="stores">Lojas</option>
+              <option value="payments">Pagamentos</option>
+              <option value="push">Push Global</option>
+              <option value="logs">Logs</option>
+              <option value="events">Eventos</option>
+              <option value="kyc">KYC</option>
+              <option value="versions">Versões</option>
+            </select>
+          </label>
+        </div>
         <PremiumTabs
+          containerClassName="hidden sm:block"
           listClassName="flex flex-nowrap gap-2 overflow-x-auto no-scrollbar scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           buttonClassName="shrink-0 whitespace-nowrap"
           items={[
@@ -2829,63 +2857,102 @@ export function SuperAdmin() {
               {(() => {
                 const latestCommit = APP_BUILD_INFO.commits?.[0];
                 return (
+              <>
+              <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.14),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.10),transparent_28%),linear-gradient(135deg,#ffffff_0%,#f8fafc_55%,#eef6ff_100%)] p-5 shadow-[0_32px_68px_-46px_rgba(15,23,42,0.4)]">
+                <div className="absolute -right-10 top-0 h-36 w-36 rounded-full bg-sky-200/30 blur-3xl" />
+                <div className="absolute -left-8 bottom-0 h-28 w-28 rounded-full bg-emerald-200/30 blur-3xl" />
+                <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="max-w-2xl">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-600 shadow-sm">
+                      <Sparkle size={12} weight="fill" className="text-amber-500" />
+                      Centro de release
+                    </div>
+                    <h3 className="mt-3 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
+                      Build estável com rastreabilidade completa
+                    </h3>
+                    <p className="mt-2 max-w-xl text-sm font-medium leading-6 text-slate-600">
+                      Versão publicada com identificação de commit, autoria e trilha de mudanças pronta para auditoria operacional e técnica.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    <div className="rounded-2xl border border-white/70 bg-white/80 px-3 py-3 shadow-sm">
+                      <div className="flex items-center gap-2 text-slate-500">
+                        <RocketLaunch size={14} weight="duotone" />
+                        <p className="text-[10px] font-black uppercase tracking-[0.14em]">Versão</p>
+                      </div>
+                      <p className="mt-2 text-base font-black text-slate-950">{APP_BUILD_INFO.versionLabel}</p>
+                    </div>
+                    <div className="rounded-2xl border border-white/70 bg-white/80 px-3 py-3 shadow-sm">
+                      <div className="flex items-center gap-2 text-slate-500">
+                        <GitCommit size={14} weight="duotone" />
+                        <p className="text-[10px] font-black uppercase tracking-[0.14em]">Hash</p>
+                      </div>
+                      <p className="mt-2 text-base font-black text-slate-950">{APP_BUILD_INFO.shortHash || '-'}</p>
+                    </div>
+                    <div className="rounded-2xl border border-white/70 bg-white/80 px-3 py-3 shadow-sm">
+                      <div className="flex items-center gap-2 text-slate-500">
+                        <Cpu size={14} weight="duotone" />
+                        <p className="text-[10px] font-black uppercase tracking-[0.14em]">Branch</p>
+                      </div>
+                      <p className="mt-2 text-sm font-black uppercase tracking-[0.08em] text-slate-950">{APP_BUILD_INFO.branch || '-'}</p>
+                    </div>
+                    <div className="rounded-2xl border border-white/70 bg-white/80 px-3 py-3 shadow-sm">
+                      <div className="flex items-center gap-2 text-slate-500">
+                        <ShieldCheck size={14} weight="duotone" className="text-emerald-600" />
+                        <p className="text-[10px] font-black uppercase tracking-[0.14em]">Status</p>
+                      </div>
+                      <p className="mt-2 text-sm font-black text-emerald-700">Release ativa</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3">
-                <div className="rounded-2xl border border-slate-200 bg-white p-3">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">Versão</p>
-                  <p className="mt-1 text-base font-black text-slate-900">{APP_BUILD_INFO.versionLabel}</p>
-                </div>
-                <div className="rounded-2xl border border-slate-200 bg-white p-3">
+                <div className="rounded-[1.4rem] border border-slate-200 bg-white p-4 shadow-[0_18px_42px_-32px_rgba(15,23,42,0.26)]">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">Build ID</p>
-                  <p className="mt-1 text-sm font-bold text-slate-900 break-all">{APP_BUILD_INFO.buildId}</p>
+                  <p className="mt-2 text-sm font-black text-slate-900 break-all">{APP_BUILD_INFO.buildId}</p>
                 </div>
-                <div className="rounded-2xl border border-slate-200 bg-white p-3">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">Commit</p>
-                  {APP_BUILD_INFO.commitHash && APP_BUILD_INFO.repositoryUrl ? (
-                    <a
-                      href={`${APP_BUILD_INFO.repositoryUrl}/commit/${APP_BUILD_INFO.commitHash}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-1 inline-flex text-sm font-bold text-sky-700 hover:text-sky-800 underline break-all"
-                    >
-                      {APP_BUILD_INFO.shortHash}
-                    </a>
-                  ) : (
-                    <p className="mt-1 text-sm font-bold text-slate-900 break-all">{APP_BUILD_INFO.shortHash}</p>
-                  )}
-                  <p className="text-[11px] text-slate-500 mt-1">{APP_BUILD_INFO.branch}</p>
-                </div>
-                <div className="rounded-2xl border border-slate-200 bg-white p-3">
+                <div className="rounded-[1.4rem] border border-slate-200 bg-white p-4 shadow-[0_18px_42px_-32px_rgba(15,23,42,0.26)]">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">Gerado em</p>
-                  <p className="mt-1 text-sm font-bold text-slate-900">{buildDate}</p>
+                  <p className="mt-2 text-sm font-black text-slate-900">{buildDate}</p>
                 </div>
-                <div className="rounded-2xl border border-slate-200 bg-white p-3">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">Autor</p>
-                  <p className="mt-1 text-sm font-bold text-slate-900">{latestCommit?.authorName || '-'}</p>
-                  <p className="text-[11px] text-slate-500 mt-1">{latestCommit?.authorEmail || '-'}</p>
+                <div className="rounded-[1.4rem] border border-slate-200 bg-white p-4 shadow-[0_18px_42px_-32px_rgba(15,23,42,0.26)]">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">Autor principal</p>
+                  <p className="mt-2 text-sm font-black text-slate-900">{latestCommit?.authorName || '-'}</p>
+                  <p className="mt-1 text-[11px] text-slate-500 break-all">{latestCommit?.authorEmail || '-'}</p>
                 </div>
-                <div className="rounded-2xl border border-slate-200 bg-white p-3">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">GitHub</p>
+                <div className="rounded-[1.4rem] border border-slate-200 bg-white p-4 shadow-[0_18px_42px_-32px_rgba(15,23,42,0.26)]">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">Repositório</p>
                   {latestCommit?.commitUrl ? (
                     <a
                       href={latestCommit.commitUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="mt-1 inline-flex text-sm font-bold text-sky-700 hover:text-sky-800 underline break-all"
+                      className="mt-2 inline-flex items-center gap-2 text-sm font-black text-sky-700 transition hover:text-sky-800"
                     >
                       Abrir commit {latestCommit.shortHash}
                     </a>
                   ) : (
-                    <p className="mt-1 text-sm font-bold text-slate-900">Link indisponível</p>
+                    <p className="mt-2 text-sm font-black text-slate-900">Link indisponível</p>
                   )}
                 </div>
               </div>
+              </>
                 );
               })()}
 
-              <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
-                <div className="px-4 py-3 border-b border-slate-200 bg-slate-50">
-                  <p className="text-xs font-extrabold text-slate-700">Mudanças incluídas nesta versão</p>
-                  <p className="text-[11px] text-slate-500">Baseado no histórico de commits do build atual.</p>
+              <div className="overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white shadow-[0_24px_56px_-40px_rgba(15,23,42,0.28)]">
+                <div className="border-b border-slate-200 bg-[linear-gradient(135deg,#f8fafc_0%,#ffffff_55%,#eef6ff_100%)] px-4 py-4">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-700">Mudanças incluídas nesta versão</p>
+                      <p className="text-[11px] text-slate-500">Baseado no histórico de commits do build atual.</p>
+                    </div>
+                    <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-500 shadow-sm">
+                      <GitCommit size={12} weight="duotone" />
+                      {APP_BUILD_INFO.commits.length} commit{APP_BUILD_INFO.commits.length === 1 ? '' : 's'} rastreado{APP_BUILD_INFO.commits.length === 1 ? '' : 's'}
+                    </div>
+                  </div>
                 </div>
                 <div className="max-h-[420px] overflow-auto">
                   {APP_BUILD_INFO.commits.length === 0 ? (
@@ -2929,6 +2996,26 @@ export function SuperAdmin() {
                       </tbody>
                     </table>
                   )}
+                </div>
+              </div>
+
+              <div className="rounded-[1.8rem] border border-slate-200 bg-[linear-gradient(135deg,#0f172a_0%,#172554_52%,#0f172a_100%)] p-5 text-white shadow-[0_28px_60px_-34px_rgba(15,23,42,0.72)]">
+                <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                  <div className="max-w-2xl">
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-300">Governança de release</p>
+                    <h4 className="mt-2 text-xl font-black tracking-tight">Histórico técnico pronto para operação, suporte e auditoria</h4>
+                    <p className="mt-2 text-sm leading-6 text-slate-300">
+                      Cada publicação fica vinculada a versão, branch, autoria e trilha de commits, reforçando previsibilidade de deploy e confiança institucional.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-white">
+                      Build {APP_BUILD_INFO.versionLabel}
+                    </span>
+                    <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-200">
+                      Release verificada
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

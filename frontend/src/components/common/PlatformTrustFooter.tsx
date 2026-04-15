@@ -1,4 +1,4 @@
-import { ShieldCheck } from '@phosphor-icons/react';
+import { ArrowSquareOut, ShieldCheck, Sparkle } from '@phosphor-icons/react';
 import { AppVersionBadge } from './AppVersionBadge';
 
 type PlatformTrustFooterProps = {
@@ -25,10 +25,8 @@ export function PlatformTrustFooter({
   const badgeClass = tone === 'dark'
     ? 'border-slate-700 bg-slate-800/80 text-slate-300'
     : 'border-slate-200 bg-slate-50 text-slate-600';
-  const versionClass = tone === 'dark' ? 'text-slate-400/70' : 'text-slate-400';
   const minimalText = tone === 'dark' ? 'text-slate-400/90' : 'text-slate-500';
   const minimalMuted = tone === 'dark' ? 'text-slate-500/75' : 'text-slate-400';
-  const minimalBorder = tone === 'dark' ? 'border-slate-700/50' : 'border-slate-200';
   const minimalBrand = tone === 'dark' ? 'text-slate-300/90' : 'text-slate-700/90';
   const isLeft = align === 'left';
   const isRight = align === 'right';
@@ -41,11 +39,22 @@ export function PlatformTrustFooter({
             href={href}
             target="_blank"
             rel="noreferrer"
-            className={`group w-full max-w-full border-t px-2 py-4 ${minimalBorder} ${minimalText}`}
+            className={`group relative w-full max-w-full overflow-hidden rounded-[1.35rem] border px-3 py-3.5 transition-all duration-300 hover:-translate-y-0.5 ${
+              tone === 'dark'
+                ? 'border-white/10 bg-[linear-gradient(145deg,rgba(15,23,42,0.98)_0%,rgba(30,41,59,0.94)_52%,rgba(15,23,42,0.98)_100%)] text-slate-100 shadow-[0_24px_44px_-28px_rgba(2,6,23,0.9)]'
+                : 'border-slate-200 bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.96)_54%,rgba(241,245,249,0.98)_100%)] text-slate-700 shadow-[0_24px_44px_-34px_rgba(15,23,42,0.18)]'
+            }`}
             aria-label="Plataforma Já no Caminho"
           >
+            <span
+              className={`pointer-events-none absolute inset-0 opacity-90 ${
+                tone === 'dark'
+                  ? 'bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.16),transparent_30%)]'
+                  : 'bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.12),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.10),transparent_30%)]'
+              }`}
+            />
             <div
-              className={`flex w-full gap-2 ${
+              className={`relative flex w-full gap-3 ${
                 isLeft
                   ? 'items-center justify-between text-left'
                   : isRight
@@ -54,22 +63,59 @@ export function PlatformTrustFooter({
               }`}
             >
               <div className={`min-w-0 ${isLeft ? '' : isRight ? 'order-2' : ''}`}>
-                <p className={`${compact ? 'text-[9px]' : 'text-[10px]'} font-medium uppercase tracking-[0.15em] ${minimalText}`}>
+                <div className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-1 ${
+                  tone === 'dark'
+                    ? 'border-white/10 bg-white/5 text-slate-300'
+                    : 'border-slate-200 bg-white/80 text-slate-500'
+                }`}>
+                  <Sparkle size={10} weight="fill" />
+                  <span className={`${compact ? 'text-[8px]' : 'text-[9px]'} font-bold uppercase tracking-[0.18em]`}>
+                    plataforma enterprise
+                  </span>
+                </div>
+                <p className={`mt-2 ${compact ? 'text-[9px]' : 'text-[10px]'} font-medium uppercase tracking-[0.18em] ${minimalText}`}>
                   desenvolvido por
                 </p>
-                <div className={`mt-0.5 inline-flex items-center gap-1.5 ${isLeft ? '' : isRight ? 'justify-end w-full' : 'justify-center sm:justify-start w-full'}`}>
-                  <span className="h-5 w-5 overflow-hidden rounded-md border border-slate-300/60 bg-white transition-all group-hover:scale-110">
+                <div className={`mt-1.5 inline-flex items-center gap-2 ${isLeft ? '' : isRight ? 'justify-end w-full' : 'justify-center sm:justify-start w-full'}`}>
+                  <span className={`h-9 w-9 overflow-hidden rounded-xl border transition-all group-hover:scale-105 ${
+                    tone === 'dark'
+                      ? 'border-white/10 bg-white shadow-[0_12px_22px_-16px_rgba(255,255,255,0.55)]'
+                      : 'border-slate-200 bg-white shadow-[0_12px_22px_-16px_rgba(15,23,42,0.22)]'
+                  }`}>
                     <img src="/jnc.png" alt="JNC" className="h-full w-full object-cover" />
                   </span>
-                  <span className={`${compact ? 'text-[10px]' : 'text-[11px]'} uppercase tracking-[0.14em] font-bold ${minimalBrand}`}>
-                    Jano Caminho
+                  <span className="min-w-0">
+                    <span className={`block ${compact ? 'text-[10px]' : 'text-[11px]'} uppercase tracking-[0.18em] font-black ${minimalBrand}`}>
+                      Jano Caminho
+                    </span>
+                    <span className={`${compact ? 'text-[9px]' : 'text-[10px]'} ${minimalMuted}`}>
+                      Infraestrutura, identidade e evolução contínua
+                    </span>
                   </span>
                 </div>
               </div>
-              <div className={`flex shrink-0 items-center gap-1.5 ${isLeft ? '' : isRight ? 'order-1' : ''}`}>
-                <ShieldCheck size={12} weight="bold" className="text-emerald-600/50" />
-                <span className={`text-[8px] ${minimalMuted}`}>
-                  <AppVersionBadge />
+              <div className={`flex shrink-0 items-center gap-2 ${isLeft ? '' : isRight ? 'order-1' : ''}`}>
+                <div className={`rounded-2xl border px-2.5 py-2 ${
+                  tone === 'dark'
+                    ? 'border-white/10 bg-white/5 text-slate-200'
+                    : 'border-slate-200 bg-white/85 text-slate-700'
+                }`}>
+                  <div className="flex items-center gap-1.5">
+                    <ShieldCheck size={12} weight="bold" className="text-emerald-500" />
+                    <span className={`text-[8px] font-bold uppercase tracking-[0.16em] ${minimalMuted}`}>
+                      release ativa
+                    </span>
+                  </div>
+                  <div className={`mt-1 text-[10px] font-black ${tone === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                    <AppVersionBadge />
+                  </div>
+                </div>
+                <span className={`hidden rounded-full border p-2 sm:inline-flex ${
+                  tone === 'dark'
+                    ? 'border-white/10 bg-white/5 text-slate-300'
+                    : 'border-slate-200 bg-white/85 text-slate-500'
+                }`}>
+                  <ArrowSquareOut size={12} weight="bold" />
                 </span>
               </div>
             </div>
@@ -86,21 +132,35 @@ export function PlatformTrustFooter({
           href={href}
           target="_blank"
           rel="noreferrer"
-          className={`group inline-flex items-center gap-2.5 rounded-2xl px-3 py-2 transition-colors hover:border-slate-300 hover:text-slate-900 ${shellClass}`}
+          className={`group relative inline-flex items-center gap-3 overflow-hidden rounded-[1.35rem] px-3.5 py-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:text-slate-900 ${shellClass}`}
           aria-label="Plataforma Jano Caminho"
         >
-          <span className="h-7 w-7 rounded-lg overflow-hidden border border-slate-200/70 shadow-sm bg-white">
+          <span
+            className={`pointer-events-none absolute inset-0 ${
+              tone === 'dark'
+                ? 'bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.16),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.14),transparent_26%)]'
+                : 'bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.10),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_26%)]'
+            }`}
+          />
+          <span className="relative h-10 w-10 rounded-xl overflow-hidden border border-slate-200/70 shadow-sm bg-white">
             <img src="/jnc.png" alt="JNC" className="h-full w-full object-cover" />
           </span>
-          <span className="flex min-w-0 flex-col text-left">
-            <span className={`font-semibold leading-tight ${compact ? 'text-[11px]' : 'text-xs'}`}>Desenvolvido por Jano Caminho</span>
-            <span className={`mt-0.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${badgeClass}`}>
+          <span className="relative flex min-w-0 flex-col text-left">
+            <span className={`text-[9px] font-bold uppercase tracking-[0.18em] ${tone === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+              ecossistema oficial
+            </span>
+            <span className={`mt-0.5 font-semibold leading-tight ${compact ? 'text-[11px]' : 'text-xs'}`}>Desenvolvido por Jano Caminho</span>
+            <span className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${badgeClass}`}>
               <ShieldCheck size={12} weight="bold" />
               Plataforma segura
             </span>
           </span>
-          <span className={`ml-1 text-[10px] ${versionClass}`}>
-            <AppVersionBadge />
+          <span className={`relative ml-1 rounded-xl border px-2.5 py-1.5 text-[10px] font-bold ${
+            tone === 'dark'
+              ? 'border-white/10 bg-white/5 text-slate-200'
+              : 'border-slate-200 bg-white/85 text-slate-700'
+          }`}>
+            <AppVersionBadge prefix="build " />
           </span>
         </a>
       </div>

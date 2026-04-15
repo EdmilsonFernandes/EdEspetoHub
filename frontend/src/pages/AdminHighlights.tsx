@@ -1,6 +1,9 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { ChartBar, CheckSquare, ClipboardText, CreditCard, Gear, Package, Scooter, Star, UsersThree } from '@phosphor-icons/react';
+import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
+import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { productService } from '../services/productService';
@@ -8,6 +11,7 @@ import { featuredService } from '../services/featuredService';
 import { formatCurrency, formatDateTime } from '../utils/format';
 import { normalizePixCode } from '../utils/pixPayload';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 
 type DurationUnit = 'DAY' | 'WEEK' | 'MONTH';
 
@@ -54,9 +58,31 @@ const paymentMethodLabel = (value: string) => {
 };
 
 export function AdminHighlights() {
-  const { auth } = useAuth();
+  const navigate = useNavigate();
+  const { auth, logout } = useAuth();
   const { showToast } = useToast();
   const storeId = String(auth?.store?.id || '').trim();
+  const storeSlug = String(auth?.store?.slug || '').trim();
+  const userRole = String(auth?.user?.role || '').toUpperCase();
+  const isOperatorUser = userRole === 'OPERATOR' || userRole === 'CHURRASQUEIRO';
+  const isVip = Boolean(auth?.store?.settings?.planExempt || auth?.subscription?.planExempt);
+  const planName = String(auth?.subscription?.plan?.name || '').toLowerCase();
+  const subscriptionStatus = String(auth?.subscription?.status || '').toUpperCase();
+  const canUseMotoboys = Boolean(
+    isVip ||
+      auth?.features?.motoboyManagement ||
+      subscriptionStatus === 'TRIAL' ||
+      planName.includes('pro') ||
+      planName.includes('vip')
+  );
+  const [sidebarCompact, setSidebarCompact] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const savedPreference = localStorage.getItem('adminSidebar:compact');
+    if (savedPreference === null) {
+      return window.matchMedia('(min-width: 1024px)').matches;
+    }
+    return savedPreference === 'true';
+  });
 
   const [products, setProducts] = useState<any[]>([]);
   const [requests, setRequests] = useState<any[]>([]);
@@ -80,6 +106,29 @@ export function AdminHighlights() {
     paymentMethod: 'PIX' as 'PIX' | 'CREDIT_CARD',
     publicNote: '',
   });
+  const navItems = useMemo(
+    () =>
+      (isOperatorUser
+        ? [
+            { id: 'produtos', label: 'Produtos', icon: Package },
+            { id: 'cardapio', label: 'Loja Online', icon: Package },
+            { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
+          ]
+        : [
+            { id: 'resumo', label: 'Resumo', icon: ChartBar },
+            { id: 'pedidos', label: 'Histórico de Pedidos', icon: ClipboardText },
+            { id: 'avaliacoes', label: 'Avaliações', icon: Star },
+            { id: 'produtos', label: 'Produtos', icon: Package },
+            { id: 'estoque', label: 'Estoque', icon: Package },
+            { id: 'destaques', label: 'Destaques', icon: Star },
+            { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
+            { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
+            { id: 'usuarios', label: 'Usuários', icon: UsersThree },
+            { id: 'config', label: 'Configurações', icon: Gear },
+            { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
+          ]),
+    [canUseMotoboys, isOperatorUser]
+  );
 
   const productOptions = useMemo(
     () =>
@@ -286,129 +335,185 @@ export function AdminHighlights() {
 
   const selectedPrice = Number(pricing?.prices?.[form.durationUnit] || 0);
   const selectedDays = DURATION_META[form.durationUnit]?.days || 1;
+  const handleNavSelect = (id: string) => {
+    if (id === 'destaques') {
+      if (typeof window !== 'undefined') sessionStorage.setItem('admin:activeTab', 'destaques');
+      return;
+    }
+    if (id === 'cardapio') {
+      if (storeSlug) navigate(`/${storeSlug}`);
+      return;
+    }
+    if (id === 'fila') {
+      navigate('/admin/queue');
+      return;
+    }
+    if (id === 'pedidos') {
+      navigate('/admin/orders');
+      return;
+    }
+    if (id === 'usuarios') {
+      if (typeof window !== 'undefined') sessionStorage.setItem('admin:activeTab', 'usuarios');
+      navigate('/admin/dashboard', { state: { activeTab: 'usuarios' } });
+      return;
+    }
+    if (id === 'motoboys' && !canUseMotoboys) {
+      showToast('Disponível no plano Pro. Faça o upgrade para liberar entregadores.', 'info');
+      navigate('/admin/renewal?focus=pro');
+      return;
+    }
+    if (typeof window !== 'undefined') sessionStorage.setItem('admin:activeTab', id);
+    navigate('/admin/dashboard', { state: { activeTab: id } });
+  };
 
   return (
     <AdminLayout contextLabel="Destaques">
-      <div className="space-y-4">
-        <section className="rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Hub Já no Caminho</p>
-              <h1 className="text-xl font-black text-slate-900">Destaques patrocinados</h1>
-              <p className="text-sm text-slate-600 mt-1">
-                A ativação ocorre automaticamente após pagamento confirmado. Validade começa no momento da aprovação do pagamento.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={openCreate}
-              className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white"
-            >
-              Novo destaque
-            </button>
-          </div>
+      <div
+        className={`w-full lg:grid lg:items-start lg:gap-0 ${
+          sidebarCompact ? 'lg:grid-cols-[80px_minmax(0,1fr)]' : 'lg:grid-cols-[260px_minmax(0,1fr)]'
+        }`}
+      >
+        <AdminDesktopSidebar
+          items={navItems.map((item) => ({
+            id: item.id,
+            label: item.label,
+            icon: item.icon,
+            disabled: item.disabled,
+            badge: item.id === 'motoboys' && item.disabled ? 'Pro' : undefined,
+            tone: item.id === 'motoboys' && item.disabled ? 'violet' : 'default',
+          }))}
+          activeId="destaques"
+          compact={sidebarCompact}
+          onToggleCompact={() => setSidebarCompact((prev) => !prev)}
+          onSelect={handleNavSelect}
+          onLogout={() => {
+            markManualLogoutRedirect('admin', '/hub');
+            logout();
+            navigate('/hub', { replace: true });
+          }}
+        />
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Vagas ativas</p>
-              <p className="mt-1 text-xl font-black text-slate-900">{Number(pricing?.activeSlots || 0)} / {Number(pricing?.maxActiveSlots || 50)}</p>
+        <div className="space-y-4">
+          <section className="rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Hub Já no Caminho</p>
+                <h1 className="text-xl font-black text-slate-900">Destaques patrocinados</h1>
+                <p className="text-sm text-slate-600 mt-1">
+                  A ativação ocorre automaticamente após pagamento confirmado. Validade começa no momento da aprovação do pagamento.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={openCreate}
+                className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white"
+              >
+                Novo destaque
+              </button>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Preço diário</p>
-              <p className="mt-1 text-xl font-black text-slate-900">{formatCurrency(Number(pricing?.prices?.DAY || 0))}</p>
-            </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Preço mensal</p>
-              <p className="mt-1 text-xl font-black text-slate-900">{formatCurrency(Number(pricing?.prices?.MONTH || 0))}</p>
-            </div>
-          </div>
-        </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
-          <div className="mb-3 flex items-center justify-between gap-2">
-            <h2 className="text-base font-black text-slate-900">Meus destaques</h2>
-            <button
-              type="button"
-              onClick={loadAll}
-              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700"
-            >
-              Atualizar
-            </button>
-          </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Vagas ativas</p>
+                <p className="mt-1 text-xl font-black text-slate-900">{Number(pricing?.activeSlots || 0)} / {Number(pricing?.maxActiveSlots || 50)}</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Preço diário</p>
+                <p className="mt-1 text-xl font-black text-slate-900">{formatCurrency(Number(pricing?.prices?.DAY || 0))}</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Preço mensal</p>
+                <p className="mt-1 text-xl font-black text-slate-900">{formatCurrency(Number(pricing?.prices?.MONTH || 0))}</p>
+              </div>
+            </div>
+          </section>
 
-          {loading ? (
-            <p className="text-sm text-slate-500">Carregando...</p>
-          ) : requests.length === 0 ? (
-            <p className="text-sm text-slate-500">Nenhum destaque solicitado ainda.</p>
-          ) : (
-            <div className="space-y-2">
-              {requests.map((request: any) => {
-                const status = String(request?.status || '').toUpperCase();
-                const canCancel = status === 'PENDING_PAYMENT' || status === 'PAYMENT_FAILED' || status === 'REJECTED';
-                const canPay = status === 'PENDING_PAYMENT' && String(request?.paymentStatus || '').toUpperCase() !== 'PAID';
-                const isActive = status === 'APPROVED' && String(request?.paymentStatus || '').toUpperCase() === 'PAID';
-                return (
-                  <div key={request.id} className="rounded-2xl border border-slate-200 bg-slate-50/60 p-3">
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <div className="flex items-start gap-2.5 min-w-0">
-                        <img
-                          src={resolveAssetUrl(request?.product?.imageUrl || undefined) || '/janocaminho-logo.png'}
-                          alt={request?.product?.name || 'Produto'}
-                          className="h-11 w-11 rounded-xl object-cover border border-slate-200 bg-white"
-                        />
-                        <div className="min-w-0">
-                        <p className="text-sm font-bold text-slate-900">{request?.product?.name || 'Produto'}</p>
-                        <p className="text-xs text-slate-500">
-                          Criado em {formatDateTime(request?.createdAt)} • {DURATION_META[String(request?.durationUnit || 'DAY').toUpperCase() as DurationUnit]?.label || `${Number(request?.durationDays || 1)} dia(s)`}
-                        </p>
-                        <p className="text-xs text-slate-600 mt-1">
-                          Pagamento: <strong>{paymentStatusLabel(request?.paymentStatus)}</strong>
-                          {` • Método: ${paymentMethodLabel(request?.paymentMethod)}`}
-                          {request?.priceAmount != null ? ` • ${formatCurrency(Number(request.priceAmount || 0))}` : ''}
-                        </p>
-                        {request?.paymentPaidAt && (
-                          <p className="text-xs text-slate-600 mt-1">Pagamento confirmado em {formatDateTime(request.paymentPaidAt)}</p>
-                        )}
-                        {isActive && request?.endsAt && (
-                          <p className="text-xs font-semibold text-emerald-700 mt-1">
-                            Em destaque até {formatDateTime(request.endsAt)}
-                          </p>
-                        )}
-                        {status === 'PAID_WAITING_SLOT' && (
-                          <p className="text-xs font-semibold text-indigo-700 mt-1">Pagamento confirmado. Entrará no Hub assim que abrir uma vaga.</p>
-                        )}
+          <section className="rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <h2 className="text-base font-black text-slate-900">Meus destaques</h2>
+              <button
+                type="button"
+                onClick={loadAll}
+                className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700"
+              >
+                Atualizar
+              </button>
+            </div>
+
+            {loading ? (
+              <p className="text-sm text-slate-500">Carregando...</p>
+            ) : requests.length === 0 ? (
+              <p className="text-sm text-slate-500">Nenhum destaque solicitado ainda.</p>
+            ) : (
+              <div className="space-y-2">
+                {requests.map((request: any) => {
+                  const status = String(request?.status || '').toUpperCase();
+                  const canCancel = status === 'PENDING_PAYMENT' || status === 'PAYMENT_FAILED' || status === 'REJECTED';
+                  const canPay = status === 'PENDING_PAYMENT' && String(request?.paymentStatus || '').toUpperCase() !== 'PAID';
+                  const isActive = status === 'APPROVED' && String(request?.paymentStatus || '').toUpperCase() === 'PAID';
+                  return (
+                    <div key={request.id} className="rounded-2xl border border-slate-200 bg-slate-50/60 p-3">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div className="flex items-start gap-2.5 min-w-0">
+                          <img
+                            src={resolveAssetUrl(request?.product?.imageUrl || undefined) || '/janocaminho-logo.png'}
+                            alt={request?.product?.name || 'Produto'}
+                            className="h-11 w-11 rounded-xl object-cover border border-slate-200 bg-white"
+                          />
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-slate-900">{request?.product?.name || 'Produto'}</p>
+                            <p className="text-xs text-slate-500">
+                              Criado em {formatDateTime(request?.createdAt)} • {DURATION_META[String(request?.durationUnit || 'DAY').toUpperCase() as DurationUnit]?.label || `${Number(request?.durationDays || 1)} dia(s)`}
+                            </p>
+                            <p className="text-xs text-slate-600 mt-1">
+                              Pagamento: <strong>{paymentStatusLabel(request?.paymentStatus)}</strong>
+                              {` • Método: ${paymentMethodLabel(request?.paymentMethod)}`}
+                              {request?.priceAmount != null ? ` • ${formatCurrency(Number(request.priceAmount || 0))}` : ''}
+                            </p>
+                            {request?.paymentPaidAt && (
+                              <p className="text-xs text-slate-600 mt-1">Pagamento confirmado em {formatDateTime(request.paymentPaidAt)}</p>
+                            )}
+                            {isActive && request?.endsAt && (
+                              <p className="text-xs font-semibold text-emerald-700 mt-1">
+                                Em destaque até {formatDateTime(request.endsAt)}
+                              </p>
+                            )}
+                            {status === 'PAID_WAITING_SLOT' && (
+                              <p className="text-xs font-semibold text-indigo-700 mt-1">Pagamento confirmado. Entrará no Hub assim que abrir uma vaga.</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                          <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-bold ${statusTone(status)}`}>
+                            {statusLabel(status)}
+                          </span>
+                          {(request?.paymentQrCodeBase64 || request?.paymentLink || request?.paymentQrCodeText) && (
+                            <button
+                              type="button"
+                              onClick={() => openPayment(request)}
+                              className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700"
+                            >
+                              {canPay ? 'Pagar agora' : 'Ver pagamento'}
+                            </button>
+                          )}
+                          {canCancel && (
+                            <button
+                              type="button"
+                              onClick={() => handleCancel(String(request.id))}
+                              className="rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 text-[11px] font-semibold text-rose-700"
+                            >
+                              Cancelar
+                            </button>
+                          )}
                         </div>
                       </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-bold ${statusTone(status)}`}>
-                          {statusLabel(status)}
-                        </span>
-                        {(request?.paymentQrCodeBase64 || request?.paymentLink || request?.paymentQrCodeText) && (
-                          <button
-                            type="button"
-                            onClick={() => openPayment(request)}
-                            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700"
-                          >
-                            {canPay ? 'Pagar agora' : 'Ver pagamento'}
-                          </button>
-                        )}
-                        {canCancel && (
-                          <button
-                            type="button"
-                            onClick={() => handleCancel(String(request.id))}
-                            className="rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 text-[11px] font-semibold text-rose-700"
-                          >
-                            Cancelar
-                          </button>
-                        )}
-                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        </div>
       </div>
 
       {createOpen && (
