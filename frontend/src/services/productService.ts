@@ -10,6 +10,10 @@ const buildProductsPath = (identifier: string) =>
     ? `/stores/${identifier}/products`
     : `/stores/slug/${identifier}/products`;
 
+const PRODUCT_CACHE_TTL_MS = 90 * 1000;
+const PRODUCT_CACHE_KEY_PREFIX = 'products:catalog:';
+const inMemoryProductCache = new Map<string, { ts: number; items: any[] }>();
+
 const normalizeProduct = (product: any) => {
   const description = product.description ?? product.desc ?? "";
   return {
@@ -54,6 +58,60 @@ const handleSessionError = (error: any) => {
   }
 };
 
+const getProductCacheKey = (storeIdentifier: string) => `${PRODUCT_CACHE_KEY_PREFIX}${storeIdentifier}`;
+
+const writeProductCache = (storeIdentifier: string, items: any[]) => {
+  const payload = {
+    ts: Date.now(),
+    items: Array.isArray(items) ? items : [],
+  };
+  inMemoryProductCache.set(storeIdentifier, payload);
+  if (typeof window === 'undefined') return;
+  try {
+    sessionStorage.setItem(getProductCacheKey(storeIdentifier), JSON.stringify(payload));
+  } catch {
+    // ignore cache persistence failures
+  }
+};
+
+const readProductCache = (storeIdentifier: string) => {
+  const now = Date.now();
+  const memory = inMemoryProductCache.get(storeIdentifier);
+  if (memory && now - Number(memory.ts || 0) <= PRODUCT_CACHE_TTL_MS) {
+    return memory.items;
+  }
+
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = sessionStorage.getItem(getProductCacheKey(storeIdentifier));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const ts = Number(parsed?.ts || 0);
+    const items = Array.isArray(parsed?.items) ? parsed.items : [];
+    if (!ts || now - ts > PRODUCT_CACHE_TTL_MS) {
+      sessionStorage.removeItem(getProductCacheKey(storeIdentifier));
+      inMemoryProductCache.delete(storeIdentifier);
+      return null;
+    }
+    inMemoryProductCache.set(storeIdentifier, { ts, items });
+    return items;
+  } catch {
+    return null;
+  }
+};
+
+const invalidateProductCache = (storeIdentifier?: string | null) => {
+  const normalized = String(storeIdentifier || '').trim();
+  if (!normalized) return;
+  inMemoryProductCache.delete(normalized);
+  if (typeof window === 'undefined') return;
+  try {
+    sessionStorage.removeItem(getProductCacheKey(normalized));
+  } catch {
+    // ignore
+  }
+};
+
 // 🔐 fonte única da loja (admin/produção)
 const getStoreIdentifierFromSession = (): string | null =>
 {
@@ -90,10 +148,12 @@ export const productService = {
     if (product.id)
     {
       const data = await apiClient.put(path, product);
+      invalidateProductCache(targetStore);
       return data ? normalizeProduct(data) : null;
     } else
     {
       const data = await apiClient.post(basePath, product);
+      invalidateProductCache(targetStore);
       return data ? normalizeProduct(data) : null;
     }
   },
@@ -108,6 +168,7 @@ export const productService = {
 
     const basePath = buildProductsPath(targetStore);
     await apiClient.delete(`${basePath}/${id}`);
+    invalidateProductCache(targetStore);
   },
 
   async list(storeId?: string)
@@ -120,7 +181,9 @@ export const productService = {
 
     try {
       const data = await apiClient.get(buildProductsPath(targetStore));
-      return data.map(normalizeProduct);
+      const normalized = data.map(normalizeProduct);
+      writeProductCache(targetStore, normalized);
+      return normalized;
     } catch (error) {
       handleSessionError(error);
       throw error;
@@ -212,6 +275,7 @@ export const productService = {
           payload,
           { signal: controller.signal }
         );
+        invalidateProductCache(targetStore);
         return normalizeProduct(data);
       } catch (error: any) {
         const isAbort = String(error?.name || '').toLowerCase() === 'aborterror';
@@ -248,7 +312,9 @@ export const productService = {
         const data = await apiClient.get(basePath);
         if (!cancelled)
         {
-          callback(data.map(normalizeProduct));
+          const normalized = data.map(normalizeProduct);
+          writeProductCache(targetStore, normalized);
+          callback(normalized);
         }
       } catch (error)
       {
@@ -257,6 +323,10 @@ export const productService = {
       }
     };
 
+    const cached = readProductCache(targetStore);
+    if (cached && !cancelled) {
+      callback(cached);
+    }
     load();
 
     return () =>
