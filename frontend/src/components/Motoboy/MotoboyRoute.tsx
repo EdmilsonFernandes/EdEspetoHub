@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { motoboyService } from '../../services/motoboyService';
-import { forceLogoutAndRedirect, isSessionAuthError } from '../../utils/sessionRedirect';
+import { consumeManualLogoutRedirect, forceLogoutAndRedirect, isSessionAuthError } from '../../utils/sessionRedirect';
 
 export function MotoboyRoute({ children }: { children: React.ReactNode }) {
   const { auth, hydrated } = useAuth();
@@ -61,7 +61,8 @@ export function MotoboyRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (allowed === false) {
-    return <Navigate to="/motoboy/login" replace />;
+    const manualLogoutRedirect = consumeManualLogoutRedirect('motoboy');
+    return <Navigate to={manualLogoutRedirect || '/motoboy/login'} replace />;
   }
 
   if (allowed === null) {

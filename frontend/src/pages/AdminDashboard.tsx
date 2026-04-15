@@ -28,6 +28,7 @@ import { formatAddress, formatCurrency, formatDateTime, formatOrderDisplayId, fo
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatSelectedModifiers } from '../utils/productModifiers';
+import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 import { FormSection } from '../components/common/FormSection';
 import { PremiumSelect } from '../components/common/PremiumSelect';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
@@ -2421,6 +2422,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           onToggleCompact={() => setSidebarCompact((prev) => !prev)}
           onSelect={handleNavSelect}
           onLogout={() => {
+            markManualLogoutRedirect('admin', '/hub');
             logout();
             navigate('/hub', { replace: true });
           }}

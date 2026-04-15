@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AdminHeader } from '../components/Admin/AdminHeader';
 import { useAuth } from '../contexts/AuthContext';
+import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 import { orderService } from '../services/orderService';
 import { formatAddress, formatCurrency, formatDateTime, formatOrderDisplayId, formatOrderStatus, formatOrderType } from '../utils/format';
 import { getPaymentMethodMeta } from '../utils/paymentAssets';
@@ -394,8 +395,9 @@ export function AdminOrders() {
           onToggleCompact={() => setSidebarCompact((prev) => !prev)}
           onSelect={handleNavSelect}
           onLogout={() => {
+            markManualLogoutRedirect('admin', '/hub');
             logout();
-            navigate('/admin');
+            navigate('/hub', { replace: true });
           }}
         />
         <div className="min-w-0 flex-1 space-y-6">

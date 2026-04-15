@@ -18,6 +18,7 @@ import { subscriptionService } from '../../services/subscriptionService';
 import { storeService } from '../../services/storeService';
 import { authService } from '../../services/authService';
 import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
+import { markManualLogoutRedirect } from '../../utils/sessionRedirect';
 
 export interface Store {
   logoUrl?: string;
@@ -564,6 +565,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
                 type="button"
                 onClick={() => {
                   setOpenUserMenu(false);
+                  markManualLogoutRedirect('admin', '/hub');
                   logout();
                   navigate('/hub', { replace: true });
                 }}

@@ -8,6 +8,7 @@ import { APP_BUILD_INFO } from '../generated/buildInfo';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { nativeBiometricService } from '../services/nativeBiometricService';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
+import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 
 export function MotoboyLogin() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -227,6 +228,7 @@ export function MotoboyLogin() {
   };
 
   const handleLogout = () => {
+    markManualLogoutRedirect('motoboy', '/hub');
     try {
       localStorage.removeItem('motoboySession');
     } catch {

@@ -2,6 +2,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { consumeManualLogoutRedirect } from '../../utils/sessionRedirect';
 
 type AdminAllowedRole = 'ADMIN' | 'OPERATOR' | 'CHURRASQUEIRO';
 
@@ -29,7 +30,8 @@ export function AdminRoute({
   const hasSession = Boolean(auth?.token && auth?.store);
   const hasAdminContext = role === 'ADMIN' || role === 'OPERATOR' || role === 'CHURRASQUEIRO';
   if (!hasSession || !hasAdminContext) {
-    return <Navigate to="/admin" replace />;
+    const manualLogoutRedirect = consumeManualLogoutRedirect('admin');
+    return <Navigate to={manualLogoutRedirect || '/admin'} replace />;
   }
   if (Array.isArray(allowedRoles) && allowedRoles.length > 0 && !allowedRoles.includes(role)) {
     return <Navigate to={fallbackTo} replace state={{ accessDenied: true }} />;

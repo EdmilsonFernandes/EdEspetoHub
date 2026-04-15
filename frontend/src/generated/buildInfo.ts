@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260415.010615.610999cf",
-  "buildId": "0.1.9+20260415.010615.610999cf-20260415.010615-610999cf",
-  "builtAt": "2026-04-15T01:06:15.362Z",
-  "commitHash": "610999cf77d6e572aea2cfe0412d7c45d4714ce2",
-  "shortHash": "610999cf",
+  "versionInternal": "0.1.9+20260415.011903.0e8989da",
+  "buildId": "0.1.9+20260415.011903.0e8989da-20260415.011903-0e8989da",
+  "builtAt": "2026-04-15T01:19:03.158Z",
+  "commitHash": "0e8989da731ff561b0708d957a482991576ba7d8",
+  "shortHash": "0e8989da",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "0e8989da731ff561b0708d957a482991576ba7d8",
+      "shortHash": "0e8989da",
+      "dateIso": "2026-04-14T22:08:23-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(hub): replace sticky search input with search sheet",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0e8989da731ff561b0708d957a482991576ba7d8"
+    },
     {
       "hash": "610999cf77d6e572aea2cfe0412d7c45d4714ce2",
       "shortHash": "610999cf",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(hub): stabilize search bar and soften condo banner",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/060cccaf5fe102a251eb4e3b01b28ee9a9f2f42a"
-    },
-    {
-      "hash": "c69d3ae74f79c0e54b23003b011af68a3b6cc7ad",
-      "shortHash": "c69d3ae7",
-      "dateIso": "2026-04-14T11:25:04-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(auth): add premium biometric enrollment prompt",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c69d3ae74f79c0e54b23003b011af68a3b6cc7ad"
     }
   ]
 } as const;

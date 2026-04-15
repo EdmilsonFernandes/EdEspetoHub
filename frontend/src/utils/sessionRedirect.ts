@@ -1,5 +1,7 @@
 type SessionScope = 'admin' | 'motoboy' | 'superadmin';
 
+const MANUAL_LOGOUT_REDIRECT_KEY = 'auth:manual-logout-redirect';
+
 const TOKEN_ERROR_REGEX = /token|jwt|unauthorized|n[aã]o autorizado|sess[aã]o expirada/i;
 
 export const inferScopeFromPathname = (pathname: string): SessionScope => {
@@ -15,6 +17,8 @@ const getLoginPath = (scope: SessionScope) => {
   return '/admin';
 };
 
+const getManualLogoutStorageKey = (scope: SessionScope) => `${MANUAL_LOGOUT_REDIRECT_KEY}:${scope}`;
+
 export const isSessionAuthError = (status?: number, message?: string, code?: string) => {
   if (status === 401) return true;
   const normalizedCode = String(code || '').toUpperCase();
@@ -27,8 +31,25 @@ export const isSessionAuthError = (status?: number, message?: string, code?: str
   return TOKEN_ERROR_REGEX.test(normalizedMessage);
 };
 
+export const markManualLogoutRedirect = (scope: SessionScope, target = '/hub') => {
+  if (typeof window === 'undefined') return;
+  window.sessionStorage.setItem(getManualLogoutStorageKey(scope), target);
+};
+
+export const consumeManualLogoutRedirect = (scope: SessionScope) => {
+  if (typeof window === 'undefined') return '';
+  const key = getManualLogoutStorageKey(scope);
+  const target = String(window.sessionStorage.getItem(key) || '').trim();
+  if (target) {
+    window.sessionStorage.removeItem(key);
+  }
+  return target;
+};
+
 export const forceLogoutAndRedirect = (scope: SessionScope) => {
   if (typeof window === 'undefined') return;
+
+  window.sessionStorage.removeItem(getManualLogoutStorageKey(scope));
 
   if (scope === 'admin') {
     localStorage.removeItem('adminSession');

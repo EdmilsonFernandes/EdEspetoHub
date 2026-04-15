@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Buildings, ChartBar, ChefHat, CurrencyDollar, Package, SignOut, Star } from '@phosphor-icons/react';
 import { orderService } from '../../services/orderService';
 import { useAuth } from '../../contexts/AuthContext';
+import { markManualLogoutRedirect } from '../../utils/sessionRedirect';
 
 export function AdminMobileBottomNav() {
   const navigate = useNavigate();
@@ -238,6 +239,7 @@ export function AdminMobileBottomNav() {
       icon: SignOut,
       active: false,
       onClick: () => {
+        markManualLogoutRedirect('admin', '/hub');
         logout();
         if (typeof window !== 'undefined') sessionStorage.removeItem('admin:activeTab');
         navigate('/hub', { replace: true });

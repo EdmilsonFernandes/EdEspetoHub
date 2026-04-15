@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { GrillQueue } from '../components/Admin/GrillQueue';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useAuth } from '../contexts/AuthContext';
+import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 import { ChartBar, ClipboardText, CreditCard, Package, Gear, Scooter, Star, CheckSquare, UsersThree } from '@phosphor-icons/react';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 
@@ -136,8 +137,9 @@ export function AdminQueue() {
           onToggleCompact={() => setSidebarCompact((prev) => !prev)}
           onSelect={handleNavSelect}
           onLogout={() => {
+            markManualLogoutRedirect('admin', '/hub');
             logout();
-            navigate('/admin');
+            navigate('/hub', { replace: true });
           }}
         />
         <div className="min-w-0 flex-1 space-y-4">

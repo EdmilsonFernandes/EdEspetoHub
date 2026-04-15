@@ -1698,6 +1698,9 @@ export function MarketplacePage() {
         onOpenPrivacy={openPrivacy}
         onOpenHelp={openHelp}
         onLogout={handleCustomerLogout}
+        onRegisterClient={() => navigate('/cliente?mode=register&hub=1&next=/hub')}
+        onRegisterStore={() => navigate('/create?plan=trial')}
+        onRegisterMotoboy={() => navigate('/motoboy/register')}
         versionLabel={APP_BUILD_INFO.versionLabel}
       />
 

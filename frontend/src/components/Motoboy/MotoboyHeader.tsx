@@ -4,6 +4,7 @@ import { SignOut, UserCircle } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
 import { motoboyService } from '../../services/motoboyService';
+import { markManualLogoutRedirect } from '../../utils/sessionRedirect';
 
 type MotoboyHeaderProps = {
   title: string;
@@ -74,6 +75,7 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
   }, [showSession, user?.profileImageUrl]);
 
   const handleLogout = () => {
+    markManualLogoutRedirect('motoboy', '/hub');
     try {
       localStorage.removeItem('motoboySession');
     } catch {

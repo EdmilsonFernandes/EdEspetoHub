@@ -43,6 +43,9 @@ type ProfileDrawerProps = {
   onOpenPrivacy: () => void;
   onOpenHelp: () => void;
   onLogout: () => void;
+  onRegisterClient: () => void;
+  onRegisterStore: () => void;
+  onRegisterMotoboy: () => void;
   versionLabel?: string;
 };
 
@@ -75,6 +78,9 @@ export function ProfileDrawer({
   onOpenPrivacy: _onOpenPrivacy,
   onOpenHelp,
   onLogout,
+  onRegisterClient,
+  onRegisterStore,
+  onRegisterMotoboy,
   versionLabel,
 }: ProfileDrawerProps) {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -272,8 +278,7 @@ export function ProfileDrawer({
                   <div className="flex items-center gap-2">
                     <p className="truncate text-base font-black text-slate-900 leading-tight">{userName}</p>
                     {currentAccessProfile ? (
-                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#336886]/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">
-                        {currentAccessProfile.icon}
+                      <span className="inline-flex shrink-0 items-center rounded-full bg-[#336886]/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">
                         <span>{currentAccessProfile.title}</span>
                       </span>
                     ) : null}
@@ -301,12 +306,9 @@ export function ProfileDrawer({
               onClick={() => setAccessPickerOpen(true)}
               className="flex w-full items-center justify-between rounded-[1.5rem] bg-slate-900 p-4 text-white shadow-[0_24px_40px_-24px_rgba(15,23,42,0.65)] transition-all active:scale-[0.97]"
             >
-              <div className="flex items-center gap-3">
-                <UserCircle size={24} weight="duotone" className="text-slate-400" />
-                <div className="text-left">
-                  <p className="text-sm font-black">Entrar</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Cliente, lojista ou entregador</p>
-                </div>
+              <div className="text-left">
+                <p className="text-sm font-black">Entrar ou criar conta</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Cliente, lojista e entregador</p>
               </div>
               <CaretRight size={16} weight="bold" className="text-slate-500" />
             </button>
@@ -378,9 +380,9 @@ export function ProfileDrawer({
 
           {!isLogged && (
             <section className="rounded-[1.65rem] border border-slate-100 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,250,252,0.86))] p-4 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.35)]">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Acesso unificado</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Primeiro acesso</p>
               <p className="mt-1 text-[12px] font-semibold leading-relaxed text-slate-600">
-                Toque em Entrar para escolher se você é cliente, lojista ou entregador.
+                Se ainda não tem conta, abra o acesso e escolha como quer começar.
               </p>
             </section>
           )}
@@ -416,8 +418,12 @@ export function ProfileDrawer({
               <div className="space-y-3">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">Escolha seu acesso</p>
-                  <h3 className="mt-1 text-[1.35rem] font-black tracking-[-0.03em] text-slate-950">Trocar perfil</h3>
-                  <p className="mt-1 text-sm font-medium leading-relaxed text-slate-500">Cada opção abre a área certa do app.</p>
+                  <h3 className="mt-1 text-[1.35rem] font-black tracking-[-0.03em] text-slate-950">
+                    {isLogged ? 'Trocar perfil' : 'Entrar ou começar'}
+                  </h3>
+                  <p className="mt-1 text-sm font-medium leading-relaxed text-slate-500">
+                    {isLogged ? 'Cada opção abre a área certa do app.' : 'Entre com sua conta ou crie o acesso certo para você.'}
+                  </p>
                 </div>
               </div>
               <button
@@ -481,6 +487,61 @@ export function ProfileDrawer({
                 </button>
               ))}
             </div>
+            {!isLogged ? (
+              <div className="relative mt-4 rounded-[1.65rem] border border-slate-200/80 bg-white/88 p-4 shadow-[0_16px_34px_-28px_rgba(15,23,42,0.28)]">
+                <div className="mb-3">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Quero começar</p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">Escolha o cadastro ideal sem poluir a tela principal.</p>
+                </div>
+                <div className="grid gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAccessPickerOpen(false);
+                      onRegisterClient();
+                      onClose();
+                    }}
+                    className="flex items-center justify-between rounded-[1.2rem] border border-slate-200 bg-slate-50/80 px-3.5 py-3 text-left text-slate-700 transition-all active:scale-[0.98]"
+                  >
+                    <div>
+                      <p className="text-sm font-black text-slate-900">Criar conta de cliente</p>
+                      <p className="mt-0.5 text-[11px] font-semibold text-slate-500">Para pedir, salvar favoritos e acompanhar pedidos.</p>
+                    </div>
+                    <CaretRight size={16} weight="bold" className="shrink-0 text-slate-300" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAccessPickerOpen(false);
+                      onRegisterStore();
+                      onClose();
+                    }}
+                    className="flex items-center justify-between rounded-[1.2rem] border border-emerald-100 bg-emerald-50/80 px-3.5 py-3 text-left text-emerald-900 transition-all active:scale-[0.98]"
+                  >
+                    <div>
+                      <p className="text-sm font-black text-emerald-950">Criar loja</p>
+                      <p className="mt-0.5 text-[11px] font-semibold text-emerald-700/80">Para vender no hub e operar seus pedidos.</p>
+                    </div>
+                    <CaretRight size={16} weight="bold" className="shrink-0 text-emerald-300" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAccessPickerOpen(false);
+                      onRegisterMotoboy();
+                      onClose();
+                    }}
+                    className="flex items-center justify-between rounded-[1.2rem] border border-amber-100 bg-amber-50/80 px-3.5 py-3 text-left text-amber-900 transition-all active:scale-[0.98]"
+                  >
+                    <div>
+                      <p className="text-sm font-black text-amber-950">Criar conta de entregador</p>
+                      <p className="mt-0.5 text-[11px] font-semibold text-amber-700/80">Para receber solicitações e acessar sua área.</p>
+                    </div>
+                    <CaretRight size={16} weight="bold" className="shrink-0 text-amber-300" />
+                  </button>
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       )}

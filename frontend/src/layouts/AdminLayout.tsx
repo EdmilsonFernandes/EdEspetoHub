@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { CaretDown, ChartBar, CheckSquare, ClipboardText, CreditCard, Gear, Package, ShoppingCart, SignOut, Scooter, Star, X, UsersThree } from '@phosphor-icons/react';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
+import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -280,6 +281,7 @@ export function AdminLayout({
             <button
               type="button"
               onClick={() => {
+                markManualLogoutRedirect('admin', '/hub');
                 logout();
                 setMobileNavOpen(false);
                 navigate('/hub', { replace: true });

@@ -736,6 +736,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     if (typeof window === "undefined") return false;
     return localStorage.getItem("queueTvMode") === "true";
   });
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isPullRefreshing, setIsPullRefreshing] = useState(false);
   const [queueFilter, setQueueFilter] = useState<'all' | 'condominium' | 'pending' | 'preparing' | 'ready' | 'late' | 'cancelled' | 'finalized'>('all');
   const [reportRange, setReportRange] = useState<'today' | 'yesterday' | 'last7' | 'custom'>('today');
   const [reportFrom, setReportFrom] = useState(() => getNowKeyInSaoPaulo());
@@ -830,6 +832,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const queueRequestSeqRef = useRef(0);
   const queueAppliedSeqRef = useRef(0);
   const queueRetryDelayRef = useRef(3000);
+  const pullStartYRef = useRef<number | null>(null);
+  const pullActiveRef = useRef(false);
+  const pullDistanceRef = useRef(0);
   const audioContextRef = useRef<AudioContext | null>(null);
   const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
   const lastNotificationAudioSrcRef = useRef<string>('');
@@ -1444,6 +1449,19 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     }, delay);
   }, [clearQueuePollTimer, loadQueue]);
 
+  const handleManualRefresh = useCallback(async () => {
+    if (queueRequestInFlightRef.current) return;
+    setIsPullRefreshing(true);
+    try {
+      await loadQueue({ silent: true });
+      scheduleQueuePoll(false);
+    } finally {
+      setIsPullRefreshing(false);
+      setPullDistance(0);
+      pullDistanceRef.current = 0;
+    }
+  }, [loadQueue, scheduleQueuePoll]);
+
   useEffect(() => {
     if (!storeIdentifier) return;
     void loadQueue();
@@ -1513,6 +1531,52 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       window.removeEventListener("keydown", unlock);
     };
   }, [soundEnabled]);
+
+  const handleTouchStart = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
+    if (tvMode || isPullRefreshing) return;
+    if ((window.innerWidth || 0) >= 1024) return;
+    if ((window.scrollY || 0) > 4) return;
+    pullStartYRef.current = event.touches[0]?.clientY ?? null;
+    pullActiveRef.current = pullStartYRef.current != null;
+    pullDistanceRef.current = 0;
+  }, [isPullRefreshing, tvMode]);
+
+  const handleTouchMove = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
+    if (!pullActiveRef.current || pullStartYRef.current == null) return;
+    if ((window.scrollY || 0) > 4) {
+      pullActiveRef.current = false;
+      pullStartYRef.current = null;
+      pullDistanceRef.current = 0;
+      setPullDistance(0);
+      return;
+    }
+
+    const currentY = event.touches[0]?.clientY ?? pullStartYRef.current;
+    const delta = Math.max(0, currentY - pullStartYRef.current);
+    if (delta <= 0) {
+      pullDistanceRef.current = 0;
+      setPullDistance(0);
+      return;
+    }
+
+    const resisted = Math.min(96, Math.round(Math.pow(delta, 0.9)));
+    pullDistanceRef.current = resisted;
+    setPullDistance(resisted);
+    event.preventDefault();
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (!pullActiveRef.current) return;
+    const shouldRefresh = pullDistanceRef.current >= 68;
+    pullActiveRef.current = false;
+    pullStartYRef.current = null;
+    if (shouldRefresh) {
+      void handleManualRefresh();
+      return;
+    }
+    pullDistanceRef.current = 0;
+    setPullDistance(0);
+  }, [handleManualRefresh]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(Date.now()), 1000);
@@ -2737,12 +2801,31 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
   return (
     <>
-    <div className={`no-print ${tvMode ? "space-y-6 rounded-3xl bg-slate-900/95 p-4 sm:p-6 text-white" : "space-y-1"}`}>
+    <div
+      className={`no-print ${tvMode ? "space-y-6 rounded-3xl bg-slate-900/95 p-4 sm:p-6 text-white" : "space-y-1"}`}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
+    >
       <style>{`
         @keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
         @keyframes satinPop{0%{transform:scale(0.92);filter:saturate(0.9)}60%{transform:scale(1.06);filter:saturate(1.08)}100%{transform:scale(1);filter:saturate(1)}}
         @keyframes drawerIn{0%{transform:translateX(100%)}100%{transform:translateX(0)}}
       `}</style>
+      {!tvMode ? (
+        <div
+          className={`pointer-events-none sticky z-40 flex justify-center transition-all duration-200 lg:hidden ${
+            pullDistance > 0 || isPullRefreshing ? 'top-2 opacity-100' : 'top-0 opacity-0'
+          }`}
+          style={{ transform: `translateY(${Math.min(18, pullDistance * 0.22)}px)` }}
+        >
+          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/96 px-3 py-1.5 text-[11px] font-bold text-slate-600 shadow-[0_12px_28px_-18px_rgba(15,23,42,0.22)] backdrop-blur-md">
+            <ArrowsClockwise size={13} weight="duotone" className={isPullRefreshing ? 'animate-spin text-[#336886]' : 'text-slate-500'} />
+            {isPullRefreshing ? 'Atualizando fila...' : pullDistance >= 68 ? 'Solte para atualizar' : 'Puxe para atualizar'}
+          </div>
+        </div>
+      ) : null}
       <div className={`${tvMode ? "" : "rounded-2xl border border-slate-200 bg-white/95 backdrop-blur-md px-2 sm:px-3 py-2 sticky top-0 z-30"}`}>
         <div className="flex flex-col gap-1 mb-0">
           {!tvMode ? (
