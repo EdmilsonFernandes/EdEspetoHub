@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260414.214115.8609c5b3",
-  "buildId": "0.1.9+20260414.214115.8609c5b3-20260414.214115-8609c5b3",
-  "builtAt": "2026-04-14T21:41:15.552Z",
-  "commitHash": "8609c5b33a7665123eb6fdc43b7e84f00630d13e",
-  "shortHash": "8609c5b3",
+  "versionInternal": "0.1.9+20260415.010615.610999cf",
+  "buildId": "0.1.9+20260415.010615.610999cf-20260415.010615-610999cf",
+  "builtAt": "2026-04-15T01:06:15.362Z",
+  "commitHash": "610999cf77d6e572aea2cfe0412d7c45d4714ce2",
+  "shortHash": "610999cf",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "610999cf77d6e572aea2cfe0412d7c45d4714ce2",
+      "shortHash": "610999cf",
+      "dateIso": "2026-04-14T18:42:05-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(hub): unify bottom navigation across condo flows",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/610999cf77d6e572aea2cfe0412d7c45d4714ce2"
+    },
     {
       "hash": "8609c5b33a7665123eb6fdc43b7e84f00630d13e",
       "shortHash": "8609c5b3",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(auth): add premium biometric enrollment prompt",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c69d3ae74f79c0e54b23003b011af68a3b6cc7ad"
-    },
-    {
-      "hash": "b2431eebe5ef2fddfe5c255717a9d968234629a3",
-      "shortHash": "b2431eeb",
-      "dateIso": "2026-04-14T11:08:43-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(hub): refine condo banner and dock bottom nav",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b2431eebe5ef2fddfe5c255717a9d968234629a3"
     }
   ]
 } as const;
