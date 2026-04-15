@@ -21,7 +21,7 @@ import {
 } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
 import { formatCurrency, formatOrderDisplayId } from '../utils/format';
-import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { useCachedCustomerProfileImage } from '../hooks/useCachedCustomerProfileImage';
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { App as CapacitorApp } from '@capacitor/app';
@@ -76,6 +76,7 @@ export function ClientAccount() {
   const [phoneDraft, setPhoneDraft] = useState('');
   const settingsSectionRef = useRef<HTMLElement | null>(null);
   const settingsOnly = searchParams.get('section') === 'settings';
+  const cachedProfileImage = useCachedCustomerProfileImage(me?.profileImageUrl, me?.profileImageVersion);
 
   const syncCustomerSession = (nextUser: any, options?: { bustProfileImage?: boolean }) => {
     try {
@@ -443,8 +444,8 @@ export function ClientAccount() {
                 <div className="flex flex-col items-center text-center space-y-4">
                   <div className="relative">
                     <div className="h-24 w-24 overflow-hidden rounded-[2rem] border-4 border-slate-50 shadow-md">
-                      {me?.profileImageUrl ? (
-                        <img src={resolveAssetUrl(me.profileImageUrl)} alt={me.fullName} className="h-full w-full object-cover" />
+                      {cachedProfileImage ? (
+                        <img src={cachedProfileImage} alt={me.fullName} className="h-full w-full object-cover" />
                       ) : (
                         <div className="grid h-full w-full place-items-center bg-slate-100 text-2xl font-black text-slate-400">
                           {String(me?.fullName || 'U').slice(0, 1).toUpperCase()}

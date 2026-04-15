@@ -36,6 +36,7 @@ import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
 import { isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
 import { formatOrderStatus } from '../utils/format';
+import { useCachedCustomerProfileImage } from '../hooks/useCachedCustomerProfileImage';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { HeaderAvatarTrigger } from '../components/Marketplace/HeaderAvatarTrigger';
 import { ProfileDrawer } from '../components/Marketplace/ProfileDrawer';
@@ -1341,13 +1342,10 @@ export function MarketplacePage() {
     customerSession?.user?.fullName || customerSession?.user?.name || (isCustomerLogged ? 'Cliente' : 'Anônimo')
   ).trim();
   const customerEmail = String(customerSession?.user?.email || '').trim();
-  const customerProfileImage = useMemo(() => {
-    const baseUrl = resolveAssetUrl(customerSession?.user?.profileImageUrl || undefined);
-    const version = Number(customerSession?.user?.profileImageVersion || 0);
-    if (!baseUrl) return undefined;
-    if (!version) return baseUrl;
-    return `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}v=${version}`;
-  }, [customerSession?.user?.profileImageUrl, customerSession?.user?.profileImageVersion]);
+  const customerProfileImage = useCachedCustomerProfileImage(
+    customerSession?.user?.profileImageUrl,
+    customerSession?.user?.profileImageVersion
+  );
   const displayLocationLabel = locationLabel === 'Sua região' && fallbackRegionLabel ? fallbackRegionLabel : locationLabel;
 
   const openCustomerAccount = useCallback(() => {

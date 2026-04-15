@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260415.221658.88fe2755",
-  "buildId": "0.1.9+20260415.221658.88fe2755-20260415.221658-88fe2755",
-  "builtAt": "2026-04-15T22:16:58.790Z",
-  "commitHash": "88fe2755d11686740cd370a32afd65c76ab39e4a",
-  "shortHash": "88fe2755",
+  "versionInternal": "0.1.9+20260415.222504.21b5bcb2",
+  "buildId": "0.1.9+20260415.222504.21b5bcb2-20260415.222504-21b5bcb2",
+  "builtAt": "2026-04-15T22:25:04.855Z",
+  "commitHash": "21b5bcb28f57e585a2748616827f8fd1d517cf33",
+  "shortHash": "21b5bcb2",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "21b5bcb28f57e585a2748616827f8fd1d517cf33",
+      "shortHash": "21b5bcb2",
+      "dateIso": "2026-04-15T19:18:50-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "build(android): bump release to 1.0.15",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/21b5bcb28f57e585a2748616827f8fd1d517cf33"
+    },
     {
       "hash": "88fe2755d11686740cd370a32afd65c76ab39e4a",
       "shortHash": "88fe2755",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style(hub): refine premium role access drawer",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e510136133b021d58ce4fd4e08ae5cd9126b60e6"
-    },
-    {
-      "hash": "05f794f1c6c003bbeefb097042fba91b398f3189",
-      "shortHash": "05f794f1",
-      "dateIso": "2026-04-14T17:32:45-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(hub): add smart access switching across saved roles",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/05f794f1c6c003bbeefb097042fba91b398f3189"
     }
   ]
 } as const;
