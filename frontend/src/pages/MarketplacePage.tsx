@@ -1757,12 +1757,8 @@ export function MarketplacePage() {
             <div className="relative z-20 px-0.5">
               <div
                 className="group relative flex min-h-[52px] items-center gap-3 rounded-[22px] border border-slate-200/90 bg-white/96 px-4 shadow-[0_12px_26px_-20px_rgba(15,23,42,0.18)] transition-[border-color,box-shadow,background-color] duration-200 ease-out hover:border-slate-300 hover:bg-white focus-within:border-[#336886]/22 focus-within:shadow-[0_16px_34px_-22px_rgba(51,104,134,0.18)] focus-within:ring-2 focus-within:ring-[#336886]/8"
-                onClick={() => {
-                  if (!isSearchEditing && !query.trim()) {
-                    setIsSearchEditing(true);
-                    window.requestAnimationFrame(() => searchInputRef.current?.focus());
-                    return;
-                  }
+                onClick={(e) => {
+                  if ((e.target as HTMLElement).closest('button')) return;
                   searchInputRef.current?.focus();
                 }}
               >
@@ -1770,45 +1766,26 @@ export function MarketplacePage() {
                   <MagnifyingGlass size={18} weight="bold" />
                 </div>
                 <div className="relative min-w-0 flex-1">
-                  {isSearchEditing || query.trim() ? (
-                    <input
-                      ref={searchInputRef}
-                      type="text"
-                      value={query}
-                      onChange={(event) => setQuery(event.target.value)}
-                      onFocus={() => setIsSearchEditing(true)}
-                      onBlur={() => {
-                        if (!query.trim()) {
-                          setIsSearchEditing(false);
-                        }
-                      }}
-                      placeholder=""
-                      autoComplete="off"
-                      inputMode="search"
-                      enterKeyHint="search"
-                      className="block min-h-[52px] w-full min-w-0 appearance-none bg-transparent pr-1 text-[14px] font-semibold text-slate-950 outline-none"
-                      style={{
-                        WebkitAppearance: 'none',
-                        WebkitTextFillColor: '#020617',
-                        caretColor: '#336886',
-                        backgroundColor: 'transparent',
-                        boxShadow: 'none',
-                      }}
-                    />
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsSearchEditing(true);
-                        window.requestAnimationFrame(() => searchInputRef.current?.focus());
-                      }}
-                      className="flex min-h-[52px] w-full items-center pr-3 text-left text-[14px] font-semibold text-slate-400"
-                      aria-label="Buscar loja, categoria ou produto"
-                      title="Buscar loja, categoria ou produto"
-                    >
-                      Buscar loja, categoria ou produto
-                    </button>
-                  )}
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    onFocus={() => setIsSearchEditing(true)}
+                    onBlur={() => setIsSearchEditing(false)}
+                    placeholder="Buscar loja, categoria ou produto"
+                    autoComplete="off"
+                    inputMode="search"
+                    enterKeyHint="search"
+                    className="block min-h-[52px] w-full min-w-0 appearance-none bg-transparent pr-1 text-[14px] font-semibold text-slate-950 placeholder:text-slate-400 outline-none"
+                    style={{
+                      WebkitAppearance: 'none',
+                      WebkitTextFillColor: query ? '#020617' : 'unset',
+                      caretColor: '#336886',
+                      backgroundColor: 'transparent',
+                      boxShadow: 'none',
+                    }}
+                  />
                 </div>
                 {query ? (
                   <button

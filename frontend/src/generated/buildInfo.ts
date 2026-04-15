@@ -5,14 +5,59 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260415.013226.79e67f2b",
-  "buildId": "0.1.9+20260415.013226.79e67f2b-20260415.013226-79e67f2b",
-  "builtAt": "2026-04-15T01:32:26.313Z",
-  "commitHash": "79e67f2bfb87e3b89bc16e77b0ef0f01e64dd9d2",
-  "shortHash": "79e67f2b",
+  "versionInternal": "0.1.9+20260415.121307.96daddab",
+  "buildId": "0.1.9+20260415.121307.96daddab-20260415.121307-96daddab",
+  "builtAt": "2026-04-15T12:13:07.670Z",
+  "commitHash": "96daddabe14508acae31a2dc271a69500887aee2",
+  "shortHash": "96daddab",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "96daddabe14508acae31a2dc271a69500887aee2",
+      "shortHash": "96daddab",
+      "dateIso": "2026-04-14T23:10:48-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "perf(storefront): cache public store bootstrap",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/96daddabe14508acae31a2dc271a69500887aee2"
+    },
+    {
+      "hash": "447a41f1f1b1c9670fa73f527b515b010964d8e1",
+      "shortHash": "447a41f1",
+      "dateIso": "2026-04-14T23:03:50-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "perf(queue): reduce dashboard queue payload",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/447a41f1f1b1c9670fa73f527b515b010964d8e1"
+    },
+    {
+      "hash": "5e6f095d3f958712cdd2a87a6abb7f54cd43793f",
+      "shortHash": "5e6f095d",
+      "dateIso": "2026-04-14T22:55:49-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "perf(store): cache public store availability",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5e6f095d3f958712cdd2a87a6abb7f54cd43793f"
+    },
+    {
+      "hash": "c85d2a9041e4460ac4bcef0661e68b1e8a35fd5e",
+      "shortHash": "c85d2a90",
+      "dateIso": "2026-04-14T22:46:19-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "perf(queue): cache product catalog for admin picker",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c85d2a9041e4460ac4bcef0661e68b1e8a35fd5e"
+    },
+    {
+      "hash": "efc295c9483278dda68bb57502052e355de505ce",
+      "shortHash": "efc295c9",
+      "dateIso": "2026-04-14T22:34:14-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(queue): speed up polling and isolate queue endpoint",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/efc295c9483278dda68bb57502052e355de505ce"
+    },
     {
       "hash": "79e67f2bfb87e3b89bc16e77b0ef0f01e64dd9d2",
       "shortHash": "79e67f2b",
@@ -237,51 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style(hub): elevate selected condo banner",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/369b8ce6a0bd6aa56bd05e15ec1d2e8c90e14b9b"
-    },
-    {
-      "hash": "5e8b5d6ee7298fa8401297b80e08dc0e89afbdc1",
-      "shortHash": "5e8b5d6e",
-      "dateIso": "2026-04-14T12:16:42-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(hub): avoid bottom-nav overlap and refine condo status",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5e8b5d6ee7298fa8401297b80e08dc0e89afbdc1"
-    },
-    {
-      "hash": "5c67752063a9e7abe4202c2574249c95ed721bce",
-      "shortHash": "5c677520",
-      "dateIso": "2026-04-14T12:08:06-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(android): bump release to 1.0.14",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5c67752063a9e7abe4202c2574249c95ed721bce"
-    },
-    {
-      "hash": "3670c470fce0c57b4cbe7c13160340381042db43",
-      "shortHash": "3670c470",
-      "dateIso": "2026-04-14T12:03:07-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(web): remove unused marketing demo video",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3670c470fce0c57b4cbe7c13160340381042db43"
-    },
-    {
-      "hash": "26778ac9bc2797432cd7ab5c0ffa725b6a45fe1f",
-      "shortHash": "26778ac9",
-      "dateIso": "2026-04-14T11:59:30-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(android): optimize bundled assets",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/26778ac9bc2797432cd7ab5c0ffa725b6a45fe1f"
-    },
-    {
-      "hash": "8f73a1e7d4ee910211521a3badc95dfe353e72d8",
-      "shortHash": "8f73a1e7",
-      "dateIso": "2026-04-14T11:47:42-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(auth): extend biometric login to admin and motoboy",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8f73a1e7d4ee910211521a3badc95dfe353e72d8"
     }
   ]
 } as const;
