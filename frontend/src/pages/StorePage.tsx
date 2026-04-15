@@ -2979,7 +2979,7 @@ export function StorePage() {
       )}
 
       {showClientWebBottomNav && (
-        <nav className="fixed bottom-0 left-0 right-0 z-[100] border-t border-[#2d5f7b]/16 bg-[linear-gradient(180deg,rgba(221,236,246,0.98)_0%,rgba(204,224,238,0.96)_100%)] shadow-[0_-14px_34px_-26px_rgba(45,95,123,0.34)] backdrop-blur-2xl lg:hidden">
+        <nav className="fixed bottom-0 left-0 right-0 z-[100] border-t border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] shadow-[0_-18px_38px_-28px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl lg:hidden">
           <div className="grid h-[4.75rem] grid-cols-4 items-center gap-2 px-4 pt-2 pb-[max(env(safe-area-inset-bottom),0px)]">
             <button
               type="button"
