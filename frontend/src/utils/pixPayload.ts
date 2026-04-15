@@ -12,6 +12,21 @@
  */
 const pad2 = (value: number) => value.toString().padStart(2, '0');
 
+const isCPF = (cpf: string) => {
+  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+  let sum = 0, rest;
+  for (let i = 1; i <= 9; i++) sum = sum + parseInt(cpf.substring(i - 1, i)) * (11 - i);
+  rest = (sum * 10) % 11;
+  if (rest === 10 || rest === 11) rest = 0;
+  if (rest !== parseInt(cpf.substring(9, 10))) return false;
+  sum = 0;
+  for (let i = 1; i <= 10; i++) sum = sum + parseInt(cpf.substring(i - 1, i)) * (12 - i);
+  rest = (sum * 10) % 11;
+  if (rest === 10 || rest === 11) rest = 0;
+  if (rest !== parseInt(cpf.substring(10, 11))) return false;
+  return true;
+};
+
 const normalizePixKey = (value: string) => {
   const raw = String(value || '').trim();
   if (!raw) return '';
@@ -21,7 +36,10 @@ const normalizePixKey = (value: string) => {
 
   if (compact.includes('@')) return compact.toLowerCase();
   if (/^[0-9a-fA-F-]{32,36}$/.test(compact)) return compact.toLowerCase();
-  if (digits.length === 11 || digits.length === 14) return digits;
+  
+  if (digits.length === 14) return digits;
+  if (digits.length === 11 && isCPF(digits)) return digits;
+
   if (digits.length >= 10 && digits.length <= 13) return digits.startsWith('55') ? `+${digits}` : `+55${digits}`;
 
   return compact;
@@ -84,7 +102,8 @@ export const buildPixPayload = ({
   const normalizedKey = normalizePixKey(key);
   const safeName = sanitizeText(name || 'CHAMA NO ESPETO', 25);
   const safeCity = sanitizeText(city || 'BRASIL', 15);
-  const safeTxId = sanitizeText(txid || 'PEDIDO', 25) || 'PEDIDO';
+  const rawTxId = toAscii(txid || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 25);
+  const safeTxId = rawTxId || '***';
   const amountValue = formatAmount(amount);
 
   if (!normalizedKey) return '';

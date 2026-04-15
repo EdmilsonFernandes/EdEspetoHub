@@ -5,14 +5,86 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260415.121307.96daddab",
-  "buildId": "0.1.9+20260415.121307.96daddab-20260415.121307-96daddab",
-  "builtAt": "2026-04-15T12:13:07.670Z",
-  "commitHash": "96daddabe14508acae31a2dc271a69500887aee2",
-  "shortHash": "96daddab",
+  "versionInternal": "0.1.9+20260415.210444.0c50014d",
+  "buildId": "0.1.9+20260415.210444.0c50014d-20260415.210444-0c50014d",
+  "builtAt": "2026-04-15T21:04:44.595Z",
+  "commitHash": "0c50014d3a45055d6a6ea6f5a78b6d99b62b70ce",
+  "shortHash": "0c50014d",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "0c50014d3a45055d6a6ea6f5a78b6d99b62b70ce",
+      "shortHash": "0c50014d",
+      "dateIso": "2026-04-15T12:01:33-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Revert \"style: reformula profile drawer para adotar padrao cristalino squircle e efeito premium iOS\"",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0c50014d3a45055d6a6ea6f5a78b6d99b62b70ce"
+    },
+    {
+      "hash": "382eecd48566f1d06d79d4583740a96797dd6957",
+      "shortHash": "382eecd4",
+      "dateIso": "2026-04-15T11:19:08-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style: reformula profile drawer para adotar padrao cristalino squircle e efeito premium iOS",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/382eecd48566f1d06d79d4583740a96797dd6957"
+    },
+    {
+      "hash": "9c6ac9eb700dcd8a866b892337e163cd250c6123",
+      "shortHash": "9c6ac9eb",
+      "dateIso": "2026-04-15T10:35:04-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(marketplace): corrige erro de sintaxe JSX que quebrou o build do vite",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9c6ac9eb700dcd8a866b892337e163cd250c6123"
+    },
+    {
+      "hash": "58abdd7e87cfda0600e63dedc4b3a2e9ae758c96",
+      "shortHash": "58abdd7e",
+      "dateIso": "2026-04-15T10:24:34-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style: unifica identidade fluida de menu em todas as sub-telas principais",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/58abdd7e87cfda0600e63dedc4b3a2e9ae758c96"
+    },
+    {
+      "hash": "ed66fc9f605f28e337b395d8e41201e0e0c2ea3d",
+      "shortHash": "ed66fc9f",
+      "dateIso": "2026-04-15T10:01:50-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(marketplace): padroniza banners da home com a mesma identidade de glassmorphism translucido do menu rodape",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ed66fc9f605f28e337b395d8e41201e0e0c2ea3d"
+    },
+    {
+      "hash": "0177b49d5cc8e329484da0a2899b8cc61afed18e",
+      "shortHash": "0177b49d",
+      "dateIso": "2026-04-15T09:41:13-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(marketplace): remove webkittextfillcolor hack that caused text glitch on ios scroll",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0177b49d5cc8e329484da0a2899b8cc61afed18e"
+    },
+    {
+      "hash": "182a21b24baa9bdd3208762bfbbf1e3895db131d",
+      "shortHash": "182a21b2",
+      "dateIso": "2026-04-15T09:34:32-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(marketplace): resolver bug fantasma da barra de pesquisa no app",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/182a21b24baa9bdd3208762bfbbf1e3895db131d"
+    },
+    {
+      "hash": "d1afd240bd1380a3ce1ac5bd22a2875a7a424a32",
+      "shortHash": "d1afd240",
+      "dateIso": "2026-04-15T09:17:01-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(queue): restore sales history calculations",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d1afd240bd1380a3ce1ac5bd22a2875a7a424a32"
+    },
     {
       "hash": "96daddabe14508acae31a2dc271a69500887aee2",
       "shortHash": "96daddab",
@@ -210,78 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(auth): bind native biometric bridge calls",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/866803823b8bd6e8aea7264f5c4532f146b2406e"
-    },
-    {
-      "hash": "6a735e5bdebdcfbc6ba150852be51035054bdeb8",
-      "shortHash": "6a735e5b",
-      "dateIso": "2026-04-14T16:14:22-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "debug(auth): show customer biometric failure state",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6a735e5bdebdcfbc6ba150852be51035054bdeb8"
-    },
-    {
-      "hash": "db9b618744f8d7681fef99a3da42cfaefdc80a9c",
-      "shortHash": "db9b6187",
-      "dateIso": "2026-04-14T15:58:13-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(auth): wait for native biometric bridge",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/db9b618744f8d7681fef99a3da42cfaefdc80a9c"
-    },
-    {
-      "hash": "690549cba59c4760d56d5add553df2354b061797",
-      "shortHash": "690549cb",
-      "dateIso": "2026-04-14T15:26:33-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "debug(auth): expose customer biometric diagnostics",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/690549cba59c4760d56d5add553df2354b061797"
-    },
-    {
-      "hash": "658f6b8d4542751d21b10835e80d22f8ac3a53dd",
-      "shortHash": "658f6b8d",
-      "dateIso": "2026-04-14T15:22:56-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(auth): harden biometric session recovery",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/658f6b8d4542751d21b10835e80d22f8ac3a53dd"
-    },
-    {
-      "hash": "1c54da99d5e5b97e6d3e2abcf48fc082bda97a1b",
-      "shortHash": "1c54da99",
-      "dateIso": "2026-04-14T14:38:41-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(auth): retry biometric bridge detection on login",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1c54da99d5e5b97e6d3e2abcf48fc082bda97a1b"
-    },
-    {
-      "hash": "3943bf163cb93dfdc990c99bab103d029936e61d",
-      "shortHash": "3943bf16",
-      "dateIso": "2026-04-14T14:21:06-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(auth): keep role picker transitions inside hub",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3943bf163cb93dfdc990c99bab103d029936e61d"
-    },
-    {
-      "hash": "31014c7e2e49179a8b00985b8f1e88a76f14bbf9",
-      "shortHash": "31014c7e",
-      "dateIso": "2026-04-14T13:45:10-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(auth): force biometric entry from role picker",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/31014c7e2e49179a8b00985b8f1e88a76f14bbf9"
-    },
-    {
-      "hash": "369b8ce6a0bd6aa56bd05e15ec1d2e8c90e14b9b",
-      "shortHash": "369b8ce6",
-      "dateIso": "2026-04-14T12:21:03-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(hub): elevate selected condo banner",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/369b8ce6a0bd6aa56bd05e15ec1d2e8c90e14b9b"
     }
   ]
 } as const;
