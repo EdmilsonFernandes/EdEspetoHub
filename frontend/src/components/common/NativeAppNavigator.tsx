@@ -107,7 +107,9 @@ export function NativeAppNavigator() {
     navigate('/hub');
   };
 
-  const isOrders = location.pathname.startsWith('/cliente/pedidos');
+  const isOrders =
+    location.pathname.startsWith('/cliente/pedidos') ||
+    location.pathname.startsWith('/pedido/');
   const isCondominium = location.pathname === '/hub' && location.search.includes('panel=condominios');
   const isFavorites = location.pathname === '/hub' && location.search.includes('favorites=1');
 

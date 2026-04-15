@@ -745,6 +745,22 @@ body {
     bottom: calc(env(safe-area-inset-bottom) + 12px);
   }
 
+  .ds-native-nav-content {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 7.5rem);
+  }
+
+  .ds-native-nav-content-lg {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 9rem);
+  }
+
+  .ds-native-nav-dock {
+    bottom: calc(env(safe-area-inset-bottom) + 5.5rem);
+  }
+
+  .ds-native-nav-fab {
+    bottom: calc(env(safe-area-inset-bottom) + 6rem);
+  }
+
   .ds-menu-orb-primary {
     background: radial-gradient(circle, var(--color-primary) 0%, transparent 70%);
   }

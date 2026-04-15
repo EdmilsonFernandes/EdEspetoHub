@@ -73,6 +73,7 @@ export function OrderTracking() {
   const { orderId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const isNativePlatform = Capacitor.isNativePlatform();
   const [order, setOrder] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -103,6 +104,9 @@ export function OrderTracking() {
     deliveryTags: [] as string[],
     tipAmount: 0,
   });
+  const mobileStatusDockBottom = isNativePlatform
+    ? 'calc(env(safe-area-inset-bottom) + 5.25rem)'
+    : '0.75rem';
 
   useEffect(() => {
     if (!orderId || typeof window === 'undefined') return;
@@ -1773,7 +1777,10 @@ export function OrderTracking() {
       </main>
 
       {!loading && !error && order ? (
-        <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 px-4 pb-3">
+        <div
+          className="sm:hidden fixed inset-x-0 z-30 px-4"
+          style={{ bottom: mobileStatusDockBottom }}
+        >
           <div className="rounded-2xl border border-white/25 bg-white/85 backdrop-blur-md px-4 py-2.5 shadow-[0_-2px_24px_-16px_rgba(15,23,42,0.7)]">
             <div className="flex items-center justify-between gap-2 text-xs">
               <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-700 border border-slate-200">

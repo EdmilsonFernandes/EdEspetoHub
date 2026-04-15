@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Capacitor } from "@capacitor/core";
 import {
   ArrowLeft,
   Phone,
@@ -73,6 +74,7 @@ export const CartViewCondominium = ({
   onCheckout,
   onBack
 }) => {
+  const isNativePlatform = Capacitor.isNativePlatform();
   const cartItems = Object.values(cart);
   const fallbackPricing = getCartPricing(cart);
   const subtotal = pricingSummary?.subtotal ?? fallbackPricing.subtotal;
@@ -201,7 +203,7 @@ export const CartViewCondominium = ({
   const validationError = validateFields();
 
   return (
-    <div className="animate-in slide-in-from-right relative overflow-x-hidden no-x-scroll bg-slate-50 pb-24 pt-[max(calc(env(safe-area-inset-top)+0.6rem),0.9rem)]">
+    <div className={`animate-in slide-in-from-right relative overflow-x-hidden no-x-scroll bg-slate-50 pt-[max(calc(env(safe-area-inset-top)+0.6rem),0.9rem)] ${isNativePlatform ? "ds-native-nav-content-lg" : "pb-24"}`}>
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       <div className="sticky top-[max(env(safe-area-inset-top),0px)] z-40 mb-4 sm:mb-6">
         <div className="rounded-[1.85rem] border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.97)_0%,rgba(244,248,252,0.96)_100%)] px-3 py-3 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
@@ -455,7 +457,7 @@ export const CartViewCondominium = ({
       )}
 
       {/* Botão Finalizar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-slate-100 z-50">
+      <div className={`fixed left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-slate-100 z-50 ${isNativePlatform ? "ds-native-nav-dock" : "bottom-0"}`}>
         <button
           onClick={() => {
             setHasTriedCheckout(true);

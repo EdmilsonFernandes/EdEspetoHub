@@ -1,6 +1,7 @@
 // @ts-nocheck
 
 import { ForkKnife, Minus, Plus, Sparkle, X } from "@phosphor-icons/react";
+import { Capacitor } from "@capacitor/core";
 import { useEffect, useState } from "react";
 import { formatCurrency } from "../../utils/format";
 import {
@@ -23,6 +24,7 @@ export interface ProductModalProps {
  }
 
 export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart, readOnly = false, readOnlyMessage = 'Pedidos apenas no balcão.' }: ProductModalProps) => {
+  const isNativePlatform = Capacitor.isNativePlatform();
   const [cookingPoint, setCookingPoint] = useState("ao ponto");
   const [passSkewer, setPassSkewer] = useState(false);
   const [modifierCounts, setModifierCounts] = useState<Record<string, number>>({});
@@ -138,7 +140,7 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart,
 
   return (
     <div
-      className={`fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 transition-opacity duration-200 ${
+      className={`fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[260] transition-opacity duration-200 ${
         isAnimating ? "opacity-100" : "opacity-0"
       }`}
       onClick={handleClose}
@@ -171,7 +173,7 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart,
           )}
         </div>
 
-        <div className="p-6 space-y-4 pb-28">
+        <div className={`p-6 space-y-4 ${isNativePlatform ? "pb-32" : "pb-28"}`}>
           <div>
             <h3 className="text-xl font-bold text-gray-900">{product?.name}</h3>
             {promoPrice ? (
@@ -295,7 +297,7 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart,
           )}
         </div>
         {!readOnly && (
-        <div className="sticky bottom-0 z-20 border-t border-slate-200 bg-white px-4 py-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <div className={`sticky bottom-0 z-20 border-t border-slate-200 bg-white px-4 py-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] ${isNativePlatform ? "ds-safe-bottom-lg" : ""}`}>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 rounded-2xl bg-slate-100 px-2 py-1.5">
               <button

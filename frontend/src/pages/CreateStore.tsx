@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useRef, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { storeService } from '../services/storeService';
 import { planService } from '../services/planService';
@@ -170,6 +171,7 @@ const formatLocalPhoneNumber = (value = '') => {
 
 export function CreateStore() {
   const ATTRIBUTION_KEY = 'jnk_attribution_v1';
+  const isNativePlatform = Capacitor.isNativePlatform();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const planIdFromUrl = searchParams.get('planId');
@@ -1080,7 +1082,7 @@ export function CreateStore() {
             </div>
           )}
 
-          <form className="space-y-6 pb-24 md:pb-0 [&_label]:text-xs [&_label]:font-bold [&_label]:text-slate-500 [&_label]:uppercase [&_label]:tracking-wider" onSubmit={handleCreateStore}>
+          <form className={`space-y-6 md:pb-0 [&_label]:text-xs [&_label]:font-bold [&_label]:text-slate-500 [&_label]:uppercase [&_label]:tracking-wider ${isNativePlatform ? 'ds-native-nav-content-lg' : 'pb-24'}`} onSubmit={handleCreateStore}>
             <div ref={personalSectionRef} className={`scroll-mt-36 ${currentStep === 1 || currentStep === 2 ? '' : 'hidden'}`} onFocusCapture={() => setCurrentStep(currentStep <= 2 ? currentStep : 1)}>
             <FormSection
               title={currentStep === 2 ? 'Endereço da operação' : 'Informações pessoais'}
@@ -1811,7 +1813,7 @@ export function CreateStore() {
               </label>
             </div>
 
-            <div className="fixed bottom-0 left-0 w-full z-50 rounded-none border-t border-slate-200 bg-white/90 backdrop-blur-md p-4 shadow-[0_-10px_26px_-20px_rgba(15,23,42,0.45)] md:static md:rounded-2xl md:border md:border-slate-200/90 md:p-3 md:shadow-[0_24px_46px_-30px_rgba(15,23,42,0.55)]">
+            <div className={`fixed left-0 w-full z-50 rounded-none border-t border-slate-200 bg-white/90 backdrop-blur-md p-4 shadow-[0_-10px_26px_-20px_rgba(15,23,42,0.45)] md:static md:rounded-2xl md:border md:border-slate-200/90 md:p-3 md:shadow-[0_24px_46px_-30px_rgba(15,23,42,0.55)] ${isNativePlatform ? 'ds-native-nav-dock' : 'bottom-0'}`}>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
                 <div className="text-[11px] text-slate-500">
                   Etapa atual <span className="font-semibold text-slate-700">{currentStep} de 4</span>

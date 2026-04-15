@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React from 'react';
+import { Capacitor } from '@capacitor/core';
 import { AppVersionBadge } from '../components/common/AppVersionBadge';
 import { ChartLineUp, DeviceMobile, ShieldCheckered } from '@phosphor-icons/react';
 
@@ -8,8 +9,10 @@ interface AuthLayoutProps {
 }
 
 export function AuthLayout({ children }: AuthLayoutProps) {
+  const isNativePlatform = Capacitor.isNativePlatform();
+
   return (
-    <div className="min-h-screen overflow-x-clip bg-[#f8fafc] px-4 py-6 sm:py-10 relative">
+    <div className={`min-h-screen overflow-x-clip bg-[#f8fafc] px-4 py-6 sm:py-10 relative ${isNativePlatform ? 'ds-native-nav-content' : ''}`}>
       {/* Background Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-sky-400/10 blur-[120px] animate-[orbFloat_18s_infinite_linear]" />

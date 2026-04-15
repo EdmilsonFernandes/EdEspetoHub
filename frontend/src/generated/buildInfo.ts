@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260415.214658.408e203d",
-  "buildId": "0.1.9+20260415.214658.408e203d-20260415.214658-408e203d",
-  "builtAt": "2026-04-15T21:46:58.222Z",
-  "commitHash": "408e203dfa28cc4660874d296f1e7ff3e232838e",
-  "shortHash": "408e203d",
+  "versionInternal": "0.1.9+20260415.220338.93d2ec7c",
+  "buildId": "0.1.9+20260415.220338.93d2ec7c-20260415.220338-93d2ec7c",
+  "builtAt": "2026-04-15T22:03:38.057Z",
+  "commitHash": "93d2ec7cd1669090f7c2b16a9bc7cd1be2b60b55",
+  "shortHash": "93d2ec7c",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "93d2ec7cd1669090f7c2b16a9bc7cd1be2b60b55",
+      "shortHash": "93d2ec7c",
+      "dateIso": "2026-04-15T18:51:45-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(app): refresh admin polish and replace installed app icon",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/93d2ec7cd1669090f7c2b16a9bc7cd1be2b60b55"
+    },
     {
       "hash": "408e203dfa28cc4660874d296f1e7ff3e232838e",
       "shortHash": "408e203d",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(auth): preserve hub context across role login flows",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3f7ecbb025c1ec8e4e8b67cca9faf484dcd2aeaa"
-    },
-    {
-      "hash": "fdbad9d56c356ee6a590d035434cc7bb85f80653",
-      "shortHash": "fdbad9d5",
-      "dateIso": "2026-04-14T17:18:30-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(hub): deepen bottom nav contrast and remove auth debug",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/fdbad9d56c356ee6a590d035434cc7bb85f80653"
     }
   ]
 } as const;
