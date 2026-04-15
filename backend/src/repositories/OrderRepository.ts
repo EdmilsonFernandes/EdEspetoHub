@@ -11,7 +11,7 @@
  * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  */
 
-import { Repository } from 'typeorm';
+import { In, MoreThanOrEqual, Repository } from 'typeorm';
 import { AppDataSource } from '../config/database';
 import { Order } from '../entities/Order';
 import { OrderItem } from '../entities/OrderItem';
@@ -209,6 +209,33 @@ export class OrderRepository
     return this.repository.find({
       where: { store: { id: storeId }, status: 'pending' },
       order: { createdAt: 'ASC' },
+    });
+  }
+
+  findDashboardQueueByStoreId(
+    storeId: string,
+    activeStatuses: string[],
+    recentStatuses: string[],
+    recentSince: Date
+  ) {
+    const where: any[] = [];
+    if (Array.isArray(activeStatuses) && activeStatuses.length > 0) {
+      where.push({
+        store: { id: storeId },
+        status: In(activeStatuses),
+      });
+    }
+    if (Array.isArray(recentStatuses) && recentStatuses.length > 0) {
+      where.push({
+        store: { id: storeId },
+        status: In(recentStatuses),
+        createdAt: MoreThanOrEqual(recentSince),
+      });
+    }
+
+    return this.repository.find({
+      where,
+      order: { createdAt: 'DESC' },
     });
   }
 

@@ -39,6 +39,8 @@ import { PushNotificationService } from './PushNotificationService';
  */
 export class OrderService
 {
+  private readonly queueActiveStatuses = [ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ];
+  private readonly queueRecentStatuses = [ 'done', 'delivered', 'finished', 'cancelled' ];
   private orderRepository = new OrderRepository();
   private storeRepository = new StoreRepository();
   private productRepository = new ProductRepository();
@@ -211,6 +213,15 @@ private async reconcileDeliveredOrdersByStore(storeId: string) {
       this.queueReconcileCooldownByStore.delete(storeId);
       throw error;
     }
+  }
+
+  private getStartOfTodayInTimeZone(timeZone = this.tz) {
+    const now = new Date();
+    const zonedNow = new Date(now.toLocaleString('en-US', { timeZone }));
+    const zonedStart = new Date(zonedNow);
+    zonedStart.setHours(0, 0, 0, 0);
+    const offsetMs = now.getTime() - zonedNow.getTime();
+    return new Date(zonedStart.getTime() + offsetMs);
   }
 
     /**
@@ -807,7 +818,12 @@ private async seedPostalShipmentFromCheckoutTx(
     const store = await this.storeRepository.findById(storeId);
     this.ensureStoreAccess(store, authStoreId);
     await this.reconcileDeliveredOrdersByStoreForQueue(store!.id);
-    const orders = await this.orderRepository.findByStoreId(store!.id);
+    const orders = await this.orderRepository.findDashboardQueueByStoreId(
+      store!.id,
+      this.queueActiveStatuses,
+      this.queueRecentStatuses,
+      this.getStartOfTodayInTimeZone()
+    );
     const withDelivery = await this.attachDeliverySnapshot(orders as any[]);
     const withShipment = await this.attachShipmentSnapshot(withDelivery as any[]);
     return this.attachCancellationSnapshot(withShipment as any[]);
@@ -818,7 +834,12 @@ private async seedPostalShipmentFromCheckoutTx(
     const store = await this.storeRepository.findBySlug(slug);
     this.ensureStoreAccess(store, authStoreId);
     await this.reconcileDeliveredOrdersByStoreForQueue(store!.id);
-    const orders = await this.orderRepository.findByStoreId(store!.id);
+    const orders = await this.orderRepository.findDashboardQueueByStoreId(
+      store!.id,
+      this.queueActiveStatuses,
+      this.queueRecentStatuses,
+      this.getStartOfTodayInTimeZone()
+    );
     const withDelivery = await this.attachDeliverySnapshot(orders as any[]);
     const withShipment = await this.attachShipmentSnapshot(withDelivery as any[]);
     return this.attachCancellationSnapshot(withShipment as any[]);
