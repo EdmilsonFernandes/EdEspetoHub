@@ -2116,6 +2116,7 @@ export function MarketplacePage() {
                     type="button"
                     onClick={() => setCondominiumPickerOpen(true)}
                     className="group relative flex w-full items-center gap-3 overflow-hidden rounded-[1.8rem] border border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] p-4 text-left shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_46px_-30px_rgba(51,104,134,0.24)] active:scale-[0.985]"
+                  >
                     <div className="absolute inset-y-0 left-0 w-28 bg-gradient-to-r from-[#336886]/10 to-transparent" />
                     <div className="pointer-events-none absolute -right-10 top-6 h-24 w-24 rounded-full bg-[#336886]/10 blur-3xl" />
                     <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-[1.15rem] bg-white text-[#336886] shadow-[0_16px_28px_-18px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/80">
