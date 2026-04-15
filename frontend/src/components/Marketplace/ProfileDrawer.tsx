@@ -176,16 +176,16 @@ export function ProfileDrawer({
 
   const actions: DrawerAction[] = isLogged
     ? [
-        { id: 'account', label: 'Minha Conta', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-[#336886]', bgColor: 'bg-[#336886]/10' },
-        { id: 'orders', label: 'Meus pedidos', icon: <BellSimple size={22} weight="duotone" />, onClick: onOpenOrders || onOpenAccount, iconColor: 'text-amber-600', bgColor: 'bg-amber-50' },
-        { id: 'settings', label: 'Configurações', icon: <ArrowsClockwise size={22} weight="duotone" />, onClick: onOpenSettings, iconColor: 'text-violet-600', bgColor: 'bg-violet-50' },
-        { id: 'legal', label: 'Termos e privacidade', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
-        { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={22} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
-        { id: 'logout', label: 'Sair da conta', icon: <SignOut size={22} weight="duotone" />, onClick: onLogout, tone: 'danger' },
+        { id: 'account', label: 'Minha Conta', icon: <UserRectangle size={18} weight="fill" />, onClick: onOpenAccount, iconColor: 'text-[#336886]', bgColor: 'bg-[#336886]/15' },
+        { id: 'orders', label: 'Meus pedidos', icon: <BellSimple size={18} weight="fill" />, onClick: onOpenOrders || onOpenAccount, iconColor: 'text-amber-600', bgColor: 'bg-amber-100/70' },
+        { id: 'settings', label: 'Configurações', icon: <ArrowsClockwise size={18} weight="bold" />, onClick: onOpenSettings, iconColor: 'text-violet-600', bgColor: 'bg-violet-100/70' },
+        { id: 'legal', label: 'Termos de Uso', icon: <Scroll size={18} weight="fill" />, onClick: onOpenTerms, iconColor: 'text-slate-500', bgColor: 'bg-slate-200/50' },
+        { id: 'help', label: 'Ajuda e Suporte', icon: <Lifebuoy size={18} weight="fill" />, onClick: onOpenHelp, iconColor: 'text-slate-500', bgColor: 'bg-slate-200/50' },
+        { id: 'logout', label: 'Sair da conta', icon: <SignOut size={18} weight="bold" />, onClick: onLogout, tone: 'danger' },
       ]
     : [
-        { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={22} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
-        { id: 'legal', label: 'Termos e privacidade', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
+        { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={18} weight="fill" />, onClick: onOpenHelp, iconColor: 'text-slate-500', bgColor: 'bg-slate-200/50' },
+        { id: 'legal', label: 'Termos e privacidade', icon: <Scroll size={18} weight="fill" />, onClick: onOpenTerms, iconColor: 'text-slate-500', bgColor: 'bg-slate-200/50' },
       ];
 
   const accessProfiles: AccessProfile[] = [
@@ -252,137 +252,155 @@ export function ProfileDrawer({
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -left-12 top-8 h-28 w-28 rounded-full bg-[#336886]/12 blur-3xl" />
           <div className="absolute right-0 top-24 h-36 w-36 rounded-full bg-emerald-100/50 blur-3xl" />
-        </div>
-        <div className="border-b border-slate-100/80 bg-white/50 p-6 pb-4">
+               <div className="relative z-10 px-4 pt-6 pb-4">
           {isLogged ? (
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
+            <div className="group relative overflow-hidden rounded-[1.8rem] border border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.96)_100%)] p-4 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/60 backdrop-blur-3xl transition-all duration-300 hover:shadow-[0_24px_46px_-30px_rgba(51,104,134,0.24)]">
+              <div className="pointer-events-none absolute -left-6 -top-6 h-28 w-28 rounded-full bg-[#336886]/5 blur-2xl transition-transform duration-500 group-hover:scale-150" />
+              
+              <div className="relative flex items-center gap-3 mb-4">
                 {profileImageUrl ? (
-                  <div className="relative">
+                  <div className="relative shrink-0">
                     <img
                       src={profileImageUrl}
                       alt={userName}
-                      loading="eager"
-                      fetchPriority="high"
-                      decoding="async"
-                      className="h-16 w-16 rounded-2xl border-2 border-white object-cover shadow-[0_18px_30px_-18px_rgba(51,104,134,0.45)] ring-2 ring-[#336886]/15"
+                      loading="lazy"
+                      className="h-[3.25rem] w-[3.25rem] rounded-full border-2 border-white object-cover shadow-[0_8px_16px_-6px_rgba(51,104,134,0.3)] ring-1 ring-[#336886]/10"
                     />
-                    <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-500 shadow-sm" />
+                    <div className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500 shadow-sm" />
                   </div>
                 ) : (
-                  <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-white to-slate-100 text-slate-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_18px_32px_-24px_rgba(15,23,42,0.35)] ring-1 ring-slate-100">
-                    <UserCircle size={36} weight="duotone" />
+                  <div className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center rounded-full bg-gradient-to-br from-white to-slate-50 text-slate-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_8px_16px_-6px_rgba(15,23,42,0.15)] ring-1 ring-[#336886]/10">
+                    <UserCircle size={28} weight="duotone" />
                   </div>
                 )}
+                
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="truncate text-base font-black text-slate-900 leading-tight">{userName}</p>
-                    {currentAccessProfile ? (
-                      <span className="inline-flex shrink-0 items-center rounded-full bg-[#336886]/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">
-                        <span>{currentAccessProfile.title}</span>
-                      </span>
-                    ) : null}
+                    <p className="truncate text-[15px] font-black tracking-tight text-slate-900">{userName}</p>
                   </div>
-                  <p className="truncate text-xs font-bold text-slate-400 mt-0.5">{userEmail}</p>
+                  <p className="truncate text-[11px] font-semibold text-slate-500">{userEmail}</p>
                 </div>
               </div>
+
               <button
                 type="button"
                 onClick={() => setAccessPickerOpen(true)}
-                className="relative flex w-full items-center justify-between overflow-hidden rounded-[1.5rem] border border-[#336886]/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(239,246,255,0.92))] px-4 py-3 text-left text-slate-700 shadow-[0_18px_34px_-24px_rgba(51,104,134,0.28)] transition-all active:scale-[0.98]"
+                className="relative flex w-full items-center justify-between overflow-hidden rounded-[1.1rem] border border-slate-200/80 bg-white/60 px-3.5 py-2.5 text-left text-slate-700 transition-all active:scale-[0.98] hover:bg-white"
               >
-                <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-[radial-gradient(circle_at_center,rgba(51,104,134,0.12),transparent_70%)]" />
-                <div className="min-w-0">
-                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Trocar acesso</p>
-                  <p className="mt-1 truncate text-sm font-black text-slate-900">
-                    {currentAccessProfile ? currentAccessProfile.title : 'Escolher perfil'}
-                  </p>
+                <div className="min-w-0 flex flex-1 items-center gap-2.5">
+                  <div className="grid h-7 w-7 place-items-center rounded-lg bg-[#336886]/10 text-[#336886]">
+                    {currentAccessProfile?.icon || <UserRectangle size={15} weight="duotone" />}
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-black uppercase tracking-[0.15em] text-slate-400">Perfil ativo</p>
+                    <p className="truncate text-xs font-black text-slate-800">
+                      {currentAccessProfile ? currentAccessProfile.title : 'Escolher perfil'}
+                    </p>
+                  </div>
                 </div>
-                <CaretRight size={16} weight="bold" className="text-slate-400" />
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100/80 text-slate-500 shadow-sm transition-transform active:scale-95">
+                  <ArrowsClockwise size={13} weight="bold" />
+                </div>
               </button>
             </div>
           ) : (
             <button
               onClick={() => setAccessPickerOpen(true)}
-              className="flex w-full items-center justify-between rounded-[1.5rem] bg-slate-900 p-4 text-white shadow-[0_24px_40px_-24px_rgba(15,23,42,0.65)] transition-all active:scale-[0.97]"
+              className="group relative w-full overflow-hidden rounded-[1.8rem] border border-[#336886]/20 bg-[linear-gradient(135deg,#0f172a_0%,#1e293b_100%)] p-5 text-left shadow-[0_20px_42px_-24px_rgba(15,23,42,0.6)] focus:outline-none focus:ring-2 focus:ring-[#336886]/30 active:scale-[0.98] transition-all"
             >
-              <div className="text-left">
-                <p className="text-sm font-black">Entrar ou criar conta</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Cliente, lojista e entregador</p>
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(51,104,134,0.4),transparent_60%)] opacity-60 transition-opacity group-hover:opacity-100" />
+              <div className="relative flex items-center justify-between">
+                <div>
+                  <p className="text-[17px] font-black tracking-tight text-white">Criar ou Entrar</p>
+                  <p className="mt-1 text-[11px] font-medium text-slate-400">
+                    Acesse como Cliente, Lojista ou Entregador
+                  </p>
+                </div>
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md transition-transform group-hover:translate-x-1">
+                  <CaretRight size={18} weight="bold" />
+                </div>
               </div>
-              <CaretRight size={16} weight="bold" className="text-slate-500" />
             </button>
           )}
-        </div>
+        </div>  </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
           {isAdmin && (
-            <section className="space-y-3">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 px-1">Minha Operação</p>
-              <div className="grid gap-2">
+            <section className="relative z-10 space-y-3 mb-6 animate-in slide-in-from-bottom-4 fade-in duration-500 fill-mode-both" style={{ animationDelay: '100ms' }}>
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-600/70 px-2 lg:px-4">Minha Operação</p>
+              <div className="overflow-hidden rounded-[1.8rem] border border-emerald-100 bg-white/70 shadow-[0_12px_32px_-20px_rgba(16,185,129,0.15)] ring-1 ring-emerald-50 backdrop-blur-md">
                 <button
                   onClick={() => {
                     if (storeSlug) window.location.href = `/${storeSlug}`;
                     onClose();
                   }}
-                  className="flex w-full items-center gap-3 rounded-[1.5rem] border border-[#336886]/15 bg-white/80 p-3.5 text-[#336886] shadow-[0_14px_28px_-24px_rgba(51,104,134,0.5)] transition-all active:scale-95"
+                  className="group flex w-full items-center gap-3.5 px-4 py-3.5 transition-colors focus:bg-slate-50 focus:outline-none active:bg-emerald-50/80 sm:hover:bg-emerald-50/50"
                 >
-                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#336886]/10 shadow-sm text-[#336886]">
-                    <CookingPot size={22} weight="duotone" />
+                  <div className="grid h-[2.15rem] w-[2.15rem] shrink-0 place-items-center rounded-[0.8rem] bg-emerald-100 text-emerald-600 transition-transform group-hover:scale-105">
+                    <CookingPot size={18} weight="fill" />
                   </div>
-                  <span className="text-[14px] font-black">Gerenciar Loja</span>
+                  <div className="min-w-0 flex-1 text-left">
+                    <span className="block text-[14px] font-black text-emerald-950">Gerenciar Loja</span>
+                  </div>
+                  <CaretRight size={15} weight="bold" className="shrink-0 text-emerald-400 opacity-60 transition-transform group-hover:translate-x-0.5" />
                 </button>
+                <div className="ml-[4.5rem] h-px border-b border-emerald-100/60" />
                 <button
                   onClick={() => {
                     window.location.href = '/hub';
                     onClose();
                   }}
-                  className="flex w-full items-center gap-3 rounded-[1.5rem] border border-emerald-100 bg-white/80 p-3.5 text-emerald-900 shadow-[0_14px_28px_-24px_rgba(16,185,129,0.45)] transition-all active:scale-95"
+                  className="group flex w-full items-center gap-3.5 px-4 py-3.5 transition-colors focus:bg-slate-50 focus:outline-none active:bg-emerald-50/80 sm:hover:bg-emerald-50/50"
                 >
-                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-50 shadow-sm text-emerald-600">
-                    <House size={22} weight="duotone" />
+                  <div className="grid h-[2.15rem] w-[2.15rem] shrink-0 place-items-center rounded-[0.8rem] bg-emerald-100 text-emerald-600 transition-transform group-hover:scale-105">
+                    <House size={18} weight="fill" />
                   </div>
-                  <span className="text-[14px] font-black">Página Inicial (Hub)</span>
+                  <div className="min-w-0 flex-1 text-left">
+                    <span className="block text-[14px] font-black text-emerald-950">Página Inicial (Hub)</span>
+                  </div>
+                  <CaretRight size={15} weight="bold" className="shrink-0 text-emerald-400 opacity-60 transition-transform group-hover:translate-x-0.5" />
                 </button>
               </div>
             </section>
           )}
 
-          <nav className="space-y-1">
-            <p className="mb-3 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 px-1">Área do Cliente</p>
-            {actions.map((action) => (
-              <button
-                key={action.id}
-                onClick={() => {
-                  action.onClick();
-                  onClose();
-                }}
-                className={`flex w-full items-center gap-4 rounded-[1.35rem] border px-3 py-3 transition-all active:scale-[0.97] ${
-                  action.tone === 'danger'
-                    ? action.id === 'deactivate'
-                      ? 'border-rose-100 bg-rose-50/70 text-rose-700 hover:bg-rose-50'
-                      : 'border-transparent text-rose-600 hover:bg-rose-50/90'
-                    : 'border-transparent text-slate-700 hover:border-white/80 hover:bg-white/85'
-                }`}
-              >
-                <div className={`grid h-10 w-10 place-items-center rounded-xl shrink-0 border border-white/60 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.28)] transition-colors ${action.tone === 'danger' && action.id === 'deactivate' ? 'bg-rose-100 text-rose-600' : action.bgColor || 'bg-slate-100'} ${action.tone === 'danger' && action.id === 'deactivate' ? '' : action.iconColor || 'text-slate-500'}`}>
-                  {action.icon}
+          <nav className="relative z-10 space-y-3 pb-8 animate-in slide-in-from-bottom-4 fade-in duration-500 fill-mode-both" style={{ animationDelay: '150ms' }}>
+            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 px-2 lg:px-4">Ajustes da conta</p>
+            <div className="overflow-hidden rounded-[1.8rem] border border-[#336886]/5 bg-white/60 text-slate-800 shadow-[0_12px_32px_-20px_rgba(15,23,42,0.1)] ring-1 ring-slate-100 backdrop-blur-md">
+              {actions.map((action, index) => (
+                <div key={action.id}>
+                  <button
+                    onClick={() => {
+                      action.onClick();
+                      onClose();
+                    }}
+                    className={`group flex w-full items-center gap-3.5 px-4 py-3.5 transition-colors focus:bg-slate-50 focus:outline-none active:bg-slate-100/80 sm:hover:bg-slate-50/80 ${
+                      action.tone === 'danger' ? 'hover:bg-rose-50/50' : ''
+                    }`}
+                  >
+                    <div className={`grid h-[2.15rem] w-[2.15rem] shrink-0 place-items-center rounded-[0.8rem] transition-colors group-hover:scale-105 ${action.tone === 'danger' ? 'bg-rose-100 text-rose-600' : action.bgColor || 'bg-slate-100'} ${action.tone !== 'danger' && action.iconColor ? action.iconColor : 'text-slate-500'}`}>
+                      {action.icon}
+                    </div>
+                    <div className="min-w-0 flex-1 text-left">
+                      <span className={`block text-[14px] font-black ${action.tone === 'danger' ? 'text-rose-600' : 'text-slate-800'}`}>
+                        {action.label}
+                      </span>
+                    </div>
+                    <CaretRight size={15} weight="bold" className={`shrink-0 opacity-40 transition-transform group-hover:translate-x-0.5 ${action.tone === 'danger' ? 'text-rose-400' : 'text-slate-400'}`} />
+                  </button>
+                  {index < actions.length - 1 && (
+                    <div className="ml-[4.5rem] h-px border-b border-slate-200/60" />
+                  )}
                 </div>
-                <div className="min-w-0 flex-1 text-left">
-                  <span className="block text-[15px] font-bold">{action.label}</span>
-                  {action.id === 'logout' ? (
-                    <span className="block text-[11px] font-medium text-slate-400">Encerra somente a sessão neste aparelho</span>
-                  ) : null}
-                </div>
-              </button>
-            ))}
+              ))}
+            </div>
           </nav>
 
           {!isLogged && (
             <section className="rounded-[1.65rem] border border-slate-100 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,250,252,0.86))] p-4 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.35)]">
               <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Primeiro acesso</p>
-              <p className="mt-1 text-[12px] font-semibold leading-relaxed text-slate-600">
-                Se ainda não tem conta, abra o acesso e escolha como quer começar.
+              <p className="mt-1.5 text-[12px] font-semibold leading-relaxed text-slate-500">
+                Acesse sua conta para organizar seus perfis, salvar seu endereço de entrega e rastrear pedidos em tempo real no hub.
               </p>
             </section>
           )}
