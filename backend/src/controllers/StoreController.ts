@@ -19,6 +19,7 @@ import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
 import { resolvePlanFeatures } from '../config/planFeatures';
+import { publicStoreCache } from '../utils/publicStoreCache';
 
 const storeService = new StoreService();
 const subscriptionService = new SubscriptionService();
@@ -334,6 +335,10 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
   static async listPortfolio(_req: Request, res: Response) {
     try {
       log.debug('Store portfolio list request');
+      const cached = publicStoreCache.getPortfolio();
+      if (cached) {
+        return res.json(cached);
+      }
       const stores = await storeService.listAll();
       const entries = await Promise.all(
         stores.map(async (store) => {
@@ -377,7 +382,9 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
           };
         })
       );
-      return res.json(entries.filter(Boolean));
+      const payload = entries.filter(Boolean);
+      publicStoreCache.setPortfolio(payload);
+      return res.json(payload);
     } catch (error: any) {
       log.warn('Store portfolio list failed', { error });
       return respondWithError(_req, res, error, 400);
@@ -398,6 +405,10 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
         return res.json(buildDemoStore(req.params.slug));
       }
       log.debug('Store get by slug request', { slug: req.params.slug });
+      const cached = publicStoreCache.getStoreBySlug(req.params.slug);
+      if (cached) {
+        return res.json(cached);
+      }
       const store = await storeService.getBySlug(req.params.slug);
       if (!store) return respondWithError(req, res, new AppError('STORE-001', 404), 404);
       const subscription = await subscriptionService.getCurrentByStore(store.id);
@@ -428,7 +439,9 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
           : null,
         openNow: StoreController.isStoreOpenNow(store),
       };
-      return res.json({ ...sanitizedStore, subscription });
+      const payload = { ...sanitizedStore, subscription };
+      publicStoreCache.setStoreBySlug(req.params.slug, payload);
+      return res.json(payload);
     } catch (error: any) {
       log.warn('Store get by slug failed', { slug: req.params.slug, error });
       return respondWithError(req, res, error, 400);
@@ -513,6 +526,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
     try {
       log.info('Store update request', { storeId: req.params.storeId });
       const store = await storeService.update(req.params.storeId, req.body);
+      publicStoreCache.invalidateStore(store);
       log.info('Store updated', { storeId: req.params.storeId });
       return res.json(store);
     } catch (error: any) {
@@ -534,6 +548,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
     try {
       log.info('Store status update request', { storeId: req.params.storeId, open: req.body?.open });
       const store = await storeService.setStatus(req.params.storeId, req.body.open);
+      publicStoreCache.invalidateStore(store);
       log.info('Store status updated', { storeId: req.params.storeId, open: store?.open });
       return res.json(store);
     } catch (error: any) {
