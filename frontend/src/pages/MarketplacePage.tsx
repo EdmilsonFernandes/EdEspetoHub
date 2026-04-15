@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
 import {
   MagnifyingGlass,
   Star,
@@ -350,6 +351,7 @@ const isTerminalRecentOrder = (entry?: {
 export function MarketplacePage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const isNativePlatform = Capacitor.isNativePlatform();
   const { setAuth } = useAuth();
   const { setBranding } = useTheme();
   const [stores, setStores] = useState<MarketplaceStore[]>([]);
@@ -762,9 +764,6 @@ export function MarketplacePage() {
       if (searchInputRef.current) {
         searchInputRef.current.blur();
       }
-      window.requestAnimationFrame(() => {
-        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-      });
     };
 
     const handleVisibility = () => {
@@ -1707,9 +1706,9 @@ export function MarketplacePage() {
           hasEntered ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}
       >
-        <header className={`sticky top-0 z-[60] transition-all duration-500 ${isHeaderElevated ? 'bg-[#F8F9FB]/92 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.35)] backdrop-blur-2xl' : 'bg-transparent'}`}>
-          <div className="mx-auto max-w-[1200px] px-4 pb-3 pt-[max(0.85rem,calc(env(safe-area-inset-top)+0.2rem))]">
-            <div className="space-y-3 rounded-[1.7rem] border border-white/80 bg-white/72 px-2 py-2.5 shadow-[0_16px_42px_-34px_rgba(15,23,42,0.34)] backdrop-blur-xl">
+        <header className={`sticky top-0 z-[60] transition-all duration-300 ${isNativePlatform ? 'bg-[#F8F9FB]/96 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.22)] backdrop-blur-xl' : isHeaderElevated ? 'bg-[#F8F9FB]/92 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.35)] backdrop-blur-2xl' : 'bg-transparent'}`}>
+          <div className={`mx-auto max-w-[1200px] px-4 ${isNativePlatform ? 'pb-2 pt-[max(0.55rem,calc(env(safe-area-inset-top)+0.1rem))]' : 'pb-3 pt-[max(0.85rem,calc(env(safe-area-inset-top)+0.2rem))]'}`}>
+            <div className={`${isNativePlatform ? 'space-y-2 rounded-[1.45rem] px-2 py-2' : 'space-y-3 rounded-[1.7rem] px-2 py-2.5'} border border-white/80 bg-white/88 shadow-[0_16px_42px_-34px_rgba(15,23,42,0.34)] backdrop-blur-xl`}>
             {/* Linha 1: Perfil e Logo */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -1754,7 +1753,7 @@ export function MarketplacePage() {
             {/* Linha 2: Busca Premium */}
             <div className="relative z-20 px-0.5">
               <div
-                className="group relative flex min-h-[52px] items-center gap-3 rounded-[22px] border border-slate-200/90 bg-white/96 px-4 shadow-[0_12px_26px_-20px_rgba(15,23,42,0.18)] transition-[border-color,box-shadow,background-color] duration-200 ease-out hover:border-slate-300 hover:bg-white focus-within:border-[#336886]/22 focus-within:shadow-[0_16px_34px_-22px_rgba(51,104,134,0.18)] focus-within:ring-2 focus-within:ring-[#336886]/8"
+                className={`group relative isolate flex items-center gap-3 border border-slate-200/90 bg-white px-4 transition-[border-color,box-shadow,background-color] duration-200 ease-out hover:border-slate-300 hover:bg-white focus-within:border-[#336886]/22 focus-within:shadow-[0_16px_34px_-22px_rgba(51,104,134,0.18)] focus-within:ring-2 focus-within:ring-[#336886]/8 ${isNativePlatform ? 'min-h-[48px] rounded-[20px] shadow-[0_10px_22px_-18px_rgba(15,23,42,0.14)]' : 'min-h-[52px] rounded-[22px] shadow-[0_12px_26px_-20px_rgba(15,23,42,0.18)]'}`}
                 onClick={(e) => {
                   if ((e.target as HTMLElement).closest('button')) return;
                   searchInputRef.current?.focus();
@@ -1775,7 +1774,7 @@ export function MarketplacePage() {
                     autoComplete="off"
                     inputMode="search"
                     enterKeyHint="search"
-                    className="block min-h-[52px] w-full min-w-0 appearance-none bg-transparent pr-1 text-[14px] font-semibold text-slate-950 placeholder:text-slate-400 outline-none"
+                    className={`block w-full min-w-0 appearance-none bg-transparent pr-1 font-semibold text-slate-950 placeholder:text-slate-400 outline-none ${isNativePlatform ? 'min-h-[48px] text-[15px]' : 'min-h-[52px] text-[14px]'}`}
                     style={{
                       WebkitAppearance: 'none',
                       caretColor: '#336886',
@@ -1803,7 +1802,7 @@ export function MarketplacePage() {
             </div>
 
             {/* Linha 3: Filtros Minimalistas (Pílulas) */}
-            <div className="-mx-1 flex gap-2 overflow-x-auto no-scrollbar scrollbar-hide px-1 py-1.5">
+            <div className={`-mx-1 flex gap-2 overflow-x-auto no-scrollbar scrollbar-hide px-1 ${isNativePlatform ? 'py-0.5' : 'py-1.5'}`}>
               {['all', 'free_shipping', 'nearby', 'open_now', 'favorites'].map((filter) => {
                 const label =
                   filter === 'all' ? 'Ver Todos' :
@@ -1816,7 +1815,7 @@ export function MarketplacePage() {
                     key={filter}
                     type="button"
                     onClick={() => setQuickFilter(filter as any)}
-                    className={`whitespace-nowrap rounded-full px-3.5 py-1.5 text-[12px] transition-all duration-150 ease-out active:scale-[0.97] ${
+                    className={`whitespace-nowrap rounded-full ${isNativePlatform ? 'px-3 py-1.5' : 'px-3.5 py-1.5'} text-[12px] transition-all duration-150 ease-out active:scale-[0.97] ${
                       active
                         ? 'bg-[#336886] text-white shadow-[0_10px_24px_-14px_rgba(51,104,134,0.68)] font-black'
                         : 'bg-white/90 text-slate-600 border border-slate-100 hover:bg-white font-bold shadow-[0_6px_16px_-14px_rgba(15,23,42,0.28)]'
@@ -1834,7 +1833,7 @@ export function MarketplacePage() {
                   setSegmentFilter('all');
                   setQuickFilter('all');
                 }}
-                className="whitespace-nowrap rounded-full border border-slate-100 bg-white/90 px-3.5 py-1.5 text-[12px] font-bold text-slate-500 shadow-[0_6px_16px_-14px_rgba(15,23,42,0.28)] transition-all duration-150 ease-out hover:bg-white active:scale-[0.97]"
+                className={`whitespace-nowrap rounded-full border border-slate-100 bg-white/90 ${isNativePlatform ? 'px-3 py-1.5' : 'px-3.5 py-1.5'} text-[12px] font-bold text-slate-500 shadow-[0_6px_16px_-14px_rgba(15,23,42,0.28)] transition-all duration-150 ease-out hover:bg-white active:scale-[0.97]`}
               >
                 Limpar
               </button>
@@ -1843,7 +1842,7 @@ export function MarketplacePage() {
           </div>
         </header>
 
-        <main className="mx-auto max-w-[1200px] space-y-6 px-4 pt-3">
+        <main className={`mx-auto max-w-[1200px] space-y-6 px-4 ${isNativePlatform ? 'pt-2' : 'pt-3'}`}>
           {/* Acompanhamento de Pedidos (Logados ou Anônimos Cache) */}
           {(isCustomerLogged && visibleActiveOrders.length > 0) ? (
             <div className="animate-in fade-in slide-in-from-top-4 duration-500">

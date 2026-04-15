@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260415.222504.21b5bcb2",
-  "buildId": "0.1.9+20260415.222504.21b5bcb2-20260415.222504-21b5bcb2",
-  "builtAt": "2026-04-15T22:25:04.855Z",
-  "commitHash": "21b5bcb28f57e585a2748616827f8fd1d517cf33",
-  "shortHash": "21b5bcb2",
+  "versionInternal": "0.1.9+20260415.223509.b91fbbd4",
+  "buildId": "0.1.9+20260415.223509.b91fbbd4-20260415.223509-b91fbbd4",
+  "builtAt": "2026-04-15T22:35:09.807Z",
+  "commitHash": "b91fbbd4f0a78cc3b5044ff0c0b368639df4cf64",
+  "shortHash": "b91fbbd4",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "b91fbbd4f0a78cc3b5044ff0c0b368639df4cf64",
+      "shortHash": "b91fbbd4",
+      "dateIso": "2026-04-15T19:26:13-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "perf(client): cache customer profile avatar locally",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b91fbbd4f0a78cc3b5044ff0c0b368639df4cf64"
+    },
     {
       "hash": "21b5bcb28f57e585a2748616827f8fd1d517cf33",
       "shortHash": "21b5bcb2",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style(hub): polish premium saved-account cards",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e78f2083497e672807e7b92852792a39f9a0921a"
-    },
-    {
-      "hash": "e510136133b021d58ce4fd4e08ae5cd9126b60e6",
-      "shortHash": "e5101361",
-      "dateIso": "2026-04-14T17:37:16-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(hub): refine premium role access drawer",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e510136133b021d58ce4fd4e08ae5cd9126b60e6"
     }
   ]
 } as const;
