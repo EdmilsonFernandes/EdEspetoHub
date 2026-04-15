@@ -37,6 +37,7 @@
   --space-4: 16px;
   --space-5: 20px;
   --space-6: 24px;
+  --jnk-native-nav-height: 0px;
 }
 
 body {
@@ -746,19 +747,19 @@ body {
   }
 
   .ds-native-nav-content {
-    padding-bottom: calc(env(safe-area-inset-bottom) + 7.5rem);
+    padding-bottom: calc(var(--jnk-native-nav-height, 0px) + 1.35rem);
   }
 
   .ds-native-nav-content-lg {
-    padding-bottom: calc(env(safe-area-inset-bottom) + 9rem);
+    padding-bottom: calc(var(--jnk-native-nav-height, 0px) + 2.75rem);
   }
 
   .ds-native-nav-dock {
-    bottom: calc(env(safe-area-inset-bottom) + 5.5rem);
+    bottom: calc(var(--jnk-native-nav-height, 0px) + 0.75rem);
   }
 
   .ds-native-nav-fab {
-    bottom: calc(env(safe-area-inset-bottom) + 6rem);
+    bottom: calc(var(--jnk-native-nav-height, 0px) + 0.85rem);
   }
 
   .ds-menu-orb-primary {

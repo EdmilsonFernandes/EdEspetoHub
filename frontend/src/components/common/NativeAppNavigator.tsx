@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { Buildings, Heart, House, Receipt } from '@phosphor-icons/react';
@@ -48,6 +48,7 @@ export function NativeAppNavigator() {
   const currentPath = getCurrentPath(location);
   const [isHidden, setIsHidden] = useState(false);
   const [hiddenByCart, setHiddenByCart] = useState(false);
+  const navRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const handleCartVisibility = (e: any) => {
@@ -96,6 +97,35 @@ export function NativeAppNavigator() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    const root = document.documentElement;
+    const isVisible =
+      Capacitor.isNativePlatform() &&
+      isEligiblePath(location.pathname) &&
+      !isHidden &&
+      !isStoreAdmin &&
+      !hiddenByCart;
+
+    const syncNativeNavHeight = () => {
+      if (!isVisible || !navRef.current) {
+        root.style.setProperty('--jnk-native-nav-height', '0px');
+        return;
+      }
+      root.style.setProperty('--jnk-native-nav-height', `${navRef.current.offsetHeight}px`);
+    };
+
+    syncNativeNavHeight();
+    window.addEventListener('resize', syncNativeNavHeight);
+    window.visualViewport?.addEventListener('resize', syncNativeNavHeight);
+
+    return () => {
+      window.removeEventListener('resize', syncNativeNavHeight);
+      window.visualViewport?.removeEventListener('resize', syncNativeNavHeight);
+      root.style.setProperty('--jnk-native-nav-height', '0px');
+    };
+  }, [hiddenByCart, isHidden, isStoreAdmin, location.pathname]);
+
   if (!Capacitor.isNativePlatform() || !isEligiblePath(location.pathname) || isHidden || isStoreAdmin || hiddenByCart) {
     return null;
   }
@@ -121,7 +151,7 @@ export function NativeAppNavigator() {
     'text-slate-500 hover:text-slate-700';
 
   return (
-    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-[35] px-0 pb-0 transition-transform duration-300 ease-in-out lg:hidden">
+    <nav ref={navRef} className="pointer-events-none fixed inset-x-0 bottom-0 z-[35] px-0 pb-0 transition-transform duration-300 ease-in-out lg:hidden">
       <div className="pointer-events-auto mx-auto max-w-none rounded-none border border-b-0 border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-2 pt-2 shadow-[0_-18px_38px_-28px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
         <div className="grid grid-cols-4 gap-1.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
         <button

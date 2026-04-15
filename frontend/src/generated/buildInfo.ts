@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260415.220338.93d2ec7c",
-  "buildId": "0.1.9+20260415.220338.93d2ec7c-20260415.220338-93d2ec7c",
-  "builtAt": "2026-04-15T22:03:38.057Z",
-  "commitHash": "93d2ec7cd1669090f7c2b16a9bc7cd1be2b60b55",
-  "shortHash": "93d2ec7c",
+  "versionInternal": "0.1.9+20260415.221658.88fe2755",
+  "buildId": "0.1.9+20260415.221658.88fe2755-20260415.221658-88fe2755",
+  "builtAt": "2026-04-15T22:16:58.790Z",
+  "commitHash": "88fe2755d11686740cd370a32afd65c76ab39e4a",
+  "shortHash": "88fe2755",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "88fe2755d11686740cd370a32afd65c76ab39e4a",
+      "shortHash": "88fe2755",
+      "dateIso": "2026-04-15T19:05:19-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(app): harden native bottom spacing across flows",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/88fe2755d11686740cd370a32afd65c76ab39e4a"
+    },
     {
       "hash": "93d2ec7cd1669090f7c2b16a9bc7cd1be2b60b55",
       "shortHash": "93d2ec7c",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(hub): add smart access switching across saved roles",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/05f794f1c6c003bbeefb097042fba91b398f3189"
-    },
-    {
-      "hash": "3f7ecbb025c1ec8e4e8b67cca9faf484dcd2aeaa",
-      "shortHash": "3f7ecbb0",
-      "dateIso": "2026-04-14T17:28:33-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(auth): preserve hub context across role login flows",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3f7ecbb025c1ec8e4e8b67cca9faf484dcd2aeaa"
     }
   ]
 } as const;
