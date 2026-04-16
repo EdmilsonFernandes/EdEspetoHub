@@ -3134,12 +3134,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 onClick={closeOrderOverlays}
               />
               <div className="fixed right-0 top-0 h-full w-full md:w-[450px] z-[10000] bg-white shadow-2xl flex flex-col animate-[drawerIn_220ms_ease-out]">
-                <div className="shrink-0 flex justify-between items-center px-4 pt-[max(env(safe-area-inset-top),1.25rem)] pb-4 border-b border-slate-200 bg-white shadow-sm">
-                  <p className="text-sm font-black text-slate-900 tracking-tight">
+                <div className="shrink-0 flex justify-between items-center gap-3 px-4 pt-[max(env(safe-area-inset-top),1.25rem)] pb-4 border-b border-slate-200 bg-white shadow-sm">
+                  <p className="min-w-0 truncate text-sm font-black text-slate-900 tracking-tight" title={resolveLocationIdentifier(selectedOrder || {}) || 'Detalhes do pedido'}>
                     {(() => {
                       const drawerLocation = resolveLocationIdentifier(selectedOrder || {});
                       const drawerMesa = parseMesaIdentifier(drawerLocation);
-                      if (isCondominiumOrder(selectedOrder || {})) return 'Pedido condomínio';
                       if (!drawerLocation) return 'Detalhes do pedido';
                       if (!drawerMesa.isMesa) return `Pedido ${drawerLocation}`;
                       return (
@@ -3205,6 +3204,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 ? "border-l-emerald-400 bg-gradient-to-br from-emerald-50/70 via-white to-emerald-50/30"
                 : "border-l-slate-300 bg-gradient-to-br from-slate-50 via-white to-slate-50";
             const drawerLocationIdentifier = resolveLocationIdentifier(order);
+            const drawerIsCondo = isCondominiumOrder(order);
             const drawerIsPickup = String(order?.type || '').toLowerCase() === 'pickup';
             return (
             <div
@@ -3300,7 +3300,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 </div>
 
                 <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2">
-                  {drawerLocationIdentifier && (
+                  {drawerLocationIdentifier && !drawerIsCondo && (
                     <div className={`px-3 py-1.5 rounded-lg text-white text-xs font-black tracking-[0.12em] shadow-sm ${drawerIsPickup ? 'bg-orange-500' : 'bg-slate-950'}`}>
                       {drawerLocationIdentifier}
                     </div>

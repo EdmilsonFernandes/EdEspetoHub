@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.212704.69dd3f7c",
-  "buildId": "0.1.9+20260416.212704.69dd3f7c-20260416.212704-69dd3f7c",
-  "builtAt": "2026-04-16T21:27:04.494Z",
-  "commitHash": "69dd3f7c4613ba2b51495b27e1211de8d8baa1a6",
-  "shortHash": "69dd3f7c",
+  "versionInternal": "0.1.9+20260416.212951.2f484496",
+  "buildId": "0.1.9+20260416.212951.2f484496-20260416.212951-2f484496",
+  "builtAt": "2026-04-16T21:29:51.123Z",
+  "commitHash": "2f484496b579991245749628cb2cdd5d16bea2b3",
+  "shortHash": "2f484496",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "2f484496b579991245749628cb2cdd5d16bea2b3",
+      "shortHash": "2f484496",
+      "dateIso": "2026-04-16T18:27:32-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(admin): compact condominium badge in queue cards",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2f484496b579991245749628cb2cdd5d16bea2b3"
+    },
     {
       "hash": "69dd3f7c4613ba2b51495b27e1211de8d8baa1a6",
       "shortHash": "69dd3f7c",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "build(android): bump release to 1.0.15",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/21b5bcb28f57e585a2748616827f8fd1d517cf33"
-    },
-    {
-      "hash": "88fe2755d11686740cd370a32afd65c76ab39e4a",
-      "shortHash": "88fe2755",
-      "dateIso": "2026-04-15T19:05:19-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(app): harden native bottom spacing across flows",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/88fe2755d11686740cd370a32afd65c76ab39e4a"
     }
   ]
 } as const;
