@@ -1,17 +1,19 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import {
   ArrowsClockwise,
+  ArrowRight,
   BellSimple,
   Storefront,
   CookingPot,
   Motorcycle,
-  Lifebuoy,
+  Headset,
+  RocketLaunch,
   SignOut,
+  ShieldCheckered,
   UserCircle,
   UserRectangle,
   House,
   CaretRight,
-  Scroll,
   X
 } from '@phosphor-icons/react';
 import { nativeBiometricService } from '../../services/nativeBiometricService';
@@ -86,6 +88,7 @@ export function ProfileDrawer({
   const [isAdmin, setIsAdmin] = useState(false);
   const [storeSlug, setStoreSlug] = useState<string | null>(null);
   const [accessPickerOpen, setAccessPickerOpen] = useState(false);
+  const [highlightFirstAccess, setHighlightFirstAccess] = useState(false);
   const [savedAccessProfiles, setSavedAccessProfiles] = useState<{
     customer: { name: string; email: string; biometric: boolean; hasSession: boolean };
     admin: { name: string; email: string; biometric: boolean; hasSession: boolean };
@@ -168,6 +171,7 @@ export function ProfileDrawer({
     } else {
       document.body.style.overflow = '';
       setAccessPickerOpen(false);
+      setHighlightFirstAccess(false);
     }
     return () => {
       document.body.style.overflow = '';
@@ -179,13 +183,13 @@ export function ProfileDrawer({
         { id: 'account', label: 'Minha Conta', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-[#336886]', bgColor: 'bg-[#336886]/10' },
         { id: 'orders', label: 'Meus pedidos', icon: <BellSimple size={22} weight="duotone" />, onClick: onOpenOrders || onOpenAccount, iconColor: 'text-amber-600', bgColor: 'bg-amber-50' },
         { id: 'settings', label: 'Configurações', icon: <ArrowsClockwise size={22} weight="duotone" />, onClick: onOpenSettings, iconColor: 'text-violet-600', bgColor: 'bg-violet-50' },
-        { id: 'legal', label: 'Termos e privacidade', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
-        { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={22} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
+        { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
+        { id: 'help', label: 'Ajuda e Atendimento', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
         { id: 'logout', label: 'Sair da conta', icon: <SignOut size={22} weight="duotone" />, onClick: onLogout, tone: 'danger' },
       ]
     : [
-        { id: 'help', label: 'Ajuda', icon: <Lifebuoy size={22} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
-        { id: 'legal', label: 'Termos e privacidade', icon: <Scroll size={22} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
+        { id: 'help', label: 'Ajuda e Atendimento', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
+        { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
       ];
 
   const accessProfiles: AccessProfile[] = [
@@ -303,14 +307,18 @@ export function ProfileDrawer({
             </div>
           ) : (
             <button
-              onClick={() => setAccessPickerOpen(true)}
-              className="flex w-full items-center justify-between rounded-[1.5rem] bg-slate-900 p-4 text-white shadow-[0_24px_40px_-24px_rgba(15,23,42,0.65)] transition-all active:scale-[0.97]"
+              onClick={() => {
+                setHighlightFirstAccess(false);
+                setAccessPickerOpen(true);
+              }}
+              className="relative flex w-full items-center justify-between overflow-hidden rounded-[1.55rem] border border-[#2d6a88]/18 bg-[linear-gradient(135deg,#0d526c_0%,#13455a_58%,#17384a_100%)] p-4 text-white shadow-[0_18px_34px_-18px_rgba(21,58,76,0.35)] transition-all active:scale-[0.97]"
             >
+              <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),transparent_72%)]" />
               <div className="text-left">
                 <p className="text-sm font-black">Entrar ou criar conta</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Cliente, lojista e entregador</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-sky-100/75">Cliente e lojista</p>
               </div>
-              <CaretRight size={16} weight="bold" className="text-slate-500" />
+              <ArrowRight size={19} weight="regular" className="text-white/78" />
             </button>
           )}
         </div>
@@ -348,7 +356,7 @@ export function ProfileDrawer({
             </section>
           )}
 
-          <nav className="space-y-1">
+          <nav className="space-y-2">
             <p className="mb-3 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 px-1">Área do Cliente</p>
             {actions.map((action) => (
               <button
@@ -357,19 +365,19 @@ export function ProfileDrawer({
                   action.onClick();
                   onClose();
                 }}
-                className={`flex w-full items-center gap-4 rounded-[1.35rem] border px-3 py-3 transition-all active:scale-[0.97] ${
+                className={`flex w-full items-center gap-4 rounded-[1.45rem] border px-3.5 py-3.5 transition-all active:scale-[0.97] ${
                   action.tone === 'danger'
                     ? action.id === 'deactivate'
                       ? 'border-rose-100 bg-rose-50/70 text-rose-700 hover:bg-rose-50'
                       : 'border-transparent text-rose-600 hover:bg-rose-50/90'
-                    : 'border-transparent text-slate-700 hover:border-white/80 hover:bg-white/85'
+                    : 'border-transparent text-slate-800 hover:border-white/80 hover:bg-white/90'
                 }`}
               >
-                <div className={`grid h-10 w-10 place-items-center rounded-xl shrink-0 border border-white/60 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.28)] transition-colors ${action.tone === 'danger' && action.id === 'deactivate' ? 'bg-rose-100 text-rose-600' : action.bgColor || 'bg-slate-100'} ${action.tone === 'danger' && action.id === 'deactivate' ? '' : action.iconColor || 'text-slate-500'}`}>
+                <div className={`grid h-12 w-12 place-items-center rounded-[1.1rem] shrink-0 border border-white/70 shadow-[0_14px_24px_-20px_rgba(15,23,42,0.22)] transition-colors ${action.tone === 'danger' && action.id === 'deactivate' ? 'bg-rose-100 text-rose-600' : action.bgColor || 'bg-slate-100'} ${action.tone === 'danger' && action.id === 'deactivate' ? '' : action.iconColor || 'text-slate-500'}`}>
                   {action.icon}
                 </div>
                 <div className="min-w-0 flex-1 text-left">
-                  <span className="block text-[15px] font-bold">{action.label}</span>
+                  <span className="block text-[15px] font-semibold leading-tight">{action.label}</span>
                   {action.id === 'logout' ? (
                     <span className="block text-[11px] font-medium text-slate-400">Encerra somente a sessão neste aparelho</span>
                   ) : null}
@@ -379,12 +387,24 @@ export function ProfileDrawer({
           </nav>
 
           {!isLogged && (
-            <section className="rounded-[1.65rem] border border-slate-100 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,250,252,0.86))] p-4 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.35)]">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Primeiro acesso</p>
-              <p className="mt-1 text-[12px] font-semibold leading-relaxed text-slate-600">
-                Se ainda não tem conta, abra o acesso e escolha como quer começar.
-              </p>
-            </section>
+            <button
+              type="button"
+              onClick={() => {
+                setHighlightFirstAccess(true);
+                setAccessPickerOpen(true);
+              }}
+              className="flex w-full items-center gap-4 rounded-[1.7rem] border border-white/80 bg-[linear-gradient(135deg,#ffffff_0%,rgba(224,242,241,0.9)_42%,rgba(239,246,255,0.96)_100%)] p-4 text-left shadow-[0_18px_34px_-24px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/60 transition-all active:scale-[0.98]"
+            >
+              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-[1.2rem] border border-white/85 bg-white/72 text-[#2b708a] shadow-[0_12px_26px_-18px_rgba(51,104,134,0.26)] backdrop-blur-sm">
+                <RocketLaunch size={28} weight="duotone" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[1.02rem] font-black leading-tight text-slate-900">Guia de Primeiro Acesso</p>
+                <p className="mt-1 text-[12.5px] font-medium leading-relaxed text-slate-600">
+                  Crie sua conta e escolha como começar agora
+                </p>
+              </div>
+            </button>
           )}
         </div>
 
@@ -488,10 +508,14 @@ export function ProfileDrawer({
               ))}
             </div>
             {!isLogged ? (
-              <div className="relative mt-4 rounded-[1.65rem] border border-slate-200/80 bg-white/88 p-4 shadow-[0_16px_34px_-28px_rgba(15,23,42,0.28)]">
+              <div className={`relative mt-4 rounded-[1.65rem] border p-4 shadow-[0_16px_34px_-28px_rgba(15,23,42,0.28)] transition-all duration-200 ${
+                highlightFirstAccess
+                  ? 'border-[#336886]/25 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(236,253,245,0.86))] ring-2 ring-[#336886]/12'
+                  : 'border-slate-200/80 bg-white/88'
+              }`}>
                 <div className="mb-3">
                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Quero começar</p>
-                  <p className="mt-1 text-xs font-semibold text-slate-500">Escolha o cadastro ideal sem poluir a tela principal.</p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">Cliente, lojista e entregador entram por aqui no primeiro acesso.</p>
                 </div>
                 <div className="grid gap-2.5">
                   <button
