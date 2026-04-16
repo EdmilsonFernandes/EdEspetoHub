@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.182726.4ac5bcbd",
-  "buildId": "0.1.9+20260416.182726.4ac5bcbd-20260416.182726-4ac5bcbd",
-  "builtAt": "2026-04-16T18:27:26.793Z",
-  "commitHash": "4ac5bcbd52f98dd1455815355c422dd2c55951ee",
-  "shortHash": "4ac5bcbd",
+  "versionInternal": "0.1.9+20260416.203758.afd8f364",
+  "buildId": "0.1.9+20260416.203758.afd8f364-20260416.203758-afd8f364",
+  "builtAt": "2026-04-16T20:37:58.441Z",
+  "commitHash": "afd8f3647fcda6041e02745dc50906cb1f04651f",
+  "shortHash": "afd8f364",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "afd8f3647fcda6041e02745dc50906cb1f04651f",
+      "shortHash": "afd8f364",
+      "dateIso": "2026-04-16T15:28:21-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(hub): premiumize search and filters header",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/afd8f3647fcda6041e02745dc50906cb1f04651f"
+    },
     {
       "hash": "4ac5bcbd52f98dd1455815355c422dd2c55951ee",
       "shortHash": "4ac5bcbd",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style: unifica identidade fluida de menu em todas as sub-telas principais",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/58abdd7e87cfda0600e63dedc4b3a2e9ae758c96"
-    },
-    {
-      "hash": "ed66fc9f605f28e337b395d8e41201e0e0c2ea3d",
-      "shortHash": "ed66fc9f",
-      "dateIso": "2026-04-15T10:01:50-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(marketplace): padroniza banners da home com a mesma identidade de glassmorphism translucido do menu rodape",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ed66fc9f605f28e337b395d8e41201e0e0c2ea3d"
     }
   ]
 } as const;

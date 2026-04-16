@@ -1616,8 +1616,11 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
           ce.ends_at,
           ce.pickup_location,
           ss.order_types,
-          COALESCE(ces.allow_pickup_at_stall, sc.allow_pickup_at_stall, TRUE) AS allow_pickup_at_stall,
-          COALESCE(ces.allow_apartment_delivery, sc.allow_apartment_delivery, FALSE) AS allow_apartment_delivery,
+          COALESCE(sc.allow_pickup_at_stall, ces.allow_pickup_at_stall, TRUE) AS allow_pickup_at_stall,
+          CASE
+            WHEN ces.allow_apartment_delivery = TRUE OR sc.allow_apartment_delivery = TRUE THEN TRUE
+            ELSE FALSE
+          END AS allow_apartment_delivery,
           COALESCE(ces.apartment_delivery_fee, sc.apartment_delivery_fee, 0) AS apartment_delivery_fee
         FROM condominiums c
         JOIN condominium_events ce

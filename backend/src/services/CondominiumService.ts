@@ -352,7 +352,11 @@ export class CondominiumService {
     const events = await this.condominiumRepository.listActiveEventsBySlug(slug);
     const selectedEvent = this.pickCurrentOrNextEvent(events);
     const eventLinks = selectedEvent ? await this.condominiumRepository.listActiveStoreLinksByEventId(selectedEvent.id) : [];
-    const links = eventLinks.length > 0 ? eventLinks : await this.condominiumRepository.listActiveStoreLinksBySlug(slug);
+    const condominiumLinks = await this.condominiumRepository.listActiveStoreLinksBySlug(slug);
+    const condominiumLinkByStoreId = new Map(
+      condominiumLinks.map((link: any) => [ String(link?.storeId || link?.store?.id || ''), link ])
+    );
+    const links = eventLinks.length > 0 ? eventLinks : condominiumLinks;
     const firstCondominium = (links[0] as any)?.condominium || selectedEvent?.condominium || await this.condominiumRepository.findActiveBySlug(slug);
     if (!firstCondominium) throw new AppError('CONDO-001', 404, { message: 'Condominio nao encontrado.' });
     const eventState = selectedEvent ? this.getEventState(selectedEvent) : 'none';
@@ -380,9 +384,19 @@ export class CondominiumService {
           ? baseOrderTypes
           : baseOrderTypes.filter((type) => String(type || '').toLowerCase() !== 'delivery');
         const supportsStoreDelivery = orderTypes.some((type) => String(type || '').toLowerCase() === 'delivery');
+        const baseCondominiumLink = condominiumLinkByStoreId.get(String(store.id || '')) || null;
+        const ruleLink = baseCondominiumLink || link;
+        const allowPickupAtStall = (ruleLink as any)?.allowPickupAtStall !== false;
         const allowApartmentDelivery =
           (link as any).allowApartmentDelivery === true ||
+          (baseCondominiumLink as any)?.allowApartmentDelivery === true ||
           (Boolean(selectedEvent) && supportsStoreDelivery);
+        const apartmentDeliveryFee =
+          (link as any).apartmentDeliveryFee != null
+            ? Number((link as any).apartmentDeliveryFee)
+            : (baseCondominiumLink as any)?.apartmentDeliveryFee != null
+              ? Number((baseCondominiumLink as any).apartmentDeliveryFee)
+              : null;
 
         return {
           id: store.id,
@@ -395,12 +409,12 @@ export class CondominiumService {
             slug: firstCondominium.slug,
           },
           condominiumLink: {
-            schedule: Array.isArray((link as any).schedule) ? (link as any).schedule : [],
-            pickupInstructions: (link as any).pickupInstructions || null,
-            allowPickupAtStall: (link as any).allowPickupAtStall !== false,
+            schedule: Array.isArray((ruleLink as any)?.schedule) ? (ruleLink as any).schedule : [],
+            pickupInstructions: (ruleLink as any)?.pickupInstructions || null,
+            allowPickupAtStall,
             allowApartmentDelivery,
-            apartmentDeliveryFee: (link as any).apartmentDeliveryFee != null ? Number((link as any).apartmentDeliveryFee) : null,
-            notes: link.notes || null,
+            apartmentDeliveryFee,
+            notes: (ruleLink as any)?.notes || null,
           },
           condominiumEvent: selectedEvent
             ? {
