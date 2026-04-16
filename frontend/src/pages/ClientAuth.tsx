@@ -91,7 +91,14 @@ export function ClientAuth() {
       setCodeDigits([ '', '', '', '' ]);
       setCodeLoading(false);
       setVerifyFlowLabel('register');
+      return;
     }
+    const timer = window.setTimeout(() => {
+      const firstInput = document.getElementById('customer-otp-0') as HTMLInputElement | null;
+      firstInput?.focus();
+      firstInput?.select?.();
+    }, 120);
+    return () => window.clearTimeout(timer);
   }, [verifyPrompt]);
 
   useEffect(() => {
@@ -295,6 +302,7 @@ export function ClientAuth() {
 
   const handleCodeDigitChange = (index: number, value: string) => {
     const nextValue = String(value || '').replace(/\D/g, '').slice(-1);
+    if (error) setError('');
     setCodeDigits((prev) => {
       const next = [ ...prev ];
       next[index] = nextValue;
@@ -309,6 +317,7 @@ export function ClientAuth() {
   };
 
   const handleCodeKeyDown = (index: number, event: any) => {
+    if (error) setError('');
     if (event.key === 'Backspace' && !codeDigits[index] && index > 0) {
       const prevInput = document.getElementById(`customer-otp-${index - 1}`) as HTMLInputElement | null;
       prevInput?.focus();
@@ -330,6 +339,7 @@ export function ClientAuth() {
     const pasted = String(event.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 4);
     if (!pasted) return;
     event.preventDefault();
+    if (error) setError('');
     setCodeDigits([
       pasted[0] || '',
       pasted[1] || '',
@@ -340,6 +350,15 @@ export function ClientAuth() {
     const targetInput = document.getElementById(`customer-otp-${targetIndex}`) as HTMLInputElement | null;
     targetInput?.focus();
   };
+
+  useEffect(() => {
+    if (!verifyPrompt) return;
+    if (verificationCode.length !== 4 || codeLoading) return;
+    const timer = window.setTimeout(() => {
+      void handleVerifyCode();
+    }, 180);
+    return () => window.clearTimeout(timer);
+  }, [verificationCode, codeLoading, verifyPrompt]);
 
   const handleVerifyCode = async () => {
     const email = String(verifyPrompt?.email || form.email || '').trim().toLowerCase();
@@ -356,6 +375,11 @@ export function ClientAuth() {
       setMessage('Conta confirmada com sucesso. Entrando...');
       finishAuthenticatedCustomerSession(result);
     } catch (e: any) {
+      try {
+        window.navigator?.vibrate?.(120);
+      } catch {
+        // no-op
+      }
       setError(e?.message || 'Não foi possível validar o código.');
     } finally {
       setCodeLoading(false);
@@ -640,7 +664,7 @@ export function ClientAuth() {
               </div>
 
               {error ? (
-                <div className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-3 text-sm font-semibold text-rose-700">
+                <div className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-3 text-sm font-semibold text-rose-700 shadow-[0_12px_30px_-24px_rgba(225,29,72,0.65)] animate-[pulse_0.45s_ease-out_1]">
                   <WarningCircle size={18} weight="fill" />
                   <span>{error}</span>
                 </div>
@@ -658,7 +682,7 @@ export function ClientAuth() {
                   disabled={verificationCode.length !== 4 || codeLoading}
                   className="rounded-2xl bg-[linear-gradient(135deg,#0f3b53,#0d4f66,#2c8c9f)] px-4 py-3.5 text-sm font-black text-white shadow-[0_24px_50px_-24px_rgba(15,59,83,0.55)] transition active:scale-[0.99] disabled:opacity-60"
                 >
-                  {codeLoading ? 'Confirmando...' : 'Confirmar e entrar'}
+                  {codeLoading ? 'Confirmando código...' : 'Confirmar e entrar'}
                 </button>
                 <button
                   type="button"

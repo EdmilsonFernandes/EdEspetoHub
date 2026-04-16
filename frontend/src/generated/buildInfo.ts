@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.131001.7cb48d0d",
-  "buildId": "0.1.9+20260416.131001.7cb48d0d-20260416.131001-7cb48d0d",
-  "builtAt": "2026-04-16T13:10:01.136Z",
-  "commitHash": "7cb48d0db12c19f4b1e7e4e9015c019e5b9d0ba6",
-  "shortHash": "7cb48d0d",
+  "versionInternal": "0.1.9+20260416.132440.0b1fa673",
+  "buildId": "0.1.9+20260416.132440.0b1fa673-20260416.132440-0b1fa673",
+  "builtAt": "2026-04-16T13:24:40.875Z",
+  "commitHash": "0b1fa67342580ff9ab3c5966507136ad801cd1bd",
+  "shortHash": "0b1fa673",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "0b1fa67342580ff9ab3c5966507136ad801cd1bd",
+      "shortHash": "0b1fa673",
+      "dateIso": "2026-04-16T10:14:12-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(customer-auth): add in-app email otp flow",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0b1fa67342580ff9ab3c5966507136ad801cd1bd"
+    },
     {
       "hash": "7cb48d0db12c19f4b1e7e4e9015c019e5b9d0ba6",
       "shortHash": "7cb48d0d",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(hub): improve condominium search and order filters",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9123100871cab18e6ff16d0c5fb0a4962767202d"
-    },
-    {
-      "hash": "2960149926e898240e083e812eeb8078c43522af",
-      "shortHash": "29601499",
-      "dateIso": "2026-04-14T18:02:42-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(hub): stabilize search and simplify role switcher",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2960149926e898240e083e812eeb8078c43522af"
     }
   ]
 } as const;
