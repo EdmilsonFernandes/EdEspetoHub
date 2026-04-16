@@ -69,6 +69,7 @@ export const CartView = ({
   paymentMethod,
   allowCustomerAutocomplete = false,
   tablePhoneOptional = false,
+  guestPhoneRequired = false,
   occupiedTables = [],
   allowedOrderTypes = [ "delivery", "pickup", "table" ],
   deliveryRadiusKm = null,
@@ -144,7 +145,7 @@ export const CartView = ({
   const isPickup = customer.type === "pickup";
   const isDelivery = customer.type === "delivery";
   const isPostalDelivery = isDelivery && String(deliveryMode || "").toLowerCase() === "postal";
-  const isOptionalPhoneMode = customer.type === "table" || customer.type === "pickup";
+  const isOptionalPhoneMode = (customer.type === "table" || customer.type === "pickup") && !guestPhoneRequired;
   const isPix = paymentMethod === "pix";
   const isCredit = paymentMethod === "credito";
   const isDebit = paymentMethod === "debito";
@@ -804,6 +805,12 @@ export const CartView = ({
                 Para pedidos na mesa ou retirada, o telefone pode ficar em branco.
               </p>
             </div>
+          )}
+
+          {guestPhoneRequired && !canUseLockedContactSummary && (
+            <p className="-mt-1 text-[11px] font-semibold text-slate-500">
+              Pedido visitante exige telefone com DDD para reduzir abuso e facilitar contato da loja.
+            </p>
           )}
 
           {/* Tipo de pedido */}

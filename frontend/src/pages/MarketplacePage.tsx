@@ -1359,12 +1359,22 @@ export function MarketplacePage() {
     navigate('/cliente/pedidos');
   }, [navigate]);
 
-  const openCustomerLogin = useCallback(() => {
+  const openCustomerLogin = useCallback(async () => {
     const savedSession = readCustomerSession();
     if (savedSession?.token) {
       setCustomerSession(savedSession);
       navigate('/hub', { replace: true });
       return;
+    }
+    if (nativeBiometricService.hasValidStoredCustomerEnrollment()) {
+      try {
+        const session = await nativeBiometricService.loginCustomerWithBiometrics('Confirme sua identidade para entrar na sua conta');
+        setCustomerSession(session);
+        navigate('/hub', { replace: true });
+        return;
+      } catch {
+        // fallback to login screen
+      }
     }
     navigate('/cliente?mode=login&next=/hub&hub=1&bio=1');
   }, [navigate]);

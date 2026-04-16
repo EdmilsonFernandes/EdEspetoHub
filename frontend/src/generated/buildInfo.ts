@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.133956.7cdfcbd0",
-  "buildId": "0.1.9+20260416.133956.7cdfcbd0-20260416.133956-7cdfcbd0",
-  "builtAt": "2026-04-16T13:39:56.335Z",
-  "commitHash": "7cdfcbd0b07dbb3ac6e5d0bdb987b654ea02dbb6",
-  "shortHash": "7cdfcbd0",
+  "versionInternal": "0.1.9+20260416.140456.2eb47d8d",
+  "buildId": "0.1.9+20260416.140456.2eb47d8d-20260416.140456-2eb47d8d",
+  "builtAt": "2026-04-16T14:04:56.007Z",
+  "commitHash": "2eb47d8dee0696679c2fb0eacc940811ac95c005",
+  "shortHash": "2eb47d8d",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "2eb47d8dee0696679c2fb0eacc940811ac95c005",
+      "shortHash": "2eb47d8d",
+      "dateIso": "2026-04-16T10:42:40-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(mobile): refine customer auth entry and bump android release",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2eb47d8dee0696679c2fb0eacc940811ac95c005"
+    },
     {
       "hash": "7cdfcbd0b07dbb3ac6e5d0bdb987b654ea02dbb6",
       "shortHash": "7cdfcbd0",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style(hub): compact condominium picker layout",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/34fd43ff83ad76ef7047802cd49bf75911779edc"
-    },
-    {
-      "hash": "8fcd1cab9b8a39511a0380de4e229f1691aa13f9",
-      "shortHash": "8fcd1cab",
-      "dateIso": "2026-04-14T18:14:17-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(hub): stabilize search and order filters",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8fcd1cab9b8a39511a0380de4e229f1691aa13f9"
     }
   ]
 } as const;

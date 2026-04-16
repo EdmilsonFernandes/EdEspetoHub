@@ -52,6 +52,68 @@ export class OrderService
   private tz = process.env.APP_TZ || 'America/Sao_Paulo';
   private queueReconcileCooldownByStore = new Map<string, number>();
   private readonly queueReconcileCooldownMs = 20000;
+  private readonly anonymousOrderPhoneWindowMinutes = 30;
+  private readonly anonymousOrderPhoneLimit = 3;
+  private readonly anonymousOrderGuestWindowMinutes = 20;
+  private readonly anonymousOrderGuestLimit = 4;
+  private normalizePhone(value?: string | null) {
+    return String(value || '').replace(/\D/g, '').slice(0, 11);
+  }
+
+  private isStaffActor(role?: string | null) {
+    const normalized = String(role || '').trim().toUpperCase();
+    return normalized === 'ADMIN' || normalized === 'OPERATOR';
+  }
+
+  private async ensureAnonymousOrderPolicy(input: CreateOrderDto, storeId: string) {
+    const isCustomer = Boolean(String(input?.customerUserId || '').trim());
+    const isStaff = this.isStaffActor(input?.actorRole);
+    if (isCustomer || isStaff) return;
+
+    const phoneDigits = this.normalizePhone(input?.phone);
+    if (phoneDigits.length < 10) {
+      throw new AppError('ORDER-ANON-001', 400, {
+        message: 'Para pedido sem cadastro, informe um telefone com DDD.',
+      });
+    }
+
+    const guestPushId = String(input?.guestPushId || '').trim();
+    const [phoneRows, guestRows] = await Promise.all([
+      AppDataSource.query(
+        `
+          SELECT COUNT(*)::int AS total
+            FROM orders
+           WHERE store_id = $1
+             AND customer_user_id IS NULL
+             AND regexp_replace(COALESCE(phone, ''), '\\D', '', 'g') = $2
+             AND created_at >= NOW() - ($3::text || ' minutes')::interval
+        `,
+        [storeId, phoneDigits, String(this.anonymousOrderPhoneWindowMinutes)]
+      ),
+      guestPushId
+        ? AppDataSource.query(
+            `
+              SELECT COUNT(*)::int AS total
+                FROM orders
+               WHERE store_id = $1
+                 AND customer_user_id IS NULL
+                 AND guest_push_id = $2
+                 AND created_at >= NOW() - ($3::text || ' minutes')::interval
+            `,
+            [storeId, guestPushId, String(this.anonymousOrderGuestWindowMinutes)]
+          )
+        : Promise.resolve([{ total: 0 }]),
+    ]);
+
+    const phoneCount = Number(phoneRows?.[0]?.total || 0);
+    const guestCount = Number(guestRows?.[0]?.total || 0);
+
+    if (phoneCount >= this.anonymousOrderPhoneLimit || guestCount >= this.anonymousOrderGuestLimit) {
+      throw new AppError('ORDER-ANON-002', 429, {
+        message: 'Muitos pedidos visitantes em sequência. Aguarde alguns minutos ou entre com sua conta.',
+      });
+    }
+  }
 
   /**
    * Ensures store queue payload keeps cancellation metadata explicit for admin screens.
@@ -740,6 +802,7 @@ private async seedPostalShipmentFromCheckoutTx(
   {
     const store = await this.storeRepository.findById(input.storeId);
     if (!store) throw new AppError('STORE-001', 404);
+    await this.ensureAnonymousOrderPolicy(input, store.id);
     const saved = await AppDataSource.transaction(async (manager) => {
       const order = await this.buildOrder(input, store, manager, randomUUID());
       const saved = await manager.getRepository(Order).save(order);
@@ -763,6 +826,7 @@ private async seedPostalShipmentFromCheckoutTx(
   {
     const store = await this.storeRepository.findBySlug(input.storeSlug);
     if (!store) throw new AppError('STORE-001', 404);
+    await this.ensureAnonymousOrderPolicy({ ...input, storeId: store.id }, store.id);
     const saved = await AppDataSource.transaction(async (manager) => {
       const order = await this.buildOrder(input, store, manager, randomUUID());
       const saved = await manager.getRepository(Order).save(order);

@@ -44,12 +44,15 @@ export class OrderController {
       log.info('Order create request', { storeId: req.params.storeId });
       const customerUserId =
         String(req.auth?.role || '').toUpperCase() === 'CUSTOMER' ? req.auth?.sub : null;
+      const actorRole = String(req.auth?.role || '').trim().toUpperCase() || null;
       const guestPushId = req.body?.guestPushId
         ? String(req.body.guestPushId || '').trim() || null
         : null;
       const order = await orderService.create({
         ...req.body,
         customerUserId,
+        actorRole,
+        clientIp: req.ip || req.socket?.remoteAddress || null,
         guestPushId,
         storeId: req.params.storeId,
       });
@@ -109,12 +112,15 @@ export class OrderController {
       log.info('Order create by slug request', { slug: req.params.slug });
       const customerUserId =
         String(req.auth?.role || '').toUpperCase() === 'CUSTOMER' ? req.auth?.sub : null;
+      const actorRole = String(req.auth?.role || '').trim().toUpperCase() || null;
       const guestPushId = req.body?.guestPushId
         ? String(req.body.guestPushId || '').trim() || null
         : null;
       const order = await orderService.createBySlug({
         ...req.body,
         customerUserId,
+        actorRole,
+        clientIp: req.ip || req.socket?.remoteAddress || null,
         guestPushId,
         storeSlug: req.params.slug,
       });

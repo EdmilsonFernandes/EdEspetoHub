@@ -1557,8 +1557,9 @@ export function StorePage() {
       return;
     }
 
-    const requiresPhone = customer.type === 'delivery' || isCondominiumOrder;
-    if (!effectiveCustomerName || (requiresPhone && !customer.phone)) {
+    const requiresPhone = !customerSession?.token && !isStoreAdmin;
+    const phoneDigits = String(customer.phone || '').replace(/\D/g, '');
+    if (!effectiveCustomerName || (requiresPhone && phoneDigits.length < 10)) {
       showToast(requiresPhone ? 'Preencha nome e telefone para continuar.' : 'Preencha seu nome para continuar.', 'warning');
       return;
     }
@@ -2575,6 +2576,7 @@ export function StorePage() {
             paymentMethod={paymentMethod}
             condominiumCheckoutContext={condominiumCheckoutContext}
             allowCustomerAutocomplete={Boolean(user?.token)}
+            guestPhoneRequired={!customerSession?.token && !isStoreAdmin}
             checkoutDisabled={!cartItemsCount || condominiumCheckoutLoading || !condominiumCheckoutContext?.event?.canOrderInCondominium}
             checkoutDisabledReason={
               !cartItemsCount
@@ -2606,6 +2608,7 @@ export function StorePage() {
             allowedOrderTypes={orderTypes}
             allowCustomerAutocomplete={Boolean(user?.token)}
             tablePhoneOptional={canUseAdminPrintFlow}
+            guestPhoneRequired={!customerSession?.token && !isStoreAdmin}
             occupiedTables={occupiedTables}
             deliveryRadiusKm={deliveryRadiusValue}
             deliveryFee={deliveryFeeValue}

@@ -39,6 +39,7 @@ export function ClientAuth() {
   const [verifyFlowLabel, setVerifyFlowLabel] = useState<'register' | 'login'>('register');
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricLoading, setBiometricLoading] = useState(false);
+  const [autoBiometricTried, setAutoBiometricTried] = useState(false);
   const [enrollmentPromptOpen, setEnrollmentPromptOpen] = useState(false);
   const [pendingBiometricSession, setPendingBiometricSession] = useState<any | null>(null);
   const [form, setForm] = useState({
@@ -125,6 +126,7 @@ export function ClientAuth() {
 
   useEffect(() => {
     setMode(getModeFromSearch(location.search));
+    setAutoBiometricTried(false);
   }, [location.search]);
 
   useEffect(() => {
@@ -197,6 +199,29 @@ export function ClientAuth() {
       setBiometricLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (mode !== 'login') return;
+    if (!biometricAvailable || biometricLoading || loading || autoBiometricTried) return;
+    const hasTypedCredentials = !forceBiometric && (Boolean(String(form.email || '').trim()) || Boolean(String(form.password || '').trim()));
+    if (hasTypedCredentials) return;
+
+    setAutoBiometricTried(true);
+    const timer = window.setTimeout(() => {
+      void handleBiometricLogin();
+    }, 180);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    autoBiometricTried,
+    biometricAvailable,
+    biometricLoading,
+    form.email,
+    form.password,
+    forceBiometric,
+    loading,
+    mode,
+  ]);
 
   const submit = async () => {
     if (loading) return;

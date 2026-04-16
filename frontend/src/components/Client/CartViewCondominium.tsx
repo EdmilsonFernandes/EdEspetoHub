@@ -64,6 +64,7 @@ export const CartViewCondominium = ({
   paymentMethod,
   condominiumCheckoutContext = null,
   allowCustomerAutocomplete = false,
+  guestPhoneRequired = false,
   checkoutDisabled = false,
   checkoutDisabledReason = "",
   checkoutLoading = false,
@@ -192,7 +193,7 @@ export const CartViewCondominium = ({
 
   const validateFields = () => {
     if (!customer.name?.trim()) return "Informe seu nome.";
-    if (!customer.phone?.trim() || customer.phone.length < 10) return "Informe um WhatsApp válido.";
+    if (guestPhoneRequired && (!customer.phone?.trim() || customer.phone.length < 10)) return "Informe um WhatsApp válido.";
     if (isApartmentDelivery) {
       if (!customer.block?.trim()) return "Informe o bloco/torre.";
       if (!customer.apartment?.trim()) return "Informe o apartamento.";
@@ -266,7 +267,9 @@ export const CartViewCondominium = ({
 
           {/* WhatsApp */}
           <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">WhatsApp</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              WhatsApp {guestPhoneRequired ? <span className="text-rose-500 font-extrabold">Obrigatório</span> : null}
+            </label>
             <div className="mt-2 grid grid-cols-[80px_1fr] gap-3">
               <select
                 value={selectedDdd || ""}
@@ -285,6 +288,11 @@ export const CartViewCondominium = ({
                 className={premiumInputClass}
               />
             </div>
+            {guestPhoneRequired ? (
+              <p className="mt-2 text-[11px] font-semibold text-slate-500">
+                Pedido visitante exige telefone com DDD para reduzir abuso e facilitar contato da loja.
+              </p>
+            ) : null}
           </div>
 
           {/* Modo de Entrega */}
