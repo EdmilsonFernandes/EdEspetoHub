@@ -25,7 +25,7 @@ export function HeaderAvatarTrigger({
     <button
       type="button"
       onClick={onClick}
-      className="relative inline-flex h-[3.05rem] w-[3.05rem] items-center justify-center overflow-hidden rounded-full border border-white/75 bg-white/92 text-slate-700 shadow-[0_14px_28px_-16px_rgba(15,23,42,0.35)] backdrop-blur-sm transition hover:bg-white active:scale-95"
+      className="relative inline-flex h-[3.2rem] w-[3.2rem] items-center justify-center overflow-hidden rounded-[1.35rem] border border-white/90 bg-[linear-gradient(145deg,#ffffff_0%,#eef6f4_100%)] text-slate-700 shadow-[0_18px_34px_-18px_rgba(15,23,42,0.42)] ring-1 ring-slate-950/5 backdrop-blur-sm transition hover:bg-white active:scale-95"
       aria-label="Abrir menu de perfil"
       title="Abrir menu de perfil"
     >
@@ -46,7 +46,7 @@ export function HeaderAvatarTrigger({
         <UserCircle size={21} weight="duotone" />
       )}
       {hasNotification ? (
-        <span className="absolute right-0.5 top-0.5 h-2.5 w-2.5 rounded-full bg-rose-500 ring-2 ring-white" />
+        <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-rose-500 ring-2 ring-white shadow-[0_8px_14px_-8px_rgba(225,29,72,0.95)]" />
       ) : null}
     </button>
   );

@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.181140.d1282fa1",
-  "buildId": "0.1.9+20260416.181140.d1282fa1-20260416.181140-d1282fa1",
-  "builtAt": "2026-04-16T18:11:40.890Z",
-  "commitHash": "d1282fa1f34557e249d8d141f4e87a85ea7edfc6",
-  "shortHash": "d1282fa1",
+  "versionInternal": "0.1.9+20260416.182726.4ac5bcbd",
+  "buildId": "0.1.9+20260416.182726.4ac5bcbd-20260416.182726-4ac5bcbd",
+  "builtAt": "2026-04-16T18:27:26.793Z",
+  "commitHash": "4ac5bcbd52f98dd1455815355c422dd2c55951ee",
+  "shortHash": "4ac5bcbd",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "4ac5bcbd52f98dd1455815355c422dd2c55951ee",
+      "shortHash": "4ac5bcbd",
+      "dateIso": "2026-04-16T15:12:32-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(hub): add premium spacing around banner",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4ac5bcbd52f98dd1455815355c422dd2c55951ee"
+    },
     {
       "hash": "d1282fa1f34557e249d8d141f4e87a85ea7edfc6",
       "shortHash": "d1282fa1",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style(marketplace): padroniza banners da home com a mesma identidade de glassmorphism translucido do menu rodape",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ed66fc9f605f28e337b395d8e41201e0e0c2ea3d"
-    },
-    {
-      "hash": "0177b49d5cc8e329484da0a2899b8cc61afed18e",
-      "shortHash": "0177b49d",
-      "dateIso": "2026-04-15T09:41:13-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(marketplace): remove webkittextfillcolor hack that caused text glitch on ios scroll",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0177b49d5cc8e329484da0a2899b8cc61afed18e"
     }
   ]
 } as const;

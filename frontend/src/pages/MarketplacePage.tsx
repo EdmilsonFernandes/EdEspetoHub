@@ -25,6 +25,7 @@ import {
   Buildings,
   CalendarBlank,
   Clock,
+  MapPinLine,
 } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { condominiumService } from '../services/condominiumService';
@@ -1706,25 +1707,34 @@ export function MarketplacePage() {
       >
         <header className={`sticky top-0 z-[60] transition-all duration-300 ${isNativePlatform ? 'bg-[#F8F9FB]/96 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.22)] backdrop-blur-xl' : isHeaderElevated ? 'bg-[#F8F9FB]/92 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.35)] backdrop-blur-2xl' : 'bg-transparent'}`}>
           <div className={`mx-auto max-w-[1200px] px-4 ${isNativePlatform ? 'pb-2 pt-[max(0.55rem,calc(env(safe-area-inset-top)+0.1rem))]' : 'pb-3 pt-[max(0.85rem,calc(env(safe-area-inset-top)+0.2rem))]'}`}>
-            <div className={`${isNativePlatform ? 'space-y-2 rounded-[1.45rem] px-2 py-2' : 'space-y-3 rounded-[1.7rem] px-2 py-2.5'} border border-white/80 bg-white/88 shadow-[0_16px_42px_-34px_rgba(15,23,42,0.34)] backdrop-blur-xl`}>
+            <div className={`${isNativePlatform ? 'space-y-2.5 rounded-[1.65rem] px-2.5 py-2.5' : 'space-y-3 rounded-[1.9rem] px-3 py-3'} relative overflow-hidden border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.95)_0%,rgba(241,247,246,0.9)_54%,rgba(255,255,255,0.92)_100%)] shadow-[0_22px_54px_-38px_rgba(15,23,42,0.46)] ring-1 ring-slate-200/55 backdrop-blur-2xl`}>
+            <div className="pointer-events-none absolute -left-12 -top-16 h-36 w-36 rounded-full bg-[#336886]/10 blur-3xl" />
+            <div className="pointer-events-none absolute -right-10 top-6 h-28 w-28 rounded-full bg-emerald-200/35 blur-3xl" />
             {/* Linha 1: Perfil e Logo */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+            <div className="relative flex items-center justify-between gap-2">
+              <div className="flex min-w-0 flex-1 items-center gap-2.5">
                 <HeaderAvatarTrigger
                   displayName={customerDisplayName}
                   profileImageUrl={customerProfileImage}
                   hasNotification={!isCustomerLogged}
                   onClick={() => setProfileDrawerOpen(true)}
                 />
-                <div className="min-w-0">
-                  <p className="truncate text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Entregar em</p>
+                <div className="min-w-0 flex-1 rounded-[1.35rem] border border-white/75 bg-white/72 px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_14px_30px_-26px_rgba(15,23,42,0.34)] ring-1 ring-slate-950/5 backdrop-blur-sm">
+                  <div className="mb-0.5 flex items-center gap-1.5">
+                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#336886]/10 text-[#336886]">
+                      <MapPinLine size={13} weight="bold" />
+                    </span>
+                    <p className="truncate text-[9.5px] font-black uppercase tracking-[0.2em] text-slate-400">Entregar em</p>
+                  </div>
                   <button
                     type="button"
-                    className="inline-flex min-w-0 items-center gap-1 text-[14px] font-black text-slate-950 transition-colors duration-150 ease-out hover:text-[#336886] active:scale-[0.99]"
+                    className="inline-flex w-full min-w-0 items-center justify-between gap-2 text-left text-[14px] font-black text-slate-950 transition-colors duration-150 ease-out hover:text-[#336886] active:scale-[0.99]"
                     onClick={() => setQuickFilter((prev) => (prev === 'nearby' ? 'all' : 'nearby'))}
                   >
                     <span className="truncate">{displayLocationLabel}</span>
-                    <CaretDown size={14} weight="bold" className="shrink-0 text-[#336886]" />
+                    <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[#336886]">
+                      <CaretDown size={13} weight="bold" />
+                    </span>
                   </button>
                 </div>
               </div>
@@ -1732,7 +1742,7 @@ export function MarketplacePage() {
               <button
                 type="button"
                 onClick={handleHubNotificationClick}
-                className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/80 bg-white/92 text-slate-700 shadow-[0_12px_28px_-18px_rgba(15,23,42,0.42)] ring-1 ring-slate-950/5 backdrop-blur-sm transition-all duration-150 ease-out hover:text-[#336886] active:scale-95"
+                className="relative flex h-[3.2rem] w-[3.2rem] shrink-0 items-center justify-center rounded-[1.35rem] border border-white/85 bg-slate-950 text-white shadow-[0_18px_34px_-18px_rgba(15,23,42,0.62)] ring-1 ring-slate-950/5 backdrop-blur-sm transition-all duration-150 ease-out hover:bg-[#153A4C] active:scale-95"
                 aria-label={hubNotificationCount > 0 ? `${hubNotificationCount} notificação de pedido` : 'Abrir notificações'}
                 title={hubNotificationCount > 0 ? 'Pedidos em andamento' : 'Notificações'}
               >
@@ -1749,15 +1759,16 @@ export function MarketplacePage() {
             </div>
 
             {/* Linha 2: Busca Premium */}
-            <div className="relative z-20 px-0.5">
+            <div className="relative z-20">
               <div
-                className={`group relative isolate flex items-center gap-3 border border-slate-200/90 bg-white px-4 transition-[border-color,box-shadow,background-color] duration-200 ease-out hover:border-slate-300 hover:bg-white focus-within:border-[#336886]/22 focus-within:shadow-[0_16px_34px_-22px_rgba(51,104,134,0.18)] focus-within:ring-2 focus-within:ring-[#336886]/8 ${isNativePlatform ? 'min-h-[48px] rounded-[20px] shadow-[0_10px_22px_-18px_rgba(15,23,42,0.14)]' : 'min-h-[52px] rounded-[22px] shadow-[0_12px_26px_-20px_rgba(15,23,42,0.18)]'}`}
+                className={`group relative isolate flex items-center gap-3 overflow-hidden border border-slate-200/80 bg-white/95 px-3.5 transition-[border-color,box-shadow,background-color] duration-200 ease-out hover:border-slate-300 hover:bg-white focus-within:border-[#336886]/25 focus-within:bg-white focus-within:shadow-[0_18px_40px_-24px_rgba(51,104,134,0.28)] focus-within:ring-2 focus-within:ring-[#336886]/10 ${isNativePlatform ? 'min-h-[50px] rounded-[1.35rem] shadow-[0_14px_30px_-24px_rgba(15,23,42,0.25)]' : 'min-h-[54px] rounded-[1.55rem] shadow-[0_16px_34px_-26px_rgba(15,23,42,0.28)]'}`}
                 onClick={(e) => {
                   if ((e.target as HTMLElement).closest('button')) return;
                   searchInputRef.current?.focus();
                 }}
               >
-                <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#336886]/10 bg-[#336886]/8 text-[#336886] shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
+                <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
+                <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[1rem] border border-[#336886]/10 bg-[#336886]/8 text-[#336886] shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
                   <MagnifyingGlass size={18} weight="bold" />
                 </div>
                 <div className="relative min-w-0 flex-1">
@@ -1800,25 +1811,31 @@ export function MarketplacePage() {
             </div>
 
             {/* Linha 3: Filtros Minimalistas (Pílulas) */}
-            <div className={`-mx-1 flex gap-2 overflow-x-auto no-scrollbar scrollbar-hide px-1 ${isNativePlatform ? 'py-0.5' : 'py-1.5'}`}>
+            <div className={`relative -mx-0.5 flex gap-2 overflow-x-auto no-scrollbar scrollbar-hide px-0.5 ${isNativePlatform ? 'py-0.5' : 'py-1'}`}>
               {['all', 'free_shipping', 'nearby', 'open_now', 'favorites'].map((filter) => {
                 const label =
-                  filter === 'all' ? 'Ver Todos' :
-                  filter === 'free_shipping' ? 'Frete Grátis' :
-                  filter === 'nearby' ? 'Perto de Você' :
-                  filter === 'favorites' ? 'Favoritos' : 'Abertos Agora';
+                  filter === 'all' ? 'Todos' :
+                  filter === 'free_shipping' ? 'Frete grátis' :
+                  filter === 'nearby' ? 'Perto de você' :
+                  filter === 'favorites' ? 'Favoritos' : 'Abertos';
+                const Icon =
+                  filter === 'all' ? Storefront :
+                  filter === 'free_shipping' ? Bicycle :
+                  filter === 'nearby' ? MapPinLine :
+                  filter === 'favorites' ? Heart : Clock;
                 const active = quickFilter === filter;
                 return (
                   <button
                     key={filter}
                     type="button"
                     onClick={() => setQuickFilter(filter as any)}
-                    className={`whitespace-nowrap rounded-full ${isNativePlatform ? 'px-3 py-1.5' : 'px-3.5 py-1.5'} text-[12px] transition-all duration-150 ease-out active:scale-[0.97] ${
+                    className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full ${isNativePlatform ? 'px-3 py-1.5' : 'px-3.5 py-1.5'} text-[12px] transition-all duration-150 ease-out active:scale-[0.97] ${
                       active
-                        ? 'bg-[#336886] text-white shadow-[0_10px_24px_-14px_rgba(51,104,134,0.68)] font-black'
-                        : 'bg-white/90 text-slate-600 border border-slate-100 hover:bg-white font-bold shadow-[0_6px_16px_-14px_rgba(15,23,42,0.28)]'
+                        ? 'border border-[#336886] bg-[#153A4C] text-white shadow-[0_14px_28px_-16px_rgba(21,58,76,0.72)] font-black'
+                        : 'border border-white/75 bg-white/72 text-slate-600 hover:bg-white font-bold shadow-[0_10px_22px_-18px_rgba(15,23,42,0.28)]'
                     }`}
                   >
+                    <Icon size={13} weight={active ? 'fill' : 'duotone'} />
                     {label}
                   </button>
                 );
@@ -1831,8 +1848,9 @@ export function MarketplacePage() {
                   setSegmentFilter('all');
                   setQuickFilter('all');
                 }}
-                className={`whitespace-nowrap rounded-full border border-slate-100 bg-white/90 ${isNativePlatform ? 'px-3 py-1.5' : 'px-3.5 py-1.5'} text-[12px] font-bold text-slate-500 shadow-[0_6px_16px_-14px_rgba(15,23,42,0.28)] transition-all duration-150 ease-out hover:bg-white active:scale-[0.97]`}
+                className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-white/75 bg-white/58 ${isNativePlatform ? 'px-3 py-1.5' : 'px-3.5 py-1.5'} text-[12px] font-bold text-slate-500 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.22)] transition-all duration-150 ease-out hover:bg-white active:scale-[0.97]`}
               >
+                <X size={12} weight="bold" />
                 Limpar
               </button>
             </div>
