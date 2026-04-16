@@ -2638,7 +2638,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         deliveryStatus === 'ACCEPTED'
       );
       if (hasAssignedMotoboy) {
-        return { label: "Disponível para Coleta", className: "bg-indigo-50 text-indigo-700 border-indigo-100" };
+        return { label: "Entregador a caminho", className: "bg-indigo-50 text-indigo-700 border-indigo-100" };
       }
       return { label: "Buscando entregador", className: "bg-amber-50 text-amber-700 border-amber-100" };
     }
@@ -2646,7 +2646,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       if (postal) {
         return { label: "Pronto para postagem", className: "bg-violet-50 text-violet-700 border-violet-100" };
       }
-      return { label: "Disponível para Coleta", className: "bg-violet-50 text-violet-700 border-violet-100" };
+      return { label: "Pronto para entrega", className: "bg-violet-50 text-violet-700 border-violet-100" };
     }
     if (normalizedStatus === "preparing") {
       return { label: "Em Preparação", className: "bg-blue-50 text-blue-700 border-blue-100" };
@@ -2655,8 +2655,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       const label =
         orderType === "delivery"
           ? (postal ? "Pronto para postagem" : "Pronto")
-          : orderType === "pickup"
-          ? "Pronto"
+        : orderType === "pickup"
+          ? "Pronto para retirada"
           : "Pronto";
       return { label, className: "bg-emerald-50 text-emerald-700 border-emerald-100" };
     }

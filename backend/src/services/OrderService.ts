@@ -187,15 +187,37 @@ export class OrderService
    *
    * @author Edmilson Lopes
    */
-  private resolveOrderStatusPushMessage(status: string, orderDisplayId: string) {
+  private resolveOrderStatusPushMessage(
+    status: string,
+    orderDisplayId: string,
+    order?: Pick<Order, 'type' | 'fulfillmentMode' | 'condominiumFulfillmentMode'>
+  ) {
     const normalized = String(status || '').toLowerCase();
+    const type = String(order?.type || '').toLowerCase();
+    const fulfillmentMode = String(order?.fulfillmentMode || '').toLowerCase();
+    const condominiumMode = String(order?.condominiumFulfillmentMode || '').toLowerCase();
+    const isPostal = type === 'delivery' && fulfillmentMode === 'postal';
+    const isDelivery = type === 'delivery' && !isPostal && condominiumMode !== 'pickup_at_stall';
+    const isPickup = type === 'pickup' || condominiumMode === 'pickup_at_stall' || fulfillmentMode === 'condominium_pickup';
     const dictionary: Record<string, string> = {
       pending: `Pedido ${orderDisplayId} recebido com sucesso.`,
-      preparing: `Pedido ${orderDisplayId} está em preparação.`,
-      ready: `Pedido ${orderDisplayId} pronto para postagem.`,
-      ready_for_delivery: `Pedido ${orderDisplayId} pronto para entrega.`,
-      waiting_for_motoboy: `Pedido ${orderDisplayId} aguardando entregador.`,
-      dispatched: `Pedido ${orderDisplayId} foi postado e está em trânsito.`,
+      preparing: `Pedido ${orderDisplayId} está sendo preparado.`,
+      ready: isPostal
+        ? `Pedido ${orderDisplayId} pronto para postagem.`
+        : isPickup
+          ? `Pedido ${orderDisplayId} pronto para retirada.`
+          : `Pedido ${orderDisplayId} pronto.`,
+      ready_for_delivery: isPostal
+        ? `Pedido ${orderDisplayId} pronto para postagem.`
+        : isDelivery
+          ? `Pedido ${orderDisplayId} pronto. Vamos chamar o entregador.`
+          : `Pedido ${orderDisplayId} pronto para retirada.`,
+      waiting_for_motoboy: isPostal
+        ? `Pedido ${orderDisplayId} foi despachado.`
+        : `Pedido ${orderDisplayId} pronto e aguardando entregador.`,
+      dispatched: isPostal
+        ? `Pedido ${orderDisplayId} foi postado e está em trânsito.`
+        : `Pedido ${orderDisplayId} saiu para entrega.`,
       in_delivery: `Pedido ${orderDisplayId} saiu para entrega.`,
       delivered: `Pedido ${orderDisplayId} foi entregue.`,
       finished: `Pedido ${orderDisplayId} foi finalizado.`,
@@ -218,7 +240,8 @@ export class OrderService
 
     const statusBody = this.resolveOrderStatusPushMessage(
       String(order?.status || 'pending'),
-      `#${String(order?.id || '').slice(0, 8)}`
+      `#${String(order?.id || '').slice(0, 8)}`,
+      order as any
     );
     const storeName = String(order?.store?.name || '').trim();
     const body = storeName ? `${storeName}: ${statusBody}` : statusBody;

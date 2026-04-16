@@ -15,6 +15,7 @@ import { DeliveryEvent } from '../entities/DeliveryEvent';
 import { Motoboy } from '../entities/Motoboy';
 import { Order } from '../entities/Order';
 import { OrderDelivery } from '../entities/OrderDelivery';
+import { PushNotificationService } from './PushNotificationService';
 
 const ACTIVE_DELIVERY_STATUSES = [ 'ACCEPTED', 'PICKED_UP', 'IN_TRANSIT' ] as const;
 type ActiveDeliveryStatus = (typeof ACTIVE_DELIVERY_STATUSES)[number];
@@ -43,10 +44,49 @@ const normalizeStatus = (value: any): DeliveryStatus => {
 };
 
 export class DeliveryService {
+  private pushService = new PushNotificationService();
+
   private deliveryExpireMinutes =
     process.env.DELIVERY_EXPIRE_MINUTES && Number(process.env.DELIVERY_EXPIRE_MINUTES) > 0
       ? Number(process.env.DELIVERY_EXPIRE_MINUTES)
       : 20;
+
+    /**
+   * Notifies the customer about motoboy delivery milestones.
+   *
+   * @author Edmilson Lopes
+   */
+private dispatchDeliveryProgressPush(
+    order: Pick<Order, 'id' | 'customerUserId' | 'guestPushId'> & { store?: { name?: string | null } | null } | null | undefined,
+    milestone: 'ACCEPTED' | 'IN_TRANSIT' | 'DELIVERED',
+    motoboy?: Motoboy | null
+  ) {
+    const userId = String(order?.customerUserId || '').trim();
+    const guestId = String(order?.guestPushId || '').trim();
+    if (!order?.id || (!userId && !guestId)) return;
+
+    const motoboyName = String((motoboy as any)?.name || (motoboy as any)?.user?.name || '').trim();
+    const firstName = motoboyName.split(/\s+/)[0] || 'O entregador';
+    const orderDisplayId = `#${String(order.id).slice(0, 8)}`;
+    const storeName = String(order?.store?.name || '').trim();
+    const messages = {
+      ACCEPTED: `${firstName} aceitou a entrega do pedido ${orderDisplayId} e está indo retirar.`,
+      IN_TRANSIT: `${firstName} retirou o pedido ${orderDisplayId} e saiu para entrega.`,
+      DELIVERED: `Pedido ${orderDisplayId} entregue. Obrigado por comprar pelo Já no Caminho.`,
+    } as const;
+    const payload = {
+      title: milestone === 'DELIVERED' ? 'Pedido entregue' : 'Entrega atualizada',
+      body: storeName ? `${storeName}: ${messages[milestone]}` : messages[milestone],
+      data: {
+        url: `https://janocaminho.com.br/pedido/${order.id}`,
+        orderId: String(order.id),
+        deliveryStatus: milestone,
+      },
+    };
+
+    if (userId) void this.pushService.notifyCustomerOrderUpdate(userId, payload);
+    if (guestId) void this.pushService.notifyGuestOrderUpdate(guestId, payload);
+  }
 
     /**
    * Executes insert event business logic.
@@ -136,7 +176,7 @@ async ensureQueueDelivery(order: Order, manager?: EntityManager) {
    * @author Edmilson Lopes
    */
 async acceptDelivery(orderId: string, motoboy: Motoboy) {
-    return AppDataSource.transaction(async (manager) => {
+    const result = await AppDataSource.transaction(async (manager) => {
       const deliveryRepo = manager.getRepository(OrderDelivery);
       const orderRepo = manager.getRepository(Order);
 
@@ -242,6 +282,8 @@ async acceptDelivery(orderId: string, motoboy: Motoboy) {
       const updated = await deliveryRepo.findOne({ where: { orderId } });
       return { order, delivery: updated };
     });
+    this.dispatchDeliveryProgressPush(result?.order as any, 'ACCEPTED', motoboy);
+    return result;
   }
 
     /**
@@ -268,7 +310,7 @@ async start(orderId: string, motoboy: Motoboy) {
    * @author Edmilson Lopes
    */
 async pickupAndStart(orderId: string, motoboy: Motoboy) {
-    return AppDataSource.transaction(async (manager) => {
+    const result = await AppDataSource.transaction(async (manager) => {
       const repo = manager.getRepository(OrderDelivery);
       const orderRepo = manager.getRepository(Order);
 
@@ -305,14 +347,16 @@ async pickupAndStart(orderId: string, motoboy: Motoboy) {
         toStatus: 'IN_TRANSIT',
       });
 
-      const order = await orderRepo.findOne({ where: { id: orderId } as any });
+      const order = await orderRepo.findOne({ where: { id: orderId } as any, relations: [ 'store' ] as any });
       if (order) {
         order.status = 'in_delivery';
         await orderRepo.save(order);
       }
 
-      return delivery;
+      return { order, delivery };
     });
+    this.dispatchDeliveryProgressPush((result as any)?.order, 'IN_TRANSIT', motoboy);
+    return result.delivery;
   }
 
     /**
@@ -321,8 +365,10 @@ async pickupAndStart(orderId: string, motoboy: Motoboy) {
    * @author Edmilson Lopes
    */
 private async advance(orderId: string, motoboy: Motoboy, to: DeliveryStatus) {
-    return AppDataSource.transaction(async (manager) => {
+    const result = await AppDataSource.transaction(async (manager) => {
       const repo = manager.getRepository(OrderDelivery);
+      const orderRepo = manager.getRepository(Order);
+      let order: Order | null = null;
       const delivery = await repo
         .createQueryBuilder('od')
         .setLock('pessimistic_write')
@@ -349,15 +395,18 @@ private async advance(orderId: string, motoboy: Motoboy, to: DeliveryStatus) {
 
       // Once the courier starts the route, we consider the order "in delivery" for store/customer views.
       if (to === 'IN_TRANSIT') {
-        const orderRepo = manager.getRepository(Order);
-        const order = await orderRepo.findOne({ where: { id: orderId } as any });
+        order = await orderRepo.findOne({ where: { id: orderId } as any, relations: [ 'store' ] as any });
         if (order) {
           order.status = 'in_delivery';
           await orderRepo.save(order);
         }
       }
-      return delivery;
+      return { order, delivery };
     });
+    if (to === 'IN_TRANSIT') {
+      this.dispatchDeliveryProgressPush(result.order as any, 'IN_TRANSIT', motoboy);
+    }
+    return result.delivery;
   }
 
     /**
@@ -366,7 +415,7 @@ private async advance(orderId: string, motoboy: Motoboy, to: DeliveryStatus) {
    * @author Edmilson Lopes
    */
 async complete(orderId: string, motoboy: Motoboy) {
-    return AppDataSource.transaction(async (manager) => {
+    const result = await AppDataSource.transaction(async (manager) => {
       const deliveryRepo = manager.getRepository(OrderDelivery);
       const orderRepo = manager.getRepository(Order);
 
@@ -409,6 +458,8 @@ async complete(orderId: string, motoboy: Motoboy) {
 
       return { order, delivery };
     });
+    this.dispatchDeliveryProgressPush(result?.order as any, 'DELIVERED', motoboy);
+    return result;
   }
 
     /**

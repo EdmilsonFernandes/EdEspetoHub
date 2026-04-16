@@ -16,8 +16,8 @@ import { usePollingPaymentStatus } from '../hooks/usePollingPaymentStatus';
 const statusLabels: Record<string, string> = {
   pending: 'Pedido Recebido',
   preparing: 'Em Preparação',
-  ready: 'Disponível para Coleta',
-  ready_for_pickup: 'Disponível para Coleta',
+  ready: 'Pronto para retirada',
+  ready_for_pickup: 'Pronto para retirada',
   ready_for_delivery: 'Pronto para entrega',
   waiting_for_motoboy: 'Aguardando entregador',
   in_delivery: 'Em rota',
@@ -269,7 +269,8 @@ export function OrderTracking() {
     if (isPostalDelivery && (normalizedStatus === 'ready' || normalizedStatus === 'ready_for_delivery')) return 'Pronto para postagem';
     if (isDelivery && (deliveryStatus === 'DELIVERED' || normalizedStatus === 'delivered' || normalizedStatus === 'finished')) return 'Entregue';
     if (isDelivery && (deliveryStatus === 'IN_TRANSIT' || normalizedStatus === 'in_delivery')) return 'Em rota';
-    if (isDelivery && (deliveryStatus === 'ACCEPTED' || deliveryStatus === 'PICKED_UP')) return 'Entregador a caminho';
+    if (isDelivery && deliveryStatus === 'ACCEPTED') return 'Entregador a caminho';
+    if (isDelivery && deliveryStatus === 'PICKED_UP') return 'Pedido retirado';
     if (isDelivery && normalizedStatus === 'dispatched') return 'Despachado';
     if (isDelivery && normalizedStatus === 'waiting_for_motoboy') return 'Aguardando entregador';
     if (isDelivery && normalizedStatus === 'ready_for_delivery') return 'Pronto para entrega';
@@ -277,7 +278,7 @@ export function OrderTracking() {
     // Legacy delivery orders that still use "done".
     if (isDelivery && normalizedStatus === 'done') return 'Entregue';
     if (order?.type === 'table' && normalizedStatus === 'done') return 'Pedido Pronto';
-    if (order?.type === 'pickup' && (normalizedStatus === 'ready' || normalizedStatus === 'ready_for_pickup')) return 'Disponível para Coleta';
+    if (order?.type === 'pickup' && (normalizedStatus === 'ready' || normalizedStatus === 'ready_for_pickup')) return 'Pronto para retirada';
     return statusLabels[normalizedStatus] || statusLabels[status] || status;
   }, [isDelivery, isPostalDelivery, order?.type, status, normalizedStatus, (order as any)?.delivery?.status]);
   const isCancelled = normalizedStatus === 'cancelled';
@@ -803,7 +804,7 @@ export function OrderTracking() {
       return [
         { id: 'pending', label: 'Pedido Recebido' },
         { id: 'preparing', label: 'Em Preparação' },
-        { id: 'ready', label: 'Disponível para Coleta' },
+        { id: 'ready', label: 'Pronto para retirada' },
         { id: 'done', label: 'Pago' },
       ];
     }

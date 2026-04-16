@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.212951.2f484496",
-  "buildId": "0.1.9+20260416.212951.2f484496-20260416.212951-2f484496",
-  "builtAt": "2026-04-16T21:29:51.123Z",
-  "commitHash": "2f484496b579991245749628cb2cdd5d16bea2b3",
-  "shortHash": "2f484496",
+  "versionInternal": "0.1.9+20260416.213957.67e75b1a",
+  "buildId": "0.1.9+20260416.213957.67e75b1a-20260416.213957-67e75b1a",
+  "builtAt": "2026-04-16T21:39:57.538Z",
+  "commitHash": "67e75b1ad125e79be61830661b077ebfc6959e39",
+  "shortHash": "67e75b1a",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "67e75b1ad125e79be61830661b077ebfc6959e39",
+      "shortHash": "67e75b1a",
+      "dateIso": "2026-04-16T18:30:30-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(admin): keep condo detail title without duplicate badge",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/67e75b1ad125e79be61830661b077ebfc6959e39"
+    },
     {
       "hash": "2f484496b579991245749628cb2cdd5d16bea2b3",
       "shortHash": "2f484496",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "perf(client): cache customer profile avatar locally",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b91fbbd4f0a78cc3b5044ff0c0b368639df4cf64"
-    },
-    {
-      "hash": "21b5bcb28f57e585a2748616827f8fd1d517cf33",
-      "shortHash": "21b5bcb2",
-      "dateIso": "2026-04-15T19:18:50-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "build(android): bump release to 1.0.15",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/21b5bcb28f57e585a2748616827f8fd1d517cf33"
     }
   ]
 } as const;

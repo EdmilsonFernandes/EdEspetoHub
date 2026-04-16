@@ -55,7 +55,7 @@ export const formatOrderStatus = (status?: string, type?: string) => {
       ? 'Aguardando entregador'
       : normalizedType === 'table'
         ? 'Pedido pronto'
-        : 'Disponível para Coleta';
+        : 'Pronto para retirada';
   const doneLabel =
     normalizedType === 'delivery'
       ? 'Saiu para entrega'
