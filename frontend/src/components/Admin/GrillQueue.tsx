@@ -116,6 +116,20 @@ const isPostalOrder = (order: any) =>
 
 const isCondominiumOrder = (order: any) => Boolean(order?.condominiumId || order?.condominiumName);
 
+const resolveCondominiumCardIdentifier = (order: any) => {
+  if (!isCondominiumOrder(order)) return "";
+  const fulfillmentMode = String(order?.fulfillmentMode || "").toLowerCase();
+  const unit = order?.condominiumUnit || {};
+  const isApartment = fulfillmentMode === "condominium_apartment" || fulfillmentMode === "apartment_delivery";
+  if (!isApartment) return "COND.";
+
+  const apartment = String(unit?.apartment || "").trim();
+  const blockOrTower = String(unit?.block || unit?.tower || "").trim();
+  if (apartment) return `APTO ${apartment}`.toUpperCase();
+  if (blockOrTower) return `BL. ${blockOrTower}`.toUpperCase();
+  return "APTO";
+};
+
 const PremiumCheckToggle = ({
   selected = false,
   onToggle,
@@ -386,10 +400,11 @@ const OrderSummaryCard = ({
   (() => {
     const orderType = String(order?.type || '').toLowerCase();
     const locationIdentifier = resolveLocationIdentifier(order);
-    const hasLocationIdentifier = Boolean(locationIdentifier);
-    const mesaMeta = parseMesaIdentifier(locationIdentifier);
-    const isMesaLocation = mesaMeta.isMesa;
     const isCondo = isCondominiumOrder(order);
+    const cardLocationIdentifier = isCondo ? resolveCondominiumCardIdentifier(order) : locationIdentifier;
+    const hasLocationIdentifier = Boolean(cardLocationIdentifier);
+    const mesaMeta = parseMesaIdentifier(cardLocationIdentifier);
+    const isMesaLocation = mesaMeta.isMesa;
     const locationBadgeTone = isMesaLocation
       ? 'bg-[#FFF3E0] text-[#E65100] border-[#E65100]'
       : isCondo
@@ -475,7 +490,7 @@ const OrderSummaryCard = ({
         <div className="space-y-3">
           {/* Header do Card */}
           <div className="flex items-start justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex min-w-0 flex-nowrap items-center gap-2.5">
               <div className={`flex items-center justify-center h-9 px-3 rounded-2xl font-black text-sm tracking-tight shadow-sm ${
                 archived ? 'bg-slate-200 text-slate-500' : 'bg-slate-900 text-white shadow-slate-900/20'
               }`}>
@@ -483,7 +498,7 @@ const OrderSummaryCard = ({
               </div>
               
               {hasLocationIdentifier && (
-                <div className={`inline-flex items-center gap-1.5 rounded-2xl border px-3 py-1.5 shadow-sm transition-colors ${locationBadgeTone}`}>
+                <div className={`inline-flex min-w-0 items-center gap-1.5 rounded-2xl border px-3 py-1.5 shadow-sm transition-colors ${locationBadgeTone}`} title={locationIdentifier || cardLocationIdentifier}>
                   {isMesaLocation ? (
                     <>
                       <Monitor size={14} weight="duotone" />
@@ -493,7 +508,7 @@ const OrderSummaryCard = ({
                   ) : (
                     <>
                       {isCondo ? <Buildings size={14} weight="duotone" /> : orderType === 'delivery' ? <Truck size={14} weight="duotone" /> : <Storefront size={14} weight="duotone" />}
-                      <span className="truncate text-[11px] font-black uppercase tracking-wider">{locationIdentifier}</span>
+                      <span className="max-w-[5.5rem] truncate whitespace-nowrap text-[11px] font-black uppercase tracking-wider sm:max-w-[8rem]">{cardLocationIdentifier}</span>
                     </>
                   )}
                 </div>
@@ -3124,6 +3139,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     {(() => {
                       const drawerLocation = resolveLocationIdentifier(selectedOrder || {});
                       const drawerMesa = parseMesaIdentifier(drawerLocation);
+                      if (isCondominiumOrder(selectedOrder || {})) return 'Pedido condomínio';
                       if (!drawerLocation) return 'Detalhes do pedido';
                       if (!drawerMesa.isMesa) return `Pedido ${drawerLocation}`;
                       return (

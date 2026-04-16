@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.211502.6c164c45",
-  "buildId": "0.1.9+20260416.211502.6c164c45-20260416.211502-6c164c45",
-  "builtAt": "2026-04-16T21:15:02.494Z",
-  "commitHash": "6c164c45e1a07cf79e5dad8f8ebab4900d15e74c",
-  "shortHash": "6c164c45",
+  "versionInternal": "0.1.9+20260416.212704.69dd3f7c",
+  "buildId": "0.1.9+20260416.212704.69dd3f7c-20260416.212704-69dd3f7c",
+  "builtAt": "2026-04-16T21:27:04.494Z",
+  "commitHash": "69dd3f7c4613ba2b51495b27e1211de8d8baa1a6",
+  "shortHash": "69dd3f7c",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "69dd3f7c4613ba2b51495b27e1211de8d8baa1a6",
+      "shortHash": "69dd3f7c",
+      "dateIso": "2026-04-16T18:15:57-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(build): refresh build info after queue fixes",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/69dd3f7c4613ba2b51495b27e1211de8d8baa1a6"
+    },
     {
       "hash": "6c164c45e1a07cf79e5dad8f8ebab4900d15e74c",
       "shortHash": "6c164c45",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(app): harden native bottom spacing across flows",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/88fe2755d11686740cd370a32afd65c76ab39e4a"
-    },
-    {
-      "hash": "93d2ec7cd1669090f7c2b16a9bc7cd1be2b60b55",
-      "shortHash": "93d2ec7c",
-      "dateIso": "2026-04-15T18:51:45-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(app): refresh admin polish and replace installed app icon",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/93d2ec7cd1669090f7c2b16a9bc7cd1be2b60b55"
     }
   ]
 } as const;
