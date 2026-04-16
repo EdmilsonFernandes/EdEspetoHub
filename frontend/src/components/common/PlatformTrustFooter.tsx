@@ -31,6 +31,47 @@ export function PlatformTrustFooter({
   const isLeft = align === 'left';
   const isRight = align === 'right';
 
+  if (mode === 'minimal' && compact) {
+    return (
+      <div className={`w-full ${className}`}>
+        <div className={`flex ${alignClass}`}>
+          <a
+            href={href}
+            target="_blank"
+            rel="noreferrer"
+            className={`group inline-flex max-w-full items-center gap-2.5 overflow-hidden rounded-full border px-2.5 py-2 transition-all duration-300 hover:-translate-y-0.5 ${
+              tone === 'dark'
+                ? 'border-white/10 bg-white/5 text-slate-100 shadow-[0_18px_34px_-26px_rgba(2,6,23,0.85)]'
+                : 'border-slate-200/85 bg-white/78 text-slate-700 shadow-[0_16px_32px_-28px_rgba(15,23,42,0.22)]'
+            }`}
+            aria-label="Plataforma Já no Caminho"
+          >
+            <span
+              className={`grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-full border p-0.5 transition-transform group-hover:scale-105 ${
+                tone === 'dark'
+                  ? 'border-white/10 bg-white'
+                  : 'border-white bg-[linear-gradient(135deg,#ffffff,#eef7f5)]'
+              }`}
+            >
+              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
+            </span>
+            <span className={`min-w-0 text-left ${isRight ? 'order-first' : ''}`}>
+              <span className={`block truncate text-[11px] font-black tracking-tight ${tone === 'dark' ? 'text-slate-100' : 'text-slate-950'}`}>
+                Já no Caminho
+              </span>
+              <span className={`mt-0.5 flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.14em] ${minimalMuted}`}>
+                <ShieldCheck size={11} weight="bold" className="shrink-0 text-emerald-500" />
+                <span>App seguro</span>
+                <span className="text-slate-300">•</span>
+                <AppVersionBadge className="normal-case tracking-normal" />
+              </span>
+            </span>
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   if (mode === 'minimal') {
     return (
       <div className={`w-full ${className}`}>
@@ -82,11 +123,11 @@ export function PlatformTrustFooter({
                       ? 'border-white/10 bg-white shadow-[0_12px_22px_-16px_rgba(255,255,255,0.55)]'
                       : 'border-slate-200 bg-white shadow-[0_12px_22px_-16px_rgba(15,23,42,0.22)]'
                   }`}>
-                    <img src="/jnc.png" alt="JNC" className="h-full w-full object-cover" />
+                    <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
                   </span>
                   <span className="min-w-0">
                     <span className={`block ${compact ? 'text-[10px]' : 'text-[11px]'} uppercase tracking-[0.18em] font-black ${minimalBrand}`}>
-                      Jano Caminho
+                      Já no Caminho
                     </span>
                     <span className={`${compact ? 'text-[9px]' : 'text-[10px]'} ${minimalMuted}`}>
                       Infraestrutura, identidade e evolução contínua
@@ -133,7 +174,7 @@ export function PlatformTrustFooter({
           target="_blank"
           rel="noreferrer"
           className={`group relative inline-flex items-center gap-3 overflow-hidden rounded-[1.35rem] px-3.5 py-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:text-slate-900 ${shellClass}`}
-          aria-label="Plataforma Jano Caminho"
+          aria-label="Plataforma Já no Caminho"
         >
           <span
             className={`pointer-events-none absolute inset-0 ${
@@ -143,13 +184,13 @@ export function PlatformTrustFooter({
             }`}
           />
           <span className="relative h-10 w-10 rounded-xl overflow-hidden border border-slate-200/70 shadow-sm bg-white">
-            <img src="/jnc.png" alt="JNC" className="h-full w-full object-cover" />
+            <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
           </span>
           <span className="relative flex min-w-0 flex-col text-left">
             <span className={`text-[9px] font-bold uppercase tracking-[0.18em] ${tone === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
               ecossistema oficial
             </span>
-            <span className={`mt-0.5 font-semibold leading-tight ${compact ? 'text-[11px]' : 'text-xs'}`}>Desenvolvido por Jano Caminho</span>
+            <span className={`mt-0.5 font-semibold leading-tight ${compact ? 'text-[11px]' : 'text-xs'}`}>Desenvolvido por Já no Caminho</span>
             <span className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${badgeClass}`}>
               <ShieldCheck size={12} weight="bold" />
               Plataforma segura

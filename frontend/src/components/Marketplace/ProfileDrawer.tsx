@@ -129,7 +129,7 @@ export function ProfileDrawer({
 
       setSavedAccessProfiles({
         customer: {
-          name: String(customerSession?.user?.fullName || customerSession?.user?.name || 'Cliente').trim(),
+          name: String(customerSession?.user?.fullName || customerSession?.user?.name || 'Usuário').trim(),
           email: String(customerSession?.user?.email || '').trim(),
           biometric: nativeBiometricService.hasValidStoredCustomerEnrollment(),
           hasSession: Boolean(customerSession?.token && customerSession?.user),
@@ -197,12 +197,12 @@ export function ProfileDrawer({
   const accessProfiles: AccessProfile[] = [
     {
       id: 'client',
-      title: 'Cliente',
+      title: 'Usuário',
       subtitle: savedAccessProfiles.customer.biometric
         ? 'Biometria pronta neste aparelho'
         : savedAccessProfiles.customer.hasSession
           ? savedAccessProfiles.customer.email || savedAccessProfiles.customer.name
-          : 'Entrar na área do cliente',
+          : 'Entrar para pedir e acompanhar',
       summary: savedAccessProfiles.customer.name || 'Conta pessoal',
       icon: <UserCircle size={24} weight="duotone" />,
       tone: 'bg-[#336886]/10 text-[#336886]',
@@ -281,15 +281,9 @@ export function ProfileDrawer({
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="truncate text-base font-black text-slate-900 leading-tight">{userName}</p>
-                    {currentAccessProfile ? (
-                      <span className="inline-flex shrink-0 items-center rounded-full bg-[#336886]/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">
-                        <span>{currentAccessProfile.title}</span>
-                      </span>
-                    ) : null}
-                  </div>
-                  <p className="truncate text-xs font-bold text-slate-400 mt-0.5">{userEmail}</p>
+                  <p className="truncate text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]/80">Conta conectada</p>
+                  <p className="mt-1 truncate text-base font-black leading-tight text-slate-950">{userName}</p>
+                  <p className="mt-0.5 truncate text-xs font-bold text-slate-500">{userEmail}</p>
                 </div>
               </div>
               <button
@@ -299,9 +293,9 @@ export function ProfileDrawer({
               >
                 <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-[radial-gradient(circle_at_center,rgba(51,104,134,0.12),transparent_70%)]" />
                 <div className="min-w-0">
-                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Trocar acesso</p>
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Acessos do app</p>
                   <p className="mt-1 truncate text-sm font-black text-slate-900">
-                    {currentAccessProfile ? currentAccessProfile.title : 'Escolher perfil'}
+                    {currentAccessProfile ? currentAccessProfile.title : 'Escolher acesso'}
                   </p>
                 </div>
                 <CaretRight size={16} weight="bold" className="text-slate-400" />
@@ -443,11 +437,11 @@ export function ProfileDrawer({
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">Escolha seu acesso</p>
                   <h3 className="mt-1 text-[1.35rem] font-black tracking-[-0.03em] text-slate-950">
-                    {isLogged ? 'Trocar perfil' : accessPickerMode === 'register' ? 'Primeiro acesso' : 'Entrar'}
+                    {isLogged ? 'Alternar acesso' : accessPickerMode === 'register' ? 'Primeiro acesso' : 'Entrar'}
                   </h3>
                   <p className="mt-1 text-sm font-medium leading-relaxed text-slate-500">
                     {isLogged
-                      ? 'Cada opção abre a área certa do app.'
+                      ? 'Sua conta pessoal fica no Hub. Lojista e entregador abrem as áreas operacionais.'
                       : accessPickerMode === 'register'
                         ? 'Escolha qual conta deseja criar e siga o fluxo certo para começar.'
                         : 'Entre com sua conta e acesse a área certa do app.'}

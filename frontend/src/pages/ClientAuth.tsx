@@ -23,6 +23,30 @@ const getModeFromSearch = (search: string) => {
 
 const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(String(value || '').trim());
 
+const normalizeVerificationCodeError = (error: any) => {
+  const rawMessage = String(error?.message || '').trim();
+  const normalized = rawMessage
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
+  if (normalized.includes('expir')) {
+    return 'Código expirado. Reenvie um novo código e tente novamente.';
+  }
+
+  if (
+    !rawMessage ||
+    normalized.includes('parametro') ||
+    normalized.includes('invalid') ||
+    normalized.includes('token') ||
+    normalized.includes('codigo')
+  ) {
+    return 'Código inválido. Confira os 4 dígitos recebidos no e-mail e tente novamente.';
+  }
+
+  return rawMessage;
+};
+
 export function ClientAuth() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -36,6 +60,7 @@ export function ClientAuth() {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [codeDigits, setCodeDigits] = useState([ '', '', '', '' ]);
   const [codeLoading, setCodeLoading] = useState(false);
+  const [lastAutoSubmittedCode, setLastAutoSubmittedCode] = useState('');
   const [verifyFlowLabel, setVerifyFlowLabel] = useState<'register' | 'login'>('register');
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricLoading, setBiometricLoading] = useState(false);
@@ -91,6 +116,7 @@ export function ClientAuth() {
     if (!verifyPrompt) {
       setCodeDigits([ '', '', '', '' ]);
       setCodeLoading(false);
+      setLastAutoSubmittedCode('');
       setVerifyFlowLabel('register');
       return;
     }
@@ -292,6 +318,7 @@ export function ClientAuth() {
     try {
       const result = await customerAccountService.resendEmailCode(email);
       localStorage.setItem('signupEmail', email);
+      setLastAutoSubmittedCode('');
       setResendCooldown(Number(result?.cooldownSec || 60));
       setMessage(result?.message || 'Novo código enviado. Digite os 4 números para concluir o acesso.');
     } catch (e: any) {
@@ -355,11 +382,14 @@ export function ClientAuth() {
   useEffect(() => {
     if (!verifyPrompt) return;
     if (verificationCode.length !== 4 || codeLoading) return;
+    if (verificationCode === lastAutoSubmittedCode) return;
+    const codeToSubmit = verificationCode;
     const timer = window.setTimeout(() => {
+      setLastAutoSubmittedCode(codeToSubmit);
       void handleVerifyCode();
     }, 180);
     return () => window.clearTimeout(timer);
-  }, [verificationCode, codeLoading, verifyPrompt]);
+  }, [verificationCode, codeLoading, verifyPrompt, lastAutoSubmittedCode]);
 
   const handleVerifyCode = async () => {
     const email = String(verifyPrompt?.email || form.email || '').trim().toLowerCase();
@@ -381,7 +411,7 @@ export function ClientAuth() {
       } catch {
         // no-op
       }
-      setError(e?.message || 'Não foi possível validar o código.');
+      setError(normalizeVerificationCodeError(e));
     } finally {
       setCodeLoading(false);
     }
@@ -682,7 +712,7 @@ export function ClientAuth() {
               </div>
 
               {error ? (
-                <div className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-3 text-sm font-semibold text-rose-700 shadow-[0_12px_30px_-24px_rgba(225,29,72,0.65)] animate-[pulse_0.45s_ease-out_1]">
+                <div className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-3 text-sm font-semibold text-rose-700 shadow-[0_12px_30px_-24px_rgba(225,29,72,0.65)] animate-in fade-in slide-in-from-top-1 duration-150">
                   <WarningCircle size={18} weight="fill" />
                   <span>{error}</span>
                 </div>

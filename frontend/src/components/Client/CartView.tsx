@@ -589,9 +589,9 @@ export const CartView = ({
   }, []);
 
   return (
-    <div className={`animate-in slide-in-from-right relative overflow-x-hidden no-x-scroll bg-slate-50 pt-[max(calc(env(safe-area-inset-top)+0.6rem),0.9rem)] ${isNativePlatform ? "ds-native-nav-content-lg" : "pb-24"}`}>
+    <div className={`animate-in slide-in-from-right relative overflow-x-hidden no-x-scroll bg-slate-50 pt-[max(calc(env(safe-area-inset-top)+1rem),1.25rem)] ${isNativePlatform ? "ds-native-nav-content-lg" : "pb-24"}`}>
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
-      <div className="sticky top-[max(env(safe-area-inset-top),0px)] z-40 mb-4 sm:mb-6">
+      <div className="sticky top-[max(calc(env(safe-area-inset-top)+0.45rem),0.75rem)] z-40 mb-4 sm:mb-6">
         <div className="rounded-[1.85rem] border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.97)_0%,rgba(244,248,252,0.96)_100%)] px-3 py-3 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
           <div className="flex items-center gap-3">
             <button
@@ -614,7 +614,7 @@ export const CartView = ({
       </div>
 
       {/* Resumo compacto (mobile) */}
-      <div className={`sm:hidden mb-4 rounded-2xl border border-slate-100 bg-white px-4 ${summaryCompact ? 'py-2' : 'py-2.5'} flex items-center justify-between sticky top-[max(calc(env(safe-area-inset-top)+5.3rem),5.6rem)] z-30 transition-all shadow-sm`}>
+      <div className={`sm:hidden mb-4 rounded-2xl border border-slate-100 bg-white px-4 ${summaryCompact ? 'py-2' : 'py-2.5'} flex items-center justify-between sticky top-[max(calc(env(safe-area-inset-top)+5.9rem),6.1rem)] z-30 transition-all shadow-sm`}>
         <div>
           <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Resumo rápido</p>
           <p className="text-sm font-semibold text-slate-800">

@@ -5,14 +5,50 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.140456.2eb47d8d",
-  "buildId": "0.1.9+20260416.140456.2eb47d8d-20260416.140456-2eb47d8d",
-  "builtAt": "2026-04-16T14:04:56.007Z",
-  "commitHash": "2eb47d8dee0696679c2fb0eacc940811ac95c005",
-  "shortHash": "2eb47d8d",
+  "versionInternal": "0.1.9+20260416.165932.4cc64048",
+  "buildId": "0.1.9+20260416.165932.4cc64048-20260416.165932-4cc64048",
+  "builtAt": "2026-04-16T16:59:32.435Z",
+  "commitHash": "4cc640480fe53f374226ce009f79d6118c45c8f0",
+  "shortHash": "4cc64048",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "4cc640480fe53f374226ce009f79d6118c45c8f0",
+      "shortHash": "4cc64048",
+      "dateIso": "2026-04-16T12:19:25-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(ClientAuth): reposition biometric login button directly above main login action for better UX",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4cc640480fe53f374226ce009f79d6118c45c8f0"
+    },
+    {
+      "hash": "8d6c9c6a27408f459509ce77c2b275dd83c7046e",
+      "shortHash": "8d6c9c6a",
+      "dateIso": "2026-04-16T12:11:37-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "docs: add TODO map for the remaining E2E test developments",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8d6c9c6a27408f459509ce77c2b275dd83c7046e"
+    },
+    {
+      "hash": "77b0c2ae633a2b0060c12af104817a7e35352a31",
+      "shortHash": "77b0c2ae",
+      "dateIso": "2026-04-16T11:23:10-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(checkout): add guest order ip and phone block guard",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/77b0c2ae633a2b0060c12af104817a7e35352a31"
+    },
+    {
+      "hash": "e90c146c95d1041732933bd8da3856a8c98e1543",
+      "shortHash": "e90c146c",
+      "dateIso": "2026-04-16T11:11:36-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(checkout): protect guest orders and restore customer auto biometrics",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e90c146c95d1041732933bd8da3856a8c98e1543"
+    },
     {
       "hash": "2eb47d8dee0696679c2fb0eacc940811ac95c005",
       "shortHash": "2eb47d8d",
@@ -246,42 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(hub): stabilize access flows and queue refresh",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/79e67f2bfb87e3b89bc16e77b0ef0f01e64dd9d2"
-    },
-    {
-      "hash": "0e8989da731ff561b0708d957a482991576ba7d8",
-      "shortHash": "0e8989da",
-      "dateIso": "2026-04-14T22:08:23-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(hub): replace sticky search input with search sheet",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0e8989da731ff561b0708d957a482991576ba7d8"
-    },
-    {
-      "hash": "610999cf77d6e572aea2cfe0412d7c45d4714ce2",
-      "shortHash": "610999cf",
-      "dateIso": "2026-04-14T18:42:05-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(hub): unify bottom navigation across condo flows",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/610999cf77d6e572aea2cfe0412d7c45d4714ce2"
-    },
-    {
-      "hash": "8609c5b33a7665123eb6fdc43b7e84f00630d13e",
-      "shortHash": "8609c5b3",
-      "dateIso": "2026-04-14T18:32:30-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(hub): refine navigation and role exit flows",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8609c5b33a7665123eb6fdc43b7e84f00630d13e"
-    },
-    {
-      "hash": "34fd43ff83ad76ef7047802cd49bf75911779edc",
-      "shortHash": "34fd43ff",
-      "dateIso": "2026-04-14T18:18:02-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(hub): compact condominium picker layout",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/34fd43ff83ad76ef7047802cd49bf75911779edc"
     }
   ]
 } as const;
