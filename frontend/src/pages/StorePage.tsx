@@ -2653,6 +2653,8 @@ export function StorePage() {
             checkoutLoading={checkoutLoading}
             onBack={() => setView('menu')}
             storeLabel={storeName || branding?.brandName || ''}
+            storeLogoUrl={branding?.logoUrl || ''}
+            storeSlug={storeSlug || ''}
           />
         )}
         {view === 'success' && (

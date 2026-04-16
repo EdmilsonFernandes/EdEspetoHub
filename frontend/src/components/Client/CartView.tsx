@@ -21,6 +21,7 @@ import { formatCurrency } from "../../utils/format";
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 import { GoogleRouteMapView } from "../GoogleRouteMapView";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
+import { getStoreAvatarUrl } from "../../utils/storeAvatar";
 import { formatSelectedModifiers, getModifiersTotal } from "../../utils/productModifiers";
 import { getBundleDiscountForCartItem, getCartPricing } from "../../utils/orderPricing";
 
@@ -102,17 +103,20 @@ export const CartView = ({
   onCheckout,
   onBack,
   storeLabel = "",
+  storeLogoUrl = "",
+  storeSlug = "",
 }) => {
   const isNativePlatform = Capacitor.isNativePlatform();
   const checkoutTopPaddingClass = isNativePlatform
-    ? "pt-[max(calc(env(safe-area-inset-top)+2.15rem),3.1rem)]"
+    ? "pt-[max(calc(env(safe-area-inset-top)+0.8rem),1.05rem)]"
     : "pt-[max(calc(env(safe-area-inset-top)+1rem),1.25rem)]";
   const checkoutStickyTopClass = isNativePlatform
-    ? "top-[max(calc(env(safe-area-inset-top)+1.2rem),1.75rem)]"
+    ? "top-[max(calc(env(safe-area-inset-top)+0.45rem),0.7rem)]"
     : "top-[max(calc(env(safe-area-inset-top)+0.45rem),0.75rem)]";
   const summaryStickyTopClass = isNativePlatform
-    ? "top-[max(calc(env(safe-area-inset-top)+7rem),7.25rem)]"
+    ? "top-[max(calc(env(safe-area-inset-top)+5.9rem),6.1rem)]"
     : "top-[max(calc(env(safe-area-inset-top)+5.9rem),6.1rem)]";
+  const checkoutStoreLogo = resolveAssetUrl(storeLogoUrl || "") || getStoreAvatarUrl(storeSlug, storeLabel || "Loja");
   const cartItems = Object.values(cart);
   const fallbackPricing = getCartPricing(cart);
   const subtotal = pricingSummary?.subtotal ?? fallbackPricing.subtotal;
@@ -612,11 +616,23 @@ export const CartView = ({
             >
               <ArrowLeft size={18} weight="bold" />
             </button>
-            <div className="min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Checkout</p>
-              <p className="truncate text-sm font-black tracking-tight text-slate-950">
-                {storeLabel || 'Finalizando seu pedido'}
-              </p>
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-[1.05rem] border border-white bg-white shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)] ring-1 ring-slate-100">
+                <img
+                  src={checkoutStoreLogo}
+                  alt={storeLabel || "Loja"}
+                  className="h-full w-full object-cover"
+                  onError={(event) => {
+                    (event.target as HTMLImageElement).src = getStoreAvatarUrl(storeSlug, storeLabel || "Loja");
+                  }}
+                />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Checkout</p>
+                <p className="truncate text-sm font-black tracking-tight text-slate-950">
+                  {storeLabel || 'Finalizando seu pedido'}
+                </p>
+              </div>
             </div>
           </div>
         </div>
