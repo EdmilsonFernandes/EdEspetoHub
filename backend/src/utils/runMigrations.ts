@@ -1163,6 +1163,33 @@ export async function runMigrations() {
     ON customer_addresses(user_id);
   `);
   await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS customer_email_otps (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      code_hash TEXT NOT NULL,
+      expires_at TIMESTAMPTZ NOT NULL,
+      used_at TIMESTAMPTZ,
+      request_ip TEXT,
+      resend_count INT NOT NULL DEFAULT 1,
+      attempts_count INT NOT NULL DEFAULT 0,
+      last_sent_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_customer_email_otps_user_created
+    ON customer_email_otps(user_id, created_at DESC);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_customer_email_otps_ip_created
+    ON customer_email_otps(request_ip, created_at DESC)
+    WHERE request_ip IS NOT NULL;
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_customer_email_otps_code_hash
+    ON customer_email_otps(code_hash);
+  `);
+  await AppDataSource.query(`
     CREATE UNIQUE INDEX IF NOT EXISTS uq_customer_addresses_default_per_user
     ON customer_addresses(user_id)
     WHERE is_default = TRUE;

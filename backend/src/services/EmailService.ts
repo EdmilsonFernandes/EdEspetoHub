@@ -285,7 +285,7 @@ private renderTemplate(template: string, vars: Record<string, string>) {
    *
    * @author Edmilson Lopes
    */
-async sendCustomerWelcome(email: string, fullName: string) {
+  async sendCustomerWelcome(email: string, fullName: string) {
     const logoUrl = this.getLogoUrl();
     const appUrl = env.appUrl || 'https://janocaminho.com.br';
     const subject = await this.getTemplateValue(
@@ -311,6 +311,62 @@ async sendCustomerWelcome(email: string, fullName: string) {
       `
     );
     const vars = { NAME: fullName || 'Cliente', APP_URL: appUrl, LOGO_URL: logoUrl };
+    const text = this.renderTemplate(textTemplate, vars);
+    const html = this.renderTemplate(htmlTemplate, vars);
+    await this.send({ to: email, subject, text, html });
+  }
+
+  /**
+   * Sends the 4-digit customer email verification code.
+   *
+   * @author Edmilson Lopes
+   */
+  async sendCustomerVerificationCode(email: string, fullName: string, code: string) {
+    const logoUrl = this.getLogoUrl();
+    const appUrl = env.appUrl || 'https://janocaminho.com.br';
+    const codeSpaced = String(code || '').split('').join(' ');
+    const subject = await this.getTemplateValue(
+      'email_templates.customer_verification.subject',
+      'Seu código de acesso - Já no Caminho'
+    );
+    const textTemplate = await this.getTemplateValue(
+      'email_templates.customer_verification.text',
+      'Olá, {{NAME}}!\n\nUse este código para confirmar seu e-mail no app: {{CODE}}\n\nO código expira em 30 minutos.\nSe não foi você, ignore este e-mail.\n\nAcesse: {{APP_URL}}'
+    );
+    const htmlTemplate = await this.getTemplateValue(
+      'email_templates.customer_verification.html',
+      `
+      <div style="font-family: Arial, sans-serif; background: radial-gradient(circle at top, #eff6ff 0%, #f8fafc 42%, #e2e8f0 100%); padding: 28px;">
+        <div style="max-width: 560px; margin: 0 auto; background: rgba(255,255,255,0.94); border: 1px solid rgba(148,163,184,0.18); border-radius: 28px; overflow: hidden; box-shadow: 0 24px 60px rgba(15,23,42,0.12);">
+          <div style="padding: 28px; background: linear-gradient(135deg, #0f3b53 0%, #0d4f66 55%, #2c8c9f 100%); color: #ffffff;">
+            <img src="{{LOGO_URL}}" alt="Já no Caminho" style="width: 84px; height: 84px; border-radius: 22px; border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 10px 30px rgba(15,23,42,0.22);" />
+            <p style="margin: 18px 0 0; font-size: 13px; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase; opacity: 0.78;">Confirmar cadastro</p>
+            <h1 style="margin: 10px 0 8px; font-size: 28px; line-height: 1.1;">Seu acesso começa aqui</h1>
+            <p style="margin: 0; max-width: 360px; font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.86);">Digite o código abaixo no app para concluir sua conta com segurança.</p>
+          </div>
+          <div style="padding: 28px;">
+            <p style="margin: 0 0 10px; color: #0f172a; font-size: 16px; font-weight: 700;">Olá, {{NAME}}</p>
+            <p style="margin: 0 0 22px; color: #475569; font-size: 14px; line-height: 1.7;">Use este código de 4 dígitos para validar seu e-mail. Ele expira em 30 minutos e só funciona no app.</p>
+            <div style="padding: 18px; border-radius: 24px; background: linear-gradient(135deg, rgba(15,59,83,0.08) 0%, rgba(45,212,191,0.12) 100%); border: 1px solid rgba(45,212,191,0.2); box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);">
+              <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.26em; text-transform: uppercase; color: #0f3b53; opacity: 0.75;">Código de confirmação</div>
+              <div style="margin-top: 10px; font-size: 38px; line-height: 1; letter-spacing: 0.42em; font-weight: 800; color: #0f172a;">{{CODE_SPACED}}</div>
+            </div>
+            <div style="margin-top: 22px; padding: 16px 18px; border-radius: 20px; background: rgba(248,250,252,0.9); border: 1px solid rgba(226,232,240,0.9); color: #64748b; font-size: 12px; line-height: 1.7;">
+              Se você não iniciou esse cadastro, ignore este e-mail. Sua conta não será ativada sem o código.
+            </div>
+            <p style="margin: 18px 0 0; color: #94a3b8; font-size: 12px;">App: {{APP_URL}}</p>
+          </div>
+        </div>
+      </div>
+      `
+    );
+    const vars = {
+      NAME: fullName || 'Cliente',
+      CODE: code,
+      CODE_SPACED: codeSpaced,
+      APP_URL: appUrl,
+      LOGO_URL: logoUrl,
+    };
     const text = this.renderTemplate(textTemplate, vars);
     const html = this.renderTemplate(htmlTemplate, vars);
     await this.send({ to: email, subject, text, html });

@@ -1,9 +1,11 @@
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { AppDataSource } from '../config/database';
 import { env } from '../config/env';
 import { AppError } from '../errors/AppError';
 import { CustomerAddress } from '../entities/CustomerAddress';
+import { CustomerEmailOtp } from '../entities/CustomerEmailOtp';
 import { User } from '../entities/User';
 import { Order } from '../entities/Order';
 import { EmailService } from './EmailService';
@@ -47,6 +49,171 @@ private normalizeEmail(value: string) {
    */
 private sanitizePhone(value?: string | null) {
     return String(value || '').replace(/\D/g, '');
+  }
+
+    /**
+   * Retrieves data for get client ip.
+   *
+   * @author Edmilson Lopes
+   */
+private getClientIp(ipAddress?: string | null) {
+    const raw = String(ipAddress || '').trim();
+    if (!raw) return null;
+    if (raw.includes(',')) return raw.split(',')[0].trim();
+    return raw;
+  }
+
+    /**
+   * Executes mask email business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private maskEmail(email: string) {
+    const [local = '', domain = ''] = String(email || '').split('@');
+    if (!local || !domain) return '';
+    const head = local.slice(0, 2);
+    const maskedLocal = `${head}${'*'.repeat(Math.max(local.length - head.length, 1))}`;
+    return `${maskedLocal}@${domain}`;
+  }
+
+    /**
+   * Executes generate otp code business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private generateOtpCode() {
+    return String(crypto.randomInt(1000, 10000));
+  }
+
+    /**
+   * Executes hash otp code business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private hashOtpCode(code: string) {
+    return crypto.createHash('sha256').update(String(code || '')).digest('hex');
+  }
+
+    /**
+   * Executes sanitize otp code business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private sanitizeOtpCode(code?: string | null) {
+    return String(code || '').replace(/\D/g, '').slice(0, 4);
+  }
+
+    /**
+   * Executes is otp resend allowed business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private async isOtpResendAllowed(userId: string, ipAddress?: string | null) {
+    const cooldownSeconds = 60;
+    const now = Date.now();
+    const oneHourAgo = new Date(now - 60 * 60 * 1000);
+    const cooldownThreshold = new Date(now - cooldownSeconds * 1000);
+    const safeIp = this.getClientIp(ipAddress);
+
+    const recentByUser = await AppDataSource.query(
+      `
+      SELECT created_at
+      FROM customer_email_otps
+      WHERE user_id = $1
+        AND created_at > $2
+      ORDER BY created_at DESC
+      `,
+      [userId, oneHourAgo]
+    );
+
+    if (Array.isArray(recentByUser) && recentByUser.length >= 5) {
+      return { allowed: false, cooldownSeconds };
+    }
+
+    if (safeIp) {
+      const recentByIp = await AppDataSource.query(
+        `
+        SELECT count(*)::int AS count
+        FROM customer_email_otps
+        WHERE request_ip = $1
+          AND created_at > $2
+        `,
+        [safeIp, oneHourAgo]
+      );
+      const totalByIp = Number(recentByIp?.[0]?.count || 0);
+      if (totalByIp >= 20) {
+        return { allowed: false, cooldownSeconds };
+      }
+    }
+
+    const cooldownRows = await AppDataSource.query(
+      `
+      SELECT created_at
+      FROM customer_email_otps
+      WHERE user_id = $1
+        AND created_at > $2
+      ORDER BY created_at DESC
+      LIMIT 1
+      `,
+      [userId, cooldownThreshold]
+    );
+
+    if (Array.isArray(cooldownRows) && cooldownRows.length > 0) {
+      return { allowed: false, cooldownSeconds };
+    }
+
+    return { allowed: true, cooldownSeconds };
+  }
+
+    /**
+   * Sends the current customer email OTP code.
+   *
+   * @author Edmilson Lopes
+   */
+private async sendCustomerEmailOtp(user: User, meta?: { ipAddress?: string | null }) {
+    const code = this.generateOtpCode();
+    const codeHash = this.hashOtpCode(code);
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+    const otpRepo = AppDataSource.getRepository(CustomerEmailOtp);
+    const maxCountRows = await AppDataSource.query(
+      `SELECT COALESCE(MAX(resend_count), 0) AS max_count FROM customer_email_otps WHERE user_id = $1`,
+      [user.id]
+    );
+    const nextResendCount = Number(maxCountRows?.[0]?.max_count || 0) + 1;
+
+    await otpRepo
+      .createQueryBuilder()
+      .update()
+      .set({ usedAt: new Date() })
+      .where('user_id = :userId AND used_at IS NULL', { userId: user.id })
+      .execute();
+
+    await otpRepo.save(
+      otpRepo.create({
+        user,
+        codeHash,
+        expiresAt,
+        requestIp: this.getClientIp(meta?.ipAddress),
+        resendCount: nextResendCount,
+        attemptsCount: 0,
+        lastSentAt: new Date(),
+      })
+    );
+
+    await this.emailService.sendCustomerVerificationCode(user.email, user.fullName || 'Cliente', code);
+  }
+
+    /**
+   * Executes create customer token business logic.
+   *
+   * @author Edmilson Lopes
+   */
+private createCustomerToken(userId: string) {
+    return jwt.sign(
+      { sub: userId, role: 'CUSTOMER' as const },
+      env.jwtSecret,
+      { expiresIn: '30d' }
+    );
   }
 
     /**
@@ -98,7 +265,10 @@ private mapAddress(entity: CustomerAddress) {
    *
    * @author Edmilson Lopes
    */
-async register(input: { fullName: string; email: string; password: string; phone?: string | null; termsAccepted?: boolean; lgpdAccepted?: boolean }) {
+async register(
+    input: { fullName: string; email: string; password: string; phone?: string | null; termsAccepted?: boolean; lgpdAccepted?: boolean },
+    meta?: { ipAddress?: string | null }
+  ) {
     const fullName = String(input?.fullName || '').trim();
     const email = this.normalizeEmail(input?.email || '');
     const password = String(input?.password || '');
@@ -128,27 +298,20 @@ async register(input: { fullName: string; email: string; password: string; phone
       email,
       password: await bcrypt.hash(password, 10),
       phone,
-      emailVerified: true,
+      emailVerified: false,
       userRole: 'CUSTOMER',
       termsAcceptedAt: new Date(),
       lgpdAcceptedAt: new Date(),
     } as Partial<User>);
     const saved = await userRepo.save(user);
-    try {
-      await this.emailService.sendCustomerWelcome(saved.email, saved.fullName);
-    } catch {
-      // Do not block customer registration when email delivery fails.
-    }
-
-    const token = jwt.sign(
-      { sub: saved.id, role: 'CUSTOMER' as const },
-      env.jwtSecret,
-      { expiresIn: '30d' }
-    );
+    await this.sendCustomerEmailOtp(saved, meta);
 
     return {
       user: this.sanitizeUser(saved),
-      token,
+      next: 'VERIFY_EMAIL_CODE',
+      email: saved.email,
+      emailMasked: this.maskEmail(saved.email),
+      cooldownSec: 60,
     };
   }
 
@@ -173,15 +336,132 @@ async login(input: { email: string; password: string }) {
     const valid = await bcrypt.compare(password, String(user.password || ''));
     if (!valid) throw new AppError('AUTH-004', 401);
 
-    const token = jwt.sign(
-      { sub: user.id, role: 'CUSTOMER' as const },
-      env.jwtSecret,
-      { expiresIn: '30d' }
-    );
+    if (!user.emailVerified) {
+      throw new AppError('AUTH-005', 401, {
+        next: 'VERIFY_EMAIL_CODE',
+        email: user.email,
+        emailMasked: this.maskEmail(user.email),
+        resendCooldownSec: 60,
+      });
+    }
+
+    const token = this.createCustomerToken(user.id);
 
     return {
       user: this.sanitizeUser(user),
       token,
+    };
+  }
+
+    /**
+   * Verifies the customer email OTP code.
+   *
+   * @author Edmilson Lopes
+   */
+async verifyEmailCode(input: { email?: string; code?: string }) {
+    const email = this.normalizeEmail(input?.email || '');
+    const code = this.sanitizeOtpCode(input?.code || '');
+    if (!email || code.length !== 4) {
+      throw new AppError('GEN-002', 400, { message: 'Informe o e-mail e o código de 4 dígitos.' });
+    }
+
+    const userRepo = AppDataSource.getRepository(User);
+    const user = await userRepo.findOne({ where: { email } });
+    if (!user || user.userRole !== 'CUSTOMER') {
+      throw new AppError('AUTH-004', 401);
+    }
+
+    const otpRepo = AppDataSource.getRepository(CustomerEmailOtp);
+    const otp = await otpRepo
+      .createQueryBuilder('otp')
+      .leftJoinAndSelect('otp.user', 'user')
+      .where('user.id = :userId', { userId: user.id })
+      .andWhere('otp.used_at IS NULL')
+      .orderBy('otp.created_at', 'DESC')
+      .getOne();
+
+    if (!otp || otp.expiresAt.getTime() < Date.now()) {
+      throw new AppError('GEN-002', 400, { message: 'Seu código expirou. Solicite um novo.' });
+    }
+
+    if (otp.attemptsCount >= 5) {
+      otp.usedAt = new Date();
+      await otpRepo.save(otp);
+      throw new AppError('GEN-002', 400, { message: 'Muitas tentativas. Solicite um novo código.' });
+    }
+
+    if (otp.codeHash !== this.hashOtpCode(code)) {
+      otp.attemptsCount = Number(otp.attemptsCount || 0) + 1;
+      if (otp.attemptsCount >= 5) {
+        otp.usedAt = new Date();
+      }
+      await otpRepo.save(otp);
+      throw new AppError('GEN-002', 400, {
+        message: otp.attemptsCount >= 5
+          ? 'Muitas tentativas. Solicite um novo código.'
+          : 'Código inválido. Confira os 4 dígitos e tente novamente.',
+      });
+    }
+
+    user.emailVerified = true;
+    otp.usedAt = new Date();
+
+    await AppDataSource.transaction(async (manager) => {
+      await manager.save(user);
+      await manager.save(otp);
+    });
+
+    try {
+      await this.emailService.sendCustomerWelcome(user.email, user.fullName || 'Cliente');
+    } catch {
+      // Customer activation should not fail when the welcome email cannot be delivered.
+    }
+
+    return {
+      user: this.sanitizeUser(user),
+      token: this.createCustomerToken(user.id),
+      verified: true,
+    };
+  }
+
+    /**
+   * Resends the customer email OTP code.
+   *
+   * @author Edmilson Lopes
+   */
+async resendEmailCode(input: { email?: string }, meta?: { ipAddress?: string | null }) {
+    const email = this.normalizeEmail(input?.email || '');
+    if (!email) {
+      throw new AppError('GEN-002', 400, { message: 'Informe um e-mail válido.' });
+    }
+
+    const userRepo = AppDataSource.getRepository(User);
+    const user = await userRepo.findOne({ where: { email } });
+    if (!user || user.userRole !== 'CUSTOMER') {
+      return { next: 'VERIFY_EMAIL_CODE', cooldownSec: 60 };
+    }
+    if (user.emailVerified) {
+      return {
+        next: 'VERIFY_EMAIL_CODE',
+        cooldownSec: 60,
+        emailMasked: this.maskEmail(user.email),
+      };
+    }
+
+    const rate = await this.isOtpResendAllowed(user.id, meta?.ipAddress);
+    if (!rate.allowed) {
+      return {
+        next: 'VERIFY_EMAIL_CODE',
+        cooldownSec: rate.cooldownSeconds,
+        emailMasked: this.maskEmail(user.email),
+      };
+    }
+
+    await this.sendCustomerEmailOtp(user, meta);
+    return {
+      next: 'VERIFY_EMAIL_CODE',
+      cooldownSec: 60,
+      emailMasked: this.maskEmail(user.email),
     };
   }
 

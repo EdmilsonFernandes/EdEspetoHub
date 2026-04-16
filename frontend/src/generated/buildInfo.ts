@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.122911.2c1fdb10",
-  "buildId": "0.1.9+20260416.122911.2c1fdb10-20260416.122911-2c1fdb10",
-  "builtAt": "2026-04-16T12:29:11.681Z",
-  "commitHash": "2c1fdb1037a09691496f0eb8ff8d0e141679bda7",
-  "shortHash": "2c1fdb10",
+  "versionInternal": "0.1.9+20260416.131001.7cb48d0d",
+  "buildId": "0.1.9+20260416.131001.7cb48d0d-20260416.131001-7cb48d0d",
+  "builtAt": "2026-04-16T13:10:01.136Z",
+  "commitHash": "7cb48d0db12c19f4b1e7e4e9015c019e5b9d0ba6",
+  "shortHash": "7cb48d0d",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "7cb48d0db12c19f4b1e7e4e9015c019e5b9d0ba6",
+      "shortHash": "7cb48d0d",
+      "dateIso": "2026-04-16T09:32:00-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(drawer): polish guest access menu copy and tests",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7cb48d0db12c19f4b1e7e4e9015c019e5b9d0ba6"
+    },
     {
       "hash": "2c1fdb1037a09691496f0eb8ff8d0e141679bda7",
       "shortHash": "2c1fdb10",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(hub): stabilize search and simplify role switcher",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2960149926e898240e083e812eeb8078c43522af"
-    },
-    {
-      "hash": "68b319f55d5a5056e35fbfda355cbd0f6ef25e44",
-      "shortHash": "68b319f5",
-      "dateIso": "2026-04-14T17:53:55-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(hub): simplify role switcher and highlight current access",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/68b319f55d5a5056e35fbfda355cbd0f6ef25e44"
     }
   ]
 } as const;

@@ -15,7 +15,7 @@ export class CustomerAccountController {
    */
 static async register(req: Request, res: Response) {
     try {
-      const result = await service.register(req.body || {});
+      const result = await service.register(req.body || {}, { ipAddress: req.ip });
       return res.status(201).json(result);
     } catch (error: any) {
       log.warn('Customer register failed', { error });
@@ -35,6 +35,34 @@ static async login(req: Request, res: Response) {
     } catch (error: any) {
       log.warn('Customer login failed', { error });
       return respondWithError(req, res, error, 401);
+    }
+  }
+
+    /**
+   * Verifies the customer email code.
+   *
+   * @author Edmilson Lopes
+   */
+static async verifyEmailCode(req: Request, res: Response) {
+    try {
+      const result = await service.verifyEmailCode(req.body || {});
+      return res.json(result);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+    /**
+   * Resends the customer email code.
+   *
+   * @author Edmilson Lopes
+   */
+static async resendEmailCode(req: Request, res: Response) {
+    try {
+      const result = await service.resendEmailCode(req.body || {}, { ipAddress: req.ip });
+      return res.json(result);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
     }
   }
 

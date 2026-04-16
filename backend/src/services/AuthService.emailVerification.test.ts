@@ -79,6 +79,12 @@ const expectAppError = async (fn: () => Promise<any>, code: string) => {
     // --- Verify flow ---
     const verifyService = new AuthService() as any;
     verifyService.storeRepository = { findByOwnerId: async () => null };
+    let customerWelcomeSent = 0;
+    verifyService.emailService = {
+      sendCustomerWelcome: async () => {
+        customerWelcomeSent += 1;
+      },
+    };
 
     const verification = {
       id: 'v1',
@@ -122,8 +128,52 @@ const expectAppError = async (fn: () => Promise<any>, code: string) => {
 
     const ok = await verifyService.verifyEmail({ token: 'valid-token', email: 'verify@example.com' });
     assert(ok.code === 'AUTH-S004', 'verify should return success');
+    assert(ok.redirectUrl === '/', 'non-customer verification without store should fallback to home');
     assert(verification.user.emailVerified === true, 'verify should activate user');
     assert(verification.usedAt !== null, 'verify should mark token as used');
+
+    const customerVerification = {
+      id: 'v-customer',
+      tokenHash: crypto.createHash('sha256').update('customer-token').digest('hex'),
+      expiresAt: new Date(Date.now() + 60_000),
+      usedAt: null,
+      user: { id: 'u-customer', email: 'customer@example.com', fullName: 'Cliente Teste', emailVerified: false, userRole: 'CUSTOMER' },
+    };
+
+    (AppDataSource as any).getRepository = () => ({
+      findOne: async ({ where }: any) => {
+        if (where?.tokenHash === customerVerification.tokenHash) return customerVerification;
+        return null;
+      },
+      createQueryBuilder: () => {
+        const state: any = {};
+        const builder: any = {
+          leftJoinAndSelect: () => builder,
+          where: (_q: string, params: any) => {
+            state.tokenHash = params?.tokenHash;
+            return builder;
+          },
+          andWhere: (_q: string, params: any) => {
+            state.email = params?.email;
+            return builder;
+          },
+          getOne: async () => {
+            if (
+              state.tokenHash === customerVerification.tokenHash &&
+              String(state.email || '').toLowerCase() === String(customerVerification.user.email || '').toLowerCase()
+            ) {
+              return customerVerification;
+            }
+            return null;
+          },
+        };
+        return builder;
+      },
+    });
+
+    const customerOk = await verifyService.verifyEmail({ token: 'customer-token', email: 'customer@example.com' });
+    assert(customerOk.redirectUrl === '/cliente?mode=login&verified=1', 'customer verification should redirect to customer login');
+    assert(customerWelcomeSent === 1, 'customer verification should send welcome email');
 
     await expectAppError(
       () => verifyService.verifyEmail({ token: 'valid-token', email: 'other@example.com' }),

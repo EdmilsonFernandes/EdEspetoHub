@@ -53,6 +53,8 @@ routes.post('/auth/resend-verification', AuthController.resendVerification);
 routes.post('/auth/change-password', requireAuth, AuthController.changePassword);
 routes.post('/customer/auth/register', CustomerAccountController.register);
 routes.post('/customer/auth/login', CustomerAccountController.login);
+routes.post('/customer/auth/verify-email-code', CustomerAccountController.verifyEmailCode);
+routes.post('/customer/auth/resend-email-code', CustomerAccountController.resendEmailCode);
 routes.get('/customer/me', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.me);
 routes.patch('/customer/me', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.updateMe);
 routes.patch('/customer/me/deactivate', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.deactivate);

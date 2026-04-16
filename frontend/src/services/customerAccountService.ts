@@ -9,6 +9,14 @@ export const customerAccountService = {
     return apiClient.post('/customer/auth/login', payload);
   },
 
+  verifyEmailCode(payload: { email: string; code: string }) {
+    return apiClient.post('/customer/auth/verify-email-code', payload);
+  },
+
+  resendEmailCode(email: string) {
+    return apiClient.post('/customer/auth/resend-email-code', { email });
+  },
+
   me() {
     return apiClient.get('/customer/me');
   },

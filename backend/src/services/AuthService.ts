@@ -896,6 +896,20 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     };
   }
 
+  /**
+   * Dispatches a verification email for any supported user role.
+   *
+   * @author Edmilson Lopes
+   */
+  async dispatchVerificationEmail(user: User, meta?: { ipAddress?: string | null }) {
+    if (user.userRole === 'MOTOBOY') {
+      await this.sendMotoboyVerificationEmail(user, meta?.ipAddress);
+      return;
+    }
+
+    await this.sendVerificationEmail(user, meta?.ipAddress);
+  }
+
 
 
 
@@ -1014,6 +1028,14 @@ async changePassword(userId: string, currentPassword: string, newPassword: strin
 
     const store = await this.storeRepository.findByOwnerId(verifiedUser.id);
     if (!store) {
+      if (verifiedUser.userRole === 'CUSTOMER') {
+        try {
+          await this.emailService.sendCustomerWelcome(verifiedUser.email, verifiedUser.fullName || 'Cliente');
+        } catch {
+          // Customer verification should not fail when the welcome email cannot be delivered.
+        }
+        return { code: 'AUTH-S004', redirectUrl: '/cliente?mode=login&verified=1' };
+      }
       return { code: 'AUTH-S004', redirectUrl: '/' };
     }
 

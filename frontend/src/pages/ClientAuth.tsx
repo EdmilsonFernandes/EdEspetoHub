@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { UserCircle, Eye, EyeSlash, LockKey } from '@phosphor-icons/react';
+import { UserCircle, Eye, EyeSlash, LockKey, WarningCircle, SealCheck, EnvelopeSimple } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { nativeBiometricService } from '../services/nativeBiometricService';
@@ -31,6 +31,12 @@ export function ClientAuth() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [verifyPrompt, setVerifyPrompt] = useState<{ email?: string; emailMasked?: string } | null>(null);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [codeDigits, setCodeDigits] = useState([ '', '', '', '' ]);
+  const [codeLoading, setCodeLoading] = useState(false);
+  const [verifyFlowLabel, setVerifyFlowLabel] = useState<'register' | 'login'>('register');
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricLoading, setBiometricLoading] = useState(false);
   const [autoBiometricTried, setAutoBiometricTried] = useState(false);
@@ -67,9 +73,26 @@ export function ClientAuth() {
     return params.toString() ? `?${params.toString()}` : '';
   }, [hubMode, nextPath]);
 
+  const verificationCode = useMemo(() => codeDigits.join(''), [codeDigits]);
+
   useEffect(() => {
     document.title = 'Área do Cliente | Já no Caminho';
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search || '');
+    if (params.get('verified') === '1') {
+      setMessage('Conta ativada com sucesso. Agora é só entrar.');
+    }
+  }, [location.search]);
+
+  useEffect(() => {
+    if (!verifyPrompt) {
+      setCodeDigits([ '', '', '', '' ]);
+      setCodeLoading(false);
+      setVerifyFlowLabel('register');
+    }
+  }, [verifyPrompt]);
 
   useEffect(() => {
     const refreshBiometricAvailability = () => {
@@ -98,6 +121,12 @@ export function ClientAuth() {
     setAutoBiometricTried(false);
   }, [location.search]);
 
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = window.setTimeout(() => setResendCooldown((prev) => Math.max(prev - 1, 0)), 1000);
+    return () => window.clearTimeout(timer);
+  }, [resendCooldown]);
+
   const finishLogin = (result: any) => {
     nativeBiometricService.syncCustomerSession(result);
 
@@ -108,6 +137,21 @@ export function ClientAuth() {
     navigate(hubMode ? '/hub' : '/cliente/conta', { replace: true });
   };
 
+  const finishAuthenticatedCustomerSession = (result: any) => {
+    if (!result?.token) throw new Error('Falha ao autenticar.');
+    nativeBiometricService.syncCustomerSession(result);
+
+    if (nativeBiometricService.shouldOfferEnrollment(result)) {
+      setPendingBiometricSession(result);
+      setEnrollmentPromptOpen(true);
+      return;
+    }
+    if (nativeBiometricService.hasStoredCustomerProfile()) {
+      nativeBiometricService.enableCustomer(result);
+    }
+    finishLogin(result);
+  };
+
   const handleEnableBiometricEnrollment = () => {
     if (pendingBiometricSession?.token) {
       const enabled = nativeBiometricService.enableCustomer(pendingBiometricSession);
@@ -116,10 +160,11 @@ export function ClientAuth() {
         setError('Não foi possível ativar a biometria neste aparelho.');
       }
     }
+    const session = pendingBiometricSession;
     setEnrollmentPromptOpen(false);
     setPendingBiometricSession(null);
-    if (pendingBiometricSession?.token) {
-      finishLogin(pendingBiometricSession);
+    if (session?.token) {
+      finishLogin(session);
     }
   };
 
@@ -175,6 +220,7 @@ export function ClientAuth() {
     setLoading(true);
     setError('');
     setMessage('');
+    setVerifyPrompt(null);
     try {
       let result: any;
       if (mode === 'register') {
@@ -192,28 +238,127 @@ export function ClientAuth() {
           termsAccepted: Boolean(form.termsAccepted),
           lgpdAccepted: Boolean(form.lgpdAccepted),
         });
-      } else {
-        result = await customerAccountService.login({
-          email: String(form.email || '').trim(),
-          password: String(form.password || ''),
+        const targetEmail = String(result?.email || form.email || '').trim().toLowerCase();
+        if (targetEmail) {
+          localStorage.setItem('signupEmail', targetEmail);
+        }
+        setVerifyPrompt({
+          email: targetEmail,
+          emailMasked: result?.emailMasked,
         });
-      }
-      if (!result?.token) throw new Error('Falha ao autenticar.');
-      nativeBiometricService.syncCustomerSession(result);
-
-      if (nativeBiometricService.shouldOfferEnrollment(result)) {
-        setPendingBiometricSession(result);
-        setEnrollmentPromptOpen(true);
+        setVerifyFlowLabel('register');
+        setResendCooldown(Number(result?.cooldownSec || 60));
+        setMessage('Enviamos um código de 4 dígitos para concluir seu cadastro.');
         return;
       }
-      if (nativeBiometricService.hasStoredCustomerProfile()) {
-        nativeBiometricService.enableCustomer(result);
-      }
-      finishLogin(result);
+
+      result = await customerAccountService.login({
+        email: String(form.email || '').trim(),
+        password: String(form.password || ''),
+      });
+      finishAuthenticatedCustomerSession(result);
     } catch (e: any) {
+      if (e?.code === 'AUTH-005') {
+        const targetEmail = String(e?.details?.email || form.email || '').trim().toLowerCase();
+        if (targetEmail) {
+          localStorage.setItem('signupEmail', targetEmail);
+        }
+        setVerifyPrompt({
+          email: targetEmail,
+          emailMasked: e?.details?.emailMasked,
+        });
+        setVerifyFlowLabel('login');
+        setMessage('Sua conta ainda precisa ser confirmada. Reenvie o código se precisar e finalize o acesso aqui mesmo.');
+      }
       setError(e?.message || 'Não foi possível autenticar.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    const email = String(verifyPrompt?.email || form.email || '').trim().toLowerCase();
+    if (!email || resendLoading || resendCooldown > 0) return;
+    setResendLoading(true);
+    setError('');
+    try {
+      const result = await customerAccountService.resendEmailCode(email);
+      localStorage.setItem('signupEmail', email);
+      setResendCooldown(Number(result?.cooldownSec || 60));
+      setMessage(result?.message || 'Novo código enviado. Digite os 4 números para concluir o acesso.');
+    } catch (e: any) {
+      setError(e?.message || 'Não foi possível reenviar agora.');
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
+  const handleCodeDigitChange = (index: number, value: string) => {
+    const nextValue = String(value || '').replace(/\D/g, '').slice(-1);
+    setCodeDigits((prev) => {
+      const next = [ ...prev ];
+      next[index] = nextValue;
+      return next;
+    });
+
+    if (nextValue && index < 3) {
+      const nextInput = document.getElementById(`customer-otp-${index + 1}`) as HTMLInputElement | null;
+      nextInput?.focus();
+      nextInput?.select?.();
+    }
+  };
+
+  const handleCodeKeyDown = (index: number, event: any) => {
+    if (event.key === 'Backspace' && !codeDigits[index] && index > 0) {
+      const prevInput = document.getElementById(`customer-otp-${index - 1}`) as HTMLInputElement | null;
+      prevInput?.focus();
+      prevInput?.select?.();
+    }
+    if (event.key === 'ArrowLeft' && index > 0) {
+      event.preventDefault();
+      const prevInput = document.getElementById(`customer-otp-${index - 1}`) as HTMLInputElement | null;
+      prevInput?.focus();
+    }
+    if (event.key === 'ArrowRight' && index < 3) {
+      event.preventDefault();
+      const nextInput = document.getElementById(`customer-otp-${index + 1}`) as HTMLInputElement | null;
+      nextInput?.focus();
+    }
+  };
+
+  const handleCodePaste = (event: any) => {
+    const pasted = String(event.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 4);
+    if (!pasted) return;
+    event.preventDefault();
+    setCodeDigits([
+      pasted[0] || '',
+      pasted[1] || '',
+      pasted[2] || '',
+      pasted[3] || '',
+    ]);
+    const targetIndex = Math.min(Math.max(pasted.length - 1, 0), 3);
+    const targetInput = document.getElementById(`customer-otp-${targetIndex}`) as HTMLInputElement | null;
+    targetInput?.focus();
+  };
+
+  const handleVerifyCode = async () => {
+    const email = String(verifyPrompt?.email || form.email || '').trim().toLowerCase();
+    if (!email || verificationCode.length !== 4 || codeLoading) return;
+    setCodeLoading(true);
+    setError('');
+    setMessage('');
+    try {
+      const result = await customerAccountService.verifyEmailCode({
+        email,
+        code: verificationCode,
+      });
+      setVerifyPrompt(null);
+      setMessage('Conta confirmada com sucesso. Entrando...');
+      finishAuthenticatedCustomerSession(result);
+    } catch (e: any) {
+      setError(e?.message || 'Não foi possível validar o código.');
+    } finally {
+      setCodeLoading(false);
     }
   };
 
@@ -399,7 +544,7 @@ export function ClientAuth() {
               disabled={loading}
               className="w-full rounded-xl bg-[linear-gradient(120deg,#0f172a,#1e293b)] px-4 py-3 text-sm font-black text-white shadow-[0_14px_26px_-16px_rgba(15,23,42,0.6)] active:scale-[0.99] disabled:opacity-60"
             >
-              {loading ? 'Processando...' : mode === 'register' ? 'Criar e entrar' : 'Entrar'}
+              {loading ? 'Processando...' : mode === 'register' ? 'Criar conta' : 'Entrar'}
             </button>
             {mode === 'login' && (
               <button
@@ -424,6 +569,110 @@ export function ClientAuth() {
         variant="info"
         icon={<LockKey size={32} weight="duotone" />}
       />
+      {verifyPrompt ? (
+        <div className="fixed inset-0 z-[120] flex items-end justify-center bg-slate-950/55 px-4 py-6 backdrop-blur-sm sm:items-center">
+          <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-white/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(241,245,249,0.94))] shadow-[0_36px_120px_-28px_rgba(15,23,42,0.55)]">
+            <div className="relative overflow-hidden bg-[linear-gradient(135deg,#0f3b53_0%,#0d4f66_55%,#2c8c9f_100%)] px-6 pb-8 pt-6 text-white">
+              <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.22),transparent_68%)]" />
+              <div className="relative flex items-start justify-between gap-4">
+                <div className="space-y-3">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-white/16 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-white/78">
+                    <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_0_4px_rgba(134,239,172,0.16)]" />
+                    Dentro do app
+                  </div>
+                  <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/12 shadow-[0_20px_40px_-24px_rgba(15,23,42,0.75)]">
+                    <EnvelopeSimple size={28} weight="duotone" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">Validar e-mail</p>
+                    <h3 className="mt-2 text-[1.7rem] font-black leading-none tracking-[-0.03em]">Código de 4 dígitos</h3>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setVerifyPrompt(null)}
+                  className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white/80 transition hover:bg-white/16"
+                >
+                  Fechar
+                </button>
+              </div>
+              <p className="relative mt-4 text-sm leading-relaxed text-white/80">
+                {verifyPrompt.emailMasked
+                  ? `Enviamos o código para ${verifyPrompt.emailMasked}.`
+                  : 'Enviamos o código para o e-mail informado.'}
+              </p>
+              <p className="relative mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/58">
+                {verifyFlowLabel === 'register' ? 'Último passo para ativar sua conta' : 'Confirme para finalizar seu login'}
+              </p>
+            </div>
+
+            <div className="space-y-5 px-6 pb-6 pt-5">
+              <div className="rounded-[1.6rem] border border-slate-200/80 bg-white/80 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">
+                  <SealCheck size={16} weight="duotone" className="text-[#0d4f66]" />
+                  Confirmação segura
+                </div>
+                <p className="mt-2 text-sm font-medium leading-relaxed text-slate-600">
+                  {verifyFlowLabel === 'register'
+                    ? 'Digite o código recebido para concluir seu cadastro sem sair do app.'
+                    : 'Digite o código recebido para confirmar a conta e concluir o login sem sair do app.'}
+                </p>
+                <div className="mt-4 flex items-center justify-between gap-2">
+                  {codeDigits.map((digit, index) => (
+                    <input
+                      key={index}
+                      id={`customer-otp-${index}`}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      autoComplete={index === 0 ? 'one-time-code' : 'off'}
+                      value={digit}
+                      onChange={(e) => handleCodeDigitChange(index, e.target.value)}
+                      onKeyDown={(e) => handleCodeKeyDown(index, e)}
+                      onPaste={handleCodePaste}
+                      className="h-16 w-14 rounded-2xl border border-slate-200 bg-slate-50 text-center text-2xl font-black tracking-[0.1em] text-slate-900 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.5)] outline-none transition focus:border-[#0d4f66] focus:bg-white focus:ring-4 focus:ring-[#0d4f66]/10 sm:w-16"
+                    />
+                  ))}
+                </div>
+                <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/90 px-3 py-2.5 text-[11px] font-semibold leading-relaxed text-slate-500">
+                  Se não recebeu, toque em <span className="font-black text-slate-700">Reenviar código</span>. Assim que o código correto bater, sua conta é confirmada e o acesso continua daqui.
+                </div>
+              </div>
+
+              {error ? (
+                <div className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-3 text-sm font-semibold text-rose-700">
+                  <WarningCircle size={18} weight="fill" />
+                  <span>{error}</span>
+                </div>
+              ) : null}
+              {message ? (
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm font-semibold text-emerald-700">
+                  {message}
+                </div>
+              ) : null}
+
+              <div className="grid gap-3">
+                <button
+                  type="button"
+                  onClick={handleVerifyCode}
+                  disabled={verificationCode.length !== 4 || codeLoading}
+                  className="rounded-2xl bg-[linear-gradient(135deg,#0f3b53,#0d4f66,#2c8c9f)] px-4 py-3.5 text-sm font-black text-white shadow-[0_24px_50px_-24px_rgba(15,59,83,0.55)] transition active:scale-[0.99] disabled:opacity-60"
+                >
+                  {codeLoading ? 'Confirmando...' : 'Confirmar e entrar'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResendVerification}
+                  disabled={resendLoading || resendCooldown > 0 || !verifyPrompt.email}
+                  className="rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+                >
+                  {resendLoading ? 'Reenviando...' : resendCooldown > 0 ? `Reenviar em ${resendCooldown}s` : 'Reenviar código'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </AuthLayout>
   );
 }
