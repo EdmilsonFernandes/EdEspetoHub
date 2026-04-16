@@ -500,9 +500,9 @@ const OrderSummaryCard = ({
             </div>
 
             <div className="flex items-center gap-2">
-              <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-100 bg-slate-50/50 transition-colors ${timerToneClass}`}>
-                <Clock size={14} weight="fill" className={timerIconToneClass} />
-                <span className="text-[11px] font-black tabular-nums tracking-tight">
+              <div className={`flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50/50 px-2.5 py-1.5 transition-colors whitespace-nowrap ${timerToneClass}`}>
+                <Clock size={14} weight="fill" className={`shrink-0 ${timerIconToneClass}`} />
+                <span className="inline-block min-w-[3.1rem] text-center text-[11px] font-black tabular-nums tracking-tight whitespace-nowrap">
                   {archived ? (closedAtLabel || '--:--') : elapsedLabel}
                 </span>
               </div>

@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.210222.02044dbf",
-  "buildId": "0.1.9+20260416.210222.02044dbf-20260416.210222-02044dbf",
-  "builtAt": "2026-04-16T21:02:22.169Z",
-  "commitHash": "02044dbf8926010ad6d6f1fb03655923dcf9a173",
-  "shortHash": "02044dbf",
+  "versionInternal": "0.1.9+20260416.210957.2f8e1188",
+  "buildId": "0.1.9+20260416.210957.2f8e1188-20260416.210957-2f8e1188",
+  "builtAt": "2026-04-16T21:09:57.350Z",
+  "commitHash": "2f8e11889ff38d87bf99cb314e81b37486d1a5de",
+  "shortHash": "2f8e1188",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "2f8e11889ff38d87bf99cb314e81b37486d1a5de",
+      "shortHash": "2f8e1188",
+      "dateIso": "2026-04-16T18:03:20-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(admin): keep phone compact in order details",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2f8e11889ff38d87bf99cb314e81b37486d1a5de"
+    },
     {
       "hash": "02044dbf8926010ad6d6f1fb03655923dcf9a173",
       "shortHash": "02044dbf",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Revert \"style: reformula profile drawer para adotar padrao cristalino squircle e efeito premium iOS\"",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0c50014d3a45055d6a6ea6f5a78b6d99b62b70ce"
-    },
-    {
-      "hash": "382eecd48566f1d06d79d4583740a96797dd6957",
-      "shortHash": "382eecd4",
-      "dateIso": "2026-04-15T11:19:08-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style: reformula profile drawer para adotar padrao cristalino squircle e efeito premium iOS",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/382eecd48566f1d06d79d4583740a96797dd6957"
     }
   ]
 } as const;
