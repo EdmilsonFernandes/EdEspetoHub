@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.215058.dc2c8eb6",
-  "buildId": "0.1.9+20260416.215058.dc2c8eb6-20260416.215058-dc2c8eb6",
-  "builtAt": "2026-04-16T21:50:58.630Z",
-  "commitHash": "dc2c8eb6a6dfbaf118c0587c81c806cf7730a1e9",
-  "shortHash": "dc2c8eb6",
+  "versionInternal": "0.1.9+20260416.220933.3f3ce5dd",
+  "buildId": "0.1.9+20260416.220933.3f3ce5dd-20260416.220933-3f3ce5dd",
+  "builtAt": "2026-04-16T22:09:33.478Z",
+  "commitHash": "3f3ce5dd27203b90137dca3c09284347f6663df7",
+  "shortHash": "3f3ce5dd",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "3f3ce5dd27203b90137dca3c09284347f6663df7",
+      "shortHash": "3f3ce5dd",
+      "dateIso": "2026-04-16T18:51:35-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(admin): remove condo badge from queue card header",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3f3ce5dd27203b90137dca3c09284347f6663df7"
+    },
     {
       "hash": "dc2c8eb6a6dfbaf118c0587c81c806cf7730a1e9",
       "shortHash": "dc2c8eb6",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(drawer): polish guest access menu copy and tests",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7cb48d0db12c19f4b1e7e4e9015c019e5b9d0ba6"
-    },
-    {
-      "hash": "2c1fdb1037a09691496f0eb8ff8d0e141679bda7",
-      "shortHash": "2c1fdb10",
-      "dateIso": "2026-04-16T09:24:56-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(tests): init playwright and vitest architectures with mock units",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2c1fdb1037a09691496f0eb8ff8d0e141679bda7"
     }
   ]
 } as const;

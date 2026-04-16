@@ -403,9 +403,10 @@ const OrderSummaryCard = ({
     const isCondo = isCondominiumOrder(order);
     const cardLocationIdentifier = isCondo ? resolveCondominiumCardIdentifier(order) : locationIdentifier;
     const condominiumLine = isCondo ? String(locationIdentifier || '').trim() : '';
-    const hasLocationIdentifier = Boolean(cardLocationIdentifier) && !isCondo;
+    const hasLocationIdentifier = Boolean(cardLocationIdentifier);
     const mesaMeta = parseMesaIdentifier(cardLocationIdentifier);
     const isMesaLocation = mesaMeta.isMesa;
+    const locationLine = isCondo ? condominiumLine : cardLocationIdentifier;
     const locationBadgeTone = isMesaLocation
       ? 'bg-[#FFF3E0] text-[#E65100] border-[#E65100]'
       : isCondo
@@ -498,22 +499,6 @@ const OrderSummaryCard = ({
                 #{String(queueRank).padStart(2, '0')}
               </div>
               
-              {hasLocationIdentifier && (
-                <div className={`inline-flex min-w-0 items-center gap-1.5 rounded-2xl border px-3 py-1.5 shadow-sm transition-colors ${locationBadgeTone}`} title={locationIdentifier || cardLocationIdentifier}>
-                  {isMesaLocation ? (
-                    <>
-                      <Monitor size={14} weight="duotone" />
-                      <span className="text-[10px] font-black uppercase tracking-wider">Mesa</span>
-                      <span className="text-sm font-black leading-none">{mesaMeta.number}</span>
-                    </>
-                  ) : (
-                    <>
-                      {isCondo ? <Buildings size={14} weight="duotone" /> : orderType === 'delivery' ? <Truck size={14} weight="duotone" /> : <Storefront size={14} weight="duotone" />}
-                      <span className="max-w-[5.5rem] truncate whitespace-nowrap text-[11px] font-black uppercase tracking-wider sm:max-w-[8rem]">{cardLocationIdentifier}</span>
-                    </>
-                  )}
-                </div>
-              )}
             </div>
 
             <div className="flex items-center gap-2">
@@ -543,15 +528,25 @@ const OrderSummaryCard = ({
 
           {/* Nome do Cliente */}
           <div className="min-w-0">
-            {condominiumLine && (
+            {hasLocationIdentifier && (
               <div
-                className="mb-2 flex min-w-0 items-start gap-2 rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-white to-sky-50 px-3 py-2 text-[11px] font-extrabold text-emerald-900 shadow-sm"
-                title={condominiumLine}
+                className={`mb-2 flex min-w-0 items-start gap-2 rounded-2xl border px-3 py-2 text-[11px] font-extrabold shadow-sm ${locationBadgeTone}`}
+                title={locationIdentifier || cardLocationIdentifier}
               >
-                <Buildings size={15} weight="duotone" className="mt-0.5 shrink-0 text-emerald-700" />
-                <span className="min-w-0 leading-snug [overflow-wrap:anywhere]">
-                  {condominiumLine}
-                </span>
+                {isMesaLocation ? (
+                  <>
+                    <Monitor size={15} weight="duotone" className="mt-0.5 shrink-0" />
+                    <span className="shrink-0 text-[10px] font-black uppercase tracking-wider">Mesa</span>
+                    <span className="text-sm font-black leading-none">{mesaMeta.number}</span>
+                  </>
+                ) : (
+                  <>
+                    {isCondo ? <Buildings size={15} weight="duotone" className="mt-0.5 shrink-0" /> : orderType === 'delivery' ? <Truck size={15} weight="duotone" className="mt-0.5 shrink-0" /> : <Storefront size={15} weight="duotone" className="mt-0.5 shrink-0" />}
+                    <span className="min-w-0 leading-snug [overflow-wrap:anywhere]">
+                      {locationLine}
+                    </span>
+                  </>
+                )}
               </div>
             )}
             <h3 className="text-[1.15rem] font-black text-slate-900 leading-tight truncate">
