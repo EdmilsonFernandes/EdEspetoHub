@@ -1,5 +1,5 @@
 import { expect, describe, it } from 'vitest';
-import { normalizePixCode, buildPixPayload } from '../../utils/pixPayload';
+import { buildPixPayload } from '../../utils/pixPayload';
 
 describe('Suíte de Pagamentos: pixPayload Utilities', () => {
 

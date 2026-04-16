@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.122441.55a3ace7",
-  "buildId": "0.1.9+20260416.122441.55a3ace7-20260416.122441-55a3ace7",
-  "builtAt": "2026-04-16T12:24:41.880Z",
-  "commitHash": "55a3ace7dc867d0f461cc66b2444f631cf7885a1",
-  "shortHash": "55a3ace7",
+  "versionInternal": "0.1.9+20260416.122911.2c1fdb10",
+  "buildId": "0.1.9+20260416.122911.2c1fdb10-20260416.122911-2c1fdb10",
+  "builtAt": "2026-04-16T12:29:11.681Z",
+  "commitHash": "2c1fdb1037a09691496f0eb8ff8d0e141679bda7",
+  "shortHash": "2c1fdb10",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "2c1fdb1037a09691496f0eb8ff8d0e141679bda7",
+      "shortHash": "2c1fdb10",
+      "dateIso": "2026-04-16T09:24:56-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(tests): init playwright and vitest architectures with mock units",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2c1fdb1037a09691496f0eb8ff8d0e141679bda7"
+    },
     {
       "hash": "55a3ace7dc867d0f461cc66b2444f631cf7885a1",
       "shortHash": "55a3ace7",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style(hub): simplify role switcher and highlight current access",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/68b319f55d5a5056e35fbfda355cbd0f6ef25e44"
-    },
-    {
-      "hash": "e56276a298d1caca89691de99a98d15d01b7f87a",
-      "shortHash": "e56276a2",
-      "dateIso": "2026-04-14T17:50:22-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(hub): improve app version visibility in drawer",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e56276a298d1caca89691de99a98d15d01b7f87a"
     }
   ]
 } as const;
