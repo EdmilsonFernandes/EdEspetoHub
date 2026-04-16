@@ -427,24 +427,7 @@ export function ClientAuth() {
         </div>
 
         <div className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40">
-          {mode === 'login' && biometricAvailable ? (
-            <div className="space-y-2">
-              <button
-                type="button"
-                onClick={handleBiometricLogin}
-                disabled={biometricLoading || loading}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#336886]/12 bg-[#336886]/8 px-4 py-3 text-sm font-black text-[#336886] shadow-[0_18px_34px_-28px_rgba(51,104,134,0.35)] transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <LockKey size={18} weight="duotone" />
-                {biometricLoading ? 'Lendo biometria...' : 'Entrar com biometria'}
-              </button>
-              <p className="text-center text-[11px] font-semibold leading-relaxed text-slate-500">
-                {storedBiometricProfile?.email
-                  ? `Biometria salva para ${storedBiometricProfile.email}. Para usar outra conta, entre com e-mail e senha.`
-                  : 'Se quiser usar outra conta, entre com e-mail e senha normalmente.'}
-              </p>
-            </div>
-          ) : null}
+ 
 
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-slate-100 inline-flex items-center justify-center shadow-inner">
@@ -570,6 +553,33 @@ export function ClientAuth() {
 
             {error ? <p className="text-sm text-rose-600">{error}</p> : null}
             {message ? <p className="text-sm text-emerald-600">{message}</p> : null}
+
+            {mode === 'login' && biometricAvailable ? (
+              <>
+                <div className="flex items-center gap-3 py-2">
+                  <div className="h-px flex-1 bg-slate-200"></div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Ou</span>
+                  <div className="h-px flex-1 bg-slate-200"></div>
+                </div>
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    onClick={handleBiometricLogin}
+                    disabled={biometricLoading || loading}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#336886]/20 bg-[#336886]/10 px-4 py-3 text-sm font-black text-[#336886] transition-all active:scale-[0.98] hover:bg-[#336886]/15 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <LockKey size={18} weight="duotone" />
+                    {biometricLoading ? 'Lendo biometria...' : 'Entrar com biometria'}
+                  </button>
+                  <p className="text-center text-[10px] font-semibold leading-relaxed text-slate-400">
+                    {storedBiometricProfile?.email
+                      ? `Biometria vinculada: ${storedBiometricProfile.email}`
+                      : 'Toque para entrar de forma rápida.'}
+                  </p>
+                </div>
+                <div className="py-1"></div>
+              </>
+            ) : null}
 
             <button
               type="submit"
