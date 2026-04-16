@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.172315.efdf900b",
-  "buildId": "0.1.9+20260416.172315.efdf900b-20260416.172315-efdf900b",
-  "builtAt": "2026-04-16T17:23:15.541Z",
-  "commitHash": "efdf900b1b2bb2d3fd3d65e225cfc83c2019148f",
-  "shortHash": "efdf900b",
+  "versionInternal": "0.1.9+20260416.173315.c897ab91",
+  "buildId": "0.1.9+20260416.173315.c897ab91-20260416.173315-c897ab91",
+  "builtAt": "2026-04-16T17:33:15.945Z",
+  "commitHash": "c897ab91752255b2770c61091a939db6f01db526",
+  "shortHash": "c897ab91",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "c897ab91752255b2770c61091a939db6f01db526",
+      "shortHash": "c897ab91",
+      "dateIso": "2026-04-16T14:24:09-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(admin): speed up order feed recovery and polish access switcher",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c897ab91752255b2770c61091a939db6f01db526"
+    },
     {
       "hash": "efdf900b1b2bb2d3fd3d65e225cfc83c2019148f",
       "shortHash": "efdf900b",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "perf(store): cache public store availability",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5e6f095d3f958712cdd2a87a6abb7f54cd43793f"
-    },
-    {
-      "hash": "c85d2a9041e4460ac4bcef0661e68b1e8a35fd5e",
-      "shortHash": "c85d2a90",
-      "dateIso": "2026-04-14T22:46:19-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "perf(queue): cache product catalog for admin picker",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c85d2a9041e4460ac4bcef0661e68b1e8a35fd5e"
     }
   ]
 } as const;

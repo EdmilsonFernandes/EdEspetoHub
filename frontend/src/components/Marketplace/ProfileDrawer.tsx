@@ -376,19 +376,21 @@ export function ProfileDrawer({
                 }}
                 className={`flex w-full items-center gap-4 rounded-[1.45rem] border px-3.5 py-3.5 transition-all active:scale-[0.97] ${
                   action.tone === 'danger'
-                    ? action.id === 'deactivate'
-                      ? 'border-rose-100 bg-rose-50/70 text-rose-700 hover:bg-rose-50'
-                      : 'border-transparent text-rose-600 hover:bg-rose-50/90'
+                    ? 'border-rose-100/70 bg-rose-50/58 text-rose-700 shadow-[0_14px_28px_-24px_rgba(225,29,72,0.35)] hover:border-rose-100 hover:bg-rose-50/82'
                     : 'border-transparent text-slate-800 hover:border-white/80 hover:bg-white/90'
                 }`}
               >
-                <div className={`grid h-12 w-12 place-items-center rounded-[1.1rem] shrink-0 border border-white/70 shadow-[0_14px_24px_-20px_rgba(15,23,42,0.22)] transition-colors ${action.tone === 'danger' && action.id === 'deactivate' ? 'bg-rose-100 text-rose-600' : action.bgColor || 'bg-slate-100'} ${action.tone === 'danger' && action.id === 'deactivate' ? '' : action.iconColor || 'text-slate-500'}`}>
+                <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-[1.1rem] border border-white/70 shadow-[0_14px_24px_-20px_rgba(15,23,42,0.22)] transition-colors ${
+                  action.tone === 'danger'
+                    ? 'bg-rose-100/78 text-rose-500'
+                    : `${action.bgColor || 'bg-slate-100'} ${action.iconColor || 'text-slate-500'}`
+                }`}>
                   {action.icon}
                 </div>
                 <div className="min-w-0 flex-1 text-left">
-                  <span className="block text-[15px] font-semibold leading-tight">{action.label}</span>
+                  <span className={`block text-[15px] leading-tight ${action.tone === 'danger' ? 'font-black text-rose-700' : 'font-semibold'}`}>{action.label}</span>
                   {action.id === 'logout' ? (
-                    <span className="block text-[11px] font-medium text-slate-400">Encerra somente a sessão neste aparelho</span>
+                    <span className="mt-0.5 block text-[11px] font-semibold text-rose-700/46">Encerra somente a sessão neste aparelho</span>
                   ) : null}
                 </div>
               </button>
