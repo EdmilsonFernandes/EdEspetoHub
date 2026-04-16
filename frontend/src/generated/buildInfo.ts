@@ -5,14 +5,32 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.211244.e59afc84",
-  "buildId": "0.1.9+20260416.211244.e59afc84-20260416.211244-e59afc84",
-  "builtAt": "2026-04-16T21:12:44.033Z",
-  "commitHash": "e59afc84d653b9992166ef0be03a2c444f5d7dbb",
-  "shortHash": "e59afc84",
+  "versionInternal": "0.1.9+20260416.211502.6c164c45",
+  "buildId": "0.1.9+20260416.211502.6c164c45-20260416.211502-6c164c45",
+  "builtAt": "2026-04-16T21:15:02.494Z",
+  "commitHash": "6c164c45e1a07cf79e5dad8f8ebab4900d15e74c",
+  "shortHash": "6c164c45",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "6c164c45e1a07cf79e5dad8f8ebab4900d15e74c",
+      "shortHash": "6c164c45",
+      "dateIso": "2026-04-16T18:14:39-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(admin): import phone icon in order details",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6c164c45e1a07cf79e5dad8f8ebab4900d15e74c"
+    },
+    {
+      "hash": "445aaa82fb7ea4b4c5ec80957497dd04f34390f7",
+      "shortHash": "445aaa82",
+      "dateIso": "2026-04-16T18:13:34-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(admin): avoid forbidden motoboy lookup in queue",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/445aaa82fb7ea4b4c5ec80957497dd04f34390f7"
+    },
     {
       "hash": "e59afc84d653b9992166ef0be03a2c444f5d7dbb",
       "shortHash": "e59afc84",
@@ -264,24 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(app): refresh admin polish and replace installed app icon",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/93d2ec7cd1669090f7c2b16a9bc7cd1be2b60b55"
-    },
-    {
-      "hash": "408e203dfa28cc4660874d296f1e7ff3e232838e",
-      "shortHash": "408e203d",
-      "dateIso": "2026-04-15T18:16:59-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix: remove unused react import in premium home concept",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/408e203dfa28cc4660874d296f1e7ff3e232838e"
-    },
-    {
-      "hash": "3486441dadfb8f588cf1c2faacf0d2068d4932df",
-      "shortHash": "3486441d",
-      "dateIso": "2026-04-15T18:04:59-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix: resolve erro no payload do pix para chaves de telefone e txid",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3486441dadfb8f588cf1c2faacf0d2068d4932df"
     }
   ]
 } as const;
