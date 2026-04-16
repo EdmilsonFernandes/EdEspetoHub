@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.165932.4cc64048",
-  "buildId": "0.1.9+20260416.165932.4cc64048-20260416.165932-4cc64048",
-  "builtAt": "2026-04-16T16:59:32.435Z",
-  "commitHash": "4cc640480fe53f374226ce009f79d6118c45c8f0",
-  "shortHash": "4cc64048",
+  "versionInternal": "0.1.9+20260416.171325.dba92551",
+  "buildId": "0.1.9+20260416.171325.dba92551-20260416.171325-dba92551",
+  "builtAt": "2026-04-16T17:13:25.392Z",
+  "commitHash": "dba925519a52b96e90e2ac31c994a1b436ba3083",
+  "shortHash": "dba92551",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "dba925519a52b96e90e2ac31c994a1b436ba3083",
+      "shortHash": "dba92551",
+      "dateIso": "2026-04-16T14:00:25-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(mobile): polish auth code and safe checkout chrome",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/dba925519a52b96e90e2ac31c994a1b436ba3083"
+    },
     {
       "hash": "4cc640480fe53f374226ce009f79d6118c45c8f0",
       "shortHash": "4cc64048",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(queue): speed up polling and isolate queue endpoint",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/efc295c9483278dda68bb57502052e355de505ce"
-    },
-    {
-      "hash": "79e67f2bfb87e3b89bc16e77b0ef0f01e64dd9d2",
-      "shortHash": "79e67f2b",
-      "dateIso": "2026-04-14T22:20:28-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(hub): stabilize access flows and queue refresh",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/79e67f2bfb87e3b89bc16e77b0ef0f01e64dd9d2"
     }
   ]
 } as const;
