@@ -677,6 +677,17 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const hasPrintAccess = userRole === 'admin' || userRole === 'operator';
   const isAdminUser = String(auth?.user?.role || '').toUpperCase() === 'ADMIN';
   const isOperatorUser = String(auth?.user?.role || '').toUpperCase() === 'OPERATOR' || String(auth?.user?.role || '').toUpperCase() === 'CHURRASQUEIRO';
+  const canLoadMotoboyManagement = Boolean(
+    isAdminUser &&
+      (
+        auth?.store?.settings?.planExempt ||
+        auth?.subscription?.planExempt ||
+        auth?.features?.motoboyManagement ||
+        String(auth?.subscription?.status || '').toUpperCase() === 'TRIAL' ||
+        String(auth?.subscription?.plan?.name || '').toLowerCase().includes('pro') ||
+        String(auth?.subscription?.plan?.name || '').toLowerCase().includes('vip')
+      )
+  );
   const storeNameForPrint = String(auth?.store?.name || auth?.store?.settings?.name || 'Minha Loja').trim();
   const storeIdentifier = useMemo(
     () => String(auth?.store?.id || auth?.store?.slug || '').trim(),
@@ -1164,7 +1175,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   useEffect(() => {
     const loadMotoboys = async () => {
       const storeId = auth?.store?.id;
-      if (!storeId) return;
+      if (!storeId || !canLoadMotoboyManagement) {
+        setActiveMotoboysCount(0);
+        return;
+      }
       try {
         const data = await motoboyAdminService.list(storeId);
         const links = Array.isArray(data) ? data : [];
@@ -1174,7 +1188,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       }
     };
     loadMotoboys();
-  }, [auth?.store?.id]);
+  }, [auth?.store?.id, canLoadMotoboyManagement]);
   useEffect(() => {
     if (typeof window === "undefined") return;
     localStorage.setItem("queueTvMode", String(tvMode));

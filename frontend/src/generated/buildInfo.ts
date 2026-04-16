@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.210957.2f8e1188",
-  "buildId": "0.1.9+20260416.210957.2f8e1188-20260416.210957-2f8e1188",
-  "builtAt": "2026-04-16T21:09:57.350Z",
-  "commitHash": "2f8e11889ff38d87bf99cb314e81b37486d1a5de",
-  "shortHash": "2f8e1188",
+  "versionInternal": "0.1.9+20260416.211244.e59afc84",
+  "buildId": "0.1.9+20260416.211244.e59afc84-20260416.211244-e59afc84",
+  "builtAt": "2026-04-16T21:12:44.033Z",
+  "commitHash": "e59afc84d653b9992166ef0be03a2c444f5d7dbb",
+  "shortHash": "e59afc84",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "e59afc84d653b9992166ef0be03a2c444f5d7dbb",
+      "shortHash": "e59afc84",
+      "dateIso": "2026-04-16T18:10:46-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(admin): prevent queue timer wrapping",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e59afc84d653b9992166ef0be03a2c444f5d7dbb"
+    },
     {
       "hash": "2f8e11889ff38d87bf99cb314e81b37486d1a5de",
       "shortHash": "2f8e1188",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix: resolve erro no payload do pix para chaves de telefone e txid",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3486441dadfb8f588cf1c2faacf0d2068d4932df"
-    },
-    {
-      "hash": "0c50014d3a45055d6a6ea6f5a78b6d99b62b70ce",
-      "shortHash": "0c50014d",
-      "dateIso": "2026-04-15T12:01:33-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Revert \"style: reformula profile drawer para adotar padrao cristalino squircle e efeito premium iOS\"",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0c50014d3a45055d6a6ea6f5a78b6d99b62b70ce"
     }
   ]
 } as const;
