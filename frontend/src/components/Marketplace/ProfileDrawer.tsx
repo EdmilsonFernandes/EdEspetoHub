@@ -89,6 +89,7 @@ export function ProfileDrawer({
   const [storeSlug, setStoreSlug] = useState<string | null>(null);
   const [accessPickerOpen, setAccessPickerOpen] = useState(false);
   const [highlightFirstAccess, setHighlightFirstAccess] = useState(false);
+  const [accessPickerMode, setAccessPickerMode] = useState<'login' | 'register'>('login');
   const [savedAccessProfiles, setSavedAccessProfiles] = useState<{
     customer: { name: string; email: string; biometric: boolean; hasSession: boolean };
     admin: { name: string; email: string; biometric: boolean; hasSession: boolean };
@@ -172,6 +173,7 @@ export function ProfileDrawer({
       document.body.style.overflow = '';
       setAccessPickerOpen(false);
       setHighlightFirstAccess(false);
+      setAccessPickerMode('login');
     }
     return () => {
       document.body.style.overflow = '';
@@ -308,6 +310,7 @@ export function ProfileDrawer({
           ) : (
             <button
               onClick={() => {
+                setAccessPickerMode('login');
                 setHighlightFirstAccess(false);
                 setAccessPickerOpen(true);
               }}
@@ -315,8 +318,8 @@ export function ProfileDrawer({
             >
               <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),transparent_72%)]" />
               <div className="text-left">
-                <p className="text-sm font-black">Entrar ou criar conta</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-sky-100/75">Cliente e lojista</p>
+                <p className="text-sm font-black">Entrar</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-sky-100/75">Cliente, lojista e entregador</p>
               </div>
               <ArrowRight size={19} weight="regular" className="text-white/78" />
             </button>
@@ -390,6 +393,7 @@ export function ProfileDrawer({
             <button
               type="button"
               onClick={() => {
+                setAccessPickerMode('register');
                 setHighlightFirstAccess(true);
                 setAccessPickerOpen(true);
               }}
@@ -439,10 +443,14 @@ export function ProfileDrawer({
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">Escolha seu acesso</p>
                   <h3 className="mt-1 text-[1.35rem] font-black tracking-[-0.03em] text-slate-950">
-                    {isLogged ? 'Trocar perfil' : 'Entrar ou começar'}
+                    {isLogged ? 'Trocar perfil' : accessPickerMode === 'register' ? 'Primeiro acesso' : 'Entrar'}
                   </h3>
                   <p className="mt-1 text-sm font-medium leading-relaxed text-slate-500">
-                    {isLogged ? 'Cada opção abre a área certa do app.' : 'Entre com sua conta ou crie o acesso certo para você.'}
+                    {isLogged
+                      ? 'Cada opção abre a área certa do app.'
+                      : accessPickerMode === 'register'
+                        ? 'Escolha qual conta deseja criar e siga o fluxo certo para começar.'
+                        : 'Entre com sua conta e acesse a área certa do app.'}
                   </p>
                 </div>
               </div>
@@ -456,8 +464,9 @@ export function ProfileDrawer({
               </button>
             </div>
 
-            <div className="grid gap-3 relative">
-              {accessProfiles.map((item) => (
+            {(isLogged || accessPickerMode === 'login') ? (
+              <div className="grid gap-3 relative">
+                {accessProfiles.map((item) => (
                 <button
                   key={item.id}
                   type="button"
@@ -505,9 +514,10 @@ export function ProfileDrawer({
                   </div>
                   <CaretRight size={17} weight="bold" className={`${item.current ? 'text-white/45' : 'text-slate-300'} transition-transform group-hover:translate-x-0.5 group-active:translate-x-0.5`} />
                 </button>
-              ))}
-            </div>
-            {!isLogged ? (
+                ))}
+              </div>
+            ) : null}
+            {!isLogged && accessPickerMode === 'register' ? (
               <div className={`relative mt-4 rounded-[1.65rem] border p-4 shadow-[0_16px_34px_-28px_rgba(15,23,42,0.28)] transition-all duration-200 ${
                 highlightFirstAccess
                   ? 'border-[#336886]/25 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(236,253,245,0.86))] ring-2 ring-[#336886]/12'

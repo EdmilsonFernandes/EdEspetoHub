@@ -171,6 +171,11 @@ const normalizeCustomerProfile = (session: CustomerSession): StoredBiometricProf
   };
 };
 
+const isSameCustomerProfile = (left: StoredBiometricProfile | null, right: StoredBiometricProfile | null) => {
+  if (!left || !right) return false;
+  return left.userId === right.userId && left.email === right.email;
+};
+
 const normalizeAdminProfile = (session: AdminSession): StoredBiometricProfile | null => {
   const userId = String(session?.user?.id || '').trim();
   const email = String(session?.user?.email || '').trim().toLowerCase();
@@ -312,6 +317,12 @@ export const nativeBiometricService = {
 
   hasValidStoredCustomerEnrollment() {
     return Boolean(this.getStoredCustomerProfile()?.userId && this.getStoredCustomerSession()?.token);
+  },
+
+  isCustomerEnrollmentForSession(session: CustomerSession | null | undefined) {
+    const current = normalizeCustomerProfile(session as CustomerSession);
+    const saved = this.getStoredCustomerProfile();
+    return isSameCustomerProfile(saved, current);
   },
 
   hasValidStoredAdminEnrollment() {

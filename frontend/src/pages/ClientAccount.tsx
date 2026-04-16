@@ -93,7 +93,7 @@ export function ClientAccount() {
       };
       localStorage.setItem('customerSession', JSON.stringify(next));
       window.dispatchEvent(new CustomEvent('jnc:customer-session-updated', { detail: next }));
-      if (nativeBiometricService.hasStoredCustomerProfile()) {
+      if (nativeBiometricService.isCustomerEnrollmentForSession(parsed)) {
         nativeBiometricService.enableCustomer(next);
       }
     } catch {
@@ -185,7 +185,13 @@ export function ClientAccount() {
 
   useEffect(() => {
     setBiometricSupported(nativeBiometricService.isSupported());
-    setBiometricEnabled(nativeBiometricService.hasStoredCustomerProfile());
+    try {
+      const raw = localStorage.getItem('customerSession');
+      const session = raw ? JSON.parse(raw) : null;
+      setBiometricEnabled(nativeBiometricService.isCustomerEnrollmentForSession(session));
+    } catch {
+      setBiometricEnabled(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -231,7 +237,7 @@ export function ClientAccount() {
       }
 
       setBiometricEnabled(true);
-      setBiometricMessage('Biometria ativada com sucesso.');
+      setBiometricMessage('Biometria ativada para esta conta neste aparelho.');
     } catch {
       setBiometricMessage('Não foi possível atualizar a biometria agora.');
     } finally {

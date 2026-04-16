@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.132440.0b1fa673",
-  "buildId": "0.1.9+20260416.132440.0b1fa673-20260416.132440-0b1fa673",
-  "builtAt": "2026-04-16T13:24:40.875Z",
-  "commitHash": "0b1fa67342580ff9ab3c5966507136ad801cd1bd",
-  "shortHash": "0b1fa673",
+  "versionInternal": "0.1.9+20260416.133956.7cdfcbd0",
+  "buildId": "0.1.9+20260416.133956.7cdfcbd0-20260416.133956-7cdfcbd0",
+  "builtAt": "2026-04-16T13:39:56.335Z",
+  "commitHash": "7cdfcbd0b07dbb3ac6e5d0bdb987b654ea02dbb6",
+  "shortHash": "7cdfcbd0",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "7cdfcbd0b07dbb3ac6e5d0bdb987b654ea02dbb6",
+      "shortHash": "7cdfcbd0",
+      "dateIso": "2026-04-16T10:26:54-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(mobile): polish customer otp modal and bump app version",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7cdfcbd0b07dbb3ac6e5d0bdb987b654ea02dbb6"
+    },
     {
       "hash": "0b1fa67342580ff9ab3c5966507136ad801cd1bd",
       "shortHash": "0b1fa673",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(hub): stabilize search and order filters",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8fcd1cab9b8a39511a0380de4e229f1691aa13f9"
-    },
-    {
-      "hash": "9123100871cab18e6ff16d0c5fb0a4962767202d",
-      "shortHash": "91231008",
-      "dateIso": "2026-04-14T18:10:06-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(hub): improve condominium search and order filters",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9123100871cab18e6ff16d0c5fb0a4962767202d"
     }
   ]
 } as const;

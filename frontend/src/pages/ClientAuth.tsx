@@ -39,7 +39,6 @@ export function ClientAuth() {
   const [verifyFlowLabel, setVerifyFlowLabel] = useState<'register' | 'login'>('register');
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricLoading, setBiometricLoading] = useState(false);
-  const [autoBiometricTried, setAutoBiometricTried] = useState(false);
   const [enrollmentPromptOpen, setEnrollmentPromptOpen] = useState(false);
   const [pendingBiometricSession, setPendingBiometricSession] = useState<any | null>(null);
   const [form, setForm] = useState({
@@ -74,6 +73,7 @@ export function ClientAuth() {
   }, [hubMode, nextPath]);
 
   const verificationCode = useMemo(() => codeDigits.join(''), [codeDigits]);
+  const storedBiometricProfile = useMemo(() => nativeBiometricService.getStoredCustomerProfile(), [biometricAvailable]);
 
   useEffect(() => {
     document.title = 'Área do Cliente | Já no Caminho';
@@ -125,7 +125,6 @@ export function ClientAuth() {
 
   useEffect(() => {
     setMode(getModeFromSearch(location.search));
-    setAutoBiometricTried(false);
   }, [location.search]);
 
   useEffect(() => {
@@ -198,29 +197,6 @@ export function ClientAuth() {
       setBiometricLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (mode !== 'login') return;
-    if (!biometricAvailable || biometricLoading || loading || autoBiometricTried) return;
-    const hasTypedCredentials = !forceBiometric && (Boolean(String(form.email || '').trim()) || Boolean(String(form.password || '').trim()));
-    if (hasTypedCredentials) return;
-
-    setAutoBiometricTried(true);
-    const timer = window.setTimeout(() => {
-      void handleBiometricLogin();
-    }, 180);
-
-    return () => window.clearTimeout(timer);
-  }, [
-    autoBiometricTried,
-    biometricAvailable,
-    biometricLoading,
-    form.email,
-    form.password,
-    forceBiometric,
-    loading,
-    mode,
-  ]);
 
   const submit = async () => {
     if (loading) return;
@@ -427,15 +403,22 @@ export function ClientAuth() {
 
         <div className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40">
           {mode === 'login' && biometricAvailable ? (
-            <button
-              type="button"
-              onClick={handleBiometricLogin}
-              disabled={biometricLoading || loading}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#336886]/12 bg-[#336886]/8 px-4 py-3 text-sm font-black text-[#336886] shadow-[0_18px_34px_-28px_rgba(51,104,134,0.35)] transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <LockKey size={18} weight="duotone" />
-              {biometricLoading ? 'Lendo biometria...' : 'Entrar com biometria'}
-            </button>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={handleBiometricLogin}
+                disabled={biometricLoading || loading}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#336886]/12 bg-[#336886]/8 px-4 py-3 text-sm font-black text-[#336886] shadow-[0_18px_34px_-28px_rgba(51,104,134,0.35)] transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <LockKey size={18} weight="duotone" />
+                {biometricLoading ? 'Lendo biometria...' : 'Entrar com biometria'}
+              </button>
+              <p className="text-center text-[11px] font-semibold leading-relaxed text-slate-500">
+                {storedBiometricProfile?.email
+                  ? `Biometria salva para ${storedBiometricProfile.email}. Para usar outra conta, entre com e-mail e senha.`
+                  : 'Se quiser usar outra conta, entre com e-mail e senha normalmente.'}
+              </p>
+            </div>
           ) : null}
 
           <div className="flex items-center gap-3">
@@ -594,8 +577,8 @@ export function ClientAuth() {
         icon={<LockKey size={32} weight="duotone" />}
       />
       {verifyPrompt ? (
-        <div className="fixed inset-0 z-[120] flex items-end justify-center bg-slate-950/55 px-4 py-6 backdrop-blur-sm sm:items-center">
-          <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-white/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(241,245,249,0.94))] shadow-[0_36px_120px_-28px_rgba(15,23,42,0.55)]">
+        <div className="fixed inset-0 z-[120] flex items-end justify-center bg-slate-950/55 px-4 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-sm sm:items-center sm:px-4 sm:py-6">
+          <div className="flex max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-7rem)] w-full max-w-md flex-col overflow-hidden rounded-[2rem] border border-white/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(241,245,249,0.94))] shadow-[0_36px_120px_-28px_rgba(15,23,42,0.55)] sm:max-h-[min(48rem,calc(100dvh-3rem))]">
             <div className="relative overflow-hidden bg-[linear-gradient(135deg,#0f3b53_0%,#0d4f66_55%,#2c8c9f_100%)] px-6 pb-8 pt-6 text-white">
               <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.22),transparent_68%)]" />
               <div className="relative flex items-start justify-between gap-4">
@@ -630,7 +613,7 @@ export function ClientAuth() {
               </p>
             </div>
 
-            <div className="space-y-5 px-6 pb-6 pt-5">
+            <div className="space-y-5 overflow-y-auto px-6 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] pt-5">
               <div className="rounded-[1.6rem] border border-slate-200/80 bg-white/80 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
                 <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">
                   <SealCheck size={16} weight="duotone" className="text-[#0d4f66]" />
