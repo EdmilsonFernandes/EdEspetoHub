@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.214342.6f1079c3",
-  "buildId": "0.1.9+20260416.214342.6f1079c3-20260416.214342-6f1079c3",
-  "builtAt": "2026-04-16T21:43:42.331Z",
-  "commitHash": "6f1079c302ec99bf2b800b7c3f5085fef6acdb36",
-  "shortHash": "6f1079c3",
+  "versionInternal": "0.1.9+20260416.215058.dc2c8eb6",
+  "buildId": "0.1.9+20260416.215058.dc2c8eb6-20260416.215058-dc2c8eb6",
+  "builtAt": "2026-04-16T21:50:58.630Z",
+  "commitHash": "dc2c8eb6a6dfbaf118c0587c81c806cf7730a1e9",
+  "shortHash": "dc2c8eb6",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "dc2c8eb6a6dfbaf118c0587c81c806cf7730a1e9",
+      "shortHash": "dc2c8eb6",
+      "dateIso": "2026-04-16T18:44:20-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(admin): refine condominium queue card layout",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/dc2c8eb6a6dfbaf118c0587c81c806cf7730a1e9"
+    },
     {
       "hash": "6f1079c302ec99bf2b800b7c3f5085fef6acdb36",
       "shortHash": "6f1079c3",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "chore(tests): init playwright and vitest architectures with mock units",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2c1fdb1037a09691496f0eb8ff8d0e141679bda7"
-    },
-    {
-      "hash": "55a3ace7dc867d0f461cc66b2444f631cf7885a1",
-      "shortHash": "55a3ace7",
-      "dateIso": "2026-04-15T19:38:47-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(home): tighten marketplace search header on app",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/55a3ace7dc867d0f461cc66b2444f631cf7885a1"
     }
   ]
 } as const;
