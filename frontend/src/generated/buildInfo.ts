@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.203758.afd8f364",
-  "buildId": "0.1.9+20260416.203758.afd8f364-20260416.203758-afd8f364",
-  "builtAt": "2026-04-16T20:37:58.441Z",
-  "commitHash": "afd8f3647fcda6041e02745dc50906cb1f04651f",
-  "shortHash": "afd8f364",
+  "versionInternal": "0.1.9+20260416.205523.6bb9f0c8",
+  "buildId": "0.1.9+20260416.205523.6bb9f0c8-20260416.205523-6bb9f0c8",
+  "builtAt": "2026-04-16T20:55:23.205Z",
+  "commitHash": "6bb9f0c84e4d9aefa4a090c0dce15b0e34807208",
+  "shortHash": "6bb9f0c8",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "6bb9f0c84e4d9aefa4a090c0dce15b0e34807208",
+      "shortHash": "6bb9f0c8",
+      "dateIso": "2026-04-16T17:39:07-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(condominiums): respect apartment delivery rule in checkout",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6bb9f0c84e4d9aefa4a090c0dce15b0e34807208"
+    },
     {
       "hash": "afd8f3647fcda6041e02745dc50906cb1f04651f",
       "shortHash": "afd8f364",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(marketplace): corrige erro de sintaxe JSX que quebrou o build do vite",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9c6ac9eb700dcd8a866b892337e163cd250c6123"
-    },
-    {
-      "hash": "58abdd7e87cfda0600e63dedc4b3a2e9ae758c96",
-      "shortHash": "58abdd7e",
-      "dateIso": "2026-04-15T10:24:34-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style: unifica identidade fluida de menu em todas as sub-telas principais",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/58abdd7e87cfda0600e63dedc4b3a2e9ae758c96"
     }
   ]
 } as const;

@@ -26,12 +26,18 @@ const adminRequest = async (path: string, options: any = {}) => {
 
 export const condominiumService = {
   async listPublic() {
-    const response = await apiClient.rawGet('/public/condominiums');
+    const response = await apiClient.rawGet('/public/condominiums', {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' },
+    });
     return toJson(response);
   },
 
   async listStores(slug: string) {
-    const response = await apiClient.rawGet(`/public/condominiums/${encodeURIComponent(slug)}/stores`);
+    const response = await apiClient.rawGet(`/public/condominiums/${encodeURIComponent(slug)}/stores`, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' },
+    });
     return toJson(response);
   },
 

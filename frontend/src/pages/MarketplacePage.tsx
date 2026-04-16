@@ -665,23 +665,36 @@ export function MarketplacePage() {
     };
   }, [loadPortfolio]);
 
+  const refreshPublicCondominiums = useCallback(async () => {
+    const data = await condominiumService.listPublic();
+    const items = Array.isArray(data) ? data : [];
+    setCondominiums(items);
+  }, []);
+
   useEffect(() => {
     let active = true;
-    condominiumService
-      .listPublic()
-      .then((data) => {
-        if (!active) return;
-        const items = Array.isArray(data) ? data : [];
-        setCondominiums(items);
-      })
-      .catch(() => {
-        if (!active) return;
-        setCondominiums([]);
-      });
+    refreshPublicCondominiums().catch(() => {
+      if (!active) return;
+      setCondominiums([]);
+    });
+
+    const handleVisibilityRefresh = () => {
+      if (document.visibilityState !== 'visible') return;
+      refreshPublicCondominiums().catch(() => undefined);
+    };
+    const intervalId = window.setInterval(() => {
+      refreshPublicCondominiums().catch(() => undefined);
+    }, 45000);
+
+    document.addEventListener('visibilitychange', handleVisibilityRefresh);
+    window.addEventListener('focus', handleVisibilityRefresh);
     return () => {
       active = false;
+      window.clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityRefresh);
+      window.removeEventListener('focus', handleVisibilityRefresh);
     };
-  }, []);
+  }, [refreshPublicCondominiums]);
 
   useEffect(() => {
     const slug = String(selectedCondominiumSlug || '').trim();
@@ -709,7 +722,21 @@ export function MarketplacePage() {
       .then((data) => {
         if (!active) return;
         const storesFromCondo = Array.isArray(data?.stores) ? data.stores : [];
-        setSelectedCondominiumEvent(data?.event || data?.condominium?.eventSummary || null);
+        const freshEvent = data?.event || data?.condominium?.eventSummary || null;
+        setSelectedCondominiumEvent(freshEvent);
+        if (freshEvent || data?.condominium) {
+          setCondominiums((prev) =>
+            prev.map((item) =>
+              String(item?.slug || '').trim() === slug
+                ? {
+                    ...item,
+                    ...(data?.condominium || {}),
+                    eventSummary: freshEvent,
+                  }
+                : item
+            )
+          );
+        }
         setCondominiumStoreSlugs(
           storesFromCondo
             .map((store: any) => String(store?.slug || '').trim())

@@ -226,7 +226,7 @@ export const apiClient = {
   patch: (path: string, body: any, options: any = {}) => request(path, { method: 'PATCH', body, ...options }),
   delete: (path: string, options: any = {}) => request(path, { method: 'DELETE', ...options }),
 
-  rawGet: (path: string) => rawRequest(path, { method: 'GET' }),
+  rawGet: (path: string, options: any = {}) => rawRequest(path, { method: 'GET', ...options }),
   rawPost: (path: string, body: any) => rawRequest(path, { method: 'POST', body }),
   rawPut: (path: string, body: any) => rawRequest(path, { method: 'PUT', body }),
   rawPatch: (path: string, body: any) => rawRequest(path, { method: 'PATCH', body }),
