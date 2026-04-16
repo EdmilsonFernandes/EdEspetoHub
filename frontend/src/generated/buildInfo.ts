@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.171325.dba92551",
-  "buildId": "0.1.9+20260416.171325.dba92551-20260416.171325-dba92551",
-  "builtAt": "2026-04-16T17:13:25.392Z",
-  "commitHash": "dba925519a52b96e90e2ac31c994a1b436ba3083",
-  "shortHash": "dba92551",
+  "versionInternal": "0.1.9+20260416.172315.efdf900b",
+  "buildId": "0.1.9+20260416.172315.efdf900b-20260416.172315-efdf900b",
+  "builtAt": "2026-04-16T17:23:15.541Z",
+  "commitHash": "efdf900b1b2bb2d3fd3d65e225cfc83c2019148f",
+  "shortHash": "efdf900b",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "efdf900b1b2bb2d3fd3d65e225cfc83c2019148f",
+      "shortHash": "efdf900b",
+      "dateIso": "2026-04-16T14:14:14-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(checkout): protect mobile header safe area",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/efdf900b1b2bb2d3fd3d65e225cfc83c2019148f"
+    },
     {
       "hash": "dba925519a52b96e90e2ac31c994a1b436ba3083",
       "shortHash": "dba92551",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "perf(queue): cache product catalog for admin picker",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c85d2a9041e4460ac4bcef0661e68b1e8a35fd5e"
-    },
-    {
-      "hash": "efc295c9483278dda68bb57502052e355de505ce",
-      "shortHash": "efc295c9",
-      "dateIso": "2026-04-14T22:34:14-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(queue): speed up polling and isolate queue endpoint",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/efc295c9483278dda68bb57502052e355de505ce"
     }
   ]
 } as const;

@@ -116,6 +116,13 @@ const request = async (path: string, options: any = {}) =>
   const url = buildUrl(path);
   const isMotoboyRoute = path.startsWith('/motoboy') || path.startsWith('motoboy');
   const isCustomerRoute = path.startsWith('/customer') || path.startsWith('customer');
+  const timeoutMs = Number(options?.timeoutMs || 0);
+  const hasExternalSignal = Boolean(options?.signal);
+  const controller =
+    timeoutMs > 0 && typeof AbortController !== 'undefined' && !hasExternalSignal
+      ? new AbortController()
+      : null;
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
   
   const motoboyToken = getMotoboyToken();
   const adminToken = getAdminToken();
@@ -130,6 +137,7 @@ const request = async (path: string, options: any = {}) =>
 
   const finalOptions: any = {
     ...options,
+    ...(controller ? { signal: controller.signal } : {}),
     headers: {
       ...defaultHeaders,
       ...(options.headers || {}),
@@ -137,6 +145,7 @@ const request = async (path: string, options: any = {}) =>
       'X-Lang': getLang(),
     },
   };
+  delete finalOptions.timeoutMs;
 
   if (finalOptions.body && typeof finalOptions.body === 'object')
   {
@@ -144,6 +153,9 @@ const request = async (path: string, options: any = {}) =>
   }
 
   try {
+    if (controller && timeoutMs > 0) {
+      timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    }
     const response = await fetch(url, finalOptions);
     const adminRole = getAdminRole();
     const isOperator = adminRole === 'OPERATOR' || adminRole === 'CHURRASQUEIRO';
@@ -151,6 +163,12 @@ const request = async (path: string, options: any = {}) =>
     const canAutoLogout = hasPrivilegedSession && !(response.status === 403 && isOperator && !isMotoboyRoute);
     return handleResponse(response, isMotoboyRoute ? 'motoboy' : 'admin', canAutoLogout);
   } catch (error: any) {
+    if (error?.name === 'AbortError') {
+      const timeoutError: any = new Error('Tempo de conexão esgotado. Tentando reconectar...');
+      timeoutError.status = 0;
+      timeoutError.code = 'REQUEST_TIMEOUT';
+      throw timeoutError;
+    }
     if (error instanceof TypeError && (error.message.includes('fetch') || error.message.includes('NetworkError'))) {
       const netError: any = new Error('Falha na conexão com o servidor. Verifique sua internet.');
       netError.status = 0;
@@ -158,6 +176,10 @@ const request = async (path: string, options: any = {}) =>
       throw netError;
     }
     throw error;
+  } finally {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
   }
 };
 

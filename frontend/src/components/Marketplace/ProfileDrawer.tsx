@@ -55,8 +55,6 @@ type AccessProfile = {
   id: 'client' | 'store' | 'motoboy';
   title: string;
   subtitle: string;
-  summary: string;
-  tone: string;
   icon: ReactNode;
   action: () => void;
   current?: boolean;
@@ -156,16 +154,6 @@ export function ProfileDrawer({
     }
   }, [isOpen]);
 
-  const getInitials = (value: string) => {
-    const parts = String(value || '')
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2);
-    if (!parts.length) return 'JN';
-    return parts.map((part) => part.charAt(0).toUpperCase()).join('');
-  };
-
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -203,9 +191,7 @@ export function ProfileDrawer({
         : savedAccessProfiles.customer.hasSession
           ? savedAccessProfiles.customer.email || savedAccessProfiles.customer.name
           : 'Entrar para pedir e acompanhar',
-      summary: savedAccessProfiles.customer.name || 'Conta pessoal',
       icon: <UserCircle size={24} weight="duotone" />,
-      tone: 'bg-[#336886]/10 text-[#336886]',
       action: onLogin,
       current: isLogged,
       ready: savedAccessProfiles.customer.biometric || savedAccessProfiles.customer.hasSession,
@@ -218,9 +204,7 @@ export function ProfileDrawer({
         : savedAccessProfiles.admin.hasSession
           ? savedAccessProfiles.admin.email || savedAccessProfiles.admin.name
           : 'Entrar na operação da loja',
-      summary: savedAccessProfiles.admin.name || 'Operação da loja',
       icon: <Storefront size={24} weight="duotone" />,
-      tone: 'bg-emerald-50 text-emerald-700',
       action: onOpenAdminLogin,
       ready: savedAccessProfiles.admin.biometric || savedAccessProfiles.admin.hasSession,
     },
@@ -232,15 +216,43 @@ export function ProfileDrawer({
         : savedAccessProfiles.motoboy.hasSession
           ? savedAccessProfiles.motoboy.email || savedAccessProfiles.motoboy.name
           : 'Entrar no painel de entregas',
-      summary: savedAccessProfiles.motoboy.name || 'Área do entregador',
       icon: <Motorcycle size={24} weight="duotone" />,
-      tone: 'bg-amber-50 text-amber-700',
       action: onOpenMotoboyLogin,
       ready: savedAccessProfiles.motoboy.biometric || savedAccessProfiles.motoboy.hasSession,
     },
   ];
 
   const currentAccessProfile = accessProfiles.find((item) => item.current) || null;
+  const getAccessCardClasses = (item: AccessProfile) => {
+    if (item.current) {
+      return {
+        shell: 'border-slate-900/10 bg-[linear-gradient(135deg,#111827_0%,#172033_58%,#101827_100%)] text-white shadow-[0_18px_34px_-22px_rgba(15,23,42,0.72)]',
+        icon: 'border-white/10 bg-white/8 text-white',
+        title: 'text-white',
+        subtitle: 'text-white/62',
+        badge: 'bg-white/12 text-white',
+        caret: 'border-white/10 bg-white/6 text-white/54',
+      };
+    }
+    if (item.id === 'store') {
+      return {
+        shell: 'border-emerald-100/85 bg-[linear-gradient(135deg,#f3fff8_0%,#e9f9f0_100%)] text-emerald-950 shadow-[0_16px_30px_-24px_rgba(16,185,129,0.34)]',
+        icon: 'border-emerald-100 bg-emerald-100/78 text-emerald-700',
+        title: 'text-slate-950',
+        subtitle: 'text-slate-600',
+        badge: 'bg-emerald-100/90 text-emerald-700',
+        caret: 'border-emerald-100 bg-white/54 text-emerald-700/60',
+      };
+    }
+    return {
+      shell: 'border-amber-100/85 bg-[linear-gradient(135deg,#fffbed_0%,#fbf4d4_100%)] text-amber-950 shadow-[0_16px_30px_-24px_rgba(245,158,11,0.34)]',
+      icon: 'border-amber-100 bg-amber-100/78 text-amber-700',
+      title: 'text-slate-950',
+      subtitle: 'text-slate-600',
+      badge: 'bg-lime-100/90 text-lime-700',
+      caret: 'border-amber-100 bg-white/54 text-amber-700/60',
+    };
+  };
 
   return (
     <div
@@ -422,93 +434,79 @@ export function ProfileDrawer({
       </aside>
 
       {accessPickerOpen && (
-        <div className="absolute inset-0 z-[10] flex items-center justify-center bg-slate-950/42 px-4 py-[max(1rem,env(safe-area-inset-top))] backdrop-blur-md animate-in fade-in duration-200" onClick={() => setAccessPickerOpen(false)}>
+        <div className="absolute inset-0 z-[10] flex items-center justify-center bg-slate-950/36 px-4 py-[max(1rem,env(safe-area-inset-top))] backdrop-blur-[10px] animate-in fade-in duration-200" onClick={() => setAccessPickerOpen(false)}>
           <div
-            className="relative w-full max-w-[446px] overflow-hidden rounded-[2.15rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.985)_0%,rgba(248,250,252,0.98)_54%,rgba(244,247,251,0.98)_100%)] p-5 shadow-[0_28px_70px_-32px_rgba(15,23,42,0.72)] animate-in zoom-in-95 slide-in-from-bottom-3 duration-200"
+            className="relative w-full max-w-[345px] overflow-hidden rounded-[1.75rem] border border-white/86 bg-[linear-gradient(180deg,rgba(255,255,255,0.985)_0%,rgba(248,250,252,0.98)_100%)] p-4 shadow-[0_26px_68px_-30px_rgba(15,23,42,0.72)] animate-in zoom-in-95 slide-in-from-bottom-3 duration-200"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
-              <div className="absolute -left-10 top-8 h-28 w-28 rounded-full bg-[#336886]/12 blur-3xl" />
-              <div className="absolute left-16 top-0 h-20 w-40 rounded-full bg-sky-100/50 blur-3xl" />
-              <div className="absolute -right-8 bottom-10 h-24 w-24 rounded-full bg-emerald-200/35 blur-3xl" />
+              <div className="absolute -left-12 top-4 h-28 w-28 rounded-full bg-[#336886]/8 blur-3xl" />
+              <div className="absolute -right-10 bottom-4 h-28 w-28 rounded-full bg-emerald-200/28 blur-3xl" />
             </div>
-            <div className="mb-4 flex items-start justify-between gap-3">
-              <div className="space-y-3">
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">Escolha seu acesso</p>
-                  <h3 className="mt-1 text-[1.35rem] font-black tracking-[-0.03em] text-slate-950">
-                    {isLogged ? 'Alternar acesso' : accessPickerMode === 'register' ? 'Primeiro acesso' : 'Entrar'}
-                  </h3>
-                  <p className="mt-1 text-sm font-medium leading-relaxed text-slate-500">
-                    {isLogged
-                      ? 'Sua conta pessoal fica no Hub. Lojista e entregador abrem as áreas operacionais.'
-                      : accessPickerMode === 'register'
-                        ? 'Escolha qual conta deseja criar e siga o fluxo certo para começar.'
-                        : 'Entre com sua conta e acesse a área certa do app.'}
-                  </p>
-                </div>
+            <div className="relative mb-4 flex items-start justify-between gap-3">
+              <div className="min-w-0 pr-2">
+                <p className="text-[9px] font-black uppercase tracking-[0.28em] text-slate-500">Escolha seu acesso</p>
+                <h3 className="mt-1 text-[1.18rem] font-black tracking-[-0.035em] text-slate-950">
+                  {isLogged ? 'Alternar acesso' : accessPickerMode === 'register' ? 'Primeiro acesso' : 'Entrar'}
+                </h3>
+                <p className="mt-1.5 text-[12px] font-semibold leading-relaxed text-slate-500">
+                  {isLogged
+                    ? 'Sua conta pessoal fica no Hub. Lojista e entregador abrem as áreas operacionais.'
+                    : accessPickerMode === 'register'
+                      ? 'Escolha qual conta deseja criar e siga o fluxo certo para começar.'
+                      : 'Entre com sua conta e acesse a área certa do app.'}
+                </p>
               </div>
               <button
                 type="button"
                 onClick={() => setAccessPickerOpen(false)}
-                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/80 bg-white/92 text-slate-600 shadow-[0_12px_26px_-18px_rgba(15,23,42,0.38)] transition-all active:scale-95"
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200/70 bg-white/88 text-slate-400 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.32)] transition-all active:scale-95"
                 aria-label="Fechar escolha de acesso"
               >
-                <X size={18} weight="bold" />
+                <X size={17} weight="bold" />
               </button>
             </div>
 
             {(isLogged || accessPickerMode === 'login') ? (
-              <div className="grid gap-3 relative">
-                {accessProfiles.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => {
-                    setAccessPickerOpen(false);
-                    item.action();
-                    onClose();
-                  }}
-                  className={`group relative flex w-full items-center gap-4 overflow-hidden rounded-[1.65rem] border p-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.08)] ring-1 transition-all duration-150 ease-out active:scale-[0.97] sm:hover:-translate-y-0.5 sm:hover:shadow-[0_18px_32px_rgba(15,23,42,0.11)] ${
-                    item.current
-                      ? 'border-slate-900/10 bg-[linear-gradient(135deg,rgba(15,23,42,0.98),rgba(30,41,59,0.96))] ring-slate-900/5'
-                      : item.ready
-                        ? 'border-white/90 bg-white/95 ring-slate-100/70'
-                        : 'border-slate-200/80 bg-slate-50/92 ring-slate-200/70'
-                  }`}
-                >
-                  <div className={`pointer-events-none absolute inset-y-0 right-0 w-24 ${
-                    item.current
-                      ? 'bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),transparent_70%)]'
-                      : 'bg-[radial-gradient(circle_at_center,rgba(51,104,134,0.08),transparent_70%)]'
-                  }`} />
-                  <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${item.current ? 'bg-white/10 text-white' : item.tone} shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]`}>
-                    <div className="relative grid place-items-center">
-                      {item.icon}
-                      <span className={`absolute -bottom-4 text-[9px] font-black uppercase tracking-[0.12em] ${item.current ? 'text-white/55' : 'text-slate-300'}`}>
-                        {getInitials(item.summary)}
+              <div className="relative grid gap-3">
+                {accessProfiles.map((item) => {
+                  const classes = getAccessCardClasses(item);
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        setAccessPickerOpen(false);
+                        item.action();
+                        onClose();
+                      }}
+                      className={`group relative flex min-h-[4.6rem] w-full items-center gap-3.5 overflow-hidden rounded-[1.35rem] border px-3.5 py-3 text-left transition-all duration-150 ease-out active:scale-[0.985] sm:hover:-translate-y-0.5 ${classes.shell}`}
+                    >
+                      <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.16),transparent_72%)]" />
+                      <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-[1.05rem] border shadow-[inset_0_1px_0_rgba(255,255,255,0.52)] ${classes.icon}`}>
+                        {item.icon}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className={`truncate text-[14px] font-black leading-tight ${classes.title}`}>{item.title}</p>
+                          {item.current ? (
+                            <span className={`inline-flex shrink-0 rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.16em] ${classes.badge}`}>
+                              Atual
+                            </span>
+                          ) : item.ready ? (
+                            <span className={`inline-flex shrink-0 rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.16em] ${classes.badge}`}>
+                              Pronto
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className={`mt-1 truncate text-[10.5px] font-semibold ${classes.subtitle}`}>{item.subtitle}</p>
+                      </div>
+                      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full border transition-transform group-hover:translate-x-0.5 group-active:translate-x-0.5 ${classes.caret}`}>
+                        <CaretRight size={16} weight="bold" />
                       </span>
-                    </div>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className={`text-[15px] font-black ${item.current ? 'text-white' : 'text-slate-900'}`}>{item.title}</p>
-                      {item.current ? (
-                        <span className="inline-flex rounded-full bg-white/12 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-white">
-                          Atual
-                        </span>
-                      ) : null}
-                      {item.ready && !item.current ? (
-                        <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-emerald-700">
-                          Pronto
-                        </span>
-                      ) : null}
-                    </div>
-                    <p className={`mt-1 text-[11px] font-bold ${item.current ? 'text-white/65' : item.ready ? 'text-slate-500' : 'text-slate-400'}`}>{item.subtitle}</p>
-                  </div>
-                  <CaretRight size={17} weight="bold" className={`${item.current ? 'text-white/45' : 'text-slate-300'} transition-transform group-hover:translate-x-0.5 group-active:translate-x-0.5`} />
-                </button>
-                ))}
+                    </button>
+                  );
+                })}
               </div>
             ) : null}
             {!isLogged && accessPickerMode === 'register' ? (

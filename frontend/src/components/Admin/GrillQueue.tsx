@@ -1437,7 +1437,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       setQueue(data);
     } catch (err) {
       console.error('Erro ao buscar fila', err);
-      queueRetryDelayRef.current = Math.min(queueRetryDelayRef.current * 2, 15000);
+      const errorCode = String((err as any)?.code || '').toUpperCase();
+      const isConnectivityError = errorCode === 'NETWORK_ERROR' || errorCode === 'REQUEST_TIMEOUT' || Number((err as any)?.status || 0) === 0;
+      queueRetryDelayRef.current = isConnectivityError
+        ? Math.min(Math.max(QUEUE_POLL_VISIBLE_MS, queueRetryDelayRef.current) * 1.35, 6000)
+        : Math.min(queueRetryDelayRef.current * 2, 15000);
       if (!silent || queueRef.current.length === 0) {
         setError('Não foi possível carregar os pedidos agora. Tentando reconectar...');
       }

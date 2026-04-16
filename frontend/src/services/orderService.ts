@@ -1,6 +1,8 @@
 import { apiClient } from "../config/apiClient";
 import { normalizeProductModifiers } from "../utils/productModifiers";
 
+const ORDER_FEED_TIMEOUT_MS = 8000;
+
 const isUuid = (value: string) =>
   /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(value);
 
@@ -186,7 +188,7 @@ export const orderService = {
     }
 
     try {
-      const data = await apiClient.get(buildOrdersPath(targetStore));
+      const data = await apiClient.get(buildOrdersPath(targetStore), { timeoutMs: ORDER_FEED_TIMEOUT_MS });
       return data.map(normalizeOrder);
     } catch (error) {
       handleSessionError(error);
@@ -203,7 +205,7 @@ export const orderService = {
     }
 
     try {
-      const data = await apiClient.get(buildQueuePath(targetStore));
+      const data = await apiClient.get(buildQueuePath(targetStore), { timeoutMs: ORDER_FEED_TIMEOUT_MS });
       return data.map(normalizeOrder);
     } catch (error) {
       handleSessionError(error);
@@ -226,7 +228,7 @@ export const orderService = {
     {
       try
       {
-        const data = await apiClient.get(buildOrdersPath(targetStore));
+        const data = await apiClient.get(buildOrdersPath(targetStore), { timeoutMs: ORDER_FEED_TIMEOUT_MS });
         if (!cancelled) callback(data.map(normalizeOrder));
       } catch (error)
       {
@@ -257,7 +259,7 @@ export const orderService = {
     const load = async () =>
     {
       try {
-        const data = await apiClient.get(buildOrdersPath(targetStore));
+        const data = await apiClient.get(buildOrdersPath(targetStore), { timeoutMs: ORDER_FEED_TIMEOUT_MS });
         if (!cancelled) callback(data.map(normalizeOrder));
       } catch (error) {
         handleSessionError(error);
