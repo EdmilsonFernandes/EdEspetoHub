@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.213957.67e75b1a",
-  "buildId": "0.1.9+20260416.213957.67e75b1a-20260416.213957-67e75b1a",
-  "builtAt": "2026-04-16T21:39:57.538Z",
-  "commitHash": "67e75b1ad125e79be61830661b077ebfc6959e39",
-  "shortHash": "67e75b1a",
+  "versionInternal": "0.1.9+20260416.214342.6f1079c3",
+  "buildId": "0.1.9+20260416.214342.6f1079c3-20260416.214342-6f1079c3",
+  "builtAt": "2026-04-16T21:43:42.331Z",
+  "commitHash": "6f1079c302ec99bf2b800b7c3f5085fef6acdb36",
+  "shortHash": "6f1079c3",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "6f1079c302ec99bf2b800b7c3f5085fef6acdb36",
+      "shortHash": "6f1079c3",
+      "dateIso": "2026-04-16T18:41:02-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(notifications): align order status messages by flow",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6f1079c302ec99bf2b800b7c3f5085fef6acdb36"
+    },
     {
       "hash": "67e75b1ad125e79be61830661b077ebfc6959e39",
       "shortHash": "67e75b1a",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(home): tighten marketplace search header on app",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/55a3ace7dc867d0f461cc66b2444f631cf7885a1"
-    },
-    {
-      "hash": "b91fbbd4f0a78cc3b5044ff0c0b368639df4cf64",
-      "shortHash": "b91fbbd4",
-      "dateIso": "2026-04-15T19:26:13-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "perf(client): cache customer profile avatar locally",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b91fbbd4f0a78cc3b5044ff0c0b368639df4cf64"
     }
   ]
 } as const;

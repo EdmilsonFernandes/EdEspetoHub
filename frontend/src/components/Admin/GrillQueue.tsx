@@ -402,6 +402,7 @@ const OrderSummaryCard = ({
     const locationIdentifier = resolveLocationIdentifier(order);
     const isCondo = isCondominiumOrder(order);
     const cardLocationIdentifier = isCondo ? resolveCondominiumCardIdentifier(order) : locationIdentifier;
+    const condominiumLine = isCondo ? String(locationIdentifier || '').trim() : '';
     const hasLocationIdentifier = Boolean(cardLocationIdentifier);
     const mesaMeta = parseMesaIdentifier(cardLocationIdentifier);
     const isMesaLocation = mesaMeta.isMesa;
@@ -542,6 +543,17 @@ const OrderSummaryCard = ({
 
           {/* Nome do Cliente */}
           <div className="min-w-0">
+            {condominiumLine && (
+              <div
+                className="mb-2 flex min-w-0 items-start gap-2 rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-white to-sky-50 px-3 py-2 text-[11px] font-extrabold text-emerald-900 shadow-sm"
+                title={condominiumLine}
+              >
+                <Buildings size={15} weight="duotone" className="mt-0.5 shrink-0 text-emerald-700" />
+                <span className="min-w-0 leading-snug [overflow-wrap:anywhere]">
+                  {condominiumLine}
+                </span>
+              </div>
+            )}
             <h3 className="text-[1.15rem] font-black text-slate-900 leading-tight truncate">
               {order.customerName || order.name || 'Cliente'}
             </h3>
@@ -1159,9 +1171,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             <span className="text-xs font-black text-slate-700">{formatCurrency(fee)}</span>
           </div>
         )}
-        <div className="flex min-w-0 items-center justify-between rounded-2xl border border-emerald-100 bg-emerald-50 px-3 py-2 shadow-sm">
-          <span className="text-emerald-600 font-black text-[9px] uppercase tracking-wider">Total</span>
-          <span className="text-xs font-black text-emerald-700">{formatCurrency(total)}</span>
+        <div className="flex min-w-0 items-center justify-between rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-white px-3 py-2.5 shadow-[0_10px_24px_-18px_rgba(5,150,105,0.7)]">
+          <span className="text-emerald-700 font-black text-[10px] uppercase tracking-wider">Total</span>
+          <span className="text-base font-black tracking-tight text-emerald-800">{formatCurrency(total)}</span>
         </div>
       </div>
     );
@@ -3134,8 +3146,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 onClick={closeOrderOverlays}
               />
               <div className="fixed right-0 top-0 h-full w-full md:w-[450px] z-[10000] bg-white shadow-2xl flex flex-col animate-[drawerIn_220ms_ease-out]">
-                <div className="shrink-0 flex justify-between items-center gap-3 px-4 pt-[max(env(safe-area-inset-top),1.25rem)] pb-4 border-b border-slate-200 bg-white shadow-sm">
-                  <p className="min-w-0 truncate text-sm font-black text-slate-900 tracking-tight" title={resolveLocationIdentifier(selectedOrder || {}) || 'Detalhes do pedido'}>
+                <div className="shrink-0 flex justify-between items-start gap-3 px-4 pt-[max(env(safe-area-inset-top),1.25rem)] pb-4 border-b border-slate-200 bg-white shadow-sm">
+                  <p className="min-w-0 flex-1 text-sm font-black leading-snug text-slate-900 tracking-tight [overflow-wrap:anywhere]" title={resolveLocationIdentifier(selectedOrder || {}) || 'Detalhes do pedido'}>
                     {(() => {
                       const drawerLocation = resolveLocationIdentifier(selectedOrder || {});
                       const drawerMesa = parseMesaIdentifier(drawerLocation);
@@ -3150,7 +3162,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       );
                     })()}
                   </p>
-                  <div className="flex items-center gap-2">
+                  <div className="flex shrink-0 items-center gap-2">
                     {selectedOrder && hasPrintAccess && (
                       <>
                         <button
