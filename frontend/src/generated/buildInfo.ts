@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.205523.6bb9f0c8",
-  "buildId": "0.1.9+20260416.205523.6bb9f0c8-20260416.205523-6bb9f0c8",
-  "builtAt": "2026-04-16T20:55:23.205Z",
-  "commitHash": "6bb9f0c84e4d9aefa4a090c0dce15b0e34807208",
-  "shortHash": "6bb9f0c8",
+  "versionInternal": "0.1.9+20260416.210222.02044dbf",
+  "buildId": "0.1.9+20260416.210222.02044dbf-20260416.210222-02044dbf",
+  "builtAt": "2026-04-16T21:02:22.169Z",
+  "commitHash": "02044dbf8926010ad6d6f1fb03655923dcf9a173",
+  "shortHash": "02044dbf",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "02044dbf8926010ad6d6f1fb03655923dcf9a173",
+      "shortHash": "02044dbf",
+      "dateIso": "2026-04-16T17:56:33-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(hub): refresh condominium event status",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/02044dbf8926010ad6d6f1fb03655923dcf9a173"
+    },
     {
       "hash": "6bb9f0c84e4d9aefa4a090c0dce15b0e34807208",
       "shortHash": "6bb9f0c8",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style: reformula profile drawer para adotar padrao cristalino squircle e efeito premium iOS",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/382eecd48566f1d06d79d4583740a96797dd6957"
-    },
-    {
-      "hash": "9c6ac9eb700dcd8a866b892337e163cd250c6123",
-      "shortHash": "9c6ac9eb",
-      "dateIso": "2026-04-15T10:35:04-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(marketplace): corrige erro de sintaxe JSX que quebrou o build do vite",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9c6ac9eb700dcd8a866b892337e163cd250c6123"
     }
   ]
 } as const;

@@ -3220,12 +3220,15 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     </div>
                   )}
                   {order.phone && (
-                    <p className="text-[11px] text-gray-500 break-words">{order.phone}</p>
+                    <p className="mt-1 inline-flex max-w-full items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-600">
+                      <Phone size={12} weight="duotone" className="shrink-0 text-[#336886]" />
+                      <span className="min-w-0 truncate whitespace-nowrap">{order.phone}</span>
+                    </p>
                   )}
                   {isPostalOrder(order) ? (
-                    <p className="text-[11px] text-gray-500 break-words">
+                    <p className="max-w-full text-[11px] text-gray-500">
                       Rastreio:{' '}
-                      <span className="font-semibold text-slate-700">
+                      <span className="inline-block max-w-full align-bottom font-semibold text-slate-700 truncate whitespace-nowrap">
                         {String(order?.shipment?.trackingCode || '').trim() || 'não informado'}
                       </span>
                     </p>
