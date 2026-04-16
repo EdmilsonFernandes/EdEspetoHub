@@ -709,7 +709,7 @@ export function StorePage() {
       }
     }
     const savedCheckoutCustomer = localStorage.getItem(checkoutCustomerStorageKey);
-    if (savedCheckoutCustomer) {
+    if (savedCheckoutCustomer && !customerSession?.token) {
       try {
         const parsed = JSON.parse(savedCheckoutCustomer);
         const savedName = String(parsed?.name || '').trim();
@@ -920,7 +920,7 @@ export function StorePage() {
       }
       document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, [storeSlug, customersStorageKey, checkoutCustomerStorageKey, customerSessionStorageKey]);
+  }, [storeSlug, customersStorageKey, checkoutCustomerStorageKey, customerSessionStorageKey, customerSession?.token]);
 
   useEffect(() => {
     let active = true;
@@ -981,8 +981,8 @@ export function StorePage() {
     setCustomer((prev: any) => {
       const prevName = String(prev?.name || '').trim();
       const prevPhone = String(prev?.phone || '').trim();
-      const nextName = prevName || sessionName;
-      const nextPhone = prevPhone || sessionPhone;
+      const nextName = sessionName || prevName;
+      const nextPhone = sessionPhone || prevPhone;
 
       if (nextName === prevName && nextPhone === prevPhone) {
         return prev;
@@ -994,7 +994,8 @@ export function StorePage() {
         phone: nextPhone,
       };
     });
-  }, [customerSession?.user?.fullName, customerSession?.user?.phone]);
+    localStorage.removeItem(checkoutCustomerStorageKey);
+  }, [checkoutCustomerStorageKey, customerSession?.user?.fullName, customerSession?.user?.phone]);
 
   useEffect(() => {
     if (!customerSession?.token) {
@@ -1722,10 +1723,14 @@ export function StorePage() {
       if (canUseAdminPrintFlow) {
         setShowPrintPrompt(true);
       }
-      localStorage.setItem(
-        checkoutCustomerStorageKey,
-        JSON.stringify({ name: effectiveCustomerName, phone: customer.phone })
-      );
+      if (!customerSession?.token) {
+        localStorage.setItem(
+          checkoutCustomerStorageKey,
+          JSON.stringify({ name: effectiveCustomerName, phone: customer.phone })
+        );
+      } else {
+        localStorage.removeItem(checkoutCustomerStorageKey);
+      }
       if (customer.type === 'table' && customer.table) {
         setOccupiedTables((prev) => {
           const normalized = String(customer.table || '').trim();
@@ -1797,10 +1802,14 @@ export function StorePage() {
     ].slice(0, 50);
     setCustomers(nextCustomers);
     localStorage.setItem(customersStorageKey, JSON.stringify(nextCustomers));
-    localStorage.setItem(
-      checkoutCustomerStorageKey,
-      JSON.stringify({ name: effectiveCustomerName, phone: customer.phone })
-    );
+    if (!customerSession?.token) {
+      localStorage.setItem(
+        checkoutCustomerStorageKey,
+        JSON.stringify({ name: effectiveCustomerName, phone: customer.phone })
+      );
+    } else {
+      localStorage.removeItem(checkoutCustomerStorageKey);
+    }
     customerService.fetchAll().then(setCustomers).catch(() => {});
 
     const trackingLink =
