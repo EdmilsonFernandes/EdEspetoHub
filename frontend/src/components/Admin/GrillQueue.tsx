@@ -18,7 +18,8 @@ import {
   CaretDown,
   Check,
   Package,
-  Buildings
+  Buildings,
+  Phone
 } from "@phosphor-icons/react";
 import { orderService } from "../../services/orderService";
 import { storeService } from "../../services/storeService";
