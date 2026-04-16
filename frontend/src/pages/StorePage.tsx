@@ -30,6 +30,7 @@ import {
 } from '../utils/productModifiers';
 import { getCartPricing } from '../utils/orderPricing';
 import { printReceiptAsImage } from '../utils/printReceiptImage';
+import { clearAllCustomerSessions } from '../utils/customerSessionStorage';
 
 const WEEKDAY_LABELS = [ 'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado' ];
 const PUBLIC_ORDER_ALERT_TTL_MS = 3 * 60 * 60 * 1000;
@@ -579,8 +580,7 @@ export function StorePage() {
       setCustomerSession(session);
       return;
     }
-    localStorage.removeItem('customerSession');
-    localStorage.removeItem(customerSessionStorageKey);
+    clearAllCustomerSessions();
     setCustomerSession(null);
   };
 
@@ -695,8 +695,7 @@ export function StorePage() {
           localStorage.setItem('customerSession', JSON.stringify(parsedCustomerSession));
         }
       } catch {
-        localStorage.removeItem('customerSession');
-        localStorage.removeItem(customerSessionStorageKey);
+        clearAllCustomerSessions();
       }
     }
 

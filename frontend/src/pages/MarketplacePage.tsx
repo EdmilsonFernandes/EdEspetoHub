@@ -47,6 +47,7 @@ import { APP_BUILD_INFO } from '../generated/buildInfo';
 import { nativeBiometricService } from '../services/nativeBiometricService';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { clearAllCustomerSessions } from '../utils/customerSessionStorage';
 
 type MarketplaceStore = {
   id?: string;
@@ -1458,10 +1459,7 @@ export function MarketplacePage() {
   }, []);
 
   const handleCustomerLogout = useCallback(() => {
-    localStorage.removeItem('customerSession');
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('customerSession_')) localStorage.removeItem(key);
-    });
+    clearAllCustomerSessions();
     setCustomerSession(null);
     navigate('/hub');
   }, [navigate]);

@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.180334.5cd164bd",
-  "buildId": "0.1.9+20260416.180334.5cd164bd-20260416.180334-5cd164bd",
-  "builtAt": "2026-04-16T18:03:34.751Z",
-  "commitHash": "5cd164bd6f2efbea03fffe4fe22abbf517520979",
-  "shortHash": "5cd164bd",
+  "versionInternal": "0.1.9+20260416.180705.88e17f60",
+  "buildId": "0.1.9+20260416.180705.88e17f60-20260416.180705-88e17f60",
+  "builtAt": "2026-04-16T18:07:05.066Z",
+  "commitHash": "88e17f60be613199d88e00298827f82ed3786514",
+  "shortHash": "88e17f60",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "88e17f60be613199d88e00298827f82ed3786514",
+      "shortHash": "88e17f60",
+      "dateIso": "2026-04-16T15:04:27-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(checkout): prioritize logged customer identity",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/88e17f60be613199d88e00298827f82ed3786514"
+    },
     {
       "hash": "5cd164bd6f2efbea03fffe4fe22abbf517520979",
       "shortHash": "5cd164bd",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(marketplace): resolver bug fantasma da barra de pesquisa no app",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/182a21b24baa9bdd3208762bfbbf1e3895db131d"
-    },
-    {
-      "hash": "d1afd240bd1380a3ce1ac5bd22a2875a7a424a32",
-      "shortHash": "d1afd240",
-      "dateIso": "2026-04-15T09:17:01-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(queue): restore sales history calculations",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d1afd240bd1380a3ce1ac5bd22a2875a7a424a32"
     }
   ]
 } as const;
