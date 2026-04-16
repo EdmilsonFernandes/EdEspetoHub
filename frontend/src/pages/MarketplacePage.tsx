@@ -1840,7 +1840,7 @@ export function MarketplacePage() {
           </div>
         </header>
 
-        <main className={`mx-auto max-w-[1200px] space-y-6 px-4 ${isNativePlatform ? 'pt-2' : 'pt-3'}`}>
+        <main className={`mx-auto max-w-[1200px] space-y-6 px-4 ${isNativePlatform ? 'pt-5' : 'pt-6'}`}>
           {/* Acompanhamento de Pedidos (Logados ou Anônimos Cache) */}
           {(isCustomerLogged && visibleActiveOrders.length > 0) ? (
             <div className="animate-in fade-in slide-in-from-top-4 duration-500">
@@ -2001,7 +2001,20 @@ export function MarketplacePage() {
           {/* Carrossel de Banners - Esconde na busca para focar no resultado */}
           {debouncedQuery.length < 2 && !selectedCondominium && (
             <div className="animate-in fade-in slide-in-from-top-4 duration-500" style={{ animationDelay: '80ms' }}>
-              <SegmentPromoCarousel mode="hub" className="mx-0" />
+              <section className="relative overflow-hidden rounded-[2.15rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.92)_0%,rgba(248,250,252,0.86)_100%)] p-2.5 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.38)] ring-1 ring-slate-200/60 backdrop-blur-xl">
+                <div className="pointer-events-none absolute -left-10 -top-12 h-32 w-32 rounded-full bg-[#336886]/10 blur-3xl" />
+                <div className="pointer-events-none absolute -right-8 bottom-0 h-28 w-28 rounded-full bg-emerald-200/35 blur-3xl" />
+                <div className="relative mb-2 flex items-center justify-between px-2">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">Destaques</p>
+                    <p className="mt-0.5 text-xs font-semibold text-slate-500">Novidades e oportunidades para começar melhor.</p>
+                  </div>
+                  <span className="hidden rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 shadow-sm sm:inline-flex">
+                    Hub
+                  </span>
+                </div>
+                <SegmentPromoCarousel mode="hub" className="mx-0 shadow-[0_18px_42px_-28px_rgba(15,23,42,0.45)]" />
+              </section>
             </div>
           )}
 

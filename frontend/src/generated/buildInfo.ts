@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.180705.88e17f60",
-  "buildId": "0.1.9+20260416.180705.88e17f60-20260416.180705-88e17f60",
-  "builtAt": "2026-04-16T18:07:05.066Z",
-  "commitHash": "88e17f60be613199d88e00298827f82ed3786514",
-  "shortHash": "88e17f60",
+  "versionInternal": "0.1.9+20260416.181140.d1282fa1",
+  "buildId": "0.1.9+20260416.181140.d1282fa1-20260416.181140-d1282fa1",
+  "builtAt": "2026-04-16T18:11:40.890Z",
+  "commitHash": "d1282fa1f34557e249d8d141f4e87a85ea7edfc6",
+  "shortHash": "d1282fa1",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "d1282fa1f34557e249d8d141f4e87a85ea7edfc6",
+      "shortHash": "d1282fa1",
+      "dateIso": "2026-04-16T15:08:03-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(auth): clear store customer sessions on logout",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d1282fa1f34557e249d8d141f4e87a85ea7edfc6"
+    },
     {
       "hash": "88e17f60be613199d88e00298827f82ed3786514",
       "shortHash": "88e17f60",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(marketplace): remove webkittextfillcolor hack that caused text glitch on ios scroll",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0177b49d5cc8e329484da0a2899b8cc61afed18e"
-    },
-    {
-      "hash": "182a21b24baa9bdd3208762bfbbf1e3895db131d",
-      "shortHash": "182a21b2",
-      "dateIso": "2026-04-15T09:34:32-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(marketplace): resolver bug fantasma da barra de pesquisa no app",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/182a21b24baa9bdd3208762bfbbf1e3895db131d"
     }
   ]
 } as const;
