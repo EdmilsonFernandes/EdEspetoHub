@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.173315.c897ab91",
-  "buildId": "0.1.9+20260416.173315.c897ab91-20260416.173315-c897ab91",
-  "builtAt": "2026-04-16T17:33:15.945Z",
-  "commitHash": "c897ab91752255b2770c61091a939db6f01db526",
-  "shortHash": "c897ab91",
+  "versionInternal": "0.1.9+20260416.173654.0170770e",
+  "buildId": "0.1.9+20260416.173654.0170770e-20260416.173654-0170770e",
+  "builtAt": "2026-04-16T17:36:54.713Z",
+  "commitHash": "0170770e019db1db1e1f766f3fac589523a0a87c",
+  "shortHash": "0170770e",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "0170770e019db1db1e1f766f3fac589523a0a87c",
+      "shortHash": "0170770e",
+      "dateIso": "2026-04-16T14:34:16-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(drawer): harmonize logout action",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0170770e019db1db1e1f766f3fac589523a0a87c"
+    },
     {
       "hash": "c897ab91752255b2770c61091a939db6f01db526",
       "shortHash": "c897ab91",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "perf(queue): reduce dashboard queue payload",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/447a41f1f1b1c9670fa73f527b515b010964d8e1"
-    },
-    {
-      "hash": "5e6f095d3f958712cdd2a87a6abb7f54cd43793f",
-      "shortHash": "5e6f095d",
-      "dateIso": "2026-04-14T22:55:49-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "perf(store): cache public store availability",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5e6f095d3f958712cdd2a87a6abb7f54cd43793f"
     }
   ]
 } as const;
