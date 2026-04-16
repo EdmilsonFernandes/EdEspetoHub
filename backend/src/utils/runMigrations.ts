@@ -1575,4 +1575,50 @@ export async function runMigrations() {
     CREATE INDEX IF NOT EXISTS idx_motoboy_push_tokens_is_active
     ON motoboy_push_tokens(is_active);
   `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS guest_order_phone_blocks (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+      phone_digits TEXT NOT NULL,
+      reason TEXT,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      CONSTRAINT uq_guest_order_phone_blocks_store_phone UNIQUE (store_id, phone_digits)
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_guest_order_phone_blocks_store
+    ON guest_order_phone_blocks(store_id);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_guest_order_phone_blocks_active
+    ON guest_order_phone_blocks(active);
+  `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS guest_order_attempts (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+      phone_digits TEXT,
+      guest_push_id TEXT,
+      ip_address TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_guest_order_attempts_store_created
+    ON guest_order_attempts(store_id, created_at DESC);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_guest_order_attempts_phone
+    ON guest_order_attempts(phone_digits);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_guest_order_attempts_guest
+    ON guest_order_attempts(guest_push_id);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_guest_order_attempts_ip
+    ON guest_order_attempts(ip_address);
+  `);
 }

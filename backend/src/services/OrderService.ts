@@ -56,8 +56,14 @@ export class OrderService
   private readonly anonymousOrderPhoneLimit = 3;
   private readonly anonymousOrderGuestWindowMinutes = 20;
   private readonly anonymousOrderGuestLimit = 4;
+  private readonly anonymousOrderIpWindowMinutes = 20;
+  private readonly anonymousOrderIpLimit = 6;
   private normalizePhone(value?: string | null) {
     return String(value || '').replace(/\D/g, '').slice(0, 11);
+  }
+
+  private normalizeIp(value?: string | null) {
+    return String(value || '').trim().slice(0, 120);
   }
 
   private isStaffActor(role?: string | null) {
@@ -78,14 +84,25 @@ export class OrderService
     }
 
     const guestPushId = String(input?.guestPushId || '').trim();
-    const [phoneRows, guestRows] = await Promise.all([
+    const ipAddress = this.normalizeIp(input?.clientIp);
+    const [blockedRows, phoneRows, guestRows, ipRows] = await Promise.all([
+      AppDataSource.query(
+        `
+          SELECT id
+            FROM guest_order_phone_blocks
+           WHERE store_id = $1
+             AND phone_digits = $2
+             AND active = TRUE
+           LIMIT 1
+        `,
+        [storeId, phoneDigits]
+      ),
       AppDataSource.query(
         `
           SELECT COUNT(*)::int AS total
-            FROM orders
+            FROM guest_order_attempts
            WHERE store_id = $1
-             AND customer_user_id IS NULL
-             AND regexp_replace(COALESCE(phone, ''), '\\D', '', 'g') = $2
+             AND phone_digits = $2
              AND created_at >= NOW() - ($3::text || ' minutes')::interval
         `,
         [storeId, phoneDigits, String(this.anonymousOrderPhoneWindowMinutes)]
@@ -94,25 +111,61 @@ export class OrderService
         ? AppDataSource.query(
             `
               SELECT COUNT(*)::int AS total
-                FROM orders
+                FROM guest_order_attempts
                WHERE store_id = $1
-                 AND customer_user_id IS NULL
                  AND guest_push_id = $2
                  AND created_at >= NOW() - ($3::text || ' minutes')::interval
             `,
             [storeId, guestPushId, String(this.anonymousOrderGuestWindowMinutes)]
           )
         : Promise.resolve([{ total: 0 }]),
+      ipAddress
+        ? AppDataSource.query(
+            `
+              SELECT COUNT(*)::int AS total
+                FROM guest_order_attempts
+               WHERE store_id = $1
+                 AND ip_address = $2
+                 AND created_at >= NOW() - ($3::text || ' minutes')::interval
+            `,
+            [storeId, ipAddress, String(this.anonymousOrderIpWindowMinutes)]
+          )
+        : Promise.resolve([{ total: 0 }]),
     ]);
+
+    if (Array.isArray(blockedRows) && blockedRows.length > 0) {
+      throw new AppError('ORDER-ANON-003', 403, {
+        message: 'Este telefone nao pode realizar pedidos visitantes no momento.',
+      });
+    }
 
     const phoneCount = Number(phoneRows?.[0]?.total || 0);
     const guestCount = Number(guestRows?.[0]?.total || 0);
+    const ipCount = Number(ipRows?.[0]?.total || 0);
 
-    if (phoneCount >= this.anonymousOrderPhoneLimit || guestCount >= this.anonymousOrderGuestLimit) {
+    if (phoneCount >= this.anonymousOrderPhoneLimit || guestCount >= this.anonymousOrderGuestLimit || ipCount >= this.anonymousOrderIpLimit) {
       throw new AppError('ORDER-ANON-002', 429, {
         message: 'Muitos pedidos visitantes em sequência. Aguarde alguns minutos ou entre com sua conta.',
       });
     }
+  }
+
+  private async registerAnonymousOrderAttempt(input: CreateOrderDto, storeId: string) {
+    const isCustomer = Boolean(String(input?.customerUserId || '').trim());
+    const isStaff = this.isStaffActor(input?.actorRole);
+    if (isCustomer || isStaff) return;
+
+    const phoneDigits = this.normalizePhone(input?.phone) || null;
+    const guestPushId = String(input?.guestPushId || '').trim() || null;
+    const ipAddress = this.normalizeIp(input?.clientIp) || null;
+
+    await AppDataSource.query(
+      `
+        INSERT INTO guest_order_attempts (store_id, phone_digits, guest_push_id, ip_address)
+        VALUES ($1, $2, $3, $4)
+      `,
+      [storeId, phoneDigits, guestPushId, ipAddress]
+    );
   }
 
   /**
@@ -809,6 +862,7 @@ private async seedPostalShipmentFromCheckoutTx(
       await this.seedPostalShipmentFromCheckoutTx(manager, saved, input as any);
       return saved;
     });
+    await this.registerAnonymousOrderAttempt(input, store.id);
     this.dispatchOrderUpdatePush(saved as any);
     return saved;
   }
@@ -833,6 +887,7 @@ private async seedPostalShipmentFromCheckoutTx(
       await this.seedPostalShipmentFromCheckoutTx(manager, saved, input as any);
       return saved;
     });
+    await this.registerAnonymousOrderAttempt({ ...input, storeId: store.id }, store.id);
     this.dispatchOrderUpdatePush(saved as any);
     return saved;
   }
