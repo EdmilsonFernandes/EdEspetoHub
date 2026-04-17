@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { Buildings, Heart, House, Receipt } from '@phosphor-icons/react';
+import { Buildings, House, Receipt, UserCircle } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { nativeBiometricService } from '../../services/nativeBiometricService';
 
@@ -173,7 +173,8 @@ export function NativeAppNavigator() {
     location.pathname.startsWith('/cliente/pedidos') ||
     location.pathname.startsWith('/pedido/');
   const isCondominium = location.pathname === '/hub' && location.search.includes('panel=condominios');
-  const isFavorites = location.pathname === '/hub' && location.search.includes('favorites=1');
+
+  const isHome = !isOrders && !isCondominium;
 
   const itemBaseClass =
     'group flex min-h-[4.15rem] flex-col items-center justify-center gap-1 rounded-[1.3rem] px-1 py-2 text-[9px] font-bold uppercase tracking-[0.12em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03]';
@@ -189,14 +190,14 @@ export function NativeAppNavigator() {
         <button
           type="button"
           onClick={handleHome}
-          className={`${itemBaseClass} ${!isOrders && !isCondominium && !isFavorites ? activeItemClass : inactiveItemClass}`}
+          className={`${itemBaseClass} ${isHome ? activeItemClass : inactiveItemClass}`}
         >
           <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ${
-            !isOrders && !isCondominium && !isFavorites
+            isHome
               ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
               : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
           }`}>
-            <House size={18} weight={!isOrders && !isCondominium && !isFavorites ? 'fill' : 'duotone'} />
+            <House size={18} weight={isHome ? 'fill' : 'duotone'} />
           </span>
           Início
         </button>
@@ -230,17 +231,13 @@ export function NativeAppNavigator() {
         </button>
         <button
           type="button"
-          onClick={() => navigate('/hub?favorites=1')}
-          className={`${itemBaseClass} ${isFavorites ? activeItemClass : inactiveItemClass}`}
+          onClick={() => window.dispatchEvent(new CustomEvent('jnk:open-profile-drawer'))}
+          className={`${itemBaseClass} ${inactiveItemClass}`}
         >
-          <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ${
-            isFavorites
-              ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
-              : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
-          }`}>
-            <Heart size={18} weight={isFavorites ? 'fill' : 'regular'} />
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
+            <UserCircle size={18} weight="duotone" />
           </span>
-          Favoritos
+          Perfil
         </button>
         </div>
       </div>

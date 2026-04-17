@@ -481,6 +481,12 @@ export function MarketplacePage() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleOpenProfileDrawer = () => setProfileDrawerOpen(true);
+    window.addEventListener('jnk:open-profile-drawer', handleOpenProfileDrawer);
+    return () => window.removeEventListener('jnk:open-profile-drawer', handleOpenProfileDrawer);
+  }, []);
+
   // Carregar pedidos anônimos do localStorage e reconciliar status real
   useEffect(() => {
     let cancelled = false;
@@ -2805,7 +2811,14 @@ export function MarketplacePage() {
 
               {/* Título */}
               <div className="relative mb-5">
-                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/60 mb-1">Já no Caminho</p>
+                <div className="mb-2 flex items-center gap-2">
+                  <img
+                    src="/janocaminho-logo.png"
+                    alt="Já no Caminho"
+                    className="h-6 w-6 rounded-full object-cover ring-1 ring-white/30"
+                  />
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/60">Já no Caminho</p>
+                </div>
                 <h2 className="text-[1.75rem] font-black tracking-tight text-white leading-none">Onde você está?</h2>
                 <p className="mt-2 text-[13px] font-medium text-white/70 leading-snug max-w-xs">
                   Escolha seu condomínio e veja as feiras ativas agora.
