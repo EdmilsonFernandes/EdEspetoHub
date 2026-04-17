@@ -1528,25 +1528,6 @@ export function MarketplacePage() {
     setSegmentFilter('all');
   }, []);
 
-  const selectCondominium = useCallback((slug: string) => {
-    const normalized = String(slug || '').trim();
-    const condominium = condominiums.find((item) => String(item?.slug || '').trim() === normalized) || null;
-    const event = condominium?.eventSummary || null;
-    const eventState = String(event?.state || '').trim().toLowerCase();
-    if (eventState !== 'live') {
-      setCondominiumAvailabilityModal({
-        name: String(condominium?.name || 'este condomínio').trim(),
-        nextLabel: formatCondominiumEventTime(event) || '',
-      });
-      return;
-    }
-    
-    setSelectedCondominiumSlug(normalized);
-    setCondominiumPickerOpen(false);
-    setCondominiumSearch('');
-    resetMarketplaceFilters();
-  }, [condominiums, resetMarketplaceFilters]);
-
   const clearCondominiumSelection = useCallback(() => {
     setSelectedCondominiumSlug('');
     setCondominiumSearch('');
@@ -1558,6 +1539,24 @@ export function MarketplacePage() {
     setCondominiumPickerOpen(false);
     navigate('/hub');
   }, [clearCondominiumSelection, navigate]);
+
+  const handleOpenPedidos = useCallback(async () => {
+    if (isCustomerLogged) {
+      navigate('/cliente/pedidos');
+      return;
+    }
+    if (nativeBiometricService.hasValidStoredCustomerEnrollment()) {
+      try {
+        const session = await nativeBiometricService.loginCustomerWithBiometrics('Confirme sua identidade para ver seus pedidos');
+        setCustomerSession(session);
+        navigate('/cliente/pedidos');
+        return;
+      } catch {
+        // Fallback
+      }
+    }
+    navigate('/cliente?mode=login&next=/cliente/pedidos&hub=1&bio=1');
+  }, [navigate, isCustomerLogged, setCustomerSession]);
 
   const [activeOrders, setActiveOrders] = useState<any[]>([]);
 
@@ -2744,7 +2743,7 @@ export function MarketplacePage() {
           </button>
           <button
             type="button"
-            onClick={() => navigate('/cliente/pedidos')}
+            onClick={handleOpenPedidos}
             className="group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
           >
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
@@ -2997,7 +2996,7 @@ export function MarketplacePage() {
                   type="button"
                   onClick={() => {
                     setCondominiumPickerOpen(false);
-                    navigate('/cliente/pedidos');
+                    handleOpenPedidos();
                   }}
                   className="group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
                 >
