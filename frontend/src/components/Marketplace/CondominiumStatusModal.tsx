@@ -1,5 +1,4 @@
-import { X, CalendarBlank, Clock } from '@phosphor-icons/react';
-import { type ReactNode } from 'react';
+import { X, CalendarBlank } from '@phosphor-icons/react';
 
 type CondominiumStatusModalProps = {
   isOpen: boolean;
