@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260417.170927.be79bfad",
-  "buildId": "0.1.9+20260417.170927.be79bfad-20260417.170927-be79bfad",
-  "builtAt": "2026-04-17T17:09:27.035Z",
-  "commitHash": "be79bfad8012def6703ecc9186c0645e789b90c4",
-  "shortHash": "be79bfad",
+  "versionInternal": "0.1.9+20260417.171826.7b3d1770",
+  "buildId": "0.1.9+20260417.171826.7b3d1770-20260417.171826-7b3d1770",
+  "builtAt": "2026-04-17T17:18:26.948Z",
+  "commitHash": "7b3d1770e63038f79f504f337c996c7c07e133fd",
+  "shortHash": "7b3d1770",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "7b3d1770e63038f79f504f337c996c7c07e133fd",
+      "shortHash": "7b3d1770",
+      "dateIso": "2026-04-17T14:10:43-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(marketplace): hide unready stores from hub",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7b3d1770e63038f79f504f337c996c7c07e133fd"
+    },
     {
       "hash": "be79bfad8012def6703ecc9186c0645e789b90c4",
       "shortHash": "be79bfad",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(mobile): polish auth code and safe checkout chrome",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/dba925519a52b96e90e2ac31c994a1b436ba3083"
-    },
-    {
-      "hash": "4cc640480fe53f374226ce009f79d6118c45c8f0",
-      "shortHash": "4cc64048",
-      "dateIso": "2026-04-16T12:19:25-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(ClientAuth): reposition biometric login button directly above main login action for better UX",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4cc640480fe53f374226ce009f79d6118c45c8f0"
     }
   ]
 } as const;

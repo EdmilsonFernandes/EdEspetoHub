@@ -204,6 +204,7 @@ export function CreateStore() {
   const [storeResendCooldown, setStoreResendCooldown] = useState(0);
   const [storeVerifyMessage, setStoreVerifyMessage] = useState('');
   const [storeVerifyError, setStoreVerifyError] = useState('');
+  const [lastAutoSubmittedStoreCode, setLastAutoSubmittedStoreCode] = useState('');
   const [logoPreviewUrl, setLogoPreviewUrl] = useState('');
   const [bannerPreviewUrl, setBannerPreviewUrl] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -217,7 +218,7 @@ export function CreateStore() {
     document: '',
     storeName: '',
   });
-  const platformLogo = '/janocaminho-logo.png';
+  const platformLogo = '/janocaminho.jpg';
   const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
   const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e', '#065f46', '#4b5563' ];
   const termsRef = useRef<HTMLDivElement | null>(null);
@@ -751,6 +752,7 @@ export function CreateStore() {
           redirectUrl: result.redirectUrl,
         });
         setStoreCodeDigits(['', '', '', '']);
+        setLastAutoSubmittedStoreCode('');
         setStoreVerifyError('');
         setStoreVerifyMessage('Enviamos um código de 4 dígitos para ativar sua loja.');
         setStoreResendCooldown(60);
@@ -919,6 +921,7 @@ export function CreateStore() {
     const digitsOnly = String(value || '').replace(/\D/g, '');
     if (!digitsOnly) {
       setStoreCodeDigits((prev) => prev.map((digit, i) => (i === index ? '' : digit)));
+      setLastAutoSubmittedStoreCode('');
       return;
     }
     const nextDigits = digitsOnly.slice(0, 4 - index).split('');
@@ -929,6 +932,7 @@ export function CreateStore() {
       });
       return next;
     });
+    setLastAutoSubmittedStoreCode('');
     const nextIndex = Math.min(index + nextDigits.length, 3);
     window.setTimeout(() => {
       const input = document.getElementById(`store-otp-${nextIndex}`) as HTMLInputElement | null;
@@ -960,6 +964,7 @@ export function CreateStore() {
     if (!pasted) return;
     event.preventDefault();
     setStoreCodeDigits([pasted[0] || '', pasted[1] || '', pasted[2] || '', pasted[3] || '']);
+    setLastAutoSubmittedStoreCode('');
     const targetIndex = Math.min(Math.max(pasted.length - 1, 0), 3);
     window.setTimeout(() => (document.getElementById(`store-otp-${targetIndex}`) as HTMLInputElement | null)?.focus(), 0);
     if (storeVerifyError) setStoreVerifyError('');
@@ -989,6 +994,18 @@ export function CreateStore() {
       setStoreCodeLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!storeVerifyPrompt) return;
+    if (storeVerificationCode.length !== 4 || storeCodeLoading) return;
+    if (storeVerificationCode === lastAutoSubmittedStoreCode) return;
+    const codeToSubmit = storeVerificationCode;
+    const timer = window.setTimeout(() => {
+      setLastAutoSubmittedStoreCode(codeToSubmit);
+      void handleVerifyStoreCode();
+    }, 180);
+    return () => window.clearTimeout(timer);
+  }, [storeVerificationCode, storeCodeLoading, storeVerifyPrompt, lastAutoSubmittedStoreCode]);
 
   const handleResendStoreCode = async () => {
     const email = String(storeVerifyPrompt?.email || registerForm.email || '').trim().toLowerCase();
@@ -1248,8 +1265,8 @@ export function CreateStore() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-3 sm:py-4">
             <button onClick={() => navigate('/')} className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-2xl overflow-hidden bg-white shadow-[0_14px_26px_-18px_rgba(239,68,68,0.7)] ring-1 ring-red-200 flex items-center justify-center">
-                <img src={platformLogo} alt="Já no Caminho" className="h-full w-full object-cover" />
+              <div className="h-11 w-11 rounded-2xl overflow-hidden bg-white shadow-[0_14px_26px_-18px_rgba(15,59,83,0.55)] ring-1 ring-[#336886]/15 flex items-center justify-center">
+                <img src={platformLogo} alt="Já no Caminho" className="h-full w-full object-contain p-1" />
               </div>
               <div className="hidden sm:block leading-tight">
                 <p className="text-lg font-black text-gray-900">Já no Caminho</p>
@@ -2077,9 +2094,9 @@ export function CreateStore() {
               </label>
             </div>
 
-            <div className="fixed bottom-0 left-0 z-50 w-full rounded-none border-t border-slate-200 bg-white/90 p-3 pb-[max(env(safe-area-inset-bottom),0.65rem)] shadow-[0_-10px_26px_-20px_rgba(15,23,42,0.45)] backdrop-blur-md md:static md:rounded-2xl md:border md:border-slate-200/90 md:p-3 md:shadow-[0_24px_46px_-30px_rgba(15,23,42,0.55)]">
+            <div className="fixed bottom-0 left-0 z-50 w-full rounded-t-[1.6rem] border border-b-0 border-white/70 bg-white/92 p-2.5 pb-[max(env(safe-area-inset-bottom),0.25rem)] shadow-[0_-24px_70px_-34px_rgba(15,23,42,0.6)] backdrop-blur-xl md:static md:rounded-2xl md:border md:border-slate-200/90 md:p-3 md:shadow-[0_24px_46px_-30px_rgba(15,23,42,0.55)]">
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
-                <div className="text-[11px] text-slate-500">
+                <div className="hidden sm:block text-[11px] text-slate-500">
                   Etapa atual <span className="font-semibold text-slate-700">{currentStep} de 4</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -2087,7 +2104,7 @@ export function CreateStore() {
                     type="button"
                     onClick={() => scrollToStep(Math.max(1, currentStep - 1))}
                     disabled={currentStep === 1}
-                    className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.55)] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-45 disabled:cursor-not-allowed sm:flex-none"
                   >
                     Voltar
                   </button>
@@ -2096,7 +2113,7 @@ export function CreateStore() {
                       type="button"
                       onClick={handleNextStep}
                       disabled={!canAdvanceFromStep(currentStep) || isPreflightingOwner}
-                      className="rounded-xl bg-gradient-to-r from-slate-900 to-slate-700 px-4 py-2 text-sm font-bold text-white shadow-[0_10px_22px_-14px_rgba(15,23,42,0.7)] transition-all duration-200 hover:-translate-y-0.5 hover:from-slate-800 hover:to-slate-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-[1.4] rounded-2xl bg-[linear-gradient(135deg,#0f3b53,#0d4f66,#2c8c9f)] px-4 py-3 text-sm font-black text-white shadow-[0_22px_42px_-24px_rgba(15,59,83,0.65)] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-55 disabled:cursor-not-allowed sm:flex-none"
                     >
                       {isPreflightingOwner ? 'Validando...' : 'Próximo'}
                     </button>
@@ -2104,7 +2121,7 @@ export function CreateStore() {
                     <button
                       type="submit"
                       disabled={isRegistering}
-                      className="rounded-xl bg-gradient-to-r from-slate-900 to-slate-700 px-4 py-2 text-sm font-bold text-white shadow-[0_10px_22px_-14px_rgba(15,23,42,0.7)] transition-all duration-200 hover:-translate-y-0.5 hover:from-slate-800 hover:to-slate-700 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="flex-[1.4] rounded-2xl bg-[linear-gradient(135deg,#0f3b53,#0d4f66,#2c8c9f)] px-4 py-3 text-sm font-black text-white shadow-[0_22px_42px_-24px_rgba(15,59,83,0.65)] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed sm:flex-none"
                     >
                       {isRegistering ? (
                         <span className="inline-flex items-center justify-center gap-2">
@@ -2231,11 +2248,11 @@ export function CreateStore() {
               </div>
               <p className="relative mt-4 text-sm leading-relaxed text-white/80">
                 {storeVerifyPrompt.emailMasked
-                  ? `Enviamos o código para ${storeVerifyPrompt.emailMasked}.`
-                  : 'Enviamos o código para o e-mail informado.'}
+                  ? `Verifique seu e-mail ${storeVerifyPrompt.emailMasked} e digite o código recebido.`
+                  : 'Verifique o e-mail informado e digite o código recebido.'}
               </p>
               <p className="relative mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/58">
-                Último passo para ativar sua loja
+                Ao preencher os 4 números, validamos automaticamente
               </p>
             </div>
 
@@ -2246,7 +2263,7 @@ export function CreateStore() {
                   Confirmação segura
                 </div>
                 <p className="mt-2 text-sm font-medium leading-relaxed text-slate-600">
-                  Digite o código recebido para confirmar seu e-mail e continuar a ativação sem sair do fluxo.
+                  O código confirma que esse e-mail pertence a você. Assim que os 4 dígitos forem preenchidos, a ativação continua automaticamente.
                 </p>
                 <div className="mt-4 flex items-center justify-between gap-2">
                   {storeCodeDigits.map((digit, index) => (
@@ -2289,7 +2306,7 @@ export function CreateStore() {
                   disabled={storeVerificationCode.length !== 4 || storeCodeLoading}
                   className="rounded-2xl bg-[linear-gradient(135deg,#0f3b53,#0d4f66,#2c8c9f)] px-4 py-3.5 text-sm font-black text-white shadow-[0_24px_50px_-24px_rgba(15,59,83,0.55)] transition active:scale-[0.99] disabled:opacity-60"
                 >
-                  {storeCodeLoading ? 'Confirmando código...' : 'Confirmar e ativar loja'}
+                  {storeCodeLoading ? 'Validando código...' : 'Confirmar agora'}
                 </button>
                 <button
                   type="button"
@@ -2310,7 +2327,7 @@ export function CreateStore() {
             <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
-                  <img src={platformLogo} alt="Já no Caminho" className="w-full h-full object-cover" />
+                  <img src={platformLogo} alt="Já no Caminho" className="w-full h-full object-contain p-1" />
                 </div>
                 <div>
                   <p className="text-lg font-bold text-slate-900">Termos de uso</p>
@@ -2375,27 +2392,40 @@ export function CreateStore() {
         </div>
       )}
       {showValidationModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-200 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
-                !
-              </div>
-              <div>
-                <p className="text-base font-semibold text-slate-900">Falta uma confirmação</p>
-                <p className="text-xs text-slate-500">Verifique os dados abaixo.</p>
+        <div className="fixed inset-0 z-[130] flex items-end justify-center bg-slate-950/55 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-sm sm:items-center sm:py-6">
+          <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-white/40 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(241,245,249,0.96))] shadow-[0_36px_100px_-30px_rgba(15,23,42,0.6)]">
+            <div className="relative overflow-hidden bg-[linear-gradient(135deg,#0f3b53_0%,#0d4f66_58%,#2c8c9f_100%)] px-6 pb-6 pt-6 text-white">
+              <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.2),transparent_68%)]" />
+              <div className="relative flex items-start gap-4">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/12 shadow-[0_20px_40px_-24px_rgba(15,23,42,0.75)]">
+                  <WarningCircle size={28} weight="duotone" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.26em] text-white/65">Revisão final</p>
+                  <h3 className="mt-2 text-xl font-black leading-tight tracking-[-0.03em]">
+                    Falta pouco para publicar
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-white/78">
+                    {validationMessage || 'Confira os campos obrigatórios antes de continuar.'}
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="px-5 py-4 text-sm text-slate-600">
-              {validationMessage || 'Confira os campos obrigatórios antes de continuar.'}
-            </div>
-            <div className="px-5 py-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+            <div className="space-y-4 px-6 py-5">
+              <div className="rounded-2xl border border-slate-200 bg-white/82 p-4 text-sm font-medium leading-relaxed text-slate-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                Se estiver no passo de plano, marque os termos de uso e a política de privacidade. O cadastro só cria a loja depois dessa confirmação.
+              </div>
               <button
                 type="button"
-                onClick={() => setShowValidationModal(false)}
-                className="px-4 py-2 rounded-lg bg-brand-primary text-white text-sm font-semibold hover:opacity-90"
+                onClick={() => {
+                  setShowValidationModal(false);
+                  if (currentStep === 4 && termsRef.current) {
+                    window.setTimeout(() => termsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
+                  }
+                }}
+                className="w-full rounded-2xl bg-[linear-gradient(135deg,#0f3b53,#0d4f66,#2c8c9f)] px-4 py-3.5 text-sm font-black text-white shadow-[0_22px_44px_-24px_rgba(15,59,83,0.65)] transition active:scale-[0.99]"
               >
-                Voltar ao cadastro
+                Revisar agora
               </button>
             </div>
           </div>

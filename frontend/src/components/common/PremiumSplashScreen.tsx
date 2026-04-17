@@ -37,29 +37,29 @@ export function PremiumSplashScreen() {
       <div className="pointer-events-none absolute left-1/2 top-[16%] h-56 w-56 -translate-x-1/2 rounded-full bg-[#336886]/10 blur-3xl" />
 
       <div className="relative flex w-full max-w-[360px] flex-col items-center">
-        <div className="splash-delivery-scene relative mb-7 h-[210px] w-full max-w-[330px] animate-in zoom-in-95 duration-700 motion-reduce:animate-none">
-          <div className="absolute left-1/2 top-6 h-40 w-56 -translate-x-1/2 rounded-[3rem] bg-white/72 blur-2xl" />
-          <div className="splash-orbit absolute left-1/2 top-[14px] h-[178px] w-[178px] -translate-x-1/2 rounded-full border border-[#336886]/10" />
+        <div className="splash-delivery-scene relative mb-7 h-[230px] w-full max-w-[330px] animate-in zoom-in-95 duration-700 motion-reduce:animate-none">
+          <div className="absolute left-1/2 top-6 h-44 w-60 -translate-x-1/2 rounded-[3rem] bg-white/72 blur-2xl" />
+          <div className="splash-orbit absolute left-1/2 top-[18px] h-[188px] w-[188px] -translate-x-1/2 rounded-full border border-[#336886]/10" />
 
-          <div className="splash-category splash-category-food absolute left-2 top-24 text-[#336886]">
+          <div className="splash-category splash-category-food absolute left-3 top-[108px] text-[#336886]">
             <ForkKnife size={22} weight="duotone" />
           </div>
-          <div className="splash-category splash-category-drink absolute right-7 top-21 text-[#5CA536]">
+          <div className="splash-category splash-category-drink absolute right-3 top-[106px] text-[#5CA536]">
             <Package size={22} weight="duotone" />
           </div>
-          <div className="splash-category splash-category-beauty absolute left-10 top-7 text-[#336886]">
+          <div className="splash-category splash-category-beauty absolute left-12 top-8 text-[#336886]">
             <Sparkle size={22} weight="duotone" />
           </div>
-          <div className="splash-category splash-category-bag absolute right-10 top-9 text-[#5CA536]">
+          <div className="splash-category splash-category-bag absolute right-12 top-8 text-[#5CA536]">
             <TShirt size={22} weight="duotone" />
           </div>
 
-          <div className="splash-brand-card absolute left-1/2 top-14 flex h-[112px] w-[112px] -translate-x-1/2 items-center justify-center rounded-[2.2rem] border border-white/90 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(232,245,246,0.88))] shadow-[0_30px_70px_-34px_rgba(15,49,84,0.75)] ring-1 ring-[#336886]/10">
-            <div className="absolute inset-3 rounded-[1.65rem] bg-[#336886]/10 blur-xl" />
+          <div className="splash-brand-card absolute left-1/2 top-[58px] flex h-[124px] w-[124px] -translate-x-1/2 items-center justify-center rounded-[2.35rem] border border-white/90 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(232,245,246,0.88))] shadow-[0_30px_70px_-34px_rgba(15,49,84,0.75)] ring-1 ring-[#336886]/10">
+            <div className="absolute inset-3 rounded-[1.75rem] bg-[#336886]/10 blur-xl" />
             <img
               src="/janocaminho.jpg"
               alt="Já no Caminho"
-              className="relative h-[76px] w-[76px] rounded-full object-cover shadow-[0_16px_32px_-18px_rgba(15,49,84,0.72)]"
+              className="relative h-[92px] w-[92px] rounded-[1.55rem] object-contain p-1 shadow-[0_16px_32px_-18px_rgba(15,49,84,0.72)]"
               onError={(event) => {
                 event.currentTarget.onerror = null;
                 event.currentTarget.src = '/janocaminho-logo.png';
