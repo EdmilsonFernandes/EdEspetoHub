@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260417.123444.43be20d5",
-  "buildId": "0.1.9+20260417.123444.43be20d5-20260417.123444-43be20d5",
-  "builtAt": "2026-04-17T12:34:44.912Z",
-  "commitHash": "43be20d596969d904583479d371fdd3b13ca0f15",
-  "shortHash": "43be20d5",
+  "versionInternal": "0.1.9+20260417.143724.083cc1fb",
+  "buildId": "0.1.9+20260417.143724.083cc1fb-20260417.143724-083cc1fb",
+  "builtAt": "2026-04-17T14:37:24.154Z",
+  "commitHash": "083cc1fbd40fb1180ce486f54216e4dd909591e5",
+  "shortHash": "083cc1fb",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "083cc1fbd40fb1180ce486f54216e4dd909591e5",
+      "shortHash": "083cc1fb",
+      "dateIso": "2026-04-17T09:36:13-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(admin): surface logout in desktop sidebar",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/083cc1fbd40fb1180ce486f54216e4dd909591e5"
+    },
     {
       "hash": "43be20d596969d904583479d371fdd3b13ca0f15",
       "shortHash": "43be20d5",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(mobile): refine customer auth entry and bump android release",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2eb47d8dee0696679c2fb0eacc940811ac95c005"
-    },
-    {
-      "hash": "7cdfcbd0b07dbb3ac6e5d0bdb987b654ea02dbb6",
-      "shortHash": "7cdfcbd0",
-      "dateIso": "2026-04-16T10:26:54-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(mobile): polish customer otp modal and bump app version",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7cdfcbd0b07dbb3ac6e5d0bdb987b654ea02dbb6"
     }
   ]
 } as const;
