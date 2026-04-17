@@ -1805,7 +1805,7 @@ export function MarketplacePage() {
             {/* Linha 2: Busca Premium */}
             <div className="relative z-20">
               <div
-                className={`group relative isolate flex items-center gap-3 overflow-hidden border border-slate-200/80 bg-white/95 px-3.5 transition-[border-color,box-shadow,background-color] duration-200 ease-out hover:border-slate-300 hover:bg-white focus-within:border-[#336886]/25 focus-within:bg-white focus-within:shadow-[0_18px_40px_-24px_rgba(51,104,134,0.28)] focus-within:ring-2 focus-within:ring-[#336886]/10 ${isNativePlatform ? 'min-h-[50px] rounded-[1.35rem] shadow-[0_14px_30px_-24px_rgba(15,23,42,0.25)]' : 'min-h-[54px] rounded-[1.55rem] shadow-[0_16px_34px_-26px_rgba(15,23,42,0.28)]'}`}
+                className={`group relative isolate flex items-center gap-3 overflow-hidden border border-slate-200/80 bg-white px-3.5 transition-[border-color,box-shadow] duration-200 ease-out hover:border-slate-300 focus-within:border-[#336886]/25 focus-within:shadow-[0_18px_40px_-24px_rgba(51,104,134,0.28)] focus-within:ring-2 focus-within:ring-[#336886]/10 ${isNativePlatform ? 'min-h-[50px] rounded-[1.35rem] shadow-[0_14px_30px_-24px_rgba(15,23,42,0.25)]' : 'min-h-[54px] rounded-[1.55rem] shadow-[0_16px_34px_-26px_rgba(15,23,42,0.28)]'}`}
                 onClick={(e) => {
                   if ((e.target as HTMLElement).closest('button')) return;
                   searchInputRef.current?.focus();
@@ -1833,6 +1833,9 @@ export function MarketplacePage() {
                       caretColor: '#336886',
                       backgroundColor: 'transparent',
                       boxShadow: 'none',
+                      WebkitTextFillColor: 'inherit',
+                      color: '#0f172a',
+                      transform: 'translateZ(0)',
                     }}
                   />
                 </div>
@@ -2178,53 +2181,42 @@ export function MarketplacePage() {
                 </div>
               ) : (
                 <>
-                  <div className="mb-3 px-1">
-                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Exclusivo para você</p>
-                    <h2 className="truncate text-lg font-black tracking-tight text-slate-900">Encontre lojas dentro do seu condomínio</h2>
-                  </div>
                   <button
                     type="button"
                     onClick={() => setCondominiumPickerOpen(true)}
-                    className="group relative flex w-full items-center gap-3 overflow-hidden rounded-[1.8rem] border border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] p-4 text-left shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_46px_-30px_rgba(51,104,134,0.24)] active:scale-[0.985]"
+                    className="group relative flex w-full items-center gap-4 overflow-hidden rounded-2xl border border-slate-100 bg-white p-4 text-left shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] transition-all duration-200 hover:border-[#336886]/20 hover:shadow-[0_4px_20px_-6px_rgba(51,104,134,0.14)] active:scale-[0.99]"
                   >
-                    <div className="absolute inset-y-0 left-0 w-28 bg-gradient-to-r from-[#336886]/10 to-transparent" />
-                    <div className="pointer-events-none absolute -right-10 top-6 h-24 w-24 rounded-full bg-[#336886]/10 blur-3xl" />
-                    <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-[1.15rem] bg-white text-[#336886] shadow-[0_16px_28px_-18px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/80">
+                    {/* Logo cluster ou ícone */}
+                    <div className="relative shrink-0 flex h-14 w-14 items-center justify-center rounded-[1.1rem] bg-[#336886]/8 text-[#336886]">
                       {condominiumPreviewLogos.length > 0 ? (
-                        <div className="flex -space-x-4">
+                        <div className="flex -space-x-3">
                           {condominiumPreviewLogos.map((logo, index) => (
                             <img
                               key={`${logo}-${index}`}
                               src={logo}
                               alt="Condomínio"
-                              className="h-9 w-9 rounded-full border-2 border-white bg-white object-contain p-1 shadow-sm"
+                              className="h-8 w-8 rounded-full border-2 border-white bg-white object-contain p-0.5 shadow-sm"
                             />
                           ))}
                         </div>
                       ) : (
-                        <Buildings size={24} weight="duotone" />
+                        <Buildings size={22} weight="duotone" />
                       )}
                     </div>
-                    <div className="relative min-w-0 flex-1">
-                      <div className="mb-1.5 flex flex-wrap items-center gap-2">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-[#336886]/8 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">
-                          <span className="h-1.5 w-1.5 rounded-full bg-[#336886] shadow-[0_0_0_4px_rgba(51,104,134,0.12)]" />
-                          Feiras disponíveis
-                        </span>
-                      </div>
-                      <p className="truncate text-[17px] font-black tracking-tight text-slate-950">Feiras próximas a você</p>
-                      <p className="mt-1 truncate text-sm font-semibold text-slate-500">
-                        {condominiums.length} condomínio{condominiums.length === 1 ? '' : 's'} com operação disponível
+
+                    {/* Texto */}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-[#336886] mb-0.5">Feiras no condomínio</p>
+                      <p className="truncate text-[15px] font-bold text-slate-900 leading-snug">Encontre lojas perto de você</p>
+                      <p className="mt-0.5 truncate text-[11px] font-medium text-slate-400">
+                        {condominiums.length} local{condominiums.length === 1 ? '' : 'is'} disponível{condominiums.length === 1 ? '' : 'is'}
                       </p>
                     </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-bold text-slate-500 shadow-sm">
-                        Explorar
-                      </span>
-                      <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#336886] shadow-sm ring-1 ring-slate-200/80">
-                      <CaretRight size={15} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
-                      </span>
-                    </div>
+
+                    {/* Seta */}
+                    <span className="shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-all duration-200 group-hover:bg-[#336886] group-hover:text-white">
+                      <CaretRight size={14} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
+                    </span>
                   </button>
                 </>
               )}
@@ -2858,14 +2850,14 @@ export function MarketplacePage() {
                     key={slug}
                     type="button"
                     onClick={() => {
-                      setCondominiumPickerOpen(false);
-                      setCondominiumSearch('');
                       if (!event?.state || event.state !== 'live') {
                         setCondominiumAvailabilityModal({
                           name: name || 'Condomínio',
                           nextLabel: formatCondominiumPickerEventTime(event) || 'A confirmar',
                         });
                       } else {
+                        setCondominiumPickerOpen(false);
+                        setCondominiumSearch('');
                         setSelectedCondominiumSlug(slug);
                       }
                     }}
@@ -2915,7 +2907,7 @@ export function MarketplacePage() {
                             ? 'bg-emerald-100 text-emerald-700'
                             : eventState === 'upcoming'
                               ? 'bg-sky-50 text-[#336886]'
-                              : 'bg-slate-100 text-slate-400'
+                              : 'bg-slate-100 text-slate-500'
                         }`}>
                           {eventState === 'live' && (
                             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
