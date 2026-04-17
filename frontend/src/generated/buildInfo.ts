@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260416.220933.3f3ce5dd",
-  "buildId": "0.1.9+20260416.220933.3f3ce5dd-20260416.220933-3f3ce5dd",
-  "builtAt": "2026-04-16T22:09:33.478Z",
-  "commitHash": "3f3ce5dd27203b90137dca3c09284347f6663df7",
-  "shortHash": "3f3ce5dd",
+  "versionInternal": "0.1.9+20260417.114021.ed66221a",
+  "buildId": "0.1.9+20260417.114021.ed66221a-20260417.114021-ed66221a",
+  "builtAt": "2026-04-17T11:40:21.494Z",
+  "commitHash": "ed66221a00bcbb0fca7e7dcc68f168ca3b4c70cd",
+  "shortHash": "ed66221a",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "ed66221a00bcbb0fca7e7dcc68f168ca3b4c70cd",
+      "shortHash": "ed66221a",
+      "dateIso": "2026-04-16T19:10:23-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(admin): move queue location badges below header",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ed66221a00bcbb0fca7e7dcc68f168ca3b4c70cd"
+    },
     {
       "hash": "3f3ce5dd27203b90137dca3c09284347f6663df7",
       "shortHash": "3f3ce5dd",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(customer-auth): add in-app email otp flow",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0b1fa67342580ff9ab3c5966507136ad801cd1bd"
-    },
-    {
-      "hash": "7cb48d0db12c19f4b1e7e4e9015c019e5b9d0ba6",
-      "shortHash": "7cb48d0d",
-      "dateIso": "2026-04-16T09:32:00-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(drawer): polish guest access menu copy and tests",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7cb48d0db12c19f4b1e7e4e9015c019e5b9d0ba6"
     }
   ]
 } as const;

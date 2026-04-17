@@ -900,47 +900,56 @@ body {
   }
 
   .ds-admin-sidebar {
-    border-radius: 22px;
-    border: 1px solid rgba(51, 65, 85, 0.72);
+    position: relative;
+    border-radius: 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.78);
+    border-left: 0;
+    border-top: 0;
+    border-bottom: 0;
     background:
-      radial-gradient(120% 100% at 100% 0%, rgba(47,157,247,0.14), transparent 52%),
-      linear-gradient(180deg, #0b1220 0%, #0f172a 58%, #111827 100%);
-    box-shadow: 0 30px 56px -36px rgba(2, 6, 23, 0.82);
+      radial-gradient(180px 180px at 0% 6%, rgba(51, 104, 134, 0.14), transparent 72%),
+      radial-gradient(220px 220px at 100% 18%, rgba(16, 185, 129, 0.16), transparent 74%),
+      linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(248,250,252,0.985) 46%, rgba(241,248,248,0.98) 100%);
+    box-shadow: 18px 0 46px -34px rgba(15, 23, 42, 0.38);
+    backdrop-filter: blur(18px);
   }
 
   .ds-admin-sidebar-title {
-    color: rgba(226, 232, 240, 0.85);
+    color: rgba(51, 104, 134, 0.86);
     font-size: 11px;
     letter-spacing: 0.24em;
     text-transform: uppercase;
-    font-weight: 700;
+    font-weight: 900;
   }
 
   .ds-admin-sidebar-item {
     width: 100%;
-    border-radius: 10px;
-    padding: 0.62rem 0.74rem;
+    border-radius: 1.15rem;
+    padding: 0.72rem 0.82rem;
     font-size: 0.86rem;
-    font-weight: 600;
-    color: #cbd5e1;
+    font-weight: 800;
+    color: #334155;
     border: 1px solid transparent;
     transition: background-color 180ms ease, color 180ms ease, transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
   }
 
   .ds-admin-sidebar-item:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(148, 163, 184, 0.16);
-    color: #f8fafc;
-    transform: none;
+    background: rgba(255, 255, 255, 0.86);
+    border-color: rgba(255, 255, 255, 0.88);
+    color: #0f172a;
+    box-shadow: 0 14px 30px -24px rgba(15, 23, 42, 0.32);
+    transform: translateY(-1px);
   }
 
   .ds-admin-sidebar-item-active {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(148, 163, 184, 0.28);
-    border-left-color: var(--color-primary);
-    border-left-width: 3px;
+    background:
+      radial-gradient(120% 120% at 100% 0%, color-mix(in srgb, var(--color-secondary) 22%, transparent), transparent 56%),
+      linear-gradient(135deg, var(--color-primary) 0%, color-mix(in srgb, var(--color-primary) 76%, #0f172a) 62%, color-mix(in srgb, var(--color-primary) 62%, #111827) 100%);
+    border-color: color-mix(in srgb, var(--color-primary) 42%, white);
     color: #fff;
-    box-shadow: none;
+    box-shadow:
+      0 16px 34px -24px color-mix(in srgb, var(--color-primary) 70%, transparent),
+      inset 0 0 0 1px color-mix(in srgb, white 18%, transparent);
   }
 
   .ds-metric-card {

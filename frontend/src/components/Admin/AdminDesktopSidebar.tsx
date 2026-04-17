@@ -121,14 +121,20 @@ export function AdminDesktopSidebar({
         title={isDisabled ? 'Disponível no plano Pro · clique para upgrade' : undefined}
         className={`group relative ds-admin-sidebar-item ds-focus-ring flex items-center ${
           compact ? 'justify-center px-0' : 'justify-between gap-2'
-        } ${nested && !compact ? 'pl-4 pr-2.5 py-2.5 rounded-lg text-[13px] font-normal text-slate-400 hover:text-white' : ''} ${
-          !nested && !compact ? 'text-slate-100 font-semibold' : ''
+        } ${nested && !compact ? 'pl-4 pr-2.5 py-2.5 rounded-[1rem] text-[13px] font-bold text-slate-500 hover:text-slate-950' : ''} ${
+          !nested && !compact ? 'font-semibold' : ''
         } ${isActive ? 'ds-admin-sidebar-item-active text-white font-medium' : ''} ${
           isDisabled ? 'opacity-80 cursor-pointer border border-violet-300/50 bg-violet-500/10 hover:bg-violet-500/20' : ''
         }`}
       >
-        <span className={`inline-flex items-center ${compact ? '' : 'gap-2'}`}>
-          <Icon size={16} weight={isActive ? 'fill' : 'duotone'} />
+        <span className={`inline-flex items-center min-w-0 ${compact ? '' : 'gap-2.5'}`}>
+          <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl transition-colors ${
+            isActive
+              ? 'bg-white/12 text-white'
+              : 'border border-white/80 bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.88))] text-[#336886] shadow-[0_12px_22px_-20px_rgba(15,23,42,0.25)]'
+          }`}>
+            <Icon size={17} weight={isActive ? 'fill' : 'duotone'} />
+          </span>
           {!compact && item.label}
         </span>
 
@@ -177,10 +183,10 @@ export function AdminDesktopSidebar({
                 <button
                   type="button"
                   onClick={() => setOpenGroups((prev) => ({ ...prev, [section.id]: !isOpen }))}
-                  className={`w-full min-h-11 rounded-xl border px-3 text-left text-[12px] font-semibold transition flex items-center justify-between ${
+                  className={`w-full min-h-11 rounded-[1rem] border px-3 text-left text-[12px] font-black transition flex items-center justify-between ${
                     hasActiveChild
-                      ? 'border-slate-700/80 bg-white/5 text-white'
-                      : 'border-transparent bg-transparent text-slate-200 hover:bg-white/5 hover:border-slate-700/70 hover:text-white'
+                      ? 'border-[#336886]/12 bg-white/86 text-slate-950 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.28)]'
+                      : 'border-transparent bg-transparent text-slate-500 hover:border-white/80 hover:bg-white/80 hover:text-slate-950'
                   }`}
                   aria-expanded={isOpen}
                   aria-controls={`sidebar-group-${section.id}`}
@@ -193,7 +199,7 @@ export function AdminDesktopSidebar({
                   />
                 </button>
                 {isOpen && (
-                  <div id={`sidebar-group-${section.id}`} className="space-y-1 ml-2 pl-2.5 border-l border-slate-700/80">
+                  <div id={`sidebar-group-${section.id}`} className="space-y-1 ml-2 pl-2.5 border-l border-[#336886]/12">
                     {section.children.map((child: SidebarItem) => renderNavItem(child, true))}
                   </div>
                 )}
@@ -202,7 +208,7 @@ export function AdminDesktopSidebar({
           })}
         </div>
 
-        <div className="mt-2 pt-2 px-2 border-t border-white/10 shrink-0">
+        <div className="mt-2 pt-2 px-2 border-t border-slate-200/70 shrink-0">
           <button
             type="button"
             onClick={onLogout}
@@ -223,7 +229,7 @@ export function AdminDesktopSidebar({
             )}
           </button>
           {!compact && (
-            <PlatformTrustFooter className="mt-3 px-3 pb-1" tone="dark" compact align="left" mode="minimal" />
+            <PlatformTrustFooter className="mt-3 px-3 pb-1" tone="light" compact align="left" mode="minimal" />
           )}
         </div>
       </div>
