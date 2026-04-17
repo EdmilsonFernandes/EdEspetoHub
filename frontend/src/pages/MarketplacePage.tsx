@@ -2251,7 +2251,7 @@ export function MarketplacePage() {
                       <p className="text-[10px] font-black uppercase tracking-widest text-[#336886] mb-0.5">Feiras no condomínio</p>
                       <p className="truncate text-[15px] font-bold text-slate-900 leading-snug">Encontre lojas perto de você</p>
                       <p className="mt-0.5 truncate text-[11px] font-medium text-slate-400">
-                        {condominiums.length} local{condominiums.length === 1 ? '' : 'is'} disponível{condominiums.length === 1 ? '' : 'is'}
+                        {condominiums.length} condomínio{condominiums.length === 1 ? '' : 's'} disponível{condominiums.length === 1 ? '' : 'is'}
                       </p>
                     </div>
 
@@ -2950,26 +2950,26 @@ export function MarketplacePage() {
                                 </div>
 
                                 {/* Live badge top-right */}
-                                <div className="relative flex items-start justify-end p-4">
-                                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-white shadow-lg">
+                                <div className="relative flex items-start justify-end p-3">
+                                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-white shadow-md">
                                     <span className="h-1.5 w-1.5 rounded-full bg-white" />
                                     Ao vivo
                                   </span>
                                 </div>
 
                                 {/* Glass bottom */}
-                                <div className="relative px-4 pb-4 pt-8">
-                                  <div className="flex items-end gap-3">
-                                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-[0.9rem] border-2 border-white/30 bg-white/10 shadow-lg backdrop-blur-sm">
-                                      <img src={logoUrl} alt={name} className="h-full w-full object-contain p-1.5 bg-white" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
+                                <div className="relative px-3 pb-3 pt-3">
+                                  <div className="flex items-center gap-2.5">
+                                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-[0.75rem] border-2 border-white/30 bg-white/10 shadow-md backdrop-blur-sm">
+                                      <img src={logoUrl} alt={name} className="h-full w-full object-contain p-1 bg-white" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
                                     </div>
-                                    <div className="min-w-0 flex-1 pb-0.5">
-                                      <p className="truncate text-base font-black text-white leading-tight">{name}</p>
-                                      {region && <p className="truncate text-[11px] font-medium text-white/65 mt-0.5">{region}</p>}
-                                      {timeLabel && <p className="truncate text-[11px] font-semibold text-emerald-300 mt-1">{timeLabel}</p>}
+                                    <div className="min-w-0 flex-1">
+                                      <p className="truncate text-sm font-black text-white leading-tight">{name}</p>
+                                      {region && <p className="truncate text-[10px] font-medium text-white/65 mt-0.5">{region}</p>}
+                                      {timeLabel && <p className="truncate text-[10px] font-semibold text-emerald-300 mt-0.5">{timeLabel}</p>}
                                     </div>
-                                    <div className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-900 shadow-lg transition-transform group-hover:translate-x-0.5">
-                                      <CaretRight size={14} weight="bold" />
+                                    <div className="shrink-0 flex h-7 w-7 items-center justify-center rounded-full bg-white text-slate-900 shadow-md transition-transform group-hover:translate-x-0.5">
+                                      <CaretRight size={12} weight="bold" />
                                     </div>
                                   </div>
                                 </div>
