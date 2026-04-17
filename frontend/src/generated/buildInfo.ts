@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260417.171826.7b3d1770",
-  "buildId": "0.1.9+20260417.171826.7b3d1770-20260417.171826-7b3d1770",
-  "builtAt": "2026-04-17T17:18:26.948Z",
-  "commitHash": "7b3d1770e63038f79f504f337c996c7c07e133fd",
-  "shortHash": "7b3d1770",
+  "versionInternal": "0.1.9+20260417.172753.1d8c2ca0",
+  "buildId": "0.1.9+20260417.172753.1d8c2ca0-20260417.172753-1d8c2ca0",
+  "builtAt": "2026-04-17T17:27:53.988Z",
+  "commitHash": "1d8c2ca0c9dd8602d370a16196cc3fb527a394b3",
+  "shortHash": "1d8c2ca0",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "1d8c2ca0c9dd8602d370a16196cc3fb527a394b3",
+      "shortHash": "1d8c2ca0",
+      "dateIso": "2026-04-17T14:19:22-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(app): polish store signup otp and splash",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1d8c2ca0c9dd8602d370a16196cc3fb527a394b3"
+    },
     {
       "hash": "7b3d1770e63038f79f504f337c996c7c07e133fd",
       "shortHash": "7b3d1770",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(checkout): protect mobile header safe area",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/efdf900b1b2bb2d3fd3d65e225cfc83c2019148f"
-    },
-    {
-      "hash": "dba925519a52b96e90e2ac31c994a1b436ba3083",
-      "shortHash": "dba92551",
-      "dateIso": "2026-04-16T14:00:25-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(mobile): polish auth code and safe checkout chrome",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/dba925519a52b96e90e2ac31c994a1b436ba3083"
     }
   ]
 } as const;

@@ -1088,6 +1088,172 @@ body {
     color: #0f172a;
   }
 
+  .create-store-form {
+    --create-store-primary: #0d4f66;
+    --create-store-accent: #2c8c9f;
+  }
+
+  .create-store-form .ds-input,
+  .create-store-form .ds-select {
+    min-height: 3.25rem;
+    border: 1px solid rgba(203, 213, 225, 0.72) !important;
+    border-radius: 1.1rem !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 252, 0.9)) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82), 0 16px 32px -30px rgba(15, 23, 42, 0.45);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    padding: 0.92rem 1rem;
+  }
+
+  .create-store-form textarea.ds-input {
+    min-height: 7.25rem;
+    line-height: 1.55;
+  }
+
+  .create-store-form .ds-input::placeholder,
+  .create-store-form .ds-select::placeholder {
+    color: #94a3b8;
+    font-weight: 600;
+  }
+
+  .create-store-form .ds-input:focus,
+  .create-store-form .ds-select:focus {
+    border-color: rgba(13, 79, 102, 0.55) !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 4px rgba(13, 79, 102, 0.11), 0 22px 44px -32px rgba(15, 59, 83, 0.62);
+    transform: translateY(-1px);
+  }
+
+  .create-store-form label {
+    color: #475569 !important;
+  }
+
+  .create-store-section {
+    border-color: rgba(255, 255, 255, 0.72) !important;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(44, 140, 159, 0.11), transparent 32%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 252, 0.9)) !important;
+    box-shadow: 0 30px 80px -52px rgba(15, 23, 42, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.82) !important;
+  }
+
+  .create-store-step-hero {
+    align-items: flex-start;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(95, 211, 90, 0.14), transparent 30%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(241, 245, 249, 0.78));
+    border: 1px solid rgba(226, 232, 240, 0.78);
+    border-radius: 1.6rem;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 20px 44px -36px rgba(15, 23, 42, 0.5);
+    display: flex;
+    gap: 0.9rem;
+    padding: 1rem;
+  }
+
+  .create-store-step-icon {
+    align-items: center;
+    background: linear-gradient(135deg, rgba(15, 59, 83, 0.12), rgba(44, 140, 159, 0.16));
+    border: 1px solid rgba(13, 79, 102, 0.13);
+    border-radius: 1.1rem;
+    color: var(--create-store-primary);
+    display: flex;
+    flex: 0 0 auto;
+    height: 3rem;
+    justify-content: center;
+    width: 3rem;
+  }
+
+  .create-store-step-icon-green {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(95, 211, 90, 0.15));
+    color: #047857;
+  }
+
+  .create-store-step-icon-amber {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(251, 191, 36, 0.15));
+    color: #b45309;
+  }
+
+  .create-store-step-eyebrow {
+    color: #64748b;
+    font-size: 0.64rem;
+    font-weight: 900;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .create-store-step-hero h3 {
+    color: #0f172a;
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin-top: 0.18rem;
+  }
+
+  .create-store-step-hero p:not(.create-store-step-eyebrow) {
+    color: #64748b;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.5;
+    margin-top: 0.35rem;
+  }
+
+  .create-store-upload-card {
+    background:
+      radial-gradient(circle at top, rgba(44, 140, 159, 0.12), transparent 46%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 252, 0.82));
+    border: 1.5px dashed rgba(13, 79, 102, 0.28);
+    border-radius: 1.35rem;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78), 0 18px 34px -32px rgba(15, 23, 42, 0.45);
+    padding: 1rem;
+    text-align: center;
+    transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  }
+
+  .create-store-upload-card:hover {
+    border-color: rgba(13, 79, 102, 0.58);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 22px 44px -34px rgba(15, 59, 83, 0.62);
+    transform: translateY(-1px);
+  }
+
+  .create-store-plan-card {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9));
+    border: 1px solid rgba(226, 232, 240, 0.86);
+    border-radius: 1.35rem;
+    box-shadow: 0 18px 38px -34px rgba(15, 23, 42, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    cursor: pointer;
+    padding: 1rem;
+    position: relative;
+    text-align: left;
+    transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  }
+
+  .create-store-plan-card:hover {
+    border-color: rgba(13, 79, 102, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .create-store-plan-card-active {
+    background:
+      radial-gradient(circle at top right, rgba(95, 211, 90, 0.18), transparent 38%),
+      linear-gradient(180deg, #ffffff, #f8fafc);
+    border: 2px solid rgba(13, 79, 102, 0.86);
+    box-shadow: 0 26px 56px -36px rgba(15, 59, 83, 0.72), 0 0 0 4px rgba(13, 79, 102, 0.08);
+  }
+
+  .create-store-check-card {
+    align-items: flex-start;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(226, 232, 240, 0.88);
+    border-radius: 1.25rem;
+    box-shadow: 0 16px 32px -30px rgba(15, 23, 42, 0.42);
+    color: #475569;
+    display: flex;
+    gap: 0.85rem;
+    padding: 0.95rem 1rem;
+    text-transform: none !important;
+  }
+
   .ds-btn {
     border-radius: var(--radius-sm);
     font-weight: 800;

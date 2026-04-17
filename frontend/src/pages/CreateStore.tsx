@@ -1348,15 +1348,26 @@ export function CreateStore() {
             </div>
           )}
 
-          <form className={`space-y-6 md:pb-0 [&_label]:text-xs [&_label]:font-bold [&_label]:text-slate-500 [&_label]:uppercase [&_label]:tracking-wider ${isNativePlatform ? 'ds-native-nav-content-lg' : 'pb-24'}`} onSubmit={handleCreateStore}>
+          <form className={`create-store-form space-y-6 md:pb-0 [&_label]:text-xs [&_label]:font-bold [&_label]:text-slate-500 [&_label]:uppercase [&_label]:tracking-wider ${isNativePlatform ? 'ds-native-nav-content-lg' : 'pb-24'}`} onSubmit={handleCreateStore}>
             <div ref={personalSectionRef} className={`scroll-mt-36 ${currentStep === 1 || currentStep === 2 ? '' : 'hidden'}`} onFocusCapture={() => setCurrentStep(currentStep <= 2 ? currentStep : 1)}>
             <FormSection
               title={currentStep === 2 ? 'Endereço da operação' : 'Informações pessoais'}
               subtitle={currentStep === 2 ? 'Onde sua loja opera e recebe pedidos.' : 'Dados do responsável pela operação da loja.'}
               variant="primary"
+              className="create-store-section"
               contentClassName="space-y-4"
             >
               <div className={currentStep === 1 ? 'space-y-4 motion-safe:animate-[createStoreStepIn_.26s_ease-out]' : 'hidden'}>
+                <div className="create-store-step-hero">
+                  <div className="create-store-step-icon">
+                    <UserCircle size={24} weight="duotone" />
+                  </div>
+                  <div>
+                    <p className="create-store-step-eyebrow">Acesso seguro</p>
+                    <h3>Crie a conta do responsável pela loja</h3>
+                    <p>Use um e-mail real. Vamos enviar o código de 4 dígitos para ativar sua loja no final.</p>
+                  </div>
+                </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">Nome completo</label>
                   <input
@@ -1494,8 +1505,16 @@ export function CreateStore() {
               </div>
 
                 <div ref={addressSectionRef} className={`pt-4 border-t border-gray-200 scroll-mt-36 ${currentStep === 2 ? 'motion-safe:animate-[createStoreStepIn_.26s_ease-out]' : 'hidden'}`} onFocusCapture={() => setCurrentStep(2)}>
-                  <h4 className="text-sm font-semibold text-gray-700">Endereço</h4>
-                  <p className="text-xs text-slate-500 mb-3">Onde sua loja opera e recebe pedidos.</p>
+                  <div className="create-store-step-hero mb-4">
+                    <div className="create-store-step-icon create-store-step-icon-green">
+                      <MapPinLine size={24} weight="duotone" />
+                    </div>
+                    <div>
+                      <p className="create-store-step-eyebrow">Local de operação</p>
+                      <h3>Informe onde a loja atende</h3>
+                      <p>O CEP ajuda a preencher o endereço e reduz erro na vitrine, entrega e suporte.</p>
+                    </div>
+                  </div>
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 min-w-0">
                       <div className="space-y-2 min-w-0">
@@ -1654,8 +1673,19 @@ export function CreateStore() {
                 title="Configurações da loja"
                 subtitle="Defina identidade, segmento e canais de contato."
                 variant="warning"
+                className="create-store-section"
                 contentClassName="space-y-4"
               >
+            <div className="create-store-step-hero">
+              <div className="create-store-step-icon create-store-step-icon-amber">
+                <Storefront size={24} weight="duotone" />
+              </div>
+              <div>
+                <p className="create-store-step-eyebrow">Vitrine pronta</p>
+                <h3>Monte a primeira impressão da sua marca</h3>
+                <p>Nome, descrição, segmento e imagens deixam sua loja mais confiável antes do primeiro pedido.</p>
+              </div>
+            </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Nome da loja</label>
               <input
@@ -1762,7 +1792,7 @@ export function CreateStore() {
                     void pickNativeStoreImage('logo');
                   }}
                 >
-                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 hover:border-red-400 transition-colors text-center">
+                  <div className="create-store-upload-card">
                     <svg className="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
@@ -1800,7 +1830,7 @@ export function CreateStore() {
                     void pickNativeStoreImage('banner');
                   }}
                 >
-                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 hover:border-red-400 transition-colors text-center">
+                  <div className="create-store-upload-card">
                     <p className="text-sm text-gray-600 mb-1">Clique para enviar</p>
                     <p className="text-xs text-gray-500">Imagem horizontal para destaque da vitrine</p>
                   </div>
@@ -1900,6 +1930,7 @@ export function CreateStore() {
                 title="Selecione um plano"
                 subtitle="Comece pelo teste gratuito e escolha o plano ideal depois."
                 variant="success"
+                className="create-store-section"
                 contentClassName="space-y-6"
                 actions={
                   <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
@@ -1907,19 +1938,29 @@ export function CreateStore() {
                   </span>
                 }
               >
-              <div className="mb-6 flex items-center justify-center gap-3">
-                <span className="text-sm font-semibold text-gray-900">Plano mensal ativo</span>
-                <span className="inline-block rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
-                  Cobranca mensal
+              <div className="create-store-step-hero">
+                <div className="create-store-step-icon create-store-step-icon-green">
+                  <CreditCard size={24} weight="duotone" />
+                </div>
+                <div>
+                  <p className="create-store-step-eyebrow">Teste sem atrito</p>
+                  <h3>Comece grátis e escolha depois</h3>
+                  <p>O trial libera sua operação por 7 dias. Se escolher plano pago agora, mantemos o pagamento no mesmo fluxo.</p>
+                </div>
+              </div>
+              <div className="mb-6 flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-emerald-100 bg-white/72 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
+                <span className="text-sm font-black text-gray-900">Plano mensal ativo</span>
+                <span className="inline-block rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-sm font-black text-emerald-700">
+                  Cobrança mensal
                 </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <button
                     type="button"
                     onClick={() => setSelectedPlanId('test-plan-7days')}
-                    className={`border-2 rounded-2xl p-4 text-left transition-all relative cursor-pointer ${selectedPlanId === 'test-plan-7days'
-                    ? 'border-2 border-slate-900 shadow-md bg-white'
-                    : 'border border-slate-200 opacity-80 hover:opacity-100'
+                    className={`create-store-plan-card ${selectedPlanId === 'test-plan-7days'
+                    ? 'create-store-plan-card-active'
+                    : ''
                   }`}
                 >
                   <span className="absolute -top-3 left-4 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
@@ -1958,10 +1999,7 @@ export function CreateStore() {
                     key={planKey}
                     onClick={() => plan?.id && setSelectedPlanId(plan.id)}
                     disabled={isDisabled}
-                    className={`cursor-pointer rounded-2xl p-4 text-left transition-all relative ${isSelected
-                      ? 'border-2 border-slate-900 shadow-md bg-white'
-                      : 'border border-slate-200 opacity-80 hover:opacity-100'
-                      } ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    className={`create-store-plan-card ${isSelected ? 'create-store-plan-card-active' : ''} ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
                     <p className="text-sm uppercase font-semibold text-gray-500">{tier.label}</p>
                     {showPromo ? (
@@ -2053,39 +2091,43 @@ export function CreateStore() {
             </div>
 
             <div ref={termsRef} className={`pt-6 border-t border-gray-100 space-y-3 ${currentStep === 4 ? '' : 'hidden'}`}>
-              <label className="flex items-start gap-3 text-sm text-gray-600">
+              <div className="rounded-[1.6rem] border border-slate-200 bg-white/88 p-4 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.35)]">
+                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">Confirmação final</p>
+                <p className="mt-1 text-sm font-bold text-slate-800">Revise e aceite para receber o código no e-mail.</p>
+              </div>
+              <label className="create-store-check-card">
                 <input
                   type="checkbox"
                   checked={termsAccepted}
                   onChange={(e) => setTermsAccepted(e.target.checked)}
                   ref={termsCheckboxRef}
-                  className="mt-1 accent-red-500"
+                  className="mt-1 h-5 w-5 accent-[#0d4f66]"
                 />
                 <span>
                   Li e aceito os{' '}
                   <button
                     type="button"
                     onClick={() => setShowTerms(true)}
-                    className="text-red-500 font-semibold hover:underline"
+                    className="text-[#0d4f66] font-black hover:underline"
                   >
                     termos de uso
                   </button>{' '}
                   da plataforma.
                 </span>
               </label>
-              <label className="flex items-start gap-3 text-sm text-gray-600">
+              <label className="create-store-check-card">
                 <input
                   type="checkbox"
                   checked={lgpdAccepted}
                   onChange={(e) => setLgpdAccepted(e.target.checked)}
-                  className="mt-1 accent-red-500"
+                  className="mt-1 h-5 w-5 accent-[#0d4f66]"
                 />
                 <span>
                   Concordo com o tratamento de dados pessoais conforme a LGPD e a{' '}
                   <button
                     type="button"
                     onClick={() => setShowTerms(true)}
-                  className="text-red-500 font-semibold hover:underline"
+                  className="text-[#0d4f66] font-black hover:underline"
                 >
                     política de privacidade
                   </button>
