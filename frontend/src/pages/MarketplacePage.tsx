@@ -2877,10 +2877,10 @@ export function MarketplacePage() {
                       key={slug}
                       type="button"
                       onClick={() => selectCondominium(slug)}
-                      className={`group relative min-w-0 overflow-hidden rounded-[1.25rem] border text-left shadow-[0_18px_34px_-28px_rgba(15,23,42,0.16)] transition-all duration-300 active:scale-[0.985] ${
+                      className={`group relative min-w-0 overflow-hidden rounded-[1.25rem] border text-left shadow-[0_12px_28px_-16px_rgba(15,23,42,0.18)] transition-all duration-300 active:scale-[0.985] ${
                         active
-                          ? 'border-[#336886]/18 bg-[linear-gradient(180deg,rgba(248,252,255,0.98)_0%,rgba(240,249,255,0.98)_100%)] ring-2 ring-[#336886]/18'
-                          : 'border-white/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.98)_100%)] hover:-translate-y-1 hover:shadow-[0_26px_44px_-30px_rgba(15,23,42,0.24)]'
+                          ? 'border-[#336886]/25 bg-white ring-2 ring-[#336886]/15'
+                          : 'border-white bg-white shadow-[0_8px_20px_-10px_rgba(15,23,42,0.12)] hover:-translate-y-1 hover:shadow-[0_20px_36px_-20px_rgba(15,23,42,0.22)]'
                       }`}
                     >
                       <div className="absolute inset-x-0 top-0 h-24 overflow-hidden">
