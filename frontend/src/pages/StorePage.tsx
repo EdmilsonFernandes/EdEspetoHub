@@ -31,6 +31,7 @@ import {
 import { getCartPricing } from '../utils/orderPricing';
 import { printReceiptAsImage } from '../utils/printReceiptImage';
 import { clearAllCustomerSessions } from '../utils/customerSessionStorage';
+import { nativeBiometricService } from '../services/nativeBiometricService';
 
 const WEEKDAY_LABELS = [ 'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado' ];
 const PUBLIC_ORDER_ALERT_TTL_MS = 3 * 60 * 60 * 1000;
@@ -628,14 +629,14 @@ export function StorePage() {
     });
   };
 
-  const refreshCustomerData = async () => {
+  const refreshCustomerData = async (baseSession = customerSession) => {
     try {
       const [me, addresses, orders] = await Promise.all([
         customerAccountService.me(),
         customerAccountService.listAddresses(),
         customerAccountService.listOrders(),
       ]);
-      const nextSession = { ...(customerSession || {}), user: me };
+      const nextSession = { ...(baseSession || customerSession || {}), user: me };
       persistCustomerSession(nextSession);
       setCustomerAddresses(Array.isArray(addresses) ? addresses : []);
       setCustomerOrders(Array.isArray(orders) ? orders : []);
@@ -2010,13 +2011,43 @@ export function StorePage() {
       persistCustomerSession(response);
       setCustomerAuthForm((prev) => ({ ...prev, password: '' }));
       setShowCustomerPassword(false);
-      await refreshCustomerData();
+      await refreshCustomerData(response);
       showToast(customerAuthMode === 'register' ? 'Cadastro concluído.' : 'Login realizado.', 'success');
     } catch (error: any) {
       setCustomerAccountError(error?.message || 'Não foi possível autenticar.');
     } finally {
       setCustomerAccountLoading(false);
     }
+  };
+
+  const openCustomerOrdersFromBottomNav = async () => {
+    if (customerSession?.token) {
+      navigate('/cliente/pedidos');
+      return;
+    }
+
+    if (nativeBiometricService.hasValidStoredCustomerEnrollment()) {
+      setCustomerAccountLoading(true);
+      setCustomerAccountError('');
+      try {
+        const session = await nativeBiometricService.loginCustomerWithBiometrics(
+          'Confirme sua identidade para ver seus pedidos'
+        );
+        persistCustomerSession(session);
+        await refreshCustomerData(session);
+        showToast('Login por biometria realizado.', 'success');
+        navigate('/cliente/pedidos');
+        return;
+      } catch (error: any) {
+        setCustomerAccountError(error?.message || 'Não foi possível entrar com biometria.');
+        showToast(error?.message || 'Não foi possível entrar com biometria.', 'error');
+      } finally {
+        setCustomerAccountLoading(false);
+      }
+    }
+
+    setCustomerAuthMode('login');
+    setShowCustomerAccount(true);
   };
 
   const handleCustomerForgotPassword = async () => {
@@ -3004,7 +3035,7 @@ export function StorePage() {
             </button>
             <button
               type="button"
-              onClick={() => navigate('/cliente/pedidos')}
+              onClick={openCustomerOrdersFromBottomNav}
               className="flex flex-col items-center justify-center rounded-2xl py-1 text-slate-400 transition-all duration-150 ease-out active:scale-[0.94]"
             >
               <Receipt size={18} weight="duotone" />

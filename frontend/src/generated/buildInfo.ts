@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260417.173932.90ada941",
-  "buildId": "0.1.9+20260417.173932.90ada941-20260417.173932-90ada941",
-  "builtAt": "2026-04-17T17:39:32.495Z",
-  "commitHash": "90ada941d857c68d5d5238b4b357f5ab054e8c47",
-  "shortHash": "90ada941",
+  "versionInternal": "0.1.9+20260417.175200.140aa3de",
+  "buildId": "0.1.9+20260417.175200.140aa3de-20260417.175200-140aa3de",
+  "builtAt": "2026-04-17T17:52:00.752Z",
+  "commitHash": "140aa3de61a226c13f32fa946d502b73bdd27b76",
+  "shortHash": "140aa3de",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "140aa3de61a226c13f32fa946d502b73bdd27b76",
+      "shortHash": "140aa3de",
+      "dateIso": "2026-04-17T14:41:03-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(store-signup): guide missing fields interactively",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/140aa3de61a226c13f32fa946d502b73bdd27b76"
+    },
     {
       "hash": "90ada941d857c68d5d5238b4b357f5ab054e8c47",
       "shortHash": "90ada941",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style(drawer): harmonize logout action",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0170770e019db1db1e1f766f3fac589523a0a87c"
-    },
-    {
-      "hash": "c897ab91752255b2770c61091a939db6f01db526",
-      "shortHash": "c897ab91",
-      "dateIso": "2026-04-16T14:24:09-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(admin): speed up order feed recovery and polish access switcher",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c897ab91752255b2770c61091a939db6f01db526"
     }
   ]
 } as const;
