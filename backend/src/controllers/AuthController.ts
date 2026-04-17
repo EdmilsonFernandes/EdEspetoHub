@@ -53,6 +53,19 @@ export class AuthController
     }
   }
 
+  static async preflightRegister(req: Request, res: Response)
+  {
+    try
+    {
+      const result = await authService.preflightStoreOwner(req.body || {});
+      return res.json(result);
+    } catch (error: any)
+    {
+      log.warn('Register preflight failed', { error, email: req.body?.email });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
 
 
 

@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useRef, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
+import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { storeService } from '../services/storeService';
 import { planService } from '../services/planService';
@@ -179,6 +180,7 @@ export function CreateStore() {
   const billingFromUrl = String(searchParams.get('billing') || '').toLowerCase();
   const [storeError, setStoreError] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isPreflightingOwner, setIsPreflightingOwner] = useState(false);
   const [plans, setPlans] = useState([]);
   const [selectedPlanId, setSelectedPlanId] = useState('test-plan-7days');
   const [paymentMethod, setPaymentMethod] = useState('PIX');
@@ -286,6 +288,49 @@ export function CreateStore() {
       console.error('Falha ao processar logo', error);
       setLogoPreviewUrl('');
       setStoreError('Não foi possível carregar o logo enviado agora.');
+    }
+  };
+
+  const pickNativeStoreImage = async (target: 'logo' | 'banner') => {
+    if (!Capacitor.isNativePlatform() || !Capacitor.isPluginAvailable('Camera')) {
+      setStoreError('Galeria do celular indisponível neste dispositivo.');
+      return;
+    }
+
+    try {
+      setStoreError('');
+      const image = await CapCamera.getPhoto({
+        quality: target === 'logo' ? 82 : 78,
+        allowEditing: false,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Prompt,
+        promptLabelHeader: target === 'logo' ? 'Logo da loja' : 'Banner da loja',
+        promptLabelPhoto: 'Escolher da galeria',
+        promptLabelPicture: 'Tirar foto',
+      });
+
+      if (!image.base64String) return;
+      const dataUrl = `data:image/${image.format || 'jpeg'};base64,${image.base64String}`;
+      if (target === 'logo') {
+        if (logoObjectUrlRef.current) {
+          URL.revokeObjectURL(logoObjectUrlRef.current);
+          logoObjectUrlRef.current = '';
+        }
+        setLogoPreviewUrl(dataUrl);
+        setRegisterForm((prev) => ({ ...prev, logoFile: dataUrl }));
+        return;
+      }
+      if (bannerObjectUrlRef.current) {
+        URL.revokeObjectURL(bannerObjectUrlRef.current);
+        bannerObjectUrlRef.current = '';
+      }
+      setBannerPreviewUrl(dataUrl);
+      setRegisterForm((prev) => ({ ...prev, bannerFile: dataUrl }));
+    } catch (error: any) {
+      const message = String(error?.message || '').toLowerCase();
+      if (message.includes('cancel')) return;
+      console.error('Falha ao abrir galeria no app', error);
+      setStoreError('Não foi possível abrir a galeria. Verifique a permissão de fotos do aplicativo.');
     }
   };
 
@@ -690,7 +735,7 @@ export function CreateStore() {
         navigate(result.redirectUrl);
       }
     } catch (error) {
-      setStoreError(error.message || 'Não foi possível criar sua loja agora.');
+      setStoreError(resolveCreateStoreError(error));
     } finally {
       setIsRegistering(false);
     }
@@ -763,6 +808,65 @@ export function CreateStore() {
 
   const updateFieldError = (key: string, message: string) => {
     setFieldErrors((prev) => ({ ...prev, [key]: message }));
+  };
+
+  const resolveCreateStoreError = (error: any) => {
+    const code = String(error?.code || '').trim();
+    const message = String(error?.message || '').trim();
+    if (code === 'AUTH-011' || /e-?mail.*cadastrado|email.*cadastrado/i.test(message)) {
+      return 'Este e-mail já está cadastrado. Use outro e-mail ou entre na conta existente.';
+    }
+    if (code === 'AUTH-010' || /cpf|cnpj/i.test(message)) {
+      return message || 'Este CPF/CNPJ já está cadastrado.';
+    }
+    if (code === 'AUTH-016' || /telefone/i.test(message)) {
+      return message || 'Este telefone já está cadastrado.';
+    }
+    if (code === 'NETWORK_ERROR' || /failed to fetch|networkerror|falha na conexão/i.test(message)) {
+      return 'Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.';
+    }
+    return message || 'Não foi possível criar sua loja agora. Revise os dados e tente novamente.';
+  };
+
+  const validateOwnerPreflight = async () => {
+    const emailMessage = validateEmail(registerForm.email);
+    const documentMessage = validateDocument(registerForm.document, registerForm.documentType);
+    if (emailMessage || documentMessage) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        email: emailMessage,
+        document: documentMessage,
+      }));
+      setValidationMessage(emailMessage || documentMessage);
+      setShowValidationModal(true);
+      return false;
+    }
+
+    setIsPreflightingOwner(true);
+    try {
+      await storeService.preflightOwner({
+        email: registerForm.email,
+        document: registerForm.document,
+        documentType: registerForm.documentType,
+        phone: registerForm.phone,
+      });
+      setFieldErrors((prev) => ({ ...prev, email: '', document: '' }));
+      return true;
+    } catch (error: any) {
+      const message = resolveCreateStoreError(error);
+      const code = String(error?.code || '');
+      if (code === 'AUTH-011' || /e-?mail/i.test(message)) {
+        updateFieldError('email', message);
+      }
+      if (code === 'AUTH-010' || /cpf|cnpj|documento/i.test(message)) {
+        updateFieldError('document', message);
+      }
+      setValidationMessage(message);
+      setShowValidationModal(true);
+      return false;
+    } finally {
+      setIsPreflightingOwner(false);
+    }
   };
 
   const storeSlugPreview = slugify(registerForm.storeName || '');
@@ -871,11 +975,15 @@ export function CreateStore() {
     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const handleNextStep = () => {
+  const handleNextStep = async () => {
     if (!canAdvanceFromStep(currentStep)) {
       setValidationMessage(getStepValidationMessage(currentStep));
       setShowValidationModal(true);
       return;
+    }
+    if (currentStep === 1) {
+      const ok = await validateOwnerPreflight();
+      if (!ok) return;
     }
     scrollToStep(Math.min(4, currentStep + 1));
   };
@@ -994,7 +1102,7 @@ export function CreateStore() {
 
   return (
     <div className="min-h-screen bg-[linear-gradient(165deg,#eef6ff_0%,#f8fafc_45%,#ecfeff_100%)]">
-      <header className="sticky top-0 z-50 border-b border-white/60 bg-white/80 backdrop-blur-xl shadow-[0_18px_36px_-28px_rgba(15,23,42,0.5)]">
+      <header className="sticky top-0 z-50 border-b border-white/60 bg-white/80 pt-[env(safe-area-inset-top)] backdrop-blur-xl shadow-[0_18px_36px_-28px_rgba(15,23,42,0.5)]">
         <div className="h-1 bg-[linear-gradient(90deg,#ef4444,#f97316,#f59e0b)]" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-3 sm:py-4">
@@ -1012,7 +1120,7 @@ export function CreateStore() {
               onClick={() => navigate('/')}
               className="px-3 py-2 sm:px-4 text-sm rounded-full border border-slate-200 text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              Voltar
+              Cancelar
             </button>
           </div>
         </div>
@@ -1488,7 +1596,14 @@ export function CreateStore() {
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700 block">Logo da loja (opcional)</label>
               <div className="flex items-start gap-4">
-                <label className="flex-1 cursor-pointer">
+                <label
+                  className="flex-1 cursor-pointer"
+                  onClick={(event) => {
+                    if (!isNativePlatform) return;
+                    event.preventDefault();
+                    void pickNativeStoreImage('logo');
+                  }}
+                >
                   <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 hover:border-red-400 transition-colors text-center">
                     <svg className="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -1500,6 +1615,7 @@ export function CreateStore() {
                     type="file"
                     accept="image/*"
                     onChange={handleLogoUpload}
+                    disabled={isNativePlatform}
                     className="hidden"
                   />
                 </label>
@@ -1518,12 +1634,19 @@ export function CreateStore() {
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700 block">Banner da loja (opcional)</label>
               <div className="flex items-start gap-4">
-                <label className="flex-1 cursor-pointer">
+                <label
+                  className="flex-1 cursor-pointer"
+                  onClick={(event) => {
+                    if (!isNativePlatform) return;
+                    event.preventDefault();
+                    void pickNativeStoreImage('banner');
+                  }}
+                >
                   <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 hover:border-red-400 transition-colors text-center">
                     <p className="text-sm text-gray-600 mb-1">Clique para enviar</p>
                     <p className="text-xs text-gray-500">Imagem horizontal para destaque da vitrine</p>
                   </div>
-                  <input type="file" accept="image/*" onChange={handleBannerUpload} className="hidden" />
+                  <input type="file" accept="image/*" onChange={handleBannerUpload} disabled={isNativePlatform} className="hidden" />
                 </label>
                 {bannerPreviewUrl && (
                   <div className="w-28 h-20 rounded-xl overflow-hidden border-2 border-gray-200 flex-shrink-0">
@@ -1813,7 +1936,7 @@ export function CreateStore() {
               </label>
             </div>
 
-            <div className={`fixed left-0 w-full z-50 rounded-none border-t border-slate-200 bg-white/90 backdrop-blur-md p-4 shadow-[0_-10px_26px_-20px_rgba(15,23,42,0.45)] md:static md:rounded-2xl md:border md:border-slate-200/90 md:p-3 md:shadow-[0_24px_46px_-30px_rgba(15,23,42,0.55)] ${isNativePlatform ? 'ds-native-nav-dock' : 'bottom-0'}`}>
+            <div className="fixed bottom-0 left-0 z-50 w-full rounded-none border-t border-slate-200 bg-white/90 p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-[0_-10px_26px_-20px_rgba(15,23,42,0.45)] backdrop-blur-md md:static md:rounded-2xl md:border md:border-slate-200/90 md:p-3 md:shadow-[0_24px_46px_-30px_rgba(15,23,42,0.55)]">
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
                 <div className="text-[11px] text-slate-500">
                   Etapa atual <span className="font-semibold text-slate-700">{currentStep} de 4</span>
@@ -1831,10 +1954,10 @@ export function CreateStore() {
                     <button
                       type="button"
                       onClick={handleNextStep}
-                      disabled={!canAdvanceFromStep(currentStep)}
+                      disabled={!canAdvanceFromStep(currentStep) || isPreflightingOwner}
                       className="rounded-xl bg-gradient-to-r from-slate-900 to-slate-700 px-4 py-2 text-sm font-bold text-white shadow-[0_10px_22px_-14px_rgba(15,23,42,0.7)] transition-all duration-200 hover:-translate-y-0.5 hover:from-slate-800 hover:to-slate-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Próximo
+                      {isPreflightingOwner ? 'Validando...' : 'Próximo'}
                     </button>
                   ) : (
                     <button

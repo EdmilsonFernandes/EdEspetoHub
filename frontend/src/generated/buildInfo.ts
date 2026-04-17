@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260417.143724.083cc1fb",
-  "buildId": "0.1.9+20260417.143724.083cc1fb-20260417.143724-083cc1fb",
-  "builtAt": "2026-04-17T14:37:24.154Z",
-  "commitHash": "083cc1fbd40fb1180ce486f54216e4dd909591e5",
-  "shortHash": "083cc1fb",
+  "versionInternal": "0.1.9+20260417.163404.389e897a",
+  "buildId": "0.1.9+20260417.163404.389e897a-20260417.163404-389e897a",
+  "builtAt": "2026-04-17T16:34:04.232Z",
+  "commitHash": "389e897a1af5ee5b338032dc7481f7709e559fc7",
+  "shortHash": "389e897a",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "389e897a1af5ee5b338032dc7481f7709e559fc7",
+      "shortHash": "389e897a",
+      "dateIso": "2026-04-17T11:38:27-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(app): add animated delivery splash",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/389e897a1af5ee5b338032dc7481f7709e559fc7"
+    },
     {
       "hash": "083cc1fbd40fb1180ce486f54216e4dd909591e5",
       "shortHash": "083cc1fb",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(checkout): protect guest orders and restore customer auto biometrics",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e90c146c95d1041732933bd8da3856a8c98e1543"
-    },
-    {
-      "hash": "2eb47d8dee0696679c2fb0eacc940811ac95c005",
-      "shortHash": "2eb47d8d",
-      "dateIso": "2026-04-16T10:42:40-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(mobile): refine customer auth entry and bump android release",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2eb47d8dee0696679c2fb0eacc940811ac95c005"
     }
   ]
 } as const;

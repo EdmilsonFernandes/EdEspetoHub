@@ -55,6 +55,11 @@ const toJson = async (response: any) => {
 };
 
 export const storeService = {
+  async preflightOwner(payload: any) {
+    const response = await apiClient.rawPost('/auth/register/preflight', payload);
+    return toJson(response);
+  },
+
   async create(payload: any) {
     const response = await apiClient.rawPost('/auth/register', payload);
     return toJson(response);

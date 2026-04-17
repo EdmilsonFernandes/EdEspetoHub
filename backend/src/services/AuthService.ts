@@ -209,6 +209,36 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     }
   }
 
+  async preflightStoreOwner(input: any) {
+    const email = String(input?.email || '').trim().toLowerCase();
+    if (!email) {
+      throw new AppError('AUTH-006', 400);
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw new AppError('AUTH-006', 400);
+    }
+
+    const documentType = String(input?.documentType || 'CPF').trim().toUpperCase();
+    const normalizedDocument = normalizeDocument(input?.document);
+    if (!normalizedDocument || !validateDocument(normalizedDocument, documentType)) {
+      throw new AppError('AUTH-009', 400);
+    }
+
+    const userRepo = AppDataSource.getRepository(User);
+    const existingEmail = await userRepo.findOne({ where: { email } });
+    if (existingEmail) {
+      throw new AppError('AUTH-011', 409);
+    }
+
+    const existingDocument = await userRepo.findOne({ where: { document: normalizedDocument } });
+    if (existingDocument) {
+      throw new AppError('AUTH-010', 409);
+    }
+
+    await this.ensurePhoneIsAvailable(AppDataSource.manager, input?.phone);
+    return { ok: true };
+  }
+
   private sanitizeAttribution(input: any) {
     if (!input || typeof input !== 'object') return null;
     const raw = input as Record<string, unknown>;

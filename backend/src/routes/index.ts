@@ -42,6 +42,7 @@ const routes = Router();
 // Auth
 routes.post('/auth/register', AuthController.register);
 routes.post('/auth/signup', AuthController.register);
+routes.post('/auth/register/preflight', AuthController.preflightRegister);
 routes.post('/auth/login', AuthController.login);
 routes.post('/auth/admin-login', AuthController.adminLogin);
 routes.post('/auth/super-login', AuthController.superAdminLogin);

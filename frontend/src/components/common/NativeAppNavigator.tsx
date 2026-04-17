@@ -31,6 +31,7 @@ const writeStack = (stack: string[]) => {
 
 const isEligiblePath = (pathname: string) => {
   if (!pathname || pathname === '/hub') return false;
+  if (pathname === '/create' || pathname.startsWith('/create/')) return false;
   if (
     pathname.startsWith('/admin') ||
     pathname.startsWith('/superadmin') ||

@@ -216,7 +216,17 @@ const rawRequest = async (path: string, options: any = {}) =>
     finalOptions.body = JSON.stringify(finalOptions.body);
   }
 
-  return fetch(url, finalOptions);
+  try {
+    return await fetch(url, finalOptions);
+  } catch (error: any) {
+    if (error instanceof TypeError && (error.message.includes('fetch') || error.message.includes('NetworkError'))) {
+      const netError: any = new Error('Falha na conexão com o servidor. Verifique sua internet e tente novamente.');
+      netError.status = 0;
+      netError.code = 'NETWORK_ERROR';
+      throw netError;
+    }
+    throw error;
+  }
 };
 
 export const apiClient = {
