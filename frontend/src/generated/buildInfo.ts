@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260417.163404.389e897a",
-  "buildId": "0.1.9+20260417.163404.389e897a-20260417.163404-389e897a",
-  "builtAt": "2026-04-17T16:34:04.232Z",
-  "commitHash": "389e897a1af5ee5b338032dc7481f7709e559fc7",
-  "shortHash": "389e897a",
+  "versionInternal": "0.1.9+20260417.164012.bb257aba",
+  "buildId": "0.1.9+20260417.164012.bb257aba-20260417.164012-bb257aba",
+  "builtAt": "2026-04-17T16:40:12.490Z",
+  "commitHash": "bb257aba3bf4f4641b4231fd36c1d03a9954b8ad",
+  "shortHash": "bb257aba",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "bb257aba3bf4f4641b4231fd36c1d03a9954b8ad",
+      "shortHash": "bb257aba",
+      "dateIso": "2026-04-17T13:35:03-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(store-signup): improve native create store flow",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/bb257aba3bf4f4641b4231fd36c1d03a9954b8ad"
+    },
     {
       "hash": "389e897a1af5ee5b338032dc7481f7709e559fc7",
       "shortHash": "389e897a",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(checkout): add guest order ip and phone block guard",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/77b0c2ae633a2b0060c12af104817a7e35352a31"
-    },
-    {
-      "hash": "e90c146c95d1041732933bd8da3856a8c98e1543",
-      "shortHash": "e90c146c",
-      "dateIso": "2026-04-16T11:11:36-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(checkout): protect guest orders and restore customer auto biometrics",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e90c146c95d1041732933bd8da3856a8c98e1543"
     }
   ]
 } as const;
