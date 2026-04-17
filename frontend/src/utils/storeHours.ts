@@ -105,7 +105,7 @@ const isOpenFromPreviousDayOvernight = (openingHours: OpeningDay[], currentDay: 
 };
 
 export const isStoreOpenNow = (openingHours?: OpeningDay[]) => {
-  if (!Array.isArray(openingHours) || openingHours.length === 0) return true;
+  if (!Array.isArray(openingHours) || openingHours.length === 0) return false;
 
   const { day, minutes } = getSaoPauloNowParts();
   const todayEntries = resolveDayEntries(openingHours, day).filter(e => e.enabled !== false);

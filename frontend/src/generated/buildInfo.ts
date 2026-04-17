@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260417.165645.006d3ef2",
-  "buildId": "0.1.9+20260417.165645.006d3ef2-20260417.165645-006d3ef2",
-  "builtAt": "2026-04-17T16:56:45.891Z",
-  "commitHash": "006d3ef2c8431f71b8fb0d73819ea62cfff9e98a",
-  "shortHash": "006d3ef2",
+  "versionInternal": "0.1.9+20260417.170927.be79bfad",
+  "buildId": "0.1.9+20260417.170927.be79bfad-20260417.170927-be79bfad",
+  "builtAt": "2026-04-17T17:09:27.035Z",
+  "commitHash": "be79bfad8012def6703ecc9186c0645e789b90c4",
+  "shortHash": "be79bfad",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "be79bfad8012def6703ecc9186c0645e789b90c4",
+      "shortHash": "be79bfad",
+      "dateIso": "2026-04-17T14:00:07-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(store-signup): add email otp activation",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/be79bfad8012def6703ecc9186c0645e789b90c4"
+    },
     {
       "hash": "006d3ef2c8431f71b8fb0d73819ea62cfff9e98a",
       "shortHash": "006d3ef2",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style(ClientAuth): reposition biometric login button directly above main login action for better UX",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4cc640480fe53f374226ce009f79d6118c45c8f0"
-    },
-    {
-      "hash": "8d6c9c6a27408f459509ce77c2b275dd83c7046e",
-      "shortHash": "8d6c9c6a",
-      "dateIso": "2026-04-16T12:11:37-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "docs: add TODO map for the remaining E2E test developments",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8d6c9c6a27408f459509ce77c2b275dd83c7046e"
     }
   ]
 } as const;

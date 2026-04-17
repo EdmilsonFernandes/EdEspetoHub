@@ -15,6 +15,7 @@ import { Request, Response } from 'express';
 import { ProductService } from '../services/ProductService';
 import { logger } from '../utils/logger';
 import { respondWithError } from '../errors/respondWithError';
+import { publicStoreCache } from '../utils/publicStoreCache';
 
 const productService = new ProductService();
 const log = logger.child({ scope: 'ProductController' });
@@ -76,6 +77,7 @@ export class ProductController {
         { ...req.body, storeId: req.params.storeId },
         req.auth?.storeId
       );
+      publicStoreCache.invalidateAll();
       log.info('Product created', { productId: product?.id, storeId: req.params.storeId });
       return res.status(201).json(product);
     } catch (error: any) {
@@ -168,6 +170,7 @@ export class ProductController {
         req.body,
         req.auth?.storeId
       );
+      publicStoreCache.invalidateAll();
       log.info('Product updated', { storeId: req.params.storeId, productId: req.params.productId });
       return res.json(product);
     } catch (error: any) {
@@ -189,6 +192,7 @@ export class ProductController {
     try {
       log.info('Product remove request', { storeId: req.params.storeId, productId: req.params.productId });
       await productService.remove(req.params.storeId, req.params.productId, req.auth?.storeId);
+      publicStoreCache.invalidateAll();
       log.info('Product removed', { storeId: req.params.storeId, productId: req.params.productId });
       return res.status(204).send();
     } catch (error: any) {
@@ -326,6 +330,7 @@ static async adjustStock(req: Request, res: Response) {
         req.auth?.storeId,
         req.auth?.sub
       );
+      publicStoreCache.invalidateAll();
       return res.json(payload);
     } catch (error: any) {
       return respondWithError(req, res, error, 400);

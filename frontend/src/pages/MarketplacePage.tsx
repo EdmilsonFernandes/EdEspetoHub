@@ -914,7 +914,7 @@ export function MarketplacePage() {
             ? store.openNow
             : (rawHours.length > 0
                 ? isStoreOpenNow(normalizeOpeningHours(rawHours as any) as any)
-                : true);
+                : false);
         const rawLogo = (store?.settings as any)?.logoUrl || (store?.settings as any)?.logo_url || (store as any)?.logoUrl || (store as any)?.logo_url;
         const logo = resolveAssetUrl(rawLogo || undefined) || getStoreAvatarUrl(store?.slug, store?.name);
         

@@ -15,11 +15,15 @@ import { Request, Response } from 'express';
 import { StoreService } from '../services/StoreService';
 import { SubscriptionService } from '../services/SubscriptionService';
 import { OrderReviewService } from '../services/OrderReviewService';
+import { AppDataSource } from '../config/database';
+import { Product } from '../entities/Product';
+import { isProductAvailableToday } from '../utils/productAvailability';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
 import { resolvePlanFeatures } from '../config/planFeatures';
 import { publicStoreCache } from '../utils/publicStoreCache';
+import { In } from 'typeorm';
 
 const storeService = new StoreService();
 const subscriptionService = new SubscriptionService();
@@ -217,6 +221,35 @@ export class StoreController {
       });
     });
   }
+
+  private static hasConfiguredOpeningHours(store: any) {
+    const openingHours = store?.settings?.openingHours;
+    return Array.isArray(openingHours) && openingHours.length > 0;
+  }
+
+  private static async getPublicProductCountsByStoreIds(storeIds: string[]) {
+    const ids = Array.from(new Set((storeIds || []).map((id) => String(id || '').trim()).filter(Boolean)));
+    const counts = new Map<string, number>();
+    if (!ids.length) return counts;
+
+    const products = await AppDataSource.getRepository(Product).find({
+      where: {
+        active: true,
+        store: { id: In(ids) },
+      },
+      relations: [ 'store' ],
+    });
+
+    (products || [])
+      .filter((product) => isProductAvailableToday(product))
+      .forEach((product: any) => {
+        const storeId = String(product?.store?.id || '');
+        if (!storeId) return;
+        counts.set(storeId, (counts.get(storeId) || 0) + 1);
+      });
+
+    return counts;
+  }
     /**
    * Executes sanitize order types by plan business logic.
    *
@@ -251,7 +284,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
     if (store.open === false) return false;
 
     const openingHours = store?.settings?.openingHours;
-    if (!Array.isArray(openingHours) || openingHours.length === 0) return true;
+    if (!Array.isArray(openingHours) || openingHours.length === 0) return false;
 
     const { day, minutes } = StoreController.getSaoPauloNowParts();
     
@@ -340,19 +373,23 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
         return res.json(cached);
       }
       const stores = await storeService.listAll();
+      const publicProductCounts = await StoreController.getPublicProductCountsByStoreIds(stores.map((store) => store.id));
       const entries = await Promise.all(
         stores.map(async (store) => {
           const subscription = await subscriptionService.getCurrentByStore(store.id);
           const isVip = Boolean(store?.settings?.planExempt);
           const isActive = isVip || subscriptionService.isActiveSubscription(subscription);
           if (!isActive) return null;
+          const publicProductCount = publicProductCounts.get(store.id) || 0;
+          if (publicProductCount <= 0) return null;
           const orderTypes = StoreController.sanitizeOrderTypesByPlan(store.settings?.orderTypes, {
             planName: subscription?.plan?.name,
             planExempt: Boolean(store.settings?.planExempt),
             subscriptionStatus: subscription?.status || null,
           });
           const isOrderingEnabled = store.settings?.isOrderingEnabled !== false;
-          const openNow = StoreController.isStoreOpenNow(store);
+          const hasOpeningHours = StoreController.hasConfiguredOpeningHours(store);
+          const openNow = hasOpeningHours && StoreController.isStoreOpenNow(store);
           const nextOpeningLabel = openNow ? null : StoreController.getNextOpeningLabel(store);
           return {
             id: store.id,
@@ -361,6 +398,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
             open: store.open,
             openNow,
             nextOpeningLabel,
+            productCount: publicProductCount,
             reviewSummary: await orderReviewService.publicSummaryByStoreId(store.id),
             settings: store.settings
               ? {
