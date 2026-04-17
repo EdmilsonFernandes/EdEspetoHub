@@ -1540,7 +1540,8 @@ export function MarketplacePage() {
       });
       return;
     }
-    setSelectedCondominiumSlug((current) => (current === normalized ? '' : normalized));
+    
+    setSelectedCondominiumSlug(normalized);
     setCondominiumPickerOpen(false);
     setCondominiumSearch('');
     resetMarketplaceFilters();
@@ -2922,9 +2923,9 @@ export function MarketplacePage() {
                                   : 'border-slate-200 bg-white/88 text-slate-500'
                           }`}>
                             {!active && eventState === 'live' ? (
-                              <span className="relative inline-flex h-1.5 w-1.5 shrink-0">
-                                <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
-                                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                              <span className="relative inline-flex h-2 w-2 shrink-0 items-center justify-center">
+                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
                               </span>
                             ) : null}
                             {!active && eventState === 'upcoming' ? (
