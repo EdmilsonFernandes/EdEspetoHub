@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260417.114021.ed66221a",
-  "buildId": "0.1.9+20260417.114021.ed66221a-20260417.114021-ed66221a",
-  "builtAt": "2026-04-17T11:40:21.494Z",
-  "commitHash": "ed66221a00bcbb0fca7e7dcc68f168ca3b4c70cd",
-  "shortHash": "ed66221a",
+  "versionInternal": "0.1.9+20260417.123444.43be20d5",
+  "buildId": "0.1.9+20260417.123444.43be20d5-20260417.123444-43be20d5",
+  "builtAt": "2026-04-17T12:34:44.912Z",
+  "commitHash": "43be20d596969d904583479d371fdd3b13ca0f15",
+  "shortHash": "43be20d5",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "43be20d596969d904583479d371fdd3b13ca0f15",
+      "shortHash": "43be20d5",
+      "dateIso": "2026-04-17T08:41:05-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(admin): refresh desktop sidebar with app drawer style",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/43be20d596969d904583479d371fdd3b13ca0f15"
+    },
     {
       "hash": "ed66221a00bcbb0fca7e7dcc68f168ca3b4c70cd",
       "shortHash": "ed66221a",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(mobile): polish customer otp modal and bump app version",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7cdfcbd0b07dbb3ac6e5d0bdb987b654ea02dbb6"
-    },
-    {
-      "hash": "0b1fa67342580ff9ab3c5966507136ad801cd1bd",
-      "shortHash": "0b1fa673",
-      "dateIso": "2026-04-16T10:14:12-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(customer-auth): add in-app email otp flow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0b1fa67342580ff9ab3c5966507136ad801cd1bd"
     }
   ]
 } as const;

@@ -61,6 +61,7 @@ export function AdminDesktopSidebar({
 
     const sistema = consume('config');
     if (sistema) sections.push({ type: 'item', item: sistema });
+    sections.push({ type: 'logout' });
 
     const leftovers = (items || []).filter((item) => !consumeIds.has(item.id));
     leftovers.forEach((item) => sections.push({ type: 'item', item }));
@@ -159,6 +160,24 @@ export function AdminDesktopSidebar({
     );
   };
 
+  const renderLogoutItem = () => (
+    <button
+      key="logout"
+      type="button"
+      onClick={onLogout}
+      className="group relative ds-admin-sidebar-item ds-focus-ring flex items-center justify-between gap-2 border-rose-100/70 bg-rose-50/58 text-rose-700 hover:border-rose-100 hover:bg-rose-50/82"
+      aria-label="Sair da conta"
+      title="Sair"
+    >
+      <span className="inline-flex min-w-0 items-center gap-2.5">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-white/80 bg-rose-100/78 text-rose-500 shadow-[0_12px_22px_-20px_rgba(225,29,72,0.3)]">
+          <SignOut size={17} weight="duotone" />
+        </span>
+        <span>Sair</span>
+      </span>
+    </button>
+  );
+
   return (
     <aside
       className={`hidden lg:block sticky top-0 self-start h-[100dvh] z-[50] transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
@@ -174,7 +193,12 @@ export function AdminDesktopSidebar({
           {(!isGroupedMode || compact) &&
             items.map((item) => renderNavItem(item))}
 
+          {!isGroupedMode && !compact && renderLogoutItem()}
+
           {isGroupedMode && !compact && groupedSections.map((section: any) => {
+            if (section.type === 'logout') {
+              return renderLogoutItem();
+            }
             if (section.type === 'item') return renderNavItem(section.item);
             const isOpen = Boolean(openGroups?.[section.id]);
             const hasActiveChild = section.children.some((child: SidebarItem) => child.id === activeId);
@@ -209,25 +233,22 @@ export function AdminDesktopSidebar({
         </div>
 
         <div className="mt-2 pt-2 px-2 border-t border-slate-200/70 shrink-0">
-          <button
-            type="button"
-            onClick={onLogout}
-            className={`group relative ds-admin-sidebar-item ds-focus-ring flex items-center ${
-              compact ? 'justify-center px-0' : 'justify-between gap-2'
-            } text-rose-700 hover:bg-rose-50`}
-            aria-label="Sair da conta"
-            title="Sair"
-          >
-            <span className={`inline-flex items-center ${compact ? '' : 'gap-2'}`}>
-              <SignOut size={16} weight="bold" />
-              {!compact && 'Sair'}
-            </span>
-            {compact && (
+          {compact && (
+            <button
+              type="button"
+              onClick={onLogout}
+              className="group relative ds-admin-sidebar-item ds-focus-ring flex items-center justify-center px-0 text-rose-700 hover:bg-rose-50"
+              aria-label="Sair da conta"
+              title="Sair"
+            >
+              <span className="inline-flex items-center">
+                <SignOut size={16} weight="bold" />
+              </span>
               <span className="pointer-events-none absolute left-[calc(100%+10px)] top-1/2 -translate-y-1/2 whitespace-nowrap rounded-lg border border-slate-700 bg-slate-900 px-2 py-1 text-[11px] font-semibold text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
                 Sair
               </span>
-            )}
-          </button>
+            </button>
+          )}
           {!compact && (
             <PlatformTrustFooter className="mt-3 px-3 pb-1" tone="light" compact align="left" mode="minimal" />
           )}
