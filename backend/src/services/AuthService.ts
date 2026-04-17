@@ -125,6 +125,18 @@ private getClientIp(ipAddress?: string | null) {
     return raw;
   }
 
+private generateEmailCode() {
+    return String(Math.floor(1000 + Math.random() * 9000));
+  }
+
+private hashVerificationValue(value: string) {
+    return crypto.createHash('sha256').update(String(value || '')).digest('hex');
+  }
+
+private sanitizeEmailCode(value?: string | null) {
+    return String(value || '').replace(/\D/g, '').slice(0, 4);
+  }
+
     /**
    * Executes is verification resend allowed business logic.
    *
@@ -606,7 +618,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       payment: null,
       token,
       redirectUrl: `/verify-email`,
-      next: 'VERIFY_EMAIL',
+      next: 'VERIFY_EMAIL_CODE',
       emailMasked: this.maskEmail(result.user.email),
       email: result.user.email,
     };
@@ -904,13 +916,14 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     if (!user) {
       return { code: 'AUTH-S002', next: 'VERIFY_EMAIL', cooldownSec: 60 };
     }
+    const next = user.userRole === 'MOTOBOY' ? 'VERIFY_EMAIL' : 'VERIFY_EMAIL_CODE';
     if (user.emailVerified) {
-      return { code: 'AUTH-S002', next: 'VERIFY_EMAIL', cooldownSec: 60 };
+      return { code: 'AUTH-S002', next, cooldownSec: 60 };
     }
 
     const rate = await this.isVerificationResendAllowed(user.id, meta?.ipAddress);
     if (!rate.allowed) {
-      return { code: 'AUTH-S002', next: 'VERIFY_EMAIL', cooldownSec: rate.cooldownSeconds };
+      return { code: 'AUTH-S002', next, cooldownSec: rate.cooldownSeconds };
     }
 
     if (user.userRole === 'MOTOBOY') {
@@ -920,7 +933,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     }
     return {
       code: 'AUTH-S002',
-      next: 'VERIFY_EMAIL',
+      next,
       cooldownSec: 60,
       emailMasked: this.maskEmail(user.email),
     };
@@ -1007,10 +1020,24 @@ async changePassword(userId: string, currentPassword: string, newPassword: strin
     const token = String(input?.token || '');
     const normalizedEmail = input?.email?.trim().toLowerCase();
     if (!token) throw new AppError('AUTH-007', 400);
-    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const emailCode = this.sanitizeEmailCode(token);
+    const isEmailCode = emailCode.length === 4 && token.replace(/\D/g, '').length === 4;
+    const tokenHash = this.hashVerificationValue(isEmailCode ? emailCode : token);
     const verificationRepo = AppDataSource.getRepository(EmailVerification);
     let verification = null as EmailVerification | null;
-    if (normalizedEmail) {
+    if (isEmailCode) {
+      if (!normalizedEmail) throw new AppError('AUTH-006', 400);
+      verification = await verificationRepo
+        .createQueryBuilder('verification')
+        .leftJoinAndSelect('verification.user', 'user')
+        .where('verification.token_hash = :tokenHash', { tokenHash })
+        .andWhere('LOWER(user.email) = :email', { email: normalizedEmail })
+        .andWhere('user.userRole != :motoboyRole', { motoboyRole: 'MOTOBOY' })
+        .andWhere('verification.used_at IS NULL')
+        .orderBy('verification.created_at', 'DESC')
+        .getOne();
+      if (!verification) throw new AppError('AUTH-007', 400);
+    } else if (normalizedEmail) {
       verification = await verificationRepo
         .createQueryBuilder('verification')
         .leftJoinAndSelect('verification.user', 'user')
@@ -1026,7 +1053,7 @@ async changePassword(userId: string, currentPassword: string, newPassword: strin
 
     let verifiedUser = verification?.user;
 
-    if (!verification) {
+    if (!verification && !isEmailCode) {
       try {
         const decoded: any = jwt.verify(token, env.jwtSecret);
         if (!decoded?.sub) throw new AppError('AUTH-007', 400);
@@ -1187,17 +1214,9 @@ async changePassword(userId: string, currentPassword: string, newPassword: strin
    * @date 2025-12-17
    */
   private async sendVerificationEmail(user: User, ipAddress?: string | null) {
-    const token = jwt.sign(
-      {
-        sub: user.id,
-        type: 'email-verify',
-        jti: crypto.randomBytes(16).toString('hex'),
-      },
-      env.jwtSecret,
-      { expiresIn: '24h' }
-    );
-    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const code = this.generateEmailCode();
+    const tokenHash = this.hashVerificationValue(code);
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
     const verificationRepo = AppDataSource.getRepository(EmailVerification);
     const maxCountRows = await AppDataSource.query(
       `SELECT COALESCE(MAX(resend_count), 0) AS max_count FROM email_verifications WHERE user_id = $1`,
@@ -1223,8 +1242,7 @@ async changePassword(userId: string, currentPassword: string, newPassword: strin
       })
     );
 
-    const link = `${env.appUrl}/verify-email?token=${encodeURIComponent(token)}`;
-    await this.emailService.sendEmailVerification(user.email, link, token);
+    await this.emailService.sendStoreVerificationCode(user.email, user.fullName || 'Lojista', code);
   }
 
   /**

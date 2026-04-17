@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260417.164012.bb257aba",
-  "buildId": "0.1.9+20260417.164012.bb257aba-20260417.164012-bb257aba",
-  "builtAt": "2026-04-17T16:40:12.490Z",
-  "commitHash": "bb257aba3bf4f4641b4231fd36c1d03a9954b8ad",
-  "shortHash": "bb257aba",
+  "versionInternal": "0.1.9+20260417.165645.006d3ef2",
+  "buildId": "0.1.9+20260417.165645.006d3ef2-20260417.165645-006d3ef2",
+  "builtAt": "2026-04-17T16:56:45.891Z",
+  "commitHash": "006d3ef2c8431f71b8fb0d73819ea62cfff9e98a",
+  "shortHash": "006d3ef2",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "006d3ef2c8431f71b8fb0d73819ea62cfff9e98a",
+      "shortHash": "006d3ef2",
+      "dateIso": "2026-04-17T13:41:09-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(app): align splash with marketplace identity",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/006d3ef2c8431f71b8fb0d73819ea62cfff9e98a"
+    },
     {
       "hash": "bb257aba3bf4f4641b4231fd36c1d03a9954b8ad",
       "shortHash": "bb257aba",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "docs: add TODO map for the remaining E2E test developments",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8d6c9c6a27408f459509ce77c2b275dd83c7046e"
-    },
-    {
-      "hash": "77b0c2ae633a2b0060c12af104817a7e35352a31",
-      "shortHash": "77b0c2ae",
-      "dateIso": "2026-04-16T11:23:10-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(checkout): add guest order ip and phone block guard",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/77b0c2ae633a2b0060c12af104817a7e35352a31"
     }
   ]
 } as const;

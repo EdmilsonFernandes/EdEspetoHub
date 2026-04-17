@@ -4,13 +4,14 @@ import { Capacitor } from '@capacitor/core';
 import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { storeService } from '../services/storeService';
+import { authService } from '../services/authService';
 import { planService } from '../services/planService';
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, resolveMonthlyEquivalent } from '../constants/planCatalog';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { formatPhoneInput } from '../utils/format';
 import { normalizePixCode } from '../utils/pixPayload';
 import { FormSection } from '../components/common/FormSection';
-import { Buildings, CheckCircle, CopySimple, CreditCard, GlobeHemisphereWest, MapPinLine, RocketLaunch, Storefront, UserCircle } from '@phosphor-icons/react';
+import { Buildings, CheckCircle, CopySimple, CreditCard, EnvelopeSimple, GlobeHemisphereWest, MapPinLine, RocketLaunch, SealCheck, Storefront, UserCircle, WarningCircle } from '@phosphor-icons/react';
 
 const BRAZIL_DDDS = [
   '11', '12', '13', '14', '15', '16', '17', '18', '19',
@@ -196,6 +197,13 @@ export function CreateStore() {
   const [showTerms, setShowTerms] = useState(false);
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [validationMessage, setValidationMessage] = useState('');
+  const [storeVerifyPrompt, setStoreVerifyPrompt] = useState<any | null>(null);
+  const [storeCodeDigits, setStoreCodeDigits] = useState(['', '', '', '']);
+  const [storeCodeLoading, setStoreCodeLoading] = useState(false);
+  const [storeResendLoading, setStoreResendLoading] = useState(false);
+  const [storeResendCooldown, setStoreResendCooldown] = useState(0);
+  const [storeVerifyMessage, setStoreVerifyMessage] = useState('');
+  const [storeVerifyError, setStoreVerifyError] = useState('');
   const [logoPreviewUrl, setLogoPreviewUrl] = useState('');
   const [bannerPreviewUrl, setBannerPreviewUrl] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -410,6 +418,14 @@ export function CreateStore() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (storeResendCooldown <= 0) return;
+    const timer = window.setInterval(() => {
+      setStoreResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [storeResendCooldown]);
 
   useEffect(() => {
     if (registerForm.storeDescription) return;
@@ -655,9 +671,16 @@ export function CreateStore() {
     setPaymentResult(null);
 
     try {
+      const effectivePlanId = resolveEffectivePlanId();
+      if (!plans.length || effectivePlanId === 'test-plan-7days') {
+        setStoreError('');
+        setValidationMessage('Aguarde carregar os planos disponíveis antes de criar sua loja.');
+        setShowValidationModal(true);
+        return;
+      }
       if (!termsAccepted || !lgpdAccepted) {
         setStoreError('');
-        setValidationMessage('Para continuar, aceite os termos de uso e a política de privacidade.');
+        setValidationMessage('Marque os termos de uso e a política de privacidade para concluir a criação da loja.');
         setShowValidationModal(true);
         if (termsRef.current) {
           termsRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -668,11 +691,6 @@ export function CreateStore() {
         return;
       }
       setIsRegistering(true);
-      const effectivePlanId = resolveEffectivePlanId();
-      if (effectivePlanId === 'test-plan-7days') {
-        setStoreError('Não foi possível identificar um plano válido. Atualize a página e tente novamente.');
-        return;
-      }
 
       let acquisitionAttribution = null;
       try {
@@ -724,6 +742,19 @@ export function CreateStore() {
       setPaymentResult(result);
       if (registerForm.email) {
         localStorage.setItem('signupEmail', registerForm.email.trim());
+      }
+
+      if (result?.next === 'VERIFY_EMAIL_CODE') {
+        setStoreVerifyPrompt({
+          email: result.email || registerForm.email.trim().toLowerCase(),
+          emailMasked: result.emailMasked,
+          redirectUrl: result.redirectUrl,
+        });
+        setStoreCodeDigits(['', '', '', '']);
+        setStoreVerifyError('');
+        setStoreVerifyMessage('Enviamos um código de 4 dígitos para ativar sua loja.');
+        setStoreResendCooldown(60);
+        return;
       }
 
       if (result.payment?.method === 'CREDIT_CARD' && result.payment.paymentLink) {
@@ -869,6 +900,112 @@ export function CreateStore() {
     }
   };
 
+  const storeVerificationCode = storeCodeDigits.join('');
+
+  const normalizeStoreOtpError = (error: any) => {
+    const rawMessage = String(error?.message || '').trim();
+    const normalized = rawMessage
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+    if (normalized.includes('expir')) return 'Código expirado. Reenvie um novo código e tente novamente.';
+    if (!rawMessage || normalized.includes('parametro') || normalized.includes('token') || normalized.includes('codigo')) {
+      return 'Código inválido. Confira os 4 dígitos recebidos no e-mail e tente novamente.';
+    }
+    return rawMessage;
+  };
+
+  const handleStoreCodeDigitChange = (index: number, value: string) => {
+    const digitsOnly = String(value || '').replace(/\D/g, '');
+    if (!digitsOnly) {
+      setStoreCodeDigits((prev) => prev.map((digit, i) => (i === index ? '' : digit)));
+      return;
+    }
+    const nextDigits = digitsOnly.slice(0, 4 - index).split('');
+    setStoreCodeDigits((prev) => {
+      const next = [...prev];
+      nextDigits.forEach((digit, offset) => {
+        next[index + offset] = digit;
+      });
+      return next;
+    });
+    const nextIndex = Math.min(index + nextDigits.length, 3);
+    window.setTimeout(() => {
+      const input = document.getElementById(`store-otp-${nextIndex}`) as HTMLInputElement | null;
+      input?.focus();
+      input?.select?.();
+    }, 0);
+    if (storeVerifyError) setStoreVerifyError('');
+  };
+
+  const handleStoreCodeKeyDown = (index: number, event: any) => {
+    if (event.key === 'Backspace' && !storeCodeDigits[index] && index > 0) {
+      event.preventDefault();
+      const input = document.getElementById(`store-otp-${index - 1}`) as HTMLInputElement | null;
+      input?.focus();
+      input?.select?.();
+    }
+    if (event.key === 'ArrowLeft' && index > 0) {
+      event.preventDefault();
+      (document.getElementById(`store-otp-${index - 1}`) as HTMLInputElement | null)?.focus();
+    }
+    if (event.key === 'ArrowRight' && index < 3) {
+      event.preventDefault();
+      (document.getElementById(`store-otp-${index + 1}`) as HTMLInputElement | null)?.focus();
+    }
+  };
+
+  const handleStoreCodePaste = (event: any) => {
+    const pasted = String(event.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 4);
+    if (!pasted) return;
+    event.preventDefault();
+    setStoreCodeDigits([pasted[0] || '', pasted[1] || '', pasted[2] || '', pasted[3] || '']);
+    const targetIndex = Math.min(Math.max(pasted.length - 1, 0), 3);
+    window.setTimeout(() => (document.getElementById(`store-otp-${targetIndex}`) as HTMLInputElement | null)?.focus(), 0);
+    if (storeVerifyError) setStoreVerifyError('');
+  };
+
+  const handleVerifyStoreCode = async () => {
+    const email = String(storeVerifyPrompt?.email || registerForm.email || '').trim().toLowerCase();
+    if (!email || storeVerificationCode.length !== 4 || storeCodeLoading) return;
+    setStoreCodeLoading(true);
+    setStoreVerifyError('');
+    setStoreVerifyMessage('');
+    try {
+      const result = await authService.verifyEmail({ email, token: storeVerificationCode });
+      setStoreVerifyMessage('Loja confirmada com sucesso. Redirecionando...');
+      setStoreVerifyPrompt(null);
+      if (result?.redirectUrl) {
+        window.setTimeout(() => navigate(result.redirectUrl), 800);
+      }
+    } catch (error: any) {
+      try {
+        window.navigator?.vibrate?.(120);
+      } catch {
+        // no-op
+      }
+      setStoreVerifyError(normalizeStoreOtpError(error));
+    } finally {
+      setStoreCodeLoading(false);
+    }
+  };
+
+  const handleResendStoreCode = async () => {
+    const email = String(storeVerifyPrompt?.email || registerForm.email || '').trim().toLowerCase();
+    if (!email || storeResendLoading || storeResendCooldown > 0) return;
+    setStoreResendLoading(true);
+    setStoreVerifyError('');
+    try {
+      const result = await authService.resendVerification(email);
+      setStoreVerifyMessage('Novo código enviado. Digite os 4 números para ativar sua loja.');
+      setStoreResendCooldown(Number(result?.cooldownSec || 60));
+    } catch (error: any) {
+      setStoreVerifyError(error?.message || 'Não foi possível reenviar o código agora.');
+    } finally {
+      setStoreResendLoading(false);
+    }
+  };
+
   const storeSlugPreview = slugify(registerForm.storeName || '');
   const handleStoreSegmentChange = (segment: string) => {
     const safeSegment = STORE_SEGMENT_PRESETS[segment] ? segment : 'outros';
@@ -946,6 +1083,9 @@ export function CreateStore() {
     if (stepId === 3) {
       return Boolean(registerForm.storeName && registerForm.segment);
     }
+    if (stepId === 4) {
+      return Boolean(plans.length && resolveEffectivePlanId() !== 'test-plan-7days' && termsAccepted && lgpdAccepted);
+    }
     return true;
   };
 
@@ -953,6 +1093,7 @@ export function CreateStore() {
     if (stepId === 1) return 'Preencha os dados pessoais obrigatórios para continuar.';
     if (stepId === 2) return 'Preencha o endereço completo para continuar.';
     if (stepId === 3) return 'Complete as informações da loja para continuar.';
+    if (stepId === 4) return 'Selecione um plano carregado e marque os termos para concluir.';
     return 'Confira os dados obrigatórios antes de continuar.';
   };
 
@@ -1936,7 +2077,7 @@ export function CreateStore() {
               </label>
             </div>
 
-            <div className="fixed bottom-0 left-0 z-50 w-full rounded-none border-t border-slate-200 bg-white/90 p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-[0_-10px_26px_-20px_rgba(15,23,42,0.45)] backdrop-blur-md md:static md:rounded-2xl md:border md:border-slate-200/90 md:p-3 md:shadow-[0_24px_46px_-30px_rgba(15,23,42,0.55)]">
+            <div className="fixed bottom-0 left-0 z-50 w-full rounded-none border-t border-slate-200 bg-white/90 p-3 pb-[max(env(safe-area-inset-bottom),0.65rem)] shadow-[0_-10px_26px_-20px_rgba(15,23,42,0.45)] backdrop-blur-md md:static md:rounded-2xl md:border md:border-slate-200/90 md:p-3 md:shadow-[0_24px_46px_-30px_rgba(15,23,42,0.55)]">
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
                 <div className="text-[11px] text-slate-500">
                   Etapa atual <span className="font-semibold text-slate-700">{currentStep} de 4</span>
@@ -2061,6 +2202,108 @@ export function CreateStore() {
         </aside>
         </div>
       </main>
+      {storeVerifyPrompt ? (
+        <div className="fixed inset-0 z-[120] flex items-end justify-center bg-slate-950/55 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-sm sm:items-center sm:px-4 sm:py-6">
+          <div className="flex max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-2rem)] w-full max-w-md flex-col overflow-hidden rounded-[2rem] border border-white/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(241,245,249,0.94))] shadow-[0_36px_120px_-28px_rgba(15,23,42,0.55)]">
+            <div className="relative overflow-hidden bg-[linear-gradient(135deg,#0f3b53_0%,#0d4f66_55%,#2c8c9f_100%)] px-6 pb-8 pt-6 text-white">
+              <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.22),transparent_68%)]" />
+              <div className="relative flex items-start justify-between gap-4">
+                <div className="space-y-3">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-white/16 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-white/78">
+                    <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_0_4px_rgba(134,239,172,0.16)]" />
+                    Loja segura
+                  </div>
+                  <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/12 shadow-[0_20px_40px_-24px_rgba(15,23,42,0.75)]">
+                    <EnvelopeSimple size={28} weight="duotone" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">Validar e-mail</p>
+                    <h3 className="mt-2 text-[1.7rem] font-black leading-none tracking-[-0.03em]">Código de 4 dígitos</h3>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setStoreVerifyPrompt(null)}
+                  className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white/80 transition hover:bg-white/16"
+                >
+                  Fechar
+                </button>
+              </div>
+              <p className="relative mt-4 text-sm leading-relaxed text-white/80">
+                {storeVerifyPrompt.emailMasked
+                  ? `Enviamos o código para ${storeVerifyPrompt.emailMasked}.`
+                  : 'Enviamos o código para o e-mail informado.'}
+              </p>
+              <p className="relative mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/58">
+                Último passo para ativar sua loja
+              </p>
+            </div>
+
+            <div className="space-y-5 overflow-y-auto px-6 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] pt-5">
+              <div className="rounded-[1.6rem] border border-slate-200/80 bg-white/80 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">
+                  <SealCheck size={16} weight="duotone" className="text-[#0d4f66]" />
+                  Confirmação segura
+                </div>
+                <p className="mt-2 text-sm font-medium leading-relaxed text-slate-600">
+                  Digite o código recebido para confirmar seu e-mail e continuar a ativação sem sair do fluxo.
+                </p>
+                <div className="mt-4 flex items-center justify-between gap-2">
+                  {storeCodeDigits.map((digit, index) => (
+                    <input
+                      key={index}
+                      id={`store-otp-${index}`}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      autoComplete={index === 0 ? 'one-time-code' : 'off'}
+                      value={digit}
+                      onChange={(e) => handleStoreCodeDigitChange(index, e.target.value)}
+                      onKeyDown={(e) => handleStoreCodeKeyDown(index, e)}
+                      onPaste={handleStoreCodePaste}
+                      className="h-16 w-14 rounded-2xl border border-slate-200 bg-slate-50 text-center text-2xl font-black tracking-[0.1em] text-slate-900 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.5)] outline-none transition focus:border-[#0d4f66] focus:bg-white focus:ring-4 focus:ring-[#0d4f66]/10 sm:w-16"
+                    />
+                  ))}
+                </div>
+                <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/90 px-3 py-2.5 text-[11px] font-semibold leading-relaxed text-slate-500">
+                  O código expira em 30 minutos. Se não recebeu, toque em <span className="font-black text-slate-700">Reenviar código</span>.
+                </div>
+              </div>
+
+              {storeVerifyError ? (
+                <div className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-3 text-sm font-semibold text-rose-700 shadow-[0_12px_30px_-24px_rgba(225,29,72,0.65)] animate-in fade-in slide-in-from-top-1 duration-150">
+                  <WarningCircle size={18} weight="fill" />
+                  <span>{storeVerifyError}</span>
+                </div>
+              ) : null}
+              {storeVerifyMessage ? (
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm font-semibold text-emerald-700">
+                  {storeVerifyMessage}
+                </div>
+              ) : null}
+
+              <div className="grid gap-3">
+                <button
+                  type="button"
+                  onClick={handleVerifyStoreCode}
+                  disabled={storeVerificationCode.length !== 4 || storeCodeLoading}
+                  className="rounded-2xl bg-[linear-gradient(135deg,#0f3b53,#0d4f66,#2c8c9f)] px-4 py-3.5 text-sm font-black text-white shadow-[0_24px_50px_-24px_rgba(15,59,83,0.55)] transition active:scale-[0.99] disabled:opacity-60"
+                >
+                  {storeCodeLoading ? 'Confirmando código...' : 'Confirmar e ativar loja'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResendStoreCode}
+                  disabled={storeResendLoading || storeResendCooldown > 0 || !storeVerifyPrompt.email}
+                  className="rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+                >
+                  {storeResendLoading ? 'Reenviando...' : storeResendCooldown > 0 ? `Reenviar em ${storeResendCooldown}s` : 'Reenviar código'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
       {showTerms && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
