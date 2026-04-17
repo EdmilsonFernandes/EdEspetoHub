@@ -314,21 +314,44 @@ export function ProfileDrawer({
               </button>
             </div>
           ) : (
-            <button
-              onClick={() => {
-                setAccessPickerMode('login');
-                setHighlightFirstAccess(false);
-                setAccessPickerOpen(true);
-              }}
-              className="relative flex w-full items-center justify-between overflow-hidden rounded-[1.55rem] border border-[#2d6a88]/18 bg-[linear-gradient(135deg,#0d526c_0%,#13455a_58%,#17384a_100%)] p-4 text-white shadow-[0_18px_34px_-18px_rgba(21,58,76,0.35)] transition-all active:scale-[0.97]"
-            >
-              <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),transparent_72%)]" />
-              <div className="text-left">
-                <p className="text-sm font-black">Entrar</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-sky-100/75">Cliente, lojista e entregador</p>
+            <div className="space-y-3.5">
+              {/* Saudação */}
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]/70">Já no Caminho</p>
+                <h2 className="mt-0.5 text-[1.15rem] font-black tracking-tight text-slate-900 leading-snug">Olá, bem-vindo!</h2>
+                <p className="mt-0.5 text-[11.5px] font-medium text-slate-500">Entre ou crie sua conta para aproveitar tudo.</p>
               </div>
-              <ArrowRight size={19} weight="regular" className="text-white/78" />
-            </button>
+
+              {/* Dois CTAs lado a lado */}
+              <div className="grid grid-cols-2 gap-2">
+                {/* Entrar */}
+                <button
+                  type="button"
+                  onClick={() => { setAccessPickerMode('login'); setHighlightFirstAccess(false); setAccessPickerOpen(true); }}
+                  className="relative flex flex-col items-start overflow-hidden rounded-[1.3rem] bg-[linear-gradient(135deg,#0d526c_0%,#17384a_100%)] p-3.5 text-white shadow-[0_12px_24px_-16px_rgba(21,58,76,0.45)] transition-all active:scale-[0.97]"
+                >
+                  <div className="pointer-events-none absolute -right-3 -top-3 h-16 w-16 rounded-full bg-white/8 blur-2xl" />
+                  <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/15">
+                    <ArrowRight size={15} weight="bold" />
+                  </div>
+                  <p className="text-[13px] font-black leading-none">Entrar</p>
+                  <p className="mt-1 text-[9.5px] font-semibold text-white/60 leading-tight">Já tenho conta</p>
+                </button>
+
+                {/* Criar conta */}
+                <button
+                  type="button"
+                  onClick={() => { setAccessPickerMode('register'); setHighlightFirstAccess(true); setAccessPickerOpen(true); }}
+                  className="relative flex flex-col items-start overflow-hidden rounded-[1.3rem] border border-slate-200 bg-white p-3.5 text-slate-800 shadow-[0_4px_14px_-8px_rgba(15,23,42,0.1)] transition-all active:scale-[0.97] hover:border-[#336886]/20 hover:shadow-[0_6px_18px_-8px_rgba(51,104,134,0.15)]"
+                >
+                  <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#336886]/10 text-[#336886]">
+                    <RocketLaunch size={15} weight="duotone" />
+                  </div>
+                  <p className="text-[13px] font-black leading-none text-slate-900">Criar conta</p>
+                  <p className="mt-1 text-[9.5px] font-semibold text-slate-400 leading-tight">Sou novo aqui</p>
+                </button>
+              </div>
+            </div>
           )}
         </div>
 
@@ -365,31 +388,10 @@ export function ProfileDrawer({
             </section>
           )}
 
-          {!isLogged && (
-            <button
-              type="button"
-              onClick={() => {
-                setAccessPickerMode('register');
-                setHighlightFirstAccess(true);
-                setAccessPickerOpen(true);
-              }}
-              className="flex w-full items-center gap-4 rounded-[1.7rem] border border-white/80 bg-[linear-gradient(135deg,#ffffff_0%,rgba(224,242,241,0.9)_42%,rgba(239,246,255,0.96)_100%)] p-4 text-left shadow-[0_18px_34px_-24px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/60 transition-all active:scale-[0.98]"
-            >
-              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-[1.2rem] border border-white/85 bg-white/72 text-[#2b708a] shadow-[0_12px_26px_-18px_rgba(51,104,134,0.26)] backdrop-blur-sm">
-                <RocketLaunch size={28} weight="duotone" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[1.02rem] font-black leading-tight text-slate-900">Comece por aqui</p>
-                <p className="mt-1 text-[12.5px] font-medium leading-relaxed text-slate-600">
-                  Crie seu acesso como usuário, loja ou entregador
-                </p>
-              </div>
-              <CaretRight size={18} weight="bold" className="shrink-0 text-[#336886]/55" />
-            </button>
-          )}
-
           <nav className="space-y-2">
-            <p className="mb-3 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 px-1">Área do Cliente</p>
+            <p className="mb-3 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 px-1">
+              {isLogged ? 'Área do Cliente' : 'Suporte'}
+            </p>
             {actions.map((action) => (
               <button
                 key={action.id}
