@@ -42,6 +42,7 @@ import { useCachedCustomerProfileImage } from '../hooks/useCachedCustomerProfile
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { HeaderAvatarTrigger } from '../components/Marketplace/HeaderAvatarTrigger';
 import { ProfileDrawer } from '../components/Marketplace/ProfileDrawer';
+import { CondominiumStatusModal } from '../components/Marketplace/CondominiumStatusModal';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { SegmentPromoCarousel } from '../components/common/SegmentPromoCarousel';
 import { APP_BUILD_INFO } from '../generated/buildInfo';
@@ -3033,21 +3034,19 @@ export function MarketplacePage() {
         </div>
       )}
 
-      <ConfirmationModal
-        isOpen={!!condominiumAvailabilityModal}
-        onClose={() => setCondominiumAvailabilityModal(null)}
-        onConfirm={() => setCondominiumAvailabilityModal(null)}
-        title="Condomínio fora de agenda"
-        description={
-          condominiumAvailabilityModal?.nextLabel
-            ? `O condomínio "${condominiumAvailabilityModal.name}" não possui feira ativa agora. A próxima será em: ${condominiumAvailabilityModal.nextLabel}.`
-            : `O condomínio "${condominiumAvailabilityModal?.name}" não possui uma feira ativa ou agendada no momento.`
-        }
-        confirmLabel="Entendi"
-        cancelLabel="Fechar"
-        variant="info"
-        icon={<CalendarBlank size={32} weight="duotone" />}
-      />
+      {condominiumAvailabilityModal && (() => {
+        const condo = condominiums.find(c => c.slug === selectedCondominiumSlug) || condominiums.find(c => c.name === condominiumAvailabilityModal.name);
+        return (
+          <CondominiumStatusModal
+            isOpen={!!condominiumAvailabilityModal}
+            onClose={() => setCondominiumAvailabilityModal(null)}
+            name={condominiumAvailabilityModal.name}
+            nextLabel={condominiumAvailabilityModal.nextLabel}
+            logoUrl={condo ? (resolveAssetUrl(condo.logoUrl || condo.bannerUrl || undefined) || getStoreAvatarUrl(condo.slug || 'condominio', condo.name || 'Condomínio')) : undefined}
+            bannerUrl={condo ? (resolveAssetUrl(condo.bannerUrl || condo.logoUrl || undefined) || undefined) : undefined}
+          />
+        );
+      })()}
 
       <ConfirmationModal
         isOpen={showDeactivateModal}
