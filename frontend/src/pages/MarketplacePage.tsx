@@ -1902,59 +1902,6 @@ export function MarketplacePage() {
           </div>
         </header>
 
-        {/* Condominium Picker Button */}
-        <section className="px-4 mb-6">
-          <div
-            className="relative overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(135deg,rgba(255,255,255,0.9)_0%,rgba(244,248,251,0.85)_100%)] p-6 shadow-[0_20px_40px_-20px_rgba(51,104,134,0.2)] backdrop-blur-2xl"
-          >
-            <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[#336886]/10 blur-2xl" />
-            
-            <div className="relative flex items-start gap-4">
-              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-[1.2rem] bg-white text-[#336886] shadow-md ring-1 ring-slate-100">
-                <Buildings size={28} weight="duotone" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <span className="inline-flex mb-1.5 items-center gap-1 rounded-full bg-[#336886]/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-[#336886]">
-                  Operação Local
-                </span>
-                <h2 className="text-xl font-black tracking-tight text-slate-900 leading-none">
-                  {selectedCondominium?.name || 'Descubra as feiras'}
-                </h2>
-                <p className="mt-1.5 text-xs font-semibold text-slate-500 leading-snug">
-                  {selectedCondominium
-                    ? `Feira ativa: ${condominiumEventTimeLabel || 'A confirmar'}`
-                    : 'Selecione seu condomínio para ver as lojas disponíveis dentro dele.'}
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                // If a condominium is selected, check its availability
-                if (selectedCondominium) {
-                  // If there's no active event or the event is not live, show the availability modal
-                  if (!activeCondominiumEvent?.state || activeCondominiumEvent.state !== 'live') {
-                    setCondominiumAvailabilityModal({
-                      name: selectedCondominium.name || 'Condomínio',
-                      nextLabel: condominiumEventTimeLabel || 'A confirmar',
-                    });
-                  } else {
-                    // Otherwise, if there's a live event, open the condominium picker
-                    setCondominiumPickerOpen(true);
-                  }
-                } else {
-                  // If no condominium is selected, just open the picker
-                  setCondominiumPickerOpen(true);
-                }
-              }}
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3.5 text-sm font-bold text-white shadow-xl transition-transform active:scale-95"
-            >
-              {selectedCondominium ? 'Alterar Condomínio' : 'Escolher Condomínio'}
-              <CaretRight size={16} weight="bold" />
-            </button>
-          </div>
-        </section>
-
         <main className={`mx-auto max-w-[1200px] space-y-6 px-4 ${isNativePlatform ? 'pt-5' : 'pt-6'}`}>
           {/* Acompanhamento de Pedidos (Logados ou Anônimos Cache) */}
           {(isCustomerLogged && visibleActiveOrders.length > 0) ? (
@@ -2930,7 +2877,6 @@ export function MarketplacePage() {
                       key={slug}
                       type="button"
                       onClick={() => {
-                        setSelectedCondominiumSlug(slug);
                         setCondominiumPickerOpen(false);
                         setCondominiumSearch('');
                         if (!event?.state || event.state !== 'live') {
@@ -2938,6 +2884,8 @@ export function MarketplacePage() {
                             name: name || 'Condomínio',
                             nextLabel: formatCondominiumPickerEventTime(event) || 'A confirmar',
                           });
+                        } else {
+                          setSelectedCondominiumSlug(slug);
                         }
                       }}
                       className={`group relative min-w-0 overflow-hidden rounded-[1.25rem] border text-left shadow-[0_12px_28px_-16px_rgba(15,23,42,0.18)] transition-all duration-300 active:scale-[0.985] ${
