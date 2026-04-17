@@ -21,7 +21,7 @@ export function CondominiumStatusModal({
 
   return (
     <div
-      className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-950/50 px-4 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-[250] flex items-center justify-center bg-slate-950/50 px-4 backdrop-blur-sm animate-in fade-in duration-200"
       role="dialog"
       aria-modal="true"
     >

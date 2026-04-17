@@ -48,29 +48,7 @@ export function PremiumHomePrototype() {
           </div>
         </header>
 
-        {/* HERO BANNER (CONDOMINIUM) */}
-        <section className="px-5 mb-8">
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(135deg,rgba(255,255,255,0.9)_0%,rgba(244,248,251,0.85)_100%)] p-6 shadow-[0_20px_40px_-20px_rgba(51,104,134,0.2)] backdrop-blur-2xl">
-            <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[#336886]/10 blur-2xl" />
-            
-            <div className="relative flex items-start gap-4">
-              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-[1.2rem] bg-white text-[#336886] shadow-md ring-1 ring-slate-100">
-                <Buildings size={28} weight="duotone" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <span className="inline-flex mb-1.5 items-center gap-1 rounded-full bg-[#336886]/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-[#336886]">
-                  Operação Local
-                </span>
-                <h2 className="text-xl font-black tracking-tight text-slate-900 leading-none">Descubra as feiras</h2>
-                <p className="mt-1.5 text-xs font-semibold text-slate-500 leading-snug">Selecione seu condomínio para ver as lojas disponíveis dentro dele.</p>
-              </div>
-            </div>
-            <button className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3.5 text-sm font-bold text-white shadow-xl transition-transform active:scale-95">
-              Escolher Condomínio
-              <CaretRight size={16} weight="bold" />
-            </button>
-          </div>
-        </section>
+
 
         {/* HORIZONTAL CHIPS (Squircles) */}
         <section className="mb-8">
