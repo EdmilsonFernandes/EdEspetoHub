@@ -36,30 +36,30 @@ export function PremiumSplashScreen() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_14%,rgba(95,211,90,0.15),transparent_30%),radial-gradient(circle_at_86%_12%,rgba(51,104,134,0.16),transparent_34%),linear-gradient(180deg,#F7FAFC_0%,#FFFFFF_48%,#EDF6F8_100%)]" />
       <div className="pointer-events-none absolute left-1/2 top-[16%] h-56 w-56 -translate-x-1/2 rounded-full bg-[#336886]/10 blur-3xl" />
 
-      <div className="relative flex w-full max-w-[360px] flex-col items-center">
-        <div className="splash-delivery-scene relative mb-7 h-[230px] w-full max-w-[330px] animate-in zoom-in-95 duration-700 motion-reduce:animate-none">
-          <div className="absolute left-1/2 top-6 h-44 w-60 -translate-x-1/2 rounded-[3rem] bg-white/72 blur-2xl" />
-          <div className="splash-orbit absolute left-1/2 top-[18px] h-[188px] w-[188px] -translate-x-1/2 rounded-full border border-[#336886]/10" />
+      <div className="relative flex w-full max-w-[320px] flex-col items-center">
+        <div className="splash-delivery-scene relative mb-7 h-[220px] w-full max-w-[300px] animate-in zoom-in-95 duration-700 motion-reduce:animate-none">
+          <div className="absolute left-1/2 top-7 h-40 w-52 -translate-x-1/2 rounded-[3rem] bg-white/72 blur-2xl" />
+          <div className="splash-orbit absolute left-1/2 top-[24px] h-[168px] w-[168px] -translate-x-1/2 rounded-full border border-[#336886]/10" />
 
-          <div className="splash-category splash-category-food absolute left-3 top-[108px] text-[#336886]">
-            <ForkKnife size={22} weight="duotone" />
+          <div className="splash-category splash-category-food absolute left-4 top-[108px] text-[#336886]">
+            <ForkKnife size={19} weight="duotone" />
           </div>
-          <div className="splash-category splash-category-drink absolute right-3 top-[106px] text-[#5CA536]">
-            <Package size={22} weight="duotone" />
+          <div className="splash-category splash-category-drink absolute right-4 top-[108px] text-[#5CA536]">
+            <Package size={19} weight="duotone" />
           </div>
-          <div className="splash-category splash-category-beauty absolute left-12 top-8 text-[#336886]">
-            <Sparkle size={22} weight="duotone" />
+          <div className="splash-category splash-category-beauty absolute left-16 top-9 text-[#336886]">
+            <Sparkle size={19} weight="duotone" />
           </div>
-          <div className="splash-category splash-category-bag absolute right-12 top-8 text-[#5CA536]">
-            <TShirt size={22} weight="duotone" />
+          <div className="splash-category splash-category-bag absolute right-16 top-9 text-[#5CA536]">
+            <TShirt size={19} weight="duotone" />
           </div>
 
-          <div className="splash-brand-card absolute left-1/2 top-[58px] flex h-[124px] w-[124px] -translate-x-1/2 items-center justify-center rounded-[2.35rem] border border-white/90 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(232,245,246,0.88))] shadow-[0_30px_70px_-34px_rgba(15,49,84,0.75)] ring-1 ring-[#336886]/10">
-            <div className="absolute inset-3 rounded-[1.75rem] bg-[#336886]/10 blur-xl" />
+          <div className="splash-brand-card absolute left-1/2 top-[64px] flex h-[96px] w-[96px] -translate-x-1/2 items-center justify-center rounded-[1.8rem] border border-white/90 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(232,245,246,0.88))] shadow-[0_30px_70px_-34px_rgba(15,49,84,0.75)] ring-1 ring-[#336886]/10">
+            <div className="absolute inset-2.5 rounded-[1.35rem] bg-[#336886]/10 blur-xl" />
             <img
               src="/janocaminho.jpg"
               alt="Já no Caminho"
-              className="relative h-[92px] w-[92px] rounded-[1.55rem] object-contain p-1 shadow-[0_16px_32px_-18px_rgba(15,49,84,0.72)]"
+              className="relative h-[70px] w-[70px] rounded-[1.2rem] object-contain p-1 shadow-[0_16px_32px_-18px_rgba(15,49,84,0.72)]"
               onError={(event) => {
                 event.currentTarget.onerror = null;
                 event.currentTarget.src = '/janocaminho-logo.png';
@@ -67,10 +67,10 @@ export function PremiumSplashScreen() {
             />
           </div>
 
-          <div className="absolute bottom-9 left-1/2 h-[38px] w-[278px] -translate-x-1/2 overflow-hidden rounded-[999px] border border-white/80 bg-white/58 shadow-[inset_0_0_0_1px_rgba(51,104,134,0.08)] backdrop-blur">
+          <div className="absolute bottom-10 left-1/2 h-[34px] w-[232px] -translate-x-1/2 overflow-hidden rounded-[999px] border border-white/80 bg-white/58 shadow-[inset_0_0_0_1px_rgba(51,104,134,0.08)] backdrop-blur">
             <div className="splash-route absolute left-0 top-1/2 h-[3px] w-[560px] -translate-y-1/2 bg-[repeating-linear-gradient(90deg,#336886_0_24px,transparent_24px_45px)] opacity-42" />
-            <div className="splash-pin absolute left-[52px] top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-[#5FD35A] shadow-[0_0_20px_rgba(95,211,90,0.9)]" />
-            <div className="splash-pin splash-pin-two absolute right-[54px] top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-[#336886] shadow-[0_0_18px_rgba(51,104,134,0.55)]" />
+            <div className="splash-pin absolute left-[46px] top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-[#5FD35A] shadow-[0_0_20px_rgba(95,211,90,0.9)]" />
+            <div className="splash-pin splash-pin-two absolute right-[48px] top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-[#336886] shadow-[0_0_18px_rgba(51,104,134,0.55)]" />
           </div>
           <div className="absolute bottom-2 left-1/2 h-6 w-44 -translate-x-1/2 rounded-[50%] bg-[#0B2447]/10 blur-md" />
         </div>
@@ -132,9 +132,9 @@ export function PremiumSplashScreen() {
           border-radius: 1.1rem;
           box-shadow: 0 18px 38px -28px rgba(15, 49, 84, 0.72);
           display: flex;
-          height: 2.75rem;
+          height: 2.35rem;
           justify-content: center;
-          width: 2.75rem;
+          width: 2.35rem;
         }
 
         .splash-category-drink {

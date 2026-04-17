@@ -197,6 +197,8 @@ export function CreateStore() {
   const [showTerms, setShowTerms] = useState(false);
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [validationMessage, setValidationMessage] = useState('');
+  const [validationItems, setValidationItems] = useState<string[]>([]);
+  const [missingFields, setMissingFields] = useState<Record<string, boolean>>({});
   const [storeVerifyPrompt, setStoreVerifyPrompt] = useState<any | null>(null);
   const [storeCodeDigits, setStoreCodeDigits] = useState(['', '', '', '']);
   const [storeCodeLoading, setStoreCodeLoading] = useState(false);
@@ -843,6 +845,28 @@ export function CreateStore() {
     setFieldErrors((prev) => ({ ...prev, [key]: message }));
   };
 
+  const clearMissingField = (key: string) => {
+    setMissingFields((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
+
+  const getMissingFieldClass = (key: string) =>
+    missingFields[key]
+      ? '!border-amber-400 !bg-amber-50/80 ring-4 ring-amber-200/50 shadow-[0_18px_38px_-28px_rgba(245,158,11,0.65)]'
+      : '';
+
+  const focusCreateStoreField = (key: string) => {
+    window.setTimeout(() => {
+      const target = document.querySelector(`[data-create-field="${key}"]`) as HTMLElement | null;
+      target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target?.focus?.();
+    }, 120);
+  };
+
   const resolveCreateStoreError = (error: any) => {
     const code = String(error?.code || '').trim();
     const message = String(error?.message || '').trim();
@@ -1106,6 +1130,87 @@ export function CreateStore() {
     return true;
   };
 
+  const getStepValidationDetails = (stepId: number) => {
+    const fields: Record<string, boolean> = {};
+    const items: string[] = [];
+    const add = (key: string, label: string) => {
+      fields[key] = true;
+      items.push(label);
+    };
+    const emailMessage = validateEmail(registerForm.email);
+    const documentMessage = validateDocument(registerForm.document, registerForm.documentType);
+    const storeNameMessage = validateStoreName(registerForm.storeName);
+    const phoneReady = Boolean(storePhoneParts.ddd && storePhoneParts.localNumber && storePhoneParts.localNumber.length >= 8);
+
+    if (stepId === 1) {
+      if (!registerForm.fullName?.trim()) add('fullName', 'Nome completo');
+      if (!registerForm.email?.trim() || emailMessage) add('email', emailMessage || 'E-mail');
+      if (!phoneReady) add('phone', 'Telefone com DDD');
+      if (!registerForm.document?.trim() || documentMessage) add('document', documentMessage || registerForm.documentType);
+      if (!registerForm.password?.trim() || registerForm.password.length < 6) add('password', 'Senha com no mínimo 6 caracteres');
+      return {
+        fields,
+        items,
+        message: items.length
+          ? 'Complete os dados de acesso antes de avançar. Destacamos na tela o que precisa de atenção.'
+          : '',
+      };
+    }
+
+    if (stepId === 2) {
+      if (!registerForm.cep?.trim()) add('cep', 'CEP');
+      if (!registerForm.state?.trim()) add('state', 'UF');
+      if (!registerForm.city?.trim()) add('city', 'Cidade');
+      if (!registerForm.street?.trim()) add('street', 'Rua ou avenida');
+      if (!registerForm.neighborhood?.trim()) add('neighborhood', 'Bairro');
+      if (!registerForm.number?.trim()) add('number', 'Número');
+      return {
+        fields,
+        items,
+        message: items.length
+          ? 'Complete o endereço de operação para sua loja aparecer corretamente na vitrine.'
+          : '',
+      };
+    }
+
+    if (stepId === 3) {
+      if (!registerForm.storeName?.trim() || storeNameMessage) add('storeName', storeNameMessage || 'Nome da loja');
+      if (!registerForm.segment?.trim()) add('segment', 'Ramo da loja');
+      return {
+        fields,
+        items,
+        message: items.length
+          ? 'Complete a identidade principal da loja para continuar.'
+          : '',
+      };
+    }
+
+    if (stepId === 4) {
+      if (!plans.length || resolveEffectivePlanId() === 'test-plan-7days') add('plan', 'Aguardar carregamento dos planos');
+      if (!termsAccepted) add('termsAccepted', 'Aceitar termos de uso');
+      if (!lgpdAccepted) add('lgpdAccepted', 'Aceitar política de privacidade e LGPD');
+      return {
+        fields,
+        items,
+        message: items.length
+          ? 'Revise as confirmações finais antes de criar a loja.'
+          : '',
+      };
+    }
+
+    return { fields, items, message: '' };
+  };
+
+  const showStepValidation = (stepId: number) => {
+    const details = getStepValidationDetails(stepId);
+    setMissingFields(details.fields);
+    setValidationItems(details.items);
+    setValidationMessage(details.message || getStepValidationMessage(stepId));
+    setShowValidationModal(true);
+    const firstField = Object.keys(details.fields)[0];
+    if (firstField) focusCreateStoreField(firstField);
+  };
+
   const getStepValidationMessage = (stepId: number) => {
     if (stepId === 1) return 'Preencha os dados pessoais obrigatórios para continuar.';
     if (stepId === 2) return 'Preencha o endereço completo para continuar.';
@@ -1116,8 +1221,7 @@ export function CreateStore() {
 
   const scrollToStep = (stepId: number) => {
     if (stepId > currentStep && !canAdvanceFromStep(currentStep)) {
-      setValidationMessage(getStepValidationMessage(currentStep));
-      setShowValidationModal(true);
+      showStepValidation(currentStep);
       return;
     }
     const target =
@@ -1135,8 +1239,7 @@ export function CreateStore() {
 
   const handleNextStep = async () => {
     if (!canAdvanceFromStep(currentStep)) {
-      setValidationMessage(getStepValidationMessage(currentStep));
-      setShowValidationModal(true);
+      showStepValidation(currentStep);
       return;
     }
     if (currentStep === 1) {
@@ -1372,9 +1475,13 @@ export function CreateStore() {
                   <label className="text-sm font-semibold text-gray-700">Nome completo</label>
                   <input
                     required
+                    data-create-field="fullName"
                     value={registerForm.fullName}
-                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, fullName: e.target.value }))}
-                    className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all"
+                    onChange={(e) => {
+                      clearMissingField('fullName');
+                      setRegisterForm((prev) => ({ ...prev, fullName: e.target.value }));
+                    }}
+                    className={`ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all ${getMissingFieldClass('fullName')}`}
                     placeholder="Seu nome completo"
                   />
                 </div>
@@ -1385,10 +1492,12 @@ export function CreateStore() {
                     <input
                       required
                       type="email"
+                      data-create-field="email"
                       value={registerForm.email}
                       onChange={(e) => {
                         const next = e.target.value;
                         setRegisterForm((prev) => ({ ...prev, email: next }));
+                        clearMissingField('email');
                         if (fieldErrors.email) {
                           updateFieldError('email', '');
                         }
@@ -1396,7 +1505,7 @@ export function CreateStore() {
                       onBlur={() => updateFieldError('email', validateEmail(registerForm.email))}
                       className={`ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all ${
                         fieldErrors.email ? 'border-red-400' : 'border-gray-200'
-                      }`}
+                      } ${getMissingFieldClass('email')}`}
                       placeholder="seu@email.com"
                     />
                     {fieldErrors.email ? (
@@ -1409,9 +1518,13 @@ export function CreateStore() {
                     <label className="text-sm font-semibold text-gray-700">Telefone</label>
                     <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-2 min-w-0">
                       <select
+                        data-create-field="phone"
                         value={storePhoneParts.ddd || ''}
-                        onChange={(e) => handleCreateStorePhoneDddChange(e.target.value)}
-                        className="ds-select ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all w-full min-w-0 text-sm font-semibold"
+                        onChange={(e) => {
+                          clearMissingField('phone');
+                          handleCreateStorePhoneDddChange(e.target.value);
+                        }}
+                        className={`ds-select ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all w-full min-w-0 text-sm font-semibold ${getMissingFieldClass('phone')}`}
                       >
                         <option value="" disabled>
                           DDD
@@ -1424,10 +1537,13 @@ export function CreateStore() {
                       </select>
                       <input
                         value={formatLocalPhoneNumber(storePhoneParts.localNumber)}
-                        onChange={(e) => handleCreateStorePhoneLocalChange(e.target.value)}
+                        onChange={(e) => {
+                          clearMissingField('phone');
+                          handleCreateStorePhoneLocalChange(e.target.value);
+                        }}
                         placeholder={storePhoneParts.ddd ? '99999-9999' : 'Selecione o DDD'}
                         disabled={!storePhoneParts.ddd}
-                        className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all w-full min-w-0 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
+                        className={`ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all w-full min-w-0 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed ${getMissingFieldClass('phone')}`}
                       />
                     </div>
                   </div>
@@ -1438,10 +1554,12 @@ export function CreateStore() {
                     <label className="text-sm font-semibold text-gray-700">Documento</label>
                     <div className="grid grid-cols-[92px_1fr] gap-2 min-w-0">
                       <select
+                        data-create-field="document"
                         value={registerForm.documentType}
                         onChange={(e) => {
                           const nextType = e.target.value;
                           setRegisterForm((prev) => ({ ...prev, documentType: nextType }));
+                          clearMissingField('document');
                           if (registerForm.document) {
                             updateFieldError('document', validateDocument(registerForm.document, nextType));
                           }
@@ -1453,10 +1571,12 @@ export function CreateStore() {
                       </select>
                       <input
                         required
+                        data-create-field="document"
                         value={registerForm.document}
                         onChange={(e) => {
                           const next = e.target.value;
                           setRegisterForm((prev) => ({ ...prev, document: next }));
+                          clearMissingField('document');
                           if (fieldErrors.document) {
                             updateFieldError('document', '');
                           }
@@ -1464,7 +1584,7 @@ export function CreateStore() {
                         onBlur={() => updateFieldError('document', validateDocument(registerForm.document, registerForm.documentType))}
                         className={`ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 ${
                           fieldErrors.document ? 'border-red-400' : 'border-gray-200'
-                        }`}
+                        } ${getMissingFieldClass('document')}`}
                         placeholder={registerForm.documentType === 'CNPJ' ? '00.000.000/0000-00' : '000.000.000-00'}
                       />
                     </div>
@@ -1477,10 +1597,14 @@ export function CreateStore() {
                     <div className="relative">
                       <input
                         required
+                        data-create-field="password"
                         type={showPassword ? 'text' : 'password'}
                         value={registerForm.password}
-                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, password: e.target.value }))}
-                        className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all w-full pr-10"
+                        onChange={(e) => {
+                          clearMissingField('password');
+                          setRegisterForm((prev) => ({ ...prev, password: e.target.value }));
+                        }}
+                        className={`ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all w-full pr-10 ${getMissingFieldClass('password')}`}
                         placeholder="Mínimo 6 caracteres"
                       />
                       <button
@@ -1521,14 +1645,16 @@ export function CreateStore() {
                         <label className="text-sm font-semibold text-gray-700">CEP</label>
                         <input
                           required
+                          data-create-field="cep"
                           value={registerForm.cep}
                           onChange={(e) => {
                             setCepAutofilled(false);
+                            clearMissingField('cep');
                             setRegisterForm((prev) => ({ ...prev, cep: normalizeCep(e.target.value) }));
                           }}
                           onBlur={(e) => handleCepLookup(e.target.value)}
                           disabled={isCepLoading}
-                          className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className={`ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed ${getMissingFieldClass('cep')}`}
                           placeholder="00000-000"
                         />
                         <button
@@ -1552,16 +1678,19 @@ export function CreateStore() {
                         <label className="text-sm font-semibold text-gray-700">UF</label>
                         <select
                           required
+                          data-create-field="state"
                           value={registerForm.state}
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            clearMissingField('state');
+                            clearMissingField('city');
                             setRegisterForm((prev) => ({
                               ...prev,
                               state: String(e.target.value || '').toUpperCase(),
                               city: '',
-                            }))
-                          }
+                            }));
+                          }}
                           disabled={isCepLoading}
-                          className="ds-select ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className={`ds-select ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed ${getMissingFieldClass('state')}`}
                         >
                           <option value="">Selecione</option>
                           {BRAZIL_STATES.map((uf) => (
@@ -1582,14 +1711,16 @@ export function CreateStore() {
                         </div>
                         <input
                           required
+                          data-create-field="city"
                           list={registerForm.state ? `cities-${registerForm.state}` : undefined}
                           value={registerForm.city}
                           onChange={(e) => {
                             setCepAutofilled(false);
+                            clearMissingField('city');
                             setRegisterForm((prev) => ({ ...prev, city: e.target.value }));
                           }}
                           disabled={isCepLoading}
-                          className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className={`ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed ${getMissingFieldClass('city')}`}
                           placeholder={isLoadingCities ? 'Carregando cidades...' : 'Digite ou selecione a cidade'}
                         />
                         {registerForm.state && cityOptions.length > 0 && (
@@ -1614,13 +1745,15 @@ export function CreateStore() {
                         <label className="text-sm font-semibold text-gray-700">Rua / Avenida</label>
                         <input
                           required
+                          data-create-field="street"
                           value={registerForm.street}
                           onChange={(e) => {
                             setCepAutofilled(false);
+                            clearMissingField('street');
                             setRegisterForm((prev) => ({ ...prev, street: e.target.value }));
                           }}
                           disabled={isCepLoading}
-                          className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className={`ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed ${getMissingFieldClass('street')}`}
                           placeholder="Nome da rua"
                         />
                       </div>
@@ -1628,13 +1761,15 @@ export function CreateStore() {
                         <label className="text-sm font-semibold text-gray-700">Bairro</label>
                         <input
                           required
+                          data-create-field="neighborhood"
                           value={registerForm.neighborhood}
                           onChange={(e) => {
                             setCepAutofilled(false);
+                            clearMissingField('neighborhood');
                             setRegisterForm((prev) => ({ ...prev, neighborhood: e.target.value }));
                           }}
                           disabled={isCepLoading}
-                          className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className={`ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed ${getMissingFieldClass('neighborhood')}`}
                           placeholder="Bairro"
                         />
                       </div>
@@ -1645,10 +1780,14 @@ export function CreateStore() {
                         <label className="text-sm font-semibold text-gray-700">Número</label>
                         <input
                           required
+                          data-create-field="number"
                           value={registerForm.number}
-                          onChange={(e) => setRegisterForm((prev) => ({ ...prev, number: e.target.value }))}
+                          onChange={(e) => {
+                            clearMissingField('number');
+                            setRegisterForm((prev) => ({ ...prev, number: e.target.value }));
+                          }}
                           disabled={isCepLoading}
-                          className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className={`ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed ${getMissingFieldClass('number')}`}
                           placeholder="123"
                         />
                       </div>
@@ -1690,10 +1829,12 @@ export function CreateStore() {
               <label className="text-sm font-semibold text-gray-700">Nome da loja</label>
               <input
                 required
+                data-create-field="storeName"
                 value={registerForm.storeName}
                 onChange={(e) => {
                   const next = e.target.value;
                   setRegisterForm((prev) => ({ ...prev, storeName: next }));
+                  clearMissingField('storeName');
                   if (fieldErrors.storeName) {
                     updateFieldError('storeName', '');
                   }
@@ -1701,7 +1842,7 @@ export function CreateStore() {
                 onBlur={() => updateFieldError('storeName', validateStoreName(registerForm.storeName))}
                 className={`ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all ${
                   fieldErrors.storeName ? 'border-red-400' : 'border-gray-200'
-                }`}
+                } ${getMissingFieldClass('storeName')}`}
                 placeholder="Nome da sua loja"
               />
               {fieldErrors.storeName && (
@@ -1744,9 +1885,13 @@ export function CreateStore() {
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Ramo da loja</label>
               <select
+                data-create-field="segment"
                 value={registerForm.segment}
-                onChange={(e) => handleStoreSegmentChange(e.target.value)}
-                className="ds-select ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all"
+                onChange={(e) => {
+                  clearMissingField('segment');
+                  handleStoreSegmentChange(e.target.value);
+                }}
+                className={`ds-select ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all ${getMissingFieldClass('segment')}`}
               >
                 {STORE_SEGMENTS.map((segment) => (
                   <option key={segment.value} value={segment.value}>
@@ -1954,7 +2099,7 @@ export function CreateStore() {
                   Cobrança mensal
                 </span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div data-create-field="plan" className={`grid grid-cols-1 sm:grid-cols-3 gap-4 rounded-[1.5rem] ${getMissingFieldClass('plan')}`}>
                   <button
                     type="button"
                     onClick={() => setSelectedPlanId('test-plan-7days')}
@@ -2098,8 +2243,12 @@ export function CreateStore() {
               <label className="create-store-check-card">
                 <input
                   type="checkbox"
+                  data-create-field="termsAccepted"
                   checked={termsAccepted}
-                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  onChange={(e) => {
+                    clearMissingField('termsAccepted');
+                    setTermsAccepted(e.target.checked);
+                  }}
                   ref={termsCheckboxRef}
                   className="mt-1 h-5 w-5 accent-[#0d4f66]"
                 />
@@ -2118,8 +2267,12 @@ export function CreateStore() {
               <label className="create-store-check-card">
                 <input
                   type="checkbox"
+                  data-create-field="lgpdAccepted"
                   checked={lgpdAccepted}
-                  onChange={(e) => setLgpdAccepted(e.target.checked)}
+                  onChange={(e) => {
+                    clearMissingField('lgpdAccepted');
+                    setLgpdAccepted(e.target.checked);
+                  }}
                   className="mt-1 h-5 w-5 accent-[#0d4f66]"
                 />
                 <span>
@@ -2154,10 +2307,10 @@ export function CreateStore() {
                     <button
                       type="button"
                       onClick={handleNextStep}
-                      disabled={!canAdvanceFromStep(currentStep) || isPreflightingOwner}
+                      disabled={isPreflightingOwner}
                       className="flex-[1.4] rounded-2xl bg-[linear-gradient(135deg,#0f3b53,#0d4f66,#2c8c9f)] px-4 py-3 text-sm font-black text-white shadow-[0_22px_42px_-24px_rgba(15,59,83,0.65)] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-55 disabled:cursor-not-allowed sm:flex-none"
                     >
-                      {isPreflightingOwner ? 'Validando...' : 'Próximo'}
+                      {isPreflightingOwner ? 'Validando...' : !canAdvanceFromStep(currentStep) ? 'Revisar campos' : 'Próximo'}
                     </button>
                   ) : (
                     <button
@@ -2457,6 +2610,28 @@ export function CreateStore() {
               <div className="rounded-2xl border border-slate-200 bg-white/82 p-4 text-sm font-medium leading-relaxed text-slate-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
                 Se estiver no passo de plano, marque os termos de uso e a política de privacidade. O cadastro só cria a loja depois dessa confirmação.
               </div>
+              {validationItems.length > 0 ? (
+                <div className="rounded-2xl border border-amber-200/80 bg-amber-50/80 p-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-amber-700">Precisa preencher</p>
+                  <div className="mt-3 grid gap-2">
+                    {validationItems.map((item) => (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => {
+                          const fieldKey = Object.keys(missingFields).find((key) => missingFields[key]);
+                          setShowValidationModal(false);
+                          if (fieldKey) focusCreateStoreField(fieldKey);
+                        }}
+                        className="flex items-center gap-2 rounded-xl border border-amber-200 bg-white/82 px-3 py-2 text-left text-sm font-bold text-slate-700 shadow-[0_12px_24px_-22px_rgba(146,64,14,0.55)]"
+                      >
+                        <span className="h-2 w-2 rounded-full bg-amber-500" />
+                        {item}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
               <button
                 type="button"
                 onClick={() => {

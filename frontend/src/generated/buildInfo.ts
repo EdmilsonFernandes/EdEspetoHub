@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260417.172753.1d8c2ca0",
-  "buildId": "0.1.9+20260417.172753.1d8c2ca0-20260417.172753-1d8c2ca0",
-  "builtAt": "2026-04-17T17:27:53.988Z",
-  "commitHash": "1d8c2ca0c9dd8602d370a16196cc3fb527a394b3",
-  "shortHash": "1d8c2ca0",
+  "versionInternal": "0.1.9+20260417.173932.90ada941",
+  "buildId": "0.1.9+20260417.173932.90ada941-20260417.173932-90ada941",
+  "builtAt": "2026-04-17T17:39:32.495Z",
+  "commitHash": "90ada941d857c68d5d5238b4b357f5ab054e8c47",
+  "shortHash": "90ada941",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "90ada941d857c68d5d5238b4b357f5ab054e8c47",
+      "shortHash": "90ada941",
+      "dateIso": "2026-04-17T14:28:41-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(store-signup): premium onboarding form polish",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/90ada941d857c68d5d5238b4b357f5ab054e8c47"
+    },
     {
       "hash": "1d8c2ca0c9dd8602d370a16196cc3fb527a394b3",
       "shortHash": "1d8c2ca0",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(admin): speed up order feed recovery and polish access switcher",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c897ab91752255b2770c61091a939db6f01db526"
-    },
-    {
-      "hash": "efdf900b1b2bb2d3fd3d65e225cfc83c2019148f",
-      "shortHash": "efdf900b",
-      "dateIso": "2026-04-16T14:14:14-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(checkout): protect mobile header safe area",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/efdf900b1b2bb2d3fd3d65e225cfc83c2019148f"
     }
   ]
 } as const;
