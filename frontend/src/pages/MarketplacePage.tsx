@@ -389,6 +389,28 @@ export function MarketplacePage() {
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const condominiumSearchInputRef = useRef<HTMLInputElement | null>(null);
 
+  const SEARCH_PLACEHOLDERS = [
+    'Buscar espetinho...',
+    'Buscar hambúrguer...',
+    'Buscar loja ou produto...',
+    'Buscar churrasco...',
+    'Buscar bebida...',
+    'Buscar sobremesa...',
+  ];
+  const [searchPlaceholderIndex, setSearchPlaceholderIndex] = useState(0);
+  const [searchPlaceholderVisible, setSearchPlaceholderVisible] = useState(true);
+  useEffect(() => {
+    if (isSearchEditing) return;
+    const cycle = window.setInterval(() => {
+      setSearchPlaceholderVisible(false);
+      window.setTimeout(() => {
+        setSearchPlaceholderIndex((i) => (i + 1) % SEARCH_PLACEHOLDERS.length);
+        setSearchPlaceholderVisible(true);
+      }, 350);
+    }, 2800);
+    return () => window.clearInterval(cycle);
+  }, [isSearchEditing]);
+
   useEffect(() => {
     const params = new URLSearchParams(location.search || '');
     if (params.get('panel') === 'condominios') {
@@ -1771,10 +1793,16 @@ export function MarketplacePage() {
                 />
                 <div className="min-w-0 flex-1 rounded-[1.35rem] border border-white/75 bg-white/72 px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_14px_30px_-26px_rgba(15,23,42,0.34)] ring-1 ring-slate-950/5 backdrop-blur-sm">
                   <div className="mb-0.5 flex items-center gap-1.5">
-                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#336886]/10 text-[#336886]">
-                      <MapPinLine size={13} weight="bold" />
-                    </span>
-                    <p className="truncate text-[9.5px] font-black uppercase tracking-[0.2em] text-slate-400">Entregar em</p>
+                    {!isCustomerLogged && (
+                      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#336886]/10 text-[#336886]">
+                        <MapPinLine size={13} weight="bold" />
+                      </span>
+                    )}
+                    <p className="truncate text-[9.5px] font-black uppercase tracking-[0.2em] text-slate-400">
+                      {isCustomerLogged
+                        ? `${(() => { const h = new Date().getHours(); return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'; })()}, ${customerDisplayName.split(' ')[0]} 👋`
+                        : `${(() => { const h = new Date().getHours(); return h < 12 ? '☀️ Bom dia' : h < 18 ? '🌤️ Boa tarde' : '🌙 Boa noite'; })()} — explore as feiras`}
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -1829,11 +1857,11 @@ export function MarketplacePage() {
                     onChange={(event) => setQuery(event.target.value)}
                     onFocus={() => setIsSearchEditing(true)}
                     onBlur={() => setIsSearchEditing(false)}
-                    placeholder="Buscar loja, categoria ou produto"
+                    placeholder={isSearchEditing ? 'Buscar loja, categoria ou produto' : SEARCH_PLACEHOLDERS[searchPlaceholderIndex]}
                     autoComplete="off"
                     inputMode="search"
                     enterKeyHint="search"
-                    className={`block w-full min-w-0 appearance-none bg-transparent pr-1 font-semibold text-slate-950 placeholder:text-slate-400 outline-none ${isNativePlatform ? 'min-h-[48px] text-[15px]' : 'min-h-[52px] text-[14px]'}`}
+                    className={`block w-full min-w-0 appearance-none bg-transparent pr-1 font-semibold text-slate-950 outline-none transition-opacity duration-300 ${searchPlaceholderVisible || isSearchEditing ? 'placeholder:opacity-100' : 'placeholder:opacity-0'} placeholder:text-slate-400 placeholder:transition-opacity placeholder:duration-300 ${isNativePlatform ? 'min-h-[48px] text-[15px]' : 'min-h-[52px] text-[14px]'}`}
                     style={{
                       WebkitAppearance: 'none',
                       caretColor: '#336886',
@@ -1865,7 +1893,7 @@ export function MarketplacePage() {
 
             {/* Linha 3: Filtros Minimalistas (Pílulas) */}
             <div className={`relative -mx-0.5 flex gap-2 overflow-x-auto no-scrollbar scrollbar-hide px-0.5 ${isNativePlatform ? 'py-0.5' : 'py-1'}`}>
-              {['all', 'free_shipping', 'nearby', 'open_now', 'favorites'].map((filter) => {
+              {(['all', 'free_shipping', 'nearby', 'open_now', 'favorites'] as const).map((filter) => {
                 const label =
                   filter === 'all' ? 'Todos' :
                   filter === 'free_shipping' ? 'Frete grátis' :
@@ -1877,16 +1905,24 @@ export function MarketplacePage() {
                   filter === 'nearby' ? MapPinLine :
                   filter === 'favorites' ? Heart : Clock;
                 const active = quickFilter === filter;
+                const activeStyle =
+                  filter === 'all'          ? 'border-[#336886]   bg-[#153A4C]   text-white  shadow-[0_10px_22px_-12px_rgba(21,58,76,0.65)]' :
+                  filter === 'free_shipping'? 'border-emerald-500 bg-emerald-600 text-white  shadow-[0_10px_22px_-12px_rgba(5,150,105,0.55)]' :
+                  filter === 'nearby'       ? 'border-sky-500     bg-sky-600     text-white  shadow-[0_10px_22px_-12px_rgba(2,132,199,0.55)]' :
+                  filter === 'open_now'     ? 'border-amber-500   bg-amber-500   text-white  shadow-[0_10px_22px_-12px_rgba(245,158,11,0.55)]' :
+                                              'border-rose-400    bg-rose-500    text-white  shadow-[0_10px_22px_-12px_rgba(244,63,94,0.55)]';
+                const inactiveStyle =
+                  filter === 'all'          ? 'border-white/75 bg-white/72 text-slate-600' :
+                  filter === 'free_shipping'? 'border-emerald-100/80 bg-emerald-50/60 text-emerald-700' :
+                  filter === 'nearby'       ? 'border-sky-100/80 bg-sky-50/60 text-sky-700' :
+                  filter === 'open_now'     ? 'border-amber-100/80 bg-amber-50/60 text-amber-700' :
+                                              'border-rose-100/80 bg-rose-50/60 text-rose-600';
                 return (
                   <button
                     key={filter}
                     type="button"
                     onClick={() => setQuickFilter(filter as any)}
-                    className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full ${isNativePlatform ? 'px-3 py-1.5' : 'px-3.5 py-1.5'} text-[12px] transition-all duration-150 ease-out active:scale-[0.97] ${
-                      active
-                        ? 'border border-[#336886] bg-[#153A4C] text-white shadow-[0_14px_28px_-16px_rgba(21,58,76,0.72)] font-black'
-                        : 'border border-white/75 bg-white/72 text-slate-600 hover:bg-white font-bold shadow-[0_10px_22px_-18px_rgba(15,23,42,0.28)]'
-                    }`}
+                    className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border ${isNativePlatform ? 'px-3 py-1.5' : 'px-3.5 py-1.5'} text-[12px] transition-all duration-200 ease-out active:scale-[0.97] shadow-[0_6px_16px_-10px_rgba(15,23,42,0.18)] ${active ? `font-black ${activeStyle}` : `font-bold ${inactiveStyle}`}`}
                   >
                     <Icon size={13} weight={active ? 'fill' : 'duotone'} />
                     {label}
@@ -2793,17 +2829,16 @@ export function MarketplacePage() {
         <div className="fixed inset-0 z-[220] overflow-y-auto bg-white text-slate-950">
           <div className="mx-auto min-h-screen max-w-[640px] pb-28">
 
-            {/* ── Hero gradiente ── */}
-            <div className="relative px-4 pb-6 pt-[max(env(safe-area-inset-top),1rem)] bg-[linear-gradient(160deg,#1e4d66_0%,#336886_45%,#3d7a9a_100%)]">
-              {/* Orbs decorativos */}
-              <div className="pointer-events-none absolute -right-10 -top-6 h-52 w-52 rounded-full bg-white/5 blur-3xl" />
-              <div className="pointer-events-none absolute -left-8 bottom-0 h-36 w-36 rounded-full bg-white/8 blur-2xl" />
+            {/* ── Hero suave ── */}
+            <div className="relative px-4 pb-6 pt-[max(env(safe-area-inset-top),1rem)]">
+              {/* Orb decorativo */}
+              <div className="pointer-events-none absolute -right-10 -top-6 h-52 w-52 rounded-full bg-[#336886]/8 blur-3xl" />
 
               {/* Botão voltar */}
               <button
                 type="button"
                 onClick={() => { setCondominiumPickerOpen(false); setCondominiumSearch(''); }}
-                className="relative mb-5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm transition-colors hover:bg-white/25 active:scale-95"
+                className="relative mb-5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-600 shadow-sm ring-1 ring-slate-200 transition-colors hover:bg-slate-50 active:scale-95"
                 aria-label="Voltar"
               >
                 <CaretRight size={16} weight="bold" className="rotate-180" />
@@ -2815,18 +2850,18 @@ export function MarketplacePage() {
                   <img
                     src="/janocaminho-logo.png"
                     alt="Já no Caminho"
-                    className="h-6 w-6 rounded-full object-cover ring-1 ring-white/30"
+                    className="h-5 w-5 rounded-full object-cover ring-1 ring-[#336886]/20"
                   />
-                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/60">Já no Caminho</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]/70">Já no Caminho</p>
                 </div>
-                <h2 className="text-[1.75rem] font-black tracking-tight text-white leading-none">Onde você está?</h2>
-                <p className="mt-2 text-[13px] font-medium text-white/70 leading-snug max-w-xs">
+                <h2 className="text-[1.75rem] font-black tracking-tight text-slate-900 leading-none">Onde você está?</h2>
+                <p className="mt-2 text-[13px] font-medium text-slate-500 leading-snug max-w-xs">
                   Escolha seu condomínio e veja as feiras ativas agora.
                 </p>
               </div>
 
-              {/* Search flutuante */}
-              <div className="relative flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.28)] transition-all duration-200 focus-within:shadow-[0_8px_32px_-4px_rgba(0,0,0,0.32)]">
+              {/* Search */}
+              <div className="relative flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-[0_4px_16px_-6px_rgba(15,23,42,0.08)] transition-all duration-200 focus-within:border-[#336886]/30 focus-within:shadow-[0_4px_20px_-6px_rgba(51,104,134,0.15)]">
                 <MagnifyingGlass size={16} weight="bold" className="shrink-0 text-slate-400" />
                 <input
                   ref={condominiumSearchInputRef}
