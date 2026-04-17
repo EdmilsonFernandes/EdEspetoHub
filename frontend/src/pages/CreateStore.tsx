@@ -197,7 +197,6 @@ export function CreateStore() {
   const [showTerms, setShowTerms] = useState(false);
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [validationMessage, setValidationMessage] = useState('');
-  const [validationItems, setValidationItems] = useState<string[]>([]);
   const [missingFields, setMissingFields] = useState<Record<string, boolean>>({});
   const [storeVerifyPrompt, setStoreVerifyPrompt] = useState<any | null>(null);
   const [storeCodeDigits, setStoreCodeDigits] = useState(['', '', '', '']);
@@ -1204,9 +1203,7 @@ export function CreateStore() {
   const showStepValidation = (stepId: number) => {
     const details = getStepValidationDetails(stepId);
     setMissingFields(details.fields);
-    setValidationItems(details.items);
     setValidationMessage(details.message || getStepValidationMessage(stepId));
-    setShowValidationModal(true);
     const firstField = Object.keys(details.fields)[0];
     if (firstField) focusCreateStoreField(firstField);
   };
@@ -1368,8 +1365,8 @@ export function CreateStore() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-3 sm:py-4">
             <button onClick={() => navigate('/')} className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-2xl overflow-hidden bg-white shadow-[0_14px_26px_-18px_rgba(15,59,83,0.55)] ring-1 ring-[#336886]/15 flex items-center justify-center">
-                <img src={platformLogo} alt="Já no Caminho" className="h-full w-full object-contain p-1" />
+              <div className="h-11 w-11 rounded-full overflow-hidden bg-[#0b2447] shadow-[0_14px_26px_-18px_rgba(15,59,83,0.55)] ring-2 ring-white/80 flex items-center justify-center">
+                <img src={platformLogo} alt="Já no Caminho" className="h-full w-full object-cover" />
               </div>
               <div className="hidden sm:block leading-tight">
                 <p className="text-lg font-black text-gray-900">Já no Caminho</p>
@@ -1379,7 +1376,7 @@ export function CreateStore() {
 
             <button
               onClick={() => navigate('/')}
-              className="px-3 py-2 sm:px-4 text-sm rounded-full border border-slate-200 text-gray-700 hover:bg-gray-50 transition-colors"
+              className="rounded-full border border-[#0d4f66]/15 bg-[linear-gradient(135deg,rgba(13,79,102,0.08),rgba(44,140,159,0.12))] px-4 py-2 text-sm font-black text-[#0d4f66] shadow-[0_14px_28px_-22px_rgba(15,59,83,0.45)] transition hover:bg-[#0d4f66]/10 active:scale-[0.98]"
             >
               Cancelar
             </button>
@@ -1390,18 +1387,14 @@ export function CreateStore() {
       <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-6 items-start">
         <div className="min-w-0 rounded-2xl border border-slate-100 bg-white p-6 md:p-10 shadow-sm">
-          <div className="mb-5 flex flex-col items-center text-center gap-3 sm:gap-2">
-            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-slate-600">
-              <Buildings size={12} weight="duotone" />
-              Criar nova loja
-            </div>
+          <div className="mb-5 flex flex-col items-center text-center gap-2">
             <h1 className="text-2xl sm:text-3xl font-black text-gray-900 leading-tight">Criar minha loja</h1>
-            <p className="text-sm sm:text-base text-slate-600">Em 4 etapas você publica sua loja com visual premium e checkout pronto.</p>
+            <p className="text-sm sm:text-base text-slate-600">4 etapas rápidas para publicar sua loja com checkout pronto.</p>
           </div>
 
           <div className="sticky top-[72px] sm:top-[84px] z-20 mb-6 rounded-2xl border border-slate-200 bg-white/95 p-3 sm:p-4 backdrop-blur">
           <div className="mb-2 flex items-center justify-between gap-2">
-            <p className="text-xs uppercase tracking-[0.22em] font-semibold text-slate-500">Onboarding</p>
+            <p className="text-xs uppercase tracking-[0.22em] font-semibold text-slate-500">Etapas da loja</p>
             <span className="text-[11px] text-slate-500 font-semibold">Etapa {currentStep} de 4</span>
           </div>
           <div className="mb-3 h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
@@ -1461,16 +1454,6 @@ export function CreateStore() {
               contentClassName="space-y-4"
             >
               <div className={currentStep === 1 ? 'space-y-4 motion-safe:animate-[createStoreStepIn_.26s_ease-out]' : 'hidden'}>
-                <div className="create-store-step-hero">
-                  <div className="create-store-step-icon">
-                    <UserCircle size={24} weight="duotone" />
-                  </div>
-                  <div>
-                    <p className="create-store-step-eyebrow">Acesso seguro</p>
-                    <h3>Crie a conta do responsável pela loja</h3>
-                    <p>Use um e-mail real. Vamos enviar o código de 4 dígitos para ativar sua loja no final.</p>
-                  </div>
-                </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">Nome completo</label>
                   <input
@@ -1629,16 +1612,6 @@ export function CreateStore() {
               </div>
 
                 <div ref={addressSectionRef} className={`pt-4 border-t border-gray-200 scroll-mt-36 ${currentStep === 2 ? 'motion-safe:animate-[createStoreStepIn_.26s_ease-out]' : 'hidden'}`} onFocusCapture={() => setCurrentStep(2)}>
-                  <div className="create-store-step-hero mb-4">
-                    <div className="create-store-step-icon create-store-step-icon-green">
-                      <MapPinLine size={24} weight="duotone" />
-                    </div>
-                    <div>
-                      <p className="create-store-step-eyebrow">Local de operação</p>
-                      <h3>Informe onde a loja atende</h3>
-                      <p>O CEP ajuda a preencher o endereço e reduz erro na vitrine, entrega e suporte.</p>
-                    </div>
-                  </div>
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 min-w-0">
                       <div className="space-y-2 min-w-0">
@@ -1815,16 +1788,6 @@ export function CreateStore() {
                 className="create-store-section"
                 contentClassName="space-y-4"
               >
-            <div className="create-store-step-hero">
-              <div className="create-store-step-icon create-store-step-icon-amber">
-                <Storefront size={24} weight="duotone" />
-              </div>
-              <div>
-                <p className="create-store-step-eyebrow">Vitrine pronta</p>
-                <h3>Monte a primeira impressão da sua marca</h3>
-                <p>Nome, descrição, segmento e imagens deixam sua loja mais confiável antes do primeiro pedido.</p>
-              </div>
-            </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Nome da loja</label>
               <input
@@ -2083,16 +2046,6 @@ export function CreateStore() {
                   </span>
                 }
               >
-              <div className="create-store-step-hero">
-                <div className="create-store-step-icon create-store-step-icon-green">
-                  <CreditCard size={24} weight="duotone" />
-                </div>
-                <div>
-                  <p className="create-store-step-eyebrow">Teste sem atrito</p>
-                  <h3>Comece grátis e escolha depois</h3>
-                  <p>O trial libera sua operação por 7 dias. Se escolher plano pago agora, mantemos o pagamento no mesmo fluxo.</p>
-                </div>
-              </div>
               <div className="mb-6 flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-emerald-100 bg-white/72 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
                 <span className="text-sm font-black text-gray-900">Plano mensal ativo</span>
                 <span className="inline-block rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-sm font-black text-emerald-700">
@@ -2310,7 +2263,7 @@ export function CreateStore() {
                       disabled={isPreflightingOwner}
                       className="flex-[1.4] rounded-2xl bg-[linear-gradient(135deg,#0f3b53,#0d4f66,#2c8c9f)] px-4 py-3 text-sm font-black text-white shadow-[0_22px_42px_-24px_rgba(15,59,83,0.65)] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-55 disabled:cursor-not-allowed sm:flex-none"
                     >
-                      {isPreflightingOwner ? 'Validando...' : !canAdvanceFromStep(currentStep) ? 'Revisar campos' : 'Próximo'}
+                      {isPreflightingOwner ? 'Validando...' : 'Próximo'}
                     </button>
                   ) : (
                     <button
@@ -2610,28 +2563,6 @@ export function CreateStore() {
               <div className="rounded-2xl border border-slate-200 bg-white/82 p-4 text-sm font-medium leading-relaxed text-slate-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
                 Se estiver no passo de plano, marque os termos de uso e a política de privacidade. O cadastro só cria a loja depois dessa confirmação.
               </div>
-              {validationItems.length > 0 ? (
-                <div className="rounded-2xl border border-amber-200/80 bg-amber-50/80 p-4">
-                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-amber-700">Precisa preencher</p>
-                  <div className="mt-3 grid gap-2">
-                    {validationItems.map((item) => (
-                      <button
-                        key={item}
-                        type="button"
-                        onClick={() => {
-                          const fieldKey = Object.keys(missingFields).find((key) => missingFields[key]);
-                          setShowValidationModal(false);
-                          if (fieldKey) focusCreateStoreField(fieldKey);
-                        }}
-                        className="flex items-center gap-2 rounded-xl border border-amber-200 bg-white/82 px-3 py-2 text-left text-sm font-bold text-slate-700 shadow-[0_12px_24px_-22px_rgba(146,64,14,0.55)]"
-                      >
-                        <span className="h-2 w-2 rounded-full bg-amber-500" />
-                        {item}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
               <button
                 type="button"
                 onClick={() => {

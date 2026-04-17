@@ -1136,67 +1136,6 @@ body {
     box-shadow: 0 30px 80px -52px rgba(15, 23, 42, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.82) !important;
   }
 
-  .create-store-step-hero {
-    align-items: flex-start;
-    background:
-      radial-gradient(circle at 0% 0%, rgba(95, 211, 90, 0.14), transparent 30%),
-      linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(241, 245, 249, 0.78));
-    border: 1px solid rgba(226, 232, 240, 0.78);
-    border-radius: 1.6rem;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 20px 44px -36px rgba(15, 23, 42, 0.5);
-    display: flex;
-    gap: 0.9rem;
-    padding: 1rem;
-  }
-
-  .create-store-step-icon {
-    align-items: center;
-    background: linear-gradient(135deg, rgba(15, 59, 83, 0.12), rgba(44, 140, 159, 0.16));
-    border: 1px solid rgba(13, 79, 102, 0.13);
-    border-radius: 1.1rem;
-    color: var(--create-store-primary);
-    display: flex;
-    flex: 0 0 auto;
-    height: 3rem;
-    justify-content: center;
-    width: 3rem;
-  }
-
-  .create-store-step-icon-green {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(95, 211, 90, 0.15));
-    color: #047857;
-  }
-
-  .create-store-step-icon-amber {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(251, 191, 36, 0.15));
-    color: #b45309;
-  }
-
-  .create-store-step-eyebrow {
-    color: #64748b;
-    font-size: 0.64rem;
-    font-weight: 900;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-  }
-
-  .create-store-step-hero h3 {
-    color: #0f172a;
-    font-size: 1rem;
-    font-weight: 900;
-    letter-spacing: -0.03em;
-    line-height: 1.15;
-    margin-top: 0.18rem;
-  }
-
-  .create-store-step-hero p:not(.create-store-step-eyebrow) {
-    color: #64748b;
-    font-size: 0.82rem;
-    font-weight: 600;
-    line-height: 1.5;
-    margin-top: 0.35rem;
-  }
-
   .create-store-upload-card {
     background:
       radial-gradient(circle at top, rgba(44, 140, 159, 0.12), transparent 46%),

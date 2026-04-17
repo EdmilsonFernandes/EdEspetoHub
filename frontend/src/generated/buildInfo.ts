@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260417.175200.140aa3de",
-  "buildId": "0.1.9+20260417.175200.140aa3de-20260417.175200-140aa3de",
-  "builtAt": "2026-04-17T17:52:00.752Z",
-  "commitHash": "140aa3de61a226c13f32fa946d502b73bdd27b76",
-  "shortHash": "140aa3de",
+  "versionInternal": "0.1.9+20260417.175859.e75ec76a",
+  "buildId": "0.1.9+20260417.175859.e75ec76a-20260417.175859-e75ec76a",
+  "builtAt": "2026-04-17T17:58:59.502Z",
+  "commitHash": "e75ec76a3b64f494e26b9b4e3e37c76f1561d35b",
+  "shortHash": "e75ec76a",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "e75ec76a3b64f494e26b9b4e3e37c76f1561d35b",
+      "shortHash": "e75ec76a",
+      "dateIso": "2026-04-17T14:53:03-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(app): use customer biometrics for orders shortcut",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e75ec76a3b64f494e26b9b4e3e37c76f1561d35b"
+    },
     {
       "hash": "140aa3de61a226c13f32fa946d502b73bdd27b76",
       "shortHash": "140aa3de",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(checkout): remove duplicate store header",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ba66472cab4e6c37ffadf7a27ab407288f6ae521"
-    },
-    {
-      "hash": "0170770e019db1db1e1f766f3fac589523a0a87c",
-      "shortHash": "0170770e",
-      "dateIso": "2026-04-16T14:34:16-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(drawer): harmonize logout action",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0170770e019db1db1e1f766f3fac589523a0a87c"
     }
   ]
 } as const;
