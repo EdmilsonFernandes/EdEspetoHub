@@ -1,5 +1,5 @@
 
-import { CaretRight, MagnifyingGlass, UserCircle, Buildings, House, Receipt, Heart, Storefront } from '@phosphor-icons/react';
+import { MagnifyingGlass, UserCircle, Buildings, House, Receipt, Heart, Storefront } from '@phosphor-icons/react';
 
 export function PremiumHomePrototype() {
   return (

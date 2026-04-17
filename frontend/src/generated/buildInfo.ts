@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260417.204049.a95238d2",
-  "buildId": "0.1.9+20260417.204049.a95238d2-20260417.204049-a95238d2",
-  "builtAt": "2026-04-17T20:40:49.949Z",
-  "commitHash": "a95238d25a0008603b547eabac299925b7a9b4c0",
-  "shortHash": "a95238d2",
+  "versionInternal": "0.1.9+20260417.212305.a3259cc5",
+  "buildId": "0.1.9+20260417.212305.a3259cc5-20260417.212305-a3259cc5",
+  "builtAt": "2026-04-17T21:23:05.730Z",
+  "commitHash": "a3259cc59e9577e456bbced64d4db4bb6e7e91b9",
+  "shortHash": "a3259cc5",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "a3259cc59e9577e456bbced64d4db4bb6e7e91b9",
+      "shortHash": "a3259cc5",
+      "dateIso": "2026-04-17T18:22:15-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(marketplace): implement selectCondominium and fix modal z-index",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a3259cc59e9577e456bbced64d4db4bb6e7e91b9"
+    },
     {
       "hash": "a95238d25a0008603b547eabac299925b7a9b4c0",
       "shortHash": "a95238d2",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(admin): avoid forbidden motoboy lookup in queue",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/445aaa82fb7ea4b4c5ec80957497dd04f34390f7"
-    },
-    {
-      "hash": "e59afc84d653b9992166ef0be03a2c444f5d7dbb",
-      "shortHash": "e59afc84",
-      "dateIso": "2026-04-16T18:10:46-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(admin): prevent queue timer wrapping",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e59afc84d653b9992166ef0be03a2c444f5d7dbb"
     }
   ]
 } as const;
