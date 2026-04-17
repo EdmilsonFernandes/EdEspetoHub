@@ -106,6 +106,11 @@ type CondominiumEventSummary = {
   canOrderInCondominium?: boolean;
 };
 
+type CondominiumAvailabilityModalState = {
+  name: string;
+  nextLabel: string;
+};
+
 const normalizeSegment = (segment?: string | null) =>
   String(segment || '')
     .normalize('NFD')
@@ -373,6 +378,7 @@ export function MarketplacePage() {
   const [condominiumStoresLoading, setCondominiumStoresLoading] = useState(false);
   const [condominiumPickerOpen, setCondominiumPickerOpen] = useState(false);
   const [condominiumSearch, setCondominiumSearch] = useState('');
+  const [condominiumAvailabilityModal, setCondominiumAvailabilityModal] = useState<CondominiumAvailabilityModalState | null>(null);
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
@@ -1523,11 +1529,21 @@ export function MarketplacePage() {
 
   const selectCondominium = useCallback((slug: string) => {
     const normalized = String(slug || '').trim();
+    const condominium = condominiums.find((item) => String(item?.slug || '').trim() === normalized) || null;
+    const event = condominium?.eventSummary || null;
+    const eventState = String(event?.state || '').trim().toLowerCase();
+    if (eventState !== 'live') {
+      setCondominiumAvailabilityModal({
+        name: String(condominium?.name || 'este condomínio').trim(),
+        nextLabel: formatCondominiumEventTime(event) || '',
+      });
+      return;
+    }
     setSelectedCondominiumSlug((current) => (current === normalized ? '' : normalized));
     setCondominiumPickerOpen(false);
     setCondominiumSearch('');
     resetMarketplaceFilters();
-  }, [resetMarketplaceFilters]);
+  }, [condominiums, resetMarketplaceFilters]);
 
   const clearCondominiumSelection = useCallback(() => {
     setSelectedCondominiumSlug('');
@@ -3016,6 +3032,22 @@ export function MarketplacePage() {
           </div>
         </div>
       )}
+
+      <ConfirmationModal
+        isOpen={!!condominiumAvailabilityModal}
+        onClose={() => setCondominiumAvailabilityModal(null)}
+        onConfirm={() => setCondominiumAvailabilityModal(null)}
+        title="Condomínio fora de agenda"
+        description={
+          condominiumAvailabilityModal?.nextLabel
+            ? `O condomínio "${condominiumAvailabilityModal.name}" não possui feira ativa agora. A próxima será em: ${condominiumAvailabilityModal.nextLabel}.`
+            : `O condomínio "${condominiumAvailabilityModal?.name}" não possui uma feira ativa ou agendada no momento.`
+        }
+        confirmLabel="Entendi"
+        cancelLabel="Fechar"
+        variant="info"
+        icon={<CalendarBlank size={32} weight="duotone" />}
+      />
 
       <ConfirmationModal
         isOpen={showDeactivateModal}
