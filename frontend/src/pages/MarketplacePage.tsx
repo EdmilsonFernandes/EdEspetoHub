@@ -2785,161 +2785,246 @@ export function MarketplacePage() {
 
       {condominiumPickerOpen && (
         <div className="fixed inset-0 z-[220] overflow-y-auto bg-white text-slate-950">
-          <div className="mx-auto min-h-screen max-w-[640px] px-4 pb-28 pt-[max(env(safe-area-inset-top),0.5rem)]">
+          <div className="mx-auto min-h-screen max-w-[640px] pb-28">
 
-            {/* Header */}
-            <div className="sticky top-0 z-10 -mx-4 flex items-center gap-3 bg-white/95 px-4 py-3 backdrop-blur-xl border-b border-slate-100">
+            {/* ── Hero gradiente ── */}
+            <div className="relative px-4 pb-6 pt-[max(env(safe-area-inset-top),1rem)] bg-[linear-gradient(160deg,#1e4d66_0%,#336886_45%,#3d7a9a_100%)]">
+              {/* Orbs decorativos */}
+              <div className="pointer-events-none absolute -right-10 -top-6 h-52 w-52 rounded-full bg-white/5 blur-3xl" />
+              <div className="pointer-events-none absolute -left-8 bottom-0 h-36 w-36 rounded-full bg-white/8 blur-2xl" />
+
+              {/* Botão voltar */}
               <button
                 type="button"
-                onClick={() => {
-                  setCondominiumPickerOpen(false);
-                  setCondominiumSearch('');
-                }}
-                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 active:scale-95"
+                onClick={() => { setCondominiumPickerOpen(false); setCondominiumSearch(''); }}
+                className="relative mb-5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm transition-colors hover:bg-white/25 active:scale-95"
                 aria-label="Voltar"
               >
                 <CaretRight size={16} weight="bold" className="rotate-180" />
               </button>
-              <div className="flex-1 min-w-0">
-                <h2 className="text-base font-black tracking-tight text-slate-900 leading-none">Escolha seu condomínio</h2>
-                <p className="mt-0.5 text-[11px] font-medium text-slate-400 truncate">Veja quais feiras estão ativas agora</p>
+
+              {/* Título */}
+              <div className="relative mb-5">
+                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/60 mb-1">Já no Caminho</p>
+                <h2 className="text-[1.75rem] font-black tracking-tight text-white leading-none">Onde você está?</h2>
+                <p className="mt-2 text-[13px] font-medium text-white/70 leading-snug max-w-xs">
+                  Escolha seu condomínio e veja as feiras ativas agora.
+                </p>
               </div>
-              <span className="shrink-0 rounded-full bg-[#336886]/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-[#336886]">
-                {filteredCondominiums.length}
-              </span>
-            </div>
 
-            {/* Search */}
-            <div className="mt-4 flex items-center gap-2.5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition-all duration-200 focus-within:border-[#336886]/30 focus-within:bg-white focus-within:shadow-[0_0_0_3px_rgba(51,104,134,0.08)]">
-              <MagnifyingGlass size={16} weight="bold" className="shrink-0 text-slate-400" />
-              <input
-                ref={condominiumSearchInputRef}
-                type="text"
-                value={condominiumSearch}
-                onChange={(event) => setCondominiumSearch(event.target.value)}
-                placeholder="Buscar por nome ou cidade..."
-                autoComplete="off"
-                className="min-h-0 min-w-0 flex-1 bg-transparent text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400"
-              />
-              {condominiumSearch ? (
-                <button
-                  type="button"
-                  onClick={() => setCondominiumSearch('')}
-                  className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-500 transition-colors hover:bg-slate-300 active:scale-95"
-                  aria-label="Limpar busca"
-                >
-                  <X size={11} weight="bold" />
-                </button>
-              ) : null}
-            </div>
-
-            {/* List */}
-            <div className="mt-4 flex flex-col gap-2 pb-4">
-              {filteredCondominiums.map(({ condominium, slug, name, region, event }) => {
-                const active = selectedCondominiumSlug === slug;
-                const imageUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
-                const eventState = event?.state || 'none';
-                const eventBadge = eventState === 'live'
-                  ? 'Ao vivo'
-                  : eventState === 'upcoming'
-                    ? 'Agendado'
-                    : 'Sem agenda';
-                const eventTimeLabel = formatCondominiumPickerEventTime(event) || formatCondominiumEventTime(event);
-                return (
+              {/* Search flutuante */}
+              <div className="relative flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.28)] transition-all duration-200 focus-within:shadow-[0_8px_32px_-4px_rgba(0,0,0,0.32)]">
+                <MagnifyingGlass size={16} weight="bold" className="shrink-0 text-slate-400" />
+                <input
+                  ref={condominiumSearchInputRef}
+                  type="text"
+                  value={condominiumSearch}
+                  onChange={(ev) => setCondominiumSearch(ev.target.value)}
+                  placeholder="Buscar por nome ou cidade..."
+                  autoComplete="off"
+                  className="min-h-0 min-w-0 flex-1 bg-transparent text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400"
+                />
+                {condominiumSearch ? (
                   <button
-                    key={slug}
                     type="button"
-                    onClick={() => {
-                      if (!event?.state || event.state !== 'live') {
-                        setCondominiumAvailabilityModal({
-                          name: name || 'Condomínio',
-                          nextLabel: formatCondominiumPickerEventTime(event) || 'A confirmar',
-                        });
-                      } else {
-                        setCondominiumPickerOpen(false);
-                        setCondominiumSearch('');
-                        setSelectedCondominiumSlug(slug);
-                      }
-                    }}
-                    className={`group flex w-full items-center gap-3.5 rounded-2xl border p-3.5 text-left transition-all duration-200 active:scale-[0.99] ${
-                      active
-                        ? 'border-[#336886]/20 bg-[#336886]/5 shadow-[0_0_0_2px_rgba(51,104,134,0.12)]'
-                        : eventState === 'live'
-                          ? 'border-emerald-100 bg-white shadow-[0_2px_8px_-4px_rgba(16,185,129,0.12)] hover:border-emerald-200 hover:shadow-[0_4px_16px_-6px_rgba(16,185,129,0.18)]'
-                          : 'border-slate-100 bg-white shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)] hover:border-slate-200 hover:shadow-[0_4px_16px_-8px_rgba(15,23,42,0.1)]'
-                    }`}
+                    onClick={() => setCondominiumSearch('')}
+                    className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200 active:scale-95"
                   >
-                    {/* Logo */}
-                    <div className="relative shrink-0">
-                      <div className={`h-14 w-14 overflow-hidden rounded-[1.1rem] border bg-slate-50 ${active ? 'border-[#336886]/15' : 'border-slate-100'}`}>
-                        <img
-                          src={imageUrl}
-                          alt={name}
-                          loading="lazy"
-                          decoding="async"
-                          className="h-full w-full object-cover"
-                          onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }}
-                        />
-                      </div>
-                      {eventState === 'live' && (
-                        <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-emerald-500">
-                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Info */}
-                    <div className="flex min-w-0 flex-1 flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <span className="truncate text-[14px] font-bold text-slate-900">{name}</span>
-                        {active && (
-                          <span className="shrink-0 rounded-full bg-[#336886] px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-white">
-                            Selecionado
-                          </span>
-                        )}
-                      </div>
-                      {region && (
-                        <span className="truncate text-[11px] font-medium text-slate-400">{region}</span>
-                      )}
-                      <div className="mt-0.5 flex items-center gap-1.5">
-                        <span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wide ${
-                          eventState === 'live'
-                            ? 'bg-emerald-100 text-emerald-700'
-                            : eventState === 'upcoming'
-                              ? 'bg-sky-50 text-[#336886]'
-                              : 'bg-slate-100 text-slate-500'
-                        }`}>
-                          {eventState === 'live' && (
-                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                          )}
-                          {eventBadge}
-                        </span>
-                        {eventTimeLabel && (
-                          <span className="truncate text-[10px] font-medium text-slate-400">{eventTimeLabel}</span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Arrow */}
-                    <CaretRight
-                      size={14}
-                      weight="bold"
-                      className={`shrink-0 transition-all duration-200 group-hover:translate-x-0.5 ${active ? 'text-[#336886]' : 'text-slate-300'}`}
-                    />
+                    <X size={11} weight="bold" />
                   </button>
-                );
-              })}
+                ) : null}
+              </div>
             </div>
 
-            {filteredCondominiums.length === 0 && (
-              <div className="py-16 text-center">
-                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-                  <Buildings size={24} weight="duotone" />
-                </div>
-                <p className="text-sm font-bold text-slate-700">Nenhum condomínio encontrado</p>
-                <p className="mt-1 text-xs text-slate-400">Tente buscar pelo nome ou pela cidade.</p>
-              </div>
-            )}
+            {/* ── Conteúdo ── */}
+            <div className="px-4 pt-5 pb-4">
+              {(() => {
+                const live = filteredCondominiums.filter(c => c.event?.state === 'live');
+                const upcoming = filteredCondominiums.filter(c => c.event?.state === 'upcoming');
+                const none = filteredCondominiums.filter(c => !c.event?.state || (c.event.state !== 'live' && c.event.state !== 'upcoming'));
+
+                const handleClick = (slug: string, name: string, event: typeof filteredCondominiums[0]['event']) => {
+                  if (!event?.state || event.state !== 'live') {
+                    setCondominiumAvailabilityModal({
+                      name: name || 'Condomínio',
+                      nextLabel: formatCondominiumPickerEventTime(event) || 'A confirmar',
+                    });
+                  } else {
+                    setCondominiumPickerOpen(false);
+                    setCondominiumSearch('');
+                    setSelectedCondominiumSlug(slug);
+                  }
+                };
+
+                if (filteredCondominiums.length === 0) {
+                  return (
+                    <div className="py-16 text-center">
+                      <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                        <Buildings size={24} weight="duotone" />
+                      </div>
+                      <p className="text-sm font-bold text-slate-700">Nenhum condomínio encontrado</p>
+                      <p className="mt-1 text-xs text-slate-400">Tente buscar pelo nome ou pela cidade.</p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="flex flex-col gap-6">
+
+                    {/* ── AO VIVO ── hero cards */}
+                    {live.length > 0 && (
+                      <section>
+                        <div className="mb-3 flex items-center gap-2">
+                          <span className="relative flex h-2.5 w-2.5">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                          </span>
+                          <span className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-600">Acontecendo agora</span>
+                          <span className="ml-auto rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-black text-emerald-700">{live.length}</span>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                          {live.map(({ condominium, slug, name, region, event }) => {
+                            const active = selectedCondominiumSlug === slug;
+                            const logoUrl = resolveAssetUrl(condominium.logoUrl || undefined) || getStoreAvatarUrl(slug, name);
+                            const bannerUrl = resolveAssetUrl(condominium.bannerUrl || condominium.logoUrl || undefined) || logoUrl;
+                            const timeLabel = formatCondominiumPickerEventTime(event) || formatCondominiumEventTime(event);
+                            return (
+                              <button
+                                key={slug}
+                                type="button"
+                                onClick={() => handleClick(slug, name, event)}
+                                className={`group relative w-full overflow-hidden rounded-[1.5rem] text-left active:scale-[0.985] transition-all duration-300 ${active ? 'ring-2 ring-[#336886] ring-offset-2' : ''}`}
+                              >
+                                {/* Banner bg */}
+                                <div className="absolute inset-0">
+                                  <img src={bannerUrl} alt="" aria-hidden className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = logoUrl; }} />
+                                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,30,40,0.18)_0%,rgba(10,30,40,0.72)_100%)]" />
+                                </div>
+
+                                {/* Live badge top-right */}
+                                <div className="relative flex items-start justify-end p-4">
+                                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-white shadow-lg">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                                    Ao vivo
+                                  </span>
+                                </div>
+
+                                {/* Glass bottom */}
+                                <div className="relative px-4 pb-4 pt-8">
+                                  <div className="flex items-end gap-3">
+                                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-[0.9rem] border-2 border-white/30 bg-white/10 shadow-lg backdrop-blur-sm">
+                                      <img src={logoUrl} alt={name} className="h-full w-full object-contain p-1.5 bg-white" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
+                                    </div>
+                                    <div className="min-w-0 flex-1 pb-0.5">
+                                      <p className="truncate text-base font-black text-white leading-tight">{name}</p>
+                                      {region && <p className="truncate text-[11px] font-medium text-white/65 mt-0.5">{region}</p>}
+                                      {timeLabel && <p className="truncate text-[11px] font-semibold text-emerald-300 mt-1">{timeLabel}</p>}
+                                    </div>
+                                    <div className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-900 shadow-lg transition-transform group-hover:translate-x-0.5">
+                                      <CaretRight size={14} weight="bold" />
+                                    </div>
+                                  </div>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </section>
+                    )}
+
+                    {/* ── EM BREVE ── cards médios */}
+                    {upcoming.length > 0 && (
+                      <section>
+                        <div className="mb-3 flex items-center gap-2">
+                          <CalendarBlank size={13} weight="fill" className="text-[#336886]" />
+                          <span className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Em breve</span>
+                          <span className="ml-auto rounded-full bg-sky-100 px-2 py-0.5 text-[9px] font-black text-sky-700">{upcoming.length}</span>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          {upcoming.map(({ condominium, slug, name, region, event }) => {
+                            const active = selectedCondominiumSlug === slug;
+                            const logoUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
+                            const timeLabel = formatCondominiumPickerEventTime(event) || formatCondominiumEventTime(event);
+                            return (
+                              <button
+                                key={slug}
+                                type="button"
+                                onClick={() => handleClick(slug, name, event)}
+                                className={`group flex w-full items-center gap-3.5 rounded-2xl border p-3.5 text-left transition-all duration-200 active:scale-[0.99] ${
+                                  active
+                                    ? 'border-[#336886]/20 bg-[#336886]/5 shadow-[0_0_0_2px_rgba(51,104,134,0.12)]'
+                                    : 'border-slate-100 bg-white shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)] hover:border-sky-100 hover:shadow-[0_4px_16px_-6px_rgba(51,104,134,0.12)]'
+                                }`}
+                              >
+                                <div className="relative shrink-0 h-14 w-14 overflow-hidden rounded-[1rem] border border-slate-100 bg-slate-50">
+                                  <img src={logoUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
+                                </div>
+                                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                                  <div className="flex items-center gap-2">
+                                    <span className="truncate text-[14px] font-bold text-slate-900">{name}</span>
+                                    {active && <span className="shrink-0 rounded-full bg-[#336886] px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-white">Selecionado</span>}
+                                  </div>
+                                  {region && <span className="truncate text-[11px] font-medium text-slate-400">{region}</span>}
+                                  <div className="mt-1 flex items-center gap-1.5">
+                                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-sky-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-[#336886]">
+                                      <span className="h-1.5 w-1.5 rounded-full bg-[#336886]" />
+                                      Agendado
+                                    </span>
+                                    {timeLabel && <span className="truncate text-[10px] font-medium text-slate-400">{timeLabel}</span>}
+                                  </div>
+                                </div>
+                                <CaretRight size={14} weight="bold" className={`shrink-0 transition-all duration-200 group-hover:translate-x-0.5 ${active ? 'text-[#336886]' : 'text-slate-300'}`} />
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </section>
+                    )}
+
+                    {/* ── SEM AGENDA ── linhas compactas */}
+                    {none.length > 0 && (
+                      <section>
+                        <div className="mb-3 flex items-center gap-2">
+                          <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Outros locais</span>
+                          <span className="ml-auto rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-black text-slate-500">{none.length}</span>
+                        </div>
+                        <div className="overflow-hidden rounded-2xl border border-slate-100">
+                          {none.map(({ condominium, slug, name, region, event }, i) => {
+                            const active = selectedCondominiumSlug === slug;
+                            const logoUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
+                            const timeLabel = formatCondominiumPickerEventTime(event) || formatCondominiumEventTime(event);
+                            return (
+                              <button
+                                key={slug}
+                                type="button"
+                                onClick={() => handleClick(slug, name, event)}
+                                className={`group flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors duration-150 active:bg-slate-50 ${
+                                  i > 0 ? 'border-t border-slate-100' : ''
+                                } ${active ? 'bg-[#336886]/5' : 'hover:bg-slate-50/70'}`}
+                              >
+                                <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
+                                  <img src={logoUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
+                                </div>
+                                <div className="flex min-w-0 flex-1 flex-col">
+                                  <span className="truncate text-[13px] font-semibold text-slate-700">{name}</span>
+                                  {region && <span className="truncate text-[10px] text-slate-400 mt-0.5">{region}</span>}
+                                  {timeLabel && <span className="truncate text-[10px] text-slate-400">{timeLabel}</span>}
+                                </div>
+                                <div className="flex shrink-0 flex-col items-end gap-1">
+                                  {active && <span className="rounded-full bg-[#336886]/10 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-[#336886]">Selecionado</span>}
+                                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-semibold text-slate-400">Sem agenda</span>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </section>
+                    )}
+
+                  </div>
+                );
+              })()}
+            </div>
 
             <nav className="fixed bottom-0 left-0 right-0 z-[230] px-0 pb-0 lg:hidden">
               <div className="mx-auto max-w-none rounded-none border border-b-0 border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-2 pt-2 shadow-[0_-18px_38px_-28px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
