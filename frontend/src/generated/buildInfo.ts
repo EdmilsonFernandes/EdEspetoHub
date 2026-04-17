@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260417.175859.e75ec76a",
-  "buildId": "0.1.9+20260417.175859.e75ec76a-20260417.175859-e75ec76a",
-  "builtAt": "2026-04-17T17:58:59.502Z",
-  "commitHash": "e75ec76a3b64f494e26b9b4e3e37c76f1561d35b",
-  "shortHash": "e75ec76a",
+  "versionInternal": "0.1.9+20260417.181925.64c9477e",
+  "buildId": "0.1.9+20260417.181925.64c9477e-20260417.181925-64c9477e",
+  "builtAt": "2026-04-17T18:19:25.355Z",
+  "commitHash": "64c9477e042ddb43006e5c76af99cbea6b7a96d6",
+  "shortHash": "64c9477e",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "64c9477e042ddb43006e5c76af99cbea6b7a96d6",
+      "shortHash": "64c9477e",
+      "dateIso": "2026-04-17T15:00:08-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(store-signup): streamline mobile creation flow",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/64c9477e042ddb43006e5c76af99cbea6b7a96d6"
+    },
     {
       "hash": "e75ec76a3b64f494e26b9b4e3e37c76f1561d35b",
       "shortHash": "e75ec76a",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style(checkout): restore premium store header",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5cd164bd6f2efbea03fffe4fe22abbf517520979"
-    },
-    {
-      "hash": "ba66472cab4e6c37ffadf7a27ab407288f6ae521",
-      "shortHash": "ba66472c",
-      "dateIso": "2026-04-16T14:38:03-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(checkout): remove duplicate store header",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ba66472cab4e6c37ffadf7a27ab407288f6ae521"
     }
   ]
 } as const;

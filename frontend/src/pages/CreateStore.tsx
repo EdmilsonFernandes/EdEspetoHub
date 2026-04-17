@@ -11,7 +11,7 @@ import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAs
 import { formatPhoneInput } from '../utils/format';
 import { normalizePixCode } from '../utils/pixPayload';
 import { FormSection } from '../components/common/FormSection';
-import { Buildings, CheckCircle, CopySimple, CreditCard, EnvelopeSimple, GlobeHemisphereWest, MapPinLine, RocketLaunch, SealCheck, Storefront, UserCircle, WarningCircle } from '@phosphor-icons/react';
+import { Buildings, CheckCircle, CopySimple, CreditCard, EnvelopeSimple, GlobeHemisphereWest, MapPinLine, RocketLaunch, Storefront, UserCircle, WarningCircle } from '@phosphor-icons/react';
 
 const BRAZIL_DDDS = [
   '11', '12', '13', '14', '15', '16', '17', '18', '19',
@@ -747,15 +747,16 @@ export function CreateStore() {
       }
 
       if (result?.next === 'VERIFY_EMAIL_CODE') {
+        const targetEmail = result.email || registerForm.email.trim().toLowerCase();
         setStoreVerifyPrompt({
-          email: result.email || registerForm.email.trim().toLowerCase(),
+          email: targetEmail,
           emailMasked: result.emailMasked,
           redirectUrl: result.redirectUrl,
         });
         setStoreCodeDigits(['', '', '', '']);
         setLastAutoSubmittedStoreCode('');
         setStoreVerifyError('');
-        setStoreVerifyMessage('Enviamos um código de 4 dígitos para ativar sua loja.');
+        setStoreVerifyMessage(`Enviamos um código de 4 dígitos no e-mail ${result.emailMasked || targetEmail} para ativar sua loja.`);
         setStoreResendCooldown(60);
         return;
       }
@@ -1004,7 +1005,16 @@ export function CreateStore() {
       setStoreVerifyMessage('Loja confirmada com sucesso. Redirecionando...');
       setStoreVerifyPrompt(null);
       if (result?.redirectUrl) {
-        window.setTimeout(() => navigate(result.redirectUrl), 800);
+        try {
+          localStorage.setItem('auth:last-admin-identifier', email);
+          localStorage.setItem('signupEmail', email);
+        } catch {
+          // no-op: login prefill is only a convenience.
+        }
+        const redirectTarget = String(result.redirectUrl).startsWith('/admin')
+          ? `/admin?identifier=${encodeURIComponent(email)}&verified=1`
+          : result.redirectUrl;
+        window.setTimeout(() => navigate(redirectTarget), 800);
       }
     } catch (error: any) {
       try {
@@ -1037,7 +1047,7 @@ export function CreateStore() {
     setStoreVerifyError('');
     try {
       const result = await authService.resendVerification(email);
-      setStoreVerifyMessage('Novo código enviado. Digite os 4 números para ativar sua loja.');
+      setStoreVerifyMessage(`Novo código enviado para ${storeVerifyPrompt?.emailMasked || email}.`);
       setStoreResendCooldown(Number(result?.cooldownSec || 60));
     } catch (error: any) {
       setStoreVerifyError(error?.message || 'Não foi possível reenviar o código agora.');
@@ -2370,20 +2380,21 @@ export function CreateStore() {
       {storeVerifyPrompt ? (
         <div className="fixed inset-0 z-[120] flex items-end justify-center bg-slate-950/55 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-sm sm:items-center sm:px-4 sm:py-6">
           <div className="flex max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-2rem)] w-full max-w-md flex-col overflow-hidden rounded-[2rem] border border-white/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(241,245,249,0.94))] shadow-[0_36px_120px_-28px_rgba(15,23,42,0.55)]">
-            <div className="relative overflow-hidden bg-[linear-gradient(135deg,#0f3b53_0%,#0d4f66_55%,#2c8c9f_100%)] px-6 pb-8 pt-6 text-white">
+            <div className="relative overflow-hidden bg-[linear-gradient(135deg,#0f3b53_0%,#0d4f66_55%,#2c8c9f_100%)] px-6 pb-6 pt-6 text-white">
               <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.22),transparent_68%)]" />
-              <div className="relative flex items-start justify-between gap-4">
-                <div className="space-y-3">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/16 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-white/78">
-                    <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_0_4px_rgba(134,239,172,0.16)]" />
-                    Loja segura
+              <div className="relative flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-start gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/12 shadow-[0_18px_36px_-24px_rgba(15,23,42,0.75)]">
+                    <EnvelopeSimple size={23} weight="duotone" />
                   </div>
-                  <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/12 shadow-[0_20px_40px_-24px_rgba(15,23,42,0.75)]">
-                    <EnvelopeSimple size={28} weight="duotone" />
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">Validar e-mail</p>
-                    <h3 className="mt-2 text-[1.7rem] font-black leading-none tracking-[-0.03em]">Código de 4 dígitos</h3>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/65">Ativação da loja</p>
+                    <h3 className="mt-1 text-2xl font-black leading-tight tracking-[-0.03em]">Confirme seu e-mail</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-white/80">
+                      Enviamos um código de 4 dígitos no e-mail{' '}
+                      <span className="font-black text-white">{storeVerifyPrompt.emailMasked || storeVerifyPrompt.email}</span>
+                      {' '}para ativar sua loja.
+                    </p>
                   </div>
                 </div>
                 <button
@@ -2394,26 +2405,11 @@ export function CreateStore() {
                   Fechar
                 </button>
               </div>
-              <p className="relative mt-4 text-sm leading-relaxed text-white/80">
-                {storeVerifyPrompt.emailMasked
-                  ? `Verifique seu e-mail ${storeVerifyPrompt.emailMasked} e digite o código recebido.`
-                  : 'Verifique o e-mail informado e digite o código recebido.'}
-              </p>
-              <p className="relative mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/58">
-                Ao preencher os 4 números, validamos automaticamente
-              </p>
             </div>
 
             <div className="space-y-5 overflow-y-auto px-6 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] pt-5">
               <div className="rounded-[1.6rem] border border-slate-200/80 bg-white/80 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">
-                  <SealCheck size={16} weight="duotone" className="text-[#0d4f66]" />
-                  Confirmação segura
-                </div>
-                <p className="mt-2 text-sm font-medium leading-relaxed text-slate-600">
-                  O código confirma que esse e-mail pertence a você. Assim que os 4 dígitos forem preenchidos, a ativação continua automaticamente.
-                </p>
-                <div className="mt-4 flex items-center justify-between gap-2">
+                <div className="flex items-center justify-between gap-2">
                   {storeCodeDigits.map((digit, index) => (
                     <input
                       key={index}

@@ -156,6 +156,12 @@ export function AdminLogin() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    const identifierFromUrl = String(searchParams.get('identifier') || searchParams.get('email') || '').trim().toLowerCase();
+    if (identifierFromUrl) {
+      setLoginForm((prev) => (prev.identifier ? prev : { ...prev, identifier: identifierFromUrl }));
+      localStorage.setItem(ADMIN_REMEMBER_IDENTIFIER_KEY, identifierFromUrl);
+      return;
+    }
     if (!rememberDevice) return;
     const rememberedIdentifier = localStorage.getItem(ADMIN_REMEMBER_IDENTIFIER_KEY);
     if (rememberedIdentifier && !loginForm.identifier) {
