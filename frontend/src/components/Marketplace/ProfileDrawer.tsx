@@ -365,6 +365,29 @@ export function ProfileDrawer({
             </section>
           )}
 
+          {!isLogged && (
+            <button
+              type="button"
+              onClick={() => {
+                setAccessPickerMode('register');
+                setHighlightFirstAccess(true);
+                setAccessPickerOpen(true);
+              }}
+              className="flex w-full items-center gap-4 rounded-[1.7rem] border border-white/80 bg-[linear-gradient(135deg,#ffffff_0%,rgba(224,242,241,0.9)_42%,rgba(239,246,255,0.96)_100%)] p-4 text-left shadow-[0_18px_34px_-24px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/60 transition-all active:scale-[0.98]"
+            >
+              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-[1.2rem] border border-white/85 bg-white/72 text-[#2b708a] shadow-[0_12px_26px_-18px_rgba(51,104,134,0.26)] backdrop-blur-sm">
+                <RocketLaunch size={28} weight="duotone" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[1.02rem] font-black leading-tight text-slate-900">Comece por aqui</p>
+                <p className="mt-1 text-[12.5px] font-medium leading-relaxed text-slate-600">
+                  Crie seu acesso como usuário, loja ou entregador
+                </p>
+              </div>
+              <CaretRight size={18} weight="bold" className="shrink-0 text-[#336886]/55" />
+            </button>
+          )}
+
           <nav className="space-y-2">
             <p className="mb-3 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 px-1">Área do Cliente</p>
             {actions.map((action) => (
@@ -396,28 +419,6 @@ export function ProfileDrawer({
               </button>
             ))}
           </nav>
-
-          {!isLogged && (
-            <button
-              type="button"
-              onClick={() => {
-                setAccessPickerMode('register');
-                setHighlightFirstAccess(true);
-                setAccessPickerOpen(true);
-              }}
-              className="flex w-full items-center gap-4 rounded-[1.7rem] border border-white/80 bg-[linear-gradient(135deg,#ffffff_0%,rgba(224,242,241,0.9)_42%,rgba(239,246,255,0.96)_100%)] p-4 text-left shadow-[0_18px_34px_-24px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/60 transition-all active:scale-[0.98]"
-            >
-              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-[1.2rem] border border-white/85 bg-white/72 text-[#2b708a] shadow-[0_12px_26px_-18px_rgba(51,104,134,0.26)] backdrop-blur-sm">
-                <RocketLaunch size={28} weight="duotone" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[1.02rem] font-black leading-tight text-slate-900">Guia de Primeiro Acesso</p>
-                <p className="mt-1 text-[12.5px] font-medium leading-relaxed text-slate-600">
-                  Crie sua conta e escolha como começar agora
-                </p>
-              </div>
-            </button>
-          )}
         </div>
 
         <div className="border-t border-slate-100/90 bg-white/70 p-6 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] backdrop-blur-xl">
@@ -512,16 +513,17 @@ export function ProfileDrawer({
               </div>
             ) : null}
             {!isLogged && accessPickerMode === 'register' ? (
-              <div className={`relative mt-4 rounded-[1.65rem] border p-4 shadow-[0_16px_34px_-28px_rgba(15,23,42,0.28)] transition-all duration-200 ${
+              <div className={`relative rounded-[1.65rem] border p-4 shadow-[0_16px_34px_-28px_rgba(15,23,42,0.28)] transition-all duration-200 ${
                 highlightFirstAccess
                   ? 'border-[#336886]/25 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(236,253,245,0.86))] ring-2 ring-[#336886]/12'
                   : 'border-slate-200/80 bg-white/88'
               }`}>
-                <div className="mb-3">
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Quero começar</p>
-                  <p className="mt-1 text-xs font-semibold text-slate-500">Cliente, lojista e entregador entram por aqui no primeiro acesso.</p>
+                <div className="mb-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Primeiro acesso</p>
+                  <p className="mt-1 text-sm font-black leading-tight text-slate-950">Escolha como quer começar</p>
+                  <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">Cada perfil tem um cadastro próprio para manter seu app organizado.</p>
                 </div>
-                <div className="grid gap-2.5">
+                <div className="grid gap-3">
                   <button
                     type="button"
                     onClick={() => {
@@ -529,13 +531,16 @@ export function ProfileDrawer({
                       onRegisterClient();
                       onClose();
                     }}
-                    className="flex items-center justify-between rounded-[1.2rem] border border-slate-200 bg-slate-50/80 px-3.5 py-3 text-left text-slate-700 transition-all active:scale-[0.98]"
+                    className="group flex min-h-[5rem] items-center gap-3.5 rounded-[1.35rem] border border-sky-100 bg-[linear-gradient(135deg,#f8fbff,#eef7ff)] px-3.5 py-3 text-left text-slate-700 shadow-[0_14px_28px_-24px_rgba(51,104,134,0.32)] transition-all active:scale-[0.98]"
                   >
-                    <div>
+                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-[1.05rem] border border-white/80 bg-white/86 text-[#336886] shadow-[0_12px_24px_-20px_rgba(51,104,134,0.35)]">
+                      <UserCircle size={25} weight="duotone" />
+                    </div>
+                    <div className="min-w-0 flex-1">
                       <p className="text-sm font-black text-slate-900">Criar conta de cliente</p>
                       <p className="mt-0.5 text-[11px] font-semibold text-slate-500">Para pedir, salvar favoritos e acompanhar pedidos.</p>
                     </div>
-                    <CaretRight size={16} weight="bold" className="shrink-0 text-slate-300" />
+                    <CaretRight size={16} weight="bold" className="shrink-0 text-slate-300 transition-transform group-active:translate-x-0.5" />
                   </button>
                   <button
                     type="button"
@@ -544,13 +549,16 @@ export function ProfileDrawer({
                       onRegisterStore();
                       onClose();
                     }}
-                    className="flex items-center justify-between rounded-[1.2rem] border border-emerald-100 bg-emerald-50/80 px-3.5 py-3 text-left text-emerald-900 transition-all active:scale-[0.98]"
+                    className="group flex min-h-[5rem] items-center gap-3.5 rounded-[1.35rem] border border-emerald-100 bg-[linear-gradient(135deg,#f3fff8,#e8f8ef)] px-3.5 py-3 text-left text-emerald-900 shadow-[0_14px_28px_-24px_rgba(16,185,129,0.32)] transition-all active:scale-[0.98]"
                   >
-                    <div>
+                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-[1.05rem] border border-white/80 bg-white/82 text-emerald-700 shadow-[0_12px_24px_-20px_rgba(16,185,129,0.35)]">
+                      <Storefront size={25} weight="duotone" />
+                    </div>
+                    <div className="min-w-0 flex-1">
                       <p className="text-sm font-black text-emerald-950">Criar loja</p>
                       <p className="mt-0.5 text-[11px] font-semibold text-emerald-700/80">Para vender no hub e operar seus pedidos.</p>
                     </div>
-                    <CaretRight size={16} weight="bold" className="shrink-0 text-emerald-300" />
+                    <CaretRight size={16} weight="bold" className="shrink-0 text-emerald-300 transition-transform group-active:translate-x-0.5" />
                   </button>
                   <button
                     type="button"
@@ -559,13 +567,16 @@ export function ProfileDrawer({
                       onRegisterMotoboy();
                       onClose();
                     }}
-                    className="flex items-center justify-between rounded-[1.2rem] border border-amber-100 bg-amber-50/80 px-3.5 py-3 text-left text-amber-900 transition-all active:scale-[0.98]"
+                    className="group flex min-h-[5rem] items-center gap-3.5 rounded-[1.35rem] border border-amber-100 bg-[linear-gradient(135deg,#fffbed,#fbf4d4)] px-3.5 py-3 text-left text-amber-900 shadow-[0_14px_28px_-24px_rgba(245,158,11,0.32)] transition-all active:scale-[0.98]"
                   >
-                    <div>
+                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-[1.05rem] border border-white/80 bg-white/80 text-amber-700 shadow-[0_12px_24px_-20px_rgba(245,158,11,0.35)]">
+                      <Motorcycle size={25} weight="duotone" />
+                    </div>
+                    <div className="min-w-0 flex-1">
                       <p className="text-sm font-black text-amber-950">Criar conta de entregador</p>
                       <p className="mt-0.5 text-[11px] font-semibold text-amber-700/80">Para receber solicitações e acessar sua área.</p>
                     </div>
-                    <CaretRight size={16} weight="bold" className="shrink-0 text-amber-300" />
+                    <CaretRight size={16} weight="bold" className="shrink-0 text-amber-300 transition-transform group-active:translate-x-0.5" />
                   </button>
                 </div>
               </div>

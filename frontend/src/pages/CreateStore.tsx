@@ -1374,7 +1374,7 @@ export function CreateStore() {
         <div className="h-1 bg-[linear-gradient(90deg,#ef4444,#f97316,#f59e0b)]" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-3 sm:py-4">
-            <button onClick={() => navigate('/')} className="flex items-center gap-3">
+            <button onClick={() => navigate('/hub')} className="flex items-center gap-3">
               <div className="h-11 w-11 rounded-full overflow-hidden bg-[#0b2447] shadow-[0_14px_26px_-18px_rgba(15,59,83,0.55)] ring-2 ring-white/80 flex items-center justify-center">
                 <img src={platformLogo} alt="Já no Caminho" className="h-full w-full object-cover" />
               </div>
@@ -1385,7 +1385,7 @@ export function CreateStore() {
             </button>
 
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/hub')}
               className="rounded-full border border-[#0d4f66]/15 bg-[linear-gradient(135deg,rgba(13,79,102,0.08),rgba(44,140,159,0.12))] px-4 py-2 text-sm font-black text-[#0d4f66] shadow-[0_14px_28px_-22px_rgba(15,59,83,0.45)] transition hover:bg-[#0d4f66]/10 active:scale-[0.98]"
             >
               Cancelar

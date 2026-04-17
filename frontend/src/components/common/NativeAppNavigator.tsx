@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { Buildings, Heart, House, Receipt } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
+import { nativeBiometricService } from '../../services/nativeBiometricService';
 
 const STACK_KEY = 'jnk_native_route_stack_v1';
 const HIDDEN_KEY = 'jnk_native_nav_hidden_v1';
@@ -26,6 +27,16 @@ const writeStack = (stack: string[]) => {
     sessionStorage.setItem(STACK_KEY, JSON.stringify(stack.slice(-MAX_STACK)));
   } catch {
     // no-op
+  }
+};
+
+const readCustomerSession = () => {
+  try {
+    const raw = localStorage.getItem('customerSession');
+    const parsed = raw ? JSON.parse(raw) : null;
+    return parsed?.token ? parsed : null;
+  } catch {
+    return null;
   }
 };
 
@@ -138,6 +149,26 @@ export function NativeAppNavigator() {
     navigate('/hub');
   };
 
+  const handleOrders = async () => {
+    const savedSession = readCustomerSession();
+    if (savedSession?.token) {
+      navigate('/cliente/pedidos');
+      return;
+    }
+
+    if (nativeBiometricService.hasValidStoredCustomerEnrollment()) {
+      try {
+        await nativeBiometricService.loginCustomerWithBiometrics('Confirme sua identidade para ver seus pedidos');
+        navigate('/cliente/pedidos');
+        return;
+      } catch {
+        // If biometric fails/cancels, keep the manual login fallback.
+      }
+    }
+
+    navigate('/cliente?mode=login&next=/cliente/pedidos&hub=1&bio=1');
+  };
+
   const isOrders =
     location.pathname.startsWith('/cliente/pedidos') ||
     location.pathname.startsWith('/pedido/');
@@ -171,7 +202,7 @@ export function NativeAppNavigator() {
         </button>
         <button
           type="button"
-          onClick={() => navigate('/cliente/pedidos')}
+          onClick={handleOrders}
           className={`${itemBaseClass} ${isOrders ? activeItemClass : inactiveItemClass}`}
         >
           <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ${

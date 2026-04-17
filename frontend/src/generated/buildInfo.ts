@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260417.181925.64c9477e",
-  "buildId": "0.1.9+20260417.181925.64c9477e-20260417.181925-64c9477e",
-  "builtAt": "2026-04-17T18:19:25.355Z",
-  "commitHash": "64c9477e042ddb43006e5c76af99cbea6b7a96d6",
-  "shortHash": "64c9477e",
+  "versionInternal": "0.1.9+20260417.184216.f1707996",
+  "buildId": "0.1.9+20260417.184216.f1707996-20260417.184216-f1707996",
+  "builtAt": "2026-04-17T18:42:16.597Z",
+  "commitHash": "f170799690f988337a5b7fcfb8c98ed02f474032",
+  "shortHash": "f1707996",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "f170799690f988337a5b7fcfb8c98ed02f474032",
+      "shortHash": "f1707996",
+      "dateIso": "2026-04-17T15:20:49-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(store-signup): simplify email verification modal",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f170799690f988337a5b7fcfb8c98ed02f474032"
+    },
     {
       "hash": "64c9477e042ddb43006e5c76af99cbea6b7a96d6",
       "shortHash": "64c9477e",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(checkout): prioritize logged customer identity",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/88e17f60be613199d88e00298827f82ed3786514"
-    },
-    {
-      "hash": "5cd164bd6f2efbea03fffe4fe22abbf517520979",
-      "shortHash": "5cd164bd",
-      "dateIso": "2026-04-16T14:47:09-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(checkout): restore premium store header",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5cd164bd6f2efbea03fffe4fe22abbf517520979"
     }
   ]
 } as const;
