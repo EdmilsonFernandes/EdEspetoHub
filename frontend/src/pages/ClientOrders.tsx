@@ -7,8 +7,8 @@ import {
   CalendarBlank,
   CheckCircle,
   Clock,
-  Heart,
   House,
+  UserCircle,
   Package,
   Receipt,
   SpinnerGap,
@@ -582,26 +582,29 @@ export function ClientOrders() {
             </div>
           ) : null}
 
-          <div className="mb-5 flex items-center justify-between gap-3">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Filtro</p>
-              <p className="mt-1 text-sm font-semibold text-slate-800">Mostrando {statusFilter === 'all' ? 'todos' : statusFilter === 'active' ? 'em andamento' : statusFilter === 'finished' ? 'finalizados' : 'cancelados'}</p>
-            </div>
-            <div className="relative">
-              <select
-                value={statusFilter}
-                onChange={(event) => setStatusFilter(event.target.value as 'all' | 'active' | 'finished' | 'cancelled')}
-                className="min-h-10 appearance-none rounded-2xl border border-slate-200 bg-white px-4 py-2 pr-9 text-sm font-semibold text-slate-700 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.28)] outline-none transition focus:border-[#336886]/25 focus:ring-2 focus:ring-[#336886]/10"
-              >
-                <option value="all">Todos</option>
-                <option value="active">Em andamento</option>
-                <option value="finished">Finalizados</option>
-                <option value="cancelled">Cancelados</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-400">
-                <Package size={14} weight="duotone" />
-              </div>
-            </div>
+          <div className="mb-5 -mx-4 flex gap-2 overflow-x-auto px-4 pb-0.5 no-scrollbar">
+            {(['all', 'active', 'finished', 'cancelled'] as const).map((f) => {
+              const label = f === 'all' ? 'Todos' : f === 'active' ? 'Em andamento' : f === 'finished' ? 'Finalizados' : 'Cancelados';
+              const isActive = statusFilter === f;
+              const activeClass = f === 'all' ? 'bg-[#153A4C] text-white border-[#336886] shadow-[0_8px_18px_-8px_rgba(21,58,76,0.5)]'
+                : f === 'active' ? 'bg-emerald-600 text-white border-emerald-500 shadow-[0_8px_18px_-8px_rgba(5,150,105,0.45)]'
+                : f === 'finished' ? 'bg-sky-600 text-white border-sky-500 shadow-[0_8px_18px_-8px_rgba(2,132,199,0.45)]'
+                : 'bg-rose-500 text-white border-rose-400 shadow-[0_8px_18px_-8px_rgba(244,63,94,0.45)]';
+              const inactiveClass = f === 'all' ? 'bg-white text-slate-600 border-slate-200'
+                : f === 'active' ? 'bg-emerald-50/70 text-emerald-700 border-emerald-100'
+                : f === 'finished' ? 'bg-sky-50/70 text-sky-700 border-sky-100'
+                : 'bg-rose-50/70 text-rose-600 border-rose-100';
+              return (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setStatusFilter(f)}
+                  className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-full border px-4 py-2 text-[12px] transition-all duration-200 active:scale-[0.97] ${isActive ? `font-black ${activeClass}` : `font-semibold ${inactiveClass}`}`}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
 
           {filteredActiveOrders.length > 0 ? (
@@ -765,13 +768,13 @@ export function ClientOrders() {
           </button>
           <button
             type="button"
-            onClick={() => navigate('/hub?favorites=1')}
+            onClick={() => window.dispatchEvent(new CustomEvent('jnk:open-profile-drawer'))}
             className="group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
           >
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
-              <Heart size={18} weight="regular" />
+              <UserCircle size={18} weight="duotone" />
             </span>
-            <span>Favoritos</span>
+            <span>Perfil</span>
           </button>
           </div>
         </div>
