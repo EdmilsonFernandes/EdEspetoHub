@@ -69,11 +69,15 @@ const isEspetoCategory = (category) => {
 
 const categoryVisualMeta = (key = "") => {
   const normalized = String(key || "").toLowerCase();
-  if (normalized.includes("espeto")) return { icon: ChefHat, tone: "text-slate-600 bg-white border-slate-200" };
-  if (normalized.includes("bebida")) return { icon: ShoppingCart, tone: "text-slate-600 bg-white border-slate-200" };
-  if (normalized.includes("por")) return { icon: ForkKnife, tone: "text-slate-600 bg-white border-slate-200" };
-  if (normalized.includes("lanche")) return { icon: Sparkle, tone: "text-slate-600 bg-white border-slate-200" };
-  return { icon: SquaresFour, tone: "text-slate-700 bg-white border-slate-200" };
+  if (normalized.includes("espeto"))    return { icon: ChefHat,      tone: "text-rose-600   bg-rose-50   border-rose-100"   };
+  if (normalized.includes("bebida"))    return { icon: ShoppingCart,  tone: "text-sky-600    bg-sky-50    border-sky-100"    };
+  if (normalized.includes("cerveja"))   return { icon: ShoppingCart,  tone: "text-amber-600  bg-amber-50  border-amber-100"  };
+  if (normalized.includes("por"))       return { icon: ForkKnife,     tone: "text-orange-600 bg-orange-50 border-orange-100" };
+  if (normalized.includes("lanche"))    return { icon: Sparkle,       tone: "text-amber-600  bg-amber-50  border-amber-100"  };
+  if (normalized.includes("sobremesa")) return { icon: Sparkle,       tone: "text-pink-600   bg-pink-50   border-pink-100"   };
+  if (normalized.includes("entrada"))   return { icon: ForkKnife,     tone: "text-emerald-600 bg-emerald-50 border-emerald-100" };
+  if (normalized.includes("refeic"))    return { icon: ForkKnife,     tone: "text-amber-600  bg-amber-50  border-amber-100"  };
+  return { icon: SquaresFour, tone: "text-violet-600 bg-violet-50 border-violet-100" };
 };
 
 const categoryGlyph = (key = "") => {
@@ -1066,16 +1070,30 @@ export const MenuView = ({
         />
       )}
 
-      <div ref={stickySearchContainerRef} className="sticky top-0 z-30 w-full border-b border-slate-100 bg-white shadow-sm">
+      <div ref={stickySearchContainerRef} className="sticky top-0 z-30 w-full border-b border-slate-100 bg-white/95 shadow-[0_4px_18px_-10px_rgba(15,23,42,0.12)] backdrop-blur-xl">
         <div className="mx-auto w-full max-w-6xl px-4 pt-3 pb-2">
-          <div className="relative">
-            <MagnifyingGlass className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <div className="relative flex items-center gap-2.5 rounded-[1.2rem] border border-slate-200/80 bg-white px-3.5 shadow-[0_2px_10px_-4px_rgba(15,23,42,0.08)] transition-[border-color,box-shadow] duration-200 focus-within:border-slate-300 focus-within:shadow-[0_4px_16px_-6px_rgba(15,23,42,0.14)]">
+            <span
+              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[0.65rem]"
+              style={{ backgroundColor: `${catalogPrimaryColor}18`, color: catalogPrimaryColor }}
+            >
+              <MagnifyingGlass className="w-3.5 h-3.5" weight="bold" />
+            </span>
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              className="w-full h-10 rounded-full border border-transparent bg-slate-100 pl-10 pr-4 text-sm text-slate-700 placeholder:text-[13px] placeholder:font-medium placeholder:text-slate-400 outline-none focus:border-slate-300 focus:ring-2 focus:ring-slate-900/10 transition-all"
-              placeholder="Buscar produtos por nome ou categoria"
+              className="min-h-[42px] flex-1 bg-transparent text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400"
+              placeholder="Buscar no cardápio..."
             />
+            {query ? (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 transition-colors hover:bg-slate-200 active:scale-95"
+              >
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2L2 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
+              </button>
+            ) : null}
           </div>
         </div>
         {filteredGrouped.length > 1 && (
@@ -1133,21 +1151,12 @@ export const MenuView = ({
       </div>
 
       <div className={`space-y-6 sm:space-y-8 px-3 sm:px-4 py-3 sm:py-4 max-w-6xl mx-auto ${cartItemsCount > 0 ? 'pb-32 sm:pb-8' : ''}`}>
-        <section className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-          <div className="relative space-y-4">
-            {!showHeader && (
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500">
-                  Bem-vindo à sua vitrine
-                </p>
-                <h2 className="text-lg sm:text-xl font-black text-slate-900 mt-1">
-                  {branding?.brandName || "Seu Espeto"}
-                </h2>
-              </div>
-            )}
-
-          </div>
-        </section>
+        {!showHeader && (
+          <section className="rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500">Bem-vindo à sua vitrine</p>
+            <h2 className="text-lg sm:text-xl font-black text-slate-900 mt-1">{branding?.brandName || "Seu Espeto"}</h2>
+          </section>
+        )}
         <div id="menu-list" className="space-y-10">
         {promoMessage && (
           <div className="rounded-3xl border border-slate-100 bg-white p-4 sm:p-5 shadow-sm">
@@ -1157,12 +1166,12 @@ export const MenuView = ({
         )}
         {!staffView && topItems.length > 0 && (
           <div className="rounded-3xl border border-slate-100 bg-white p-4 sm:p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <p className="inline-flex items-center gap-2 text-lg font-bold tracking-tight text-slate-800">
-                <Sparkle size={16} weight="fill" className="text-amber-500" />
-                Mais pedidos hoje
-              </p>
-              <span className="text-xs text-slate-500">Top {topItems.length}</span>
+            <div className="mb-1">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-amber-600">
+                <Sparkle size={10} weight="fill" />
+                Top {topItems.length} do dia
+              </span>
+              <h2 className="mt-1.5 text-[15px] font-black tracking-tight text-slate-900">Mais pedidos hoje</h2>
             </div>
             <div className="mt-3 flex gap-3 overflow-x-auto pb-1 sm:grid sm:grid-cols-3 sm:gap-3 sm:overflow-visible no-scrollbar scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {topItems.map((item) => {
@@ -1210,36 +1219,37 @@ export const MenuView = ({
           </div>
         )}
         {featuredProduct && (
-          <div className="rounded-3xl border border-slate-100 bg-white p-4 sm:p-5 shadow-sm">
+          <div
+            className="rounded-3xl overflow-hidden border border-slate-100 p-4 sm:p-5 shadow-sm"
+            style={{ background: `linear-gradient(135deg, ${catalogPrimaryColor}14 0%, white 55%)` }}
+          >
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.3em] text-amber-500 font-semibold">Promoção do dia</p>
-                <h3 className="text-lg font-bold text-slate-900 mt-1">{featuredProduct.name}</h3>
+              <div className="min-w-0 flex-1">
+                <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em]" style={{ backgroundColor: `${catalogPrimaryColor}18`, color: catalogPrimaryColor }}>
+                  <Sparkle size={9} weight="fill" />
+                  Promoção do dia
+                </span>
+                <h3 className="text-[15px] font-black text-slate-900 mt-1.5 leading-tight">{featuredProduct.name}</h3>
                 {!staffView && featuredProduct.description && (
-                  <p className="text-xs text-slate-600 mt-1">{featuredProduct.description}</p>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed line-clamp-2">{featuredProduct.description}</p>
                 )}
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex shrink-0 flex-col items-end gap-2">
                 {resolvePromoPrice(featuredProduct) ? (
-                  <div className="flex flex-col items-end">
-                    <span className="text-xs text-slate-400 line-through">
-                      {formatCurrency(featuredProduct.price || 0)}
-                    </span>
-                    <span className="text-lg font-black text-emerald-600">
-                      {formatCurrency(resolvePromoPrice(featuredProduct))}
-                    </span>
+                  <div className="flex flex-col items-end leading-none">
+                    <span className="text-[10px] text-slate-400 line-through">{formatCurrency(featuredProduct.price || 0)}</span>
+                    <span className="text-xl font-black text-emerald-600">{formatCurrency(resolvePromoPrice(featuredProduct))}</span>
                   </div>
                 ) : (
-                  <span className="text-lg font-black tracking-tight text-slate-800">
-                    {formatCurrency(featuredProduct.price || 0)}
-                  </span>
+                  <span className="text-xl font-black tracking-tight text-slate-900">{formatCurrency(featuredProduct.price || 0)}</span>
                 )}
                 <button
                   type="button"
                   onClick={() => openProductModal(featuredProduct)}
-                  className="px-4 py-2 rounded-full text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition"
+                  className="px-4 py-2 rounded-full text-xs font-black transition-all active:scale-95"
+                  style={{ backgroundColor: catalogPrimaryColor, color: catalogPrimaryText }}
                 >
-                  Ver detalhes
+                  Pedir agora
                 </button>
               </div>
             </div>
