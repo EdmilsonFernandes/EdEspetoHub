@@ -2577,52 +2577,52 @@ export function MarketplacePage() {
                             : 'border-slate-200/80 bg-slate-50/90 shadow-[0_8px_20px_rgba(15,23,42,0.04)]'
                         }`}
                       >
-                        <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
-                          <img
-                            src={store.banner || store.logo}
-                            alt={store.name}
-                            loading="lazy"
-                            decoding="async"
-                            className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 ${store.isOpen ? '' : 'grayscale opacity-70'}`}
-                            onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/42 via-transparent to-transparent" />
-                          <span className={`absolute left-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-1 text-[9px] font-black uppercase tracking-[0.1em] shadow-sm ${
-                            isCondominiumEventLive ? 'bg-white text-emerald-700' : 'bg-white/92 text-[#336886]'
-                          }`}>
-                            <span className={`h-1.5 w-1.5 rounded-full ${isCondominiumEventLive ? 'bg-emerald-500' : 'bg-[#336886]'}`} />
-                            {isCondominiumEventLive ? 'Atendendo' : hasUpcomingCondominiumEvent ? 'Confirmada' : 'Prévia'}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.preventDefault();
-                              event.stopPropagation();
-                              toggleFavoriteStore(store.slug);
-                            }}
-                            className={`absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ease-out active:scale-[0.86] ${
-                              favoriteStoreSlugs.includes(store.slug)
-                                ? 'scale-[1.06] bg-rose-500 text-white shadow-[0_4px_18px_-4px_rgba(244,63,94,0.72)]'
-                                : 'border border-white/20 bg-black/28 text-white backdrop-blur-md hover:bg-black/42'
-                            }`}
-                            aria-label={`Favoritar ${store.name}`}
-                            title={`Favoritar ${store.name}`}
-                          >
-                            <Heart
-                              size={14}
-                              weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'}
+                        {/* Banner + logo wrapper — sem overflow-hidden para o logo não ser cortado */}
+                        <div className="relative">
+                          <div className="relative h-[78px] overflow-hidden rounded-t-[1.45rem] bg-slate-100">
+                            <img
+                              src={store.banner || store.logo}
+                              alt={store.name}
+                              loading="lazy"
+                              decoding="async"
+                              className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 ${store.isOpen ? '' : 'grayscale opacity-70'}`}
+                              onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
                             />
-                          </button>
+                            <div className={`absolute inset-0 ${store.isOpen ? 'bg-gradient-to-t from-black/38 via-black/5 to-transparent' : 'bg-gradient-to-t from-black/20 via-transparent to-transparent'}`} />
+                            <span className={`absolute left-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.1em] shadow-sm backdrop-blur-sm ${
+                              isCondominiumEventLive ? 'bg-white/92 text-emerald-700' : 'bg-white/92 text-[#336886]'
+                            }`}>
+                              <span className={`h-1.5 w-1.5 rounded-full ${isCondominiumEventLive ? 'bg-emerald-500 animate-pulse' : 'bg-[#336886]'}`} />
+                              {isCondominiumEventLive ? 'Ao vivo' : hasUpcomingCondominiumEvent ? 'Agendado' : 'Prévia'}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                toggleFavoriteStore(store.slug);
+                              }}
+                              className={`absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full transition-all duration-200 ease-out active:scale-[0.86] ${
+                                favoriteStoreSlugs.includes(store.slug)
+                                  ? 'scale-[1.06] bg-rose-500 text-white shadow-[0_4px_18px_-4px_rgba(244,63,94,0.72)]'
+                                  : 'border border-white/20 bg-black/28 text-white backdrop-blur-md hover:bg-black/42'
+                              }`}
+                              aria-label={`Favoritar ${store.name}`}
+                            >
+                              <Heart size={12} weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'} />
+                            </button>
+                          </div>
+                          {/* Logo fora do overflow-hidden — não é cortado */}
                           <img
                             src={store.logo}
                             alt=""
                             loading="lazy"
                             decoding="async"
-                            className="absolute -bottom-5 left-3 h-11 w-11 rounded-full border-2 border-white bg-white object-cover shadow-[0_10px_20px_-12px_rgba(15,23,42,0.45)]"
+                            className={`absolute -bottom-4 left-2.5 z-10 h-10 w-10 rounded-[0.75rem] border-2 border-white bg-white object-cover shadow-[0_8px_18px_-8px_rgba(15,23,42,0.45)] ${store.isOpen ? '' : 'grayscale opacity-60'}`}
                             onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
                           />
                         </div>
-                        <div className="px-3 pb-3 pt-7">
+                        <div className="px-3 pb-3 pt-6">
                           <h3 className={`line-clamp-1 text-sm font-black leading-tight ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>
                             {store.name}
                           </h3>
