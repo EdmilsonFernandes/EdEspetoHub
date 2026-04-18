@@ -2581,14 +2581,17 @@ export function MarketplacePage() {
                               event.stopPropagation();
                               toggleFavoriteStore(store.slug);
                             }}
-                            className="absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/92 text-slate-300 shadow-sm transition-all duration-150 ease-out hover:text-rose-500 active:scale-90"
+                            className={`absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ease-out active:scale-[0.86] ${
+                              favoriteStoreSlugs.includes(store.slug)
+                                ? 'scale-[1.06] bg-rose-500 text-white shadow-[0_4px_18px_-4px_rgba(244,63,94,0.72)]'
+                                : 'border border-white/20 bg-black/28 text-white backdrop-blur-md hover:bg-black/42'
+                            }`}
                             aria-label={`Favoritar ${store.name}`}
                             title={`Favoritar ${store.name}`}
                           >
                             <Heart
-                              size={15}
+                              size={14}
                               weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'}
-                              className={favoriteStoreSlugs.includes(store.slug) ? 'text-rose-500' : ''}
                             />
                           </button>
                           <img
@@ -2684,10 +2687,14 @@ export function MarketplacePage() {
                               event.stopPropagation();
                               toggleFavoriteStore(store.slug);
                             }}
-                            className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-slate-300 shadow-sm transition-all duration-150 ease-out hover:text-rose-500 active:scale-90"
+                            className={`absolute right-2.5 top-2.5 inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ease-out active:scale-[0.86] ${
+                              favoriteStoreSlugs.includes(store.slug)
+                                ? 'scale-[1.06] bg-rose-500 text-white shadow-[0_4px_18px_-4px_rgba(244,63,94,0.72)]'
+                                : 'border border-white/20 bg-black/28 text-white backdrop-blur-md hover:bg-black/42'
+                            }`}
                             aria-label={`Favoritar ${store.name}`}
                           >
-                            <Heart size={13} weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'} className={favoriteStoreSlugs.includes(store.slug) ? 'text-rose-500' : ''} />
+                            <Heart size={14} weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'} />
                           </button>
                         </div>
 
