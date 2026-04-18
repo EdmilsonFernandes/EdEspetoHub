@@ -27,6 +27,7 @@ import {
   Clock,
   MapPinLine,
   UserCircle,
+  Warning,
 } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { condominiumService } from '../services/condominiumService';
@@ -413,6 +414,15 @@ export function MarketplacePage() {
   const [searchPlaceholderIndex, setSearchPlaceholderIndex] = useState(0);
   const [searchPlaceholderVisible, setSearchPlaceholderVisible] = useState(true);
   const [condoPickerFilter, setCondoPickerFilter] = useState<'all' | 'live' | 'upcoming' | 'none'>('all');
+  const [condoGeoCache, setCondoGeoCache] = useState<Record<string, { lat: number; lng: number } | null>>({});
+  const [condoDistanceWarning, setCondoDistanceWarning] = useState<{
+    slug: string;
+    name: string;
+    event: CondominiumEventSummary | null;
+    distanceKm: number;
+    logoUrl: string;
+    bannerUrl?: string;
+  } | null>(null);
   useEffect(() => {
     if (isSearchEditing) return;
     const cycle = window.setInterval(() => {
@@ -449,6 +459,25 @@ export function MarketplacePage() {
 
     return () => window.clearTimeout(timer);
   }, [condominiumPickerOpen]);
+
+  useEffect(() => {
+    if (!condominiumPickerOpen || !userLocation) return;
+    let cancelled = false;
+    const liveCandos = condominiums.filter(c => c.eventSummary?.state === 'live');
+    for (const condo of liveCandos) {
+      const slug = String(condo.slug || '');
+      if (!slug) continue;
+      const address = [condo.address, condo.city, condo.state].filter(Boolean).join(', ');
+      if (!address) continue;
+      void mapsService.geocode(address).then((geo) => {
+        if (!cancelled) setCondoGeoCache(prev => ({ ...prev, [slug]: { lat: geo.lat, lng: geo.lng } }));
+      }).catch(() => {
+        if (!cancelled) setCondoGeoCache(prev => ({ ...prev, [slug]: null }));
+      });
+    }
+    return () => { cancelled = true; };
+  }, [condominiumPickerOpen, userLocation, condominiums]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const [showStorePromoPopup, setShowStorePromoPopup] = useState(false);
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
   const [featuredLoading, setFeaturedLoading] = useState(false);
@@ -3011,17 +3040,40 @@ export function MarketplacePage() {
                   ? filteredCondominiums.filter(c => !c.event?.state || (c.event.state !== 'live' && c.event.state !== 'upcoming'))
                   : [];
 
-                const handleClick = (slug: string, name: string, event: typeof filteredCondominiums[0]['event']) => {
+                const CONDO_DISTANCE_LIMIT_KM = 2;
+                const selectCondominium = (slug: string) => {
+                  setCondominiumPickerOpen(false);
+                  setCondominiumSearch('');
+                  setSelectedCondominiumSlug(slug);
+                };
+                const handleClick = (slug: string, name: string, event: typeof filteredCondominiums[0]['event'], condominium: HubCondominium) => {
                   if (!event?.state || event.state !== 'live') {
                     setCondominiumAvailabilityModal({
                       name: name || 'Condomínio',
                       nextLabel: formatCondominiumPickerEventTime(event) || 'A confirmar',
                     });
-                  } else {
-                    setCondominiumPickerOpen(false);
-                    setCondominiumSearch('');
-                    setSelectedCondominiumSlug(slug);
+                    return;
                   }
+                  if (userLocation) {
+                    const coords = condoGeoCache[slug];
+                    if (coords) {
+                      const toRad = (d: number) => (d * Math.PI) / 180;
+                      const dLat = toRad(coords.lat - userLocation.lat);
+                      const dLng = toRad(coords.lng - userLocation.lng);
+                      const x = Math.sin(dLat / 2) ** 2 + Math.sin(dLng / 2) ** 2 * Math.cos(toRad(userLocation.lat)) * Math.cos(toRad(coords.lat));
+                      const distKm = 6371 * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+                      if (distKm > CONDO_DISTANCE_LIMIT_KM) {
+                        setCondoDistanceWarning({
+                          slug, name, event,
+                          distanceKm: distKm,
+                          logoUrl: resolveAssetUrl(condominium.logoUrl || undefined) || getStoreAvatarUrl(slug, name),
+                          bannerUrl: resolveAssetUrl(condominium.bannerUrl || undefined) || undefined,
+                        });
+                        return;
+                      }
+                    }
+                  }
+                  selectCondominium(slug);
                 };
 
                 const hasResults = live.length > 0 || upcoming.length > 0 || none.length > 0;
@@ -3065,7 +3117,7 @@ export function MarketplacePage() {
                               <button
                                 key={slug}
                                 type="button"
-                                onClick={() => handleClick(slug, name, event)}
+                                onClick={() => handleClick(slug, name, event, condominium)}
                                 className={`group relative overflow-hidden flex w-full items-center gap-3.5 rounded-[1.4rem] border p-4 text-left transition-all duration-300 active:scale-[0.985] ${
                                   active
                                     ? 'border-emerald-300/60 bg-emerald-50 shadow-[0_6px_24px_-8px_rgba(16,185,129,0.32)]'
@@ -3129,7 +3181,7 @@ export function MarketplacePage() {
                               <button
                                 key={slug}
                                 type="button"
-                                onClick={() => handleClick(slug, name, event)}
+                                onClick={() => handleClick(slug, name, event, condominium)}
                                 className={`group relative overflow-hidden flex w-full items-center gap-3.5 rounded-[1.4rem] border p-4 text-left transition-all duration-300 active:scale-[0.985] ${
                                   active
                                     ? 'border-[#336886]/25 bg-[#336886]/6 shadow-[0_4px_20px_-8px_rgba(51,104,134,0.22)]'
@@ -3179,7 +3231,7 @@ export function MarketplacePage() {
                               <button
                                 key={slug}
                                 type="button"
-                                onClick={() => handleClick(slug, name, null)}
+                                onClick={() => handleClick(slug, name, null, condominium)}
                                 className={`group relative overflow-hidden flex w-full items-center gap-3 rounded-[1.25rem] border p-3 text-left transition-all duration-200 active:scale-[0.99] ${
                                   active
                                     ? 'border-[#336886]/15 bg-[#336886]/5'
@@ -3266,6 +3318,76 @@ export function MarketplacePage() {
                 </div>
               </div>
             </nav>
+          </div>
+        </div>
+      )}
+
+      {condoDistanceWarning && (
+        <div className="fixed inset-0 z-[260] flex items-end sm:items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom)+1.25rem)]">
+          <div className="absolute inset-0 bg-slate-950/55 backdrop-blur-sm" onClick={() => setCondoDistanceWarning(null)} />
+          <div className="relative w-full max-w-md overflow-hidden rounded-[2rem] bg-white shadow-[0_40px_80px_-20px_rgba(15,23,42,0.55)]">
+            {condoDistanceWarning.bannerUrl && (
+              <img src={condoDistanceWarning.bannerUrl} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-[0.06] blur-2xl" />
+            )}
+            <div className="relative">
+              {/* Header */}
+              <div className="relative overflow-hidden bg-amber-50/90 px-5 pt-6 pb-5">
+                <div className="pointer-events-none absolute -right-8 -top-8 h-36 w-36 rounded-full bg-amber-200/50 blur-3xl" />
+                <div className="pointer-events-none absolute -left-10 bottom-0 h-28 w-28 rounded-full bg-orange-100/60 blur-3xl" />
+                <div className="relative flex items-center gap-4">
+                  <div className="relative shrink-0">
+                    <div className="h-16 w-16 overflow-hidden rounded-[1.2rem] border-2 border-amber-200/70 shadow-[0_8px_20px_-8px_rgba(245,158,11,0.35)]">
+                      <img src={condoDistanceWarning.logoUrl} alt={condoDistanceWarning.name} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(condoDistanceWarning!.slug, condoDistanceWarning!.name); }} />
+                    </div>
+                    <span className="absolute -bottom-1.5 -right-1.5 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-amber-400 text-white shadow-sm">
+                      <Warning size={13} weight="fill" />
+                    </span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-600">Você está longe</p>
+                    <h3 className="mt-0.5 truncate text-[17px] font-black leading-tight text-slate-900">{condoDistanceWarning.name}</h3>
+                    <p className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-black text-amber-700">
+                      <MapPinLine size={11} weight="fill" />
+                      {condoDistanceWarning.distanceKm.toFixed(1).replace('.', ',')} km daqui
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="px-5 py-4">
+                <p className="text-[14px] leading-relaxed text-slate-600">
+                  Essa é uma <strong className="text-slate-900">feira presencial</strong> — você precisa estar no local para retirar ou receber seu pedido. Tem certeza que consegue ir até lá?
+                </p>
+                <div className="mt-3 rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-[12px] font-medium text-amber-700">
+                  A distância estimada entre você e esta feira é de <strong>{condoDistanceWarning.distanceKm.toFixed(1).replace('.', ',')} km</strong>. Pedimos que confirme antes de prosseguir.
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-2.5 border-t border-slate-100 px-5 py-4">
+                <button
+                  type="button"
+                  onClick={() => setCondoDistanceWarning(null)}
+                  className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 py-3 text-[13px] font-bold text-slate-600 transition-all active:scale-[0.98]"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const { slug } = condoDistanceWarning;
+                    setCondoDistanceWarning(null);
+                    setCondominiumPickerOpen(false);
+                    setCondominiumSearch('');
+                    setSelectedCondominiumSlug(slug);
+                  }}
+                  className="flex-1 rounded-2xl bg-[#153A4C] py-3 text-[13px] font-black text-white shadow-[0_8px_20px_-8px_rgba(21,58,76,0.5)] transition-all hover:bg-[#1e4d62] active:scale-[0.98]"
+                >
+                  Continuar mesmo assim
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
