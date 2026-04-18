@@ -1823,11 +1823,7 @@ export function MarketplacePage() {
                 />
                 <div className="min-w-0 flex-1 rounded-[1.35rem] border border-white/75 bg-white/72 px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_14px_30px_-26px_rgba(15,23,42,0.34)] ring-1 ring-slate-950/5 backdrop-blur-sm">
                   <div className="mb-0.5 flex items-center gap-1.5">
-                    {!isCustomerLogged && (
-                      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#336886]/10 text-[#336886]">
-                        <MapPinLine size={13} weight="bold" />
-                      </span>
-                    )}
+                    <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-4 w-4 shrink-0 rounded-[0.4rem] object-cover shadow-[0_2px_6px_-2px_rgba(21,58,76,0.3)]" />
                     <p className="truncate text-[9.5px] font-black uppercase tracking-[0.2em] text-slate-400">
                       {isCustomerLogged
                         ? `${(() => { const h = new Date().getHours(); return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'; })()}, ${customerDisplayName.split(' ')[0]} 👋`
@@ -2648,24 +2644,38 @@ export function MarketplacePage() {
                     <Link
                       key={store.id}
                       to={storePath}
-                      className={`group overflow-hidden rounded-[1.65rem] border bg-white transition-all duration-200 ease-out active:scale-[0.985] ${
+                      className={`group relative overflow-hidden rounded-[1.75rem] border bg-white transition-all duration-300 ease-out active:scale-[0.982] ${
                         store.isOpen
-                          ? 'border-white/90 shadow-[0_8px_24px_rgba(15,23,42,0.06)] md:hover:-translate-y-0.5 md:hover:shadow-[0_14px_30px_rgba(15,23,42,0.09)]'
-                          : 'border-slate-200/80 bg-slate-50/80 shadow-[0_8px_20px_rgba(15,23,42,0.035)]'
+                          ? 'border-white shadow-[0_10px_32px_rgba(15,23,42,0.08),0_2px_8px_rgba(15,23,42,0.04)] md:hover:-translate-y-1 md:hover:shadow-[0_20px_44px_rgba(15,23,42,0.11)]'
+                          : 'border-slate-100 bg-slate-50/70 shadow-[0_6px_18px_rgba(15,23,42,0.04)]'
                       }`}
                     >
-                      {/* Banner strip */}
-                      <div className="relative h-[62px] overflow-hidden bg-slate-100">
+                      {/* Banner */}
+                      <div className="relative h-[90px] overflow-hidden bg-slate-100">
                         <img
                           src={store.banner || store.logo}
                           alt=""
                           aria-hidden
                           loading="lazy"
                           decoding="async"
-                          className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 ${store.isOpen ? '' : 'grayscale opacity-50'}`}
+                          className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.06] ${store.isOpen ? '' : 'grayscale opacity-45'}`}
                           onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
+                        <div className={`absolute inset-0 ${store.isOpen ? 'bg-gradient-to-t from-black/35 via-black/5 to-black/10' : 'bg-gradient-to-t from-black/20 via-transparent to-transparent'}`} />
+
+                        {/* Open/closed status badge */}
+                        {store.isOpen ? (
+                          <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-emerald-500/90 px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.14em] text-white shadow-[0_4px_10px_-4px_rgba(16,185,129,0.7)] backdrop-blur-sm">
+                            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
+                            Aberto
+                          </span>
+                        ) : (
+                          <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-slate-800/65 px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.14em] text-white/90 backdrop-blur-sm">
+                            Fechado
+                          </span>
+                        )}
+
+                        {/* Favorite */}
                         <button
                           type="button"
                           onClick={(event) => {
@@ -2673,73 +2683,77 @@ export function MarketplacePage() {
                             event.stopPropagation();
                             toggleFavoriteStore(store.slug);
                           }}
-                          className="absolute right-2 top-1.5 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-slate-300 shadow-sm transition-all duration-150 ease-out hover:text-rose-500 active:scale-90"
+                          className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-slate-300 shadow-sm transition-all duration-150 ease-out hover:text-rose-500 active:scale-90"
                           aria-label={`Favoritar ${store.name}`}
                         >
                           <Heart size={13} weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'} className={favoriteStoreSlugs.includes(store.slug) ? 'text-rose-500' : ''} />
                         </button>
+
+                        {/* Store logo overlapping banner bottom */}
                         <img
                           src={store.logo}
                           alt=""
                           loading="lazy"
                           decoding="async"
-                          className={`absolute -bottom-4 left-3 h-10 w-10 rounded-[0.75rem] border-2 border-white bg-white object-cover shadow-[0_8px_16px_-10px_rgba(15,23,42,0.4)] ${store.isOpen ? '' : 'grayscale opacity-70'}`}
+                          className={`absolute -bottom-5 left-3.5 h-12 w-12 rounded-[0.9rem] border-[2.5px] border-white bg-white object-cover shadow-[0_10px_22px_-10px_rgba(15,23,42,0.5)] ${store.isOpen ? '' : 'grayscale opacity-55'}`}
                           onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
                         />
                       </div>
 
                       {/* Content */}
-                      <div className="px-3 pb-3 pt-6">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h3 className={`truncate text-[15px] font-black ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>{store.name}</h3>
-                              <span className={`inline-flex h-2 w-2 shrink-0 rounded-full ${store.isOpen ? 'bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.14),0_0_14px_rgba(16,185,129,0.55)]' : 'bg-slate-300'}`} />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] font-medium text-slate-500">
+                      <div className="px-3.5 pb-3.5 pt-8">
+                        <h3 className={`truncate text-[15.5px] font-black leading-tight tracking-[-0.01em] ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>
+                          {store.name}
+                        </h3>
+                        {store.segment && (
+                          <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-400">
+                            {store.segment}
+                          </p>
+                        )}
+                        <div className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] font-medium text-slate-500">
                           {store.rating > 0 ? (
-                            <span className="inline-flex items-center gap-1">
-                              <Star size={11} weight="fill" className="text-amber-400" />
+                            <span className="inline-flex items-center gap-0.5">
+                              <Star size={10} weight="fill" className="text-amber-400" />
                               <span className="font-bold text-slate-700">{store.rating.toFixed(1)}</span>
                             </span>
                           ) : null}
-                          {store.rating > 0 ? <span className="text-slate-300">•</span> : null}
-                          <span>{store.etaMin}-{store.etaMax} min</span>
-                          <span className="text-slate-300">•</span>
+                          {store.rating > 0 ? <span className="text-slate-200">·</span> : null}
+                          <span>{store.etaMin}–{store.etaMax} min</span>
+                          <span className="text-slate-200">·</span>
                           <span>{distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)}</span>
                         </div>
                         {!store.isOpen && (
-                          <p className="mt-1 inline-flex max-w-full items-center rounded-full bg-slate-200/70 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">
+                          <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-500">
                             {store.nextOpeningLabel || 'Sem horário cadastrado'}
                           </p>
                         )}
-                        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-                          {store.isOpen && store.rating >= 4.9 && (
-                            <span className="inline-flex items-center gap-1 rounded-full border border-rose-100 bg-rose-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-rose-600 shadow-[0_8px_18px_-16px_rgba(225,29,72,0.4)]">
-                              <Sparkle size={10} weight="fill" className="text-rose-500" />
-                              Bombando agora
-                            </span>
-                          )}
-                          {store.freeShipping ? (
-                            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700 shadow-[0_8px_18px_-16px_rgba(16,185,129,0.5)]">
-                              <Bicycle size={10} weight="fill" className="text-emerald-600" />
-                              Grátis
-                            </span>
-                          ) : null}
-                          {store.rating >= 4.7 && !favoriteStoreSlugs.includes(store.slug) && (
-                            <span className="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700 shadow-[0_8px_18px_-16px_rgba(245,158,11,0.45)]">
-                              <Star size={10} weight="fill" className="text-amber-500" />
-                              Favorita da região
-                            </span>
-                          )}
-                          {(store as any).sponsored && (
-                            <span className="inline-flex rounded-full border border-slate-100 bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-500">
-                              Patrocinado
-                            </span>
-                          )}
-                        </div>
+                        {store.isOpen && (
+                          <div className="mt-2.5 flex flex-wrap gap-1.5">
+                            {store.rating >= 4.9 && (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-rose-100 bg-rose-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-rose-600 shadow-[0_6px_16px_-12px_rgba(225,29,72,0.5)]">
+                                <Sparkle size={9} weight="fill" />
+                                Top da região
+                              </span>
+                            )}
+                            {store.freeShipping && (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-emerald-700 shadow-[0_6px_16px_-12px_rgba(16,185,129,0.5)]">
+                                <Bicycle size={9} weight="fill" />
+                                Grátis
+                              </span>
+                            )}
+                            {store.rating >= 4.7 && !favoriteStoreSlugs.includes(store.slug) && (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 px-2.5 py-0.5 text-[9.5px] font-bold text-amber-700">
+                                <Star size={9} weight="fill" className="text-amber-400" />
+                                Favorita
+                              </span>
+                            )}
+                            {(store as any).sponsored && (
+                              <span className="inline-flex rounded-full border border-slate-100 bg-slate-50 px-2.5 py-0.5 text-[9.5px] font-medium text-slate-400">
+                                Patrocinado
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </Link>
                   );
