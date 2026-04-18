@@ -2900,13 +2900,14 @@ export function MarketplacePage() {
       </nav>
 
       {condominiumPickerOpen && (
-        <div className="fixed inset-0 z-[220] overflow-y-auto bg-white text-slate-950">
+        <div className="fixed inset-0 z-[220] overflow-y-auto bg-[#f4f6f9] text-slate-950">
           <div className="mx-auto min-h-screen max-w-[640px] pb-28">
 
             {/* ── Hero suave ── */}
-            <div className="relative px-4 pb-6 pt-[max(env(safe-area-inset-top),1rem)]">
-              {/* Orb decorativo */}
-              <div className="pointer-events-none absolute -right-10 -top-6 h-52 w-52 rounded-full bg-[#336886]/8 blur-3xl" />
+            <div className="relative px-4 pb-5 pt-[max(env(safe-area-inset-top),1rem)]">
+              {/* Orbs decorativos */}
+              <div className="pointer-events-none absolute -right-10 -top-6 h-52 w-52 rounded-full bg-[#336886]/10 blur-3xl" />
+              <div className="pointer-events-none absolute -left-14 top-16 h-40 w-40 rounded-full bg-emerald-300/12 blur-3xl" />
 
               {/* Botão voltar */}
               <button
@@ -2935,7 +2936,7 @@ export function MarketplacePage() {
               </div>
 
               {/* Search */}
-              <div className="relative flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-[0_4px_16px_-6px_rgba(15,23,42,0.08)] transition-all duration-200 focus-within:border-[#336886]/30 focus-within:shadow-[0_4px_20px_-6px_rgba(51,104,134,0.15)]">
+              <div className="relative flex items-center gap-3 rounded-2xl border border-white bg-white px-4 py-3 shadow-[0_4px_20px_-8px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.9)] transition-all duration-200 focus-within:border-[#336886]/25 focus-within:shadow-[0_6px_24px_-8px_rgba(51,104,134,0.18)]">
                 <MagnifyingGlass size={16} weight="bold" className="shrink-0 text-slate-400" />
                 <input
                   ref={condominiumSearchInputRef}
@@ -2958,31 +2959,42 @@ export function MarketplacePage() {
               </div>
 
               {/* ── Filter pills ── */}
-              <div className="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-1 no-scrollbar">
+              <div className="-mx-4 mt-3.5 flex gap-2 overflow-x-auto px-4 pb-1 no-scrollbar">
                 {([
-                  { key: 'all' as const, label: 'Todos' },
-                  { key: 'live' as const, label: 'Ao vivo' },
-                  { key: 'upcoming' as const, label: 'Em breve' },
-                  { key: 'none' as const, label: 'Sem agenda' },
-                ]).map(({ key, label }) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setCondoPickerFilter(key)}
-                    className={`shrink-0 rounded-full px-3.5 py-1.5 text-[11px] font-bold transition-all duration-150 active:scale-95 ${
-                      condoPickerFilter === key
-                        ? key === 'live' ? 'bg-emerald-500 text-white shadow-sm'
-                          : key === 'upcoming' ? 'bg-sky-500 text-white shadow-sm'
-                          : key === 'none' ? 'bg-slate-700 text-white shadow-sm'
-                          : 'bg-[#336886] text-white shadow-sm'
-                        : key === 'live' ? 'bg-emerald-50 text-emerald-700'
-                          : key === 'upcoming' ? 'bg-sky-50 text-sky-700'
-                          : 'bg-slate-100 text-slate-500'
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
+                  { key: 'all' as const, label: 'Todos', dot: null },
+                  { key: 'live' as const, label: 'Ao vivo', dot: 'emerald' },
+                  { key: 'upcoming' as const, label: 'Em breve', dot: 'brand' },
+                  { key: 'none' as const, label: 'Sem agenda', dot: null },
+                ]).map(({ key, label, dot }) => {
+                  const isActive = condoPickerFilter === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setCondoPickerFilter(key)}
+                      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[11px] font-bold transition-all duration-200 active:scale-95 ${
+                        isActive
+                          ? key === 'live'
+                            ? 'border-emerald-400/40 bg-emerald-500 text-white shadow-[0_4px_14px_-6px_rgba(16,185,129,0.55)]'
+                            : key === 'upcoming'
+                            ? 'border-[#336886]/30 bg-[#336886] text-white shadow-[0_4px_14px_-6px_rgba(51,104,134,0.5)]'
+                            : key === 'none'
+                            ? 'border-slate-400/30 bg-slate-700 text-white shadow-sm'
+                            : 'border-slate-300/40 bg-slate-900 text-white shadow-sm'
+                          : key === 'live'
+                          ? 'border-emerald-100 bg-white text-emerald-700 hover:border-emerald-200'
+                          : key === 'upcoming'
+                          ? 'border-[#336886]/10 bg-white text-[#336886] hover:border-[#336886]/20'
+                          : 'border-slate-100 bg-white text-slate-500 hover:border-slate-200'
+                      }`}
+                    >
+                      {dot === 'emerald' && (
+                        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActive ? 'bg-white animate-pulse' : 'bg-emerald-400'}`} />
+                      )}
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -3032,60 +3044,64 @@ export function MarketplacePage() {
                 return (
                   <div className="flex flex-col gap-6">
 
-                    {/* ── AO VIVO ── hero cards */}
+                    {/* ── AO VIVO ── */}
                     {live.length > 0 && (
                       <section>
                         <div className="mb-3 flex items-center gap-2">
-                          <span className="relative flex h-2.5 w-2.5">
+                          <span className="relative flex h-2.5 w-2.5 shrink-0">
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                             <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
                           </span>
                           <span className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-600">Acontecendo agora</span>
-                          <span className="ml-auto rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-black text-emerald-700">{live.length}</span>
+                          <span className="ml-auto inline-flex items-center justify-center rounded-full bg-emerald-500 px-2 py-0.5 text-[9px] font-black text-white shadow-[0_2px_8px_-4px_rgba(16,185,129,0.6)]">{live.length}</span>
                         </div>
-                        <div className="flex flex-col gap-3">
+                        <div className="flex flex-col gap-2.5">
                           {live.map(({ condominium, slug, name, region, event }) => {
                             const active = selectedCondominiumSlug === slug;
                             const logoUrl = resolveAssetUrl(condominium.logoUrl || undefined) || getStoreAvatarUrl(slug, name);
-                            const bannerUrl = resolveAssetUrl(condominium.bannerUrl || condominium.logoUrl || undefined) || logoUrl;
                             const timeLabel = formatCondominiumPickerEventTime(event) || formatCondominiumEventTime(event);
                             return (
                               <button
                                 key={slug}
                                 type="button"
                                 onClick={() => handleClick(slug, name, event)}
-                                className={`group relative w-full overflow-hidden rounded-[1.5rem] text-left active:scale-[0.985] transition-all duration-300 ${active ? 'ring-2 ring-[#336886] ring-offset-2' : ''}`}
+                                className={`group flex w-full items-center gap-3.5 rounded-[1.4rem] border p-4 text-left transition-all duration-300 active:scale-[0.985] ${
+                                  active
+                                    ? 'border-emerald-300/60 bg-emerald-50 shadow-[0_6px_24px_-8px_rgba(16,185,129,0.32)]'
+                                    : 'border-emerald-100 bg-white shadow-[0_4px_20px_-8px_rgba(16,185,129,0.18)] hover:border-emerald-200 hover:shadow-[0_8px_28px_-8px_rgba(16,185,129,0.28)]'
+                                }`}
                               >
-                                {/* Banner bg */}
-                                <div className="absolute inset-0">
-                                  <img src={bannerUrl} alt="" aria-hidden className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = logoUrl; }} />
-                                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,30,40,0.18)_0%,rgba(10,30,40,0.72)_100%)]" />
-                                </div>
-
-                                {/* Live badge top-right */}
-                                <div className="relative flex items-start justify-end p-3">
-                                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-white shadow-md">
+                                {/* Logo com pulse ring */}
+                                <div className="relative shrink-0">
+                                  <div className={`h-14 w-14 overflow-hidden rounded-[1rem] border-2 shadow-[0_4px_14px_-6px_rgba(16,185,129,0.3)] ${active ? 'border-emerald-300' : 'border-emerald-100'}`}>
+                                    <img src={logoUrl} alt={name} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
+                                  </div>
+                                  <span className="absolute -bottom-1 -right-1 flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-white bg-emerald-500 shadow-[0_2px_6px_-2px_rgba(16,185,129,0.6)]">
                                     <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                                    Ao vivo
                                   </span>
                                 </div>
 
-                                {/* Glass bottom */}
-                                <div className="relative px-3 pb-3 pt-3">
-                                  <div className="flex items-center gap-2.5">
-                                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-[0.75rem] border-2 border-white/30 bg-white/10 shadow-md backdrop-blur-sm">
-                                      <img src={logoUrl} alt={name} className="h-full w-full object-contain p-1 bg-white" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                      <p className="truncate text-sm font-black text-white leading-tight">{name}</p>
-                                      {region && <p className="truncate text-[10px] font-medium text-white/65 mt-0.5">{region}</p>}
-                                      {timeLabel && <p className="truncate text-[10px] font-semibold text-emerald-300 mt-0.5">{timeLabel}</p>}
-                                    </div>
-                                    <div className="shrink-0 flex h-7 w-7 items-center justify-center rounded-full bg-white text-slate-900 shadow-md transition-transform group-hover:translate-x-0.5">
-                                      <CaretRight size={12} weight="bold" />
-                                    </div>
-                                  </div>
+                                {/* Texto */}
+                                <div className="min-w-0 flex-1">
+                                  <span className="block truncate text-[14.5px] font-black leading-tight text-slate-900">{name}</span>
+                                  {region && <span className="block truncate text-[11px] font-medium text-slate-400 mt-0.5">{region}</span>}
+                                  {timeLabel && (
+                                    <span className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600">
+                                      <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-emerald-500" />
+                                      {timeLabel}
+                                    </span>
+                                  )}
                                 </div>
+
+                                {/* CTA */}
+                                <span className={`shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[10px] font-black uppercase tracking-wide transition-all duration-200 ${
+                                  active
+                                    ? 'bg-emerald-500 text-white shadow-[0_4px_12px_-4px_rgba(16,185,129,0.5)]'
+                                    : 'bg-emerald-100 text-emerald-700 group-hover:bg-emerald-500 group-hover:text-white'
+                                }`}>
+                                  Entrar
+                                  <CaretRight size={9} weight="bold" />
+                                </span>
                               </button>
                             );
                           })}
@@ -3093,15 +3109,15 @@ export function MarketplacePage() {
                       </section>
                     )}
 
-                    {/* ── EM BREVE ── cards médios */}
+                    {/* ── EM BREVE ── */}
                     {upcoming.length > 0 && (
                       <section>
                         <div className="mb-3 flex items-center gap-2">
-                          <CalendarBlank size={13} weight="fill" className="text-[#336886]" />
+                          <Clock size={13} weight="fill" className="text-[#336886]" />
                           <span className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Em breve</span>
-                          <span className="ml-auto rounded-full bg-sky-100 px-2 py-0.5 text-[9px] font-black text-sky-700">{upcoming.length}</span>
+                          <span className="ml-auto inline-flex items-center justify-center rounded-full bg-[#336886]/10 px-2 py-0.5 text-[9px] font-black text-[#336886]">{upcoming.length}</span>
                         </div>
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-2.5">
                           {upcoming.map(({ condominium, slug, name, region, event }) => {
                             const active = selectedCondominiumSlug === slug;
                             const logoUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
@@ -3111,24 +3127,24 @@ export function MarketplacePage() {
                                 key={slug}
                                 type="button"
                                 onClick={() => handleClick(slug, name, event)}
-                                className={`group flex w-full items-center gap-3.5 rounded-2xl border p-3.5 text-left transition-all duration-200 active:scale-[0.99] ${
+                                className={`group flex w-full items-center gap-3.5 rounded-[1.4rem] border p-4 text-left transition-all duration-300 active:scale-[0.985] ${
                                   active
-                                    ? 'border-[#336886]/20 bg-[#336886]/5 shadow-[0_0_0_2px_rgba(51,104,134,0.12)]'
-                                    : 'border-slate-100 bg-white shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)] hover:border-sky-100 hover:shadow-[0_4px_16px_-6px_rgba(51,104,134,0.12)]'
+                                    ? 'border-[#336886]/25 bg-[#336886]/6 shadow-[0_4px_20px_-8px_rgba(51,104,134,0.22)]'
+                                    : 'border-slate-100 bg-white shadow-[0_2px_12px_-6px_rgba(15,23,42,0.07)] hover:border-[#336886]/15 hover:shadow-[0_6px_20px_-8px_rgba(51,104,134,0.14)]'
                                 }`}
                               >
-                                <div className="relative shrink-0 h-14 w-14 overflow-hidden rounded-[1rem] border border-slate-100 bg-slate-50">
+                                <div className={`h-14 w-14 shrink-0 overflow-hidden rounded-[1rem] border ${active ? 'border-[#336886]/20' : 'border-slate-100'} bg-slate-50`}>
                                   <img src={logoUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
                                 </div>
-                                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                                <div className="flex min-w-0 flex-1 flex-col">
                                   <div className="flex items-center gap-2">
-                                    <span className="truncate text-[14px] font-bold text-slate-900">{name}</span>
-                                    {active && <span className="shrink-0 rounded-full bg-[#336886] px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-white">Selecionado</span>}
+                                    <span className="truncate text-[14.5px] font-bold text-slate-900">{name}</span>
+                                    {active && <span className="shrink-0 rounded-full bg-[#336886] px-1.5 py-0.5 text-[7.5px] font-black uppercase tracking-widest text-white">Você aqui</span>}
                                   </div>
-                                  {region && <span className="truncate text-[11px] font-medium text-slate-400">{region}</span>}
-                                  <div className="mt-1 flex items-center gap-1.5">
-                                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-sky-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-[#336886]">
-                                      <span className="h-1.5 w-1.5 rounded-full bg-[#336886]" />
+                                  {region && <span className="block truncate text-[11px] font-medium text-slate-400 mt-0.5">{region}</span>}
+                                  <div className="mt-1.5 flex items-center gap-1.5">
+                                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#336886]/8 px-2 py-0.5 text-[9px] font-black text-[#336886]">
+                                      <Clock size={8} weight="fill" />
                                       Agendado
                                     </span>
                                     {timeLabel && <span className="truncate text-[10px] font-medium text-slate-400">{timeLabel}</span>}
@@ -3142,54 +3158,42 @@ export function MarketplacePage() {
                       </section>
                     )}
 
-                    {/* ── SEM AGENDA ── cards compactos */}
+                    {/* ── SEM AGENDA ── */}
                     {none.length > 0 && (
                       <section>
                         <div className="mb-3 flex items-center gap-2">
                           <CalendarBlank size={12} weight="duotone" className="text-slate-400" />
                           <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Outros condomínios</span>
-                          <span className="ml-auto rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-black text-slate-500">{none.length}</span>
+                          <span className="ml-auto rounded-full bg-slate-200/80 px-2 py-0.5 text-[9px] font-bold text-slate-500">{none.length}</span>
                         </div>
                         <div className="flex flex-col gap-2">
-                          {none.map(({ condominium, slug, name, region, event }) => {
+                          {none.map(({ condominium, slug, name, region }) => {
                             const active = selectedCondominiumSlug === slug;
                             const logoUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
-                            const bannerBg = resolveAssetUrl(condominium.bannerUrl || condominium.logoUrl || undefined);
-                            const timeLabel = formatCondominiumPickerEventTime(event) || formatCondominiumEventTime(event);
                             return (
                               <button
                                 key={slug}
                                 type="button"
-                                onClick={() => handleClick(slug, name, event)}
-                                className={`group relative flex w-full items-center gap-3.5 overflow-hidden rounded-2xl border p-3 text-left transition-all duration-200 active:scale-[0.99] ${
+                                onClick={() => handleClick(slug, name, null)}
+                                className={`group flex w-full items-center gap-3 rounded-[1.25rem] border p-3 text-left transition-all duration-200 active:scale-[0.99] ${
                                   active
-                                    ? 'border-[#336886]/20 bg-[#336886]/5 shadow-[0_0_0_2px_rgba(51,104,134,0.12)]'
-                                    : 'border-slate-100 bg-white shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)] hover:border-slate-200 hover:shadow-[0_4px_12px_-4px_rgba(15,23,42,0.1)]'
+                                    ? 'border-[#336886]/15 bg-[#336886]/5'
+                                    : 'border-slate-100/90 bg-white/80 hover:bg-white hover:border-slate-200'
                                 }`}
                               >
-                                {bannerBg && (
-                                  <div
-                                    className="pointer-events-none absolute inset-0 rounded-2xl opacity-[0.04]"
-                                    style={{ backgroundImage: `url(${bannerBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-                                  />
-                                )}
-                                <div className={`relative h-11 w-11 shrink-0 overflow-hidden rounded-[0.85rem] border bg-slate-50 ${active ? 'border-[#336886]/20' : 'border-slate-100'}`}>
-                                  <img src={logoUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-cover grayscale-[40%]" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
+                                <div className={`h-11 w-11 shrink-0 overflow-hidden rounded-[0.8rem] border bg-slate-50 transition-all duration-300 ${
+                                  active ? 'border-[#336886]/20' : 'border-slate-100 grayscale-[35%] opacity-70 group-hover:grayscale-0 group-hover:opacity-100'
+                                }`}>
+                                  <img src={logoUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
                                 </div>
-                                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                                  <span className={`truncate text-[13px] font-bold ${active ? 'text-[#336886]' : 'text-slate-600'}`}>{name}</span>
-                                  {region && <span className="truncate text-[10px] font-medium text-slate-400">{region}</span>}
-                                  {timeLabel && <span className="truncate text-[10px] text-slate-400">{timeLabel}</span>}
+                                <div className="min-w-0 flex-1">
+                                  <span className={`block truncate text-[13px] font-semibold ${active ? 'text-[#336886]' : 'text-slate-600'}`}>{name}</span>
+                                  {region && <span className="block truncate text-[10px] text-slate-400">{region}</span>}
                                 </div>
-                                <div className="flex shrink-0 flex-col items-end gap-1.5">
-                                  {active
-                                    ? <span className="rounded-full bg-[#336886]/10 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-[#336886]">Selecionado</span>
-                                    : <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-semibold text-slate-400">
-                                        <CalendarBlank size={8} weight="duotone" />
-                                        Sem agenda
-                                      </span>
-                                  }
-                                </div>
+                                <span className={`shrink-0 text-[9px] font-bold uppercase tracking-wide ${active ? 'text-[#336886]' : 'text-slate-300 group-hover:text-slate-400'}`}>
+                                  {active ? 'Aqui' : 'Ver'}
+                                  {!active && <CaretRight size={9} weight="bold" className="ml-0.5 inline" />}
+                                </span>
                               </button>
                             );
                           })}
