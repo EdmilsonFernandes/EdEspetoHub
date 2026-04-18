@@ -2478,7 +2478,7 @@ export function StorePage() {
                     </div>
                   )}
 
-                  <PlatformTrustFooter className="pt-1" />
+                  <PlatformTrustFooter className="pt-1" compact />
                 </div>
               </div>
             </div>

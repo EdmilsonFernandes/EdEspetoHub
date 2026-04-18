@@ -1549,7 +1549,7 @@ export const MenuView = ({
           </div>
         )}
         <div className="pt-1 pb-2">
-          <PlatformTrustFooter />
+          <PlatformTrustFooter compact />
         </div>
         </div>
       </div>

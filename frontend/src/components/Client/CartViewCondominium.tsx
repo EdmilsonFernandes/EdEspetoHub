@@ -18,6 +18,7 @@ import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { formatSelectedModifiers, getModifiersTotal } from "../../utils/productModifiers";
 import { getBundleDiscountForCartItem, getCartPricing } from "../../utils/orderPricing";
+import { DddSelect } from "../common/DddSelect";
 
 const BRAZIL_DDDS = [
   "11", "12", "13", "14", "15", "16", "17", "18", "19",
@@ -286,15 +287,11 @@ export const CartViewCondominium = ({
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               WhatsApp {guestPhoneRequired ? <span className="text-rose-500 font-extrabold">Obrigatório</span> : null}
             </label>
-            <div className="mt-2 grid grid-cols-[80px_1fr] gap-3">
-              <select
+            <div className="mt-2 grid grid-cols-[100px_1fr] gap-3">
+              <DddSelect
                 value={selectedDdd || ""}
-                onChange={(e) => handleDddChange(e.target.value)}
-                className={premiumInputClass}
-              >
-                <option value="" disabled>DDD</option>
-                {BRAZIL_DDDS.map((ddd) => <option key={ddd} value={ddd}>{ddd}</option>)}
-              </select>
+                onChange={(ddd) => handleDddChange(ddd)}
+              />
               <input
                 type="tel"
                 inputMode="numeric"

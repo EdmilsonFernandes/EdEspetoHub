@@ -24,6 +24,7 @@ import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { getStoreAvatarUrl } from "../../utils/storeAvatar";
 import { formatSelectedModifiers, getModifiersTotal } from "../../utils/productModifiers";
 import { getBundleDiscountForCartItem, getCartPricing } from "../../utils/orderPricing";
+import { DddSelect } from "../common/DddSelect";
 
 const BRAZIL_DDDS = [
   "11", "12", "13", "14", "15", "16", "17", "18", "19",
@@ -738,20 +739,11 @@ export const CartView = ({
               <div className="mt-2 grid grid-cols-1 sm:grid-cols-[110px_1fr] gap-3 items-end">
                 <div>
                   <span className="text-[11px] font-semibold text-slate-500">DDD</span>
-                  <select
+                  <DddSelect
                     value={selectedDdd || ""}
-                    onChange={(e) => handleDddChange(e.target.value)}
-                    className={`${premiumInputClass} mt-1 text-sm font-semibold text-slate-700`}
-                  >
-                    <option value="" disabled>
-                      Selecione
-                    </option>
-                    {BRAZIL_DDDS.map((ddd) => (
-                      <option key={ddd} value={ddd}>
-                        {ddd}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(ddd) => handleDddChange(ddd)}
+                    className="mt-1"
+                  />
                 </div>
                 <div>
                   <span className="text-[11px] font-semibold text-slate-500">Número</span>
@@ -799,20 +791,11 @@ export const CartView = ({
               <div className="mt-2 grid grid-cols-1 sm:grid-cols-[110px_1fr] gap-3 items-end">
                 <div>
                   <span className="text-[11px] font-semibold text-slate-500">DDD</span>
-                  <select
+                  <DddSelect
                     value={selectedDdd || ""}
-                    onChange={(e) => handleDddChange(e.target.value)}
-                    className={`${premiumInputClass} mt-1 text-sm font-semibold text-slate-700`}
-                  >
-                    <option value="" disabled>
-                      Selecione
-                    </option>
-                    {BRAZIL_DDDS.map((ddd) => (
-                      <option key={ddd} value={ddd}>
-                        {ddd}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(ddd) => handleDddChange(ddd)}
+                    className="mt-1"
+                  />
                 </div>
                 <div>
                   <span className="text-[11px] font-semibold text-slate-500">Número</span>
