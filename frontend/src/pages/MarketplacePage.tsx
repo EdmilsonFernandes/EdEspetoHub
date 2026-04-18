@@ -2655,7 +2655,7 @@ export function MarketplacePage() {
                       }`}
                     >
                       {/* Banner strip */}
-                      <div className="relative h-[90px] overflow-hidden bg-slate-100">
+                      <div className="relative h-[62px] overflow-hidden bg-slate-100">
                         <img
                           src={store.banner || store.logo}
                           alt=""
@@ -2665,7 +2665,7 @@ export function MarketplacePage() {
                           className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 ${store.isOpen ? '' : 'grayscale opacity-50'}`}
                           onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
                         <button
                           type="button"
                           onClick={(event) => {
@@ -2673,23 +2673,23 @@ export function MarketplacePage() {
                             event.stopPropagation();
                             toggleFavoriteStore(store.slug);
                           }}
-                          className="absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/92 text-slate-300 shadow-sm transition-all duration-150 ease-out hover:text-rose-500 active:scale-90"
+                          className="absolute right-2 top-1.5 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-slate-300 shadow-sm transition-all duration-150 ease-out hover:text-rose-500 active:scale-90"
                           aria-label={`Favoritar ${store.name}`}
                         >
-                          <Heart size={15} weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'} className={favoriteStoreSlugs.includes(store.slug) ? 'text-rose-500' : ''} />
+                          <Heart size={13} weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'} className={favoriteStoreSlugs.includes(store.slug) ? 'text-rose-500' : ''} />
                         </button>
                         <img
                           src={store.logo}
                           alt=""
                           loading="lazy"
                           decoding="async"
-                          className={`absolute -bottom-5 left-3.5 h-12 w-12 rounded-[0.9rem] border-2 border-white bg-white object-cover shadow-[0_10px_20px_-12px_rgba(15,23,42,0.45)] ${store.isOpen ? '' : 'grayscale opacity-70'}`}
+                          className={`absolute -bottom-4 left-3 h-10 w-10 rounded-[0.75rem] border-2 border-white bg-white object-cover shadow-[0_8px_16px_-10px_rgba(15,23,42,0.4)] ${store.isOpen ? '' : 'grayscale opacity-70'}`}
                           onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
                         />
                       </div>
 
                       {/* Content */}
-                      <div className="px-3.5 pb-3.5 pt-7">
+                      <div className="px-3 pb-3 pt-6">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
@@ -3119,15 +3119,16 @@ export function MarketplacePage() {
                       </section>
                     )}
 
-                    {/* ── SEM AGENDA ── linhas compactas */}
+                    {/* ── SEM AGENDA ── cards compactos */}
                     {none.length > 0 && (
                       <section>
                         <div className="mb-3 flex items-center gap-2">
-                          <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Outros locais</span>
+                          <CalendarBlank size={12} weight="duotone" className="text-slate-400" />
+                          <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Outros condomínios</span>
                           <span className="ml-auto rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-black text-slate-500">{none.length}</span>
                         </div>
-                        <div className="overflow-hidden rounded-2xl border border-slate-100">
-                          {none.map(({ condominium, slug, name, region, event }, i) => {
+                        <div className="flex flex-col gap-2">
+                          {none.map(({ condominium, slug, name, region, event }) => {
                             const active = selectedCondominiumSlug === slug;
                             const logoUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
                             const bannerBg = resolveAssetUrl(condominium.bannerUrl || condominium.logoUrl || undefined);
@@ -3137,27 +3138,34 @@ export function MarketplacePage() {
                                 key={slug}
                                 type="button"
                                 onClick={() => handleClick(slug, name, event)}
-                                className={`group relative flex w-full items-center gap-3 overflow-hidden px-4 py-3.5 text-left transition-colors duration-150 active:bg-slate-50 ${
-                                  i > 0 ? 'border-t border-slate-100' : ''
-                                } ${active ? 'bg-[#336886]/5' : 'hover:bg-slate-50/70'}`}
+                                className={`group relative flex w-full items-center gap-3.5 overflow-hidden rounded-2xl border p-3 text-left transition-all duration-200 active:scale-[0.99] ${
+                                  active
+                                    ? 'border-[#336886]/20 bg-[#336886]/5 shadow-[0_0_0_2px_rgba(51,104,134,0.12)]'
+                                    : 'border-slate-100 bg-white shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)] hover:border-slate-200 hover:shadow-[0_4px_12px_-4px_rgba(15,23,42,0.1)]'
+                                }`}
                               >
                                 {bannerBg && (
                                   <div
-                                    className="pointer-events-none absolute inset-0 opacity-[0.05]"
+                                    className="pointer-events-none absolute inset-0 rounded-2xl opacity-[0.04]"
                                     style={{ backgroundImage: `url(${bannerBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
                                   />
                                 )}
-                                <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
-                                  <img src={logoUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
+                                <div className={`relative h-11 w-11 shrink-0 overflow-hidden rounded-[0.85rem] border bg-slate-50 ${active ? 'border-[#336886]/20' : 'border-slate-100'}`}>
+                                  <img src={logoUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-cover grayscale-[40%]" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
                                 </div>
-                                <div className="flex min-w-0 flex-1 flex-col">
-                                  <span className="truncate text-[13px] font-semibold text-slate-700">{name}</span>
-                                  {region && <span className="truncate text-[10px] text-slate-400 mt-0.5">{region}</span>}
+                                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                                  <span className={`truncate text-[13px] font-bold ${active ? 'text-[#336886]' : 'text-slate-600'}`}>{name}</span>
+                                  {region && <span className="truncate text-[10px] font-medium text-slate-400">{region}</span>}
                                   {timeLabel && <span className="truncate text-[10px] text-slate-400">{timeLabel}</span>}
                                 </div>
-                                <div className="flex shrink-0 flex-col items-end gap-1">
-                                  {active && <span className="rounded-full bg-[#336886]/10 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-[#336886]">Selecionado</span>}
-                                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-semibold text-slate-400">Sem agenda</span>
+                                <div className="flex shrink-0 flex-col items-end gap-1.5">
+                                  {active
+                                    ? <span className="rounded-full bg-[#336886]/10 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-[#336886]">Selecionado</span>
+                                    : <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-semibold text-slate-400">
+                                        <CalendarBlank size={8} weight="duotone" />
+                                        Sem agenda
+                                      </span>
+                                  }
                                 </div>
                               </button>
                             );
