@@ -2858,7 +2858,7 @@ export function MarketplacePage() {
               <div className="relative mb-5">
                 <div className="mb-2 flex items-center gap-2">
                   <img
-                    src="/janocaminho-logo.png"
+                    src="/janocaminho.jpg"
                     alt="Já no Caminho"
                     className="h-5 w-5 rounded-full object-cover ring-1 ring-[#336886]/20"
                   />
