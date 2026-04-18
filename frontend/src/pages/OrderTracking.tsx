@@ -852,9 +852,11 @@ export function OrderTracking() {
   const itemsToRender = Array.isArray(order?.items) ? order.items : [];
 
   return (
-    <div className="min-h-screen bg-[#f8f8f6] pt-[env(safe-area-inset-top)]">
+    <div className="min-h-screen bg-[#EEF2F7] pt-[env(safe-area-inset-top)]">
+      <div className="pointer-events-none fixed top-[-12%] right-[-8%] h-[42%] w-[50%] rounded-full bg-[#153A4C]/14 blur-[120px] -z-10" />
+      <div className="pointer-events-none fixed bottom-[10%] left-[-6%] h-[28%] w-[36%] rounded-full bg-[#336886]/8 blur-[100px] -z-10" />
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
-      <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-[#f8f8f6]/95 backdrop-blur-xl shadow-[0_8px_28px_-20px_rgba(15,23,42,0.18)]">
+      <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-[#EEF2F7]/95 backdrop-blur-xl shadow-[0_8px_28px_-20px_rgba(15,23,42,0.18)]">
         {/* Barra de progresso dinâmica do pedido */}
         <div className="h-[2.5px] w-full bg-slate-100 overflow-hidden">
           <div

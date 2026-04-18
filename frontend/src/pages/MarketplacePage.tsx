@@ -402,6 +402,7 @@ export function MarketplacePage() {
   const [isSearchEditing, setIsSearchEditing] = useState(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const condominiumSearchInputRef = useRef<HTMLInputElement | null>(null);
+  const storesSectionRef = useRef<HTMLElement | null>(null);
 
   const SEARCH_PLACEHOLDERS = [
     'Buscar espetinho...',
@@ -1681,24 +1682,28 @@ export function MarketplacePage() {
     [activeAnonymousOrders, dismissedAnonymousOrderIds]
   );
 
-  const hubNotificationCount = visibleActiveOrders.length + visibleActiveAnonymousOrders.length;
+  const hubNotificationCount = visibleActiveOrders.length + (isCustomerLogged ? 0 : visibleActiveAnonymousOrders.length);
 
   const handleHubNotificationClick = useCallback(() => {
     if (visibleActiveOrders.length > 0) {
       openCustomerOrders();
       return;
     }
-    const anonymousOrderId = String(visibleActiveAnonymousOrders[0]?.id || '').trim();
-    if (anonymousOrderId) {
-      navigate(`/pedido/${anonymousOrderId}`);
+    if (!isCustomerLogged) {
+      const anonymousOrderId = String(visibleActiveAnonymousOrders[0]?.id || '').trim();
+      if (anonymousOrderId) {
+        navigate(`/pedido/${anonymousOrderId}`);
+        return;
+      }
+      openCustomerLogin();
       return;
     }
-    if (isCustomerLogged) {
-      openCustomerOrders();
-      return;
-    }
-    openCustomerLogin();
+    openCustomerOrders();
   }, [isCustomerLogged, navigate, openCustomerLogin, openCustomerOrders, visibleActiveAnonymousOrders, visibleActiveOrders]);
+
+  useEffect(() => {
+    if (isCustomerLogged) setActiveAnonymousOrders([]);
+  }, [isCustomerLogged]);
 
   const loadActiveOrders = useCallback(async () => {
     const session = readCustomerSession();
@@ -1753,12 +1758,13 @@ export function MarketplacePage() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[radial-gradient(circle_at_top_right,rgba(51,104,134,0.10),transparent_30%),linear-gradient(180deg,#F8F9FB_0%,#FFFFFF_46%,#F8F9FB_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
+    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[radial-gradient(ellipse_at_top_right,rgba(51,104,134,0.16),transparent_38%),radial-gradient(ellipse_at_bottom_left,rgba(21,58,76,0.08),transparent_40%),linear-gradient(180deg,#EEF2F7_0%,#F4F8FB_50%,#EEF2F7_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
       {/* Elemento Decorativo de Fundo (Premium Look) */}
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-[55] h-[max(env(safe-area-inset-top),0.75rem)] bg-[#F8F9FB]" />
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-[55] h-[max(env(safe-area-inset-top),0.75rem)] bg-[#EEF2F7]" />
       <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[320px] bg-gradient-to-b from-[#336886]/8 via-white/30 to-transparent" />
-      <div className="fixed left-[-8%] top-[10%] h-[28%] w-[38%] rounded-full bg-white/80 blur-[120px] pointer-events-none -z-10" />
-      <div className="fixed top-[-10%] right-[-10%] h-[40%] w-[50%] bg-[#336886]/14 blur-[120px] rounded-full pointer-events-none -z-10" />
+      <div className="fixed left-[-8%] top-[10%] h-[28%] w-[38%] rounded-full bg-[#336886]/6 blur-[130px] pointer-events-none -z-10" />
+      <div className="fixed top-[-10%] right-[-10%] h-[44%] w-[52%] bg-[#153A4C]/18 blur-[110px] rounded-full pointer-events-none -z-10" />
+      <div className="fixed bottom-[5%] right-[5%] h-[22%] w-[28%] bg-[#336886]/8 blur-[100px] rounded-full pointer-events-none -z-10" />
 
       <div
         className={`pointer-events-none fixed left-1/2 z-[120] -translate-x-1/2 rounded-full border border-slate-200 bg-white/95 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm transition-all duration-200 ${
@@ -1836,7 +1842,7 @@ export function MarketplacePage() {
           hasEntered ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}
       >
-        <header className={`sticky top-0 z-[60] transition-all duration-300 ${isNativePlatform ? 'bg-[#F8F9FB]/96 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.22)] backdrop-blur-xl' : isHeaderElevated ? 'bg-[#F8F9FB]/92 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.35)] backdrop-blur-2xl' : 'bg-transparent'}`}>
+        <header className={`sticky top-0 z-[60] transition-all duration-300 ${isNativePlatform ? 'bg-[#EEF2F7]/96 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.22)] backdrop-blur-xl' : isHeaderElevated ? 'bg-[#EEF2F7]/92 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.35)] backdrop-blur-2xl' : 'bg-transparent'}`}>
           <div className={`mx-auto max-w-[1200px] px-4 ${isNativePlatform ? 'pb-2 pt-[max(0.55rem,calc(env(safe-area-inset-top)+0.1rem))]' : 'pb-3 pt-[max(0.85rem,calc(env(safe-area-inset-top)+0.2rem))]'}`}>
             <div className={`${isNativePlatform ? 'space-y-2.5 rounded-[1.65rem] px-2.5 py-2.5' : 'space-y-3 rounded-[1.9rem] px-3 py-3'} relative overflow-hidden border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.95)_0%,rgba(241,247,246,0.9)_54%,rgba(255,255,255,0.92)_100%)] shadow-[0_22px_54px_-38px_rgba(15,23,42,0.46)] ring-1 ring-slate-200/55 backdrop-blur-2xl`}>
             <div className="pointer-events-none absolute -left-12 -top-16 h-36 w-36 rounded-full bg-[#336886]/10 blur-3xl" />
@@ -1947,27 +1953,24 @@ export function MarketplacePage() {
             </div>
 
             {/* Linha 3: Filtros Minimalistas (Pílulas) */}
-            <div className={`relative -mx-0.5 flex gap-2 overflow-x-auto no-scrollbar scrollbar-hide px-0.5 ${isNativePlatform ? 'py-0.5' : 'py-1'}`}>
-              {(['all', 'free_shipping', 'nearby', 'open_now', 'favorites'] as const).map((filter) => {
+            <div className={`relative -mx-0.5 ${isNativePlatform ? 'py-0.5' : 'py-1'}`}>
+              <div className="flex gap-2 overflow-x-auto no-scrollbar scrollbar-hide px-0.5">
+              {(['free_shipping', 'nearby', 'open_now', 'favorites'] as const).map((filter) => {
                 const label =
-                  filter === 'all' ? 'Todos' :
                   filter === 'free_shipping' ? 'Frete grátis' :
                   filter === 'nearby' ? 'Perto de você' :
                   filter === 'favorites' ? 'Favoritos' : 'Abertos';
                 const Icon =
-                  filter === 'all' ? Storefront :
                   filter === 'free_shipping' ? Bicycle :
                   filter === 'nearby' ? MapPinLine :
                   filter === 'favorites' ? Heart : Clock;
                 const active = quickFilter === filter;
                 const activeStyle =
-                  filter === 'all'          ? 'border-[#336886]   bg-[#153A4C]   text-white  shadow-[0_10px_22px_-12px_rgba(21,58,76,0.65)]' :
                   filter === 'free_shipping'? 'border-emerald-500 bg-emerald-600 text-white  shadow-[0_10px_22px_-12px_rgba(5,150,105,0.55)]' :
                   filter === 'nearby'       ? 'border-sky-500     bg-sky-600     text-white  shadow-[0_10px_22px_-12px_rgba(2,132,199,0.55)]' :
                   filter === 'open_now'     ? 'border-amber-500   bg-amber-500   text-white  shadow-[0_10px_22px_-12px_rgba(245,158,11,0.55)]' :
                                               'border-rose-400    bg-rose-500    text-white  shadow-[0_10px_22px_-12px_rgba(244,63,94,0.55)]';
                 const inactiveStyle =
-                  filter === 'all'          ? 'border-white/75 bg-white/72 text-slate-600' :
                   filter === 'free_shipping'? 'border-emerald-100/80 bg-emerald-50/60 text-emerald-700' :
                   filter === 'nearby'       ? 'border-sky-100/80 bg-sky-50/60 text-sky-700' :
                   filter === 'open_now'     ? 'border-amber-100/80 bg-amber-50/60 text-amber-700' :
@@ -1976,7 +1979,18 @@ export function MarketplacePage() {
                   <button
                     key={filter}
                     type="button"
-                    onClick={() => setQuickFilter(filter as any)}
+                    onClick={() => {
+                      const next = quickFilter === filter ? 'all' : filter;
+                      setQuickFilter(next);
+                      if (next !== 'all') {
+                        window.setTimeout(() => {
+                          const el = storesSectionRef.current;
+                          if (!el) return;
+                          const y = el.getBoundingClientRect().top + window.scrollY - 168;
+                          window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+                        }, 120);
+                      }
+                    }}
                     className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border ${isNativePlatform ? 'px-3 py-1.5' : 'px-3.5 py-1.5'} text-[12px] transition-all duration-200 ease-out active:scale-[0.97] shadow-[0_6px_16px_-10px_rgba(15,23,42,0.18)] ${active ? `font-black ${activeStyle}` : `font-bold ${inactiveStyle}`}`}
                   >
                     <Icon size={13} weight={active ? 'fill' : 'duotone'} />
@@ -1984,21 +1998,25 @@ export function MarketplacePage() {
                   </button>
                 );
               })}
-              <button
-                type="button"
-                onClick={() => {
-                  setQuery('');
-                  setDebouncedQuery('');
-                  setSegmentFilter('all');
-                  setQuickFilter('all');
-                }}
-                className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-white/75 bg-white/58 ${isNativePlatform ? 'px-3 py-1.5' : 'px-3.5 py-1.5'} text-[12px] font-bold text-slate-500 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.22)] transition-all duration-150 ease-out hover:bg-white active:scale-[0.97]`}
-              >
-                <X size={12} weight="bold" />
-                Limpar
-              </button>
+              {(quickFilter !== 'all' || segmentFilter !== 'all' || debouncedQuery) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQuery('');
+                    setDebouncedQuery('');
+                    setSegmentFilter('all');
+                    setQuickFilter('all');
+                  }}
+                  className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-rose-200/80 bg-rose-50/70 ${isNativePlatform ? 'px-3 py-1.5' : 'px-3.5 py-1.5'} text-[12px] font-bold text-rose-600 shadow-[0_6px_16px_-10px_rgba(244,63,94,0.18)] transition-all duration-200 ease-out active:scale-[0.97]`}
+                >
+                  <X size={12} weight="bold" />
+                  Limpar
+                </button>
+              )}
+              </div>
+              <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#EEF2F7]/90 to-transparent" />
             </div>
-            </div>
+          </div>
           </div>
         </header>
 
@@ -2505,7 +2523,7 @@ export function MarketplacePage() {
             </section>
           )}
 
-          <section className="mb-8 space-y-4" style={{ transition: 'all .45s ease', transitionDelay: '400ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
+          <section ref={storesSectionRef} className="mb-8 space-y-4" style={{ transition: 'all .45s ease', transitionDelay: '400ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
             <div className="flex items-center justify-between gap-2">
               <div>
                 <div className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-slate-500">

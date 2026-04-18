@@ -12,7 +12,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   const isNativePlatform = Capacitor.isNativePlatform();
 
   return (
-    <div className={`min-h-screen overflow-x-clip bg-[#f8fafc] px-4 py-6 sm:py-10 relative ${isNativePlatform ? 'ds-native-nav-content' : ''}`}>
+    <div className={`min-h-screen overflow-x-clip bg-[#EEF2F7] px-4 py-6 sm:py-10 relative ${isNativePlatform ? 'ds-native-nav-content' : ''}`}>
       {/* Background Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-sky-400/10 blur-[120px] animate-[orbFloat_18s_infinite_linear]" />

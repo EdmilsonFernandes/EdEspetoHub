@@ -311,7 +311,7 @@ export function ClientAccount() {
     return {
       label: 'Não verificado',
       tone: 'text-slate-600',
-      bg: 'bg-slate-50 border-slate-100',
+      bg: 'bg-[#EEF2F7] border-slate-100',
       icon: <XCircle size={16} weight="duotone" className="text-slate-400" />,
     };
   };
@@ -416,14 +416,16 @@ export function ClientAccount() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+      <div className="flex min-h-screen items-center justify-center bg-[#EEF2F7]">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-slate-900" />
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 pb-12 pt-[env(safe-area-inset-top)]">
+    <main className="min-h-screen bg-[#EEF2F7] pb-12 pt-[env(safe-area-inset-top)]">
+      <div className="pointer-events-none fixed top-[-12%] right-[-8%] h-[40%] w-[48%] rounded-full bg-[#153A4C]/12 blur-[120px] -z-10" />
+      <div className="pointer-events-none fixed bottom-[5%] left-[-6%] h-[24%] w-[32%] rounded-full bg-[#336886]/7 blur-[100px] -z-10" />
       <div className="mx-auto max-w-2xl">
         {/* Header Fixo Premium */}
         <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white/80 px-4 py-4 backdrop-blur-md">
@@ -479,7 +481,7 @@ export function ClientAccount() {
                       <input
                         value={nameDraft}
                         onChange={e => setNameDraft(e.target.value)}
-                        className="w-full rounded-2xl border border-slate-100 bg-slate-50 py-3 pl-11 pr-4 text-sm font-bold text-slate-700 focus:border-slate-900/20 focus:outline-none"
+                        className="w-full rounded-2xl border border-slate-100 bg-[#EEF2F7] py-3 pl-11 pr-4 text-sm font-bold text-slate-700 focus:border-slate-900/20 focus:outline-none"
                       />
                     </div>
                   </div>
@@ -502,7 +504,7 @@ export function ClientAccount() {
                       <input
                         value={phoneDraft}
                         onChange={e => setPhoneDraft(e.target.value)}
-                        className="w-full rounded-2xl border border-slate-100 bg-slate-50 py-3 pl-11 pr-4 text-sm font-bold text-slate-700 focus:border-slate-900/20 focus:outline-none"
+                        className="w-full rounded-2xl border border-slate-100 bg-[#EEF2F7] py-3 pl-11 pr-4 text-sm font-bold text-slate-700 focus:border-slate-900/20 focus:outline-none"
                       />
                     </div>
                   </div>
@@ -544,7 +546,7 @@ export function ClientAccount() {
                     addresses.map(addr => (
                       <div key={addr.id} className="group flex items-center justify-between rounded-3xl bg-white p-4 shadow-sm border border-slate-100">
                         <div className="flex items-center gap-3">
-                          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-slate-50 text-slate-400 group-hover:bg-sky-50 group-hover:text-sky-600 transition-colors">
+                          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-[#EEF2F7] text-slate-400 group-hover:bg-sky-50 group-hover:text-sky-600 transition-colors">
                             <MapPinLine size={20} weight="duotone" />
                           </div>
                           <div className="min-w-0">
@@ -572,7 +574,7 @@ export function ClientAccount() {
                       placeholder="Nova senha"
                       value={pwdForm.newPassword}
                       onChange={e => setPwdForm(p => ({...p, newPassword: e.target.value}))}
-                      className="w-full rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-[13px] font-bold focus:outline-none"
+                      className="w-full rounded-xl border border-slate-100 bg-[#EEF2F7] px-3 py-2 text-[13px] font-bold focus:outline-none"
                     />
                     <button
                       onClick={handleChangePassword}
@@ -613,7 +615,7 @@ export function ClientAccount() {
             <div className="relative mt-5 grid gap-3">
               {biometricSupported ? (
                 <div className={`flex flex-col gap-3 rounded-[1.45rem] border px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between ${
-                  biometricEnabled ? 'bg-[#336886]/[0.07] border-[#336886]/15' : 'bg-slate-50 border-slate-100'
+                  biometricEnabled ? 'bg-[#336886]/[0.07] border-[#336886]/15' : 'bg-[#EEF2F7] border-slate-100'
                 }`}>
                   <div className="flex min-w-0 items-center gap-3">
                     <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-[#336886] shadow-[0_10px_22px_-18px_rgba(15,23,42,0.28)]">
@@ -653,7 +655,7 @@ export function ClientAccount() {
                   description: 'Avisos de status e acompanhamento.',
                   state: pushEnabled
                     ? { label: 'Permitido', tone: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-100' }
-                    : { label: 'Bloqueado', tone: 'text-slate-500', bg: 'bg-slate-50 border-slate-100' },
+                    : { label: 'Bloqueado', tone: 'text-slate-500', bg: 'bg-[#EEF2F7] border-slate-100' },
                   icon: <BellSimpleRinging size={18} weight="duotone" className="text-[#336886]" />,
                   checked: pushEnabled,
                   action: () => handlePermissionAction('push', pushEnabled),

@@ -552,16 +552,18 @@ export function ClientOrders() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f8f8f6]">
+      <div className="flex min-h-screen items-center justify-center bg-[#EEF2F7]">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-slate-900" />
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#f8f8f6] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] pt-[env(safe-area-inset-top)]">
+    <main className="min-h-screen bg-[#EEF2F7] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] pt-[env(safe-area-inset-top)]">
+      <div className="pointer-events-none fixed top-[-10%] right-[-8%] h-[38%] w-[46%] rounded-full bg-[#153A4C]/13 blur-[120px] -z-10" />
+      <div className="pointer-events-none fixed bottom-[8%] left-[-5%] h-[26%] w-[34%] rounded-full bg-[#336886]/7 blur-[100px] -z-10" />
       <div className="mx-auto max-w-2xl">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200/80 bg-[#f8f8f6]/95 px-4 py-4 backdrop-blur-md">
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200/80 bg-[#EEF2F7]/95 px-4 py-4 backdrop-blur-md">
           <button
             onClick={() => navigate(-1)}
             className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-slate-600 shadow-sm ring-1 ring-slate-200 transition-all active:scale-95"

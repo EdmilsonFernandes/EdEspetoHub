@@ -56,7 +56,7 @@ const SuperAdminHighlights = lazyPage(() => import('./pages/SuperAdminHighlights
 const SystemGuidePage = lazyPage(() => import('./pages/SystemGuidePage'), 'SystemGuidePage');
 
 const AppRouteFallback = () => (
-  <div className="min-h-screen bg-[#F8F9FB] px-4 py-[max(2rem,env(safe-area-inset-top))] text-slate-900">
+  <div className="min-h-screen bg-[#EEF2F7] px-4 py-[max(2rem,env(safe-area-inset-top))] text-slate-900">
     <div className="mx-auto max-w-[430px] space-y-4">
       <div className="flex items-center gap-3">
         <div className="h-11 w-11 animate-pulse rounded-full bg-white shadow-[0_8px_24px_rgba(0,0,0,0.055)]" />
