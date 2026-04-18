@@ -460,6 +460,13 @@ export function MarketplacePage() {
     return () => window.clearTimeout(timer);
   }, [condominiumPickerOpen]);
 
+  const [showStorePromoPopup, setShowStorePromoPopup] = useState(false);
+  const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
+  const [featuredLoading, setFeaturedLoading] = useState(false);
+  const [featuredOffset, setFeaturedOffset] = useState(0);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationLabel, setLocationLabel] = useState('Sua região');
+
   useEffect(() => {
     if (!condominiumPickerOpen || !userLocation) return;
     let cancelled = false;
@@ -477,13 +484,6 @@ export function MarketplacePage() {
     }
     return () => { cancelled = true; };
   }, [condominiumPickerOpen, userLocation, condominiums]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const [showStorePromoPopup, setShowStorePromoPopup] = useState(false);
-  const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
-  const [featuredLoading, setFeaturedLoading] = useState(false);
-  const [featuredOffset, setFeaturedOffset] = useState(0);
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [locationLabel, setLocationLabel] = useState('Sua região');
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [customerSession, setCustomerSession] = useState(() => readCustomerSession());
   const [showDeactivateModal, setShowDeactivateModal] = useState(false);
