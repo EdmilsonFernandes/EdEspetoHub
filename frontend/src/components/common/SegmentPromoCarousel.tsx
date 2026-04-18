@@ -116,11 +116,9 @@ export function SegmentPromoCarousel({
         ))}
       </div>
 
-      {interactive ? (
-        <div className="pointer-events-none absolute bottom-2 right-2 z-[3] inline-flex rounded-full border border-white/70 bg-white/92 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-slate-900 shadow-[0_10px_22px_-14px_rgba(15,23,42,0.5)] backdrop-blur-md sm:bottom-3 sm:right-3 sm:px-3 sm:py-1.5 sm:text-[10px]">
-          Criar loja
-        </div>
-      ) : null}
+      <div className="pointer-events-none absolute bottom-2 right-2 z-[3] inline-flex rounded-full border border-white/70 bg-white/92 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-slate-900 shadow-[0_10px_22px_-14px_rgba(15,23,42,0.5)] backdrop-blur-md sm:bottom-3 sm:right-3 sm:px-3 sm:py-1.5 sm:text-[10px]">
+        Criar loja →
+      </div>
 
       <div className="absolute inset-x-0 bottom-0 flex justify-center pb-1.5 sm:pb-2">
         <div className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-slate-950/20 px-2 py-0.5 backdrop-blur-md">
@@ -145,11 +143,20 @@ export function SegmentPromoCarousel({
 
   if (!interactive) {
     return (
-      <div
-        className={`group relative block overflow-hidden rounded-[1.65rem] border border-white bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)] ${className}`}
+      <a
+        href="/create?plan=trial"
+        aria-label="Criar loja no Já no Caminho"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onClick={(event) => {
+          if (suppressClickRef.current) {
+            event.preventDefault();
+          }
+        }}
+        className={`group relative block overflow-hidden rounded-[1.65rem] border border-white bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out active:scale-[0.985] ${className}`}
       >
         {content}
-      </div>
+      </a>
     );
   }
 
