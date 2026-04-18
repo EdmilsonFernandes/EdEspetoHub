@@ -2200,7 +2200,7 @@ export function MarketplacePage() {
                   </div>
                   <div className="pointer-events-none absolute -right-8 top-4 h-20 w-20 rounded-full bg-[#336886]/10 blur-3xl" />
                   <div className="pointer-events-none absolute -left-10 bottom-0 h-24 w-24 rounded-full bg-sky-100/70 blur-3xl" />
-                  <div className="relative px-4 py-4 sm:px-5 sm:py-4.5">
+                  <div className="relative px-4 py-5 sm:px-5 sm:py-5">
                     <div className="flex items-start justify-between gap-3">
                       <button
                         type="button"
@@ -2224,20 +2224,10 @@ export function MarketplacePage() {
                           <span className="block max-w-[15rem] text-[1.12rem] font-black leading-tight tracking-[-0.03em] text-slate-950 sm:max-w-[20rem] sm:text-[1.22rem]">
                             {String(selectedCondominium.name || 'Condomínio')}
                           </span>
-                          <span className="mt-0.5 block truncate text-[11px] font-semibold text-slate-500 sm:text-[11.5px]">
+                          <span className="mt-1 block truncate text-[11px] font-semibold text-slate-500 sm:text-[11.5px]">
                             {selectedCondominium.city && selectedCondominium.state
                               ? `${selectedCondominium.city} - ${selectedCondominium.state}`
                               : selectedCondominium.city || selectedCondominium.state || 'Operação local'}
-                          </span>
-                          <span className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-[#336886]/12 bg-[#336886]/7 px-2.5 py-1 text-[10px] font-bold text-[#336886]">
-                            <span className={`h-1.5 w-1.5 rounded-full ${
-                              isCondominiumEventLive
-                                ? 'bg-emerald-500'
-                                : hasUpcomingCondominiumEvent
-                                  ? 'bg-sky-500'
-                                  : 'bg-slate-400'
-                            }`} />
-                            {isCondominiumEventLive ? 'Agenda ativa' : hasUpcomingCondominiumEvent ? 'Agendado' : 'Sem agenda'}
                           </span>
                         </span>
                       </button>
@@ -2252,7 +2242,7 @@ export function MarketplacePage() {
                         Trocar
                       </button>
                     </div>
-                    <div className="mt-3.5 flex flex-wrap items-center gap-2">
+                    <div className="mt-4 flex flex-wrap items-center gap-2">
                       <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold ${
                         isCondominiumEventLive
                           ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'
