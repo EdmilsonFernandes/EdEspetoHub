@@ -400,6 +400,7 @@ export function MarketplacePage() {
   ];
   const [searchPlaceholderIndex, setSearchPlaceholderIndex] = useState(0);
   const [searchPlaceholderVisible, setSearchPlaceholderVisible] = useState(true);
+  const [condoPickerFilter, setCondoPickerFilter] = useState<'all' | 'live' | 'upcoming' | 'none'>('all');
   useEffect(() => {
     if (isSearchEditing) return;
     const cycle = window.setInterval(() => {
@@ -2846,7 +2847,7 @@ export function MarketplacePage() {
               {/* Botão voltar */}
               <button
                 type="button"
-                onClick={() => { setCondominiumPickerOpen(false); setCondominiumSearch(''); }}
+                onClick={() => { setCondominiumPickerOpen(false); setCondominiumSearch(''); setCondoPickerFilter('all'); }}
                 className="relative mb-5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-600 shadow-sm ring-1 ring-slate-200 transition-colors hover:bg-slate-50 active:scale-95"
                 aria-label="Voltar"
               >
@@ -2891,14 +2892,48 @@ export function MarketplacePage() {
                   </button>
                 ) : null}
               </div>
+
+              {/* ── Filter pills ── */}
+              <div className="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-1 no-scrollbar">
+                {([
+                  { key: 'all' as const, label: 'Todos' },
+                  { key: 'live' as const, label: 'Ao vivo' },
+                  { key: 'upcoming' as const, label: 'Em breve' },
+                  { key: 'none' as const, label: 'Sem agenda' },
+                ]).map(({ key, label }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setCondoPickerFilter(key)}
+                    className={`shrink-0 rounded-full px-3.5 py-1.5 text-[11px] font-bold transition-all duration-150 active:scale-95 ${
+                      condoPickerFilter === key
+                        ? key === 'live' ? 'bg-emerald-500 text-white shadow-sm'
+                          : key === 'upcoming' ? 'bg-sky-500 text-white shadow-sm'
+                          : key === 'none' ? 'bg-slate-700 text-white shadow-sm'
+                          : 'bg-[#336886] text-white shadow-sm'
+                        : key === 'live' ? 'bg-emerald-50 text-emerald-700'
+                          : key === 'upcoming' ? 'bg-sky-50 text-sky-700'
+                          : 'bg-slate-100 text-slate-500'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* ── Conteúdo ── */}
-            <div className="px-4 pt-5 pb-4">
+            <div className="px-4 pt-3 pb-4">
               {(() => {
-                const live = filteredCondominiums.filter(c => c.event?.state === 'live');
-                const upcoming = filteredCondominiums.filter(c => c.event?.state === 'upcoming');
-                const none = filteredCondominiums.filter(c => !c.event?.state || (c.event.state !== 'live' && c.event.state !== 'upcoming'));
+                const live = (condoPickerFilter === 'all' || condoPickerFilter === 'live')
+                  ? filteredCondominiums.filter(c => c.event?.state === 'live')
+                  : [];
+                const upcoming = (condoPickerFilter === 'all' || condoPickerFilter === 'upcoming')
+                  ? filteredCondominiums.filter(c => c.event?.state === 'upcoming')
+                  : [];
+                const none = (condoPickerFilter === 'all' || condoPickerFilter === 'none')
+                  ? filteredCondominiums.filter(c => !c.event?.state || (c.event.state !== 'live' && c.event.state !== 'upcoming'))
+                  : [];
 
                 const handleClick = (slug: string, name: string, event: typeof filteredCondominiums[0]['event']) => {
                   if (!event?.state || event.state !== 'live') {
@@ -2913,14 +2948,19 @@ export function MarketplacePage() {
                   }
                 };
 
-                if (filteredCondominiums.length === 0) {
+                const hasResults = live.length > 0 || upcoming.length > 0 || none.length > 0;
+                if (!hasResults) {
                   return (
                     <div className="py-16 text-center">
                       <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400">
                         <Buildings size={24} weight="duotone" />
                       </div>
-                      <p className="text-sm font-bold text-slate-700">Nenhum condomínio encontrado</p>
-                      <p className="mt-1 text-xs text-slate-400">Tente buscar pelo nome ou pela cidade.</p>
+                      <p className="text-sm font-bold text-slate-700">
+                        {condoPickerFilter !== 'all' ? 'Nenhum resultado neste filtro' : 'Nenhum condomínio encontrado'}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-400">
+                        {condoPickerFilter !== 'all' ? 'Tente selecionar "Todos" para ver tudo.' : 'Tente buscar pelo nome ou pela cidade.'}
+                      </p>
                     </div>
                   );
                 }
@@ -3049,16 +3089,23 @@ export function MarketplacePage() {
                           {none.map(({ condominium, slug, name, region, event }, i) => {
                             const active = selectedCondominiumSlug === slug;
                             const logoUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
+                            const bannerBg = resolveAssetUrl(condominium.bannerUrl || condominium.logoUrl || undefined);
                             const timeLabel = formatCondominiumPickerEventTime(event) || formatCondominiumEventTime(event);
                             return (
                               <button
                                 key={slug}
                                 type="button"
                                 onClick={() => handleClick(slug, name, event)}
-                                className={`group flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors duration-150 active:bg-slate-50 ${
+                                className={`group relative flex w-full items-center gap-3 overflow-hidden px-4 py-3.5 text-left transition-colors duration-150 active:bg-slate-50 ${
                                   i > 0 ? 'border-t border-slate-100' : ''
                                 } ${active ? 'bg-[#336886]/5' : 'hover:bg-slate-50/70'}`}
                               >
+                                {bannerBg && (
+                                  <div
+                                    className="pointer-events-none absolute inset-0 opacity-[0.05]"
+                                    style={{ backgroundImage: `url(${bannerBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                                  />
+                                )}
                                 <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
                                   <img src={logoUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
                                 </div>
