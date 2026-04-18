@@ -26,6 +26,7 @@ import {
   CalendarBlank,
   Clock,
   MapPinLine,
+  UserCircle,
 } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { condominiumService } from '../services/condominiumService';
@@ -507,6 +508,22 @@ export function MarketplacePage() {
     const handleOpenProfileDrawer = () => setProfileDrawerOpen(true);
     window.addEventListener('jnk:open-profile-drawer', handleOpenProfileDrawer);
     return () => window.removeEventListener('jnk:open-profile-drawer', handleOpenProfileDrawer);
+  }, []);
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    const existing = readCustomerSession();
+    if (existing?.token) return;
+    if (!nativeBiometricService.hasValidStoredCustomerEnrollment()) return;
+    const timer = window.setTimeout(async () => {
+      try {
+        const session = await nativeBiometricService.loginCustomerWithBiometrics('Confirme sua identidade para entrar');
+        setCustomerSession(session);
+      } catch {
+        // usuário cancelou — segue no fluxo normal
+      }
+    }, 900);
+    return () => window.clearTimeout(timer);
   }, []);
 
   // Carregar pedidos anônimos do localStorage e reconciliar status real
@@ -2805,21 +2822,13 @@ export function MarketplacePage() {
           </button>
           <button
             type="button"
-            onClick={() => setQuickFilter((prev) => (prev === 'favorites' ? 'all' : 'favorites'))}
-            className={`group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] py-2 text-[9px] font-bold uppercase tracking-[0.12em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03] ${
-              quickFilter === 'favorites'
-                ? 'bg-[linear-gradient(180deg,rgba(51,104,134,0.12)_0%,rgba(51,104,134,0.06)_100%)] text-[#2d5f7b] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/12'
-                : 'text-slate-500 hover:text-slate-700'
-            }`}
+            onClick={() => setProfileDrawerOpen(true)}
+            className="group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
           >
-            <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ${
-              quickFilter === 'favorites'
-                ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
-                : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
-            }`}>
-              <Heart size={18} weight={quickFilter === 'favorites' ? 'fill' : 'regular'} />
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
+              <UserCircle size={18} weight="duotone" />
             </span>
-            <span>Favoritos</span>
+            <span>Perfil</span>
           </button>
           </div>
         </div>
@@ -3116,14 +3125,14 @@ export function MarketplacePage() {
                   type="button"
                   onClick={() => {
                     setCondominiumPickerOpen(false);
-                    navigate('/hub?favorites=1');
+                    setProfileDrawerOpen(true);
                   }}
                   className="group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
                 >
                   <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
-                    <Heart size={18} weight="regular" />
+                    <UserCircle size={18} weight="duotone" />
                   </span>
-                  <span>Favoritos</span>
+                  <span>Perfil</span>
                 </button>
                 </div>
               </div>
