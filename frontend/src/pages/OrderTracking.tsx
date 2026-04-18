@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Bicycle, CheckCircle, Clock, CircleNotch, CreditCard, MapPin, Package, Phone, Star, User } from '@phosphor-icons/react';
+import { ArrowLeft, Bicycle, CheckCircle, Clock, CircleNotch, CreditCard, MapPin, Package, Phone, Star, User } from '@phosphor-icons/react';
 import { orderService } from '../services/orderService';
 import { mapsService } from '../services/mapsService';
 import { formatAddress, formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId } from '../utils/format';
@@ -852,57 +852,76 @@ export function OrderTracking() {
   const itemsToRender = Array.isArray(order?.items) ? order.items : [];
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-[env(safe-area-inset-top)]">
+    <div className="min-h-screen bg-[#f8f8f6] pt-[env(safe-area-inset-top)]">
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
-      <header className="sticky top-0 z-50 border-b border-white/20 bg-white/85 backdrop-blur-md shadow-[0_18px_36px_-28px_rgba(15,23,42,0.5)]">
-        <div className="h-1 bg-slate-200" />
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-[max(0.5rem,env(safe-area-inset-top))]">
-          <div className="flex items-center justify-between py-2.5 sm:py-4">
-            <button onClick={handleBack} className="flex items-center gap-2.5 min-w-0">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl overflow-hidden shadow-[0_14px_26px_-18px_rgba(239,68,68,0.7)] border border-white bg-white shrink-0">
-                <img src={storeLogo} alt={storeName} className="w-full h-full object-cover" />
+      <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-[#f8f8f6]/95 backdrop-blur-xl shadow-[0_8px_28px_-20px_rgba(15,23,42,0.18)]">
+        {/* Barra de progresso dinâmica do pedido */}
+        <div className="h-[2.5px] w-full bg-slate-100 overflow-hidden">
+          <div
+            className="h-full transition-all duration-700 ease-out"
+            style={{ width: `${progress}%`, background: isCancelled ? '#f43f5e' : 'linear-gradient(90deg,#336886,#10b981)' }}
+          />
+        </div>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-3 py-3 sm:py-3.5">
+            {/* Store identity — also back button */}
+            <button onClick={handleBack} className="flex min-w-0 items-center gap-2.5">
+              <div className="h-9 w-9 shrink-0 overflow-hidden rounded-[0.75rem] border border-white bg-white shadow-[0_8px_18px_-10px_rgba(51,104,134,0.35)]">
+                <img src={storeLogo} alt={storeName} className="h-full w-full object-cover" />
               </div>
-              <div className="text-left leading-tight min-w-0">
-                <p className="text-sm sm:text-lg font-black text-slate-900 truncate">{storeName}</p>
-                <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-[0.22em]">Acompanhar pedido</p>
+              <div className="min-w-0 text-left leading-tight">
+                <p className="truncate text-[13px] font-black text-slate-900 sm:text-[15px]">{storeName}</p>
+                <p className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                  <img src="/janocaminho.jpg" alt="" className="h-[10px] w-[10px] rounded-[0.2rem] object-cover" />
+                  Já no Caminho
+                </p>
               </div>
             </button>
+            {/* Voltar */}
             <button
               onClick={handleBack}
-              className="px-3 py-2 sm:px-4 text-xs sm:text-sm rounded-full border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all duration-200 active:scale-[0.97] active:opacity-80 shrink-0"
+              className="flex shrink-0 items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-[12px] font-semibold text-slate-600 shadow-sm transition-all hover:bg-slate-50 active:scale-95"
             >
+              <ArrowLeft size={13} weight="bold" />
               Voltar
             </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pb-32 sm:pb-12 sm:py-12">
-        <div className="bg-white border border-slate-100 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] p-6 sm:p-8">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pb-32 sm:pb-10 sm:py-6">
+        <div>
           {loading && (
-            <div className="py-6 space-y-4">
-              <div className="ds-skeleton h-24 w-full" />
-              <div className="ds-skeleton h-28 w-full" />
-              <div className="ds-skeleton h-20 w-full" />
+            <div className="space-y-3 py-4">
+              <div className="ds-skeleton h-28 w-full rounded-3xl" />
+              <div className="ds-skeleton h-32 w-full rounded-3xl" />
+              <div className="ds-skeleton h-24 w-full rounded-3xl" />
             </div>
           )}
 
           {error && !loading && (
-            <div className="bg-red-50 text-red-700 text-sm p-4 rounded-xl border border-red-100">
+            <div className="rounded-2xl border border-rose-100 bg-rose-50 p-4 text-sm text-rose-700">
               {error}
             </div>
           )}
 
           {!loading && !error && order && (
-            <div className="space-y-4 sm:space-y-6">
-              <div className="rounded-2xl sm:rounded-3xl border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] p-5 sm:p-6">
+            <div className="space-y-3 sm:space-y-4">
+              <div className={`relative overflow-hidden rounded-[1.65rem] border p-5 sm:p-6 ${
+                isCancelled
+                  ? 'border-rose-100 bg-[linear-gradient(145deg,#fff5f5,#fff)]'
+                  : isReady
+                  ? 'border-emerald-100 bg-[linear-gradient(145deg,#f0fdf4,#fff)]'
+                  : 'border-[#336886]/10 bg-[linear-gradient(145deg,rgba(51,104,134,0.05),#fff)]'
+              }`}>
+                <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full blur-3xl opacity-40" style={{ background: isCancelled ? '#fecdd3' : isReady ? '#bbf7d0' : '#bfdbfe' }} />
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                    <p className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/80 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 shadow-sm">
                       Pedido #{formatOrderDisplayId(order.id, storeSlug)}
                     </p>
-                    <div className="mt-2 flex items-center gap-3 flex-wrap">
-                      <h1 className="text-[26px] leading-none sm:text-3xl font-black text-slate-900">{statusLabel}</h1>
+                    <div className="mt-3 flex items-center gap-3 flex-wrap">
+                      <h1 className="text-[1.65rem] leading-none sm:text-3xl font-black text-slate-900">{statusLabel}</h1>
                       {isDelivery && (
                         String((order as any)?.delivery?.status || '').toUpperCase() === 'IN_TRANSIT' ||
                         status === 'in_delivery' ||
@@ -1059,42 +1078,56 @@ export function OrderTracking() {
                   </div>
                 ) : null}
 
-                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                  <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 font-bold">Linha do pedido</p>
-                  <div className="relative mt-2 pl-0.5">
-                    <span className={`pointer-events-none absolute left-[9px] top-2 bottom-2 w-px ${isCancelled ? 'bg-rose-200' : 'bg-slate-200'}`} />
-                    <div className="space-y-2">
+                <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-[0_2px_12px_-6px_rgba(15,23,42,0.08)]">
+                  <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Linha do pedido</p>
+                  <div className="relative pl-1">
+                    {/* Trilho de fundo */}
+                    <span className="pointer-events-none absolute left-[10px] top-3 bottom-3 w-[2px] rounded-full bg-slate-100" />
+                    {/* Trilho preenchido (concluído) */}
+                    {currentIndex > 0 && (
+                      <span
+                        className="pointer-events-none absolute left-[10px] top-3 w-[2px] rounded-full transition-all duration-700"
+                        style={{
+                          height: `${(currentIndex / Math.max(steps.length - 1, 1)) * 100}%`,
+                          background: isCancelled ? '#fda4af' : 'linear-gradient(180deg,#336886,#10b981)',
+                        }}
+                      />
+                    )}
+                    <div className="space-y-3">
                     {steps.map((step) => {
                       const stepIndex = steps.findIndex((item) => item.id === step.id);
                       const isCompleted = stepIndex >= 0 && stepIndex < currentIndex;
                       const isCurrent = stepIndex === currentIndex;
                       return (
-                        <div key={`mobile-line-${step.id}`} className="relative z-[1] flex items-center gap-2">
+                        <div key={`mobile-line-${step.id}`} className="relative z-[1] flex items-center gap-3">
                           <span
-                            className={`h-5 w-5 rounded-full border grid place-items-center ${
+                            className={`h-[22px] w-[22px] shrink-0 rounded-full border-2 grid place-items-center transition-all duration-300 ${
                               isCurrent
                                 ? isCancelled
-                                  ? 'border-rose-500 bg-rose-500 text-white'
-                                  : 'border-orange-500 bg-orange-500 text-white animate-pulse'
+                                  ? 'border-rose-500 bg-rose-500 text-white shadow-[0_0_0_3px_rgba(244,63,94,0.15)]'
+                                  : 'border-[#336886] bg-[#336886] text-white shadow-[0_0_0_3px_rgba(51,104,134,0.18)] animate-pulse'
                                 : isCompleted
                                   ? isCancelled
-                                    ? 'border-rose-200 bg-rose-100 text-rose-700'
-                                    : 'border-slate-300 bg-slate-200 text-slate-700'
-                                  : 'border-slate-200 bg-slate-50 text-slate-400'
+                                    ? 'border-rose-200 bg-rose-100 text-rose-600'
+                                    : 'border-emerald-200 bg-emerald-100 text-emerald-600'
+                                  : 'border-slate-200 bg-slate-50 text-slate-300'
                             }`}
                           >
-                            {isCompleted ? <CheckCircle size={12} weight="fill" /> : <span className="text-[9px] font-bold">{stepIndex + 1}</span>}
+                            {isCompleted
+                              ? <CheckCircle size={13} weight="fill" />
+                              : <span className="text-[8px] font-black">{stepIndex + 1}</span>
+                            }
                           </span>
-                          <span className={`text-[12px] ${
+                          <span className={`text-[12.5px] leading-tight ${
                             isCurrent
                               ? isCancelled
-                                ? 'font-extrabold text-rose-600'
-                                : 'font-extrabold text-orange-600'
+                                ? 'font-black text-rose-600'
+                                : 'font-black text-slate-900'
                               : isCompleted
                                 ? isCancelled
-                                  ? 'font-semibold text-rose-700'
-                                  : 'font-semibold text-slate-700'
-                                : 'text-slate-400'
+                                  ? 'font-semibold text-rose-500'
+                                  : 'font-semibold text-slate-500'
+                                : 'text-slate-300'
                           }`}>
                             {step.label}
                           </span>
@@ -1779,16 +1812,37 @@ export function OrderTracking() {
 
       {!loading && !error && order ? (
         <div
-          className="sm:hidden fixed inset-x-0 z-30 px-4"
+          className="sm:hidden fixed inset-x-0 z-30 px-3"
           style={{ bottom: mobileStatusDockBottom }}
         >
-          <div className="rounded-2xl border border-white/25 bg-white/85 backdrop-blur-md px-4 py-2.5 shadow-[0_-2px_24px_-16px_rgba(15,23,42,0.7)]">
-            <div className="flex items-center justify-between gap-2 text-xs">
-              <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-700 border border-slate-200">
-                <span className={`h-1.5 w-1.5 rounded-full ${isReady ? 'bg-emerald-500' : 'bg-orange-500 animate-pulse'}`} />
-                {statusLabel}
+          <div className={`overflow-hidden rounded-[1.4rem] border backdrop-blur-2xl shadow-[0_8px_32px_-12px_rgba(15,23,42,0.3)] ${
+            isCancelled
+              ? 'border-rose-200/60 bg-white/92'
+              : isReady
+              ? 'border-emerald-200/60 bg-white/92'
+              : 'border-[#336886]/15 bg-white/92'
+          }`}>
+            <div
+              className="h-[3px] w-full transition-all duration-700"
+              style={{ width: `${progress}%`, background: isCancelled ? '#f43f5e' : isReady ? '#10b981' : 'linear-gradient(90deg,#336886,#10b981)' }}
+            />
+            <div className="flex items-center justify-between gap-3 px-4 py-3">
+              <div className="flex min-w-0 items-center gap-2.5">
+                <span className={`flex h-2 w-2 shrink-0 rounded-full ${
+                  isCancelled ? 'bg-rose-500' : isReady ? 'bg-emerald-500' : 'animate-pulse bg-[#336886]'
+                }`} />
+                <span className="truncate text-[12.5px] font-black text-slate-900">{statusLabel}</span>
+                <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                  isCancelled
+                    ? 'bg-rose-50 text-rose-600'
+                    : isReady
+                    ? 'bg-emerald-50 text-emerald-700'
+                    : 'bg-[#336886]/8 text-[#336886]'
+                }`}>{typeLabel}</span>
+              </div>
+              <span className="shrink-0 text-[15px] font-black tracking-tight text-slate-900">
+                {formatCurrency(order?.total || 0)}
               </span>
-              <span className="text-base font-black tracking-tight text-slate-900">{formatCurrency(order?.total || 0)}</span>
             </div>
           </div>
         </div>
