@@ -3059,18 +3059,20 @@ export function MarketplacePage() {
                           {live.map(({ condominium, slug, name, region, event }) => {
                             const active = selectedCondominiumSlug === slug;
                             const logoUrl = resolveAssetUrl(condominium.logoUrl || undefined) || getStoreAvatarUrl(slug, name);
+                            const bannerUrl = resolveAssetUrl(condominium.bannerUrl || condominium.logoUrl || undefined) || logoUrl;
                             const timeLabel = formatCondominiumPickerEventTime(event) || formatCondominiumEventTime(event);
                             return (
                               <button
                                 key={slug}
                                 type="button"
                                 onClick={() => handleClick(slug, name, event)}
-                                className={`group flex w-full items-center gap-3.5 rounded-[1.4rem] border p-4 text-left transition-all duration-300 active:scale-[0.985] ${
+                                className={`group relative overflow-hidden flex w-full items-center gap-3.5 rounded-[1.4rem] border p-4 text-left transition-all duration-300 active:scale-[0.985] ${
                                   active
                                     ? 'border-emerald-300/60 bg-emerald-50 shadow-[0_6px_24px_-8px_rgba(16,185,129,0.32)]'
                                     : 'border-emerald-100 bg-white shadow-[0_4px_20px_-8px_rgba(16,185,129,0.18)] hover:border-emerald-200 hover:shadow-[0_8px_28px_-8px_rgba(16,185,129,0.28)]'
                                 }`}
                               >
+                                <img src={bannerUrl} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-[0.08] blur-xl saturate-75" />
                                 {/* Logo com pulse ring */}
                                 <div className="relative shrink-0">
                                   <div className={`h-14 w-14 overflow-hidden rounded-[1rem] border-2 shadow-[0_4px_14px_-6px_rgba(16,185,129,0.3)] ${active ? 'border-emerald-300' : 'border-emerald-100'}`}>
@@ -3082,7 +3084,7 @@ export function MarketplacePage() {
                                 </div>
 
                                 {/* Texto */}
-                                <div className="min-w-0 flex-1">
+                                <div className="relative min-w-0 flex-1">
                                   <span className="block truncate text-[14.5px] font-black leading-tight text-slate-900">{name}</span>
                                   {region && <span className="block truncate text-[11px] font-medium text-slate-400 mt-0.5">{region}</span>}
                                   {timeLabel && (
@@ -3094,7 +3096,7 @@ export function MarketplacePage() {
                                 </div>
 
                                 {/* CTA */}
-                                <span className={`shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[10px] font-black uppercase tracking-wide transition-all duration-200 ${
+                                <span className={`relative shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[10px] font-black uppercase tracking-wide transition-all duration-200 ${
                                   active
                                     ? 'bg-emerald-500 text-white shadow-[0_4px_12px_-4px_rgba(16,185,129,0.5)]'
                                     : 'bg-emerald-100 text-emerald-700 group-hover:bg-emerald-500 group-hover:text-white'
@@ -3121,22 +3123,24 @@ export function MarketplacePage() {
                           {upcoming.map(({ condominium, slug, name, region, event }) => {
                             const active = selectedCondominiumSlug === slug;
                             const logoUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
+                            const bannerUrl = resolveAssetUrl(condominium.bannerUrl || condominium.logoUrl || undefined) || logoUrl;
                             const timeLabel = formatCondominiumPickerEventTime(event) || formatCondominiumEventTime(event);
                             return (
                               <button
                                 key={slug}
                                 type="button"
                                 onClick={() => handleClick(slug, name, event)}
-                                className={`group flex w-full items-center gap-3.5 rounded-[1.4rem] border p-4 text-left transition-all duration-300 active:scale-[0.985] ${
+                                className={`group relative overflow-hidden flex w-full items-center gap-3.5 rounded-[1.4rem] border p-4 text-left transition-all duration-300 active:scale-[0.985] ${
                                   active
                                     ? 'border-[#336886]/25 bg-[#336886]/6 shadow-[0_4px_20px_-8px_rgba(51,104,134,0.22)]'
                                     : 'border-slate-100 bg-white shadow-[0_2px_12px_-6px_rgba(15,23,42,0.07)] hover:border-[#336886]/15 hover:shadow-[0_6px_20px_-8px_rgba(51,104,134,0.14)]'
                                 }`}
                               >
-                                <div className={`h-14 w-14 shrink-0 overflow-hidden rounded-[1rem] border ${active ? 'border-[#336886]/20' : 'border-slate-100'} bg-slate-50`}>
+                                <img src={bannerUrl} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-[0.07] blur-xl saturate-75" />
+                                <div className={`relative shrink-0 h-14 w-14 overflow-hidden rounded-[1rem] border ${active ? 'border-[#336886]/20' : 'border-slate-100'} bg-slate-50`}>
                                   <img src={logoUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
                                 </div>
-                                <div className="flex min-w-0 flex-1 flex-col">
+                                <div className="relative flex min-w-0 flex-1 flex-col">
                                   <div className="flex items-center gap-2">
                                     <span className="truncate text-[14.5px] font-bold text-slate-900">{name}</span>
                                     {active && <span className="shrink-0 rounded-full bg-[#336886] px-1.5 py-0.5 text-[7.5px] font-black uppercase tracking-widest text-white">Você aqui</span>}
@@ -3150,7 +3154,7 @@ export function MarketplacePage() {
                                     {timeLabel && <span className="truncate text-[10px] font-medium text-slate-400">{timeLabel}</span>}
                                   </div>
                                 </div>
-                                <CaretRight size={14} weight="bold" className={`shrink-0 transition-all duration-200 group-hover:translate-x-0.5 ${active ? 'text-[#336886]' : 'text-slate-300'}`} />
+                                <CaretRight size={14} weight="bold" className={`relative shrink-0 transition-all duration-200 group-hover:translate-x-0.5 ${active ? 'text-[#336886]' : 'text-slate-300'}`} />
                               </button>
                             );
                           })}
@@ -3170,27 +3174,29 @@ export function MarketplacePage() {
                           {none.map(({ condominium, slug, name, region }) => {
                             const active = selectedCondominiumSlug === slug;
                             const logoUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
+                            const bannerUrl = resolveAssetUrl(condominium.bannerUrl || condominium.logoUrl || undefined) || logoUrl;
                             return (
                               <button
                                 key={slug}
                                 type="button"
                                 onClick={() => handleClick(slug, name, null)}
-                                className={`group flex w-full items-center gap-3 rounded-[1.25rem] border p-3 text-left transition-all duration-200 active:scale-[0.99] ${
+                                className={`group relative overflow-hidden flex w-full items-center gap-3 rounded-[1.25rem] border p-3 text-left transition-all duration-200 active:scale-[0.99] ${
                                   active
                                     ? 'border-[#336886]/15 bg-[#336886]/5'
                                     : 'border-slate-100/90 bg-white/80 hover:bg-white hover:border-slate-200'
                                 }`}
                               >
-                                <div className={`h-11 w-11 shrink-0 overflow-hidden rounded-[0.8rem] border bg-slate-50 transition-all duration-300 ${
+                                <img src={bannerUrl} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-[0.06] blur-xl saturate-50" />
+                                <div className={`relative h-11 w-11 shrink-0 overflow-hidden rounded-[0.8rem] border bg-slate-50 transition-all duration-300 ${
                                   active ? 'border-[#336886]/20' : 'border-slate-100 grayscale-[35%] opacity-70 group-hover:grayscale-0 group-hover:opacity-100'
                                 }`}>
                                   <img src={logoUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
                                 </div>
-                                <div className="min-w-0 flex-1">
+                                <div className="relative min-w-0 flex-1">
                                   <span className={`block truncate text-[13px] font-semibold ${active ? 'text-[#336886]' : 'text-slate-600'}`}>{name}</span>
                                   {region && <span className="block truncate text-[10px] text-slate-400">{region}</span>}
                                 </div>
-                                <span className={`shrink-0 text-[9px] font-bold uppercase tracking-wide ${active ? 'text-[#336886]' : 'text-slate-300 group-hover:text-slate-400'}`}>
+                                <span className={`relative shrink-0 text-[9px] font-bold uppercase tracking-wide ${active ? 'text-[#336886]' : 'text-slate-300 group-hover:text-slate-400'}`}>
                                   {active ? 'Aqui' : 'Ver'}
                                   {!active && <CaretRight size={9} weight="bold" className="ml-0.5 inline" />}
                                 </span>
