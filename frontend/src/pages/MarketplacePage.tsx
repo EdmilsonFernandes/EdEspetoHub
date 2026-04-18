@@ -238,6 +238,18 @@ const categoryVisuals: Record<string, { icon: typeof Storefront; label: string }
   Empório: { icon: ShoppingCart, label: 'Empório' },
 };
 
+const CATEGORY_COLORS: Record<string, { active: string; inactive: string; icon: string }> = {
+  Restaurante: { active: 'bg-amber-500 shadow-[0_12px_26px_-14px_rgba(245,158,11,0.62)]', inactive: 'border border-amber-100 bg-amber-50/80', icon: 'text-amber-500' },
+  Hamburguer: { active: 'bg-orange-500 shadow-[0_12px_26px_-14px_rgba(249,115,22,0.62)]', inactive: 'border border-orange-100 bg-orange-50/80', icon: 'text-orange-500' },
+  Lanche:     { active: 'bg-orange-400 shadow-[0_12px_26px_-14px_rgba(249,115,22,0.55)]', inactive: 'border border-orange-100 bg-orange-50/80', icon: 'text-orange-400' },
+  Pizza:      { active: 'bg-rose-500 shadow-[0_12px_26px_-14px_rgba(244,63,94,0.62)]',    inactive: 'border border-rose-100 bg-rose-50/80',   icon: 'text-rose-500' },
+  Bebidas:    { active: 'bg-violet-500 shadow-[0_12px_26px_-14px_rgba(139,92,246,0.62)]', inactive: 'border border-violet-100 bg-violet-50/80', icon: 'text-violet-500' },
+  Mercado:    { active: 'bg-emerald-600 shadow-[0_12px_26px_-14px_rgba(5,150,105,0.62)]', inactive: 'border border-emerald-100 bg-emerald-50/80', icon: 'text-emerald-600' },
+  Farmacia:   { active: 'bg-teal-500 shadow-[0_12px_26px_-14px_rgba(20,184,166,0.62)]',  inactive: 'border border-teal-100 bg-teal-50/80',   icon: 'text-teal-500' },
+  Doces:      { active: 'bg-pink-500 shadow-[0_12px_26px_-14px_rgba(236,72,153,0.62)]',  inactive: 'border border-pink-100 bg-pink-50/80',   icon: 'text-pink-500' },
+  Empório:    { active: 'bg-lime-600 shadow-[0_12px_26px_-14px_rgba(101,163,13,0.62)]',  inactive: 'border border-lime-100 bg-lime-50/80',   icon: 'text-lime-600' },
+};
+
 type FeaturedProduct = {
   id: string;
   storeSlug: string;
@@ -1838,7 +1850,7 @@ export function MarketplacePage() {
               <button
                 type="button"
                 onClick={handleHubNotificationClick}
-                className="relative flex h-[3.2rem] w-[3.2rem] shrink-0 items-center justify-center rounded-[1.35rem] border border-white/85 bg-slate-950 text-white shadow-[0_18px_34px_-18px_rgba(15,23,42,0.62)] ring-1 ring-slate-950/5 backdrop-blur-sm transition-all duration-150 ease-out hover:bg-[#153A4C] active:scale-95"
+                className="relative flex h-[3.2rem] w-[3.2rem] shrink-0 items-center justify-center rounded-[1.35rem] border border-[#336886]/20 bg-[#153A4C] text-white shadow-[0_18px_34px_-18px_rgba(21,58,76,0.55)] ring-1 ring-[#336886]/10 backdrop-blur-sm transition-all duration-150 ease-out hover:bg-[#1e4d62] active:scale-95"
                 aria-label={hubNotificationCount > 0 ? `${hubNotificationCount} notificação de pedido` : 'Abrir notificações'}
                 title={hubNotificationCount > 0 ? 'Pedidos em andamento' : 'Notificações'}
               >
@@ -2241,43 +2253,61 @@ export function MarketplacePage() {
                 </div>
               ) : (
                 <>
-                  <button
-                    type="button"
-                    onClick={() => setCondominiumPickerOpen(true)}
-                    className="group relative flex w-full items-center gap-4 overflow-hidden rounded-2xl border border-slate-100 bg-white p-4 text-left shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] transition-all duration-200 hover:border-[#336886]/20 hover:shadow-[0_4px_20px_-6px_rgba(51,104,134,0.14)] active:scale-[0.99]"
-                  >
-                    {/* Logo cluster ou ícone */}
-                    <div className="relative shrink-0 flex h-14 w-14 items-center justify-center rounded-[1.1rem] bg-[#336886]/8 text-[#336886]">
-                      {condominiumPreviewLogos.length > 0 ? (
-                        <div className="flex -space-x-3">
-                          {condominiumPreviewLogos.map((logo, index) => (
-                            <img
-                              key={`${logo}-${index}`}
-                              src={logo}
-                              alt="Condomínio"
-                              className="h-8 w-8 rounded-full border-2 border-white bg-white object-contain p-0.5 shadow-sm"
-                            />
-                          ))}
+                  {(() => {
+                    const liveCount = condominiums.filter(c => c.eventSummary?.state === 'live').length;
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => setCondominiumPickerOpen(true)}
+                        className="group relative flex w-full items-center gap-4 overflow-hidden rounded-[1.6rem] border border-[#336886]/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(239,247,255,0.92)_100%)] p-4 text-left shadow-[0_4px_24px_-8px_rgba(51,104,134,0.14)] transition-all duration-200 hover:border-[#336886]/22 hover:shadow-[0_8px_28px_-8px_rgba(51,104,134,0.2)] active:scale-[0.99]"
+                      >
+                        <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-[#336886]/6 blur-2xl" />
+
+                        {/* Logo cluster */}
+                        <div className="relative shrink-0 flex h-14 w-14 items-center justify-center rounded-[1.1rem] bg-[#336886]/10 text-[#336886] ring-1 ring-[#336886]/10">
+                          {condominiumPreviewLogos.length > 0 ? (
+                            <div className="flex -space-x-3">
+                              {condominiumPreviewLogos.map((logo, index) => (
+                                <img
+                                  key={`${logo}-${index}`}
+                                  src={logo}
+                                  alt="Condomínio"
+                                  className="h-8 w-8 rounded-full border-2 border-white bg-white object-contain p-0.5 shadow-sm"
+                                />
+                              ))}
+                            </div>
+                          ) : (
+                            <Buildings size={22} weight="duotone" />
+                          )}
                         </div>
-                      ) : (
-                        <Buildings size={22} weight="duotone" />
-                      )}
-                    </div>
 
-                    {/* Texto */}
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-[#336886] mb-0.5">Feiras no condomínio</p>
-                      <p className="truncate text-[15px] font-bold text-slate-900 leading-snug">Encontre lojas perto de você</p>
-                      <p className="mt-0.5 truncate text-[11px] font-medium text-slate-400">
-                        {condominiums.length} condomínio{condominiums.length === 1 ? '' : 's'} disponível{condominiums.length === 1 ? '' : 'is'}
-                      </p>
-                    </div>
+                        {/* Texto */}
+                        <div className="min-w-0 flex-1">
+                          <div className="mb-1 flex items-center gap-2">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#336886]">Feiras no condomínio</p>
+                            {liveCount > 0 && (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[8px] font-black uppercase tracking-wide text-white">
+                                <span className="relative flex h-1.5 w-1.5">
+                                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
+                                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
+                                </span>
+                                {liveCount} ao vivo
+                              </span>
+                            )}
+                          </div>
+                          <p className="truncate text-[15px] font-black text-slate-900 leading-snug">Encontre lojas perto de você</p>
+                          <p className="mt-0.5 truncate text-[11px] font-medium text-slate-400">
+                            {condominiums.length} condomínio{condominiums.length === 1 ? '' : 's'} disponível{condominiums.length === 1 ? '' : 'is'}
+                          </p>
+                        </div>
 
-                    {/* Seta */}
-                    <span className="shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-all duration-200 group-hover:bg-[#336886] group-hover:text-white">
-                      <CaretRight size={14} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
-                    </span>
-                  </button>
+                        {/* Seta */}
+                        <span className="shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#336886]/10 text-[#336886] transition-all duration-200 group-hover:bg-[#336886] group-hover:text-white">
+                          <CaretRight size={14} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
+                        </span>
+                      </button>
+                    );
+                  })()}
                 </>
               )}
             </section>
@@ -2304,6 +2334,7 @@ export function MarketplacePage() {
               {categoryTiles.map((item, index) => {
                 const active = segmentFilter === item.label;
                 const CategoryIcon = item.icon;
+                const colors = CATEGORY_COLORS[item.label];
                 return (
                   <button
                     key={`${item.label}-${index}`}
@@ -2312,16 +2343,20 @@ export function MarketplacePage() {
                     onClick={() => setSegmentFilter(prev => prev === item.label ? 'all' : item.label)}
                   >
                     <div className={`flex h-11 w-11 items-center justify-center rounded-[16px] transition-all duration-200 ease-out ${
-                      active ? 'bg-[#336886] shadow-[0_12px_26px_-14px_rgba(51,104,134,0.68)] scale-[1.04]' : 'border border-slate-100 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.045)] group-hover:bg-slate-50'
+                      active
+                        ? `${colors?.active ?? 'bg-[#336886] shadow-[0_12px_26px_-14px_rgba(51,104,134,0.68)]'} scale-[1.04]`
+                        : `${colors?.inactive ?? 'border border-slate-100 bg-white'} shadow-[0_8px_22px_rgba(15,23,42,0.04)] group-hover:scale-[1.03]`
                     }`}>
                       <CategoryIcon
                         size={20}
                         weight={active ? 'fill' : 'duotone'}
-                        className={`transition-all duration-150 ease-out ${active ? 'scale-[0.94] text-white' : 'text-slate-500 group-hover:scale-105 group-hover:text-slate-700'}`}
+                        className={`transition-all duration-150 ease-out ${
+                          active ? 'scale-[0.94] text-white' : `${colors?.icon ?? 'text-slate-500'} group-hover:scale-105`
+                        }`}
                       />
                     </div>
                     <span className={`text-center text-[9.5px] font-bold uppercase tracking-[0.08em] transition-colors ${
-                      active ? 'text-[#336886]' : 'text-slate-500'
+                      active ? (colors ? colors.icon : 'text-[#336886]') : 'text-slate-500'
                     }`}>{item.label}</span>
                   </button>
                 );
@@ -2613,91 +2648,97 @@ export function MarketplacePage() {
                     <Link
                       key={store.id}
                       to={storePath}
-                      className={`group rounded-[1.65rem] border bg-white px-3.5 py-3.5 transition-all duration-200 ease-out active:scale-[0.985] ${
+                      className={`group overflow-hidden rounded-[1.65rem] border bg-white transition-all duration-200 ease-out active:scale-[0.985] ${
                         store.isOpen
                           ? 'border-white/90 shadow-[0_8px_24px_rgba(15,23,42,0.06)] md:hover:-translate-y-0.5 md:hover:shadow-[0_14px_30px_rgba(15,23,42,0.09)]'
                           : 'border-slate-200/80 bg-slate-50/80 shadow-[0_8px_20px_rgba(15,23,42,0.035)]'
                       }`}
                     >
-                      <div className="flex items-start gap-3.5">
+                      {/* Banner strip */}
+                      <div className="relative h-[90px] overflow-hidden bg-slate-100">
                         <img
-                          src={store.logo}
-                          alt={store.name}
-                          className={`h-16 w-16 shrink-0 rounded-full border border-slate-100 bg-slate-50 object-cover shadow-[0_10px_22px_-14px_rgba(15,23,42,0.3)] ring-2 ring-white transition-all duration-200 ${
-                            store.isOpen ? '' : 'grayscale opacity-70'
-                          }`}
+                          src={store.banner || store.logo}
+                          alt=""
+                          aria-hidden
+                          loading="lazy"
+                          decoding="async"
+                          className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 ${store.isOpen ? '' : 'grayscale opacity-50'}`}
                           onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
                         />
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-start justify-between gap-2.5">
-                            <div className="min-w-0 pr-1">
-                              <div className="flex items-center gap-2">
-                                <h3 className={`truncate text-[15px] font-black ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>{store.name}</h3>
-                                <span className={`inline-flex h-2 w-2 rounded-full ${store.isOpen ? 'bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.14),0_0_14px_rgba(16,185,129,0.55)]' : 'bg-slate-400'}`} />
-                              </div>
-                            </div>
-                            <div className="flex shrink-0 items-center">
-                              <button
-                                type="button"
-                                onClick={(event) => {
-                                  event.preventDefault();
-                                  event.stopPropagation();
-                                  toggleFavoriteStore(store.slug);
-                                }}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-300 transition-all duration-150 ease-out hover:bg-rose-50 hover:text-rose-500 active:scale-90"
-                                aria-label={`Favoritar ${store.name}`}
-                                title={`Favoritar ${store.name}`}
-                              >
-                                <Heart
-                                  size={15}
-                                  weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'}
-                                  className={favoriteStoreSlugs.includes(store.slug) ? 'text-rose-500' : ''}
-                                />
-                              </button>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            toggleFavoriteStore(store.slug);
+                          }}
+                          className="absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/92 text-slate-300 shadow-sm transition-all duration-150 ease-out hover:text-rose-500 active:scale-90"
+                          aria-label={`Favoritar ${store.name}`}
+                        >
+                          <Heart size={15} weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'} className={favoriteStoreSlugs.includes(store.slug) ? 'text-rose-500' : ''} />
+                        </button>
+                        <img
+                          src={store.logo}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                          className={`absolute -bottom-5 left-3.5 h-12 w-12 rounded-[0.9rem] border-2 border-white bg-white object-cover shadow-[0_10px_20px_-12px_rgba(15,23,42,0.45)] ${store.isOpen ? '' : 'grayscale opacity-70'}`}
+                          onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
+                        />
+                      </div>
+
+                      {/* Content */}
+                      <div className="px-3.5 pb-3.5 pt-7">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h3 className={`truncate text-[15px] font-black ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>{store.name}</h3>
+                              <span className={`inline-flex h-2 w-2 shrink-0 rounded-full ${store.isOpen ? 'bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.14),0_0_14px_rgba(16,185,129,0.55)]' : 'bg-slate-300'}`} />
                             </div>
                           </div>
-                          <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] font-medium text-slate-500">
-                            {store.rating > 0 ? (
-                              <span className="inline-flex items-center gap-1">
-                                <Star size={11} weight="fill" className="text-amber-400" />
-                                <span className="font-bold text-slate-700">{store.rating.toFixed(1)}</span>
-                              </span>
-                            ) : null}
-                            {store.rating > 0 ? <span className="text-slate-300">•</span> : null}
-                            <span>{store.etaMin}-{store.etaMax} min</span>
-                            <span className="text-slate-300">•</span>
-                            <span>{distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)}</span>
-                          </div>
-                          {!store.isOpen && (
-                            <p className="mt-1 inline-flex max-w-full items-center rounded-full bg-slate-200/70 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">
-                              {store.nextOpeningLabel || 'Sem horário cadastrado'}
-                            </p>
+                        </div>
+                        <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] font-medium text-slate-500">
+                          {store.rating > 0 ? (
+                            <span className="inline-flex items-center gap-1">
+                              <Star size={11} weight="fill" className="text-amber-400" />
+                              <span className="font-bold text-slate-700">{store.rating.toFixed(1)}</span>
+                            </span>
+                          ) : null}
+                          {store.rating > 0 ? <span className="text-slate-300">•</span> : null}
+                          <span>{store.etaMin}-{store.etaMax} min</span>
+                          <span className="text-slate-300">•</span>
+                          <span>{distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)}</span>
+                        </div>
+                        {!store.isOpen && (
+                          <p className="mt-1 inline-flex max-w-full items-center rounded-full bg-slate-200/70 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">
+                            {store.nextOpeningLabel || 'Sem horário cadastrado'}
+                          </p>
+                        )}
+                        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                          {store.isOpen && store.rating >= 4.9 && (
+                            <span className="inline-flex items-center gap-1 rounded-full border border-rose-100 bg-rose-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-rose-600 shadow-[0_8px_18px_-16px_rgba(225,29,72,0.4)]">
+                              <Sparkle size={10} weight="fill" className="text-rose-500" />
+                              Bombando agora
+                            </span>
                           )}
-                          <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-                            {store.isOpen && store.rating >= 4.9 && (
-                               <span className="inline-flex items-center gap-1 rounded-full border border-rose-100 bg-rose-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-rose-600 shadow-[0_8px_18px_-16px_rgba(225,29,72,0.4)]">
-                                 <Sparkle size={10} weight="fill" className="text-rose-500" />
-                                 Bombando agora
-                               </span>
-                            )}
-                            {store.freeShipping ? (
-                              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700 shadow-[0_8px_18px_-16px_rgba(16,185,129,0.5)]">
-                                <Bicycle size={10} weight="fill" className="text-emerald-600" />
-                                Grátis
-                              </span>
-                            ) : null}
-                            {store.rating >= 4.7 && !favoriteStoreSlugs.includes(store.slug) && (
-                              <span className="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700 shadow-[0_8px_18px_-16px_rgba(245,158,11,0.45)]">
-                                <Star size={10} weight="fill" className="text-amber-500" />
-                                Favorita da região
-                              </span>
-                            )}
-                            {(store as any).sponsored && (
-                              <span className="inline-flex rounded-full border border-slate-100 bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-500">
-                                Patrocinado
-                              </span>
-                            )}
-                          </div>
+                          {store.freeShipping ? (
+                            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700 shadow-[0_8px_18px_-16px_rgba(16,185,129,0.5)]">
+                              <Bicycle size={10} weight="fill" className="text-emerald-600" />
+                              Grátis
+                            </span>
+                          ) : null}
+                          {store.rating >= 4.7 && !favoriteStoreSlugs.includes(store.slug) && (
+                            <span className="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700 shadow-[0_8px_18px_-16px_rgba(245,158,11,0.45)]">
+                              <Star size={10} weight="fill" className="text-amber-500" />
+                              Favorita da região
+                            </span>
+                          )}
+                          {(store as any).sponsored && (
+                            <span className="inline-flex rounded-full border border-slate-100 bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-500">
+                              Patrocinado
+                            </span>
+                          )}
                         </div>
                       </div>
                     </Link>
