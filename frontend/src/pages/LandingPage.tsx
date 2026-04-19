@@ -33,7 +33,6 @@ import {
   UserCircle,
   UserPlus,
   UsersThree,
-  WhatsappLogo,
   X,
 } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
@@ -265,7 +264,7 @@ export function LandingPage() {
     return () => { mounted = false; };
   }, []);
 
-  const ctaPrimaryHref = 'https://wa.me/5512997822784';
+  const ctaPrimaryHref = 'mailto:contato@janocaminho.com.br';
   const proofVisuals = [
     {
       title: 'Gestão Estratégica',
@@ -362,12 +361,11 @@ export function LandingPage() {
                 </button>
                 <a
                   href={ctaPrimaryHref}
-                  target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-base font-black text-white backdrop-blur-md transition-all hover:bg-white/10 active:scale-[0.98]"
                 >
-                  <WhatsappLogo size={18} weight="fill" className="text-emerald-400" />
-                  Ver demonstração
+                  <EnvelopeSimple size={17} weight="duotone" className="text-sky-300" />
+                  Fale por e-mail
                 </a>
               </div>
 
@@ -603,8 +601,8 @@ export function LandingPage() {
               rel="noreferrer"
               className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-sm font-black text-slate-300 backdrop-blur-md transition-all hover:bg-white/10 active:scale-[0.98]"
             >
-              <WhatsappLogo size={16} weight="fill" className="text-emerald-400" />
-              Falar com especialista
+              <EnvelopeSimple size={15} weight="duotone" className="text-sky-300" />
+              Fale por e-mail
             </a>
           </div>
         </div>
@@ -649,7 +647,6 @@ export function LandingPage() {
               <div className="flex flex-col gap-3 pt-1 sm:flex-row">
                 <a
                   href={ctaPrimaryHref}
-                  target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center justify-center rounded-2xl bg-slate-950 px-6 py-3.5 text-sm font-black text-white shadow-[0_18px_36px_-18px_rgba(15,23,42,0.8)] transition-all hover:scale-[1.01] active:scale-[0.98]"
                 >
@@ -959,8 +956,8 @@ export function LandingPage() {
                 rel="noreferrer"
                 className="inline-flex items-center gap-2.5 justify-center rounded-2xl border border-white/15 bg-white/5 px-10 py-5 text-lg font-black text-white backdrop-blur-md transition-all hover:bg-white/10 active:scale-[0.98]"
               >
-                <WhatsappLogo size={20} weight="fill" className="text-emerald-400" />
-                Solicitar demonstração
+                <EnvelopeSimple size={19} weight="duotone" className="text-sky-300" />
+                Tirar dúvidas por e-mail
               </a>
             </div>
 

@@ -2863,6 +2863,29 @@ export function MarketplacePage() {
             </section>
           )}
 
+          {/* Banner: convite para lojistas */}
+          <section className="px-3 pb-3 pt-1">
+            <button
+              type="button"
+              onClick={() => navigate('/create?plan=trial')}
+              className="group w-full overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#0d1e2e_0%,#1a3347_100%)] p-4 text-left shadow-[0_8px_24px_-12px_rgba(15,23,42,0.4)] transition-all active:scale-[0.99] hover:shadow-[0_12px_32px_-12px_rgba(15,23,42,0.55)]"
+            >
+              <div className="flex items-center gap-3.5">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#336886]/25">
+                  <Storefront size={22} weight="duotone" className="text-sky-300" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-black leading-tight text-white">Tem um negócio? Abra sua loja aqui.</p>
+                  <p className="mt-0.5 text-[11px] font-medium text-slate-400">Pedidos, produção e entrega em um só lugar.</p>
+                </div>
+                <div className="shrink-0 flex items-center gap-1 rounded-xl bg-white/10 px-3 py-1.5 text-[11px] font-black text-sky-200 transition-colors group-hover:bg-white/15">
+                  Começar
+                  <CaretRight size={11} weight="bold" />
+                </div>
+              </div>
+            </button>
+          </section>
+
           <section className="pb-2 space-y-2 sm:pb-4">
             <p className="text-center text-xs font-semibold text-slate-500">Conectando você aos melhores lojistas da região.</p>
             <PlatformTrustFooter mode="minimal" align="center" compact />
