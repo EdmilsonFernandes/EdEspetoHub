@@ -198,8 +198,11 @@ export function AdminLayout({
       {mobileNavOpen && (
         <div className="lg:hidden fixed inset-0 z-[9999] bg-black/55 backdrop-blur-sm" onClick={() => setMobileNavOpen(false)}>
           <aside
-            className="h-full w-[85%] max-w-[360px] bg-[#0d1626] border-r border-white/[0.07] shadow-[2px_0_40px_rgba(0,0,0,0.55)] px-4 pb-4 flex flex-col"
-            style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}
+            className="h-full w-[85%] max-w-[360px] border-r border-white/[0.07] shadow-[2px_0_40px_rgba(0,0,0,0.55)] px-4 pb-4 flex flex-col"
+            style={{
+              paddingTop: 'calc(1rem + env(safe-area-inset-top))',
+              background: `linear-gradient(180deg, ${hexToRgba(primaryColor, 0.18)} 0px, #111114 100px, #111114 100%)`,
+            }}
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-center justify-between gap-2 pb-3 border-b border-white/[0.08]">

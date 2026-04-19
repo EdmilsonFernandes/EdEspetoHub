@@ -450,17 +450,6 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
         </button>
         <button
           type="button"
-          onClick={toggleFocusMode}
-          className={`inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors ${
-            isFocusMode ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'
-          }`}
-          title="Modo foco"
-          aria-label="Modo foco"
-        >
-          <Target size={16} />
-        </button>
-        <button
-          type="button"
           onClick={() => navigate('/admin/dashboard', { state: { openNotifications: true } })}
           className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 transition-colors"
           title="Notificações"

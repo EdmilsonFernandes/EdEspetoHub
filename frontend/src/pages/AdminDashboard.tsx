@@ -2453,8 +2453,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       <div className="md:hidden flex items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white/90 backdrop-blur-sm px-3 py-2.5 shadow-[0_8px_24px_-16px_rgba(15,23,42,0.18)]">
         <div className="flex items-center gap-2.5 min-w-0">
           {ActiveTabIcon && (
-            <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-sky-100 bg-sky-50">
-              <ActiveTabIcon size={16} weight="duotone" className="text-sky-600" />
+            <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50">
+              <ActiveTabIcon size={16} weight="duotone" className="text-slate-500" />
             </span>
           )}
           <div className="min-w-0">

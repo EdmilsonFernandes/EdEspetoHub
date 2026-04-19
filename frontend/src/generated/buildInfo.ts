@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260419.134245.79c1764c",
-  "buildId": "0.1.9+20260419.134245.79c1764c-20260419.134245-79c1764c",
-  "builtAt": "2026-04-19T13:42:45.178Z",
-  "commitHash": "79c1764ce33e2b55aabc5901313868d67a075d9b",
-  "shortHash": "79c1764c",
+  "versionInternal": "0.1.9+20260419.135318.9e5eb94d",
+  "buildId": "0.1.9+20260419.135318.9e5eb94d-20260419.135318-9e5eb94d",
+  "builtAt": "2026-04-19T13:53:18.619Z",
+  "commitHash": "9e5eb94d20abb96af0033f15f879c7eff99109d1",
+  "shortHash": "9e5eb94d",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "9e5eb94d20abb96af0033f15f879c7eff99109d1",
+      "shortHash": "9e5eb94d",
+      "dateIso": "2026-04-19T10:44:21-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(admin-drawer): use store primary color, fix safe area, remove icon boxes and active dot",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9e5eb94d20abb96af0033f15f879c7eff99109d1"
+    },
     {
       "hash": "79c1764ce33e2b55aabc5901313868d67a075d9b",
       "shortHash": "79c1764c",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style(marketplace): premium condominium picker with gradient hero and sectioned layout",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/085927a44cf50e1c2b25f900820e447e97fcfa62"
-    },
-    {
-      "hash": "8bb021ce98cc642bbcacaa4086e22c0ef116ab0e",
-      "shortHash": "8bb021ce",
-      "dateIso": "2026-04-17T18:46:38-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(marketplace): fix picker navigation, sem-agenda badge, ghost search and improve condo banner",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8bb021ce98cc642bbcacaa4086e22c0ef116ab0e"
     }
   ]
 } as const;
