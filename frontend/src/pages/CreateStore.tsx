@@ -2332,7 +2332,7 @@ export function CreateStore() {
                       <div className="rounded-xl border border-emerald-200 bg-white p-3 space-y-2">
                         <p className="text-xs text-gray-500">Código copia e cola</p>
                         <p className="text-xs text-gray-700 break-all">
-                          {normalizePixCode(paymentResult.payment.qrCodeText)}
+                          {paymentResult.payment.qrCodeText}
                         </p>
                         <button
                           type="button"

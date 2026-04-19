@@ -477,7 +477,7 @@ export function PaymentPage() {
                       {payment.qrCodeText && (
                         <div className="w-full rounded-xl border border-slate-200 bg-white p-3 text-left space-y-2">
                           <p className="text-xs text-gray-500">Código copia e cola</p>
-                          <p className="text-xs text-gray-700 break-all">{normalizePixCode(payment.qrCodeText)}</p>
+                          <p className="text-xs text-gray-700 break-all">{payment.qrCodeText}</p>
                           <button
                             onClick={() => handleCopyPix(payment.qrCodeText)}
                             className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:opacity-90"
