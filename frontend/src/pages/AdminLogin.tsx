@@ -8,7 +8,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { runClientFreshStart } from '../utils/clientFreshStart';
 import { APP_BUILD_INFO } from '../generated/buildInfo';
-import { ArrowLeft, Check, Eye, EyeSlash, LockKey, ShieldCheck, WarningCircle, WhatsappLogo } from '@phosphor-icons/react';
+import { ArrowLeft, Check, Eye, EyeSlash, LockKey, ShieldCheck, WarningCircle } from '@phosphor-icons/react';
 import { nativeBiometricService } from '../services/nativeBiometricService';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 
@@ -361,10 +361,15 @@ export function AdminLogin() {
     <AuthLayout>
       <div className="space-y-4 ds-login-card-enter w-full">
         <div className="text-center space-y-2.5">
-          <button type="button" onClick={handleLogoTap} className="mx-auto block hover:scale-105 transition-transform active:scale-95">
-            <img src="/janocaminho-logo.png" alt="Já no Caminho" className="mx-auto h-16 w-auto drop-shadow-md" />
+          <button type="button" onClick={handleLogoTap} className="mx-auto flex flex-col items-center gap-3 hover:scale-[1.03] transition-transform active:scale-95">
+            <div className="h-[4.5rem] w-[4.5rem] overflow-hidden rounded-2xl border border-[#336886]/20 bg-white p-0.5 shadow-[0_8px_28px_-8px_rgba(13,79,102,0.28)]">
+              <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-full w-full rounded-xl object-cover" />
+            </div>
+            <div className="text-center leading-tight">
+              <p className="text-base font-black tracking-tight text-slate-900">Já no Caminho</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#336886]/80">Plataforma de pedidos</p>
+            </div>
           </button>
-          <p className="text-[12px] font-bold uppercase tracking-[0.25em] text-slate-400">Acesso da plataforma</p>
           <div className="flex items-center justify-center gap-3">
             <LockKey size={32} weight="duotone" className="text-[#0d4f66]" />
             <h2 className="text-[2rem] sm:text-[2.2rem] font-black text-slate-800 tracking-[-0.03em]">Login</h2>
@@ -541,14 +546,12 @@ export function AdminLogin() {
           </div>
         </form>
 
-        <button
-          type="button"
-          onClick={() => window.open('https://wa.me/5512991234567', '_blank')}
-          className="w-full flex items-center justify-center gap-2 text-xs font-bold text-slate-400 hover:text-[#0d4f66] transition-colors py-2 group"
+        <a
+          href="mailto:contato@janocaminho.com.br"
+          className="w-full flex items-center justify-center gap-2 text-xs font-bold text-slate-400 hover:text-[#0d4f66] transition-colors py-2"
         >
-          <WhatsappLogo size={18} weight="duotone" className="group-hover:animate-bounce" />
-          Precisa de ajuda? Fale conosco
-        </button>
+          Precisa de ajuda? contato@janocaminho.com.br
+        </a>
       </div>
       <ConfirmationModal
         isOpen={enrollmentPromptOpen}

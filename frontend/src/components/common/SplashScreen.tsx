@@ -33,14 +33,15 @@ export function SplashScreen() {
         
         {/* Logo/Mascote com Animação Premium */}
         <div className="relative animate-in zoom-in-90 duration-1000 ease-out">
-          <div className="relative h-32 w-32 sm:h-40 sm:w-40">
-            <img
-              src="/janocaminho-logov1.svg"
-              alt="Já no Caminho"
-              className="h-full w-full object-contain animate-bounce [animation-duration:3s]"
-            />
-            {/* Sombra Dinâmica */}
-            <div className="mx-auto mt-2 h-2 w-16 animate-pulse rounded-full bg-slate-200/60 blur-sm" />
+          <div className="relative h-32 w-32 sm:h-36 sm:w-36">
+            <div className="h-full w-full overflow-hidden rounded-[2rem] border border-[#336886]/20 bg-white p-1 shadow-[0_20px_60px_-16px_rgba(13,79,102,0.35)]">
+              <img
+                src="/janocaminho-logo.png"
+                alt="Já no Caminho"
+                className="h-full w-full rounded-[1.5rem] object-cover"
+              />
+            </div>
+            <div className="mx-auto mt-3 h-1.5 w-12 animate-pulse rounded-full bg-[#336886]/20 blur-sm" />
           </div>
         </div>
 
