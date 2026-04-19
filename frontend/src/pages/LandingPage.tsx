@@ -12,21 +12,28 @@ import {
   Desktop,
   DeviceMobile,
   DownloadSimple,
+  EnvelopeSimple,
+  Eye,
+  EyeSlash,
   GooglePlayLogo,
   Handshake,
   ListChecks,
+  Lock,
   MapPin,
   Motorcycle,
   Package,
+  Phone,
   QrCode,
   Rocket,
   ShieldCheck,
   Star,
   Storefront,
   TrendUp,
+  User,
   UserCircle,
   UserPlus,
   UsersThree,
+  WhatsappLogo,
   X,
 } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
@@ -113,6 +120,7 @@ export function LandingPage() {
   const [customerAuthError, setCustomerAuthError] = useState('');
   const [targetStoreSlug, setTargetStoreSlug] = useState('');
   const [apkLinkCopied, setApkLinkCopied] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     document.title = 'Já no Caminho | Plataforma completa para gestão de pedidos e entregas';
@@ -280,87 +288,27 @@ export function LandingPage() {
   ];
 
   const features = [
-    {
-      icon: ListChecks,
-      title: 'Pedidos em tempo real',
-      desc: 'Receba e acompanhe cada pedido instantaneamente, com atualização automática em todos os dispositivos.',
-      accent: 'sky',
-    },
-    {
-      icon: Package,
-      title: 'Fila de produção',
-      desc: 'Gerencie o preparo visualmente: pendente, produzindo, pronto. Cada etapa no seu lugar.',
-      accent: 'amber',
-    },
-    {
-      icon: Motorcycle,
-      title: 'Motoboys integrados',
-      desc: 'Cadastre, gerencie e acompanhe sua equipe de entregadores. Controle de ciclos e ganhos.',
-      accent: 'violet',
-    },
-    {
-      icon: CurrencyDollar,
-      title: 'PIX automático',
-      desc: 'BR Code gerado na hora para cada pedido. O cliente escaneia e o pagamento é confirmado.',
-      accent: 'emerald',
-    },
-    {
-      icon: ChartLine,
-      title: 'Dashboard analítico',
-      desc: 'Faturamento, ticket médio, volume de pedidos e comparativos por período.',
-      accent: 'sky',
-    },
-    {
-      icon: MapPin,
-      title: 'Rastreamento de pedidos',
-      desc: 'Seus clientes acompanham o pedido em tempo real — do preparo até a entrega na porta.',
-      accent: 'rose',
-    },
-    {
-      icon: Buildings,
-      title: 'Hub de condomínios',
-      desc: 'Venda em feiras e condomínios com vitrine própria. Retirada na barraca ou entrega no apt.',
-      accent: 'indigo',
-    },
-    {
-      icon: Desktop,
-      title: 'Multi-dispositivo',
-      desc: 'Painel admin no PC, app mobile para o time, PWA instalável. Tudo sincronizado.',
-      accent: 'sky',
-    },
-    {
-      icon: Bell,
-      title: 'Notificações push',
-      desc: 'Alertas automáticos de novos pedidos, atualizações e entregas. Nunca perca uma venda.',
-      accent: 'amber',
-    },
-    {
-      icon: UsersThree,
-      title: 'Multi-usuário',
-      desc: 'Perfis distintos para admin, operador e churrasqueiro. Cada um acessa só o que precisa.',
-      accent: 'violet',
-    },
-    {
-      icon: Star,
-      title: 'Destaque na plataforma',
-      desc: 'Promova sua loja com destaque pago e alcance mais clientes no marketplace.',
-      accent: 'amber',
-    },
-    {
-      icon: TrendUp,
-      title: 'Marketplace público',
-      desc: 'Sua loja visível para todos os clientes da plataforma Já no Caminho. Sem esforço extra.',
-      accent: 'emerald',
-    },
+    { icon: ListChecks,    title: 'Pedidos em tempo real',   desc: 'Novos pedidos chegam na hora, atualizados em todos os dispositivos.', accent: 'sky' },
+    { icon: Package,       title: 'Fila de produção',        desc: 'Pendente, produzindo, pronto — controle visual de cada etapa.', accent: 'amber' },
+    { icon: Motorcycle,    title: 'Motoboys integrados',     desc: 'Cadastre entregadores, gerencie ciclos e acompanhe ganhos.', accent: 'violet' },
+    { icon: CurrencyDollar,title: 'PIX automático',          desc: 'BR Code gerado por pedido. Cliente escaneia, pagamento confirmado.', accent: 'emerald' },
+    { icon: ChartLine,     title: 'Dashboard analítico',     desc: 'Faturamento, ticket médio e comparativos por período.', accent: 'sky' },
+    { icon: MapPin,        title: 'Rastreamento',            desc: 'Clientes acompanham o pedido do preparo até a porta.', accent: 'rose' },
+    { icon: Buildings,     title: 'Hub de condomínios',      desc: 'Vitrine própria em feiras e condomínios. Retirada ou entrega.', accent: 'indigo' },
+    { icon: Desktop,       title: 'Multi-dispositivo',       desc: 'Admin no PC, app mobile para o time, PWA instalável.', accent: 'sky' },
+    { icon: Bell,          title: 'Notificações push',       desc: 'Alerta automático de novos pedidos. Nunca perca uma venda.', accent: 'amber' },
+    { icon: UsersThree,    title: 'Multi-usuário',           desc: 'Admin, operador e churrasqueiro com acessos distintos.', accent: 'violet' },
+    { icon: Star,          title: 'Destaque na plataforma',  desc: 'Promova sua loja com destaque pago no marketplace.', accent: 'amber' },
+    { icon: TrendUp,       title: 'Marketplace público',     desc: 'Sua loja visível para todos os clientes da plataforma.', accent: 'emerald' },
   ];
 
-  const accentMap: Record<string, { bg: string; icon: string; dot: string }> = {
-    sky:     { bg: 'bg-sky-400/10',     icon: 'text-sky-400',     dot: 'bg-sky-400' },
-    amber:   { bg: 'bg-amber-400/10',   icon: 'text-amber-400',   dot: 'bg-amber-400' },
-    violet:  { bg: 'bg-violet-400/10',  icon: 'text-violet-400',  dot: 'bg-violet-400' },
-    emerald: { bg: 'bg-emerald-400/10', icon: 'text-emerald-400', dot: 'bg-emerald-400' },
-    rose:    { bg: 'bg-rose-400/10',    icon: 'text-rose-400',    dot: 'bg-rose-400' },
-    indigo:  { bg: 'bg-indigo-400/10',  icon: 'text-indigo-400',  dot: 'bg-indigo-400' },
+  const accentMap: Record<string, { bg: string; icon: string }> = {
+    sky:     { bg: 'bg-sky-400/10',     icon: 'text-sky-400' },
+    amber:   { bg: 'bg-amber-400/10',   icon: 'text-amber-400' },
+    violet:  { bg: 'bg-violet-400/10',  icon: 'text-violet-400' },
+    emerald: { bg: 'bg-emerald-400/10', icon: 'text-emerald-400' },
+    rose:    { bg: 'bg-rose-400/10',    icon: 'text-rose-400' },
+    indigo:  { bg: 'bg-indigo-400/10',  icon: 'text-indigo-400' },
   };
 
   return (
@@ -416,8 +364,9 @@ export function LandingPage() {
                   href={ctaPrimaryHref}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-base font-black text-white backdrop-blur-md transition-all hover:bg-white/10 active:scale-[0.98]"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-base font-black text-white backdrop-blur-md transition-all hover:bg-white/10 active:scale-[0.98]"
                 >
+                  <WhatsappLogo size={18} weight="fill" className="text-emerald-400" />
                   Ver demonstração
                 </a>
               </div>
@@ -654,6 +603,7 @@ export function LandingPage() {
               rel="noreferrer"
               className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-sm font-black text-slate-300 backdrop-blur-md transition-all hover:bg-white/10 active:scale-[0.98]"
             >
+              <WhatsappLogo size={16} weight="fill" className="text-emerald-400" />
               Falar com especialista
             </a>
           </div>
@@ -708,9 +658,10 @@ export function LandingPage() {
                 <button
                   type="button"
                   onClick={() => navigate('/hub')}
-                  className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-black text-slate-800 transition-all hover:bg-slate-50 active:scale-[0.98]"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-black text-slate-800 transition-all hover:bg-slate-50 active:scale-[0.98]"
                 >
                   Ver Hub
+                  <ArrowRight size={15} weight="bold" />
                 </button>
               </div>
             </div>
@@ -1006,8 +957,9 @@ export function LandingPage() {
                 href={ctaPrimaryHref}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-10 py-5 text-lg font-black text-white backdrop-blur-md transition-all hover:bg-white/10 active:scale-[0.98]"
+                className="inline-flex items-center gap-2.5 justify-center rounded-2xl border border-white/15 bg-white/5 px-10 py-5 text-lg font-black text-white backdrop-blur-md transition-all hover:bg-white/10 active:scale-[0.98]"
               >
+                <WhatsappLogo size={20} weight="fill" className="text-emerald-400" />
                 Solicitar demonstração
               </a>
             </div>
@@ -1071,7 +1023,7 @@ export function LandingPage() {
       {showCustomerAuth && (
         <div
           className="fixed inset-0 z-[130] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm"
-          onClick={() => setShowCustomerAuth(false)}
+          onClick={() => { setShowCustomerAuth(false); setShowPassword(false); }}
         >
           <div
             className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl animate-in zoom-in-95 duration-200 sm:p-7"
@@ -1086,61 +1038,83 @@ export function LandingPage() {
               </div>
               <button
                 type="button"
-                onClick={() => setShowCustomerAuth(false)}
+                onClick={() => { setShowCustomerAuth(false); setShowPassword(false); }}
                 className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:text-slate-900"
               >
                 <X size={18} weight="bold" />
               </button>
             </div>
 
-            <div className="mt-5 flex gap-2">
+            {/* Mode toggle — segmented pill */}
+            <div className="mt-5 flex rounded-2xl border border-slate-200 bg-slate-50 p-1">
               {(['login', 'register'] as const).map((mode) => (
                 <button
                   key={mode}
                   type="button"
-                  onClick={() => setCustomerAuthMode(mode)}
-                  className={`rounded-xl border px-4 py-2 text-xs font-bold transition-colors ${
+                  onClick={() => { setCustomerAuthMode(mode); setShowPassword(false); }}
+                  className={`flex-1 rounded-xl py-2 text-xs font-black transition-all ${
                     customerAuthMode === mode
-                      ? 'border-slate-900 bg-slate-900 text-white'
-                      : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
                   }`}
                 >
-                  {mode === 'login' ? 'Entrar' : 'Cadastro'}
+                  {mode === 'login' ? 'Já tenho conta' : 'Criar conta grátis'}
                 </button>
               ))}
             </div>
 
             <div className="mt-5 space-y-3">
               {customerAuthMode === 'register' && (
-                <input
-                  value={customerAuthForm.fullName}
-                  onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, fullName: e.target.value }))}
-                  placeholder="Nome completo"
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-                />
+                <div className="relative">
+                  <User size={15} weight="duotone" className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    value={customerAuthForm.fullName}
+                    onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, fullName: e.target.value }))}
+                    placeholder="Nome completo"
+                    className="w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                  />
+                </div>
               )}
               {customerAuthMode === 'register' && (
-                <input
-                  value={customerAuthForm.phone}
-                  onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, phone: formatPhoneBr(e.target.value) }))}
-                  placeholder="Telefone (opcional)"
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-                />
+                <div className="relative">
+                  <Phone size={15} weight="duotone" className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    value={customerAuthForm.phone}
+                    onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, phone: formatPhoneBr(e.target.value) }))}
+                    placeholder="Telefone (opcional)"
+                    className="w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                  />
+                </div>
               )}
-              <input
-                type="email"
-                value={customerAuthForm.email}
-                onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, email: e.target.value }))}
-                placeholder="E-mail"
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-              />
-              <input
-                type="password"
-                value={customerAuthForm.password}
-                onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, password: e.target.value }))}
-                placeholder="Senha"
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-              />
+              <div className="relative">
+                <EnvelopeSimple size={15} weight="duotone" className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="email"
+                  value={customerAuthForm.email}
+                  onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, email: e.target.value }))}
+                  placeholder="E-mail"
+                  className="w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                />
+              </div>
+              <div className="relative">
+                <Lock size={15} weight="duotone" className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={customerAuthForm.password}
+                  onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, password: e.target.value }))}
+                  placeholder="Senha"
+                  className="w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-10 text-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((p) => !p)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700"
+                  tabIndex={-1}
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                >
+                  {showPassword ? <EyeSlash size={16} weight="duotone" /> : <Eye size={16} weight="duotone" />}
+                </button>
+              </div>
 
               {customerAuthMode === 'register' && (
                 <div className="space-y-2 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
