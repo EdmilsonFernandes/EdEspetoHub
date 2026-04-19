@@ -229,6 +229,7 @@ export function AdminRenewal() {
                     } ${isSelected
                       ? 'border-brand-primary shadow-[0_22px_36px_-28px_rgba(14,165,233,0.72)] bg-brand-primary-soft/45'
                       : 'border-gray-200 hover:border-brand-primary/35 hover:-translate-y-0.5'
+                      } ${tier.key === 'pro' && isSelected ? 'ring-2 ring-brand-primary/30 ring-offset-1' : ''
                       } ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
                     {tier.popular && (
@@ -258,9 +259,12 @@ export function AdminRenewal() {
                       {displayPrice === null ? 'Entre em contato com o suporte.' : (billingKey === 'yearly' ? `${billing.period} (R$ ${Number(monthlyEq || 0).toFixed(2)}/mês)` : billing.period)}
                     </p>
                     <p className="text-xs text-slate-500 mt-1">{durationLabel}</p>
-                    <ul className="mt-3 text-xs text-slate-600 space-y-1">
+                    <ul className="mt-3 text-xs text-slate-600 space-y-1.5">
                       {tier.features.map((feature) => (
-                        <li key={feature}>✓ {feature}</li>
+                        <li key={feature} className="flex items-start gap-1.5">
+                          <span className="mt-[1px] shrink-0 font-black text-emerald-500">✓</span>
+                          <span>{feature}</span>
+                        </li>
                       ))}
                     </ul>
                   </button>
@@ -342,7 +346,7 @@ export function AdminRenewal() {
               type="button"
               onClick={handleRenew}
               disabled={!selectedPlanId || isSubmitting}
-              className="w-full bg-brand-gradient text-white py-4 rounded-xl font-semibold hover:opacity-95 disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
+              className="w-full bg-brand-gradient text-white py-4 rounded-2xl font-bold text-base hover:opacity-95 disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-[0_18px_40px_-24px_rgba(14,165,233,0.6)] hover:shadow-[0_22px_48px_-24px_rgba(14,165,233,0.75)] active:scale-[0.99]"
             >
               {isSubmitting ? 'Gerando pagamento...' : 'Gerar renovação'}
             </button>

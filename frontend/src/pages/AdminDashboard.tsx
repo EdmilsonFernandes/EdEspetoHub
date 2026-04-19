@@ -2394,6 +2394,9 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     });
   };
 
+  const activeNavItem = (navItems || []).find((item) => item.id === activeTab);
+  const ActiveTabIcon = activeNavItem?.icon || null;
+
   return (
     <AdminLayout contextLabel="Painel da Loja" fluid>
       <div
@@ -2446,6 +2449,28 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         </div>
       )}
       {activeTab !== 'fila' && (
+      <>
+      <div className="md:hidden flex items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white/90 backdrop-blur-sm px-3 py-2.5 shadow-[0_8px_24px_-16px_rgba(15,23,42,0.18)]">
+        <div className="flex items-center gap-2.5 min-w-0">
+          {ActiveTabIcon && (
+            <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-sky-100 bg-sky-50">
+              <ActiveTabIcon size={16} weight="duotone" className="text-sky-600" />
+            </span>
+          )}
+          <div className="min-w-0">
+            <p className="text-[9px] uppercase tracking-[0.22em] font-bold text-slate-400 leading-none mb-0.5">Seção atual</p>
+            <p className="text-[13px] font-bold text-slate-900 truncate leading-tight">{tabMeta[activeTab]?.title || 'Painel'}</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new CustomEvent('admin:open-global-nav'))}
+          className="shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-600 active:scale-[0.97] transition"
+        >
+          <Hash size={12} />
+          Navegar
+        </button>
+      </div>
       <section className="hidden md:flex relative z-[220] items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white/90 backdrop-blur-sm px-4 py-3 shadow-[0_20px_45px_-36px_rgba(15,23,42,0.5)] overflow-visible">
         <div className="min-w-0">
           <p className="text-[10px] uppercase tracking-[0.24em] font-bold text-slate-400">Workspace</p>
@@ -2500,6 +2525,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           </button>
         </div>
       </section>
+      </>
       )}
 
       {activeTab === 'resumo' && (

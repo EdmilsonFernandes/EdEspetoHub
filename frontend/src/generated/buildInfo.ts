@@ -5,283 +5,283 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260417.212305.a3259cc5",
-  "buildId": "0.1.9+20260417.212305.a3259cc5-20260417.212305-a3259cc5",
-  "builtAt": "2026-04-17T21:23:05.730Z",
-  "commitHash": "a3259cc59e9577e456bbced64d4db4bb6e7e91b9",
-  "shortHash": "a3259cc5",
+  "versionInternal": "0.1.9+20260419.131242.e54b6066",
+  "buildId": "0.1.9+20260419.131242.e54b6066-20260419.131242-e54b6066",
+  "builtAt": "2026-04-19T13:12:42.547Z",
+  "commitHash": "e54b6066a4a680ae8863d9831c6260668325921d",
+  "shortHash": "e54b6066",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
     {
-      "hash": "a3259cc59e9577e456bbced64d4db4bb6e7e91b9",
-      "shortHash": "a3259cc5",
-      "dateIso": "2026-04-17T18:22:15-03:00",
+      "hash": "e54b6066a4a680ae8863d9831c6260668325921d",
+      "shortHash": "e54b6066",
+      "dateIso": "2026-04-19T09:22:02-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(marketplace): implement selectCondominium and fix modal z-index",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a3259cc59e9577e456bbced64d4db4bb6e7e91b9"
+      "subject": "fix(pix): fix corrupted payload caused by spaces in sanitizeText vs normalizePixCode",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e54b6066a4a680ae8863d9831c6260668325921d"
     },
     {
-      "hash": "a95238d25a0008603b547eabac299925b7a9b4c0",
-      "shortHash": "a95238d2",
-      "dateIso": "2026-04-17T16:57:11-03:00",
+      "hash": "e76eb1d7b5165aadde3896916c6c3236b80237bb",
+      "shortHash": "e76eb1d7",
+      "dateIso": "2026-04-18T18:21:56-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(footer): implement biometric login for orders navigation",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a95238d25a0008603b547eabac299925b7a9b4c0"
+      "subject": "feat(ui): unify brand background and improve filter UX across all client pages",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e76eb1d7b5165aadde3896916c6c3236b80237bb"
     },
     {
-      "hash": "e5817ad7cc7f4a9ab1728f22ae339ef4f142035c",
-      "shortHash": "e5817ad7",
-      "dateIso": "2026-04-17T16:47:17-03:00",
+      "hash": "5b81479b832646dda6c53c82a1305085b53e0266",
+      "shortHash": "5b81479b",
+      "dateIso": "2026-04-18T17:51:04-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(hub): restrict condo selection and enhance live status visual",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e5817ad7cc7f4a9ab1728f22ae339ef4f142035c"
+      "subject": "feat(order-tracking): premium UX/UI redesign with JNC brand identity",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5b81479b832646dda6c53c82a1305085b53e0266"
     },
     {
-      "hash": "d66a57d3baf2180b9dfa7cb9bc7f383835769f0e",
-      "shortHash": "d66a57d3",
-      "dateIso": "2026-04-17T16:36:15-03:00",
+      "hash": "6cb7695f1cb7484f6ccd784aa049bd8b5f538525",
+      "shortHash": "6cb7695f",
+      "dateIso": "2026-04-18T17:44:09-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(hub): remove unused imports in CondominiumStatusModal",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d66a57d3baf2180b9dfa7cb9bc7f383835769f0e"
+      "subject": "fix(product-modal): make layout fully responsive for all font sizes",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6cb7695f1cb7484f6ccd784aa049bd8b5f538525"
     },
     {
-      "hash": "3905ae843364adf5cf39d38e20c30643ff6b3615",
-      "shortHash": "3905ae84",
-      "dateIso": "2026-04-17T16:31:33-03:00",
+      "hash": "22718ab477c17bde1f19f7ead8090bf01c5fa334",
+      "shortHash": "22718ab4",
+      "dateIso": "2026-04-18T17:37:48-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(hub): upgrade condominium cards to a solid premium aesthetic",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3905ae843364adf5cf39d38e20c30643ff6b3615"
+      "subject": "fix(condo-stores): fix logo clipping and improve card layout in condo grid",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/22718ab477c17bde1f19f7ead8090bf01c5fa334"
     },
     {
-      "hash": "6cbb38cd628c753edd81a112cb092a9aa666caea",
-      "shortHash": "6cbb38cd",
-      "dateIso": "2026-04-17T16:29:04-03:00",
+      "hash": "5239868858f1fb933f297403477d68b68d8eaea3",
+      "shortHash": "52398688",
+      "dateIso": "2026-04-18T11:55:16-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(hub): improve condominium status modal with visual branding",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6cbb38cd628c753edd81a112cb092a9aa666caea"
+      "subject": "fix(build): move condoGeoCache useEffect after userLocation state declaration",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5239868858f1fb933f297403477d68b68d8eaea3"
     },
     {
-      "hash": "2e0e55658acfe2549f38c8aa9e2126dd4a0037fc",
-      "shortHash": "2e0e5565",
-      "dateIso": "2026-04-17T16:09:07-03:00",
+      "hash": "0d4fe465c0b6c07839483b160e0dd357814d92d9",
+      "shortHash": "0d4fe465",
+      "dateIso": "2026-04-18T11:51:08-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(hub): add condominium availability modal and update documentation",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2e0e55658acfe2549f38c8aa9e2126dd4a0037fc"
+      "subject": "fix(condo-home): remove redundant agenda badge and add more breathing room",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0d4fe465c0b6c07839483b160e0dd357814d92d9"
     },
     {
-      "hash": "c320ad0229c157817238ab044c23914b20525ed1",
-      "shortHash": "c320ad02",
-      "dateIso": "2026-04-17T15:43:33-03:00",
+      "hash": "16e56639ee987426a993a3b90e393470256524ca",
+      "shortHash": "16e56639",
+      "dateIso": "2026-04-18T11:49:39-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(hub): refine first-access drawer and native orders auth",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c320ad0229c157817238ab044c23914b20525ed1"
+      "subject": "feat(condo-picker): distance check with premium warning modal on condominium entry",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/16e56639ee987426a993a3b90e393470256524ca"
     },
     {
-      "hash": "f170799690f988337a5b7fcfb8c98ed02f474032",
-      "shortHash": "f1707996",
-      "dateIso": "2026-04-17T15:20:49-03:00",
+      "hash": "919b83dc7675b424a34c61a751f93fd06271ca13",
+      "shortHash": "919b83dc",
+      "dateIso": "2026-04-18T11:43:58-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(store-signup): simplify email verification modal",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f170799690f988337a5b7fcfb8c98ed02f474032"
+      "subject": "feat(condo-picker): restore subtle banner as blurred background on condominium cards",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/919b83dc7675b424a34c61a751f93fd06271ca13"
     },
     {
-      "hash": "64c9477e042ddb43006e5c76af99cbea6b7a96d6",
-      "shortHash": "64c9477e",
-      "dateIso": "2026-04-17T15:00:08-03:00",
+      "hash": "ac559016e803bcebed0f3bb7b5a304cb8f95b9ec",
+      "shortHash": "ac559016",
+      "dateIso": "2026-04-18T11:34:50-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(store-signup): streamline mobile creation flow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/64c9477e042ddb43006e5c76af99cbea6b7a96d6"
+      "subject": "feat(ux): make promo carousel clickable and add JNC logo to orders header",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ac559016e803bcebed0f3bb7b5a304cb8f95b9ec"
     },
     {
-      "hash": "e75ec76a3b64f494e26b9b4e3e37c76f1561d35b",
-      "shortHash": "e75ec76a",
-      "dateIso": "2026-04-17T14:53:03-03:00",
+      "hash": "3b9be4c762dab265575ea023b618f380861ef3a4",
+      "shortHash": "3b9be4c7",
+      "dateIso": "2026-04-18T11:29:26-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(app): use customer biometrics for orders shortcut",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e75ec76a3b64f494e26b9b4e3e37c76f1561d35b"
+      "subject": "feat(condominios): premium picker — unified cards, refined filters",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3b9be4c762dab265575ea023b618f380861ef3a4"
     },
     {
-      "hash": "140aa3de61a226c13f32fa946d502b73bdd27b76",
-      "shortHash": "140aa3de",
-      "dateIso": "2026-04-17T14:41:03-03:00",
+      "hash": "cc36bb2795dc6953fb22fdb855d75c528d0b0aa8",
+      "shortHash": "cc36bb27",
+      "dateIso": "2026-04-18T11:19:25-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(store-signup): guide missing fields interactively",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/140aa3de61a226c13f32fa946d502b73bdd27b76"
+      "subject": "feat(ui): premium favorite button — glass dark + rose filled",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/cc36bb2795dc6953fb22fdb855d75c528d0b0aa8"
     },
     {
-      "hash": "90ada941d857c68d5d5238b4b357f5ab054e8c47",
-      "shortHash": "90ada941",
-      "dateIso": "2026-04-17T14:28:41-03:00",
+      "hash": "4dec5c56bc0c9e0da796ec955ef98653f6b96a37",
+      "shortHash": "4dec5c56",
+      "dateIso": "2026-04-18T11:13:17-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(store-signup): premium onboarding form polish",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/90ada941d857c68d5d5238b4b357f5ab054e8c47"
+      "subject": "fix(ui): store logo clipping + orders nav Perfil consistency",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4dec5c56bc0c9e0da796ec955ef98653f6b96a37"
     },
     {
-      "hash": "1d8c2ca0c9dd8602d370a16196cc3fb527a394b3",
-      "shortHash": "1d8c2ca0",
-      "dateIso": "2026-04-17T14:19:22-03:00",
+      "hash": "177acfa1a2af712a2a2d73d488a26d355fc5d4e4",
+      "shortHash": "177acfa1",
+      "dateIso": "2026-04-18T11:10:40-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(app): polish store signup otp and splash",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1d8c2ca0c9dd8602d370a16196cc3fb527a394b3"
+      "subject": "feat(ui): custom DDD picker + premium footer brand identity",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/177acfa1a2af712a2a2d73d488a26d355fc5d4e4"
     },
     {
-      "hash": "7b3d1770e63038f79f504f337c996c7c07e133fd",
-      "shortHash": "7b3d1770",
-      "dateIso": "2026-04-17T14:10:43-03:00",
+      "hash": "096c5dc5acb8d02e8d3d47c487a4f78ec8fb8740",
+      "shortHash": "096c5dc5",
+      "dateIso": "2026-04-18T11:03:55-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(marketplace): hide unready stores from hub",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7b3d1770e63038f79f504f337c996c7c07e133fd"
+      "subject": "feat(ui): premium store cards + brand identity across screens",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/096c5dc5acb8d02e8d3d47c487a4f78ec8fb8740"
     },
     {
-      "hash": "be79bfad8012def6703ecc9186c0645e789b90c4",
-      "shortHash": "be79bfad",
-      "dateIso": "2026-04-17T14:00:07-03:00",
+      "hash": "0783e71b1f556757f0dc20d5b5aec86087a88efd",
+      "shortHash": "0783e71b",
+      "dateIso": "2026-04-18T10:52:35-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(store-signup): add email otp activation",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/be79bfad8012def6703ecc9186c0645e789b90c4"
+      "subject": "feat(store): unify bottom nav identity with hub design system",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0783e71b1f556757f0dc20d5b5aec86087a88efd"
     },
     {
-      "hash": "006d3ef2c8431f71b8fb0d73819ea62cfff9e98a",
-      "shortHash": "006d3ef2",
-      "dateIso": "2026-04-17T13:41:09-03:00",
+      "hash": "2bf04db04abf856dece1d5dc48248eb29a8d69da",
+      "shortHash": "2bf04db0",
+      "dateIso": "2026-04-18T10:47:21-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(app): align splash with marketplace identity",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/006d3ef2c8431f71b8fb0d73819ea62cfff9e98a"
+      "subject": "fix(home+picker): compact store cards and premium condo picker",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2bf04db04abf856dece1d5dc48248eb29a8d69da"
     },
     {
-      "hash": "bb257aba3bf4f4641b4231fd36c1d03a9954b8ad",
-      "shortHash": "bb257aba",
-      "dateIso": "2026-04-17T13:35:03-03:00",
+      "hash": "5d7d5e03a428e41cb5de8ac324a5eb7bbed38492",
+      "shortHash": "5d7d5e03",
+      "dateIso": "2026-04-18T10:41:46-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(store-signup): improve native create store flow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/bb257aba3bf4f4641b4231fd36c1d03a9954b8ad"
+      "subject": "feat(store): premium visual upgrades to menu view",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5d7d5e03a428e41cb5de8ac324a5eb7bbed38492"
     },
     {
-      "hash": "389e897a1af5ee5b338032dc7481f7709e559fc7",
-      "shortHash": "389e897a",
-      "dateIso": "2026-04-17T11:38:27-03:00",
+      "hash": "6566d9c7019eb44d4389f51ade244e12f6ad7c14",
+      "shortHash": "6566d9c7",
+      "dateIso": "2026-04-18T10:32:07-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(app): add animated delivery splash",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/389e897a1af5ee5b338032dc7481f7709e559fc7"
+      "subject": "feat(home): premium visual upgrades across home page",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6566d9c7019eb44d4389f51ade244e12f6ad7c14"
     },
     {
-      "hash": "083cc1fbd40fb1180ce486f54216e4dd909591e5",
-      "shortHash": "083cc1fb",
-      "dateIso": "2026-04-17T09:36:13-03:00",
+      "hash": "d0e1852405c9b7f17e14a57b9d7cd1e8424231e9",
+      "shortHash": "d0e18524",
+      "dateIso": "2026-04-18T10:27:02-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(admin): surface logout in desktop sidebar",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/083cc1fbd40fb1180ce486f54216e4dd909591e5"
+      "subject": "fix(picker): use correct brand logo (janocaminho.jpg) in picker header",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d0e1852405c9b7f17e14a57b9d7cd1e8424231e9"
     },
     {
-      "hash": "43be20d596969d904583479d371fdd3b13ca0f15",
-      "shortHash": "43be20d5",
-      "dateIso": "2026-04-17T08:41:05-03:00",
+      "hash": "98ceb01f2a04818036ed9c79920d15fe7fc1a1ac",
+      "shortHash": "98ceb01f",
+      "dateIso": "2026-04-18T10:23:49-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(admin): refresh desktop sidebar with app drawer style",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/43be20d596969d904583479d371fdd3b13ca0f15"
+      "subject": "feat(picker): add filter pills and banner bg for condominiums",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/98ceb01f2a04818036ed9c79920d15fe7fc1a1ac"
     },
     {
-      "hash": "ed66221a00bcbb0fca7e7dcc68f168ca3b4c70cd",
-      "shortHash": "ed66221a",
-      "dateIso": "2026-04-16T19:10:23-03:00",
+      "hash": "9c376d4caf9ea427a9accd62de05c88ca4925232",
+      "shortHash": "9c376d4c",
+      "dateIso": "2026-04-18T10:14:51-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(admin): move queue location badges below header",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ed66221a00bcbb0fca7e7dcc68f168ca3b4c70cd"
+      "subject": "fix(nav): make Perfil permanent in hub/picker navs and add auto-biometric on startup",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9c376d4caf9ea427a9accd62de05c88ca4925232"
     },
     {
-      "hash": "3f3ce5dd27203b90137dca3c09284347f6663df7",
-      "shortHash": "3f3ce5dd",
-      "dateIso": "2026-04-16T18:51:35-03:00",
+      "hash": "55eaa57dca8a6678c840fe7c3b3204f62f7ac196",
+      "shortHash": "55eaa57d",
+      "dateIso": "2026-04-17T19:10:28-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(admin): remove condo badge from queue card header",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3f3ce5dd27203b90137dca3c09284347f6663df7"
+      "subject": "fix(picker): compact live cards and fix locais→condomínios label",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/55eaa57dca8a6678c840fe7c3b3204f62f7ac196"
     },
     {
-      "hash": "dc2c8eb6a6dfbaf118c0587c81c806cf7730a1e9",
-      "shortHash": "dc2c8eb6",
-      "dateIso": "2026-04-16T18:44:20-03:00",
+      "hash": "334f13f69b4901c8a2e268556f048ef6f59e99aa",
+      "shortHash": "334f13f6",
+      "dateIso": "2026-04-17T19:08:02-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(admin): refine condominium queue card layout",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/dc2c8eb6a6dfbaf118c0587c81c806cf7730a1e9"
+      "subject": "feat(home): alive header with greeting, rotating search placeholder and colored filter pills",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/334f13f69b4901c8a2e268556f048ef6f59e99aa"
     },
     {
-      "hash": "6f1079c302ec99bf2b800b7c3f5085fef6acdb36",
-      "shortHash": "6f1079c3",
-      "dateIso": "2026-04-16T18:41:02-03:00",
+      "hash": "ee9cf7070e47efe5dfd70e85f41fdacaecb9cbf3",
+      "shortHash": "ee9cf707",
+      "dateIso": "2026-04-17T19:00:49-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(notifications): align order status messages by flow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6f1079c302ec99bf2b800b7c3f5085fef6acdb36"
+      "subject": "feat(nav): replace Favoritos with Perfil in bottom nav and add brand logo to picker hero",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ee9cf7070e47efe5dfd70e85f41fdacaecb9cbf3"
     },
     {
-      "hash": "67e75b1ad125e79be61830661b077ebfc6959e39",
-      "shortHash": "67e75b1a",
-      "dateIso": "2026-04-16T18:30:30-03:00",
+      "hash": "7d32b6980f108a7afb0b62bc1a677e18fa246f51",
+      "shortHash": "7d32b698",
+      "dateIso": "2026-04-17T18:55:00-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(admin): keep condo detail title without duplicate badge",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/67e75b1ad125e79be61830661b077ebfc6959e39"
+      "subject": "ux(drawer): clarify login vs register flow for unauthenticated users",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7d32b6980f108a7afb0b62bc1a677e18fa246f51"
     },
     {
-      "hash": "2f484496b579991245749628cb2cdd5d16bea2b3",
-      "shortHash": "2f484496",
-      "dateIso": "2026-04-16T18:27:32-03:00",
+      "hash": "085927a44cf50e1c2b25f900820e447e97fcfa62",
+      "shortHash": "085927a4",
+      "dateIso": "2026-04-17T18:51:33-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(admin): compact condominium badge in queue cards",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2f484496b579991245749628cb2cdd5d16bea2b3"
+      "subject": "style(marketplace): premium condominium picker with gradient hero and sectioned layout",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/085927a44cf50e1c2b25f900820e447e97fcfa62"
     },
     {
-      "hash": "69dd3f7c4613ba2b51495b27e1211de8d8baa1a6",
-      "shortHash": "69dd3f7c",
-      "dateIso": "2026-04-16T18:15:57-03:00",
+      "hash": "8bb021ce98cc642bbcacaa4086e22c0ef116ab0e",
+      "shortHash": "8bb021ce",
+      "dateIso": "2026-04-17T18:46:38-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(build): refresh build info after queue fixes",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/69dd3f7c4613ba2b51495b27e1211de8d8baa1a6"
+      "subject": "fix(marketplace): fix picker navigation, sem-agenda badge, ghost search and improve condo banner",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8bb021ce98cc642bbcacaa4086e22c0ef116ab0e"
     },
     {
-      "hash": "6c164c45e1a07cf79e5dad8f8ebab4900d15e74c",
-      "shortHash": "6c164c45",
-      "dateIso": "2026-04-16T18:14:39-03:00",
+      "hash": "28569e1bced88907a8bb6c0c98baa18ccb641d46",
+      "shortHash": "28569e1b",
+      "dateIso": "2026-04-17T18:36:54-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(admin): import phone icon in order details",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6c164c45e1a07cf79e5dad8f8ebab4900d15e74c"
+      "subject": "style(marketplace): redesign condominium picker to premium list layout",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/28569e1bced88907a8bb6c0c98baa18ccb641d46"
     },
     {
-      "hash": "445aaa82fb7ea4b4c5ec80957497dd04f34390f7",
-      "shortHash": "445aaa82",
-      "dateIso": "2026-04-16T18:13:34-03:00",
+      "hash": "4413f32e37a2755a21158b9e6bedcf0572475719",
+      "shortHash": "4413f32e",
+      "dateIso": "2026-04-17T18:33:24-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(admin): avoid forbidden motoboy lookup in queue",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/445aaa82fb7ea4b4c5ec80957497dd04f34390f7"
+      "subject": "fix(marketplace): show availability modal without navigating for condos without agenda",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4413f32e37a2755a21158b9e6bedcf0572475719"
     }
   ]
 } as const;

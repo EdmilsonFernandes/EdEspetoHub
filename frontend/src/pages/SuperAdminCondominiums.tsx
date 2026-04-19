@@ -36,6 +36,14 @@ const statusCopy: Record<string, { label: string; tone: string }> = {
   blocked: { label: 'Bloqueado', tone: 'bg-slate-200 text-slate-700 ring-slate-300' },
 };
 
+const requestBorderAccent = (status: string) => {
+  const s = String(status || 'pending');
+  if (s === 'approved') return 'border-l-emerald-400';
+  if (s === 'pending') return 'border-l-amber-400';
+  if (s === 'rejected' || s === 'blocked') return 'border-l-rose-400';
+  return 'border-l-slate-300';
+};
+
 const addHoursToLocalDateTime = (value: string, hours: number) => {
   if (!value) return '';
   const date = new Date(value);
@@ -753,7 +761,7 @@ export function SuperAdminCondominiums() {
               const condominiumLogo = resolveAssetUrl(request.condominium?.logoUrl || request.condominium?.bannerUrl || '') || '';
               const status = statusCopy[String(request.status || 'pending')] || statusCopy.pending;
               return (
-              <div key={request.id} className="rounded-[1.6rem] border border-slate-200 bg-[linear-gradient(135deg,_#ffffff_0%,_#f8fafc_45%,_#ffffff_100%)] p-4 shadow-[0_22px_45px_-34px_rgba(15,23,42,0.45)]">
+              <div key={request.id} className={`rounded-[1.6rem] border border-l-4 ${requestBorderAccent(request.status)} bg-[linear-gradient(135deg,_#ffffff_0%,_#f8fafc_45%,_#ffffff_100%)] p-4 shadow-[0_22px_45px_-34px_rgba(15,23,42,0.45)]`}>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex min-w-0 items-center gap-3">
                     <div className="flex -space-x-3">

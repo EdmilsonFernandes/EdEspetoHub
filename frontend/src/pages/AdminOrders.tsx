@@ -8,7 +8,7 @@ import { formatAddress, formatCurrency, formatDateTime, formatOrderDisplayId, fo
 import { getPaymentMethodMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatSelectedModifiers } from '../utils/productModifiers';
-import { Hash, Storefront, Truck, ChartBar, ClipboardText, CreditCard, Package, Gear, Scooter, Star, UsersThree, CheckSquare } from '@phosphor-icons/react';
+import { Hash, Storefront, Truck, ChartBar, ClipboardText, CreditCard, Package, Gear, Scooter, Star, UsersThree, CheckSquare, SquaresFour, Rows } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
@@ -406,8 +406,11 @@ export function AdminOrders() {
         <div className="rounded-[24px] border border-slate-100 bg-white p-5 shadow-[0_8px_30px_rgba(15,23,42,0.04)] relative z-20">
           <div className="flex items-center justify-between gap-3 mb-4">
             <div>
-              <h2 className="text-lg font-bold text-slate-800">Lista de pedidos</h2>
-              <p className="text-sm text-slate-500">{filteredOrders.length} pedidos encontrados</p>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-black text-slate-900">Histórico de Pedidos</h2>
+                <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-bold">{filteredOrders.length}</span>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">Acompanhe status, filtros e histórico dos pedidos.</p>
             </div>
           </div>
 
@@ -448,34 +451,38 @@ export function AdminOrders() {
                 placeholder="Buscar cliente, telefone ou ID do pedido"
                 className="w-full sm:w-64 ds-input ds-focus-ring py-2 text-sm"
               />
-              <div className="flex gap-2">
+              <div className="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1 gap-0.5 shrink-0">
                 <button
                   onClick={() => setViewMode('cards')}
-                  className={`px-3 py-2 rounded-xl text-sm font-semibold border transition-all duration-200 ${
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                     viewMode === 'cards'
-                      ? 'bg-brand-primary text-white border-brand-primary shadow-[0_8px_20px_-12px_rgba(59,130,246,0.55)]'
-                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                      ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                      : 'text-slate-500 hover:text-slate-700'
                   }`}
                 >
+                  <SquaresFour size={13} weight={viewMode === 'cards' ? 'fill' : 'duotone'} />
                   Cards
                 </button>
                 <button
                   onClick={() => setViewMode('table')}
-                  className={`px-3 py-2 rounded-xl text-sm font-semibold border transition-all duration-200 ${
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                     viewMode === 'table'
-                      ? 'bg-brand-primary text-white border-brand-primary shadow-[0_8px_20px_-12px_rgba(59,130,246,0.55)]'
-                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                      ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                      : 'text-slate-500 hover:text-slate-700'
                   }`}
                 >
+                  <Rows size={13} weight={viewMode === 'table' ? 'fill' : 'duotone'} />
                   Tabela
                 </button>
               </div>
-              <button
-                onClick={clearFilters}
-                className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50"
-              >
-                Limpar filtros
-              </button>
+              {(statusFilter !== 'all' || dateFilter || query) && (
+                <button
+                  onClick={clearFilters}
+                  className="px-3 py-2 rounded-lg text-xs font-bold border border-rose-100 bg-rose-50 text-rose-600 hover:bg-rose-100 transition shrink-0"
+                >
+                  Limpar
+                </button>
+              )}
             </div>
           </div>
 
@@ -507,7 +514,7 @@ export function AdminOrders() {
                   return (
                     <div
                       key={order.id || `${order.customerName}-${index}`}
-                      className="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.04)] space-y-3 ds-interactive-card"
+                      className={`rounded-[24px] border border-l-4 ${statusAccent(order.status)} p-6 shadow-[0_8px_30px_rgba(15,23,42,0.04)] space-y-3 ds-interactive-card`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="space-y-1">
@@ -626,7 +633,7 @@ export function AdminOrders() {
                 {filteredOrders.map((order, index) => (
                   <div
                     key={order.id || `${order.customerName}-${index}`}
-                    className="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.04)] flex flex-col gap-4 ds-interactive-card"
+                    className={`rounded-[24px] border border-l-4 ${statusAccent(order.status)} p-6 shadow-[0_8px_30px_rgba(15,23,42,0.04)] flex flex-col gap-4 ds-interactive-card`}
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div>

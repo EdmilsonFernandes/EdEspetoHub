@@ -188,88 +188,103 @@ export function AdminLayout({
       {mobileNavOpen && (
         <div className="lg:hidden fixed inset-0 z-[9999] bg-black/55 backdrop-blur-sm" onClick={() => setMobileNavOpen(false)}>
           <aside
-            className="h-full w-[85%] max-w-[360px] bg-white border-r border-slate-200 shadow-2xl p-4 flex flex-col"
+            className="h-full w-[85%] max-w-[360px] bg-[#0d1626] border-r border-white/[0.07] shadow-[2px_0_40px_rgba(0,0,0,0.55)] p-4 flex flex-col"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex items-center justify-between gap-2 pb-3 border-b border-slate-100">
-              <div className="min-w-0">
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-semibold">Navegação</p>
-                <p className="text-sm font-bold text-slate-900 truncate">{auth?.user?.fullName || auth?.user?.name || auth?.user?.email || 'Usuário'}</p>
+            <div className="flex items-center justify-between gap-2 pb-3 border-b border-white/[0.08]">
+              <div className="min-w-0 flex items-center gap-2.5">
+                <div className="h-8 w-8 shrink-0 overflow-hidden rounded-[0.6rem] border border-white/15 bg-white/10">
+                  <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[9px] uppercase tracking-[0.22em] text-slate-500 font-bold">Painel</p>
+                  <p className="text-[13px] font-bold text-slate-100 truncate leading-tight">{auth?.user?.fullName || auth?.user?.name || auth?.user?.email || 'Usuário'}</p>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => setMobileNavOpen(false)}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.1] bg-white/[0.07] text-slate-400 active:scale-95"
                 aria-label="Fechar menu"
               >
-                <X size={16} weight="bold" />
+                <X size={15} weight="bold" />
               </button>
             </div>
-            <div className="pt-2 space-y-1 flex-1 overflow-y-auto">
+            <div className="pt-2 space-y-0.5 flex-1 overflow-y-auto">
               {groupedMobileSections.map((section: any) => {
                 if (section.type === 'item') {
                   const item = section.item;
                   const Icon = item.icon;
+                  const isActive = activeMobileId === item.id;
                   return (
                     <button
                       key={item.id}
                       type="button"
                       onClick={() => handleNavSelect(item.id)}
-                      className={`w-full min-h-11 px-2.5 py-2.5 rounded-lg text-left text-sm font-medium flex items-center justify-between transition-colors ${
+                      className={`w-full min-h-[42px] px-2.5 py-2 rounded-xl text-left text-[13px] font-medium flex items-center justify-between transition-all duration-150 active:scale-[0.98] ${
                         item.disabled
-                          ? 'bg-violet-50 text-violet-700'
-                          : activeMobileId === item.id
-                          ? 'bg-slate-50 text-brand-primary border-l-4 border-brand-primary pl-2'
-                          : 'text-slate-700 hover:bg-slate-50'
+                          ? 'bg-violet-500/[0.12] text-violet-300'
+                          : isActive
+                          ? 'bg-white/[0.11] text-white font-semibold'
+                          : 'text-slate-400 hover:bg-white/[0.06] hover:text-slate-200'
                       }`}
                     >
-                      <span className="inline-flex items-center gap-2">
-                        <Icon size={16} weight="duotone" />
+                      <span className="inline-flex items-center gap-2.5">
+                        <span className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors ${
+                          item.disabled ? 'bg-violet-500/20 text-violet-400' : isActive ? 'bg-sky-500/20 text-sky-400' : 'bg-white/[0.07] text-slate-500'
+                        }`}>
+                          <Icon size={14} weight={isActive ? 'fill' : 'duotone'} />
+                        </span>
                         {item.label}
                       </span>
-                      {item.disabled && <span className="text-[10px] font-bold rounded-full bg-violet-100 text-violet-700 px-2 py-0.5">Pro</span>}
+                      {item.disabled && <span className="text-[9px] font-black rounded-full bg-violet-500/20 text-violet-300 px-2 py-0.5 uppercase tracking-wide">Pro</span>}
+                      {isActive && <span className="h-1.5 w-1.5 rounded-full bg-sky-400 shrink-0" />}
                     </button>
                   );
                 }
                 const isOpen = mobileOpenGroup === section.id;
                 const hasActiveChild = section.children.some((child: any) => child.id === activeMobileId);
                 return (
-                  <div key={section.id} className="space-y-0.5 border-b border-slate-100 pb-1.5 last:border-b-0">
+                  <div key={section.id} className="space-y-0.5 pt-2 first:pt-0">
                     <button
                       type="button"
                       onClick={() => setMobileOpenGroup((prev) => (prev === section.id ? null : section.id))}
-                      className={`w-full min-h-11 px-2.5 py-2.5 rounded-lg text-left text-sm font-semibold flex items-center justify-between transition-colors ${
-                        hasActiveChild
-                          ? 'bg-slate-100 text-slate-900'
-                          : 'text-slate-800 hover:bg-slate-50'
+                      className={`w-full px-2.5 py-1.5 rounded-lg text-left text-[10px] font-black uppercase tracking-[0.18em] flex items-center justify-between transition-colors ${
+                        hasActiveChild ? 'text-slate-200' : 'text-slate-600 hover:text-slate-400'
                       }`}
                       aria-expanded={isOpen}
                     >
                       <span>{section.label}</span>
-                      <CaretDown size={16} weight="bold" className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                      <CaretDown size={12} weight="bold" className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
                     </button>
                     {isOpen && (
-                      <div className="space-y-0.5 bg-slate-50/90 rounded-lg py-1">
+                      <div className="space-y-0.5 ml-1 pl-3 border-l border-white/[0.07]">
                         {section.children.map((item: any) => {
                           const Icon = item.icon;
+                          const isActive = activeMobileId === item.id;
                           return (
                             <button
                               key={item.id}
                               type="button"
                               onClick={() => handleNavSelect(item.id)}
-                              className={`w-full min-h-11 pl-5 pr-2.5 py-2.5 rounded-md text-left text-sm font-normal flex items-center justify-between transition-colors ${
+                              className={`w-full min-h-[40px] px-2.5 py-2 rounded-xl text-left text-[13px] flex items-center justify-between transition-all duration-150 active:scale-[0.98] ${
                                 item.disabled
-                                  ? 'bg-violet-50 text-violet-700'
-                                  : activeMobileId === item.id
-                                  ? 'bg-white text-brand-primary border-l-4 border-brand-primary pl-4'
-                                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
+                                  ? 'bg-violet-500/[0.12] text-violet-300 font-medium'
+                                  : isActive
+                                  ? 'bg-white/[0.11] text-white font-semibold'
+                                  : 'text-slate-400 hover:bg-white/[0.06] hover:text-slate-200 font-normal'
                               }`}
                             >
-                              <span className="inline-flex items-center gap-2">
-                                <Icon size={15} weight="duotone" />
+                              <span className="inline-flex items-center gap-2.5">
+                                <span className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors ${
+                                  item.disabled ? 'bg-violet-500/20 text-violet-400' : isActive ? 'bg-sky-500/20 text-sky-400' : 'bg-white/[0.06] text-slate-500'
+                                }`}>
+                                  <Icon size={12} weight={isActive ? 'fill' : 'duotone'} />
+                                </span>
                                 {item.label}
                               </span>
-                              {item.disabled && <span className="text-[10px] font-bold rounded-full bg-violet-100 text-violet-700 px-2 py-0.5">Pro</span>}
+                              {item.disabled && <span className="text-[9px] font-black rounded-full bg-violet-500/20 text-violet-300 px-2 py-0.5 uppercase tracking-wide">Pro</span>}
+                              {isActive && <span className="h-1.5 w-1.5 rounded-full bg-sky-400 shrink-0" />}
                             </button>
                           );
                         })}
@@ -287,12 +302,12 @@ export function AdminLayout({
                 setMobileNavOpen(false);
                 navigate('/hub', { replace: true });
               }}
-              className="mt-3 w-full min-h-12 px-3 py-3 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 text-sm font-semibold flex items-center justify-center gap-2"
+              className="mt-3 w-full min-h-11 px-3 py-2.5 rounded-xl border border-rose-500/[0.22] bg-rose-500/[0.1] text-rose-400 text-sm font-semibold flex items-center justify-center gap-2 transition-colors hover:bg-rose-500/[0.16] active:scale-[0.98]"
             >
-              <SignOut size={16} weight="bold" />
-              Sair
+              <SignOut size={15} weight="bold" />
+              Sair da conta
             </button>
-            <PlatformTrustFooter className="mt-3 pt-1" compact mode="minimal" />
+            <PlatformTrustFooter className="mt-3 pt-1 opacity-40" compact mode="minimal" />
           </aside>
         </div>
       )}

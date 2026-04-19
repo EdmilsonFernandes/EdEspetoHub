@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ChartBar, CheckSquare, ClipboardText, CreditCard, Gear, Package, Scooter, Star, UsersThree } from '@phosphor-icons/react';
+import { ChartBar, CheckSquare, ClipboardText, CreditCard, Gear, Package, Plus, Scooter, Star, UsersThree } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
@@ -30,6 +30,15 @@ const statusTone = (status: string) => {
   if (value === 'REJECTED') return 'bg-rose-100 text-rose-700 border-rose-200';
   if (value === 'CANCELLED' || value === 'EXPIRED') return 'bg-slate-100 text-slate-700 border-slate-200';
   return 'bg-slate-100 text-slate-700 border-slate-200';
+};
+
+const statusBorderAccent = (status: string) => {
+  const value = String(status || '').toUpperCase();
+  if (value === 'APPROVED') return 'border-l-emerald-400';
+  if (value === 'PAID_WAITING_SLOT') return 'border-l-indigo-400';
+  if (value === 'PENDING_PAYMENT') return 'border-l-amber-400';
+  if (value === 'PAYMENT_FAILED' || value === 'REJECTED') return 'border-l-rose-400';
+  return 'border-l-slate-300';
 };
 
 const statusLabel = (status: string) => {
@@ -406,15 +415,16 @@ export function AdminHighlights() {
               <button
                 type="button"
                 onClick={openCreate}
-                className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white"
+                className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white active:scale-[0.97] transition"
               >
+                <Plus size={14} weight="bold" />
                 Novo destaque
               </button>
             </div>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Vagas ativas</p>
+              <div className="rounded-2xl border border-sky-200 bg-sky-50/60 px-3 py-2.5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-sky-600">Vagas ativas</p>
                 <p className="mt-1 text-xl font-black text-slate-900">{Number(pricing?.activeSlots || 0)} / {Number(pricing?.maxActiveSlots || 50)}</p>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
@@ -452,7 +462,7 @@ export function AdminHighlights() {
                   const canPay = status === 'PENDING_PAYMENT' && String(request?.paymentStatus || '').toUpperCase() !== 'PAID';
                   const isActive = status === 'APPROVED' && String(request?.paymentStatus || '').toUpperCase() === 'PAID';
                   return (
-                    <div key={request.id} className="rounded-2xl border border-slate-200 bg-slate-50/60 p-3">
+                    <div key={request.id} className={`rounded-2xl border border-l-4 ${statusBorderAccent(status)} bg-slate-50/60 p-3`}>
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <div className="flex items-start gap-2.5 min-w-0">
                           <img

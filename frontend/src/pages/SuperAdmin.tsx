@@ -1258,7 +1258,7 @@ export function SuperAdmin() {
         </div>
       </div>
 
-      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-white/90 backdrop-blur border-b border-slate-200">
+      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-white/92 backdrop-blur border-b border-slate-200 shadow-[0_4px_24px_-8px_rgba(15,23,42,0.09)]">
         <div className="sm:hidden">
           <label className="block">
             <span className="mb-1 block text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">
@@ -1302,14 +1302,14 @@ export function SuperAdmin() {
       </div>
 
       <div
-        className={`rounded-2xl border px-4 py-3 bg-gradient-to-r ${(
+        className={`rounded-2xl border px-4 py-3.5 bg-gradient-to-r ${(
           SECTION_META[activeSection] || SECTION_META.executive
         ).tone}`}
       >
-        <p className="text-xs uppercase tracking-[0.16em] opacity-90">
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">
           {(SECTION_META[activeSection] || SECTION_META.executive).title}
         </p>
-        <p className="text-sm opacity-95">{(SECTION_META[activeSection] || SECTION_META.executive).description}</p>
+        <p className="text-sm font-semibold opacity-95 mt-0.5">{(SECTION_META[activeSection] || SECTION_META.executive).description}</p>
       </div>
 
       {summary && activeSection === 'executive' && (

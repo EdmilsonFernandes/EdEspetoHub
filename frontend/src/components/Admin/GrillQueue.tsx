@@ -456,6 +456,23 @@ const OrderSummaryCard = ({
       if (orderType === 'table') return { icon: Monitor };
       return { icon: Hash };
     })();
+    const cardBgTone = (() => {
+      if (archived) return 'bg-slate-50/80';
+      const raw = String(order?.status || '').toLowerCase();
+      if (raw === 'pending') return 'bg-gradient-to-br from-amber-50/40 via-white to-white';
+      if (raw === 'preparing') return 'bg-gradient-to-br from-sky-50/40 via-white to-white';
+      if (raw === 'ready' || raw === 'ready_for_delivery' || raw === 'waiting_for_motoboy' || raw === 'dispatched' || raw === 'in_delivery') return 'bg-gradient-to-br from-violet-50/40 via-white to-white';
+      if (raw === 'done' || raw === 'delivered' || raw === 'finished') return 'bg-gradient-to-br from-emerald-50/30 via-white to-white';
+      return 'bg-white';
+    })();
+    const statusBadgeTone = (() => {
+      const raw = String(order?.status || '').toLowerCase();
+      if (raw === 'pending') return 'bg-amber-50 border-amber-100 text-amber-600';
+      if (raw === 'preparing') return 'bg-sky-50 border-sky-100 text-sky-600';
+      if (raw === 'ready' || raw === 'ready_for_delivery' || raw === 'waiting_for_motoboy' || raw === 'dispatched' || raw === 'in_delivery') return 'bg-violet-50 border-violet-100 text-violet-600';
+      if (raw === 'done' || raw === 'delivered' || raw === 'finished') return 'bg-emerald-50 border-emerald-100 text-emerald-600';
+      return 'bg-slate-50 border-transparent text-slate-500';
+    })();
     return (
   <div
     role="button"
@@ -468,9 +485,9 @@ const OrderSummaryCard = ({
       }
     }}
     className={`relative w-full min-h-[140px] rounded-[1.8rem] border transition-all duration-300 cursor-pointer overflow-hidden ${
-      archived 
-        ? 'bg-slate-50/80 border-slate-200/60 opacity-80' 
-        : 'bg-white border-slate-200 shadow-[0_8px_20px_-12px_rgba(15,23,42,0.12)] hover:border-[#336886]/30 hover:shadow-[0_20px_40px_-20px_rgba(15,23,42,0.18)] hover:-translate-y-0.5'
+      archived
+        ? `${cardBgTone} border-slate-200/60 opacity-80`
+        : `${cardBgTone} border-slate-200 shadow-[0_8px_20px_-12px_rgba(15,23,42,0.12)] hover:border-[#336886]/30 hover:shadow-[0_20px_40px_-20px_rgba(15,23,42,0.18)] hover:-translate-y-0.5`
     }`}
   >
     <div className="flex items-stretch h-full">
@@ -577,7 +594,7 @@ const OrderSummaryCard = ({
 
           {/* Centro: Status (Agora visível em todas as telas) */}
           <div className="flex justify-center min-w-0">
-            <span className={`truncate text-[9px] font-black uppercase tracking-wider px-2 py-1 rounded-lg border border-transparent bg-slate-50 ${statusToneClass}`}>
+            <span className={`truncate text-[9px] font-black uppercase tracking-wider px-2 py-1 rounded-lg border ${statusBadgeTone}`}>
               {archived ? 'Finalizado' : statusMeta.label}
             </span>
           </div>
@@ -2984,13 +3001,13 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 <div className="relative mt-0.5">
                   <div className="flex flex-nowrap items-center gap-2 overflow-x-auto snap-x snap-mandatory pb-1.5 pr-2 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
                   {[
-                    { id: 'all', label: 'Todos', value: allActiveQueue.length },
-                    { id: 'condominium', label: 'Condomínio', value: queueMetrics.condominium },
-                    { id: 'pending', label: 'Pendentes', value: queueMetrics.pending },
-                    { id: 'preparing', label: 'Em Preparação', value: queueMetrics.preparing },
-                    { id: 'ready', label: 'Prontos', value: queueMetrics.ready },
-                    { id: 'late', label: 'Atrasados', value: queueMetrics.late },
-                    { id: 'cancelled', label: 'Cancelados', value: queueMetrics.cancelled },
+                    { id: 'all', label: 'Todos', value: allActiveQueue.length, activeClass: 'bg-slate-800 text-white' },
+                    { id: 'condominium', label: 'Condomínio', value: queueMetrics.condominium, activeClass: 'bg-emerald-500 text-white' },
+                    { id: 'pending', label: 'Pendentes', value: queueMetrics.pending, activeClass: 'bg-amber-500 text-white' },
+                    { id: 'preparing', label: 'Em Preparação', value: queueMetrics.preparing, activeClass: 'bg-sky-500 text-white' },
+                    { id: 'ready', label: 'Prontos', value: queueMetrics.ready, activeClass: 'bg-violet-500 text-white' },
+                    { id: 'late', label: 'Atrasados', value: queueMetrics.late, activeClass: 'bg-rose-500 text-white' },
+                    { id: 'cancelled', label: 'Cancelados', value: queueMetrics.cancelled, activeClass: 'bg-slate-500 text-white' },
                   ].map((kpi) => (
                     <button
                       key={kpi.id}
@@ -2998,7 +3015,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       onClick={() => setQueueFilter(kpi.id as any)}
                     className={`flex snap-start shrink-0 items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-medium transition-colors whitespace-nowrap ${
                         queueFilter === kpi.id
-                          ? 'bg-amber-500 text-white'
+                          ? kpi.activeClass
                           : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
                     >
