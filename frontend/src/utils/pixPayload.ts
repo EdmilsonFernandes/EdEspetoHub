@@ -60,8 +60,7 @@ const toAscii = (value: string) => {
 
 const sanitizeText = (value: string, max = 25) =>
   toAscii(value)
-    .replace(/[^A-Za-z0-9 \\-\\._]/g, '')
-    .trim()
+    .replace(/[^A-Za-z0-9]/g, '')
     .slice(0, max);
 
 const formatField = (id: string, value: string) => `${id}${pad2(value.length)}${value}`;
