@@ -56,7 +56,8 @@ type CreatePaymentInput = {
  * @date 2026-01-06
  */
 const hasCredentials = () =>
-  Boolean(env.mercadoPago.accessToken && env.mercadoPago.publicKey);
+  // Server-side payment creation only needs the private access token.
+  Boolean(env.mercadoPago.accessToken);
 /**
  * Builds headers.
  *

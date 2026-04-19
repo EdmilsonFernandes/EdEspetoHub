@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260419.131242.e54b6066",
-  "buildId": "0.1.9+20260419.131242.e54b6066-20260419.131242-e54b6066",
-  "builtAt": "2026-04-19T13:12:42.547Z",
-  "commitHash": "e54b6066a4a680ae8863d9831c6260668325921d",
-  "shortHash": "e54b6066",
+  "versionInternal": "0.1.9+20260419.132452.e9cccc38",
+  "buildId": "0.1.9+20260419.132452.e9cccc38-20260419.132452-e9cccc38",
+  "builtAt": "2026-04-19T13:24:52.054Z",
+  "commitHash": "e9cccc38ba79068ea3692d7427c59b9e27368b40",
+  "shortHash": "e9cccc38",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "e9cccc38ba79068ea3692d7427c59b9e27368b40",
+      "shortHash": "e9cccc38",
+      "dateIso": "2026-04-19T10:15:28-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(admin): full visual redesign of admin/operator screens",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e9cccc38ba79068ea3692d7427c59b9e27368b40"
+    },
     {
       "hash": "e54b6066a4a680ae8863d9831c6260668325921d",
       "shortHash": "e54b6066",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style(marketplace): redesign condominium picker to premium list layout",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/28569e1bced88907a8bb6c0c98baa18ccb641d46"
-    },
-    {
-      "hash": "4413f32e37a2755a21158b9e6bedcf0572475719",
-      "shortHash": "4413f32e",
-      "dateIso": "2026-04-17T18:33:24-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(marketplace): show availability modal without navigating for condos without agenda",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4413f32e37a2755a21158b9e6bedcf0572475719"
     }
   ]
 } as const;

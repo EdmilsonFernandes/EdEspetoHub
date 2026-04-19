@@ -51,17 +51,25 @@ export const normalizePixCode = (value: string) =>
     .trim();
 
 const toAscii = (value: string) => {
-  if (!value) return '';
-  if (value.normalize) {
-    return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  }
-  return value;
+  const str = String(value || '');
+  const normalized = str.normalize
+    ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    : str
+        .replace(/[àáâãä]/gi, 'a')
+        .replace(/[èéêë]/gi, 'e')
+        .replace(/[ìíîï]/gi, 'i')
+        .replace(/[òóôõö]/gi, 'o')
+        .replace(/[ùúûü]/gi, 'u')
+        .replace(/[ýÿ]/gi, 'y')
+        .replace(/[ñ]/gi, 'n')
+        .replace(/[ç]/gi, 'c');
+  return normalized.replace(/[^\x00-\x7F]/g, '');
 };
 
-const sanitizeText = (value: string, max = 25) =>
-  toAscii(value)
-    .replace(/[^A-Za-z0-9]/g, '')
-    .slice(0, max);
+const sanitizeText = (value: string, max = 25) => {
+  const clean = toAscii(value).replace(/[^A-Za-z0-9]/g, '');
+  return clean.slice(0, max);
+};
 
 const formatField = (id: string, value: string) => `${id}${pad2(value.length)}${value}`;
 
@@ -123,7 +131,8 @@ export const buildPixPayload = ({
   ].filter(Boolean);
 
   const payload = payloadParts.join('');
-  const checksum = crc16(`${payload}6304`);
+  const payloadForCrc = `${payload}6304`;
+  const checksum = crc16(payloadForCrc);
 
-  return normalizePixCode(`${payload}6304${checksum}`);
+  return `${payloadForCrc}${checksum}`;
 };
