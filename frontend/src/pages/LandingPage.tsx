@@ -1,21 +1,33 @@
 import { useEffect, useState, useRef } from 'react';
 import {
-  CheckCircle,
-  Cube,
-  Handshake,
-  Rocket,
-  Storefront,
-  X,
-  TrendUp,
-  ShieldCheck,
-  Desktop,
-  UserCircle,
-  DownloadSimple,
-  DeviceMobile,
-  GooglePlayLogo,
-  CopySimple,
-  QrCode,
+  ArrowRight,
+  ArrowsClockwise,
+  Bell,
   Buildings,
+  ChartLine,
+  CheckCircle,
+  CloudArrowUp,
+  CopySimple,
+  CurrencyDollar,
+  Desktop,
+  DeviceMobile,
+  DownloadSimple,
+  GooglePlayLogo,
+  Handshake,
+  ListChecks,
+  MapPin,
+  Motorcycle,
+  Package,
+  QrCode,
+  Rocket,
+  ShieldCheck,
+  Star,
+  Storefront,
+  TrendUp,
+  UserCircle,
+  UserPlus,
+  UsersThree,
+  X,
 } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { LandingPageLayout } from '../layouts/LandingPageLayout';
@@ -36,12 +48,10 @@ const Counter = ({ value, duration = 2000, prefix = '', suffix = '', formatter }
       if (!startTime) startTime = currentTime;
       const progress = Math.min((currentTime - startTime) / duration, 1);
       const currentCount = Math.floor(progress * value);
-      
       if (currentCount !== countRef.current) {
         setCount(currentCount);
         countRef.current = currentCount;
       }
-      
       if (progress < 1) {
         requestAnimationFrame(animate);
       } else {
@@ -108,7 +118,6 @@ export function LandingPage() {
     document.title = 'Já no Caminho | Plataforma completa para gestão de pedidos e entregas';
     const description =
       'Plataforma de gestão de pedidos, entregas e retirada para qualquer comércio. Sistema moderno com painel administrativo completo.';
-
     upsertMeta('description', description, 'name');
     upsertMeta('og:title', 'Já no Caminho | Plataforma completa para gestão de pedidos e entregas', 'property');
     upsertMeta('og:description', description, 'property');
@@ -161,10 +170,8 @@ export function LandingPage() {
           password: String(customerAuthForm.password || ''),
         });
       }
-
       if (!result?.token) throw new Error('Não foi possível autenticar.');
       localStorage.setItem('customerSession', JSON.stringify(result));
-
       const slug = String(targetStoreSlug || '').trim();
       if (slug) {
         navigate(`/${slug}`);
@@ -222,10 +229,7 @@ export function LandingPage() {
         if (!mounted) return;
         setMetrics(null);
       });
-
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, []);
 
   useEffect(() => {
@@ -250,10 +254,7 @@ export function LandingPage() {
         if (!mounted) return;
         setFeaturedStores([]);
       });
-
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, []);
 
   const ctaPrimaryHref = 'https://wa.me/5512997822784';
@@ -278,104 +279,226 @@ export function LandingPage() {
     },
   ];
 
+  const features = [
+    {
+      icon: ListChecks,
+      title: 'Pedidos em tempo real',
+      desc: 'Receba e acompanhe cada pedido instantaneamente, com atualização automática em todos os dispositivos.',
+      accent: 'sky',
+    },
+    {
+      icon: Package,
+      title: 'Fila de produção',
+      desc: 'Gerencie o preparo visualmente: pendente, produzindo, pronto. Cada etapa no seu lugar.',
+      accent: 'amber',
+    },
+    {
+      icon: Motorcycle,
+      title: 'Motoboys integrados',
+      desc: 'Cadastre, gerencie e acompanhe sua equipe de entregadores. Controle de ciclos e ganhos.',
+      accent: 'violet',
+    },
+    {
+      icon: CurrencyDollar,
+      title: 'PIX automático',
+      desc: 'BR Code gerado na hora para cada pedido. O cliente escaneia e o pagamento é confirmado.',
+      accent: 'emerald',
+    },
+    {
+      icon: ChartLine,
+      title: 'Dashboard analítico',
+      desc: 'Faturamento, ticket médio, volume de pedidos e comparativos por período.',
+      accent: 'sky',
+    },
+    {
+      icon: MapPin,
+      title: 'Rastreamento de pedidos',
+      desc: 'Seus clientes acompanham o pedido em tempo real — do preparo até a entrega na porta.',
+      accent: 'rose',
+    },
+    {
+      icon: Buildings,
+      title: 'Hub de condomínios',
+      desc: 'Venda em feiras e condomínios com vitrine própria. Retirada na barraca ou entrega no apt.',
+      accent: 'indigo',
+    },
+    {
+      icon: Desktop,
+      title: 'Multi-dispositivo',
+      desc: 'Painel admin no PC, app mobile para o time, PWA instalável. Tudo sincronizado.',
+      accent: 'sky',
+    },
+    {
+      icon: Bell,
+      title: 'Notificações push',
+      desc: 'Alertas automáticos de novos pedidos, atualizações e entregas. Nunca perca uma venda.',
+      accent: 'amber',
+    },
+    {
+      icon: UsersThree,
+      title: 'Multi-usuário',
+      desc: 'Perfis distintos para admin, operador e churrasqueiro. Cada um acessa só o que precisa.',
+      accent: 'violet',
+    },
+    {
+      icon: Star,
+      title: 'Destaque na plataforma',
+      desc: 'Promova sua loja com destaque pago e alcance mais clientes no marketplace.',
+      accent: 'amber',
+    },
+    {
+      icon: TrendUp,
+      title: 'Marketplace público',
+      desc: 'Sua loja visível para todos os clientes da plataforma Já no Caminho. Sem esforço extra.',
+      accent: 'emerald',
+    },
+  ];
+
+  const accentMap: Record<string, { bg: string; icon: string; dot: string }> = {
+    sky:     { bg: 'bg-sky-400/10',     icon: 'text-sky-400',     dot: 'bg-sky-400' },
+    amber:   { bg: 'bg-amber-400/10',   icon: 'text-amber-400',   dot: 'bg-amber-400' },
+    violet:  { bg: 'bg-violet-400/10',  icon: 'text-violet-400',  dot: 'bg-violet-400' },
+    emerald: { bg: 'bg-emerald-400/10', icon: 'text-emerald-400', dot: 'bg-emerald-400' },
+    rose:    { bg: 'bg-rose-400/10',    icon: 'text-rose-400',    dot: 'bg-rose-400' },
+    indigo:  { bg: 'bg-indigo-400/10',  icon: 'text-indigo-400',  dot: 'bg-indigo-400' },
+  };
+
   return (
     <LandingPageLayout>
-      <section className="relative overflow-hidden bg-[linear-gradient(145deg,#020617_0%,#0f172a_50%,#020617_100%)]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(47,157,247,0.15),_transparent_40%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_rgba(16,185,129,0.1),_transparent_40%)]" />
-        
-        <div className="max-w-7xl mx-auto px-4 py-24 sm:py-32 lg:py-40 relative">
-          <div className="grid gap-16 lg:grid-cols-[1.2fr_0.8fr] items-center">
+
+      {/* ══════════════════════════════════════════════════════════════
+          HERO
+      ══════════════════════════════════════════════════════════════ */}
+      <section className="relative overflow-hidden bg-[linear-gradient(145deg,#020617_0%,#0f172a_55%,#020617_100%)]">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_10%,_rgba(47,157,247,0.18),_transparent_42%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,_rgba(16,185,129,0.12),_transparent_42%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(99,102,241,0.05),_transparent_60%)]" />
+
+        <div className="relative mx-auto max-w-7xl px-4 py-24 sm:py-32 lg:py-44">
+          <div className="grid items-center gap-16 lg:grid-cols-[1.15fr_0.85fr]">
+
+            {/* ── Left: copy ── */}
             <div className="space-y-8 text-center lg:text-left">
-              <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-1000">
-                <div className="inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-400/5 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-sky-300 backdrop-blur-md">
-                  <Rocket size={16} weight="duotone" className="animate-pulse" />
-                  SaaS de Alta Performance
-                </div>
-                <h1 className="text-4xl sm:text-6xl xl:text-7xl font-black tracking-tight leading-[1.1] text-white">
-                  Sua gestão <br />
-                  <span className="bg-gradient-to-r from-sky-400 via-emerald-400 to-sky-400 bg-clip-text text-transparent animate-text-gradient">levada a sério.</span>
+
+              {/* Eyebrow badge */}
+              <div className="animate-in fade-in slide-in-from-top-3 duration-700">
+                <span className="inline-flex items-center gap-2 rounded-full border border-sky-400/25 bg-sky-400/5 px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.22em] text-sky-300 backdrop-blur-md">
+                  <Rocket size={12} weight="duotone" className="animate-pulse" />
+                  Plataforma SaaS para comércios
+                </span>
+              </div>
+
+              {/* Headline */}
+              <div className="animate-in fade-in slide-in-from-top-5 duration-700 delay-100 space-y-5">
+                <h1 className="text-[2.6rem] font-black leading-[1.06] tracking-tight text-white sm:text-6xl xl:text-7xl">
+                  Pedidos, produção<br />
+                  e entrega —{' '}
+                  <span className="animate-text-gradient bg-gradient-to-r from-sky-400 via-emerald-400 to-sky-400 bg-clip-text text-transparent">
+                    no mesmo lugar.
+                  </span>
                 </h1>
-                <p className="text-base sm:text-xl text-slate-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium">
-                  Abandone a confusão. Estruture pedidos, produção e logística em um único fluxo profissional e escale seu negócio com tecnologia de ponta.
+                <p className="mx-auto max-w-xl text-base font-medium leading-relaxed text-slate-400 lg:mx-0 sm:text-xl">
+                  Sistema completo para churrasqueiros, vendedores, feiras e delivery. Configure em minutos e comece a vender hoje.
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
+              {/* CTAs */}
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200 flex flex-col gap-4 sm:flex-row justify-center lg:justify-start">
+                <button
+                  type="button"
+                  onClick={() => navigate('/create?plan=trial')}
+                  className="group inline-flex items-center justify-center gap-2.5 rounded-2xl bg-white px-8 py-4 text-base font-black text-slate-950 shadow-[0_20px_50px_-15px_rgba(255,255,255,0.22)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Criar minha loja grátis
+                  <ArrowRight size={17} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
+                </button>
                 <a
                   href={ctaPrimaryHref}
                   target="_blank"
                   rel="noreferrer"
-                  className="group relative inline-flex items-center justify-center rounded-2xl bg-white px-8 py-4 text-base font-black text-slate-950 shadow-[0_20px_40px_-12px_rgba(255,255,255,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-base font-black text-white backdrop-blur-md transition-all hover:bg-white/10 active:scale-[0.98]"
                 >
-                  Solicitar Demonstração
+                  Ver demonstração
                 </a>
-                <button
-                  type="button"
-                  onClick={() => navigate('/create?plan=trial')}
-                  className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-base font-black text-white backdrop-blur-md hover:bg-white/10 transition-all active:scale-[0.98]"
-                >
-                  Criar minha loja
-                </button>
+              </div>
+
+              {/* Subtle customer login */}
+              <div className="animate-in fade-in duration-700 delay-300">
                 <button
                   type="button"
                   onClick={() => {
-                    if (hasCustomerSession) {
-                      navigate('/cliente/conta');
-                      return;
-                    }
+                    if (hasCustomerSession) { navigate('/cliente/conta'); return; }
                     setShowCustomerAuth(true);
                   }}
-                  className="inline-flex items-center gap-2 justify-center rounded-2xl border border-sky-300/30 bg-sky-500/10 px-8 py-4 text-base font-black text-sky-100 backdrop-blur-md hover:bg-sky-500/15 transition-all active:scale-[0.98]"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 transition-colors hover:text-slate-300"
                 >
-                  <UserCircle size={18} weight="duotone" />
-                  {hasCustomerSession ? 'Minha conta' : 'Entrar como cliente'}
+                  <UserCircle size={14} weight="duotone" />
+                  {hasCustomerSession ? 'Minha conta de cliente' : 'Já tenho conta de cliente'}
                 </button>
               </div>
 
-              <div className="flex flex-wrap gap-4 justify-center lg:justify-start pt-6 opacity-60">
-                <div className="flex items-center gap-2 text-[11px] font-bold text-slate-300 uppercase tracking-widest">
-                  <ShieldCheck size={18} weight="duotone" className="text-emerald-400" />
-                  AWS Cloud Native
-                </div>
-                <div className="flex items-center gap-2 text-[11px] font-bold text-slate-300 uppercase tracking-widest">
-                  <TrendUp size={18} weight="duotone" className="text-sky-400" />
-                  Real-time Analytics
-                </div>
-                <div className="flex items-center gap-2 text-[11px] font-bold text-slate-300 uppercase tracking-widest">
-                  <Desktop size={18} weight="duotone" className="text-indigo-400" />
-                  Multi-device UI
-                </div>
+              {/* Trust strip */}
+              <div className="animate-in fade-in duration-700 delay-300 flex flex-wrap justify-center gap-x-6 gap-y-2 opacity-55 lg:justify-start">
+                {[
+                  { icon: ShieldCheck, text: 'Sem cartão de crédito', color: 'text-emerald-400' },
+                  { icon: ArrowsClockwise, text: 'Dados em tempo real', color: 'text-sky-400' },
+                  { icon: Desktop, text: 'Multi-dispositivo', color: 'text-indigo-400' },
+                ].map(({ icon: Icon, text, color }) => (
+                  <div key={text} className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-slate-300">
+                    <Icon size={15} weight="duotone" className={color} />
+                    {text}
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="relative lg:h-[500px] flex items-center justify-center animate-in zoom-in-95 fade-in duration-1000 delay-300">
-              <div className="absolute -inset-4 bg-sky-500/10 rounded-full blur-[80px] animate-pulse" />
-              <div className="relative w-full max-w-sm lg:max-w-none premium-border-gradient rounded-[2.5rem] bg-slate-900/40 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl border border-white/10">
-                <div className="space-y-8">
-                  <div className="flex items-center justify-between pb-6 border-b border-white/5">
-                    <div className="h-12 w-12 rounded-2xl bg-sky-400/10 flex items-center justify-center">
-                      <Storefront size={24} weight="duotone" className="text-sky-400" />
+            {/* ── Right: live metrics card ── */}
+            <div className="animate-in zoom-in-95 fade-in duration-700 delay-250 relative flex items-center justify-center lg:h-[520px]">
+              <div className="pointer-events-none absolute -inset-8 rounded-full bg-sky-500/8 blur-[90px]" />
+              <div className="relative w-full max-w-sm rounded-[2.75rem] border border-white/10 bg-slate-900/60 p-7 shadow-2xl backdrop-blur-2xl sm:p-9 lg:max-w-none">
+                <div className="space-y-7">
+
+                  {/* Card header */}
+                  <div className="flex items-center justify-between border-b border-white/[0.06] pb-6">
+                    <div className="flex h-13 w-13 items-center justify-center rounded-2xl bg-sky-400/10">
+                      <Storefront size={26} weight="duotone" className="text-sky-400" />
                     </div>
                     <div className="text-right">
-                      <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Monitor Público</p>
-                      <p className="text-xs font-medium text-emerald-400">Sistema Online</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Monitor ao vivo</p>
+                      <div className="mt-1 flex items-center justify-end gap-1.5">
+                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+                        <p className="text-xs font-semibold text-emerald-400">Sistema online</p>
+                      </div>
                     </div>
                   </div>
-                  
+
+                  {/* Live metrics */}
                   <div className="grid gap-6">
                     <div className="space-y-1">
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Lojas Ativas</p>
-                      <p className="text-4xl font-black text-white text-glow-sky">
-                        {metrics ? <Counter value={metrics.activeStores || 0} /> : '---'}
+                      <p className="text-[11px] font-black uppercase tracking-widest text-slate-600">Lojas ativas</p>
+                      <p className="text-5xl font-black text-white">
+                        {metrics
+                          ? <Counter value={metrics.activeStores || 0} />
+                          : <span className="text-slate-700">—</span>
+                        }
                       </p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Pedidos Processados</p>
-                      <p className="text-4xl font-black text-white">
-                        {metrics ? <Counter value={metrics.totalOrders || 0} /> : '---'}
+                      <p className="text-[11px] font-black uppercase tracking-widest text-slate-600">Pedidos processados</p>
+                      <p className="text-5xl font-black text-white">
+                        {metrics
+                          ? <Counter value={metrics.totalOrders || 0} />
+                          : <span className="text-slate-700">—</span>
+                        }
                       </p>
                     </div>
+                  </div>
+
+                  {/* Trial nudge */}
+                  <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] px-5 py-4">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">Comece hoje</p>
+                    <p className="mt-1 text-sm font-bold text-white">7 dias grátis, sem cartão.</p>
+                    <p className="mt-0.5 text-xs text-slate-500">Cancele a qualquer momento.</p>
                   </div>
                 </div>
               </div>
@@ -384,51 +507,201 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* ══════════════════════════════════════════════════════════════
+          SOCIAL PROOF MARQUEE
+      ══════════════════════════════════════════════════════════════ */}
       {featuredStores.length > 0 && <SocialProofMarquee clients={featuredStores} />}
 
+      {/* ══════════════════════════════════════════════════════════════
+          SEGMENT PROMO CAROUSEL
+      ══════════════════════════════════════════════════════════════ */}
       <section className="bg-[linear-gradient(180deg,#edf6ff_0%,#ffffff_100%)] py-12 sm:py-14">
-        <div className="max-w-6xl mx-auto px-4">
+        <div className="mx-auto max-w-6xl px-4">
           <SegmentPromoCarousel className="shadow-[0_22px_46px_-34px_rgba(15,23,42,0.42)]" />
         </div>
       </section>
 
-      <section className="bg-white py-20 sm:py-28 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-            <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-emerald-700">
-                <Buildings size={14} weight="duotone" />
+      {/* ══════════════════════════════════════════════════════════════
+          COMO FUNCIONA
+      ══════════════════════════════════════════════════════════════ */}
+      <section className="border-y border-slate-100 bg-white py-24 sm:py-32">
+        <div className="mx-auto max-w-5xl px-4">
+
+          <div className="mb-16 text-center space-y-3">
+            <p className="text-[11px] font-black uppercase tracking-[0.4em] text-sky-600">Simples assim</p>
+            <h2 className="text-3xl font-black leading-tight tracking-tight text-slate-900 sm:text-5xl">
+              Do cadastro ao primeiro pedido<br className="hidden sm:block" /> em menos de 10 minutos.
+            </h2>
+            <p className="mx-auto max-w-xl text-base font-medium text-slate-500 leading-relaxed">
+              Sem burocracia, sem instalação. Basta criar sua conta e configurar sua loja pelo painel web.
+            </p>
+          </div>
+
+          <div className="relative grid gap-10 sm:grid-cols-3">
+            {/* Connector line — desktop only */}
+            <div className="pointer-events-none absolute left-[calc(16.67%+2rem)] right-[calc(16.67%+2rem)] top-11 hidden h-px bg-gradient-to-r from-sky-200 via-emerald-200 to-indigo-200 sm:block" />
+
+            {[
+              {
+                step: '01',
+                icon: UserPlus,
+                title: 'Crie sua conta',
+                desc: 'Cadastro em 2 minutos. Sem cartão de crédito — 7 dias gratuitos para testar tudo.',
+                ringColor: 'ring-sky-200',
+                bgColor: 'bg-sky-50',
+                iconColor: 'text-sky-600',
+                stepColor: 'text-sky-400',
+              },
+              {
+                step: '02',
+                icon: Storefront,
+                title: 'Configure sua loja',
+                desc: 'Adicione produtos, defina área de entrega, formas de pagamento e horários de funcionamento.',
+                ringColor: 'ring-emerald-200',
+                bgColor: 'bg-emerald-50',
+                iconColor: 'text-emerald-600',
+                stepColor: 'text-emerald-400',
+              },
+              {
+                step: '03',
+                icon: Package,
+                title: 'Comece a receber',
+                desc: 'Pedidos chegam em tempo real. Gerencie produção, motoboys e PIX de um só lugar.',
+                ringColor: 'ring-indigo-200',
+                bgColor: 'bg-indigo-50',
+                iconColor: 'text-indigo-600',
+                stepColor: 'text-indigo-400',
+              },
+            ].map(({ step, icon: Icon, title, desc, ringColor, bgColor, iconColor, stepColor }) => (
+              <div key={step} className="relative flex flex-col items-center text-center gap-5">
+                <div className={`relative z-10 flex h-[88px] w-[88px] flex-col items-center justify-center gap-1 rounded-3xl ring-2 ${ringColor} ${bgColor} shadow-sm`}>
+                  <Icon size={30} weight="duotone" className={iconColor} />
+                  <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${stepColor}`}>{step}</span>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-black text-slate-900">{title}</h3>
+                  <p className="text-sm font-medium leading-relaxed text-slate-500">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-14 text-center">
+            <button
+              type="button"
+              onClick={() => navigate('/create?plan=trial')}
+              className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-9 py-4 text-sm font-black text-white shadow-[0_20px_40px_-20px_rgba(15,23,42,0.75)] transition-all hover:scale-[1.01] active:scale-[0.98]"
+            >
+              Começar agora — é grátis
+              <ArrowRight size={16} weight="bold" />
+            </button>
+            <p className="mt-3 text-xs font-medium text-slate-400">7 dias grátis · Sem cartão · Cancele quando quiser</p>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════
+          FEATURES GRID
+      ══════════════════════════════════════════════════════════════ */}
+      <section className="relative overflow-hidden bg-slate-950 py-24 sm:py-32">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_center,_rgba(47,157,247,0.07),_transparent_65%)]" />
+
+        <div className="relative mx-auto max-w-7xl px-4">
+
+          <div className="mb-16 text-center space-y-4">
+            <p className="text-[11px] font-black uppercase tracking-[0.4em] text-sky-400">Tudo incluso</p>
+            <h2 className="text-3xl font-black leading-tight text-white sm:text-5xl">
+              Não é só um cardápio online.<br className="hidden sm:block" /> É uma operação completa.
+            </h2>
+            <p className="mx-auto max-w-2xl text-base font-medium leading-relaxed text-slate-400 sm:text-lg">
+              De pedidos a entregas, de pagamentos a análises — cada recurso foi pensado para o comerciante brasileiro.
+            </p>
+          </div>
+
+          <div className="grid gap-px overflow-hidden rounded-3xl border border-white/[0.06] bg-white/[0.04] sm:grid-cols-2 lg:grid-cols-4">
+            {features.map(({ icon: Icon, title, desc, accent }) => {
+              const colors = accentMap[accent] || accentMap['sky'];
+              return (
+                <div
+                  key={title}
+                  className="group flex flex-col gap-4 bg-slate-950 p-6 transition-colors hover:bg-white/[0.03]"
+                >
+                  <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${colors.bg} transition-transform group-hover:scale-110`}>
+                    <Icon size={22} weight="duotone" className={colors.icon} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <h3 className="text-sm font-black text-white">{title}</h3>
+                    <p className="text-xs font-medium leading-relaxed text-slate-500">{desc}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-14 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+            <button
+              type="button"
+              onClick={() => navigate('/create?plan=trial')}
+              className="inline-flex items-center gap-2 rounded-2xl bg-white px-8 py-4 text-sm font-black text-slate-950 shadow-[0_20px_40px_-15px_rgba(255,255,255,0.18)] transition-all hover:scale-[1.01] active:scale-[0.98]"
+            >
+              Experimente tudo por 7 dias
+              <ArrowRight size={16} weight="bold" />
+            </button>
+            <a
+              href={ctaPrimaryHref}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-sm font-black text-slate-300 backdrop-blur-md transition-all hover:bg-white/10 active:scale-[0.98]"
+            >
+              Falar com especialista
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════
+          HUB DE CONDOMÍNIOS
+      ══════════════════════════════════════════════════════════════ */}
+      <section className="overflow-hidden bg-white py-20 sm:py-28">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="grid items-center gap-12 lg:grid-cols-[0.95fr_1.05fr]">
+
+            {/* Copy */}
+            <div className="space-y-7">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-emerald-700">
+                <Buildings size={13} weight="duotone" />
                 Comércio hiperlocal
               </div>
               <div className="space-y-4">
-                <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-slate-950 leading-tight">
+                <h2 className="text-3xl font-black leading-tight tracking-tight text-slate-950 sm:text-5xl">
                   Sua loja também pode vender dentro de condomínios.
                 </h2>
-                <p className="text-base sm:text-lg text-slate-600 font-medium leading-relaxed">
+                <p className="text-base font-medium leading-relaxed text-slate-600 sm:text-lg">
                   Feiras, eventos internos e comércios de bairro ganham uma vitrine própria dentro do Hub. O cliente escolhe o condomínio, vê as lojas disponíveis e faz o pedido pelo mesmo fluxo profissional.
                 </p>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-2.5 sm:grid-cols-2">
                 {[
                   'Lojas por condomínio',
                   'Feiras com curadoria',
                   'Retirada na barraca',
                   'Entrega no apartamento',
                 ].map((item) => (
-                  <div key={item} className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-                    <CheckCircle size={17} weight="fill" className="shrink-0 text-emerald-500" />
+                  <div key={item} className="flex items-center gap-2.5 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 shadow-sm">
+                    <CheckCircle size={16} weight="fill" className="shrink-0 text-emerald-500" />
                     <span className="text-sm font-black text-slate-800">{item}</span>
                   </div>
                 ))}
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <div className="flex flex-col gap-3 pt-1 sm:flex-row">
                 <a
                   href={ctaPrimaryHref}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center justify-center rounded-2xl bg-slate-950 px-6 py-3.5 text-sm font-black text-white shadow-[0_18px_34px_-18px_rgba(15,23,42,0.8)] transition-all hover:scale-[1.01] active:scale-[0.98]"
+                  className="inline-flex items-center justify-center rounded-2xl bg-slate-950 px-6 py-3.5 text-sm font-black text-white shadow-[0_18px_36px_-18px_rgba(15,23,42,0.8)] transition-all hover:scale-[1.01] active:scale-[0.98]"
                 >
                   Quero levar para meu condomínio
                 </a>
@@ -442,13 +715,14 @@ export function LandingPage() {
               </div>
             </div>
 
+            {/* Visual mock */}
             <div className="relative">
-              <div className="rounded-[2.25rem] border border-slate-200 bg-[linear-gradient(145deg,#f8fafc,#ffffff)] p-4 sm:p-5 shadow-[0_28px_60px_-36px_rgba(15,23,42,0.45)]">
-                <div className="rounded-[1.7rem] border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="rounded-[2.25rem] border border-slate-200/80 bg-[linear-gradient(145deg,#f8fafc,#ffffff)] p-4 shadow-[0_32px_64px_-40px_rgba(15,23,42,0.4)] sm:p-5">
+                <div className="rounded-[1.7rem] border border-slate-100 bg-white p-4 shadow-sm">
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Comprando na feira</p>
-                      <p className="mt-1 text-lg font-black text-slate-950">Condomínio Spazio Campo Azuli</p>
+                      <p className="mt-0.5 text-lg font-black text-slate-950">Condomínio Spazio Campo Azuli</p>
                     </div>
                     <span className="rounded-xl bg-[#336886]/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]">Trocar</span>
                   </div>
@@ -459,16 +733,16 @@ export function LandingPage() {
                       alt="Condomínio Spazio Campo Azuli"
                       loading="lazy"
                       className="h-12 w-12 rounded-[1rem] border border-slate-100 object-cover"
-                      onError={(event) => { (event.target as HTMLImageElement).src = '/janocaminho-logo.png'; }}
+                      onError={(e) => { (e.target as HTMLImageElement).src = '/janocaminho-logo.png'; }}
                     />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-black text-slate-950">Lojas deste condomínio</p>
-                      <p className="mt-0.5 text-[11px] font-semibold text-slate-500">Feira aberta, pedidos pelo app</p>
+                      <p className="mt-0.5 text-[11px] font-semibold text-slate-500">Feira aberta — pedidos pelo app</p>
                     </div>
                     <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-black text-emerald-700">Ativo</span>
                   </div>
 
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
                     {[
                       { title: 'Churrasquinho', desc: 'Retirar na barraca' },
                       { title: 'Queijos artesanais', desc: 'Entrega no apartamento' },
@@ -477,13 +751,13 @@ export function LandingPage() {
                     ].map((item) => (
                       <div key={item.title} className="rounded-[1.2rem] border border-slate-100 bg-slate-50 p-3">
                         <p className="text-sm font-black text-slate-900">{item.title}</p>
-                        <p className="mt-1 text-[11px] font-semibold text-slate-500">{item.desc}</p>
+                        <p className="mt-0.5 text-[11px] font-semibold text-slate-500">{item.desc}</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div className="mt-3 grid gap-2.5 sm:grid-cols-3">
                   {[
                     { value: '1 app', label: 'Hub geral e condomínio' },
                     { value: '0 atrito', label: 'Cliente escolhe onde está' },
@@ -491,7 +765,7 @@ export function LandingPage() {
                   ].map((item) => (
                     <div key={item.label} className="rounded-2xl bg-slate-950 px-4 py-3 text-white">
                       <p className="text-lg font-black">{item.value}</p>
-                      <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{item.label}</p>
+                      <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{item.label}</p>
                     </div>
                   ))}
                 </div>
@@ -501,58 +775,78 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="bg-slate-950 py-24 sm:py-32 relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-        
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center space-y-4 mb-20">
-            <h2 className="text-xs uppercase tracking-[0.4em] text-sky-400 font-black">Infraestrutura</h2>
-            <p className="text-3xl sm:text-5xl font-black text-white leading-tight">
-              Projetado para quem não <br className="hidden sm:block" /> pode parar de vender.
+      {/* ══════════════════════════════════════════════════════════════
+          INFRAESTRUTURA
+      ══════════════════════════════════════════════════════════════ */}
+      <section className="relative overflow-hidden bg-slate-950 py-24 sm:py-32">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,_rgba(16,185,129,0.06),_transparent_60%)]" />
+
+        <div className="relative mx-auto max-w-7xl px-4">
+          <div className="mb-16 text-center space-y-3">
+            <p className="text-[11px] font-black uppercase tracking-[0.4em] text-emerald-400">Construído para não parar</p>
+            <h2 className="text-3xl font-black leading-tight text-white sm:text-5xl">
+              A tecnologia trabalha.<br className="hidden sm:block" /> Você vende.
+            </h2>
+            <p className="mx-auto max-w-xl text-base font-medium leading-relaxed text-slate-400">
+              Infraestrutura profissional para que você nunca perca um pedido, mesmo nos momentos de maior movimento.
             </p>
           </div>
 
-          <div className="grid gap-8 sm:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-3">
             {[
               {
-                title: 'Escalabilidade AWS',
-                desc: 'Operação baseada em microserviços, pronta para picos de vendas sem lentidão.',
-                icon: Cloud,
+                icon: CloudArrowUp,
+                title: 'Sempre no ar',
+                desc: 'Hospedagem em nuvem com alta disponibilidade. Seu sistema funciona nos dias de maior pico sem lentidão.',
+                accent: 'sky',
               },
               {
-                title: 'Sincronização Real-time',
-                desc: 'Pedidos e status atualizados instantaneamente em todos os dispositivos.',
                 icon: ArrowsClockwise,
+                title: 'Atualização instantânea',
+                desc: 'Pedidos, status e notificações sincronizados em tempo real em todos os dispositivos da equipe.',
+                accent: 'emerald',
               },
               {
-                title: 'Data-driven Design',
-                desc: 'Cada pixel focado em reduzir cliques e acelerar a tomada de decisão.',
                 icon: ChartLine,
+                title: 'Dados que guiam decisões',
+                desc: 'Dashboard com faturamento, ticket médio e desempenho por período. Tudo visível com clareza.',
+                accent: 'indigo',
               },
-            ].map((item, i) => (
-              <div key={i} className="group p-8 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-md hover:bg-white/[0.05] transition-all hover:border-white/10">
-                <div className="h-12 w-12 rounded-2xl bg-sky-400/10 flex items-center justify-center text-sky-400 mb-6 group-hover:scale-110 transition-transform">
-                  <item.icon size={28} weight="duotone" />
+            ].map(({ icon: Icon, title, desc, accent }) => {
+              const colors = accentMap[accent] || accentMap['sky'];
+              return (
+                <div
+                  key={title}
+                  className="group rounded-3xl border border-white/[0.06] bg-white/[0.02] p-8 backdrop-blur-md transition-all hover:border-white/10 hover:bg-white/[0.04]"
+                >
+                  <div className={`mb-6 flex h-13 w-13 items-center justify-center rounded-2xl ${colors.bg} transition-transform group-hover:scale-110`}>
+                    <Icon size={28} weight="duotone" className={colors.icon} />
+                  </div>
+                  <h3 className="mb-3 text-xl font-black text-white">{title}</h3>
+                  <p className="text-sm font-medium leading-relaxed text-slate-400">{desc}</p>
                 </div>
-                <h3 className="text-xl font-bold text-white mb-3">{item.title}</h3>
-                <p className="text-slate-400 leading-relaxed text-sm font-medium">{item.desc}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
-      <section className="bg-white py-24 sm:py-32 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16">
-            <div className="space-y-4">
-              <h2 className="text-xs uppercase tracking-[0.4em] text-sky-600 font-black">Visual Proof</h2>
-              <p className="text-3xl sm:text-5xl font-black text-slate-900 leading-tight">
-                Um painel que <br /> trabalha para você.
-              </p>
+      {/* ══════════════════════════════════════════════════════════════
+          VISUAL PROOF (screenshots)
+      ══════════════════════════════════════════════════════════════ */}
+      <section className="overflow-hidden bg-white py-24 sm:py-32">
+        <div className="mx-auto max-w-7xl px-4">
+
+          <div className="mb-16 flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+            <div className="space-y-3">
+              <p className="text-[11px] font-black uppercase tracking-[0.4em] text-sky-600">O sistema na prática</p>
+              <h2 className="text-3xl font-black leading-tight text-slate-900 sm:text-5xl">
+                Um painel que<br /> trabalha para você.
+              </h2>
             </div>
-            <p className="text-slate-500 max-w-md font-medium leading-relaxed">
-              Interface projetada para decisão rápida, execução diária e escala operacional. Experimente a clareza de dados reais.
+            <p className="max-w-md font-medium leading-relaxed text-slate-500">
+              Interface projetada para decisão rápida, execução diária e escala operacional. Veja como é na prática.
             </p>
           </div>
 
@@ -560,21 +854,25 @@ export function LandingPage() {
             {proofVisuals.map((item, i) => (
               <div
                 key={i}
-                className="group relative cursor-pointer"
+                className="group cursor-pointer"
                 onClick={() => setActiveProof(item)}
               >
-                <div className="relative rounded-[2.5rem] border-[10px] border-slate-900 bg-slate-950 shadow-2xl overflow-hidden aspect-[4/3] group-hover:scale-[1.02] transition-all duration-500">
-                  <img src={item.image} alt={item.alt} className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-8">
-                    <p className="text-white font-bold flex items-center gap-2">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-[2.25rem] border-[8px] border-slate-900 bg-slate-950 shadow-2xl transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-[0_32px_64px_-20px_rgba(15,23,42,0.6)]">
+                  <img
+                    src={item.image}
+                    alt={item.alt}
+                    className="h-full w-full object-cover opacity-90 transition-opacity group-hover:opacity-100"
+                  />
+                  <div className="absolute inset-0 flex items-end bg-gradient-to-t from-slate-950/80 via-transparent to-transparent p-7 opacity-0 transition-opacity group-hover:opacity-100">
+                    <p className="flex items-center gap-2 font-bold text-white">
                       Visualizar detalhes
-                      <ArrowRight size={18} />
+                      <ArrowRight size={17} />
                     </p>
                   </div>
                 </div>
-                <div className="mt-6 space-y-2">
-                  <h3 className="text-lg font-black text-slate-900">{item.title}</h3>
-                  <p className="text-sm text-slate-500 font-medium leading-relaxed">{item.description}</p>
+                <div className="mt-5 space-y-1.5">
+                  <h3 className="text-base font-black text-slate-900">{item.title}</h3>
+                  <p className="text-sm font-medium leading-relaxed text-slate-500">{item.description}</p>
                 </div>
               </div>
             ))}
@@ -582,125 +880,309 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* ══════════════════════════════════════════════════════════════
+          APP DOWNLOAD
+      ══════════════════════════════════════════════════════════════ */}
+      <section className="relative overflow-hidden bg-[linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] py-20 sm:py-24">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.14),_transparent_45%)]" />
+        <div className="relative mx-auto max-w-7xl px-4">
+          <div className="mb-12 text-center space-y-3">
+            <p className="text-[11px] font-black uppercase tracking-[0.4em] text-sky-600">Acesso mobile</p>
+            <h2 className="text-3xl font-black leading-tight text-slate-900 sm:text-4xl">
+              Instale o app e gerencie<br className="hidden sm:block" /> de qualquer lugar.
+            </h2>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+            {/* Download CTA */}
+            <div className="rounded-[2rem] border border-slate-200/80 bg-white/90 p-6 shadow-[0_24px_52px_-30px_rgba(15,23,42,0.32)] backdrop-blur-xl sm:p-8">
+              <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-sky-700">
+                <DeviceMobile size={13} weight="duotone" />
+                App Android
+              </div>
+              <h3 className="mt-4 text-2xl font-black leading-tight text-slate-900 sm:text-3xl">
+                Baixe o app do<br />Já no Caminho
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">
+                Instale agora no Android com experiência app-like e acesso rápido ao Hub. Play Store em breve.
+              </p>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <a
+                  href={androidApkPath}
+                  download
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[linear-gradient(120deg,#0f172a,#1e293b)] px-5 py-3 text-sm font-black text-white shadow-[0_16px_32px_-18px_rgba(15,23,42,0.85)] transition-all hover:scale-[1.01] active:scale-[0.98]"
+                >
+                  <DownloadSimple size={16} weight="bold" />
+                  Baixar APK
+                </a>
+                <button
+                  type="button"
+                  disabled
+                  className="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-400"
+                  title="Publicação em andamento"
+                >
+                  <GooglePlayLogo size={16} weight="duotone" />
+                  Em breve na Play Store
+                </button>
+              </div>
+            </div>
+
+            {/* QR + steps */}
+            <div className="rounded-[2rem] border border-slate-200/80 bg-white/90 p-6 shadow-[0_24px_52px_-30px_rgba(15,23,42,0.32)] backdrop-blur-xl sm:p-8">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">Instalação rápida</p>
+              <div className="mt-4 flex items-center gap-4">
+                <div className="shrink-0 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
+                  <img
+                    src={androidApkQrSrc}
+                    alt="QR Code para baixar o app Android"
+                    loading="lazy"
+                    className="h-24 w-24 rounded-lg object-cover sm:h-28 sm:w-28"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Baixar via QR Code</p>
+                  <p className="mt-1 text-xs text-slate-600">Escaneie no celular e instale em poucos passos.</p>
+                  <button
+                    type="button"
+                    onClick={handleCopyApkLink}
+                    className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-700 transition-colors hover:bg-slate-50"
+                  >
+                    <CopySimple size={12} weight="bold" />
+                    {apkLinkCopied ? 'Link copiado!' : 'Copiar link'}
+                  </button>
+                </div>
+              </div>
+              <ol className="mt-5 space-y-3 text-sm text-slate-600">
+                {[
+                  <span>Toque em <strong className="font-black text-slate-800">Baixar APK</strong>.</span>,
+                  'Autorize a instalação de fontes desconhecidas no Android.',
+                  'Instale e abra. Publicação na Play Store em andamento.',
+                ].map((text, i) => (
+                  <li key={i} className="flex items-start gap-2.5">
+                    <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-900 text-[10px] font-black text-white">{i + 1}</span>
+                    <span>{text}</span>
+                  </li>
+                ))}
+              </ol>
+              <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">
+                <QrCode size={11} weight="duotone" />
+                Play Store em breve
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════
+          FINAL CTA
+      ══════════════════════════════════════════════════════════════ */}
+      <section className="relative overflow-hidden bg-slate-900 py-24 sm:py-32">
+        <div className="pointer-events-none absolute inset-0 opacity-25 bg-[radial-gradient(circle_at_center,_rgba(47,157,247,0.4),_transparent_65%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+        <div className="relative mx-auto max-w-7xl px-4">
+          <div className="rounded-[3rem] border border-white/10 bg-white/[0.025] p-8 text-center backdrop-blur-2xl sm:p-16 space-y-10">
+
+            <div className="space-y-5">
+              <p className="text-[11px] font-black uppercase tracking-[0.4em] text-emerald-400">Vamos escalar?</p>
+              <h2 className="text-3xl font-black leading-tight text-white sm:text-6xl">
+                Sua gestão de elite<br /> começa agora.
+              </h2>
+              <p className="mx-auto max-w-2xl text-base font-medium leading-relaxed text-slate-400 sm:text-lg">
+                Junte-se a centenas de comerciantes que transformaram sua operação com o Já no Caminho. Experimente 7 dias por nossa conta — sem cartão.
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+              <button
+                type="button"
+                onClick={() => navigate('/create?plan=trial')}
+                className="inline-flex items-center gap-2.5 rounded-2xl bg-white px-10 py-5 text-lg font-black text-slate-950 shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                Iniciar teste grátis
+                <ArrowRight size={19} weight="bold" />
+              </button>
+              <a
+                href={ctaPrimaryHref}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-10 py-5 text-lg font-black text-white backdrop-blur-md transition-all hover:bg-white/10 active:scale-[0.98]"
+              >
+                Solicitar demonstração
+              </a>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-8 border-t border-white/[0.06] pt-10">
+              {[
+                { icon: ShieldCheck, text: 'Sem cartão', color: 'text-emerald-400' },
+                { icon: CheckCircle, text: 'Setup em 5 min', color: 'text-sky-400' },
+                { icon: Handshake, text: 'Suporte incluído', color: 'text-indigo-400' },
+                { icon: TrendUp, text: '7 dias grátis', color: 'text-amber-400' },
+              ].map(({ icon: Icon, text, color }) => (
+                <div key={text} className="flex flex-col items-center gap-2">
+                  <Icon size={26} weight="duotone" className={color} />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════
+          MODAL: SCREENSHOT FULLSCREEN
+      ══════════════════════════════════════════════════════════════ */}
       {activeProof && (
-        <div className="fixed inset-0 z-[120] bg-slate-950/95 backdrop-blur-md p-4 sm:p-10 flex items-center justify-center animate-in fade-in duration-300">
-          <div className="w-full max-w-6xl rounded-[2.5rem] overflow-hidden bg-white shadow-2xl animate-in zoom-in-95 duration-300">
+        <div
+          className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/95 p-4 backdrop-blur-md animate-in fade-in duration-200 sm:p-10"
+          onClick={() => setActiveProof(null)}
+        >
+          <div
+            className="w-full max-w-6xl overflow-hidden rounded-[2.5rem] bg-white shadow-2xl animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between border-b border-slate-100 px-8 py-6">
               <div>
                 <h3 className="text-xl font-black text-slate-900">{activeProof.title}</h3>
-                <p className="text-sm text-slate-500 font-medium">{activeProof.description}</p>
+                <p className="text-sm font-medium text-slate-500">{activeProof.description}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setActiveProof(null)}
-                className="h-12 w-12 rounded-2xl border border-slate-200 bg-white text-slate-600 hover:text-slate-900 flex items-center justify-center transition-colors"
+                className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 transition-colors hover:text-slate-900"
               >
-                <X size={24} weight="bold" />
+                <X size={22} weight="bold" />
               </button>
             </div>
-            <div className="bg-slate-950 p-4 sm:p-8 overflow-y-auto max-h-[70vh]">
-              <img src={activeProof.image} alt={activeProof.title} className="w-full h-auto object-contain rounded-3xl shadow-2xl" />
+            <div className="max-h-[70vh] overflow-y-auto bg-slate-950 p-4 sm:p-8">
+              <img
+                src={activeProof.image}
+                alt={activeProof.title}
+                className="h-auto w-full rounded-3xl object-contain shadow-2xl"
+              />
             </div>
           </div>
         </div>
       )}
 
+      {/* ══════════════════════════════════════════════════════════════
+          MODAL: CUSTOMER AUTH
+      ══════════════════════════════════════════════════════════════ */}
       {showCustomerAuth && (
-        <div className="fixed inset-0 z-[130] bg-slate-950/85 backdrop-blur-sm p-4 flex items-center justify-center">
-          <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-2xl">
+        <div
+          className="fixed inset-0 z-[130] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm"
+          onClick={() => setShowCustomerAuth(false)}
+        >
+          <div
+            className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl animate-in zoom-in-95 duration-200 sm:p-7"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 font-black">Área do cliente</p>
-                <h3 className="text-xl font-black text-slate-900">
-                  {customerAuthMode === 'register' ? 'Criar conta' : 'Entrar na sua conta'}
+                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-slate-400">Área do cliente</p>
+                <h3 className="mt-0.5 text-xl font-black text-slate-900">
+                  {customerAuthMode === 'register' ? 'Criar conta de cliente' : 'Entrar na sua conta'}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowCustomerAuth(false)}
-                className="h-10 w-10 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-slate-900 flex items-center justify-center"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:text-slate-900"
               >
                 <X size={18} weight="bold" />
               </button>
             </div>
 
-            <div className="mt-4 flex gap-2">
-              <button
-                type="button"
-                onClick={() => setCustomerAuthMode('login')}
-                className={`rounded-xl px-3 py-2 text-xs font-bold border ${customerAuthMode === 'login' ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200'}`}
-              >
-                Login
-              </button>
-              <button
-                type="button"
-                onClick={() => setCustomerAuthMode('register')}
-                className={`rounded-xl px-3 py-2 text-xs font-bold border ${customerAuthMode === 'register' ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200'}`}
-              >
-                Cadastro
-              </button>
+            <div className="mt-5 flex gap-2">
+              {(['login', 'register'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setCustomerAuthMode(mode)}
+                  className={`rounded-xl border px-4 py-2 text-xs font-bold transition-colors ${
+                    customerAuthMode === mode
+                      ? 'border-slate-900 bg-slate-900 text-white'
+                      : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {mode === 'login' ? 'Entrar' : 'Cadastro'}
+                </button>
+              ))}
             </div>
 
-            <div className="mt-4 space-y-3">
+            <div className="mt-5 space-y-3">
               {customerAuthMode === 'register' && (
                 <input
                   value={customerAuthForm.fullName}
                   onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, fullName: e.target.value }))}
                   placeholder="Nome completo"
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
                 />
               )}
               {customerAuthMode === 'register' && (
-                  <input
-                    value={customerAuthForm.phone}
-                    onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, phone: formatPhoneBr(e.target.value) }))}
-                    placeholder="Telefone (opcional)"
-                    className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
-                  />
+                <input
+                  value={customerAuthForm.phone}
+                  onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, phone: formatPhoneBr(e.target.value) }))}
+                  placeholder="Telefone (opcional)"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                />
               )}
               <input
+                type="email"
                 value={customerAuthForm.email}
                 onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, email: e.target.value }))}
                 placeholder="E-mail"
-                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
               />
               <input
                 type="password"
                 value={customerAuthForm.password}
                 onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, password: e.target.value }))}
                 placeholder="Senha"
-                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
               />
 
               {customerAuthMode === 'register' && (
-                <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-                  <label className="flex items-start gap-2 text-[11px] font-semibold leading-relaxed text-slate-600">
+                <div className="space-y-2 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
+                  <label className="flex cursor-pointer items-start gap-2.5 text-[11px] font-semibold leading-relaxed text-slate-600">
                     <input
                       type="checkbox"
                       checked={customerAuthForm.termsAccepted}
                       onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, termsAccepted: e.target.checked }))}
-                      className="mt-0.5 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/20"
+                      className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-slate-900"
                     />
-                    <span>Li e aceito os <a href="/terms" target="_blank" rel="noreferrer" className="font-black text-slate-900 underline underline-offset-2">Termos de Uso</a>.</span>
+                    <span>
+                      Li e aceito os{' '}
+                      <a href="/terms" target="_blank" rel="noreferrer" className="font-black text-slate-900 underline underline-offset-2">
+                        Termos de Uso
+                      </a>
+                      .
+                    </span>
                   </label>
-                  <label className="flex items-start gap-2 text-[11px] font-semibold leading-relaxed text-slate-600">
+                  <label className="flex cursor-pointer items-start gap-2.5 text-[11px] font-semibold leading-relaxed text-slate-600">
                     <input
                       type="checkbox"
                       checked={customerAuthForm.lgpdAccepted}
                       onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, lgpdAccepted: e.target.checked }))}
-                      className="mt-0.5 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/20"
+                      className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-slate-900"
                     />
-                    <span>Autorizo o uso dos meus dados conforme a <a href="/terms#lgpd" target="_blank" rel="noreferrer" className="font-black text-slate-900 underline underline-offset-2">Política de Privacidade e LGPD</a>.</span>
+                    <span>
+                      Autorizo o uso dos meus dados conforme a{' '}
+                      <a href="/terms#lgpd" target="_blank" rel="noreferrer" className="font-black text-slate-900 underline underline-offset-2">
+                        Política de Privacidade
+                      </a>
+                      .
+                    </span>
                   </label>
                 </div>
               )}
 
               <div className="space-y-1">
-                <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Ir para loja</label>
+                <label className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Ir para loja</label>
                 <select
                   value={targetStoreSlug}
                   onChange={(e) => setTargetStoreSlug(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-white"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-slate-400"
                 >
                   {featuredStores.length === 0 ? (
                     <option value="">Selecionar depois</option>
@@ -714,21 +1196,30 @@ export function LandingPage() {
                 </select>
               </div>
 
-              {customerAuthError ? <p className="text-sm text-rose-600">{customerAuthError}</p> : null}
+              {customerAuthError && (
+                <p className={`rounded-xl px-3 py-2 text-xs font-semibold ${customerAuthError.includes('recuperação') ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-600'}`}>
+                  {customerAuthError}
+                </p>
+              )}
 
               <button
                 type="button"
                 disabled={customerAuthLoading}
                 onClick={handleCustomerAuthSubmit}
-                className="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-black text-white disabled:opacity-60"
+                className="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-black text-white transition-opacity disabled:opacity-60 hover:opacity-90"
               >
-                {customerAuthLoading ? 'Processando...' : customerAuthMode === 'register' ? 'Criar e entrar' : 'Entrar'}
+                {customerAuthLoading
+                  ? 'Processando...'
+                  : customerAuthMode === 'register'
+                  ? 'Criar conta e entrar'
+                  : 'Entrar'}
               </button>
+
               {customerAuthMode === 'login' && (
                 <button
                   type="button"
                   onClick={handleCustomerForgotPassword}
-                  className="w-full text-center text-xs font-semibold text-slate-500 hover:text-slate-700"
+                  className="w-full text-center text-xs font-semibold text-slate-400 transition-colors hover:text-slate-700"
                 >
                   Esqueci minha senha
                 </button>
@@ -738,147 +1229,6 @@ export function LandingPage() {
         </div>
       )}
 
-      <section className="bg-[linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] py-20 sm:py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.14),_transparent_45%)]" />
-        <div className="max-w-7xl mx-auto px-4 relative">
-          <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] items-stretch">
-            <div className="rounded-[2rem] border border-slate-200/80 bg-white/90 backdrop-blur-xl p-6 sm:p-8 shadow-[0_24px_50px_-28px_rgba(15,23,42,0.35)]">
-              <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-sky-700">
-                <DeviceMobile size={14} weight="duotone" />
-                App Android
-              </div>
-              <h3 className="mt-4 text-2xl sm:text-3xl font-black text-slate-900 leading-tight">
-                Baixe o app do Já no Caminho
-              </h3>
-              <p className="mt-2 text-slate-600 text-sm sm:text-base leading-relaxed">
-                Instale agora no Android com experiência app-like e acesso rápido ao Hub.
-              </p>
-
-              <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                <a
-                  href={androidApkPath}
-                  download
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[linear-gradient(120deg,#0f172a,#1e293b)] px-5 py-3 text-sm font-black text-white shadow-[0_16px_30px_-18px_rgba(15,23,42,0.85)] transition-all hover:scale-[1.01] active:scale-[0.98]"
-                >
-                  <DownloadSimple size={16} weight="bold" />
-                  Baixar APK
-                </a>
-                <button
-                  type="button"
-                  disabled
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-500"
-                  title="Publicação em andamento"
-                >
-                  <GooglePlayLogo size={16} weight="duotone" />
-                  Em breve na Play Store
-                </button>
-              </div>
-            </div>
-
-            <div className="rounded-[2rem] border border-slate-200/80 bg-white/90 backdrop-blur-xl p-6 sm:p-8 shadow-[0_24px_50px_-28px_rgba(15,23,42,0.35)]">
-              <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400 font-black">Instalação rápida</p>
-              <div className="mt-4 flex items-center gap-4">
-                <div className="rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
-                  <img
-                    src={androidApkQrSrc}
-                    alt="QR Code para baixar o app Android"
-                    loading="lazy"
-                    className="h-24 w-24 sm:h-28 sm:w-28 rounded-lg object-cover"
-                  />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Baixar via QR Code</p>
-                  <p className="mt-1 text-xs text-slate-600">Escaneie no celular e instale em poucos passos.</p>
-                  <button
-                    type="button"
-                    onClick={handleCopyApkLink}
-                    className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50"
-                  >
-                    <CopySimple size={13} weight="bold" />
-                    {apkLinkCopied ? 'Link copiado' : 'Copiar link'}
-                  </button>
-                </div>
-              </div>
-              <ol className="mt-4 space-y-3 text-sm text-slate-600">
-                <li className="flex items-start gap-2">
-                  <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-900 text-[10px] font-black text-white">1</span>
-                  Toque em <span className="font-black text-slate-800">Baixar APK</span>.
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-900 text-[10px] font-black text-white">2</span>
-                  Autorize instalação de fontes desconhecidas no Android.
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-900 text-[10px] font-black text-white">3</span>
-                  Instale e abra o app. Publicação na Play Store em andamento.
-                </li>
-              </ol>
-              <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">
-                <QrCode size={12} weight="duotone" />
-                Play Store em breve
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-slate-900 py-24 sm:py-32 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_rgba(47,157,247,0.3),_transparent_70%)]" />
-        <div className="max-w-7xl mx-auto px-4 relative">
-          <div className="rounded-[3rem] border border-white/10 bg-white/[0.02] backdrop-blur-2xl p-8 sm:p-16 text-center space-y-8">
-            <div className="space-y-4">
-              <h2 className="text-xs uppercase tracking-[0.4em] text-emerald-400 font-black">Vamos escalar?</h2>
-              <p className="text-3xl sm:text-6xl font-black text-white leading-tight">
-                Sua gestão de elite <br /> começa agora.
-              </p>
-              <p className="text-slate-400 max-w-2xl mx-auto text-base sm:text-lg font-medium leading-relaxed">
-                Junte-se a centenas de empresas que transformaram sua operação com a Já no Caminho. Experimente 7 dias por nossa conta.
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href={ctaPrimaryHref}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center rounded-2xl bg-white px-10 py-5 text-lg font-black text-slate-950 shadow-2xl hover:scale-[1.02] transition-all"
-              >
-                Solicitar Demonstração
-              </a>
-              <button
-                type="button"
-                onClick={() => navigate('/create?plan=trial')}
-                className="inline-flex items-center justify-center rounded-2xl border border-white/20 bg-white/5 px-10 py-5 text-lg font-black text-white backdrop-blur-md hover:bg-white/10 transition-all"
-              >
-                Iniciar Teste Grátis
-              </button>
-            </div>
-            
-            <div className="pt-8 flex items-center justify-center gap-8 border-t border-white/5">
-              <div className="flex flex-col items-center gap-1">
-                <ShieldCheck size={24} weight="duotone" className="text-emerald-400" />
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Sem Cartão</span>
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <CheckCircle size={24} weight="duotone" className="text-sky-400" />
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Setup em 5min</span>
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <Handshake size={24} weight="duotone" className="text-indigo-400" />
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Suporte 24/7</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
     </LandingPageLayout>
   );
 }
-
-const Cloud = (props: any) => <Cube {...props} />;
-const ArrowsClockwise = (props: any) => <Rocket {...props} />;
-const ChartLine = (props: any) => <TrendUp {...props} />;
-const ArrowRight = (props: any) => <Rocket {...props} className="rotate-90" />;
-
-
-
