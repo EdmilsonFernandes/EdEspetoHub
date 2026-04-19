@@ -4,7 +4,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { consumeManualLogoutRedirect } from '../../utils/sessionRedirect';
 
-type AdminAllowedRole = 'ADMIN' | 'OPERATOR' | 'CHURRASQUEIRO';
+type AdminAllowedRole = 'ADMIN' | 'OPERATOR' | 'LOJISTA';
 
 export function AdminRoute({
   children,
@@ -28,7 +28,7 @@ export function AdminRoute({
 
   const role = String(auth?.user?.role || '').toUpperCase() as AdminAllowedRole;
   const hasSession = Boolean(auth?.token && auth?.store);
-  const hasAdminContext = role === 'ADMIN' || role === 'OPERATOR' || role === 'CHURRASQUEIRO';
+  const hasAdminContext = role === 'ADMIN' || role === 'OPERATOR' || role === 'LOJISTA';
   if (!hasSession || !hasAdminContext) {
     const manualLogoutRedirect = consumeManualLogoutRedirect('admin');
     return <Navigate to={manualLogoutRedirect || '/admin'} replace />;

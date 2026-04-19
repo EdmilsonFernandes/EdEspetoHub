@@ -34,7 +34,8 @@ import { respondWithError } from '../errors/respondWithError';
 export type UserRole =
   | 'ADMIN'
   | 'OPERATOR'
-  | 'CHURRASQUEIRO'
+  | 'LOJISTA'
+  | 'CHURRASQUEIRO'   // legacy alias — kept for existing JWTs/DB rows
   | 'SUPER_ADMIN'
   | 'MOTOBOY'
   | 'STORE_OWNER'
@@ -94,7 +95,8 @@ export const requireRole = (...roles: UserRole[]) =>
   {
     const normalizeRole = (value?: UserRole) => {
       if (!value) return '';
-      if (value === 'CHURRASQUEIRO') return 'OPERATOR';
+      if (value === 'CHURRASQUEIRO') return 'OPERATOR'; // legacy
+      if (value === 'LOJISTA') return 'OPERATOR';
       return value;
     };
     const role = normalizeRole(req.auth?.role);

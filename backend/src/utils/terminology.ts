@@ -12,7 +12,7 @@
  */
 
 const ROLE_ALIASES: Record<string, string> = {
-  CHURRASQUEIRO: 'OPERATOR',
+  LOJISTA: 'OPERATOR',
   ADMIN: 'MANAGER',
 };
 

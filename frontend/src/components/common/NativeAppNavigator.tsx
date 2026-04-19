@@ -72,7 +72,7 @@ export function NativeAppNavigator() {
 
   const isStoreAdmin = useMemo(() => {
     const role = String(auth?.user?.role || '').toUpperCase();
-    return role === 'ADMIN' || role === 'OPERATOR' || role === 'CHURRASQUEIRO';
+    return role === 'ADMIN' || role === 'OPERATOR' || role === 'LOJISTA';
   }, [auth?.user?.role]);
 
   useEffect(() => {

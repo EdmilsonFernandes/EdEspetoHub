@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { ChatCircleText, DownloadSimple, House, List, MagnifyingGlass, Moon, ShieldCheck, SignOut, Storefront, Sun, Truck, X } from '@phosphor-icons/react';
+import { DownloadSimple, House, List, MagnifyingGlass, Moon, ShieldCheck, SignOut, Storefront, Sun, Truck, X } from '@phosphor-icons/react';
 
 interface LandingPageLayoutProps {
   children: React.ReactNode;
@@ -17,7 +17,6 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showWhatsappHint, setShowWhatsappHint] = useState(false);
   const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<any>(null);
   const [showInstallCta, setShowInstallCta] = useState(false);
   const [cookieConsent, setCookieConsent] = useState<'unknown' | 'accepted' | 'rejected'>('unknown');
@@ -41,13 +40,6 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
     return () => {
       document.documentElement.style.scrollBehavior = previous;
     };
-  }, []);
-
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      setShowWhatsappHint(true);
-    }, 5000);
-    return () => window.clearTimeout(timeout);
   }, []);
 
   useEffect(() => {
@@ -308,14 +300,6 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             </button>
             <button
               type="button"
-              onClick={() => navigate('/arquitetura')}
-              className="w-full inline-flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200"
-            >
-              Arquitetura
-              <House size={18} weight="duotone" />
-            </button>
-            <button
-              type="button"
               onClick={() => navigate('/instalar')}
               className="w-full inline-flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200"
             >
@@ -370,32 +354,16 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
         </div>
       </nav>
 
-      <a
-        href="https://wa.me/5512997822784"
-        target="_blank"
-        rel="noreferrer"
-        onClick={() => setShowWhatsappHint(false)}
-        className="fixed bottom-24 sm:bottom-5 right-4 z-50 inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-3 text-white shadow-[0_22px_50px_-20px_rgba(5,150,105,0.8)] ring-1 ring-emerald-300/30 hover:bg-emerald-500 transition"
-        aria-label="Falar no WhatsApp"
-      >
-        <ChatCircleText size={18} weight="duotone" />
-        <span className="hidden sm:inline text-sm font-bold">WhatsApp</span>
-      </a>
       {showInstallCta && (
         <button
           type="button"
           onClick={handleInstallApp}
-          className="fixed bottom-[8.8rem] sm:bottom-[5.8rem] right-4 z-50 inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2.5 text-white shadow-[0_18px_38px_-18px_rgba(15,23,42,0.7)] ring-1 ring-slate-300/20 hover:bg-slate-800 transition"
+          className="fixed bottom-24 sm:bottom-5 right-4 z-50 inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2.5 text-white shadow-[0_18px_38px_-18px_rgba(15,23,42,0.7)] ring-1 ring-slate-300/20 hover:bg-slate-800 transition"
           aria-label="Instalar app"
         >
           <DownloadSimple size={16} weight="bold" />
           <span className="text-xs sm:text-sm font-bold">Instalar app</span>
         </button>
-      )}
-      {showWhatsappHint && (
-        <div className="fixed bottom-[10.2rem] sm:bottom-[4.5rem] right-4 z-50 rounded-2xl border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-emerald-700 shadow-[0_16px_36px_-20px_rgba(16,185,129,0.6)] pointer-events-none">
-          Dúvidas? Fale com um especialista
-        </div>
       )}
       {cookieConsent === 'unknown' && (
         <div className="fixed left-3 right-3 bottom-[5.8rem] sm:bottom-4 z-[90]">
@@ -432,7 +400,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
         </div>
       )}
       {/* Footer */}
-      <footer className="bg-[#070b14] text-slate-300 pt-14 pb-10 border-t border-slate-800/60 animate-in fade-in duration-700 motion-reduce:animate-none">
+      <footer className="bg-[#070b14] text-slate-300 pt-14 pb-28 sm:pb-10 border-t border-slate-800/60 animate-in fade-in duration-700 motion-reduce:animate-none">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <section className="rounded-[2rem] border border-slate-700/60 bg-[linear-gradient(120deg,#111827_0%,#0f172a_50%,#111827_100%)] p-6 sm:p-8 shadow-[0_24px_60px_-36px_rgba(14,165,233,0.45)] animate-in fade-in slide-in-from-bottom-4 duration-700 motion-reduce:animate-none">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
@@ -450,12 +418,10 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                   Começar teste grátis
                 </button>
                 <a
-                  href="https://wa.me/5512997822784"
-                  target="_blank"
-                  rel="noreferrer"
+                  href="mailto:contato@janocaminho.com.br"
                   className="inline-flex items-center justify-center rounded-xl border border-slate-600 bg-white/5 px-5 py-3 text-sm font-black text-slate-100 hover:bg-white/10 transition"
                 >
-                  Falar com especialista
+                  Falar por e-mail
                 </a>
               </div>
             </div>
@@ -501,9 +467,6 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               <div className="space-y-2 text-sm text-slate-400">
                 <a href="mailto:contato@janocaminho.com.br" className="block hover:text-white transition-colors">
                   contato@janocaminho.com.br
-                </a>
-                <a href="https://wa.me/5512997822784" target="_blank" rel="noreferrer" className="block hover:text-white transition-colors">
-                  WhatsApp comercial
                 </a>
                 <button onClick={() => navigate('/admin')} className="block hover:text-white transition-colors">
                   Acesso administrativo

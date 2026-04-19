@@ -158,7 +158,7 @@ const request = async (path: string, options: any = {}) =>
     }
     const response = await fetch(url, finalOptions);
     const adminRole = getAdminRole();
-    const isOperator = adminRole === 'OPERATOR' || adminRole === 'CHURRASQUEIRO';
+    const isOperator = adminRole === 'OPERATOR' || adminRole === 'LOJISTA';
     const hasPrivilegedSession = isMotoboyRoute ? Boolean(motoboyToken) : Boolean(adminToken);
     const canAutoLogout = hasPrivilegedSession && !(response.status === 403 && isOperator && !isMotoboyRoute);
     return handleResponse(response, isMotoboyRoute ? 'motoboy' : 'admin', canAutoLogout);

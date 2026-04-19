@@ -132,7 +132,7 @@ const Header = ({
 }) => {
   const normalizedRole = String(userRole || "").toLowerCase();
   const isAdminUser = normalizedRole === "admin";
-  const isOperatorUser = normalizedRole === "operator" || normalizedRole === "churrasqueiro";
+  const isOperatorUser = normalizedRole === "operator" || normalizedRole === "lojista";
   const isLogged = Boolean(isAuthenticated || isAdminUser || isOperatorUser);
   const [mobileCollapsedStable, setMobileCollapsedStable] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);

@@ -11,7 +11,7 @@ export function AdminMobileBottomNav() {
   const location = useLocation();
   const { auth, logout } = useAuth();
   const role = String(auth?.user?.role || '').toUpperCase();
-  const isOperator = role === 'OPERATOR' || role === 'CHURRASQUEIRO';
+  const isOperator = role === 'OPERATOR' || role === 'LOJISTA';
   const isSuperAdmin = role === 'SUPER_ADMIN';
   const primaryColor = String(
     auth?.store?.settings?.primaryColor ||

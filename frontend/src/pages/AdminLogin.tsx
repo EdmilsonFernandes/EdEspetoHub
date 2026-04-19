@@ -331,7 +331,7 @@ export function AdminLogin() {
   useEffect(() => {
     if (!hydrated) return;
     const role = String(auth?.user?.role || '').toUpperCase();
-    if (auth?.token && (role === 'ADMIN' || role === 'OPERATOR' || role === 'CHURRASQUEIRO')) {
+    if (auth?.token && (role === 'ADMIN' || role === 'OPERATOR' || role === 'LOJISTA')) {
       const redirectTab = sessionStorage.getItem('admin:redirectTab');
       const redirectSlug = sessionStorage.getItem('admin:redirectSlug');
       if (redirectTab && (!redirectSlug || redirectSlug === auth.store?.slug)) {

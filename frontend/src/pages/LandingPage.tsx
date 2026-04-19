@@ -102,7 +102,6 @@ export function LandingPage() {
     totalOrders?: number;
     totalRevenue?: number;
   } | null>(null);
-  const [activeProof, setActiveProof] = useState<{ title: string; image: string; description?: string } | null>(null);
   const [featuredStores, setFeaturedStores] = useState<Array<{ id: string; name: string; slug: string; logoUrl?: string | null }>>([]);
   const [showCustomerAuth, setShowCustomerAuth] = useState(false);
   const [hasCustomerSession, setHasCustomerSession] = useState(false);
@@ -265,26 +264,6 @@ export function LandingPage() {
   }, []);
 
   const ctaPrimaryHref = 'mailto:contato@janocaminho.com.br';
-  const proofVisuals = [
-    {
-      title: 'Gestão Estratégica',
-      image: '/marketing/dashboard-real.png',
-      description: 'Visão 360º do seu faturamento, ticket médio e performance por período.',
-      alt: 'Dashboard administrativo com indicadores de vendas, operação e desempenho da loja',
-    },
-    {
-      title: 'Fila de Produção',
-      image: '/marketing/fila-real.png',
-      description: 'Controle visual de cada etapa do pedido, do preparo à saída para entrega.',
-      alt: 'Tela de fila de pedidos em tempo real com status operacionais e priorização',
-    },
-    {
-      title: 'Painel de Operações',
-      image: '/marketing/pedidos-real.png',
-      description: 'Gestão centralizada de múltiplos pedidos, pagamentos e logística reversa.',
-      alt: 'Painel de pedidos com controle de produção, pagamento e acompanhamento logístico',
-    },
-  ];
 
   const features = [
     { icon: ListChecks,    title: 'Pedidos em tempo real',   desc: 'Novos pedidos chegam na hora, atualizados em todos os dispositivos.', accent: 'sky' },
@@ -296,7 +275,7 @@ export function LandingPage() {
     { icon: Buildings,     title: 'Hub de condomínios',      desc: 'Vitrine própria em feiras e condomínios. Retirada ou entrega.', accent: 'indigo' },
     { icon: Desktop,       title: 'Multi-dispositivo',       desc: 'Admin no PC, app mobile para o time, PWA instalável.', accent: 'sky' },
     { icon: Bell,          title: 'Notificações push',       desc: 'Alerta automático de novos pedidos. Nunca perca uma venda.', accent: 'amber' },
-    { icon: UsersThree,    title: 'Multi-usuário',           desc: 'Admin, operador e churrasqueiro com acessos distintos.', accent: 'violet' },
+    { icon: UsersThree,    title: 'Multi-usuário',           desc: 'Admin, operador e lojista com acessos distintos.', accent: 'violet' },
     { icon: Star,          title: 'Destaque na plataforma',  desc: 'Promova sua loja com destaque pago no marketplace.', accent: 'amber' },
     { icon: TrendUp,       title: 'Marketplace público',     desc: 'Sua loja visível para todos os clientes da plataforma.', accent: 'emerald' },
   ];
@@ -345,7 +324,7 @@ export function LandingPage() {
                   </span>
                 </h1>
                 <p className="mx-auto max-w-xl text-base font-medium leading-relaxed text-slate-400 lg:mx-0 sm:text-xl">
-                  Sistema completo para churrasqueiros, vendedores, feiras e delivery. Configure em minutos e comece a vender hoje.
+                  Sistema completo para lojistas, vendedores, feiras e delivery. Configure em minutos e comece a vender hoje.
                 </p>
               </div>
 
@@ -781,54 +760,6 @@ export function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════════
-          VISUAL PROOF (screenshots)
-      ══════════════════════════════════════════════════════════════ */}
-      <section className="overflow-hidden bg-white py-24 sm:py-32">
-        <div className="mx-auto max-w-7xl px-4">
-
-          <div className="mb-16 flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
-            <div className="space-y-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.4em] text-sky-600">O sistema na prática</p>
-              <h2 className="text-3xl font-black leading-tight text-slate-900 sm:text-5xl">
-                Um painel que<br /> trabalha para você.
-              </h2>
-            </div>
-            <p className="max-w-md font-medium leading-relaxed text-slate-500">
-              Interface projetada para decisão rápida, execução diária e escala operacional. Veja como é na prática.
-            </p>
-          </div>
-
-          <div className="grid gap-8 md:grid-cols-3">
-            {proofVisuals.map((item, i) => (
-              <div
-                key={i}
-                className="group cursor-pointer"
-                onClick={() => setActiveProof(item)}
-              >
-                <div className="relative aspect-[4/3] overflow-hidden rounded-[2.25rem] border-[8px] border-slate-900 bg-slate-950 shadow-2xl transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-[0_32px_64px_-20px_rgba(15,23,42,0.6)]">
-                  <img
-                    src={item.image}
-                    alt={item.alt}
-                    className="h-full w-full object-cover opacity-90 transition-opacity group-hover:opacity-100"
-                  />
-                  <div className="absolute inset-0 flex items-end bg-gradient-to-t from-slate-950/80 via-transparent to-transparent p-7 opacity-0 transition-opacity group-hover:opacity-100">
-                    <p className="flex items-center gap-2 font-bold text-white">
-                      Visualizar detalhes
-                      <ArrowRight size={17} />
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-5 space-y-1.5">
-                  <h3 className="text-base font-black text-slate-900">{item.title}</h3>
-                  <p className="text-sm font-medium leading-relaxed text-slate-500">{item.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════════════════
           APP DOWNLOAD
       ══════════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden bg-[linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] py-20 sm:py-24">
@@ -977,42 +908,6 @@ export function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* ══════════════════════════════════════════════════════════════
-          MODAL: SCREENSHOT FULLSCREEN
-      ══════════════════════════════════════════════════════════════ */}
-      {activeProof && (
-        <div
-          className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/95 p-4 backdrop-blur-md animate-in fade-in duration-200 sm:p-10"
-          onClick={() => setActiveProof(null)}
-        >
-          <div
-            className="w-full max-w-6xl overflow-hidden rounded-[2.5rem] bg-white shadow-2xl animate-in zoom-in-95 duration-200"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between border-b border-slate-100 px-8 py-6">
-              <div>
-                <h3 className="text-xl font-black text-slate-900">{activeProof.title}</h3>
-                <p className="text-sm font-medium text-slate-500">{activeProof.description}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setActiveProof(null)}
-                className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 transition-colors hover:text-slate-900"
-              >
-                <X size={22} weight="bold" />
-              </button>
-            </div>
-            <div className="max-h-[70vh] overflow-y-auto bg-slate-950 p-4 sm:p-8">
-              <img
-                src={activeProof.image}
-                alt={activeProof.title}
-                className="h-auto w-full rounded-3xl object-contain shadow-2xl"
-              />
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ══════════════════════════════════════════════════════════════
           MODAL: CUSTOMER AUTH

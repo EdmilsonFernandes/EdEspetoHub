@@ -2249,7 +2249,7 @@ export function SuperAdmin() {
               <option value="all">Role: Todas</option>
               <option value="SUPER_ADMIN">Super admin</option>
               <option value="ADMIN">Admin</option>
-              <option value="CHURRASQUEIRO">Churrasqueiro</option>
+              <option value="LOJISTA">Lojista</option>
             </select>
             <select
               value={accessLogMethod}

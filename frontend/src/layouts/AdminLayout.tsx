@@ -28,7 +28,7 @@ export function AdminLayout({
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [mobileOpenGroup, setMobileOpenGroup] = useState<string | null>(null);
   const userRole = String(auth?.user?.role || '').toUpperCase();
-  const isOperatorUser = userRole === 'OPERATOR' || userRole === 'CHURRASQUEIRO';
+  const isOperatorUser = userRole === 'OPERATOR' || userRole === 'LOJISTA';
   const storeSlug = String(auth?.store?.slug || '').trim();
   const isVip = Boolean(auth?.store?.settings?.planExempt || auth?.subscription?.planExempt);
   const planName = String(auth?.subscription?.plan?.name || '').toLowerCase();

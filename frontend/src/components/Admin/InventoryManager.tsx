@@ -51,7 +51,7 @@ const resolveMovementOrigin = (movement: any) => {
     const roleLabel =
       actorRole === 'ADMIN' || actorRole === 'STORE_OWNER'
         ? 'Admin'
-        : actorRole === 'OPERATOR' || actorRole === 'CHURRASQUEIRO'
+        : actorRole === 'OPERATOR' || actorRole === 'LOJISTA'
         ? 'Operador'
         : 'Usuário';
     return `${roleLabel}: ${actorName}`;

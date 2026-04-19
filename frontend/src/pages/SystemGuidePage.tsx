@@ -22,7 +22,7 @@ const guideSections = [
     points: [
       'Cliente compra pelo Hub ou pela vitrine da loja.',
       'Lojista recebe o pedido na fila operacional.',
-      'Operador ou churrasqueiro muda os status de preparo.',
+      'Operador ou lojista muda os status de preparo.',
       'Motoboy entra quando o fluxo for de entrega.',
       'Cliente acompanha o pedido em tempo real pelo app ou navegador.',
     ],

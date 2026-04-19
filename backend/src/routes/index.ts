@@ -155,51 +155,51 @@ routes.get('/stores/:storeId/users', requireAuth, requireRole('ADMIN'), StoreUse
 routes.post('/stores/:storeId/users', requireAuth, requireRole('ADMIN'), StoreUserController.create);
 routes.patch('/stores/:storeId/users/:userId/password', requireAuth, requireRole('ADMIN'), StoreUserController.updatePassword);
 routes.delete('/stores/:storeId/users/:userId', requireAuth, requireRole('ADMIN'), StoreUserController.remove);
-routes.get('/stores/:storeId/featured-requests', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), FeaturedProductController.listByStore);
-routes.get('/stores/:storeId/featured-pricing', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), FeaturedProductController.getStorePricing);
-routes.post('/stores/:storeId/featured-requests', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), FeaturedProductController.createStoreRequest);
-routes.patch('/stores/:storeId/featured-requests/:requestId/cancel', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), FeaturedProductController.cancelByStore);
-routes.patch('/stores/:storeId/featured-requests/:requestId/refresh-payment', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), FeaturedProductController.refreshPaymentByStore);
+routes.get('/stores/:storeId/featured-requests', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), FeaturedProductController.listByStore);
+routes.get('/stores/:storeId/featured-pricing', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), FeaturedProductController.getStorePricing);
+routes.post('/stores/:storeId/featured-requests', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), FeaturedProductController.createStoreRequest);
+routes.patch('/stores/:storeId/featured-requests/:requestId/cancel', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), FeaturedProductController.cancelByStore);
+routes.patch('/stores/:storeId/featured-requests/:requestId/refresh-payment', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), FeaturedProductController.refreshPaymentByStore);
 routes.get('/stores/:storeId/condominiums', requireAuth, requireRole('ADMIN'), CondominiumController.listStoreOptions);
 routes.post('/stores/:storeId/condominium-requests', requireAuth, requireRole('ADMIN'), CondominiumController.createStoreRequest);
 routes.delete('/stores/:storeId/condominiums/:condominiumId', requireAuth, requireRole('ADMIN'), CondominiumController.removeStoreCondominium);
 
 // Products admin (cadastro não depende de assinatura)
 routes.post('/stores/:storeId/products', requireAuth, requireRole('ADMIN'), ProductController.create);
-routes.get('/stores/:storeId/products', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), ProductController.list);
+routes.get('/stores/:storeId/products', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), ProductController.list);
 routes.put('/stores/:storeId/products/:productId', requireAuth, requireRole('ADMIN'), ProductController.update);
 routes.delete('/stores/:storeId/products/:productId', requireAuth, requireRole('ADMIN'), ProductController.remove);
-routes.get('/stores/:storeId/categories', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), ProductController.listCategories);
+routes.get('/stores/:storeId/categories', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), ProductController.listCategories);
 routes.patch('/stores/:storeId/categories/priority', requireAuth, requireRole('ADMIN'), ProductController.setCategoryPriority);
-routes.get('/stores/:storeId/inventory', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), ProductController.listInventory);
-routes.get('/stores/:storeId/inventory/alerts', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), ProductController.getInventoryAlerts);
-routes.get('/stores/:storeId/inventory/movements', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), ProductController.listInventoryMovements);
-routes.patch('/stores/:storeId/products/:productId/stock', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), ProductController.adjustStock);
-routes.post('/stores/:storeId/postal/quote', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), ShippingController.quotePostalByStore);
+routes.get('/stores/:storeId/inventory', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), ProductController.listInventory);
+routes.get('/stores/:storeId/inventory/alerts', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), ProductController.getInventoryAlerts);
+routes.get('/stores/:storeId/inventory/movements', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), ProductController.listInventoryMovements);
+routes.patch('/stores/:storeId/products/:productId/stock', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), ProductController.adjustStock);
+routes.post('/stores/:storeId/postal/quote', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), ShippingController.quotePostalByStore);
 
 // Orders - cliente cria (aqui sim assinatura com carência)
 routes.post('/stores/:storeId/orders', hydrateAuthOptional, requireActiveSubscription, OrderController.create);
 routes.post('/stores/slug/:slug/orders', hydrateAuthOptional, requireActiveSubscription, OrderController.createBySlug);
 
-// Orders - staff vê fila/histórico (churrasqueiro + admin)
-routes.get('/stores/:storeId/orders/queue', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.listQueue);
-routes.get('/stores/slug/:slug/orders/queue', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.listQueueBySlug);
-routes.get('/stores/:storeId/orders', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.list);
-routes.get('/stores/slug/:slug/orders', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.listBySlug);
-routes.patch('/orders/:orderId/status', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.updateStatus);
-routes.patch('/orders/:orderId/fulfillment-mode', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.updateFulfillmentMode);
-routes.patch('/orders/:orderId/postal', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.updatePostalShipment);
-routes.patch('/orders/:orderId', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.updateItems);
-routes.patch('/orders/:orderId/reopen', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.reopen);
-routes.patch('/orders/:orderId/mark-as-printed', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.markItemsAsPrinted);
+// Orders - staff vê fila/histórico (lojista + admin)
+routes.get('/stores/:storeId/orders/queue', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.listQueue);
+routes.get('/stores/slug/:slug/orders/queue', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.listQueueBySlug);
+routes.get('/stores/:storeId/orders', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.list);
+routes.get('/stores/slug/:slug/orders', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.listBySlug);
+routes.patch('/orders/:orderId/status', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.updateStatus);
+routes.patch('/orders/:orderId/fulfillment-mode', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.updateFulfillmentMode);
+routes.patch('/orders/:orderId/postal', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.updatePostalShipment);
+routes.patch('/orders/:orderId', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.updateItems);
+routes.patch('/orders/:orderId/reopen', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.reopen);
+routes.patch('/orders/:orderId/mark-as-printed', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.markItemsAsPrinted);
 routes.get('/orders/:orderId/public', OrderController.getPublic);
 routes.get('/v2/orders/:orderId/tracking', OrderController.getTrackingV2);
 routes.get('/orders/:orderId/review', OrderReviewController.getByOrder);
 routes.post('/orders/:orderId/review', OrderReviewController.submitByOrder);
-routes.get('/stores/:storeId/reviews', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderReviewController.listByStore);
-routes.get('/stores/:storeId/reviews/summary', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderReviewController.summaryByStore);
-routes.get('/stores/:storeId/reviews/tip-payouts', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), requirePlanFeature('tipPayouts'), OrderReviewController.listTipPayoutsByStore);
-routes.patch('/stores/:storeId/reviews/:reviewId/tip-payout', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), requirePlanFeature('tipPayouts'), OrderReviewController.markTipPayoutByStore);
+routes.get('/stores/:storeId/reviews', requireAuth, requireRole('ADMIN', 'LOJISTA'), OrderReviewController.listByStore);
+routes.get('/stores/:storeId/reviews/summary', requireAuth, requireRole('ADMIN', 'LOJISTA'), OrderReviewController.summaryByStore);
+routes.get('/stores/:storeId/reviews/tip-payouts', requireAuth, requireRole('ADMIN', 'LOJISTA'), requirePlanFeature('tipPayouts'), OrderReviewController.listTipPayoutsByStore);
+routes.patch('/stores/:storeId/reviews/:reviewId/tip-payout', requireAuth, requireRole('ADMIN', 'LOJISTA'), requirePlanFeature('tipPayouts'), OrderReviewController.markTipPayoutByStore);
 
 // Motoboy
 routes.get('/motoboy/orders/available', requireAuth, MotoboyController.listAvailableOrders);

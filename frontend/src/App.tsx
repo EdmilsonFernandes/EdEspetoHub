@@ -111,7 +111,7 @@ function App() {
                 path="/admin/dashboard"
                 element={
                   <AppErrorBoundary>
-                    <AdminRoute allowedRoles={['ADMIN', 'OPERATOR', 'CHURRASQUEIRO']} fallbackTo="/admin/queue">
+                    <AdminRoute allowedRoles={['ADMIN', 'OPERATOR', 'LOJISTA']} fallbackTo="/admin/queue">
                       <AdminDashboard />
                     </AdminRoute>
                   </AppErrorBoundary>
@@ -173,7 +173,7 @@ function App() {
                 path="/admin/highlights"
                 element={
                   <AppErrorBoundary>
-                    <AdminRoute allowedRoles={['ADMIN', 'OPERATOR', 'CHURRASQUEIRO']}>
+                    <AdminRoute allowedRoles={['ADMIN', 'OPERATOR', 'LOJISTA']}>
                       <AdminHighlights />
                     </AdminRoute>
                   </AppErrorBoundary>
