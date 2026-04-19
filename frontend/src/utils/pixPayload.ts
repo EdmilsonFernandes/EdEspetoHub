@@ -67,8 +67,18 @@ const toAscii = (value: string) => {
 };
 
 const sanitizeText = (value: string, max = 25) => {
-  const clean = toAscii(value).replace(/[^A-Za-z0-9]/g, '');
-  return clean.slice(0, max);
+  const ascii = toAscii(value)
+    .replace(/[^A-Za-z0-9 ]/g, '')
+    .trim()
+    .toUpperCase();
+  // Stop at the last complete word that fits — never cut mid-word
+  const words = ascii.split(/\s+/).filter(Boolean);
+  let result = '';
+  for (const word of words) {
+    if ((result + word).length <= max) result += word;
+    else break;
+  }
+  return result || ascii.replace(/\s+/g, '').slice(0, max);
 };
 
 const formatField = (id: string, value: string) => `${id}${pad2(value.length)}${value}`;
@@ -108,7 +118,7 @@ export const buildPixPayload = ({
 }) => {
   const normalizedKey = normalizePixKey(key);
   const safeName = sanitizeText(name || 'CHAMA NO ESPETO', 25);
-  const safeCity = sanitizeText(city || 'BRASIL', 15);
+  const safeCity = sanitizeText(city || 'BRASIL', 25);
   const rawTxId = toAscii(txid || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 25);
   const safeTxId = rawTxId || '***';
   const amountValue = formatAmount(amount);

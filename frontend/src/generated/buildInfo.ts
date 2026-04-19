@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260419.135318.9e5eb94d",
-  "buildId": "0.1.9+20260419.135318.9e5eb94d-20260419.135318-9e5eb94d",
-  "builtAt": "2026-04-19T13:53:18.619Z",
-  "commitHash": "9e5eb94d20abb96af0033f15f879c7eff99109d1",
-  "shortHash": "9e5eb94d",
+  "versionInternal": "0.1.9+20260419.135910.450c0278",
+  "buildId": "0.1.9+20260419.135910.450c0278-20260419.135910-450c0278",
+  "builtAt": "2026-04-19T13:59:10.648Z",
+  "commitHash": "450c0278d81b66d363eb0c1f420048c123e8576f",
+  "shortHash": "450c0278",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "450c0278d81b66d363eb0c1f420048c123e8576f",
+      "shortHash": "450c0278",
+      "dateIso": "2026-04-19T10:54:31-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(admin-drawer): remove blue bg, drop Target button mobile, neutralize context strip icon",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/450c0278d81b66d363eb0c1f420048c123e8576f"
+    },
     {
       "hash": "9e5eb94d20abb96af0033f15f879c7eff99109d1",
       "shortHash": "9e5eb94d",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "ux(drawer): clarify login vs register flow for unauthenticated users",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7d32b6980f108a7afb0b62bc1a677e18fa246f51"
-    },
-    {
-      "hash": "085927a44cf50e1c2b25f900820e447e97fcfa62",
-      "shortHash": "085927a4",
-      "dateIso": "2026-04-17T18:51:33-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(marketplace): premium condominium picker with gradient hero and sectioned layout",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/085927a44cf50e1c2b25f900820e447e97fcfa62"
     }
   ]
 } as const;
