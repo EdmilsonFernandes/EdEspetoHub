@@ -33,6 +33,16 @@ export function AdminLayout({
   const isVip = Boolean(auth?.store?.settings?.planExempt || auth?.subscription?.planExempt);
   const planName = String(auth?.subscription?.plan?.name || '').toLowerCase();
   const subscriptionStatus = String(auth?.subscription?.status || '').toUpperCase();
+  const primaryColor = String(
+    auth?.store?.settings?.primaryColor ||
+    auth?.store?.settings?.primary_color ||
+    '#334155'
+  );
+  const hexToRgba = (hex: string, alpha: number) => {
+    const n = hex.replace('#', '');
+    if (!/^[0-9a-fA-F]{6}$/.test(n)) return `rgba(51,65,85,${alpha})`;
+    return `rgba(${parseInt(n.slice(0,2),16)},${parseInt(n.slice(2,4),16)},${parseInt(n.slice(4,6),16)},${alpha})`;
+  };
   const canUseMotoboys = Boolean(
     isVip ||
       auth?.features?.motoboyManagement ||
@@ -188,7 +198,8 @@ export function AdminLayout({
       {mobileNavOpen && (
         <div className="lg:hidden fixed inset-0 z-[9999] bg-black/55 backdrop-blur-sm" onClick={() => setMobileNavOpen(false)}>
           <aside
-            className="h-full w-[85%] max-w-[360px] bg-[#0d1626] border-r border-white/[0.07] shadow-[2px_0_40px_rgba(0,0,0,0.55)] p-4 flex flex-col"
+            className="h-full w-[85%] max-w-[360px] bg-[#0d1626] border-r border-white/[0.07] shadow-[2px_0_40px_rgba(0,0,0,0.55)] px-4 pb-4 flex flex-col"
+            style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-center justify-between gap-2 pb-3 border-b border-white/[0.08]">
@@ -225,20 +236,21 @@ export function AdminLayout({
                         item.disabled
                           ? 'bg-violet-500/[0.12] text-violet-300'
                           : isActive
-                          ? 'bg-white/[0.11] text-white font-semibold'
+                          ? 'text-white font-semibold'
                           : 'text-slate-400 hover:bg-white/[0.06] hover:text-slate-200'
                       }`}
+                      style={isActive && !item.disabled ? { backgroundColor: hexToRgba(primaryColor, 0.18) } : undefined}
                     >
                       <span className="inline-flex items-center gap-2.5">
-                        <span className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors ${
-                          item.disabled ? 'bg-violet-500/20 text-violet-400' : isActive ? 'bg-sky-500/20 text-sky-400' : 'bg-white/[0.07] text-slate-500'
-                        }`}>
-                          <Icon size={14} weight={isActive ? 'fill' : 'duotone'} />
-                        </span>
+                        <Icon
+                          size={15}
+                          weight={isActive ? 'fill' : 'duotone'}
+                          className={`shrink-0 transition-colors ${item.disabled ? 'text-violet-400' : isActive ? '' : 'text-slate-500'}`}
+                          style={isActive && !item.disabled ? { color: primaryColor } : undefined}
+                        />
                         {item.label}
                       </span>
                       {item.disabled && <span className="text-[9px] font-black rounded-full bg-violet-500/20 text-violet-300 px-2 py-0.5 uppercase tracking-wide">Pro</span>}
-                      {isActive && <span className="h-1.5 w-1.5 rounded-full bg-sky-400 shrink-0" />}
                     </button>
                   );
                 }
@@ -271,20 +283,21 @@ export function AdminLayout({
                                 item.disabled
                                   ? 'bg-violet-500/[0.12] text-violet-300 font-medium'
                                   : isActive
-                                  ? 'bg-white/[0.11] text-white font-semibold'
+                                  ? 'text-white font-semibold'
                                   : 'text-slate-400 hover:bg-white/[0.06] hover:text-slate-200 font-normal'
                               }`}
+                              style={isActive && !item.disabled ? { backgroundColor: hexToRgba(primaryColor, 0.18) } : undefined}
                             >
                               <span className="inline-flex items-center gap-2.5">
-                                <span className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors ${
-                                  item.disabled ? 'bg-violet-500/20 text-violet-400' : isActive ? 'bg-sky-500/20 text-sky-400' : 'bg-white/[0.06] text-slate-500'
-                                }`}>
-                                  <Icon size={12} weight={isActive ? 'fill' : 'duotone'} />
-                                </span>
+                                <Icon
+                                  size={13}
+                                  weight={isActive ? 'fill' : 'duotone'}
+                                  className={`shrink-0 transition-colors ${item.disabled ? 'text-violet-400' : isActive ? '' : 'text-slate-500'}`}
+                                  style={isActive && !item.disabled ? { color: primaryColor } : undefined}
+                                />
                                 {item.label}
                               </span>
                               {item.disabled && <span className="text-[9px] font-black rounded-full bg-violet-500/20 text-violet-300 px-2 py-0.5 uppercase tracking-wide">Pro</span>}
-                              {isActive && <span className="h-1.5 w-1.5 rounded-full bg-sky-400 shrink-0" />}
                             </button>
                           );
                         })}

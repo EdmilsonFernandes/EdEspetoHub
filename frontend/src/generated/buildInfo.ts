@@ -5,14 +5,23 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260419.132452.e9cccc38",
-  "buildId": "0.1.9+20260419.132452.e9cccc38-20260419.132452-e9cccc38",
-  "builtAt": "2026-04-19T13:24:52.054Z",
-  "commitHash": "e9cccc38ba79068ea3692d7427c59b9e27368b40",
-  "shortHash": "e9cccc38",
+  "versionInternal": "0.1.9+20260419.134245.79c1764c",
+  "buildId": "0.1.9+20260419.134245.79c1764c-20260419.134245-79c1764c",
+  "builtAt": "2026-04-19T13:42:45.178Z",
+  "commitHash": "79c1764ce33e2b55aabc5901313868d67a075d9b",
+  "shortHash": "79c1764c",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "79c1764ce33e2b55aabc5901313868d67a075d9b",
+      "shortHash": "79c1764c",
+      "dateIso": "2026-04-19T10:25:36-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(pix): fix CRC16 invalidation and toAscii fallback in buildPixPayload",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/79c1764ce33e2b55aabc5901313868d67a075d9b"
+    },
     {
       "hash": "e9cccc38ba79068ea3692d7427c59b9e27368b40",
       "shortHash": "e9cccc38",
@@ -273,15 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(marketplace): fix picker navigation, sem-agenda badge, ghost search and improve condo banner",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8bb021ce98cc642bbcacaa4086e22c0ef116ab0e"
-    },
-    {
-      "hash": "28569e1bced88907a8bb6c0c98baa18ccb641d46",
-      "shortHash": "28569e1b",
-      "dateIso": "2026-04-17T18:36:54-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(marketplace): redesign condominium picker to premium list layout",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/28569e1bced88907a8bb6c0c98baa18ccb641d46"
     }
   ]
 } as const;
