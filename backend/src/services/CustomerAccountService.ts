@@ -686,6 +686,32 @@ async setDefaultAddress(userId: string, addressId: string) {
    * @author Edmilson Lopes
    */
   async listOrders(userId: string) {
+    // Silently cancel awaiting_payment orders whose MP payment already expired
+    try {
+      const expired = await AppDataSource.query(
+        `SELECT op.id, op.order_id FROM order_payments op
+         INNER JOIN orders o ON o.id = op.order_id
+         WHERE o.customer_user_id = $1
+           AND o.status = 'awaiting_payment'
+           AND op.payment_status = 'PENDING'
+           AND op.expires_at IS NOT NULL
+           AND op.expires_at < NOW() - INTERVAL '2 minutes'`,
+        [userId]
+      );
+      for (const row of expired) {
+        await AppDataSource.query(
+          `UPDATE order_payments SET payment_status = 'FAILED', failed_at = NOW() WHERE id = $1`,
+          [row.id]
+        );
+        await AppDataSource.query(
+          `UPDATE orders SET payment_status = 'FAILED', status = 'cancelled',
+           canceled_reason = 'Pagamento não confirmado dentro do prazo.'
+           WHERE id = $1 AND status = 'awaiting_payment'`,
+          [row.order_id]
+        );
+      }
+    } catch { /* non-blocking — never break list */ }
+
     const rows = await AppDataSource.getRepository(Order).find({
       where: { customerUserId: userId },
       relations: [ 'store', 'store.settings', 'store.owner', 'items', 'items.product', 'shipment' ],
