@@ -87,6 +87,7 @@ export function StorePage() {
     lgpdAccepted: false,
   });
   const [customerAuthCheckoutPrompt, setCustomerAuthCheckoutPrompt] = useState(false);
+  const [customerCheckoutResume, setCustomerCheckoutResume] = useState(null);
   const [customerVerifyPrompt, setCustomerVerifyPrompt] = useState<any | null>(null);
   const [customerVerifyCode, setCustomerVerifyCode] = useState('');
   const [customerVerifyLoading, setCustomerVerifyLoading] = useState(false);
@@ -658,17 +659,22 @@ export function StorePage() {
         customerAccountService.listOrders(),
       ]);
       const nextSession = { ...(baseSession || customerSession || {}), user: me };
+      const nextAddresses = Array.isArray(addresses) ? addresses : [];
+      const nextOrders = Array.isArray(orders) ? orders : [];
       persistCustomerSession(nextSession);
-      setCustomerAddresses(Array.isArray(addresses) ? addresses : []);
-      setCustomerOrders(Array.isArray(orders) ? orders : []);
+      setCustomerAddresses(nextAddresses);
+      setCustomerOrders(nextOrders);
       const preferred =
-        (Array.isArray(addresses) ? addresses : []).find((item: any) => item?.isDefault) ||
-        (Array.isArray(addresses) ? addresses[0] : null);
+        nextAddresses.find((item: any) => item?.isDefault) ||
+        nextAddresses[0] ||
+        null;
       hydrateCustomerFromAddress(preferred || null);
+      return { me, addresses: nextAddresses, orders: nextOrders };
     } catch {
       persistCustomerSession(null);
       setCustomerAddresses([]);
       setCustomerOrders([]);
+      return null;
     }
   };
 
@@ -2013,7 +2019,13 @@ export function StorePage() {
       setLastOrderItems(lastItemsPayload.items);
     }
     setView(isStoreAdmin ? 'menu' : 'success');
-    showToast('Pedido enviado com sucesso.', 'success', { durationMs: 3000 });
+    showToast(
+      createdOrder?.status === 'awaiting_payment'
+        ? 'Pedido registrado! Finalize o pagamento para confirmar.'
+        : 'Pedido enviado com sucesso.',
+      'success',
+      { durationMs: 3000 }
+    );
     if (isStoreAdmin) {
       showOrderNotice(createdOrder?.id);
     }
@@ -2058,13 +2070,21 @@ export function StorePage() {
     setCustomerVerifyPrompt(null);
     setCustomerVerifyCode('');
     setCustomerResendCooldown(0);
-    await refreshCustomerData(response);
+    const customerData = await refreshCustomerData(response);
 
     if (customerAuthCheckoutPrompt) {
+      const addressCount = Array.isArray(customerData?.addresses) ? customerData.addresses.length : 0;
+      const shouldCollectAddress = customer.type === 'delivery' && addressCount === 0;
       setShowCustomerAccount(false);
       setCustomerAuthCheckoutPrompt(false);
+      setCustomerCheckoutResume({ token: Date.now(), step: shouldCollectAddress ? 2 : 4 });
       setView('cart');
-      showToast('Conta conectada. Confira o pedido e toque em finalizar.', 'success');
+      showToast(
+        shouldCollectAddress
+          ? 'Conta conectada. Cadastre um endereço para finalizar a entrega.'
+          : 'Conta conectada. Confira o pedido e toque em finalizar.',
+        'success'
+      );
       return;
     }
 
@@ -2807,6 +2827,8 @@ export function StorePage() {
             onChangePayment={setPaymentMethod}
             onUpdateCart={updateCart}
             onCheckout={checkout}
+            checkoutResume={customerCheckoutResume}
+            onCheckoutResumeConsumed={() => setCustomerCheckoutResume(null)}
             checkoutLoading={checkoutLoading}
             onBack={() => setView('menu')}
           />

@@ -99,11 +99,13 @@ export const CartView = ({
   checkoutDisabled = false,
   checkoutDisabledReason = "",
   checkoutLoading = false,
+  checkoutResume = null,
   pricingSummary,
   onChangeCustomer,
   onChangePayment,
   onUpdateCart,
   onCheckout,
+  onCheckoutResumeConsumed,
   onBack,
   storeLabel = "",
   storeLogoUrl = "",
@@ -562,6 +564,19 @@ export const CartView = ({
   const hasLoggedContactInfo = Boolean(loggedDeliveryName || loggedDeliveryPhone);
   const canUseLockedContactSummary = Boolean(isLoggedAssistedFlow && hasLoggedContactInfo);
   const useMultiStepFlow = isCustomerLogged;
+
+  useEffect(() => {
+    if (!useMultiStepFlow || !checkoutResume?.token) return;
+    const requestedStep = Number(checkoutResume?.step || 4);
+    const nextStep = Math.max(1, Math.min(4, requestedStep));
+    setCheckoutStep(nextStep);
+    setHasTriedCheckout(false);
+    if (typeof window !== "undefined") {
+      window.setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 0);
+    }
+    onCheckoutResumeConsumed?.();
+  }, [checkoutResume?.token, checkoutResume?.step, onCheckoutResumeConsumed, useMultiStepFlow]);
+
   const loggedDeliveryAddressSummary = useMemo(() => {
     if (!activeSavedAddress) return normalizedCustomerAddress;
     const street = [activeSavedAddress?.street, activeSavedAddress?.number].filter(Boolean).join(', ');
@@ -689,7 +704,7 @@ export const CartView = ({
             {!useMultiStepFlow && <p className="text-xs text-slate-500 hidden sm:block">Complete as infos para enviarmos seu pedido.</p>}
           </div>
           <span className="text-[11px] font-extrabold text-brand-primary bg-brand-primary-soft px-3 py-1 rounded-full border border-brand-primary/20">
-            {useMultiStepFlow ? 'Etapa 2/3' : 'Etapa 1/2'}
+            {useMultiStepFlow ? 'Etapa 2/4' : 'Etapa 1/2'}
           </span>
         </div>
 
@@ -881,6 +896,24 @@ export const CartView = ({
               ))}
             </div>
           </div>
+
+          {/* Retirada info */}
+          {customer.type === "pickup" && (
+            <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50/60 to-white p-4 shadow-sm">
+              <div className="flex items-start gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                  <House size={16} weight="duotone" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-800">Retirada no local</p>
+                  <p className="mt-0.5 text-sm font-semibold text-slate-800 leading-snug">
+                    {storeAddress || 'Retire no balcão da loja'}
+                  </p>
+                  <p className="mt-1 text-[11px] text-slate-500">Apresente seu número de pedido ao retirar.</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Endereço */}
           {customer.type === "delivery" && (
@@ -1479,35 +1512,42 @@ export const CartView = ({
       {/* Sugestões (carrossel horizontal – step 1) */}
       {(!useMultiStepFlow || checkoutStep === 1) && suggestedProducts.length > 0 && (
         <div className="mb-4 sm:mb-6">
-          <div className="flex items-center justify-between mb-2.5 px-1">
-            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Adicionar ao pedido</span>
+          <div className="flex items-center justify-between mb-3 px-1">
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-slate-500">Adicionar ao pedido</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">Itens que combinam com sua seleção</p>
+            </div>
           </div>
-          <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory">
+          <div className="flex gap-3 overflow-x-auto pb-3 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory">
             {suggestedProducts.map((prod) => (
               <button
                 key={prod.id}
                 type="button"
                 onClick={() => onUpdateCart?.(prod, 1, { cookingPoint: '', passSkewer: false, selectedModifiers: [] })}
-                className="flex-none w-[120px] snap-start rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden active:scale-[0.97] transition-transform"
+                className="group flex-none w-[148px] snap-start rounded-2xl border border-slate-100 bg-white shadow-[0_4px_16px_-6px_rgba(15,23,42,0.14)] overflow-hidden active:scale-[0.96] transition-all hover:shadow-[0_8px_24px_-8px_rgba(15,23,42,0.2)] hover:-translate-y-0.5"
               >
-                <div className="w-full h-20 bg-slate-100 overflow-hidden">
+                <div className="relative w-full h-[90px] bg-slate-100 overflow-hidden">
                   {prod.imageUrl ? (
                     <img
                       src={resolveAssetUrl(prod.imageUrl)}
                       alt={prod.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       loading="lazy"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-2xl">🍖</div>
+                    <div className="w-full h-full flex items-center justify-center text-3xl bg-gradient-to-br from-slate-50 to-slate-100">🍖</div>
                   )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
-                <div className="p-2.5">
-                  <p className="text-[11px] font-bold text-slate-800 leading-tight line-clamp-2 mb-1">{prod.name}</p>
-                  <p className="text-[11px] font-black text-brand-primary">{formatCurrency(prod.price)}</p>
+                <div className="p-2.5 pb-0">
+                  <p className="text-[12px] font-bold text-slate-800 leading-tight line-clamp-2">{prod.name}</p>
+                  <p className="text-[12px] font-black text-brand-primary mt-1">{formatCurrency(prod.price)}</p>
                 </div>
-                <div className="mx-2.5 mb-2.5 flex items-center justify-center rounded-xl bg-slate-900 py-1.5 text-xs font-black text-white">
-                  + Adicionar
+                <div className="p-2.5 pt-2">
+                  <div className="flex items-center justify-center gap-1 rounded-xl bg-slate-900 py-2 text-[11px] font-black text-white group-hover:bg-brand-primary transition-colors">
+                    <span>+</span>
+                    <span>Adicionar</span>
+                  </div>
                 </div>
               </button>
             ))}
@@ -1602,7 +1642,8 @@ export const CartView = ({
         {(isPix || isCredit || isDebit) && (
           <div className="mt-4 flex items-center justify-center gap-2 rounded-xl border border-[#009ee3]/20 bg-[#009ee3]/5 py-2.5 px-3">
             <ShieldCheck size={14} weight="duotone" className="shrink-0 text-[#009ee3]" />
-            <span className="text-[11px] font-semibold text-[#009ee3]">Pagamento processado com segurança pelo Mercado Pago</span>
+            <span className="text-[11px] font-semibold text-[#009ee3]">Pagamento processado com segurança pelo</span>
+            <img src="/uploads/payment/mercado-pago.webp" alt="Mercado Pago" className="h-4 w-auto object-contain shrink-0" />
           </div>
         )}
       </div>}

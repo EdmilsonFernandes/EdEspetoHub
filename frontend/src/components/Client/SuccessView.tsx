@@ -154,8 +154,8 @@ const OnlinePaymentBlock = ({ onlinePayment, paymentStatus }) => {
       <div className="w-full mb-6">
         <div className="rounded-2xl border border-sky-100 bg-white shadow-sm overflow-hidden">
           <div className="flex items-center gap-3 border-b border-sky-50 bg-sky-50/60 px-4 py-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sky-100">
-              <CreditCard size={18} weight="duotone" className="text-sky-700" />
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white border border-sky-100 overflow-hidden shadow-sm">
+              <img src="/uploads/payment/mercado-pago.webp" alt="Mercado Pago" className="h-6 w-6 object-contain" />
             </span>
             <div className="min-w-0">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-800">Pagamento via Mercado Pago</p>
@@ -170,20 +170,21 @@ const OnlinePaymentBlock = ({ onlinePayment, paymentStatus }) => {
             <p className="mb-4 text-xs text-slate-500 text-center">
               Seu pedido foi registrado. Clique abaixo para efetuar o pagamento com cartão via Mercado Pago.
             </p>
-            <button
-              type="button"
-              onClick={() => {
+            <a
+              href={onlinePayment.paymentLink || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => {
                 if (Capacitor.isNativePlatform()) {
-                  window.open(onlinePayment.paymentLink, '_system');
-                } else {
-                  window.open(onlinePayment.paymentLink, '_blank', 'noopener,noreferrer');
+                  e.preventDefault();
+                  if (onlinePayment.paymentLink) window.open(onlinePayment.paymentLink, '_system');
                 }
               }}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#009ee3] py-3.5 text-sm font-black text-white shadow-[0_8px_20px_-10px_rgba(0,158,227,0.6)] transition hover:brightness-105 active:scale-[0.98]"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#009ee3] py-3.5 text-sm font-black text-white shadow-[0_8px_20px_-10px_rgba(0,158,227,0.6)] transition hover:brightness-105 active:scale-[0.98] no-underline"
             >
               <ArrowSquareOut size={16} weight="bold" />
-              Pagar agora
-            </button>
+              Pagar agora via Mercado Pago
+            </a>
           </div>
         </div>
       </div>
@@ -302,8 +303,8 @@ export const SuccessView = ({
         <div className="rounded-[1.85rem] border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.97)_0%,rgba(244,248,252,0.96)_100%)] px-3 py-3 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
           {/* Step indicator */}
           <div className="mb-3 flex items-center gap-1">
-            {[{ label: 'Sacola', done: true }, { label: 'Entrega', done: true }, { label: 'Pagamento', done: true }, { label: isPaid ? 'Confirmado' : isAwaitingPayment ? 'Pagamento' : 'Confirmado', done: isPaid, active: !isPaid }].map(({ label, done, active }, i) => (
-              <React.Fragment key={label}>
+            {[{ label: 'Sacola', done: true }, { label: 'Entrega', done: true }, { label: 'Pagamento', done: true }, { label: 'Confirmar', done: isPaid, active: !isPaid }].map(({ label, done, active }, i) => (
+              <React.Fragment key={i}>
                 <div className="flex items-center gap-1">
                   <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black transition-colors ${done ? 'bg-emerald-500 text-white' : active ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-500'}`}>
                     {done ? '✓' : i + 1}
@@ -338,7 +339,7 @@ export const SuccessView = ({
       </div>
 
       {/* Content */}
-      <div className="space-y-4">
+      <div className="space-y-4 px-4 sm:px-6">
         {/* Status card */}
         <div className={`rounded-3xl border p-5 shadow-sm ${isPaid ? 'bg-gradient-to-b from-emerald-50 to-white border-emerald-200' : isAwaitingPayment ? 'bg-gradient-to-b from-[#009ee3]/5 to-white border-[#009ee3]/20' : 'bg-gradient-to-b from-sky-50 to-white border-sky-200'}`}>
           <div className="flex items-center gap-3">
