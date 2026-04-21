@@ -8,6 +8,7 @@ import {
   CheckCircle,
   CloudArrowUp,
   CopySimple,
+  CreditCard,
   CurrencyDollar,
   Desktop,
   DeviceMobile,
@@ -544,13 +545,19 @@ export function LandingPage() {
                   Receba pedidos online sem burocracia.
                 </h2>
                 <p className="max-w-2xl text-sm font-medium leading-7 text-slate-600 sm:text-base">
-                  O lojista pode conectar a própria conta Mercado Pago e cobrar Pix, crédito ou débito direto nos pedidos. Se preferir, continua no modo convencional e combina o pagamento como já faz hoje.
+                  O lojista conecta a própria conta Mercado Pago e libera cobrança online para Pix e cartão. Quem preferir manter o atendimento presencial continua recebendo pedidos normalmente.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {['Pix', 'Cartão de crédito', 'Cartão de débito', 'Fallback manual'].map((item) => (
-                  <span key={item} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-black text-slate-600 shadow-sm">
-                    {item}
+              <div className="grid gap-2 sm:grid-cols-2">
+                {[
+                  { icon: QrCode, label: 'Pix online', tone: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
+                  { icon: CreditCard, label: 'Crédito', tone: 'text-sky-600 bg-sky-50 border-sky-100' },
+                  { icon: CurrencyDollar, label: 'Débito', tone: 'text-indigo-600 bg-indigo-50 border-indigo-100' },
+                  { icon: Storefront, label: 'Pagamento na loja', tone: 'text-slate-600 bg-white border-slate-200' },
+                ].map(({ icon: Icon, label, tone }) => (
+                  <span key={label} className={`inline-flex items-center gap-2 rounded-2xl border px-3 py-2 text-xs font-black shadow-sm ${tone}`}>
+                    <Icon size={16} weight="duotone" />
+                    {label}
                   </span>
                 ))}
               </div>
