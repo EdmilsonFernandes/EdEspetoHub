@@ -176,7 +176,11 @@ const OnlinePaymentBlock = ({ onlinePayment, paymentStatus }) => {
               type="button"
               onClick={() => {
                 const url = onlinePayment.paymentLink;
-                if (!url) return;
+                if (!url) {
+                  alert('DEBUG: paymentLink está vazio');
+                  return;
+                }
+                alert('DEBUG: abrindo ' + url.slice(0, 60));
                 window.open(url, Capacitor.isNativePlatform() ? '_system' : '_blank');
               }}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#009ee3] py-3.5 text-sm font-black text-white shadow-[0_8px_20px_-10px_rgba(0,158,227,0.6)] transition hover:brightness-105 active:scale-[0.98]"
