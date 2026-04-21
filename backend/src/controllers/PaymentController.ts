@@ -23,10 +23,12 @@ import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
 import { AppDataSource } from '../config/database';
 import { Payment } from '../entities/Payment';
+import { OrderPaymentService } from '../services/OrderPaymentService';
 
 const paymentService = new PaymentService();
 const subscriptionService = new SubscriptionService();
 const paymentEventRepository = new PaymentEventRepository();
+const orderPaymentService = new OrderPaymentService();
 const log = logger.child({ scope: 'PaymentController' });
 /**
  * Provides PaymentController functionality.
@@ -122,6 +124,11 @@ export class PaymentController {
 
     try {
       log.info('Mercado Pago webhook received', { paymentId });
+      const orderPaymentResult = await orderPaymentService.handleProviderWebhookPayment(String(paymentId));
+      if (orderPaymentResult) {
+        log.info('Mercado Pago order payment webhook processed', { paymentId });
+        return res.json({ status: 'ok', result: orderPaymentResult });
+      }
       const result = await paymentService.confirmMercadoPagoPayment(String(paymentId));
       log.info('Mercado Pago webhook processed', { paymentId });
       return res.json({ status: 'ok', result });

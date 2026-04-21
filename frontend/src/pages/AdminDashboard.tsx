@@ -879,9 +879,12 @@ const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpg
   );
 };
 
-const PaymentsView = ({ subscription, loading, error, payments }) => {
+const PaymentsView = ({ subscription, loading, error, payments, storeId }) => {
   const navigate = useNavigate();
   const [showAllHistory, setShowAllHistory] = useState(false);
+  const [mpAccount, setMpAccount] = useState<any>(null);
+  const [mpLoading, setMpLoading] = useState(false);
+  const [mpActionLoading, setMpActionLoading] = useState(false);
   const planSectionRef = useRef<HTMLDivElement | null>(null);
   const summarySectionRef = useRef<HTMLDivElement | null>(null);
   const historySectionRef = useRef<HTMLDivElement | null>(null);
@@ -929,6 +932,25 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
   const statusAccent = isVip ? 'border-l-emerald-400 bg-white' : (statusMap[rawStatus]?.accent || 'border-l-slate-200 bg-white');
   const paidAtLabel = subscription?.latestPaymentAt ? formatDateTime(subscription.latestPaymentAt) : '—';
   const rawPaymentStatus = (subscription?.latestPaymentStatus || '').toUpperCase();
+  useEffect(() => {
+    if (!storeId) return;
+    let cancelled = false;
+    setMpLoading(true);
+    storeService
+      .getMercadoPagoAccount(storeId)
+      .then((data) => {
+        if (!cancelled) setMpAccount(data);
+      })
+      .catch(() => {
+        if (!cancelled) setMpAccount(null);
+      })
+      .finally(() => {
+        if (!cancelled) setMpLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [storeId]);
   const paymentStatusMap: Record<string, string> = {
     PAID: 'Pagamento aprovado',
     PENDING: 'Pagamento pendente',
@@ -1115,6 +1137,58 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
             </button>
           </div>
         )}
+        <div className="rounded-2xl border border-slate-200 border-l-4 border-l-emerald-400 bg-white p-4">
+          <p className="text-xs uppercase tracking-[0.25em] text-emerald-700">Pedidos online</p>
+          <p className="text-sm font-bold text-slate-900 mt-2">Mercado Pago da loja</p>
+          <p className="text-xs text-slate-500 mt-1">
+            {mpLoading
+              ? 'Verificando conexão...'
+              : mpAccount?.connected
+              ? 'Conectado. Pix e cartão dos pedidos podem ser cobrados no Mercado Pago do lojista.'
+              : mpAccount?.oauthConfigured === false
+              ? 'OAuth ainda não está configurado no servidor.'
+              : 'Opcional. Sem conexão, o checkout continua registrando a forma de pagamento convencional.'}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {!mpAccount?.connected ? (
+              <button
+                type="button"
+                disabled={!storeId || mpActionLoading || mpAccount?.oauthConfigured === false}
+                onClick={async () => {
+                  if (!storeId) return;
+                  setMpActionLoading(true);
+                  try {
+                    const data = await storeService.createMercadoPagoConnectUrl(storeId, window.location.href);
+                    if (data?.authUrl) window.location.href = data.authUrl;
+                  } finally {
+                    setMpActionLoading(false);
+                  }
+                }}
+                className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white disabled:opacity-60"
+              >
+                {mpActionLoading ? 'Abrindo...' : 'Conectar Mercado Pago'}
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled={!storeId || mpActionLoading}
+                onClick={async () => {
+                  if (!storeId) return;
+                  setMpActionLoading(true);
+                  try {
+                    const data = await storeService.disconnectMercadoPago(storeId);
+                    setMpAccount(data);
+                  } finally {
+                    setMpActionLoading(false);
+                  }
+                }}
+                className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-60"
+              >
+                Desconectar
+              </button>
+            )}
+          </div>
+        </div>
         {Array.isArray(payments) && payments.length > 0 && (
           <div ref={summarySectionRef} className="scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-3">
             <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500 font-bold">Resumo financeiro</p>
@@ -2718,6 +2792,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               loading={subscriptionLoading}
               error={subscriptionError}
               payments={paymentsHistory}
+              storeId={storeId}
             />
           </FormSection>
         )}
@@ -3164,6 +3239,3 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     </AdminLayout>
   );
 }
-
-
-

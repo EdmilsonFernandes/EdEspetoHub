@@ -90,6 +90,21 @@ export const storeService = {
     return toJson(response);
   },
 
+  async getMercadoPagoAccount(storeId: string) {
+    const response = await apiClient.rawGet(`/stores/${storeId}/payment-accounts/mercadopago`);
+    return toJson(response);
+  },
+
+  async createMercadoPagoConnectUrl(storeId: string, returnTo?: string) {
+    const response = await apiClient.rawPost(`/stores/${storeId}/payment-accounts/mercadopago/connect`, { returnTo });
+    return toJson(response);
+  },
+
+  async disconnectMercadoPago(storeId: string) {
+    const response = await apiClient.rawDelete(`/stores/${storeId}/payment-accounts/mercadopago`);
+    return toJson(response);
+  },
+
   async updateSettings(slug: any, payload: any) {
     const response = await apiClient.rawPut(`/stores/${slug}/settings`, payload);
     return toJson(response);

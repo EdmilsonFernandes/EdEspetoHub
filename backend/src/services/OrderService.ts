@@ -31,6 +31,7 @@ import { EntityManager } from 'typeorm';
 import { Product } from '../entities/Product';
 import { OrderShipment } from '../entities/OrderShipment';
 import { PushNotificationService } from './PushNotificationService';
+import { OrderPaymentService } from './OrderPaymentService';
 /**
  * Provides OrderService functionality.
  *
@@ -49,6 +50,7 @@ export class OrderService
   private userRepository = new UserRepository();
   private storeUserRepository = new StoreUserRepository();
   private pushService = new PushNotificationService();
+  private orderPaymentService = new OrderPaymentService();
   private tz = process.env.APP_TZ || 'America/Sao_Paulo';
   private queueReconcileCooldownByStore = new Map<string, number>();
   private readonly queueReconcileCooldownMs = 20000;
@@ -883,6 +885,19 @@ private async seedPostalShipmentFromCheckoutTx(
       const order = await this.buildOrder(input, store, manager, randomUUID());
       const saved = await manager.getRepository(Order).save(order);
       await this.seedPostalShipmentFromCheckoutTx(manager, saved, input as any);
+      const payment = await this.orderPaymentService.createForOrderIfEnabled(saved, manager);
+      if (payment) {
+        (saved as any).payment = {
+          id: payment.id,
+          status: payment.paymentStatus,
+          provider: payment.provider,
+          providerId: payment.providerId,
+          paymentLink: payment.paymentLink,
+          qrCodeBase64: payment.qrCodeBase64,
+          qrCodeText: payment.qrCodeText,
+          expiresAt: payment.expiresAt,
+        };
+      }
       return saved;
     });
     await this.registerAnonymousOrderAttempt(input, store.id);
@@ -908,6 +923,19 @@ private async seedPostalShipmentFromCheckoutTx(
       const order = await this.buildOrder(input, store, manager, randomUUID());
       const saved = await manager.getRepository(Order).save(order);
       await this.seedPostalShipmentFromCheckoutTx(manager, saved, input as any);
+      const payment = await this.orderPaymentService.createForOrderIfEnabled(saved, manager);
+      if (payment) {
+        (saved as any).payment = {
+          id: payment.id,
+          status: payment.paymentStatus,
+          provider: payment.provider,
+          providerId: payment.providerId,
+          paymentLink: payment.paymentLink,
+          qrCodeBase64: payment.qrCodeBase64,
+          qrCodeText: payment.qrCodeText,
+          expiresAt: payment.expiresAt,
+        };
+      }
       return saved;
     });
     await this.registerAnonymousOrderAttempt({ ...input, storeId: store.id }, store.id);

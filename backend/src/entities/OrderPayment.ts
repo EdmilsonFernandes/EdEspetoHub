@@ -1,0 +1,65 @@
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Order } from './Order';
+import { Store } from './Store';
+
+@Entity({ name: 'order_payments' })
+export class OrderPayment {
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
+
+  @OneToOne(() => Order, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'order_id' })
+  order!: Order;
+
+  @Column({ name: 'order_id', type: 'uuid' })
+  orderId!: string;
+
+  @ManyToOne(() => Store, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'store_id' })
+  store!: Store;
+
+  @Column({ name: 'store_id', type: 'uuid' })
+  storeId!: string;
+
+  @Column({ name: 'payment_method', type: 'varchar' })
+  paymentMethod!: string;
+
+  @Column({ name: 'payment_status', type: 'varchar', default: 'PENDING' })
+  paymentStatus!: 'PENDING' | 'PAID' | 'FAILED';
+
+  @Column({ name: 'amount', type: 'numeric', precision: 10, scale: 2 })
+  amount!: number;
+
+  @Column({ name: 'provider', type: 'varchar', default: 'MERCADO_PAGO' })
+  provider!: 'MERCADO_PAGO';
+
+  @Column({ name: 'provider_id', type: 'varchar', nullable: true })
+  providerId?: string | null;
+
+  @Column({ name: 'payment_link', type: 'text', nullable: true })
+  paymentLink?: string | null;
+
+  @Column({ name: 'qr_code_base64', type: 'text', nullable: true })
+  qrCodeBase64?: string | null;
+
+  @Column({ name: 'qr_code_text', type: 'text', nullable: true })
+  qrCodeText?: string | null;
+
+  @Column({ name: 'expires_at', type: 'timestamptz', nullable: true })
+  expiresAt?: Date | null;
+
+  @Column({ name: 'paid_at', type: 'timestamptz', nullable: true })
+  paidAt?: Date | null;
+
+  @Column({ name: 'failed_at', type: 'timestamptz', nullable: true })
+  failedAt?: Date | null;
+
+  @Column({ name: 'provider_payload', type: 'jsonb', nullable: true })
+  providerPayload?: Record<string, any> | null;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt!: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt!: Date;
+}

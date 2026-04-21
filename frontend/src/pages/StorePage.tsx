@@ -1874,15 +1874,16 @@ export function StorePage() {
     setPostalQuote(null);
     setSelectedPostalServiceCode('');
     setPaymentMethod(defaultPaymentMethod);
-    setLastOrder({
-      id: createdOrder?.id,
-      type: customer.type,
-      payment,
-      phone: sanitizedPhoneKey || customer.phone,
-      pixKey,
-      table: customer.table,
-      customerName: effectiveCustomerName,
-      address: deliveryAddress || customer.address,
+      setLastOrder({
+        id: createdOrder?.id,
+        type: customer.type,
+        payment,
+        phone: sanitizedPhoneKey || customer.phone,
+        pixKey,
+        onlinePayment: createdOrder?.payment || null,
+        table: customer.table,
+        customerName: effectiveCustomerName,
+        address: deliveryAddress || customer.address,
       total: orderTotal,
       items: printableItems,
       queueRank: createdOrder?.queueRank ?? createdOrder?.queuePosition ?? null,
@@ -2705,6 +2706,7 @@ export function StorePage() {
               phone={lastOrder?.phone}
               table={lastOrder?.table}
               orderId={lastOrder?.id}
+              onlinePayment={lastOrder?.onlinePayment}
               onPrintReceipt={canUseAdminPrintFlow ? printLastOrderReceipt : undefined}
               onTrackOrder={
                 canUseAdminPrintFlow

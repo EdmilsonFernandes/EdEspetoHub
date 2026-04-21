@@ -9,7 +9,57 @@ const PIX_KEY_MOCK =
   "00020126580014BR.GOV.BCB.PIX0136123e4567-e89b-12d3-a456-426614174000520400005303986540510.005802BR5913EspetinhoDatony6008SaoPaulo62070503***6304";
 
 // Componente responsável por exibir o pagamento (Pix ou retirada)
-const PaymentSummary = ({ paymentMethod, pixKey, phone }) => {
+const PaymentSummary = ({ paymentMethod, pixKey, phone, onlinePayment }) => {
+  if (onlinePayment?.qrCodeBase64 || onlinePayment?.qrCodeText || onlinePayment?.paymentLink) {
+    const qrData = onlinePayment.qrCodeText || pixKey || phone || PIX_KEY_MOCK;
+    const qrUrl = onlinePayment.qrCodeBase64 || `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(qrData)}`;
+    return (
+      <div className="bg-white p-6 rounded-2xl shadow-lg border border-emerald-100 w-full mb-8">
+        <div className="flex flex-col items-center gap-3 mb-4 text-center">
+          <div className="p-3 bg-emerald-50 rounded-full">
+            <QrCode size={24} weight="duotone" className="text-emerald-700" />
+          </div>
+          <span className="font-bold text-gray-800">Pagamento online Mercado Pago</span>
+          <p className="text-xs text-gray-500">
+            Confirme o pagamento para a loja receber a atualização automaticamente.
+          </p>
+        </div>
+
+        {(onlinePayment.qrCodeBase64 || onlinePayment.qrCodeText) && (
+          <>
+            <div className="flex justify-center mb-4">
+              <img src={qrUrl} alt="QR Code Pix Mercado Pago" className="w-48 h-48 rounded-lg border" />
+            </div>
+            {onlinePayment.qrCodeText && (
+              <div className="bg-gray-50 p-4 rounded-xl font-mono text-xs text-gray-700 break-all select-all border border-gray-200">
+                {onlinePayment.qrCodeText}
+              </div>
+            )}
+            {onlinePayment.qrCodeText && (
+              <button
+                onClick={() => navigator.clipboard.writeText(onlinePayment.qrCodeText)}
+                className="w-full mt-4 py-3 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:opacity-90 transition-colors"
+              >
+                Copiar código Pix
+              </button>
+            )}
+          </>
+        )}
+
+        {onlinePayment.paymentLink && (
+          <a
+            href={onlinePayment.paymentLink}
+            target="_blank"
+            rel="noreferrer"
+            className="block w-full mt-4 py-3 bg-brand-primary text-white rounded-xl font-bold text-sm hover:opacity-90 transition-colors text-center"
+          >
+            Abrir pagamento
+          </a>
+        )}
+      </div>
+    );
+  }
+
   if (paymentMethod === "pix") {
     const qrData = pixKey || phone || PIX_KEY_MOCK;
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(
@@ -115,6 +165,7 @@ export const SuccessView = ({
   orderId,
   onTrackOrder,
   onPrintReceipt,
+  onlinePayment,
 }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-6 animate-in zoom-in">
@@ -140,6 +191,7 @@ export const SuccessView = ({
         paymentMethod={paymentMethod}
         pixKey={pixKey}
         phone={phone}
+        onlinePayment={onlinePayment}
       />
 
       <div className="flex flex-col sm:flex-row gap-3">

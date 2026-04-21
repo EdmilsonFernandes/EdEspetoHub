@@ -48,6 +48,7 @@ type CreatePaymentInput = {
     email: string;
     name: string;
   };
+  accessToken?: string;
 };
 /**
  * Handles has credentials.
@@ -55,17 +56,17 @@ type CreatePaymentInput = {
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-06
  */
-const hasCredentials = () =>
+const hasCredentials = (accessToken?: string) =>
   // Server-side payment creation only needs the private access token.
-  Boolean(env.mercadoPago.accessToken);
+  Boolean(accessToken || env.mercadoPago.accessToken);
 /**
  * Builds headers.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-06
  */
-const buildHeaders = () => ({
-  Authorization: `Bearer ${env.mercadoPago.accessToken}`,
+const buildHeaders = (accessToken?: string) => ({
+  Authorization: `Bearer ${accessToken || env.mercadoPago.accessToken}`,
   'Content-Type': 'application/json',
   'X-Idempotency-Key': crypto.randomUUID(),
 });
@@ -95,7 +96,7 @@ export class MercadoPagoService {
    * @date 2026-01-06
    */
   async createPayment(input: CreatePaymentInput) {
-    if (!hasCredentials()) return null;
+    if (!hasCredentials(input.accessToken)) return null;
 
     if (input.method === 'PIX') {
       return this.createPixPayment(input);
@@ -114,11 +115,11 @@ export class MercadoPagoService {
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-06
    */
-  async getPayment(paymentId: string) {
-    if (!hasCredentials()) return null;
+  async getPayment(paymentId: string, accessToken?: string) {
+    if (!hasCredentials(accessToken)) return null;
     const url = `${env.mercadoPago.apiBaseUrl}/v1/payments/${paymentId}`;
     this.debugLog('GET payment', { url, paymentId });
-    const response = await fetch(url, { headers: buildHeaders() });
+    const response = await fetch(url, { headers: buildHeaders(accessToken) });
     if (!response.ok) {
       /**
        * Handles body.
@@ -170,7 +171,7 @@ export class MercadoPagoService {
 
     const response = await fetch(url, {
       method: 'POST',
-      headers: buildHeaders(),
+      headers: buildHeaders(input.accessToken),
       body: JSON.stringify(body),
     });
 
@@ -233,7 +234,7 @@ export class MercadoPagoService {
 
     const response = await fetch(url, {
       method: 'POST',
-      headers: buildHeaders(),
+      headers: buildHeaders(input.accessToken),
       body: JSON.stringify(body),
     });
 
@@ -285,7 +286,7 @@ export class MercadoPagoService {
 
     const response = await fetch(url, {
       method: 'POST',
-      headers: buildHeaders(),
+      headers: buildHeaders(input.accessToken),
       body: JSON.stringify(body),
     });
 

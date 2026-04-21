@@ -565,6 +565,49 @@ CREATE TABLE IF NOT EXISTS condominiums (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS store_payment_accounts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  provider TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'CONNECTED',
+  provider_user_id TEXT,
+  access_token_encrypted TEXT NOT NULL,
+  refresh_token_encrypted TEXT,
+  expires_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT uq_store_payment_accounts_store_provider UNIQUE (store_id, provider)
+);
+
+CREATE INDEX IF NOT EXISTS idx_store_payment_accounts_store
+ON store_payment_accounts(store_id);
+
+CREATE TABLE IF NOT EXISTS order_payments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  payment_method TEXT NOT NULL,
+  payment_status TEXT NOT NULL DEFAULT 'PENDING',
+  amount NUMERIC(10,2) NOT NULL,
+  provider TEXT NOT NULL DEFAULT 'MERCADO_PAGO',
+  provider_id TEXT,
+  payment_link TEXT,
+  qr_code_base64 TEXT,
+  qr_code_text TEXT,
+  expires_at TIMESTAMPTZ,
+  paid_at TIMESTAMPTZ,
+  failed_at TIMESTAMPTZ,
+  provider_payload JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT uq_order_payments_order UNIQUE (order_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_order_payments_store_created
+ON order_payments(store_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_order_payments_provider_id
+ON order_payments(provider_id);
+
 CREATE INDEX IF NOT EXISTS idx_condominiums_active
 ON condominiums(active);
 

@@ -32,6 +32,7 @@ import { ShippingController } from '../controllers/ShippingController';
 import { CustomerAccountController } from '../controllers/CustomerAccountController';
 import { FeaturedProductController } from '../controllers/FeaturedProductController';
 import { CondominiumController } from '../controllers/CondominiumController';
+import { StorePaymentAccountController } from '../controllers/StorePaymentAccountController';
 
 import { hydrateAuthOptional, requireAuth, requireRole } from '../middleware/authGuard';
 import { requireActiveSubscription } from '../middleware/subscriptionGuard';
@@ -81,6 +82,7 @@ routes.post('/subscriptions/:id/renew', SubscriptionController.renew);
 routes.patch('/subscriptions/:id/status', SubscriptionController.updateStatus);
 routes.post('/webhooks/payment-confirmed', PaymentController.confirm);
 routes.post('/webhooks/mercadopago', PaymentController.mercadoPagoWebhook);
+routes.get('/payment-accounts/mercadopago/callback', StorePaymentAccountController.mercadoPagoCallback);
 routes.get('/stores/:storeId/payments', requireAuth, requireRole('ADMIN'), PaymentController.listByStore);
 routes.get('/payments/:paymentId', PaymentController.getById);
 routes.get('/payments/:paymentId/events', PaymentController.getEvents);
@@ -151,6 +153,9 @@ routes.get('/public/stores/slug/:slug/tables/status', OrderController.listTableS
 routes.put('/stores/:storeId', requireAuth, requireRole('ADMIN'), StoreController.update);
 routes.put('/stores/:storeId/status', requireAuth, requireRole('ADMIN'), StoreController.updateStatus);
 routes.get('/stores/:storeId/link-stats', requireAuth, requireRole('ADMIN'), StoreController.getLinkStats);
+routes.get('/stores/:storeId/payment-accounts/mercadopago', requireAuth, requireRole('ADMIN'), StorePaymentAccountController.getMercadoPagoStatus);
+routes.post('/stores/:storeId/payment-accounts/mercadopago/connect', requireAuth, requireRole('ADMIN'), StorePaymentAccountController.createMercadoPagoConnectUrl);
+routes.delete('/stores/:storeId/payment-accounts/mercadopago', requireAuth, requireRole('ADMIN'), StorePaymentAccountController.disconnectMercadoPago);
 routes.get('/stores/:storeId/users', requireAuth, requireRole('ADMIN'), StoreUserController.list);
 routes.post('/stores/:storeId/users', requireAuth, requireRole('ADMIN'), StoreUserController.create);
 routes.patch('/stores/:storeId/users/:userId/password', requireAuth, requireRole('ADMIN'), StoreUserController.updatePassword);

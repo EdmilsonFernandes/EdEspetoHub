@@ -17,6 +17,7 @@ import { OrderEtaServiceV2 } from '../services/OrderEtaServiceV2';
 import { AppDataSource } from '../config/database';
 import { Motoboy } from '../entities/Motoboy';
 import { OrderDelivery } from '../entities/OrderDelivery';
+import { OrderPayment } from '../entities/OrderPayment';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
@@ -359,6 +360,9 @@ static async markItemsAsPrinted(req: Request, res: Response) {
         order?.type === 'delivery'
           ? await AppDataSource.getRepository(OrderDelivery).findOne({ where: { orderId: order.id } as any })
           : null;
+      const orderPayment = await AppDataSource.getRepository(OrderPayment).findOne({
+        where: { orderId: order.id } as any,
+      });
       const motoboy =
         deliveryRow?.motoboyId
           ? await AppDataSource.getRepository(Motoboy).findOne({
@@ -397,6 +401,18 @@ static async markItemsAsPrinted(req: Request, res: Response) {
         address: order.address,
         paymentMethod: order.paymentMethod,
         paymentStatus: order.paymentStatus,
+        payment: orderPayment
+          ? {
+              id: orderPayment.id,
+              status: orderPayment.paymentStatus,
+              provider: orderPayment.provider,
+              providerId: orderPayment.providerId || null,
+              paymentLink: orderPayment.paymentLink || null,
+              qrCodeBase64: orderPayment.qrCodeBase64 || null,
+              qrCodeText: orderPayment.qrCodeText || null,
+              expiresAt: orderPayment.expiresAt || null,
+            }
+          : null,
         cashTendered: order.cashTendered ?? null,
         total: order.total,
         deliveryFee: order.deliveryFee ?? null,
