@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
+import { App as CapacitorApp } from '@capacitor/app';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -539,6 +540,18 @@ export function ClientOrders() {
       document.removeEventListener('visibilitychange', refreshIfVisible);
     };
   }, [activeOrderIds, activeOrders.length, loadOrders]);
+
+  // On native APK: refresh immediately when app returns to foreground (user coming back from MP browser)
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    const hasAwaitingPayment = orders.some((o) => String(o.status || '').toLowerCase() === 'awaiting_payment');
+    if (!hasAwaitingPayment) return;
+    let handle: any;
+    CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+      if (isActive) void loadOrders({ silent: true });
+    }).then((h) => { handle = h; });
+    return () => { handle?.remove(); };
+  }, [orders, loadOrders]);
 
   const openStore = (slug?: string) => {
     if (!slug) {
