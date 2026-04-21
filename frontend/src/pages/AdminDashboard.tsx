@@ -32,6 +32,7 @@ import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 import { FormSection } from '../components/common/FormSection';
 import { PremiumSelect } from '../components/common/PremiumSelect';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
+import mercadoPagoLogo from '../assets/mercado-pago-logo.svg';
 
 const formatPlanCycle = (days: number) => {
   if (!Number.isFinite(days)) return '—';
@@ -1137,19 +1138,60 @@ const PaymentsView = ({ subscription, loading, error, payments, storeId }) => {
             </button>
           </div>
         )}
-        <div className="rounded-2xl border border-slate-200 border-l-4 border-l-emerald-400 bg-white p-4">
-          <p className="text-xs uppercase tracking-[0.25em] text-emerald-700">Pedidos online</p>
-          <p className="text-sm font-bold text-slate-900 mt-2">Mercado Pago da loja</p>
-          <p className="text-xs text-slate-500 mt-1">
-            {mpLoading
-              ? 'Verificando conexão...'
-              : mpAccount?.connected
-              ? 'Conectado. Pix e cartão dos pedidos podem ser cobrados no Mercado Pago do lojista.'
-              : mpAccount?.oauthConfigured === false
-              ? 'OAuth ainda não está configurado no servidor.'
-              : 'Opcional. Sem conexão, o checkout continua registrando a forma de pagamento convencional.'}
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_45px_-38px_rgba(15,23,42,0.55)]">
+          <div className="border-b border-slate-100 bg-gradient-to-r from-white via-sky-50/70 to-yellow-50/70 p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="flex h-10 w-28 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 shadow-sm">
+                    <img src={mercadoPagoLogo} alt="Mercado Pago" className="max-h-7 w-full object-contain" />
+                  </span>
+                  <span
+                    className={`rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] ${
+                      mpLoading
+                        ? 'bg-slate-100 text-slate-600'
+                        : mpAccount?.connected
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : 'bg-slate-100 text-slate-700'
+                    }`}
+                  >
+                    {mpLoading ? 'Verificando' : mpAccount?.connected ? 'Conectado' : 'Modo convencional'}
+                  </span>
+                </div>
+                <p className="mt-3 text-sm font-black text-slate-950">
+                  Receba Pix e cartão direto no Mercado Pago da loja
+                </p>
+                <p className="mt-1 max-w-xl text-xs leading-5 text-slate-600">
+                  {mpLoading
+                    ? 'Estamos verificando se esta loja já autorizou a cobrança online.'
+                    : mpAccount?.connected
+                    ? 'Novos pedidos em Pix, crédito e débito geram cobrança online e o valor cai na conta Mercado Pago conectada.'
+                    : mpAccount?.oauthConfigured === false
+                    ? 'A conexão OAuth ainda não está configurada no servidor. O checkout segue no modo convencional.'
+                    : 'Sem conexão, o pedido continua registrando Pix, crédito ou débito, mas a cobrança fica combinada fora do sistema.'}
+                </p>
+              </div>
+              <div className="rounded-xl border border-white/80 bg-white/90 px-3 py-2 text-xs text-slate-600 shadow-sm sm:w-52">
+                <p className="font-black text-slate-900">Fluxo atual</p>
+                <p className="mt-1">
+                  {mpAccount?.connected
+                    ? 'Cobrança online ativa para novos pedidos.'
+                    : 'Atendimento no modo presencial/manual.'}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="grid gap-3 p-4 sm:grid-cols-2">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Com Mercado Pago</p>
+              <p className="mt-1 text-xs leading-5 text-slate-700">Cliente paga online por Pix, crédito ou débito.</p>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
+              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Sem conexão</p>
+              <p className="mt-1 text-xs leading-5 text-slate-700">O pedido registra a escolha e a loja cobra como já fazia.</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 px-4 pb-4 pt-1">
             {!mpAccount?.connected ? (
               <button
                 type="button"
@@ -1164,9 +1206,9 @@ const PaymentsView = ({ subscription, loading, error, payments, storeId }) => {
                     setMpActionLoading(false);
                   }
                 }}
-                className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white disabled:opacity-60"
+                className="rounded-lg bg-[#009ee3] px-4 py-2 text-xs font-black text-white shadow-sm hover:bg-[#008dcc] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {mpActionLoading ? 'Abrindo...' : 'Conectar Mercado Pago'}
+                {mpActionLoading ? 'Abrindo Mercado Pago...' : 'Conectar conta Mercado Pago'}
               </button>
             ) : (
               <button
@@ -1182,9 +1224,9 @@ const PaymentsView = ({ subscription, loading, error, payments, storeId }) => {
                     setMpActionLoading(false);
                   }
                 }}
-                className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-60"
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-black text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Desconectar
+                {mpActionLoading ? 'Desconectando...' : 'Desconectar e voltar ao modo convencional'}
               </button>
             )}
           </div>
