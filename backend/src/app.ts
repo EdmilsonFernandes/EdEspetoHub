@@ -18,7 +18,6 @@ import path from 'path';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import { loadSsmEnv } from './config/ssm';
-import { ensureBaseSchema, ensureDatabaseExists, getEnvDbConn } from './utils/dbBootstrap';
 /**
  * Handles bootstrap.
  *
@@ -28,6 +27,7 @@ import { ensureBaseSchema, ensureDatabaseExists, getEnvDbConn } from './utils/db
 async function bootstrap()
 {
   await loadSsmEnv();
+  const { ensureBaseSchema, ensureDatabaseExists, getEnvDbConn } = await import('./utils/dbBootstrap');
   const { AppDataSource } = await import('./config/database');
   const routes = (await import('./routes')).default;
   const { env } = await import('./config/env');
