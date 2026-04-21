@@ -43,6 +43,7 @@ import { customerAccountService } from '../services/customerAccountService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { SocialProofMarquee } from '../components/Landing/SocialProofMarquee';
 import { SegmentPromoCarousel } from '../components/common/SegmentPromoCarousel';
+import mercadoPagoLogo from '../assets/mercado-pago-logo.svg';
 
 const Counter = ({ value, duration = 2000, prefix = '', suffix = '', formatter }: { value: number; duration?: number; prefix?: string; suffix?: string; formatter?: (v: number) => string }) => {
   const [count, setCount] = useState(0);
@@ -269,7 +270,7 @@ export function LandingPage() {
     { icon: ListChecks,    title: 'Pedidos em tempo real',   desc: 'Novos pedidos chegam na hora, atualizados em todos os dispositivos.', accent: 'sky' },
     { icon: Package,       title: 'Fila de produção',        desc: 'Pendente, produzindo, pronto — controle visual de cada etapa.', accent: 'amber' },
     { icon: Motorcycle,    title: 'Motoboys integrados',     desc: 'Cadastre entregadores, gerencie ciclos e acompanhe ganhos.', accent: 'violet' },
-    { icon: CurrencyDollar,title: 'PIX automático',          desc: 'BR Code gerado por pedido. Cliente escaneia, pagamento confirmado.', accent: 'emerald' },
+    { icon: CurrencyDollar,title: 'Pagamento online',        desc: 'Pix, crédito e débito com Mercado Pago da própria loja.', accent: 'emerald' },
     { icon: ChartLine,     title: 'Dashboard analítico',     desc: 'Faturamento, ticket médio e comparativos por período.', accent: 'sky' },
     { icon: MapPin,        title: 'Rastreamento',            desc: 'Clientes acompanham o pedido do preparo até a porta.', accent: 'rose' },
     { icon: Buildings,     title: 'Hub de condomínios',      desc: 'Vitrine própria em feiras e condomínios. Retirada ou entrega.', accent: 'indigo' },
@@ -367,6 +368,7 @@ export function LandingPage() {
               <div className="animate-in fade-in duration-700 delay-300 flex flex-wrap justify-center gap-x-6 gap-y-2 opacity-55 lg:justify-start">
                 {[
                   { icon: ShieldCheck, text: 'Sem cartão de crédito', color: 'text-emerald-400' },
+                  { icon: CurrencyDollar, text: 'Mercado Pago opcional', color: 'text-sky-400' },
                   { icon: ArrowsClockwise, text: 'Dados em tempo real', color: 'text-sky-400' },
                   { icon: Desktop, text: 'Multi-dispositivo', color: 'text-indigo-400' },
                 ].map(({ icon: Icon, text, color }) => (
@@ -522,6 +524,83 @@ export function LandingPage() {
               <ArrowRight size={16} weight="bold" />
             </button>
             <p className="mt-3 text-xs font-medium text-slate-400">7 dias grátis · Sem cartão · Cancele quando quiser</p>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════
+          PAGAMENTO ONLINE
+      ══════════════════════════════════════════════════════════════ */}
+      <section className="bg-white py-20 sm:py-28">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="grid items-center gap-10 rounded-[2rem] border border-slate-200 bg-[linear-gradient(135deg,#f8fafc_0%,#ffffff_48%,#eef8ff_100%)] p-6 shadow-[0_24px_70px_-55px_rgba(15,23,42,0.55)] sm:p-10 lg:grid-cols-[0.92fr_1.08fr]">
+            <div className="space-y-6">
+              <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-sky-700 shadow-sm">
+                <ShieldCheck size={13} weight="duotone" />
+                Pagamento online opcional
+              </div>
+              <div className="space-y-3">
+                <h2 className="text-3xl font-black leading-tight tracking-tight text-slate-950 sm:text-5xl">
+                  Receba pedidos online sem burocracia.
+                </h2>
+                <p className="max-w-2xl text-sm font-medium leading-7 text-slate-600 sm:text-base">
+                  O lojista pode conectar a própria conta Mercado Pago e cobrar Pix, crédito ou débito direto nos pedidos. Se preferir, continua no modo convencional e combina o pagamento como já faz hoje.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {['Pix', 'Cartão de crédito', 'Cartão de débito', 'Fallback manual'].map((item) => (
+                  <span key={item} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-black text-slate-600 shadow-sm">
+                    {item}
+                  </span>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate('/create?plan=trial')}
+                className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-7 py-3.5 text-sm font-black text-white shadow-[0_18px_38px_-20px_rgba(15,23,42,0.75)] transition-all hover:scale-[1.01] active:scale-[0.98]"
+              >
+                Ativar minha loja
+                <ArrowRight size={16} weight="bold" />
+              </button>
+            </div>
+
+            <div className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-[0_24px_55px_-45px_rgba(15,23,42,0.55)]">
+              <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-5">
+                <img src={mercadoPagoLogo} alt="Mercado Pago" className="h-9 w-auto max-w-[170px] object-contain" />
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-200">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  Conexão segura
+                </span>
+              </div>
+              <div className="grid gap-3 py-5 sm:grid-cols-3">
+                {[
+                  { label: 'Pedido', value: 'R$ 86,90' },
+                  { label: 'Forma', value: 'Pix online' },
+                  { label: 'Status', value: 'Aguardando' },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">{item.label}</p>
+                    <p className="mt-1 text-sm font-black text-slate-900">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="rounded-2xl border border-sky-100 bg-sky-50/70 p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-sky-600 shadow-sm">
+                    <QrCode size={22} weight="duotone" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-black text-slate-950">Cobrança gerada no checkout</p>
+                    <p className="mt-1 text-xs font-medium leading-5 text-slate-600">
+                      O cliente finaliza o pedido e recebe o pagamento online quando a loja estiver conectada.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <p className="mt-4 text-[11px] font-medium leading-5 text-slate-400">
+                A conexão é feita por OAuth. O lojista autoriza com a própria conta e pode desconectar quando quiser.
+              </p>
+            </div>
           </div>
         </div>
       </section>
