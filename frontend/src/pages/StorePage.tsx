@@ -1213,11 +1213,27 @@ export function StorePage() {
           if (!cancelled && nextPs === 'PAID' && customerSession?.token) {
             setTimeout(() => navigate('/cliente/pedidos'), 2500);
           }
+          if (!cancelled && nextPs === 'FAILED') {
+            cancelled = true;
+            showToast('PIX expirado ou pagamento recusado. Faça um novo pedido.', 'warning', { durationMs: 4000 });
+            setTimeout(() => setView('menu'), 3000);
+          }
         }
       } catch {}
     };
 
-    const intervalId = setInterval(poll, 3000);
+    const checkExpiry = () => {
+      const expiresAt = lastOrder?.onlinePayment?.expiresAt;
+      if (!expiresAt || cancelled) return;
+      if (new Date(expiresAt).getTime() <= Date.now()) {
+        cancelled = true;
+        setLastOrder((prev: any) => prev ? { ...prev, paymentStatus: 'FAILED' } : prev);
+        showToast('PIX expirado. Faça um novo pedido.', 'warning', { durationMs: 4000 });
+        setTimeout(() => setView('menu'), 3000);
+      }
+    };
+
+    const intervalId = setInterval(() => { void poll(); checkExpiry(); }, 3000);
     return () => {
       cancelled = true;
       clearInterval(intervalId);

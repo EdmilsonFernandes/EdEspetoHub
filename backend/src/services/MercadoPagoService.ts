@@ -272,10 +272,12 @@ export class MercadoPagoService {
    */
   private async createPixPayment(input: CreatePaymentInput) {
     const url = `${env.mercadoPago.apiBaseUrl}/v1/payments`;
+    const pixExpiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
     const body = {
       transaction_amount: input.amount,
       description: input.description,
       payment_method_id: 'pix',
+      date_of_expiration: pixExpiresAt,
       external_reference: input.externalReference,
       payer: {
         email: input.payer.email,
