@@ -2019,6 +2019,11 @@ export function StorePage() {
       setLastOrderItems(lastItemsPayload.items);
     }
     setView(isStoreAdmin ? 'menu' : 'success');
+    // Auto-open MP payment link so user doesn't need to tap a second button
+    const mpPaymentLink = createdOrder?.payment?.paymentLink;
+    if (mpPaymentLink && createdOrder?.status === 'awaiting_payment') {
+      window.open(mpPaymentLink, '_system');
+    }
     showToast(
       createdOrder?.status === 'awaiting_payment'
         ? 'Pedido registrado! Finalize o pagamento para confirmar.'

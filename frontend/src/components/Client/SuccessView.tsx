@@ -400,14 +400,15 @@ export const SuccessView = ({
 
         {/* Actions */}
         <div className="flex flex-col gap-3">
-          {onMyOrders ? (
+          {onMyOrders && (
             <button
               onClick={onMyOrders}
               className="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 py-4 text-base font-black text-white shadow-sm transition hover:bg-slate-800 active:scale-[0.98]"
             >
               <ListBullets size={20} weight="duotone" /> Meus pedidos
             </button>
-          ) : (
+          )}
+          {!onMyOrders && (
             <button
               onClick={onNewOrder}
               className="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 py-4 text-base font-black text-white shadow-sm transition hover:bg-slate-800 active:scale-[0.98]"
@@ -416,7 +417,7 @@ export const SuccessView = ({
             </button>
           )}
           <div className="flex gap-3">
-            {orderId && onTrackOrder && !isPaid && !isAwaitingPayment && (
+            {orderId && onTrackOrder && !isAwaitingPayment && (
               <button
                 onClick={onTrackOrder}
                 className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 py-3.5 text-sm font-bold text-emerald-800 transition hover:bg-emerald-100 active:scale-[0.98]"
@@ -432,7 +433,7 @@ export const SuccessView = ({
                 <Printer size={18} weight="duotone" /> Comprovante
               </button>
             )}
-            {onWhatsApp && (
+            {onWhatsApp && !isAwaitingPayment && (
               <button
                 onClick={onWhatsApp}
                 className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 py-3.5 text-sm font-bold text-emerald-800 transition hover:bg-emerald-100 active:scale-[0.98]"
