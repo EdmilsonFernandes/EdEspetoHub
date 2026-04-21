@@ -2909,36 +2909,32 @@ export function StorePage() {
           />
         )}
         {view === 'success' && (
-          <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="max-w-lg mx-auto min-h-full">
-            <SuccessView
-              orderType={lastOrder?.type}
-              paymentMethod={lastOrder?.payment}
-              pixKey={lastOrder?.pixKey}
-              phone={lastOrder?.phone}
-              table={lastOrder?.table}
-              orderId={lastOrder?.id}
-              onlinePayment={!isStoreAdmin && !isCondominiumCheckout ? lastOrder?.onlinePayment : null}
-              paymentStatus={!isStoreAdmin && !isCondominiumCheckout ? lastOrder?.paymentStatus : undefined}
-              onPrintReceipt={canUseAdminPrintFlow ? printLastOrderReceipt : undefined}
-              onTrackOrder={
-                canUseAdminPrintFlow
-                  ? undefined
-                  : () => {
-                      if (lastOrder?.id) {
-                        navigate(`/pedido/${lastOrder.id}`);
-                      }
+          <SuccessView
+            orderType={lastOrder?.type}
+            paymentMethod={lastOrder?.payment}
+            pixKey={lastOrder?.pixKey}
+            phone={lastOrder?.phone}
+            table={lastOrder?.table}
+            orderId={lastOrder?.id}
+            onlinePayment={!isStoreAdmin && !isCondominiumCheckout ? lastOrder?.onlinePayment : null}
+            paymentStatus={!isStoreAdmin && !isCondominiumCheckout ? lastOrder?.paymentStatus : undefined}
+            onPrintReceipt={canUseAdminPrintFlow ? printLastOrderReceipt : undefined}
+            onTrackOrder={
+              canUseAdminPrintFlow
+                ? undefined
+                : () => {
+                    if (lastOrder?.id) {
+                      navigate(`/pedido/${lastOrder.id}`);
                     }
-              }
-              onNewOrder={() => setView('menu')}
-              onMyOrders={customerSession?.token ? () => navigate('/cliente/pedidos') : undefined}
-              onWhatsApp={pendingWhatsApp ?? undefined}
-              storeLabel={storeName || branding?.brandName || ''}
-              storeLogoUrl={branding?.logoUrl || ''}
-              storeSlug={storeSlug || ''}
-            />
-            </div>
-          </div>
+                  }
+            }
+            onNewOrder={() => setView('menu')}
+            onMyOrders={customerSession?.token ? () => navigate('/cliente/pedidos') : undefined}
+            onWhatsApp={pendingWhatsApp ?? undefined}
+            storeLabel={storeName || branding?.brandName || ''}
+            storeLogoUrl={branding?.logoUrl || ''}
+            storeSlug={storeSlug || ''}
+          />
         )}
       </main>
 
