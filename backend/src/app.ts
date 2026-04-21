@@ -35,6 +35,7 @@ async function bootstrap()
 	  const { scheduleSubscriptionExpirationJob } = await import('./jobs/subscription-expiration.job');
 	  const { scheduleDeliveryExpirationJob } = await import('./jobs/delivery-expiration.job');
 	  const { scheduleFaceVerifyJob } = await import('./jobs/face-verify.job');
+	  const { scheduleAwaitingPaymentExpirationJob } = await import('./jobs/awaiting-payment-expiration.job');
 	  const { runMigrations } = await import('./utils/runMigrations');
   const { requestLogger } = await import('./middleware/requestLogger');
   const { accessLogger } = await import('./middleware/accessLogger');
@@ -106,6 +107,7 @@ async function bootstrap()
 	  scheduleSubscriptionExpirationJob();
 	  scheduleDeliveryExpirationJob();
 	  scheduleFaceVerifyJob();
+	  scheduleAwaitingPaymentExpirationJob();
 
   app.listen(env.port, () =>
   {
