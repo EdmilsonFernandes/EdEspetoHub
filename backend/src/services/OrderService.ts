@@ -925,13 +925,23 @@ private async seedPostalShipmentFromCheckoutTx(
    */
   async createBySlug(input: Omit<CreateOrderDto, 'storeId'> & { storeSlug: string })
   {
-    const store = await this.storeRepository.findBySlug(input.storeSlug);
+    const store = await this.storeRepository.findBySlugWithOwner(input.storeSlug);
     if (!store) throw new AppError('STORE-001', 404);
     await this.ensureAnonymousOrderPolicy({ ...input, storeId: store.id }, store.id);
     const saved = await AppDataSource.transaction(async (manager) => {
       const order = await this.buildOrder(input, store, manager, randomUUID());
       const saved = await manager.getRepository(Order).save(order);
       await this.seedPostalShipmentFromCheckoutTx(manager, saved, input as any);
+      // Attach customer email so MP payer resolution works even when the relation isn't loaded post-save.
+      if (input.customerUserId && !(saved as any).customerUser?.email) {
+        const [customerRow] = await manager.query(
+          'SELECT email FROM users WHERE id = $1 LIMIT 1',
+          [input.customerUserId]
+        );
+        if (customerRow?.email) {
+          (saved as any).customerUser = { email: customerRow.email };
+        }
+      }
       const payment = await this.orderPaymentService.createForOrderIfEnabled(saved, manager);
       if (payment) {
         (saved as any).payment = {
