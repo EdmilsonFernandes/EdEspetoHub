@@ -10,8 +10,10 @@ import { getStoreAvatarUrl } from "../../utils/storeAvatar";
 const formatCountdown = (ms: number) => {
   if (ms <= 0) return "00:00";
   const totalSec = Math.floor(ms / 1000);
-  const min = Math.floor(totalSec / 60);
+  const hours = Math.floor(totalSec / 3600);
+  const min = Math.floor((totalSec % 3600) / 60);
   const sec = totalSec % 60;
+  if (hours > 0) return `${hours}h ${min.toString().padStart(2, "0")}m`;
   return `${min.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
 };
 
@@ -371,8 +373,8 @@ export const SuccessView = ({
           </div>
         </div>
 
-        {/* Online payment UI (Mercado Pago) */}
-        {hasOnlinePayment && (
+        {/* Online payment UI (Mercado Pago) — hide when paid, status card above already confirms it */}
+        {hasOnlinePayment && !isPaid && (
           <OnlinePaymentBlock onlinePayment={onlinePayment} paymentStatus={paymentStatus} />
         )}
 

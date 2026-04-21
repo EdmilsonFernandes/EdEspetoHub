@@ -1209,6 +1209,9 @@ export function StorePage() {
         const nextPs = String(data?.paymentStatus || '').toUpperCase();
         if (!cancelled && (nextPs === 'PAID' || nextPs === 'FAILED')) {
           setLastOrder((prev: any) => prev ? { ...prev, paymentStatus: nextPs } : prev);
+          if (!cancelled && nextPs === 'PAID' && customerSession?.token) {
+            setTimeout(() => navigate('/cliente/pedidos'), 2500);
+          }
         }
       } catch {}
     };
@@ -2462,7 +2465,7 @@ export function StorePage() {
           </div>
         </div>
       )}
-      {view !== 'menu' && view !== 'cart' && (
+      {view !== 'menu' && view !== 'cart' && view !== 'success' && (
         <div className="bg-white shadow-md px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sticky top-0 z-40 border-b border-gray-100">
           <div
             className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border shadow-sm bg-white flex-shrink-0 flex items-center justify-center"
