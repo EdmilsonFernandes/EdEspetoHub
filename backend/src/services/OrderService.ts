@@ -887,9 +887,6 @@ private async seedPostalShipmentFromCheckoutTx(
       await this.seedPostalShipmentFromCheckoutTx(manager, saved, input as any);
       const payment = await this.orderPaymentService.createForOrderIfEnabled(saved, manager);
       if (payment) {
-        // Hold order off the queue until MP confirms payment via webhook
-        await manager.getRepository(Order).update({ id: saved.id }, { status: 'awaiting_payment' });
-        saved.status = 'awaiting_payment';
         (saved as any).payment = {
           id: payment.id,
           status: payment.paymentStatus,
@@ -900,6 +897,12 @@ private async seedPostalShipmentFromCheckoutTx(
           qrCodeText: payment.qrCodeText,
           expiresAt: payment.expiresAt,
         };
+        // Only hold off queue if MP actually created a payment (has providerId).
+        // If MP failed or had no payer email, fall through to normal pending flow.
+        if (payment.providerId) {
+          await manager.getRepository(Order).update({ id: saved.id }, { status: 'awaiting_payment' });
+          saved.status = 'awaiting_payment';
+        }
       }
       return saved;
     });
@@ -931,9 +934,6 @@ private async seedPostalShipmentFromCheckoutTx(
       await this.seedPostalShipmentFromCheckoutTx(manager, saved, input as any);
       const payment = await this.orderPaymentService.createForOrderIfEnabled(saved, manager);
       if (payment) {
-        // Hold order off the queue until MP confirms payment via webhook
-        await manager.getRepository(Order).update({ id: saved.id }, { status: 'awaiting_payment' });
-        saved.status = 'awaiting_payment';
         (saved as any).payment = {
           id: payment.id,
           status: payment.paymentStatus,
@@ -944,6 +944,12 @@ private async seedPostalShipmentFromCheckoutTx(
           qrCodeText: payment.qrCodeText,
           expiresAt: payment.expiresAt,
         };
+        // Only hold off queue if MP actually created a payment (has providerId).
+        // If MP failed or had no payer email, fall through to normal pending flow.
+        if (payment.providerId) {
+          await manager.getRepository(Order).update({ id: saved.id }, { status: 'awaiting_payment' });
+          saved.status = 'awaiting_payment';
+        }
       }
       return saved;
     });
