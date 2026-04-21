@@ -28,15 +28,14 @@ const OnlinePaymentBlock = ({ onlinePayment, paymentStatus }) => {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (!onlinePayment?.expiresAt) return;
-    const update = () => {
-      const diff = new Date(onlinePayment.expiresAt).getTime() - Date.now();
-      setTimeLeft(diff > 0 ? diff : 0);
-    };
+    if (!isPix) return;
+    const reported = onlinePayment?.expiresAt ? new Date(onlinePayment.expiresAt).getTime() : 0;
+    const expiryMs = (reported - Date.now() > 30_000) ? reported : Date.now() + 5 * 60 * 1000;
+    const update = () => setTimeLeft(Math.max(0, expiryMs - Date.now()));
     update();
     const id = setInterval(update, 500);
     return () => clearInterval(id);
-  }, [onlinePayment?.expiresAt]);
+  }, [onlinePayment?.expiresAt, isPix]);
 
   const isExpired = timeLeft !== null && timeLeft === 0;
 

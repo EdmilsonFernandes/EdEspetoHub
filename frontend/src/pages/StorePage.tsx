@@ -1614,7 +1614,9 @@ export function StorePage() {
     const isStaffTableOrder = customer.type === 'table' && canUseAdminPrintFlow;
     const normalizedTable = String(customer.table || '').trim();
     const effectiveCustomerName =
-      String(customer.name || '').trim() || (isStaffTableOrder && normalizedTable ? `Cliente Mesa ${normalizedTable}` : '');
+      String(customer.name || '').trim() ||
+      String(customerSession?.user?.fullName || '').trim() ||
+      (isStaffTableOrder && normalizedTable ? `Cliente Mesa ${normalizedTable}` : '');
 
     if (!validCartItems.length) {
       showToast('Adicione pelo menos 1 item para finalizar o pedido.', 'warning');
@@ -1789,7 +1791,7 @@ export function StorePage() {
       const demoId = `demo-${Date.now()}`;
       reconcileLocalStockAfterCheckout(validCartItems);
       setCart({});
-      setCustomer(initialCustomer);
+      setCustomer({ ...initialCustomer, name: String(customerSession?.user?.fullName || '').trim(), phone: String(customerSession?.user?.phone || '').trim() });
       setDeliveryMode('distance');
       setPostalQuote(null);
       setSelectedPostalServiceCode('');
@@ -1958,7 +1960,7 @@ export function StorePage() {
     }
 
     setCart({});
-    setCustomer(initialCustomer);
+    setCustomer({ ...initialCustomer, name: String(customerSession?.user?.fullName || '').trim(), phone: String(customerSession?.user?.phone || '').trim() });
     setDeliveryMode('distance');
     setPostalQuote(null);
     setSelectedPostalServiceCode('');
