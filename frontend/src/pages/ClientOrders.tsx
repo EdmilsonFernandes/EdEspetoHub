@@ -275,6 +275,16 @@ function OrderCard({
               <span className={`font-medium ${statusMeta.toneClass}`}>{statusMeta.label}</span>
             </div>
             <p className="mt-1 text-[11px] text-slate-500">{orderDate || formatGroupDate(order.createdAt)}</p>
+            {String(order.status || '').toLowerCase() === 'awaiting_payment' && order.paymentLink && (
+              <button
+                type="button"
+                onClick={() => window.open(order.paymentLink, '_system')}
+                className="mt-2 inline-flex items-center gap-1.5 rounded-xl bg-[#009ee3] px-3 py-2 text-[12px] font-black text-white shadow-sm active:scale-[0.97] transition-transform"
+              >
+                <img src="/uploads/payment/mercado-pago.webp" alt="MP" className="h-4 w-4 object-contain" />
+                Pagar agora
+              </button>
+            )}
             {String(order.paymentStatus || '').toUpperCase() === 'PAID' && (
               <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
                 <CheckCircle size={10} weight="fill" /> Pago via Mercado Pago

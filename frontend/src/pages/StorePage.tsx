@@ -2018,18 +2018,14 @@ export function StorePage() {
       localStorage.setItem(`lastOrderItems:${storeSlug}`, JSON.stringify(lastItemsPayload));
       setLastOrderItems(lastItemsPayload.items);
     }
-    const mpPaymentLink = createdOrder?.payment?.paymentLink;
-    const isAwaitingMpPayment = Boolean(mpPaymentLink && createdOrder?.status === 'awaiting_payment');
+    const isAwaitingMpPayment = Boolean(
+      createdOrder?.payment?.paymentLink && createdOrder?.status === 'awaiting_payment'
+    );
     if (isStoreAdmin) {
       setView('menu');
-    } else if (isAwaitingMpPayment) {
-      // Open MP checkout and navigate straight to orders list — no intermediate screen needed
-      window.open(mpPaymentLink, '_system');
-      if (customerSession?.token) {
-        navigate('/cliente/pedidos');
-      } else {
-        setView('success');
-      }
+    } else if (isAwaitingMpPayment && customerSession?.token) {
+      // Navigate to orders — paymentLink will be shown as a direct button there (window.open in click handler works, after async doesn't)
+      navigate('/cliente/pedidos');
     } else {
       setView('success');
     }

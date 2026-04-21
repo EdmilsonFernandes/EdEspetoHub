@@ -719,6 +719,22 @@ async setDefaultAddress(userId: string, addressId: string) {
       take: 100,
     });
 
+    // Fetch paymentLink for awaiting_payment orders so the client can show a direct pay button
+    const awaitingIds = rows
+      .filter((o) => o.status === 'awaiting_payment')
+      .map((o) => o.id);
+    const paymentLinkMap: Record<string, string> = {};
+    if (awaitingIds.length > 0) {
+      const paymentRows: { order_id: string; payment_link: string }[] = await AppDataSource.query(
+        `SELECT order_id, payment_link FROM order_payments
+         WHERE order_id = ANY($1) AND payment_status = 'PENDING' AND payment_link IS NOT NULL`,
+        [awaitingIds]
+      );
+      for (const row of paymentRows) {
+        paymentLinkMap[row.order_id] = row.payment_link;
+      }
+    }
+
     return rows.map((order) => ({
       id: order.id,
       createdAt: order.createdAt,
@@ -746,6 +762,7 @@ async setDefaultAddress(userId: string, addressId: string) {
         : null,
       paymentMethod: order.paymentMethod || null,
       paymentStatus: order.paymentStatus || null,
+      paymentLink: paymentLinkMap[order.id] || null,
       total: Number(order.total || 0),
       deliveryFee: order.deliveryFee != null ? Number(order.deliveryFee) : null,
       customerName: order.customerName,
