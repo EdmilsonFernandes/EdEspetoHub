@@ -1639,7 +1639,7 @@ export const CartView = ({
         {(isPix || isCredit || isDebit) && (
           <div className="mt-4 rounded-2xl border border-[#009ee3]/18 bg-gradient-to-r from-[#009ee3]/6 to-white p-3 flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white border border-[#009ee3]/20 shadow-sm overflow-hidden">
-              <img src="/uploads/payment/mercado-pago.webp" alt="Mercado Pago" className="h-7 w-7 object-contain" />
+              <img src="/uploads/payment/mercado-pago.svg" alt="Mercado Pago" className="h-7 w-7 object-contain" />
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-black text-[#009ee3]">Mercado Pago</p>
@@ -1849,7 +1849,7 @@ export const CartView = ({
                     {checkoutLoading
                       ? 'Processando...'
                       : (isCredit || isDebit)
-                      ? <><img src="/uploads/payment/mercado-pago.webp" alt="" className="h-5 w-5 object-contain brightness-0 invert" /> Pagar via Mercado Pago <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>
+                      ? <><img src="/uploads/payment/mercado-pago.svg" alt="" className="h-5 w-5 object-contain brightness-0 invert" /> Pagar via Mercado Pago <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>
                       : <>{isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />} {'Fazer pedido'} <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>
                     }
                   </>

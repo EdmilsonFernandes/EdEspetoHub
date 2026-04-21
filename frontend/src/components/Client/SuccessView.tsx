@@ -175,7 +175,7 @@ const OnlinePaymentBlock = ({ onlinePayment, paymentStatus }) => {
         <div className="rounded-2xl border border-sky-100 bg-white shadow-sm overflow-hidden">
           <div className="flex items-center gap-3 border-b border-sky-50 bg-sky-50/60 px-4 py-3">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white border border-sky-100 overflow-hidden shadow-sm">
-              <img src="/uploads/payment/mercado-pago.webp" alt="Mercado Pago" className="h-6 w-6 object-contain" />
+              <img src="/uploads/payment/mercado-pago.svg" alt="Mercado Pago" className="h-6 w-6 object-contain" />
             </span>
             <div className="min-w-0">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-800">Pagamento via Mercado Pago</p>

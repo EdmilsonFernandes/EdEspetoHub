@@ -46,8 +46,8 @@ const PROVIDER_LABELS: Record<string, string> = {
 };
 
 const PROVIDER_ICONS: Record<string, string> = {
-  mercado_pago: '/uploads/payment/mercado-pago.webp',
-  mercadopago: '/uploads/payment/mercado-pago.webp',
+  mercado_pago: '/uploads/payment/mercado-pago.svg',
+  mercadopago: '/uploads/payment/mercado-pago.svg',
 };
 
 export const getPaymentMethodMeta = (method?: string) => {
