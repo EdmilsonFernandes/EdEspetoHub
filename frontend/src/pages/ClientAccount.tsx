@@ -75,9 +75,9 @@ export function ClientAccount() {
   const [nameDraft, setNameDraft] = useState('');
   const [phoneDraft, setPhoneDraft] = useState('');
   const settingsSectionRef = useRef<HTMLElement | null>(null);
-  const profileFileInputRef = useRef<HTMLInputElement | null>(null);
   const settingsOnly = searchParams.get('section') === 'settings';
   const cachedProfileImage = useCachedCustomerProfileImage(me?.profileImageUrl, me?.profileImageVersion);
+  const canUseNativeProfilePhotoPicker = Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('Camera');
 
   const syncCustomerSession = (nextUser: any, options?: { bustProfileImage?: boolean }) => {
     try {
@@ -272,6 +272,45 @@ export function ClientAccount() {
       reader.readAsDataURL(file);
     });
 
+  const compressImageFileToDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      if (!String(file.type || '').startsWith('image/')) {
+        reject(new Error('Selecione uma imagem válida.'));
+        return;
+      }
+
+      const objectUrl = URL.createObjectURL(file);
+      const image = new Image();
+      image.onload = () => {
+        try {
+          const maxEdge = 1280;
+          const width = image.naturalWidth || image.width || maxEdge;
+          const height = image.naturalHeight || image.height || maxEdge;
+          const scale = Math.min(1, maxEdge / Math.max(width, height));
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(width * scale));
+          canvas.height = Math.max(1, Math.round(height * scale));
+          const ctx = canvas.getContext('2d');
+          if (!ctx) throw new Error('Não foi possível preparar a imagem.');
+          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.84);
+          if (!dataUrl || dataUrl.length > 9_500_000) {
+            throw new Error('A imagem selecionada é muito grande. Escolha uma foto menor.');
+          }
+          resolve(dataUrl);
+        } catch (error) {
+          reject(error);
+        } finally {
+          URL.revokeObjectURL(objectUrl);
+        }
+      };
+      image.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('Não foi possível abrir essa imagem. Tente outra foto da galeria.'));
+      };
+      image.src = objectUrl;
+    });
+
   const updateProfileImageFromDataUrl = async (dataUrl: string) => {
     if (!dataUrl || profileSaving) return;
     setProfileSaving(true);
@@ -294,7 +333,19 @@ export function ClientAccount() {
     event.target.value = '';
     if (!file) return;
     try {
-      const dataUrl = await readFileAsDataUrl(file);
+      if (!String(file.type || '').startsWith('image/')) {
+        throw new Error('Selecione uma imagem válida.');
+      }
+      setProfileMessage('Preparando foto...');
+      let dataUrl = '';
+      try {
+        dataUrl = await compressImageFileToDataUrl(file);
+      } catch {
+        dataUrl = await readFileAsDataUrl(file);
+        if (dataUrl.length > 9_500_000) {
+          throw new Error('A imagem selecionada é muito grande. Escolha uma foto menor.');
+        }
+      }
       await updateProfileImageFromDataUrl(dataUrl);
     } catch (e: any) {
       setProfileMessage(e?.message || 'Não foi possível abrir a imagem selecionada.');
@@ -303,10 +354,6 @@ export function ClientAccount() {
 
   const openProfileImagePicker = () => {
     setProfileMessage('');
-    if (!Capacitor.isNativePlatform() || !Capacitor.isPluginAvailable('Camera')) {
-      profileFileInputRef.current?.click();
-      return;
-    }
     void pickProfileImageNative();
   };
 
@@ -501,21 +548,32 @@ export function ClientAccount() {
                         </div>
                       )}
                     </div>
-                    <input
-                      ref={profileFileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleProfileImageFileChange}
-                      className="sr-only"
-                    />
-                    <button 
-                      onClick={openProfileImagePicker}
-                      disabled={profileSaving}
-                      className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-white shadow-lg active:scale-90 transition-transform"
-                      aria-label="Trocar foto de perfil"
-                    >
-                      <Camera size={16} weight="fill" />
-                    </button>
+                    {canUseNativeProfilePhotoPicker ? (
+                      <button 
+                        onClick={openProfileImagePicker}
+                        disabled={profileSaving}
+                        className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-white shadow-lg active:scale-90 transition-transform disabled:opacity-60"
+                        aria-label="Trocar foto de perfil"
+                      >
+                        <Camera size={16} weight="fill" />
+                      </button>
+                    ) : (
+                      <label
+                        className={`absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-slate-900 text-white shadow-lg active:scale-90 transition-transform ${
+                          profileSaving ? 'opacity-60' : 'cursor-pointer'
+                        }`}
+                        aria-label="Trocar foto de perfil"
+                      >
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/*"
+                          onChange={handleProfileImageFileChange}
+                          disabled={profileSaving}
+                          className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                        />
+                        <Camera size={16} weight="fill" />
+                      </label>
+                    )}
                   </div>
                   <div>
                     <h2 className="text-xl font-black text-slate-900">{me?.fullName || 'Usuário'}</h2>
