@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ArrowRight,
   ArrowsClockwise,
@@ -38,39 +38,12 @@ import {
 } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { LandingPageLayout } from '../layouts/LandingPageLayout';
-import { platformService } from '../services/platformService';
 import { storeService } from '../services/storeService';
 import { customerAccountService } from '../services/customerAccountService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { SocialProofMarquee } from '../components/Landing/SocialProofMarquee';
 import { SegmentPromoCarousel } from '../components/common/SegmentPromoCarousel';
 import mercadoPagoLogo from '../assets/mercado-pago-logo.svg';
-
-const Counter = ({ value, duration = 2000, prefix = '', suffix = '', formatter }: { value: number; duration?: number; prefix?: string; suffix?: string; formatter?: (v: number) => string }) => {
-  const [count, setCount] = useState(0);
-  const countRef = useRef(0);
-
-  useEffect(() => {
-    let startTime: number | null = null;
-    const animate = (currentTime: number) => {
-      if (!startTime) startTime = currentTime;
-      const progress = Math.min((currentTime - startTime) / duration, 1);
-      const currentCount = Math.floor(progress * value);
-      if (currentCount !== countRef.current) {
-        setCount(currentCount);
-        countRef.current = currentCount;
-      }
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        setCount(value);
-      }
-    };
-    requestAnimationFrame(animate);
-  }, [value, duration]);
-
-  return <span>{prefix}{formatter ? formatter(count) : count}{suffix}</span>;
-};
 
 const upsertMeta = (name: string, content: string, attr: 'name' | 'property' = 'name') => {
   if (typeof document === 'undefined') return;
@@ -100,11 +73,6 @@ export function LandingPage() {
   const androidApkQrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data=${encodeURIComponent(
     androidApkPublicUrl
   )}`;
-  const [metrics, setMetrics] = useState<{
-    activeStores?: number;
-    totalOrders?: number;
-    totalRevenue?: number;
-  } | null>(null);
   const [featuredStores, setFeaturedStores] = useState<Array<{ id: string; name: string; slug: string; logoUrl?: string | null }>>([]);
   const [showCustomerAuth, setShowCustomerAuth] = useState(false);
   const [hasCustomerSession, setHasCustomerSession] = useState(false);
@@ -221,25 +189,6 @@ export function LandingPage() {
       setApkLinkCopied(false);
     }
   };
-
-  useEffect(() => {
-    let mounted = true;
-    platformService
-      .getPublicMetrics()
-      .then((data) => {
-        if (!mounted) return;
-        setMetrics({
-          activeStores: Number(data?.activeStores) || 0,
-          totalOrders: Number(data?.totalOrders) || 0,
-          totalRevenue: Number(data?.totalRevenue) || 0,
-        });
-      })
-      .catch(() => {
-        if (!mounted) return;
-        setMetrics(null);
-      });
-    return () => { mounted = false; };
-  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -382,75 +331,90 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* ── Right: product console mock ── */}
+            {/* ── Right: premium payment/product preview ── */}
             <div className="animate-in zoom-in-95 fade-in duration-700 delay-250 relative flex items-center justify-center">
-              <div className="pointer-events-none absolute -inset-8 rounded-full bg-sky-500/10 blur-[90px]" />
-              <div className="relative w-full max-w-xl rounded-[2.25rem] border border-white/10 bg-white/[0.06] p-3 shadow-2xl backdrop-blur-2xl">
-                <div className="rounded-[1.75rem] border border-white/10 bg-slate-950/90 p-4">
-                  <div className="flex items-center justify-between border-b border-white/[0.07] pb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-slate-950">
-                        <Storefront size={23} weight="duotone" />
-                      </div>
+              <div className="pointer-events-none absolute -inset-8 rounded-full bg-[#00bcff]/10 blur-[90px]" />
+              <div className="relative w-full max-w-xl rounded-[2.25rem] border border-white/10 bg-white/[0.07] p-3 shadow-2xl backdrop-blur-2xl">
+                <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950/92">
+                  <div className="border-b border-white/[0.07] bg-white/[0.035] p-5">
+                    <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-sky-300">Painel da loja</p>
-                        <p className="text-sm font-black text-white">Operação em tempo real</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.24em] text-sky-300">Checkout integrado</p>
+                        <h3 className="mt-1 text-xl font-black tracking-tight text-white">Cobrança online no pedido</h3>
+                        <p className="mt-1 max-w-xs text-xs font-semibold leading-5 text-slate-400">
+                          O cliente paga no fluxo da loja e o valor cai na conta Mercado Pago do próprio lojista.
+                        </p>
+                      </div>
+                      <div className="rounded-2xl bg-white px-3 py-2 shadow-[0_18px_38px_-24px_rgba(0,188,255,0.8)]">
+                        <img src={mercadoPagoLogo} alt="Mercado Pago" className="h-8 w-auto" />
                       </div>
                     </div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-3 py-1 text-[11px] font-bold text-emerald-300 ring-1 ring-emerald-400/20">
-                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-                      Online
-                    </span>
                   </div>
 
-                  <div className="mt-4 grid gap-3 sm:grid-cols-[1.1fr_0.9fr]">
-                    <div className="space-y-3">
-                      {[
-                        { code: '#1027', name: 'Combo família', status: 'Novo pedido', tone: 'bg-sky-400/10 text-sky-300' },
-                        { code: '#1026', name: 'Espeto premium', status: 'Em produção', tone: 'bg-amber-400/10 text-amber-300' },
-                        { code: '#1025', name: 'Pedido Pix', status: 'Aguardando pagamento', tone: 'bg-emerald-400/10 text-emerald-300' },
-                      ].map((order) => (
-                        <div key={order.code} className="rounded-2xl border border-white/[0.06] bg-white/[0.035] p-3">
-                          <div className="flex items-center justify-between gap-3">
-                            <div>
-                              <p className="text-[11px] font-black text-slate-500">{order.code}</p>
-                              <p className="mt-0.5 text-sm font-black text-white">{order.name}</p>
-                            </div>
-                            <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${order.tone}`}>{order.status}</span>
+                  <div className="p-5">
+                    <div className="grid gap-3 sm:grid-cols-[0.95fr_1.05fr]">
+                      <div className="rounded-2xl border border-white/[0.07] bg-white/[0.035] p-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Pedido #1027</p>
+                          <span className="rounded-full bg-emerald-400/10 px-2.5 py-1 text-[10px] font-black text-emerald-300 ring-1 ring-emerald-400/20">Pago</span>
+                        </div>
+                        <p className="mt-4 text-sm font-black text-white">Combo família</p>
+                        <div className="mt-4 space-y-2 text-xs font-semibold text-slate-400">
+                          <div className="flex justify-between gap-3">
+                            <span>Subtotal</span>
+                            <span className="text-slate-200">R$ 89,90</span>
                           </div>
+                          <div className="flex justify-between gap-3">
+                            <span>Entrega</span>
+                            <span className="text-slate-200">R$ 6,00</span>
+                          </div>
+                          <div className="border-t border-white/[0.07] pt-2">
+                            <div className="flex justify-between gap-3">
+                              <span className="text-white">Total</span>
+                              <span className="text-lg font-black text-white">R$ 95,90</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="rounded-2xl border border-[#00bcff]/20 bg-[#00bcff]/10 p-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-100">Conta conectada</p>
+                            <p className="mt-1 text-sm font-black text-white">Mercado Pago do lojista</p>
+                          </div>
+                          <ShieldCheck size={22} weight="duotone" className="text-sky-200" />
+                        </div>
+                        <div className="mt-5 grid grid-cols-3 gap-2">
+                          {[
+                            { icon: QrCode, label: 'Pix' },
+                            { icon: CreditCard, label: 'Crédito' },
+                            { icon: CurrencyDollar, label: 'Débito' },
+                          ].map(({ icon: Icon, label }) => (
+                            <div key={label} className="rounded-xl bg-white/90 px-2 py-2 text-center text-[11px] font-black text-slate-900">
+                              <Icon size={15} weight="duotone" className="mx-auto mb-1 text-[#009ee3]" />
+                              {label}
+                            </div>
+                          ))}
+                        </div>
+                        <p className="mt-4 text-xs font-semibold leading-5 text-sky-50">
+                          Se a loja não conectar a conta, o pedido continua funcionando no modo presencial.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {[
+                        { icon: ArrowsClockwise, label: 'Atualização ao vivo' },
+                        { icon: Package, label: 'Produção sincronizada' },
+                        { icon: Motorcycle, label: 'Entrega acompanhada' },
+                      ].map(({ icon: Icon, label }) => (
+                        <div key={label} className="inline-flex items-center gap-2 rounded-full border border-white/[0.07] bg-white/[0.035] px-3 py-2 text-[11px] font-black text-slate-300">
+                          <Icon size={14} weight="duotone" className="text-sky-300" />
+                          {label}
                         </div>
                       ))}
                     </div>
-
-                    <div className="space-y-3">
-                      <div className="rounded-2xl border border-white/[0.06] bg-white/[0.035] p-4">
-                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Hoje</p>
-                        <p className="mt-2 text-3xl font-black text-white">
-                          {metrics ? <Counter value={metrics.totalOrders || 0} /> : '24'}
-                        </p>
-                        <p className="text-xs font-semibold text-slate-500">pedidos processados</p>
-                      </div>
-                      <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/10 p-4">
-                        <div className="flex items-center gap-2">
-                          <img src={mercadoPagoLogo} alt="Mercado Pago" className="h-5 w-auto rounded-sm bg-white px-1" />
-                          <span className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-200">Opcional</span>
-                        </div>
-                        <p className="mt-2 text-xs font-semibold leading-5 text-emerald-50">Pix e cartão direto na conta do lojista.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                    {[
-                      { icon: ListChecks, label: 'Pedidos' },
-                      { icon: Package, label: 'Produção' },
-                      { icon: Motorcycle, label: 'Entrega' },
-                    ].map(({ icon: Icon, label }) => (
-                      <div key={label} className="flex items-center gap-2 rounded-2xl bg-white/[0.04] px-3 py-2 text-xs font-black text-slate-300">
-                        <Icon size={15} weight="duotone" className="text-sky-300" />
-                        {label}
-                      </div>
-                    ))}
                   </div>
                 </div>
               </div>

@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { DownloadSimple, House, List, MagnifyingGlass, Moon, ShieldCheck, SignOut, Storefront, Sun, Truck, X } from '@phosphor-icons/react';
+import mercadoPagoLogo from '../assets/mercado-pago-logo.svg';
 
 interface LandingPageLayoutProps {
   children: React.ReactNode;
@@ -475,13 +476,18 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             </div>
 
             <div>
-              <h3 className="text-sm font-black text-white mb-3 uppercase tracking-[0.12em]">Liderança técnica</h3>
+              <h3 className="text-sm font-black text-white mb-3 uppercase tracking-[0.12em]">Integrações</h3>
               <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">
-                <p className="text-sm font-semibold text-white">Edmilson Lopes</p>
-                <p className="text-xs text-slate-400 mt-1">Arquitetura, produto e operação da plataforma.</p>
+                <div className="inline-flex rounded-xl bg-white px-3 py-2">
+                  <img src={mercadoPagoLogo} alt="Mercado Pago" className="h-8 w-auto" />
+                </div>
+                <p className="mt-3 text-sm font-semibold text-white">Pagamentos online opcionais</p>
+                <p className="mt-1 text-xs leading-5 text-slate-400">
+                  O lojista pode conectar a própria conta Mercado Pago para receber Pix, crédito e débito nos pedidos.
+                </p>
                 <div className="mt-3 flex items-center gap-2 text-[11px] text-emerald-300 font-bold uppercase tracking-[0.12em]">
                   <ShieldCheck size={14} weight="duotone" />
-                  Plataforma segura
+                  Conexão via OAuth
                 </div>
               </div>
             </div>
@@ -496,4 +502,3 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
     </div>
   );
 }
-
