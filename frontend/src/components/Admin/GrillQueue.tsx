@@ -2821,27 +2821,36 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         </div>
       )}
 
-      {order.status === "ready" && !isPostalOrder(order) && (
-        <div className="w-full">
-          <div className={`mb-2 text-[11px] font-semibold border rounded-lg px-2.5 py-1 ${
-            order.type === "delivery"
-              ? "text-emerald-700 bg-emerald-50 border-emerald-100"
-              : "text-emerald-700 bg-emerald-50 border-emerald-100"
-          }`}>
-            {order.type === "delivery"
-              ? "Motoboy saiu? Confirme o pagamento."
-              : "Cliente chegou? Confirme o pagamento."}
+      {order.status === "ready" && !isPostalOrder(order) && (() => {
+        const alreadyPaid = String(order.paymentStatus || '').toUpperCase() === 'PAID';
+        return (
+          <div className="w-full">
+            <div className="mb-2 text-[11px] font-semibold border rounded-lg px-2.5 py-1 text-emerald-700 bg-emerald-50 border-emerald-100">
+              {alreadyPaid
+                ? "Pagamento já confirmado. Finalize o pedido."
+                : order.type === "delivery"
+                ? "Motoboy saiu? Confirme o pagamento."
+                : "Cliente chegou? Confirme o pagamento."}
+            </div>
+            <button
+              onClick={() => {
+                pulseCta(order.id + '-pay');
+                if (alreadyPaid) {
+                  handleAdvance(order.id, 'done');
+                } else {
+                  openPaymentConfirm(order);
+                }
+              }}
+              disabled={updating === order.id}
+              style={ctaPulseId === order.id + '-pay' ? { animation: 'btnPop 220ms ease' } : undefined}
+              className="w-full px-3 py-3 rounded-lg bg-emerald-600 text-white text-sm font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
+            >
+              <CheckSquare size={16} weight="duotone" />
+              {alreadyPaid ? "Finalizar pedido" : order.type === "delivery" ? "Saiu para entrega" : "Confirmar pagamento"}
+            </button>
           </div>
-          <button
-            onClick={() => { pulseCta(order.id + '-pay'); openPaymentConfirm(order); }}
-            disabled={updating === order.id}
-            style={ctaPulseId === order.id + '-pay' ? { animation: 'btnPop 220ms ease' } : undefined}
-            className="w-full px-3 py-3 rounded-lg bg-emerald-600 text-white text-sm font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
-          >
-            <CheckSquare size={16} weight="duotone" /> {order.type === "delivery" ? "Saiu para entrega" : "Confirmar pagamento"}
-          </button>
-        </div>
-      )}
+        );
+      })()}
 
 
       {order.status === "ready" && isPostalOrder(order) && (
