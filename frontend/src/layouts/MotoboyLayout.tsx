@@ -82,21 +82,25 @@ export function MotoboyLayout() {
 
   return (
     <div className="min-h-screen motoboy-bg pb-28">
-      {/* ── Mode indicator ── */}
-      <div className="sticky top-0 z-[75] flex items-center justify-between border-b border-white/[0.05] bg-slate-950/92 px-4 py-1.5 backdrop-blur-xl">
-        <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.7)]" />
-          <Truck size={12} weight="duotone" className="text-amber-400" />
-          <span className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">Modo Entregador</span>
+      {/* ── Mode indicator pill (fixed, above bottom nav) ── */}
+      <div
+        className="fixed left-3 z-[75] animate-in fade-in slide-in-from-bottom-3 duration-500 motion-reduce:animate-none"
+        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 5rem)' }}
+      >
+        <div className="flex items-center gap-1.5 overflow-hidden rounded-full border border-white/[0.08] bg-slate-950/90 py-1.5 pl-2.5 pr-1 shadow-[0_8px_28px_-8px_rgba(0,0,0,0.6)] backdrop-blur-xl">
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400 shadow-[0_0_5px_rgba(251,191,36,0.9)]" />
+          <Truck size={11} weight="duotone" className="shrink-0 text-amber-400" />
+          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">Entregador</span>
+          <span className="mx-0.5 h-3 w-px bg-white/10" />
+          <button
+            type="button"
+            onClick={() => navigate('/hub')}
+            className="flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-1 text-[9px] font-black text-amber-400 transition hover:bg-amber-500/25 active:scale-95"
+          >
+            <ArrowLeft size={9} weight="bold" />
+            Hub
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => navigate('/hub')}
-          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-black text-slate-400 transition-colors hover:bg-white/[0.07] hover:text-amber-300 active:scale-95"
-        >
-          <ArrowLeft size={10} weight="bold" />
-          Voltar ao Hub
-        </button>
       </div>
       <Outlet />
 
