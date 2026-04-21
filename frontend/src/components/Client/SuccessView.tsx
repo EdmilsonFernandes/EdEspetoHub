@@ -170,21 +170,18 @@ const OnlinePaymentBlock = ({ onlinePayment, paymentStatus }) => {
             <p className="mb-4 text-xs text-slate-500 text-center">
               Seu pedido foi registrado. Clique abaixo para efetuar o pagamento com cartão via Mercado Pago.
             </p>
-            <a
-              href={onlinePayment.paymentLink || '#'}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => {
-                if (Capacitor.isNativePlatform()) {
-                  e.preventDefault();
-                  if (onlinePayment.paymentLink) window.open(onlinePayment.paymentLink, '_system');
-                }
+            <button
+              type="button"
+              onClick={() => {
+                const url = onlinePayment.paymentLink;
+                if (!url) return;
+                window.open(url, '_system');
               }}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#009ee3] py-3.5 text-sm font-black text-white shadow-[0_8px_20px_-10px_rgba(0,158,227,0.6)] transition hover:brightness-105 active:scale-[0.98] no-underline"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#009ee3] py-3.5 text-sm font-black text-white shadow-[0_8px_20px_-10px_rgba(0,158,227,0.6)] transition hover:brightness-105 active:scale-[0.98]"
             >
               <ArrowSquareOut size={16} weight="bold" />
-              Pagar agora via Mercado Pago
-            </a>
+              Pagar via Mercado Pago
+            </button>
           </div>
         </div>
       </div>
@@ -303,17 +300,26 @@ export const SuccessView = ({
         <div className="rounded-[1.85rem] border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.97)_0%,rgba(244,248,252,0.96)_100%)] px-3 py-3 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
           {/* Step indicator */}
           <div className="mb-3 flex items-center gap-1">
-            {[{ label: 'Sacola', done: true }, { label: 'Entrega', done: true }, { label: 'Pagamento', done: true }, { label: 'Confirmar', done: isPaid, active: !isPaid }].map(({ label, done, active }, i) => (
-              <React.Fragment key={i}>
-                <div className="flex items-center gap-1">
-                  <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black transition-colors ${done ? 'bg-emerald-500 text-white' : active ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-500'}`}>
-                    {done ? '✓' : i + 1}
-                  </span>
-                  <span className={`text-[9px] font-bold uppercase tracking-wide ${done ? 'text-emerald-600' : active ? 'text-slate-900' : 'text-slate-400'}`}>{label}</span>
-                </div>
-                {i < 3 && <div className={`h-px flex-1 transition-colors ${done ? 'bg-emerald-300' : 'bg-slate-200'}`} />}
-              </React.Fragment>
-            ))}
+            {(() => {
+              const step4Done = isPaid || !hasOnlinePayment;
+              const step4Pending = isAwaitingPayment;
+              return [
+                { label: 'Sacola', done: true },
+                { label: 'Entrega', done: true },
+                { label: 'Pagamento', done: true },
+                { label: 'Pedido', done: step4Done, pending: step4Pending },
+              ].map(({ label, done, pending }: any, i) => (
+                <React.Fragment key={i}>
+                  <div className="flex items-center gap-1">
+                    <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black transition-colors ${done ? 'bg-emerald-500 text-white' : pending ? 'bg-amber-400 text-white' : 'bg-slate-200 text-slate-500'}`}>
+                      {done ? '✓' : i + 1}
+                    </span>
+                    <span className={`text-[9px] font-bold uppercase tracking-wide ${done ? 'text-emerald-600' : pending ? 'text-amber-600' : 'text-slate-400'}`}>{label}</span>
+                  </div>
+                  {i < 3 && <div className={`h-px flex-1 transition-colors ${done ? 'bg-emerald-300' : 'bg-slate-200'}`} />}
+                </React.Fragment>
+              ));
+            })()}
           </div>
           <div className="flex items-center gap-3">
             <button

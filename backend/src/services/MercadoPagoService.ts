@@ -188,9 +188,10 @@ export class MercadoPagoService {
     }
 
     const data = (await response.json()) as MercadoPagoPreferenceResponse;
-    this.debugLog('POST preference ok', { id: data.id });
+    const paymentLink = data.init_point || data.sandbox_init_point || null;
+    this.debugLog('POST preference ok', { id: data.id, paymentLink });
     return {
-      paymentLink: data.init_point || data.sandbox_init_point || null,
+      paymentLink,
       qrCodeBase64: null,
       qrCodeText: null,
       providerId: data.id,

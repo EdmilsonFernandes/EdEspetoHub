@@ -1591,9 +1591,6 @@ export const CartView = ({
           <h2 className="font-black text-slate-900 text-base sm:text-lg flex items-center gap-2 tracking-tight">
             <CreditCard size={18} className="text-brand-primary" /> Forma de Pagamento
           </h2>
-          <span className="text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full">
-            Seguro e rápido
-          </span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -1640,10 +1637,17 @@ export const CartView = ({
           ))}
         </div>
         {(isPix || isCredit || isDebit) && (
-          <div className="mt-4 flex items-center justify-center gap-2 rounded-xl border border-[#009ee3]/20 bg-[#009ee3]/5 py-2.5 px-3">
-            <ShieldCheck size={14} weight="duotone" className="shrink-0 text-[#009ee3]" />
-            <span className="text-[11px] font-semibold text-[#009ee3]">Pagamento processado com segurança pelo</span>
-            <img src="/uploads/payment/mercado-pago.webp" alt="Mercado Pago" className="h-4 w-auto object-contain shrink-0" />
+          <div className="mt-4 rounded-2xl border border-[#009ee3]/18 bg-gradient-to-r from-[#009ee3]/6 to-white p-3 flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white border border-[#009ee3]/20 shadow-sm overflow-hidden">
+              <img src="/uploads/payment/mercado-pago.webp" alt="Mercado Pago" className="h-7 w-7 object-contain" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[11px] font-black text-[#009ee3]">Mercado Pago</p>
+              <p className="text-[10px] text-slate-500 leading-tight flex items-center gap-1">
+                <ShieldCheck size={10} weight="duotone" className="shrink-0 text-emerald-500" />
+                Pagamento seguro e criptografado
+              </p>
+            </div>
           </div>
         )}
       </div>}
