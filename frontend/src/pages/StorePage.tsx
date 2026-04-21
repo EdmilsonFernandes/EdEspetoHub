@@ -2219,6 +2219,11 @@ export function StorePage() {
     setCustomerAccountNotice('');
     try {
       const response = await customerAccountService.resendEmailCode(email);
+      setCustomerVerifyPrompt((prev) => ({
+        ...(prev || {}),
+        email,
+        emailMasked: response?.emailMasked || prev?.emailMasked || email,
+      }));
       setCustomerVerifyCode('');
       setCustomerResendCooldown(Number(response?.cooldownSec || 60));
       setCustomerAccountNotice(response?.message || 'Novo código enviado para seu e-mail.');
@@ -2997,9 +3002,20 @@ export function StorePage() {
                     <div>
                       <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Validar e-mail</p>
                       <p className="mt-1 text-sm font-semibold text-slate-700">
-                        {customerVerifyPrompt?.emailMasked
-                          ? `Digite o código enviado para ${customerVerifyPrompt.emailMasked}.`
-                          : 'Digite o código enviado para seu e-mail.'}
+                        {(() => {
+                          const target = String(customerVerifyPrompt?.emailMasked || customerVerifyPrompt?.email || '').trim();
+                          return target ? (
+                            <>
+                              Digite o código enviado para{' '}
+                              <span className="inline-flex rounded-lg bg-slate-100 px-2 py-0.5 font-black text-slate-900">
+                                {target}
+                              </span>
+                              .
+                            </>
+                          ) : (
+                            'Digite o código enviado para seu e-mail.'
+                          );
+                        })()}
                       </p>
                     </div>
                     <input

@@ -75,6 +75,7 @@ export function ClientAccount() {
   const [nameDraft, setNameDraft] = useState('');
   const [phoneDraft, setPhoneDraft] = useState('');
   const settingsSectionRef = useRef<HTMLElement | null>(null);
+  const profileFileInputRef = useRef<HTMLInputElement | null>(null);
   const settingsOnly = searchParams.get('section') === 'settings';
   const cachedProfileImage = useCachedCustomerProfileImage(me?.profileImageUrl, me?.profileImageVersion);
 
@@ -263,6 +264,52 @@ export function ClientAccount() {
     }
   };
 
+  const readFileAsDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(new Error('Não foi possível ler a imagem selecionada.'));
+      reader.readAsDataURL(file);
+    });
+
+  const updateProfileImageFromDataUrl = async (dataUrl: string) => {
+    if (!dataUrl || profileSaving) return;
+    setProfileSaving(true);
+    setProfileMessage('');
+    try {
+      const updated = await customerAccountService.updateMe({ profileImageFile: dataUrl });
+      setMe(updated || null);
+      syncCustomerSession(updated || null, { bustProfileImage: true });
+      setProfileMessage('Foto atualizada!');
+      setPhotoPermission('granted');
+    } catch (e: any) {
+      setProfileMessage(e?.message || 'Não foi possível atualizar a foto.');
+    } finally {
+      setProfileSaving(false);
+    }
+  };
+
+  const handleProfileImageFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      await updateProfileImageFromDataUrl(dataUrl);
+    } catch (e: any) {
+      setProfileMessage(e?.message || 'Não foi possível abrir a imagem selecionada.');
+    }
+  };
+
+  const openProfileImagePicker = () => {
+    setProfileMessage('');
+    if (!Capacitor.isNativePlatform() || !Capacitor.isPluginAvailable('Camera')) {
+      profileFileInputRef.current?.click();
+      return;
+    }
+    void pickProfileImageNative();
+  };
+
   const pickProfileImageNative = async () => {
     try {
       const image = await CapCamera.getPhoto({
@@ -277,13 +324,7 @@ export function ClientAccount() {
 
       if (image.base64String) {
         const dataUrl = `data:image/${image.format};base64,${image.base64String}`;
-        setProfileSaving(true);
-        const updated = await customerAccountService.updateMe({ profileImageFile: dataUrl });
-        setMe(updated || null);
-        syncCustomerSession(updated || null, { bustProfileImage: true });
-        setProfileMessage('Foto atualizada!');
-        setProfileSaving(false);
-        setPhotoPermission('granted');
+        await updateProfileImageFromDataUrl(dataUrl);
         setCameraPermission('granted');
       }
     } catch {
@@ -460,9 +501,18 @@ export function ClientAccount() {
                         </div>
                       )}
                     </div>
+                    <input
+                      ref={profileFileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleProfileImageFileChange}
+                      className="sr-only"
+                    />
                     <button 
-                      onClick={pickProfileImageNative}
+                      onClick={openProfileImagePicker}
+                      disabled={profileSaving}
                       className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-white shadow-lg active:scale-90 transition-transform"
+                      aria-label="Trocar foto de perfil"
                     >
                       <Camera size={16} weight="fill" />
                     </button>

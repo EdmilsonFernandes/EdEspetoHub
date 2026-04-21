@@ -318,6 +318,11 @@ export function ClientAuth() {
     try {
       const result = await customerAccountService.resendEmailCode(email);
       localStorage.setItem('signupEmail', email);
+      setVerifyPrompt((prev) => ({
+        ...(prev || {}),
+        email,
+        emailMasked: result?.emailMasked || prev?.emailMasked || email,
+      }));
       setLastAutoSubmittedCode('');
       setResendCooldown(Number(result?.cooldownSec || 60));
       setMessage(result?.message || 'Novo código enviado. Digite os 4 números para concluir o acesso.');
@@ -674,9 +679,20 @@ export function ClientAuth() {
                 </button>
               </div>
               <p className="relative mt-4 text-sm leading-relaxed text-white/80">
-                {verifyPrompt.emailMasked
-                  ? `Enviamos o código para ${verifyPrompt.emailMasked}.`
-                  : 'Enviamos o código para o e-mail informado.'}
+                {(() => {
+                  const target = String(verifyPrompt.emailMasked || verifyPrompt.email || '').trim();
+                  return target ? (
+                    <>
+                      Enviamos o código para{' '}
+                      <span className="inline-flex rounded-full border border-white/18 bg-white/12 px-2.5 py-1 font-black text-white">
+                        {target}
+                      </span>
+                      .
+                    </>
+                  ) : (
+                    'Enviamos o código para o e-mail informado.'
+                  );
+                })()}
               </p>
               <p className="relative mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/58">
                 {verifyFlowLabel === 'register' ? 'Último passo para ativar sua conta' : 'Confirme para finalizar seu login'}
