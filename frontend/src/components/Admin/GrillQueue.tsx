@@ -3303,6 +3303,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                             />
                           )}
                           <span>{paymentMeta.label}</span>
+                          {String(order.paymentStatus || '').toUpperCase() === 'PAID' && (
+                            <span className="inline-flex items-center rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
+                              Pago
+                            </span>
+                          )}
                         </>
                       );
                     })()}
