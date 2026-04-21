@@ -14,6 +14,7 @@ import { formatSelectedModifiers } from '../utils/productModifiers';
 import { usePollingPaymentStatus } from '../hooks/usePollingPaymentStatus';
 
 const statusLabels: Record<string, string> = {
+  awaiting_payment: 'Aguardando pagamento',
   pending: 'Pedido Recebido',
   preparing: 'Em Preparação',
   ready: 'Pronto para retirada',
