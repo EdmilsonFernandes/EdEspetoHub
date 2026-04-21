@@ -2023,9 +2023,6 @@ export function StorePage() {
     );
     if (isStoreAdmin) {
       setView('menu');
-    } else if (isAwaitingMpPayment && customerSession?.token) {
-      // Navigate to orders — paymentLink will be shown as a direct button there (window.open in click handler works, after async doesn't)
-      navigate('/cliente/pedidos');
     } else {
       setView('success');
     }
