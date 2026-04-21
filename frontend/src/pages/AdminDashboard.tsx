@@ -1138,60 +1138,48 @@ const PaymentsView = ({ subscription, loading, error, payments, storeId }) => {
             </button>
           </div>
         )}
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_45px_-38px_rgba(15,23,42,0.55)]">
-          <div className="border-b border-slate-100 bg-gradient-to-r from-white via-sky-50/70 to-yellow-50/70 p-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="flex h-10 w-28 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 shadow-sm">
-                    <img src={mercadoPagoLogo} alt="Mercado Pago" className="max-h-7 w-full object-contain" />
-                  </span>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_18px_45px_-42px_rgba(15,23,42,0.55)]">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-3">
+                <img src={mercadoPagoLogo} alt="Mercado Pago" className="h-8 w-auto max-w-[150px] object-contain" />
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                    mpLoading
+                      ? 'bg-slate-100 text-slate-600'
+                      : mpAccount?.connected
+                      ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                      : 'bg-slate-100 text-slate-600'
+                  }`}
+                >
                   <span
-                    className={`rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] ${
-                      mpLoading
-                        ? 'bg-slate-100 text-slate-600'
-                        : mpAccount?.connected
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-slate-100 text-slate-700'
+                    className={`h-1.5 w-1.5 rounded-full ${
+                      mpLoading ? 'bg-slate-400' : mpAccount?.connected ? 'bg-emerald-500' : 'bg-slate-400'
                     }`}
-                  >
-                    {mpLoading ? 'Verificando' : mpAccount?.connected ? 'Conectado' : 'Modo convencional'}
-                  </span>
-                </div>
-                <p className="mt-3 text-sm font-black text-slate-950">
-                  Receba Pix e cartão direto no Mercado Pago da loja
-                </p>
-                <p className="mt-1 max-w-xl text-xs leading-5 text-slate-600">
-                  {mpLoading
-                    ? 'Estamos verificando se esta loja já autorizou a cobrança online.'
-                    : mpAccount?.connected
-                    ? 'Novos pedidos em Pix, crédito e débito geram cobrança online e o valor cai na conta Mercado Pago conectada.'
-                    : mpAccount?.oauthConfigured === false
-                    ? 'A conexão OAuth ainda não está configurada no servidor. O checkout segue no modo convencional.'
-                    : 'Sem conexão, o pedido continua registrando Pix, crédito ou débito, mas a cobrança fica combinada fora do sistema.'}
-                </p>
+                  />
+                  {mpLoading ? 'Verificando' : mpAccount?.connected ? 'Conta conectada' : 'Modo convencional'}
+                </span>
               </div>
-              <div className="rounded-xl border border-white/80 bg-white/90 px-3 py-2 text-xs text-slate-600 shadow-sm sm:w-52">
-                <p className="font-black text-slate-900">Fluxo atual</p>
-                <p className="mt-1">
-                  {mpAccount?.connected
-                    ? 'Cobrança online ativa para novos pedidos.'
-                    : 'Atendimento no modo presencial/manual.'}
-                </p>
+              <p className="mt-3 text-sm font-black text-slate-950">
+                Cobrança online para pedidos da loja
+              </p>
+              <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-600">
+                {mpLoading
+                  ? 'Verificando a autorização desta loja.'
+                  : mpAccount?.connected
+                  ? 'Pix, crédito e débito dos novos pedidos são cobrados online e recebidos na conta Mercado Pago conectada.'
+                  : mpAccount?.oauthConfigured === false
+                  ? 'A conexão OAuth ainda não está configurada no servidor. O checkout segue no modo convencional.'
+                  : 'Conectar é opcional. Sem Mercado Pago, o pedido registra a forma escolhida e a loja cobra como já faz hoje.'}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-semibold text-slate-500">
+                <span>Pix</span>
+                <span>Cartão de crédito</span>
+                <span>Cartão de débito</span>
+                <span>Fallback manual</span>
               </div>
             </div>
-          </div>
-          <div className="grid gap-3 p-4 sm:grid-cols-2">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Com Mercado Pago</p>
-              <p className="mt-1 text-xs leading-5 text-slate-700">Cliente paga online por Pix, crédito ou débito.</p>
-            </div>
-            <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
-              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Sem conexão</p>
-              <p className="mt-1 text-xs leading-5 text-slate-700">O pedido registra a escolha e a loja cobra como já fazia.</p>
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 px-4 pb-4 pt-1">
+            <div className="flex shrink-0 flex-col items-stretch gap-2 sm:min-w-56">
             {!mpAccount?.connected ? (
               <button
                 type="button"
@@ -1206,7 +1194,7 @@ const PaymentsView = ({ subscription, loading, error, payments, storeId }) => {
                     setMpActionLoading(false);
                   }
                 }}
-                className="rounded-lg bg-[#009ee3] px-4 py-2 text-xs font-black text-white shadow-sm hover:bg-[#008dcc] disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-lg bg-[#009ee3] px-4 py-2.5 text-xs font-black text-white shadow-sm transition hover:bg-[#008dcc] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {mpActionLoading ? 'Abrindo Mercado Pago...' : 'Conectar conta Mercado Pago'}
               </button>
@@ -1224,11 +1212,15 @@ const PaymentsView = ({ subscription, loading, error, payments, storeId }) => {
                     setMpActionLoading(false);
                   }
                 }}
-                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-black text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-lg px-3 py-2 text-xs font-bold text-slate-500 transition hover:bg-slate-50 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {mpActionLoading ? 'Desconectando...' : 'Desconectar e voltar ao modo convencional'}
+                {mpActionLoading ? 'Desconectando...' : 'Desconectar'}
               </button>
             )}
+              <p className="text-center text-[11px] leading-4 text-slate-500">
+                {mpAccount?.connected ? 'Ao desconectar, novos pedidos voltam ao modo convencional.' : 'Autorização feita no ambiente seguro do Mercado Pago.'}
+              </p>
+            </div>
           </div>
         </div>
         {Array.isArray(payments) && payments.length > 0 && (
