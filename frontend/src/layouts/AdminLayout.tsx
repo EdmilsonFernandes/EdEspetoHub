@@ -5,7 +5,7 @@ import { AdminHeader } from '../components/Admin/AdminHeader';
 import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { CaretDown, ChartBar, CheckSquare, ClipboardText, CreditCard, Gear, Package, ShoppingCart, SignOut, Scooter, Star, X, UsersThree } from '@phosphor-icons/react';
+import { ArrowLeft, CaretDown, ChartBar, CheckSquare, ClipboardText, CreditCard, Gear, Package, ShoppingCart, SignOut, Scooter, Star, Storefront, X, UsersThree } from '@phosphor-icons/react';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 
@@ -181,6 +181,22 @@ export function AdminLayout({
 
   return (
     <div className="ds-admin-bg overflow-x-clip pb-[calc(7.5rem+env(safe-area-inset-bottom))] lg:pb-0">
+      {/* ── Mode indicator ── */}
+      <div className="sticky top-0 z-[55] flex items-center justify-between border-b border-white/[0.05] bg-slate-950/92 px-4 py-1.5 backdrop-blur-xl">
+        <div className="flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-sky-400 shadow-[0_0_6px_rgba(56,189,248,0.7)]" />
+          <Storefront size={12} weight="duotone" className="text-sky-400" />
+          <span className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">Modo Admin</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate('/hub')}
+          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-black text-slate-400 transition-colors hover:bg-white/[0.07] hover:text-sky-300 active:scale-95"
+        >
+          <ArrowLeft size={10} weight="bold" />
+          Voltar ao Hub
+        </button>
+      </div>
       <div
         key={location.pathname}
         className={

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
-import { House, ListChecks, UserCircle, Wallet } from '@phosphor-icons/react';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { ArrowLeft, House, ListChecks, Truck, UserCircle, Wallet } from '@phosphor-icons/react';
 
 type Tab = {
   to: string;
@@ -11,6 +11,7 @@ type Tab = {
 
 export function MotoboyLayout() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const [installPrompt, setInstallPrompt] = useState<any | null>(null);
   const [showInstall, setShowInstall] = useState(false);
   const [queueBadge, setQueueBadge] = useState(false);
@@ -81,6 +82,22 @@ export function MotoboyLayout() {
 
   return (
     <div className="min-h-screen motoboy-bg pb-28">
+      {/* ── Mode indicator ── */}
+      <div className="sticky top-0 z-[75] flex items-center justify-between border-b border-white/[0.05] bg-slate-950/92 px-4 py-1.5 backdrop-blur-xl">
+        <div className="flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.7)]" />
+          <Truck size={12} weight="duotone" className="text-amber-400" />
+          <span className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">Modo Entregador</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate('/hub')}
+          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-black text-slate-400 transition-colors hover:bg-white/[0.07] hover:text-amber-300 active:scale-95"
+        >
+          <ArrowLeft size={10} weight="bold" />
+          Voltar ao Hub
+        </button>
+      </div>
       <Outlet />
 
       {showInstall && installPrompt && (
