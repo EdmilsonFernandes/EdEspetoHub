@@ -1796,7 +1796,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     }
   };
 
-  const openPaymentConfirm = (order) => {
+  const openPaymentConfirm = (order, opts?: { alreadyPaid?: boolean }) => {
     setCashConfirmValue('');
     setConfirmModal({
       id: order.id,
@@ -1807,6 +1807,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       phone: order.phone || '',
       pixKey: storePixKey,
       isPostal: isPostalOrder(order),
+      alreadyPaid: opts?.alreadyPaid === true,
     });
   };
 
@@ -2827,7 +2828,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           <div className="w-full">
             <div className="mb-2 text-[11px] font-semibold border rounded-lg px-2.5 py-1 text-emerald-700 bg-emerald-50 border-emerald-100">
               {alreadyPaid
-                ? "Pagamento já confirmado. Finalize o pedido."
+                ? "Pagamento confirmado. Confirme quando o cliente retirar."
                 : order.type === "delivery"
                 ? "Motoboy saiu? Confirme o pagamento."
                 : "Cliente chegou? Confirme o pagamento."}
@@ -2835,18 +2836,14 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             <button
               onClick={() => {
                 pulseCta(order.id + '-pay');
-                if (alreadyPaid) {
-                  handleAdvance(order.id, 'done');
-                } else {
-                  openPaymentConfirm(order);
-                }
+                openPaymentConfirm(order, alreadyPaid ? { alreadyPaid: true } : undefined);
               }}
               disabled={updating === order.id}
               style={ctaPulseId === order.id + '-pay' ? { animation: 'btnPop 220ms ease' } : undefined}
               className="w-full px-3 py-3 rounded-lg bg-emerald-600 text-white text-sm font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
             >
               <CheckSquare size={16} weight="duotone" />
-              {alreadyPaid ? "Finalizar pedido" : order.type === "delivery" ? "Saiu para entrega" : "Confirmar pagamento"}
+              {alreadyPaid ? "Confirmar retirada" : order.type === "delivery" ? "Saiu para entrega" : "Confirmar pagamento"}
             </button>
           </div>
         );
@@ -3550,7 +3547,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               return (
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Confirmar pagamento</p>
+                <p className="text-xs uppercase tracking-[0.35em] text-slate-400">{confirmModal.alreadyPaid ? 'Confirmar retirada' : 'Confirmar pagamento'}</p>
                 <h3 className="text-lg font-bold text-slate-900 mt-2">
                   {!modalMesa.isMesa ? (
                     titleContent
@@ -3573,6 +3570,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             </div>
               );
             })()}
+            {confirmModal.alreadyPaid && (
+              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">
+                Pagamento via {getPaymentMethodMeta(confirmModal.payment).label} já confirmado. Clique em "Pedido retirado" quando o cliente buscar.
+              </div>
+            )}
             <div className="mt-4 space-y-3 text-sm text-slate-600">
               <div className="flex items-center justify-between">
                 <span>Cliente</span>
@@ -3624,7 +3626,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 </div>
               )}
             </div>
-            {isPixPayment && (
+            {isPixPayment && !confirmModal.alreadyPaid && (
               <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-slate-700">Pix do lojista</span>
@@ -3662,7 +3664,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 )}
               </div>
             )}
-            {isCashPayment && (
+            {isCashPayment && !confirmModal.alreadyPaid && (
               <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold">Pagamento em dinheiro</span>
@@ -3725,7 +3727,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     Confirmando...
                   </span>
                 ) : (
-                  'Pagamento recebido'
+                  confirmModal.alreadyPaid ? 'Pedido retirado' : 'Pagamento recebido'
                 )}
               </button>
             </div>
