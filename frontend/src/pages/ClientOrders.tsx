@@ -441,6 +441,7 @@ export function ClientOrders() {
   });
   const requestIdRef = useRef(0);
   const inFlightRef = useRef(false);
+  const prevAwaitingIdsRef = useRef<Set<string>>(new Set());
 
   const refreshActiveOrderDetails = useCallback(async (targetOrders: any[]) => {
     const active = (Array.isArray(targetOrders) ? targetOrders : []).filter(
@@ -561,16 +562,40 @@ export function ClientOrders() {
     };
   }, [activeOrderIds, activeOrders.length, loadOrders]);
 
-  // On native APK: refresh immediately when app returns to foreground (user coming back from MP browser)
+  // Detect payment confirmation: show toast when any awaiting_payment order transitions to a paid status
+  useEffect(() => {
+    const currentAwaiting = new Set(
+      orders.filter((o) => String(o.status || '').toLowerCase() === 'awaiting_payment').map((o) => o.id)
+    );
+    const prev = prevAwaitingIdsRef.current;
+    if (prev.size > 0) {
+      const confirmed = [...prev].filter((id) => {
+        if (currentAwaiting.has(id)) return false;
+        const order = orders.find((o) => o.id === id);
+        const s = String(order?.status || '').toLowerCase();
+        return !['cancelled', 'rejected'].includes(s);
+      });
+      if (confirmed.length > 0) {
+        showToast('Pagamento confirmado! Seu pedido foi aceito.', 'success', { durationMs: 6000 });
+      }
+    }
+    prevAwaitingIdsRef.current = currentAwaiting;
+  }, [orders]);
+
+  // On native APK: refresh when app returns to foreground or MP browser closes
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
     const hasAwaitingPayment = orders.some((o) => String(o.status || '').toLowerCase() === 'awaiting_payment');
     if (!hasAwaitingPayment) return;
-    let handle: any;
+    let appHandle: any;
+    let browserHandle: any;
     CapacitorApp.addListener('appStateChange', ({ isActive }) => {
       if (isActive) void loadOrders({ silent: true });
-    }).then((h) => { handle = h; });
-    return () => { handle?.remove(); };
+    }).then((h) => { appHandle = h; });
+    Browser.addListener('browserFinished', () => {
+      void loadOrders({ silent: true });
+    }).then((h) => { browserHandle = h; });
+    return () => { appHandle?.remove(); browserHandle?.remove(); };
   }, [orders, loadOrders]);
 
   const openStore = (slug?: string) => {
