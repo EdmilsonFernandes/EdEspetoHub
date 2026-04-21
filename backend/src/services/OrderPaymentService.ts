@@ -79,7 +79,18 @@ export class OrderPaymentService {
       row.paymentLink = mpPayment?.paymentLink || null;
       row.qrCodeBase64 = this.normalizeQrCode(mpPayment?.qrCodeBase64);
       row.qrCodeText = mpPayment?.qrCodeText || null;
-      if (mpPayment?.expiresAt) {
+      if (providerMethod === 'PIX') {
+        // Always set a local expiry for PIX — never rely solely on provider value
+        const pixExpiry = new Date(Date.now() + 5 * 60 * 1000);
+        if (mpPayment?.expiresAt) {
+          const parsed = new Date(mpPayment.expiresAt);
+          row.expiresAt = (Number.isFinite(parsed.getTime()) && parsed.getTime() > Date.now() + 30_000)
+            ? parsed
+            : pixExpiry;
+        } else {
+          row.expiresAt = pixExpiry;
+        }
+      } else if (mpPayment?.expiresAt) {
         const parsed = new Date(mpPayment.expiresAt);
         if (Number.isFinite(parsed.getTime())) row.expiresAt = parsed;
       }

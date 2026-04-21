@@ -1523,6 +1523,7 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
         `SELECT id, expires_at FROM order_payments
           WHERE order_id = $1 AND payment_status = 'PENDING' AND expires_at IS NOT NULL
           AND expires_at < NOW() - INTERVAL '2 minutes'
+          AND created_at < NOW() - INTERVAL '7 minutes'
           LIMIT 1`,
         [orderId]
       );
