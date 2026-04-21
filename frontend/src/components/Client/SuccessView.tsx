@@ -310,8 +310,8 @@ export const SuccessView = ({
   const isAwaitingPayment = hasOnlinePayment && !isPaid && String(paymentStatus || '').toUpperCase() !== 'FAILED';
   const isNativePlatform = Capacitor.isNativePlatform();
   const checkoutTopPaddingClass = isNativePlatform
-    ? "pt-[max(calc(env(safe-area-inset-top)+0.8rem),1.05rem)]"
-    : "pt-[max(calc(env(safe-area-inset-top)+1rem),1.25rem)]";
+    ? "pt-[max(calc(env(safe-area-inset-top)+0.45rem),0.7rem)]"
+    : "pt-[max(calc(env(safe-area-inset-top)+0.45rem),0.75rem)]";
   const checkoutStickyTopClass = isNativePlatform
     ? "top-[max(calc(env(safe-area-inset-top)+0.45rem),0.7rem)]"
     : "top-[max(calc(env(safe-area-inset-top)+0.45rem),0.75rem)]";
@@ -371,8 +371,8 @@ export const SuccessView = ({
 
       {/* Content */}
       <div className="space-y-4 px-4 sm:px-6">
-        {/* Status card */}
-        <div className={`rounded-3xl border p-5 shadow-sm ${isPaid ? 'bg-gradient-to-b from-emerald-50 to-white border-emerald-200' : isAwaitingPayment ? 'bg-gradient-to-b from-[#009ee3]/5 to-white border-[#009ee3]/20' : 'bg-gradient-to-b from-sky-50 to-white border-sky-200'}`}>
+        {/* Status card — hidden when awaiting payment (OnlinePaymentBlock already covers it) */}
+        {!isAwaitingPayment && <div className={`rounded-3xl border p-5 shadow-sm ${isPaid ? 'bg-gradient-to-b from-emerald-50 to-white border-emerald-200' : 'bg-gradient-to-b from-sky-50 to-white border-sky-200'}`}>
           <div className="flex items-center gap-3">
             <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-inner ${isPaid ? 'bg-emerald-100' : isAwaitingPayment ? 'bg-[#009ee3]/10' : 'bg-sky-100'}`}>
               <CheckCircle size={28} weight="duotone" className={isPaid ? 'text-emerald-600' : isAwaitingPayment ? 'text-[#009ee3]' : 'text-sky-600'} />
@@ -394,7 +394,7 @@ export const SuccessView = ({
               </p>
             </div>
           </div>
-        </div>
+        </div>}
 
         {/* Online payment UI (Mercado Pago) — hide when paid, status card above already confirms it */}
         {hasOnlinePayment && !isPaid && (
