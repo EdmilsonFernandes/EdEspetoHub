@@ -41,6 +41,7 @@ const NATIVE_NAV_VISIBILITY_EVENT = 'jnc:native-nav-visibility';
 const getOrderStatusTone = (status?: string) => {
   const normalized = String(status || '').trim().toLowerCase();
   const tones: Record<string, string> = {
+    awaiting_payment: 'bg-sky-100 text-sky-700 border-sky-200',
     pending: 'bg-amber-100 text-amber-700 border-amber-200',
     preparing: 'bg-sky-100 text-sky-700 border-sky-200',
     ready: 'bg-emerald-100 text-emerald-700 border-emerald-200',
@@ -136,6 +137,7 @@ export function StorePage() {
   const [customer, setCustomer] = useState(initialCustomer);
   const [paymentMethod, setPaymentMethod] = useState(defaultPaymentMethod);
   const [lastOrder, setLastOrder] = useState(null);
+  const [pendingWhatsApp, setPendingWhatsApp] = useState<(() => void) | null>(null);
   const [branding, setBranding] = useState(() => getPersistedBranding(storeSlug || defaultBranding.espetoId));
   const [storeOpenNow, setStoreOpenNow] = useState(true);
   const [storePhone, setStorePhone] = useState('');
@@ -1845,7 +1847,7 @@ export function StorePage() {
           ? `${window.location.origin}/pedido/${createdOrder.id}?ot=${encodeURIComponent(String(createdOrder.accessToken))}`
           : `${window.location.origin}/pedido/${createdOrder.id}`
         : '';
-    const shouldNotifyOwner = !isStoreAdmin && (customer.type === 'pickup' || customer.type === 'table');
+    const shouldNotifyOwner = !isStoreAdmin && !customerSession?.token && (customer.type === 'pickup' || customer.type === 'table');
     if (shouldNotifyOwner) {
       const itemsList = validCartItems
         .map((item: any) => `• ${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
@@ -1878,11 +1880,12 @@ export function StorePage() {
       ].filter(Boolean);
 
       const targetNumber = resolvedWhatsApp || WHATSAPP_NUMBER;
-      const phone = String(targetNumber || '').replace(/\D/g, '');
-      openWhatsAppUrl(phone, messageLines.join('\n'));
+      const waPhone = String(targetNumber || '').replace(/\D/g, '');
+      const waMessage = messageLines.join('\n');
+      setPendingWhatsApp(() => () => openWhatsAppUrl(waPhone, waMessage));
+    } else {
+      setPendingWhatsApp(null);
     }
-    // Evita abrir uma segunda janela do WhatsApp automaticamente.
-    // O acompanhamento fica no botão da tela de sucesso e no histórico recente.
 
     reconcileLocalStockAfterCheckout(validCartItems);
 
@@ -2747,6 +2750,8 @@ export function StorePage() {
                     }
               }
               onNewOrder={() => setView('menu')}
+              onMyOrders={customerSession?.token ? () => navigate('/cliente/pedidos') : undefined}
+              onWhatsApp={pendingWhatsApp ?? undefined}
             />
           </div>
         )}

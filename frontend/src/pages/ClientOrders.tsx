@@ -130,6 +130,12 @@ const getStatusMeta = (status: string, orderType?: string) => {
   }
 
   switch (normalized) {
+    case 'AWAITING_PAYMENT':
+      return {
+        label: 'Aguardando pagamento',
+        icon: <Clock size={15} weight="duotone" className="text-sky-500" />,
+        toneClass: 'text-sky-600',
+      };
     case 'PENDING':
     case 'ACCEPTED':
       return {
@@ -286,7 +292,14 @@ function OrderCard({
         className="mt-3 block w-full text-left"
       >
         <div className="rounded-2xl bg-slate-50/90 px-3 py-2.5">
-          {isActive && (etaWindowLabel || isDelayed) ? (
+          {normalizeStatus(order.status) === 'AWAITING_PAYMENT' ? (
+            <div className="mb-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-700">
+                <SpinnerGap size={12} weight="duotone" className="animate-spin" />
+                Confirme o pagamento para o pedido entrar na fila
+              </span>
+            </div>
+          ) : isActive && (etaWindowLabel || isDelayed) ? (
             <div className="mb-2 flex flex-wrap items-center gap-2">
               {etaWindowLabel ? (
                 <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${isDelayed ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'}`}>

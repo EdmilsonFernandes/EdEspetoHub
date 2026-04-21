@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useState } from "react";
-import { CheckCircle, QrCode, ArrowLeft, CreditCard, Printer, Copy, Check, ArrowSquareOut, Spinner, SealCheck } from "@phosphor-icons/react";
+import { CheckCircle, QrCode, ArrowLeft, CreditCard, Printer, Copy, Check, ArrowSquareOut, Spinner, SealCheck, WhatsappLogo, ListBullets } from "@phosphor-icons/react";
+import { Capacitor } from "@capacitor/core";
 import { formatPaymentMethod } from "../../utils/format";
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 
@@ -167,15 +168,20 @@ const OnlinePaymentBlock = ({ onlinePayment, paymentStatus }) => {
             <p className="mb-4 text-xs text-slate-500 text-center">
               Seu pedido foi registrado. Clique abaixo para efetuar o pagamento com cartão via Mercado Pago.
             </p>
-            <a
-              href={onlinePayment.paymentLink}
-              target="_blank"
-              rel="noreferrer"
+            <button
+              type="button"
+              onClick={() => {
+                if (Capacitor.isNativePlatform()) {
+                  window.open(onlinePayment.paymentLink, '_system');
+                } else {
+                  window.open(onlinePayment.paymentLink, '_blank', 'noopener,noreferrer');
+                }
+              }}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#009ee3] py-3.5 text-sm font-black text-white shadow-[0_8px_20px_-10px_rgba(0,158,227,0.6)] transition hover:brightness-105 active:scale-[0.98]"
             >
               <ArrowSquareOut size={16} weight="bold" />
               Pagar agora
-            </a>
+            </button>
           </div>
         </div>
       </div>
@@ -257,6 +263,8 @@ export const SuccessView = ({
   orderType,
   paymentMethod,
   onNewOrder,
+  onMyOrders,
+  onWhatsApp,
   pixKey,
   phone,
   table,
@@ -327,7 +335,7 @@ export const SuccessView = ({
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-3 flex-wrap justify-center">
         {orderId && onPrintReceipt && (
           <button
             onClick={onPrintReceipt}
@@ -336,7 +344,7 @@ export const SuccessView = ({
             <Printer size={18} weight="duotone" /> Imprimir comprovante
           </button>
         )}
-        {orderId && onTrackOrder && (
+        {orderId && onTrackOrder && !isPaid && (
           <button
             onClick={onTrackOrder}
             className="flex items-center justify-center gap-2 text-white bg-emerald-600 font-bold px-6 py-3 rounded-xl transition-colors hover:opacity-90"
@@ -344,12 +352,29 @@ export const SuccessView = ({
             <CheckCircle size={18} weight="duotone" /> Acompanhar pedido
           </button>
         )}
-        <button
-          onClick={onNewOrder}
-          className="flex items-center justify-center gap-2 text-white bg-brand-primary font-bold px-6 py-3 rounded-xl transition-colors hover:opacity-90"
-        >
-          <ArrowLeft size={18} weight="duotone" /> Voltar para os pedidos
-        </button>
+        {onMyOrders ? (
+          <button
+            onClick={onMyOrders}
+            className="flex items-center justify-center gap-2 text-white bg-brand-primary font-bold px-6 py-3 rounded-xl transition-colors hover:opacity-90"
+          >
+            <ListBullets size={18} weight="duotone" /> Meus pedidos
+          </button>
+        ) : (
+          <button
+            onClick={onNewOrder}
+            className="flex items-center justify-center gap-2 text-white bg-brand-primary font-bold px-6 py-3 rounded-xl transition-colors hover:opacity-90"
+          >
+            <ArrowLeft size={18} weight="duotone" /> Voltar para os pedidos
+          </button>
+        )}
+        {onWhatsApp && (
+          <button
+            onClick={onWhatsApp}
+            className="flex items-center justify-center gap-2 text-white bg-emerald-600 font-bold px-6 py-3 rounded-xl transition-colors hover:opacity-90"
+          >
+            <WhatsappLogo size={18} weight="duotone" /> Notificar loja
+          </button>
+        )}
       </div>
     </div>
   );

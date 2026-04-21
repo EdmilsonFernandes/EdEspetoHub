@@ -63,6 +63,7 @@ export const formatOrderStatus = (status?: string, type?: string) => {
         ? 'Pedido pronto'
         : 'Finalizado';
   const map: Record<string, string> = {
+    awaiting_payment: 'Aguardando pagamento',
     pending: 'Pedido Recebido',
     preparing: 'Em Preparação',
     ready: readyLabel,

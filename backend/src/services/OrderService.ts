@@ -1517,6 +1517,20 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
   async getPublicById(orderId: string)
   {
     await this.reconcileDeliveredOrderById(orderId);
+    // Auto-fail awaiting_payment orders whose MP payment expired
+    try {
+      const rows = await AppDataSource.query(
+        `SELECT id, expires_at FROM order_payments
+          WHERE order_id = $1 AND payment_status = 'PENDING' AND expires_at IS NOT NULL
+          AND expires_at < NOW() - INTERVAL '2 minutes'
+          LIMIT 1`,
+        [orderId]
+      );
+      if (rows?.length) {
+        await this.orderPaymentService.markFailedFromWebhook(rows[0].id);
+      }
+    } catch { /* non-blocking */ }
+
     const order = await this.orderRepository.findById(orderId);
     if (!order) return null;
     const queueStatuses = [ 'pending', 'preparing', 'ready' ];
