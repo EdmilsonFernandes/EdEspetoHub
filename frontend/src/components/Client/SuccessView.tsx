@@ -95,12 +95,29 @@ const OnlinePaymentBlock = ({ onlinePayment, paymentStatus }) => {
               <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-800">Pix via Mercado Pago</p>
               <p className="text-[11px] text-emerald-700/70">Escaneie o QR code ou copie o código</p>
             </div>
-            {timeLeft !== null && !isExpired && (
-              <span className={`ml-auto shrink-0 rounded-full px-2.5 py-1 text-[11px] font-black tabular-nums ${timeLeft < 60000 ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-700'}`}>
-                {formatCountdown(timeLeft)}
-              </span>
-            )}
           </div>
+
+          {/* Countdown destaque */}
+          {timeLeft !== null && !isExpired && (
+            <div className={`mx-4 mt-4 rounded-2xl border p-4 text-center ${
+              timeLeft < 60000 ? 'border-rose-200 bg-rose-50' : timeLeft < 120000 ? 'border-amber-200 bg-amber-50' : 'border-emerald-200 bg-emerald-50'
+            }`}>
+              <p className={`mb-1 text-[10px] font-black uppercase tracking-widest ${
+                timeLeft < 60000 ? 'text-rose-500' : timeLeft < 120000 ? 'text-amber-500' : 'text-emerald-600'
+              }`}>Tempo para pagar</p>
+              <p className={`text-5xl font-black tabular-nums leading-none ${
+                timeLeft < 60000 ? 'text-rose-600 animate-pulse' : timeLeft < 120000 ? 'text-amber-600' : 'text-emerald-700'
+              }`}>{formatCountdown(timeLeft)}</p>
+              <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/60">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    timeLeft < 60000 ? 'bg-rose-500' : timeLeft < 120000 ? 'bg-amber-400' : 'bg-emerald-500'
+                  }`}
+                  style={{ width: `${Math.min(100, (timeLeft / (5 * 60 * 1000)) * 100)}%` }}
+                />
+              </div>
+            </div>
+          )}
 
           {/* QR code */}
           <div className="flex flex-col items-center gap-4 p-5">
