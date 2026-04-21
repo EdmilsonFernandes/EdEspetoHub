@@ -146,6 +146,7 @@ export const CartView = ({
   const [showEmptyCartSheet, setShowEmptyCartSheet] = useState(false);
   const [hasTriedCheckout, setHasTriedCheckout] = useState(false);
   const [showOptionalPhoneFields, setShowOptionalPhoneFields] = useState(false);
+  const [checkoutStep, setCheckoutStep] = useState(1);
   const previousCartItemsCountRef = useRef<number>(cartItems.length);
   const cepLookupLockRef = useRef(false);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
@@ -556,6 +557,7 @@ export const CartView = ({
   const loggedDeliveryPhone = String(customer?.phone || '').trim();
   const hasLoggedContactInfo = Boolean(loggedDeliveryName || loggedDeliveryPhone);
   const canUseLockedContactSummary = Boolean(isLoggedAssistedFlow && hasLoggedContactInfo);
+  const useMultiStepFlow = isCustomerLogged;
   const loggedDeliveryAddressSummary = useMemo(() => {
     if (!activeSavedAddress) return normalizedCustomerAddress;
     const street = [activeSavedAddress?.street, activeSavedAddress?.number].filter(Boolean).join(', ');
@@ -608,13 +610,32 @@ export const CartView = ({
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       <div className={`sticky ${checkoutStickyTopClass} z-40 mb-4 sm:mb-6`}>
         <div className="rounded-[1.85rem] border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.97)_0%,rgba(244,248,252,0.96)_100%)] px-3 py-3 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
+          {useMultiStepFlow && (
+            <div className="mb-3 flex items-center gap-1">
+              {[{ label: 'Sacola', step: 1 }, { label: 'Entrega', step: 2 }, { label: 'Pagamento', step: 3 }].map(({ label, step }, i) => {
+                const isActive = checkoutStep === step;
+                const isDone = checkoutStep > step;
+                return (
+                  <React.Fragment key={step}>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black transition-colors ${isDone ? 'bg-emerald-500 text-white' : isActive ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-500'}`}>
+                        {isDone ? '✓' : step}
+                      </span>
+                      <span className={`text-[10px] font-bold uppercase tracking-wide transition-colors ${isActive ? 'text-slate-900' : isDone ? 'text-emerald-600' : 'text-slate-400'}`}>{label}</span>
+                    </div>
+                    {i < 2 && <div className={`h-px flex-1 transition-colors ${isDone ? 'bg-emerald-300' : 'bg-slate-200'}`} />}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          )}
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={onBack}
+              onClick={useMultiStepFlow && checkoutStep > 1 ? () => setCheckoutStep(s => s - 1) : onBack}
               className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] border border-slate-200/80 bg-white text-[#336886] shadow-[0_14px_28px_-18px_rgba(51,104,134,0.3)] transition hover:-translate-y-0.5 hover:bg-sky-50 active:scale-95"
-              aria-label="Voltar ao cardápio"
-              title="Voltar ao cardápio"
+              aria-label={useMultiStepFlow && checkoutStep > 1 ? "Voltar à etapa anterior" : "Voltar ao cardápio"}
+              title={useMultiStepFlow && checkoutStep > 1 ? "Voltar à etapa anterior" : "Voltar ao cardápio"}
             >
               <ArrowLeft size={18} weight="bold" />
             </button>
@@ -641,7 +662,7 @@ export const CartView = ({
       </div>
 
       {/* Resumo compacto (mobile) */}
-      <div className={`sm:hidden mb-4 rounded-2xl border border-slate-100 bg-white px-4 ${summaryCompact ? 'py-2' : 'py-2.5'} flex items-center justify-between sticky ${summaryStickyTopClass} z-30 transition-all shadow-sm`}>
+      {(!useMultiStepFlow || checkoutStep > 1) && <div className={`sm:hidden mb-4 rounded-2xl border border-slate-100 bg-white px-4 ${summaryCompact ? 'py-2' : 'py-2.5'} flex items-center justify-between sticky ${summaryStickyTopClass} z-30 transition-all shadow-sm`}>
         <div>
           <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Resumo rápido</p>
           <p className="text-sm font-semibold text-slate-800">
@@ -652,17 +673,19 @@ export const CartView = ({
           <p className="text-[11px] text-slate-400">Total</p>
           <p className="text-base font-bold text-slate-900">{formatCurrency(totalWithFee)}</p>
         </div>
-      </div>
+      </div>}
 
       {/* Dados do cliente */}
-      <div className="relative overflow-hidden bg-white rounded-3xl border border-slate-100 p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
+      {(!useMultiStepFlow || checkoutStep === 2) && <div className="relative overflow-hidden bg-white rounded-3xl border border-slate-100 p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
         <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div>
-            <h2 className="font-black text-slate-900 text-base sm:text-lg tracking-tight">Detalhes do Pedido</h2>
-            <p className="text-xs text-slate-500 hidden sm:block">Complete as infos para enviarmos seu pedido.</p>
+            <h2 className="font-black text-slate-900 text-base sm:text-lg tracking-tight">
+              {useMultiStepFlow ? 'Como você quer receber?' : 'Detalhes do Pedido'}
+            </h2>
+            {!useMultiStepFlow && <p className="text-xs text-slate-500 hidden sm:block">Complete as infos para enviarmos seu pedido.</p>}
           </div>
           <span className="text-[11px] font-extrabold text-brand-primary bg-brand-primary-soft px-3 py-1 rounded-full border border-brand-primary/20">
-            Etapa 1/2
+            {useMultiStepFlow ? 'Etapa 2/3' : 'Etapa 1/2'}
           </span>
         </div>
 
@@ -713,7 +736,7 @@ export const CartView = ({
           </div>
           )}
 
-          {canUseLockedContactSummary && (
+          {canUseLockedContactSummary && !useMultiStepFlow && (
             <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4 shadow-sm">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -1334,11 +1357,20 @@ export const CartView = ({
             </div>
           )}
         </div>
-      </div>
+      </div>}
 
       {/* Resumo */}
-      <div className="relative overflow-hidden bg-white rounded-2xl border border-slate-100 p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:-translate-y-0.5 active:scale-[0.99] shadow-sm">
-        <h2 className="font-black text-slate-900 mb-3 sm:mb-4 text-base sm:text-lg tracking-tight">Resumo</h2>
+      {(!useMultiStepFlow || checkoutStep === 1) && <div className="relative overflow-hidden bg-white rounded-2xl border border-slate-100 p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:-translate-y-0.5 active:scale-[0.99] shadow-sm">
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <h2 className="font-black text-slate-900 text-base sm:text-lg tracking-tight">
+            {useMultiStepFlow ? 'Sua Sacola' : 'Resumo'}
+          </h2>
+          {useMultiStepFlow && (
+            <button type="button" onClick={onBack} className="text-[11px] font-bold text-[#336886] hover:underline">
+              + Adicionar itens
+            </button>
+          )}
+        </div>
 
         {cartItems.map((item) => (
           <div
@@ -1458,10 +1490,39 @@ export const CartView = ({
           </div>
         )}
 
-      </div>
+      </div>}
+
+      {/* Compact pricing + Forma de Pagamento (multi-step step 3) */}
+      {useMultiStepFlow && checkoutStep === 3 && (
+        <div className="relative overflow-hidden bg-white rounded-2xl border border-slate-100 p-4 sm:p-6 mb-4 shadow-sm">
+          <h2 className="font-black text-slate-900 text-base tracking-tight mb-3">Resumo do pedido</h2>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between text-slate-600">
+              <span>{cartItems.reduce((a, i) => a + i.qty, 0)} {cartItems.reduce((a, i) => a + i.qty, 0) === 1 ? 'item' : 'itens'}</span>
+              <span className="font-semibold text-slate-800">{formatCurrency(total)}</span>
+            </div>
+            {discountTotal > 0 && (
+              <div className="flex justify-between text-emerald-700 font-semibold">
+                <span>Promoção</span>
+                <span>- {formatCurrency(discountTotal)}</span>
+              </div>
+            )}
+            {isDelivery && deliveryFeeValue > 0 && (
+              <div className="flex justify-between text-slate-600">
+                <span className="inline-flex items-center gap-1"><Truck size={13} weight="duotone" className="text-emerald-500" />Taxa de entrega</span>
+                <span className="font-semibold text-slate-800">{formatCurrency(deliveryFeeValue)}</span>
+              </div>
+            )}
+            <div className="flex justify-between pt-2 border-t border-slate-100">
+              <span className="font-bold text-slate-900">Total</span>
+              <span className="text-xl font-black text-slate-900">{formatCurrency(totalWithFee)}</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Forma de Pagamento */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-white via-blue-50/40 to-white rounded-2xl border border-blue-100 p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:-translate-y-0.5 active:scale-[0.99] shadow-[0_28px_56px_-44px_rgba(37,99,235,0.35)]">
+      {(!useMultiStepFlow || checkoutStep === 3) && <div className="relative overflow-hidden bg-gradient-to-br from-white via-blue-50/40 to-white rounded-2xl border border-blue-100 p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:-translate-y-0.5 active:scale-[0.99] shadow-[0_28px_56px_-44px_rgba(37,99,235,0.35)]">
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-400/80 via-brand-primary/70 to-white" />
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-black text-slate-900 text-base sm:text-lg flex items-center gap-2 tracking-tight">
@@ -1515,9 +1576,9 @@ export const CartView = ({
             </button>
           ))}
         </div>
-      </div>
+      </div>}
 
-      {isCash && (
+      {(!useMultiStepFlow || checkoutStep === 3) && isCash && (
         <div className="relative overflow-hidden bg-gradient-to-br from-white via-amber-50/35 to-white rounded-2xl border border-amber-100 p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:-translate-y-0.5 active:scale-[0.99] space-y-3 shadow-[0_28px_56px_-44px_rgba(245,158,11,0.4)]">
           <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-400/80 via-amber-500/60 to-white" />
           <div className="flex items-start justify-between gap-3">
@@ -1575,51 +1636,110 @@ export const CartView = ({
 
       {/* Botão Finalizar */}
       <div className={`fixed left-0 right-0 w-full box-border p-4 border-t border-slate-100 bg-white/90 backdrop-blur-md max-w-lg mx-auto z-50 shadow-[0_-14px_28px_-22px_rgba(15,23,42,0.28)] ${isNativePlatform ? "ds-native-nav-dock" : "bottom-0"}`}>
-        <button
-          onClick={async () => {
-            setHasTriedCheckout(true);
-            setCtaPulse(true);
-            window.setTimeout(() => setCtaPulse(false), 220);
-            if (isLoggedDeliveryFlow && !hasSavedAddress) {
-              onOpenAddressManager?.();
-              return;
-            }
-            if (isDeliveryValidationMode) {
-              const rawCep = (customer.cep || "").replace(/\D/g, "");
-              if (rawCep.length !== 8) {
-                setCepError("Informe um CEP válido para validar a entrega.");
-                cepInputRef.current?.focus();
-                return;
+        {useMultiStepFlow ? (
+          <>
+            <button
+              onClick={() => {
+                setCtaPulse(true);
+                window.setTimeout(() => setCtaPulse(false), 220);
+                if (checkoutStep === 1) {
+                  setCheckoutStep(2);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  return;
+                }
+                if (checkoutStep === 2) {
+                  if (isLoggedDeliveryFlow && !hasSavedAddress) {
+                    onOpenAddressManager?.();
+                    return;
+                  }
+                  setCheckoutStep(3);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  return;
+                }
+                // Step 3: final checkout
+                setHasTriedCheckout(true);
+                onCheckout({
+                  cashTendered: isCash && cashNeedsChange && cashTenderedValue !== null ? Number(cashTenderedValue) : null,
+                });
+              }}
+              disabled={checkoutStep === 2
+                ? (checkoutLoading || (customer.type === 'delivery' && deliveryCheck?.status === 'out') || (customer.type === 'table' && !String(customer.table || '').trim()))
+                : checkoutStep === 3
+                ? (checkoutLoading || checkoutDisabled || cashValidation.blocked)
+                : false}
+              className={`w-full font-bold text-lg py-4 rounded-2xl shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
+                (checkoutStep === 2 && (checkoutLoading || (customer.type === 'delivery' && deliveryCheck?.status === 'out') || (customer.type === 'table' && !String(customer.table || '').trim()))) ||
+                (checkoutStep === 3 && (checkoutLoading || checkoutDisabled || cashValidation.blocked))
+                  ? "bg-slate-300 text-slate-600 cursor-not-allowed"
+                  : "bg-slate-900 text-white cursor-pointer"
+              }`}
+              style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
+            >
+              {checkoutStep < 3
+                ? <>
+                    {isLoggedDeliveryFlow && !hasSavedAddress && checkoutStep === 2 ? 'Cadastrar endereço' : 'Continuar'}
+                    <ArrowLeft size={18} weight="bold" className="rotate-180" />
+                  </>
+                : <>
+                    {checkoutLoading ? 'Processando...' : <>{isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />} {'Fazer pedido'} <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>}
+                  </>
               }
-              await handleCepLookup();
-              return;
-            }
-            if (isPostalQuoteMode) {
-              await Promise.resolve(onCalculatePostalQuote?.());
-              return;
-            }
-            await Promise.resolve(
-              onCheckout({
-              cashTendered:
-                isCash && cashNeedsChange && cashTenderedValue !== null ? Number(cashTenderedValue) : null,
-              })
-            );
-          }}
-          disabled={primaryCtaDisabled}
-          className={`w-full font-bold text-lg py-4 rounded-2xl shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
-            primaryCtaDisabled
-              ? "bg-slate-300 text-slate-600 cursor-not-allowed"
-              : "bg-slate-900 text-white cursor-pointer"
-          }`}
-          style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
-        >
-          {isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />}
-          {checkoutLoading ? "Processando..." : primaryCtaLabel}
-        </button>
-        {hasTriedCheckout && !isDeliveryValidationMode && (checkoutDisabled || cashValidation.blocked) && !hideOutOfRangeInlineReason && (checkoutDisabledReason || cashValidation.reason) && (
-          <p className="mt-2 text-center text-[11px] text-rose-600 font-semibold">
-            {cashValidation.blocked ? cashValidation.reason : checkoutDisabledReason}
-          </p>
+            </button>
+            {hasTriedCheckout && checkoutStep === 3 && (checkoutDisabled || cashValidation.blocked) && (checkoutDisabledReason || cashValidation.reason) && (
+              <p className="mt-2 text-center text-[11px] text-rose-600 font-semibold">
+                {cashValidation.blocked ? cashValidation.reason : checkoutDisabledReason}
+              </p>
+            )}
+          </>
+        ) : (
+          <>
+            <button
+              onClick={async () => {
+                setHasTriedCheckout(true);
+                setCtaPulse(true);
+                window.setTimeout(() => setCtaPulse(false), 220);
+                if (isLoggedDeliveryFlow && !hasSavedAddress) {
+                  onOpenAddressManager?.();
+                  return;
+                }
+                if (isDeliveryValidationMode) {
+                  const rawCep = (customer.cep || "").replace(/\D/g, "");
+                  if (rawCep.length !== 8) {
+                    setCepError("Informe um CEP válido para validar a entrega.");
+                    cepInputRef.current?.focus();
+                    return;
+                  }
+                  await handleCepLookup();
+                  return;
+                }
+                if (isPostalQuoteMode) {
+                  await Promise.resolve(onCalculatePostalQuote?.());
+                  return;
+                }
+                await Promise.resolve(
+                  onCheckout({
+                  cashTendered:
+                    isCash && cashNeedsChange && cashTenderedValue !== null ? Number(cashTenderedValue) : null,
+                  })
+                );
+              }}
+              disabled={primaryCtaDisabled}
+              className={`w-full font-bold text-lg py-4 rounded-2xl shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
+                primaryCtaDisabled
+                  ? "bg-slate-300 text-slate-600 cursor-not-allowed"
+                  : "bg-slate-900 text-white cursor-pointer"
+              }`}
+              style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
+            >
+              {isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />}
+              {checkoutLoading ? "Processando..." : primaryCtaLabel}
+            </button>
+            {hasTriedCheckout && !isDeliveryValidationMode && (checkoutDisabled || cashValidation.blocked) && !hideOutOfRangeInlineReason && (checkoutDisabledReason || cashValidation.reason) && (
+              <p className="mt-2 text-center text-[11px] text-rose-600 font-semibold">
+                {cashValidation.blocked ? cashValidation.reason : checkoutDisabledReason}
+              </p>
+            )}
+          </>
         )}
       </div>
 

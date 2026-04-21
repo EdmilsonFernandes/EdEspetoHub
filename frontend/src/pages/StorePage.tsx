@@ -1166,6 +1166,33 @@ export function StorePage() {
     autoTrackRef.current = true;
   }, [view, lastOrder?.id]);
 
+  // Poll Mercado Pago payment status while on success screen and payment is pending
+  // Only for customer context — admin/lojista/entregador pay on-site, no online payment needed
+  useEffect(() => {
+    if (view !== 'success') return;
+    if (isStoreAdmin || isCondominiumCheckout) return;
+    if (!lastOrder?.id || !lastOrder?.onlinePayment) return;
+    const ps = String(lastOrder?.paymentStatus || '').toUpperCase();
+    if (ps === 'PAID' || ps === 'FAILED') return;
+
+    let cancelled = false;
+    const poll = async () => {
+      try {
+        const data = await orderService.getPublicById(lastOrder.id);
+        const nextPs = String(data?.paymentStatus || '').toUpperCase();
+        if (!cancelled && (nextPs === 'PAID' || nextPs === 'FAILED')) {
+          setLastOrder((prev: any) => prev ? { ...prev, paymentStatus: nextPs } : prev);
+        }
+      } catch {}
+    };
+
+    const intervalId = setInterval(poll, 3000);
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
+  }, [view, lastOrder?.id, lastOrder?.paymentStatus, lastOrder?.onlinePayment]);
+
   useEffect(() => {
     if (user?.token) {
       setLastPublicOrderId('');
@@ -1881,6 +1908,7 @@ export function StorePage() {
         phone: sanitizedPhoneKey || customer.phone,
         pixKey,
         onlinePayment: createdOrder?.payment || null,
+        paymentStatus: String(createdOrder?.paymentStatus || 'PENDING').toUpperCase(),
         table: customer.table,
         customerName: effectiveCustomerName,
         address: deliveryAddress || customer.address,
@@ -2706,7 +2734,8 @@ export function StorePage() {
               phone={lastOrder?.phone}
               table={lastOrder?.table}
               orderId={lastOrder?.id}
-              onlinePayment={lastOrder?.onlinePayment}
+              onlinePayment={!isStoreAdmin && !isCondominiumCheckout ? lastOrder?.onlinePayment : null}
+              paymentStatus={!isStoreAdmin && !isCondominiumCheckout ? lastOrder?.paymentStatus : undefined}
               onPrintReceipt={canUseAdminPrintFlow ? printLastOrderReceipt : undefined}
               onTrackOrder={
                 canUseAdminPrintFlow
