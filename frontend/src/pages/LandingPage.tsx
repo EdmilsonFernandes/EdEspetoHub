@@ -96,6 +96,7 @@ export function LandingPage() {
   const navigate = useNavigate();
   const androidApkPath = '/downloads/ja-no-caminho-android-latest.apk';
   const androidApkPublicUrl = 'https://www.janocaminho.com.br/downloads/ja-no-caminho-android-latest.apk';
+  const appStorePreviewSrc = '/marketing/google-play-preview.jpg';
   const androidApkQrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data=${encodeURIComponent(
     androidApkPublicUrl
   )}`;
@@ -870,80 +871,111 @@ export function LandingPage() {
       {/* ══════════════════════════════════════════════════════════════
           APP DOWNLOAD
       ══════════════════════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-[linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] py-20 sm:py-24">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.14),_transparent_45%)]" />
+      <section className="relative overflow-hidden bg-[linear-gradient(180deg,#f8fafc_0%,#eef6f8_48%,#f8fafc_100%)] py-20 sm:py-24">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(51,104,134,0.16),_transparent_44%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-slate-300/70 to-transparent" />
         <div className="relative mx-auto max-w-7xl px-4">
-          <div className="mb-12 text-center space-y-3">
-            <p className="text-[11px] font-black uppercase tracking-[0.4em] text-sky-600">Acesso mobile</p>
-            <h2 className="text-3xl font-black leading-tight text-slate-900 sm:text-4xl">
-              Instale o app e gerencie<br className="hidden sm:block" /> de qualquer lugar.
+          <div className="mb-12 max-w-3xl space-y-3">
+            <p className="text-[11px] font-black uppercase tracking-[0.4em] text-[#336886]">App + web hub</p>
+            <h2 className="text-3xl font-black leading-tight text-slate-950 sm:text-5xl">
+              O Já no Caminho funciona como app, hub e vitrine online.
             </h2>
+            <p className="text-sm font-medium leading-7 text-slate-600 sm:text-base">
+              No Android, o lojista e o cliente podem instalar o app. No iPhone, a experiência segue pelo navegador com acesso rápido ao Hub enquanto a versão iOS não chega.
+            </p>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-            {/* Download CTA */}
-            <div className="rounded-[2rem] border border-slate-200/80 bg-white/90 p-6 shadow-[0_24px_52px_-30px_rgba(15,23,42,0.32)] backdrop-blur-xl sm:p-8">
-              <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-sky-700">
-                <DeviceMobile size={13} weight="duotone" />
-                App Android
+          <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+            <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_30px_70px_-44px_rgba(15,23,42,0.5)] sm:p-6">
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(95,211,90,0.10),transparent_32%),radial-gradient(circle_at_86%_20%,rgba(51,104,134,0.12),transparent_34%)]" />
+              <div className="relative overflow-hidden rounded-[1.55rem] bg-slate-950 p-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]">
+                <img
+                  src={appStorePreviewSrc}
+                  alt="Prévia do aplicativo Já no Caminho no Google Play"
+                  loading="lazy"
+                  className="aspect-[1011/500] w-full rounded-[1.25rem] object-cover"
+                />
               </div>
-              <h3 className="mt-4 text-2xl font-black leading-tight text-slate-900 sm:text-3xl">
-                Baixe o app do<br />Já no Caminho
+              <div className="relative mt-5 grid gap-3 sm:grid-cols-3">
+                {[
+                  { icon: GooglePlayLogo, title: 'Google Play', text: 'Em fase final de publicação' },
+                  { icon: DeviceMobile, title: 'Android', text: 'Instalação rápida pelo APK' },
+                  { icon: Desktop, title: 'iPhone e web', text: 'Acesso pelo navegador' },
+                ].map(({ icon: Icon, title, text }) => (
+                  <div key={title} className="rounded-2xl border border-slate-100 bg-slate-50/80 p-3">
+                    <Icon size={18} weight="duotone" className="text-[#336886]" />
+                    <p className="mt-2 text-xs font-black text-slate-950">{title}</p>
+                    <p className="mt-0.5 text-[11px] font-semibold leading-4 text-slate-500">{text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-[2rem] border border-slate-200/80 bg-white/90 p-6 shadow-[0_24px_52px_-30px_rgba(15,23,42,0.32)] backdrop-blur-xl sm:p-8">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#336886]/15 bg-[#336886]/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">
+                <DeviceMobile size={13} weight="duotone" />
+                Acesso para todos
+              </div>
+              <h3 className="mt-4 text-2xl font-black leading-tight text-slate-950 sm:text-3xl">
+                Um app para comprar, vender e acompanhar pedidos.
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">
-                Instale agora no Android com experiência app-like e acesso rápido ao Hub. Play Store em breve.
+                O Hub em <strong className="font-black text-slate-800">janocaminho.com.br/hub</strong> já atende cliente, lojista e entregador. A Play Store entra como canal oficial para deixar a instalação mais simples e confiável.
               </p>
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => navigate('/hub')}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0f172a] px-5 py-3 text-sm font-black text-white shadow-[0_16px_32px_-18px_rgba(15,23,42,0.85)] transition-all hover:scale-[1.01] active:scale-[0.98]"
+                >
+                  <Storefront size={16} weight="duotone" />
+                  Acessar Hub web
+                </button>
                 <a
                   href={androidApkPath}
                   download
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[linear-gradient(120deg,#0f172a,#1e293b)] px-5 py-3 text-sm font-black text-white shadow-[0_16px_32px_-18px_rgba(15,23,42,0.85)] transition-all hover:scale-[1.01] active:scale-[0.98]"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-800 transition-colors hover:bg-slate-50"
                 >
                   <DownloadSimple size={16} weight="bold" />
                   Baixar APK
                 </a>
-                <button
-                  type="button"
-                  disabled
-                  className="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-400"
-                  title="Publicação em andamento"
-                >
-                  <GooglePlayLogo size={16} weight="duotone" />
-                  Em breve na Play Store
-                </button>
               </div>
-            </div>
+              <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">
+                <GooglePlayLogo size={11} weight="duotone" />
+                Google Play visível para testers até a publicação
+              </div>
 
-            {/* QR + steps */}
-            <div className="rounded-[2rem] border border-slate-200/80 bg-white/90 p-6 shadow-[0_24px_52px_-30px_rgba(15,23,42,0.32)] backdrop-blur-xl sm:p-8">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">Instalação rápida</p>
-              <div className="mt-4 flex items-center gap-4">
-                <div className="shrink-0 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
-                  <img
-                    src={androidApkQrSrc}
-                    alt="QR Code para baixar o app Android"
-                    loading="lazy"
-                    className="h-24 w-24 rounded-lg object-cover sm:h-28 sm:w-28"
-                  />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Baixar via QR Code</p>
-                  <p className="mt-1 text-xs text-slate-600">Escaneie no celular e instale em poucos passos.</p>
-                  <button
-                    type="button"
-                    onClick={handleCopyApkLink}
-                    className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-700 transition-colors hover:bg-slate-50"
-                  >
-                    <CopySimple size={12} weight="bold" />
-                    {apkLinkCopied ? 'Link copiado!' : 'Copiar link'}
-                  </button>
+              <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50/80 p-4">
+                <div className="flex items-center gap-4">
+                  <div className="shrink-0 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
+                    <img
+                      src={androidApkQrSrc}
+                      alt="QR Code para baixar o app Android"
+                      loading="lazy"
+                      className="h-24 w-24 rounded-lg object-cover sm:h-28 sm:w-28"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Baixar via QR Code</p>
+                    <p className="mt-1 text-xs leading-5 text-slate-600">Use o celular para instalar o app Android ou compartilhe o link com a equipe.</p>
+                    <button
+                      type="button"
+                      onClick={handleCopyApkLink}
+                      className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-700 transition-colors hover:bg-slate-50"
+                    >
+                      <CopySimple size={12} weight="bold" />
+                      {apkLinkCopied ? 'Link copiado!' : 'Copiar link'}
+                    </button>
+                  </div>
                 </div>
               </div>
+
               <ol className="mt-5 space-y-3 text-sm text-slate-600">
                 {[
-                  <span>Toque em <strong className="font-black text-slate-800">Baixar APK</strong>.</span>,
-                  'Autorize a instalação de fontes desconhecidas no Android.',
-                  'Instale e abra. Publicação na Play Store em andamento.',
+                  <span>Android: instale pelo APK ou pela Google Play quando sua conta tiver acesso.</span>,
+                  <span>iPhone: acesse pelo Safari e adicione o Hub à tela inicial.</span>,
+                  <span>Lojista e cliente entram pelo mesmo app, cada um com sua área.</span>,
                 ].map((text, i) => (
                   <li key={i} className="flex items-start gap-2.5">
                     <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-900 text-[10px] font-black text-white">{i + 1}</span>
@@ -951,9 +983,9 @@ export function LandingPage() {
                   </li>
                 ))}
               </ol>
-              <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">
-                <QrCode size={11} weight="duotone" />
-                Play Store em breve
+              <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700">
+                <ShieldCheck size={11} weight="duotone" />
+                Canal oficial em preparação
               </div>
             </div>
           </div>
