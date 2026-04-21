@@ -20,7 +20,7 @@ import {
   ShieldCheck,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
-import { getPaymentMethodMeta } from "../../utils/paymentAssets";
+import { getPaymentMethodMeta, getPaymentProviderMeta } from "../../utils/paymentAssets";
 import { GoogleRouteMapView } from "../GoogleRouteMapView";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { getStoreAvatarUrl } from "../../utils/storeAvatar";
@@ -123,6 +123,7 @@ export const CartView = ({
     ? "top-[max(calc(env(safe-area-inset-top)+5.9rem),6.1rem)]"
     : "top-[max(calc(env(safe-area-inset-top)+5.9rem),6.1rem)]";
   const checkoutStoreLogo = resolveAssetUrl(storeLogoUrl || "") || getStoreAvatarUrl(storeSlug, storeLabel || "Loja");
+  const mercadoPagoMeta = getPaymentProviderMeta("mercado_pago");
   const cartItems = Object.values(cart);
   const fallbackPricing = getCartPricing(cart);
   const subtotal = pricingSummary?.subtotal ?? fallbackPricing.subtotal;
@@ -1639,7 +1640,11 @@ export const CartView = ({
         {(isPix || isCredit || isDebit) && (
           <div className="mt-4 rounded-2xl border border-[#009ee3]/18 bg-gradient-to-r from-[#009ee3]/6 to-white p-3 flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white border border-[#009ee3]/20 shadow-sm overflow-hidden">
-              <img src="/uploads/payment/mercado-pago.svg" alt="Mercado Pago" className="h-7 w-7 object-contain" />
+              {mercadoPagoMeta.icon ? (
+                <img src={mercadoPagoMeta.icon} alt={mercadoPagoMeta.label} className="h-7 w-7 object-contain" />
+              ) : (
+                <ShieldCheck size={18} weight="duotone" className="text-[#009ee3]" />
+              )}
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-black text-[#009ee3]">Mercado Pago</p>
@@ -1849,7 +1854,7 @@ export const CartView = ({
                     {checkoutLoading
                       ? 'Processando...'
                       : (isCredit || isDebit)
-                      ? <><img src="/uploads/payment/mercado-pago.svg" alt="" className="h-5 w-5 object-contain brightness-0 invert" /> Pagar via Mercado Pago <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>
+                      ? <><img src={mercadoPagoMeta.icon} alt="" className="h-5 w-5 object-contain brightness-0 invert" /> Pagar via Mercado Pago <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>
                       : <>{isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />} {'Fazer pedido'} <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>
                     }
                   </>
@@ -1991,5 +1996,4 @@ export const CartView = ({
     </div>
   );
 };
-
 

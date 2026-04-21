@@ -11,6 +11,7 @@
  * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  */
 import { resolveAssetUrl } from './resolveAssetUrl';
+import mercadoPagoLogo from '../assets/mercado-pago-logo.svg';
 
 const normalize = (value?: string) =>
   (value || '').toString().trim().toLowerCase().replace(/\s+/g, '_');
@@ -46,8 +47,8 @@ const PROVIDER_LABELS: Record<string, string> = {
 };
 
 const PROVIDER_ICONS: Record<string, string> = {
-  mercado_pago: '/uploads/payment/mercado-pago.svg',
-  mercadopago: '/uploads/payment/mercado-pago.svg',
+  mercado_pago: mercadoPagoLogo,
+  mercadopago: mercadoPagoLogo,
 };
 
 export const getPaymentMethodMeta = (method?: string) => {

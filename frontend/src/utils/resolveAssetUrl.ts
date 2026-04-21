@@ -35,9 +35,11 @@ export const resolveAssetUrl = (value?: string) => {
   
   // Lista de arquivos que sabemos que são LOCAIS do App (estão na pasta public)
   const isLocalAsset = path.startsWith('/icons/') || 
+                       path.startsWith('/assets/') ||
                        path.startsWith('/marketing/') || 
                        path === '/favicon.svg' || 
                        path === '/logo.svg' || 
+                       path === '/mercado-pago.svg' ||
                        path === '/janocaminho-logo.png' ||
                        path === '/janocaminho.jpg' ||
                        path === '/jnc.png';
