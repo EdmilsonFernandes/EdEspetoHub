@@ -678,12 +678,169 @@ sudo certbot --nginx -d janocaminho.com.br -d www.janocaminho.com.br
 
 Mercado Pago (producao):
 
-- Configure em `backend/.env.docker`:
-  - `MP_ACCESS_TOKEN`
-  - `MP_PUBLIC_KEY`
-  - `MP_WEBHOOK_SECRET`
-  - `MP_WEBHOOK_URL=https://www.janocaminho.com.br/api/webhooks/mercadopago`
-- O webhook exige HTTPS valido.
+- A plataforma usa duas camadas de Mercado Pago:
+  - **Conta da plataforma**: usada para cobrança de planos, renovações e destaques.
+  - **Conta do lojista via OAuth**: opcional, usada para cobrar pedidos da própria loja em Pix, crédito e débito.
+- Se a loja não conectar o Mercado Pago dela, o checkout continua no modo convencional: o pedido registra a forma de pagamento escolhida, mas a cobrança é feita fora do sistema.
+- Se a loja conectar, novos pedidos com `pix`, `credito` ou `debito` criam registro em `order_payments` e tentam gerar cobrança no Mercado Pago do lojista.
+
+Variáveis necessárias:
+
+```env
+APP_BASE_URL=https://www.janocaminho.com.br
+MP_ACCESS_TOKEN=<access-token-da-plataforma>
+MP_PUBLIC_KEY=<public-key-da-plataforma>
+MP_WEBHOOK_URL=https://www.janocaminho.com.br/api/webhooks/mercadopago
+MP_WEBHOOK_SECRET=<secret-do-webhook>
+MP_API_BASE_URL=https://api.mercadopago.com
+MP_DEBUG=false
+
+# OAuth para lojistas
+MP_CLIENT_ID=<client-id-da-aplicacao-mercado-pago>
+MP_CLIENT_SECRET=<client-secret-da-aplicacao-mercado-pago>
+MP_OAUTH_REDIRECT_URL=https://www.janocaminho.com.br/api/payment-accounts/mercadopago/callback
+MP_OAUTH_ENCRYPTION_KEY=<hex-64-caracteres>
+```
+
+Em producao, preferimos guardar esses valores no AWS SSM Parameter Store (`SecureString`) dentro do JSON do parametro, por exemplo `/janocaminho/prod` ou `/chamanoespeto/prod`, conforme o ambiente. Para conferir o SSM:
+
+```bash
+aws ssm get-parameter \
+  --name /janocaminho/prod \
+  --with-decryption \
+  --region us-east-2
+```
+
+Para gerar uma chave de criptografia OAuth localmente:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Configuracao no painel do Mercado Pago:
+
+1. Acesse a aplicacao no painel de desenvolvedor do Mercado Pago.
+2. Em produto integrado, use pagamentos online com Checkout Transparente/API Pagamentos conforme a integracao atual.
+3. Em configuracao avancada/OAuth, cadastre exatamente:
+
+```text
+https://www.janocaminho.com.br/api/payment-accounts/mercadopago/callback
+```
+
+4. Se houver opcao de PKCE para OAuth, manter desativado enquanto o backend usar o fluxo atual com `client_secret`.
+5. Permissoes esperadas: `read`, `write` e `offline_access`.
+6. Configure o webhook de producao para:
+
+```text
+https://www.janocaminho.com.br/api/webhooks/mercadopago
+```
+
+Rotas implementadas:
+
+- `GET /api/stores/:storeId/payment-accounts/mercadopago` verifica status da conexao da loja.
+- `POST /api/stores/:storeId/payment-accounts/mercadopago/connect` gera a URL de autorizacao OAuth.
+- `GET /api/payment-accounts/mercadopago/callback` recebe o `code`, troca por token e salva a conta conectada.
+- `DELETE /api/stores/:storeId/payment-accounts/mercadopago` desconecta e volta a loja para o modo convencional.
+
+Tabelas usadas:
+
+- `store_payment_accounts`: guarda a conexao OAuth da loja, com tokens criptografados.
+- `order_payments`: guarda as tentativas/cobrancas online criadas para pedidos.
+
+Ponto importante de inicializacao da API:
+
+- O SSM precisa ser carregado antes de qualquer import que leia `config/env`.
+- Se `MP_CLIENT_ID` e `MP_CLIENT_SECRET` estiverem no SSM, mas o painel mostrar OAuth nao configurado, recrie o container da API e confira se a imagem contem o carregamento correto.
+
+Verificacao rapida dentro do container:
+
+```bash
+docker exec chamanoespeto-api node - <<'NODE'
+(async () => {
+  const { loadSsmEnv } = require('./dist/config/ssm');
+  await loadSsmEnv();
+  const { env } = require('./dist/config/env');
+  console.log({
+    appUrl: env.appUrl,
+    clientId: env.mercadoPago.clientId,
+    redirect: env.mercadoPago.oauthRedirectUrl,
+    hasSecret: Boolean(env.mercadoPago.clientSecret),
+    hasEncryptionKey: Boolean(env.mercadoPago.encryptionKey),
+    webhookUrl: env.mercadoPago.webhookUrl,
+  });
+})();
+NODE
+```
+
+Teste da conexao no navegador, logado como lojista/admin:
+
+```js
+const s = JSON.parse(localStorage.getItem('adminSession') || '{}');
+
+fetch(`/api/stores/${s.store.id}/payment-accounts/mercadopago`, {
+  headers: { Authorization: `Bearer ${s.token}` },
+})
+  .then((r) => r.json())
+  .then(console.log);
+```
+
+Resultado esperado quando a aplicacao OAuth esta configurada:
+
+```json
+{
+  "connected": false,
+  "status": "DISCONNECTED",
+  "oauthConfigured": true
+}
+```
+
+Depois que o lojista conectar, esperado:
+
+```json
+{
+  "connected": true,
+  "status": "CONNECTED",
+  "oauthConfigured": true
+}
+```
+
+Teste de pedido online:
+
+1. Conecte a loja em **Financeiro > Pagamentos > Mercado Pago**.
+2. Faça um pedido novo na loja escolhendo Pix, crédito ou débito.
+3. Para Pix, a tela de sucesso deve exibir QR/link de pagamento.
+4. Confira no banco:
+
+```bash
+docker exec -it chamanoespeto-postgres psql -U postgres -d espetinho -c \
+"select id, store_id, payment_status, provider, provider_id, created_at from order_payments order by created_at desc limit 5;"
+```
+
+Para voltar ao modo convencional:
+
+1. No painel do lojista, acesse **Financeiro > Pagamentos**.
+2. Clique em **Desconectar e voltar ao modo convencional**.
+3. A loja deixa de criar cobrancas online; Pix, crédito e débito voltam a ser apenas informacao no pedido.
+
+Nginx/HTTPS:
+
+- O webhook e o OAuth exigem HTTPS valido.
+- `janocaminho.com.br` e `www.janocaminho.com.br` devem responder corretamente.
+- Em producao, mantenha redirect HTTP para HTTPS e, preferencialmente, canonical para `https://www.janocaminho.com.br`.
+- O callback deve chegar no Express. Este teste deve responder `302`, nao `404`:
+
+```bash
+curl -I https://www.janocaminho.com.br/api/payment-accounts/mercadopago/callback
+```
+
+Deploy apos mudar SSM ou imagem:
+
+```bash
+cd ~/EdEspetoHub
+docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod pull api frontend
+docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod up -d --no-deps --force-recreate api frontend
+docker logs --tail 60 chamanoespeto-api
+```
 
 6) SMTP (exemplo Zoho):
 
