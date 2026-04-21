@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { CheckCircle, QrCode, ArrowLeft, CreditCard, Printer, Copy, Check, ArrowSquareOut, Spinner, SealCheck, WhatsappLogo, ListBullets } from "@phosphor-icons/react";
 import { Capacitor } from "@capacitor/core";
+import { Browser } from "@capacitor/browser";
 import { formatPaymentMethod } from "../../utils/format";
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
@@ -178,13 +179,7 @@ const OnlinePaymentBlock = ({ onlinePayment, paymentStatus }) => {
                 const url = onlinePayment.paymentLink;
                 if (!url) return;
                 if (Capacitor.isNativePlatform()) {
-                  // window.open(_system) goes through onCreateWindow and is blocked in Capacitor 7.
-                  // Anchor click triggers shouldOverrideUrlLoading which opens external URLs via Android Intent.
-                  const a = document.createElement('a');
-                  a.href = url;
-                  document.body.appendChild(a);
-                  a.click();
-                  setTimeout(() => document.body.removeChild(a), 100);
+                  Browser.open({ url });
                 } else {
                   window.open(url, '_blank');
                 }

@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
+import { Browser } from '@capacitor/browser';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -299,11 +300,7 @@ function OrderCard({
             const url = order.paymentLink;
             if (!url) return;
             if (Capacitor.isNativePlatform()) {
-              const a = document.createElement('a');
-              a.href = url;
-              document.body.appendChild(a);
-              a.click();
-              setTimeout(() => document.body.removeChild(a), 100);
+              Browser.open({ url });
             } else {
               window.open(url, '_blank');
             }
