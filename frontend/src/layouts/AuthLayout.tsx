@@ -32,11 +32,11 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             {/* Brand lockup */}
             <div className="flex items-center gap-3.5">
               <div className="h-[3.25rem] w-[3.25rem] shrink-0 overflow-hidden rounded-2xl border border-white/20 bg-white/10 p-0.5 shadow-[0_8px_24px_-8px_rgba(0,0,0,0.4)] backdrop-blur-md">
-                <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-full w-full rounded-xl object-cover" />
+                <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-xl object-cover" />
               </div>
               <div className="leading-tight">
                 <p className="text-lg font-black tracking-tight text-white">Já no Caminho</p>
-                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-sky-300/80">SaaS Plataform</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-sky-300/80">Plataforma SaaS</p>
               </div>
             </div>
 

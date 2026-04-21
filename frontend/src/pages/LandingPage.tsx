@@ -123,13 +123,13 @@ export function LandingPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    document.title = 'Já no Caminho | Plataforma completa para gestão de pedidos e entregas';
+    document.title = 'Já no Caminho | Sistema premium para vender, operar e entregar';
     const description =
-      'Plataforma de gestão de pedidos, entregas e retirada para qualquer comércio. Sistema moderno com painel administrativo completo.';
+      'Plataforma premium para lojistas: cardápio online, pedidos em tempo real, produção, entregas, pagamentos online e hub de vendas.';
     upsertMeta('description', description, 'name');
-    upsertMeta('og:title', 'Já no Caminho | Plataforma completa para gestão de pedidos e entregas', 'property');
+    upsertMeta('og:title', 'Já no Caminho | Sistema premium para vender, operar e entregar', 'property');
     upsertMeta('og:description', description, 'property');
-    upsertMeta('og:image', 'https://www.janocaminho.com.br/janocaminho-logo.png', 'property');
+    upsertMeta('og:image', 'https://www.janocaminho.com.br/janocaminho.jpg', 'property');
     upsertMeta('og:type', 'website', 'property');
   }, []);
 
@@ -270,7 +270,7 @@ export function LandingPage() {
   const features = [
     { icon: ListChecks,    title: 'Pedidos em tempo real',   desc: 'Novos pedidos chegam na hora, atualizados em todos os dispositivos.', accent: 'sky' },
     { icon: Package,       title: 'Fila de produção',        desc: 'Pendente, produzindo, pronto — controle visual de cada etapa.', accent: 'amber' },
-    { icon: Motorcycle,    title: 'Motoboys integrados',     desc: 'Cadastre entregadores, gerencie ciclos e acompanhe ganhos.', accent: 'violet' },
+    { icon: Motorcycle,    title: 'Entregadores integrados', desc: 'Cadastre entregadores, gerencie vínculos e acompanhe ganhos.', accent: 'violet' },
     { icon: CurrencyDollar,title: 'Pagamento online',        desc: 'Pix, crédito e débito com Mercado Pago da própria loja.', accent: 'emerald' },
     { icon: ChartLine,     title: 'Dashboard analítico',     desc: 'Faturamento, ticket médio e comparativos por período.', accent: 'sky' },
     { icon: MapPin,        title: 'Rastreamento',            desc: 'Clientes acompanham o pedido do preparo até a porta.', accent: 'rose' },
@@ -302,7 +302,7 @@ export function LandingPage() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,_rgba(16,185,129,0.12),_transparent_42%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(99,102,241,0.05),_transparent_60%)]" />
 
-        <div className="relative mx-auto max-w-7xl px-4 py-24 sm:py-32 lg:py-44">
+        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:py-28 lg:py-36">
           <div className="grid items-center gap-16 lg:grid-cols-[1.15fr_0.85fr]">
 
             {/* ── Left: copy ── */}
@@ -312,21 +312,21 @@ export function LandingPage() {
               <div className="animate-in fade-in slide-in-from-top-3 duration-700">
                 <span className="inline-flex items-center gap-2 rounded-full border border-sky-400/25 bg-sky-400/5 px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.22em] text-sky-300 backdrop-blur-md">
                   <Rocket size={12} weight="duotone" className="animate-pulse" />
-                  Plataforma SaaS para comércios
+                  Loja online, operação e entrega em um só painel
                 </span>
               </div>
 
               {/* Headline */}
               <div className="animate-in fade-in slide-in-from-top-5 duration-700 delay-100 space-y-5">
                 <h1 className="text-[2.6rem] font-black leading-[1.06] tracking-tight text-white sm:text-6xl xl:text-7xl">
-                  Pedidos, produção<br />
-                  e entrega —{' '}
+                  Sua loja vendendo<br />
+                  com cara de{' '}
                   <span className="animate-text-gradient bg-gradient-to-r from-sky-400 via-emerald-400 to-sky-400 bg-clip-text text-transparent">
-                    no mesmo lugar.
+                    aplicativo premium.
                   </span>
                 </h1>
-                <p className="mx-auto max-w-xl text-base font-medium leading-relaxed text-slate-400 lg:mx-0 sm:text-xl">
-                  Sistema completo para lojistas, vendedores, feiras e delivery. Configure em minutos e comece a vender hoje.
+                <p className="mx-auto max-w-2xl text-base font-medium leading-relaxed text-slate-400 lg:mx-0 sm:text-xl">
+                  Crie uma vitrine profissional, receba pedidos em tempo real, organize a produção, conecte entregadores e cobre online com Mercado Pago quando quiser.
                 </p>
               </div>
 
@@ -337,7 +337,7 @@ export function LandingPage() {
                   onClick={() => navigate('/create?plan=trial')}
                   className="group inline-flex items-center justify-center gap-2.5 rounded-2xl bg-white px-8 py-4 text-base font-black text-slate-950 shadow-[0_20px_50px_-15px_rgba(255,255,255,0.22)] transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  Criar minha loja grátis
+                  Começar teste grátis
                   <ArrowRight size={17} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
                 </button>
                 <a
@@ -368,10 +368,10 @@ export function LandingPage() {
               {/* Trust strip */}
               <div className="animate-in fade-in duration-700 delay-300 flex flex-wrap justify-center gap-x-6 gap-y-2 opacity-55 lg:justify-start">
                 {[
-                  { icon: ShieldCheck, text: 'Sem cartão de crédito', color: 'text-emerald-400' },
+                  { icon: ShieldCheck, text: '7 dias grátis', color: 'text-emerald-400' },
                   { icon: CurrencyDollar, text: 'Mercado Pago opcional', color: 'text-sky-400' },
-                  { icon: ArrowsClockwise, text: 'Dados em tempo real', color: 'text-sky-400' },
-                  { icon: Desktop, text: 'Multi-dispositivo', color: 'text-indigo-400' },
+                  { icon: ArrowsClockwise, text: 'Pedidos ao vivo', color: 'text-sky-400' },
+                  { icon: Desktop, text: 'Painel + celular', color: 'text-indigo-400' },
                 ].map(({ icon: Icon, text, color }) => (
                   <div key={text} className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-slate-300">
                     <Icon size={15} weight="duotone" className={color} />
@@ -381,53 +381,75 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* ── Right: live metrics card ── */}
-            <div className="animate-in zoom-in-95 fade-in duration-700 delay-250 relative flex items-center justify-center lg:h-[520px]">
-              <div className="pointer-events-none absolute -inset-8 rounded-full bg-sky-500/8 blur-[90px]" />
-              <div className="relative w-full max-w-sm rounded-[2.75rem] border border-white/10 bg-slate-900/60 p-7 shadow-2xl backdrop-blur-2xl sm:p-9 lg:max-w-none">
-                <div className="space-y-7">
-
-                  {/* Card header */}
-                  <div className="flex items-center justify-between border-b border-white/[0.06] pb-6">
-                    <div className="flex h-13 w-13 items-center justify-center rounded-2xl bg-sky-400/10">
-                      <Storefront size={26} weight="duotone" className="text-sky-400" />
+            {/* ── Right: product console mock ── */}
+            <div className="animate-in zoom-in-95 fade-in duration-700 delay-250 relative flex items-center justify-center">
+              <div className="pointer-events-none absolute -inset-8 rounded-full bg-sky-500/10 blur-[90px]" />
+              <div className="relative w-full max-w-xl rounded-[2.25rem] border border-white/10 bg-white/[0.06] p-3 shadow-2xl backdrop-blur-2xl">
+                <div className="rounded-[1.75rem] border border-white/10 bg-slate-950/90 p-4">
+                  <div className="flex items-center justify-between border-b border-white/[0.07] pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-slate-950">
+                        <Storefront size={23} weight="duotone" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-sky-300">Painel da loja</p>
+                        <p className="text-sm font-black text-white">Operação em tempo real</p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Monitor ao vivo</p>
-                      <div className="mt-1 flex items-center justify-end gap-1.5">
-                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-                        <p className="text-xs font-semibold text-emerald-400">Sistema online</p>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-3 py-1 text-[11px] font-bold text-emerald-300 ring-1 ring-emerald-400/20">
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+                      Online
+                    </span>
+                  </div>
+
+                  <div className="mt-4 grid gap-3 sm:grid-cols-[1.1fr_0.9fr]">
+                    <div className="space-y-3">
+                      {[
+                        { code: '#1027', name: 'Combo família', status: 'Novo pedido', tone: 'bg-sky-400/10 text-sky-300' },
+                        { code: '#1026', name: 'Espeto premium', status: 'Em produção', tone: 'bg-amber-400/10 text-amber-300' },
+                        { code: '#1025', name: 'Pedido Pix', status: 'Aguardando pagamento', tone: 'bg-emerald-400/10 text-emerald-300' },
+                      ].map((order) => (
+                        <div key={order.code} className="rounded-2xl border border-white/[0.06] bg-white/[0.035] p-3">
+                          <div className="flex items-center justify-between gap-3">
+                            <div>
+                              <p className="text-[11px] font-black text-slate-500">{order.code}</p>
+                              <p className="mt-0.5 text-sm font-black text-white">{order.name}</p>
+                            </div>
+                            <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${order.tone}`}>{order.status}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="rounded-2xl border border-white/[0.06] bg-white/[0.035] p-4">
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Hoje</p>
+                        <p className="mt-2 text-3xl font-black text-white">
+                          {metrics ? <Counter value={metrics.totalOrders || 0} /> : '24'}
+                        </p>
+                        <p className="text-xs font-semibold text-slate-500">pedidos processados</p>
+                      </div>
+                      <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/10 p-4">
+                        <div className="flex items-center gap-2">
+                          <img src={mercadoPagoLogo} alt="Mercado Pago" className="h-5 w-auto rounded-sm bg-white px-1" />
+                          <span className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-200">Opcional</span>
+                        </div>
+                        <p className="mt-2 text-xs font-semibold leading-5 text-emerald-50">Pix e cartão direto na conta do lojista.</p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Live metrics */}
-                  <div className="grid gap-6">
-                    <div className="space-y-1">
-                      <p className="text-[11px] font-black uppercase tracking-widest text-slate-600">Lojas ativas</p>
-                      <p className="text-5xl font-black text-white">
-                        {metrics
-                          ? <Counter value={metrics.activeStores || 0} />
-                          : <span className="text-slate-700">—</span>
-                        }
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-[11px] font-black uppercase tracking-widest text-slate-600">Pedidos processados</p>
-                      <p className="text-5xl font-black text-white">
-                        {metrics
-                          ? <Counter value={metrics.totalOrders || 0} />
-                          : <span className="text-slate-700">—</span>
-                        }
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Trial nudge */}
-                  <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] px-5 py-4">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">Comece hoje</p>
-                    <p className="mt-1 text-sm font-bold text-white">7 dias grátis, sem cartão.</p>
-                    <p className="mt-0.5 text-xs text-slate-500">Cancele a qualquer momento.</p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                    {[
+                      { icon: ListChecks, label: 'Pedidos' },
+                      { icon: Package, label: 'Produção' },
+                      { icon: Motorcycle, label: 'Entrega' },
+                    ].map(({ icon: Icon, label }) => (
+                      <div key={label} className="flex items-center gap-2 rounded-2xl bg-white/[0.04] px-3 py-2 text-xs font-black text-slate-300">
+                        <Icon size={15} weight="duotone" className="text-sky-300" />
+                        {label}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -475,7 +497,7 @@ export function LandingPage() {
                 step: '01',
                 icon: UserPlus,
                 title: 'Crie sua conta',
-                desc: 'Cadastro em 2 minutos. Sem cartão de crédito — 7 dias gratuitos para testar tudo.',
+                desc: 'Abra sua loja com 7 dias grátis e configure o básico em poucos minutos.',
                 ringColor: 'ring-sky-200',
                 bgColor: 'bg-sky-50',
                 iconColor: 'text-sky-600',
@@ -485,7 +507,7 @@ export function LandingPage() {
                 step: '02',
                 icon: Storefront,
                 title: 'Configure sua loja',
-                desc: 'Adicione produtos, defina área de entrega, formas de pagamento e horários de funcionamento.',
+                desc: 'Cadastre produtos, horários, retirada, entrega, equipe e pagamentos online opcionais.',
                 ringColor: 'ring-emerald-200',
                 bgColor: 'bg-emerald-50',
                 iconColor: 'text-emerald-600',
@@ -494,8 +516,8 @@ export function LandingPage() {
               {
                 step: '03',
                 icon: Package,
-                title: 'Comece a receber',
-                desc: 'Pedidos chegam em tempo real. Gerencie produção, motoboys e PIX de um só lugar.',
+                title: 'Venda com controle',
+                desc: 'Pedidos chegam ao vivo. Acompanhe produção, entregadores, status e cobrança em um painel.',
                 ringColor: 'ring-indigo-200',
                 bgColor: 'bg-indigo-50',
                 iconColor: 'text-indigo-600',
@@ -538,11 +560,11 @@ export function LandingPage() {
             <div className="space-y-6">
               <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-sky-700 shadow-sm">
                 <ShieldCheck size={13} weight="duotone" />
-                Pagamento online opcional
+                Gateway do lojista
               </div>
               <div className="space-y-3">
                 <h2 className="text-3xl font-black leading-tight tracking-tight text-slate-950 sm:text-5xl">
-                  Receba pedidos online sem burocracia.
+                  Dê ao cliente a experiência de pagar dentro do pedido.
                 </h2>
                 <p className="max-w-2xl text-sm font-medium leading-7 text-slate-600 sm:text-base">
                   O lojista conecta a própria conta Mercado Pago e libera cobrança online para Pix e cartão. Quem preferir manter o atendimento presencial continua recebendo pedidos normalmente.
@@ -553,7 +575,7 @@ export function LandingPage() {
                   { icon: QrCode, label: 'Pix online', tone: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
                   { icon: CreditCard, label: 'Crédito', tone: 'text-sky-600 bg-sky-50 border-sky-100' },
                   { icon: CurrencyDollar, label: 'Débito', tone: 'text-indigo-600 bg-indigo-50 border-indigo-100' },
-                  { icon: Storefront, label: 'Pagamento na loja', tone: 'text-slate-600 bg-white border-slate-200' },
+                  { icon: Storefront, label: 'Pagamento presencial', tone: 'text-slate-600 bg-white border-slate-200' },
                 ].map(({ icon: Icon, label, tone }) => (
                   <span key={label} className={`inline-flex items-center gap-2 rounded-2xl border px-3 py-2 text-xs font-black shadow-sm ${tone}`}>
                     <Icon size={16} weight="duotone" />
@@ -746,7 +768,7 @@ export function LandingPage() {
                       alt="Condomínio Spazio Campo Azuli"
                       loading="lazy"
                       className="h-12 w-12 rounded-[1rem] border border-slate-100 object-cover"
-                      onError={(e) => { (e.target as HTMLImageElement).src = '/janocaminho-logo.png'; }}
+                      onError={(e) => { (e.target as HTMLImageElement).src = '/janocaminho.jpg'; }}
                     />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-black text-slate-950">Lojas deste condomínio</p>
@@ -951,10 +973,10 @@ export function LandingPage() {
             <div className="space-y-5">
               <p className="text-[11px] font-black uppercase tracking-[0.4em] text-emerald-400">Vamos escalar?</p>
               <h2 className="text-3xl font-black leading-tight text-white sm:text-6xl">
-                Sua gestão de elite<br /> começa agora.
+                Sua loja pronta para<br /> vender com estrutura.
               </h2>
               <p className="mx-auto max-w-2xl text-base font-medium leading-relaxed text-slate-400 sm:text-lg">
-                Junte-se a centenas de comerciantes que transformaram sua operação com o Já no Caminho. Experimente 7 dias por nossa conta — sem cartão.
+                Experimente uma plataforma feita para o comerciante que quer organizar pedidos, atender melhor e crescer sem depender de improviso.
               </p>
             </div>
 
