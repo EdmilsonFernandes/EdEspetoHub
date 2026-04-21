@@ -108,6 +108,7 @@ export const CartView = ({
   storeLabel = "",
   storeLogoUrl = "",
   storeSlug = "",
+  suggestedProducts = [],
 }) => {
   const isNativePlatform = Capacitor.isNativePlatform();
   const checkoutTopPaddingClass = isNativePlatform
@@ -615,18 +616,18 @@ export const CartView = ({
         <div className="rounded-[1.85rem] border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.97)_0%,rgba(244,248,252,0.96)_100%)] px-3 py-3 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
           {useMultiStepFlow && (
             <div className="mb-3 flex items-center gap-1">
-              {[{ label: 'Sacola', step: 1 }, { label: 'Entrega', step: 2 }, { label: 'Pagamento', step: 3 }].map(({ label, step }, i) => {
+              {[{ label: 'Sacola', step: 1 }, { label: 'Entrega', step: 2 }, { label: 'Pagamento', step: 3 }, { label: 'Confirmar', step: 4 }].map(({ label, step }, i) => {
                 const isActive = checkoutStep === step;
                 const isDone = checkoutStep > step;
                 return (
                   <React.Fragment key={step}>
-                    <div className="flex items-center gap-1.5">
-                      <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black transition-colors ${isDone ? 'bg-emerald-500 text-white' : isActive ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-500'}`}>
+                    <div className="flex items-center gap-1">
+                      <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black transition-colors ${isDone ? 'bg-emerald-500 text-white' : isActive ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-500'}`}>
                         {isDone ? '✓' : step}
                       </span>
-                      <span className={`text-[10px] font-bold uppercase tracking-wide transition-colors ${isActive ? 'text-slate-900' : isDone ? 'text-emerald-600' : 'text-slate-400'}`}>{label}</span>
+                      <span className={`text-[9px] font-bold uppercase tracking-wide transition-colors ${isActive ? 'text-slate-900' : isDone ? 'text-emerald-600' : 'text-slate-400'}`}>{label}</span>
                     </div>
-                    {i < 2 && <div className={`h-px flex-1 transition-colors ${isDone ? 'bg-emerald-300' : 'bg-slate-200'}`} />}
+                    {i < 3 && <div className={`h-px flex-1 transition-colors ${isDone ? 'bg-emerald-300' : 'bg-slate-200'}`} />}
                   </React.Fragment>
                 );
               })}
@@ -1032,6 +1033,7 @@ export const CartView = ({
                       )}
                     </div>
                   ) : null}
+                  {!isLoggedDeliveryFlow && (
                   <div className={`rounded-2xl border px-3 py-2.5 text-xs ${
                     isPostalDelivery
                       ? "border-amber-100 bg-amber-50/70 text-amber-800"
@@ -1041,6 +1043,7 @@ export const CartView = ({
                       ? "Insira seu CEP para cotar PAC/SEDEX e escolher o envio."
                       : "Insira seu CEP para conferirmos a distância e o tempo de entrega."}
                   </div>
+                  )}
                   {!isLoggedDeliveryFlow && (
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="sm:col-span-2">
@@ -1146,56 +1149,33 @@ export const CartView = ({
                     </>
                   )}
                 </div>
-                  <div className="rounded-2xl premium-card-soft p-4 space-y-4 bg-slate-50 border border-slate-100">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.25em] text-slate-400">
-                          {isPostalDelivery ? "Envio postal" : "Entrega"}
-                        </p>
-                        <p className="text-base font-semibold text-slate-800">
-                          {isPostalDelivery
-                            ? "PAC / SEDEX"
-                            : radiusValue
-                            ? `Raio até ${radiusValue} km`
-                            : "Sem limite de raio"}
-                        </p>
-                      </div>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold px-2 py-1 border border-emerald-100">
-                        <MapPinLine size={12} weight="duotone" />
-                        {isPostalDelivery ? "Postagem" : "Frete"}
+                  <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">
+                        {isPostalDelivery ? "Envio postal" : "Frete de entrega"}
+                      </p>
+                      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold border ${deliveryFeeValue > 0 ? 'bg-sky-50 text-sky-700 border-sky-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}>
+                        <MapPinLine size={11} weight="duotone" />
+                        {deliveryFeeValue > 0 ? formatCurrency(deliveryFeeValue) : 'Grátis'}
                       </span>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="rounded-xl border border-emerald-100 bg-white px-3 py-2 flex flex-col gap-1">
-                        <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Valor do frete</span>
-                        <span className={`text-base font-bold ${deliveryFeeValue > 0 ? 'text-emerald-600' : 'text-slate-600'}`}>
-                          {deliveryFeeValue > 0 ? formatCurrency(deliveryFeeValue) : 'Grátis'}
-                        </span>
+                    {!isPostalDelivery && deliveryCheck?.distanceKm ? (
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="rounded-xl border border-slate-100 bg-white px-3 py-2">
+                          <span className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Distância</span>
+                          <p className="text-sm font-bold text-slate-800 mt-0.5">{deliveryCheck.distanceKm.toFixed(1)} km</p>
+                        </div>
+                        {deliveryCheck?.durationMin ? (
+                          <div className="rounded-xl border border-slate-100 bg-white px-3 py-2">
+                            <span className="text-[10px] uppercase tracking-[0.18em] text-slate-400 flex items-center gap-1"><Clock size={10} weight="duotone" />Estimativa</span>
+                            <p className="text-sm font-bold text-slate-800 mt-0.5">{deliveryCheck.durationMin} min</p>
+                          </div>
+                        ) : null}
                       </div>
-                      <div className="rounded-xl border border-slate-100 bg-white px-3 py-2 flex flex-col gap-1">
-                        <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                          {isPostalDelivery ? "Origem" : "Distância"}
-                        </span>
-                        <span className="text-base font-semibold text-slate-800">
-                          {isPostalDelivery
-                            ? (postalOriginZip || "-")
-                            : deliveryCheck?.distanceKm
-                            ? `${deliveryCheck.distanceKm.toFixed(1)} km`
-                            : "-"}
-                        </span>
-                      </div>
-                    </div>
-                    {!isPostalDelivery && (
-                    <div className="rounded-xl border border-slate-100 bg-white px-3 py-2 flex items-center justify-between text-base">
-                      <span className="font-semibold text-slate-600 inline-flex items-center gap-2">
-                        <Clock size={14} weight="duotone" />
-                        Tempo de rota
-                      </span>
-                      <span className="font-semibold text-slate-800">
-                        {deliveryCheck?.durationMin ? `${deliveryCheck.durationMin} min` : "-"}
-                      </span>
-                    </div>
-                    )}
+                    ) : null}
+                    {isPostalDelivery && postalOriginZip ? (
+                      <p className="text-xs text-slate-500">CEP de origem: <span className="font-semibold text-slate-700">{postalOriginZip}</span></p>
+                    ) : null}
                     {customer.address && !isLoggedDeliveryFlow && (
                       <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm text-slate-600">
                         {customer.address}
@@ -1320,7 +1300,7 @@ export const CartView = ({
             </div>
           )}
 
-          {customer.type === "table" && (
+          {customer.type === "table" && visibleOrderTypes.includes('table') && (
             <div className="rounded-xl sm:rounded-2xl border border-gray-100 p-3 sm:p-4 space-y-3">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
                 Escolha a mesa
@@ -1496,6 +1476,45 @@ export const CartView = ({
 
       </div>}
 
+      {/* Sugestões (carrossel horizontal – step 1) */}
+      {(!useMultiStepFlow || checkoutStep === 1) && suggestedProducts.length > 0 && (
+        <div className="mb-4 sm:mb-6">
+          <div className="flex items-center justify-between mb-2.5 px-1">
+            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Adicionar ao pedido</span>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory">
+            {suggestedProducts.map((prod) => (
+              <button
+                key={prod.id}
+                type="button"
+                onClick={() => onUpdateCart?.(prod, 1, { cookingPoint: '', passSkewer: false, selectedModifiers: [] })}
+                className="flex-none w-[120px] snap-start rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden active:scale-[0.97] transition-transform"
+              >
+                <div className="w-full h-20 bg-slate-100 overflow-hidden">
+                  {prod.imageUrl ? (
+                    <img
+                      src={resolveAssetUrl(prod.imageUrl)}
+                      alt={prod.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-2xl">🍖</div>
+                  )}
+                </div>
+                <div className="p-2.5">
+                  <p className="text-[11px] font-bold text-slate-800 leading-tight line-clamp-2 mb-1">{prod.name}</p>
+                  <p className="text-[11px] font-black text-brand-primary">{formatCurrency(prod.price)}</p>
+                </div>
+                <div className="mx-2.5 mb-2.5 flex items-center justify-center rounded-xl bg-slate-900 py-1.5 text-xs font-black text-white">
+                  + Adicionar
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Compact pricing + Forma de Pagamento (multi-step step 3) */}
       {useMultiStepFlow && checkoutStep === 3 && (
         <div className="relative overflow-hidden bg-white rounded-2xl border border-slate-100 p-4 sm:p-6 mb-4 shadow-sm">
@@ -1644,6 +1663,82 @@ export const CartView = ({
         </div>
       )}
 
+      {/* Step 4: Confirmação do pedido */}
+      {useMultiStepFlow && checkoutStep === 4 && (
+        <div className="space-y-3 mb-4">
+          {/* Itens */}
+          <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-3">Itens do pedido</p>
+            <div className="space-y-2">
+              {cartItems.map((item) => (
+                <div key={item.key || item.id} className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[10px] font-black text-slate-700">{item.qty}</span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-slate-800 truncate">{item.name}</p>
+                      {formatItemOptions(item) && (
+                        <p className="text-[10px] text-slate-400 truncate">{formatItemOptions(item)}</p>
+                      )}
+                    </div>
+                  </div>
+                  <span className="shrink-0 text-sm font-bold text-slate-800">{formatCurrency((item.price + getModifiersTotal(item.selectedModifiers || [])) * item.qty)}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 pt-3 border-t border-slate-100 flex justify-between">
+              <span className="text-sm font-bold text-slate-700">Subtotal</span>
+              <span className="text-sm font-bold text-slate-800">{formatCurrency(total)}</span>
+            </div>
+            {isDelivery && deliveryFeeValue > 0 && (
+              <div className="flex justify-between mt-2">
+                <span className="text-sm text-slate-500 flex items-center gap-1"><Truck size={12} weight="duotone" className="text-emerald-500" />Entrega</span>
+                <span className="text-sm font-semibold text-slate-700">{formatCurrency(deliveryFeeValue)}</span>
+              </div>
+            )}
+            <div className="mt-2 pt-2 border-t border-slate-100 flex justify-between">
+              <span className="text-base font-black text-slate-900">Total</span>
+              <span className="text-base font-black text-slate-900">{formatCurrency(totalWithFee)}</span>
+            </div>
+          </div>
+
+          {/* Entrega / Retirada */}
+          <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">
+              {customer.type === 'delivery' ? 'Entrega' : customer.type === 'pickup' ? 'Retirada no local' : `Mesa ${customer.table || ''}`}
+            </p>
+            {customer.type === 'delivery' && (
+              <p className="text-sm text-slate-700 font-medium">
+                {[customer.street, customer.number, customer.neighborhood, customer.city].filter(Boolean).join(', ') || customer.address || '—'}
+              </p>
+            )}
+            {customer.type === 'pickup' && (
+              <p className="text-sm text-slate-700 font-medium">{storeAddress || 'Retirada no balcão'}</p>
+            )}
+          </div>
+
+          {/* Pagamento */}
+          <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Pagamento</p>
+            {(() => {
+              const methodMeta = getPaymentMethodMeta(paymentMethod);
+              return (
+                <div className="flex items-center gap-2">
+                  {methodMeta.icon ? (
+                    <img src={methodMeta.icon} alt={methodMeta.label} className="h-5 w-5 object-contain" />
+                  ) : (
+                    <CreditCard size={16} weight="duotone" className="text-slate-500" />
+                  )}
+                  <span className="text-sm font-semibold text-slate-800 capitalize">{methodMeta.label}</span>
+                </div>
+              );
+            })()}
+            {isCash && cashNeedsChange && cashTenderedValue !== null && cashTenderedValue >= totalWithFee && (
+              <p className="mt-1 text-xs text-slate-500">Troco: <span className="font-bold text-slate-700">{formatCurrency(cashChangeDue)}</span></p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Botão Finalizar */}
       <div className={`fixed left-0 right-0 w-full box-border p-4 border-t border-slate-100 bg-white/90 backdrop-blur-md max-w-lg mx-auto z-50 shadow-[0_-14px_28px_-22px_rgba(15,23,42,0.28)] ${isNativePlatform ? "ds-native-nav-dock" : "bottom-0"}`}>
         {useMultiStepFlow ? (
@@ -1666,7 +1761,12 @@ export const CartView = ({
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                   return;
                 }
-                // Step 3: final checkout
+                if (checkoutStep === 3) {
+                  setCheckoutStep(4);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  return;
+                }
+                // Step 4: final checkout
                 setHasTriedCheckout(true);
                 onCheckout({
                   cashTendered: isCash && cashNeedsChange && cashTenderedValue !== null ? Number(cashTenderedValue) : null,
@@ -1675,12 +1775,17 @@ export const CartView = ({
               disabled={checkoutStep === 2
                 ? (checkoutLoading || (customer.type === 'delivery' && deliveryCheck?.status === 'out') || (customer.type === 'table' && !String(customer.table || '').trim()))
                 : checkoutStep === 3
+                ? (checkoutDisabled || cashValidation.blocked)
+                : checkoutStep === 4
                 ? (checkoutLoading || checkoutDisabled || cashValidation.blocked)
                 : false}
               className={`w-full font-bold text-lg py-4 rounded-2xl shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
                 (checkoutStep === 2 && (checkoutLoading || (customer.type === 'delivery' && deliveryCheck?.status === 'out') || (customer.type === 'table' && !String(customer.table || '').trim()))) ||
-                (checkoutStep === 3 && (checkoutLoading || checkoutDisabled || cashValidation.blocked))
+                (checkoutStep === 3 && (checkoutDisabled || cashValidation.blocked)) ||
+                (checkoutStep === 4 && (checkoutLoading || checkoutDisabled || cashValidation.blocked))
                   ? "bg-slate-300 text-slate-600 cursor-not-allowed"
+                  : checkoutStep === 4
+                  ? "bg-emerald-600 text-white cursor-pointer"
                   : "bg-slate-900 text-white cursor-pointer"
               }`}
               style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
@@ -1690,12 +1795,17 @@ export const CartView = ({
                     {isLoggedDeliveryFlow && !hasSavedAddress && checkoutStep === 2 ? 'Cadastrar endereço' : 'Continuar'}
                     <ArrowLeft size={18} weight="bold" className="rotate-180" />
                   </>
+                : checkoutStep === 3
+                ? <>
+                    Confirmar pedido
+                    <ArrowLeft size={18} weight="bold" className="rotate-180" />
+                  </>
                 : <>
                     {checkoutLoading ? 'Processando...' : <>{isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />} {'Fazer pedido'} <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>}
                   </>
               }
             </button>
-            {hasTriedCheckout && checkoutStep === 3 && (checkoutDisabled || cashValidation.blocked) && (checkoutDisabledReason || cashValidation.reason) && (
+            {hasTriedCheckout && checkoutStep === 4 && (checkoutDisabled || cashValidation.blocked) && (checkoutDisabledReason || cashValidation.reason) && (
               <p className="mt-2 text-center text-[11px] text-rose-600 font-semibold">
                 {cashValidation.blocked ? cashValidation.reason : checkoutDisabledReason}
               </p>

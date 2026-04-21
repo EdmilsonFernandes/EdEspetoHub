@@ -76,6 +76,7 @@ export function StorePage() {
   const [showCustomerAccount, setShowCustomerAccount] = useState(false);
   const [customerAccountLoading, setCustomerAccountLoading] = useState(false);
   const [customerAccountError, setCustomerAccountError] = useState('');
+  const [customerAccountNotice, setCustomerAccountNotice] = useState('');
   const [customerAuthMode, setCustomerAuthMode] = useState<'login' | 'register'>('login');
   const [customerAuthForm, setCustomerAuthForm] = useState({
     fullName: '',
@@ -85,6 +86,12 @@ export function StorePage() {
     termsAccepted: false,
     lgpdAccepted: false,
   });
+  const [customerAuthCheckoutPrompt, setCustomerAuthCheckoutPrompt] = useState(false);
+  const [customerVerifyPrompt, setCustomerVerifyPrompt] = useState<any | null>(null);
+  const [customerVerifyCode, setCustomerVerifyCode] = useState('');
+  const [customerVerifyLoading, setCustomerVerifyLoading] = useState(false);
+  const [customerResendCooldown, setCustomerResendCooldown] = useState(0);
+  const [customerResendLoading, setCustomerResendLoading] = useState(false);
   const [rememberCustomerEmail, setRememberCustomerEmail] = useState(() => {
     try {
       return Boolean(localStorage.getItem(CUSTOMER_REMEMBER_EMAIL_KEY));
@@ -117,6 +124,14 @@ export function StorePage() {
       // ignore
     }
   }, []);
+
+  useEffect(() => {
+    if (customerResendCooldown <= 0) return;
+    const timer = window.setInterval(() => {
+      setCustomerResendCooldown((value) => Math.max(0, Number(value || 0) - 1));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [customerResendCooldown]);
 
   const formatPhoneBr = (value: string) => {
     const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
@@ -1587,6 +1602,31 @@ export function StorePage() {
       return;
     }
 
+    if (!isStoreAdmin && !isDemo && !customerSession?.token) {
+      const rememberedEmail = (() => {
+        try {
+          return String(localStorage.getItem(CUSTOMER_REMEMBER_EMAIL_KEY) || '').trim();
+        } catch {
+          return '';
+        }
+      })();
+      setCustomerAuthCheckoutPrompt(true);
+      setCustomerVerifyPrompt(null);
+      setCustomerVerifyCode('');
+      setCustomerAccountError('');
+      setCustomerAccountNotice('');
+      setCustomerAuthMode(rememberedEmail ? 'login' : 'register');
+      setCustomerAuthForm((prev) => ({
+        ...prev,
+        fullName: prev.fullName || String(effectiveCustomerName || customer.name || '').trim(),
+        phone: prev.phone || String(customer.phone || '').trim(),
+        email: prev.email || rememberedEmail,
+      }));
+      setShowCustomerAccount(true);
+      showToast('Entre ou crie sua conta para finalizar o pedido com segurança.', 'warning');
+      return;
+    }
+
     const requiresPhone = !customerSession?.token && !isStoreAdmin;
     const phoneDigits = String(customer.phone || '').replace(/\D/g, '');
     if (!effectiveCustomerName || (requiresPhone && phoneDigits.length < 10)) {
@@ -1999,13 +2039,39 @@ export function StorePage() {
     setCustomerAddresses([]);
     setCustomerOrders([]);
     setShowCustomerAccount(false);
+    setCustomerAuthCheckoutPrompt(false);
+    setCustomerVerifyPrompt(null);
+    setCustomerVerifyCode('');
+    setCustomerAccountError('');
+    setCustomerAccountNotice('');
     showToast('Sessão de cliente encerrada.', 'success');
+  };
+
+  const finishCustomerAuthentication = async (response: any, message: string) => {
+    persistCustomerSession(response);
+    setCustomerAuthForm((prev) => ({ ...prev, password: '' }));
+    setShowCustomerPassword(false);
+    setCustomerVerifyPrompt(null);
+    setCustomerVerifyCode('');
+    setCustomerResendCooldown(0);
+    await refreshCustomerData(response);
+
+    if (customerAuthCheckoutPrompt) {
+      setShowCustomerAccount(false);
+      setCustomerAuthCheckoutPrompt(false);
+      setView('cart');
+      showToast('Conta conectada. Confira o pedido e toque em finalizar.', 'success');
+      return;
+    }
+
+    showToast(message, 'success');
   };
 
   const handleCustomerAuthSubmit = async () => {
     if (customerAccountLoading) return;
     setCustomerAccountLoading(true);
     setCustomerAccountError('');
+    setCustomerAccountNotice('');
     try {
       let response: any;
       if (customerAuthMode === 'register') {
@@ -2020,6 +2086,18 @@ export function StorePage() {
           termsAccepted: Boolean(customerAuthForm.termsAccepted),
           lgpdAccepted: Boolean(customerAuthForm.lgpdAccepted),
         });
+        if (response?.next === 'VERIFY_EMAIL_CODE') {
+          const targetEmail = String(response?.email || customerAuthForm.email || '').trim().toLowerCase();
+          setCustomerVerifyPrompt({
+            email: targetEmail,
+            emailMasked: response?.emailMasked,
+            flow: 'register',
+          });
+          setCustomerVerifyCode('');
+          setCustomerResendCooldown(Number(response?.cooldownSec || 60));
+          setCustomerAccountNotice('Enviamos um código de 4 dígitos para concluir seu cadastro.');
+          return;
+        }
       } else {
         response = await customerAccountService.login({
           email: String(customerAuthForm.email || '').trim(),
@@ -2040,15 +2118,61 @@ export function StorePage() {
       } catch {
         // ignore
       }
-      persistCustomerSession(response);
-      setCustomerAuthForm((prev) => ({ ...prev, password: '' }));
-      setShowCustomerPassword(false);
-      await refreshCustomerData(response);
-      showToast(customerAuthMode === 'register' ? 'Cadastro concluído.' : 'Login realizado.', 'success');
+      await finishCustomerAuthentication(
+        response,
+        customerAuthMode === 'register' ? 'Cadastro concluído.' : 'Login realizado.'
+      );
     } catch (error: any) {
+      if (error?.code === 'AUTH-005') {
+        const targetEmail = String(error?.details?.email || customerAuthForm.email || '').trim().toLowerCase();
+        setCustomerVerifyPrompt({
+          email: targetEmail,
+          emailMasked: error?.details?.emailMasked,
+          flow: 'login',
+        });
+        setCustomerVerifyCode('');
+        setCustomerResendCooldown(Number(error?.details?.resendCooldownSec || 60));
+        setCustomerAccountNotice('Sua conta ainda precisa ser confirmada. Digite o código enviado ao e-mail.');
+        return;
+      }
       setCustomerAccountError(error?.message || 'Não foi possível autenticar.');
     } finally {
       setCustomerAccountLoading(false);
+    }
+  };
+
+  const handleCustomerVerifyCode = async () => {
+    const email = String(customerVerifyPrompt?.email || customerAuthForm.email || '').trim().toLowerCase();
+    const code = String(customerVerifyCode || '').replace(/\D/g, '').slice(0, 4);
+    if (!email || code.length !== 4 || customerVerifyLoading) return;
+    setCustomerVerifyLoading(true);
+    setCustomerAccountError('');
+    setCustomerAccountNotice('');
+    try {
+      const response = await customerAccountService.verifyEmailCode({ email, code });
+      await finishCustomerAuthentication(response, 'Conta confirmada com sucesso.');
+    } catch (error: any) {
+      setCustomerAccountError(error?.message || 'Código inválido ou expirado.');
+    } finally {
+      setCustomerVerifyLoading(false);
+    }
+  };
+
+  const handleCustomerResendVerification = async () => {
+    const email = String(customerVerifyPrompt?.email || customerAuthForm.email || '').trim().toLowerCase();
+    if (!email || customerResendLoading || customerResendCooldown > 0) return;
+    setCustomerResendLoading(true);
+    setCustomerAccountError('');
+    setCustomerAccountNotice('');
+    try {
+      const response = await customerAccountService.resendEmailCode(email);
+      setCustomerVerifyCode('');
+      setCustomerResendCooldown(Number(response?.cooldownSec || 60));
+      setCustomerAccountNotice(response?.message || 'Novo código enviado para seu e-mail.');
+    } catch (error: any) {
+      setCustomerAccountError(error?.message || 'Não foi possível reenviar o código agora.');
+    } finally {
+      setCustomerResendLoading(false);
     }
   };
 
@@ -2078,6 +2202,11 @@ export function StorePage() {
       }
     }
 
+    setCustomerAuthCheckoutPrompt(false);
+    setCustomerVerifyPrompt(null);
+    setCustomerVerifyCode('');
+    setCustomerAccountError('');
+    setCustomerAccountNotice('');
     setCustomerAuthMode('login');
     setShowCustomerAccount(true);
   };
@@ -2609,7 +2738,14 @@ export function StorePage() {
               onOpenQueue={isStoreAdmin ? requireAdminSession : undefined}
               onOpenAdmin={isStoreAdmin && normalizedRole === 'admin' ? () => navigate('/admin/dashboard') : undefined}
               onLogout={isStoreAdmin ? handleStoreSessionLogout : undefined}
-              onOpenCustomerAccount={!isStoreAdmin ? () => setShowCustomerAccount(true) : undefined}
+              onOpenCustomerAccount={!isStoreAdmin ? () => {
+                setCustomerAuthCheckoutPrompt(false);
+                setCustomerVerifyPrompt(null);
+                setCustomerVerifyCode('');
+                setCustomerAccountError('');
+                setCustomerAccountNotice('');
+                setShowCustomerAccount(true);
+              } : undefined}
               isCustomerAuthenticated={Boolean(customerSession?.token)}
               userRole={normalizedRole}
               isAuthenticated={Boolean(user?.token)}
@@ -2703,7 +2839,14 @@ export function StorePage() {
               hydrateCustomerFromAddress(address);
               showToast('Endereço aplicado no checkout.', 'success');
             }}
-            onOpenAddressManager={() => setShowCustomerAccount(true)}
+            onOpenAddressManager={() => {
+              setCustomerAuthCheckoutPrompt(false);
+              setCustomerVerifyPrompt(null);
+              setCustomerVerifyCode('');
+              setCustomerAccountError('');
+              setCustomerAccountNotice('');
+              setShowCustomerAccount(true);
+            }}
             checkoutDisabled={!cartItemsCount || deliveryValidation.blocked || loggedDeliveryNeedsSavedAddress}
             checkoutDisabledReason={
               !cartItemsCount
@@ -2726,10 +2869,14 @@ export function StorePage() {
             storeLabel={storeName || branding?.brandName || ''}
             storeLogoUrl={branding?.logoUrl || ''}
             storeSlug={storeSlug || ''}
+            suggestedProducts={useMemo(
+              () => products.filter((p) => !cart[p.id] && p.active !== false).slice(0, 10),
+              [products, cart]
+            )}
           />
         )}
         {view === 'success' && (
-          <div className="max-w-md mx-auto px-2">
+          <div className="max-w-lg mx-auto">
             <SuccessView
               orderType={lastOrder?.type}
               paymentMethod={lastOrder?.payment}
@@ -2752,6 +2899,9 @@ export function StorePage() {
               onNewOrder={() => setView('menu')}
               onMyOrders={customerSession?.token ? () => navigate('/cliente/pedidos') : undefined}
               onWhatsApp={pendingWhatsApp ?? undefined}
+              storeLabel={storeName || branding?.brandName || ''}
+              storeLogoUrl={branding?.logoUrl || ''}
+              storeSlug={storeSlug || ''}
             />
           </div>
         )}
@@ -2771,7 +2921,14 @@ export function StorePage() {
               </div>
               <button
                 type="button"
-                onClick={() => setShowCustomerAccount(false)}
+                onClick={() => {
+                  setShowCustomerAccount(false);
+                  setCustomerAuthCheckoutPrompt(false);
+                  setCustomerVerifyPrompt(null);
+                  setCustomerVerifyCode('');
+                  setCustomerAccountError('');
+                  setCustomerAccountNotice('');
+                }}
                 className="rounded-xl border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-slate-600 hover:bg-white"
               >
                 Fechar
@@ -2780,6 +2937,76 @@ export function StorePage() {
 
             {!customerSession?.token ? (
               <div className="mt-4 space-y-3">
+                {customerAuthCheckoutPrompt && (
+                  <div className="rounded-2xl border border-sky-200 bg-sky-50 px-3 py-3 text-sm font-semibold leading-relaxed text-sky-800">
+                    Para finalizar o pedido, entre ou crie sua conta. Seu carrinho fica salvo enquanto você faz isso.
+                  </div>
+                )}
+                {customerVerifyPrompt ? (
+                  <div className="space-y-3 rounded-2xl border border-slate-200 bg-white/80 p-3">
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Validar e-mail</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-700">
+                        {customerVerifyPrompt?.emailMasked
+                          ? `Digite o código enviado para ${customerVerifyPrompt.emailMasked}.`
+                          : 'Digite o código enviado para seu e-mail.'}
+                      </p>
+                    </div>
+                    <input
+                      value={customerVerifyCode}
+                      onChange={(e) => setCustomerVerifyCode(String(e.target.value || '').replace(/\D/g, '').slice(0, 4))}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          void handleCustomerVerifyCode();
+                        }
+                      }}
+                      placeholder="0000"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-2xl font-black tracking-[0.35em] text-slate-900 outline-none focus:bg-white focus:ring-2 focus:ring-slate-900/15"
+                    />
+                    {customerAccountError ? (
+                      <p className="text-sm text-rose-600">{customerAccountError}</p>
+                    ) : null}
+                    {customerAccountNotice ? (
+                      <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">{customerAccountNotice}</p>
+                    ) : null}
+                    <button
+                      type="button"
+                      disabled={customerVerifyCode.length !== 4 || customerVerifyLoading}
+                      onClick={handleCustomerVerifyCode}
+                      className="w-full rounded-xl bg-[linear-gradient(120deg,#0f172a,#1e293b)] px-4 py-2.5 text-sm font-bold text-white shadow-[0_18px_30px_-20px_rgba(15,23,42,0.85)] active:scale-[0.99] disabled:opacity-60"
+                    >
+                      {customerVerifyLoading ? 'Validando...' : 'Confirmar código'}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={customerResendLoading || customerResendCooldown > 0}
+                      onClick={handleCustomerResendVerification}
+                      className="w-full text-center text-xs font-semibold text-sky-700 disabled:text-slate-400"
+                    >
+                      {customerResendCooldown > 0
+                        ? `Reenviar código em ${customerResendCooldown}s`
+                        : customerResendLoading
+                        ? 'Reenviando...'
+                        : 'Reenviar código'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCustomerVerifyPrompt(null);
+                        setCustomerVerifyCode('');
+                        setCustomerAccountError('');
+                        setCustomerAccountNotice('');
+                      }}
+                      className="w-full text-center text-xs font-semibold text-slate-500 hover:text-slate-700"
+                    >
+                      Voltar para login
+                    </button>
+                  </div>
+                ) : (
+                  <>
                 <div className="flex gap-2 rounded-xl bg-slate-100 p-1 border border-slate-200/80">
                   <button
                     type="button"
@@ -2875,6 +3102,9 @@ export function StorePage() {
                 {customerAccountError ? (
                   <p className="text-sm text-rose-600">{customerAccountError}</p>
                 ) : null}
+                {customerAccountNotice ? (
+                  <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">{customerAccountNotice}</p>
+                ) : null}
                 <button
                   type="button"
                   disabled={customerAccountLoading}
@@ -2891,6 +3121,8 @@ export function StorePage() {
                   >
                     Esqueci minha senha
                   </button>
+                )}
+                  </>
                 )}
               </div>
             ) : (

@@ -274,6 +274,11 @@ function OrderCard({
               <span className={`font-medium ${statusMeta.toneClass}`}>{statusMeta.label}</span>
             </div>
             <p className="mt-1 text-[11px] text-slate-500">{orderDate || formatGroupDate(order.createdAt)}</p>
+            {String(order.paymentStatus || '').toUpperCase() === 'PAID' && (
+              <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                <CheckCircle size={10} weight="fill" /> Pago via Mercado Pago
+              </span>
+            )}
             {condominiumOrder?.condominiumName ? (
               <p className="mt-1 inline-flex max-w-full rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">
                 <span className="truncate">{condominiumLabel} • {condominiumOrder.condominiumName}</span>

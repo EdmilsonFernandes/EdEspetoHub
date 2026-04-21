@@ -1,6 +1,6 @@
 // @ts-nocheck
 import * as React from 'react';
-import { ChartBar, BookOpen, CheckSquare, ClipboardText, CreditCard, Package, Gear, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, CheckSquare, ClipboardText, CreditCard, Package, Gear, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree, PlugsConnected, CheckCircle, SealCheck } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
@@ -880,12 +880,137 @@ const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpg
   );
 };
 
-const PaymentsView = ({ subscription, loading, error, payments, storeId }) => {
-  const navigate = useNavigate();
-  const [showAllHistory, setShowAllHistory] = useState(false);
+const GatewayView = ({ storeId }) => {
   const [mpAccount, setMpAccount] = useState<any>(null);
   const [mpLoading, setMpLoading] = useState(false);
   const [mpActionLoading, setMpActionLoading] = useState(false);
+
+  useEffect(() => {
+    if (!storeId) return;
+    let cancelled = false;
+    setMpLoading(true);
+    storeService
+      .getMercadoPagoAccount(storeId)
+      .then((data) => { if (!cancelled) setMpAccount(data); })
+      .catch(() => { if (!cancelled) setMpAccount(null); })
+      .finally(() => { if (!cancelled) setMpLoading(false); });
+    return () => { cancelled = true; };
+  }, [storeId]);
+
+  const isConnected = Boolean(!mpLoading && mpAccount?.connected);
+  const oauthMissing = mpAccount?.oauthConfigured === false;
+
+  return (
+    <div className="space-y-4">
+      {/* Header card */}
+      <div className={`rounded-3xl overflow-hidden border shadow-[0_20px_60px_-40px_rgba(0,158,227,0.35)] ${isConnected ? 'border-[#009ee3]/30' : 'border-slate-200'}`}>
+        {/* Top band */}
+        <div className={`px-5 py-4 flex items-center justify-between gap-4 ${isConnected ? 'bg-gradient-to-r from-[#009ee3]/10 to-white' : 'bg-slate-50'}`}>
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm border border-slate-100">
+              <img src={mercadoPagoLogo} alt="Mercado Pago" className="h-7 w-auto object-contain" />
+            </div>
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Gateway de pagamento</p>
+              <p className="text-base font-black text-slate-900 leading-tight">Mercado Pago</p>
+            </div>
+          </div>
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold shrink-0 ${
+            mpLoading ? 'bg-slate-100 text-slate-500'
+            : isConnected ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+            : 'bg-slate-100 text-slate-500'
+          }`}>
+            <span className={`h-1.5 w-1.5 rounded-full ${mpLoading ? 'bg-slate-400 animate-pulse' : isConnected ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+            {mpLoading ? 'Verificando…' : isConnected ? 'Conta conectada' : 'Não conectado'}
+          </span>
+        </div>
+
+        {/* Body */}
+        <div className="bg-white px-5 py-4 space-y-4">
+          {isConnected ? (
+            <div className="flex items-start gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
+              <SealCheck size={22} weight="duotone" className="shrink-0 text-emerald-600 mt-0.5" />
+              <div>
+                <p className="text-sm font-black text-emerald-900">Cobrança online ativa</p>
+                <p className="mt-0.5 text-xs text-emerald-700/80 leading-relaxed">
+                  Pix, crédito e débito dos novos pedidos são cobrados online e recebidos direto na sua conta Mercado Pago.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+              <p className="text-sm font-bold text-slate-800">Cobrança convencional</p>
+              <p className="mt-0.5 text-xs text-slate-500 leading-relaxed">
+                {oauthMissing
+                  ? 'A conexão OAuth ainda não está configurada no servidor. O checkout segue no modo convencional.'
+                  : 'Sem Mercado Pago, o pedido registra a forma escolhida e a loja cobra como já faz hoje.'}
+              </p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {['Pix', 'Crédito', 'Débito', 'Fallback manual'].map((m) => (
+              <div key={m} className="flex items-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
+                <CheckCircle size={13} weight="duotone" className={isConnected ? 'text-emerald-500' : 'text-slate-300'} />
+                <span className="text-[11px] font-semibold text-slate-600">{m}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between gap-3 pt-1">
+            {!isConnected ? (
+              <button
+                type="button"
+                disabled={!storeId || mpActionLoading || oauthMissing || mpLoading}
+                onClick={async () => {
+                  if (!storeId) return;
+                  setMpActionLoading(true);
+                  try {
+                    const data = await storeService.createMercadoPagoConnectUrl(storeId, window.location.href);
+                    if (data?.authUrl) window.location.href = data.authUrl;
+                  } finally {
+                    setMpActionLoading(false);
+                  }
+                }}
+                className="flex-1 rounded-xl bg-[#009ee3] px-4 py-3 text-sm font-black text-white shadow-sm transition hover:bg-[#008dcc] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {mpActionLoading ? 'Abrindo Mercado Pago…' : 'Conectar conta Mercado Pago'}
+              </button>
+            ) : (
+              <>
+                <p className="text-xs text-slate-500 leading-tight">Ao desconectar, novos pedidos voltam ao modo convencional.</p>
+                <button
+                  type="button"
+                  disabled={!storeId || mpActionLoading}
+                  onClick={async () => {
+                    if (!storeId) return;
+                    setMpActionLoading(true);
+                    try {
+                      const data = await storeService.disconnectMercadoPago(storeId);
+                      setMpAccount(data);
+                    } finally {
+                      setMpActionLoading(false);
+                    }
+                  }}
+                  className="shrink-0 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-bold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
+                >
+                  {mpActionLoading ? 'Desconectando…' : 'Desconectar'}
+                </button>
+              </>
+            )}
+          </div>
+          {!isConnected && !oauthMissing && (
+            <p className="text-center text-[11px] text-slate-400">Autorização feita no ambiente seguro do Mercado Pago.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const PaymentsView = ({ subscription, loading, error, payments }) => {
+  const navigate = useNavigate();
+  const [showAllHistory, setShowAllHistory] = useState(false);
   const planSectionRef = useRef<HTMLDivElement | null>(null);
   const summarySectionRef = useRef<HTMLDivElement | null>(null);
   const historySectionRef = useRef<HTMLDivElement | null>(null);
@@ -933,25 +1058,6 @@ const PaymentsView = ({ subscription, loading, error, payments, storeId }) => {
   const statusAccent = isVip ? 'border-l-emerald-400 bg-white' : (statusMap[rawStatus]?.accent || 'border-l-slate-200 bg-white');
   const paidAtLabel = subscription?.latestPaymentAt ? formatDateTime(subscription.latestPaymentAt) : '—';
   const rawPaymentStatus = (subscription?.latestPaymentStatus || '').toUpperCase();
-  useEffect(() => {
-    if (!storeId) return;
-    let cancelled = false;
-    setMpLoading(true);
-    storeService
-      .getMercadoPagoAccount(storeId)
-      .then((data) => {
-        if (!cancelled) setMpAccount(data);
-      })
-      .catch(() => {
-        if (!cancelled) setMpAccount(null);
-      })
-      .finally(() => {
-        if (!cancelled) setMpLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [storeId]);
   const paymentStatusMap: Record<string, string> = {
     PAID: 'Pagamento aprovado',
     PENDING: 'Pagamento pendente',
@@ -1138,91 +1244,6 @@ const PaymentsView = ({ subscription, loading, error, payments, storeId }) => {
             </button>
           </div>
         )}
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_18px_45px_-42px_rgba(15,23,42,0.55)]">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-3">
-                <img src={mercadoPagoLogo} alt="Mercado Pago" className="h-8 w-auto max-w-[150px] object-contain" />
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold ${
-                    mpLoading
-                      ? 'bg-slate-100 text-slate-600'
-                      : mpAccount?.connected
-                      ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
-                      : 'bg-slate-100 text-slate-600'
-                  }`}
-                >
-                  <span
-                    className={`h-1.5 w-1.5 rounded-full ${
-                      mpLoading ? 'bg-slate-400' : mpAccount?.connected ? 'bg-emerald-500' : 'bg-slate-400'
-                    }`}
-                  />
-                  {mpLoading ? 'Verificando' : mpAccount?.connected ? 'Conta conectada' : 'Modo convencional'}
-                </span>
-              </div>
-              <p className="mt-3 text-sm font-black text-slate-950">
-                Cobrança online para pedidos da loja
-              </p>
-              <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-600">
-                {mpLoading
-                  ? 'Verificando a autorização desta loja.'
-                  : mpAccount?.connected
-                  ? 'Pix, crédito e débito dos novos pedidos são cobrados online e recebidos na conta Mercado Pago conectada.'
-                  : mpAccount?.oauthConfigured === false
-                  ? 'A conexão OAuth ainda não está configurada no servidor. O checkout segue no modo convencional.'
-                  : 'Conectar é opcional. Sem Mercado Pago, o pedido registra a forma escolhida e a loja cobra como já faz hoje.'}
-              </p>
-              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-semibold text-slate-500">
-                <span>Pix</span>
-                <span>Cartão de crédito</span>
-                <span>Cartão de débito</span>
-                <span>Fallback manual</span>
-              </div>
-            </div>
-            <div className="flex shrink-0 flex-col items-stretch gap-2 sm:min-w-56">
-            {!mpAccount?.connected ? (
-              <button
-                type="button"
-                disabled={!storeId || mpActionLoading || mpAccount?.oauthConfigured === false}
-                onClick={async () => {
-                  if (!storeId) return;
-                  setMpActionLoading(true);
-                  try {
-                    const data = await storeService.createMercadoPagoConnectUrl(storeId, window.location.href);
-                    if (data?.authUrl) window.location.href = data.authUrl;
-                  } finally {
-                    setMpActionLoading(false);
-                  }
-                }}
-                className="rounded-lg bg-[#009ee3] px-4 py-2.5 text-xs font-black text-white shadow-sm transition hover:bg-[#008dcc] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {mpActionLoading ? 'Abrindo Mercado Pago...' : 'Conectar conta Mercado Pago'}
-              </button>
-            ) : (
-              <button
-                type="button"
-                disabled={!storeId || mpActionLoading}
-                onClick={async () => {
-                  if (!storeId) return;
-                  setMpActionLoading(true);
-                  try {
-                    const data = await storeService.disconnectMercadoPago(storeId);
-                    setMpAccount(data);
-                  } finally {
-                    setMpActionLoading(false);
-                  }
-                }}
-                className="rounded-lg px-3 py-2 text-xs font-bold text-slate-500 transition hover:bg-slate-50 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {mpActionLoading ? 'Desconectando...' : 'Desconectar'}
-              </button>
-            )}
-              <p className="text-center text-[11px] leading-4 text-slate-500">
-                {mpAccount?.connected ? 'Ao desconectar, novos pedidos voltam ao modo convencional.' : 'Autorização feita no ambiente seguro do Mercado Pago.'}
-              </p>
-            </div>
-          </div>
-        </div>
         {Array.isArray(payments) && payments.length > 0 && (
           <div ref={summarySectionRef} className="scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-3">
             <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500 font-bold">Resumo financeiro</p>
@@ -1358,7 +1379,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [linkStats, setLinkStats] = useState<any>(null);
   const [subscriptionError, setSubscriptionError] = useState('');
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'avaliacoes' | 'produtos' | 'estoque' | 'config' | 'fila' | 'pagamentos' | 'motoboys' | 'usuarios'>(() => {
+  const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'avaliacoes' | 'produtos' | 'estoque' | 'config' | 'fila' | 'pagamentos' | 'gateway' | 'motoboys' | 'usuarios'>(() => {
     const requestedTabFromState = String((location.state as any)?.activeTab || '').trim();
     const requestedTabFromQuery = String(new URLSearchParams(location.search || '').get('tab') || '').trim();
     const requestedTabFromSession =
@@ -1458,7 +1479,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'estoque', label: 'Estoque', icon: Package },
             { id: 'destaques', label: 'Destaques', icon: Star },
-            { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
+            { id: 'pagamentos', label: 'Minha assinatura', icon: CreditCard },
+            { id: 'gateway', label: 'Gateway de pagamento', icon: PlugsConnected },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
             { id: 'usuarios', label: 'Usuários', icon: UsersThree, standalone: true },
             { id: 'config', label: 'Configurações', icon: Gear },
@@ -1481,7 +1503,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       produtos: { title: 'Produtos', subtitle: 'Gerencie catálogo, preço, disponibilidade e destaque da vitrine.' },
       estoque: { title: 'Estoque', subtitle: 'Monitore níveis, alertas e movimentações dos produtos.' },
       destaques: { title: 'Destaques patrocinados', subtitle: 'Solicite e acompanhe campanhas de destaque para o Hub.' },
-      pagamentos: { title: 'Pagamentos', subtitle: 'Controle assinatura, ciclo e eventos de cobrança da loja.' },
+      pagamentos: { title: 'Minha assinatura', subtitle: 'Controle assinatura, ciclo e eventos de cobrança da loja.' },
+      gateway: { title: 'Gateway de pagamento', subtitle: 'Conecte o Mercado Pago para aceitar Pix, crédito e débito online.' },
       config: { title: 'Configurações', subtitle: 'Ajuste identidade, canais, tipos de pedido e horários da operação.' },
       fila: { title: 'Gestor de Pedidos', subtitle: 'Acompanhe pedidos em andamento e a fila da loja em tempo real.' },
       motoboys: { title: 'Entregadores', subtitle: 'Vínculos, documentos, solicitações e status de entrega.' },
@@ -1584,7 +1607,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
   useEffect(() => {
     if (!isOperatorUser) return;
-    const disallowed = new Set(['resumo', 'pedidos', 'pagamentos', 'avaliacoes', 'config', 'motoboys', 'usuarios', 'estoque']);
+    const disallowed = new Set(['resumo', 'pedidos', 'pagamentos', 'gateway', 'avaliacoes', 'config', 'motoboys', 'usuarios', 'estoque']);
     if (disallowed.has(activeTab)) {
       setActiveTab('fila');
     }
@@ -1707,7 +1730,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       openQueueMonitor({ replace: true });
       return;
     }
-    const allowedTabs = new Set(['resumo', 'avaliacoes', 'produtos', 'estoque', 'config', 'pagamentos', 'motoboys', 'usuarios']);
+    const allowedTabs = new Set(['resumo', 'avaliacoes', 'produtos', 'estoque', 'config', 'pagamentos', 'gateway', 'motoboys', 'usuarios']);
     if (!allowedTabs.has(nextTab)) {
       navigate('/admin/dashboard', { replace: true, state: {} });
       return;
@@ -2816,7 +2839,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
         {activeTab === 'pagamentos' && (
           <FormSection
-            title="Pagamentos"
+            title="Minha assinatura"
             subtitle="Assinatura atual, ciclo e histórico financeiro."
             variant="success"
             className="bg-white premium-card"
@@ -2826,8 +2849,18 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               loading={subscriptionLoading}
               error={subscriptionError}
               payments={paymentsHistory}
-              storeId={storeId}
             />
+          </FormSection>
+        )}
+
+        {activeTab === 'gateway' && (
+          <FormSection
+            title="Gateway de pagamento"
+            subtitle="Conecte o Mercado Pago para aceitar Pix, crédito e débito diretamente nos pedidos."
+            variant="default"
+            className="bg-white premium-card"
+          >
+            <GatewayView storeId={storeId} />
           </FormSection>
         )}
 

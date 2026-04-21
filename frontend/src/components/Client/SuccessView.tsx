@@ -4,6 +4,8 @@ import { CheckCircle, QrCode, ArrowLeft, CreditCard, Printer, Copy, Check, Arrow
 import { Capacitor } from "@capacitor/core";
 import { formatPaymentMethod } from "../../utils/format";
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
+import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
+import { getStoreAvatarUrl } from "../../utils/storeAvatar";
 
 const formatCountdown = (ms: number) => {
   if (ms <= 0) return "00:00";
@@ -273,6 +275,9 @@ export const SuccessView = ({
   onPrintReceipt,
   onlinePayment,
   paymentStatus,
+  storeLabel = "",
+  storeLogoUrl = "",
+  storeSlug = "",
 }) => {
   const hasOnlinePayment = Boolean(
     onlinePayment?.qrCodeBase64 || onlinePayment?.qrCodeText || onlinePayment?.paymentLink
@@ -280,101 +285,156 @@ export const SuccessView = ({
   const isStaticPix = !hasOnlinePayment && paymentMethod === "pix";
   const isLocalPayment = !hasOnlinePayment && paymentMethod !== "pix";
   const isPaid = String(paymentStatus || "").toUpperCase() === "PAID";
+  const isAwaitingPayment = hasOnlinePayment && !isPaid && String(paymentStatus || '').toUpperCase() !== 'FAILED';
+  const isNativePlatform = Capacitor.isNativePlatform();
+  const checkoutTopPaddingClass = isNativePlatform
+    ? "pt-[max(calc(env(safe-area-inset-top)+0.8rem),1.05rem)]"
+    : "pt-[max(calc(env(safe-area-inset-top)+1rem),1.25rem)]";
+  const checkoutStickyTopClass = isNativePlatform
+    ? "top-[max(calc(env(safe-area-inset-top)+0.45rem),0.7rem)]"
+    : "top-[max(calc(env(safe-area-inset-top)+0.45rem),0.75rem)]";
+  const storeLogo = resolveAssetUrl(storeLogoUrl || "") || getStoreAvatarUrl(storeSlug, storeLabel || "Loja");
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-6 animate-in zoom-in">
-      <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-sm transition-colors duration-700 ${isPaid ? 'bg-emerald-100 text-emerald-600' : 'bg-brand-primary-soft text-brand-primary'}`}>
-        <CheckCircle size={48} weight="duotone" />
+    <div className={`animate-in fade-in duration-300 relative overflow-x-hidden bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.10),transparent_34%),linear-gradient(180deg,#eef5f7_0%,#f8fafc_8.5rem,#f8fafc_100%)] ${checkoutTopPaddingClass} ${isNativePlatform ? "ds-native-nav-content-lg" : "pb-24"}`}>
+      {/* Sticky header matching CartView */}
+      <div className={`sticky ${checkoutStickyTopClass} z-40 mb-4`}>
+        <div className="rounded-[1.85rem] border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.97)_0%,rgba(244,248,252,0.96)_100%)] px-3 py-3 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
+          {/* Step indicator */}
+          <div className="mb-3 flex items-center gap-1">
+            {[{ label: 'Sacola', done: true }, { label: 'Entrega', done: true }, { label: 'Pagamento', done: true }, { label: isPaid ? 'Confirmado' : isAwaitingPayment ? 'Pagamento' : 'Confirmado', done: isPaid, active: !isPaid }].map(({ label, done, active }, i) => (
+              <React.Fragment key={label}>
+                <div className="flex items-center gap-1">
+                  <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black transition-colors ${done ? 'bg-emerald-500 text-white' : active ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-500'}`}>
+                    {done ? '✓' : i + 1}
+                  </span>
+                  <span className={`text-[9px] font-bold uppercase tracking-wide ${done ? 'text-emerald-600' : active ? 'text-slate-900' : 'text-slate-400'}`}>{label}</span>
+                </div>
+                {i < 3 && <div className={`h-px flex-1 transition-colors ${done ? 'bg-emerald-300' : 'bg-slate-200'}`} />}
+              </React.Fragment>
+            ))}
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={onMyOrders || onNewOrder}
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] border border-slate-200/80 bg-white text-[#336886] shadow-[0_14px_28px_-18px_rgba(51,104,134,0.3)] transition hover:-translate-y-0.5 hover:bg-sky-50 active:scale-95"
+            >
+              <ArrowLeft size={18} weight="bold" />
+            </button>
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-[1.05rem] border border-white bg-white shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)] ring-1 ring-slate-100">
+                <img src={storeLogo} alt={storeLabel || "Loja"} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(storeSlug, storeLabel || "Loja"); }} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Pedido</p>
+                <p className="truncate text-sm font-black tracking-tight text-slate-950">
+                  {isPaid ? 'Confirmado!' : isAwaitingPayment ? 'Conclua o pagamento' : 'Realizado!'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <h2 className="text-3xl font-black text-gray-800 mb-2">
-        {isPaid ? 'Pedido Confirmado!' : 'Pedido Realizado!'}
-      </h2>
+      {/* Content */}
+      <div className="space-y-4">
+        {/* Status card */}
+        <div className={`rounded-3xl border p-5 shadow-sm ${isPaid ? 'bg-gradient-to-b from-emerald-50 to-white border-emerald-200' : isAwaitingPayment ? 'bg-gradient-to-b from-[#009ee3]/5 to-white border-[#009ee3]/20' : 'bg-gradient-to-b from-sky-50 to-white border-sky-200'}`}>
+          <div className="flex items-center gap-3">
+            <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-inner ${isPaid ? 'bg-emerald-100' : isAwaitingPayment ? 'bg-[#009ee3]/10' : 'bg-sky-100'}`}>
+              <CheckCircle size={28} weight="duotone" className={isPaid ? 'text-emerald-600' : isAwaitingPayment ? 'text-[#009ee3]' : 'text-sky-600'} />
+            </div>
+            <div className="min-w-0">
+              <h2 className={`text-lg font-black leading-tight ${isPaid ? 'text-emerald-800' : 'text-slate-900'}`}>
+                {isPaid ? 'Pedido confirmado!' : isAwaitingPayment ? 'Conclua o pagamento' : 'Pedido realizado!'}
+              </h2>
+              <p className={`text-xs leading-relaxed mt-0.5 ${isPaid ? 'text-emerald-700/80' : 'text-slate-500'}`}>
+                {isPaid
+                  ? 'Pagamento confirmado. Seu pedido está em produção!'
+                  : isAwaitingPayment
+                  ? 'Finalize o pagamento para entrar na fila de produção.'
+                  : orderType === 'delivery'
+                  ? 'Recebemos seu pedido. Avisaremos quando sair para entrega.'
+                  : orderType === 'table'
+                  ? `Pedido recebido — Mesa ${table || '—'}.`
+                  : 'Seu pedido foi recebido e seguirá para produção.'}
+              </p>
+            </div>
+          </div>
+        </div>
 
-      <p className="text-gray-500 mb-6 max-w-xs mx-auto leading-relaxed">
-        {isPaid
-          ? 'Pagamento confirmado. Seu pedido está em produção!'
-          : orderType === "delivery"
-          ? "Recebemos seu pedido de entrega. Avisaremos quando sair para entrega."
-          : orderType === "table"
-          ? `Seu pedido foi recebido e seguirá para a produção. Mesa ${table || "-"}.`
-          : "Seu pedido foi recebido e seguirá para a produção."}
-      </p>
-
-      <PaymentBadge paymentMethod={paymentMethod} />
-
-      {/* Online payment UI (Mercado Pago) */}
-      {hasOnlinePayment && (
-        <div className="w-full max-w-sm">
+        {/* Online payment UI (Mercado Pago) */}
+        {hasOnlinePayment && (
           <OnlinePaymentBlock onlinePayment={onlinePayment} paymentStatus={paymentStatus} />
+        )}
+
+        {/* Static Pix (no MP) */}
+        {isStaticPix && <StaticPixBlock pixKey={pixKey} phone={phone} />}
+
+        {/* Cash / card on delivery */}
+        {isLocalPayment && (
+          <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Forma de pagamento</p>
+            <div className="flex items-center gap-2">
+              {(() => {
+                const methodMeta = getPaymentMethodMeta(paymentMethod);
+                return (
+                  <>
+                    {methodMeta.icon && <img src={methodMeta.icon} alt={methodMeta.label} className="h-5 w-5 object-contain" />}
+                    <span className="text-sm font-semibold text-slate-800">{formatPaymentMethod(paymentMethod)}</span>
+                  </>
+                );
+              })()}
+            </div>
+            <p className="mt-2 text-xs text-slate-500">Finalize o pagamento no local quando seu pedido estiver pronto.</p>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex flex-col gap-3">
+          {onMyOrders ? (
+            <button
+              onClick={onMyOrders}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 py-4 text-base font-black text-white shadow-sm transition hover:bg-slate-800 active:scale-[0.98]"
+            >
+              <ListBullets size={20} weight="duotone" /> Meus pedidos
+            </button>
+          ) : (
+            <button
+              onClick={onNewOrder}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 py-4 text-base font-black text-white shadow-sm transition hover:bg-slate-800 active:scale-[0.98]"
+            >
+              <ArrowLeft size={20} weight="duotone" /> Fazer novo pedido
+            </button>
+          )}
+          <div className="flex gap-3">
+            {orderId && onTrackOrder && !isPaid && !isAwaitingPayment && (
+              <button
+                onClick={onTrackOrder}
+                className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 py-3.5 text-sm font-bold text-emerald-800 transition hover:bg-emerald-100 active:scale-[0.98]"
+              >
+                <CheckCircle size={18} weight="duotone" /> Acompanhar
+              </button>
+            )}
+            {orderId && onPrintReceipt && (
+              <button
+                onClick={onPrintReceipt}
+                className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 py-3.5 text-sm font-bold text-amber-800 transition hover:bg-amber-100 active:scale-[0.98]"
+              >
+                <Printer size={18} weight="duotone" /> Comprovante
+              </button>
+            )}
+            {onWhatsApp && (
+              <button
+                onClick={onWhatsApp}
+                className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 py-3.5 text-sm font-bold text-emerald-800 transition hover:bg-emerald-100 active:scale-[0.98]"
+              >
+                <WhatsappLogo size={18} weight="duotone" /> WhatsApp
+              </button>
+            )}
+          </div>
         </div>
-      )}
-
-      {/* Static Pix (no MP) */}
-      {isStaticPix && <StaticPixBlock pixKey={pixKey} phone={phone} />}
-
-      {/* Cash / card on delivery */}
-      {isLocalPayment && (
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 w-full mb-8 text-left max-w-sm">
-          <h3 className="font-bold text-gray-800 mb-2">Pagamento na entrega/retirada</h3>
-          <p className="text-sm text-gray-600 flex flex-wrap items-center gap-2">
-            Forma registrada:
-            {(() => {
-              const methodMeta = getPaymentMethodMeta(paymentMethod);
-              return (
-                <span className="font-bold uppercase inline-flex items-center gap-2">
-                  {methodMeta.icon && (
-                    <img src={methodMeta.icon} alt={methodMeta.label} className="h-4 w-4 object-contain" />
-                  )}
-                  {formatPaymentMethod(paymentMethod)}
-                </span>
-              );
-            })()}
-            . Quando seu pedido estiver pronto, finalize o pagamento no local.
-          </p>
-        </div>
-      )}
-
-      <div className="flex flex-col sm:flex-row gap-3 flex-wrap justify-center">
-        {orderId && onPrintReceipt && (
-          <button
-            onClick={onPrintReceipt}
-            className="flex items-center justify-center gap-2 text-amber-800 bg-amber-50 border border-amber-200 font-bold px-6 py-3 rounded-xl transition-colors hover:bg-amber-100"
-          >
-            <Printer size={18} weight="duotone" /> Imprimir comprovante
-          </button>
-        )}
-        {orderId && onTrackOrder && !isPaid && (
-          <button
-            onClick={onTrackOrder}
-            className="flex items-center justify-center gap-2 text-white bg-emerald-600 font-bold px-6 py-3 rounded-xl transition-colors hover:opacity-90"
-          >
-            <CheckCircle size={18} weight="duotone" /> Acompanhar pedido
-          </button>
-        )}
-        {onMyOrders ? (
-          <button
-            onClick={onMyOrders}
-            className="flex items-center justify-center gap-2 text-white bg-brand-primary font-bold px-6 py-3 rounded-xl transition-colors hover:opacity-90"
-          >
-            <ListBullets size={18} weight="duotone" /> Meus pedidos
-          </button>
-        ) : (
-          <button
-            onClick={onNewOrder}
-            className="flex items-center justify-center gap-2 text-white bg-brand-primary font-bold px-6 py-3 rounded-xl transition-colors hover:opacity-90"
-          >
-            <ArrowLeft size={18} weight="duotone" /> Voltar para os pedidos
-          </button>
-        )}
-        {onWhatsApp && (
-          <button
-            onClick={onWhatsApp}
-            className="flex items-center justify-center gap-2 text-white bg-emerald-600 font-bold px-6 py-3 rounded-xl transition-colors hover:opacity-90"
-          >
-            <WhatsappLogo size={18} weight="duotone" /> Notificar loja
-          </button>
-        )}
       </div>
     </div>
   );

@@ -53,7 +53,7 @@ export function AdminDesktopSidebar({
     const catalogo = ['produtos', 'estoque', 'destaques', 'cardapio'].map(consume).filter(Boolean);
     if (catalogo.length) sections.push({ type: 'group', id: 'catalogo', label: 'Produtos e Loja', children: catalogo });
 
-    const financeiro = ['pagamentos'].map(consume).filter(Boolean);
+    const financeiro = ['pagamentos', 'gateway'].map(consume).filter(Boolean);
     if (financeiro.length) sections.push({ type: 'group', id: 'financeiro', label: 'Financeiro', children: financeiro });
 
     const gestao = ['motoboys', 'usuarios'].map(consume).filter(Boolean);
