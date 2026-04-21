@@ -295,7 +295,19 @@ function OrderCard({
       {String(order.status || '').toLowerCase() === 'awaiting_payment' && order.paymentLink && (
         <button
           type="button"
-          onClick={() => window.open(order.paymentLink, Capacitor.isNativePlatform() ? '_system' : '_blank')}
+          onClick={() => {
+            const url = order.paymentLink;
+            if (!url) return;
+            if (Capacitor.isNativePlatform()) {
+              const a = document.createElement('a');
+              a.href = url;
+              document.body.appendChild(a);
+              a.click();
+              setTimeout(() => document.body.removeChild(a), 100);
+            } else {
+              window.open(url, '_blank');
+            }
+          }}
           className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#009ee3] py-3 text-sm font-black text-white shadow-[0_6px_18px_-8px_rgba(0,158,227,0.55)] active:scale-[0.98] transition-transform"
         >
           <img src="/uploads/payment/mercado-pago.webp" alt="" className="h-5 w-5 object-contain brightness-0 invert" />
