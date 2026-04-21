@@ -336,6 +336,10 @@ export function StorePage() {
     [validCartItems]
   );
   const cartItemsTotal = cartPricing.discountedSubtotal;
+  const suggestedProducts = useMemo(
+    () => products.filter((p: any) => !cart[p.id] && p.active !== false).slice(0, 10),
+    [products, cart]
+  );
   const cartDiscountTotal = cartPricing.discountTotal;
   const deliveryRadiusValue = useMemo(() => {
     const value = getNumeric(deliveryRadiusKm);
@@ -2869,10 +2873,7 @@ export function StorePage() {
             storeLabel={storeName || branding?.brandName || ''}
             storeLogoUrl={branding?.logoUrl || ''}
             storeSlug={storeSlug || ''}
-            suggestedProducts={useMemo(
-              () => products.filter((p) => !cart[p.id] && p.active !== false).slice(0, 10),
-              [products, cart]
-            )}
+            suggestedProducts={suggestedProducts}
           />
         )}
         {view === 'success' && (
