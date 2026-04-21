@@ -118,10 +118,14 @@ export class OrderPaymentService {
       if (mpLink) row.paymentLink = mpLink;
       await repo.save(row);
 
-      await manager.getRepository(Order).update(
-        { id: row.orderId },
-        { paymentStatus: 'PAID' }
-      );
+      // Update paymentStatus; promote awaiting_payment → pending so order enters the queue
+      await manager.getRepository(Order).update({ id: row.orderId }, { paymentStatus: 'PAID' });
+      await manager.getRepository(Order)
+        .createQueryBuilder()
+        .update()
+        .set({ status: 'pending' })
+        .where('id = :id AND status = :s', { id: row.orderId, s: 'awaiting_payment' })
+        .execute();
     });
   }
 
@@ -134,10 +138,14 @@ export class OrderPaymentService {
     row.providerPayload = mpPayment || null;
     if (mpPayment?.id) row.providerId = String(mpPayment.id);
     await repo.save(row);
-    await AppDataSource.getRepository(Order).update(
-      { id: row.orderId },
-      { paymentStatus: 'FAILED' }
-    );
+    // Update paymentStatus; cancel order if it was still awaiting payment
+    await AppDataSource.getRepository(Order).update({ id: row.orderId }, { paymentStatus: 'FAILED' });
+    await AppDataSource.getRepository(Order)
+      .createQueryBuilder()
+      .update()
+      .set({ status: 'cancelled' })
+      .where('id = :id AND status = :s', { id: row.orderId, s: 'awaiting_payment' })
+      .execute();
   }
 
   async refreshFromProvider(orderPaymentId: string) {

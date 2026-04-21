@@ -887,6 +887,9 @@ private async seedPostalShipmentFromCheckoutTx(
       await this.seedPostalShipmentFromCheckoutTx(manager, saved, input as any);
       const payment = await this.orderPaymentService.createForOrderIfEnabled(saved, manager);
       if (payment) {
+        // Hold order off the queue until MP confirms payment via webhook
+        await manager.getRepository(Order).update({ id: saved.id }, { status: 'awaiting_payment' });
+        saved.status = 'awaiting_payment';
         (saved as any).payment = {
           id: payment.id,
           status: payment.paymentStatus,
@@ -901,7 +904,10 @@ private async seedPostalShipmentFromCheckoutTx(
       return saved;
     });
     await this.registerAnonymousOrderAttempt(input, store.id);
-    this.dispatchOrderUpdatePush(saved as any);
+    // Only notify admin queue when order is already active (cash / no MP)
+    if (saved.status !== 'awaiting_payment') {
+      this.dispatchOrderUpdatePush(saved as any);
+    }
     return saved;
   }
 
@@ -925,6 +931,9 @@ private async seedPostalShipmentFromCheckoutTx(
       await this.seedPostalShipmentFromCheckoutTx(manager, saved, input as any);
       const payment = await this.orderPaymentService.createForOrderIfEnabled(saved, manager);
       if (payment) {
+        // Hold order off the queue until MP confirms payment via webhook
+        await manager.getRepository(Order).update({ id: saved.id }, { status: 'awaiting_payment' });
+        saved.status = 'awaiting_payment';
         (saved as any).payment = {
           id: payment.id,
           status: payment.paymentStatus,
@@ -939,7 +948,10 @@ private async seedPostalShipmentFromCheckoutTx(
       return saved;
     });
     await this.registerAnonymousOrderAttempt({ ...input, storeId: store.id }, store.id);
-    this.dispatchOrderUpdatePush(saved as any);
+    // Only notify admin queue when order is already active (cash / no MP)
+    if (saved.status !== 'awaiting_payment') {
+      this.dispatchOrderUpdatePush(saved as any);
+    }
     return saved;
   }
 
