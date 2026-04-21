@@ -1830,7 +1830,7 @@ export const CartView = ({
                 (checkoutStep === 4 && (checkoutLoading || checkoutDisabled || cashValidation.blocked))
                   ? "bg-slate-300 text-slate-600 cursor-not-allowed"
                   : checkoutStep === 4
-                  ? "bg-emerald-600 text-white cursor-pointer"
+                  ? (isCredit || isDebit) ? "bg-[#009ee3] text-white cursor-pointer" : "bg-emerald-600 text-white cursor-pointer"
                   : "bg-slate-900 text-white cursor-pointer"
               }`}
               style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
@@ -1846,7 +1846,12 @@ export const CartView = ({
                     <ArrowLeft size={18} weight="bold" className="rotate-180" />
                   </>
                 : <>
-                    {checkoutLoading ? 'Processando...' : <>{isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />} {'Fazer pedido'} <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>}
+                    {checkoutLoading
+                      ? 'Processando...'
+                      : (isCredit || isDebit)
+                      ? <><img src="/uploads/payment/mercado-pago.webp" alt="" className="h-5 w-5 object-contain brightness-0 invert" /> Pagar via Mercado Pago <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>
+                      : <>{isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />} {'Fazer pedido'} <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>
+                    }
                   </>
               }
             </button>

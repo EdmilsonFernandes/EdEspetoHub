@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft, Eye, EyeSlash, ClipboardText, House, Receipt, Buildings, UserCircle } from '@phosphor-icons/react';
 import { productService } from '../services/productService';
@@ -2024,8 +2025,19 @@ export function StorePage() {
     const isAwaitingMpPayment = Boolean(
       createdOrder?.payment?.paymentLink && createdOrder?.status === 'awaiting_payment'
     );
+    const isMpCardPayment = isAwaitingMpPayment && (paymentMethod === 'credito' || paymentMethod === 'debito');
     if (isStoreAdmin) {
       setView('menu');
+    } else if (isMpCardPayment) {
+      const mpUrl = createdOrder.payment.paymentLink;
+      if (Capacitor.isNativePlatform()) {
+        Browser.open({ url: mpUrl });
+      } else {
+        window.open(mpUrl, '_blank');
+      }
+      if (customerSession?.token) {
+        navigate('/cliente/pedidos');
+      }
     } else {
       setView('success');
     }
