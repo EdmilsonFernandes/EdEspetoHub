@@ -2909,7 +2909,8 @@ export function StorePage() {
           />
         )}
         {view === 'success' && (
-          <div className="max-w-lg mx-auto">
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="max-w-lg mx-auto min-h-full">
             <SuccessView
               orderType={lastOrder?.type}
               paymentMethod={lastOrder?.payment}
@@ -2936,6 +2937,7 @@ export function StorePage() {
               storeLogoUrl={branding?.logoUrl || ''}
               storeSlug={storeSlug || ''}
             />
+            </div>
           </div>
         )}
       </main>

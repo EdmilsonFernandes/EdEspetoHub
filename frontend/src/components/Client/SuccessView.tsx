@@ -177,7 +177,7 @@ const OnlinePaymentBlock = ({ onlinePayment, paymentStatus }) => {
               onClick={() => {
                 const url = onlinePayment.paymentLink;
                 if (!url) return;
-                window.open(url, '_system');
+                window.open(url, Capacitor.isNativePlatform() ? '_system' : '_blank');
               }}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#009ee3] py-3.5 text-sm font-black text-white shadow-[0_8px_20px_-10px_rgba(0,158,227,0.6)] transition hover:brightness-105 active:scale-[0.98]"
             >
@@ -326,7 +326,7 @@ export const SuccessView = ({
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={onMyOrders || onNewOrder}
+              onClick={onNewOrder}
               className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] border border-slate-200/80 bg-white text-[#336886] shadow-[0_14px_28px_-18px_rgba(51,104,134,0.3)] transition hover:-translate-y-0.5 hover:bg-sky-50 active:scale-95"
             >
               <ArrowLeft size={18} weight="bold" />
