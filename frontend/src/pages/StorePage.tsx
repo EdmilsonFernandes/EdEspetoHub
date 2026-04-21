@@ -2465,7 +2465,7 @@ export function StorePage() {
   const hasContent = products.length > 0 || !loadError;
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-[#EEF2F7] to-[#E4EBF3] font-sans overflow-x-hidden no-x-scroll ${isNativeRuntime ? 'ds-native-nav-content' : 'pb-28 sm:pb-24'}`}>
+    <div className={`min-h-screen bg-gradient-to-br from-[#EEF2F7] to-[#E4EBF3] font-sans overflow-x-clip no-x-scroll ${isNativeRuntime ? 'ds-native-nav-content' : 'pb-28 sm:pb-24'}`}>
       {isDemo && view === 'menu' && (
         <div className="bg-amber-50 border-b border-amber-200">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-amber-900">
