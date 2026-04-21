@@ -1222,18 +1222,7 @@ export function StorePage() {
       } catch {}
     };
 
-    const checkExpiry = () => {
-      const expiresAt = lastOrder?.onlinePayment?.expiresAt;
-      if (!expiresAt || cancelled) return;
-      if (new Date(expiresAt).getTime() <= Date.now()) {
-        cancelled = true;
-        setLastOrder((prev: any) => prev ? { ...prev, paymentStatus: 'FAILED' } : prev);
-        showToast('PIX expirado. Faça um novo pedido.', 'warning', { durationMs: 4000 });
-        setTimeout(() => setView('menu'), 3000);
-      }
-    };
-
-    const intervalId = setInterval(() => { void poll(); checkExpiry(); }, 3000);
+    const intervalId = setInterval(() => { void poll(); }, 3000);
     return () => {
       cancelled = true;
       clearInterval(intervalId);
