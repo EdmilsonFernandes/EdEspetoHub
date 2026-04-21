@@ -2018,14 +2018,23 @@ export function StorePage() {
       localStorage.setItem(`lastOrderItems:${storeSlug}`, JSON.stringify(lastItemsPayload));
       setLastOrderItems(lastItemsPayload.items);
     }
-    setView(isStoreAdmin ? 'menu' : 'success');
-    // Auto-open MP payment link so user doesn't need to tap a second button
     const mpPaymentLink = createdOrder?.payment?.paymentLink;
-    if (mpPaymentLink && createdOrder?.status === 'awaiting_payment') {
+    const isAwaitingMpPayment = Boolean(mpPaymentLink && createdOrder?.status === 'awaiting_payment');
+    if (isStoreAdmin) {
+      setView('menu');
+    } else if (isAwaitingMpPayment) {
+      // Open MP checkout and navigate straight to orders list — no intermediate screen needed
       window.open(mpPaymentLink, '_system');
+      if (customerSession?.token) {
+        navigate('/cliente/pedidos');
+      } else {
+        setView('success');
+      }
+    } else {
+      setView('success');
     }
     showToast(
-      createdOrder?.status === 'awaiting_payment'
+      isAwaitingMpPayment
         ? 'Pedido registrado! Finalize o pagamento para confirmar.'
         : 'Pedido enviado com sucesso.',
       'success',
