@@ -116,9 +116,13 @@ const getStatusMeta = (status: string, orderType?: string) => {
   const normalized = normalizeStatus(status);
   const normalizedType = String(orderType || '').trim().toLowerCase();
 
-  if (normalized === 'READY' && normalizedType === 'PICKUP') {
+  if (normalized === 'READY') {
+    const readyLabel =
+      normalizedType === 'delivery' ? 'Aguardando entregador' :
+      normalizedType === 'table' ? 'Pedido pronto' :
+      'Disponível para retirada';
     return {
-      label: 'Disponível para retirada',
+      label: readyLabel,
       icon: <Package size={15} weight="duotone" className="text-emerald-600" />,
       toneClass: 'text-emerald-600',
     };
@@ -147,7 +151,6 @@ const getStatusMeta = (status: string, orderType?: string) => {
         toneClass: 'text-amber-600',
       };
     case 'PREPARING':
-    case 'READY':
     case 'READY_FOR_DELIVERY':
     case 'WAITING_FOR_MOTOBOY':
       return {

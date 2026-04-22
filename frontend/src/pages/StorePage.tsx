@@ -62,7 +62,6 @@ const isTerminalRecentOrder = (entry?: { status?: string; paymentStatus?: string
   const paymentStatus = String(entry?.paymentStatus || '').trim().toUpperCase();
   if ([ 'done', 'delivered', 'finished', 'cancelled', 'rejected' ].includes(status)) return true;
   if (!status && paymentStatus === 'PAID') return true;
-  if (paymentStatus === 'PAID' && [ 'ready', 'dispatched' ].includes(status)) return true;
   return false;
 };
 
