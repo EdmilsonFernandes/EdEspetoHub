@@ -313,20 +313,24 @@ export function ProfileDrawer({
                   {[
                     {
                       id: 'client',
-                      label: 'Cliente',
+                      label: 'Usuário',
                       hint: 'Hub',
-                      icon: <UserCircle size={20} weight="duotone" />,
+                      icon: <UserCircle size={22} weight="duotone" />,
                       current: true,
                       ready: true,
+                      cardClass: '',
+                      iconClass: 'bg-white/16 text-white ring-1 ring-white/18 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]',
                       onClick: onClose,
                     },
                     {
                       id: 'store',
                       label: 'Loja',
                       hint: 'Painel',
-                      icon: <Storefront size={20} weight="duotone" />,
+                      icon: <Storefront size={22} weight="duotone" />,
                       current: false,
                       ready: savedAccessProfiles.admin.biometric || savedAccessProfiles.admin.hasSession,
+                      cardClass: 'hover:border-emerald-200 hover:bg-emerald-50/60 hover:text-emerald-800',
+                      iconClass: 'bg-[linear-gradient(135deg,#ecfdf5,#d1fae5)] text-emerald-700 ring-1 ring-emerald-100 shadow-[0_12px_18px_-14px_rgba(16,185,129,0.7)]',
                       onClick: () => {
                         onOpenAdminLogin();
                         onClose();
@@ -336,9 +340,11 @@ export function ProfileDrawer({
                       id: 'motoboy',
                       label: 'Entrega',
                       hint: 'Rotas',
-                      icon: <Motorcycle size={20} weight="duotone" />,
+                      icon: <Motorcycle size={22} weight="duotone" />,
                       current: false,
                       ready: savedAccessProfiles.motoboy.biometric || savedAccessProfiles.motoboy.hasSession,
+                      cardClass: 'hover:border-amber-200 hover:bg-amber-50/70 hover:text-amber-800',
+                      iconClass: 'bg-[linear-gradient(135deg,#fff7ed,#fde68a)] text-amber-700 ring-1 ring-amber-100 shadow-[0_12px_18px_-14px_rgba(245,158,11,0.72)]',
                       onClick: () => {
                         onOpenMotoboyLogin();
                         onClose();
@@ -352,12 +358,10 @@ export function ProfileDrawer({
                       className={`group flex min-h-[5.45rem] flex-col items-center justify-between rounded-[1.15rem] border px-2 py-2.5 text-center transition-all active:scale-[0.97] ${
                         item.current
                           ? 'border-[#336886]/18 bg-[#336886] text-white shadow-[0_16px_28px_-18px_rgba(51,104,134,0.68)]'
-                          : 'border-slate-200/90 bg-white/86 text-slate-700 shadow-[0_12px_22px_-20px_rgba(15,23,42,0.28)] hover:border-[#336886]/18 hover:text-[#336886]'
+                          : `border-slate-200/90 bg-white/86 text-slate-700 shadow-[0_12px_22px_-20px_rgba(15,23,42,0.28)] ${item.cardClass}`
                       }`}
                     >
-                      <span className={`grid h-9 w-9 place-items-center rounded-full ${
-                        item.current ? 'bg-white/16 text-white' : 'bg-slate-100 text-[#336886] group-hover:bg-[#336886]/10'
-                      }`}>
+                      <span className={`grid h-10 w-10 place-items-center rounded-full transition-transform group-active:scale-95 ${item.iconClass}`}>
                         {item.icon}
                       </span>
                       <span className="min-w-0">
