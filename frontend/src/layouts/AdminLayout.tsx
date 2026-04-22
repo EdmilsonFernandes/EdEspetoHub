@@ -68,7 +68,7 @@ export function AdminLayout({
             { id: 'destaques', label: 'Destaques', icon: Star },
             { id: 'cardapio', label: 'Loja Online', icon: ShoppingCart },
             { id: 'pagamentos', label: 'Minha assinatura', icon: CreditCard },
-            { id: 'gateway', label: 'Gateway de pagamento', icon: CreditCard },
+            { id: 'gateway', label: 'Pagamentos Online', icon: CreditCard },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
             { id: 'usuarios', label: 'Usuários', icon: UsersThree },
             { id: 'config', label: 'Configurações', icon: Gear },

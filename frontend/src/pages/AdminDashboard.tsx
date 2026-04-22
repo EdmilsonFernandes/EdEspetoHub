@@ -899,109 +899,162 @@ const GatewayView = ({ storeId }) => {
 
   const isConnected = Boolean(!mpLoading && mpAccount?.connected);
   const oauthMissing = mpAccount?.oauthConfigured === false;
+  const paymentCapabilities = [
+    { label: 'Pix', detail: 'Confirmação online' },
+    { label: 'Crédito', detail: 'Checkout seguro' },
+    { label: 'Débito', detail: 'Cobrança direta' },
+    { label: 'Manual', detail: 'Fallback imediato' },
+  ];
 
   return (
     <div className="space-y-4">
-      {/* Header card */}
-      <div className={`rounded-3xl overflow-hidden border shadow-[0_20px_60px_-40px_rgba(0,158,227,0.35)] ${isConnected ? 'border-[#009ee3]/30' : 'border-slate-200'}`}>
-        {/* Top band */}
-        <div className={`px-5 py-4 flex items-center justify-between gap-4 ${isConnected ? 'bg-gradient-to-r from-[#009ee3]/10 to-white' : 'bg-slate-50'}`}>
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm border border-slate-100">
-              <img src={mercadoPagoLogo} alt="Mercado Pago" className="h-7 w-auto object-contain" />
+      <div className={`overflow-hidden rounded-[1.35rem] border shadow-[0_24px_70px_-46px_rgba(15,23,42,0.34)] ${
+        isConnected ? 'border-[#009ee3]/25 bg-[linear-gradient(145deg,#ffffff_0%,#f4fbff_48%,#ffffff_100%)]' : 'border-slate-200 bg-white'
+      }`}>
+        <div className="grid gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1.08fr)_minmax(300px,0.92fr)] lg:gap-6">
+          <div className="min-w-0 space-y-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-slate-200/80 bg-white shadow-[0_18px_34px_-28px_rgba(15,23,42,0.38)]">
+                  <img src={mercadoPagoLogo} alt="Mercado Pago" className="h-8 w-auto object-contain" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Pagamentos Online</p>
+                  <h3 className="mt-1 text-lg font-black leading-tight text-slate-950">Mercado Pago</h3>
+                  <p className="mt-1 text-xs text-slate-500">Pix, crédito e débito com recebimento na conta da loja.</p>
+                </div>
+              </div>
+
+              <span className={`inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-black ring-1 ${
+                mpLoading ? 'bg-slate-50 text-slate-500 ring-slate-200'
+                : isConnected ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                : oauthMissing ? 'bg-amber-50 text-amber-700 ring-amber-200'
+                : 'bg-slate-50 text-slate-600 ring-slate-200'
+              }`}>
+                <span className={`h-2 w-2 rounded-full ${
+                  mpLoading ? 'bg-slate-400 animate-pulse'
+                  : isConnected ? 'bg-emerald-500'
+                  : oauthMissing ? 'bg-amber-500'
+                  : 'bg-slate-400'
+                }`} />
+                {mpLoading ? 'Verificando' : isConnected ? 'Ativo' : oauthMissing ? 'Pendente' : 'Disponível'}
+              </span>
             </div>
+
+            <div className={`rounded-2xl border px-4 py-4 ${
+              isConnected ? 'border-emerald-100 bg-emerald-50/70' : oauthMissing ? 'border-amber-100 bg-amber-50/70' : 'border-slate-200 bg-slate-50/80'
+            }`}>
+              <div className="flex gap-3">
+                {isConnected ? (
+                  <SealCheck size={24} weight="duotone" className="mt-0.5 shrink-0 text-emerald-600" />
+                ) : oauthMissing ? (
+                  <WarningCircle size={24} weight="duotone" className="mt-0.5 shrink-0 text-amber-600" />
+                ) : (
+                  <PlugsConnected size={24} weight="duotone" className="mt-0.5 shrink-0 text-[#009ee3]" />
+                )}
+                <div className="min-w-0">
+                  <p className={`text-sm font-black ${isConnected ? 'text-emerald-950' : oauthMissing ? 'text-amber-950' : 'text-slate-900'}`}>
+                    {isConnected ? 'Cobrança online ativa' : oauthMissing ? 'OAuth Mercado Pago pendente' : 'Pronto para conectar'}
+                  </p>
+                  <p className={`mt-1 text-xs leading-relaxed ${isConnected ? 'text-emerald-800/80' : oauthMissing ? 'text-amber-800/80' : 'text-slate-500'}`}>
+                    {isConnected
+                      ? 'Novos pedidos podem ser pagos online e o valor cai direto na conta Mercado Pago conectada.'
+                      : oauthMissing
+                        ? 'A conexão ainda precisa ser configurada no servidor. Enquanto isso, a loja segue no modo convencional.'
+                        : 'Ao conectar, o cliente paga no fluxo do pedido e a operação continua com fallback manual quando necessário.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {paymentCapabilities.map((item) => (
+                <div key={item.label} className="rounded-2xl border border-slate-200/80 bg-white/80 px-3 py-3 shadow-[0_12px_24px_-22px_rgba(15,23,42,0.35)]">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle size={15} weight="duotone" className={isConnected ? 'text-emerald-500' : 'text-slate-300'} />
+                    <span className="text-xs font-black text-slate-800">{item.label}</span>
+                  </div>
+                  <p className="mt-1 text-[10px] font-semibold leading-tight text-slate-400">{item.detail}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-4 border-t border-slate-200/80 pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Gateway de pagamento</p>
-              <p className="text-base font-black text-slate-900 leading-tight">Mercado Pago</p>
-            </div>
-          </div>
-          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold shrink-0 ${
-            mpLoading ? 'bg-slate-100 text-slate-500'
-            : isConnected ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
-            : 'bg-slate-100 text-slate-500'
-          }`}>
-            <span className={`h-1.5 w-1.5 rounded-full ${mpLoading ? 'bg-slate-400 animate-pulse' : isConnected ? 'bg-emerald-500' : 'bg-slate-400'}`} />
-            {mpLoading ? 'Verificando…' : isConnected ? 'Conta conectada' : 'Não conectado'}
-          </span>
-        </div>
-
-        {/* Body */}
-        <div className="bg-white px-5 py-4 space-y-4">
-          {isConnected ? (
-            <div className="flex items-start gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
-              <SealCheck size={22} weight="duotone" className="shrink-0 text-emerald-600 mt-0.5" />
-              <div>
-                <p className="text-sm font-black text-emerald-900">Cobrança online ativa</p>
-                <p className="mt-0.5 text-xs text-emerald-700/80 leading-relaxed">
-                  Pix, crédito e débito dos novos pedidos são cobrados online e recebidos direto na sua conta Mercado Pago.
-                </p>
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Status da conta</p>
+              <div className="mt-3 flex items-start gap-3">
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                  isConnected ? 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100' : 'bg-slate-50 text-slate-500 ring-1 ring-slate-200'
+                }`}>
+                  {isConnected ? <SealCheck size={20} weight="duotone" /> : <CreditCard size={20} weight="duotone" />}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-black text-slate-950">
+                    {mpLoading ? 'Verificando conexão' : isConnected ? 'Conta Mercado Pago conectada' : 'Nenhuma conta conectada'}
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                    {isConnected
+                      ? 'A cobrança online está liberada para os próximos pedidos elegíveis.'
+                      : 'Conecte uma conta para liberar checkout online sem mudar a rotina dos pedidos manuais.'}
+                  </p>
+                </div>
               </div>
             </div>
-          ) : (
-            <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-              <p className="text-sm font-bold text-slate-800">Cobrança convencional</p>
-              <p className="mt-0.5 text-xs text-slate-500 leading-relaxed">
-                {oauthMissing
-                  ? 'A conexão OAuth ainda não está configurada no servidor. O checkout segue no modo convencional.'
-                  : 'Sem Mercado Pago, o pedido registra a forma escolhida e a loja cobra como já faz hoje.'}
-              </p>
+
+            <div className="rounded-2xl border border-slate-200 bg-white/90 p-4">
+              {!isConnected ? (
+                <div className="space-y-3">
+                  <button
+                    type="button"
+                    disabled={!storeId || mpActionLoading || oauthMissing || mpLoading}
+                    onClick={async () => {
+                      if (!storeId) return;
+                      setMpActionLoading(true);
+                      try {
+                        const data = await storeService.createMercadoPagoConnectUrl(storeId, window.location.href);
+                        if (data?.authUrl) window.location.href = data.authUrl;
+                      } finally {
+                        setMpActionLoading(false);
+                      }
+                    }}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#009ee3] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-24px_rgba(0,158,227,0.75)] transition hover:bg-[#008dcc] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <PlugsConnected size={18} weight="duotone" />
+                    {mpActionLoading ? 'Abrindo Mercado Pago...' : 'Conectar Mercado Pago'}
+                  </button>
+                  {!oauthMissing && (
+                    <p className="text-center text-[11px] text-slate-400">Autorização feita no ambiente seguro do Mercado Pago.</p>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm font-black text-slate-900">Gerenciar conexão</p>
+                    <p className="mt-1 text-xs leading-relaxed text-slate-500">Ao desconectar, novos pedidos voltam automaticamente ao modo convencional.</p>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={!storeId || mpActionLoading}
+                    onClick={async () => {
+                      if (!storeId) return;
+                      setMpActionLoading(true);
+                      try {
+                        const data = await storeService.disconnectMercadoPago(storeId);
+                        setMpAccount(data);
+                      } finally {
+                        setMpActionLoading(false);
+                      }
+                    }}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-black text-rose-700 shadow-sm transition hover:border-rose-300 hover:bg-rose-50 disabled:opacity-50"
+                  >
+                    <X size={17} weight="bold" />
+                    {mpActionLoading ? 'Desconectando...' : 'Desconectar gateway'}
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {['Pix', 'Crédito', 'Débito', 'Fallback manual'].map((m) => (
-              <div key={m} className="flex items-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
-                <CheckCircle size={13} weight="duotone" className={isConnected ? 'text-emerald-500' : 'text-slate-300'} />
-                <span className="text-[11px] font-semibold text-slate-600">{m}</span>
-              </div>
-            ))}
           </div>
-
-          <div className="flex items-center justify-between gap-3 pt-1">
-            {!isConnected ? (
-              <button
-                type="button"
-                disabled={!storeId || mpActionLoading || oauthMissing || mpLoading}
-                onClick={async () => {
-                  if (!storeId) return;
-                  setMpActionLoading(true);
-                  try {
-                    const data = await storeService.createMercadoPagoConnectUrl(storeId, window.location.href);
-                    if (data?.authUrl) window.location.href = data.authUrl;
-                  } finally {
-                    setMpActionLoading(false);
-                  }
-                }}
-                className="flex-1 rounded-xl bg-[#009ee3] px-4 py-3 text-sm font-black text-white shadow-sm transition hover:bg-[#008dcc] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {mpActionLoading ? 'Abrindo Mercado Pago…' : 'Conectar conta Mercado Pago'}
-              </button>
-            ) : (
-              <>
-                <p className="text-xs text-slate-500 leading-tight">Ao desconectar, novos pedidos voltam ao modo convencional.</p>
-                <button
-                  type="button"
-                  disabled={!storeId || mpActionLoading}
-                  onClick={async () => {
-                    if (!storeId) return;
-                    setMpActionLoading(true);
-                    try {
-                      const data = await storeService.disconnectMercadoPago(storeId);
-                      setMpAccount(data);
-                    } finally {
-                      setMpActionLoading(false);
-                    }
-                  }}
-                  className="shrink-0 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-bold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
-                >
-                  {mpActionLoading ? 'Desconectando…' : 'Desconectar'}
-                </button>
-              </>
-            )}
-          </div>
-          {!isConnected && !oauthMissing && (
-            <p className="text-center text-[11px] text-slate-400">Autorização feita no ambiente seguro do Mercado Pago.</p>
-          )}
         </div>
       </div>
     </div>
@@ -1480,7 +1533,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             { id: 'estoque', label: 'Estoque', icon: Package },
             { id: 'destaques', label: 'Destaques', icon: Star },
             { id: 'pagamentos', label: 'Minha assinatura', icon: CreditCard },
-            { id: 'gateway', label: 'Gateway de pagamento', icon: PlugsConnected },
+            { id: 'gateway', label: 'Pagamentos Online', icon: PlugsConnected },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
             { id: 'usuarios', label: 'Usuários', icon: UsersThree, standalone: true },
             { id: 'config', label: 'Configurações', icon: Gear },
@@ -1504,7 +1557,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       estoque: { title: 'Estoque', subtitle: 'Monitore níveis, alertas e movimentações dos produtos.' },
       destaques: { title: 'Destaques patrocinados', subtitle: 'Solicite e acompanhe campanhas de destaque para o Hub.' },
       pagamentos: { title: 'Minha assinatura', subtitle: 'Controle assinatura, ciclo e eventos de cobrança da loja.' },
-      gateway: { title: 'Gateway de pagamento', subtitle: 'Conecte o Mercado Pago para aceitar Pix, crédito e débito online.' },
+      gateway: { title: 'Pagamentos Online', subtitle: 'Conecte o Mercado Pago para aceitar Pix, crédito e débito online.' },
       config: { title: 'Configurações', subtitle: 'Ajuste identidade, canais, tipos de pedido e horários da operação.' },
       fila: { title: 'Gestor de Pedidos', subtitle: 'Acompanhe pedidos em andamento e a fila da loja em tempo real.' },
       motoboys: { title: 'Entregadores', subtitle: 'Vínculos, documentos, solicitações e status de entrega.' },
@@ -2855,7 +2908,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
         {activeTab === 'gateway' && (
           <FormSection
-            title="Gateway de pagamento"
+            title="Pagamentos Online"
             subtitle="Conecte o Mercado Pago para aceitar Pix, crédito e débito diretamente nos pedidos."
             variant="default"
             className="bg-white premium-card"
