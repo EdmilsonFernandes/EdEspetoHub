@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowSquareOut,
@@ -65,7 +65,6 @@ export function CondominiumDashboard() {
     notes: '',
   });
   const [selectedStoreByEvent, setSelectedStoreByEvent] = useState<Record<string, string>>({});
-  const [inviteNoteByEvent, setInviteNoteByEvent] = useState<Record<string, string>>({});
 
   const load = async () => {
     setLoading(true);
@@ -108,18 +107,14 @@ export function CondominiumDashboard() {
   const approvedStores = Array.isArray(data.approvedStores) ? data.approvedStores : [];
   const pendingRequests = requests.filter((request: any) => String(request?.status || 'pending') === 'pending');
   const nextEvent = events.find((event: any) => event.state === 'live') || events.find((event: any) => event.state === 'upcoming') || events[0];
-  const invitedCount = events.reduce((acc: number, event: any) => acc + (Array.isArray(event?.storeInvitations) ? event.storeInvitations.length : 0), 0);
+  const fairStoresCount = events.reduce((acc: number, event: any) => acc + (Array.isArray(event?.stores) ? event.stores.length : 0), 0);
 
   const metrics = [
     { label: 'Feiras na agenda', value: events.length, tone: 'bg-[#153A4C] text-white' },
     { label: 'Lojas aprovadas', value: approvedStores.length, tone: 'bg-emerald-600 text-white' },
-    { label: 'Convites enviados', value: invitedCount, tone: 'bg-sky-600 text-white' },
+    { label: 'Lojas em feiras', value: fairStoresCount, tone: 'bg-sky-600 text-white' },
     { label: 'Solicitações pendentes', value: pendingRequests.length, tone: 'bg-amber-500 text-white' },
   ];
-
-  const availableStores = useMemo(() => {
-    return stores.filter((store: any) => String(store?.condominiumStatus || '') !== 'approved');
-  }, [stores]);
 
   const logout = () => {
     localStorage.removeItem('condominiumSession');
@@ -159,26 +154,6 @@ export function CondominiumDashboard() {
       startsAt: value,
       endsAt: prev.endsAt || addHoursToLocalDateTime(value, 5),
     }));
-  };
-
-  const inviteStore = async (eventId: string) => {
-    const storeId = selectedStoreByEvent[eventId];
-    if (!storeId) return;
-    setSaving(true);
-    setError('');
-    try {
-      await condominiumService.organizerInviteStore(eventId, {
-        storeId,
-        inviteNote: inviteNoteByEvent[eventId] || '',
-      });
-      setSelectedStoreByEvent((prev) => ({ ...prev, [eventId]: '' }));
-      setInviteNoteByEvent((prev) => ({ ...prev, [eventId]: '' }));
-      await load();
-    } catch (err: any) {
-      setError(err?.message || 'Falha ao convidar loja.');
-    } finally {
-      setSaving(false);
-    }
   };
 
   const confirmStore = async (eventId: string, storeId: string) => {
@@ -245,7 +220,7 @@ export function CondominiumDashboard() {
                   {condominium.name || 'Condomínio'}
                 </h1>
                 <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-slate-600">
-                  Organize feiras, convide comerciantes e acompanhe as solicitações sem depender do Super Admin.
+                  Organize feiras, aprove solicitações de lojistas e escale lojas aprovadas sem depender do Super Admin.
                 </p>
               </div>
             </div>
@@ -297,8 +272,8 @@ export function CondominiumDashboard() {
                   </p>
                 </div>
               </div>
-              <button onClick={() => setActiveTab('lojas')} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#153A4C] px-5 py-3 text-sm font-black text-white">
-                Convidar lojas <CaretRight size={16} weight="bold" />
+              <button onClick={() => setActiveTab('solicitacoes')} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#153A4C] px-5 py-3 text-sm font-black text-white">
+                Ver solicitações <CaretRight size={16} weight="bold" />
               </button>
             </div>
           </section>
@@ -307,7 +282,7 @@ export function CondominiumDashboard() {
         <nav className="grid gap-2 sm:grid-cols-3">
           {[
             { id: 'agenda', label: 'Agenda', helper: 'Criar e acompanhar feiras' },
-            { id: 'lojas', label: 'Lojas', helper: 'Convidar e confirmar presença' },
+            { id: 'lojas', label: 'Lojas', helper: 'Aprovadas e disponíveis' },
             { id: 'solicitacoes', label: 'Solicitações', helper: 'Aprovar pedidos de lojistas' },
           ].map((tab) => {
             const active = activeTab === tab.id;
@@ -376,19 +351,24 @@ export function CondominiumDashboard() {
                     </div>
                     <div className="min-w-[260px] space-y-2">
                       <select value={selectedStoreByEvent[event.id] || ''} onChange={(e) => setSelectedStoreByEvent((prev) => ({ ...prev, [event.id]: e.target.value }))} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold">
-                        <option value="">Escolher loja para convidar</option>
-                        {availableStores.map((store: any) => <option key={store.id} value={store.id}>{store.name}</option>)}
+                        <option value="">Escolher loja aprovada</option>
+                        {approvedStores.map((link: any) => {
+                          const store = link.store || {};
+                          return <option key={store.id || link.storeId} value={store.id || link.storeId}>{store.name || 'Loja aprovada'}</option>;
+                        })}
                       </select>
-                      <input value={inviteNoteByEvent[event.id] || ''} onChange={(e) => setInviteNoteByEvent((prev) => ({ ...prev, [event.id]: e.target.value }))} placeholder="Mensagem opcional" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold" />
-                      <button onClick={() => inviteStore(event.id)} disabled={saving || !selectedStoreByEvent[event.id]} className="w-full rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-black text-white disabled:opacity-50">
-                        Enviar convite
+                      <p className="rounded-2xl bg-slate-50 px-3 py-2 text-xs font-semibold leading-5 text-slate-500">
+                        As lojas aparecem aqui depois que o lojista solicita participação e você aprova em Solicitações.
+                      </p>
+                      <button onClick={() => confirmStore(event.id, selectedStoreByEvent[event.id])} disabled={saving || !selectedStoreByEvent[event.id]} className="w-full rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-black text-white disabled:opacity-50">
+                        Adicionar à feira
                       </button>
                     </div>
                   </div>
 
-                  <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  <div className="mt-4 grid gap-3">
                     <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
-                      <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">Confirmadas</p>
+                      <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">Lojas confirmadas nesta feira</p>
                       <div className="mt-3 space-y-2">
                         {Array.isArray(event.stores) && event.stores.length ? event.stores.map((store: any) => (
                           <div key={store.id} className="flex items-center gap-2 rounded-xl bg-white px-3 py-2">
@@ -397,21 +377,6 @@ export function CondominiumDashboard() {
                             <CheckCircle size={17} weight="fill" className="text-emerald-500" />
                           </div>
                         )) : <p className="text-sm font-semibold text-slate-400">Nenhuma loja confirmada.</p>}
-                      </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
-                      <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">Convites</p>
-                      <div className="mt-3 space-y-2">
-                        {Array.isArray(event.storeInvitations) && event.storeInvitations.length ? event.storeInvitations.map((invite: any) => (
-                          <div key={invite.id} className="flex items-center gap-2 rounded-xl bg-white px-3 py-2">
-                            <img src={resolveAssetUrl(invite.logoUrl || '') || getStoreAvatarUrl(invite.storeSlug, invite.storeName)} alt={invite.storeName} className="h-8 w-8 rounded-lg object-cover" />
-                            <span className="min-w-0 flex-1 truncate text-sm font-bold text-slate-800">{invite.storeName}</span>
-                            <button onClick={() => confirmStore(event.id, invite.storeId)} disabled={saving} className="rounded-xl bg-[#153A4C] px-3 py-2 text-[11px] font-black text-white">
-                              Confirmar
-                            </button>
-                          </div>
-                        )) : <p className="text-sm font-semibold text-slate-400">Nenhum convite pendente.</p>}
                       </div>
                     </div>
                   </div>
@@ -441,7 +406,7 @@ export function CondominiumDashboard() {
                     store.condominiumStatus === 'invited' ? 'bg-sky-100 text-sky-700' :
                     'bg-slate-100 text-slate-500'
                   }`}>
-                    {store.condominiumStatus === 'approved' ? 'Aprovada' : store.condominiumStatus === 'invited' ? 'Convidada' : 'Disponível'}
+                    {store.condominiumStatus === 'approved' ? 'Aprovada' : store.condominiumStatus === 'invited' ? 'Pendente' : 'Disponível'}
                   </span>
                 </div>
               </article>
