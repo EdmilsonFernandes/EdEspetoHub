@@ -14,6 +14,7 @@ import {
   Package,
   Receipt,
   Motorcycle,
+  SealCheck,
   SpinnerGap,
   Storefront,
   Timer,
@@ -25,7 +26,7 @@ import { orderService } from '../services/orderService';
 import { useToast } from '../contexts/ToastContext';
 import { formatCurrency } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
-import { getPaymentProviderMeta, mercadoPagoHorizontal } from '../utils/paymentAssets';
+import { getPaymentProviderMeta } from '../utils/paymentAssets';
 
 const TERMINAL_STATUSES = [ 'DELIVERED', 'CANCELLED', 'FINISHED', 'REJECTED', 'DONE' ];
 const ACTIVE_REFRESH_MS = 10_000;
@@ -286,26 +287,6 @@ function OrderCard({
               <span className={`font-medium ${statusMeta.toneClass}`}>{statusMeta.label}</span>
             </div>
             <p className="mt-1 text-[11px] text-slate-500">{orderDate || formatGroupDate(order.createdAt)}</p>
-            {isPaymentApproved && (
-              <span className="mt-2 flex max-w-full items-center justify-between gap-2.5 rounded-[18px] border border-slate-200/90 bg-[linear-gradient(135deg,#ffffff_0%,#f4fbff_100%)] px-2.5 py-2 shadow-[0_14px_30px_-26px_rgba(0,158,227,0.5)]">
-                <span className="flex min-w-0 items-center gap-2">
-                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
-                    <CheckCircle size={17} weight="fill" />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block truncate text-[11px] font-black uppercase tracking-[0.12em] text-emerald-700">
-                      Pagamento aprovado
-                    </span>
-                    <span className="mt-0.5 block truncate text-[11px] font-semibold text-slate-500">
-                      Confirmado online
-                    </span>
-                  </span>
-                </span>
-                <span className="flex h-7 shrink-0 items-center rounded-full border border-slate-200/80 bg-white px-2.5 shadow-sm">
-                  <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-3.5 w-[78px] object-contain" />
-                </span>
-              </span>
-            )}
             {condominiumOrder?.condominiumName ? (
               <p className="mt-1 inline-flex max-w-full rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">
                 <span className="truncate">{condominiumLabel} • {condominiumOrder.condominiumName}</span>
@@ -317,6 +298,29 @@ function OrderCard({
           <p className="text-sm font-semibold text-slate-900">{formatCurrency(order.total || 0)}</p>
         </div>
       </div>
+
+      {isPaymentApproved && (
+        <div className="mt-3 overflow-hidden rounded-[22px] border border-[#009ee3]/18 bg-[linear-gradient(135deg,#f8fdff_0%,#ffffff_48%,#eefaff_100%)] p-[1px] shadow-[0_18px_34px_-30px_rgba(0,158,227,0.72)]">
+          <div className="flex flex-wrap items-center justify-between gap-2.5 rounded-[21px] bg-white/92 px-3 py-2.5">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[15px] bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
+                <SealCheck size={21} weight="fill" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[12px] font-black leading-tight text-slate-950">
+                  Pagamento aprovado
+                </span>
+                <span className="mt-0.5 block text-[11px] font-semibold leading-tight text-slate-500">
+                  Confirmado com Mercado Pago
+                </span>
+              </span>
+            </div>
+            <span className="ml-auto flex h-11 w-[150px] max-w-full shrink-0 items-center justify-center rounded-[16px] border border-slate-200/85 bg-white px-2.5 shadow-[0_10px_24px_-20px_rgba(10,0,128,0.42)]">
+              <img src="/mercado-pago-horizontal.png" alt="Mercado Pago" className="h-8 w-[124px] object-contain" />
+            </span>
+          </div>
+        </div>
+      )}
 
       {String(order.status || '').toLowerCase() === 'awaiting_payment' && order.paymentLink && (
         <button
