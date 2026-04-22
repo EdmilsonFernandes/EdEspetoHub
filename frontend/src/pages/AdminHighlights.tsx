@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ChartBar, CheckSquare, ClipboardText, CreditCard, Gear, Package, Plus, Scooter, Star, UsersThree } from '@phosphor-icons/react';
+import { BookOpen, ChartBar, CheckSquare, ClipboardText, CreditCard, Gear, Package, PlugsConnected, Plus, Scooter, Star, UsersThree } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
@@ -128,8 +128,10 @@ export function AdminHighlights() {
             { id: 'avaliacoes', label: 'Avaliações', icon: Star },
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'estoque', label: 'Estoque', icon: Package },
+            { id: 'cardapio', label: 'Loja Online', icon: BookOpen },
             { id: 'destaques', label: 'Destaques', icon: Star },
-            { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
+            { id: 'pagamentos', label: 'Minha assinatura', icon: CreditCard },
+            { id: 'gateway', label: 'Gateway de pagamento', icon: PlugsConnected },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
             { id: 'usuarios', label: 'Usuários', icon: UsersThree },
             { id: 'config', label: 'Configurações', icon: Gear },
