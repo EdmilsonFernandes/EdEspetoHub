@@ -168,6 +168,17 @@ export function ProfileDrawer({
     };
   }, [isOpen]);
 
+  const getAccessStateLabel = (profile: { biometric: boolean; hasSession: boolean }) => {
+    if (profile.biometric) return 'Biometria ativa';
+    if (profile.hasSession) return 'Sessão salva';
+    return 'Entrar';
+  };
+  const getCompactAccessStateLabel = (profile: { biometric: boolean; hasSession: boolean }) => {
+    if (profile.biometric) return 'Biometria';
+    if (profile.hasSession) return 'Sessão salva';
+    return 'Entrar';
+  };
+
   const actions: DrawerAction[] = isLogged
     ? [
         { id: 'account', label: 'Minha Conta', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-[#336886]', bgColor: 'bg-[#336886]/10' },
@@ -187,7 +198,7 @@ export function ProfileDrawer({
       id: 'client',
       title: 'Cliente',
       subtitle: savedAccessProfiles.customer.biometric
-        ? 'Biometria pronta neste aparelho'
+        ? 'Entrar com biometria neste aparelho'
         : savedAccessProfiles.customer.hasSession
           ? savedAccessProfiles.customer.email || savedAccessProfiles.customer.name
           : 'Entrar para pedir e acompanhar',
@@ -200,7 +211,7 @@ export function ProfileDrawer({
       id: 'store',
       title: 'Lojista',
       subtitle: savedAccessProfiles.admin.biometric
-        ? 'Biometria pronta neste aparelho'
+        ? 'Entrar com biometria neste aparelho'
         : savedAccessProfiles.admin.hasSession
           ? savedAccessProfiles.admin.email || savedAccessProfiles.admin.name
           : 'Entrar na operação da loja',
@@ -212,13 +223,44 @@ export function ProfileDrawer({
       id: 'motoboy',
       title: 'Entregador',
       subtitle: savedAccessProfiles.motoboy.biometric
-        ? 'Biometria pronta neste aparelho'
+        ? 'Entrar com biometria neste aparelho'
         : savedAccessProfiles.motoboy.hasSession
           ? savedAccessProfiles.motoboy.email || savedAccessProfiles.motoboy.name
           : 'Entrar no painel de entregas',
       icon: <Motorcycle size={24} weight="duotone" />,
       action: onOpenMotoboyLogin,
       ready: savedAccessProfiles.motoboy.biometric || savedAccessProfiles.motoboy.hasSession,
+    },
+  ];
+  const visibleAccessProfiles = isLogged ? accessProfiles.filter((item) => item.id !== 'client') : accessProfiles;
+  const quickSwitchAccess = [
+    {
+      id: 'store',
+      label: 'Loja',
+      description: 'Painel do lojista',
+      state: getCompactAccessStateLabel(savedAccessProfiles.admin),
+      icon: <Storefront size={23} weight="duotone" />,
+      shell: 'border-emerald-100 bg-[linear-gradient(135deg,#f6fff9_0%,#eef9f3_100%)] text-emerald-950 shadow-[0_14px_28px_-24px_rgba(16,185,129,0.42)]',
+      iconClass: 'bg-white/82 text-emerald-700 ring-1 ring-emerald-100',
+      stateClass: savedAccessProfiles.admin.biometric || savedAccessProfiles.admin.hasSession ? 'text-emerald-700' : 'text-slate-500',
+      onClick: () => {
+        onOpenAdminLogin();
+        onClose();
+      },
+    },
+    {
+      id: 'motoboy',
+      label: 'Entrega',
+      description: 'Rotas e coletas',
+      state: getCompactAccessStateLabel(savedAccessProfiles.motoboy),
+      icon: <Motorcycle size={23} weight="duotone" />,
+      shell: 'border-amber-100 bg-[linear-gradient(135deg,#fffdf3_0%,#fbf5dc_100%)] text-amber-950 shadow-[0_14px_28px_-24px_rgba(245,158,11,0.42)]',
+      iconClass: 'bg-white/80 text-amber-700 ring-1 ring-amber-100',
+      stateClass: savedAccessProfiles.motoboy.biometric || savedAccessProfiles.motoboy.hasSession ? 'text-amber-700' : 'text-slate-500',
+      onClick: () => {
+        onOpenMotoboyLogin();
+        onClose();
+      },
     },
   ];
 
@@ -299,78 +341,30 @@ export function ProfileDrawer({
               </div>
               <section className="relative overflow-hidden rounded-[1.55rem] border border-[#336886]/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(243,248,251,0.96)_100%)] p-3.5 shadow-[0_18px_34px_-26px_rgba(51,104,134,0.24)]">
                 <div className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-[#336886]/10 blur-3xl" />
-                <div className="relative mb-3 flex items-end justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Acesso rápido</p>
-                    <p className="mt-0.5 text-sm font-black leading-tight text-slate-950">Escolha como entrar</p>
-                  </div>
-                  <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-emerald-700 ring-1 ring-emerald-100">
-                    1 toque
-                  </span>
+                <div className="relative mb-3">
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Alternar acesso</p>
+                  <p className="mt-0.5 text-sm font-black leading-tight text-slate-950">Loja ou entrega</p>
+                  <p className="mt-1 text-[11px] font-semibold leading-snug text-slate-500">Sua conta de cliente continua conectada no Hub.</p>
                 </div>
 
-                <div className="relative grid grid-cols-3 gap-2">
-                  {[
-                    {
-                      id: 'client',
-                      label: 'Usuário',
-                      hint: 'Hub',
-                      icon: <UserCircle size={22} weight="duotone" />,
-                      current: true,
-                      ready: true,
-                      cardClass: '',
-                      iconClass: 'bg-white/16 text-white ring-1 ring-white/18 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]',
-                      onClick: onClose,
-                    },
-                    {
-                      id: 'store',
-                      label: 'Loja',
-                      hint: 'Painel',
-                      icon: <Storefront size={22} weight="duotone" />,
-                      current: false,
-                      ready: savedAccessProfiles.admin.biometric || savedAccessProfiles.admin.hasSession,
-                      cardClass: 'hover:border-emerald-200 hover:bg-emerald-50/60 hover:text-emerald-800',
-                      iconClass: 'bg-[linear-gradient(135deg,#ecfdf5,#d1fae5)] text-emerald-700 ring-1 ring-emerald-100 shadow-[0_12px_18px_-14px_rgba(16,185,129,0.7)]',
-                      onClick: () => {
-                        onOpenAdminLogin();
-                        onClose();
-                      },
-                    },
-                    {
-                      id: 'motoboy',
-                      label: 'Entrega',
-                      hint: 'Rotas',
-                      icon: <Motorcycle size={22} weight="duotone" />,
-                      current: false,
-                      ready: savedAccessProfiles.motoboy.biometric || savedAccessProfiles.motoboy.hasSession,
-                      cardClass: 'hover:border-amber-200 hover:bg-amber-50/70 hover:text-amber-800',
-                      iconClass: 'bg-[linear-gradient(135deg,#fff7ed,#fde68a)] text-amber-700 ring-1 ring-amber-100 shadow-[0_12px_18px_-14px_rgba(245,158,11,0.72)]',
-                      onClick: () => {
-                        onOpenMotoboyLogin();
-                        onClose();
-                      },
-                    },
-                  ].map((item) => (
+                <div className="relative grid gap-2">
+                  {quickSwitchAccess.map((item) => (
                     <button
                       key={item.id}
                       type="button"
                       onClick={item.onClick}
-                      className={`group flex min-h-[5.45rem] flex-col items-center justify-between rounded-[1.15rem] border px-2 py-2.5 text-center transition-all active:scale-[0.97] ${
-                        item.current
-                          ? 'border-[#336886]/18 bg-[#336886] text-white shadow-[0_16px_28px_-18px_rgba(51,104,134,0.68)]'
-                          : `border-slate-200/90 bg-white/86 text-slate-700 shadow-[0_12px_22px_-20px_rgba(15,23,42,0.28)] ${item.cardClass}`
-                      }`}
+                      className={`group flex min-h-[4.5rem] w-full items-center gap-3 rounded-[1.2rem] border px-3 py-2.5 text-left transition-all active:scale-[0.98] ${item.shell}`}
                     >
-                      <span className={`grid h-10 w-10 place-items-center rounded-full transition-transform group-active:scale-95 ${item.iconClass}`}>
+                      <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-[1rem] shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] transition-transform group-active:scale-95 ${item.iconClass}`}>
                         {item.icon}
                       </span>
-                      <span className="min-w-0">
-                        <span className="block truncate text-[11px] font-black leading-tight">{item.label}</span>
-                        <span className={`mt-0.5 block truncate text-[9px] font-black uppercase tracking-[0.12em] ${
-                          item.current ? 'text-white/62' : item.ready ? 'text-emerald-600' : 'text-slate-400'
-                        }`}>
-                          {item.current ? 'Atual' : item.ready ? 'Pronto' : item.hint}
-                        </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[14px] font-black leading-tight">{item.label}</span>
+                        <span className="mt-0.5 block truncate text-[11px] font-semibold text-slate-600">{item.description}</span>
+                      </span>
+                      <span className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/70 bg-white/72 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] shadow-sm">
+                        <span className={item.stateClass}>{item.state}</span>
+                        <CaretRight size={12} weight="bold" className="text-slate-400 transition-transform group-active:translate-x-0.5" />
                       </span>
                     </button>
                   ))}
@@ -516,11 +510,11 @@ export function ProfileDrawer({
               <div className="min-w-0 pr-2">
                 <p className="text-[9px] font-black uppercase tracking-[0.28em] text-slate-500">Escolha seu acesso</p>
                 <h3 className="mt-1 text-[1.18rem] font-black tracking-[-0.035em] text-slate-950">
-                  {isLogged ? 'Trocar perfil' : accessPickerMode === 'register' ? 'Primeiro acesso' : 'Entrar'}
+                  {isLogged ? 'Abrir outro acesso' : accessPickerMode === 'register' ? 'Primeiro acesso' : 'Entrar'}
                 </h3>
                 <p className="mt-1.5 text-[12px] font-semibold leading-relaxed text-slate-500">
                   {isLogged
-                    ? 'Cliente continua no Hub. Lojista e entregador abrem suas áreas de operação.'
+                    ? 'Sua sessão de cliente fica ativa. Escolha apenas a área operacional que deseja abrir.'
                     : accessPickerMode === 'register'
                       ? 'Escolha qual conta deseja criar e siga o fluxo certo para começar.'
                       : 'Entre com sua conta e acesse a área certa do app.'}
@@ -538,8 +532,15 @@ export function ProfileDrawer({
 
             {(isLogged || accessPickerMode === 'login') ? (
               <div className="relative grid gap-3">
-                {accessProfiles.map((item) => {
+                {visibleAccessProfiles.map((item) => {
                   const classes = getAccessCardClasses(item);
+                  const stateLabel = item.current
+                    ? 'Atual'
+                    : item.id === 'client'
+                      ? getAccessStateLabel(savedAccessProfiles.customer)
+                      : item.id === 'store'
+                        ? getAccessStateLabel(savedAccessProfiles.admin)
+                        : getAccessStateLabel(savedAccessProfiles.motoboy);
                   return (
                     <button
                       key={item.id}
@@ -558,15 +559,9 @@ export function ProfileDrawer({
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <p className={`truncate text-[14px] font-black leading-tight ${classes.title}`}>{item.title}</p>
-                          {item.current ? (
-                            <span className={`inline-flex shrink-0 rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.16em] ${classes.badge}`}>
-                              Atual
-                            </span>
-                          ) : item.ready ? (
-                            <span className={`inline-flex shrink-0 rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.16em] ${classes.badge}`}>
-                              Pronto
-                            </span>
-                          ) : null}
+                          <span className={`inline-flex shrink-0 rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.16em] ${classes.badge}`}>
+                            {stateLabel}
+                          </span>
                         </div>
                         <p className={`mt-1 truncate text-[10.5px] font-semibold ${classes.subtitle}`}>{item.subtitle}</p>
                       </div>
