@@ -175,7 +175,7 @@ export class SubscriptionService {
    */
   async createRenewalPayment(storeId: string, input: RenewSubscriptionDto, authStoreId?: string) {
     this.log.info('Create renewal payment', { storeId, planId: input.planId, paymentMethod: input.paymentMethod });
-    const store = await this.storeRepository.findById(storeId);
+    const store = await this.storeRepository.findByIdWithOwner(storeId);
     if (!store) throw new AppError('STORE-001', 404);
     if (authStoreId && store.id !== authStoreId) throw new AppError('AUTH-003', 403);
 
