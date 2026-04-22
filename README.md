@@ -185,11 +185,7 @@ Opcional (debug): `SSM_LOG_KEYS=true` para logar quais chaves foram aplicadas (s
 Opcional (debug): `SSM_LOG_OVERRIDES=false` para ocultar overrides locais (padrao loga).
 
 Exemplo de JSON no SSM:
-```
-
-Verificacao rapida:
-- `aws ssm get-parameter --name /janocaminho/prod --with-decryption --region us-east-2`
-- Ao subir a API, procure o log `SSM env loaded` (mostra o nome do parametro e a quantidade de chaves).
+```json
 {
   "JWT_SECRET": "secret",
   "APP_BASE_URL": "https://www.janocaminho.com.br",
@@ -198,6 +194,11 @@ Verificacao rapida:
   "PGUSER": "postgres",
   "PGPASSWORD": "senha",
   "PGDATABASE": "espetinho",
+  "DB_POOL_MAX": "10",
+  "DB_POOL_IDLE_TIMEOUT_MS": "30000",
+  "DB_POOL_CONNECTION_TIMEOUT_MS": "5000",
+  "DB_STATEMENT_TIMEOUT_MS": "15000",
+  "DB_IDLE_IN_TRANSACTION_TIMEOUT_MS": "10000",
   "MP_ACCESS_TOKEN": "xxx",
   "MP_PUBLIC_KEY": "xxx",
   "MP_WEBHOOK_SECRET": "xxx",
@@ -209,6 +210,10 @@ Verificacao rapida:
   "EMAIL_FROM": "Jano Caminho <contato@janocaminho.com.br>"
 }
 ```
+
+Verificacao rapida:
+- `aws ssm get-parameter --name /janocaminho/prod --with-decryption --region us-east-2`
+- Ao subir a API, procure o log `SSM env loaded` (mostra o nome do parametro e a quantidade de chaves).
 
 Crie `frontend/.env`:
 
@@ -567,6 +572,109 @@ Isso garante que o rodapé/console de versões mostrem exatamente a build em pro
 Postgres (producao):
 - Defina `POSTGRES_VOLUME_NAME` em `.env.prod` para fixar o volume e evitar "sumir o banco" ao mudar pasta/projeto.
 - O deploy via `scripts/compose-prod.sh` usa `docker-compose.prod.yml` e trata o volume do Postgres como **external** (nao e removido por `docker compose down -v`).
+
+### PostgreSQL: pool de conexoes da API
+
+A API usa TypeORM com `pg` e agora o pool de conexoes com o PostgreSQL e configuravel por ambiente. Isso evita que a API abra conexoes demais em pico, reaproveita conexoes existentes e coloca limite de tempo para consultas ou transacoes travadas.
+
+Configuracao usada em producao:
+
+```json
+{
+  "DB_POOL_MAX": "10",
+  "DB_POOL_IDLE_TIMEOUT_MS": "30000",
+  "DB_POOL_CONNECTION_TIMEOUT_MS": "5000",
+  "DB_STATEMENT_TIMEOUT_MS": "15000",
+  "DB_IDLE_IN_TRANSACTION_TIMEOUT_MS": "10000"
+}
+```
+
+O que cada variavel faz:
+
+- `DB_POOL_MAX`: maximo de conexoes abertas por **cada container da API**. O padrao do projeto e `10`.
+- `DB_POOL_IDLE_TIMEOUT_MS`: tempo para fechar conexao ociosa no pool. `30000` = 30 segundos.
+- `DB_POOL_CONNECTION_TIMEOUT_MS`: tempo maximo esperando uma conexao livre antes de falhar. `5000` = 5 segundos.
+- `DB_STATEMENT_TIMEOUT_MS`: tempo maximo de uma query no PostgreSQL. `15000` = 15 segundos.
+- `DB_IDLE_IN_TRANSACTION_TIMEOUT_MS`: tempo maximo de uma transacao parada/aberta sem executar nada. `10000` = 10 segundos.
+
+Por que isso melhora a performance percebida:
+
+- Reduz criacao/destruicao desnecessaria de conexoes.
+- Evita que picos de acesso derrubem o banco abrindo conexoes sem limite.
+- Faz queries travadas falharem mais rapido, liberando recurso para os proximos pedidos.
+- Ajuda a API a responder de forma mais previsivel quando o volume de usuarios aumenta.
+
+Importante: isso melhora estabilidade e tempo de resposta, mas nao aumenta a capacidade do banco sozinho. Se o trafego crescer muito, ainda precisa monitorar CPU, memoria, I/O, queries lentas e tamanho do Postgres.
+
+#### Como calcular com mais de uma API
+
+`DB_POOL_MAX` vale por instancia/container. Entao o total reservado pela API e:
+
+```txt
+total_api_connections = quantidade_de_apis * DB_POOL_MAX
+```
+
+Com Postgres em `max_connections = 100`, reserve conexoes para pgAdmin, scripts, backups, migrations e acesso manual. Uma regra segura:
+
+```txt
+quantidade_de_apis * DB_POOL_MAX <= max_connections - 20
+```
+
+Exemplos:
+
+| Instancias de API | DB_POOL_MAX | Conexoes maximas da API |
+| --- | ---: | ---: |
+| 1 | 10 | 10 |
+| 2 | 10 | 20 |
+| 4 | 10 | 40 |
+| 4 | 20 | 80 |
+
+Para uma EC2 pequena e um unico Postgres, comece com `DB_POOL_MAX=10`. Se criar mais containers da API, mantenha `10` ou reduza por instancia antes de aumentar. So aumente quando o banco tiver folga real e houver evidencia de fila esperando conexao.
+
+#### Onde configurar em producao
+
+Em producao, esses valores ficam no AWS SSM Parameter Store dentro do JSON do parametro do ambiente, por exemplo `/chamanoespeto/prod` ou `/janocaminho/prod`.
+
+Exemplo para conferir o valor atual:
+
+```bash
+aws ssm get-parameter \
+  --name /chamanoespeto/prod \
+  --with-decryption \
+  --region us-east-2 \
+  --query Parameter.Value \
+  --output text
+```
+
+Depois de alterar o SSM, recrie a API para ela reler as variaveis:
+
+```bash
+git pull
+./scripts/deploy-api.sh
+```
+
+O script `deploy-api.sh` constroi o codigo local que esta no EC2 depois do `git pull`, recria o container da API com `--force-recreate` e mostra o commit local que esta sendo implantado.
+
+#### Como validar no servidor
+
+Conferir se as variaveis chegaram dentro do container:
+
+```bash
+docker exec chamanoespeto-api sh -lc 'node -e "console.log({
+  DB_POOL_MAX: process.env.DB_POOL_MAX,
+  DB_POOL_IDLE_TIMEOUT_MS: process.env.DB_POOL_IDLE_TIMEOUT_MS,
+  DB_POOL_CONNECTION_TIMEOUT_MS: process.env.DB_POOL_CONNECTION_TIMEOUT_MS,
+  DB_STATEMENT_TIMEOUT_MS: process.env.DB_STATEMENT_TIMEOUT_MS,
+  DB_IDLE_IN_TRANSACTION_TIMEOUT_MS: process.env.DB_IDLE_IN_TRANSACTION_TIMEOUT_MS
+})"'
+```
+
+Conferir conexoes no Postgres:
+
+```bash
+docker exec chamanoespeto-postgres psql -U postgres -d espetinho -c "show max_connections;"
+docker exec chamanoespeto-postgres psql -U postgres -d espetinho -c "select state, count(*) from pg_stat_activity group by state order by state;"
+```
 
 Limpeza segura de disco (quando der ENOSPC):
 
@@ -1096,10 +1204,22 @@ Crie um arquivo `.env.prod` com `FRONTEND_PORT=80` e suba assim:
 docker compose --env-file .env.prod up --build -d
 ```
 
-### Deploy sem build no servidor (recomendado para EC2 pequeno)
+### Deploy atual no EC2: git pull + build local
+
+No ambiente atual, o deploy nao depende de subir imagem no registry. O fluxo e entrar no EC2, atualizar o codigo pelo Git e recriar os containers necessarios:
+
+```bash
+git pull
+./scripts/deploy-frontend.sh
+./scripts/deploy-api.sh
+```
+
+O `deploy-api.sh` usa o codigo local recem-atualizado, executa `docker compose up -d --build --no-deps --force-recreate api` e imprime o commit que esta sendo implantado. Isso ajuda a confirmar que a API subiu com o codigo novo.
+
+### Deploy sem build no servidor (opcional para EC2 pequeno)
 
 Em instâncias pequenas (ex: `t3.small`) o `docker compose up --build` pode travar o SSH por falta de CPU/RAM/créditos.
-Para evitar isso, o projeto publica imagens no **GHCR** via GitHub Actions e o servidor apenas **puxa** as imagens.
+Como alternativa, o projeto pode publicar imagens no **GHCR** via GitHub Actions e o servidor apenas **puxar** as imagens.
 
 1) Verifique se o workflow `.github/workflows/publish-ghcr.yml` está rodando após `git push` (GitHub Actions).
 
@@ -1135,7 +1255,7 @@ Execução produção (porta 80):
 sh scripts/compose-prod.sh
 ```
 
-Execução produção (pull-only, sem build):
+Execução produção opcional (pull-only, sem build):
 
 ```bash
 sh scripts/compose-prod-pull.sh
