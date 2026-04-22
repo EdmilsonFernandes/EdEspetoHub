@@ -190,12 +190,21 @@ export function PaymentPage() {
                 <p className="text-xs text-gray-500 uppercase tracking-[0.25em]">Pagamento</p>
               </div>
             </button>
-            <button
-              onClick={() => navigate('/create')}
-              className="px-3 py-2 sm:px-4 text-sm rounded-full border border-slate-200 text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              Criar outra loja
-            </button>
+            {storeSlug ? (
+              <button
+                onClick={() => navigate(`/admin?slug=${encodeURIComponent(storeSlug)}`)}
+                className="px-3 py-2 sm:px-4 text-sm rounded-full border border-slate-200 text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                ← Voltar ao painel
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate('/create')}
+                className="px-3 py-2 sm:px-4 text-sm rounded-full border border-slate-200 text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Criar outra loja
+              </button>
+            )}
           </div>
         </div>
       </header>
