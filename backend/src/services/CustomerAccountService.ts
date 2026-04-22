@@ -685,7 +685,7 @@ async setDefaultAddress(userId: string, addressId: string) {
    *
    * @author Edmilson Lopes
    */
-  async listOrders(userId: string) {
+  async listOrders(userId: string, { limit = 10, offset = 0 }: { limit?: number; offset?: number } = {}) {
     // Silently cancel awaiting_payment orders whose MP payment already expired
     try {
       const expired = await AppDataSource.query(
@@ -712,11 +712,12 @@ async setDefaultAddress(userId: string, addressId: string) {
       }
     } catch { /* non-blocking — never break list */ }
 
-    const rows = await AppDataSource.getRepository(Order).find({
+    const [rows, total] = await AppDataSource.getRepository(Order).findAndCount({
       where: { customerUserId: userId },
       relations: [ 'store', 'store.settings', 'store.owner', 'items', 'items.product', 'shipment' ],
       order: { createdAt: 'DESC' },
-      take: 100,
+      take: limit,
+      skip: offset,
     });
 
     // Fetch paymentLink for awaiting_payment orders so the client can show a direct pay button
@@ -735,7 +736,7 @@ async setDefaultAddress(userId: string, addressId: string) {
       }
     }
 
-    return rows.map((order) => ({
+    const data = rows.map((order) => ({
       id: order.id,
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
@@ -803,6 +804,7 @@ async setDefaultAddress(userId: string, addressId: string) {
         imageUrl: item.product?.imageUrl || null,
       })),
     }));
+    return { data, total, hasMore: offset + limit < total };
   }
 
   /**

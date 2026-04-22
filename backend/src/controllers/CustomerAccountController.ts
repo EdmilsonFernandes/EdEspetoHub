@@ -211,8 +211,10 @@ static async deleteAddress(req: Request, res: Response) {
 static async listOrders(req: Request, res: Response) {
     try {
       if (!req.auth?.sub) throw new AppError('AUTH-001', 401);
-      const rows = await service.listOrders(req.auth.sub);
-      return res.json(rows);
+      const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 50);
+      const offset = Math.max(Number(req.query.offset) || 0, 0);
+      const result = await service.listOrders(req.auth.sub, { limit, offset });
+      return res.json(result);
     } catch (error: any) {
       return respondWithError(req, res, error, 400);
     }

@@ -460,6 +460,8 @@ export function ClientOrders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [orders, setOrders] = useState<any[]>([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'finished' | 'cancelled'>('all');
   const [orderDetails, setOrderDetails] = useState<Record<string, any>>({});
   const [cancelModal, setCancelModal] = useState<{ order: any | null; reason: string; submitting: boolean }>({
@@ -470,6 +472,9 @@ export function ClientOrders() {
   const requestIdRef = useRef(0);
   const inFlightRef = useRef(false);
   const prevAwaitingIdsRef = useRef<Set<string>>(new Set());
+  const offsetRef = useRef(0);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const PAGE_SIZE = 10;
 
   const refreshActiveOrderDetails = useCallback(async (targetOrders: any[]) => {
     const active = (Array.isArray(targetOrders) ? targetOrders : []).filter(
@@ -511,25 +516,52 @@ export function ClientOrders() {
     }
 
     try {
-      const ordersData = await customerAccountService.listOrders();
+      const result = await customerAccountService.listOrders({ limit: PAGE_SIZE, offset: 0 });
       if (requestId !== requestIdRef.current) return;
-      const normalized = Array.isArray(ordersData) ? ordersData : [];
-      setOrders(normalized);
-      if (!options?.silent) {
-        setLoading(false);
+      const { data = [], hasMore: more = false } = result || {};
+
+      if (options?.silent) {
+        // Merge first page into existing state: update known orders, prepend genuinely new ones
+        setOrders((prev) => {
+          const newMap = new Map((data as any[]).map((o: any) => [o.id, o]));
+          const updated = prev.map((o: any) => (newMap.has(o.id) ? newMap.get(o.id) : o));
+          const existingIds = new Set(prev.map((o: any) => o.id));
+          const newItems = (data as any[]).filter((o: any) => !existingIds.has(o.id));
+          return [...newItems, ...updated];
+        });
+      } else {
+        setOrders(data);
+        setHasMore(more);
+        offsetRef.current = (data as any[]).length;
       }
-      void refreshActiveOrderDetails(normalized);
+
+      if (!options?.silent) setLoading(false);
+      void refreshActiveOrderDetails(data);
     } catch (e: any) {
       if (requestId !== requestIdRef.current) return;
       setError(e?.message || 'Falha ao carregar pedidos.');
       if (!options?.silent) showToast(e?.message || 'Falha ao carregar pedidos.', 'error');
     } finally {
-      if (requestId === requestIdRef.current) {
-        setLoading(false);
-      }
+      if (requestId === requestIdRef.current) setLoading(false);
       inFlightRef.current = false;
     }
   }, [refreshActiveOrderDetails, showToast]);
+
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const result = await customerAccountService.listOrders({ limit: PAGE_SIZE, offset: offsetRef.current });
+      const { data = [], hasMore: more = false } = result || {};
+      setOrders((prev) => [...prev, ...(data as any[])]);
+      setHasMore(more);
+      offsetRef.current += (data as any[]).length;
+    } catch {
+      // ignore — user can scroll again to retry
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [loadingMore, hasMore]);
 
   useEffect(() => {
     document.title = 'Meus Pedidos | Já no Caminho';
@@ -592,6 +624,18 @@ export function ClientOrders() {
       document.removeEventListener('visibilitychange', refreshIfVisible);
     };
   }, [activeOrderIds, activeOrders.length, loadOrders]);
+
+  useEffect(() => {
+    if (!hasMore) return;
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      (entries) => { if (entries[0]?.isIntersecting) void loadMore(); },
+      { rootMargin: '160px' }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, loadMore]);
 
   // Detect payment confirmation: show toast when any awaiting_payment order transitions to a paid status
   useEffect(() => {
@@ -784,6 +828,12 @@ export function ClientOrders() {
                     </div>
                   </section>
                 ))}
+                <div ref={sentinelRef} className="h-1" />
+                {loadingMore && (
+                  <div className="flex justify-center py-4">
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" />
+                  </div>
+                )}
               </div>
             )}
           </section>

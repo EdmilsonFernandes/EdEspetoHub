@@ -37,8 +37,11 @@ export const customerAccountService = {
     return apiClient.post('/auth/forgot-password', { email });
   },
 
-  listOrders() {
-    return apiClient.get('/customer/orders');
+  listOrders(params?: { limit?: number; offset?: number }) {
+    const qs = params
+      ? `?${new URLSearchParams({ limit: String(params.limit ?? 10), offset: String(params.offset ?? 0) }).toString()}`
+      : '';
+    return apiClient.get(`/customer/orders${qs}`);
   },
 
   cancelOrder(orderId: string, payload: { reason: string }) {

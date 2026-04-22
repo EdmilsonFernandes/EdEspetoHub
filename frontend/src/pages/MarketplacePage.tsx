@@ -1725,8 +1725,8 @@ export function MarketplacePage() {
       return;
     }
     try {
-      const orders = await customerAccountService.listOrders();
-      const active = (orders || []).filter((o: any) => {
+      const result = await customerAccountService.listOrders({ limit: 20 });
+      const active = ((result?.data) || []).filter((o: any) => {
         const status = String(o.status || '').toLowerCase();
         const createdAt = new Date(o?.createdAt || 0).getTime();
         const isRecentEnough = Number.isFinite(createdAt) ? (Date.now() - createdAt) < ACTIVE_ORDER_ALERT_MAX_AGE_MS : true;
