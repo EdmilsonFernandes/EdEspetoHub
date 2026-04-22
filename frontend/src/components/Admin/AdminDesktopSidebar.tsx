@@ -203,31 +203,38 @@ export function AdminDesktopSidebar({
               return renderLogoutItem();
             }
             if (section.type === 'item') return renderNavItem(section.item);
-            const isOpen = Boolean(openGroups?.[section.id]);
+            const isSingleItem = section.children.length === 1;
+            const isOpen = isSingleItem || Boolean(openGroups?.[section.id]);
             const hasActiveChild = section.children.some((child: SidebarItem) => child.id === activeId);
             return (
               <div key={section.id} className="space-y-1">
-                <button
-                  type="button"
-                  onClick={() => setOpenGroups((prev) => ({ ...prev, [section.id]: !isOpen }))}
-                  className={`w-full min-h-11 rounded-[1rem] border px-3 text-left text-[12px] font-black transition flex items-center justify-between ${
-                    hasActiveChild
-                      ? 'border-[#336886]/12 bg-white/86 text-slate-950 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.28)]'
-                      : 'border-transparent bg-transparent text-slate-500 hover:border-white/80 hover:bg-white/80 hover:text-slate-950'
-                  }`}
-                  aria-expanded={isOpen}
-                  aria-controls={`sidebar-group-${section.id}`}
-                >
-                  <span>{section.label}</span>
-                  <CaretDown
-                    size={14}
-                    weight="bold"
-                    className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-                  />
-                </button>
+                {isSingleItem ? (
+                  <p className={`px-3 text-[11px] font-black uppercase tracking-[0.18em] ${hasActiveChild ? 'text-[#336886]' : 'text-slate-400'}`}>
+                    {section.label}
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setOpenGroups((prev) => ({ ...prev, [section.id]: !isOpen }))}
+                    className={`w-full min-h-11 rounded-[1rem] border px-3 text-left text-[12px] font-black transition flex items-center justify-between ${
+                      hasActiveChild
+                        ? 'border-[#336886]/12 bg-white/86 text-slate-950 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.28)]'
+                        : 'border-transparent bg-transparent text-slate-500 hover:border-white/80 hover:bg-white/80 hover:text-slate-950'
+                    }`}
+                    aria-expanded={isOpen}
+                    aria-controls={`sidebar-group-${section.id}`}
+                  >
+                    <span>{section.label}</span>
+                    <CaretDown
+                      size={14}
+                      weight="bold"
+                      className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+                )}
                 {isOpen && (
-                  <div id={`sidebar-group-${section.id}`} className="space-y-1 ml-2 pl-2.5 border-l border-[#336886]/12">
-                    {section.children.map((child: SidebarItem) => renderNavItem(child, true))}
+                  <div id={`sidebar-group-${section.id}`} className={`space-y-1 ${isSingleItem ? '' : 'ml-2 pl-2.5 border-l border-[#336886]/12'}`}>
+                    {section.children.map((child: SidebarItem) => renderNavItem(child, !isSingleItem))}
                   </div>
                 )}
               </div>
