@@ -185,7 +185,7 @@ export function ProfileDrawer({
   const accessProfiles: AccessProfile[] = [
     {
       id: 'client',
-      title: 'Usuário',
+      title: 'Cliente',
       subtitle: savedAccessProfiles.customer.biometric
         ? 'Biometria pronta neste aparelho'
         : savedAccessProfiles.customer.hasSession
@@ -222,7 +222,6 @@ export function ProfileDrawer({
     },
   ];
 
-  const currentAccessProfile = accessProfiles.find((item) => item.current) || null;
   const getAccessCardClasses = (item: AccessProfile) => {
     if (item.current) {
       return {
@@ -301,16 +300,40 @@ export function ProfileDrawer({
               <button
                 type="button"
                 onClick={() => setAccessPickerOpen(true)}
-                className="relative flex w-full items-center justify-between overflow-hidden rounded-[1.5rem] border border-[#336886]/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(239,246,255,0.92))] px-4 py-3 text-left text-slate-700 shadow-[0_18px_34px_-24px_rgba(51,104,134,0.28)] transition-all active:scale-[0.98]"
+                className="relative w-full overflow-hidden rounded-[1.5rem] border border-[#336886]/14 bg-[linear-gradient(135deg,rgba(255,255,255,0.98),rgba(239,246,255,0.94))] px-4 py-3 text-left text-slate-700 shadow-[0_18px_34px_-24px_rgba(51,104,134,0.28)] transition-all active:scale-[0.98]"
               >
                 <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-[radial-gradient(circle_at_center,rgba(51,104,134,0.12),transparent_70%)]" />
-                <div className="min-w-0">
-                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Acessos do app</p>
-                  <p className="mt-1 truncate text-sm font-black text-slate-900">
-                    {currentAccessProfile ? currentAccessProfile.title : 'Escolher acesso'}
-                  </p>
+                <div className="relative flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Perfil de acesso</p>
+                    <p className="mt-1 truncate text-sm font-black text-slate-950">Trocar perfil</p>
+                    <p className="mt-0.5 text-[11px] font-semibold leading-tight text-slate-500">Cliente, lojista ou entregador.</p>
+                  </div>
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[#336886]/12 bg-white/82 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] shadow-[0_10px_22px_-18px_rgba(51,104,134,0.35)]">
+                    Abrir
+                    <CaretRight size={12} weight="bold" />
+                  </span>
                 </div>
-                <CaretRight size={16} weight="bold" className="text-slate-400" />
+                <div className="relative mt-3 grid grid-cols-3 gap-1.5">
+                  {[
+                    { id: 'client', label: 'Cliente', active: true, ready: savedAccessProfiles.customer.biometric || savedAccessProfiles.customer.hasSession },
+                    { id: 'store', label: 'Loja', active: false, ready: savedAccessProfiles.admin.biometric || savedAccessProfiles.admin.hasSession },
+                    { id: 'motoboy', label: 'Entrega', active: false, ready: savedAccessProfiles.motoboy.biometric || savedAccessProfiles.motoboy.hasSession },
+                  ].map((item) => (
+                    <span
+                      key={item.id}
+                      className={`inline-flex min-w-0 items-center justify-center rounded-full px-2 py-1 text-[9px] font-black uppercase tracking-[0.1em] ${
+                        item.active
+                          ? 'bg-[#336886] text-white shadow-[0_10px_18px_-14px_rgba(51,104,134,0.7)]'
+                          : item.ready
+                            ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'
+                            : 'bg-slate-100 text-slate-400'
+                      }`}
+                    >
+                      {item.label}
+                    </span>
+                  ))}
+                </div>
               </button>
             </div>
           ) : (
@@ -452,11 +475,11 @@ export function ProfileDrawer({
               <div className="min-w-0 pr-2">
                 <p className="text-[9px] font-black uppercase tracking-[0.28em] text-slate-500">Escolha seu acesso</p>
                 <h3 className="mt-1 text-[1.18rem] font-black tracking-[-0.035em] text-slate-950">
-                  {isLogged ? 'Alternar acesso' : accessPickerMode === 'register' ? 'Primeiro acesso' : 'Entrar'}
+                  {isLogged ? 'Trocar perfil' : accessPickerMode === 'register' ? 'Primeiro acesso' : 'Entrar'}
                 </h3>
                 <p className="mt-1.5 text-[12px] font-semibold leading-relaxed text-slate-500">
                   {isLogged
-                    ? 'Sua conta pessoal fica no Hub. Lojista e entregador abrem as áreas operacionais.'
+                    ? 'Cliente continua no Hub. Lojista e entregador abrem suas áreas de operação.'
                     : accessPickerMode === 'register'
                       ? 'Escolha qual conta deseja criar e siga o fluxo certo para começar.'
                       : 'Entre com sua conta e acesse a área certa do app.'}
