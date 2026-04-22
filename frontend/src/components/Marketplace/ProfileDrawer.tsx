@@ -1,8 +1,8 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import {
-  ArrowsClockwise,
   ArrowRight,
-  BellSimple,
+  GearSix,
+  Receipt,
   Storefront,
   CookingPot,
   Motorcycle,
@@ -171,8 +171,8 @@ export function ProfileDrawer({
   const actions: DrawerAction[] = isLogged
     ? [
         { id: 'account', label: 'Minha Conta', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-[#336886]', bgColor: 'bg-[#336886]/10' },
-        { id: 'orders', label: 'Meus pedidos', icon: <BellSimple size={22} weight="duotone" />, onClick: onOpenOrders || onOpenAccount, iconColor: 'text-amber-600', bgColor: 'bg-amber-50' },
-        { id: 'settings', label: 'Configurações', icon: <ArrowsClockwise size={22} weight="duotone" />, onClick: onOpenSettings, iconColor: 'text-violet-600', bgColor: 'bg-violet-50' },
+        { id: 'orders', label: 'Meus pedidos', icon: <Receipt size={22} weight="duotone" />, onClick: onOpenOrders || onOpenAccount, iconColor: 'text-[#336886]', bgColor: 'bg-[#336886]/10' },
+        { id: 'settings', label: 'Configurações', icon: <GearSix size={22} weight="duotone" />, onClick: onOpenSettings, iconColor: 'text-violet-600', bgColor: 'bg-violet-50' },
         { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
         { id: 'help', label: 'Ajuda e Atendimento', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
         { id: 'logout', label: 'Sair da conta', icon: <SignOut size={22} weight="duotone" />, onClick: onLogout, tone: 'danger' },
