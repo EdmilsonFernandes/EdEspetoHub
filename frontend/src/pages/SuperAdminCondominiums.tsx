@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Buildings, CalendarBlank, CaretRight, Clock, ImageSquare, PencilSimple, Storefront, Trash, UploadSimple } from '@phosphor-icons/react';
+import { Buildings, CalendarBlank, CaretRight, Clock, Eye, EyeSlash, ImageSquare, Key, PencilSimple, Storefront, Trash, UploadSimple, UserCircle } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { condominiumService } from '../services/condominiumService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
@@ -102,6 +102,9 @@ export function SuperAdminCondominiums() {
     email: '',
     password: '',
   });
+  const [showUserPasswordInput, setShowUserPasswordInput] = useState(false);
+  const [createdPasswordByUserId, setCreatedPasswordByUserId] = useState<Record<string, string>>({});
+  const [revealedCondominiumPasswords, setRevealedCondominiumPasswords] = useState<Record<string, boolean>>({});
   const [storeRuleDrafts, setStoreRuleDrafts] = useState<Record<string, { allowPickupAtStall: boolean; allowApartmentDelivery: boolean; apartmentDeliveryFee: string }>>({});
 
   const load = async () => {
@@ -436,13 +439,17 @@ export function SuperAdminCondominiums() {
 
   const createCondominiumUser = async () => {
     if (!userForm.condominiumId || !userForm.email || !userForm.password) {
-      setError('Escolha o condomínio e informe e-mail e senha do responsável.');
+      setError('Escolha o condomínio e informe usuário/e-mail e senha do responsável.');
       return;
     }
     setSaving(true);
     setError('');
     try {
-      await condominiumService.adminCreateUser(userForm.condominiumId, userForm);
+      const savedUser = await condominiumService.adminCreateUser(userForm.condominiumId, userForm);
+      if (savedUser?.id && savedUser?.temporaryPassword) {
+        setCreatedPasswordByUserId((prev) => ({ ...prev, [savedUser.id]: savedUser.temporaryPassword }));
+        setRevealedCondominiumPasswords((prev) => ({ ...prev, [savedUser.id]: false }));
+      }
       setUserForm({ condominiumId: userForm.condominiumId, name: '', email: '', password: '' });
       await load();
     } catch (err: any) {
@@ -648,34 +655,103 @@ export function SuperAdminCondominiums() {
             </div>
           </section>
 
-          <section id="condominium-access-card" className="rounded-[2rem] border border-[#336886]/15 bg-[linear-gradient(180deg,_#ffffff_0%,_#f8fafc_100%)] p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#336886]/10 text-[#336886]">
-                <Buildings size={22} weight="duotone" />
-              </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Usuário responsável</p>
-                <h2 className="text-lg font-black tracking-tight text-slate-950">Acesso do condomínio</h2>
-                <p className="text-sm font-medium text-slate-500">Aqui você cria o login do responsável por cada condomínio.</p>
+          <section id="condominium-access-card" className="overflow-hidden rounded-[2rem] border border-[#336886]/15 bg-white shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
+            <div className="bg-[linear-gradient(135deg,_#153A4C_0%,_#336886_58%,_#0f172a_100%)] p-5 text-white">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/14 text-white ring-1 ring-white/18">
+                  <Key size={23} weight="duotone" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/62">Usuário responsável</p>
+                  <h2 className="text-xl font-black tracking-tight">Acesso do condomínio</h2>
+                  <p className="text-sm font-semibold text-white/68">Crie ou redefina o login usado pelo responsável.</p>
+                </div>
               </div>
             </div>
-            <div className="mt-5 space-y-3">
-              <select value={userForm.condominiumId} onChange={(event) => setUserForm((prev) => ({ ...prev, condominiumId: event.target.value }))} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold">
-                <option value="">Escolha o condomínio</option>
-                {(data.condominiums || []).map((item: any) => <option key={item.id} value={item.id}>{item.name}</option>)}
-              </select>
-              <input value={userForm.name} onChange={(event) => setUserForm((prev) => ({ ...prev, name: event.target.value }))} placeholder="Nome do responsável" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white" />
-              <input type="email" value={userForm.email} onChange={(event) => setUserForm((prev) => ({ ...prev, email: event.target.value }))} placeholder="E-mail de acesso" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white" />
-              <input type="password" value={userForm.password} onChange={(event) => setUserForm((prev) => ({ ...prev, password: event.target.value }))} placeholder="Senha temporária" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white" />
-              <button onClick={createCondominiumUser} disabled={saving || !userForm.condominiumId || !userForm.email || !userForm.password} className="w-full rounded-2xl bg-[#336886] px-4 py-3.5 text-sm font-black text-white shadow-[0_18px_34px_-22px_rgba(51,104,134,0.8)] disabled:opacity-50">
-                Criar acesso
+            <div className="space-y-4 p-5">
+              <div className="grid gap-3">
+                <label className="block">
+                  <span className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Condomínio</span>
+                  <select value={userForm.condominiumId} onChange={(event) => setUserForm((prev) => ({ ...prev, condominiumId: event.target.value }))} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white">
+                    <option value="">Escolha o condomínio</option>
+                    {(data.condominiums || []).map((item: any) => <option key={item.id} value={item.id}>{item.name}</option>)}
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Nome do responsável</span>
+                  <input value={userForm.name} onChange={(event) => setUserForm((prev) => ({ ...prev, name: event.target.value }))} placeholder="Ex: Portaria Spazio Azuli" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white" />
+                </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Usuário ou e-mail</span>
+                  <input type="text" value={userForm.email} onChange={(event) => setUserForm((prev) => ({ ...prev, email: event.target.value }))} autoComplete="username" placeholder="spazio.azuli" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white" />
+                </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Senha</span>
+                  <div className="relative">
+                    <input type={showUserPasswordInput ? 'text' : 'password'} value={userForm.password} onChange={(event) => setUserForm((prev) => ({ ...prev, password: event.target.value }))} autoComplete="new-password" placeholder="azuli@123" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white" />
+                    <button
+                      type="button"
+                      onClick={() => setShowUserPasswordInput((prev) => !prev)}
+                      className="absolute right-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-xl text-slate-400 transition hover:bg-white hover:text-[#336886]"
+                      aria-label={showUserPasswordInput ? 'Ocultar senha' : 'Mostrar senha'}
+                    >
+                      {showUserPasswordInput ? <EyeSlash size={18} weight="bold" /> : <Eye size={18} weight="bold" />}
+                    </button>
+                  </div>
+                </label>
+              </div>
+              <button onClick={createCondominiumUser} disabled={saving || !userForm.condominiumId || !userForm.email || !userForm.password} className="w-full rounded-2xl bg-[#153A4C] px-4 py-3.5 text-sm font-black text-white shadow-[0_18px_34px_-22px_rgba(21,58,76,0.8)] transition hover:bg-[#1f5066] disabled:opacity-50">
+                Salvar acesso
               </button>
               {(data.condominiumUsers || []).length ? (
-                <div className="space-y-2 pt-2">
+                <div className="space-y-2 border-t border-slate-100 pt-4">
                   {(data.condominiumUsers || []).slice(0, 4).map((user: any) => (
-                    <div key={user.id} className="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
-                      <p className="truncate text-sm font-black text-slate-800">{user.name}</p>
-                      <p className="truncate text-xs font-semibold text-slate-500">{user.email} • {user.condominium?.name || 'Condomínio'}</p>
+                    <div key={user.id} className="rounded-[1.3rem] border border-slate-200 bg-[linear-gradient(180deg,_#ffffff_0%,_#f8fafc_100%)] p-3 shadow-[0_16px_36px_-30px_rgba(15,23,42,0.45)]">
+                      <div className="flex items-start gap-3">
+                        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-[#336886]/10 text-[#336886]">
+                          <UserCircle size={21} weight="duotone" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-black text-slate-900">{user.name || 'Responsável'}</p>
+                          <p className="truncate text-xs font-semibold text-slate-500">{user.condominium?.name || 'Condomínio'}</p>
+                        </div>
+                        <span className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${user.active !== false ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100' : 'bg-slate-100 text-slate-500 ring-1 ring-slate-200'}`}>
+                          {user.active !== false ? 'Ativo' : 'Inativo'}
+                        </span>
+                      </div>
+                      <div className="mt-3 grid gap-2">
+                        <div className="rounded-2xl bg-white px-3 py-2 ring-1 ring-slate-100">
+                          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Usuário</p>
+                          <p className="mt-0.5 truncate text-sm font-black text-slate-800">{user.email}</p>
+                        </div>
+                        <div className="flex items-center gap-2 rounded-2xl bg-white px-3 py-2 ring-1 ring-slate-100">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Senha</p>
+                            <p className="mt-0.5 truncate text-sm font-black text-slate-800">
+                              {createdPasswordByUserId[user.id]
+                                ? revealedCondominiumPasswords[user.id]
+                                  ? createdPasswordByUserId[user.id]
+                                  : '••••••••'
+                                : 'Protegida'}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            disabled={!createdPasswordByUserId[user.id]}
+                            onClick={() => setRevealedCondominiumPasswords((prev) => ({ ...prev, [user.id]: !prev[user.id] }))}
+                            className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-slate-50 text-slate-500 ring-1 ring-slate-100 transition hover:text-[#336886] disabled:cursor-not-allowed disabled:opacity-40"
+                            aria-label={revealedCondominiumPasswords[user.id] ? 'Ocultar senha' : 'Mostrar senha'}
+                            title={createdPasswordByUserId[user.id] ? 'Mostrar ou ocultar senha recém-definida' : 'Redefina a senha para exibir aqui'}
+                          >
+                            {revealedCondominiumPasswords[user.id] ? <EyeSlash size={18} weight="bold" /> : <Eye size={18} weight="bold" />}
+                          </button>
+                        </div>
+                      </div>
+                      {!createdPasswordByUserId[user.id] ? (
+                        <p className="mt-2 text-[11px] font-semibold leading-5 text-slate-400">
+                          Por segurança, senhas antigas não são recuperadas. Para visualizar, salve uma nova senha para este usuário.
+                        </p>
+                      ) : null}
                     </div>
                   ))}
                 </div>

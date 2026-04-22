@@ -138,7 +138,7 @@ export class CondominiumService {
     const email = String(payload?.email || '').trim().toLowerCase();
     const password = String(payload?.password || '').trim();
     if (!name || !email || !password) {
-      throw new AppError('CONDO-011', 400, { message: 'Nome, e-mail e senha sao obrigatorios.' });
+      throw new AppError('CONDO-011', 400, { message: 'Nome, usuario/e-mail e senha sao obrigatorios.' });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
@@ -153,7 +153,10 @@ export class CondominiumService {
       active: true,
     });
 
-    return this.toPublicCondominiumUser({ ...saved, condominium });
+    return {
+      ...this.toPublicCondominiumUser({ ...saved, condominium }),
+      temporaryPassword: password,
+    };
   }
 
   async adminCreateEvent(condominiumId: string, payload: any) {

@@ -16,9 +16,9 @@ export const authService = {
         });
         return response;
     },
-    async condominiumLogin(email: string, password: string) {
+    async condominiumLogin(identifier: string, password: string) {
         const response = await apiClient.post("/auth/condominium-login", {
-            email: String(email || "").trim().toLowerCase(),
+            email: String(identifier || "").trim().toLowerCase(),
             password,
         });
         return response;
