@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import {
   ArrowRight,
+  CheckCircle,
   GearSix,
   Receipt,
   Storefront,
@@ -14,6 +15,7 @@ import {
   UserRectangle,
   House,
   CaretRight,
+  Fingerprint,
   X
 } from '@phosphor-icons/react';
 import { nativeBiometricService } from '../../services/nativeBiometricService';
@@ -239,6 +241,11 @@ export function ProfileDrawer({
       label: 'Loja',
       description: 'Painel do lojista',
       state: getCompactAccessStateLabel(savedAccessProfiles.admin),
+      stateIcon: savedAccessProfiles.admin.biometric
+        ? <Fingerprint size={13} weight="duotone" />
+        : savedAccessProfiles.admin.hasSession
+          ? <CheckCircle size={13} weight="fill" />
+          : <CaretRight size={13} weight="bold" />,
       icon: <Storefront size={23} weight="duotone" />,
       shell: 'border-emerald-100 bg-[linear-gradient(135deg,#f6fff9_0%,#eef9f3_100%)] text-emerald-950 shadow-[0_14px_28px_-24px_rgba(16,185,129,0.42)]',
       iconClass: 'bg-white/82 text-emerald-700 ring-1 ring-emerald-100',
@@ -253,6 +260,11 @@ export function ProfileDrawer({
       label: 'Entrega',
       description: 'Rotas e coletas',
       state: getCompactAccessStateLabel(savedAccessProfiles.motoboy),
+      stateIcon: savedAccessProfiles.motoboy.biometric
+        ? <Fingerprint size={13} weight="duotone" />
+        : savedAccessProfiles.motoboy.hasSession
+          ? <CheckCircle size={13} weight="fill" />
+          : <CaretRight size={13} weight="bold" />,
       icon: <Motorcycle size={23} weight="duotone" />,
       shell: 'border-amber-100 bg-[linear-gradient(135deg,#fffdf3_0%,#fbf5dc_100%)] text-amber-950 shadow-[0_14px_28px_-24px_rgba(245,158,11,0.42)]',
       iconClass: 'bg-white/80 text-amber-700 ring-1 ring-amber-100',
@@ -353,19 +365,20 @@ export function ProfileDrawer({
                       key={item.id}
                       type="button"
                       onClick={item.onClick}
-                      className={`group flex min-h-[4.5rem] w-full items-center gap-3 rounded-[1.2rem] border px-3 py-2.5 text-left transition-all active:scale-[0.98] ${item.shell}`}
+                      className={`group relative flex min-h-[5rem] w-full items-start gap-3 rounded-[1.2rem] border px-3 py-3 pr-9 text-left transition-all active:scale-[0.98] ${item.shell}`}
                     >
                       <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-[1rem] shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] transition-transform group-active:scale-95 ${item.iconClass}`}>
                         {item.icon}
                       </span>
-                      <span className="min-w-0 flex-1">
+                      <span className="min-w-0 flex-1 pt-0.5">
                         <span className="block truncate text-[14px] font-black leading-tight">{item.label}</span>
                         <span className="mt-0.5 block truncate text-[11px] font-semibold text-slate-600">{item.description}</span>
+                        <span className={`mt-2 inline-flex max-w-full items-center gap-1.5 rounded-full border border-white/80 bg-white/72 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] shadow-sm ${item.stateClass}`}>
+                          <span className="shrink-0">{item.stateIcon}</span>
+                          <span className="truncate">{item.state}</span>
+                        </span>
                       </span>
-                      <span className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/70 bg-white/72 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] shadow-sm">
-                        <span className={item.stateClass}>{item.state}</span>
-                        <CaretRight size={12} weight="bold" className="text-slate-400 transition-transform group-active:translate-x-0.5" />
-                      </span>
+                      <CaretRight size={14} weight="bold" className="absolute right-3 top-3 text-slate-400/80 transition-transform group-active:translate-x-0.5" />
                     </button>
                   ))}
                 </div>
