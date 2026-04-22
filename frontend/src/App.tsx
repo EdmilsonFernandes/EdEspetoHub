@@ -54,7 +54,6 @@ const MarketplacePage = lazyPage(() => import('./pages/MarketplacePage'), 'Marke
 const CondominiumLogin = lazyPage(() => import('./pages/CondominiumLogin'), 'CondominiumLogin');
 const CondominiumDashboard = lazyPage(() => import('./pages/CondominiumDashboard'), 'CondominiumDashboard');
 const AdminHighlights = lazyPage(() => import('./pages/AdminHighlights'), 'AdminHighlights');
-const SuperAdminHighlights = lazyPage(() => import('./pages/SuperAdminHighlights'), 'SuperAdminHighlights');
 const SystemGuidePage = lazyPage(() => import('./pages/SystemGuidePage'), 'SystemGuidePage');
 
 const AppRouteFallback = () => (
@@ -209,7 +208,7 @@ function App() {
                   </AppErrorBoundary>
                 }
               />
-              <Route path="/superadmin/highlights" element={<SuperAdminHighlights />} />
+              <Route path="/superadmin/highlights" element={<Navigate to="/superadmin" replace />} />
               <Route path="/maps" element={<AddressDistance />} />
               <Route path="/motoboy/login" element={<MotoboyLogin />} />
               <Route path="/motoboy/register" element={<MotoboyRegister />} />

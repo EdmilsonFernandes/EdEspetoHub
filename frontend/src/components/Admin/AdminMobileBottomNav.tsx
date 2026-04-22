@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Buildings, ChartBar, ChefHat, CurrencyDollar, Package, SignOut, Star } from '@phosphor-icons/react';
+import { Buildings, ChartBar, ChefHat, CurrencyDollar, Package, SignOut } from '@phosphor-icons/react';
 import { orderService } from '../../services/orderService';
 import { useAuth } from '../../contexts/AuthContext';
 import { markManualLogoutRedirect } from '../../utils/sessionRedirect';
@@ -264,21 +264,19 @@ export function AdminMobileBottomNav() {
         onClick: () => navigate('/superadmin/condominiums'),
       },
       {
-        id: 'super-highlights',
-        label: 'Destaques',
-        icon: Star,
-        active: path.startsWith('/superadmin/highlights'),
-        onClick: () => navigate('/superadmin/highlights'),
-      },
-      {
         id: 'super-logout',
         label: 'Sair',
         icon: SignOut,
+        tone: 'danger',
         active: false,
         onClick: () => {
           localStorage.removeItem('superAdminToken');
           localStorage.removeItem('superAdminUser');
-          navigate('/superadmin');
+          if (typeof window !== 'undefined') {
+            window.location.assign('/superadmin');
+          } else {
+            navigate('/superadmin', { replace: true });
+          }
         },
       },
     ];
@@ -292,9 +290,10 @@ export function AdminMobileBottomNav() {
           transform: effectiveVisibility ? 'translateY(0)' : 'translateY(calc(100% - 4px))',
         }}
       >
-        <ul className="pointer-events-auto mx-auto grid w-full max-w-lg grid-cols-4 gap-1 rounded-t-3xl border-t border-x border-slate-200/40 bg-white/76 p-1.5 pb-[max(env(safe-area-inset-bottom),4px)] shadow-[0_-12px_48px_-20px_rgba(15,23,42,0.45)] backdrop-blur-2xl">
+        <ul className={`pointer-events-auto mx-auto grid w-full max-w-md ${superItems.length === 3 ? 'grid-cols-3' : 'grid-cols-4'} gap-1 rounded-t-3xl border-t border-x border-slate-200/50 bg-white/86 p-1.5 pb-[max(env(safe-area-inset-bottom),4px)] shadow-[0_-12px_48px_-24px_rgba(15,23,42,0.42)] backdrop-blur-2xl`}>
           {superItems.map((item) => {
             const Icon = item.icon;
+            const danger = item.tone === 'danger';
             return (
               <li key={item.id}>
                 <button
@@ -303,11 +302,13 @@ export function AdminMobileBottomNav() {
                   className={`w-full min-h-12 rounded-xl py-1 text-[8px] font-black uppercase tracking-[0.1em] flex flex-col items-center justify-center gap-0.5 transition ${
                     item.active
                       ? 'bg-slate-950 text-white shadow-[0_12px_24px_-18px_rgba(15,23,42,0.5)]'
-                      : 'bg-transparent text-slate-500 hover:bg-slate-100/80 hover:text-slate-800'
+                      : danger
+                        ? 'bg-rose-50 text-rose-700 hover:bg-rose-100'
+                        : 'bg-transparent text-slate-500 hover:bg-slate-100/80 hover:text-slate-800'
                   }`}
                 >
                   <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${
-                    item.active ? 'bg-white/12 text-white' : 'bg-slate-100 text-slate-600'
+                    item.active ? 'bg-white/12 text-white' : danger ? 'bg-white text-rose-600 ring-1 ring-rose-100' : 'bg-slate-100 text-slate-600'
                   }`}>
                     <Icon size={17} weight={item.active ? 'fill' : 'duotone'} />
                   </span>

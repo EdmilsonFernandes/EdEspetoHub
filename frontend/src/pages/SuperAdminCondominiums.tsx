@@ -377,10 +377,17 @@ export function SuperAdminCondominiums() {
   const bannerPreview = condominiumForm.bannerFile || resolveAssetUrl(condominiumForm.bannerUrl) || '';
   const workspaceTabs = [
     { id: 'overview', label: 'Visão geral', helper: 'Resumo e atalhos' },
-    { id: 'setup', label: 'Cadastros', helper: 'Condomínio e feira' },
+    { id: 'setup', label: 'Cadastros', helper: 'Condomínio, feira e acessos' },
     { id: 'operations', label: 'Operação', helper: 'Lojas e solicitações' },
     { id: 'agenda', label: 'Agenda', helper: 'Eventos cadastrados' },
   ] as const;
+
+  const focusCondominiumAccess = () => {
+    setActiveWorkspace('setup');
+    window.setTimeout(() => {
+      document.getElementById('condominium-access-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 80);
+  };
 
   const getStoreRuleDraft = (condominiumId: string, storeLink: any) => {
     const key = `${condominiumId}:${storeLink.storeId}`;
@@ -460,12 +467,21 @@ export function SuperAdminCondominiums() {
                   Organize a agenda dos condomínios, publique novas feiras e confirme as lojas participantes em um painel mais claro para operação no mobile e no desktop.
                 </p>
               </div>
-              <Link
-                to="/superadmin"
-                className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white/85 px-4 py-3 text-sm font-black text-slate-700 shadow-sm backdrop-blur"
-              >
-                Voltar ao Super Admin
-              </Link>
+              <div className="flex flex-col gap-2 sm:flex-row lg:items-center">
+                <button
+                  type="button"
+                  onClick={focusCondominiumAccess}
+                  className="inline-flex items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-24px_rgba(15,23,42,0.8)]"
+                >
+                  Criar usuário do condomínio
+                </button>
+                <Link
+                  to="/superadmin"
+                  className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white/85 px-4 py-3 text-sm font-black text-slate-700 shadow-sm backdrop-blur"
+                >
+                  Voltar ao Super Admin
+                </Link>
+              </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -632,14 +648,15 @@ export function SuperAdminCondominiums() {
             </div>
           </section>
 
-          <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
+          <section id="condominium-access-card" className="rounded-[2rem] border border-[#336886]/15 bg-[linear-gradient(180deg,_#ffffff_0%,_#f8fafc_100%)] p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#336886]/10 text-[#336886]">
                 <Buildings size={22} weight="duotone" />
               </div>
               <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Usuário responsável</p>
                 <h2 className="text-lg font-black tracking-tight text-slate-950">Acesso do condomínio</h2>
-                <p className="text-sm font-medium text-slate-500">Crie ou atualize o responsável pelo painel próprio.</p>
+                <p className="text-sm font-medium text-slate-500">Aqui você cria o login do responsável por cada condomínio.</p>
               </div>
             </div>
             <div className="mt-5 space-y-3">

@@ -10,6 +10,7 @@ import {
   CreditCard,
   Clock,
   ChartBar,
+  Buildings,
   Funnel,
   DownloadSimple,
   Trash,
@@ -1192,24 +1193,25 @@ export function SuperAdmin() {
           <button
             type="button"
             onClick={() => { window.location.href = '/superadmin/condominiums'; }}
-            className="hidden rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-2 text-sm font-black text-emerald-800 shadow-sm transition hover:bg-emerald-100 sm:inline-flex"
+            className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/88 px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm transition hover:border-[#336886]/25 hover:text-[#336886] sm:inline-flex"
           >
+            <Buildings size={15} weight="duotone" />
             Condomínios
           </button>
           <button
             type="button"
             onClick={() => setProfileMenuOpen((prev) => !prev)}
-            className="flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-2.5 py-2 shadow-sm transition hover:bg-white"
+            className="flex items-center gap-2 rounded-full border border-slate-200 bg-white/92 px-2 py-1.5 shadow-sm transition hover:border-slate-300 hover:bg-white"
             aria-haspopup="menu"
             aria-expanded={profileMenuOpen}
             title="Abrir menu de perfil"
           >
-            <div className="h-8 w-8 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center">
+            <div className="h-8 w-8 rounded-full bg-slate-950 text-white text-xs font-black flex items-center justify-center shadow-sm">
               {superAdminUser ? superAdminUser.slice(0, 2).toUpperCase() : 'SA'}
             </div>
             <div className="hidden sm:block text-left text-xs leading-tight">
-              <div className="font-semibold text-slate-800">{superAdminUser || 'Admin Já no Caminho'}</div>
-              <div className="text-slate-500">{getSuperAdminRoleLabel('SUPER_ADMIN')}</div>
+              <div className="max-w-[180px] truncate font-black text-slate-900">{superAdminUser || 'Admin Já no Caminho'}</div>
+              <div className="font-semibold text-slate-400">{getSuperAdminRoleLabel('SUPER_ADMIN')}</div>
             </div>
             <CaretDown size={14} className={`text-slate-500 transition-transform ${profileMenuOpen ? 'rotate-180' : ''}`} />
           </button>
@@ -1236,9 +1238,20 @@ export function SuperAdmin() {
                 type="button"
                 onClick={() => {
                   setProfileMenuOpen(false);
-                  loadOverview(token);
+                  window.location.href = '/superadmin/condominiums';
                 }}
                 className="mt-2 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+              >
+                <Buildings size={16} weight="duotone" />
+                Condomínios e acessos
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setProfileMenuOpen(false);
+                  loadOverview(token);
+                }}
+                className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
               >
                 <ArrowClockwise size={16} weight="duotone" />
                 Atualizar dados
@@ -3232,4 +3245,3 @@ export function SuperAdmin() {
     </AdminLayout>
   );
 }
-
