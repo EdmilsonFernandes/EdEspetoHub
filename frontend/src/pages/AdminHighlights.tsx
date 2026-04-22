@@ -377,7 +377,7 @@ export function AdminHighlights() {
   };
 
   return (
-    <AdminLayout contextLabel="Destaques">
+    <AdminLayout contextLabel="Destaques" fluid>
       <div
         className={`w-full lg:grid lg:items-start lg:gap-0 ${
           sidebarCompact ? 'lg:grid-cols-[80px_minmax(0,1fr)]' : 'lg:grid-cols-[260px_minmax(0,1fr)]'
