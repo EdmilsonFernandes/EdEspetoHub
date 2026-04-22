@@ -2929,6 +2929,7 @@ export function StorePage() {
             storeLogoUrl={branding?.logoUrl || ''}
             storeSlug={storeSlug || ''}
             suggestedProducts={suggestedProducts}
+            userRole={normalizedRole}
           />
         )}
         {view === 'success' && (

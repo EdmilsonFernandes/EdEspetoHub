@@ -111,6 +111,7 @@ export const CartView = ({
   storeLogoUrl = "",
   storeSlug = "",
   suggestedProducts = [],
+  userRole = "",
 }) => {
   const isNativePlatform = Capacitor.isNativePlatform();
   const checkoutTopPaddingClass = isNativePlatform
@@ -178,6 +179,16 @@ export const CartView = ({
   const cashTenderedValue = isCash ? normalizeNumber(cashTenderedInput) : null;
   const cashChangeDue =
     isCash && cashTenderedValue !== null ? Number(cashTenderedValue) - Number(totalWithFee || 0) : null;
+  const normalizedUserRole = String(userRole || "").trim().toLowerCase();
+  const isProfessionalUser = [
+    "admin",
+    "operator",
+    "lojista",
+    "super_admin",
+    "motoboy",
+    "entregador",
+  ].includes(normalizedUserRole);
+  const showSuggestedProducts = Boolean(isCustomerLogged && !isProfessionalUser && suggestedProducts.length > 0);
 
   const cashValidation = useMemo(() => {
     if (!isCash) return { blocked: false, reason: "" };
@@ -1511,7 +1522,7 @@ export const CartView = ({
       </div>}
 
       {/* Sugestões (carrossel horizontal – step 1) */}
-      {(!useMultiStepFlow || checkoutStep === 1) && suggestedProducts.length > 0 && (
+      {(!useMultiStepFlow || checkoutStep === 1) && showSuggestedProducts && (
         <div className="mb-4 sm:mb-6">
           <div className="flex items-center justify-between mb-3 px-1">
             <div>
@@ -1996,4 +2007,3 @@ export const CartView = ({
     </div>
   );
 };
-
