@@ -1524,42 +1524,28 @@ export const CartView = ({
       {/* Sugestões (carrossel horizontal – step 1) */}
       {(!useMultiStepFlow || checkoutStep === 1) && showSuggestedProducts && (
         <div className="mb-4 sm:mb-6">
-          <div className="flex items-center justify-between mb-3 px-1">
-            <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-slate-500">Adicionar ao pedido</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">Itens que combinam com sua seleção</p>
-            </div>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-3 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory">
+          <p className="mb-2 px-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Adicionar ao pedido</p>
+          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory">
             {suggestedProducts.map((prod) => (
               <button
                 key={prod.id}
                 type="button"
                 onClick={() => onUpdateCart?.(prod, 1, { cookingPoint: '', passSkewer: false, selectedModifiers: [] })}
-                className="group flex-none w-[148px] snap-start rounded-2xl border border-slate-100 bg-white shadow-[0_4px_16px_-6px_rgba(15,23,42,0.14)] overflow-hidden active:scale-[0.96] transition-all hover:shadow-[0_8px_24px_-8px_rgba(15,23,42,0.2)] hover:-translate-y-0.5"
+                className="group flex-none w-[200px] snap-start flex items-center gap-3 rounded-2xl border border-slate-100 bg-white px-2 py-2 shadow-sm active:scale-[0.97] transition-all"
               >
-                <div className="relative w-full h-[90px] bg-slate-100 overflow-hidden">
+                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-slate-100">
                   {prod.imageUrl ? (
-                    <img
-                      src={resolveAssetUrl(prod.imageUrl)}
-                      alt={prod.name}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      loading="lazy"
-                    />
+                    <img src={resolveAssetUrl(prod.imageUrl)} alt={prod.name} className="h-full w-full object-cover" loading="lazy" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-3xl bg-gradient-to-br from-slate-50 to-slate-100">🍖</div>
+                    <div className="flex h-full w-full items-center justify-center text-xl">🍖</div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
-                <div className="p-2.5 pb-0">
-                  <p className="text-[12px] font-bold text-slate-800 leading-tight line-clamp-2">{prod.name}</p>
-                  <p className="text-[12px] font-black text-brand-primary mt-1">{formatCurrency(prod.price)}</p>
+                <div className="min-w-0 flex-1 text-left">
+                  <p className="truncate text-[12px] font-semibold leading-tight text-slate-800">{prod.name}</p>
+                  <p className="text-[12px] font-black text-brand-primary">{formatCurrency(prod.price)}</p>
                 </div>
-                <div className="p-2.5 pt-2">
-                  <div className="flex items-center justify-center gap-1 rounded-xl bg-slate-900 py-2 text-[11px] font-black text-white group-hover:bg-brand-primary transition-colors">
-                    <span>+</span>
-                    <span>Adicionar</span>
-                  </div>
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white text-base font-black group-active:bg-brand-primary transition-colors">
+                  +
                 </div>
               </button>
             ))}
