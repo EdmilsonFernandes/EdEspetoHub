@@ -15,6 +15,13 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const numberEnv = (name: string, fallback: number, min = 0) => {
+  const raw = process.env[name];
+  if (!raw) return fallback;
+  const value = Number(raw);
+  return Number.isFinite(value) && value >= min ? value : fallback;
+};
+
 export const env = {
   port: process.env.PORT ? Number(process.env.PORT) : 4000,
   jwtSecret: process.env.JWT_SECRET || 'super-secret-token',
@@ -66,6 +73,11 @@ export const env = {
     username: process.env.PGUSER || 'postgres',
     password: process.env.PGPASSWORD || 'postgres',
     database: process.env.PGDATABASE || 'espetinho',
+    poolMax: numberEnv('DB_POOL_MAX', 10, 1),
+    poolIdleTimeoutMs: numberEnv('DB_POOL_IDLE_TIMEOUT_MS', 30000, 1000),
+    poolConnectionTimeoutMs: numberEnv('DB_POOL_CONNECTION_TIMEOUT_MS', 5000, 1000),
+    statementTimeoutMs: numberEnv('DB_STATEMENT_TIMEOUT_MS', 15000, 0),
+    idleInTransactionSessionTimeoutMs: numberEnv('DB_IDLE_IN_TRANSACTION_TIMEOUT_MS', 10000, 0),
   },
   etaV2: {
     enabled: process.env.ENABLE_ORDER_ETA_V2 !== 'false',

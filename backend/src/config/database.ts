@@ -65,6 +65,13 @@ export const AppDataSource = new DataSource({
   synchronize: false,
   entities: [ User, Store, StoreSettings, Product, Order, OrderShipment, OrderReview, OrderItem, OrderEtaEstimate, Motoboy, MotoboyStore, OrderDelivery, DeliveryEvent, MotoboyDocument, MotoboyStoreRequest, MotoboyAuditLog, DeliveryBillingCycle, DeliveryBillingCharge, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog, StoreLinkHit, StoreUser, InventoryMovement, CustomerAddress, FeaturedProductRequest, Condominium, StoreCondominium, CondominiumEvent, CondominiumEventStore, StoreCondominiumRequest, CustomerEmailOtp, StorePaymentAccount, OrderPayment ],
   migrations: [],
-  logging: [ 'error' ]
+  logging: [ 'error' ],
+  extra: {
+    max: env.database.poolMax,
+    idleTimeoutMillis: env.database.poolIdleTimeoutMs,
+    connectionTimeoutMillis: env.database.poolConnectionTimeoutMs,
+    statement_timeout: env.database.statementTimeoutMs,
+    idle_in_transaction_session_timeout: env.database.idleInTransactionSessionTimeoutMs,
+  }
   //logging: [ 'error', 'query' ]
 });
