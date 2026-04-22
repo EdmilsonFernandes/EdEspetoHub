@@ -264,7 +264,7 @@ export function MotoboyLogin() {
         <div className="text-center space-y-2.5">
           <button type="button" onClick={handleLogoTap} className="mx-auto flex flex-col items-center gap-3 hover:scale-[1.03] transition-transform active:scale-95">
             <div className="h-[4.5rem] w-[4.5rem] overflow-hidden rounded-2xl border border-[#336886]/20 bg-white p-0.5 shadow-[0_8px_28px_-8px_rgba(13,79,102,0.28)]">
-              <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-full w-full rounded-xl object-cover" />
+              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-xl object-cover" />
             </div>
             <div className="text-center leading-tight">
               <p className="text-base font-black tracking-tight text-slate-900">Já no Caminho</p>
@@ -272,7 +272,7 @@ export function MotoboyLogin() {
             </div>
           </button>
           <div className="flex items-center justify-center gap-3">
-            <LockKey size={32} weight="duotone" className="text-[#0d4f66]" />
+            <Scooter size={34} weight="duotone" className="text-[#0d4f66]" />
             <h2 className="text-[2rem] sm:text-[2.2rem] font-black text-slate-800 tracking-[-0.03em]">
               {alreadyLoggedIn ? 'Sessão Ativa' : 'Login Entregador'}
             </h2>
@@ -285,14 +285,16 @@ export function MotoboyLogin() {
           ) : null}
         </div>
 
-        <div className="auth-segment">
-          <button type="button" onClick={() => navigate(`/admin${hubSuffix}`)} className="auth-segment-btn">Lojista</button>
-          <button type="button" onClick={() => navigate(`/cliente?mode=login${hubMode ? '&hub=1' : ''}${nextPath ? `&next=${encodeURIComponent(nextPath)}` : ''}`)} className="auth-segment-btn">Cliente</button>
-          <button type="button" className="auth-segment-btn active">Entregador</button>
-          {superAdminUnlocked ? (
-            <button type="button" onClick={() => navigate('/superadmin')} className="auth-segment-btn">Master</button>
-          ) : null}
-        </div>
+        {!hubMode ? (
+          <div className="auth-segment">
+            <button type="button" onClick={() => navigate(`/admin${hubSuffix}`)} className="auth-segment-btn">Lojista</button>
+            <button type="button" onClick={() => navigate(`/cliente?mode=login${nextPath ? `&next=${encodeURIComponent(nextPath)}` : ''}`)} className="auth-segment-btn">Cliente</button>
+            <button type="button" className="auth-segment-btn active">Entregador</button>
+            {superAdminUnlocked ? (
+              <button type="button" onClick={() => navigate('/superadmin')} className="auth-segment-btn">Master</button>
+            ) : null}
+          </div>
+        ) : null}
 
         <div className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40">
           {alreadyLoggedIn ? (
@@ -329,6 +331,16 @@ export function MotoboyLogin() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="flex items-center gap-3 rounded-2xl border border-[#336886]/10 bg-[#336886]/6 px-3.5 py-3 text-left">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-[#0d4f66] shadow-sm ring-1 ring-[#336886]/10">
+                  <Scooter size={22} weight="duotone" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Login entregador</p>
+                  <p className="mt-0.5 truncate text-xs font-semibold text-slate-500">Entre para ver rotas, coletas e entregas.</p>
+                </div>
+              </div>
+
               {biometricAvailable ? (
                 <button
                   type="button"
@@ -473,13 +485,15 @@ export function MotoboyLogin() {
                   {loading ? 'Entrando...' : 'Acessar Painel'}
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => navigate('/motoboy/register')}
-                  className="w-full h-12 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                >
-                  Criar conta de entregador
-                </button>
+                {!hubMode ? (
+                  <button
+                    type="button"
+                    onClick={() => navigate('/motoboy/register')}
+                    className="w-full h-12 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  >
+                    Criar conta de entregador
+                  </button>
+                ) : null}
               </div>
             </form>
           )}

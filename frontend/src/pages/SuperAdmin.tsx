@@ -209,7 +209,7 @@ const SECTION_META: Record<string, { title: string; description: string; tone: s
 
 export function SuperAdmin() {
   const { showToast } = useToast();
-  const platformLogo = '/janocaminho-logo.png';
+  const platformLogo = '/janocaminho.jpg';
   const [token, setToken] = useState(() => localStorage.getItem(STORAGE_KEY) || '');
   const [superAdminUser, setSuperAdminUser] = useState(() => localStorage.getItem(STORAGE_USER_KEY) || '');
   const [overview, setOverview] = useState(null);
@@ -1060,7 +1060,7 @@ export function SuperAdmin() {
       <AuthLayout>
         <div className="space-y-4 login-page-enter">
           <div className="text-center space-y-2.5">
-            <img src="/janocaminho-logo.png" alt="Já no Caminho" className="mx-auto h-14 w-auto rounded-xl" />
+            <img src="/janocaminho.jpg" alt="Já no Caminho" className="mx-auto h-14 w-auto rounded-xl" />
             <p className="text-[12px] font-bold uppercase tracking-[0.22em] text-slate-500">Acesso da plataforma</p>
             <h2 className="text-[2rem] sm:text-[2.2rem] font-black text-slate-800 tracking-[-0.02em]">Login Super Admin</h2>
           </div>
@@ -3232,5 +3232,4 @@ export function SuperAdmin() {
     </AdminLayout>
   );
 }
-
 

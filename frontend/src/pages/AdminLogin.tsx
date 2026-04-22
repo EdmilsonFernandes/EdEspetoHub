@@ -363,16 +363,18 @@ export function AdminLogin() {
         <div className="text-center space-y-2.5">
           <button type="button" onClick={handleLogoTap} className="mx-auto flex flex-col items-center gap-3 hover:scale-[1.03] transition-transform active:scale-95">
             <div className="h-[4.5rem] w-[4.5rem] overflow-hidden rounded-2xl border border-[#336886]/20 bg-white p-0.5 shadow-[0_8px_28px_-8px_rgba(13,79,102,0.28)]">
-              <img src="/janocaminho-logo.png" alt="Já no Caminho" className="h-full w-full rounded-xl object-cover" />
+              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-xl object-cover" />
             </div>
             <div className="text-center leading-tight">
               <p className="text-base font-black tracking-tight text-slate-900">Já no Caminho</p>
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#336886]/80">Plataforma de pedidos</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#336886]/80">Área do lojista</p>
             </div>
           </button>
           <div className="flex items-center justify-center gap-3">
             <LockKey size={32} weight="duotone" className="text-[#0d4f66]" />
-            <h2 className="text-[2rem] sm:text-[2.2rem] font-black text-slate-800 tracking-[-0.03em]">Login</h2>
+            <h2 className="text-[2rem] sm:text-[2.2rem] font-black text-slate-800 tracking-[-0.03em]">
+              {hubMode ? 'Login Lojista' : 'Login'}
+            </h2>
           </div>
           {superAdminUnlocked ? (
             <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 rounded-full border border-emerald-100">
@@ -382,14 +384,16 @@ export function AdminLogin() {
           ) : null}
         </div>
 
-        <div className="auth-segment">
-          <button type="button" className="auth-segment-btn active">Lojista</button>
-          <button type="button" onClick={() => navigate(`/cliente?mode=login${hubMode ? '&hub=1' : ''}${nextPath ? `&next=${encodeURIComponent(nextPath)}` : ''}`)} className="auth-segment-btn">Cliente</button>
-          <button type="button" onClick={() => navigate(`/motoboy/login${hubSuffix}`)} className="auth-segment-btn">Entregador</button>
-          {superAdminUnlocked ? (
-            <button type="button" onClick={() => navigate('/superadmin')} className="auth-segment-btn">Master</button>
-          ) : null}
-        </div>
+        {!hubMode ? (
+          <div className="auth-segment">
+            <button type="button" className="auth-segment-btn active">Lojista</button>
+            <button type="button" onClick={() => navigate(`/cliente?mode=login${nextPath ? `&next=${encodeURIComponent(nextPath)}` : ''}`)} className="auth-segment-btn">Cliente</button>
+            <button type="button" onClick={() => navigate(`/motoboy/login${hubSuffix}`)} className="auth-segment-btn">Entregador</button>
+            {superAdminUnlocked ? (
+              <button type="button" onClick={() => navigate('/superadmin')} className="auth-segment-btn">Master</button>
+            ) : null}
+          </div>
+        ) : null}
 
         <form onSubmit={handleLogin} autoComplete="on" className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40">
           {biometricAvailable ? (
@@ -568,4 +572,3 @@ export function AdminLogin() {
   );
 
 }
-
