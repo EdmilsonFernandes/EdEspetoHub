@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { DownloadSimple, House, List, MagnifyingGlass, Moon, ShieldCheck, SignOut, Storefront, Sun, Truck, X } from '@phosphor-icons/react';
-import mercadoPagoLogo from '../assets/mercado-pago-logo.svg';
+import mercadoPagoHorizontal from '../assets/mercado-pago-horizontal.svg';
 
 interface LandingPageLayoutProps {
   children: React.ReactNode;
@@ -478,8 +478,8 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             <div>
               <h3 className="text-sm font-black text-white mb-3 uppercase tracking-[0.12em]">Integrações</h3>
               <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">
-                <div className="inline-flex rounded-xl bg-white px-3 py-2">
-                  <img src={mercadoPagoLogo} alt="Mercado Pago" className="h-8 w-auto" />
+                <div className="rounded-2xl border border-sky-400/15 bg-white px-4 py-3 shadow-[0_18px_42px_-28px_rgba(0,158,227,0.8)]">
+                  <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-10 w-full object-contain" />
                 </div>
                 <p className="mt-3 text-sm font-semibold text-white">Pagamentos online opcionais</p>
                 <p className="mt-1 text-xs leading-5 text-slate-400">
