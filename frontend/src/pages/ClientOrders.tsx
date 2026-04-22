@@ -233,6 +233,7 @@ function OrderCard({
     etaDeadlineMs &&
     Date.now() > etaDeadlineMs + DELAY_GRACE_MS
   );
+  const isPaymentApproved = normalizeStatus(order.paymentStatus) === 'PAID';
 
   const handleHelp = () => {
     const nativeUrl = buildWhatsappLink(order.store?.phone, true);
@@ -285,14 +286,23 @@ function OrderCard({
               <span className={`font-medium ${statusMeta.toneClass}`}>{statusMeta.label}</span>
             </div>
             <p className="mt-1 text-[11px] text-slate-500">{orderDate || formatGroupDate(order.createdAt)}</p>
-            {String(order.paymentStatus || '').toUpperCase() === 'PAID' && (
-              <span className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-[#e7d000] bg-[#ffe600] px-1.5 py-1 shadow-[0_10px_24px_-18px_rgba(10,0,128,0.65)]">
-                <span className="inline-flex items-center gap-1 rounded-full bg-[#009ee3] px-1.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] text-white">
-                  <CheckCircle size={10} weight="fill" className="shrink-0" />
-                  Pago
+            {isPaymentApproved && (
+              <span className="mt-2 flex max-w-full items-center justify-between gap-2.5 rounded-[18px] border border-slate-200/90 bg-[linear-gradient(135deg,#ffffff_0%,#f4fbff_100%)] px-2.5 py-2 shadow-[0_14px_30px_-26px_rgba(0,158,227,0.5)]">
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
+                    <CheckCircle size={17} weight="fill" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-[11px] font-black uppercase tracking-[0.12em] text-emerald-700">
+                      Pagamento aprovado
+                    </span>
+                    <span className="mt-0.5 block truncate text-[11px] font-semibold text-slate-500">
+                      Confirmado online
+                    </span>
+                  </span>
                 </span>
-                <span className="rounded-full bg-white px-2 py-0.5 shadow-sm ring-1 ring-[#0a0080]/10">
-                  <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-4 w-[86px] object-contain" />
+                <span className="flex h-7 shrink-0 items-center rounded-full border border-slate-200/80 bg-white px-2.5 shadow-sm">
+                  <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-3.5 w-[78px] object-contain" />
                 </span>
               </span>
             )}
