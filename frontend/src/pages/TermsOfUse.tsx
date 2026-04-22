@@ -1,5 +1,6 @@
-import { ArrowLeft } from '@phosphor-icons/react';
+import { ArrowLeft, ShieldCheck } from '@phosphor-icons/react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { AppVersionBadge } from '../components/common/AppVersionBadge';
 
 const LAST_UPDATE = '22 de abril de 2026';
 
@@ -23,20 +24,26 @@ export function TermsOfUse() {
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-slate-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <button
-            onClick={() => navigate(fromHub ? '/hub' : '/')}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-colors"
+            onClick={() => navigate(fromHub ? '/hub' : -1 as any)}
+            className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-all active:scale-90"
+            aria-label="Voltar"
           >
-            <ArrowLeft size={15} weight="bold" />
-            {fromHub ? 'Voltar ao app' : 'Voltar'}
+            <ArrowLeft size={20} weight="bold" />
           </button>
 
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg overflow-hidden border border-slate-200 shadow-sm shrink-0">
-              <img src="/janocaminho-logo.png" alt="Já no Caminho" className="w-full h-full object-cover" />
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[0.6rem] border border-slate-100 bg-white shadow-sm">
+              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
             </div>
-            <span className="text-sm font-bold text-slate-800 hidden sm:block">Já no Caminho</span>
+            <div className="hidden sm:block text-left">
+              <p className="text-[13px] font-black text-slate-900 leading-tight">Já no Caminho</p>
+              <p className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
+                <ShieldCheck size={10} weight="fill" className="text-emerald-500" />
+                <AppVersionBadge />
+              </p>
+            </div>
           </div>
         </div>
       </header>
@@ -47,7 +54,7 @@ export function TermsOfUse() {
         <div className="rounded-3xl bg-gradient-to-br from-[#1a3a52] to-[#336886] p-6 sm:p-8 text-white shadow-xl">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-white/20 shadow-lg shrink-0">
-              <img src="/janocaminho-logo.png" alt="Já no Caminho" className="w-full h-full object-cover" />
+              <img src="/janocaminho.jpg" alt="Já no Caminho" className="w-full h-full object-cover" />
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl font-black">Termos de Uso e Privacidade</h1>
