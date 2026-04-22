@@ -22,8 +22,11 @@ export function TermsOfUse() {
   const fromHub = new URLSearchParams(location.search || '').get('from') === 'hub';
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-slate-200">
+    <div className="min-h-screen bg-slate-50 pb-[env(safe-area-inset-bottom)]">
+      <header
+        className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-slate-200"
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      >
         <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <button
             onClick={() => navigate(fromHub ? '/hub' : -1 as any)}
