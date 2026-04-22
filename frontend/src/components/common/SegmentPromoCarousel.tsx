@@ -9,10 +9,10 @@ type PromoSlide = {
 
 const PROMO_SLIDES: PromoSlide[] = [
   {
-    id: 'beleza',
-    image: '/marketing/promo-beleza-lite.jpg',
-    imageAlt: 'Banner institucional do Ja no Caminho para o segmento de beleza',
-    fit: 'contain',
+    id: 'mercado-pago',
+    image: '/marketing/mp01.png',
+    imageAlt: 'Banner Mercado Pago do Ja no Caminho para ativar loja online',
+    fit: 'cover',
   },
   {
     id: 'termica',
@@ -111,14 +111,18 @@ export function SegmentPromoCarousel({
               loading="lazy"
               className={`relative z-[1] h-full w-full object-center ${slide.fit === 'cover' ? 'object-cover' : 'object-contain'}`}
             />
-            <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-slate-950/28 via-transparent to-transparent" />
+            {slide.id !== 'mercado-pago' && (
+              <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-slate-950/28 via-transparent to-transparent" />
+            )}
           </div>
         ))}
       </div>
 
-      <div className="pointer-events-none absolute bottom-2 right-2 z-[3] inline-flex rounded-full border border-white/70 bg-white/92 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-slate-900 shadow-[0_10px_22px_-14px_rgba(15,23,42,0.5)] backdrop-blur-md sm:bottom-3 sm:right-3 sm:px-3 sm:py-1.5 sm:text-[10px]">
-        Criar loja →
-      </div>
+      {PROMO_SLIDES[activeIndex]?.id !== 'mercado-pago' && (
+        <div className="pointer-events-none absolute bottom-2 right-2 z-[3] inline-flex rounded-full border border-white/70 bg-white/92 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-slate-900 shadow-[0_10px_22px_-14px_rgba(15,23,42,0.5)] backdrop-blur-md sm:bottom-3 sm:right-3 sm:px-3 sm:py-1.5 sm:text-[10px]">
+          Criar loja →
+        </div>
+      )}
 
       <div className="absolute inset-x-0 bottom-0 flex justify-center pb-1.5 sm:pb-2">
         <div className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-slate-950/20 px-2 py-0.5 backdrop-blur-md">
