@@ -115,26 +115,7 @@ const groupOrdersByDate = (orders: any[]) => {
 const getStatusMeta = (status: string, orderType?: string) => {
   const normalized = normalizeStatus(status);
   const normalizedType = String(orderType || '').trim().toLowerCase();
-
-  if (normalized === 'READY') {
-    const readyLabel =
-      normalizedType === 'delivery' ? 'Aguardando entregador' :
-      normalizedType === 'table' ? 'Pedido pronto' :
-      'Disponível para retirada';
-    return {
-      label: readyLabel,
-      icon: <Package size={15} weight="duotone" className="text-emerald-600" />,
-      toneClass: 'text-emerald-600',
-    };
-  }
-
-  if ([ 'DELIVERING', 'IN_DELIVERY', 'DISPATCHED' ].includes(normalized) && normalizedType === 'DELIVERY') {
-    return {
-      label: 'Em rota',
-      icon: <Truck size={15} weight="duotone" className="text-indigo-600" />,
-      toneClass: 'text-indigo-600',
-    };
-  }
+  const isDelivery = normalizedType === 'delivery';
 
   switch (normalized) {
     case 'AWAITING_PAYMENT':
@@ -151,14 +132,38 @@ const getStatusMeta = (status: string, orderType?: string) => {
         toneClass: 'text-amber-600',
       };
     case 'PREPARING':
-    case 'READY_FOR_DELIVERY':
-    case 'WAITING_FOR_MOTOBOY':
       return {
-        label: 'Em andamento',
+        label: 'Em preparação',
         icon: <SpinnerGap size={15} weight="duotone" className="text-sky-600" />,
         toneClass: 'text-sky-600',
       };
+    case 'READY':
+    case 'READY_FOR_DELIVERY':
+    case 'WAITING_FOR_MOTOBOY': {
+      const readyLabel =
+        isDelivery ? 'Aguardando entregador' :
+        normalizedType === 'table' ? 'Pedido pronto' :
+        'Disponível para retirada';
+      return {
+        label: readyLabel,
+        icon: <Package size={15} weight="duotone" className="text-emerald-600" />,
+        toneClass: 'text-emerald-600',
+      };
+    }
+    case 'DELIVERING':
+    case 'IN_DELIVERY':
+    case 'DISPATCHED':
+      return {
+        label: 'Em rota',
+        icon: <Truck size={15} weight="duotone" className="text-indigo-600" />,
+        toneClass: 'text-indigo-600',
+      };
     case 'DELIVERED':
+      return {
+        label: 'Entregue',
+        icon: <CheckCircle size={15} weight="fill" className="text-emerald-500" />,
+        toneClass: 'text-emerald-600',
+      };
     case 'DONE':
     case 'FINISHED':
       return {
