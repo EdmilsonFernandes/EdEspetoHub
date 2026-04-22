@@ -11,6 +11,7 @@
  * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  */
 
+import bcrypt from 'bcryptjs';
 import { resolvePlanFeatures } from '../config/planFeatures';
 import { AppError } from '../errors/AppError';
 import { CondominiumRepository } from '../repositories/CondominiumRepository';
@@ -30,10 +31,11 @@ export class CondominiumService {
   private orderReviewService = new OrderReviewService();
 
   async adminOverview() {
-    const [condominiums, stores, pendingRequests] = await Promise.all([
+    const [condominiums, stores, pendingRequests, condominiumUsers] = await Promise.all([
       this.condominiumRepository.listAllForAdmin(),
       this.condominiumRepository.listAllStoresForAdmin(),
       this.condominiumRepository.listRequests(),
+      this.condominiumRepository.listCondominiumUsers(),
     ]);
 
     const eventGroups = await Promise.all(
@@ -68,6 +70,7 @@ export class CondominiumService {
         state: store.settings?.state || null,
       })),
       requests: pendingRequests.map((request) => this.toPublicRequest(request)),
+      condominiumUsers: condominiumUsers.map((user: any) => this.toPublicCondominiumUser(user)),
     };
   }
 
@@ -125,6 +128,32 @@ export class CondominiumService {
     if (!condominium) throw new AppError('CONDO-001', 404, { message: 'Condominio nao encontrado.' });
     await this.condominiumRepository.deactivateCondominium(condominiumId);
     return { ok: true };
+  }
+
+  async adminCreateCondominiumUser(condominiumId: string, payload: any) {
+    const condominium = await this.condominiumRepository.findById(condominiumId);
+    if (!condominium) throw new AppError('CONDO-001', 404, { message: 'Condominio nao encontrado.' });
+
+    const name = String(payload?.name || `Responsavel ${condominium.name}`).trim();
+    const email = String(payload?.email || '').trim().toLowerCase();
+    const password = String(payload?.password || '').trim();
+    if (!name || !email || !password) {
+      throw new AppError('CONDO-011', 400, { message: 'Nome, e-mail e senha sao obrigatorios.' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const existing = await this.condominiumRepository.findCondominiumUserByEmail(email);
+    const saved = await this.condominiumRepository.saveCondominiumUser({
+      ...(existing || {}),
+      condominiumId,
+      name,
+      email,
+      passwordHash,
+      role: 'CONDOMINIUM_ADMIN',
+      active: true,
+    });
+
+    return this.toPublicCondominiumUser({ ...saved, condominium });
   }
 
   async adminCreateEvent(condominiumId: string, payload: any) {
@@ -246,6 +275,129 @@ export class CondominiumService {
       await this.condominiumRepository.upsertStoreCondominium(request.condominiumId, request.storeId, false);
     }
     return this.toPublicRequest(saved);
+  }
+
+  async organizerOverview(condominiumId?: string) {
+    const safeCondominiumId = String(condominiumId || '').trim();
+    if (!safeCondominiumId) throw new AppError('AUTH-003', 403);
+
+    const condominium = await this.condominiumRepository.findById(safeCondominiumId);
+    if (!condominium || condominium.active === false) {
+      throw new AppError('CONDO-001', 404, { message: 'Condominio nao encontrado.' });
+    }
+
+    const [events, approvedStores, requests, stores] = await Promise.all([
+      this.condominiumRepository.listEventsByCondominiumId(safeCondominiumId, new Date(Date.now() - 24 * 60 * 60 * 1000)),
+      this.condominiumRepository.listStoreLinksByCondominiumId(safeCondominiumId),
+      this.condominiumRepository.listRequests(undefined, undefined, safeCondominiumId),
+      this.condominiumRepository.listAllStoresForAdmin(),
+    ]);
+
+    const approvedStoreIds = new Set(approvedStores.map((link: any) => String(link.storeId || '')));
+    const invitedStoreIds = new Set(
+      events.flatMap((event: any) =>
+        (Array.isArray(event?.storeLinks) ? event.storeLinks : [])
+          .filter((link: any) => String(link?.status || '').toLowerCase() === 'invited')
+          .map((link: any) => String(link.storeId || link.store?.id || ''))
+      )
+    );
+
+    return {
+      condominium: this.toPublicCondominium(condominium, this.pickCurrentOrNextEvent(events) || null),
+      events: events.map((event) => this.toPublicEvent(event)),
+      approvedStores: approvedStores.map((link: any) => this.toPublicStoreLink(link)),
+      requests: requests.map((request) => this.toPublicRequest(request)),
+      stores: stores.map((store: any) => ({
+        id: store.id,
+        name: store.name,
+        slug: store.slug,
+        logoUrl: store.settings?.logoUrl || null,
+        bannerUrl: store.settings?.bannerUrl || null,
+        segment: store.settings?.segment || 'outros',
+        city: store.settings?.city || null,
+        state: store.settings?.state || null,
+        condominiumStatus: approvedStoreIds.has(String(store.id))
+          ? 'approved'
+          : invitedStoreIds.has(String(store.id))
+            ? 'invited'
+            : 'available',
+      })),
+    };
+  }
+
+  async organizerUpdateCondominium(condominiumId: string | undefined, payload: any) {
+    const safeCondominiumId = String(condominiumId || '').trim();
+    if (!safeCondominiumId) throw new AppError('AUTH-003', 403);
+    return this.adminUpdateCondominium(safeCondominiumId, payload);
+  }
+
+  async organizerCreateEvent(condominiumId: string | undefined, payload: any) {
+    const safeCondominiumId = String(condominiumId || '').trim();
+    if (!safeCondominiumId) throw new AppError('AUTH-003', 403);
+    return this.adminCreateEvent(safeCondominiumId, payload);
+  }
+
+  async organizerUpdateEvent(condominiumId: string | undefined, eventId: string, payload: any) {
+    await this.assertEventBelongsToCondominium(eventId, condominiumId);
+    return this.adminUpdateEvent(eventId, payload);
+  }
+
+  async organizerDeactivateEvent(condominiumId: string | undefined, eventId: string) {
+    await this.assertEventBelongsToCondominium(eventId, condominiumId);
+    return this.adminDeactivateEvent(eventId);
+  }
+
+  async organizerInviteStoreToEvent(condominiumId: string | undefined, eventId: string, storeId: string, invitedBy?: string, inviteNote?: string) {
+    await this.assertEventBelongsToCondominium(eventId, condominiumId);
+    const safeStoreId = String(storeId || '').trim();
+    if (!safeStoreId) throw new AppError('CONDO-006', 400, { message: 'Loja obrigatoria.' });
+
+    await this.condominiumRepository.upsertEventStore(eventId, safeStoreId, {
+      status: 'invited',
+      active: false,
+      invitedBy: invitedBy || null,
+      inviteNote: inviteNote || null,
+    });
+
+    return { ok: true };
+  }
+
+  async organizerConfirmStoreInEvent(condominiumId: string | undefined, eventId: string, storeId: string) {
+    const event = await this.assertEventBelongsToCondominium(eventId, condominiumId);
+    const safeStoreId = String(storeId || '').trim();
+    if (!safeStoreId) throw new AppError('CONDO-006', 400, { message: 'Loja obrigatoria.' });
+    await this.condominiumRepository.upsertStoreCondominium(event.condominiumId, safeStoreId, true);
+    await this.condominiumRepository.upsertEventStore(eventId, safeStoreId, {
+      status: 'confirmed',
+      active: true,
+    });
+    return { ok: true };
+  }
+
+  async organizerUpdateStoreSettings(condominiumId: string | undefined, storeId: string, payload: any) {
+    const safeCondominiumId = String(condominiumId || '').trim();
+    if (!safeCondominiumId) throw new AppError('AUTH-003', 403);
+    return this.adminUpdateStoreSettings(safeCondominiumId, storeId, payload);
+  }
+
+  async organizerReviewRequest(condominiumId: string | undefined, requestId: string, payload: any, reviewedBy?: string) {
+    const request = await this.condominiumRepository.findRequestById(requestId);
+    if (!request) throw new AppError('CONDO-004', 404, { message: 'Solicitacao nao encontrada.' });
+    if (String(request.condominiumId || '') !== String(condominiumId || '')) {
+      throw new AppError('AUTH-003', 403);
+    }
+    return this.adminReviewRequest(requestId, payload, reviewedBy);
+  }
+
+  private async assertEventBelongsToCondominium(eventId: string, condominiumId?: string) {
+    const safeCondominiumId = String(condominiumId || '').trim();
+    if (!safeCondominiumId) throw new AppError('AUTH-003', 403);
+    const event = await this.condominiumRepository.findEventById(String(eventId || ''));
+    if (!event) throw new AppError('CONDO-007', 404, { message: 'Feira nao encontrada.' });
+    if (String(event.condominiumId || '') !== safeCondominiumId) {
+      throw new AppError('AUTH-003', 403);
+    }
+    return event;
   }
 
   async listStoreCondominiumOptions(storeId: string, authStoreId?: string) {
@@ -536,6 +688,19 @@ export class CondominiumService {
           logoUrl: link.store.settings?.logoUrl || null,
           bannerUrl: link.store.settings?.bannerUrl || null,
           segment: link.store.settings?.segment || null,
+          status: link.status || 'confirmed',
+        })),
+      storeInvitations: storeLinks
+        .filter((link: any) => link?.store && String(link?.status || '').toLowerCase() === 'invited')
+        .map((link: any) => ({
+          id: link.id,
+          storeId: link.storeId || link.store.id,
+          storeName: link.store.name,
+          storeSlug: link.store.slug,
+          logoUrl: link.store.settings?.logoUrl || null,
+          inviteNote: link.inviteNote || null,
+          status: link.status || 'invited',
+          createdAt: link.createdAt instanceof Date ? link.createdAt.toISOString() : link.createdAt,
         })),
     };
   }
@@ -560,6 +725,19 @@ export class CondominiumService {
       condominium: request.condominium ? this.toPublicCondominium(request.condominium, null) : null,
       storeId: request.storeId,
       condominiumId: request.condominiumId,
+    };
+  }
+
+  private toPublicCondominiumUser(user: any) {
+    return {
+      id: user.id,
+      condominiumId: user.condominiumId,
+      name: user.name,
+      email: user.email,
+      role: user.role || 'CONDOMINIUM_ADMIN',
+      active: user.active !== false,
+      lastLoginAt: user.lastLoginAt instanceof Date ? user.lastLoginAt.toISOString() : user.lastLoginAt || null,
+      condominium: user.condominium ? this.toPublicCondominium(user.condominium, null) : null,
     };
   }
 

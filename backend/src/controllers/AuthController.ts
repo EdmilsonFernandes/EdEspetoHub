@@ -143,6 +143,22 @@ export class AuthController
     }
   }
 
+  static async condominiumLogin(req: Request, res: Response)
+  {
+    const { email, password } = req.body || {};
+    try
+    {
+      log.info('Condominium login request', { email });
+      const result = await authService.condominiumLogin(email, password);
+      log.info('Condominium login success', { condominiumId: result.condominium?.id, email });
+      return res.json(result);
+    } catch (error: any)
+    {
+      log.warn('Condominium login failed', { email, error });
+      return respondWithError(req, res, error, 401);
+    }
+  }
+
 
 
 

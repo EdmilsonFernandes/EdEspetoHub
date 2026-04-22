@@ -37,6 +37,7 @@ export type UserRole =
   | 'LOJISTA'
   | 'CHURRASQUEIRO'   // legacy alias — kept for existing JWTs/DB rows
   | 'SUPER_ADMIN'
+  | 'CONDOMINIUM_ADMIN'
   | 'MOTOBOY'
   | 'STORE_OWNER'
   | 'CUSTOMER';
@@ -44,6 +45,7 @@ export type UserRole =
 type JwtPayload = {
   sub: string;        // userId
   storeId?: string;   // storeId do dono (opcional para super admin)
+  condominiumId?: string;
   role: UserRole;
 };
 

@@ -96,6 +96,12 @@ export function SuperAdminCondominiums() {
     eventId: '',
     storeId: '',
   });
+  const [userForm, setUserForm] = useState({
+    condominiumId: '',
+    name: '',
+    email: '',
+    password: '',
+  });
   const [storeRuleDrafts, setStoreRuleDrafts] = useState<Record<string, { allowPickupAtStall: boolean; allowApartmentDelivery: boolean; apartmentDeliveryFee: string }>>({});
 
   const load = async () => {
@@ -421,6 +427,24 @@ export function SuperAdminCondominiums() {
     }
   };
 
+  const createCondominiumUser = async () => {
+    if (!userForm.condominiumId || !userForm.email || !userForm.password) {
+      setError('Escolha o condomínio e informe e-mail e senha do responsável.');
+      return;
+    }
+    setSaving(true);
+    setError('');
+    try {
+      await condominiumService.adminCreateUser(userForm.condominiumId, userForm);
+      setUserForm({ condominiumId: userForm.condominiumId, name: '', email: '', password: '' });
+      await load();
+    } catch (err: any) {
+      setError(err?.message || 'Falha ao criar acesso do condomínio.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <AdminLayout contextLabel="Condomínios" showHeader={false}>
       <div className="space-y-6">
@@ -605,6 +629,40 @@ export function SuperAdminCondominiums() {
                   </button>
                 ) : null}
               </div>
+            </div>
+          </section>
+
+          <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#336886]/10 text-[#336886]">
+                <Buildings size={22} weight="duotone" />
+              </div>
+              <div>
+                <h2 className="text-lg font-black tracking-tight text-slate-950">Acesso do condomínio</h2>
+                <p className="text-sm font-medium text-slate-500">Crie ou atualize o responsável pelo painel próprio.</p>
+              </div>
+            </div>
+            <div className="mt-5 space-y-3">
+              <select value={userForm.condominiumId} onChange={(event) => setUserForm((prev) => ({ ...prev, condominiumId: event.target.value }))} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold">
+                <option value="">Escolha o condomínio</option>
+                {(data.condominiums || []).map((item: any) => <option key={item.id} value={item.id}>{item.name}</option>)}
+              </select>
+              <input value={userForm.name} onChange={(event) => setUserForm((prev) => ({ ...prev, name: event.target.value }))} placeholder="Nome do responsável" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white" />
+              <input type="email" value={userForm.email} onChange={(event) => setUserForm((prev) => ({ ...prev, email: event.target.value }))} placeholder="E-mail de acesso" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white" />
+              <input type="password" value={userForm.password} onChange={(event) => setUserForm((prev) => ({ ...prev, password: event.target.value }))} placeholder="Senha temporária" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white" />
+              <button onClick={createCondominiumUser} disabled={saving || !userForm.condominiumId || !userForm.email || !userForm.password} className="w-full rounded-2xl bg-[#336886] px-4 py-3.5 text-sm font-black text-white shadow-[0_18px_34px_-22px_rgba(51,104,134,0.8)] disabled:opacity-50">
+                Criar acesso
+              </button>
+              {(data.condominiumUsers || []).length ? (
+                <div className="space-y-2 pt-2">
+                  {(data.condominiumUsers || []).slice(0, 4).map((user: any) => (
+                    <div key={user.id} className="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
+                      <p className="truncate text-sm font-black text-slate-800">{user.name}</p>
+                      <p className="truncate text-xs font-semibold text-slate-500">{user.email} • {user.condominium?.name || 'Condomínio'}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
             </div>
           </section>
 

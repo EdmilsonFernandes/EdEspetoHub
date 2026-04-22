@@ -19,6 +19,7 @@ import { CondominiumEventStore } from '../entities/CondominiumEventStore';
 import { Store } from '../entities/Store';
 import { StoreCondominium } from '../entities/StoreCondominium';
 import { StoreCondominiumRequest } from '../entities/StoreCondominiumRequest';
+import { CondominiumUser } from '../entities/CondominiumUser';
 
 /**
  * Provides CondominiumRepository functionality.
@@ -32,6 +33,7 @@ export class CondominiumRepository {
   private condominiumEventRepository: Repository<CondominiumEvent>;
   private condominiumEventStoreRepository: Repository<CondominiumEventStore>;
   private storeCondominiumRequestRepository: Repository<StoreCondominiumRequest>;
+  private condominiumUserRepository: Repository<CondominiumUser>;
 
   /**
    * Creates a new instance.
@@ -45,6 +47,7 @@ export class CondominiumRepository {
     this.condominiumEventRepository = AppDataSource.getRepository(CondominiumEvent);
     this.condominiumEventStoreRepository = AppDataSource.getRepository(CondominiumEventStore);
     this.storeCondominiumRequestRepository = AppDataSource.getRepository(StoreCondominiumRequest);
+    this.condominiumUserRepository = AppDataSource.getRepository(CondominiumUser);
   }
 
   /**
@@ -72,6 +75,21 @@ export class CondominiumRepository {
       relations: [ 'store', 'store.settings' ],
       order: { createdAt: 'DESC' },
     });
+  }
+
+  listCondominiumUsers() {
+    return this.condominiumUserRepository.find({
+      relations: [ 'condominium' ],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  findCondominiumUserByEmail(email: string) {
+    return this.condominiumUserRepository.findOne({ where: { email } });
+  }
+
+  saveCondominiumUser(payload: Partial<CondominiumUser>) {
+    return this.condominiumUserRepository.save(this.condominiumUserRepository.create(payload));
   }
 
   /**
@@ -334,24 +352,51 @@ export class CondominiumRepository {
     );
   }
 
-  async upsertEventStore(eventId: string, storeId: string) {
+  async upsertEventStore(
+    eventId: string,
+    storeId: string,
+    options: {
+      status?: string;
+      active?: boolean;
+      invitedBy?: string | null;
+      inviteNote?: string | null;
+    } = {}
+  ) {
+    const status = String(options.status || 'confirmed').trim().toLowerCase() || 'confirmed';
+    const active = typeof options.active === 'boolean' ? options.active : status === 'confirmed';
     await AppDataSource.query(
       `
         INSERT INTO condominium_event_stores (
           event_id,
           store_id,
           active,
+          status,
           allow_pickup_at_stall,
           allow_apartment_delivery,
+          invited_by,
+          invite_note,
+          responded_at,
           updated_at
         )
-        VALUES ($1, $2, TRUE, TRUE, FALSE, NOW())
+        VALUES ($1, $2, $3, $4, TRUE, FALSE, $5, $6, $7, NOW())
         ON CONFLICT (event_id, store_id) DO UPDATE SET
-          active = TRUE,
+          active = EXCLUDED.active,
+          status = EXCLUDED.status,
           allow_pickup_at_stall = TRUE,
+          invited_by = COALESCE(EXCLUDED.invited_by, condominium_event_stores.invited_by),
+          invite_note = COALESCE(EXCLUDED.invite_note, condominium_event_stores.invite_note),
+          responded_at = EXCLUDED.responded_at,
           updated_at = NOW();
       `,
-      [eventId, storeId]
+      [
+        eventId,
+        storeId,
+        active,
+        status,
+        options.invitedBy || null,
+        options.inviteNote || null,
+        status === 'confirmed' ? new Date() : null,
+      ]
     );
   }
 
@@ -390,7 +435,7 @@ export class CondominiumRepository {
       .getMany();
   }
 
-  listRequests(status?: string, storeId?: string) {
+  listRequests(status?: string, storeId?: string, condominiumId?: string) {
     const qb = this.storeCondominiumRequestRepository
       .createQueryBuilder('request')
       .innerJoinAndSelect('request.store', 'store')
@@ -399,13 +444,14 @@ export class CondominiumRepository {
       .orderBy('request.created_at', 'DESC');
     if (status) qb.andWhere('request.status = :status', { status });
     if (storeId) qb.andWhere('request.store_id = :storeId', { storeId });
+    if (condominiumId) qb.andWhere('request.condominium_id = :condominiumId', { condominiumId });
     return qb.getMany();
   }
 
   findRequestById(id: string) {
     return this.storeCondominiumRequestRepository.findOne({
       where: { id },
-      relations: [ 'store', 'condominium' ],
+      relations: [ 'store', 'store.settings', 'condominium' ],
     });
   }
 

@@ -51,6 +51,7 @@ import { StoreCondominium } from '../entities/StoreCondominium';
 import { CondominiumEvent } from '../entities/CondominiumEvent';
 import { CondominiumEventStore } from '../entities/CondominiumEventStore';
 import { StoreCondominiumRequest } from '../entities/StoreCondominiumRequest';
+import { CondominiumUser } from '../entities/CondominiumUser';
 import { CustomerEmailOtp } from '../entities/CustomerEmailOtp';
 import { StorePaymentAccount } from '../entities/StorePaymentAccount';
 import { OrderPayment } from '../entities/OrderPayment';
@@ -63,7 +64,7 @@ export const AppDataSource = new DataSource({
   password: env.database.password,
   database: env.database.database,
   synchronize: false,
-  entities: [ User, Store, StoreSettings, Product, Order, OrderShipment, OrderReview, OrderItem, OrderEtaEstimate, Motoboy, MotoboyStore, OrderDelivery, DeliveryEvent, MotoboyDocument, MotoboyStoreRequest, MotoboyAuditLog, DeliveryBillingCycle, DeliveryBillingCharge, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog, StoreLinkHit, StoreUser, InventoryMovement, CustomerAddress, FeaturedProductRequest, Condominium, StoreCondominium, CondominiumEvent, CondominiumEventStore, StoreCondominiumRequest, CustomerEmailOtp, StorePaymentAccount, OrderPayment ],
+  entities: [ User, Store, StoreSettings, Product, Order, OrderShipment, OrderReview, OrderItem, OrderEtaEstimate, Motoboy, MotoboyStore, OrderDelivery, DeliveryEvent, MotoboyDocument, MotoboyStoreRequest, MotoboyAuditLog, DeliveryBillingCycle, DeliveryBillingCharge, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog, StoreLinkHit, StoreUser, InventoryMovement, CustomerAddress, FeaturedProductRequest, Condominium, StoreCondominium, CondominiumEvent, CondominiumEventStore, StoreCondominiumRequest, CondominiumUser, CustomerEmailOtp, StorePaymentAccount, OrderPayment ],
   migrations: [],
   logging: [ 'error' ],
   extra: {

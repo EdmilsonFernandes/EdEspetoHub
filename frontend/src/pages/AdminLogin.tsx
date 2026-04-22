@@ -389,6 +389,7 @@ export function AdminLogin() {
             <button type="button" className="auth-segment-btn active">Lojista</button>
             <button type="button" onClick={() => navigate(`/cliente?mode=login${nextPath ? `&next=${encodeURIComponent(nextPath)}` : ''}`)} className="auth-segment-btn">Cliente</button>
             <button type="button" onClick={() => navigate(`/motoboy/login${hubSuffix}`)} className="auth-segment-btn">Entregador</button>
+            <button type="button" onClick={() => navigate('/condominio/login')} className="auth-segment-btn">Condomínio</button>
             {superAdminUnlocked ? (
               <button type="button" onClick={() => navigate('/superadmin')} className="auth-segment-btn">Master</button>
             ) : null}

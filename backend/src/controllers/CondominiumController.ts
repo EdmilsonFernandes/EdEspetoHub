@@ -62,6 +62,15 @@ export class CondominiumController {
     }
   }
 
+  static async adminCreateUser(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.adminCreateCondominiumUser(String(req.params.condominiumId || ''), req.body || {});
+      return res.status(201).json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
   static async adminCreateEvent(req: Request, res: Response) {
     try {
       const payload = await condominiumService.adminCreateEvent(String(req.params.condominiumId || ''), req.body || {});
@@ -123,6 +132,106 @@ export class CondominiumController {
   static async adminReviewRequest(req: Request, res: Response) {
     try {
       const payload = await condominiumService.adminReviewRequest(String(req.params.requestId || ''), req.body || {}, req.auth?.sub);
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async organizerOverview(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.organizerOverview(req.auth?.condominiumId);
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async organizerUpdateCondominium(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.organizerUpdateCondominium(req.auth?.condominiumId, req.body || {});
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async organizerCreateEvent(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.organizerCreateEvent(req.auth?.condominiumId, req.body || {});
+      return res.status(201).json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async organizerUpdateEvent(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.organizerUpdateEvent(req.auth?.condominiumId, String(req.params.eventId || ''), req.body || {});
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async organizerDeactivateEvent(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.organizerDeactivateEvent(req.auth?.condominiumId, String(req.params.eventId || ''));
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async organizerInviteStoreToEvent(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.organizerInviteStoreToEvent(
+        req.auth?.condominiumId,
+        String(req.params.eventId || ''),
+        String(req.body?.storeId || ''),
+        req.auth?.sub,
+        String(req.body?.inviteNote || '')
+      );
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async organizerConfirmStoreInEvent(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.organizerConfirmStoreInEvent(
+        req.auth?.condominiumId,
+        String(req.params.eventId || ''),
+        String(req.body?.storeId || '')
+      );
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async organizerUpdateStoreSettings(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.organizerUpdateStoreSettings(
+        req.auth?.condominiumId,
+        String(req.params.storeId || ''),
+        req.body || {}
+      );
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async organizerReviewRequest(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.organizerReviewRequest(
+        req.auth?.condominiumId,
+        String(req.params.requestId || ''),
+        req.body || {},
+        req.auth?.sub
+      );
       return res.json(payload);
     } catch (error: any) {
       return respondWithError(req, res, error, 400);

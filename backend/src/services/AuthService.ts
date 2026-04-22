@@ -38,6 +38,7 @@ import { normalizeDocument, validateDocument } from '../utils/documents';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { PlatformAdmin } from '../entities/PlatformAdmin';
+import { CondominiumUser } from '../entities/CondominiumUser';
 import { getStoreSegmentPreset, sanitizeStoreSegment } from '../utils/storeSegment';
 import { resolvePlanFeatures, resolvePlanTier } from '../config/planFeatures';
 import { StoreUserRepository } from '../repositories/StoreUserRepository';
@@ -305,6 +306,58 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     );
 
     return { token };
+  }
+
+  async condominiumLogin(email: string, password: string) {
+    const normalized = String(email || '').trim().toLowerCase();
+    if (!normalized || !password) {
+      throw new AppError('AUTH-004', 401);
+    }
+
+    const repo = AppDataSource.getRepository(CondominiumUser);
+    const user = await repo.findOne({
+      where: { email: normalized },
+      relations: [ 'condominium' ],
+    });
+
+    if (!user || user.active === false || user.condominium?.active === false) {
+      throw new AppError('AUTH-004', 401);
+    }
+
+    const matches = await bcrypt.compare(password, user.passwordHash);
+    if (!matches) {
+      throw new AppError('AUTH-021', 401);
+    }
+
+    user.lastLoginAt = new Date();
+    await repo.save(user);
+
+    const token = jwt.sign(
+      {
+        sub: user.id,
+        role: 'CONDOMINIUM_ADMIN',
+        condominiumId: user.condominiumId,
+      },
+      env.jwtSecret,
+      { expiresIn: '30d' }
+    );
+
+    return {
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: 'CONDOMINIUM_ADMIN',
+      },
+      condominium: {
+        id: user.condominium.id,
+        name: user.condominium.name,
+        slug: user.condominium.slug,
+        logoUrl: user.condominium.logoUrl || null,
+        bannerUrl: user.condominium.bannerUrl || null,
+      },
+    };
   }
 
 

@@ -47,6 +47,7 @@ routes.post('/auth/register/preflight', AuthController.preflightRegister);
 routes.post('/auth/login', AuthController.login);
 routes.post('/auth/admin-login', AuthController.adminLogin);
 routes.post('/auth/super-login', AuthController.superAdminLogin);
+routes.post('/auth/condominium-login', AuthController.condominiumLogin);
 routes.post('/auth/forgot-password', AuthController.forgotPassword);
 routes.post('/auth/reset-password', AuthController.resetPassword);
 routes.post('/auth/verify-email', AuthController.verifyEmail);
@@ -99,6 +100,7 @@ routes.get('/admin/condominiums/manage', requireAuth, requireRole('SUPER_ADMIN')
 routes.post('/admin/condominiums', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminCreate);
 routes.patch('/admin/condominiums/:condominiumId', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminUpdate);
 routes.patch('/admin/condominiums/:condominiumId/deactivate', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminDeactivate);
+routes.post('/admin/condominiums/:condominiumId/users', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminCreateUser);
 routes.post('/admin/condominiums/:condominiumId/events', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminCreateEvent);
 routes.patch('/admin/condominium-events/:eventId', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminUpdateEvent);
 routes.patch('/admin/condominium-events/:eventId/deactivate', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminDeactivateEvent);
@@ -106,10 +108,21 @@ routes.post('/admin/condominiums/:condominiumId/stores', requireAuth, requireRol
 routes.patch('/admin/condominiums/:condominiumId/stores/:storeId/settings', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminUpdateStoreSettings);
 routes.post('/admin/condominium-events/:eventId/stores', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminAddStoreToEvent);
 routes.patch('/admin/condominium-requests/:requestId/review', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminReviewRequest);
- routes.post('/admin/payments/:paymentId/reprocess', requireAuth, requireRole('SUPER_ADMIN'), PaymentController.reprocess);
- routes.patch('/admin/stores/:storeId/suspend', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.suspendStore);
- routes.patch('/admin/stores/:storeId/reactivate', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.reactivateStore);
- routes.patch('/admin/stores/:storeId/plan-exempt', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.updatePlanExempt);
+routes.post('/admin/payments/:paymentId/reprocess', requireAuth, requireRole('SUPER_ADMIN'), PaymentController.reprocess);
+routes.patch('/admin/stores/:storeId/suspend', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.suspendStore);
+routes.patch('/admin/stores/:storeId/reactivate', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.reactivateStore);
+routes.patch('/admin/stores/:storeId/plan-exempt', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.updatePlanExempt);
+
+// Condominium organizer
+routes.get('/condominium/manage', requireAuth, requireRole('CONDOMINIUM_ADMIN'), CondominiumController.organizerOverview);
+routes.patch('/condominium/me', requireAuth, requireRole('CONDOMINIUM_ADMIN'), CondominiumController.organizerUpdateCondominium);
+routes.post('/condominium/events', requireAuth, requireRole('CONDOMINIUM_ADMIN'), CondominiumController.organizerCreateEvent);
+routes.patch('/condominium/events/:eventId', requireAuth, requireRole('CONDOMINIUM_ADMIN'), CondominiumController.organizerUpdateEvent);
+routes.patch('/condominium/events/:eventId/deactivate', requireAuth, requireRole('CONDOMINIUM_ADMIN'), CondominiumController.organizerDeactivateEvent);
+routes.post('/condominium/events/:eventId/stores/invite', requireAuth, requireRole('CONDOMINIUM_ADMIN'), CondominiumController.organizerInviteStoreToEvent);
+routes.post('/condominium/events/:eventId/stores/confirm', requireAuth, requireRole('CONDOMINIUM_ADMIN'), CondominiumController.organizerConfirmStoreInEvent);
+routes.patch('/condominium/stores/:storeId/settings', requireAuth, requireRole('CONDOMINIUM_ADMIN'), CondominiumController.organizerUpdateStoreSettings);
+routes.patch('/condominium/requests/:requestId/review', requireAuth, requireRole('CONDOMINIUM_ADMIN'), CondominiumController.organizerReviewRequest);
 
 // Platform KYC (motoboy documents) - SUPER_ADMIN only
 routes.get('/admin/motoboys/kyc/audit', requireAuth, requireRole('SUPER_ADMIN'), MotoboyKycController.auditSummary);

@@ -1484,6 +1484,28 @@ export async function runMigrations() {
     ON condominiums(active);
   `);
   await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS condominium_users (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      condominium_id UUID NOT NULL REFERENCES condominiums(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      role TEXT NOT NULL DEFAULT 'CONDOMINIUM_ADMIN',
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      last_login_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_condominium_users_condominium
+    ON condominium_users(condominium_id);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_condominium_users_active
+    ON condominium_users(active);
+  `);
+  await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS store_condominiums (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
@@ -1569,6 +1591,26 @@ export async function runMigrations() {
   await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_condominium_event_stores_active
     ON condominium_event_stores(active);
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS condominium_event_stores
+    ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'confirmed';
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS condominium_event_stores
+    ADD COLUMN IF NOT EXISTS invited_by UUID;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS condominium_event_stores
+    ADD COLUMN IF NOT EXISTS invite_note TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS condominium_event_stores
+    ADD COLUMN IF NOT EXISTS responded_at TIMESTAMPTZ;
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_condominium_event_stores_status
+    ON condominium_event_stores(status);
   `);
   await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS store_condominium_requests (

@@ -16,6 +16,13 @@ export const authService = {
         });
         return response;
     },
+    async condominiumLogin(email: string, password: string) {
+        const response = await apiClient.post("/auth/condominium-login", {
+            email: String(email || "").trim().toLowerCase(),
+            password,
+        });
+        return response;
+    },
     async forgotPassword(email: string) {
         const response = await apiClient.post("/auth/forgot-password", {
             email,

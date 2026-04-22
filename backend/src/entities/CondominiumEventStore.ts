@@ -45,6 +45,9 @@ export class CondominiumEventStore {
   @Column({ default: true })
   active!: boolean;
 
+  @Column({ type: 'text', default: 'confirmed' })
+  status!: string;
+
   @Column({ name: 'allow_pickup_at_stall', type: 'boolean', default: true })
   allowPickupAtStall!: boolean;
 
@@ -56,6 +59,15 @@ export class CondominiumEventStore {
 
   @Column({ type: 'text', nullable: true })
   notes?: string | null;
+
+  @Column({ name: 'invited_by', type: 'uuid', nullable: true })
+  invitedBy?: string | null;
+
+  @Column({ name: 'invite_note', type: 'text', nullable: true })
+  inviteNote?: string | null;
+
+  @Column({ name: 'responded_at', type: 'timestamptz', nullable: true })
+  respondedAt?: Date | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;

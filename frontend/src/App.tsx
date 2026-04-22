@@ -51,6 +51,8 @@ const ClientAuth = lazyPage(() => import('./pages/ClientAuth'), 'ClientAuth');
 const ClientAccount = lazyPage(() => import('./pages/ClientAccount'), 'ClientAccount');
 const ClientOrders = lazyPage(() => import('./pages/ClientOrders'), 'ClientOrders');
 const MarketplacePage = lazyPage(() => import('./pages/MarketplacePage'), 'MarketplacePage');
+const CondominiumLogin = lazyPage(() => import('./pages/CondominiumLogin'), 'CondominiumLogin');
+const CondominiumDashboard = lazyPage(() => import('./pages/CondominiumDashboard'), 'CondominiumDashboard');
 const AdminHighlights = lazyPage(() => import('./pages/AdminHighlights'), 'AdminHighlights');
 const SuperAdminHighlights = lazyPage(() => import('./pages/SuperAdminHighlights'), 'SuperAdminHighlights');
 const SystemGuidePage = lazyPage(() => import('./pages/SystemGuidePage'), 'SystemGuidePage');
@@ -102,6 +104,8 @@ function App() {
               <Route path="/cliente/conta" element={<ClientAccount />} />
               <Route path="/cliente/pedidos" element={<ClientOrders />} />
               <Route path="/cliente/enderecos" element={<AddressDistance />} />
+              <Route path="/condominio/login" element={<CondominiumLogin />} />
+              <Route path="/condominio" element={<CondominiumDashboard />} />
               <Route path="/admin" element={<AdminLogin />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
