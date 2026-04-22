@@ -39,13 +39,17 @@ tmp_file="$(mktemp)"
 awk '!/^FRONTEND_BUILD_COMMITS_JSON=/' "$ENV_FILE" > "$tmp_file"
 mv "$tmp_file" "$ENV_FILE"
 
+if command -v git >/dev/null 2>&1 && git -C "$ROOT_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "Deploying API from local git revision: $(git -C "$ROOT_DIR" rev-parse --short HEAD)"
+fi
+
 sh "$ROOT_DIR/scripts/docker-clean-build-cache.sh" || true
 
 $COMPOSE_CMD \
   -f "$ROOT_DIR/docker-compose.yml" \
   -f "$ROOT_DIR/docker-compose.prod.yml" \
   --env-file "$ENV_FILE" \
-  up -d --build --no-deps api
+  up -d --build --no-deps --force-recreate api
 
 sh "$ROOT_DIR/scripts/docker-clean-build-cache.sh" || true
 
