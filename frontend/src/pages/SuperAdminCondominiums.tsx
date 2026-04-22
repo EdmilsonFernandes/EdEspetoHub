@@ -62,11 +62,11 @@ const toDateTimeLocalInput = (value?: string) => {
 };
 
 export function SuperAdminCondominiums() {
-  const [data, setData] = useState<any>({ condominiums: [], stores: [], requests: [] });
+  const [data, setData] = useState<any>({ condominiums: [], stores: [], requests: [], accessRequests: [] });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [activeWorkspace, setActiveWorkspace] = useState<'overview' | 'setup' | 'operations' | 'agenda'>('overview');
+  const [activeWorkspace, setActiveWorkspace] = useState<'overview' | 'setup' | 'access' | 'operations' | 'agenda'>('overview');
   const [editingCondominiumId, setEditingCondominiumId] = useState('');
   const [editingEventId, setEditingEventId] = useState('');
   const [condominiumForm, setCondominiumForm] = useState({
@@ -116,7 +116,7 @@ export function SuperAdminCondominiums() {
     setError('');
     try {
       const payload = await condominiumService.adminOverview();
-      setData(payload || { condominiums: [], stores: [], requests: [] });
+      setData(payload || { condominiums: [], stores: [], requests: [], accessRequests: [] });
     } catch (err: any) {
       setError(err?.message || 'Não foi possível carregar condomínios.');
     } finally {
@@ -137,15 +137,18 @@ export function SuperAdminCondominiums() {
   const metrics = useMemo(() => {
     const condominiums = Array.isArray(data.condominiums) ? data.condominiums : [];
     const requests = Array.isArray(data.requests) ? data.requests : [];
-    const pendingRequests = requests.filter((request: any) => String(request?.status || 'pending') === 'pending').length;
+    const accessRequests = Array.isArray(data.accessRequests) ? data.accessRequests : [];
+    const pendingStoreRequests = requests.filter((request: any) => String(request?.status || 'pending') === 'pending').length;
+    const pendingAccessRequests = accessRequests.filter((request: any) => String(request?.status || 'pending') === 'pending').length;
     const confirmedStores = events.reduce((acc: number, event: any) => acc + (Array.isArray(event?.stores) ? event.stores.length : 0), 0);
     return {
       condominiums: condominiums.length,
       events: events.length,
-      pendingRequests,
+      pendingRequests: pendingStoreRequests + pendingAccessRequests,
+      pendingAccessRequests,
       confirmedStores,
     };
-  }, [data.condominiums, data.requests, events]);
+  }, [data.condominiums, data.requests, data.accessRequests, events]);
 
   const createCondominium = async () => {
     setSaving(true);
@@ -380,11 +383,25 @@ export function SuperAdminCondominiums() {
     }
   };
 
+  const reviewAccessRequest = async (requestId: string, status: 'pending' | 'approved' | 'rejected' | 'cancelled') => {
+    setSaving(true);
+    setError('');
+    try {
+      await condominiumService.adminReviewAccessRequest(requestId, { status });
+      await load();
+    } catch (err: any) {
+      setError(err?.message || 'Falha ao revisar solicitação de acesso.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const logoPreview = condominiumForm.logoFile || resolveAssetUrl(condominiumForm.logoUrl) || '';
   const bannerPreview = condominiumForm.bannerFile || resolveAssetUrl(condominiumForm.bannerUrl) || '';
   const workspaceTabs = [
     { id: 'overview', label: 'Visão geral', helper: 'Resumo e atalhos' },
     { id: 'setup', label: 'Cadastros', helper: 'Condomínio, feira e acessos' },
+    { id: 'access', label: 'Solicitações', helper: 'Novos condomínios' },
     { id: 'operations', label: 'Operação', helper: 'Lojas e solicitações' },
     { id: 'agenda', label: 'Agenda', helper: 'Eventos cadastrados' },
   ] as const;
@@ -394,6 +411,18 @@ export function SuperAdminCondominiums() {
     window.setTimeout(() => {
       document.getElementById('condominium-access-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 80);
+  };
+
+  const prepareAccessUser = (request: any) => {
+    const condominiumId = request?.createdCondominiumId || request?.createdCondominium?.id || '';
+    if (!condominiumId) return;
+    setUserForm({
+      condominiumId,
+      name: request.responsibleName || '',
+      email: request.responsibleEmail || '',
+      password: '',
+    });
+    focusCondominiumAccess();
   };
 
   const getStoreRuleDraft = (condominiumId: string, storeLink: any) => {
@@ -783,6 +812,66 @@ export function SuperAdminCondominiums() {
           </section>
           </div>
         </div>
+        ) : null}
+
+        {(activeWorkspace === 'overview' || activeWorkspace === 'access') ? (
+        <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-black tracking-tight text-slate-950">Solicitações de condomínios</h2>
+              <p className="text-sm font-medium text-slate-500">Analise novos condomínios, aprove o cadastro e depois crie o usuário responsável.</p>
+            </div>
+            <div className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-amber-700 ring-1 ring-amber-100">
+              {metrics.pendingAccessRequests || 0} novas
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3">
+            {(data.accessRequests || []).length === 0 ? (
+              <p className="rounded-[1.5rem] border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm font-semibold text-slate-500">Nenhuma solicitação de condomínio por enquanto.</p>
+            ) : (data.accessRequests || []).map((request: any) => {
+              const preview = resolveAssetUrl(request.logoUrl || request.bannerUrl || '') || '';
+              const status = statusCopy[String(request.status || 'pending')] || statusCopy.pending;
+              const canPrepareUser = String(request.status || '') === 'approved' && (request.createdCondominiumId || request.createdCondominium?.id);
+              return (
+                <article key={request.id} className={`rounded-[1.6rem] border border-l-4 ${requestBorderAccent(request.status)} bg-[linear-gradient(135deg,_#ffffff_0%,_#f8fafc_45%,_#ffffff_100%)] p-4 shadow-[0_22px_45px_-34px_rgba(15,23,42,0.45)]`}>
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="flex min-w-0 gap-3">
+                      <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[1.25rem] bg-slate-50 ring-1 ring-slate-100">
+                        {preview ? <img src={preview} alt={request.condominiumName} className="h-full w-full object-contain p-1.5" /> : <Buildings size={24} weight="duotone" className="text-[#336886]" />}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="truncate text-base font-black text-slate-950">{request.condominiumName}</h3>
+                          <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ring-1 ${status.tone}`}>{status.label}</span>
+                        </div>
+                        <p className="mt-1 text-xs font-semibold text-slate-500">{[request.city, request.state].filter(Boolean).join(' - ') || 'Local não informado'}</p>
+                        <p className="mt-2 text-sm font-bold text-slate-800">{request.responsibleName} <span className="font-semibold text-slate-400">• {request.responsibleRole || 'Responsável'}</span></p>
+                        <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{request.responsibleEmail} • {request.responsiblePhone || 'sem WhatsApp'}</p>
+                        {request.message ? <p className="mt-2 rounded-2xl bg-slate-50 px-3 py-2 text-xs font-semibold leading-5 text-slate-600 ring-1 ring-slate-100">{request.message}</p> : null}
+                        {request.createdCondominium ? (
+                          <p className="mt-2 text-xs font-black text-emerald-700">Cadastro criado: {request.createdCondominium.name}</p>
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className="flex w-full flex-wrap gap-2 lg:max-w-[360px] lg:justify-end">
+                      <button onClick={() => reviewAccessRequest(request.id, 'approved')} disabled={saving || request.status === 'approved'} className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white shadow-[0_16px_30px_-22px_rgba(5,150,105,0.85)] disabled:opacity-50">
+                        Aprovar e criar cadastro
+                      </button>
+                      {canPrepareUser ? (
+                        <button onClick={() => prepareAccessUser(request)} disabled={saving} className="rounded-xl bg-[#153A4C] px-3 py-2 text-xs font-black text-white disabled:opacity-50">
+                          Criar usuário
+                        </button>
+                      ) : null}
+                      <button onClick={() => reviewAccessRequest(request.id, 'rejected')} disabled={saving || request.status === 'rejected'} className="rounded-xl bg-white px-3 py-2 text-xs font-black text-rose-700 ring-1 ring-rose-100 disabled:opacity-50">Recusar</button>
+                      <button onClick={() => reviewAccessRequest(request.id, 'pending')} disabled={saving || request.status === 'pending'} className="rounded-xl bg-amber-50 px-3 py-2 text-xs font-black text-amber-700 ring-1 ring-amber-100 disabled:opacity-50">Voltar p/ análise</button>
+                      <button onClick={() => reviewAccessRequest(request.id, 'cancelled')} disabled={saving || request.status === 'cancelled'} className="rounded-xl bg-slate-50 px-3 py-2 text-xs font-black text-slate-600 ring-1 ring-slate-200 disabled:opacity-50">Arquivar</button>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
         ) : null}
 
         {(activeWorkspace === 'overview' || activeWorkspace === 'operations') ? (

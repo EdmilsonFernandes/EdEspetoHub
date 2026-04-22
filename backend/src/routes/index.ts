@@ -108,6 +108,7 @@ routes.post('/admin/condominiums/:condominiumId/stores', requireAuth, requireRol
 routes.patch('/admin/condominiums/:condominiumId/stores/:storeId/settings', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminUpdateStoreSettings);
 routes.post('/admin/condominium-events/:eventId/stores', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminAddStoreToEvent);
 routes.patch('/admin/condominium-requests/:requestId/review', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminReviewRequest);
+routes.patch('/admin/condominium-access-requests/:requestId/review', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminReviewAccessRequest);
 routes.post('/admin/payments/:paymentId/reprocess', requireAuth, requireRole('SUPER_ADMIN'), PaymentController.reprocess);
 routes.patch('/admin/stores/:storeId/suspend', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.suspendStore);
 routes.patch('/admin/stores/:storeId/reactivate', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.reactivateStore);
@@ -147,6 +148,7 @@ routes.post(
 routes.get('/public/platform/metrics', PlatformPublicController.metrics);
 routes.get('/public/stores', StoreController.listPortfolio);
 routes.get('/public/condominiums', CondominiumController.listPublic);
+routes.post('/public/condominium-access-requests', CondominiumController.createAccessRequest);
 routes.get('/public/condominiums/:slug', CondominiumController.getPublicBySlug);
 routes.get('/public/condominiums/:slug/stores', CondominiumController.listPublicStoresBySlug);
 routes.get('/public/featured-products', FeaturedProductController.listPublic);

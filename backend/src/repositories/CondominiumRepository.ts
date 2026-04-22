@@ -20,6 +20,7 @@ import { Store } from '../entities/Store';
 import { StoreCondominium } from '../entities/StoreCondominium';
 import { StoreCondominiumRequest } from '../entities/StoreCondominiumRequest';
 import { CondominiumUser } from '../entities/CondominiumUser';
+import { CondominiumAccessRequest } from '../entities/CondominiumAccessRequest';
 
 /**
  * Provides CondominiumRepository functionality.
@@ -34,6 +35,7 @@ export class CondominiumRepository {
   private condominiumEventStoreRepository: Repository<CondominiumEventStore>;
   private storeCondominiumRequestRepository: Repository<StoreCondominiumRequest>;
   private condominiumUserRepository: Repository<CondominiumUser>;
+  private condominiumAccessRequestRepository: Repository<CondominiumAccessRequest>;
 
   /**
    * Creates a new instance.
@@ -48,6 +50,41 @@ export class CondominiumRepository {
     this.condominiumEventStoreRepository = AppDataSource.getRepository(CondominiumEventStore);
     this.storeCondominiumRequestRepository = AppDataSource.getRepository(StoreCondominiumRequest);
     this.condominiumUserRepository = AppDataSource.getRepository(CondominiumUser);
+    this.condominiumAccessRequestRepository = AppDataSource.getRepository(CondominiumAccessRequest);
+  }
+
+  async ensureAccessRequestTable() {
+    await AppDataSource.query('CREATE EXTENSION IF NOT EXISTS pgcrypto;');
+    await AppDataSource.query(`
+      CREATE TABLE IF NOT EXISTS condominium_access_requests (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        condominium_name varchar NOT NULL,
+        slug text NULL,
+        description text NULL,
+        address text NULL,
+        city text NULL,
+        state text NULL,
+        zip_code text NULL,
+        logo_url text NULL,
+        banner_url text NULL,
+        responsible_name varchar NOT NULL,
+        responsible_role text NULL,
+        responsible_email varchar NOT NULL,
+        responsible_phone text NULL,
+        message text NULL,
+        status text NOT NULL DEFAULT 'pending',
+        review_note text NULL,
+        reviewed_by uuid NULL,
+        reviewed_at timestamptz NULL,
+        created_condominium_id uuid NULL REFERENCES condominiums(id) ON DELETE SET NULL,
+        created_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now()
+      );
+    `);
+    await AppDataSource.query(`
+      CREATE INDEX IF NOT EXISTS idx_condominium_access_requests_status_created
+      ON condominium_access_requests (status, created_at DESC);
+    `);
   }
 
   /**
@@ -82,6 +119,44 @@ export class CondominiumRepository {
       relations: [ 'condominium' ],
       order: { createdAt: 'DESC' },
     });
+  }
+
+  async listAccessRequests(status?: string) {
+    await this.ensureAccessRequestTable();
+    const qb = this.condominiumAccessRequestRepository
+      .createQueryBuilder('request')
+      .leftJoinAndSelect('request.createdCondominium', 'createdCondominium')
+      .orderBy('request.created_at', 'DESC');
+    if (status) qb.andWhere('request.status = :status', { status });
+    return qb.getMany();
+  }
+
+  async findAccessRequestById(id: string) {
+    await this.ensureAccessRequestTable();
+    return this.condominiumAccessRequestRepository.findOne({
+      where: { id },
+      relations: [ 'createdCondominium' ],
+    });
+  }
+
+  async findPendingAccessRequestByEmailOrName(email: string, condominiumName: string) {
+    await this.ensureAccessRequestTable();
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+    const normalizedName = String(condominiumName || '').trim();
+    return this.condominiumAccessRequestRepository
+      .createQueryBuilder('request')
+      .where('request.status = :status', { status: 'pending' })
+      .andWhere('(LOWER(request.responsible_email) = :email OR LOWER(request.condominium_name) = :name)', {
+        email: normalizedEmail,
+        name: normalizedName.toLowerCase(),
+      })
+      .orderBy('request.created_at', 'DESC')
+      .getOne();
+  }
+
+  async saveAccessRequest(payload: Partial<CondominiumAccessRequest>) {
+    await this.ensureAccessRequestTable();
+    return this.condominiumAccessRequestRepository.save(this.condominiumAccessRequestRepository.create(payload));
   }
 
   findCondominiumUserByEmail(email: string) {

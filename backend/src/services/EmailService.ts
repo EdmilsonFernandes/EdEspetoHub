@@ -554,4 +554,52 @@ private renderTemplate(template: string, vars: Record<string, string>) {
       payload.emails.map((email) => this.send({ to: email, subject, text, html }))
     );
   }
+
+  async sendCondominiumAccessRequestNotification(payload: {
+    to?: string;
+    condominiumName: string;
+    responsibleName: string;
+    responsibleRole?: string | null;
+    responsibleEmail: string;
+    responsiblePhone?: string | null;
+    city?: string | null;
+    state?: string | null;
+    requestId?: string;
+  }) {
+    const target = String(payload.to || 'contato@janocaminho.com.br').trim();
+    if (!target) return;
+    const adminUrl = `${env.appUrl.replace(/\/$/, '')}/superadmin/condominiums`;
+    const subject = `Nova solicitação de condomínio - ${payload.condominiumName}`;
+    const lines = [
+      'Nova solicitação de acesso de condomínio.',
+      `Condomínio: ${payload.condominiumName}`,
+      `Responsável: ${payload.responsibleName}`,
+      `Cargo: ${payload.responsibleRole || '-'}`,
+      `E-mail: ${payload.responsibleEmail}`,
+      `WhatsApp: ${payload.responsiblePhone || '-'}`,
+      `Local: ${[payload.city, payload.state].filter(Boolean).join(' - ') || '-'}`,
+      `Solicitação: ${payload.requestId || '-'}`,
+      '',
+      `Analisar no Super Admin: ${adminUrl}`,
+    ];
+    const text = lines.join('\n');
+    const html = `
+      <div style="font-family: Arial, sans-serif; background: #f8fafc; padding: 24px;">
+        <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 22px;">
+          <p style="margin: 0 0 8px; color: #336886; font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;">Condomínio</p>
+          <h2 style="margin: 0 0 12px; color: #0f172a;">Nova solicitação de acesso</h2>
+          <ul style="padding-left: 18px; margin: 0 0 18px; color: #0f172a; line-height: 1.65;">
+            <li><strong>Condomínio:</strong> ${payload.condominiumName}</li>
+            <li><strong>Responsável:</strong> ${payload.responsibleName}</li>
+            <li><strong>Cargo:</strong> ${payload.responsibleRole || '-'}</li>
+            <li><strong>E-mail:</strong> ${payload.responsibleEmail}</li>
+            <li><strong>WhatsApp:</strong> ${payload.responsiblePhone || '-'}</li>
+            <li><strong>Local:</strong> ${[payload.city, payload.state].filter(Boolean).join(' - ') || '-'}</li>
+          </ul>
+          <a href="${adminUrl}" style="display: inline-block; padding: 12px 18px; background: #153A4C; color: #ffffff; text-decoration: none; border-radius: 12px; font-weight: 700;">Analisar solicitação</a>
+        </div>
+      </div>
+    `;
+    await this.send({ to: target, subject, text, html });
+  }
 }

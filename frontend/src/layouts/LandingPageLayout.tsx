@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { DownloadSimple, House, List, MagnifyingGlass, Moon, ShieldCheck, SignOut, Storefront, Sun, Truck, X } from '@phosphor-icons/react';
+import { Buildings, DownloadSimple, House, List, MagnifyingGlass, Moon, ShieldCheck, SignOut, Storefront, Sun, Truck, X } from '@phosphor-icons/react';
 import mercadoPagoHorizontal from '../assets/mercado-pago-horizontal.svg';
 
 interface LandingPageLayoutProps {
@@ -160,6 +160,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
       },
     },
     { id: 'marketplace', label: 'Já no Caminho', onClick: () => navigate('/hub') },
+    { id: 'condominiums', label: 'Condomínios', onClick: () => navigate('/condominio/solicitar') },
     { id: 'guide', label: 'Guia', onClick: () => navigate('/guia') },
     { id: 'architecture', label: 'Arquitetura', onClick: () => navigate('/arquitetura') },
     { id: 'install', label: 'Instalar app', onClick: () => navigate('/instalar') },
@@ -306,6 +307,14 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             >
               Instalar app
               <DownloadSimple size={18} weight="duotone" />
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/condominio/solicitar')}
+              className="w-full inline-flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200"
+            >
+              Sou condomínio
+              <Buildings size={18} weight="duotone" />
             </button>
             <button
               type="button"

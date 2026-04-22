@@ -115,6 +115,13 @@ export function CondominiumLogin() {
             <LockKey size={19} weight="duotone" />
             {loading ? 'Entrando...' : 'Entrar no painel'}
           </button>
+          <button
+            type="button"
+            onClick={() => navigate('/condominio/solicitar')}
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-[#153A4C] transition hover:bg-slate-50"
+          >
+            Solicitar acesso para meu condomínio
+          </button>
         </form>
       </div>
     </AuthLayout>

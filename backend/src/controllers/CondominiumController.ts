@@ -138,6 +138,15 @@ export class CondominiumController {
     }
   }
 
+  static async adminReviewAccessRequest(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.adminReviewAccessRequest(String(req.params.requestId || ''), req.body || {}, req.auth?.sub);
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
   static async organizerOverview(req: Request, res: Response) {
     try {
       const payload = await condominiumService.organizerOverview(req.auth?.condominiumId);
@@ -276,6 +285,15 @@ export class CondominiumController {
         req.auth?.storeId
       );
       return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async createAccessRequest(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.createAccessRequest(req.body || {});
+      return res.status(201).json(payload);
     } catch (error: any) {
       return respondWithError(req, res, error, 400);
     }

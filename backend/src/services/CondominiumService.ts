@@ -16,6 +16,7 @@ import { resolvePlanFeatures } from '../config/planFeatures';
 import { AppError } from '../errors/AppError';
 import { CondominiumRepository } from '../repositories/CondominiumRepository';
 import { saveBase64Image } from '../utils/imageStorage';
+import { EmailService } from './EmailService';
 import { OrderReviewService } from './OrderReviewService';
 import { SubscriptionService } from './SubscriptionService';
 
@@ -29,13 +30,15 @@ export class CondominiumService {
   private condominiumRepository = new CondominiumRepository();
   private subscriptionService = new SubscriptionService();
   private orderReviewService = new OrderReviewService();
+  private emailService = new EmailService();
 
   async adminOverview() {
-    const [condominiums, stores, pendingRequests, condominiumUsers] = await Promise.all([
+    const [condominiums, stores, pendingRequests, condominiumUsers, accessRequests] = await Promise.all([
       this.condominiumRepository.listAllForAdmin(),
       this.condominiumRepository.listAllStoresForAdmin(),
       this.condominiumRepository.listRequests(),
       this.condominiumRepository.listCondominiumUsers(),
+      this.condominiumRepository.listAccessRequests(),
     ]);
 
     const eventGroups = await Promise.all(
@@ -70,8 +73,57 @@ export class CondominiumService {
         state: store.settings?.state || null,
       })),
       requests: pendingRequests.map((request) => this.toPublicRequest(request)),
+      accessRequests: accessRequests.map((request) => this.toPublicAccessRequest(request)),
       condominiumUsers: condominiumUsers.map((user: any) => this.toPublicCondominiumUser(user)),
     };
+  }
+
+  async createAccessRequest(payload: any) {
+    const condominiumName = String(payload?.condominiumName || payload?.name || '').trim();
+    const responsibleName = String(payload?.responsibleName || '').trim();
+    const responsibleEmail = String(payload?.responsibleEmail || '').trim().toLowerCase();
+    const responsiblePhone = String(payload?.responsiblePhone || '').trim();
+    if (!condominiumName || !responsibleName || !responsibleEmail || !responsiblePhone) {
+      throw new AppError('CONDO-012', 400, { message: 'Condominio, responsavel, e-mail e WhatsApp sao obrigatorios.' });
+    }
+    const existing = await this.condominiumRepository.findPendingAccessRequestByEmailOrName(responsibleEmail, condominiumName);
+    if (existing) return this.toPublicAccessRequest(existing);
+
+    const safeSlug = this.slugify(payload?.slug || condominiumName) || 'condominio';
+    const uploadedLogo = await saveBase64Image(payload?.logoFile, `condominium-request-logo-${safeSlug}`, 'condominiums');
+    const uploadedBanner = await saveBase64Image(payload?.bannerFile, `condominium-request-banner-${safeSlug}`, 'condominiums');
+    const saved = await this.condominiumRepository.saveAccessRequest({
+      condominiumName,
+      slug: safeSlug,
+      description: payload?.description || null,
+      address: payload?.address || null,
+      city: payload?.city || null,
+      state: payload?.state || null,
+      zipCode: payload?.zipCode || null,
+      logoUrl: uploadedLogo || payload?.logoUrl || null,
+      bannerUrl: uploadedBanner || payload?.bannerUrl || null,
+      responsibleName,
+      responsibleRole: payload?.responsibleRole || null,
+      responsibleEmail,
+      responsiblePhone,
+      message: payload?.message || null,
+      status: 'pending',
+    });
+    try {
+      await this.emailService.sendCondominiumAccessRequestNotification({
+        condominiumName,
+        responsibleName,
+        responsibleRole: payload?.responsibleRole || null,
+        responsibleEmail,
+        responsiblePhone,
+        city: payload?.city || null,
+        state: payload?.state || null,
+        requestId: saved.id,
+      });
+    } catch {
+      // A solicitação não deve falhar se o SMTP estiver indisponível.
+    }
+    return this.toPublicAccessRequest(saved);
   }
 
   async adminCreateCondominium(payload: any) {
@@ -278,6 +330,43 @@ export class CondominiumService {
       await this.condominiumRepository.upsertStoreCondominium(request.condominiumId, request.storeId, false);
     }
     return this.toPublicRequest(saved);
+  }
+
+  async adminReviewAccessRequest(requestId: string, payload: any, reviewedBy?: string) {
+    const request = await this.condominiumRepository.findAccessRequestById(requestId);
+    if (!request) throw new AppError('CONDO-013', 404, { message: 'Solicitacao de condominio nao encontrada.' });
+    const status = String(payload?.status || '').trim().toLowerCase();
+    if (![ 'pending', 'approved', 'rejected', 'cancelled' ].includes(status)) {
+      throw new AppError('CONDO-005', 400, { message: 'Status de revisao invalido.' });
+    }
+
+    let createdCondominiumId = request.createdCondominiumId || null;
+    if (status === 'approved' && !createdCondominiumId) {
+      const condominium = await this.adminCreateCondominium({
+        name: request.condominiumName,
+        slug: request.slug || this.slugify(request.condominiumName),
+        description: request.description,
+        address: request.address,
+        city: request.city,
+        state: request.state,
+        zipCode: request.zipCode,
+        logoUrl: request.logoUrl,
+        bannerUrl: request.bannerUrl,
+        active: true,
+      });
+      createdCondominiumId = condominium.id;
+    }
+
+    const saved = await this.condominiumRepository.saveAccessRequest({
+      ...request,
+      status,
+      reviewNote: payload?.reviewNote || null,
+      reviewedBy: status === 'pending' ? null : reviewedBy || null,
+      reviewedAt: status === 'pending' ? null : new Date(),
+      createdCondominiumId,
+    });
+    const refreshed = await this.condominiumRepository.findAccessRequestById(saved.id);
+    return this.toPublicAccessRequest(refreshed || saved);
   }
 
   async organizerOverview(condominiumId?: string) {
@@ -747,6 +836,32 @@ export class CondominiumService {
       condominium: request.condominium ? this.toPublicCondominium(request.condominium, null) : null,
       storeId: request.storeId,
       condominiumId: request.condominiumId,
+    };
+  }
+
+  private toPublicAccessRequest(request: any) {
+    return {
+      id: request.id,
+      condominiumName: request.condominiumName,
+      slug: request.slug || null,
+      description: request.description || null,
+      address: request.address || null,
+      city: request.city || null,
+      state: request.state || null,
+      zipCode: request.zipCode || null,
+      logoUrl: request.logoUrl || null,
+      bannerUrl: request.bannerUrl || null,
+      responsibleName: request.responsibleName,
+      responsibleRole: request.responsibleRole || null,
+      responsibleEmail: request.responsibleEmail,
+      responsiblePhone: request.responsiblePhone || null,
+      message: request.message || null,
+      status: request.status || 'pending',
+      reviewNote: request.reviewNote || null,
+      createdCondominiumId: request.createdCondominiumId || null,
+      createdCondominium: request.createdCondominium ? this.toPublicCondominium(request.createdCondominium, null) : null,
+      createdAt: request.createdAt instanceof Date ? request.createdAt.toISOString() : request.createdAt,
+      reviewedAt: request.reviewedAt instanceof Date ? request.reviewedAt.toISOString() : request.reviewedAt || null,
     };
   }
 

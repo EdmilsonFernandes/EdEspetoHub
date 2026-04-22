@@ -69,6 +69,10 @@ export const condominiumService = {
     return toJson(response);
   },
 
+  createAccessRequest(payload: any) {
+    return apiClient.post('/public/condominium-access-requests', payload);
+  },
+
   adminOverview() {
     return adminRequest('/admin/condominiums/manage');
   },
@@ -126,6 +130,10 @@ export const condominiumService = {
 
   adminReviewRequest(requestId: string, payload: { status: 'pending' | 'approved' | 'rejected' | 'blocked' | 'cancelled'; reviewNote?: string }) {
     return adminRequest(`/admin/condominium-requests/${encodeURIComponent(requestId)}/review`, { method: 'PATCH', body: payload });
+  },
+
+  adminReviewAccessRequest(requestId: string, payload: { status: 'pending' | 'approved' | 'rejected' | 'cancelled'; reviewNote?: string }) {
+    return adminRequest(`/admin/condominium-access-requests/${encodeURIComponent(requestId)}/review`, { method: 'PATCH', body: payload });
   },
 
   organizerOverview() {
