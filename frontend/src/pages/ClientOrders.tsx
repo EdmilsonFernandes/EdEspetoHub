@@ -13,10 +13,10 @@ import {
   UserCircle,
   Package,
   Receipt,
+  Motorcycle,
   SpinnerGap,
   Storefront,
   Timer,
-  Truck,
   XCircle,
   Buildings,
 } from '@phosphor-icons/react';
@@ -155,7 +155,7 @@ const getStatusMeta = (status: string, orderType?: string) => {
     case 'DISPATCHED':
       return {
         label: 'Em rota',
-        icon: <Truck size={15} weight="duotone" className="text-indigo-600" />,
+        icon: <Motorcycle size={15} weight="duotone" className="text-indigo-600" />,
         toneClass: 'text-indigo-600',
       };
     case 'DELIVERED':
@@ -370,6 +370,24 @@ function OrderCard({
               ) : null}
             </div>
           </div>
+          {['DELIVERING', 'IN_DELIVERY', 'DISPATCHED'].includes(normalizeStatus(order.status)) && details?.delivery?.motoboy?.name ? (
+            <div className="mt-2.5 flex items-center gap-2.5 rounded-2xl border border-indigo-100 bg-indigo-50 px-3 py-2">
+              <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full border-2 border-white shadow-sm">
+                {details.delivery.motoboy.profileImageUrl ? (
+                  <img src={resolveAssetUrl(details.delivery.motoboy.profileImageUrl)} alt={details.delivery.motoboy.name} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="grid h-full w-full place-items-center bg-indigo-200 text-xs font-bold text-indigo-700">
+                    {String(details.delivery.motoboy.name)[0]?.toUpperCase()}
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-indigo-500">Entregador</p>
+                <p className="truncate text-sm font-semibold text-indigo-900">{details.delivery.motoboy.name}</p>
+              </div>
+              <Motorcycle size={18} weight="duotone" className="ml-auto shrink-0 text-indigo-400" />
+            </div>
+          ) : null}
         </div>
       </button>
 
