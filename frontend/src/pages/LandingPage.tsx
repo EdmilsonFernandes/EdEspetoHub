@@ -345,9 +345,9 @@ export function LandingPage() {
                           O cliente paga no fluxo da loja e o valor cai na conta Mercado Pago do próprio lojista.
                         </p>
                       </div>
-                      <div className="w-full max-w-[260px] rounded-2xl border border-[#00bcff]/20 bg-white px-4 py-3 shadow-[0_18px_42px_-26px_rgba(0,158,227,0.75)] sm:w-[230px]">
+                      <div className="w-full max-w-[260px] rounded-2xl border border-[#ffe600]/60 bg-[#ffe600] px-4 py-3 shadow-[0_20px_46px_-26px_rgba(255,230,0,0.85)] sm:w-[230px]">
                         <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-10 w-full object-contain" />
-                        <div className="mt-2 flex items-center justify-center gap-1.5 rounded-full bg-[#00bcff]/10 px-2 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-[#0a0080]">
+                        <div className="mt-2 flex items-center justify-center gap-1.5 rounded-full bg-[#009ee3] px-2 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-white">
                           <ShieldCheck size={11} weight="duotone" />
                           Integração OAuth
                         </div>
@@ -381,13 +381,13 @@ export function LandingPage() {
                         </div>
                       </div>
 
-                      <div className="rounded-2xl border border-[#00bcff]/25 bg-[linear-gradient(145deg,rgba(0,188,255,0.18),rgba(10,0,128,0.08))] p-4">
+                      <div className="rounded-2xl border border-[#ffe600]/40 bg-[linear-gradient(145deg,rgba(255,230,0,0.2),rgba(0,188,255,0.14))] p-4">
                         <div className="flex items-center justify-between gap-3">
                           <div>
-                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-100">Conta conectada</p>
+                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#ffe600]">Conta conectada</p>
                             <p className="mt-1 text-sm font-black text-white">Mercado Pago do lojista</p>
                           </div>
-                          <ShieldCheck size={22} weight="duotone" className="text-sky-200" />
+                          <ShieldCheck size={22} weight="duotone" className="text-[#ffe600]" />
                         </div>
                         <div className="mt-5 grid grid-cols-3 gap-2">
                           {[
@@ -563,17 +563,17 @@ export function LandingPage() {
             </div>
 
             <div className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_24px_55px_-45px_rgba(15,23,42,0.55)]">
-              <div className="border-b border-slate-100 bg-[linear-gradient(135deg,#ffffff_0%,#eef9ff_100%)] p-5">
+              <div className="border-b border-[#e7d000] bg-[#ffe600] p-5">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="rounded-2xl border border-sky-100 bg-white px-5 py-3 shadow-[0_18px_36px_-28px_rgba(0,158,227,0.65)]">
+                  <div className="rounded-2xl border border-[#0a0080]/10 bg-[#ffe600] px-5 py-3 shadow-[0_18px_34px_-28px_rgba(10,0,128,0.85)]">
                     <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-12 w-full max-w-[250px] object-contain" />
                   </div>
-                  <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-emerald-700 ring-1 ring-emerald-200">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#009ee3] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-white shadow-sm ring-1 ring-[#0a0080]/10">
+                    <span className="h-1.5 w-1.5 rounded-full bg-white" />
                     Conexão segura
                   </span>
                 </div>
-                <p className="mt-4 text-xs font-bold leading-5 text-slate-500">
+                <p className="mt-4 text-xs font-black leading-5 text-[#0a0080]">
                   O lojista autoriza pelo ambiente Mercado Pago e recebe direto na própria conta.
                 </p>
               </div>

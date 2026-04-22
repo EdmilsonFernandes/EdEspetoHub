@@ -478,7 +478,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             <div>
               <h3 className="text-sm font-black text-white mb-3 uppercase tracking-[0.12em]">Integrações</h3>
               <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">
-                <div className="rounded-2xl border border-sky-400/15 bg-white px-4 py-3 shadow-[0_18px_42px_-28px_rgba(0,158,227,0.8)]">
+                <div className="rounded-2xl border border-[#ffe600]/60 bg-[#ffe600] px-4 py-3 shadow-[0_18px_42px_-28px_rgba(255,230,0,0.8)]">
                   <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-10 w-full object-contain" />
                 </div>
                 <p className="mt-3 text-sm font-semibold text-white">Pagamentos online opcionais</p>
