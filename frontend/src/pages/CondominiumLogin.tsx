@@ -41,8 +41,8 @@ export function CondominiumLogin() {
     <AuthLayout>
       <div className="w-full max-w-[560px] space-y-4 ds-login-card-enter">
         <div className="text-center">
-          <div className="mx-auto grid h-[4.5rem] w-[4.5rem] place-items-center overflow-hidden rounded-2xl border border-[#336886]/20 bg-white p-0.5 shadow-[0_8px_28px_-8px_rgba(13,79,102,0.28)]">
-            <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-xl object-cover" />
+          <div className="mx-auto grid h-[4.75rem] w-[4.75rem] place-items-center overflow-hidden rounded-full border-[4px] border-white bg-white p-0.5 shadow-[0_16px_38px_-18px_rgba(13,79,102,0.5)] ring-1 ring-[#336886]/12">
+            <img src="/janocaminho.png" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
           </div>
           <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-700">
             <ShieldCheck size={14} weight="fill" />
