@@ -30,7 +30,7 @@ export class FeaturedProductService {
   private mercadoPago = new MercadoPagoService();
 
   private async resolveStore(storeId: string) {
-    const store = await AppDataSource.getRepository(Store).findOne({ where: { id: storeId } });
+    const store = await AppDataSource.getRepository(Store).findOne({ where: { id: storeId }, relations: ['owner'] });
     if (!store) throw new AppError('STORE-001', 404);
     return store;
   }
@@ -226,7 +226,7 @@ export class FeaturedProductService {
     let providerExpiresAt: Date | null = expiresAt;
 
     const mpEnabled = Boolean(env.mercadoPago.accessToken);
-    const payerEmail = String(user?.email || store?.owner?.email || '').trim();
+    const payerEmail = String(user?.email || store?.owner?.email || env.email.smtpUser || '').trim();
     const payerName = String(user?.fullName || store?.owner?.fullName || store?.name || 'Cliente').trim();
 
     if (mpEnabled && payerEmail) {
