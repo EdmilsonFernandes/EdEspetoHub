@@ -441,10 +441,23 @@ export function MarketplacePage() {
     if (params.get('panel') === 'condominios') {
       setCondominiumPickerOpen(true);
     }
+    if (params.get('profile') === '1') {
+      setCondominiumPickerOpen(false);
+      setProfileDrawerOpen(true);
+      params.delete('profile');
+      navigate(
+        {
+          pathname: location.pathname,
+          search: params.toString() ? `?${params.toString()}` : '',
+        },
+        { replace: true }
+      );
+      return;
+    }
     if (params.get('favorites') === '1') {
       setQuickFilter('favorites');
     }
-  }, [location.search]);
+  }, [location.pathname, location.search, navigate]);
 
   useEffect(() => {
     if (!condominiumPickerOpen) return;

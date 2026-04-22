@@ -515,7 +515,10 @@ export function ClientOrders() {
       if (requestId !== requestIdRef.current) return;
       const normalized = Array.isArray(ordersData) ? ordersData : [];
       setOrders(normalized);
-      await refreshActiveOrderDetails(normalized);
+      if (!options?.silent) {
+        setLoading(false);
+      }
+      void refreshActiveOrderDetails(normalized);
     } catch (e: any) {
       if (requestId !== requestIdRef.current) return;
       setError(e?.message || 'Falha ao carregar pedidos.');
@@ -877,7 +880,7 @@ export function ClientOrders() {
           </button>
           <button
             type="button"
-            onClick={() => window.dispatchEvent(new CustomEvent('jnk:open-profile-drawer'))}
+            onClick={() => navigate('/hub?profile=1')}
             className="group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
           >
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">

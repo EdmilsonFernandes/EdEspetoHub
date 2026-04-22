@@ -231,7 +231,7 @@ export function NativeAppNavigator() {
         </button>
         <button
           type="button"
-          onClick={() => window.dispatchEvent(new CustomEvent('jnk:open-profile-drawer'))}
+          onClick={() => navigate('/hub?profile=1')}
           className={`${itemBaseClass} ${inactiveItemClass}`}
         >
           <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
