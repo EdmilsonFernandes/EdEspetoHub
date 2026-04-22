@@ -25,7 +25,7 @@ import { orderService } from '../services/orderService';
 import { useToast } from '../contexts/ToastContext';
 import { formatCurrency } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
-import { getPaymentProviderMeta } from '../utils/paymentAssets';
+import { getPaymentProviderMeta, mercadoPagoHorizontal } from '../utils/paymentAssets';
 
 const TERMINAL_STATUSES = [ 'DELIVERED', 'CANCELLED', 'FINISHED', 'REJECTED', 'DONE' ];
 const ACTIVE_REFRESH_MS = 10_000;
@@ -286,8 +286,11 @@ function OrderCard({
             </div>
             <p className="mt-1 text-[11px] text-slate-500">{orderDate || formatGroupDate(order.createdAt)}</p>
             {String(order.paymentStatus || '').toUpperCase() === 'PAID' && (
-              <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
-                <CheckCircle size={10} weight="fill" /> Pago via Mercado Pago
+              <span className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white px-2 py-0.5 shadow-sm">
+                <CheckCircle size={10} weight="fill" className="shrink-0 text-emerald-500" />
+                <span className="text-[10px] font-bold text-emerald-700">Pago</span>
+                <span className="h-3 w-px shrink-0 bg-slate-200" />
+                <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-3.5 object-contain" />
               </span>
             )}
             {condominiumOrder?.condominiumName ? (

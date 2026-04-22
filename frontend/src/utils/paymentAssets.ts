@@ -12,6 +12,9 @@
  */
 import { resolveAssetUrl } from './resolveAssetUrl';
 import mercadoPagoLogo from '../assets/mercado-pago-logo.svg';
+import mercadoPagoHorizontal from '../assets/mercado-pago-horizontal.svg';
+
+export { mercadoPagoHorizontal };
 
 const normalize = (value?: string) =>
   (value || '').toString().trim().toLowerCase().replace(/\s+/g, '_');

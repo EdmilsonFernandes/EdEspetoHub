@@ -4,7 +4,7 @@ import { CheckCircle, QrCode, ArrowLeft, CreditCard, Printer, Copy, Check, Arrow
 import { Capacitor } from "@capacitor/core";
 import { Browser } from "@capacitor/browser";
 import { formatPaymentMethod } from "../../utils/format";
-import { getPaymentMethodMeta, getPaymentProviderMeta } from "../../utils/paymentAssets";
+import { getPaymentMethodMeta, getPaymentProviderMeta, mercadoPagoHorizontal } from "../../utils/paymentAssets";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { getStoreAvatarUrl } from "../../utils/storeAvatar";
 
@@ -86,8 +86,11 @@ const PixPaymentScreen = ({ onlinePayment, paymentStatus, onNewOrder, storeLabel
           </div>
           {/* live status pill */}
           {isPaid ? (
-            <span className="flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-black text-emerald-700 border border-emerald-200">
-              <SealCheck size={12} weight="fill" /> Pago
+            <span className="flex items-center gap-1.5 rounded-full bg-white border border-emerald-200 pl-2 pr-2.5 py-1 shadow-sm">
+              <SealCheck size={12} weight="fill" className="text-emerald-500 shrink-0" />
+              <span className="text-[10px] font-black text-emerald-700">Pago</span>
+              <span className="h-3 w-px bg-slate-200 shrink-0" />
+              <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-3.5 object-contain" />
             </span>
           ) : isFailed || isExpired ? (
             <span className="flex items-center gap-1.5 rounded-full bg-rose-100 px-2.5 py-1 text-[11px] font-black text-rose-700 border border-rose-200">
@@ -220,11 +223,18 @@ const OnlinePaymentBlock = ({ onlinePayment, paymentStatus }) => {
   if (isPaid) {
     return (
       <div className="w-full mb-6 animate-in zoom-in duration-500">
-        <div className="flex flex-col items-center gap-3 rounded-2xl border border-emerald-200 bg-gradient-to-b from-emerald-50 to-white p-6 shadow-sm">
+        <div className="flex flex-col items-center gap-4 rounded-2xl border border-emerald-200 bg-gradient-to-b from-emerald-50 to-white p-6 shadow-sm">
           <span className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 shadow-inner">
             <SealCheck size={32} weight="duotone" className="text-emerald-600" />
           </span>
-          <p className="text-base font-black text-emerald-800">Pagamento confirmado!</p>
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-base font-black text-emerald-800">Pagamento confirmado!</p>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white px-3 py-1 shadow-sm">
+              <CheckCircle size={11} weight="fill" className="shrink-0 text-emerald-500" />
+              <span className="text-[10px] font-bold text-emerald-700">Pago via</span>
+              <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-4 object-contain" />
+            </span>
+          </div>
           <p className="text-xs text-emerald-700/80 text-center">
             Seu pagamento foi recebido. O pedido já está na fila de produção.
           </p>
