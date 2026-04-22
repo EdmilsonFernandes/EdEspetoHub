@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Bicycle, CheckCircle, Clock, CircleNotch, CreditCard, MapPin, Package, Phone, Star, User } from '@phosphor-icons/react';
+import { ArrowLeft, Bicycle, CheckCircle, Clock, CircleNotch, CreditCard, MapPin, Package, Phone, SealCheck, Star, User } from '@phosphor-icons/react';
 import { orderService } from '../services/orderService';
 import { mapsService } from '../services/mapsService';
 import { formatAddress, formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId } from '../utils/format';
@@ -300,6 +300,7 @@ export function OrderTracking() {
     '';
   const isPixPayment = (paymentValue || '').toString().trim().toLowerCase() === 'pix';
   const paymentStatusNormalized = String(order?.paymentStatus || '').toUpperCase();
+  const showMercadoPagoApproved = paymentStatusNormalized === 'PAID';
   const shouldHidePixPaymentBlockBase =
     isPixPayment &&
     (
@@ -1250,6 +1251,28 @@ export function OrderTracking() {
                         )}
                         <span>{paymentMeta.label}</span>
                       </p>
+                    )}
+                    {showMercadoPagoApproved && (
+                      <div className="overflow-hidden rounded-[22px] border border-[#009ee3]/20 bg-[linear-gradient(135deg,#f8fdff_0%,#ffffff_52%,#eefaff_100%)] p-[1px] shadow-[0_18px_34px_-30px_rgba(0,158,227,0.68)]">
+                        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[21px] bg-white/94 px-3 py-3">
+                          <div className="flex min-w-0 items-center gap-2.5">
+                            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[15px] bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
+                              <SealCheck size={21} weight="fill" />
+                            </span>
+                            <span className="min-w-0">
+                              <span className="block text-[12px] font-black leading-tight text-slate-950">
+                                Pagamento aprovado
+                              </span>
+                              <span className="mt-0.5 block text-[11px] font-semibold leading-tight text-slate-500">
+                                Confirmado pelo Mercado Pago
+                              </span>
+                            </span>
+                          </div>
+                          <span className="ml-auto flex h-11 w-[142px] shrink-0 items-center justify-center rounded-[16px] border border-slate-200/85 bg-white px-2.5 shadow-[0_10px_24px_-20px_rgba(10,0,128,0.42)]">
+                            <img src="/mercado-pago-horizontal.png" alt="Mercado Pago" className="h-8 w-[118px] object-contain" />
+                          </span>
+                        </div>
+                      </div>
                     )}
                     {order.payment?.toString().toLowerCase() === 'dinheiro' && order.cashTendered ? (
                       <>

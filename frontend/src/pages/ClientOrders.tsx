@@ -14,7 +14,6 @@ import {
   Package,
   Receipt,
   Motorcycle,
-  SealCheck,
   SpinnerGap,
   Storefront,
   Timer,
@@ -234,8 +233,6 @@ function OrderCard({
     etaDeadlineMs &&
     Date.now() > etaDeadlineMs + DELAY_GRACE_MS
   );
-  const isPaymentApproved = normalizeStatus(order.paymentStatus) === 'PAID';
-
   const handleHelp = () => {
     const nativeUrl = buildWhatsappLink(order.store?.phone, true);
     const webUrl = buildWhatsappLink(order.store?.phone, false);
@@ -298,29 +295,6 @@ function OrderCard({
           <p className="text-sm font-semibold text-slate-900">{formatCurrency(order.total || 0)}</p>
         </div>
       </div>
-
-      {isPaymentApproved && (
-        <div className="mt-3 overflow-hidden rounded-[22px] border border-[#009ee3]/18 bg-[linear-gradient(135deg,#f8fdff_0%,#ffffff_48%,#eefaff_100%)] p-[1px] shadow-[0_18px_34px_-30px_rgba(0,158,227,0.72)]">
-          <div className="flex flex-wrap items-center justify-between gap-2.5 rounded-[21px] bg-white/92 px-3 py-2.5">
-            <div className="flex min-w-0 items-center gap-2.5">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[15px] bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
-                <SealCheck size={21} weight="fill" />
-              </span>
-              <span className="min-w-0">
-                <span className="block text-[12px] font-black leading-tight text-slate-950">
-                  Pagamento aprovado
-                </span>
-                <span className="mt-0.5 block text-[11px] font-semibold leading-tight text-slate-500">
-                  Confirmado com Mercado Pago
-                </span>
-              </span>
-            </div>
-            <span className="ml-auto flex h-11 w-[150px] max-w-full shrink-0 items-center justify-center rounded-[16px] border border-slate-200/85 bg-white px-2.5 shadow-[0_10px_24px_-20px_rgba(10,0,128,0.42)]">
-              <img src="/mercado-pago-horizontal.png" alt="Mercado Pago" className="h-8 w-[124px] object-contain" />
-            </span>
-          </div>
-        </div>
-      )}
 
       {String(order.status || '').toLowerCase() === 'awaiting_payment' && order.paymentLink && (
         <button

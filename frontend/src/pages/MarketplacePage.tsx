@@ -39,7 +39,6 @@ import { mapsService } from '../services/mapsService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
 import { isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
-import { formatOrderStatus } from '../utils/format';
 import { useCachedCustomerProfileImage } from '../hooks/useCachedCustomerProfileImage';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { HeaderAvatarTrigger } from '../components/Marketplace/HeaderAvatarTrigger';
@@ -289,7 +288,6 @@ const readCustomerSession = () => {
 
 const FAVORITES_STORAGE_KEY = 'hub:favorites:stores';
 const SELECTED_CONDOMINIUM_STORAGE_KEY = 'hub:selected-condominium';
-const DISMISSED_CUSTOMER_ORDERS_KEY = 'hub:dismissed-customer-orders';
 const DISMISSED_ANONYMOUS_ORDERS_KEY = 'hub:dismissed-anonymous-orders';
 const STORE_PROMO_POPUP_DISMISSED_UNTIL_KEY = 'hub:store-promo-popup-dismissed-until';
 const ORDER_EXPIRATION_MS = 3 * 60 * 60 * 1000; // 3 horas
@@ -327,23 +325,6 @@ const readMotoboySession = () => {
   } catch {
     return null;
   }
-};
-
-const getOrderStatusTone = (status?: string) => {
-  const normalized = String(status || '').trim().toLowerCase();
-  const tones: Record<string, string> = {
-    pending: 'bg-amber-100 text-amber-700 ring-1 ring-amber-200',
-    preparing: 'bg-[#336886]/10 text-[#336886] ring-1 ring-[#336886]/20',
-    ready: 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200',
-    ready_for_delivery: 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200',
-    waiting_for_motoboy: 'bg-violet-100 text-violet-700 ring-1 ring-violet-200',
-    in_delivery: 'bg-indigo-100 text-indigo-700 ring-1 ring-indigo-200',
-    dispatched: 'bg-indigo-100 text-indigo-700 ring-1 ring-indigo-200',
-    delivered: 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200',
-    finished: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
-    cancelled: 'bg-rose-100 text-rose-700 ring-1 ring-rose-200',
-  };
-  return tones[normalized] || 'bg-slate-100 text-slate-700 ring-1 ring-slate-200';
 };
 
 // Interface para pedidos em andamento (cache anônimo)
@@ -505,15 +486,6 @@ export function MarketplacePage() {
   const [distanceByStore, setDistanceByStore] = useState<Record<string, number>>({});
   const [distanceLoading, setDistanceLoading] = useState(false);
   const [activeAnonymousOrders, setActiveAnonymousOrders] = useState<ActiveAnonymousOrder[]>([]);
-  const [dismissedCustomerOrderIds, setDismissedCustomerOrderIds] = useState<string[]>(() => {
-    try {
-      const raw = localStorage.getItem(DISMISSED_CUSTOMER_ORDERS_KEY) || sessionStorage.getItem(DISMISSED_CUSTOMER_ORDERS_KEY);
-      const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed.map((item) => String(item || '').trim()).filter(Boolean) : [];
-    } catch {
-      return [];
-    }
-  });
   const [dismissedAnonymousOrderIds, setDismissedAnonymousOrderIds] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(DISMISSED_ANONYMOUS_ORDERS_KEY) || sessionStorage.getItem(DISMISSED_ANONYMOUS_ORDERS_KEY);
@@ -665,15 +637,6 @@ export function MarketplacePage() {
       // ignore
     }
   }, [favoriteStoreSlugs]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(DISMISSED_CUSTOMER_ORDERS_KEY, JSON.stringify(dismissedCustomerOrderIds));
-      sessionStorage.setItem(DISMISSED_CUSTOMER_ORDERS_KEY, JSON.stringify(dismissedCustomerOrderIds));
-    } catch {
-      // ignore
-    }
-  }, [dismissedCustomerOrderIds]);
 
   useEffect(() => {
     try {
@@ -1686,8 +1649,8 @@ export function MarketplacePage() {
   }, []);
 
   const visibleActiveOrders = useMemo(
-    () => activeOrders.filter((order) => !dismissedCustomerOrderIds.includes(String(order?.id || '').trim())),
-    [activeOrders, dismissedCustomerOrderIds]
+    () => activeOrders,
+    [activeOrders]
   );
 
   const visibleActiveAnonymousOrders = useMemo(
@@ -1894,18 +1857,18 @@ export function MarketplacePage() {
               <button
                 type="button"
                 onClick={handleHubNotificationClick}
-                className="relative flex h-[3.2rem] w-[3.2rem] shrink-0 items-center justify-center rounded-[1.35rem] border border-[#336886]/20 bg-[#153A4C] text-white shadow-[0_18px_34px_-18px_rgba(21,58,76,0.55)] ring-1 ring-[#336886]/10 backdrop-blur-sm transition-all duration-150 ease-out hover:bg-[#1e4d62] active:scale-95"
+                className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] border border-[#336886]/18 bg-[#153A4C] text-white shadow-[0_14px_26px_-18px_rgba(21,58,76,0.55)] ring-1 ring-[#336886]/10 backdrop-blur-sm transition-all duration-150 ease-out hover:bg-[#1e4d62] active:scale-95"
                 aria-label={hubNotificationCount > 0 ? `${hubNotificationCount} notificação de pedido` : 'Abrir notificações'}
                 title={hubNotificationCount > 0 ? 'Pedidos em andamento' : 'Notificações'}
               >
-                <BellRinging size={20} weight={hubNotificationCount > 0 ? 'fill' : 'duotone'} />
+                <BellRinging size={18} weight={hubNotificationCount > 0 ? 'fill' : 'duotone'} />
                 {hubNotificationCount > 0 ? (
-                  <span className="absolute -right-0.5 -top-0.5 flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-black leading-none text-white ring-2 ring-white shadow-[0_8px_18px_-10px_rgba(225,29,72,0.9)]">
+                  <span className="absolute -right-0.5 -top-0.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-1 text-[9px] font-black leading-none text-white ring-2 ring-white shadow-[0_8px_18px_-10px_rgba(225,29,72,0.9)]">
                     {hubNotificationCount > 9 ? '9+' : hubNotificationCount}
                   </span>
                 ) : null}
                 {hubNotificationCount > 0 ? (
-                  <span className="absolute inset-0 rounded-full border border-rose-600/35 animate-ping" />
+                  <span className="absolute inset-0 rounded-[1.15rem] border border-rose-600/35 animate-ping" />
                 ) : null}
               </button>
             </div>
@@ -2034,76 +1997,8 @@ export function MarketplacePage() {
         </header>
 
         <main className={`mx-auto max-w-[1200px] space-y-6 px-4 ${isNativePlatform ? 'pt-5' : 'pt-6'}`}>
-          {/* Acompanhamento de Pedidos (Logados ou Anônimos Cache) */}
-          {(isCustomerLogged && visibleActiveOrders.length > 0) ? (
-            <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-              <div className="relative overflow-hidden rounded-[2.5rem] border border-emerald-200/50 bg-emerald-50/90 backdrop-blur-md p-5 shadow-[0_20px_40px_-15px_rgba(16,185,129,0.2)]">
-                <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-emerald-200/20 blur-2xl" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    const ids = visibleActiveOrders.map((order) => String(order?.id || '').trim()).filter(Boolean);
-                    const next = Array.from(new Set([ ...dismissedCustomerOrderIds, ...ids ]));
-                    try {
-                      localStorage.setItem(DISMISSED_CUSTOMER_ORDERS_KEY, JSON.stringify(next));
-                      sessionStorage.setItem(DISMISSED_CUSTOMER_ORDERS_KEY, JSON.stringify(next));
-                    } catch {
-                      // ignore
-                    }
-                    setDismissedCustomerOrderIds(next);
-                  }}
-                  className="absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200 bg-white/80 text-emerald-700 shadow-sm transition-colors hover:bg-white"
-                  aria-label="Fechar aviso de pedidos em andamento"
-                  title="Fechar aviso"
-                >
-                  <X size={14} weight="bold" />
-                </button>
-                <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="relative flex h-2.5 w-2.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                      </span>
-                      <span className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-700">
-                        {visibleActiveOrders.length === 1 ? 'Pedido em Andamento' : 'Pedidos em Andamento'}
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {visibleActiveOrders.map((order) => (
-                        <button
-                          key={order.id}
-                          onClick={() => navigate(`/pedido/${order.id}`)}
-                          className="min-w-[210px] rounded-[1.4rem] border border-white/70 bg-white/95 px-3.5 py-3 text-left shadow-[0_12px_26px_-18px_rgba(16,185,129,0.35)] transition-all active:scale-95"
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <p className="truncate text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
-                                {order.store?.name || 'Loja'}
-                              </p>
-                              <p className="mt-1 text-sm font-black text-slate-900">
-                                #{String(order.id).slice(-6).toUpperCase()}
-                              </p>
-                            </div>
-                            <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] ${getOrderStatusTone(order.status)}`}>
-                              {formatOrderStatus(order.status, order.type)}
-                            </span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <button
-                    onClick={openCustomerOrders}
-                    className="group inline-flex items-center justify-center gap-3 rounded-2xl bg-emerald-600 px-6 py-3 text-sm font-black text-white shadow-xl transition-all hover:bg-emerald-700 active:scale-95"
-                  >
-                    Ver Meus Pedidos
-                    <CaretRight size={16} weight="bold" className="group-hover:translate-x-1 transition-transform" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : (!isCustomerLogged && visibleActiveAnonymousOrders.length > 0) && (
+          {/* Acompanhamento anonimo salvo neste navegador */}
+          {!isCustomerLogged && visibleActiveAnonymousOrders.length > 0 && (
             <div className="animate-in fade-in slide-in-from-top-4 duration-500">
               <div className="relative overflow-hidden rounded-[2.5rem] border border-amber-200/50 bg-amber-50/90 backdrop-blur-md p-5 shadow-[0_20px_40px_-15px_rgba(245,158,11,0.15)]">
                 <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-amber-200/20 blur-2xl" />

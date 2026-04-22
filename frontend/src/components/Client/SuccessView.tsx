@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { CheckCircle, QrCode, ArrowLeft, CreditCard, Printer, Copy, Check, ArrowSquareOut, Spinner, SealCheck, WhatsappLogo, ListBullets, XCircle } from "@phosphor-icons/react";
 import { Capacitor } from "@capacitor/core";
 import { Browser } from "@capacitor/browser";
-import { formatPaymentMethod } from "../../utils/format";
+import { formatOrderDisplayId, formatPaymentMethod } from "../../utils/format";
 import { getPaymentMethodMeta, getPaymentProviderMeta, mercadoPagoHorizontal } from "../../utils/paymentAssets";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { getStoreAvatarUrl } from "../../utils/storeAvatar";
@@ -399,6 +399,7 @@ export const SuccessView = ({
     ? "top-[max(calc(env(safe-area-inset-top)+0.45rem),0.7rem)]"
     : "top-[max(calc(env(safe-area-inset-top)+0.45rem),0.75rem)]";
   const storeLogo = resolveAssetUrl(storeLogoUrl || "") || getStoreAvatarUrl(storeSlug, storeLabel || "Loja");
+  const orderDisplayId = orderId ? formatOrderDisplayId(orderId, storeSlug) : "";
 
   return (
     <div className={`animate-in fade-in duration-300 relative overflow-x-clip min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.10),transparent_34%),linear-gradient(180deg,#eef5f7_0%,#f8fafc_8.5rem,#f8fafc_100%)] ${checkoutTopPaddingClass} ${isNativePlatform ? "ds-native-nav-content-lg" : "pb-24"}`}>
@@ -442,7 +443,9 @@ export const SuccessView = ({
                 <img src={storeLogo} alt={storeLabel || "Loja"} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(storeSlug, storeLabel || "Loja"); }} />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Pedido</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">
+                  {orderDisplayId ? `Pedido #${orderDisplayId}` : "Pedido"}
+                </p>
                 <p className="truncate text-sm font-black tracking-tight text-slate-950">
                   {isPaid ? 'Confirmado!' : isAwaitingPayment ? 'Conclua o pagamento' : 'Realizado!'}
                 </p>

@@ -2730,7 +2730,7 @@ export function StorePage() {
           </div>
         ) : !showInactiveState && !showClosedState && view === 'menu' && products.length > 0 && (
           <div className="space-y-4">
-              {!user?.token && recentPublicOrders.length > 0 && (
+              {!user?.token && !customerSession?.token && recentPublicOrders.length > 0 && (
               <div className="fixed bottom-20 left-4 right-4 z-[110] sm:relative sm:bottom-0 sm:left-0 sm:right-0 sm:mx-6 rounded-[1.75rem] border border-emerald-200/60 bg-white/92 backdrop-blur-xl px-4 py-3 shadow-[0_18px_42px_-22px_rgba(16,185,129,0.35)] flex items-center justify-between gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <button
                   type="button"
@@ -2944,7 +2944,7 @@ export function StorePage() {
             paymentStatus={!isStoreAdmin && !isCondominiumCheckout ? lastOrder?.paymentStatus : undefined}
             onPrintReceipt={canUseAdminPrintFlow ? printLastOrderReceipt : undefined}
             onTrackOrder={
-              canUseAdminPrintFlow
+              canUseAdminPrintFlow || customerSession?.token
                 ? undefined
                 : () => {
                     if (lastOrder?.id) {
