@@ -1,6 +1,6 @@
 // @ts-nocheck
 import * as React from 'react';
-import { ChartBar, BookOpen, CheckSquare, ClipboardText, CreditCard, Package, Gear, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree, PlugsConnected, CheckCircle, SealCheck } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, Buildings, CheckSquare, ClipboardText, CreditCard, Package, Gear, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree, PlugsConnected, CheckCircle, SealCheck } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
@@ -1432,7 +1432,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [linkStats, setLinkStats] = useState<any>(null);
   const [subscriptionError, setSubscriptionError] = useState('');
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'avaliacoes' | 'produtos' | 'estoque' | 'config' | 'fila' | 'pagamentos' | 'gateway' | 'motoboys' | 'usuarios'>(() => {
+  const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'avaliacoes' | 'produtos' | 'estoque' | 'config' | 'fila' | 'pagamentos' | 'gateway' | 'motoboys' | 'usuarios' | 'condominios'>(() => {
     const requestedTabFromState = String((location.state as any)?.activeTab || '').trim();
     const requestedTabFromQuery = String(new URLSearchParams(location.search || '').get('tab') || '').trim();
     const requestedTabFromSession =
@@ -1524,6 +1524,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'cardapio', label: 'Loja Online', icon: Package },
             { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
+            { id: 'condominios', label: 'Condomínios', icon: Buildings },
           ]
         : [
             { id: 'resumo', label: 'Resumo', icon: ChartBar },
@@ -1535,6 +1536,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             { id: 'pagamentos', label: 'Minha assinatura', icon: CreditCard },
             { id: 'gateway', label: 'Pagamentos Online', icon: PlugsConnected },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
+            { id: 'condominios', label: 'Condomínios', icon: Buildings },
             { id: 'usuarios', label: 'Usuários', icon: UsersThree, standalone: true },
             { id: 'config', label: 'Configurações', icon: Gear },
             { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
@@ -1561,6 +1563,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       config: { title: 'Configurações', subtitle: 'Ajuste identidade, canais, tipos de pedido e horários da operação.' },
       fila: { title: 'Gestor de Pedidos', subtitle: 'Acompanhe pedidos em andamento e a fila da loja em tempo real.' },
       motoboys: { title: 'Entregadores', subtitle: 'Vínculos, documentos, solicitações e status de entrega.' },
+      condominios: { title: 'Condomínios e feiras', subtitle: 'Solicite participação em condomínios e acompanhe aprovações da loja.' },
       usuarios: { title: 'Usuários', subtitle: 'Cadastre e gerencie acessos de admin e operador da loja.' },
     }),
     []
@@ -1783,7 +1786,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       openQueueMonitor({ replace: true });
       return;
     }
-    const allowedTabs = new Set(['resumo', 'avaliacoes', 'produtos', 'estoque', 'config', 'pagamentos', 'gateway', 'motoboys', 'usuarios']);
+    const allowedTabs = new Set(['resumo', 'avaliacoes', 'produtos', 'estoque', 'config', 'pagamentos', 'gateway', 'motoboys', 'condominios', 'usuarios']);
     if (!allowedTabs.has(nextTab)) {
       navigate('/admin/dashboard', { replace: true, state: {} });
       return;
@@ -1799,7 +1802,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     branding: true,
     orderTypes: false,
     hours: false,
-    condominiums: false,
   });
 
   const updateAuthStore = (updates) => {
@@ -2973,31 +2975,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-[0_12px_28px_-24px_rgba(15,23,42,0.4)]">
                 <button
                   type="button"
-                  onClick={() => setConfigPanels((prev) => ({ ...prev, condominiums: !prev.condominiums }))}
-                  className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-slate-50 transition"
-                >
-                  <div>
-                    <p className="text-sm font-bold text-slate-800">Condomínios e feiras</p>
-                    <p className="text-xs text-slate-500">Solicite participação em feiras de condomínios próximos.</p>
-                  </div>
-                  <span
-                    className={`inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-transform ${
-                      configPanels.condominiums ? 'rotate-180' : ''
-                    }`}
-                  >
-                    <CaretRight size={14} weight="bold" />
-                  </span>
-                </button>
-                {configPanels.condominiums && (
-                  <div className="border-t border-slate-100 p-4">
-                    <StoreCondominiumPanel storeId={storeId} />
-                  </div>
-                )}
-              </section>
-
-              <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-[0_12px_28px_-24px_rgba(15,23,42,0.4)]">
-                <button
-                  type="button"
                   onClick={() => setConfigPanels((prev) => ({ ...prev, branding: !prev.branding }))}
                   className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-slate-50 transition"
                 >
@@ -3127,6 +3104,17 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             className="premium-card"
           >
             <AdminMotoboys />
+          </FormSection>
+        )}
+
+        {activeTab === 'condominios' && (
+          <FormSection
+            title="Condomínios e feiras"
+            subtitle="Solicite participação em condomínios e acompanhe aprovações da loja."
+            variant="default"
+            className="premium-card-soft"
+          >
+            <StoreCondominiumPanel storeId={storeId} />
           </FormSection>
         )}
 

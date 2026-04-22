@@ -9,8 +9,10 @@ import {
   CheckCircle,
   Clock,
   DoorOpen,
+  PencilSimple,
   Plus,
   Storefront,
+  Trash,
   XCircle,
 } from '@phosphor-icons/react';
 import { condominiumService } from '../services/condominiumService';
@@ -40,12 +42,12 @@ const addHoursToLocalDateTime = (value: string, hours: number) => {
   return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
 };
 
-const statusLabel = (status?: string) => {
-  const normalized = String(status || '').toLowerCase();
-  if (normalized === 'live') return 'Ao vivo';
-  if (normalized === 'finished') return 'Finalizada';
-  if (normalized === 'cancelled') return 'Cancelada';
-  return 'Agendada';
+const toDateTimeLocalInput = (value?: string) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const offsetMs = date.getTimezoneOffset() * 60 * 1000;
+  return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
 };
 
 export function CondominiumDashboard() {
@@ -61,9 +63,9 @@ export function CondominiumDashboard() {
     startsAt: '',
     endsAt: '',
     pickupLocation: '',
-    status: 'scheduled',
     notes: '',
   });
+  const [editingEventId, setEditingEventId] = useState('');
   const [selectedStoreByEvent, setSelectedStoreByEvent] = useState<Record<string, string>>({});
 
   const load = async () => {
@@ -121,7 +123,7 @@ export function CondominiumDashboard() {
     navigate('/condominio/login', { replace: true });
   };
 
-  const createEvent = async () => {
+  const saveEvent = async () => {
     const startsAt = new Date(eventForm.startsAt);
     const endsAt = new Date(eventForm.endsAt);
     if (!eventForm.startsAt || !eventForm.endsAt || Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime()) || endsAt <= startsAt) {
@@ -131,18 +133,57 @@ export function CondominiumDashboard() {
     setSaving(true);
     setError('');
     try {
-      await condominiumService.organizerCreateEvent({
+      const payload = {
         title: eventForm.title || `Feira do ${condominium.name || 'condomínio'}`,
         startsAt: eventForm.startsAt,
         endsAt: eventForm.endsAt,
         pickupLocation: eventForm.pickupLocation,
-        status: eventForm.status,
+        status: 'scheduled',
         notes: eventForm.notes,
-      });
-      setEventForm({ title: '', startsAt: '', endsAt: '', pickupLocation: '', status: 'scheduled', notes: '' });
+      };
+      if (editingEventId) {
+        await condominiumService.organizerUpdateEvent(editingEventId, payload);
+      } else {
+        await condominiumService.organizerCreateEvent(payload);
+      }
+      setEditingEventId('');
+      setEventForm({ title: '', startsAt: '', endsAt: '', pickupLocation: '', notes: '' });
       await load();
     } catch (err: any) {
-      setError(err?.message || 'Falha ao criar feira.');
+      setError(err?.message || 'Falha ao salvar feira.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const editEvent = (event: any) => {
+    setEditingEventId(event.id);
+    setEventForm({
+      title: event.title || '',
+      startsAt: toDateTimeLocalInput(event.startsAt),
+      endsAt: toDateTimeLocalInput(event.endsAt),
+      pickupLocation: event.pickupLocation || '',
+      notes: event.notes || '',
+    });
+    setActiveTab('agenda');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEventEdit = () => {
+    setEditingEventId('');
+    setEventForm({ title: '', startsAt: '', endsAt: '', pickupLocation: '', notes: '' });
+  };
+
+  const deactivateEvent = async (eventId: string) => {
+    if (!window.confirm('Deseja encerrar esta feira?')) return;
+    setSaving(true);
+    setError('');
+    try {
+      await condominiumService.organizerDeactivateEvent(eventId);
+      if (editingEventId === eventId) cancelEventEdit();
+      await load();
+    } catch (err: any) {
+      setError(err?.message || 'Falha ao encerrar feira.');
     } finally {
       setSaving(false);
     }
@@ -177,6 +218,21 @@ export function CondominiumDashboard() {
       await load();
     } catch (err: any) {
       setError(err?.message || 'Falha ao revisar solicitação.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const removeApprovedStore = async (storeId: string, storeName?: string) => {
+    if (!storeId) return;
+    if (!window.confirm(`Remover ${storeName || 'esta loja'} do condomínio?`)) return;
+    setSaving(true);
+    setError('');
+    try {
+      await condominiumService.organizerRemoveStore(storeId);
+      await load();
+    } catch (err: any) {
+      setError(err?.message || 'Falha ao remover loja do condomínio.');
     } finally {
       setSaving(false);
     }
@@ -309,8 +365,8 @@ export function CondominiumDashboard() {
                   <Plus size={22} weight="bold" />
                 </span>
                 <div>
-                  <h2 className="text-lg font-black text-slate-950">Nova feira</h2>
-                  <p className="text-sm font-semibold text-slate-500">O condomínio já vem definido pelo seu acesso.</p>
+                  <h2 className="text-lg font-black text-slate-950">{editingEventId ? 'Editar feira' : 'Nova feira'}</h2>
+                  <p className="text-sm font-semibold text-slate-500">Defina a agenda. A feira entra ao vivo automaticamente no horário.</p>
                 </div>
               </div>
               <div className="mt-5 space-y-3">
@@ -320,16 +376,17 @@ export function CondominiumDashboard() {
                   <input type="datetime-local" value={eventForm.endsAt} onChange={(event) => setEventForm((prev) => ({ ...prev, endsAt: event.target.value }))} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none focus:border-[#336886] focus:bg-white" />
                 </div>
                 <input value={eventForm.pickupLocation} onChange={(event) => setEventForm((prev) => ({ ...prev, pickupLocation: event.target.value }))} placeholder="Local: praça, salão, entrada social..." className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none focus:border-[#336886] focus:bg-white" />
-                <select value={eventForm.status} onChange={(event) => setEventForm((prev) => ({ ...prev, status: event.target.value }))} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none focus:border-[#336886] focus:bg-white">
-                  <option value="scheduled">Agendada</option>
-                  <option value="live">Ao vivo</option>
-                  <option value="finished">Finalizada</option>
-                  <option value="cancelled">Cancelada</option>
-                </select>
                 <textarea value={eventForm.notes} onChange={(event) => setEventForm((prev) => ({ ...prev, notes: event.target.value }))} placeholder="Observações para operação" className="min-h-[92px] w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none focus:border-[#336886] focus:bg-white" />
-                <button onClick={createEvent} disabled={saving || !eventForm.startsAt || !eventForm.endsAt} className="w-full rounded-2xl bg-[#153A4C] px-4 py-3.5 text-sm font-black text-white disabled:opacity-50">
-                  Criar feira
-                </button>
+                <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
+                  <button onClick={saveEvent} disabled={saving || !eventForm.startsAt || !eventForm.endsAt} className="w-full rounded-2xl bg-[#153A4C] px-4 py-3.5 text-sm font-black text-white disabled:opacity-50">
+                    {editingEventId ? 'Salvar feira' : 'Criar feira'}
+                  </button>
+                  {editingEventId ? (
+                    <button type="button" onClick={cancelEventEdit} disabled={saving} className="rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-black text-slate-600 disabled:opacity-50">
+                      Cancelar
+                    </button>
+                  ) : null}
+                </div>
               </div>
             </section>
 
@@ -339,7 +396,6 @@ export function CondominiumDashboard() {
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-600">{statusLabel(event.status)}</span>
                         <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-emerald-700">
                           <Clock size={12} weight="bold" />
                           {event.state === 'live' ? 'Ao vivo agora' : event.state === 'upcoming' ? 'Próxima' : 'Encerrada'}
@@ -350,6 +406,14 @@ export function CondominiumDashboard() {
                       {event.pickupLocation ? <p className="mt-2 text-sm font-bold text-[#336886]">{event.pickupLocation}</p> : null}
                     </div>
                     <div className="min-w-[260px] space-y-2">
+                      <div className="grid grid-cols-2 gap-2">
+                        <button type="button" onClick={() => editEvent(event)} className="inline-flex items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-black text-slate-700 transition hover:bg-slate-50">
+                          <PencilSimple size={15} weight="bold" /> Editar
+                        </button>
+                        <button type="button" onClick={() => deactivateEvent(event.id)} disabled={saving} className="inline-flex items-center justify-center gap-1.5 rounded-2xl bg-rose-50 px-3 py-2.5 text-xs font-black text-rose-700 ring-1 ring-rose-100 disabled:opacity-50">
+                          <Trash size={15} weight="bold" /> Encerrar
+                        </button>
+                      </div>
                       <select value={selectedStoreByEvent[event.id] || ''} onChange={(e) => setSelectedStoreByEvent((prev) => ({ ...prev, [event.id]: e.target.value }))} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold">
                         <option value="">Escolher loja aprovada</option>
                         {approvedStores.map((link: any) => {
@@ -409,6 +473,16 @@ export function CondominiumDashboard() {
                     {store.condominiumStatus === 'approved' ? 'Aprovada' : store.condominiumStatus === 'invited' ? 'Pendente' : 'Disponível'}
                   </span>
                 </div>
+                {store.condominiumStatus === 'approved' ? (
+                  <button
+                    type="button"
+                    onClick={() => removeApprovedStore(store.id, store.name)}
+                    disabled={saving}
+                    className="mt-4 w-full rounded-2xl border border-rose-100 bg-rose-50 px-4 py-2.5 text-xs font-black text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
+                  >
+                    Remover do condomínio
+                  </button>
+                ) : null}
               </article>
             ))}
           </section>

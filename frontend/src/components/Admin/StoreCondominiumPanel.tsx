@@ -98,9 +98,9 @@ export function StoreCondominiumPanel({ storeId }: Props) {
         <div className="flex items-start gap-3">
           <Buildings size={22} weight="duotone" className="mt-0.5 text-emerald-700" />
           <div>
-            <p className="text-sm font-black text-slate-900">Condomínios e feiras</p>
+            <p className="text-sm font-black text-slate-900">Solicitações para condomínios</p>
             <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-600">
-              Solicite participação em condomínios. Após aprovação, sua loja poderá ser confirmada nas próximas feiras pela plataforma.
+              Escolha onde a loja quer atender, envie a solicitação e acompanhe a aprovação para entrar nas próximas feiras.
             </p>
           </div>
         </div>

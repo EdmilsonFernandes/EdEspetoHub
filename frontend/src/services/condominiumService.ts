@@ -160,6 +160,10 @@ export const condominiumService = {
     return condominiumRequest(`/condominium/stores/${encodeURIComponent(storeId)}/settings`, { method: 'PATCH', body: payload });
   },
 
+  organizerRemoveStore(storeId: string) {
+    return condominiumRequest(`/condominium/stores/${encodeURIComponent(storeId)}`, { method: 'DELETE' });
+  },
+
   organizerReviewRequest(requestId: string, payload: { status: 'approved' | 'rejected'; reviewNote?: string }) {
     return condominiumRequest(`/condominium/requests/${encodeURIComponent(requestId)}/review`, { method: 'PATCH', body: payload });
   },

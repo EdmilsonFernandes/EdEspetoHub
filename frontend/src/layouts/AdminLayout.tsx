@@ -5,7 +5,7 @@ import { AdminHeader } from '../components/Admin/AdminHeader';
 import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { CaretDown, ChartBar, CheckSquare, ClipboardText, CreditCard, Gear, Package, ShoppingCart, SignOut, Scooter, Star, X, UsersThree } from '@phosphor-icons/react';
+import { Buildings, CaretDown, ChartBar, CheckSquare, ClipboardText, CreditCard, Gear, Package, ShoppingCart, SignOut, Scooter, Star, X, UsersThree } from '@phosphor-icons/react';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 
@@ -58,6 +58,7 @@ export function AdminLayout({
             { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'cardapio', label: 'Loja Online', icon: Package },
+            { id: 'condominios', label: 'Condomínios', icon: Buildings },
           ]
         : [
             { id: 'resumo', label: 'Resumo', icon: ChartBar },
@@ -70,6 +71,7 @@ export function AdminLayout({
             { id: 'pagamentos', label: 'Minha assinatura', icon: CreditCard },
             { id: 'gateway', label: 'Pagamentos Online', icon: CreditCard },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
+            { id: 'condominios', label: 'Condomínios', icon: Buildings },
             { id: 'usuarios', label: 'Usuários', icon: UsersThree },
             { id: 'config', label: 'Configurações', icon: Gear },
             { id: 'avaliacoes', label: 'Avaliações', icon: Star },
@@ -83,6 +85,7 @@ export function AdminLayout({
         { type: 'item', item: mobileNavItems.find((i) => i.id === 'fila') },
         { type: 'item', item: mobileNavItems.find((i) => i.id === 'produtos') },
         { type: 'item', item: mobileNavItems.find((i) => i.id === 'cardapio') },
+        { type: 'item', item: mobileNavItems.find((i) => i.id === 'condominios') },
       ].filter((entry) => Boolean(entry?.item));
     }
     const byId = new Map((mobileNavItems || []).map((item) => [item.id, item]));
@@ -102,7 +105,7 @@ export function AdminLayout({
     if (marketing.length) sections.push({ type: 'group', id: 'marketing', label: 'Marketing', children: marketing });
     const financeiro = ['pagamentos', 'gateway'].map(consume).filter(Boolean);
     if (financeiro.length) sections.push({ type: 'group', id: 'financeiro', label: 'Financeiro', children: financeiro });
-    const gestao = ['motoboys', 'usuarios'].map(consume).filter(Boolean);
+    const gestao = ['motoboys', 'condominios', 'usuarios'].map(consume).filter(Boolean);
     if (gestao.length) sections.push({ type: 'group', id: 'gestao', label: 'Gestão', children: gestao });
     const sistema = consume('config');
     if (sistema) sections.push({ type: 'item', item: sistema });

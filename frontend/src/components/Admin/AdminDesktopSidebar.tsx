@@ -59,7 +59,7 @@ export function AdminDesktopSidebar({
     const financeiro = ['pagamentos', 'gateway'].map(consume).filter(Boolean);
     if (financeiro.length) sections.push({ type: 'group', id: 'financeiro', label: 'Financeiro', children: financeiro });
 
-    const gestao = ['motoboys', 'usuarios'].map(consume).filter(Boolean);
+    const gestao = ['motoboys', 'condominios', 'usuarios'].map(consume).filter(Boolean);
     if (gestao.length) sections.push({ type: 'group', id: 'gestao', label: 'Gestão', children: gestao });
 
     const sistema = consume('config');

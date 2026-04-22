@@ -256,15 +256,19 @@ export function SuperAdminCondominiums() {
     setError('');
     setEventFormError('');
     try {
+      const payload = {
+        ...eventForm,
+        status: 'scheduled',
+      };
       if (editingEventId) {
-        await condominiumService.adminUpdateEvent(editingEventId, eventForm);
+        await condominiumService.adminUpdateEvent(editingEventId, payload);
       } else {
         await condominiumService.adminCreateEvent(eventForm.condominiumId, {
           title: eventForm.title || `Feira do ${(data.condominiums || []).find((item: any) => item.id === eventForm.condominiumId)?.name || 'condomínio'}`,
           startsAt: eventForm.startsAt,
           endsAt: eventForm.endsAt,
           pickupLocation: eventForm.pickupLocation,
-          status: eventForm.status,
+          status: 'scheduled',
           notes: eventForm.notes,
         });
       }
@@ -619,8 +623,8 @@ export function SuperAdminCondominiums() {
                 <CalendarBlank size={22} weight="duotone" />
               </div>
               <div>
-                <h2 className="text-lg font-black tracking-tight text-slate-950">Nova feira</h2>
-                <p className="text-sm font-medium text-slate-500">Defina janela operacional e ponto de retirada.</p>
+                <h2 className="text-lg font-black tracking-tight text-slate-950">{editingEventId ? 'Editar feira' : 'Nova feira'}</h2>
+                <p className="text-sm font-medium text-slate-500">Defina a agenda. A feira entra ao vivo automaticamente no horário.</p>
               </div>
             </div>
             <div className="mt-5 space-y-3">
@@ -634,12 +638,6 @@ export function SuperAdminCondominiums() {
                 <input type="datetime-local" value={eventForm.endsAt} onChange={(event) => handleEventEndsAtChange(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
               </div>
               <input value={eventForm.pickupLocation} onChange={(event) => handleEventPickupLocationChange(event.target.value)} placeholder="Ex: praça central, entrada social, lounge gourmet" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
-              <select value={eventForm.status} onChange={(event) => setEventForm((prev) => ({ ...prev, status: event.target.value }))} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold">
-                <option value="scheduled">Agendada</option>
-                <option value="live">Ao vivo</option>
-                <option value="finished">Finalizada</option>
-                <option value="cancelled">Cancelada</option>
-              </select>
               <textarea value={eventForm.notes} onChange={(event) => setEventForm((prev) => ({ ...prev, notes: event.target.value }))} placeholder="Observações da agenda" className="min-h-[96px] w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
               {eventFormError ? <p className="rounded-2xl border border-rose-100 bg-rose-50 px-3 py-2.5 text-xs font-bold text-rose-700">{eventFormError}</p> : null}
               <div className="flex flex-col gap-2">

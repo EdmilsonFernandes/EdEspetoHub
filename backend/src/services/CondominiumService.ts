@@ -383,6 +383,25 @@ export class CondominiumService {
     return this.adminUpdateStoreSettings(safeCondominiumId, storeId, payload);
   }
 
+  async organizerRemoveStore(condominiumId: string | undefined, storeId: string) {
+    const safeCondominiumId = String(condominiumId || '').trim();
+    const safeStoreId = String(storeId || '').trim();
+    if (!safeCondominiumId) throw new AppError('AUTH-003', 403);
+    if (!safeStoreId) throw new AppError('CONDO-006', 400, { message: 'Loja obrigatoria.' });
+
+    await this.condominiumRepository.deactivateStoreCondominium(safeCondominiumId, safeStoreId);
+
+    const request = await this.condominiumRepository.findRequestByStoreAndCondominium(safeStoreId, safeCondominiumId);
+    if (request && [ 'pending', 'approved' ].includes(String(request.status || '').toLowerCase())) {
+      request.status = 'cancelled';
+      request.reviewNote = 'Removido pelo condominio.';
+      request.reviewedAt = new Date();
+      await this.condominiumRepository.saveRequest(request);
+    }
+
+    return { ok: true };
+  }
+
   async organizerReviewRequest(condominiumId: string | undefined, requestId: string, payload: any, reviewedBy?: string) {
     const request = await this.condominiumRepository.findRequestById(requestId);
     if (!request) throw new AppError('CONDO-004', 404, { message: 'Solicitacao nao encontrada.' });

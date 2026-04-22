@@ -122,6 +122,7 @@ routes.patch('/condominium/events/:eventId/deactivate', requireAuth, requireRole
 routes.post('/condominium/events/:eventId/stores/invite', requireAuth, requireRole('CONDOMINIUM_ADMIN'), CondominiumController.organizerInviteStoreToEvent);
 routes.post('/condominium/events/:eventId/stores/confirm', requireAuth, requireRole('CONDOMINIUM_ADMIN'), CondominiumController.organizerConfirmStoreInEvent);
 routes.patch('/condominium/stores/:storeId/settings', requireAuth, requireRole('CONDOMINIUM_ADMIN'), CondominiumController.organizerUpdateStoreSettings);
+routes.delete('/condominium/stores/:storeId', requireAuth, requireRole('CONDOMINIUM_ADMIN'), CondominiumController.organizerRemoveStore);
 routes.patch('/condominium/requests/:requestId/review', requireAuth, requireRole('CONDOMINIUM_ADMIN'), CondominiumController.organizerReviewRequest);
 
 // Platform KYC (motoboy documents) - SUPER_ADMIN only
@@ -178,9 +179,9 @@ routes.get('/stores/:storeId/featured-pricing', requireAuth, requireRole('ADMIN'
 routes.post('/stores/:storeId/featured-requests', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), FeaturedProductController.createStoreRequest);
 routes.patch('/stores/:storeId/featured-requests/:requestId/cancel', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), FeaturedProductController.cancelByStore);
 routes.patch('/stores/:storeId/featured-requests/:requestId/refresh-payment', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), FeaturedProductController.refreshPaymentByStore);
-routes.get('/stores/:storeId/condominiums', requireAuth, requireRole('ADMIN'), CondominiumController.listStoreOptions);
-routes.post('/stores/:storeId/condominium-requests', requireAuth, requireRole('ADMIN'), CondominiumController.createStoreRequest);
-routes.delete('/stores/:storeId/condominiums/:condominiumId', requireAuth, requireRole('ADMIN'), CondominiumController.removeStoreCondominium);
+routes.get('/stores/:storeId/condominiums', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), CondominiumController.listStoreOptions);
+routes.post('/stores/:storeId/condominium-requests', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), CondominiumController.createStoreRequest);
+routes.delete('/stores/:storeId/condominiums/:condominiumId', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), CondominiumController.removeStoreCondominium);
 
 // Products admin (cadastro não depende de assinatura)
 routes.post('/stores/:storeId/products', requireAuth, requireRole('ADMIN'), ProductController.create);

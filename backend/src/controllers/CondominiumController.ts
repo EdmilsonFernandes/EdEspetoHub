@@ -224,6 +224,18 @@ export class CondominiumController {
     }
   }
 
+  static async organizerRemoveStore(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.organizerRemoveStore(
+        req.auth?.condominiumId,
+        String(req.params.storeId || '')
+      );
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
   static async organizerReviewRequest(req: Request, res: Response) {
     try {
       const payload = await condominiumService.organizerReviewRequest(
