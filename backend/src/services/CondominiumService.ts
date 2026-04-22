@@ -204,10 +204,24 @@ export class CondominiumService {
       role: 'CONDOMINIUM_ADMIN',
       active: true,
     });
+    let credentialsEmailSent = false;
+    try {
+      await this.emailService.sendCondominiumAccessCredentials({
+        email,
+        responsibleName: name,
+        condominiumName: condominium.name,
+        username: email,
+        temporaryPassword: password,
+      });
+      credentialsEmailSent = true;
+    } catch {
+      credentialsEmailSent = false;
+    }
 
     return {
       ...this.toPublicCondominiumUser({ ...saved, condominium }),
       temporaryPassword: password,
+      credentialsEmailSent,
     };
   }
 

@@ -483,6 +483,9 @@ export function SuperAdminCondominiums() {
         setCreatedPasswordByUserId((prev) => ({ ...prev, [savedUser.id]: savedUser.temporaryPassword }));
         setRevealedCondominiumPasswords((prev) => ({ ...prev, [savedUser.id]: false }));
       }
+      if (savedUser?.credentialsEmailSent === false) {
+        setError('Acesso criado, mas o e-mail de credenciais não foi enviado. Envie usuário e senha manualmente.');
+      }
       setUserForm({ condominiumId: userForm.condominiumId, name: '', email: '', password: '' });
       await load();
     } catch (err: any) {
