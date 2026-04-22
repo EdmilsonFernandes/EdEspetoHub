@@ -321,7 +321,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
     if (!Array.isArray(openingHours) || openingHours.length === 0) return null;
 
     const { day: currentDay, minutes: currentMinutes } = StoreController.getSaoPauloNowParts();
-    const weekdayNames = [ 'domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado' ];
+    const weekdayNames = [ 'domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado' ];
 
     for (let dayOffset = 0; dayOffset <= 7; dayOffset += 1) {
       const day = (currentDay + dayOffset) % 7;
@@ -348,9 +348,9 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
       const nextInterval = intervals.find((interval: any) => dayOffset > 0 || interval.startMinutes > currentMinutes);
       if (!nextInterval) continue;
 
-      if (dayOffset === 0) return `Abre hoje as ${nextInterval.start}`;
-      if (dayOffset === 1) return `Abre amanha as ${nextInterval.start}`;
-      return `Abre ${weekdayNames[day]} as ${nextInterval.start}`;
+      if (dayOffset === 0) return `Abre hoje às ${nextInterval.start}`;
+      if (dayOffset === 1) return `Abre amanhã às ${nextInterval.start}`;
+      return `Abre ${weekdayNames[day]} às ${nextInterval.start}`;
     }
 
     return null;

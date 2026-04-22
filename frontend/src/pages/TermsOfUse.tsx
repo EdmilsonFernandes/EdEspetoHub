@@ -1,107 +1,172 @@
+import { ArrowLeft } from '@phosphor-icons/react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const FALLBACK_TERMS = `
-<h2>Termos e Condições de Uso da Plataforma</h2>
-<p>Bem-vindo à plataforma <strong>Já no Caminho</strong>, desenvolvida por <strong>Edmilson Tecnologia da Informação • CNPJ 44.771.427/0001-69</strong> (doravante "Plataforma"). Ao acessar ou utilizar nossa Plataforma, você ("Usuário") concorda expressamente com estes Termos de Uso. Caso não concorde, não utilize nossos serviços.</p>
+const LAST_UPDATE = '22 de abril de 2026';
 
-<h3>1. Natureza do Serviço</h3>
-<p>A Plataforma atua exclusivamente como um <strong>intermediador tecnológico</strong> de soluções, disponibilizando um ambiente virtual para que estabelecimentos parceiros ("Lojas/Restaurantes") ofereçam seus produtos aos Usuários. <strong>Não preparamos, embalamos, vendemos ou entregamos os produtos físicos.</strong></p>
+function Section({ title }: { title: string }) {
+  return <h3 className="text-sm font-bold text-slate-800 mt-5 mb-1.5">{title}</h3>;
+}
 
-<h3>2. Isenção de Responsabilidade</h3>
-<p>O Usuário reconhece e concorda que a Plataforma <strong>não possui qualquer responsabilidade</strong> sobre:</p>
-<ul>
-  <li>A qualidade, preparo, segurança, higiene, integridade ou adequação para consumo dos produtos comercializados pelas Lojas;</li>
-  <li>Prazos de entrega, atrasos, extravios ou conduta dos entregadores (motoboys), sejam eles próprios da Loja ou independentes;</li>
-  <li>A precisão das informações nutricionais, preços ou descrições dos produtos fornecidos pelas Lojas;</li>
-  <li>Eventuais danos diretos, indiretos, materiais ou morais, lucros cessantes ou prejuízos decorrentes do consumo dos produtos ou da prestação do serviço de entrega.</li>
-</ul>
-<p>Qualquer reclamação referente ao produto ou à entrega deverá ser direcionada diretamente à Loja responsável pelo pedido.</p>
+function Para({ children }: { children: React.ReactNode }) {
+  return <p className="text-sm text-slate-600 leading-relaxed">{children}</p>;
+}
 
-<h3>3. Pagamentos e Transações</h3>
-<p>A Plataforma utiliza gateways de pagamento de terceiros (ex: Mercado Pago). Não armazenamos dados completos de cartão de crédito em nossos servidores. A Plataforma não se responsabiliza por falhas de processamento, recusas de crédito, chargebacks ou fraudes oriundas de terceiros ou dos próprios gateways. O Usuário é o único responsável por fornecer informações de pagamento precisas e válidas.</p>
-
-<h3>4. Obrigações do Usuário</h3>
-<p>O Usuário compromete-se a fornecer dados cadastrais verdadeiros, não utilizar a Plataforma para fins ilícitos, lesivos ou fraudulentos, e manter a estrita confidencialidade de suas credenciais de acesso. O uso indevido, fraudulento ou a tentativa de burla ao sistema resultará no banimento imediato da conta, sem prejuízo das medidas legais cabíveis.</p>
-
-<h3>5. Disponibilidade da Plataforma</h3>
-<p>Não garantimos que a Plataforma funcionará de forma ininterrupta, livre de erros, vírus ou outras falhas tecnológicas. Reservamo-nos o direito de suspender, alterar ou encerrar os serviços a qualquer momento, por razões de manutenção técnica ou atualizações, sem prévio aviso e sem gerar qualquer direito a indenização ao Usuário.</p>
-
-<h3>6. Modificações dos Termos</h3>
-<p>Estes Termos podem ser alterados a qualquer momento, a exclusivo critério da Plataforma. O uso contínuo dos serviços após as alterações constitui plena aceitação dos novos Termos.</p>
-`;
-
-const FALLBACK_LGPD = `
-<h2>Política de Privacidade e Proteção de Dados (LGPD)</h2>
-<p>Esta Política de Privacidade descreve como o aplicativo <strong>Já no Caminho</strong>, desenvolvido por <strong>Edmilson Tecnologia da Informação • CNPJ 44.771.427/0001-69</strong>, coleta, utiliza e protege os dados pessoais dos Usuários, em conformidade com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 - LGPD).</p>
-
-<h3>1. Dados Coletados</h3>
-<p>Coletamos os dados estritamente necessários para a execução dos serviços: Nome, E-mail (identificador de login), Telefone, Endereço de Entrega, Histórico de Pedidos e Informações de Dispositivo.</p>
-
-<h3>2. Finalidade e Exclusão de Dados</h3>
-<p>Os dados são utilizados exclusivamente para processar pedidos e facilitar a entrega. 
-<strong>O Usuário possui o direito de solicitar a exclusão de sua conta e seus dados a qualquer momento.</strong></p>
-
-<h3>3. Como solicitar a exclusão da conta</h3>
-<p>O usuário pode solicitar a exclusão de seus dados de duas formas:</p>
-<ul>
-  <li><strong>Pelo Aplicativo:</strong> Acesse o menu "Minha Conta" e clique no botão "Excluir minha conta permanentemente".</li>
-  <li><strong>Pela Web/E-mail:</strong> Envie uma solicitação para <strong>contato@janocaminho.com.br</strong> com o assunto "Exclusão de Dados".</li>
-</ul>
-
-<h3>4. Dados Mantidos e Período de Armazenamento</h3>
-<p>Ao solicitar a exclusão, os dados de perfil são desativados e anonimizados. Contudo, em conformidade com as leis fiscais e regulatórias brasileiras, dados referentes a transações financeiras e histórico de pedidos podem ser mantidos por até 5 anos para fins de auditoria e cumprimento legal.</p>
-
-<h3>5. Canal de Contato</h3>
-<p>Para dúvidas sobre privacidade, contate nosso DPO em: <strong>contato@janocaminho.com.br</strong></p>
-`;
+function UList({ children }: { children: React.ReactNode }) {
+  return <ul className="mt-1.5 space-y-1 list-disc list-inside text-sm text-slate-600 leading-relaxed">{children}</ul>;
+}
 
 export function TermsOfUse() {
   const navigate = useNavigate();
   const location = useLocation();
-  const platformLogo = '/janocaminho-logo.png';
   const fromHub = new URLSearchParams(location.search || '').get('from') === 'hub';
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="bg-white/90 backdrop-blur border-b border-slate-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <button onClick={() => navigate('/')} className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl overflow-hidden border border-slate-200 shadow-sm">
-              <img src={platformLogo} alt="Já no Caminho" className="w-full h-full object-cover" />
-            </div>
-            <div className="text-left">
-              <p className="text-base font-bold text-slate-900">Já no Caminho</p>
-              <p className="text-xs text-slate-500">Termos e Privacidade</p>
-            </div>
-          </button>
+      <header className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-slate-200">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
           <button
-            onClick={() => navigate(fromHub ? '/hub' : '/create')}
-            className="px-3 py-2 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
+            onClick={() => navigate(fromHub ? '/hub' : '/')}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-colors"
           >
-            {fromHub ? 'Voltar ao app' : 'Voltar ao cadastro'}
+            <ArrowLeft size={15} weight="bold" />
+            {fromHub ? 'Voltar ao app' : 'Voltar'}
           </button>
+
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg overflow-hidden border border-slate-200 shadow-sm shrink-0">
+              <img src="/janocaminho-logo.png" alt="Já no Caminho" className="w-full h-full object-cover" />
+            </div>
+            <span className="text-sm font-bold text-slate-800 hidden sm:block">Já no Caminho</span>
+          </div>
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-6">
-        <div className="bg-white border border-slate-200 rounded-3xl shadow-xl p-6 sm:p-10 space-y-6">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Termos de uso</h1>
-            <p className="text-sm text-slate-500 mt-2">
-              Ao criar uma conta, você declara que leu e concorda com os termos abaixo.
-            </p>
-          </div>
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-6">
 
-          <div className="prose prose-slate max-w-none text-sm" dangerouslySetInnerHTML={{ __html: FALLBACK_TERMS }} />
-
-          <div className="border-t border-slate-200 pt-6">
-            <h2 id="lgpd" className="text-base font-semibold text-slate-900 mb-3">LGPD</h2>
-            <div className="prose prose-slate max-w-none text-sm" dangerouslySetInnerHTML={{ __html: FALLBACK_LGPD }} />
+        {/* Hero */}
+        <div className="rounded-3xl bg-gradient-to-br from-[#1a3a52] to-[#336886] p-6 sm:p-8 text-white shadow-xl">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-white/20 shadow-lg shrink-0">
+              <img src="/janocaminho-logo.png" alt="Já no Caminho" className="w-full h-full object-cover" />
+            </div>
+            <div>
+              <h1 className="text-xl sm:text-2xl font-black">Termos de Uso e Privacidade</h1>
+              <p className="text-sm text-white/70 mt-0.5">Última atualização: {LAST_UPDATE}</p>
+            </div>
           </div>
+          <p className="mt-4 text-sm text-white/80 leading-relaxed">
+            Ao criar uma conta ou utilizar a plataforma <strong className="text-white">Já no Caminho</strong>, você declara que leu, compreendeu e concorda com os termos abaixo. Caso não concorde, não utilize nossos serviços.
+          </p>
         </div>
+
+        {/* Termos de Uso */}
+        <div className="rounded-3xl bg-white border border-slate-200 shadow-[0_10px_28px_-22px_rgba(15,23,42,0.35)] p-6 sm:p-8 space-y-1">
+          <h2 className="text-lg font-black text-slate-900">Termos e Condições de Uso</h2>
+          <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">Edmilson Tecnologia da Informação · CNPJ 44.771.427/0001-69</p>
+
+          <Section title="1. Natureza do Serviço" />
+          <Para>
+            A Plataforma atua exclusivamente como um <strong>intermediador tecnológico</strong>, disponibilizando um ambiente virtual para que estabelecimentos parceiros ("Lojas") ofereçam seus produtos e serviços aos usuários. <strong>Não preparamos, embalamos, vendemos, entregamos nem somos responsáveis pelos produtos físicos</strong> comercializados pelas Lojas.
+          </Para>
+
+          <Section title="2. Isenção de Responsabilidade" />
+          <Para>O usuário reconhece e concorda que a Plataforma <strong>não possui qualquer responsabilidade</strong> sobre:</Para>
+          <UList>
+            <li>A qualidade, preparo, segurança, higiene, integridade ou adequação para consumo dos produtos comercializados pelas Lojas;</li>
+            <li>Prazos de entrega, atrasos, extravios ou conduta dos entregadores (motoboys), sejam eles próprios da Loja ou independentes;</li>
+            <li>A precisão das informações nutricionais, preços ou descrições fornecidas pelas Lojas;</li>
+            <li>Eventuais danos diretos, indiretos, materiais ou morais, lucros cessantes ou prejuízos decorrentes do consumo dos produtos ou da prestação do serviço de entrega;</li>
+            <li>Atos ilícitos praticados por estabelecimentos parceiros, entregadores ou terceiros cadastrados na plataforma.</li>
+          </UList>
+          <Para>Qualquer reclamação referente ao produto ou à entrega deverá ser direcionada diretamente à Loja responsável pelo pedido.</Para>
+
+          <Section title="3. Conteúdo Impróprio, Ilegal ou Irregular" />
+          <Para>
+            A Plataforma é um marketplace aberto e <strong>não realiza curadoria prévia</strong> dos produtos ou serviços cadastrados pelas Lojas parceiras. O usuário reconhece expressamente que:
+          </Para>
+          <UList>
+            <li>A Plataforma <strong>não se responsabiliza</strong> por conteúdo, imagens, descrições ou produtos que possam ser considerados impróprios, ofensivos, ilegais ou em desacordo com a legislação vigente, publicados por Lojas ou terceiros;</li>
+            <li>A comercialização de produtos ilegais, falsificados, controlados ou proibidos é de <strong>exclusiva responsabilidade da Loja</strong> que os oferta;</li>
+            <li>Em caso de denúncia de conteúdo impróprio ou irregular, a Plataforma poderá suspender ou remover o estabelecimento, sem que isso gere qualquer responsabilidade para a Plataforma sobre danos já causados;</li>
+            <li>O usuário que identificar conteúdo irregular deve reportar pelo e-mail <strong>contato@janocaminho.com.br</strong>.</li>
+          </UList>
+
+          <Section title="4. Responsabilidade dos Estabelecimentos Parceiros" />
+          <Para>
+            As Lojas parceiras são <strong>pessoas jurídicas ou físicas independentes</strong> e são as únicas responsáveis pelos produtos que oferecem, pela qualidade do atendimento, pelo cumprimento das normas sanitárias, fiscais e legais aplicáveis ao seu ramo de atividade. A relação entre a Plataforma e as Lojas é de prestação de serviço tecnológico, sem qualquer vínculo trabalhista ou societário.
+          </Para>
+
+          <Section title="5. Pagamentos e Transações" />
+          <Para>
+            A Plataforma utiliza gateways de pagamento de terceiros (ex: Mercado Pago). Não armazenamos dados completos de cartão de crédito. A Plataforma não se responsabiliza por falhas de processamento, recusas de crédito, chargebacks ou fraudes de terceiros. O usuário é o único responsável por fornecer informações de pagamento precisas e válidas.
+          </Para>
+
+          <Section title="6. Obrigações do Usuário" />
+          <Para>
+            O usuário compromete-se a fornecer dados cadastrais verdadeiros, não utilizar a Plataforma para fins ilícitos, lesivos ou fraudulentos, e manter a confidencialidade de suas credenciais. O uso indevido ou fraudulento resultará no banimento imediato da conta, sem prejuízo das medidas legais cabíveis.
+          </Para>
+
+          <Section title="7. Disponibilidade da Plataforma" />
+          <Para>
+            Não garantimos que a Plataforma funcionará de forma ininterrupta ou livre de erros. Reservamo-nos o direito de suspender, alterar ou encerrar os serviços a qualquer momento, por razões de manutenção técnica ou atualizações, sem prévio aviso e sem gerar direito a indenização.
+          </Para>
+
+          <Section title="8. Foro e Legislação Aplicável" />
+          <Para>
+            Estes Termos são regidos pelas leis da República Federativa do Brasil. Fica eleito o foro da comarca de domicílio do usuário para dirimir quaisquer controvérsias decorrentes deste instrumento, com renúncia expressa a qualquer outro, por mais privilegiado que seja.
+          </Para>
+
+          <Section title="9. Modificações dos Termos" />
+          <Para>
+            Estes Termos podem ser alterados a qualquer momento, a exclusivo critério da Plataforma. O uso contínuo dos serviços após as alterações constitui plena aceitação dos novos Termos.
+          </Para>
+        </div>
+
+        {/* LGPD */}
+        <div className="rounded-3xl bg-white border border-slate-200 shadow-[0_10px_28px_-22px_rgba(15,23,42,0.35)] p-6 sm:p-8 space-y-1">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="inline-flex rounded-full bg-[#336886]/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest text-[#336886]">LGPD</span>
+          </div>
+          <h2 className="text-lg font-black text-slate-900">Política de Privacidade e Proteção de Dados</h2>
+          <p className="text-xs text-slate-400 font-medium">Em conformidade com a Lei nº 13.709/2018</p>
+
+          <Section title="1. Dados Coletados" />
+          <Para>
+            Coletamos os dados estritamente necessários para a execução dos serviços: nome, e-mail (identificador de login), telefone, endereço de entrega, histórico de pedidos e informações de dispositivo (para notificações push).
+          </Para>
+
+          <Section title="2. Finalidade do Tratamento" />
+          <Para>
+            Os dados são utilizados exclusivamente para processar pedidos, facilitar a entrega, enviar notificações relacionadas ao serviço e cumprir obrigações legais. <strong>Não vendemos dados pessoais a terceiros.</strong>
+          </Para>
+
+          <Section title="3. Compartilhamento de Dados" />
+          <Para>
+            Dados de pedido (nome, endereço, telefone) são compartilhados com a Loja parceira e/ou entregador exclusivamente para viabilizar a entrega. Dados de pagamento são processados diretamente pelo gateway (Mercado Pago) e não ficam armazenados em nossos servidores.
+          </Para>
+
+          <Section title="4. Exclusão de Conta e Dados" />
+          <Para>O usuário pode solicitar a exclusão de seus dados de duas formas:</Para>
+          <UList>
+            <li><strong>Pelo Aplicativo:</strong> acesse "Minha Conta" e clique em "Excluir minha conta permanentemente".</li>
+            <li><strong>Por E-mail:</strong> envie solicitação para <strong>contato@janocaminho.com.br</strong> com o assunto "Exclusão de Dados".</li>
+          </UList>
+
+          <Section title="5. Período de Armazenamento" />
+          <Para>
+            Ao solicitar a exclusão, os dados de perfil são desativados e anonimizados. Dados referentes a transações financeiras podem ser mantidos por até 5 anos para fins de auditoria e cumprimento das leis fiscais e regulatórias brasileiras.
+          </Para>
+
+          <Section title="6. Canal de Contato (DPO)" />
+          <Para>
+            Para dúvidas sobre privacidade ou exercício de direitos previstos na LGPD (acesso, correção, portabilidade, oposição), entre em contato: <strong>contato@janocaminho.com.br</strong>
+          </Para>
+        </div>
+
+        <p className="text-center text-[11px] text-slate-400 pb-4">
+          © {new Date().getFullYear()} Edmilson Tecnologia da Informação · CNPJ 44.771.427/0001-69
+        </p>
       </main>
     </div>
   );
 }
-
-
