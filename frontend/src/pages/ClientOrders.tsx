@@ -19,7 +19,6 @@ import {
   Package,
   Receipt,
   Motorcycle,
-  ShieldCheck,
   SpinnerGap,
   Storefront,
   Timer,
@@ -31,7 +30,7 @@ import {
 import { customerAccountService } from '../services/customerAccountService';
 import { orderService } from '../services/orderService';
 import { useToast } from '../contexts/ToastContext';
-import { formatCurrency } from '../utils/format';
+import { formatCurrency, formatOrderDisplayId } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getPaymentProviderMeta } from '../utils/paymentAssets';
 import { formatSelectedModifiers } from '../utils/productModifiers';
@@ -140,7 +139,10 @@ const buildOrderSupportMessage = ({
   topicTitle?: string;
   topicMessage?: string;
 }) => {
-  const orderNumber = String(order?.id || '').trim() || '-';
+  const orderNumber =
+    formatOrderDisplayId(String(order?.id || '').trim(), String(order?.store?.slug || order?.storeSlug || '').trim()) ||
+    String(order?.id || '').trim() ||
+    '-';
   const safeCustomerName = String(
     customerName ||
     order?.customer?.fullName ||
@@ -710,6 +712,10 @@ function OrderHelpScreen({
   const statusMeta = getStatusMeta(order?.status, order?.type);
   const isDelivery = isDeliverySupportOrder(order);
   const orderDateTime = formatSupportDateTime(order?.createdAt) || formatGroupDate(order?.createdAt);
+  const orderDisplayId =
+    formatOrderDisplayId(String(order?.id || '').trim(), String(order?.store?.slug || order?.storeSlug || '').trim()) ||
+    String(order?.id || '').trim() ||
+    '-';
   const totalLabel = isDelivery ? 'Total com entrega' : 'Total para retirada';
   const supportSections = useMemo(() => getOrderHelpSections(isDelivery), [isDelivery]);
   const defaultExpandedId = supportSections[0]?.items?.[0]?.id || null;
@@ -767,52 +773,52 @@ function OrderHelpScreen({
         </header>
 
         <div className="flex-1 overflow-y-auto px-4 py-5">
-          <div className="rounded-[30px] border border-[#153A4C]/10 bg-[linear-gradient(135deg,#153A4C,#336886)] p-4 text-white shadow-[0_28px_60px_-36px_rgba(21,58,76,0.45)]">
+          <div className="rounded-[30px] border border-slate-200 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(244,248,251,0.98)_58%,rgba(237,244,248,0.96)_100%)] p-4 text-slate-900 shadow-[0_28px_60px_-40px_rgba(15,23,42,0.25)]">
             <div className="flex items-start gap-3">
-              <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[1.2rem] border border-white/20 bg-white/10">
+              <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[1.2rem] border border-slate-200 bg-white shadow-sm">
                 {logoUrl ? (
                   <img src={logoUrl} alt={storeName} className="h-full w-full object-cover" />
                 ) : (
-                  <div className="grid h-full w-full place-items-center bg-white/10 text-sm font-black text-white">
+                  <div className="grid h-full w-full place-items-center bg-slate-100 text-sm font-black text-[#153A4C]">
                     {getStoreInitials(storeName)}
                   </div>
                 )}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="truncate text-lg font-black">{storeName}</p>
-                  <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-100">
+                  <p className="truncate text-lg font-black text-slate-900">{storeName}</p>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[#153A4C]/10 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#153A4C] shadow-sm">
                     {statusMeta.icon}
                     {statusMeta.label}
                   </span>
                 </div>
-                <p className="mt-1 text-sm font-medium text-slate-200">Pedido #{order?.id || '-'} • {orderDateTime}</p>
+                <p className="mt-1 text-sm font-medium text-slate-500">Pedido #{orderDisplayId} • {orderDateTime}</p>
               </div>
             </div>
 
             <div className="mt-4 grid gap-2 sm:grid-cols-3">
-              <div className="rounded-[1.15rem] border border-white/12 bg-white/10 px-4 py-3">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-200/75">Resumo</p>
-                <p className="mt-1 text-sm font-black text-white">{totalLabel}</p>
-                <p className="mt-1 text-base font-black text-white">{formatCurrency(order?.total || 0)}</p>
+              <div className="rounded-[1.15rem] border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Resumo</p>
+                <p className="mt-1 text-sm font-black text-slate-900">{totalLabel}</p>
+                <p className="mt-1 text-base font-black text-[#153A4C]">{formatCurrency(order?.total || 0)}</p>
               </div>
-              <div className="rounded-[1.15rem] border border-white/12 bg-white/10 px-4 py-3">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-200/75">Atendimento</p>
-                <p className="mt-1 text-sm font-black text-white">{isDelivery ? 'Entrega' : 'Retirada'}</p>
-                <p className="mt-1 text-xs font-medium text-slate-200">{isDelivery ? 'Pedido com envio' : 'Pedido para retirada'}</p>
+              <div className="rounded-[1.15rem] border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Atendimento</p>
+                <p className="mt-1 text-sm font-black text-slate-900">{isDelivery ? 'Entrega' : 'Retirada'}</p>
+                <p className="mt-1 text-xs font-medium text-slate-500">{isDelivery ? 'Pedido com envio' : 'Pedido para retirada'}</p>
               </div>
-              <div className="rounded-[1.15rem] border border-white/12 bg-white/10 px-4 py-3">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-200/75">Canal</p>
-                <p className="mt-1 text-sm font-black text-white">Loja responsável</p>
-                <p className="mt-1 text-xs font-medium text-slate-200">Contato direto pelo pedido</p>
+              <div className="rounded-[1.15rem] border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Canal</p>
+                <p className="mt-1 text-sm font-black text-slate-900">Loja responsável</p>
+                <p className="mt-1 text-xs font-medium text-slate-500">Contato direto pelo pedido</p>
               </div>
             </div>
           </div>
 
           <div className="mt-4 rounded-[26px] border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.32)]">
             <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#153A4C]/6 text-[#153A4C]">
-                <ShieldCheck size={20} weight="duotone" />
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <img src="/janocaminho.png" alt="Já no Caminho" className="h-full w-full object-cover" />
               </div>
               <div>
                 <p className="text-sm font-black text-slate-900">Como funciona o atendimento</p>
