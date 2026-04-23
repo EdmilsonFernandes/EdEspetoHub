@@ -199,87 +199,106 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
       style={{ fontFamily: 'Inter, Geist, system-ui, -apple-system, Segoe UI, sans-serif' }}
     >
       <header className="fixed left-1/2 top-3 z-50 w-[calc(100%-1rem)] max-w-7xl -translate-x-1/2 sm:top-4 sm:w-[calc(100%-2rem)]">
-        <div className="rounded-[2rem] border border-white/10 bg-[#0d1930]/72 px-4 py-3 shadow-[0_24px_70px_-34px_rgba(2,6,23,0.72)] backdrop-blur-xl ring-1 ring-white/6 sm:px-6 lg:px-7">
-          <div className="flex items-center justify-between gap-4">
-            <a href="https://www.janocaminho.com.br" className="flex min-w-0 items-center gap-3 group">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/80 bg-white p-0.5 shadow-[0_14px_34px_-20px_rgba(255,255,255,0.4)] transition-transform group-hover:scale-[1.03]">
+        <div className="relative rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(11,18,32,0.94)_0%,rgba(8,15,28,0.92)_52%,rgba(5,10,21,0.96)_100%)] shadow-[0_34px_90px_-42px_rgba(2,6,23,0.92)] ring-1 ring-white/6 backdrop-blur-xl">
+          <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(148,163,184,0.55),transparent)]" />
+          <div className="pointer-events-none absolute inset-y-4 left-[22rem] hidden w-px bg-white/6 xl:block" />
+          <div className="pointer-events-none absolute right-28 top-3 h-12 w-28 rounded-full bg-[#84cc16]/10 blur-2xl" />
+          <div className="pointer-events-none absolute left-24 top-3 h-10 w-20 rounded-full bg-sky-400/10 blur-2xl" />
+          <div className="relative flex items-center justify-between gap-3 px-3 py-3 sm:px-4 lg:px-5">
+            <a href="https://www.janocaminho.com.br" className="group flex min-w-0 items-center gap-3 rounded-[1.35rem] px-2 py-1.5 transition-colors hover:bg-white/[0.03]">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/85 bg-white p-0.5 shadow-[0_16px_30px_-22px_rgba(255,255,255,0.5)] transition-transform group-hover:scale-[1.03]">
                 <img src="/janocaminho.png" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
               </div>
               <div className="min-w-0 leading-tight">
                 <p className="truncate text-base font-black tracking-[-0.03em] text-white sm:text-lg">Já no Caminho</p>
-                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-sky-300/78">Plataforma SaaS</p>
+                <div className="mt-1 flex items-center gap-2">
+                  <span className="inline-flex rounded-full border border-sky-300/20 bg-sky-400/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-sky-200/90">
+                    Plataforma SaaS
+                  </span>
+                </div>
               </div>
             </a>
 
-            <nav className="hidden lg:flex items-center gap-2">
-              <button
-                onClick={goHome}
-                className="rounded-full px-4 py-2 text-sm font-medium tracking-[-0.02em] text-slate-300 transition-colors hover:text-white"
-              >
-                Início
-              </button>
-              <div
-                className="relative"
-                onMouseEnter={() => setSolutionsMenuOpen(true)}
-                onMouseLeave={() => setSolutionsMenuOpen(false)}
-              >
+            <div className="hidden min-w-0 flex-1 justify-center xl:flex">
+              <nav className="flex items-center gap-1 rounded-full border border-white/8 bg-white/[0.04] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
                 <button
-                  type="button"
-                  onClick={() => setSolutionsMenuOpen((prev) => !prev)}
-                  className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium tracking-[-0.02em] text-slate-300 transition-colors hover:text-white"
+                  onClick={goHome}
+                  className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold tracking-[-0.02em] text-slate-300 transition-all hover:bg-white/[0.06] hover:text-white"
                 >
-                  Soluções
-                  <CaretDown size={14} weight="bold" className={`transition-transform ${solutionsMenuOpen ? 'rotate-180 text-white' : ''}`} />
+                  <House size={16} weight="duotone" className="text-sky-300" />
+                  Início
                 </button>
-                {solutionsMenuOpen ? (
-                  <div className="absolute left-1/2 top-[calc(100%+0.85rem)] w-[23rem] -translate-x-1/2 overflow-hidden rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.96)_0%,rgba(13,25,48,0.96)_100%)] p-2.5 shadow-[0_28px_60px_-30px_rgba(2,6,23,0.85)] backdrop-blur-xl">
-                    <div className="space-y-1">
-                      {solutionsLinks.map((item) => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => {
-                            setSolutionsMenuOpen(false);
-                            item.onClick();
-                          }}
-                          className="flex w-full items-start gap-3 rounded-[1.1rem] px-3.5 py-3 text-left transition hover:bg-white/6"
-                        >
-                          <span className="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full bg-[#84cc16] shadow-[0_0_18px_rgba(132,204,22,0.55)]" />
-                          <span className="min-w-0">
-                            <span className="block text-sm font-semibold tracking-[-0.02em] text-white">{item.label}</span>
-                            <span className="mt-1 block text-xs font-medium leading-5 text-slate-400">{item.helper}</span>
-                          </span>
-                        </button>
-                      ))}
+                <div
+                  className="relative"
+                  onMouseEnter={() => setSolutionsMenuOpen(true)}
+                  onMouseLeave={() => setSolutionsMenuOpen(false)}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setSolutionsMenuOpen((prev) => !prev)}
+                    className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold tracking-[-0.02em] text-slate-300 transition-all hover:bg-white/[0.06] hover:text-white"
+                  >
+                    <Buildings size={16} weight="duotone" className="text-emerald-300" />
+                    Soluções
+                    <CaretDown size={14} weight="bold" className={`transition-transform ${solutionsMenuOpen ? 'rotate-180 text-white' : ''}`} />
+                  </button>
+                  {solutionsMenuOpen ? (
+                    <div className="absolute left-1/2 top-[calc(100%+0.9rem)] w-[24rem] -translate-x-1/2 rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(10,16,29,0.98)_0%,rgba(7,12,24,0.98)_100%)] p-2.5 shadow-[0_32px_70px_-32px_rgba(2,6,23,0.92)] backdrop-blur-xl">
+                      <div className="border-b border-white/6 px-3.5 pb-3 pt-1">
+                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Plataforma</p>
+                        <p className="mt-1 text-sm font-semibold text-white">Entradas organizadas para operação, expansão e aquisição.</p>
+                      </div>
+                      <div className="mt-2 space-y-1">
+                        {solutionsLinks.map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => {
+                              setSolutionsMenuOpen(false);
+                              item.onClick();
+                            }}
+                            className="flex w-full items-start gap-3 rounded-[1rem] px-3.5 py-3 text-left transition hover:bg-white/[0.05]"
+                          >
+                            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/8 bg-white/[0.04]">
+                              <span className="h-2.5 w-2.5 rounded-full bg-[#84cc16] shadow-[0_0_18px_rgba(132,204,22,0.55)]" />
+                            </span>
+                            <span className="min-w-0">
+                              <span className="block text-sm font-semibold tracking-[-0.02em] text-white">{item.label}</span>
+                              <span className="mt-1 block text-xs font-medium leading-5 text-slate-400">{item.helper}</span>
+                            </span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ) : null}
-              </div>
-              <button
-                onClick={() => navigate('/instalar')}
-                className="rounded-full px-4 py-2 text-sm font-medium tracking-[-0.02em] text-slate-300 transition-colors hover:text-white"
-              >
-                Instalar app
-              </button>
-            </nav>
+                  ) : null}
+                </div>
+                <button
+                  onClick={() => navigate('/instalar')}
+                  className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold tracking-[-0.02em] text-slate-300 transition-all hover:bg-white/[0.06] hover:text-white"
+                >
+                  <DownloadSimple size={16} weight="duotone" className="text-sky-300" />
+                  Instalar app
+                </button>
+              </nav>
+            </div>
 
-            <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={() => navigate('/admin')}
-                className="relative hidden sm:inline-flex px-1 py-2 text-sm font-medium tracking-[-0.02em] text-slate-300 transition-colors hover:text-[#84cc16] after:absolute after:bottom-1 after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:rounded-full after:bg-[#84cc16] after:shadow-[0_0_16px_rgba(132,204,22,0.45)] after:transition-transform hover:after:scale-x-100"
+                className="hidden md:inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-semibold tracking-[-0.02em] text-slate-200 transition-all hover:border-[#84cc16]/35 hover:bg-white/[0.06] hover:text-white"
               >
                 Entrar
               </button>
               <button
                 onClick={() => navigate('/create?plan=trial')}
-                className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(180deg,#a3e635_0%,#84cc16_100%)] px-5 py-2.5 text-sm font-black tracking-[-0.02em] text-[#0d1930] shadow-[0_0_0_1px_rgba(255,255,255,0.16),0_20px_36px_-22px_rgba(132,204,22,0.85)] transition-all hover:scale-[1.02] hover:brightness-[1.03] active:scale-[0.98] sm:px-6"
+                className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(180deg,#b7f34a_0%,#84cc16_100%)] px-5 py-2.5 text-sm font-black tracking-[-0.02em] text-[#07111f] shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_20px_42px_-24px_rgba(132,204,22,0.95)] transition-all hover:scale-[1.02] hover:brightness-[1.04] active:scale-[0.985] sm:px-6"
               >
                 Criar loja grátis
               </button>
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(true)}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 text-white transition hover:bg-white/6 lg:hidden"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white transition hover:bg-white/[0.08] xl:hidden"
               >
                 <List size={20} weight="bold" />
               </button>
@@ -305,10 +324,15 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
           aria-modal="true"
           aria-label="Menu mobile"
         >
-          <div className="flex items-center justify-between px-4 py-4 border-b border-slate-100 dark:border-slate-800">
-            <div>
-              <p className="text-sm font-black text-slate-900 dark:text-slate-100">Menu</p>
-              <p className="text-xs text-slate-500">Já no Caminho</p>
+          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4 dark:border-slate-800">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white p-0.5 shadow-sm dark:border-slate-700 dark:bg-slate-100">
+                <img src="/janocaminho.png" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
+              </div>
+              <div>
+                <p className="text-sm font-black text-slate-900 dark:text-slate-100">Já no Caminho</p>
+                <p className="text-xs font-semibold text-slate-500">Navegação principal</p>
+              </div>
             </div>
             <button
               type="button"
