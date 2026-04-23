@@ -365,6 +365,56 @@ export const CartView = ({
     return labels.length ? labels.join(' • ') : '';
   };
 
+  const resolveCartItemImage = (item) => resolveAssetUrl(item?.imageUrl || "");
+  const totalCartUnits = cartItems.reduce((acc, item) => acc + Number(item?.qty || 0), 0);
+  const cartPreviewItems = useMemo(() => cartItems.slice(0, 3), [cartItems]);
+  const extraCartPreviewCount = Math.max(0, cartItems.length - cartPreviewItems.length);
+
+  const checkoutContextMeta = useMemo(() => {
+    if (customer.type === "pickup") {
+      return {
+        icon: <House size={20} weight="duotone" />,
+        title: "Retirada rápida no balcão",
+        description: "Seu pedido segue para preparo e você acompanha tudo pelo app até a retirada.",
+        toneClass: "border-emerald-100 bg-[linear-gradient(135deg,rgba(236,253,245,0.96)_0%,rgba(255,255,255,0.98)_100%)]",
+        iconClass: "bg-emerald-100 text-emerald-700",
+        chips: [
+          storeAddress || "Retirada no local",
+          "Sem taxa de entrega",
+          "Acompanhamento em tempo real",
+        ],
+      };
+    }
+
+    if (customer.type === "table") {
+      return {
+        icon: <ForkKnife size={20} weight="duotone" />,
+        title: "Pedido identificado para a mesa",
+        description: "A cozinha recebe seu pedido com identificação da mesa para acelerar a operação.",
+        toneClass: "border-amber-100 bg-[linear-gradient(135deg,rgba(255,251,235,0.97)_0%,rgba(255,255,255,0.98)_100%)]",
+        iconClass: "bg-amber-100 text-amber-700",
+        chips: [
+          customer.table ? `Mesa ${customer.table}` : "Mesa a confirmar",
+          "Fluxo mais ágil",
+          "Atualizações no app",
+        ],
+      };
+    }
+
+    return {
+      icon: <Bicycle size={20} weight="duotone" />,
+      title: "Entrega com validação inteligente",
+      description: "Confira o endereço, escolha a melhor forma de pagamento e siga o pedido com mais segurança.",
+      toneClass: "border-sky-100 bg-[linear-gradient(135deg,rgba(239,246,255,0.97)_0%,rgba(255,255,255,0.98)_100%)]",
+      iconClass: "bg-sky-100 text-[#336886]",
+      chips: [
+        radiusValue ? `Até ${radiusValue} km` : "Entrega ativa",
+        deliveryFeeValue > 0 ? `Frete ${formatCurrency(deliveryFeeValue)}` : "Frete calculado no fluxo",
+        "Pagamento protegido",
+      ],
+    };
+  }, [customer.table, customer.type, deliveryFeeValue, radiusValue, storeAddress]);
+
   const buildDeliveryAddress = (data) => {
     const street = String(data.street || "").trim();
     const number = String(data.number || "").trim();
@@ -694,11 +744,35 @@ export const CartView = ({
 
       {/* Resumo compacto (mobile) */}
       {(!useMultiStepFlow || checkoutStep > 1) && <div className={`sm:hidden mb-4 rounded-2xl border border-slate-100 bg-white px-4 ${summaryCompact ? 'py-2' : 'py-2.5'} flex items-center justify-between sticky ${summaryStickyTopClass} z-30 transition-all shadow-sm`}>
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Resumo rápido</p>
-          <p className="text-sm font-semibold text-slate-800">
-            {cartItems.reduce((acc, item) => acc + item.qty, 0)} itens
-          </p>
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex items-center -space-x-2">
+            {cartPreviewItems.map((item, index) => {
+              const imageUrl = resolveCartItemImage(item);
+              return (
+                <div
+                  key={item.key || item.id || index}
+                  className="h-9 w-9 overflow-hidden rounded-full border-2 border-white bg-slate-100 shadow-sm"
+                >
+                  {imageUrl ? (
+                    <img src={imageUrl} alt={item.name} className="h-full w-full object-cover" loading="lazy" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-[10px] text-slate-400">🍖</div>
+                  )}
+                </div>
+              );
+            })}
+            {extraCartPreviewCount > 0 ? (
+              <span className="inline-flex h-9 min-w-[2.3rem] items-center justify-center rounded-full border-2 border-white bg-[#153A4C] px-2 text-[10px] font-black text-white shadow-sm">
+                +{extraCartPreviewCount}
+              </span>
+            ) : null}
+          </div>
+          <div className="min-w-0">
+            <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Resumo rápido</p>
+            <p className="truncate text-sm font-semibold text-slate-800">
+              {totalCartUnits} {totalCartUnits === 1 ? "item" : "itens"} na sacola
+            </p>
+          </div>
         </div>
         <div className="text-right">
           <p className="text-[11px] text-slate-400">Total</p>
@@ -906,6 +980,35 @@ export const CartView = ({
                   </span>
                 </button>
               ))}
+            </div>
+          </div>
+
+          <div className={`relative overflow-hidden rounded-[1.8rem] border p-4 shadow-[0_20px_40px_-30px_rgba(15,23,42,0.22)] ${checkoutContextMeta.toneClass}`}>
+            <div className="pointer-events-none absolute -right-8 top-0 h-28 w-28 rounded-full bg-white/70 blur-3xl" />
+            <div className="pointer-events-none absolute bottom-0 left-0 h-24 w-24 rounded-full bg-white/60 blur-3xl" />
+            <div className="relative flex items-start gap-3">
+              <div className="relative shrink-0">
+                <span className="absolute inset-0 rounded-2xl bg-white/60 animate-ping" />
+                <span className={`relative flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm ${checkoutContextMeta.iconClass}`}>
+                  {checkoutContextMeta.icon}
+                </span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Fluxo guiado</p>
+                <h3 className="mt-1 text-[15px] font-black leading-tight text-slate-900">{checkoutContextMeta.title}</h3>
+                <p className="mt-1 text-xs leading-relaxed text-slate-600">{checkoutContextMeta.description}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {checkoutContextMeta.chips.filter(Boolean).slice(0, 3).map((chip) => (
+                    <span
+                      key={chip}
+                      className="inline-flex items-center gap-1 rounded-full border border-white/70 bg-white/80 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm"
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      {chip}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1523,17 +1626,25 @@ export const CartView = ({
 
       {/* Sugestões (carrossel horizontal – step 1) */}
       {(!useMultiStepFlow || checkoutStep === 1) && showSuggestedProducts && (
-        <div className="mb-4 sm:mb-6">
-          <p className="mb-2 px-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Adicionar ao pedido</p>
-          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory">
+        <div className="mb-4 sm:mb-6 rounded-[1.9rem] border border-slate-100 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(241,245,249,0.95)_100%)] p-4 shadow-[0_24px_48px_-34px_rgba(15,23,42,0.24)]">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Adicionar ao pedido</p>
+              <p className="mt-1 text-sm font-bold text-slate-900">Complete sua sacola com mais alguns favoritos</p>
+            </div>
+            <span className="inline-flex rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886] shadow-sm">
+              Sugestões
+            </span>
+          </div>
+          <div className="mt-3 flex gap-3 overflow-x-auto pb-2 pl-1 pr-4 scrollbar-hide snap-x snap-mandatory">
             {suggestedProducts.map((prod) => (
               <button
                 key={prod.id}
                 type="button"
                 onClick={() => onUpdateCart?.(prod, 1, { cookingPoint: '', passSkewer: false, selectedModifiers: [] })}
-                className="group flex-none w-[200px] snap-start flex items-center gap-3 rounded-2xl border border-slate-100 bg-white px-2 py-2 shadow-sm active:scale-[0.97] transition-all"
+                className="group flex-none w-[216px] snap-start flex items-center gap-3 rounded-[1.35rem] border border-slate-100 bg-white px-3 py-3 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.24)] active:scale-[0.97] transition-all hover:-translate-y-0.5"
               >
-                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-100">
                   {prod.imageUrl ? (
                     <img src={resolveAssetUrl(prod.imageUrl)} alt={prod.name} className="h-full w-full object-cover" loading="lazy" />
                   ) : (
@@ -1541,10 +1652,11 @@ export const CartView = ({
                   )}
                 </div>
                 <div className="min-w-0 flex-1 text-left">
-                  <p className="truncate text-[12px] font-semibold leading-tight text-slate-800">{prod.name}</p>
-                  <p className="text-[12px] font-black text-brand-primary">{formatCurrency(prod.price)}</p>
+                  <p className="truncate text-[13px] font-bold leading-tight text-slate-800">{prod.name}</p>
+                  <p className="mt-1 text-[11px] font-medium text-slate-400">Entrou bem com seu pedido</p>
+                  <p className="mt-1.5 text-[13px] font-black text-[#153A4C]">{formatCurrency(prod.price)}</p>
                 </div>
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white text-base font-black group-active:bg-brand-primary transition-colors">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] text-white text-base font-black shadow-[0_14px_26px_-18px_rgba(21,58,76,0.55)] transition-colors">
                   +
                 </div>
               </button>
@@ -1556,10 +1668,68 @@ export const CartView = ({
       {/* Compact pricing + Forma de Pagamento (multi-step step 3) */}
       {useMultiStepFlow && checkoutStep === 3 && (
         <div className="relative overflow-hidden bg-white rounded-2xl border border-slate-100 p-4 sm:p-6 mb-4 shadow-sm">
-          <h2 className="font-black text-slate-900 text-base tracking-tight mb-3">Resumo do pedido</h2>
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="font-black text-slate-900 text-base tracking-tight">Resumo do pedido</h2>
+              <p className="mt-1 text-xs text-slate-500">Revise os itens antes de escolher a forma de pagamento.</p>
+            </div>
+            <div className="flex items-center -space-x-2">
+              {cartPreviewItems.map((item, index) => {
+                const imageUrl = resolveCartItemImage(item);
+                return (
+                  <div
+                    key={item.key || item.id || index}
+                    className="h-10 w-10 overflow-hidden rounded-full border-2 border-white bg-slate-100 shadow-sm"
+                  >
+                    {imageUrl ? (
+                      <img src={imageUrl} alt={item.name} className="h-full w-full object-cover" loading="lazy" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-[10px] text-slate-400">🍖</div>
+                    )}
+                  </div>
+                );
+              })}
+              {extraCartPreviewCount > 0 ? (
+                <span className="inline-flex h-10 min-w-[2.5rem] items-center justify-center rounded-full border-2 border-white bg-[#153A4C] px-2 text-[10px] font-black text-white shadow-sm">
+                  +{extraCartPreviewCount}
+                </span>
+              ) : null}
+            </div>
+          </div>
+          <div className="mt-4 space-y-2 rounded-[1.4rem] border border-slate-100 bg-slate-50/80 p-3">
+            {cartPreviewItems.map((item) => {
+              const imageUrl = resolveCartItemImage(item);
+              const optionsLabel = formatItemOptions(item);
+              return (
+                <div key={item.key || item.id} className="flex items-center gap-3">
+                  <div className="h-11 w-11 shrink-0 overflow-hidden rounded-2xl bg-white ring-1 ring-slate-100">
+                    {imageUrl ? (
+                      <img src={imageUrl} alt={item.name} className="h-full w-full object-cover" loading="lazy" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-[10px] text-slate-400">🍖</div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold text-slate-800">{item.name}</p>
+                    <p className="truncate text-[11px] text-slate-500">
+                      {item.qty}x{optionsLabel ? ` • ${optionsLabel}` : ""}
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-sm font-black text-slate-800">{formatCurrency(item.price * item.qty)}</span>
+                </div>
+              );
+            })}
+            {extraCartPreviewCount > 0 ? (
+              <div className="pt-1">
+                <span className="inline-flex items-center gap-1 rounded-full border border-[#336886]/10 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-[#336886] shadow-sm">
+                  +{extraCartPreviewCount} {extraCartPreviewCount === 1 ? "item" : "itens"} no pedido
+                </span>
+              </div>
+            ) : null}
+          </div>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between text-slate-600">
-              <span>{cartItems.reduce((a, i) => a + i.qty, 0)} {cartItems.reduce((a, i) => a + i.qty, 0) === 1 ? 'item' : 'itens'}</span>
+              <span>{totalCartUnits} {totalCartUnits === 1 ? 'item' : 'itens'}</span>
               <span className="font-semibold text-slate-800">{formatCurrency(total)}</span>
             </div>
             {discountTotal > 0 && (
@@ -1715,23 +1885,52 @@ export const CartView = ({
         <div className="space-y-3 mb-4">
           {/* Itens */}
           <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-3">Itens do pedido</p>
-            <div className="space-y-2">
-              {cartItems.map((item) => (
-                <div key={item.key || item.id} className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[10px] font-black text-slate-700">{item.qty}</span>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-800 truncate">{item.name}</p>
-                      {formatItemOptions(item) && (
-                        <p className="text-[10px] text-slate-400 truncate">{formatItemOptions(item)}</p>
-                      )}
-                    </div>
-                  </div>
-                  <span className="shrink-0 text-sm font-bold text-slate-800">{formatCurrency((item.price + getModifiersTotal(item.selectedModifiers || [])) * item.qty)}</span>
-                </div>
-              ))}
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Itens do pedido</p>
+                <p className="mt-1 text-xs text-slate-500">Confirme os itens e quantidades antes de enviar.</p>
+              </div>
+              <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600">
+                {totalCartUnits} {totalCartUnits === 1 ? "item" : "itens"}
+              </span>
             </div>
+            <div className="space-y-2">
+              {cartItems.map((item, index) => {
+                const imageUrl = resolveCartItemImage(item);
+                return (
+                  <div key={item.key || item.id || index} className="flex items-center justify-between gap-3 rounded-[1.2rem] border border-slate-100 bg-slate-50/75 px-3 py-2.5">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-2xl bg-white ring-1 ring-slate-100">
+                        {imageUrl ? (
+                          <img src={imageUrl} alt={item.name} className="h-full w-full object-cover" loading="lazy" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-[10px] text-slate-400">🍖</div>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex min-w-[1.6rem] items-center justify-center rounded-full bg-white px-1.5 py-0.5 text-[10px] font-black text-slate-700 ring-1 ring-slate-200">
+                            {item.qty}x
+                          </span>
+                          <p className="truncate text-sm font-bold text-slate-800">{item.name}</p>
+                        </div>
+                        {formatItemOptions(item) && (
+                          <p className="mt-1 truncate text-[11px] text-slate-500">{formatItemOptions(item)}</p>
+                        )}
+                      </div>
+                    </div>
+                    <span className="shrink-0 text-sm font-black text-slate-800">{formatCurrency(item.price * item.qty)}</span>
+                  </div>
+                );
+              })}
+            </div>
+            {extraCartPreviewCount > 0 ? (
+              <div className="mt-3 flex justify-start">
+                <span className="inline-flex items-center gap-1 rounded-full border border-[#336886]/10 bg-[#336886]/5 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-[#336886]">
+                  Pedido completo com {cartItems.length} seleções
+                </span>
+              </div>
+            ) : null}
             <div className="mt-3 pt-3 border-t border-slate-100 flex justify-between">
               <span className="text-sm font-bold text-slate-700">Subtotal</span>
               <span className="text-sm font-bold text-slate-800">{formatCurrency(total)}</span>
@@ -1750,38 +1949,66 @@ export const CartView = ({
 
           {/* Entrega / Retirada */}
           <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">
-              {customer.type === 'delivery' ? 'Entrega' : customer.type === 'pickup' ? 'Retirada no local' : `Mesa ${customer.table || ''}`}
-            </p>
-            {customer.type === 'delivery' && (
-              <p className="text-sm text-slate-700 font-medium">
-                {[customer.street, customer.number, customer.neighborhood, customer.city].filter(Boolean).join(', ') || customer.address || '—'}
-              </p>
-            )}
-            {customer.type === 'pickup' && (
-              <p className="text-sm text-slate-700 font-medium">{storeAddress || 'Retirada no balcão'}</p>
-            )}
+            <div className="flex items-center gap-3">
+              <span className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ${
+                customer.type === 'delivery'
+                  ? 'bg-sky-50 text-[#336886]'
+                  : customer.type === 'pickup'
+                    ? 'bg-emerald-50 text-emerald-700'
+                    : 'bg-amber-50 text-amber-700'
+              }`}>
+                {customer.type === 'delivery' ? <Bicycle size={18} weight="duotone" /> : customer.type === 'pickup' ? <House size={18} weight="duotone" /> : <ForkKnife size={18} weight="duotone" />}
+              </span>
+              <div className="min-w-0">
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
+                  {customer.type === 'delivery' ? 'Entrega' : customer.type === 'pickup' ? 'Retirada no local' : `Mesa ${customer.table || ''}`}
+                </p>
+                {customer.type === 'delivery' && (
+                  <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-700">
+                    {[customer.street, customer.number, customer.neighborhood, customer.city].filter(Boolean).join(', ') || customer.address || '—'}
+                  </p>
+                )}
+                {customer.type === 'pickup' && (
+                  <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-700">{storeAddress || 'Retirada no balcão'}</p>
+                )}
+                {customer.type === 'table' && (
+                  <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-700">Pedido identificado para a mesa {customer.table || 'selecionada'}.</p>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Pagamento */}
           <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Pagamento</p>
-            {(() => {
-              const methodMeta = getPaymentMethodMeta(paymentMethod);
-              return (
-                <div className="flex items-center gap-2">
-                  {methodMeta.icon ? (
-                    <img src={methodMeta.icon} alt={methodMeta.label} className="h-5 w-5 object-contain" />
-                  ) : (
-                    <CreditCard size={16} weight="duotone" className="text-slate-500" />
-                  )}
-                  <span className="text-sm font-semibold text-slate-800 capitalize">{methodMeta.label}</span>
-                </div>
-              );
-            })()}
-            {isCash && cashNeedsChange && cashTenderedValue !== null && cashTenderedValue >= totalWithFee && (
-              <p className="mt-1 text-xs text-slate-500">Troco: <span className="font-bold text-slate-700">{formatCurrency(cashChangeDue)}</span></p>
-            )}
+            <div className="flex items-center gap-3">
+              <span className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ${
+                (isPix || isCredit || isDebit) ? 'bg-sky-50 text-[#009ee3]' : 'bg-slate-100 text-slate-600'
+              }`}>
+                <CreditCard size={18} weight="duotone" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Pagamento</p>
+                {(() => {
+                  const methodMeta = getPaymentMethodMeta(paymentMethod);
+                  return (
+                    <div className="mt-1 flex items-center gap-2">
+                      {methodMeta.icon ? (
+                        <img src={methodMeta.icon} alt={methodMeta.label} className="h-5 w-5 object-contain" />
+                      ) : (
+                        <CreditCard size={16} weight="duotone" className="text-slate-500" />
+                      )}
+                      <span className="text-sm font-semibold text-slate-800 capitalize">{methodMeta.label}</span>
+                    </div>
+                  );
+                })()}
+                {isCash && cashNeedsChange && cashTenderedValue !== null && cashTenderedValue >= totalWithFee ? (
+                  <p className="mt-1 text-xs text-slate-500">Troco para {formatCurrency(cashTenderedValue)} • devolução {formatCurrency(cashChangeDue)}</p>
+                ) : null}
+                {(isPix || isCredit || isDebit) ? (
+                  <p className="mt-1 text-xs text-slate-500">Cobrança segura via Mercado Pago.</p>
+                ) : null}
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -6,6 +6,8 @@ import { Browser } from '@capacitor/browser';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
+  ArrowClockwise,
+  ArrowSquareOut,
   CalendarBlank,
   CheckCircle,
   Clock,
@@ -26,6 +28,7 @@ import { useToast } from '../contexts/ToastContext';
 import { formatCurrency } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getPaymentProviderMeta } from '../utils/paymentAssets';
+import { formatSelectedModifiers } from '../utils/productModifiers';
 
 const TERMINAL_STATUSES = [ 'DELIVERED', 'CANCELLED', 'FINISHED', 'REJECTED', 'DONE' ];
 const ACTIVE_REFRESH_MS = 10_000;
@@ -61,6 +64,19 @@ const getStoreInitials = (name?: string) => {
     .slice(0, 2);
   if (!parts.length) return 'JN';
   return parts.map((part) => part[0]?.toUpperCase() || '').join('');
+};
+
+const getOrderItemQty = (item: any) => Math.max(1, Number(item?.quantity ?? item?.qty ?? 1));
+
+const getOrderItemImageUrl = (item: any) => resolveAssetUrl(item?.imageUrl || item?.product?.imageUrl || '');
+
+const getOrderItemDetails = (item: any) => {
+  const labels = [];
+  if (item?.cookingPoint) labels.push(String(item.cookingPoint));
+  if (item?.passSkewer) labels.push('passar farinha');
+  const modifiers = formatSelectedModifiers(item?.selectedModifiers || []);
+  if (modifiers.length) labels.push(`+ ${modifiers.join(', ')}`);
+  return labels.join(' • ');
 };
 
 const getEtaWindowLabel = (eta?: { windowMin?: number; windowMax?: number; totalMinutes?: number } | null) => {
@@ -340,17 +356,37 @@ function OrderCard({
           ) : null}
 
           <div className="flex min-w-0 items-center gap-3">
-            <div className="w-full space-y-2">
-              {visibleItems.map((item: any) => (
-                <div key={item.id} className="flex items-center gap-2.5">
-                  <span className="inline-flex min-w-6 justify-center rounded-md bg-white px-1.5 py-0.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">
-                    {item.quantity}
-                  </span>
-                  <span className="min-w-0 truncate text-sm text-slate-700">{item.name || 'Item do pedido'}</span>
-                </div>
-              ))}
+            <div className="w-full space-y-2.5">
+              {visibleItems.map((item: any, index: number) => {
+                const imageUrl = getOrderItemImageUrl(item);
+                const itemDetails = getOrderItemDetails(item);
+                return (
+                  <div key={item.id || `${order.id}-item-${index}`} className="flex items-center gap-3 rounded-[1.15rem] border border-slate-100 bg-white/90 px-2.5 py-2 shadow-[0_10px_22px_-20px_rgba(15,23,42,0.25)]">
+                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-100">
+                      {imageUrl ? (
+                        <img src={imageUrl} alt={item.name || 'Item do pedido'} className="h-full w-full object-cover" loading="lazy" />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-[10px] text-slate-400">🍖</div>
+                      )}
+                    </div>
+                    <span className="inline-flex min-w-[1.7rem] justify-center rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-black text-slate-700 ring-1 ring-slate-200">
+                      {getOrderItemQty(item)}x
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-semibold text-slate-800">{item.name || 'Item do pedido'}</span>
+                      {itemDetails ? (
+                        <span className="mt-0.5 block truncate text-[11px] text-slate-500">{itemDetails}</span>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
               {extraItems > 0 ? (
-                <p className="pl-8 text-xs font-medium text-slate-500">+{extraItems} itens</p>
+                <div className="pt-0.5">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[#336886]/10 bg-[#336886]/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]">
+                    +{extraItems} {extraItems === 1 ? 'item extra' : 'itens extras'} no pedido
+                  </span>
+                </div>
               ) : null}
               {normalizeStatus(order.status) === 'CANCELLED' && String(order.canceledReason || '').trim() ? (
                 <div className="rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-xs text-rose-700">
@@ -400,22 +436,24 @@ function OrderCard({
             </div>
           )}
         </div>
-        <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2">
           {isActive && isDelayed ? (
             <button
               type="button"
               onClick={handleHelp}
-              className="rounded-xl px-3 py-2 text-sm font-semibold text-rose-500 transition-colors hover:bg-rose-50"
+              className="inline-flex items-center gap-1.5 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700 shadow-sm transition-colors hover:bg-amber-100"
             >
+              <ArrowSquareOut size={14} weight="bold" />
               Falar com a loja
             </button>
           ) : !isActive ? (
             <button
               type="button"
               onClick={handleHelp}
-              className="rounded-xl px-3 py-2 text-sm font-semibold text-rose-500 transition-colors hover:bg-rose-50"
+              className="inline-flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 shadow-sm transition-colors hover:bg-slate-50"
             >
-              Ajuda
+              <ArrowSquareOut size={14} weight="bold" />
+              Suporte
             </button>
           ) : null}
           {canCancel ? (
@@ -431,9 +469,10 @@ function OrderCard({
             <button
               type="button"
               onClick={() => onOpenStore(order.store?.slug)}
-              className="rounded-xl bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+              className="inline-flex items-center gap-1.5 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-3.5 py-2 text-sm font-semibold text-white shadow-[0_16px_30px_-20px_rgba(21,58,76,0.55)] transition-colors hover:brightness-105"
             >
-              Pedir novamente
+              <ArrowClockwise size={14} weight="bold" />
+              Pedir de novo
             </button>
           ) : null}
         </div>
@@ -791,7 +830,7 @@ export function ClientOrders() {
                 <p className="mt-1 text-sm text-slate-500">Quando pedir pelo app, eles vão aparecer aqui.</p>
                 <button
                   onClick={() => navigate('/hub')}
-                  className="mt-6 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+                  className="mt-6 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-5 py-3 text-sm font-semibold text-white shadow-[0_20px_36px_-24px_rgba(21,58,76,0.55)] transition-colors hover:brightness-105"
                 >
                   Explorar lojas
                 </button>

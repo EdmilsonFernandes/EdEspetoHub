@@ -1229,16 +1229,30 @@ export const MenuView = ({
             className="rounded-3xl overflow-hidden border border-slate-100 p-4 sm:p-5 shadow-sm"
             style={{ background: `linear-gradient(135deg, ${catalogPrimaryColor}14 0%, white 55%)` }}
           >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex min-w-0 flex-1 items-center gap-4">
+                <div className="h-20 w-20 shrink-0 overflow-hidden rounded-[1.4rem] border border-white/80 bg-white shadow-[0_16px_28px_-20px_rgba(15,23,42,0.32)] ring-1 ring-slate-100">
+                  {featuredProduct.imageUrl ? (
+                    <img
+                      src={resolveAssetUrl(featuredProduct.imageUrl)}
+                      alt={featuredProduct.name}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-slate-100 text-2xl">🍖</div>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
                 <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em]" style={{ backgroundColor: `${catalogPrimaryColor}18`, color: catalogPrimaryColor }}>
                   <Sparkle size={9} weight="fill" />
                   Promoção do dia
                 </span>
-                <h3 className="text-[15px] font-black text-slate-900 mt-1.5 leading-tight">{featuredProduct.name}</h3>
-                {!staffView && featuredProduct.description && (
-                  <p className="text-xs text-slate-500 mt-1 leading-relaxed line-clamp-2">{featuredProduct.description}</p>
-                )}
+                  <h3 className="text-[15px] font-black text-slate-900 mt-1.5 leading-tight">{featuredProduct.name}</h3>
+                  {!staffView && featuredProduct.description && (
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed line-clamp-2">{featuredProduct.description}</p>
+                  )}
+                </div>
               </div>
               <div className="flex shrink-0 flex-col items-end gap-2">
                 {resolvePromoPrice(featuredProduct) ? (
@@ -1938,4 +1952,3 @@ export const MenuView = ({
     </div>
   );
 };
-
