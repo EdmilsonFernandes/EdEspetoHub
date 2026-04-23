@@ -4,8 +4,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { Buildings, CaretDown, CreditCard, CurrencyDollar, DownloadSimple, House, List, MagnifyingGlass, Moon, QrCode, ShieldCheck, SignOut, Storefront, Sun, Truck, X } from '@phosphor-icons/react';
-import mercadoPagoHorizontal from '../assets/mercado-pago-horizontal.svg';
-
 interface LandingPageLayoutProps {
   children: React.ReactNode;
 }
@@ -566,7 +564,9 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 <div className="relative overflow-hidden rounded-[1.35rem] border border-white/10 bg-[linear-gradient(145deg,rgba(13,25,48,0.94),rgba(2,52,81,0.9))] p-4 shadow-[0_22px_48px_-28px_rgba(0,158,227,0.45)]">
                   <div className="pointer-events-none absolute -left-4 top-4 h-14 w-14 rounded-full bg-[#009ee3]/25 blur-2xl" />
                   <div className="pointer-events-none absolute -right-4 bottom-3 h-14 w-14 rounded-full bg-[#84cc16]/18 blur-2xl" />
-                  <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="relative h-10 w-full object-contain brightness-0 invert" />
+                  <div className="relative rounded-[1rem] border border-white/70 bg-white/96 px-3 py-2 shadow-[0_18px_34px_-24px_rgba(255,255,255,0.65)]">
+                    <img src="/mercado-pago-horizontal.png" alt="Mercado Pago" className="h-14 w-full object-contain object-left" />
+                  </div>
                   <div className="relative mt-3 flex flex-wrap gap-2">
                     {[
                       { icon: QrCode, label: 'Pix' },

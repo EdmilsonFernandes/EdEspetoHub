@@ -43,7 +43,7 @@ import { customerAccountService } from '../services/customerAccountService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { SocialProofMarquee } from '../components/Landing/SocialProofMarquee';
 import { SegmentPromoCarousel } from '../components/common/SegmentPromoCarousel';
-import mercadoPagoHorizontal from '../assets/mercado-pago-horizontal.svg';
+const mercadoPagoLandingLogo = '/mercado-pago-horizontal.png';
 
 const upsertMeta = (name: string, content: string, attr: 'name' | 'property' = 'name') => {
   if (typeof document === 'undefined') return;
@@ -345,10 +345,12 @@ export function LandingPage() {
                           O cliente paga no fluxo da loja e o valor cai na conta Mercado Pago do próprio lojista.
                         </p>
                       </div>
-                      <div className="relative w-full max-w-[260px] overflow-hidden rounded-[1.35rem] border border-white/10 bg-[linear-gradient(145deg,rgba(13,25,48,0.94),rgba(2,52,81,0.92))] px-4 py-3 shadow-[0_28px_56px_-32px_rgba(0,158,227,0.55)] sm:w-[230px]">
+                      <div className="relative w-full max-w-[290px] overflow-hidden rounded-[1.35rem] border border-white/10 bg-[linear-gradient(145deg,rgba(13,25,48,0.94),rgba(2,52,81,0.92))] px-4 py-3 shadow-[0_28px_56px_-32px_rgba(0,158,227,0.55)] sm:w-[270px]">
                         <div className="pointer-events-none absolute -left-5 top-3 h-14 w-14 rounded-full bg-[#009ee3]/30 blur-2xl" />
                         <div className="pointer-events-none absolute -right-5 bottom-2 h-14 w-14 rounded-full bg-[#84cc16]/20 blur-2xl" />
-                        <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="relative h-10 w-full object-contain brightness-0 invert" />
+                        <div className="relative rounded-[1rem] border border-white/70 bg-white/96 px-3 py-2 shadow-[0_18px_34px_-24px_rgba(255,255,255,0.65)]">
+                          <img src={mercadoPagoLandingLogo} alt="Mercado Pago" className="h-14 w-full object-contain object-left" />
+                        </div>
                         <div className="relative mt-2 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.08] px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-slate-100 backdrop-blur-xl">
                           <Lock size={11} weight="duotone" className="text-sky-300" />
                           Autorização segura
@@ -607,8 +609,8 @@ export function LandingPage() {
                       O cliente paga dentro do fluxo da loja e a cobrança segue para a conta conectada do próprio lojista, sem repasse manual.
                     </p>
                   </div>
-                  <div className="rounded-[1.25rem] border border-white/10 bg-white/[0.08] px-4 py-3 shadow-[0_22px_42px_-28px_rgba(0,158,227,0.65)] backdrop-blur-xl">
-                    <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-10 w-full max-w-[210px] object-contain brightness-0 invert" />
+                  <div className="rounded-[1.25rem] border border-white/10 bg-white/95 px-4 py-3 shadow-[0_22px_42px_-28px_rgba(0,158,227,0.65)]">
+                    <img src={mercadoPagoLandingLogo} alt="Mercado Pago" className="h-16 w-full max-w-[250px] object-contain object-left" />
                   </div>
                 </div>
 
