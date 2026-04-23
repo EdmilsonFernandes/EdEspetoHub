@@ -98,11 +98,54 @@ const getEtaDeadlineMs = (order: any, details?: any) => {
 const isCustomerCancelableStatus = (status?: string) =>
   [ 'PENDING', 'ACCEPTED', 'PREPARING', 'READY', 'READY_FOR_DELIVERY', 'WAITING_FOR_MOTOBOY' ].includes(normalizeStatus(status));
 
-const buildWhatsappLink = (phone?: string | null, native = false) => {
+const buildWhatsappLink = (phone?: string | null, native = false, message?: string) => {
   const normalized = String(phone || '').replace(/\D/g, '').replace(/^55/, '');
   if (!normalized) return '';
-  if (native) return `whatsapp://send?phone=55${normalized}`;
-  return `https://wa.me/55${normalized}`;
+  const encodedMessage = String(message || '').trim() ? encodeURIComponent(String(message || '').trim()) : '';
+  if (native) return encodedMessage ? `whatsapp://send?phone=55${normalized}&text=${encodedMessage}` : `whatsapp://send?phone=55${normalized}`;
+  return encodedMessage ? `https://wa.me/55${normalized}?text=${encodedMessage}` : `https://wa.me/55${normalized}`;
+};
+
+const formatSupportDateTime = (value?: string) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
+const buildOrderSupportMessage = ({
+  order,
+  customerName,
+  storeName,
+  isActive,
+}: {
+  order: any;
+  customerName?: string;
+  storeName?: string;
+  isActive: boolean;
+}) => {
+  const orderNumber = String(order?.id || '').trim() || '-';
+  const safeCustomerName = String(
+    customerName ||
+    order?.customer?.fullName ||
+    order?.customer?.name ||
+    order?.customerName ||
+    'Cliente'
+  ).trim();
+  const safeStoreName = String(storeName || order?.store?.name || 'a loja').trim();
+  const orderDateTime = formatSupportDateTime(order?.createdAt);
+
+  if (isActive) {
+    return `Olá, tudo bem? Meu nome é ${safeCustomerName}. Sou cliente do pedido #${orderNumber}${orderDateTime ? `, feito em ${orderDateTime},` : ''} na ${safeStoreName}. Gostaria de saber o status do meu pedido e confirmar se está tudo certo. Pode me ajudar?`;
+  }
+
+  return `Olá, tudo bem? Meu nome é ${safeCustomerName}. Sou cliente do pedido #${orderNumber}${orderDateTime ? `, feito em ${orderDateTime},` : ''} na ${safeStoreName}. Tenho uma dúvida sobre esse pedido e gostaria de suporte. Pode me ajudar?`;
 };
 
 const groupOrdersByDate = (orders: any[]) => {
@@ -207,6 +250,7 @@ function OrderCard({
   order,
   isActive,
   details,
+  customerName,
   onCancelRequest,
   onOpenOrder,
   onOpenStore,
@@ -214,6 +258,7 @@ function OrderCard({
   order: any;
   isActive: boolean;
   details?: any;
+  customerName?: string;
   onCancelRequest: (order: any) => void;
   onOpenOrder: (orderId: string) => void;
   onOpenStore: (slug?: string) => void;
@@ -250,8 +295,14 @@ function OrderCard({
     Date.now() > etaDeadlineMs + DELAY_GRACE_MS
   );
   const handleHelp = () => {
-    const nativeUrl = buildWhatsappLink(order.store?.phone, true);
-    const webUrl = buildWhatsappLink(order.store?.phone, false);
+    const supportMessage = buildOrderSupportMessage({
+      order,
+      customerName,
+      storeName,
+      isActive,
+    });
+    const nativeUrl = buildWhatsappLink(order.store?.phone, true, supportMessage);
+    const webUrl = buildWhatsappLink(order.store?.phone, false, supportMessage);
     if (!webUrl) {
       onOpenStore(order.store?.slug);
       return;
@@ -625,6 +676,15 @@ export function ClientOrders() {
     [filteredOrders]
   );
   const groupedFilteredPastOrders = useMemo(() => groupOrdersByDate(filteredPastOrders), [filteredPastOrders]);
+  const customerDisplayName = useMemo(() => {
+    try {
+      const sessionRaw = localStorage.getItem('customerSession');
+      const session = sessionRaw ? JSON.parse(sessionRaw) : null;
+      return String(session?.user?.fullName || session?.user?.name || '').trim();
+    } catch {
+      return '';
+    }
+  }, []);
 
   useEffect(() => {
     if (!activeOrders.length) return;
@@ -798,6 +858,7 @@ export function ClientOrders() {
                     order={order}
                     isActive
                     details={orderDetails[order.id]}
+                    customerName={customerDisplayName}
                     onCancelRequest={(selectedOrder) => setCancelModal({ order: selectedOrder, reason: '', submitting: false })}
                     onOpenOrder={(orderId) => navigate(`/pedido/${orderId}`)}
                     onOpenStore={openStore}
@@ -839,6 +900,7 @@ export function ClientOrders() {
                           order={order}
                           isActive={false}
                           details={orderDetails[order.id]}
+                          customerName={customerDisplayName}
                           onCancelRequest={() => {}}
                           onOpenOrder={(orderId) => navigate(`/pedido/${orderId}`)}
                           onOpenStore={openStore}
