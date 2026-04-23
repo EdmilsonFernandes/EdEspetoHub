@@ -16,6 +16,7 @@ import { resolvePlanFeatures } from '../config/planFeatures';
 import { AppError } from '../errors/AppError';
 import { CondominiumRepository } from '../repositories/CondominiumRepository';
 import { saveBase64Image } from '../utils/imageStorage';
+import { logger } from '../utils/logger';
 import { EmailService } from './EmailService';
 import { OrderReviewService } from './OrderReviewService';
 import { SubscriptionService } from './SubscriptionService';
@@ -31,6 +32,29 @@ export class CondominiumService {
   private subscriptionService = new SubscriptionService();
   private orderReviewService = new OrderReviewService();
   private emailService = new EmailService();
+  private log = logger.child({ scope: 'CondominiumService' });
+
+  private async notifyAccessRequestByEmail(payload: {
+    condominiumName: string;
+    responsibleName: string;
+    responsibleRole?: string | null;
+    responsibleEmail: string;
+    responsiblePhone?: string | null;
+    city?: string | null;
+    state?: string | null;
+    requestId?: string;
+  }) {
+    try {
+      await this.emailService.sendCondominiumAccessRequestNotification(payload);
+    } catch (error) {
+      this.log.error('Condominium access request notification failed', {
+        condominiumName: payload.condominiumName,
+        responsibleEmail: payload.responsibleEmail,
+        requestId: payload.requestId || null,
+        error,
+      });
+    }
+  }
 
   async adminOverview() {
     const [condominiums, stores, pendingRequests, condominiumUsers, accessRequests] = await Promise.all([
@@ -87,7 +111,19 @@ export class CondominiumService {
       throw new AppError('CONDO-012', 400, { message: 'Condominio, responsavel, e-mail e WhatsApp sao obrigatorios.' });
     }
     const existing = await this.condominiumRepository.findPendingAccessRequestByEmailOrName(responsibleEmail, condominiumName);
-    if (existing) return this.toPublicAccessRequest(existing);
+    if (existing) {
+      await this.notifyAccessRequestByEmail({
+        condominiumName,
+        responsibleName: existing.responsibleName || responsibleName,
+        responsibleRole: existing.responsibleRole || payload?.responsibleRole || null,
+        responsibleEmail,
+        responsiblePhone: existing.responsiblePhone || responsiblePhone,
+        city: existing.city || payload?.city || null,
+        state: existing.state || payload?.state || null,
+        requestId: existing.id,
+      });
+      return this.toPublicAccessRequest(existing);
+    }
 
     const safeSlug = this.slugify(payload?.slug || condominiumName) || 'condominio';
     const uploadedLogo = await saveBase64Image(payload?.logoFile, `condominium-request-logo-${safeSlug}`, 'condominiums');
@@ -109,20 +145,16 @@ export class CondominiumService {
       message: payload?.message || null,
       status: 'pending',
     });
-    try {
-      await this.emailService.sendCondominiumAccessRequestNotification({
-        condominiumName,
-        responsibleName,
-        responsibleRole: payload?.responsibleRole || null,
-        responsibleEmail,
-        responsiblePhone,
-        city: payload?.city || null,
-        state: payload?.state || null,
-        requestId: saved.id,
-      });
-    } catch {
-      // A solicitação não deve falhar se o SMTP estiver indisponível.
-    }
+    await this.notifyAccessRequestByEmail({
+      condominiumName,
+      responsibleName,
+      responsibleRole: payload?.responsibleRole || null,
+      responsibleEmail,
+      responsiblePhone,
+      city: payload?.city || null,
+      state: payload?.state || null,
+      requestId: saved.id,
+    });
     return this.toPublicAccessRequest(saved);
   }
 

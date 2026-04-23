@@ -40,7 +40,64 @@ export class EmailService {
    */
   private getLogoUrl() {
     const base = env.appUrl?.replace(/\/$/, '') || 'http://localhost:3000';
-    return `${base}/janocaminho.jpg`;
+    return `${base}/janocaminho.png`;
+  }
+
+  private getSupportEmail() {
+    return 'contato@janocaminho.com.br';
+  }
+
+  private getUnsubscribeMailto() {
+    const supportEmail = this.getSupportEmail();
+    const subject = encodeURIComponent('Descadastro de e-mails - Ja no Caminho');
+    const body = encodeURIComponent(
+      'Ola, quero parar de receber comunicacoes nao essenciais do Ja no Caminho.\n\nE-mail: '
+    );
+    return `mailto:${supportEmail}?subject=${subject}&body=${body}`;
+  }
+
+  private withStandardFooter(payload: EmailPayload) {
+    const supportEmail = this.getSupportEmail();
+    const unsubscribeLink = this.getUnsubscribeMailto();
+    const footerText = [
+      '',
+      '---',
+      'Ja no Caminho',
+      `Precisa de ajuda? ${supportEmail}`,
+      `Para parar de receber comunicacoes nao essenciais, responda este e-mail ou use: ${unsubscribeLink}`,
+      'Aviso: e-mails operacionais e de seguranca podem continuar sendo enviados quando necessarios.',
+    ].join('\n');
+    const footerHtml = `
+      <div style="max-width: 560px; margin: 16px auto 0; padding: 16px 18px; border: 1px solid #e2e8f0; border-radius: 16px; background: #ffffff; color: #64748b; font-family: Arial, sans-serif; font-size: 12px; line-height: 1.7;">
+        <div style="font-weight: 700; color: #0f172a; margin-bottom: 6px;">Ja no Caminho</div>
+        <div>Precisa de ajuda? <a href="mailto:${supportEmail}" style="color: #153A4C; font-weight: 700; text-decoration: none;">${supportEmail}</a></div>
+        <div style="margin-top: 6px;">Para parar de receber comunicacoes nao essenciais, <a href="${unsubscribeLink}" style="color: #153A4C; font-weight: 700; text-decoration: none;">clique aqui para cancelar a inscricao</a>.</div>
+        <div style="margin-top: 6px;">Aviso: e-mails operacionais e de seguranca podem continuar sendo enviados quando necessarios.</div>
+      </div>
+    `;
+
+    return {
+      ...payload,
+      text: `${String(payload.text || '').trimEnd()}${footerText}`,
+      html: payload.html ? `${payload.html}${footerHtml}` : undefined,
+    };
+  }
+
+  private parseRecipients(value?: string | null) {
+    return String(value || '')
+      .split(',')
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+  }
+
+  private getNotificationRecipients(primary?: string | null) {
+    return Array.from(
+      new Set([
+        ...this.parseRecipients(primary),
+        ...this.parseRecipients(env.email.notifyOnSignup || ''),
+        this.getSupportEmail(),
+      ])
+    );
   }
 
   /**
@@ -72,18 +129,32 @@ export class EmailService {
    * @date 2026-01-06
    */
   async send(payload: EmailPayload) {
+    const normalizedPayload = this.withStandardFooter(payload);
     const transporter = this.getTransporter();
     if (!transporter) {
-      this.log.info('Email mock', { to: payload.to, subject: payload.subject });
+      this.log.info('Email mock', { to: normalizedPayload.to, subject: normalizedPayload.subject });
       return;
     }
-    await transporter.sendMail({
-      from: env.email.from,
-      to: payload.to,
-      subject: payload.subject,
-      text: payload.text,
-      html: payload.html,
-    });
+    try {
+      await transporter.sendMail({
+        from: env.email.from,
+        replyTo: this.getSupportEmail(),
+        to: normalizedPayload.to,
+        subject: normalizedPayload.subject,
+        text: normalizedPayload.text,
+        html: normalizedPayload.html,
+        headers: {
+          'List-Unsubscribe': `<${this.getUnsubscribeMailto()}>`,
+        },
+      });
+    } catch (error) {
+      this.log.error('Email send failed', {
+        to: normalizedPayload.to,
+        subject: normalizedPayload.subject,
+        error,
+      });
+      throw error;
+    }
   }
 
     /**
@@ -566,8 +637,8 @@ private renderTemplate(template: string, vars: Record<string, string>) {
     state?: string | null;
     requestId?: string;
   }) {
-    const target = String(payload.to || 'contato@janocaminho.com.br').trim();
-    if (!target) return;
+    const targets = this.getNotificationRecipients(payload.to || '');
+    if (!targets.length) return;
     const adminUrl = `${env.appUrl.replace(/\/$/, '')}/superadmin/condominiums`;
     const subject = `Nova solicitação de condomínio - ${payload.condominiumName}`;
     const lines = [
@@ -600,7 +671,7 @@ private renderTemplate(template: string, vars: Record<string, string>) {
         </div>
       </div>
     `;
-    await this.send({ to: target, subject, text, html });
+    await Promise.all(targets.map((target) => this.send({ to: target, subject, text, html })));
   }
 
   async sendCondominiumAccessCredentials(payload: {

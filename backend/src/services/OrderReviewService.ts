@@ -23,6 +23,8 @@ import { SubscriptionRepository } from '../repositories/SubscriptionRepository';
 import { saveBase64Image } from '../utils/imageStorage';
 import { resolvePlanFeatures } from '../config/planFeatures';
 import { verifyOrderAccessToken } from '../utils/orderAccessToken';
+import { StorePaymentAccountService } from './StorePaymentAccountService';
+import { logger } from '../utils/logger';
 
 type SubmitReviewInput = {
   storeRating: number;
@@ -42,11 +44,19 @@ type MarkTipPayoutInput = {
 
 export class OrderReviewService {
   private mercadoPagoService = new MercadoPagoService();
+  private accountService = new StorePaymentAccountService();
   private orderRepository = new OrderRepository();
   private storeRepository = new StoreRepository();
   private subscriptionRepository = new SubscriptionRepository();
   private orderDeliveryRepository = new OrderDeliveryRepository();
   private orderReviewRepository = new OrderReviewRepository();
+  private log = logger.child({ scope: 'OrderReviewService' });
+
+  private normalizeQrCode(qrCode?: string | null) {
+    if (!qrCode) return null;
+    if (qrCode.startsWith('data:image')) return qrCode;
+    return `data:image/png;base64,${qrCode}`;
+  }
 
     /**
    * Executes resolve store review features business logic.
@@ -133,10 +143,13 @@ private async ensureTipPayment(order: any, review: any) {
 
     const description = `Gorjeta do pedido ${order.id.slice(0, 8)} - ${order.store?.name || 'Loja'}`;
     const externalReference = `review_tip:${review.id}`;
-    const payerEmail = String(order?.store?.owner?.email || order?.customerName || 'cliente@janocaminho.com.br')
+    const payerEmail = String((order as any)?.customerUser?.email || '')
       .trim()
       .toLowerCase();
     const payerName = String(order?.customerName || 'Cliente').trim() || 'Cliente';
+    const connectedAccessToken = order?.store?.id
+      ? await this.accountService.getActiveAccessToken(order.store.id)
+      : null;
 
     let paymentLink: string | null = null;
     let qrCodeBase64: string | null = null;
@@ -145,28 +158,47 @@ private async ensureTipPayment(order: any, review: any) {
     let providerId: string | null = null;
     let expiresAt: Date | null = new Date(Date.now() + 30 * 60 * 1000);
 
-    if (env.mercadoPago.accessToken) {
-      const mp = await this.mercadoPagoService.createPayment({
-        amount: tipAmount,
-        method: 'PIX',
-        description,
-        externalReference,
-        payer: {
-          email: payerEmail.includes('@') ? payerEmail : 'cliente@janocaminho.com.br',
-          name: payerName,
-        },
-      });
-      if (mp) {
-        provider = 'MERCADO_PAGO';
-        providerId = mp.providerId || null;
-        paymentLink = mp.paymentLink || null;
-        qrCodeBase64 = mp.qrCodeBase64 ? (mp.qrCodeBase64.startsWith('data:image') ? mp.qrCodeBase64 : `data:image/png;base64,${mp.qrCodeBase64}`) : null;
-        qrCodeText = mp.qrCodeText || null;
-        expiresAt = (mp as any)?.expiresAt ? new Date((mp as any).expiresAt) : expiresAt;
+    if (connectedAccessToken || env.mercadoPago.accessToken) {
+      try {
+        const mp = await this.mercadoPagoService.createPayment({
+          amount: tipAmount,
+          method: 'PIX',
+          description,
+          externalReference,
+          payer: {
+            email: payerEmail.includes('@') ? payerEmail : 'cliente@janocaminho.com.br',
+            name: payerName,
+          },
+          accessToken: connectedAccessToken || undefined,
+        });
+        if (mp) {
+          provider = 'MERCADO_PAGO';
+          providerId = mp.providerId || null;
+          paymentLink = mp.paymentLink || null;
+          qrCodeBase64 = this.normalizeQrCode(mp.qrCodeBase64);
+          qrCodeText = mp.qrCodeText || null;
+          expiresAt = (mp as any)?.expiresAt ? new Date((mp as any).expiresAt) : expiresAt;
+        }
+      } catch (error) {
+        this.log.warn('Tip PIX generation failed', {
+          reviewId: review.id,
+          orderId: order.id,
+          storeId: order?.store?.id || null,
+          hasConnectedMercadoPago: Boolean(connectedAccessToken),
+          error,
+        });
+        throw new AppError('PAY-004', 400, {
+          message: 'Nao foi possivel gerar o Pix da gorjeta agora. Tente novamente em instantes.',
+        });
       }
     }
 
-    if (!qrCodeText) {
+    if (!qrCodeText && !qrCodeBase64 && !paymentLink) {
+      this.log.warn('Tip PIX falling back to mock payload', {
+        reviewId: review.id,
+        orderId: order.id,
+        storeId: order?.store?.id || null,
+      });
       const payload = `PIX GORJETA | Store: ${order.store?.name || 'Loja'} | Amount: ${tipAmount.toFixed(2)} | Review:${review.id}`;
       qrCodeText = payload;
       qrCodeBase64 = await QRCode.toDataURL(payload);

@@ -29,6 +29,7 @@ import { DeliveryBillingService } from './DeliveryBillingService';
 import { OrderReviewService } from './OrderReviewService';
 import { FeaturedProductService } from './FeaturedProductService';
 import { OrderPaymentService } from './OrderPaymentService';
+import { StorePaymentAccountService } from './StorePaymentAccountService';
 /**
  * Provides PaymentService functionality.
  *
@@ -43,6 +44,7 @@ export class PaymentService {
   private orderReviewService = new OrderReviewService();
   private featuredProductService = new FeaturedProductService();
   private orderPaymentService = new OrderPaymentService();
+  private accountService = new StorePaymentAccountService();
   private log = logger.child({ scope: 'PaymentService' });
   /**
    * Normalizes QR payload to Data URL format for consistent client rendering.
@@ -54,6 +56,34 @@ export class PaymentService {
     if (!qrCode) return null;
     if (qrCode.startsWith('data:image')) return qrCode;
     return `data:image/png;base64,${qrCode}`;
+  }
+
+  private async getMercadoPagoPaymentAnyAccessToken(mercadoPagoPaymentId: string) {
+    const accounts = await this.accountService.listActiveAccessTokens();
+    const candidates = [
+      ...(env.mercadoPago.accessToken ? [ { accessToken: undefined as string | undefined, scope: 'platform' } ] : []),
+      ...accounts.map((account) => ({
+        accessToken: account.accessToken,
+        scope: 'store',
+        storeId: account.storeId,
+      })),
+    ];
+
+    if (!candidates.length) {
+      throw new AppError('PAY-003', 400);
+    }
+
+    let lastError: unknown = null;
+    for (const candidate of candidates) {
+      try {
+        return await this.mercadoPago.getPayment(mercadoPagoPaymentId, candidate.accessToken);
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    if (lastError) throw lastError;
+    throw new AppError('PAY-004', 404);
   }
 
     /**
@@ -259,11 +289,7 @@ private resolvePlanChargeAmount(plan: Plan) {
    */
   async confirmMercadoPagoPayment(mercadoPagoPaymentId: string) {
     this.log.info('Confirm Mercado Pago payment', { mercadoPagoPaymentId });
-    if (!env.mercadoPago.accessToken) {
-      throw new AppError('PAY-003', 400);
-    }
-
-    const mpPayment = await this.mercadoPago.getPayment(mercadoPagoPaymentId);
+    const mpPayment = await this.getMercadoPagoPaymentAnyAccessToken(mercadoPagoPaymentId);
     if (!mpPayment) {
       throw new AppError('PAY-004', 404);
     }
@@ -279,10 +305,6 @@ private resolvePlanChargeAmount(plan: Plan) {
    */
   async reprocessByPaymentId(paymentId: string, providerId?: string) {
     this.log.info('Reprocess payment', { paymentId, providerId });
-    if (!env.mercadoPago.accessToken) {
-      throw new AppError('PAY-003', 400);
-    }
-
     const paymentRepo = AppDataSource.getRepository(Payment);
     const payment = await paymentRepo.findOne({ where: { id: paymentId } });
     if (!payment) {
@@ -294,7 +316,7 @@ private resolvePlanChargeAmount(plan: Plan) {
       throw new AppError('PAY-005', 400);
     }
 
-    const mpPayment = await this.mercadoPago.getPayment(mpId);
+    const mpPayment = await this.getMercadoPagoPaymentAnyAccessToken(mpId);
     if (!mpPayment) {
       throw new AppError('PAY-004', 404);
     }
