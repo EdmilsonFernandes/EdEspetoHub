@@ -76,6 +76,10 @@ const getOrCreateGuestPushId = () => {
   }
 };
 
+const syncPushTokenNow = () => {
+  void syncPushTokenWithBackend();
+};
+
 const syncPushTokenWithBackend = async (tokenRaw?: string | null) => {
   const token = String(tokenRaw || localStorage.getItem(PUSH_TOKEN_KEY) || '').trim();
   if (!token) return;
@@ -170,9 +174,12 @@ export const bootstrapNativeApp = async () => {
 
   try {
     await App.addListener('appUrlOpen', ({ url }) => {
-      const target = normalizeInternalUrl(String(url || ''));
-      if (!target) return;
-      window.location.assign(target);
+      navigateFromPayload({ url });
+    });
+    await App.addListener('appStateChange', ({ isActive }) => {
+      if (isActive && MOBILE_PUSH_ENABLED) {
+        syncPushTokenNow();
+      }
     });
   } catch {
     // no-op
@@ -180,17 +187,18 @@ export const bootstrapNativeApp = async () => {
 
   await bootstrapPushNotifications();
   if (MOBILE_PUSH_ENABLED) {
-    void syncPushTokenWithBackend();
-    window.addEventListener('focus', () => {
-      void syncPushTokenWithBackend();
-    });
-    window.setInterval(() => {
-      void syncPushTokenWithBackend();
-    }, 15000);
-    window.addEventListener('storage', (event) => {
-      if (event.key === 'customerSession') {
-        void syncPushTokenWithBackend();
+    syncPushTokenNow();
+    window.addEventListener('focus', syncPushTokenNow);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        syncPushTokenNow();
       }
     });
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'customerSession') {
+        syncPushTokenNow();
+      }
+    });
+    window.addEventListener('jnc:customer-session-updated', syncPushTokenNow as EventListener);
   }
 };

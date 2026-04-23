@@ -384,6 +384,10 @@ export function MarketplacePage() {
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const condominiumSearchInputRef = useRef<HTMLInputElement | null>(null);
   const storesSectionRef = useRef<HTMLElement | null>(null);
+  const portfolioLoadInFlightRef = useRef(false);
+  const publicCondominiumLoadInFlightRef = useRef(false);
+  const activeOrdersLoadInFlightRef = useRef(false);
+  const anonymousOrdersHydrationInFlightRef = useRef(false);
 
   const SEARCH_PLACEHOLDERS = [
     'Buscar espetinho...',
@@ -558,6 +562,9 @@ export function MarketplacePage() {
   useEffect(() => {
     let cancelled = false;
     const hydrateOrders = async () => {
+      if (anonymousOrdersHydrationInFlightRef.current) return;
+      if (typeof document !== 'undefined' && document.hidden) return;
+      anonymousOrdersHydrationInFlightRef.current = true;
       const now = Date.now();
       const found: ActiveAnonymousOrder[] = [];
       
@@ -617,6 +624,8 @@ export function MarketplacePage() {
         }
       } catch (e) {
         console.error('Erro ao carregar pedidos anônimos', e);
+      } finally {
+        anonymousOrdersHydrationInFlightRef.current = false;
       }
     };
 
@@ -702,13 +711,19 @@ export function MarketplacePage() {
   }, []);
 
   const loadPortfolio = useCallback(async () => {
-    const data = await storeService.listPortfolio();
-    setStores(Array.isArray(data) ? data : []);
-    setError('');
+    if (portfolioLoadInFlightRef.current) return;
+    portfolioLoadInFlightRef.current = true;
+    try {
+      const data = await storeService.listPortfolio();
+      setStores(Array.isArray(data) ? data : []);
+      setError('');
+    } finally {
+      portfolioLoadInFlightRef.current = false;
+    }
   }, []);
 
   const refreshHub = useCallback(async () => {
-    if (isRefreshing) return;
+    if (portfolioLoadInFlightRef.current) return;
     setIsRefreshing(true);
     try {
       await loadPortfolio();
@@ -717,7 +732,7 @@ export function MarketplacePage() {
     } finally {
       setIsRefreshing(false);
     }
-  }, [isRefreshing, loadPortfolio]);
+  }, [loadPortfolio]);
 
   useEffect(() => {
     let active = true;
@@ -736,10 +751,17 @@ export function MarketplacePage() {
     };
   }, [loadPortfolio]);
 
-  const refreshPublicCondominiums = useCallback(async () => {
-    const data = await condominiumService.listPublic();
-    const items = Array.isArray(data) ? data : [];
-    setCondominiums(items);
+  const refreshPublicCondominiums = useCallback(async (options?: { skipIfHidden?: boolean }) => {
+    if (options?.skipIfHidden && typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
+    if (publicCondominiumLoadInFlightRef.current) return;
+    publicCondominiumLoadInFlightRef.current = true;
+    try {
+      const data = await condominiumService.listPublic();
+      const items = Array.isArray(data) ? data : [];
+      setCondominiums(items);
+    } finally {
+      publicCondominiumLoadInFlightRef.current = false;
+    }
   }, []);
 
   useEffect(() => {
@@ -751,10 +773,10 @@ export function MarketplacePage() {
 
     const handleVisibilityRefresh = () => {
       if (document.visibilityState !== 'visible') return;
-      refreshPublicCondominiums().catch(() => undefined);
+      refreshPublicCondominiums({ skipIfHidden: true }).catch(() => undefined);
     };
     const intervalId = window.setInterval(() => {
-      refreshPublicCondominiums().catch(() => undefined);
+      refreshPublicCondominiums({ skipIfHidden: true }).catch(() => undefined);
     }, 45000);
 
     document.addEventListener('visibilitychange', handleVisibilityRefresh);
@@ -1682,11 +1704,14 @@ export function MarketplacePage() {
   }, [isCustomerLogged]);
 
   const loadActiveOrders = useCallback(async () => {
+    if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
+    if (activeOrdersLoadInFlightRef.current) return;
     const session = readCustomerSession();
     if (!session?.token) {
       setActiveOrders([]);
       return;
     }
+    activeOrdersLoadInFlightRef.current = true;
     try {
       const result = await customerAccountService.listOrders({ limit: 20 });
       const active = ((result?.data) || []).filter((o: any) => {
@@ -1698,17 +1723,31 @@ export function MarketplacePage() {
       setActiveOrders(active.slice(0, 3));
     } catch {
       // ignore
+    } finally {
+      activeOrdersLoadInFlightRef.current = false;
     }
   }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(loadActiveOrders, 1200);
-    const interval = window.setInterval(loadActiveOrders, 30000);
+    if (!isCustomerLogged) {
+      setActiveOrders([]);
+      return;
+    }
+    const refreshIfVisible = () => {
+      if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
+      void loadActiveOrders();
+    };
+    const timer = window.setTimeout(refreshIfVisible, 1200);
+    const interval = window.setInterval(refreshIfVisible, 30000);
+    window.addEventListener('focus', refreshIfVisible);
+    document.addEventListener('visibilitychange', refreshIfVisible);
     return () => {
       window.clearTimeout(timer);
       window.clearInterval(interval);
+      window.removeEventListener('focus', refreshIfVisible);
+      document.removeEventListener('visibilitychange', refreshIfVisible);
     };
-  }, [loadActiveOrders]);
+  }, [isCustomerLogged, loadActiveOrders]);
 
   useEffect(() => {
     if (loading) return;
