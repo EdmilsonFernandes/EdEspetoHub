@@ -437,6 +437,21 @@ async publicSummaryByStoreId(storeId: string) {
     };
   }
 
+  async publicSummariesByStoreIds(storeIds: string[]) {
+    const uniqueStoreIds = Array.from(new Set(storeIds.map((storeId) => String(storeId || '').trim()).filter(Boolean)));
+    const rows = await this.orderReviewRepository.getPublicSummariesByStoreIds(uniqueStoreIds);
+    return uniqueStoreIds.reduce((acc, storeId) => {
+      const summary = rows.get(storeId);
+      acc.set(storeId, {
+        totalReviews: Number(summary?.total_reviews || 0),
+        avgStoreRating: Number(summary?.store_avg_rating || 0),
+        totalDeliveryReviews: Number(summary?.total_delivery_reviews || 0),
+        avgDeliveryRating: Number(summary?.delivery_avg_rating || 0),
+      });
+      return acc;
+    }, new Map<string, { totalReviews: number; avgStoreRating: number; totalDeliveryReviews: number; avgDeliveryRating: number }>());
+  }
+
     /**
    * Marks workflow state for mark tip paid from webhook.
    *

@@ -114,6 +114,18 @@ export class CondominiumRepository {
     });
   }
 
+  listStoreLinksByCondominiumIds(condominiumIds: string[]) {
+    if (!condominiumIds.length) return Promise.resolve([] as StoreCondominium[]);
+    return this.storeCondominiumRepository
+      .createQueryBuilder('link')
+      .innerJoinAndSelect('link.store', 'store')
+      .leftJoinAndSelect('store.settings', 'settings')
+      .where('link.condominium_id IN (:...condominiumIds)', { condominiumIds })
+      .andWhere('link.active = true')
+      .orderBy('link.created_at', 'DESC')
+      .getMany();
+  }
+
   listCondominiumUsers() {
     return this.condominiumUserRepository.find({
       relations: [ 'condominium' ],
@@ -236,6 +248,20 @@ export class CondominiumRepository {
       .leftJoinAndSelect('storeLinks.store', 'store')
       .leftJoinAndSelect('store.settings', 'settings')
       .where('event.condominium_id = :condominiumId', { condominiumId })
+      .andWhere('event.active = true')
+      .orderBy('event.starts_at', 'ASC');
+    if (from) qb.andWhere('event.ends_at >= :from', { from });
+    return qb.getMany();
+  }
+
+  listEventsByCondominiumIds(condominiumIds: string[], from?: Date) {
+    if (!condominiumIds.length) return Promise.resolve([] as CondominiumEvent[]);
+    const qb = this.condominiumEventRepository
+      .createQueryBuilder('event')
+      .leftJoinAndSelect('event.storeLinks', 'storeLinks')
+      .leftJoinAndSelect('storeLinks.store', 'store')
+      .leftJoinAndSelect('store.settings', 'settings')
+      .where('event.condominium_id IN (:...condominiumIds)', { condominiumIds })
       .andWhere('event.active = true')
       .orderBy('event.starts_at', 'ASC');
     if (from) qb.andWhere('event.ends_at >= :from', { from });

@@ -114,6 +114,22 @@ export class SubscriptionService {
     return subscription;
   }
 
+  async getCurrentByStoreIds(storeIds: string[]) {
+    const uniqueStoreIds = Array.from(new Set(storeIds.map((storeId) => String(storeId || '').trim()).filter(Boolean)));
+    if (!uniqueStoreIds.length) return new Map<string, Subscription>();
+
+    const subscriptions = await this.subscriptionRepository.findCurrentByStoreIds(uniqueStoreIds);
+    return subscriptions.reduce((acc, subscription) => {
+      const status = this.resolveStatus(subscription);
+      if (status !== subscription.status) {
+        subscription.status = status;
+      }
+      const storeId = String(subscription.store?.id || '').trim();
+      if (storeId) acc.set(storeId, subscription);
+      return acc;
+    }, new Map<string, Subscription>());
+  }
+
   /**
    * Gets current by store slug.
    *

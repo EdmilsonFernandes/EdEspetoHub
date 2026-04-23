@@ -93,6 +93,31 @@ findCurrentByStoreId(storeId: string) {
       .getOne();
   }
 
+  findCurrentByStoreIds(storeIds: string[]) {
+    if (!storeIds.length) return Promise.resolve([] as Subscription[]);
+    return this.repository
+      .createQueryBuilder('subscription')
+      .distinctOn([ 'store.id' ])
+      .leftJoinAndSelect('subscription.store', 'store')
+      .leftJoinAndSelect('store.settings', 'settings')
+      .leftJoinAndSelect('subscription.plan', 'plan')
+      .where('store.id IN (:...storeIds)', { storeIds })
+      .orderBy('store.id', 'ASC')
+      .addOrderBy(
+        `CASE
+          WHEN subscription.status IN ('ACTIVE','EXPIRING','TRIAL') THEN 0
+          WHEN subscription.status = 'SUSPENDED' THEN 1
+          WHEN subscription.status = 'PENDING' THEN 2
+          WHEN subscription.status IN ('EXPIRED','CANCELLED') THEN 3
+          ELSE 4
+        END`,
+        'ASC'
+      )
+      .addOrderBy('subscription.endDate', 'DESC')
+      .addOrderBy('subscription.createdAt', 'DESC')
+      .getMany();
+  }
+
   /**
    * Handles find by id.
    *

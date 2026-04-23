@@ -64,21 +64,23 @@ export class CondominiumService {
       this.condominiumRepository.listCondominiumUsers(),
       this.condominiumRepository.listAccessRequests(),
     ]);
-
-    const eventGroups = await Promise.all(
-      condominiums.map(async (condominium) => ({
-        condominiumId: condominium.id,
-        events: await this.condominiumRepository.listEventsByCondominiumId(condominium.id, new Date(Date.now() - 24 * 60 * 60 * 1000)),
-      }))
-    );
-    const storeLinkGroups = await Promise.all(
-      condominiums.map(async (condominium) => ({
-        condominiumId: condominium.id,
-        storeLinks: await this.condominiumRepository.listStoreLinksByCondominiumId(condominium.id),
-      }))
-    );
-    const eventsByCondominium = new Map(eventGroups.map((group) => [group.condominiumId, group.events]));
-    const storeLinksByCondominium = new Map(storeLinkGroups.map((group) => [group.condominiumId, group.storeLinks]));
+    const condominiumIds = condominiums.map((condominium) => condominium.id);
+    const [events, storeLinks] = await Promise.all([
+      this.condominiumRepository.listEventsByCondominiumIds(condominiumIds, new Date(Date.now() - 24 * 60 * 60 * 1000)),
+      this.condominiumRepository.listStoreLinksByCondominiumIds(condominiumIds),
+    ]);
+    const eventsByCondominium = events.reduce((acc, event: any) => {
+      const condominiumId = String(event?.condominiumId || '');
+      if (!acc.has(condominiumId)) acc.set(condominiumId, []);
+      acc.get(condominiumId)?.push(event);
+      return acc;
+    }, new Map<string, any[]>());
+    const storeLinksByCondominium = storeLinks.reduce((acc, link: any) => {
+      const condominiumId = String(link?.condominiumId || '');
+      if (!acc.has(condominiumId)) acc.set(condominiumId, []);
+      acc.get(condominiumId)?.push(link);
+      return acc;
+    }, new Map<string, any[]>());
 
     return {
       condominiums: condominiums.map((condominium) => ({
@@ -628,13 +630,7 @@ export class CondominiumService {
    */
   async listPublic() {
     const rows = await this.condominiumRepository.listActive();
-    const eventGroups = await Promise.all(
-      rows.map(async (condominium) => ({
-        condominiumId: condominium.id,
-        event: this.pickCurrentOrNextEvent(await this.condominiumRepository.listActiveEventsBySlug(condominium.slug)),
-      }))
-    );
-    const summaries = new Map(eventGroups.map((group) => [group.condominiumId, group.event || null]));
+    const summaries = await this.condominiumRepository.getEventSummaryByCondominiumIds(rows.map((condominium) => condominium.id));
     return rows.map((condominium) => this.toPublicCondominium(condominium, summaries.get(condominium.id) || null));
   }
 
@@ -670,13 +666,28 @@ export class CondominiumService {
     if (!firstCondominium) throw new AppError('CONDO-001', 404, { message: 'Condominio nao encontrado.' });
     const eventState = selectedEvent ? this.getEventState(selectedEvent) : 'none';
     const canOrderInCondominium = eventState === 'live';
+    const storeIds = Array.from(new Set(
+      links
+        .map((link: any) => String(link?.store?.id || ''))
+        .filter(Boolean)
+    ));
+    const [subscriptionsByStoreId, reviewSummariesByStoreId] = await Promise.all([
+      this.subscriptionService.getCurrentByStoreIds(storeIds),
+      this.orderReviewService.publicSummariesByStoreIds(storeIds),
+    ]);
+    const publicSelectedEvent = selectedEvent
+      ? {
+          ...this.toPublicEvent(selectedEvent),
+          canOrderInCondominium,
+        }
+      : null;
 
     const stores = await Promise.all(
       links.map(async (link) => {
         const store = link.store;
         if (!store) return null;
 
-        const subscription = await this.subscriptionService.getCurrentByStore(store.id);
+        const subscription = subscriptionsByStoreId.get(String(store.id || '')) || null;
         const isVip = Boolean(store?.settings?.planExempt);
         const isActive = isVip || this.subscriptionService.isActiveSubscription(subscription);
         if (!isActive) return null;
@@ -725,13 +736,13 @@ export class CondominiumService {
             apartmentDeliveryFee,
             notes: (ruleLink as any)?.notes || null,
           },
-          condominiumEvent: selectedEvent
-            ? {
-                ...this.toPublicEvent(selectedEvent),
-                canOrderInCondominium,
-              }
-            : null,
-          reviewSummary: await this.orderReviewService.publicSummaryByStoreId(store.id),
+          condominiumEvent: publicSelectedEvent,
+          reviewSummary: reviewSummariesByStoreId.get(String(store.id || '')) || {
+            totalReviews: 0,
+            avgStoreRating: 0,
+            totalDeliveryReviews: 0,
+            avgDeliveryRating: 0,
+          },
           settings: store.settings
             ? {
                 logoUrl: store.settings.logoUrl || null,
@@ -755,12 +766,7 @@ export class CondominiumService {
 
     return {
       condominium: this.toPublicCondominium(firstCondominium, selectedEvent || null),
-      event: selectedEvent
-        ? {
-            ...this.toPublicEvent(selectedEvent),
-            canOrderInCondominium,
-          }
-        : null,
+      event: publicSelectedEvent,
       stores: stores.filter(Boolean),
     };
   }

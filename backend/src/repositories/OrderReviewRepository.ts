@@ -151,6 +151,29 @@ async getStoreSummary(storeId: string) {
     return { summary: summary || {}, distribution: distribution || [], motoboy: motoboy || [] };
   }
 
+  async getPublicSummariesByStoreIds(storeIds: string[]) {
+    if (!storeIds.length) return new Map<string, any>();
+    const rows = await AppDataSource.query(
+      `
+      SELECT
+        store_id AS "storeId",
+        COUNT(*)::int AS total_reviews,
+        COALESCE(ROUND(AVG(store_rating)::numeric, 2), 0)::numeric AS store_avg_rating,
+        COUNT(delivery_rating)::int AS total_delivery_reviews,
+        COALESCE(ROUND(AVG(delivery_rating)::numeric, 2), 0)::numeric AS delivery_avg_rating
+      FROM order_reviews
+      WHERE store_id = ANY($1::uuid[])
+      GROUP BY store_id
+      `,
+      [storeIds]
+    );
+
+    return rows.reduce((acc: Map<string, any>, row: any) => {
+      acc.set(String(row.storeId || ''), row);
+      return acc;
+    }, new Map<string, any>());
+  }
+
     /**
    * Lists records for list tip payouts by store id.
    *
