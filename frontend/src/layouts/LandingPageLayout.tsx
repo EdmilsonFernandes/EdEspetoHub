@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { Buildings, DownloadSimple, House, List, MagnifyingGlass, Moon, ShieldCheck, SignOut, Storefront, Sun, Truck, X } from '@phosphor-icons/react';
+import { Buildings, CaretDown, DownloadSimple, House, List, MagnifyingGlass, Moon, ShieldCheck, SignOut, Storefront, Sun, Truck, X } from '@phosphor-icons/react';
 import mercadoPagoHorizontal from '../assets/mercado-pago-horizontal.svg';
 
 interface LandingPageLayoutProps {
@@ -18,12 +18,14 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [solutionsMenuOpen, setSolutionsMenuOpen] = useState(false);
   const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<any>(null);
   const [showInstallCta, setShowInstallCta] = useState(false);
   const [cookieConsent, setCookieConsent] = useState<'unknown' | 'accepted' | 'rejected'>('unknown');
 
   useEffect(() => {
     setMobileMenuOpen(false);
+    setSolutionsMenuOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -147,24 +149,20 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
     navigate('/');
   };
 
-  const navLinks = [
-    {
-      id: 'home',
-      label: 'Início',
-      onClick: () => {
-        if (location.pathname === '/') {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          return;
-        }
-        navigate('/');
-      },
-    },
-    { id: 'marketplace', label: 'Já no Caminho', onClick: () => navigate('/hub') },
-    { id: 'condominiums', label: 'Condomínios', onClick: () => navigate('/condominio/solicitar') },
-    { id: 'guide', label: 'Guia', onClick: () => navigate('/guia') },
-    { id: 'architecture', label: 'Arquitetura', onClick: () => navigate('/arquitetura') },
-    { id: 'install', label: 'Instalar app', onClick: () => navigate('/instalar') },
+  const solutionsLinks = [
+    { id: 'marketplace', label: 'Hub', helper: 'Cliente, lojista e entregador no mesmo fluxo', onClick: () => navigate('/hub') },
+    { id: 'condominiums', label: 'Condomínios', helper: 'Solicite acesso e gerencie feiras do condomínio', onClick: () => navigate('/condominio/solicitar') },
+    { id: 'guide', label: 'Guia', helper: 'Fluxos, recursos e visão operacional da plataforma', onClick: () => navigate('/guia') },
+    { id: 'architecture', label: 'Arquitetura', helper: 'Base técnica, produto e evolução da solução', onClick: () => navigate('/arquitetura') },
   ];
+
+  const goHome = () => {
+    if (location.pathname === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    navigate('/');
+  };
 
   const mobilePrimaryNav = useMemo(
     () => [
@@ -200,48 +198,88 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
       className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.14),_transparent_48%),radial-gradient(circle_at_bottom_right,_rgba(95,211,90,0.16),_transparent_45%)] bg-gray-50 dark:bg-slate-950"
       style={{ fontFamily: 'Inter, Geist, system-ui, -apple-system, Segoe UI, sans-serif' }}
     >
-      <header className="sticky top-0 z-50 border-b border-white/5 bg-slate-950/80 backdrop-blur-2xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <a href="https://www.janocaminho.com.br" className="flex items-center gap-3 group">
-              <div className="h-10 w-10 rounded-xl bg-white/10 p-0.5 border border-white/10 group-hover:scale-105 transition-transform overflow-hidden shrink-0">
-                <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover rounded-lg" />
+      <header className="fixed left-1/2 top-3 z-50 w-[calc(100%-1rem)] max-w-7xl -translate-x-1/2 sm:top-4 sm:w-[calc(100%-2rem)]">
+        <div className="rounded-[2rem] border border-white/10 bg-[#0d1930]/72 px-4 py-3 shadow-[0_24px_70px_-34px_rgba(2,6,23,0.72)] backdrop-blur-xl ring-1 ring-white/6 sm:px-6 lg:px-7">
+          <div className="flex items-center justify-between gap-4">
+            <a href="https://www.janocaminho.com.br" className="flex min-w-0 items-center gap-3 group">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/80 bg-white p-0.5 shadow-[0_14px_34px_-20px_rgba(255,255,255,0.4)] transition-transform group-hover:scale-[1.03]">
+                <img src="/janocaminho.png" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
               </div>
-              <div className="leading-tight">
-                <p className="text-lg font-black text-white tracking-tight">Já no Caminho</p>
-                <p className="text-[10px] font-bold text-sky-400 uppercase tracking-widest">Plataforma SaaS</p>
+              <div className="min-w-0 leading-tight">
+                <p className="truncate text-base font-black tracking-[-0.03em] text-white sm:text-lg">Já no Caminho</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-sky-300/78">Plataforma SaaS</p>
               </div>
             </a>
 
-            <nav className="hidden lg:flex items-center gap-8">
-              {navLinks.map((item) => (
+            <nav className="hidden lg:flex items-center gap-2">
+              <button
+                onClick={goHome}
+                className="rounded-full px-4 py-2 text-sm font-medium tracking-[-0.02em] text-slate-300 transition-colors hover:text-white"
+              >
+                Início
+              </button>
+              <div
+                className="relative"
+                onMouseEnter={() => setSolutionsMenuOpen(true)}
+                onMouseLeave={() => setSolutionsMenuOpen(false)}
+              >
                 <button
-                  key={item.id}
-                  onClick={item.onClick}
-                  className="text-sm font-bold text-slate-400 hover:text-white transition-colors uppercase tracking-widest"
+                  type="button"
+                  onClick={() => setSolutionsMenuOpen((prev) => !prev)}
+                  className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium tracking-[-0.02em] text-slate-300 transition-colors hover:text-white"
                 >
-                  {item.label}
+                  Soluções
+                  <CaretDown size={14} weight="bold" className={`transition-transform ${solutionsMenuOpen ? 'rotate-180 text-white' : ''}`} />
                 </button>
-              ))}
+                {solutionsMenuOpen ? (
+                  <div className="absolute left-1/2 top-[calc(100%+0.85rem)] w-[23rem] -translate-x-1/2 overflow-hidden rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.96)_0%,rgba(13,25,48,0.96)_100%)] p-2.5 shadow-[0_28px_60px_-30px_rgba(2,6,23,0.85)] backdrop-blur-xl">
+                    <div className="space-y-1">
+                      {solutionsLinks.map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => {
+                            setSolutionsMenuOpen(false);
+                            item.onClick();
+                          }}
+                          className="flex w-full items-start gap-3 rounded-[1.1rem] px-3.5 py-3 text-left transition hover:bg-white/6"
+                        >
+                          <span className="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full bg-[#84cc16] shadow-[0_0_18px_rgba(132,204,22,0.55)]" />
+                          <span className="min-w-0">
+                            <span className="block text-sm font-semibold tracking-[-0.02em] text-white">{item.label}</span>
+                            <span className="mt-1 block text-xs font-medium leading-5 text-slate-400">{item.helper}</span>
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+              <button
+                onClick={() => navigate('/instalar')}
+                className="rounded-full px-4 py-2 text-sm font-medium tracking-[-0.02em] text-slate-300 transition-colors hover:text-white"
+              >
+                Instalar app
+              </button>
             </nav>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <button
                 onClick={() => navigate('/admin')}
-                className="hidden sm:inline-flex text-xs font-black text-slate-400 hover:text-white uppercase tracking-widest transition-colors"
+                className="relative hidden sm:inline-flex px-1 py-2 text-sm font-medium tracking-[-0.02em] text-slate-300 transition-colors hover:text-[#84cc16] after:absolute after:bottom-1 after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:rounded-full after:bg-[#84cc16] after:shadow-[0_0_16px_rgba(132,204,22,0.45)] after:transition-transform hover:after:scale-x-100"
               >
-                Login
+                Entrar
               </button>
               <button
                 onClick={() => navigate('/create?plan=trial')}
-                className="inline-flex px-6 py-2.5 text-xs font-black rounded-xl bg-white text-slate-950 hover:bg-sky-50 transition-all active:scale-95 uppercase tracking-widest"
+                className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(180deg,#a3e635_0%,#84cc16_100%)] px-5 py-2.5 text-sm font-black tracking-[-0.02em] text-[#0d1930] shadow-[0_0_0_1px_rgba(255,255,255,0.16),0_20px_36px_-22px_rgba(132,204,22,0.85)] transition-all hover:scale-[1.02] hover:brightness-[1.03] active:scale-[0.98] sm:px-6"
               >
-                Começar agora
+                Criar loja grátis
               </button>
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(true)}
-                className="lg:hidden h-10 w-10 inline-flex items-center justify-center rounded-xl border border-white/10 text-white"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 text-white transition hover:bg-white/6 lg:hidden"
               >
                 <List size={20} weight="bold" />
               </button>
@@ -250,7 +288,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
         </div>
       </header>
 
-      <main className="pb-24 sm:pb-0"> {children} </main>
+      <main className="pb-24 pt-24 sm:pb-0 sm:pt-28"> {children} </main>
 
       <div className={`sm:hidden fixed inset-0 z-[75] transition ${mobileMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
         <button
@@ -286,9 +324,9 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               <button
                 type="button"
                 onClick={() => navigate('/create?plan=trial')}
-                className="w-full inline-flex items-center justify-between rounded-xl px-4 py-3 bg-brand-gradient text-white font-black"
+                className="w-full inline-flex items-center justify-between rounded-xl px-4 py-3 bg-[linear-gradient(180deg,#a3e635_0%,#84cc16_100%)] text-[#0d1930] font-black shadow-[0_16px_30px_-20px_rgba(132,204,22,0.75)]"
               >
-                Criar loja
+                Criar loja grátis
                 <Storefront size={18} weight="duotone" />
               </button>
             )}
@@ -316,6 +354,25 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               Sou condomínio
               <Buildings size={18} weight="duotone" />
             </button>
+            <div className="rounded-2xl border border-slate-200/80 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950/70">
+              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Soluções</p>
+              <div className="mt-3 space-y-2">
+                {solutionsLinks.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={item.onClick}
+                    className="flex w-full items-start justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
+                  >
+                    <span className="min-w-0">
+                      <span className="block">{item.label}</span>
+                      <span className="mt-1 block text-xs font-medium leading-5 text-slate-500 dark:text-slate-400">{item.helper}</span>
+                    </span>
+                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#84cc16]" />
+                  </button>
+                ))}
+              </div>
+            </div>
             <button
               type="button"
               onClick={toggleTheme}
@@ -440,8 +497,8 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
           <section className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 animate-in fade-in slide-in-from-bottom-3 duration-700 delay-100 motion-reduce:animate-none">
             <div>
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl border border-slate-700 bg-slate-900 p-0.5">
-                  <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover rounded-lg" />
+                <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-white p-0.5">
+                  <img src="/janocaminho.png" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
                 </div>
                 <div>
                   <p className="text-base font-black text-white">Já no Caminho</p>
