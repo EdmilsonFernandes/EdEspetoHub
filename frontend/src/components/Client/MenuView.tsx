@@ -1231,7 +1231,7 @@ export const MenuView = ({
           >
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex min-w-0 flex-1 items-center gap-4">
-                <div className="h-20 w-20 shrink-0 overflow-hidden rounded-[1.4rem] border border-white/80 bg-white shadow-[0_16px_28px_-20px_rgba(15,23,42,0.32)] ring-1 ring-slate-100">
+                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-[1.2rem] border border-white/80 bg-white shadow-[0_16px_28px_-20px_rgba(15,23,42,0.32)] ring-1 ring-slate-100 sm:h-[4.25rem] sm:w-[4.25rem]">
                   {featuredProduct.imageUrl ? (
                     <img
                       src={resolveAssetUrl(featuredProduct.imageUrl)}

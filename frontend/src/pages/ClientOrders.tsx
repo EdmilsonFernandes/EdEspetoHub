@@ -358,17 +358,9 @@ function OrderCard({
           <div className="flex min-w-0 items-center gap-3">
             <div className="w-full space-y-2.5">
               {visibleItems.map((item: any, index: number) => {
-                const imageUrl = getOrderItemImageUrl(item);
                 const itemDetails = getOrderItemDetails(item);
                 return (
-                  <div key={item.id || `${order.id}-item-${index}`} className="flex items-center gap-3 rounded-[1.15rem] border border-slate-100 bg-white/90 px-2.5 py-2 shadow-[0_10px_22px_-20px_rgba(15,23,42,0.25)]">
-                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-100">
-                      {imageUrl ? (
-                        <img src={imageUrl} alt={item.name || 'Item do pedido'} className="h-full w-full object-cover" loading="lazy" />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-[10px] text-slate-400">🍖</div>
-                      )}
-                    </div>
+                  <div key={item.id || `${order.id}-item-${index}`} className="flex items-center gap-3 rounded-[1.15rem] border border-slate-100 bg-white/90 px-3 py-2.5 shadow-[0_10px_22px_-20px_rgba(15,23,42,0.25)]">
                     <span className="inline-flex min-w-[1.7rem] justify-center rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-black text-slate-700 ring-1 ring-slate-200">
                       {getOrderItemQty(item)}x
                     </span>
