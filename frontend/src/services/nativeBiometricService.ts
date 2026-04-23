@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core';
+import { clearAllCustomerSessions } from '../utils/customerSessionStorage';
 
 const BIOMETRIC_RESULT_EVENT = 'jnc:android-biometric-result';
 const CUSTOMER_SESSION_EVENT = 'jnc:customer-session-updated';
@@ -384,6 +385,19 @@ export const nativeBiometricService = {
   disableCustomer() {
     const bridge = getBridge();
     return Boolean(bridge?.clearCustomerProfile?.());
+  },
+
+  clearCustomerAuthArtifacts(options?: { disableBiometric?: boolean }) {
+    clearAllCustomerSessions();
+    syncCustomerSession(null);
+    if (options?.disableBiometric === false) {
+      return true;
+    }
+    try {
+      return this.disableCustomer();
+    } catch {
+      return false;
+    }
   },
 
   disableAdmin() {

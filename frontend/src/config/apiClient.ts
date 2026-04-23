@@ -1,4 +1,9 @@
-import { forceLogoutAndRedirect, inferScopeFromPathname, isSessionAuthError } from '../utils/sessionRedirect';
+import {
+  forceLogoutAndRedirect,
+  inferScopeFromPathname,
+  isSessionAuthError,
+  recoverCustomerSession,
+} from '../utils/sessionRedirect';
 
 const resolveBaseUrl = () =>
 {
@@ -51,8 +56,9 @@ const buildUrl = (path: string) =>
 
 const handleResponse = async (
   response: Response,
-  routeScope: 'admin' | 'motoboy' = 'admin',
-  canAutoLogout = false
+  routeScope: 'customer' | 'admin' | 'motoboy' = 'admin',
+  canAutoLogout = false,
+  onAuthError?: () => void
 ) =>
 {
   if (!response.ok)
@@ -73,12 +79,22 @@ const handleResponse = async (
 
     const messageToCheck = payload?.message || message || '';
     if (canAutoLogout && isSessionAuthError(response.status, messageToCheck, payload?.code || '')) {
+      if (onAuthError) {
+        onAuthError();
+      }
       const inferredScope =
         typeof window !== 'undefined'
           ? inferScopeFromPathname(window.location.pathname)
           : routeScope;
-      const targetScope = inferredScope === 'superadmin' ? routeScope : inferredScope;
-      forceLogoutAndRedirect(targetScope);
+      const targetScope =
+        routeScope === 'customer'
+          ? routeScope
+          : inferredScope === 'superadmin'
+            ? routeScope
+            : inferredScope;
+      if (!onAuthError || routeScope !== 'customer') {
+        forceLogoutAndRedirect(targetScope);
+      }
     }
 
     throw error;
@@ -161,7 +177,19 @@ const request = async (path: string, options: any = {}) =>
     const isOperator = adminRole === 'OPERATOR' || adminRole === 'LOJISTA';
     const hasPrivilegedSession = isMotoboyRoute ? Boolean(motoboyToken) : Boolean(adminToken);
     const canAutoLogout = hasPrivilegedSession && !(response.status === 403 && isOperator && !isMotoboyRoute);
-    return handleResponse(response, isMotoboyRoute ? 'motoboy' : 'admin', canAutoLogout);
+    const isCustomerAuthPage =
+      typeof window !== 'undefined' && String(window.location.pathname || '').toLowerCase().startsWith('/cliente');
+    const routeScope = isMotoboyRoute ? 'motoboy' : isCustomerRoute ? 'customer' : 'admin';
+    const customerAuthRecovery =
+      isCustomerRoute && customerToken
+        ? () => recoverCustomerSession({ redirect: isCustomerAuthPage })
+        : undefined;
+    return handleResponse(
+      response,
+      routeScope,
+      isCustomerRoute ? Boolean(customerToken) : canAutoLogout,
+      customerAuthRecovery
+    );
   } catch (error: any) {
     if (error?.name === 'AbortError') {
       const timeoutError: any = new Error('Tempo de conexão esgotado. Tentando reconectar...');

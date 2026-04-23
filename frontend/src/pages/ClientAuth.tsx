@@ -110,6 +110,9 @@ export function ClientAuth() {
     if (params.get('verified') === '1') {
       setMessage('Conta ativada com sucesso. Agora é só entrar.');
     }
+    if (params.get('reason') === 'session_expired') {
+      setMessage('Seu acesso expirou ou foi atualizado. Entre novamente para continuar. Se usava biometria, ative de novo após o login.');
+    }
   }, [location.search]);
 
   useEffect(() => {
