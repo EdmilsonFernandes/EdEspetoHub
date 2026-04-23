@@ -171,6 +171,7 @@ export const CartView = ({
     "entregador",
   ].includes(normalizedUserRole);
   const isEndCustomerLogged = Boolean(isCustomerLogged && !isProfessionalUser);
+  const showCustomerFulfillmentInsights = isEndCustomerLogged;
   const visibleOrderTypes = (Array.isArray(allowedOrderTypes) && allowedOrderTypes.length
     ? allowedOrderTypes
     : [ "delivery", "pickup", "table" ]
@@ -1059,42 +1060,44 @@ export const CartView = ({
             </div>
           </div>
 
-          <div className={`relative overflow-hidden rounded-[2rem] border p-4 sm:p-5 shadow-[0_24px_48px_-32px_rgba(15,23,42,0.25)] ${checkoutContextMeta.toneClass}`}>
-            <div className="pointer-events-none absolute -right-6 top-0 h-32 w-32 rounded-full bg-white/70 blur-3xl" />
-            <div className="pointer-events-none absolute bottom-0 left-0 h-24 w-24 rounded-full bg-white/60 blur-3xl" />
-            <div className="relative flex items-start gap-4">
-              <div className="relative shrink-0">
-                <span className="absolute -inset-1 rounded-[1.35rem] bg-white/70 blur-md" />
-                <span className={`relative flex h-12 w-12 items-center justify-center rounded-[1.2rem] shadow-sm ${checkoutContextMeta.iconClass}`}>
-                  {checkoutContextMeta.icon}
-                </span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Resumo da etapa</p>
-                  <span className="inline-flex rounded-full border border-white/70 bg-white/80 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-600 shadow-sm">
-                    {orderTypeVisuals[customer.type]?.label || "Pedido"}
+          {showCustomerFulfillmentInsights && (
+            <div className={`relative overflow-hidden rounded-[2rem] border p-4 sm:p-5 shadow-[0_24px_48px_-32px_rgba(15,23,42,0.25)] ${checkoutContextMeta.toneClass}`}>
+              <div className="pointer-events-none absolute -right-6 top-0 h-32 w-32 rounded-full bg-white/70 blur-3xl" />
+              <div className="pointer-events-none absolute bottom-0 left-0 h-24 w-24 rounded-full bg-white/60 blur-3xl" />
+              <div className="relative flex items-start gap-4">
+                <div className="relative shrink-0">
+                  <span className="absolute -inset-1 rounded-[1.35rem] bg-white/70 blur-md" />
+                  <span className={`relative flex h-12 w-12 items-center justify-center rounded-[1.2rem] shadow-sm ${checkoutContextMeta.iconClass}`}>
+                    {checkoutContextMeta.icon}
                   </span>
                 </div>
-                <h3 className="mt-2 text-[15px] font-black leading-tight text-slate-900">{checkoutContextMeta.title}</h3>
-                <p className="mt-1.5 text-xs leading-relaxed text-slate-600">{checkoutContextMeta.description}</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {checkoutSummaryChips.map((chip) => (
-                    <span
-                      key={chip}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/88 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm"
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                      {chip}
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Resumo da etapa</p>
+                    <span className="inline-flex rounded-full border border-white/70 bg-white/80 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-600 shadow-sm">
+                      {orderTypeVisuals[customer.type]?.label || "Pedido"}
                     </span>
-                  ))}
+                  </div>
+                  <h3 className="mt-2 text-[15px] font-black leading-tight text-slate-900">{checkoutContextMeta.title}</h3>
+                  <p className="mt-1.5 text-xs leading-relaxed text-slate-600">{checkoutContextMeta.description}</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {checkoutSummaryChips.map((chip) => (
+                      <span
+                        key={chip}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/88 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm"
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        {chip}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Retirada info */}
-          {customer.type === "pickup" && (
+          {showCustomerFulfillmentInsights && customer.type === "pickup" && (
             <div className="rounded-[1.7rem] border border-emerald-200/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(236,253,245,0.96)_100%)] p-4 shadow-[0_22px_42px_-34px_rgba(5,150,105,0.35)]">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
@@ -1127,32 +1130,34 @@ export const CartView = ({
           {/* Endereço */}
           {customer.type === "delivery" && (
             <div className="rounded-[1.8rem] border border-slate-200/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.96)_48%,rgba(241,245,249,0.92)_100%)] p-4 sm:p-5 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.28)]">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
-                    {isPostalDelivery ? "Envio postal" : "Entrega no endereço"}
-                  </p>
-                  <h3 className="mt-1 text-[15px] font-black leading-tight text-slate-900">
-                    {deliverySummaryTitle}
-                  </h3>
-                  <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
-                    {deliverySummaryDescription}
-                  </p>
+              {showCustomerFulfillmentInsights && (
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
+                      {isPostalDelivery ? "Envio postal" : "Entrega no endereço"}
+                    </p>
+                    <h3 className="mt-1 text-[15px] font-black leading-tight text-slate-900">
+                      {deliverySummaryTitle}
+                    </h3>
+                    <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
+                      {deliverySummaryDescription}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {deliveryMetaChips.map((chip) => (
+                      <span
+                        key={chip.key}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm"
+                      >
+                        {chip.icon}
+                        {chip.label}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {deliveryMetaChips.map((chip) => (
-                    <span
-                      key={chip.key}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm"
-                    >
-                      {chip.icon}
-                      {chip.label}
-                    </span>
-                  ))}
-                </div>
-              </div>
+              )}
               {postalEnabled && (
-                <div className="mt-4 rounded-[1.2rem] border border-slate-200 bg-slate-100/80 p-1.5 grid grid-cols-2 gap-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+                <div className={`${showCustomerFulfillmentInsights ? 'mt-4' : 'mt-0'} rounded-[1.2rem] border border-slate-200 bg-slate-100/80 p-1.5 grid grid-cols-2 gap-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]`}>
                   <button
                     type="button"
                     onClick={() => onChangeDeliveryMode?.("distance")}
@@ -2072,35 +2077,37 @@ export const CartView = ({
           </div>
 
           {/* Entrega / Retirada */}
-          <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-            <div className="flex items-center gap-3">
-              <span className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ${
-                customer.type === 'delivery'
-                  ? 'bg-sky-50 text-[#336886]'
-                  : customer.type === 'pickup'
-                    ? 'bg-emerald-50 text-emerald-700'
-                    : 'bg-amber-50 text-amber-700'
-              }`}>
-                {customer.type === 'delivery' ? <Bicycle size={18} weight="duotone" /> : customer.type === 'pickup' ? <House size={18} weight="duotone" /> : <ForkKnife size={18} weight="duotone" />}
-              </span>
-              <div className="min-w-0">
-                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
-                  {customer.type === 'delivery' ? 'Entrega' : customer.type === 'pickup' ? 'Retirada no local' : `Mesa ${customer.table || ''}`}
-                </p>
-                {customer.type === 'delivery' && (
-                  <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-700">
-                    {[customer.street, customer.number, customer.neighborhood, customer.city].filter(Boolean).join(', ') || customer.address || '—'}
+          {showCustomerFulfillmentInsights && (
+            <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+              <div className="flex items-center gap-3">
+                <span className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ${
+                  customer.type === 'delivery'
+                    ? 'bg-sky-50 text-[#336886]'
+                    : customer.type === 'pickup'
+                      ? 'bg-emerald-50 text-emerald-700'
+                      : 'bg-amber-50 text-amber-700'
+                }`}>
+                  {customer.type === 'delivery' ? <Bicycle size={18} weight="duotone" /> : customer.type === 'pickup' ? <House size={18} weight="duotone" /> : <ForkKnife size={18} weight="duotone" />}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
+                    {customer.type === 'delivery' ? 'Entrega' : customer.type === 'pickup' ? 'Retirada no local' : `Mesa ${customer.table || ''}`}
                   </p>
-                )}
-                {customer.type === 'pickup' && (
-                  <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-700">{storeAddress || 'Retirada no balcão'}</p>
-                )}
-                {customer.type === 'table' && (
-                  <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-700">Pedido identificado para a mesa {customer.table || 'selecionada'}.</p>
-                )}
+                  {customer.type === 'delivery' && (
+                    <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-700">
+                      {[customer.street, customer.number, customer.neighborhood, customer.city].filter(Boolean).join(', ') || customer.address || '—'}
+                    </p>
+                  )}
+                  {customer.type === 'pickup' && (
+                    <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-700">{storeAddress || 'Retirada no balcão'}</p>
+                  )}
+                  {customer.type === 'table' && (
+                    <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-700">Pedido identificado para a mesa {customer.table || 'selecionada'}.</p>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Pagamento */}
           <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
