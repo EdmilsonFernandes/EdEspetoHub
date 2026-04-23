@@ -164,6 +164,22 @@ const buildOrderSupportMessage = ({
   return `Olá, tudo bem? Meu nome é ${safeCustomerName}. Sou cliente do pedido #${orderNumber}${orderDateTime ? `, feito em ${orderDateTime},` : ''} na ${safeStoreName}. Tenho uma dúvida sobre esse pedido e gostaria de suporte. Pode me ajudar?`;
 };
 
+const buildReorderPayload = (order: any) => {
+  const items = Array.isArray(order?.items) ? order.items : [];
+  return {
+    items: items
+      .map((item: any) => ({
+        productId: item?.productId || item?.product?.id || null,
+        name: item?.name || item?.product?.name || '',
+        quantity: item?.quantity ?? item?.qty ?? 1,
+        cookingPoint: item?.cookingPoint || '',
+        passSkewer: Boolean(item?.passSkewer),
+        selectedModifiers: Array.isArray(item?.selectedModifiers) ? item.selectedModifiers : [],
+      }))
+      .filter((item: any) => item.productId || item.name),
+  };
+};
+
 const isDeliverySupportOrder = (order: any) => {
   const normalizedType = String(order?.type || '').trim().toLowerCase();
   const normalizedCondominiumMode = String(
@@ -457,6 +473,16 @@ function OrderCard({
     etaDeadlineMs &&
     Date.now() > etaDeadlineMs + DELAY_GRACE_MS
   );
+  const handleRepeatOrder = () => {
+    const storeSlug = String(order?.store?.slug || '').trim();
+    const payload = buildReorderPayload(order);
+    if (!storeSlug || !payload.items.length) {
+      onOpenStore(order?.store?.slug);
+      return;
+    }
+    localStorage.setItem(`reorder:${storeSlug}`, JSON.stringify(payload));
+    onOpenStore(storeSlug);
+  };
 
   return (
     <article className="rounded-[28px] border border-slate-200 bg-white p-4 shadow-[0_12px_30px_-28px_rgba(15,23,42,0.4)]">
@@ -655,7 +681,7 @@ function OrderCard({
           {!isActive ? (
             <button
               type="button"
-              onClick={() => onOpenStore(order.store?.slug)}
+              onClick={handleRepeatOrder}
               className="inline-flex items-center gap-1.5 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-3.5 py-2 text-sm font-semibold text-white shadow-[0_16px_30px_-20px_rgba(21,58,76,0.55)] transition-colors hover:brightness-105"
             >
               <ArrowClockwise size={14} weight="bold" />
