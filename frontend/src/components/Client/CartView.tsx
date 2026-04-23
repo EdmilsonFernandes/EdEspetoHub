@@ -306,9 +306,12 @@ export const CartView = ({
       : [];
 
   const handleNameChange = (value) => {
-    const next = { ...customer, name: value };
+    const normalizedValue = isProfessionalUser
+      ? String(value || "").toLocaleUpperCase("pt-BR")
+      : value;
+    const next = { ...customer, name: normalizedValue };
     if (allowCustomerAutocomplete) {
-      const normalized = normalizeText(value);
+      const normalized = normalizeText(normalizedValue);
       if (normalized.length >= 2) {
         const match = customers.find(
           (entry) => normalizeText(entry.name) === normalized
@@ -333,11 +336,14 @@ export const CartView = ({
     const parts = extractPhoneParts(entry.phone || "");
     const safeDdd = BRAZIL_DDDS.includes(parts.ddd) ? parts.ddd : "";
     const safeLocal = String(parts.localNumber || "").replace(/\D/g, "").slice(0, 9);
+    const nextName = isProfessionalUser
+      ? String(entry.name || "").toLocaleUpperCase("pt-BR")
+      : entry.name;
     setSelectedDdd(safeDdd);
     setLocalPhoneDigits(safeLocal);
     onChangeCustomer({
       ...customer,
-      name: entry.name,
+      name: nextName,
       phone: buildPhoneFromParts(safeDdd, safeLocal),
     });
     setSuggestionsOpen(false);
@@ -875,7 +881,7 @@ export const CartView = ({
                     allowCustomerAutocomplete && setTimeout(() => setSuggestionsOpen(false), 150)
                   }
                   placeholder="Nome completo"
-                  className="w-full rounded-2xl bg-slate-100 py-3 pl-10 pr-4 text-base sm:text-lg text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all"
+                  className={`w-full rounded-2xl bg-slate-100 py-3 pl-10 pr-4 text-base sm:text-lg text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all ${isProfessionalUser ? 'uppercase' : ''}`}
                 />
                 <MagnifyingGlass size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 {allowCustomerAutocomplete && suggestionsOpen && filteredCustomers.length > 0 && (

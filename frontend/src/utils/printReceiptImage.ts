@@ -158,7 +158,7 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
     separator(),
     ...itemsLines,
     separator(),
-    `${ESC_POS.boldOn}${fitLeftRight("TOTAL:", sanitizeText(payload.totalLabel || "R$ 0,00"))}${ESC_POS.boldOff}`,
+    `${ESC_POS.boldOn}${ESC_POS.textDoubleHeightOn}${fitLeftRight("TOTAL:", sanitizeText(payload.totalLabel || "R$ 0,00"))}${ESC_POS.textSizeReset}${ESC_POS.boldOff}`,
     "",
     "",
   ];
@@ -238,7 +238,7 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
     .item-name { flex: 1; padding-right: 6px; font-weight: 800; }
     .item-price { white-space: nowrap; font-weight: 800; }
     .item-note { font-size: 10px; margin-left: 8px; margin-bottom: 3px; line-height: 1.4; }
-    .total { display: flex; justify-content: space-between; font-size: 14px; font-weight: 800; margin-top: 6px; }
+    .total { display: flex; justify-content: space-between; font-size: 16px; font-weight: 900; margin-top: 8px; }
     .spacer { height: 16px; }
     @media print {
       .customer-block {
