@@ -478,10 +478,8 @@ Demo:
 
 - Tela: `http://localhost:3000/superadmin`
 - Autenticacao usa a tabela `platform_admins` (nao usa mais variavel de ambiente).
-- Usuario seed (criado em `schema.sql` e `runMigrations`):
-  - usuario: `janocaminhoadmin`
-  - senha: `janocaminho2026#!`
-- Troque a senha direto no banco se precisar.
+- Usuario seed inicial e criado em `schema.sql` e `runMigrations`.
+- Para ambiente real, altere a senha bootstrap logo apos a primeira subida.
 
 ```mermaid
 flowchart TD

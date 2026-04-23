@@ -4,10 +4,10 @@
 Este arquivo foi gerado em 07/04/2026 para permitir o upload do App Bundle (.aab) na Google Play Store.
 
 - **Arquivo da Chave:** `janocaminho-upload-key.jks` (localizado na raiz do projeto)
-- **Alias da Chave:** `janocaminho`
-- **Senha da KeyStore:** `janocaminho2026`
-- **Senha da Chave (Alias):** `janocaminho2026`
-- **DN:** `CN=Edmilson Fernandes, OU=Edmilson TI, O=Edmilson TI, L=Sao Paulo, ST=SP, C=BR`
+- **Alias da Chave:** armazenado fora do repositório
+- **Senha da KeyStore:** armazenada fora do repositório
+- **Senha da Chave (Alias):** armazenada fora do repositório
+- **DN:** armazenado fora do repositório
 
 ## Versão Atual (Build de 07/04/2026)
 - **Nome do Arquivo:** `jnc-oficial-playstore.aab`

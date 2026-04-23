@@ -31,15 +31,19 @@ async function bootstrap()
   const { AppDataSource } = await import('./config/database');
   const routes = (await import('./routes')).default;
   const { env } = await import('./config/env');
+  const { validateCriticalRuntimeConfig } = await import('./config/runtimeValidation');
 	  const { swaggerSpec } = await import('./config/swagger');
 	  const { scheduleSubscriptionExpirationJob } = await import('./jobs/subscription-expiration.job');
 	  const { scheduleDeliveryExpirationJob } = await import('./jobs/delivery-expiration.job');
 	  const { scheduleFaceVerifyJob } = await import('./jobs/face-verify.job');
 	  const { scheduleAwaitingPaymentExpirationJob } = await import('./jobs/awaiting-payment-expiration.job');
 	  const { runMigrations } = await import('./utils/runMigrations');
+  const { applyApiSecurityHeaders } = await import('./middleware/apiSecurity');
   const { requestLogger } = await import('./middleware/requestLogger');
   const { accessLogger } = await import('./middleware/accessLogger');
   const { logger } = await import('./utils/logger');
+
+  validateCriticalRuntimeConfig();
 
   // Auto-heal: if the database was dropped, recreate it so the API can boot.
   // Retry because on docker starts Postgres may not be ready yet.
@@ -77,10 +81,38 @@ async function bootstrap()
   await ensureBaseSchema(AppDataSource);
   await runMigrations();
   const app = express();
+  const corsAllowedOrigins = new Set(env.corsAllowedOrigins);
   // API endpoints are dynamic; avoid 304/ETag cache surprises in browsers/proxies.
+  app.disable('x-powered-by');
   app.set('etag', false);
+  app.set('trust proxy', env.trustProxyHops);
+  app.use(applyApiSecurityHeaders);
   app.use(requestLogger);
-  app.use(cors());
+  app.use((req, res, next) =>
+  {
+    const origin = String(req.headers.origin || '').trim();
+    if (!origin || corsAllowedOrigins.has(origin)) {
+      return next();
+    }
+
+    return res.status(403).json({
+      code: 'CORS_NOT_ALLOWED',
+      message: 'Origem não permitida.',
+    });
+  });
+  app.use(cors({
+    origin: (origin, callback) => {
+      if (!origin || corsAllowedOrigins.has(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(null, false);
+    },
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Authorization', 'Content-Type', 'X-Requested-With', 'X-Signature', 'X-Request-Id'],
+    exposedHeaders: ['Retry-After'],
+    optionsSuccessStatus: 204,
+  }));
   app.use(express.json({ limit: '10mb' }));
   app.use(accessLogger);
   // Avoid browser/proxy caching for dynamic APIs (prevents 304 "Not Modified" hiding new queue/orders).
@@ -111,7 +143,12 @@ async function bootstrap()
 
   app.listen(env.port, () =>
   {
-    logger.info('API listening', { port: env.port });
+    logger.info('API listening', {
+      port: env.port,
+      trustProxyHops: env.trustProxyHops,
+      corsAllowedOrigins: env.corsAllowedOrigins,
+      strictRuntimeValidation: env.security.strictRuntimeValidation,
+    });
   });
 }
 

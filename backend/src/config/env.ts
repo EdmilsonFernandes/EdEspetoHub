@@ -22,10 +22,62 @@ const numberEnv = (name: string, fallback: number, min = 0) => {
   return Number.isFinite(value) && value >= min ? value : fallback;
 };
 
+const listEnv = (name: string) => {
+  const raw = process.env[name];
+  if (!raw) return [] as string[];
+  return raw
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+};
+
+const expandWebOrigins = (origin: string) => {
+  const normalized = String(origin || '').trim();
+  if (!normalized) return [] as string[];
+
+  const origins = new Set<string>([normalized]);
+  try {
+    const url = new URL(normalized);
+    if (url.protocol === 'http:' || url.protocol === 'https:') {
+      if (url.hostname.startsWith('www.')) {
+        origins.add(`${url.protocol}//${url.hostname.slice(4)}${url.port ? `:${url.port}` : ''}`);
+      } else if (url.hostname.includes('.')) {
+        origins.add(`${url.protocol}//www.${url.hostname}${url.port ? `:${url.port}` : ''}`);
+      }
+    }
+  } catch {
+    // Ignore malformed URLs here; runtime validation will catch strict cases.
+  }
+
+  return Array.from(origins);
+};
+
+const appUrl = process.env.APP_BASE_URL || 'http://localhost:3000';
+const configuredCorsOrigins = [
+  ...expandWebOrigins(appUrl),
+  ...listEnv('CORS_ALLOWED_ORIGINS').flatMap(expandWebOrigins),
+];
+
+const defaultCorsOrigins = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:8080',
+  'http://127.0.0.1:8080',
+  'http://localhost',
+  'http://127.0.0.1',
+  'capacitor://localhost',
+  'ionic://localhost',
+];
+
 export const env = {
   port: process.env.PORT ? Number(process.env.PORT) : 4000,
   jwtSecret: process.env.JWT_SECRET || 'super-secret-token',
-  appUrl: process.env.APP_BASE_URL || 'http://localhost:3000',
+  appUrl,
+  nodeEnv: String(process.env.NODE_ENV || 'development').toLowerCase(),
+  trustProxyHops: numberEnv('TRUST_PROXY_HOPS', 1, 0),
+  corsAllowedOrigins: Array.from(new Set([ ...configuredCorsOrigins, ...defaultCorsOrigins ])),
   superAdminEmail: process.env.SUPER_ADMIN_EMAIL || '',
   superAdminPassword: process.env.SUPER_ADMIN_PASSWORD || '',
   pendingSignupTtlDays: (() => {
@@ -115,5 +167,15 @@ export const env = {
     fcmProjectId: process.env.FCM_PROJECT_ID || '',
     fcmServiceAccountPath: process.env.FCM_SERVICE_ACCOUNT_PATH || process.env.GOOGLE_APPLICATION_CREDENTIALS || '',
     fcmServiceAccountJson: process.env.FCM_SERVICE_ACCOUNT_JSON || '',
+  },
+  security: {
+    authRateLimitWindowMs: numberEnv('AUTH_RATE_LIMIT_WINDOW_MS', 15 * 60 * 1000, 1000),
+    authRateLimitMax: numberEnv('AUTH_RATE_LIMIT_MAX', 25, 1),
+    recoveryRateLimitWindowMs: numberEnv('AUTH_RECOVERY_RATE_LIMIT_WINDOW_MS', 15 * 60 * 1000, 1000),
+    recoveryRateLimitMax: numberEnv('AUTH_RECOVERY_RATE_LIMIT_MAX', 10, 1),
+    strictRuntimeValidation:
+      process.env.REQUIRE_STRICT_RUNTIME_VALIDATION === 'true' ||
+      Boolean(process.env.SSM_PARAMETER_NAME) ||
+      /^https:\/\//i.test(appUrl),
   },
 };
