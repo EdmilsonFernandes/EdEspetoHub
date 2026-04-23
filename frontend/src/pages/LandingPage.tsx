@@ -604,17 +604,26 @@ export function LandingPage() {
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-[0.22em] text-sky-200">Mercado Pago integrado</p>
-                    <h3 className="mt-2 text-2xl font-black tracking-tight text-white">Checkout com cara de plataforma</h3>
-                    <p className="mt-2 max-w-md text-sm font-medium leading-6 text-slate-300">
-                      O cliente paga dentro do fluxo da loja e a cobrança segue para a conta conectada do próprio lojista, sem repasse manual.
+                    <p className="mt-2 max-w-sm text-xs font-medium leading-5 text-slate-400">
+                      Conta do lojista conectada ao checkout do pedido.
                     </p>
                   </div>
-                  <div className="rounded-[1.25rem] border border-white/10 bg-white/95 px-4 py-3 shadow-[0_22px_42px_-28px_rgba(0,158,227,0.65)]">
-                    <img src={mercadoPagoLandingLogo} alt="Mercado Pago" className="h-16 w-full max-w-[250px] object-contain object-left" />
+                  <div className="space-y-2">
+                    <div className="rounded-[1.25rem] border border-white/10 bg-white/95 px-4 py-3 shadow-[0_22px_42px_-28px_rgba(0,158,227,0.65)]">
+                      <img src={mercadoPagoLandingLogo} alt="Mercado Pago" className="h-16 w-full max-w-[250px] object-contain object-left" />
+                    </div>
+                    <div className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.08] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-slate-100 backdrop-blur-xl">
+                      <Lock size={11} weight="duotone" className="text-sky-300" />
+                      Conta conectada
+                    </div>
                   </div>
                 </div>
 
                 <div className="mt-5 rounded-[1.35rem] border border-white/10 bg-white/[0.05] p-4 backdrop-blur-xl">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-200">Checkout com cara de plataforma</p>
+                  <p className="mt-2 max-w-md text-sm font-medium leading-6 text-slate-300">
+                    O cliente paga dentro do fluxo da loja e a cobrança segue para a conta conectada do próprio lojista, sem repasse manual.
+                  </p>
                   <div className="flex items-center gap-3">
                     <div className="rounded-2xl border border-white/10 bg-white/[0.08] px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-white">
                       Mercado Pago
