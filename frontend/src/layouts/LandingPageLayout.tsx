@@ -195,35 +195,30 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
 
   return (
     <div
-      className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.14),_transparent_48%),radial-gradient(circle_at_bottom_right,_rgba(95,211,90,0.16),_transparent_45%)] bg-gray-50 dark:bg-slate-950"
+      className="min-h-screen bg-[linear-gradient(180deg,#0a1426_0px,#0e1d36_148px,#f8fafc_148px),radial-gradient(circle_at_top,_rgba(47,157,247,0.14),_transparent_48%),radial-gradient(circle_at_bottom_right,_rgba(95,211,90,0.16),_transparent_45%)] dark:bg-slate-950"
       style={{ fontFamily: 'Inter, Geist, system-ui, -apple-system, Segoe UI, sans-serif' }}
     >
-      <header className="fixed left-1/2 top-3 z-50 w-[calc(100%-1rem)] max-w-7xl -translate-x-1/2 sm:top-4 sm:w-[calc(100%-2rem)]">
-        <div className="relative rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(11,18,32,0.94)_0%,rgba(8,15,28,0.92)_52%,rgba(5,10,21,0.96)_100%)] shadow-[0_34px_90px_-42px_rgba(2,6,23,0.92)] ring-1 ring-white/6 backdrop-blur-xl">
-          <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(148,163,184,0.55),transparent)]" />
-          <div className="pointer-events-none absolute inset-y-4 left-[22rem] hidden w-px bg-white/6 xl:block" />
-          <div className="pointer-events-none absolute right-28 top-3 h-12 w-28 rounded-full bg-[#84cc16]/10 blur-2xl" />
-          <div className="pointer-events-none absolute left-24 top-3 h-10 w-20 rounded-full bg-sky-400/10 blur-2xl" />
-          <div className="relative flex items-center justify-between gap-3 px-3 py-3 sm:px-4 lg:px-5">
-            <a href="https://www.janocaminho.com.br" className="group flex min-w-0 items-center gap-3 rounded-[1.35rem] px-2 py-1.5 transition-colors hover:bg-white/[0.03]">
+      <header className="fixed left-1/2 top-5 z-50 w-[calc(100%-1rem)] max-w-7xl -translate-x-1/2 sm:top-5 sm:w-[calc(100%-2rem)]">
+        <div className="relative rounded-[100px] border border-white/10 bg-[rgba(13,25,48,0.6)] px-4 py-3 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] backdrop-blur-[12px] ring-1 ring-white/6 sm:px-6 lg:px-8">
+          <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.16),transparent)]" />
+          <div className="pointer-events-none absolute right-24 top-2 h-12 w-24 rounded-full bg-[#84cc16]/12 blur-2xl" />
+          <div className="pointer-events-none absolute left-28 top-2 h-10 w-20 rounded-full bg-sky-400/12 blur-2xl" />
+          <div className="relative flex items-center justify-between gap-4">
+            <a href="https://www.janocaminho.com.br" className="group ml-1 flex min-w-0 items-center gap-3 rounded-full pr-2 transition-colors hover:bg-white/[0.03]">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/85 bg-white p-0.5 shadow-[0_16px_30px_-22px_rgba(255,255,255,0.5)] transition-transform group-hover:scale-[1.03]">
                 <img src="/janocaminho.png" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
               </div>
               <div className="min-w-0 leading-tight">
                 <p className="truncate text-base font-black tracking-[-0.03em] text-white sm:text-lg">Já no Caminho</p>
-                <div className="mt-1 flex items-center gap-2">
-                  <span className="inline-flex rounded-full border border-sky-300/20 bg-sky-400/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-sky-200/90">
-                    Plataforma SaaS
-                  </span>
-                </div>
+                <p className="mt-1 text-[10px] font-black uppercase tracking-[0.2em] text-sky-200/78">Plataforma SaaS</p>
               </div>
             </a>
 
             <div className="hidden min-w-0 flex-1 justify-center xl:flex">
-              <nav className="flex items-center gap-1 rounded-full border border-white/8 bg-white/[0.04] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+              <nav className="flex items-center gap-2">
                 <button
                   onClick={goHome}
-                  className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold tracking-[-0.02em] text-slate-300 transition-all hover:bg-white/[0.06] hover:text-white"
+                  className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium tracking-[-0.02em] text-slate-300 transition-all hover:text-white"
                 >
                   <House size={16} weight="duotone" className="text-sky-300" />
                   Início
@@ -236,7 +231,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                   <button
                     type="button"
                     onClick={() => setSolutionsMenuOpen((prev) => !prev)}
-                    className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold tracking-[-0.02em] text-slate-300 transition-all hover:bg-white/[0.06] hover:text-white"
+                    className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium tracking-[-0.02em] text-slate-300 transition-all hover:text-white"
                   >
                     <Buildings size={16} weight="duotone" className="text-emerald-300" />
                     Soluções
@@ -274,7 +269,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 </div>
                 <button
                   onClick={() => navigate('/instalar')}
-                  className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold tracking-[-0.02em] text-slate-300 transition-all hover:bg-white/[0.06] hover:text-white"
+                  className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium tracking-[-0.02em] text-slate-300 transition-all hover:text-white"
                 >
                   <DownloadSimple size={16} weight="duotone" className="text-sky-300" />
                   Instalar app
@@ -285,13 +280,13 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={() => navigate('/admin')}
-                className="hidden md:inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-semibold tracking-[-0.02em] text-slate-200 transition-all hover:border-[#84cc16]/35 hover:bg-white/[0.06] hover:text-white"
+                className="hidden md:inline-flex items-center rounded-full px-3 py-2.5 text-sm font-medium tracking-[-0.02em] text-slate-300 transition-all hover:text-[#84cc16]"
               >
                 Entrar
               </button>
               <button
                 onClick={() => navigate('/create?plan=trial')}
-                className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(180deg,#b7f34a_0%,#84cc16_100%)] px-5 py-2.5 text-sm font-black tracking-[-0.02em] text-[#07111f] shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_20px_42px_-24px_rgba(132,204,22,0.95)] transition-all hover:scale-[1.02] hover:brightness-[1.04] active:scale-[0.985] sm:px-6"
+                className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(180deg,#a8ea37_0%,#84cc16_100%)] px-5 py-2.5 text-sm font-black tracking-[-0.02em] text-[#07111f] shadow-[0_12px_24px_-14px_rgba(132,204,22,0.52)] transition-all hover:scale-[1.02] hover:shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_16px_32px_-14px_rgba(132,204,22,0.58),0_0_22px_rgba(132,204,22,0.28)] active:scale-[0.985] sm:px-6"
               >
                 Criar loja grátis
               </button>
@@ -307,7 +302,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
         </div>
       </header>
 
-      <main className="pb-24 pt-24 sm:pb-0 sm:pt-28"> {children} </main>
+      <main className="pb-24 pt-20 sm:pb-0 sm:pt-24"> {children} </main>
 
       <div className={`sm:hidden fixed inset-0 z-[75] transition ${mobileMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
         <button
