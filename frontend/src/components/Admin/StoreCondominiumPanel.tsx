@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Buildings, CalendarBlank, CheckCircle, Clock } from '@phosphor-icons/react';
+import { Buildings, CalendarBlank, CheckCircle, Clock, SignOut, WarningCircle } from '@phosphor-icons/react';
+import { ConfirmationModal } from '../common/ConfirmationModal';
+import { useToast } from '../../contexts/ToastContext';
 import { condominiumService } from '../../services/condominiumService';
 import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
 
@@ -35,11 +37,18 @@ const statusCopy: Record<string, { label: string; tone: string }> = {
 };
 
 export function StoreCondominiumPanel({ storeId }: Props) {
+  const { showToast } = useToast();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [savingId, setSavingId] = useState('');
   const [messageById, setMessageById] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
+  const [confirmModal, setConfirmModal] = useState<null | {
+    condominiumId: string;
+    title: string;
+    description: string;
+    confirmLabel: string;
+  }>(null);
 
   const load = async () => {
     if (!storeId) return;
@@ -69,6 +78,7 @@ export function StoreCondominiumPanel({ storeId }: Props) {
         message: messageById[condominiumId] || '',
       });
       await load();
+      showToast('Solicitação enviada para o condomínio.', 'success');
     } catch (err: any) {
       setError(err?.message || 'Não foi possível enviar solicitação.');
     } finally {
@@ -78,17 +88,17 @@ export function StoreCondominiumPanel({ storeId }: Props) {
 
   const removeAssociation = async (condominiumId: string, status: string) => {
     if (!storeId) return;
-    const label = status === 'approved' ? 'sair deste condomínio' : 'cancelar esta solicitação';
-    if (!window.confirm(`Deseja ${label}?`)) return;
     setSavingId(condominiumId);
     setError('');
     try {
       await condominiumService.removeStoreCondominium(storeId, condominiumId);
       await load();
+      showToast(status === 'approved' ? 'Loja desassociada do condomínio.' : 'Solicitação cancelada.', 'success');
     } catch (err: any) {
       setError(err?.message || 'Não foi possível atualizar a participação.');
     } finally {
       setSavingId('');
+      setConfirmModal(null);
     }
   };
 
@@ -175,7 +185,14 @@ export function StoreCondominiumPanel({ storeId }: Props) {
                   <div className="w-full sm:max-w-[220px]">
                     <button
                       type="button"
-                      onClick={() => removeAssociation(condominium.id, status)}
+                      onClick={() => setConfirmModal({
+                        condominiumId: condominium.id,
+                        title: status === 'approved' ? 'Sair deste condomínio?' : 'Cancelar solicitação?',
+                        description: status === 'approved'
+                          ? 'Sua loja deixará de participar deste condomínio e não poderá mais entrar nas próximas feiras até uma nova aprovação.'
+                          : 'O pedido atual será removido da análise e você poderá solicitar novamente depois.',
+                        confirmLabel: status === 'approved' ? 'Sair do condomínio' : 'Cancelar solicitação',
+                      })}
                       disabled={savingId === condominium.id}
                       className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
                     >
@@ -189,6 +206,19 @@ export function StoreCondominiumPanel({ storeId }: Props) {
           );
         })}
       </div>
+
+      <ConfirmationModal
+        isOpen={!!confirmModal}
+        onClose={() => !savingId && setConfirmModal(null)}
+        onConfirm={() => confirmModal && removeAssociation(confirmModal.condominiumId, items.find((item) => item.condominium?.id === confirmModal.condominiumId)?.status || '')}
+        title={confirmModal?.title || ''}
+        description={confirmModal?.description || ''}
+        confirmLabel={confirmModal?.confirmLabel || 'Confirmar'}
+        cancelLabel="Voltar"
+        variant="warning"
+        icon={confirmModal?.confirmLabel?.includes('Sair') ? <SignOut size={32} weight="duotone" /> : <WarningCircle size={32} weight="duotone" />}
+        isLoading={!!savingId}
+      />
     </div>
   );
 }

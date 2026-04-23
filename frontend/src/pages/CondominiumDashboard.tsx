@@ -15,8 +15,11 @@ import {
   Storefront,
   Trash,
   UploadSimple,
+  WarningCircle,
   XCircle,
 } from '@phosphor-icons/react';
+import { ConfirmationModal } from '../components/common/ConfirmationModal';
+import { useToast } from '../contexts/ToastContext';
 import { condominiumService } from '../services/condominiumService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
@@ -62,6 +65,7 @@ const readFileAsDataUrl = (file: File) =>
 
 export function CondominiumDashboard() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [session, setSession] = useState<any>(null);
   const [data, setData] = useState<any>({ condominium: null, events: [], stores: [], requests: [], approvedStores: [] });
   const [loading, setLoading] = useState(true);
@@ -90,6 +94,14 @@ export function CondominiumDashboard() {
   });
   const [editingEventId, setEditingEventId] = useState('');
   const [selectedStoreByEvent, setSelectedStoreByEvent] = useState<Record<string, string>>({});
+  const [confirmModal, setConfirmModal] = useState<null | {
+    title: string;
+    description: string;
+    confirmLabel: string;
+    variant: 'danger' | 'warning' | 'info';
+    icon?: React.ReactNode;
+    onConfirm: () => Promise<void>;
+  }>(null);
 
   const load = async () => {
     setLoading(true);
@@ -209,6 +221,7 @@ export function CondominiumDashboard() {
         bannerFile: '',
       }));
       await load();
+      showToast('Dados do condomínio atualizados.', 'success');
     } catch (err: any) {
       setError(err?.message || 'Falha ao salvar dados do condomínio.');
     } finally {
@@ -239,9 +252,11 @@ export function CondominiumDashboard() {
       } else {
         await condominiumService.organizerCreateEvent(payload);
       }
+      const wasEditing = Boolean(editingEventId);
       setEditingEventId('');
       setEventForm({ title: '', startsAt: '', endsAt: '', pickupLocation: '', notes: '' });
       await load();
+      showToast(wasEditing ? 'Feira atualizada com sucesso.' : 'Feira criada com sucesso.', 'success');
     } catch (err: any) {
       setError(err?.message || 'Falha ao salvar feira.');
     } finally {
@@ -268,17 +283,18 @@ export function CondominiumDashboard() {
   };
 
   const deactivateEvent = async (eventId: string) => {
-    if (!window.confirm('Deseja encerrar esta feira?')) return;
     setSaving(true);
     setError('');
     try {
       await condominiumService.organizerDeactivateEvent(eventId);
       if (editingEventId === eventId) cancelEventEdit();
       await load();
+      showToast('Feira encerrada.', 'success');
     } catch (err: any) {
       setError(err?.message || 'Falha ao encerrar feira.');
     } finally {
       setSaving(false);
+      setConfirmModal(null);
     }
   };
 
@@ -296,6 +312,7 @@ export function CondominiumDashboard() {
     try {
       await condominiumService.organizerConfirmStore(eventId, { storeId });
       await load();
+      showToast('Loja adicionada à feira.', 'success');
     } catch (err: any) {
       setError(err?.message || 'Falha ao confirmar loja na feira.');
     } finally {
@@ -309,6 +326,7 @@ export function CondominiumDashboard() {
     try {
       await condominiumService.organizerReviewRequest(requestId, { status });
       await load();
+      showToast(status === 'approved' ? 'Solicitação aprovada.' : 'Solicitação recusada.', 'success');
     } catch (err: any) {
       setError(err?.message || 'Falha ao revisar solicitação.');
     } finally {
@@ -318,16 +336,17 @@ export function CondominiumDashboard() {
 
   const removeApprovedStore = async (storeId: string, storeName?: string) => {
     if (!storeId) return;
-    if (!window.confirm(`Remover ${storeName || 'esta loja'} do condomínio?`)) return;
     setSaving(true);
     setError('');
     try {
       await condominiumService.organizerRemoveStore(storeId);
       await load();
+      showToast(`${storeName || 'Loja'} removida do condomínio.`, 'success');
     } catch (err: any) {
       setError(err?.message || 'Falha ao remover loja do condomínio.');
     } finally {
       setSaving(false);
+      setConfirmModal(null);
     }
   };
 
@@ -504,7 +523,19 @@ export function CondominiumDashboard() {
                         <button type="button" onClick={() => editEvent(event)} className="inline-flex items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-black text-slate-700 transition hover:bg-slate-50">
                           <PencilSimple size={15} weight="bold" /> Editar
                         </button>
-                        <button type="button" onClick={() => deactivateEvent(event.id)} disabled={saving} className="inline-flex items-center justify-center gap-1.5 rounded-2xl bg-rose-50 px-3 py-2.5 text-xs font-black text-rose-700 ring-1 ring-rose-100 disabled:opacity-50">
+                        <button
+                          type="button"
+                          onClick={() => setConfirmModal({
+                            title: 'Encerrar esta feira?',
+                            description: 'A feira será finalizada para este condomínio e deixará de aparecer como ativa.',
+                            confirmLabel: 'Encerrar feira',
+                            variant: 'danger',
+                            icon: <WarningCircle size={32} weight="duotone" />,
+                            onConfirm: () => deactivateEvent(event.id),
+                          })}
+                          disabled={saving}
+                          className="inline-flex items-center justify-center gap-1.5 rounded-2xl bg-rose-50 px-3 py-2.5 text-xs font-black text-rose-700 ring-1 ring-rose-100 disabled:opacity-50"
+                        >
                           <Trash size={15} weight="bold" /> Encerrar
                         </button>
                       </div>
@@ -570,7 +601,14 @@ export function CondominiumDashboard() {
                 {store.condominiumStatus === 'approved' ? (
                   <button
                     type="button"
-                    onClick={() => removeApprovedStore(store.id, store.name)}
+                    onClick={() => setConfirmModal({
+                      title: 'Remover loja do condomínio?',
+                      description: `${store.name || 'Esta loja'} perderá a associação atual e não poderá mais ser escalada nas próximas feiras até nova aprovação.`,
+                      confirmLabel: 'Remover loja',
+                      variant: 'danger',
+                      icon: <WarningCircle size={32} weight="duotone" />,
+                      onConfirm: () => removeApprovedStore(store.id, store.name),
+                    })}
                     disabled={saving}
                     className="mt-4 w-full rounded-2xl border border-rose-100 bg-rose-50 px-4 py-2.5 text-xs font-black text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
                   >
@@ -730,6 +768,18 @@ export function CondominiumDashboard() {
             </div>
           </section>
         ) : null}
+
+        <ConfirmationModal
+          isOpen={!!confirmModal}
+          onClose={() => !saving && setConfirmModal(null)}
+          onConfirm={() => confirmModal?.onConfirm()}
+          title={confirmModal?.title || ''}
+          description={confirmModal?.description || ''}
+          confirmLabel={confirmModal?.confirmLabel || 'Confirmar'}
+          variant={confirmModal?.variant || 'warning'}
+          icon={confirmModal?.icon}
+          isLoading={saving}
+        />
       </div>
     </div>
   );
