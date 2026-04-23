@@ -369,19 +369,36 @@ export const CartView = ({
   const totalCartUnits = cartItems.reduce((acc, item) => acc + Number(item?.qty || 0), 0);
   const cartPreviewItems = useMemo(() => cartItems.slice(0, 3), [cartItems]);
   const extraCartPreviewCount = Math.max(0, cartItems.length - cartPreviewItems.length);
+  const orderTypeVisuals: Record<string, { label: string; helper: string; icon: React.ReactNode }> = {
+    delivery: {
+      label: "Entrega",
+      helper: "No endereço",
+      icon: <Bicycle size={16} weight="duotone" />,
+    },
+    pickup: {
+      label: "Retirada",
+      helper: "No balcão",
+      icon: <House size={16} weight="duotone" />,
+    },
+    table: {
+      label: "Mesa",
+      helper: "No salão",
+      icon: <ForkKnife size={16} weight="duotone" />,
+    },
+  };
 
   const checkoutContextMeta = useMemo(() => {
     if (customer.type === "pickup") {
       return {
         icon: <House size={20} weight="duotone" />,
-        title: "Retirada rápida no balcão",
-        description: "Seu pedido segue para preparo e você acompanha tudo pelo app até a retirada.",
-        toneClass: "border-emerald-100 bg-[linear-gradient(135deg,rgba(236,253,245,0.96)_0%,rgba(255,255,255,0.98)_100%)]",
+        title: "Retire no balcão com mais agilidade",
+        description: "Seu pedido segue para preparo e você acompanha tudo pelo app até o momento da retirada.",
+        toneClass: "border-emerald-200/80 bg-[linear-gradient(135deg,rgba(236,253,245,0.98)_0%,rgba(255,255,255,0.98)_52%,rgba(240,253,244,0.92)_100%)]",
         iconClass: "bg-emerald-100 text-emerald-700",
         chips: [
-          storeAddress || "Retirada no local",
           "Sem taxa de entrega",
-          "Acompanhamento em tempo real",
+          "Pedido identificado",
+          "Acompanhamento no app",
         ],
       };
     }
@@ -391,7 +408,7 @@ export const CartView = ({
         icon: <ForkKnife size={20} weight="duotone" />,
         title: "Pedido identificado para a mesa",
         description: "A cozinha recebe seu pedido com identificação da mesa para acelerar a operação.",
-        toneClass: "border-amber-100 bg-[linear-gradient(135deg,rgba(255,251,235,0.97)_0%,rgba(255,255,255,0.98)_100%)]",
+        toneClass: "border-amber-200/80 bg-[linear-gradient(135deg,rgba(255,251,235,0.98)_0%,rgba(255,255,255,0.98)_52%,rgba(254,249,195,0.9)_100%)]",
         iconClass: "bg-amber-100 text-amber-700",
         chips: [
           customer.table ? `Mesa ${customer.table}` : "Mesa a confirmar",
@@ -404,8 +421,8 @@ export const CartView = ({
     return {
       icon: <Bicycle size={20} weight="duotone" />,
       title: "Entrega com validação inteligente",
-      description: "Confira o endereço, escolha a melhor forma de pagamento e siga o pedido com mais segurança.",
-      toneClass: "border-sky-100 bg-[linear-gradient(135deg,rgba(239,246,255,0.97)_0%,rgba(255,255,255,0.98)_100%)]",
+      description: "Confirme o endereço, visualize o frete e siga para o pagamento com mais segurança.",
+      toneClass: "border-sky-200/80 bg-[linear-gradient(135deg,rgba(239,246,255,0.98)_0%,rgba(255,255,255,0.98)_50%,rgba(239,248,255,0.92)_100%)]",
       iconClass: "bg-sky-100 text-[#336886]",
       chips: [
         radiusValue ? `Até ${radiusValue} km` : "Entrega ativa",
@@ -428,6 +445,47 @@ export const CartView = ({
     ].filter(Boolean);
     return parts.join(" | ");
   };
+
+  const deliverySummaryTitle = isPostalDelivery
+    ? "Envio para o endereço selecionado"
+    : "Entrega no endereço selecionado";
+  const deliverySummaryDescription = isPostalDelivery
+    ? "Confirme o destino e escolha o serviço postal com melhor prazo e valor."
+    : "Revise o endereço, valide a distância e siga com o pedido sem perder contexto.";
+  const deliveryMetaChips = [
+    {
+      key: "fee",
+      icon: <Truck size={12} weight="duotone" className="text-[#336886]" />,
+      label: deliveryFeeValue > 0 ? formatCurrency(deliveryFeeValue) : isPostalDelivery ? "A cotar" : "Sem taxa",
+    },
+    !isPostalDelivery && deliveryCheck?.distanceKm
+      ? {
+          key: "distance",
+          icon: <MapPinLine size={12} weight="duotone" className="text-emerald-600" />,
+          label: `${deliveryCheck.distanceKm.toFixed(1)} km`,
+        }
+      : null,
+    !isPostalDelivery && deliveryCheck?.durationMin
+      ? {
+          key: "duration",
+          icon: <Clock size={12} weight="duotone" className="text-amber-600" />,
+          label: `${deliveryCheck.durationMin} min`,
+        }
+      : null,
+    isPostalDelivery && postalOriginZip
+      ? {
+          key: "origin",
+          icon: <MapPinLine size={12} weight="duotone" className="text-slate-500" />,
+          label: `Origem ${postalOriginZip}`,
+        }
+      : null,
+  ].filter(Boolean);
+  const checkoutSummaryChips = [
+    customer.type === "pickup" ? (storeAddress || "Retirada no local") : null,
+    ...checkoutContextMeta.chips,
+  ]
+    .filter(Boolean)
+    .slice(0, 3);
 
   const updateDeliveryField = (field, value) => {
     const next = { ...customer, [field]: value };
@@ -951,57 +1009,79 @@ export const CartView = ({
           )}
 
           {/* Tipo de pedido */}
-          <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
-              Tipo de pedido
-            </p>
-            <div className="flex gap-1 rounded-2xl bg-slate-100 p-1 flex-wrap sm:flex-nowrap">
-              {visibleOrderTypes.map((type) => (
-                <button
-                  key={type}
-                  onClick={() => onChangeCustomer({ ...customer, type })}
-                  className={`flex-1 min-w-0 py-2.5 sm:py-3 rounded-xl flex flex-col items-center justify-center gap-1 transition-all active:scale-[0.98] ${
-                    customer.type === type
-                      ? "bg-slate-900 text-white shadow-sm"
-                      : "bg-transparent text-slate-500 hover:text-slate-700 font-medium"
-                  }`}
-                >
-                  <span className={`h-9 w-9 rounded-xl flex items-center justify-center ${customer.type === type ? 'bg-white/15 text-white' : 'bg-transparent text-slate-600'}`}>
-                    {type === "delivery" && <Bicycle size={16} weight="duotone" />}
-                    {type === "pickup" && <House size={16} weight="duotone" />}
-                    {type === "table" && <ForkKnife size={16} weight="duotone" />}
-                  </span>
-                  <span className="text-[10px] uppercase font-bold tracking-wide">
-                    {type === "table"
-                      ? "Mesa"
-                      : type === "pickup"
-                      ? "Retira"
-                      : "Entrega"}
-                  </span>
-                </button>
-              ))}
+          <div className="rounded-[1.7rem] border border-slate-200/80 bg-[linear-gradient(135deg,rgba(248,250,252,0.96)_0%,rgba(255,255,255,0.98)_100%)] p-3 sm:p-4 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.28)]">
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
+                  Tipo de pedido
+                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-700">
+                  Escolha como quer receber este pedido.
+                </p>
+              </div>
+              <span className="inline-flex rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#153A4C] shadow-sm">
+                {orderTypeVisuals[customer.type]?.label || "Pedido"}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {visibleOrderTypes.map((type) => {
+                const typeMeta = orderTypeVisuals[type] || orderTypeVisuals.delivery;
+                const isActive = customer.type === type;
+                return (
+                  <button
+                    key={type}
+                    onClick={() => onChangeCustomer({ ...customer, type })}
+                    className={`flex min-h-[74px] min-w-0 flex-1 items-center gap-3 rounded-[1.2rem] border px-3 py-3 text-left transition-all active:scale-[0.98] ${
+                      isActive
+                        ? "border-slate-900 bg-white text-slate-900 shadow-[0_16px_30px_-24px_rgba(15,23,42,0.45)]"
+                        : "border-transparent bg-white/60 text-slate-500 hover:border-slate-200 hover:bg-white"
+                    }`}
+                  >
+                    <span
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${
+                        isActive ? "bg-slate-900 text-white shadow-sm" : "bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      {typeMeta.icon}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-black leading-tight tracking-tight">
+                        {typeMeta.label}
+                      </span>
+                      <span className={`mt-0.5 block text-[11px] font-semibold ${isActive ? "text-slate-500" : "text-slate-400"}`}>
+                        {typeMeta.helper}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          <div className={`relative overflow-hidden rounded-[1.8rem] border p-4 shadow-[0_20px_40px_-30px_rgba(15,23,42,0.22)] ${checkoutContextMeta.toneClass}`}>
-            <div className="pointer-events-none absolute -right-8 top-0 h-28 w-28 rounded-full bg-white/70 blur-3xl" />
+          <div className={`relative overflow-hidden rounded-[2rem] border p-4 sm:p-5 shadow-[0_24px_48px_-32px_rgba(15,23,42,0.25)] ${checkoutContextMeta.toneClass}`}>
+            <div className="pointer-events-none absolute -right-6 top-0 h-32 w-32 rounded-full bg-white/70 blur-3xl" />
             <div className="pointer-events-none absolute bottom-0 left-0 h-24 w-24 rounded-full bg-white/60 blur-3xl" />
-            <div className="relative flex items-start gap-3">
+            <div className="relative flex items-start gap-4">
               <div className="relative shrink-0">
-                <span className="absolute inset-0 rounded-2xl bg-white/60 animate-ping" />
-                <span className={`relative flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm ${checkoutContextMeta.iconClass}`}>
+                <span className="absolute -inset-1 rounded-[1.35rem] bg-white/70 blur-md" />
+                <span className={`relative flex h-12 w-12 items-center justify-center rounded-[1.2rem] shadow-sm ${checkoutContextMeta.iconClass}`}>
                   {checkoutContextMeta.icon}
                 </span>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Fluxo guiado</p>
-                <h3 className="mt-1 text-[15px] font-black leading-tight text-slate-900">{checkoutContextMeta.title}</h3>
-                <p className="mt-1 text-xs leading-relaxed text-slate-600">{checkoutContextMeta.description}</p>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Resumo da etapa</p>
+                  <span className="inline-flex rounded-full border border-white/70 bg-white/80 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-600 shadow-sm">
+                    {orderTypeVisuals[customer.type]?.label || "Pedido"}
+                  </span>
+                </div>
+                <h3 className="mt-2 text-[15px] font-black leading-tight text-slate-900">{checkoutContextMeta.title}</h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-slate-600">{checkoutContextMeta.description}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {checkoutContextMeta.chips.filter(Boolean).slice(0, 3).map((chip) => (
+                  {checkoutSummaryChips.map((chip) => (
                     <span
                       key={chip}
-                      className="inline-flex items-center gap-1 rounded-full border border-white/70 bg-white/80 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/88 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm"
                     >
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                       {chip}
@@ -1014,42 +1094,71 @@ export const CartView = ({
 
           {/* Retirada info */}
           {customer.type === "pickup" && (
-            <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50/60 to-white p-4 shadow-sm">
-              <div className="flex items-start gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
-                  <House size={16} weight="duotone" />
-                </span>
-                <div className="min-w-0">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-800">Retirada no local</p>
-                  <p className="mt-0.5 text-sm font-semibold text-slate-800 leading-snug">
-                    {storeAddress || 'Retire no balcão da loja'}
+            <div className="rounded-[1.7rem] border border-emerald-200/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(236,253,245,0.96)_100%)] p-4 shadow-[0_22px_42px_-34px_rgba(5,150,105,0.35)]">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">Retirada no local</p>
+                  <p className="mt-1 text-sm font-black leading-tight text-slate-900">
+                    {storeAddress || "Retire no balcão da loja"}
                   </p>
-                  <p className="mt-1 text-[11px] text-slate-500">Apresente seu número de pedido ao retirar.</p>
+                  <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
+                    Seu pedido segue identificado para retirada. Apresente o número do pedido ao chegar.
+                  </p>
                 </div>
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.1rem] bg-emerald-100 text-emerald-700 shadow-sm">
+                  <House size={18} weight="duotone" />
+                </span>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700 shadow-sm">
+                  Sem frete
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm">
+                  Pedido identificado
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm">
+                  Retirada simples
+                </span>
               </div>
             </div>
           )}
 
           {/* Endereço */}
           {customer.type === "delivery" && (
-            <div className="rounded-2xl premium-card p-3 sm:p-4 bg-white border border-slate-100 shadow-sm">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  Endereço de entrega
-                </p>
-                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-semibold px-2 py-1">
-                  {isPostalDelivery ? "Postal" : "Entrega"}
-                </span>
+            <div className="rounded-[1.8rem] border border-slate-200/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.96)_48%,rgba(241,245,249,0.92)_100%)] p-4 sm:p-5 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.28)]">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
+                    {isPostalDelivery ? "Envio postal" : "Entrega no endereço"}
+                  </p>
+                  <h3 className="mt-1 text-[15px] font-black leading-tight text-slate-900">
+                    {deliverySummaryTitle}
+                  </h3>
+                  <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
+                    {deliverySummaryDescription}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {deliveryMetaChips.map((chip) => (
+                    <span
+                      key={chip.key}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm"
+                    >
+                      {chip.icon}
+                      {chip.label}
+                    </span>
+                  ))}
+                </div>
               </div>
               {postalEnabled && (
-                <div className="mb-3 rounded-xl border border-slate-200 bg-slate-50 p-1 grid grid-cols-2 gap-1">
+                <div className="mt-4 rounded-[1.2rem] border border-slate-200 bg-slate-100/80 p-1.5 grid grid-cols-2 gap-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
                   <button
                     type="button"
                     onClick={() => onChangeDeliveryMode?.("distance")}
-                    className={`px-3 py-2 rounded-lg text-xs font-bold transition ${
+                    className={`rounded-[1rem] px-3 py-2.5 text-xs font-black transition ${
                       !isPostalDelivery
-                        ? "bg-slate-900 text-white"
-                        : "bg-transparent text-slate-600 hover:bg-white"
+                        ? "bg-white text-slate-900 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.45)]"
+                        : "bg-transparent text-slate-500 hover:bg-white/70"
                     }`}
                   >
                     Entrega local
@@ -1057,10 +1166,10 @@ export const CartView = ({
                   <button
                     type="button"
                     onClick={() => onChangeDeliveryMode?.("postal")}
-                    className={`px-3 py-2 rounded-lg text-xs font-bold transition ${
+                    className={`rounded-[1rem] px-3 py-2.5 text-xs font-black transition ${
                       isPostalDelivery
-                        ? "bg-slate-900 text-white"
-                        : "bg-transparent text-slate-600 hover:bg-white"
+                        ? "bg-white text-slate-900 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.45)]"
+                        : "bg-transparent text-slate-500 hover:bg-white/70"
                     }`}
                   >
                     Envio postal
@@ -1068,13 +1177,13 @@ export const CartView = ({
                 </div>
               )}
               {isCustomerLogged && !isLoggedDeliveryFlow && (
-                <div className="mb-3 space-y-2">
+                <div className="mt-4 space-y-2">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 font-bold">Endereços salvos</p>
                     <button
                       type="button"
                       onClick={() => onOpenAddressManager?.()}
-                      className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700"
+                      className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold text-slate-700 shadow-sm"
                     >
                       Gerenciar
                     </button>
@@ -1093,7 +1202,7 @@ export const CartView = ({
                           type="button"
                           key={String(address?.id || Math.random())}
                           onClick={() => onApplySavedAddress?.(address)}
-                          className={`snap-start w-[258px] max-w-[82vw] rounded-2xl border px-3 py-2.5 text-left transition shadow-sm ${
+                          className={`snap-start w-[258px] max-w-[82vw] rounded-[1.3rem] border px-3 py-3 text-left transition shadow-[0_16px_30px_-24px_rgba(15,23,42,0.24)] ${
                             isCurrent
                               ? "border-brand-primary bg-brand-primary/10"
                               : "border-slate-200 bg-white hover:bg-slate-50"
@@ -1139,10 +1248,10 @@ export const CartView = ({
                   )}
                 </div>
               )}
-              <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-4">
+              <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1.08fr_0.92fr]">
                 <div className="space-y-4">
                   {isLoggedDeliveryFlow ? (
-                    <div className="rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-4 text-sm text-slate-600 shadow-sm">
+                    <div className="rounded-[1.45rem] border border-slate-200/80 bg-white/85 px-4 py-4 text-sm text-slate-600 shadow-[0_16px_30px_-24px_rgba(15,23,42,0.22)]">
                       {hasSavedAddress ? (
                         <>
                           <div className="flex items-start justify-between gap-3">
@@ -1153,7 +1262,7 @@ export const CartView = ({
                             <button
                               type="button"
                               onClick={() => onOpenAddressManager?.()}
-                              className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-semibold text-slate-700 shadow-sm"
+                              className="shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-700 shadow-sm"
                             >
                               Trocar
                             </button>
@@ -1172,7 +1281,7 @@ export const CartView = ({
                             <button
                               type="button"
                               onClick={() => onOpenAddressManager?.()}
-                              className="shrink-0 rounded-xl border border-amber-200 bg-white px-3 py-2 text-[11px] font-semibold text-amber-700 shadow-sm"
+                              className="shrink-0 rounded-full border border-amber-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-amber-700 shadow-sm"
                             >
                               Cadastrar
                             </button>
@@ -1182,10 +1291,10 @@ export const CartView = ({
                     </div>
                   ) : null}
                   {!isLoggedDeliveryFlow && (
-                  <div className={`rounded-2xl border px-3 py-2.5 text-xs ${
+                  <div className={`rounded-[1.35rem] border px-3 py-3 text-xs shadow-[0_14px_24px_-26px_rgba(15,23,42,0.2)] ${
                     isPostalDelivery
-                      ? "border-amber-100 bg-amber-50/70 text-amber-800"
-                      : "border-sky-100 bg-sky-50/70 text-sky-800"
+                      ? "border-amber-200 bg-amber-50/70 text-amber-800"
+                      : "border-sky-200 bg-sky-50/70 text-sky-800"
                   }`}>
                     {isPostalDelivery
                       ? "Insira seu CEP para cotar PAC/SEDEX e escolher o envio."
@@ -1224,7 +1333,7 @@ export const CartView = ({
                         type="button"
                         onClick={handleCepLookup}
                         disabled={cepLoading || checkoutLoading}
-                        className="w-full px-3 py-3 rounded-xl bg-slate-100 text-sm text-slate-700 hover:bg-slate-200 transition disabled:opacity-60"
+                        className="w-full rounded-[1.1rem] border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-60"
                       >
                         {cepLoading ? "Buscando..." : "Buscar CEP"}
                       </button>
@@ -1297,24 +1406,43 @@ export const CartView = ({
                     </>
                   )}
                 </div>
-                  <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">
-                        {isPostalDelivery ? "Envio postal" : "Frete de entrega"}
-                      </p>
+                <div className="rounded-[1.6rem] border border-slate-200/80 bg-white/88 p-4 shadow-[0_20px_38px_-30px_rgba(15,23,42,0.28)] space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
+                          {isPostalDelivery ? "Resumo do envio" : "Resumo da entrega"}
+                        </p>
+                        <p className="mt-1 text-sm font-black leading-tight text-slate-900">
+                          {isPostalDelivery ? "Prazo e valor no mesmo lugar" : "Destino e frete com leitura rápida"}
+                        </p>
+                      </div>
                       <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold border ${deliveryFeeValue > 0 ? 'bg-sky-50 text-sky-700 border-sky-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}>
                         <MapPinLine size={11} weight="duotone" />
                         {deliveryFeeValue > 0 ? formatCurrency(deliveryFeeValue) : 'Grátis'}
                       </span>
                     </div>
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">
+                        {isPostalDelivery ? "Envio postal" : "Frete de entrega"}
+                      </p>
+                      <span className="text-[11px] font-semibold text-slate-500">
+                        {isPostalDelivery ? "Selecione o serviço ideal" : "Confira antes de seguir"}
+                      </span>
+                    </div>
+                    {customer.address && !isLoggedDeliveryFlow && (
+                      <div className="rounded-[1.2rem] border border-slate-200 bg-slate-50/80 px-3 py-3">
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Destino</p>
+                        <p className="mt-1 text-sm font-semibold leading-snug text-slate-800">{customer.address}</p>
+                      </div>
+                    )}
                     {!isPostalDelivery && deliveryCheck?.distanceKm ? (
                       <div className="grid grid-cols-2 gap-2">
-                        <div className="rounded-xl border border-slate-100 bg-white px-3 py-2">
+                        <div className="rounded-[1.1rem] border border-slate-200 bg-slate-50/80 px-3 py-2.5">
                           <span className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Distância</span>
                           <p className="text-sm font-bold text-slate-800 mt-0.5">{deliveryCheck.distanceKm.toFixed(1)} km</p>
                         </div>
                         {deliveryCheck?.durationMin ? (
-                          <div className="rounded-xl border border-slate-100 bg-white px-3 py-2">
+                          <div className="rounded-[1.1rem] border border-slate-200 bg-slate-50/80 px-3 py-2.5">
                             <span className="text-[10px] uppercase tracking-[0.18em] text-slate-400 flex items-center gap-1"><Clock size={10} weight="duotone" />Estimativa</span>
                             <p className="text-sm font-bold text-slate-800 mt-0.5">{deliveryCheck.durationMin} min</p>
                           </div>
@@ -1324,13 +1452,8 @@ export const CartView = ({
                     {isPostalDelivery && postalOriginZip ? (
                       <p className="text-xs text-slate-500">CEP de origem: <span className="font-semibold text-slate-700">{postalOriginZip}</span></p>
                     ) : null}
-                    {customer.address && !isLoggedDeliveryFlow && (
-                      <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm text-slate-600">
-                        {customer.address}
-                      </div>
-                    )}
                     {isPostalDelivery && (
-                      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm space-y-3">
+                      <div className="rounded-[1.35rem] border border-slate-200 bg-slate-50/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] space-y-3">
                         <div className="space-y-1">
                           <h4 className="text-sm font-semibold text-slate-900">Escolha o frete</h4>
                           <p className="text-xs text-slate-500">
@@ -1341,7 +1464,7 @@ export const CartView = ({
                           type="button"
                           onClick={() => onCalculatePostalQuote?.()}
                           disabled={postalQuoteLoading}
-                          className="w-full min-h-11 rounded-xl bg-slate-900 text-white px-3 py-2.5 text-sm font-bold disabled:opacity-60 inline-flex items-center justify-center gap-2"
+                          className="inline-flex w-full min-h-11 items-center justify-center gap-2 rounded-[1.1rem] bg-slate-900 px-3 py-2.5 text-sm font-bold text-white disabled:opacity-60"
                         >
                           {postalQuoteLoading && (
                             <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
@@ -1363,7 +1486,7 @@ export const CartView = ({
                                   type="button"
                                   key={String(service?.serviceCode || service?.serviceName || Math.random())}
                                   onClick={() => onSelectPostalService?.(String(service?.serviceCode || ""))}
-                                  className={`w-full rounded-xl border px-3 py-3 text-left transition min-h-11 ${
+                                  className={`w-full min-h-11 rounded-[1.1rem] border px-3 py-3 text-left transition ${
                                     selected
                                       ? "border-brand-primary bg-brand-primary/10 shadow-sm"
                                       : "border-slate-200 bg-white hover:bg-slate-50"
@@ -1395,19 +1518,19 @@ export const CartView = ({
                           </div>
                         )}
                         {!postalQuoteLoading && !postalServices.length && String(customer.cep || "").replace(/\D/g, "").length === 8 && (
-                          <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 space-y-2">
+                          <div className="rounded-[1.1rem] border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 space-y-2">
                             <p>Não foi possível encontrar opções agora.</p>
                             <button
                               type="button"
                               onClick={() => onCalculatePostalQuote?.()}
-                              className="w-full min-h-11 rounded-xl border border-amber-300 bg-white px-3 py-2 text-sm font-semibold text-amber-800"
+                              className="w-full min-h-11 rounded-[1rem] border border-amber-300 bg-white px-3 py-2 text-sm font-semibold text-amber-800"
                             >
                               Tentar novamente
                             </button>
                           </div>
                         )}
                         {selectedPostalService && (
-                          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800">
+                          <div className="rounded-[1.1rem] border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800">
                             Frete selecionado: {selectedPostalService?.serviceName || selectedPostalService?.serviceCode || "Serviço"} •{" "}
                             {Number(selectedPostalService?.estimatedDays || 0) > 0
                               ? `${selectedPostalService?.estimatedDays} dia(s)`
@@ -1418,12 +1541,12 @@ export const CartView = ({
                       </div>
                     )}
                     {showDeliveryStatus && (
-                      <div className={`rounded-xl border px-3 py-2 text-base font-semibold ${deliveryStatus.tone}`}>
+                      <div className={`rounded-[1.1rem] border px-3 py-2.5 text-base font-semibold ${deliveryStatus.tone}`}>
                         {deliveryStatus.label}
                     </div>
                   )}
                   {showRouteMap && (
-                    <div className="rounded-xl border border-slate-200 bg-white p-2">
+                    <div className="rounded-[1.2rem] border border-slate-200 bg-white p-2 shadow-[0_18px_30px_-28px_rgba(15,23,42,0.28)]">
                       <GoogleRouteMapView
                         origin={{ lat: Number(storeCoords.lat), lng: Number(storeCoords.lng) }}
                         destination={{ lat: Number(deliveryCoords.lat), lng: Number(deliveryCoords.lng) }}
@@ -1431,7 +1554,7 @@ export const CartView = ({
                     </div>
                   )}
                   {showDeliveryDebug && (
-                    <div className="rounded-xl border border-slate-100 bg-white px-3 py-2">
+                    <div className="rounded-[1.1rem] border border-slate-200 bg-slate-50/80 px-3 py-2.5">
                       <p className="text-xs uppercase tracking-[0.2em] text-slate-400 mb-2">Validação da entrega</p>
                       <div className="space-y-1 text-sm text-slate-600">
                         {deliveryDebug.map((row) => (
