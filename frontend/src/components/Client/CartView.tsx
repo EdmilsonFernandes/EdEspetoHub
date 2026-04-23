@@ -161,10 +161,20 @@ export const CartView = ({
   const premiumInputClass =
     "w-full rounded-2xl bg-slate-100 px-4 py-3 text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all shadow-sm";
 
+  const normalizedUserRole = String(userRole || "").trim().toLowerCase();
+  const isProfessionalUser = [
+    "admin",
+    "operator",
+    "lojista",
+    "super_admin",
+    "motoboy",
+    "entregador",
+  ].includes(normalizedUserRole);
+  const isEndCustomerLogged = Boolean(isCustomerLogged && !isProfessionalUser);
   const visibleOrderTypes = (Array.isArray(allowedOrderTypes) && allowedOrderTypes.length
     ? allowedOrderTypes
     : [ "delivery", "pickup", "table" ]
-  ).filter((t) => !(isCustomerLogged && t === "table"));
+  ).filter((t) => !(isEndCustomerLogged && t === "table"));
   const isPickup = customer.type === "pickup";
   const isDelivery = customer.type === "delivery";
   const isPostalDelivery = isDelivery && String(deliveryMode || "").toLowerCase() === "postal";
@@ -179,16 +189,7 @@ export const CartView = ({
   const cashTenderedValue = isCash ? normalizeNumber(cashTenderedInput) : null;
   const cashChangeDue =
     isCash && cashTenderedValue !== null ? Number(cashTenderedValue) - Number(totalWithFee || 0) : null;
-  const normalizedUserRole = String(userRole || "").trim().toLowerCase();
-  const isProfessionalUser = [
-    "admin",
-    "operator",
-    "lojista",
-    "super_admin",
-    "motoboy",
-    "entregador",
-  ].includes(normalizedUserRole);
-  const showSuggestedProducts = Boolean(isCustomerLogged && !isProfessionalUser && suggestedProducts.length > 0);
+  const showSuggestedProducts = Boolean(isEndCustomerLogged && suggestedProducts.length > 0);
 
   const cashValidation = useMemo(() => {
     if (!isCash) return { blocked: false, reason: "" };
@@ -661,8 +662,8 @@ export const CartView = ({
     () => (Array.isArray(savedAddresses) ? savedAddresses.slice(0, 3) : []),
     [savedAddresses]
   );
-  const isLoggedDeliveryFlow = Boolean(isCustomerLogged && isDelivery);
-  const isLoggedPickupFlow = Boolean(isCustomerLogged && isPickup);
+  const isLoggedDeliveryFlow = Boolean(isEndCustomerLogged && isDelivery);
+  const isLoggedPickupFlow = Boolean(isEndCustomerLogged && isPickup);
   const isLoggedAssistedFlow = isLoggedDeliveryFlow || isLoggedPickupFlow;
   const hasSavedAddress = savedDeliveryAddresses.length > 0;
   const activeSavedAddress = useMemo(
@@ -683,7 +684,7 @@ export const CartView = ({
   const loggedDeliveryPhone = String(customer?.phone || '').trim();
   const hasLoggedContactInfo = Boolean(loggedDeliveryName || loggedDeliveryPhone);
   const canUseLockedContactSummary = Boolean(isLoggedAssistedFlow && hasLoggedContactInfo);
-  const useMultiStepFlow = isCustomerLogged;
+  const useMultiStepFlow = isEndCustomerLogged;
 
   useEffect(() => {
     if (!useMultiStepFlow || !checkoutResume?.token) return;
@@ -854,7 +855,7 @@ export const CartView = ({
 
         <div className="space-y-4 sm:space-y-5">
           {/* Nome */}
-          {!canUseLockedContactSummary && !isCustomerLogged && (
+          {!canUseLockedContactSummary && !isEndCustomerLogged && (
           <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               Seu Nome
@@ -917,7 +918,7 @@ export const CartView = ({
           )}
 
           {/* WhatsApp */}
-          {!isOptionalPhoneMode && !canUseLockedContactSummary && !isCustomerLogged && (
+          {!isOptionalPhoneMode && !canUseLockedContactSummary && !isEndCustomerLogged && (
             <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 WhatsApp <span className="text-rose-500 font-extrabold">Obrigatório</span>
@@ -947,7 +948,7 @@ export const CartView = ({
             </div>
           )}
 
-          {isOptionalPhoneMode && !showOptionalPhoneFields && !canUseLockedContactSummary && !isCustomerLogged && (
+          {isOptionalPhoneMode && !showOptionalPhoneFields && !canUseLockedContactSummary && !isEndCustomerLogged && (
             <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
               <button
                 type="button"
@@ -1176,7 +1177,7 @@ export const CartView = ({
                   </button>
                 </div>
               )}
-              {isCustomerLogged && !isLoggedDeliveryFlow && (
+              {isEndCustomerLogged && !isLoggedDeliveryFlow && (
                 <div className="mt-4 space-y-2">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 font-bold">Endereços salvos</p>
