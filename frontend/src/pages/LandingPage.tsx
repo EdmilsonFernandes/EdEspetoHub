@@ -345,11 +345,13 @@ export function LandingPage() {
                           O cliente paga no fluxo da loja e o valor cai na conta Mercado Pago do próprio lojista.
                         </p>
                       </div>
-                      <div className="w-full max-w-[260px] rounded-2xl border border-[#ffe600]/60 bg-[#ffe600] px-4 py-3 shadow-[0_20px_46px_-26px_rgba(255,230,0,0.85)] sm:w-[230px]">
-                        <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-10 w-full object-contain" />
-                        <div className="mt-2 flex items-center justify-center gap-1.5 rounded-full bg-[#009ee3] px-2 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-white">
-                          <ShieldCheck size={11} weight="duotone" />
-                          Integração OAuth
+                      <div className="relative w-full max-w-[260px] overflow-hidden rounded-[1.35rem] border border-white/10 bg-[linear-gradient(145deg,rgba(13,25,48,0.94),rgba(2,52,81,0.92))] px-4 py-3 shadow-[0_28px_56px_-32px_rgba(0,158,227,0.55)] sm:w-[230px]">
+                        <div className="pointer-events-none absolute -left-5 top-3 h-14 w-14 rounded-full bg-[#009ee3]/30 blur-2xl" />
+                        <div className="pointer-events-none absolute -right-5 bottom-2 h-14 w-14 rounded-full bg-[#84cc16]/20 blur-2xl" />
+                        <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="relative h-10 w-full object-contain brightness-0 invert" />
+                        <div className="relative mt-2 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.08] px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-slate-100 backdrop-blur-xl">
+                          <Lock size={11} weight="duotone" className="text-sky-300" />
+                          Autorização segura
                         </div>
                       </div>
                     </div>
@@ -381,28 +383,46 @@ export function LandingPage() {
                         </div>
                       </div>
 
-                      <div className="rounded-2xl border border-[#ffe600]/40 bg-[linear-gradient(145deg,rgba(255,230,0,0.2),rgba(0,188,255,0.14))] p-4">
-                        <div className="flex items-center justify-between gap-3">
+                      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(145deg,rgba(13,25,48,0.92),rgba(5,44,68,0.9))] p-4 shadow-[0_28px_60px_-36px_rgba(2,132,199,0.6)]">
+                        <div className="pointer-events-none absolute -left-4 top-8 h-16 w-16 rounded-full bg-[#009ee3]/20 blur-2xl" />
+                        <div className="pointer-events-none absolute -right-4 bottom-5 h-16 w-16 rounded-full bg-[#84cc16]/15 blur-2xl" />
+                        <div className="relative flex items-center justify-between gap-3">
                           <div>
-                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#ffe600]">Conta conectada</p>
+                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-200">Conta conectada</p>
                             <p className="mt-1 text-sm font-black text-white">Mercado Pago do lojista</p>
                           </div>
-                          <ShieldCheck size={22} weight="duotone" className="text-[#ffe600]" />
+                          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.08] backdrop-blur-xl">
+                            <ShieldCheck size={20} weight="duotone" className="text-emerald-300" />
+                          </div>
                         </div>
-                        <div className="mt-5 grid grid-cols-3 gap-2">
+                        <div className="relative mt-4 flex items-center gap-3 rounded-[1.15rem] border border-white/10 bg-white/[0.05] px-3 py-3 backdrop-blur-xl">
+                          <div className="rounded-2xl border border-white/10 bg-white/[0.08] px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-white">
+                            MP
+                          </div>
+                          <div className="relative flex-1">
+                            <span className="absolute left-0 right-0 top-1/2 -translate-y-1/2 border-t border-dashed border-sky-300/35" />
+                            <span className="relative mx-auto flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.1]">
+                              <Lock size={15} weight="duotone" className="text-sky-300" />
+                            </span>
+                          </div>
+                          <div className="rounded-2xl border border-white/10 bg-white/[0.08] px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-emerald-200">
+                            JNC
+                          </div>
+                        </div>
+                        <div className="mt-4 grid grid-cols-3 gap-2">
                           {[
                             { icon: QrCode, label: 'Pix' },
                             { icon: CreditCard, label: 'Crédito' },
                             { icon: CurrencyDollar, label: 'Débito' },
                           ].map(({ icon: Icon, label }) => (
-                            <div key={label} className="rounded-xl bg-white/90 px-2 py-2 text-center text-[11px] font-black text-slate-900">
-                              <Icon size={15} weight="duotone" className="mx-auto mb-1 text-[#009ee3]" />
+                            <div key={label} className="rounded-[1rem] border border-white/10 bg-white/[0.08] px-2 py-2 text-center text-[11px] font-black text-white backdrop-blur-xl">
+                              <Icon size={15} weight="duotone" className="mx-auto mb-1 text-sky-300" />
                               {label}
                             </div>
                           ))}
                         </div>
-                        <p className="mt-4 text-xs font-semibold leading-5 text-sky-50">
-                          Se a loja não conectar a conta, o pedido continua funcionando no modo presencial.
+                        <p className="relative mt-4 text-xs font-semibold leading-5 text-slate-300">
+                          Recebimento direto na conta da loja, com fallback presencial quando a cobrança online estiver desligada.
                         </p>
                       </div>
                     </div>
@@ -525,11 +545,11 @@ export function LandingPage() {
       ══════════════════════════════════════════════════════════════ */}
       <section className="bg-white py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-4">
-          <div className="grid items-center gap-10 rounded-[2rem] border border-slate-200 bg-[linear-gradient(135deg,#f8fafc_0%,#ffffff_48%,#eef8ff_100%)] p-6 shadow-[0_24px_70px_-55px_rgba(15,23,42,0.55)] sm:p-10 lg:grid-cols-[0.92fr_1.08fr]">
+          <div className="grid items-center gap-10 rounded-[2rem] border border-slate-200 bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.08),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(132,204,22,0.08),transparent_28%),linear-gradient(135deg,#f8fafc_0%,#ffffff_48%,#eef8ff_100%)] p-6 shadow-[0_24px_70px_-55px_rgba(15,23,42,0.55)] sm:p-10 lg:grid-cols-[0.92fr_1.08fr]">
             <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-sky-700 shadow-sm">
+              <div className="inline-flex items-center gap-2 rounded-full border border-sky-200/80 bg-white/80 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-sky-700 shadow-sm backdrop-blur-xl">
                 <ShieldCheck size={13} weight="duotone" />
-                Gateway do lojista
+                JNC Payment Bridge
               </div>
               <div className="space-y-3">
                 <h2 className="text-3xl font-black leading-tight tracking-tight text-slate-950 sm:text-5xl">
@@ -541,71 +561,106 @@ export function LandingPage() {
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
                 {[
-                  { icon: QrCode, label: 'Pix online', tone: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
-                  { icon: CreditCard, label: 'Crédito', tone: 'text-sky-600 bg-sky-50 border-sky-100' },
-                  { icon: CurrencyDollar, label: 'Débito', tone: 'text-indigo-600 bg-indigo-50 border-indigo-100' },
-                  { icon: Storefront, label: 'Pagamento presencial', tone: 'text-slate-600 bg-white border-slate-200' },
+                  { icon: QrCode, label: 'Pix online', tone: 'text-emerald-700 bg-white/85 border-emerald-100' },
+                  { icon: CreditCard, label: 'Crédito', tone: 'text-sky-700 bg-white/85 border-sky-100' },
+                  { icon: CurrencyDollar, label: 'Débito', tone: 'text-indigo-700 bg-white/85 border-indigo-100' },
+                  { icon: Storefront, label: 'Fallback presencial', tone: 'text-slate-700 bg-white/85 border-slate-200' },
                 ].map(({ icon: Icon, label, tone }) => (
-                  <span key={label} className={`inline-flex items-center gap-2 rounded-2xl border px-3 py-2 text-xs font-black shadow-sm ${tone}`}>
+                  <span key={label} className={`inline-flex items-center gap-2 rounded-[1rem] border px-3 py-2 text-xs font-black shadow-sm backdrop-blur-xl ${tone}`}>
                     <Icon size={16} weight="duotone" />
                     {label}
                   </span>
                 ))}
               </div>
+              <div className="rounded-[1.35rem] border border-slate-200/80 bg-white/80 p-4 shadow-[0_20px_40px_-32px_rgba(15,23,42,0.45)] backdrop-blur-xl">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#0d1930,#0b4d72)] text-white shadow-[0_18px_30px_-18px_rgba(2,132,199,0.45)]">
+                    <Lock size={20} weight="duotone" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-black text-slate-950">Conexão segura, sem repasse manual</p>
+                    <p className="mt-1 text-xs font-medium leading-5 text-slate-600 sm:text-sm">
+                      A loja autoriza no ambiente do Mercado Pago e o dinheiro cai direto na conta dela, com visual de checkout nativo no pedido.
+                    </p>
+                  </div>
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={() => navigate('/create?plan=trial')}
-                className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-7 py-3.5 text-sm font-black text-white shadow-[0_18px_38px_-20px_rgba(15,23,42,0.75)] transition-all hover:scale-[1.01] active:scale-[0.98]"
+                className="inline-flex items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#84cc16,#65a30d)] px-7 py-3.5 text-sm font-black text-[#0d1930] shadow-[0_22px_44px_-22px_rgba(132,204,22,0.6)] transition-all hover:scale-[1.01] active:scale-[0.98]"
               >
                 Ativar minha loja
                 <ArrowRight size={16} weight="bold" />
               </button>
             </div>
 
-            <div className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_24px_55px_-45px_rgba(15,23,42,0.55)]">
-              <div className="border-b border-[#e7d000] bg-[#ffe600] p-5">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="rounded-2xl border border-[#0a0080]/10 bg-[#ffe600] px-5 py-3 shadow-[0_18px_34px_-28px_rgba(10,0,128,0.85)]">
-                    <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-12 w-full max-w-[250px] object-contain" />
-                  </div>
-                  <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#009ee3] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-white shadow-sm ring-1 ring-[#0a0080]/10">
-                    <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                    Conexão segura
-                  </span>
-                </div>
-                <p className="mt-4 text-xs font-black leading-5 text-[#0a0080]">
-                  O lojista autoriza pelo ambiente Mercado Pago e recebe direto na própria conta.
-                </p>
-              </div>
-              <div className="p-5">
-              <div className="grid gap-3 sm:grid-cols-3">
-                {[
-                  { label: 'Pedido', value: 'R$ 86,90' },
-                  { label: 'Forma', value: 'Pix online' },
-                  { label: 'Recebedor', value: 'Lojista' },
-                ].map((item) => (
-                  <div key={item.label} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">{item.label}</p>
-                    <p className="mt-1 text-sm font-black text-slate-900">{item.value}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-5 rounded-2xl border border-sky-100 bg-sky-50/70 p-4">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-sky-600 shadow-sm">
-                    <QrCode size={22} weight="duotone" />
-                  </div>
+            <div className="relative overflow-hidden rounded-[1.75rem] border border-slate-900/5 bg-[linear-gradient(135deg,#091223_0%,#0d1930_44%,#07324c_100%)] p-1 shadow-[0_36px_90px_-50px_rgba(2,132,199,0.55)]">
+              <div className="pointer-events-none absolute left-8 top-10 h-24 w-24 rounded-full bg-[#009ee3]/25 blur-3xl" />
+              <div className="pointer-events-none absolute bottom-8 right-8 h-24 w-24 rounded-full bg-[#84cc16]/18 blur-3xl" />
+              <div className="relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-5 py-5 backdrop-blur-[20px] sm:px-6 sm:py-6">
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <p className="text-sm font-black text-slate-950">Cobrança gerada no checkout</p>
-                    <p className="mt-1 text-xs font-medium leading-5 text-slate-600">
-                      O cliente finaliza o pedido e recebe o pagamento online quando a loja estiver conectada.
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-sky-200">Mercado Pago integrado</p>
+                    <h3 className="mt-2 text-2xl font-black tracking-tight text-white">Checkout com cara de plataforma</h3>
+                    <p className="mt-2 max-w-md text-sm font-medium leading-6 text-slate-300">
+                      O cliente paga dentro do fluxo da loja e a cobrança segue para a conta conectada do próprio lojista, sem repasse manual.
                     </p>
                   </div>
+                  <div className="rounded-[1.25rem] border border-white/10 bg-white/[0.08] px-4 py-3 shadow-[0_22px_42px_-28px_rgba(0,158,227,0.65)] backdrop-blur-xl">
+                    <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-10 w-full max-w-[210px] object-contain brightness-0 invert" />
+                  </div>
                 </div>
-              </div>
-              <p className="mt-4 text-[11px] font-medium leading-5 text-slate-400">
-                A conexão é feita por OAuth. O lojista autoriza com a própria conta e pode desconectar quando quiser.
-              </p>
+
+                <div className="mt-5 rounded-[1.35rem] border border-white/10 bg-white/[0.05] p-4 backdrop-blur-xl">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-2xl border border-white/10 bg-white/[0.08] px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-white">
+                      Mercado Pago
+                    </div>
+                    <div className="relative flex-1">
+                      <span className="absolute left-0 right-0 top-1/2 -translate-y-1/2 border-t border-dashed border-sky-300/35" />
+                      <span className="relative mx-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.1] shadow-[0_14px_30px_-18px_rgba(0,158,227,0.55)]">
+                        <Lock size={18} weight="duotone" className="text-sky-300" />
+                      </span>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-white/[0.08] px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-emerald-200">
+                      JNC Checkout
+                    </div>
+                  </div>
+                  <p className="mt-3 text-xs font-medium leading-5 text-slate-300">
+                    OAuth seguro para autorizar uma vez e manter Pix, crédito e débito dentro do pedido.
+                  </p>
+                </div>
+
+                <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                  {[
+                    { icon: QrCode, label: 'Pix', accent: 'text-emerald-300' },
+                    { icon: CreditCard, label: 'Crédito', accent: 'text-sky-300' },
+                    { icon: CurrencyDollar, label: 'Débito', accent: 'text-indigo-300' },
+                  ].map(({ icon: Icon, label, accent }) => (
+                    <div key={label} className="rounded-[1rem] border border-white/10 bg-white/[0.08] px-3 py-3 text-center backdrop-blur-xl">
+                      <Icon size={17} weight="duotone" className={`mx-auto mb-1.5 ${accent}`} />
+                      <p className="text-[11px] font-black uppercase tracking-[0.16em] text-white">{label}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                  {[
+                    { label: 'Pedido', value: 'R$ 86,90' },
+                    { label: 'Fluxo', value: 'Checkout online' },
+                    { label: 'Recebedor', value: 'Conta da loja' },
+                  ].map((item) => (
+                    <div key={item.label} className="rounded-[1rem] border border-white/10 bg-white/[0.05] px-4 py-3 backdrop-blur-xl">
+                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">{item.label}</p>
+                      <p className="mt-1 text-sm font-black text-white">{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-4 rounded-[1.2rem] border border-white/10 bg-white/[0.05] px-4 py-3 text-[11px] font-medium leading-5 text-slate-300 backdrop-blur-xl">
+                  Se a loja preferir manter o atendimento presencial, o pedido continua operando sem bloquear o restante da jornada.
+                </div>
               </div>
             </div>
           </div>

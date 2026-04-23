@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { Buildings, CaretDown, DownloadSimple, House, List, MagnifyingGlass, Moon, ShieldCheck, SignOut, Storefront, Sun, Truck, X } from '@phosphor-icons/react';
+import { Buildings, CaretDown, CreditCard, CurrencyDollar, DownloadSimple, House, List, MagnifyingGlass, Moon, QrCode, ShieldCheck, SignOut, Storefront, Sun, Truck, X } from '@phosphor-icons/react';
 import mercadoPagoHorizontal from '../assets/mercado-pago-horizontal.svg';
 
 interface LandingPageLayoutProps {
@@ -563,16 +563,30 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             <div>
               <h3 className="text-sm font-black text-white mb-3 uppercase tracking-[0.12em]">Integrações</h3>
               <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">
-                <div className="rounded-2xl border border-[#ffe600]/60 bg-[#ffe600] px-4 py-3 shadow-[0_18px_42px_-28px_rgba(255,230,0,0.8)]">
-                  <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-10 w-full object-contain" />
+                <div className="relative overflow-hidden rounded-[1.35rem] border border-white/10 bg-[linear-gradient(145deg,rgba(13,25,48,0.94),rgba(2,52,81,0.9))] p-4 shadow-[0_22px_48px_-28px_rgba(0,158,227,0.45)]">
+                  <div className="pointer-events-none absolute -left-4 top-4 h-14 w-14 rounded-full bg-[#009ee3]/25 blur-2xl" />
+                  <div className="pointer-events-none absolute -right-4 bottom-3 h-14 w-14 rounded-full bg-[#84cc16]/18 blur-2xl" />
+                  <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="relative h-10 w-full object-contain brightness-0 invert" />
+                  <div className="relative mt-3 flex flex-wrap gap-2">
+                    {[
+                      { icon: QrCode, label: 'Pix' },
+                      { icon: CreditCard, label: 'Crédito' },
+                      { icon: CurrencyDollar, label: 'Débito' },
+                    ].map(({ icon: Icon, label }) => (
+                      <span key={label} className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.08] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-100 backdrop-blur-xl">
+                        <Icon size={12} weight="duotone" className="text-sky-300" />
+                        {label}
+                      </span>
+                    ))}
+                  </div>
                 </div>
                 <p className="mt-3 text-sm font-semibold text-white">Pagamentos online opcionais</p>
                 <p className="mt-1 text-xs leading-5 text-slate-400">
-                  O lojista pode conectar a própria conta Mercado Pago para receber Pix, crédito e débito nos pedidos.
+                  O lojista conecta a própria conta Mercado Pago e recebe Pix, crédito e débito direto no fluxo do pedido.
                 </p>
                 <div className="mt-3 flex items-center gap-2 text-[11px] text-emerald-300 font-bold uppercase tracking-[0.12em]">
                   <ShieldCheck size={14} weight="duotone" />
-                  Conexão via OAuth
+                  OAuth seguro
                 </div>
               </div>
             </div>
