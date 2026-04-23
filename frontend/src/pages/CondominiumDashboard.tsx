@@ -63,6 +63,14 @@ const readFileAsDataUrl = (file: File) =>
     reader.readAsDataURL(file);
   });
 
+const requestStatusCopy: Record<string, { label: string; tone: string }> = {
+  pending: { label: 'Em análise', tone: 'bg-amber-100 text-amber-800' },
+  approved: { label: 'Aprovada', tone: 'bg-emerald-100 text-emerald-700' },
+  rejected: { label: 'Recusada', tone: 'bg-rose-100 text-rose-700' },
+  cancelled: { label: 'Cancelada', tone: 'bg-slate-100 text-slate-600' },
+  blocked: { label: 'Bloqueada', tone: 'bg-slate-200 text-slate-700' },
+};
+
 export function CondominiumDashboard() {
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -622,7 +630,9 @@ export function CondominiumDashboard() {
 
         {activeTab === 'solicitacoes' ? (
           <section className="space-y-3">
-            {requests.length ? requests.map((request: any) => (
+            {requests.length ? requests.map((request: any) => {
+              const statusMeta = requestStatusCopy[String(request.status || 'pending')] || { label: 'Atualizada', tone: 'bg-slate-100 text-slate-600' };
+              return (
               <article key={request.id} className="rounded-[1.6rem] border border-slate-200 bg-white p-4 shadow-[0_18px_50px_-40px_rgba(15,23,42,0.45)]">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex min-w-0 items-center gap-3">
@@ -642,11 +652,11 @@ export function CondominiumDashboard() {
                       </button>
                     </div>
                   ) : (
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600">{request.status}</span>
+                    <span className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] ${statusMeta.tone}`}>{statusMeta.label}</span>
                   )}
                 </div>
               </article>
-            )) : (
+            )}) : (
               <div className="rounded-[2rem] border border-dashed border-slate-300 bg-white p-8 text-center">
                 <Storefront size={34} weight="duotone" className="mx-auto text-slate-300" />
                 <p className="mt-3 text-sm font-bold text-slate-500">Nenhuma solicitação de loja no momento.</p>
