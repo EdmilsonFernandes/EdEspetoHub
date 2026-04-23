@@ -8,17 +8,23 @@ import {
   ArrowLeft,
   ArrowClockwise,
   ArrowSquareOut,
+  CaretDown,
   CalendarBlank,
   CheckCircle,
+  ChatCircleDots,
   Clock,
+  CreditCard,
   House,
   UserCircle,
   Package,
   Receipt,
   Motorcycle,
+  ShieldCheck,
   SpinnerGap,
   Storefront,
   Timer,
+  WarningCircle,
+  WhatsappLogo,
   XCircle,
   Buildings,
 } from '@phosphor-icons/react';
@@ -124,11 +130,15 @@ const buildOrderSupportMessage = ({
   customerName,
   storeName,
   isActive,
+  topicTitle,
+  topicMessage,
 }: {
   order: any;
   customerName?: string;
   storeName?: string;
   isActive: boolean;
+  topicTitle?: string;
+  topicMessage?: string;
 }) => {
   const orderNumber = String(order?.id || '').trim() || '-';
   const safeCustomerName = String(
@@ -140,6 +150,12 @@ const buildOrderSupportMessage = ({
   ).trim();
   const safeStoreName = String(storeName || order?.store?.name || 'a loja').trim();
   const orderDateTime = formatSupportDateTime(order?.createdAt);
+  const normalizedTopicTitle = String(topicTitle || '').trim();
+  const normalizedTopicMessage = String(topicMessage || '').trim();
+
+  if (normalizedTopicTitle || normalizedTopicMessage) {
+    return `Olá, tudo bem? Meu nome é ${safeCustomerName}. Sou cliente do pedido #${orderNumber}${orderDateTime ? `, feito em ${orderDateTime},` : ''} na ${safeStoreName}. Preciso de ajuda com: ${normalizedTopicTitle || 'meu pedido'}. ${normalizedTopicMessage || 'Pode me orientar, por favor?'} Pode me ajudar?`;
+  }
 
   if (isActive) {
     return `Olá, tudo bem? Meu nome é ${safeCustomerName}. Sou cliente do pedido #${orderNumber}${orderDateTime ? `, feito em ${orderDateTime},` : ''} na ${safeStoreName}. Gostaria de saber o status do meu pedido e confirmar se está tudo certo. Pode me ajudar?`;
@@ -147,6 +163,153 @@ const buildOrderSupportMessage = ({
 
   return `Olá, tudo bem? Meu nome é ${safeCustomerName}. Sou cliente do pedido #${orderNumber}${orderDateTime ? `, feito em ${orderDateTime},` : ''} na ${safeStoreName}. Tenho uma dúvida sobre esse pedido e gostaria de suporte. Pode me ajudar?`;
 };
+
+const isDeliverySupportOrder = (order: any) => {
+  const normalizedType = String(order?.type || '').trim().toLowerCase();
+  const normalizedCondominiumMode = String(
+    order?.condominiumOrder?.fulfillmentMode ||
+    order?.condominiumFulfillmentMode ||
+    ''
+  ).trim().toLowerCase();
+
+  return (
+    normalizedType === 'delivery' ||
+    normalizedCondominiumMode === 'apartment_delivery' ||
+    normalizedCondominiumMode === 'condominium_apartment'
+  );
+};
+
+const getOrderHelpSections = (isDelivery: boolean) => [
+  {
+    id: 'status',
+    title: 'Status e andamento',
+    subtitle: 'Prazo, preparo e etapa atual do pedido',
+    icon: Clock,
+    items: [
+      {
+        id: 'status-current',
+        title: 'Quero saber o status do meu pedido',
+        answer: 'A loja acompanha o preparo e consegue confirmar a etapa atual do pedido. Em pedidos com entrega, a saída e a chegada também dependem da operação de entrega vinculada.',
+        whatsappHint: 'Gostaria de confirmar o status atual do meu pedido.',
+      },
+      {
+        id: 'status-delay',
+        title: 'Meu pedido está demorando',
+        answer: 'Quando houver atraso, a confirmação do novo prazo precisa ser feita diretamente com a loja. Em entregas, o tempo final também pode variar conforme a operação de entrega.',
+        whatsappHint: 'Meu pedido parece estar demorando além do esperado e preciso de uma atualização.',
+      },
+      {
+        id: 'status-confirm',
+        title: isDelivery ? 'Preciso confirmar a entrega' : 'Preciso confirmar a retirada',
+        answer: isDelivery
+          ? 'Confirme com a loja os dados da entrega, referência do endereço e a etapa atual do envio.'
+          : 'Confirme com a loja o horário, o ponto e os detalhes da retirada do pedido.',
+        whatsappHint: isDelivery
+          ? 'Preciso confirmar os detalhes da entrega do meu pedido.'
+          : 'Preciso confirmar os detalhes da retirada do meu pedido.',
+      },
+    ],
+  },
+  {
+    id: 'payment',
+    title: 'Pagamento',
+    subtitle: 'Cobrança, reconhecimento e divergência de valor',
+    icon: CreditCard,
+    items: [
+      {
+        id: 'payment-check',
+        title: 'Pagamento não foi reconhecido',
+        answer: 'Se você já pagou e o pedido ainda não foi confirmado, a loja precisa validar o recebimento e a conciliação desse pagamento no atendimento do pedido.',
+        whatsappHint: 'Já realizei o pagamento, mas ele ainda não foi reconhecido no pedido.',
+      },
+      {
+        id: 'payment-value',
+        title: 'Valor cobrado diferente',
+        answer: 'Qualquer divergência de valor deve ser validada primeiro com a loja responsável pelo pedido, incluindo itens, taxas e forma de cobrança.',
+        whatsappHint: 'Notei uma divergência no valor cobrado do meu pedido e gostaria de verificar.',
+      },
+      {
+        id: 'payment-method',
+        title: 'Dúvida sobre Pix, cartão ou taxa',
+        answer: 'A loja pode confirmar a forma de cobrança usada no pedido, o valor final e orientar sobre dúvidas práticas do pagamento aplicado.',
+        whatsappHint: 'Tenho uma dúvida sobre a forma de pagamento ou taxa aplicada no meu pedido.',
+      },
+    ],
+  },
+  {
+    id: 'items',
+    title: 'Itens do pedido',
+    subtitle: 'Conferência, qualidade e composição do pedido',
+    icon: Package,
+    items: [
+      {
+        id: 'items-missing',
+        title: 'Item faltando',
+        answer: 'A conferência e a montagem do pedido são responsabilidade da loja. Para agilizar a solução, fale com a loja informando qual item não foi recebido.',
+        whatsappHint: 'Recebi o pedido, mas faltou um item. Gostaria de verificar isso com vocês.',
+      },
+      {
+        id: 'items-wrong',
+        title: 'Recebi item diferente',
+        answer: 'Quando o item enviado não corresponde ao pedido, a loja deve confirmar a divergência e orientar a melhor forma de atendimento.',
+        whatsappHint: 'Recebi um item diferente do que pedi e preciso de suporte.',
+      },
+      {
+        id: 'items-quality',
+        title: 'Problema na qualidade ou preparo',
+        answer: 'Questões de preparo, temperatura, ponto ou apresentação precisam ser tratadas com a loja responsável pela produção do pedido.',
+        whatsappHint: 'Tenho uma dúvida sobre a qualidade ou preparo de um item do meu pedido.',
+      },
+    ],
+  },
+  {
+    id: 'fulfillment',
+    title: isDelivery ? 'Entrega' : 'Retirada',
+    subtitle: isDelivery ? 'Endereço, recebimento e andamento da entrega' : 'Horário, ponto e confirmação da retirada',
+    icon: isDelivery ? Motorcycle : Storefront,
+    items: isDelivery
+      ? [
+          {
+            id: 'delivery-address',
+            title: 'Preciso ajustar ou confirmar o endereço',
+            answer: 'A loja precisa validar rapidamente se ainda é possível ajustar referência, complemento ou ponto de entrega do pedido.',
+            whatsappHint: 'Preciso confirmar ou ajustar os dados de entrega do meu pedido.',
+          },
+          {
+            id: 'delivery-missing',
+            title: 'Pedido marcado como entregue e não recebi',
+            answer: 'Nesse caso, fale imediatamente com a loja para confirmar o registro da entrega e a operação responsável pelo envio.',
+            whatsappHint: 'Meu pedido foi marcado como entregue, mas eu ainda não recebi.',
+          },
+          {
+            id: 'delivery-contact',
+            title: 'Preciso falar sobre a entrega',
+            answer: 'Se houver dúvida sobre saída, rota, referência ou recebimento, a loja consegue orientar o atendimento e o contato sobre essa entrega.',
+            whatsappHint: 'Preciso de ajuda com a entrega do meu pedido.',
+          },
+        ]
+      : [
+          {
+            id: 'pickup-time',
+            title: 'Quero confirmar o horário de retirada',
+            answer: 'A loja consegue informar a previsão e o melhor momento para retirar o pedido sem desencontro.',
+            whatsappHint: 'Quero confirmar o horário ideal para retirar meu pedido.',
+          },
+          {
+            id: 'pickup-point',
+            title: 'Preciso confirmar o local de retirada',
+            answer: 'Se houver qualquer dúvida sobre balcão, feira ou ponto de retirada, confirme diretamente com a loja antes de sair.',
+            whatsappHint: 'Preciso confirmar o local de retirada do meu pedido.',
+          },
+          {
+            id: 'pickup-problem',
+            title: 'Tive um problema na retirada',
+            answer: 'Ocorrências no momento da retirada devem ser tratadas com a loja responsável pelo atendimento do pedido.',
+            whatsappHint: 'Tive um problema no momento da retirada do meu pedido.',
+          },
+        ],
+  },
+];
 
 const groupOrdersByDate = (orders: any[]) => {
   const groups: Array<{ key: string; label: string; orders: any[] }> = [];
@@ -250,16 +413,16 @@ function OrderCard({
   order,
   isActive,
   details,
-  customerName,
   onCancelRequest,
+  onOpenHelp,
   onOpenOrder,
   onOpenStore,
 }: {
   order: any;
   isActive: boolean;
   details?: any;
-  customerName?: string;
   onCancelRequest: (order: any) => void;
+  onOpenHelp: (order: any) => void;
   onOpenOrder: (orderId: string) => void;
   onOpenStore: (slug?: string) => void;
 }) {
@@ -294,25 +457,6 @@ function OrderCard({
     etaDeadlineMs &&
     Date.now() > etaDeadlineMs + DELAY_GRACE_MS
   );
-  const handleHelp = () => {
-    const supportMessage = buildOrderSupportMessage({
-      order,
-      customerName,
-      storeName,
-      isActive,
-    });
-    const nativeUrl = buildWhatsappLink(order.store?.phone, true, supportMessage);
-    const webUrl = buildWhatsappLink(order.store?.phone, false, supportMessage);
-    if (!webUrl) {
-      onOpenStore(order.store?.slug);
-      return;
-    }
-    if (Capacitor.isNativePlatform() && nativeUrl) {
-      window.location.href = nativeUrl;
-      return;
-    }
-    window.open(webUrl, '_blank', 'noopener,noreferrer');
-  };
 
   return (
     <article className="rounded-[28px] border border-slate-200 bg-white p-4 shadow-[0_12px_30px_-28px_rgba(15,23,42,0.4)]">
@@ -483,7 +627,7 @@ function OrderCard({
           {isActive && isDelayed ? (
             <button
               type="button"
-              onClick={handleHelp}
+              onClick={() => onOpenHelp(order)}
               className="inline-flex items-center gap-1.5 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700 shadow-sm transition-colors hover:bg-amber-100"
             >
               <ArrowSquareOut size={14} weight="bold" />
@@ -492,7 +636,7 @@ function OrderCard({
           ) : !isActive ? (
             <button
               type="button"
-              onClick={handleHelp}
+              onClick={() => onOpenHelp(order)}
               className="inline-flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 shadow-sm transition-colors hover:bg-slate-50"
             >
               <ArrowSquareOut size={14} weight="bold" />
@@ -524,6 +668,264 @@ function OrderCard({
   );
 }
 
+function OrderHelpScreen({
+  order,
+  customerName,
+  onClose,
+  onOpenStore,
+}: {
+  order: any;
+  customerName?: string;
+  onClose: () => void;
+  onOpenStore: (slug?: string) => void;
+}) {
+  const storeName = order?.store?.name || 'Loja parceira';
+  const logoUrl = resolveAssetUrl(order?.store?.settings?.logoUrl || '');
+  const statusMeta = getStatusMeta(order?.status, order?.type);
+  const isDelivery = isDeliverySupportOrder(order);
+  const orderDateTime = formatSupportDateTime(order?.createdAt) || formatGroupDate(order?.createdAt);
+  const totalLabel = isDelivery ? 'Total com entrega' : 'Total para retirada';
+  const supportSections = useMemo(() => getOrderHelpSections(isDelivery), [isDelivery]);
+  const defaultExpandedId = supportSections[0]?.items?.[0]?.id || null;
+  const [expandedTopicId, setExpandedTopicId] = useState<string | null>(defaultExpandedId);
+
+  useEffect(() => {
+    setExpandedTopicId(defaultExpandedId);
+  }, [defaultExpandedId, order?.id]);
+
+  const handleWhatsApp = (topicTitle?: string, topicMessage?: string) => {
+    const supportMessage = buildOrderSupportMessage({
+      order,
+      customerName,
+      storeName,
+      isActive: !TERMINAL_STATUSES.includes(normalizeStatus(order?.status)),
+      topicTitle,
+      topicMessage,
+    });
+    const nativeUrl = buildWhatsappLink(order?.store?.phone, true, supportMessage);
+    const webUrl = buildWhatsappLink(order?.store?.phone, false, supportMessage);
+    if (!webUrl) {
+      onClose();
+      onOpenStore(order?.store?.slug);
+      return;
+    }
+    if (Capacitor.isNativePlatform() && nativeUrl) {
+      window.location.href = nativeUrl;
+      return;
+    }
+    window.open(webUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  return (
+    <div className="fixed inset-0 z-[90] bg-[#EEF2F7]">
+      <div className="pointer-events-none absolute right-[-12%] top-[-10%] h-[34%] w-[48%] rounded-full bg-[#153A4C]/12 blur-[120px]" />
+      <div className="pointer-events-none absolute bottom-[4%] left-[-8%] h-[26%] w-[34%] rounded-full bg-[#336886]/8 blur-[110px]" />
+
+      <div className="relative mx-auto flex h-full max-w-2xl flex-col">
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200/80 bg-[#EEF2F7]/96 px-4 py-4 backdrop-blur-md">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-slate-600 shadow-sm ring-1 ring-slate-200 transition-all active:scale-95"
+          >
+            <ArrowLeft size={20} weight="bold" />
+          </button>
+          <div className="flex flex-col items-center gap-0.5">
+            <div className="flex items-center gap-1.5">
+              <img src="/janocaminho.png" alt="Já no Caminho" className="h-5 w-5 rounded-[0.5rem] object-cover shadow-sm ring-1 ring-slate-200" />
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Atendimento</p>
+            </div>
+            <h1 className="text-[15px] font-semibold text-slate-900">Ajuda com pedido</h1>
+          </div>
+          <div className="w-10" />
+        </header>
+
+        <div className="flex-1 overflow-y-auto px-4 py-5">
+          <div className="rounded-[30px] border border-[#153A4C]/10 bg-[linear-gradient(135deg,#153A4C,#336886)] p-4 text-white shadow-[0_28px_60px_-36px_rgba(21,58,76,0.45)]">
+            <div className="flex items-start gap-3">
+              <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[1.2rem] border border-white/20 bg-white/10">
+                {logoUrl ? (
+                  <img src={logoUrl} alt={storeName} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="grid h-full w-full place-items-center bg-white/10 text-sm font-black text-white">
+                    {getStoreInitials(storeName)}
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="truncate text-lg font-black">{storeName}</p>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-100">
+                    {statusMeta.icon}
+                    {statusMeta.label}
+                  </span>
+                </div>
+                <p className="mt-1 text-sm font-medium text-slate-200">Pedido #{order?.id || '-'} • {orderDateTime}</p>
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-2 sm:grid-cols-3">
+              <div className="rounded-[1.15rem] border border-white/12 bg-white/10 px-4 py-3">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-200/75">Resumo</p>
+                <p className="mt-1 text-sm font-black text-white">{totalLabel}</p>
+                <p className="mt-1 text-base font-black text-white">{formatCurrency(order?.total || 0)}</p>
+              </div>
+              <div className="rounded-[1.15rem] border border-white/12 bg-white/10 px-4 py-3">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-200/75">Atendimento</p>
+                <p className="mt-1 text-sm font-black text-white">{isDelivery ? 'Entrega' : 'Retirada'}</p>
+                <p className="mt-1 text-xs font-medium text-slate-200">{isDelivery ? 'Pedido com envio' : 'Pedido para retirada'}</p>
+              </div>
+              <div className="rounded-[1.15rem] border border-white/12 bg-white/10 px-4 py-3">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-200/75">Canal</p>
+                <p className="mt-1 text-sm font-black text-white">Loja responsável</p>
+                <p className="mt-1 text-xs font-medium text-slate-200">Contato direto pelo pedido</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-[26px] border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.32)]">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#153A4C]/6 text-[#153A4C]">
+                <ShieldCheck size={20} weight="duotone" />
+              </div>
+              <div>
+                <p className="text-sm font-black text-slate-900">Como funciona o atendimento</p>
+                <p className="mt-1 text-xs font-medium leading-5 text-slate-600 sm:text-sm">
+                  O Já no Caminho facilita o contato e o registro do atendimento. A preparação, conferência e atendimento do pedido são de responsabilidade da loja. Em pedidos com entrega, a execução da entrega é responsabilidade da operação vinculada ao pedido.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <section className="mt-5">
+            <div className="px-1">
+              <h2 className="text-base font-black text-slate-900">Precisa de ajuda com...</h2>
+              <p className="mt-1 text-sm text-slate-500">Escolha o assunto e veja a orientação antes de falar com a loja.</p>
+            </div>
+
+            <div className="mt-3 space-y-3">
+              {supportSections.map((section) => {
+                const Icon = section.icon;
+                return (
+                  <div key={section.id} className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_16px_36px_-32px_rgba(15,23,42,0.32)]">
+                    <div className="flex items-start gap-3 border-b border-slate-100 px-4 py-4">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#153A4C]/6 text-[#153A4C]">
+                        <Icon size={20} weight="duotone" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-black text-slate-900">{section.title}</p>
+                        <p className="mt-1 text-xs font-medium leading-5 text-slate-500">{section.subtitle}</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      {section.items.map((item) => {
+                        const isExpanded = expandedTopicId === item.id;
+                        return (
+                          <div key={item.id} className="border-t border-slate-100 first:border-t-0">
+                            <button
+                              type="button"
+                              onClick={() => setExpandedTopicId((prev) => (prev === item.id ? null : item.id))}
+                              className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left transition-colors hover:bg-slate-50"
+                            >
+                              <div className="min-w-0">
+                                <p className="text-sm font-semibold text-slate-900">{item.title}</p>
+                              </div>
+                              <CaretDown
+                                size={18}
+                                weight="bold"
+                                className={`shrink-0 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                              />
+                            </button>
+
+                            {isExpanded ? (
+                              <div className="border-t border-slate-100 bg-slate-50/70 px-4 py-4">
+                                <div className="rounded-[1.2rem] border border-slate-200 bg-white px-4 py-3">
+                                  <div className="flex items-start gap-2.5">
+                                    <WarningCircle size={18} weight="duotone" className="mt-0.5 shrink-0 text-[#336886]" />
+                                    <p className="text-sm font-medium leading-6 text-slate-600">{item.answer}</p>
+                                  </div>
+                                </div>
+
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                  {buildWhatsappLink(order?.store?.phone, false) ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleWhatsApp(item.title, item.whatsappHint)}
+                                      className="inline-flex items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#16a34a,#15803d)] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-20px_rgba(22,163,74,0.45)] transition-all hover:brightness-105 active:scale-[0.98]"
+                                    >
+                                      <WhatsappLogo size={18} weight="fill" />
+                                      Falar com a loja no WhatsApp
+                                    </button>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        onClose();
+                                        onOpenStore(order?.store?.slug);
+                                      }}
+                                      className="inline-flex items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-20px_rgba(21,58,76,0.45)] transition-all hover:brightness-105 active:scale-[0.98]"
+                                    >
+                                      <ArrowSquareOut size={16} weight="bold" />
+                                      Abrir loja
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-4 rounded-[24px] border border-slate-200 bg-white p-4 shadow-[0_16px_36px_-32px_rgba(15,23,42,0.32)]">
+              <div className="flex items-start gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#153A4C]/6 text-[#153A4C]">
+                  <ChatCircleDots size={20} weight="duotone" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-black text-slate-900">Contato direto com a loja</p>
+                  <p className="mt-1 text-xs font-medium leading-5 text-slate-600 sm:text-sm">
+                    Se preferir, você pode abrir o atendimento direto com uma mensagem pronta e contextualizada com esse pedido.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {buildWhatsappLink(order?.store?.phone, false) ? (
+                      <button
+                        type="button"
+                        onClick={() => handleWhatsApp()}
+                        className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700 transition-colors hover:bg-emerald-100"
+                      >
+                        <WhatsappLogo size={18} weight="fill" />
+                        Abrir conversa no WhatsApp
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          onOpenStore(order?.store?.slug);
+                        }}
+                        className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 transition-colors hover:bg-slate-50"
+                      >
+                        <ArrowSquareOut size={16} weight="bold" />
+                        Abrir loja
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ClientOrders() {
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -534,6 +936,7 @@ export function ClientOrders() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'finished' | 'cancelled'>('all');
   const [orderDetails, setOrderDetails] = useState<Record<string, any>>({});
+  const [helpOrder, setHelpOrder] = useState<any | null>(null);
   const [cancelModal, setCancelModal] = useState<{ order: any | null; reason: string; submitting: boolean }>({
     order: null,
     reason: '',
@@ -636,6 +1039,15 @@ export function ClientOrders() {
   useEffect(() => {
     document.title = 'Meus Pedidos | Já no Caminho';
   }, []);
+
+  useEffect(() => {
+    if (!helpOrder || typeof document === 'undefined') return undefined;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [helpOrder]);
 
   useEffect(() => {
     const sessionRaw = localStorage.getItem('customerSession');
@@ -858,8 +1270,8 @@ export function ClientOrders() {
                     order={order}
                     isActive
                     details={orderDetails[order.id]}
-                    customerName={customerDisplayName}
                     onCancelRequest={(selectedOrder) => setCancelModal({ order: selectedOrder, reason: '', submitting: false })}
+                    onOpenHelp={setHelpOrder}
                     onOpenOrder={(orderId) => navigate(`/pedido/${orderId}`)}
                     onOpenStore={openStore}
                   />
@@ -900,8 +1312,8 @@ export function ClientOrders() {
                           order={order}
                           isActive={false}
                           details={orderDetails[order.id]}
-                          customerName={customerDisplayName}
                           onCancelRequest={() => {}}
+                          onOpenHelp={setHelpOrder}
                           onOpenOrder={(orderId) => navigate(`/pedido/${orderId}`)}
                           onOpenStore={openStore}
                         />
@@ -920,6 +1332,15 @@ export function ClientOrders() {
           </section>
         </div>
       </div>
+
+      {helpOrder ? (
+        <OrderHelpScreen
+          order={helpOrder}
+          customerName={customerDisplayName}
+          onClose={() => setHelpOrder(null)}
+          onOpenStore={openStore}
+        />
+      ) : null}
 
       {cancelModal.order ? (
         <div className="fixed inset-0 z-[180] flex items-center justify-center bg-slate-950/45 p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:items-center">
@@ -976,7 +1397,7 @@ export function ClientOrders() {
       ) : null}
 
       <nav className={`fixed bottom-0 left-0 right-0 z-[100] px-0 pb-0 transition-transform duration-300 lg:hidden ${
-        cancelModal.order ? 'translate-y-[120%] pointer-events-none' : 'translate-y-0'
+        cancelModal.order || helpOrder ? 'translate-y-[120%] pointer-events-none' : 'translate-y-0'
       }`}>
         <div className="mx-auto max-w-none rounded-none border border-b-0 border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-2 pt-2 shadow-[0_-18px_38px_-28px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
           <div className="grid min-h-[4.75rem] grid-cols-4 items-center gap-1.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
