@@ -9,10 +9,12 @@ import {
   CheckCircle,
   Clock,
   DoorOpen,
+  ImageSquare,
   PencilSimple,
   Plus,
   Storefront,
   Trash,
+  UploadSimple,
   XCircle,
 } from '@phosphor-icons/react';
 import { condominiumService } from '../services/condominiumService';
@@ -50,6 +52,14 @@ const toDateTimeLocalInput = (value?: string) => {
   return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
 };
 
+const readFileAsDataUrl = (file: File) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+
 export function CondominiumDashboard() {
   const navigate = useNavigate();
   const [session, setSession] = useState<any>(null);
@@ -57,13 +67,26 @@ export function CondominiumDashboard() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'agenda' | 'lojas' | 'solicitacoes'>('agenda');
+  const [activeTab, setActiveTab] = useState<'agenda' | 'lojas' | 'solicitacoes' | 'perfil'>('agenda');
   const [eventForm, setEventForm] = useState({
     title: '',
     startsAt: '',
     endsAt: '',
     pickupLocation: '',
     notes: '',
+  });
+  const [profileForm, setProfileForm] = useState({
+    name: '',
+    slug: '',
+    city: '',
+    state: 'SP',
+    address: '',
+    description: '',
+    zipCode: '',
+    logoUrl: '',
+    bannerUrl: '',
+    logoFile: '',
+    bannerFile: '',
   });
   const [editingEventId, setEditingEventId] = useState('');
   const [selectedStoreByEvent, setSelectedStoreByEvent] = useState<Record<string, string>>({});
@@ -110,6 +133,8 @@ export function CondominiumDashboard() {
   const pendingRequests = requests.filter((request: any) => String(request?.status || 'pending') === 'pending');
   const nextEvent = events.find((event: any) => event.state === 'live') || events.find((event: any) => event.state === 'upcoming') || events[0];
   const fairStoresCount = events.reduce((acc: number, event: any) => acc + (Array.isArray(event?.stores) ? event.stores.length : 0), 0);
+  const profileLogoPreview = profileForm.logoFile || resolveAssetUrl(profileForm.logoUrl) || '';
+  const profileBannerPreview = profileForm.bannerFile || resolveAssetUrl(profileForm.bannerUrl) || '';
 
   const metrics = [
     { label: 'Feiras na agenda', value: events.length, tone: 'bg-[#153A4C] text-white' },
@@ -121,6 +146,74 @@ export function CondominiumDashboard() {
   const logout = () => {
     localStorage.removeItem('condominiumSession');
     navigate('/condominio/login', { replace: true });
+  };
+
+  useEffect(() => {
+    setProfileForm({
+      name: condominium.name || '',
+      slug: condominium.slug || '',
+      city: condominium.city || '',
+      state: condominium.state || 'SP',
+      address: condominium.address || '',
+      description: condominium.description || '',
+      zipCode: condominium.zipCode || '',
+      logoUrl: condominium.logoUrl || '',
+      bannerUrl: condominium.bannerUrl || '',
+      logoFile: '',
+      bannerFile: '',
+    });
+  }, [
+    condominium.address,
+    condominium.bannerUrl,
+    condominium.city,
+    condominium.description,
+    condominium.logoUrl,
+    condominium.name,
+    condominium.slug,
+    condominium.state,
+    condominium.zipCode,
+  ]);
+
+  const handleProfileAssetUpload = async (field: 'logoFile' | 'bannerFile', file?: File | null) => {
+    if (!file) return;
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      setProfileForm((prev) => ({ ...prev, [field]: dataUrl }));
+    } catch {
+      setError('Não foi possível carregar a imagem selecionada.');
+    }
+  };
+
+  const saveProfile = async () => {
+    if (!profileForm.name.trim() || !profileForm.slug.trim()) {
+      setError('Nome e slug do condomínio são obrigatórios.');
+      return;
+    }
+    setSaving(true);
+    setError('');
+    try {
+      const updatedCondominium = await condominiumService.organizerUpdate(profileForm);
+      setData((prev: any) => ({ ...prev, condominium: updatedCondominium }));
+      setSession((prev: any) => {
+        const nextSession = prev ? { ...prev, condominium: { ...(prev.condominium || {}), ...updatedCondominium } } : prev;
+        if (nextSession) {
+          localStorage.setItem('condominiumSession', JSON.stringify(nextSession));
+        }
+        return nextSession;
+      });
+      setProfileForm((prev) => ({
+        ...prev,
+        logoUrl: updatedCondominium.logoUrl || prev.logoUrl,
+        bannerUrl: updatedCondominium.bannerUrl || prev.bannerUrl,
+        logoFile: '',
+        bannerFile: '',
+      }));
+      await load();
+    } catch (err: any) {
+      setError(err?.message || 'Falha ao salvar dados do condomínio.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const saveEvent = async () => {
@@ -335,11 +428,12 @@ export function CondominiumDashboard() {
           </section>
         ) : null}
 
-        <nav className="grid gap-2 sm:grid-cols-3">
+        <nav className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
           {[
             { id: 'agenda', label: 'Agenda', helper: 'Criar e acompanhar feiras' },
             { id: 'lojas', label: 'Lojas', helper: 'Aprovadas e disponíveis' },
             { id: 'solicitacoes', label: 'Solicitações', helper: 'Aprovar pedidos de lojistas' },
+            { id: 'perfil', label: 'Perfil', helper: 'Editar dados e identidade visual' },
           ].map((tab) => {
             const active = activeTab === tab.id;
             return (
@@ -520,6 +614,120 @@ export function CondominiumDashboard() {
                 <p className="mt-3 text-sm font-bold text-slate-500">Nenhuma solicitação de loja no momento.</p>
               </div>
             )}
+          </section>
+        ) : null}
+
+        {activeTab === 'perfil' ? (
+          <section className="grid gap-4 xl:grid-cols-[1.08fr_0.92fr]">
+            <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_22px_70px_-50px_rgba(15,23,42,0.45)]">
+              <div className="flex items-center gap-3">
+                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#336886]/10 text-[#336886]">
+                  <PencilSimple size={22} weight="bold" />
+                </span>
+                <div>
+                  <h2 className="text-lg font-black text-slate-950">Perfil do condomínio</h2>
+                  <p className="text-sm font-semibold text-slate-500">Atualize a identidade visual e os dados usados no Hub e nas feiras.</p>
+                </div>
+              </div>
+
+              <div className="mt-5 overflow-hidden rounded-[1.6rem] border border-slate-200 bg-slate-50">
+                <div className="relative h-36 bg-gradient-to-br from-emerald-50 via-white to-sky-50">
+                  {profileBannerPreview ? (
+                    <img src={profileBannerPreview} alt="Banner do condomínio" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-slate-300">
+                      <ImageSquare size={34} weight="duotone" />
+                    </div>
+                  )}
+                  <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/20 to-transparent" />
+                  <div className="absolute -bottom-9 left-5 flex h-24 w-24 items-center justify-center overflow-hidden rounded-[1.5rem] border-[5px] border-white bg-white shadow-[0_18px_40px_-24px_rgba(15,23,42,0.55)]">
+                    {profileLogoPreview ? (
+                      <img src={profileLogoPreview} alt="Logo do condomínio" className="h-full w-full object-contain p-2" />
+                    ) : (
+                      <Buildings size={30} weight="duotone" className="text-[#336886]" />
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 px-5 pb-5 pt-12">
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 shadow-sm">
+                    <UploadSimple size={14} weight="bold" />
+                    Upload logo
+                    <input type="file" accept="image/*" className="hidden" onChange={(event) => handleProfileAssetUpload('logoFile', event.target.files?.[0])} />
+                  </label>
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 shadow-sm">
+                    <UploadSimple size={14} weight="bold" />
+                    Upload banner
+                    <input type="file" accept="image/*" className="hidden" onChange={(event) => handleProfileAssetUpload('bannerFile', event.target.files?.[0])} />
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_22px_70px_-50px_rgba(15,23,42,0.45)]">
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[
+                  ['name', 'Nome do condomínio'],
+                  ['slug', 'Slug'],
+                  ['city', 'Cidade'],
+                  ['state', 'UF'],
+                  ['address', 'Endereço'],
+                  ['description', 'Descrição'],
+                  ['zipCode', 'CEP'],
+                  ['logoUrl', 'Logo URL opcional'],
+                  ['bannerUrl', 'Banner URL opcional'],
+                ].map(([key, label]) => (
+                  <label key={key} className={`${key === 'address' || key === 'bannerUrl' || key === 'description' ? 'sm:col-span-2' : ''} block`}>
+                    <span className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">{label}</span>
+                    {key === 'description' ? (
+                      <textarea
+                        value={(profileForm as any)[key]}
+                        onChange={(event) => setProfileForm((prev) => ({ ...prev, [key]: event.target.value }))}
+                        placeholder={label}
+                        className="min-h-[110px] w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white"
+                      />
+                    ) : (
+                      <input
+                        value={(profileForm as any)[key]}
+                        onChange={(event) => setProfileForm((prev) => ({ ...prev, [key]: event.target.value }))}
+                        placeholder={label}
+                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white"
+                      />
+                    )}
+                  </label>
+                ))}
+              </div>
+
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={saveProfile}
+                  disabled={saving || !profileForm.name.trim() || !profileForm.slug.trim()}
+                  className="w-full rounded-2xl bg-[#153A4C] px-4 py-3.5 text-sm font-black text-white disabled:opacity-50"
+                >
+                  Salvar dados do condomínio
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setProfileForm({
+                    name: condominium.name || '',
+                    slug: condominium.slug || '',
+                    city: condominium.city || '',
+                    state: condominium.state || 'SP',
+                    address: condominium.address || '',
+                    description: condominium.description || '',
+                    zipCode: condominium.zipCode || '',
+                    logoUrl: condominium.logoUrl || '',
+                    bannerUrl: condominium.bannerUrl || '',
+                    logoFile: '',
+                    bannerFile: '',
+                  })}
+                  disabled={saving}
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-black text-slate-700 disabled:opacity-50"
+                >
+                  Descartar alterações
+                </button>
+              </div>
+            </div>
           </section>
         ) : null}
       </div>
