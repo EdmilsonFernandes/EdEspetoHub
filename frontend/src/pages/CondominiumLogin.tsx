@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Buildings, Eye, EyeSlash, LockKey, ShieldCheck } from '@phosphor-icons/react';
+import { ArrowLeft, Buildings, Eye, EyeSlash, LockKey, ShieldCheck } from '@phosphor-icons/react';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { authService } from '../services/authService';
 
@@ -121,6 +121,14 @@ export function CondominiumLogin() {
             className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-[#153A4C] transition hover:bg-slate-50"
           >
             Solicitar acesso para meu condomínio
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/', { replace: true })}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-black text-slate-600 transition hover:bg-white"
+          >
+            <ArrowLeft size={16} weight="bold" />
+            Voltar para a principal
           </button>
         </form>
       </div>

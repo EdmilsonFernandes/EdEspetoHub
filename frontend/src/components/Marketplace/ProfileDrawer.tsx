@@ -504,7 +504,9 @@ export function ProfileDrawer({
                 </span>
               </div>
             </div>
-            <img src="/janocaminho.jpg" alt="Logo" loading="eager" fetchPriority="high" decoding="async" className="h-8 w-auto rounded-full object-cover opacity-95" />
+            <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-white bg-white p-0.5 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.55)]">
+              <img src="/janocaminho.png" alt="Logo" loading="eager" fetchPriority="high" decoding="async" className="h-full w-full rounded-full object-cover opacity-95" />
+            </div>
           </div>
         </div>
       </aside>
