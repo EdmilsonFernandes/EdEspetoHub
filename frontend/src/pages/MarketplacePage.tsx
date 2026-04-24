@@ -2971,9 +2971,9 @@ export function MarketplacePage() {
                       Veja o que está ao vivo, o que vem em seguida e entre com um toque no condomínio certo.
                     </p>
                   </div>
-                  <div className="shrink-0 rounded-[1.35rem] border border-emerald-200/70 bg-white/82 px-3 py-2 shadow-[0_16px_30px_-22px_rgba(16,185,129,0.42)] backdrop-blur-md">
+                  <div className="shrink-0 min-w-[5.75rem] rounded-[1.35rem] border border-emerald-200/70 bg-white/82 px-3 py-2 text-center shadow-[0_16px_30px_-22px_rgba(16,185,129,0.42)] backdrop-blur-md">
                     <p className="text-[9px] font-black uppercase tracking-[0.18em] text-emerald-600">Agora</p>
-                    <p className="mt-1 text-right text-lg font-black leading-none text-slate-950">
+                    <p className="mt-1 text-lg font-black leading-none text-slate-950">
                       {condominiumPickerCounts.live}
                     </p>
                     <p className="mt-1 text-[10px] font-semibold text-slate-500">feira{condominiumPickerCounts.live === 1 ? '' : 's'} ao vivo</p>
