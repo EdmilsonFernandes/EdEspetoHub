@@ -2821,9 +2821,9 @@ export function MarketplacePage() {
                     </span>
                     <div>
                       <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">Exploração ampliada</p>
-                      <p className="mt-1 text-sm font-bold text-slate-900">Você está vendo lojas fora da sua região principal.</p>
+                      <p className="mt-1 text-sm font-bold text-slate-900">Você está vendo uma vitrine ampliada do app.</p>
                       <p className="mt-1 text-xs font-medium text-slate-500">
-                        Isso ajuda a conhecer o app enquanto a cobertura local ainda está chegando.
+                        Isso ajuda a explorar mais lojas sem depender do contexto local da home.
                       </p>
                     </div>
                   </div>
@@ -3208,7 +3208,7 @@ export function MarketplacePage() {
                             {store.rating >= 4.9 && (
                               <span className="inline-flex items-center gap-1 rounded-full border border-rose-100 bg-rose-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-rose-600 shadow-[0_6px_16px_-12px_rgba(225,29,72,0.5)]">
                                 <Sparkle size={9} weight="fill" />
-                                Top da região
+                                Destaque
                               </span>
                             )}
                             {store.freeShipping && (
@@ -3318,7 +3318,7 @@ export function MarketplacePage() {
           </section>
 
           <section className="pb-2 space-y-2 sm:pb-4">
-            <p className="text-center text-xs font-semibold text-slate-500">Conectando você aos melhores lojistas da região.</p>
+            <p className="text-center text-xs font-semibold text-slate-500">Conectando você aos melhores lojistas do app.</p>
             <PlatformTrustFooter mode="minimal" align="center" compact />
           </section>
         </main>
