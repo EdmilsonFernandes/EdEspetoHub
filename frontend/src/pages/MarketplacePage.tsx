@@ -1089,6 +1089,8 @@ export function MarketplacePage() {
         
         const rawBanner = (store?.settings as any)?.bannerUrl || (store?.settings as any)?.banner_url || (store as any)?.bannerUrl || (store as any)?.banner_url;
         const banner = resolveAssetUrl(rawBanner || undefined) || logo;
+        const storeLat = parseOptionalNumber((store as any)?.settings?.lat);
+        const storeLng = parseOptionalNumber((store as any)?.settings?.lng);
 
         // DEBUG LOG PARA HUB NO APK
         const isMobileDebug = typeof window !== 'undefined' && 
@@ -1122,6 +1124,8 @@ export function MarketplacePage() {
           nextOpeningLabel: String(store?.nextOpeningLabel || '').trim(),
           primaryColor: String(store?.settings?.primaryColor || '').trim(),
           secondaryColor: String(store?.settings?.secondaryColor || '').trim(),
+          storeLat,
+          storeLng,
           addressText: [
             String((store as any)?.settings?.address || '').trim(),
             String((store as any)?.settings?.city || '').trim(),
@@ -1158,6 +1162,8 @@ export function MarketplacePage() {
       nextOpeningLabel: string;
       primaryColor: string;
       secondaryColor: string;
+      storeLat: number | null;
+      storeLng: number | null;
       addressText: string;
       logo: string;
       banner: string;
@@ -1414,7 +1420,10 @@ export function MarketplacePage() {
     };
 
     const loadApproxDistances = async () => {
-      if (!userLocation || scopedEnrichedStores.length === 0) return;
+      if (!userLocation || scopedEnrichedStores.length === 0) {
+        setDistanceByStore({});
+        return;
+      }
       if (scopedEnrichedStores.every((store) => store.distanceSource === 'server')) {
         setDistanceByStore({});
         return;
@@ -1424,11 +1433,15 @@ export function MarketplacePage() {
         const targets = scopedEnrichedStores
           .filter((store) => store.distanceSource !== 'server')
           .slice(0, 8)
-          .filter((store) => store.addressText.length >= 8);
+          .filter((store) => (store.storeLat != null && store.storeLng != null) || store.addressText.length >= 8);
         const settled = await Promise.allSettled(
           targets.map(async (store) => {
-            const geo = await mapsService.geocode(store.addressText);
-            const km = haversineKm(userLocation, { lat: geo.lat, lng: geo.lng });
+            const km =
+              store.storeLat != null && store.storeLng != null
+                ? haversineKm(userLocation, { lat: store.storeLat, lng: store.storeLng })
+                : await mapsService
+                    .geocode(store.addressText)
+                    .then((geo) => haversineKm(userLocation, { lat: geo.lat, lng: geo.lng }));
             return [store.id, km] as const;
           })
         );
