@@ -47,6 +47,7 @@
   "PAY-008": "Assinatura inválida.",
   "PAY-009": "Evento ignorado.",
   "PAY-010": "Pagamento pendente. Sua loja ainda não está ativa.",
+  "PAY-015": "Não foi possível gerar a cobrança online da loja.",
   "PROD-001": "Produto não encontrado.",
   "PROD-002": "Produto inválido para esta loja.",
   "ORDER-001": "Pedido não encontrado.",

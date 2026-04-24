@@ -96,11 +96,14 @@ export class OrderPaymentService {
       }
       row = await repo.save(row);
     } catch (error) {
-      this.log.warn('Order payment creation failed, keeping conventional order flow', {
+      this.log.warn('Order payment creation failed', {
         orderId: order.id,
         storeId: order.store.id,
         error,
       });
+      if (error instanceof AppError) {
+        throw error;
+      }
     }
 
     return row;

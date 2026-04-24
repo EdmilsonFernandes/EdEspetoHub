@@ -78,6 +78,24 @@ const buildHeaders = (accessToken?: string) => ({
  */
 export class MercadoPagoService {
   private log = logger.child({ scope: 'MercadoPagoService' });
+  private buildCreatePaymentError(method: CreatePaymentInput['method'], status: number, bodyText: string) {
+    const normalizedBody = String(bodyText || '').toLowerCase();
+    const isPixQrKeyError =
+      method === 'PIX' &&
+      (normalizedBody.includes('collector user without key enabled for qr render') ||
+        normalizedBody.includes('"code":13253'));
+
+    const message = isPixQrKeyError
+      ? 'A conta Mercado Pago desta loja ainda não está habilitada para gerar QR Pix. Peça para a loja revisar a conta conectada.'
+      : 'Não foi possível gerar a cobrança online da loja agora. Tente novamente em instantes.';
+
+    return new AppError('PAY-015', 400, {
+      message,
+      providerStatus: status,
+      provider: 'MERCADO_PAGO',
+      method,
+    });
+  }
   /**
    * Handles debug log.
    *
@@ -184,7 +202,7 @@ export class MercadoPagoService {
        */
       const bodyText = await response.text().catch(() => '');
       this.log.error('POST preference failed', { status: response.status, body: bodyText });
-      throw new AppError('PAY-004', 400);
+      throw this.buildCreatePaymentError('CREDIT_CARD', response.status, bodyText);
     }
 
     const data = (await response.json()) as MercadoPagoPreferenceResponse;
@@ -248,7 +266,7 @@ export class MercadoPagoService {
        */
       const bodyText = await response.text().catch(() => '');
       this.log.error('POST boleto preference failed', { status: response.status, body: bodyText });
-      throw new AppError('PAY-004', 400);
+      throw this.buildCreatePaymentError('BOLETO', response.status, bodyText);
     }
 
     const data = (await response.json()) as MercadoPagoPreferenceResponse;
@@ -304,7 +322,7 @@ export class MercadoPagoService {
        */
       const bodyText = await response.text().catch(() => '');
       this.log.error('POST pix failed', { status: response.status, body: bodyText });
-      throw new AppError('PAY-004', 400);
+      throw this.buildCreatePaymentError('PIX', response.status, bodyText);
     }
 
     const data = (await response.json()) as MercadoPagoPaymentResponse;

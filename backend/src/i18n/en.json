@@ -47,6 +47,7 @@
   "PAY-008": "Invalid signature.",
   "PAY-009": "Event ignored.",
   "PAY-010": "Payment pending. Your store is not active yet.",
+  "PAY-015": "Unable to generate the store's online charge.",
   "PROD-001": "Product not found.",
   "PROD-002": "Invalid product for this store.",
   "ORDER-001": "Order not found.",
