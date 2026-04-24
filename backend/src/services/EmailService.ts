@@ -32,6 +32,12 @@ export class EmailService {
   private transporter?: nodemailer.Transporter;
   private log = logger.child({ scope: 'EmailService' });
   private settingsService = new SettingsService();
+  private getSenderAddress() {
+    const raw = String(env.email.from || '').trim();
+    const match = raw.match(/<([^>]+)>/);
+    const email = String(match?.[1] || raw || 'no-reply@janocaminho.com.br').trim();
+    return `Já no Caminho <${email}>`;
+  }
   /**
    * Gets logo url.
    *
@@ -137,7 +143,7 @@ export class EmailService {
     }
     try {
       await transporter.sendMail({
-        from: env.email.from,
+        from: this.getSenderAddress(),
         replyTo: this.getSupportEmail(),
         to: normalizedPayload.to,
         subject: normalizedPayload.subject,
