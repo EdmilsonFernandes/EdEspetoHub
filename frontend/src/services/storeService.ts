@@ -80,6 +80,17 @@ export const storeService = {
     return toJson(response);
   },
 
+  async discoverPortfolio(params?: { lat?: number | null; lng?: number | null; city?: string | null; state?: string | null }) {
+    const search = new URLSearchParams();
+    if (params && Number.isFinite(Number(params.lat))) search.set('lat', String(params.lat));
+    if (params && Number.isFinite(Number(params.lng))) search.set('lng', String(params.lng));
+    if (params?.city) search.set('city', String(params.city).trim());
+    if (params?.state) search.set('state', String(params.state).trim());
+    const suffix = search.toString() ? `?${search.toString()}` : '';
+    const response = await apiClient.rawGet(`/public/stores/discovery${suffix}`);
+    return toJson(response);
+  },
+
   async trackPublicVisit(slug: string, payload: any) {
     const response = await apiClient.rawPost(`/public/stores/slug/${slug}/track`, payload);
     return toJson(response);

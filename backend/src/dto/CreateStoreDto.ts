@@ -39,6 +39,8 @@ export interface CreateStoreDto {
   address?: string;
   city?: string;
   state?: string;
+  lat?: number;
+  lng?: number;
   socialLinks?: { type: string; value: string }[];
   openingHours?: any[];
   orderTypes?: string[];

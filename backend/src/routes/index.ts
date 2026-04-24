@@ -148,6 +148,7 @@ routes.post(
 // Store public
 routes.get('/public/platform/metrics', PlatformPublicController.metrics);
 routes.get('/public/stores', StoreController.listPortfolio);
+routes.get('/public/stores/discovery', StoreController.listDiscovery);
 routes.get('/public/condominiums', CondominiumController.listPublic);
 routes.post('/public/condominium-access-requests', CondominiumController.createAccessRequest);
 routes.get('/public/condominiums/:slug', CondominiumController.getPublicBySlug);

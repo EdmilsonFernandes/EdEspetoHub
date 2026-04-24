@@ -48,6 +48,12 @@ export class StoreSettings
   @Column({ name: 'state', type: 'text', nullable: true })
   state?: string | null;
 
+  @Column('decimal', { name: 'lat', precision: 10, scale: 7, nullable: true })
+  lat?: number | null;
+
+  @Column('decimal', { name: 'lng', precision: 10, scale: 7, nullable: true })
+  lng?: number | null;
+
   @Column({ name: 'primary_color', default: '#b91c1c' })
   primaryColor!: string;
 

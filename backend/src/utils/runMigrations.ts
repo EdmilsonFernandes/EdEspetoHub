@@ -64,6 +64,14 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS state TEXT;
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS lat NUMERIC(10,7);
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS lng NUMERIC(10,7);
+  `);
+  await AppDataSource.query(`
     UPDATE store_settings ss
     SET address = u.address
     FROM stores s

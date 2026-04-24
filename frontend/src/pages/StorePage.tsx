@@ -803,6 +803,15 @@ export function StorePage() {
           setDeliveryFee(data.settings?.deliveryFee ?? '');
           setPostalEnabled(Boolean(data.settings?.postalEnabled));
           setPostalOriginZip(String(data.settings?.postalOriginZip || ''));
+          if (Number.isFinite(Number(data.settings?.lat)) && Number.isFinite(Number(data.settings?.lng))) {
+            const nextCoords = { lat: Number(data.settings.lat), lng: Number(data.settings.lng) };
+            setStoreCoords(nextCoords);
+            try {
+              localStorage.setItem(`store:coords:${storeSlug}`, JSON.stringify(nextCoords));
+            } catch {
+              // ignore cache write failure
+            }
+          }
           setStoreOpenNow(typeof data.openNow === 'boolean' ? data.openNow : isStoreOpenNow(normalizedHours));
           setStoreSubscription(data.subscription || null);
           setStorePlanExempt(Boolean(data.settings?.planExempt || data.subscription?.planExempt));
@@ -2599,74 +2608,88 @@ export function StorePage() {
           </div>
         )}
         {showClosedState && (
-          <div className="min-h-[72vh] bg-[#f7f7f7]">
-            <div className="w-full max-w-5xl mx-auto px-4 py-6 sm:py-8">
-              <div className="grid gap-4 md:grid-cols-2 md:items-start">
+          <div className="min-h-[72vh] bg-[radial-gradient(ellipse_at_top_right,rgba(51,104,134,0.16),transparent_36%),radial-gradient(ellipse_at_bottom_left,rgba(21,58,76,0.08),transparent_42%),linear-gradient(180deg,#EEF2F7_0%,#F4F8FB_54%,#EEF2F7_100%)]">
+            <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:py-7">
+              <button
+                type="button"
+                onClick={() => navigate('/hub')}
+                className="mb-4 inline-flex items-center gap-2 rounded-[1.1rem] border border-white/85 bg-white/90 px-4 py-2.5 text-xs font-black uppercase tracking-[0.14em] text-slate-700 shadow-[0_16px_34px_-26px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/65 backdrop-blur-xl transition-all hover:bg-white"
+              >
+                <ArrowLeft size={16} weight="bold" />
+                Voltar ao hub
+              </button>
+
+              <div className="grid gap-4 md:grid-cols-[minmax(0,1.2fr)_minmax(300px,0.8fr)] md:items-start">
                 <div className="space-y-4">
-                  <div className="rounded-3xl bg-white p-5 sm:p-6 shadow-[0_10px_28px_-22px_rgba(15,23,42,0.45)]">
-                    <div className="flex items-center gap-4 min-w-0">
-                      <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl overflow-hidden bg-slate-100 shrink-0">
-                        <img
-                          src={branding?.logoUrl || '/janocaminho.jpg'}
-                          alt={closedStateStoreName}
-                          className="w-full h-full object-cover"
-                          onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(storeSlug, branding?.brandName); }}
-                        />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Perfil da loja</p>
-                        <h1 className="text-2xl sm:text-3xl font-black text-[#1a1a1a] break-words">
-                          {closedStateStoreName}
-                        </h1>
-                        <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700">
-                          <Clock size={14} weight="bold" />
-                          Fechado no momento
+                  <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.92)_0%,rgba(241,247,246,0.9)_54%,rgba(255,255,255,0.94)_100%)] shadow-[0_26px_60px_-38px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
+                    <div className="relative h-40 overflow-hidden sm:h-48">
+                      <img
+                        src={branding?.bannerUrl || branding?.logoUrl || '/janocaminho.png'}
+                        alt={closedStateStoreName}
+                        className="h-full w-full object-cover"
+                        onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(storeSlug, branding?.brandName); }}
+                      />
+                      <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(7,13,25,0.72)_0%,rgba(9,16,32,0.54)_40%,rgba(15,23,42,0.24)_100%)]" />
+                      <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+                        <div className="flex items-end gap-4">
+                          <div className="h-18 w-18 shrink-0 overflow-hidden rounded-[1.35rem] border border-white/65 bg-white/90 shadow-[0_16px_30px_-18px_rgba(15,23,42,0.45)] sm:h-20 sm:w-20">
+                            <img
+                              src={branding?.logoUrl || '/janocaminho.png'}
+                              alt={closedStateStoreName}
+                              className="h-full w-full object-cover"
+                              onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(storeSlug, branding?.brandName); }}
+                            />
+                          </div>
+                          <div className="min-w-0 text-white">
+                            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70">Loja temporariamente fechada</p>
+                            <h1 className="mt-1 break-words text-2xl font-black leading-tight sm:text-3xl">{closedStateStoreName}</h1>
+                            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-rose-200/30 bg-rose-500/18 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-rose-50 backdrop-blur-md">
+                              <Clock size={14} weight="bold" />
+                              Fechado agora
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                    <p className="mt-4 text-sm text-[#666666]">
-                      O atendimento está fechado agora. Veja os horários abaixo e volte no próximo período.
-                    </p>
-                    {todayHoursLabel && (
-                      <p className="mt-2 text-sm text-slate-600">
-                        <span className="font-semibold text-slate-800">Hoje:</span> {todayHoursLabel}
-                      </p>
-                    )}
-                  </div>
 
-                  {storeDescription && (
-                    <div className="rounded-3xl bg-white p-5 shadow-[0_10px_28px_-22px_rgba(15,23,42,0.45)]">
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">Sobre</p>
-                      <p className="mt-2 text-sm text-[#666666] break-words">{storeDescription}</p>
+                    <div className="space-y-4 px-5 py-5 sm:px-6 sm:py-6">
+                      <div className="rounded-[1.55rem] border border-slate-200/85 bg-white/88 p-4 shadow-[0_14px_32px_-26px_rgba(15,23,42,0.22)]">
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Próximo atendimento</p>
+                        <p className="mt-1 text-base font-black text-slate-900">
+                          {todayHoursLabel || 'Sem horário configurado para hoje'}
+                        </p>
+                        <p className="mt-1 text-sm text-slate-500">
+                          O cardápio continua visível, mas os pedidos voltam a abrir no próximo período da operação.
+                        </p>
+                      </div>
+
+                      {storeDescription && (
+                        <div className="rounded-[1.55rem] border border-slate-200/85 bg-white/88 p-4 shadow-[0_14px_32px_-26px_rgba(15,23,42,0.16)]">
+                          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Sobre a loja</p>
+                          <p className="mt-2 break-words text-sm leading-relaxed text-slate-600">{storeDescription}</p>
+                        </div>
+                      )}
                     </div>
-                  )}
-
-                  <button
-                    onClick={() => navigate('/')}
-                    className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-slate-200 bg-white text-slate-700 font-semibold hover:bg-slate-50 transition-all"
-                  >
-                    <ArrowLeft size={16} weight="bold" />
-                    Voltar ao início
-                  </button>
+                  </section>
                 </div>
 
                 <div className="space-y-4">
-                  <div className="rounded-3xl bg-white p-5 shadow-[0_10px_28px_-22px_rgba(15,23,42,0.45)]">
-                    <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">Contato e endereço</p>
-                    <div className="mt-3 space-y-3">
+                  <section className="rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.94)_0%,rgba(247,250,252,0.92)_100%)] p-5 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Contato e endereço</p>
+                    <div className="mt-4 space-y-3">
                       {instagramHandle && (
                         <a
                           href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="flex items-start gap-2 text-sm font-semibold text-[#0a66c2] hover:underline break-all"
+                          className="flex items-start gap-3 rounded-[1.2rem] border border-slate-200/85 bg-white px-4 py-3 text-sm font-semibold text-[#0a66c2] shadow-[0_10px_22px_-20px_rgba(15,23,42,0.35)] hover:underline break-all"
                         >
                           <InstagramLogo size={18} weight="fill" className="mt-0.5 shrink-0" />
                           <span>{instagramHandle}</span>
                         </a>
                       )}
                       {storeAddress && (
-                        <div className="flex items-start gap-2 text-sm text-[#666666] break-words">
+                        <div className="flex items-start gap-3 rounded-[1.2rem] border border-slate-200/85 bg-white px-4 py-3 text-sm text-slate-600 shadow-[0_10px_22px_-20px_rgba(15,23,42,0.35)] break-words">
                           <MapPinLine size={18} weight="bold" className="mt-0.5 shrink-0 text-slate-500" />
                           <span>{storeAddress}</span>
                         </div>
@@ -2675,25 +2698,27 @@ export function StorePage() {
                         <p className="text-sm text-slate-500">Nenhum contato cadastrado.</p>
                       )}
                     </div>
-                  </div>
+                  </section>
 
                   {weeklyHoursRows.length > 0 && (
-                    <div className="rounded-3xl bg-white p-5 shadow-[0_10px_28px_-22px_rgba(15,23,42,0.45)]">
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">Horários da semana</p>
-                      <div className="mt-3 divide-y divide-slate-100">
+                    <section className="rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.94)_0%,rgba(247,250,252,0.92)_100%)] p-5 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
+                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Horários da semana</p>
+                      <div className="mt-4 space-y-2">
                         {weeklyHoursRows.map((row) => (
                           <div
                             key={`${row.day}-${row.label}`}
-                            className={`flex items-center justify-between gap-3 py-2 text-sm ${
-                              row.isToday ? 'font-bold text-slate-900 bg-amber-50/70 px-2 rounded-lg' : 'text-[#666666]'
+                            className={`flex items-center justify-between gap-3 rounded-[1rem] px-3 py-2.5 text-sm ${
+                              row.isToday
+                                ? 'bg-amber-50 text-slate-900 shadow-[0_10px_20px_-18px_rgba(245,158,11,0.5)]'
+                                : 'bg-white text-slate-600'
                             }`}
                           >
-                            <span className="min-w-0">{row.label}</span>
-                            <span className="text-right break-words">{row.value}</span>
+                            <span className={`min-w-0 ${row.isToday ? 'font-black' : 'font-semibold'}`}>{row.label}</span>
+                            <span className={`text-right break-words ${row.isToday ? 'font-black' : 'font-medium'}`}>{row.value}</span>
                           </div>
                         ))}
                       </div>
-                    </div>
+                    </section>
                   )}
 
                   <PlatformTrustFooter className="pt-1" compact />

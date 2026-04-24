@@ -25,6 +25,8 @@ import { sanitizeSocialLinks } from '../utils/socialLinks';
 import { AppError } from '../errors/AppError';
 import { getStoreSegmentPreset, sanitizeStoreSegment } from '../utils/storeSegment';
 import { resolvePlanFeatures } from '../config/planFeatures';
+import { env } from '../config/env';
+import { logger } from '../utils/logger';
 /**
  * Provides StoreService functionality.
  *
@@ -35,6 +37,7 @@ export class StoreService
 {
   private subscriptionService = new SubscriptionService();
   private storeRepository = AppDataSource.getRepository(Store);
+  private log = logger.child({ scope: 'StoreService' });
     /**
    * Executes parse number business logic.
    *
@@ -96,6 +99,73 @@ private normalizePostalZip(value?: string | null) {
     return digits || null;
   }
 
+  private parseCoordinate(value?: any): number | null | undefined {
+    if (value === undefined) return undefined;
+    if (value === null) return null;
+    const parsed = Number(String(value).replace(',', '.').trim());
+    if (!Number.isFinite(parsed)) return null;
+    return parsed;
+  }
+
+  private buildGeocodeAddress(payload: {
+    address?: string | null;
+    city?: string | null;
+    state?: string | null;
+    fallbackAddress?: string | null;
+  }) {
+    const address = String(payload.address || '').trim() || String(payload.fallbackAddress || '').trim();
+    const city = String(payload.city || '').trim();
+    const state = String(payload.state || '').trim().toUpperCase();
+    const parts = [address, city, state].filter(Boolean);
+    return parts.length ? parts.join(', ') : '';
+  }
+
+  private async geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
+    const normalizedAddress = String(address || '').trim();
+    if (!normalizedAddress) return null;
+    try {
+      const response = await fetch(`${env.etaV2.mapsBaseUrl}/geocode`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: normalizedAddress }),
+      });
+      if (!response.ok) {
+        this.log.warn('Store geocode failed', { address: normalizedAddress, status: response.status });
+        return null;
+      }
+      const payload = (await response.json()) as { lat?: number; lng?: number };
+      const lat = Number(payload?.lat);
+      const lng = Number(payload?.lng);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+      return { lat, lng };
+    } catch (error) {
+      this.log.warn('Store geocode exception', { address: normalizedAddress, error });
+      return null;
+    }
+  }
+
+  public async ensureStoreCoordinates(store: Store) {
+    if (!store?.id || !store?.settings) return store;
+    const currentLat = this.parseCoordinate(store.settings.lat);
+    const currentLng = this.parseCoordinate(store.settings.lng);
+    if (Number.isFinite(Number(currentLat)) && Number.isFinite(Number(currentLng))) {
+      return store;
+    }
+    const address = this.buildGeocodeAddress({
+      address: store.settings.address,
+      city: store.settings.city,
+      state: store.settings.state,
+      fallbackAddress: store.owner?.address,
+    });
+    if (!address) return store;
+    const geo = await this.geocodeAddress(address);
+    if (!geo) return store;
+    store.settings.lat = geo.lat;
+    store.settings.lng = geo.lng;
+    await this.storeRepository.save(store);
+    return store;
+  }
+
   /* =========================
    * CREATE STORE
    * ========================= */
@@ -141,6 +211,24 @@ private normalizePostalZip(value?: string | null) {
       const bannerPosition = this.normalizeBannerPosition(input.bannerPosition);
       const postalOriginZip = this.normalizePostalZip(input.postalOriginZip);
       const postalEnabled = Boolean(input.postalEnabled) && Boolean(postalOriginZip);
+      const requestedLat = this.parseCoordinate(input.lat);
+      const requestedLng = this.parseCoordinate(input.lng);
+      let resolvedLat = Number.isFinite(Number(requestedLat)) ? Number(requestedLat) : null;
+      let resolvedLng = Number.isFinite(Number(requestedLng)) ? Number(requestedLng) : null;
+      if (resolvedLat === null || resolvedLng === null) {
+        const geocoded = await this.geocodeAddress(
+          this.buildGeocodeAddress({
+            address: trimmedAddress,
+            city: trimmedCity,
+            state: trimmedState,
+            fallbackAddress: owner.address,
+          })
+        );
+        if (geocoded) {
+          resolvedLat = geocoded.lat;
+          resolvedLng = geocoded.lng;
+        }
+      }
 
       // 3️⃣ Settings
       const normalizedPix = this.normalizePixKey(input.pixKey);
@@ -153,6 +241,8 @@ private normalizePostalZip(value?: string | null) {
         address: trimmedAddress || owner.address || null,
         city: trimmedCity || null,
         state: trimmedState || null,
+        lat: resolvedLat,
+        lng: resolvedLng,
         primaryColor: input.primaryColor || segmentPreset.primaryColor,
         secondaryColor: input.secondaryColor || segmentPreset.secondaryColor,
         pixKey: normalizedPix ?? null,
@@ -373,6 +463,36 @@ private normalizePostalZip(value?: string | null) {
       {
         const trimmedState = data.state?.toString().trim().toUpperCase();
         store.settings.state = trimmedState || null;
+      }
+
+      const nextLat = this.parseCoordinate(data.lat);
+      const nextLng = this.parseCoordinate(data.lng);
+      const shouldRefreshCoordinates =
+        data.address !== undefined ||
+        data.city !== undefined ||
+        data.state !== undefined ||
+        data.lat !== undefined ||
+        data.lng !== undefined;
+
+      if (data.lat !== undefined) {
+        store.settings.lat = Number.isFinite(Number(nextLat)) ? Number(nextLat) : null;
+      }
+      if (data.lng !== undefined) {
+        store.settings.lng = Number.isFinite(Number(nextLng)) ? Number(nextLng) : null;
+      }
+      if (shouldRefreshCoordinates && (data.lat === undefined || data.lng === undefined)) {
+        const geocoded = await this.geocodeAddress(
+          this.buildGeocodeAddress({
+            address: store.settings.address,
+            city: store.settings.city,
+            state: store.settings.state,
+            fallbackAddress: store.owner?.address,
+          })
+        );
+        if (geocoded) {
+          if (data.lat === undefined) store.settings.lat = geocoded.lat;
+          if (data.lng === undefined) store.settings.lng = geocoded.lng;
+        }
       }
 
       return storeRepo.save(store);

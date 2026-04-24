@@ -250,6 +250,86 @@ export class StoreController {
 
     return counts;
   }
+
+  private static normalizeGeoText(value?: string | null) {
+    return String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .toLowerCase();
+  }
+
+  private static toQueryNumber(value: unknown) {
+    const parsed = Number(String(value ?? '').replace(',', '.').trim());
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  private static haversineKm(
+    origin: { lat: number; lng: number },
+    destination: { lat: number; lng: number }
+  ) {
+    const toRad = (deg: number) => (deg * Math.PI) / 180;
+    const dLat = toRad(destination.lat - origin.lat);
+    const dLng = toRad(destination.lng - origin.lng);
+    const lat1 = toRad(origin.lat);
+    const lat2 = toRad(destination.lat);
+    const x =
+      Math.sin(dLat / 2) ** 2 +
+      Math.sin(dLng / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
+    return 6371 * (2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x)));
+  }
+
+  private static async buildPublicStorePayload(
+    store: any,
+    publicProductCount: number,
+    subscription: any
+  ) {
+    const isVip = Boolean(store?.settings?.planExempt);
+    const isActive = isVip || subscriptionService.isActiveSubscription(subscription);
+    if (!isActive) return null;
+    if (publicProductCount <= 0) return null;
+
+    const orderTypes = StoreController.sanitizeOrderTypesByPlan(store.settings?.orderTypes, {
+      planName: subscription?.plan?.name,
+      planExempt: Boolean(store.settings?.planExempt),
+      subscriptionStatus: subscription?.status || null,
+    });
+    const isOrderingEnabled = store.settings?.isOrderingEnabled !== false;
+    const hasOpeningHours = StoreController.hasConfiguredOpeningHours(store);
+    const openNow = hasOpeningHours && StoreController.isStoreOpenNow(store);
+    const nextOpeningLabel = openNow ? null : StoreController.getNextOpeningLabel(store);
+    const reviewSummary = await orderReviewService.publicSummaryByStoreId(store.id);
+    return {
+      id: store.id,
+      name: store.name,
+      slug: store.slug,
+      open: store.open,
+      openNow,
+      nextOpeningLabel,
+      productCount: publicProductCount,
+      reviewSummary,
+      settings: store.settings
+        ? {
+            logoUrl: store.settings.logoUrl || null,
+            bannerUrl: store.settings.bannerUrl || null,
+            description: store.settings.description || null,
+            address: store.settings.address || null,
+            openingHours: Array.isArray(store.settings.openingHours) ? store.settings.openingHours : [],
+            primaryColor: store.settings.primaryColor || null,
+            secondaryColor: store.settings.secondaryColor || null,
+            segment: store.settings.segment || 'outros',
+            city: store.settings.city || null,
+            state: store.settings.state || null,
+            isOrderingEnabled,
+            orderTypes,
+            postalEnabled: Boolean(store.settings.postalEnabled),
+            deliveryRadiusKm: store.settings.deliveryRadiusKm ?? null,
+            lat: store.settings.lat ?? null,
+            lng: store.settings.lng ?? null,
+          }
+        : null,
+    };
+  }
     /**
    * Executes sanitize order types by plan business logic.
    *
@@ -377,47 +457,8 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
       const entries = await Promise.all(
         stores.map(async (store) => {
           const subscription = await subscriptionService.getCurrentByStore(store.id);
-          const isVip = Boolean(store?.settings?.planExempt);
-          const isActive = isVip || subscriptionService.isActiveSubscription(subscription);
-          if (!isActive) return null;
           const publicProductCount = publicProductCounts.get(store.id) || 0;
-          if (publicProductCount <= 0) return null;
-          const orderTypes = StoreController.sanitizeOrderTypesByPlan(store.settings?.orderTypes, {
-            planName: subscription?.plan?.name,
-            planExempt: Boolean(store.settings?.planExempt),
-            subscriptionStatus: subscription?.status || null,
-          });
-          const isOrderingEnabled = store.settings?.isOrderingEnabled !== false;
-          const hasOpeningHours = StoreController.hasConfiguredOpeningHours(store);
-          const openNow = hasOpeningHours && StoreController.isStoreOpenNow(store);
-          const nextOpeningLabel = openNow ? null : StoreController.getNextOpeningLabel(store);
-          return {
-            id: store.id,
-            name: store.name,
-            slug: store.slug,
-            open: store.open,
-            openNow,
-            nextOpeningLabel,
-            productCount: publicProductCount,
-            reviewSummary: await orderReviewService.publicSummaryByStoreId(store.id),
-            settings: store.settings
-              ? {
-                  logoUrl: store.settings.logoUrl || null,
-                  bannerUrl: store.settings.bannerUrl || null,
-                  description: store.settings.description || null,
-                  address: store.settings.address || null,
-                  openingHours: Array.isArray(store.settings.openingHours) ? store.settings.openingHours : [],
-                  primaryColor: store.settings.primaryColor || null,
-                  secondaryColor: store.settings.secondaryColor || null,
-                  segment: store.settings.segment || 'outros',
-                  city: store.settings.city || null,
-                  state: store.settings.state || null,
-                  isOrderingEnabled,
-                  orderTypes,
-                  postalEnabled: Boolean(store.settings.postalEnabled),
-                }
-              : null,
-          };
+          return StoreController.buildPublicStorePayload(store, publicProductCount, subscription);
         })
       );
       const payload = entries.filter(Boolean);
@@ -426,6 +467,144 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
     } catch (error: any) {
       log.warn('Store portfolio list failed', { error });
       return respondWithError(_req, res, error, 400);
+    }
+  }
+
+  static async listDiscovery(req: Request, res: Response) {
+    try {
+      const userLat = StoreController.toQueryNumber(req.query?.lat);
+      const userLng = StoreController.toQueryNumber(req.query?.lng);
+      const userCity = String(req.query?.city || '').trim();
+      const userState = String(req.query?.state || '').trim().toUpperCase();
+      const hasUserCoords = userLat !== null && userLng !== null;
+
+      const stores = await storeService.listAll();
+      const publicProductCounts = await StoreController.getPublicProductCountsByStoreIds(stores.map((store) => store.id));
+      const payloads = await Promise.all(
+        stores.map(async (store) => {
+          const subscription = await subscriptionService.getCurrentByStore(store.id);
+          const publicProductCount = publicProductCounts.get(store.id) || 0;
+          const supportsPostal = Boolean(store?.settings?.postalEnabled);
+          if (hasUserCoords && !supportsPostal) {
+            await storeService.ensureStoreCoordinates(store);
+          }
+          return StoreController.buildPublicStorePayload(store, publicProductCount, subscription);
+        })
+      );
+
+      const normalizedCity = StoreController.normalizeGeoText(userCity);
+      const normalizedState = StoreController.normalizeGeoText(userState);
+      const hydrated = payloads
+        .filter(Boolean)
+        .map((entry: any) => {
+          const orderTypes = Array.isArray(entry?.settings?.orderTypes) ? entry.settings.orderTypes : [];
+          const supportsDelivery = orderTypes.some((type: string) => String(type || '').toLowerCase() === 'delivery');
+          const supportsPickup = orderTypes.some((type: string) => String(type || '').toLowerCase() === 'pickup');
+          const supportsTable = orderTypes.some((type: string) => String(type || '').toLowerCase() === 'table');
+          const supportsPostal = Boolean(entry?.settings?.postalEnabled) && supportsDelivery;
+          const storeLat = Number(entry?.settings?.lat);
+          const storeLng = Number(entry?.settings?.lng);
+          const hasStoreCoords = Number.isFinite(storeLat) && Number.isFinite(storeLng);
+          const distanceKm =
+            hasUserCoords && hasStoreCoords
+              ? StoreController.haversineKm({ lat: Number(userLat), lng: Number(userLng) }, { lat: storeLat, lng: storeLng })
+              : null;
+          const deliveryRadiusKm = StoreController.toQueryNumber(entry?.settings?.deliveryRadiusKm);
+          const sameCity =
+            normalizedCity &&
+            StoreController.normalizeGeoText(entry?.settings?.city) === normalizedCity &&
+            (!normalizedState || StoreController.normalizeGeoText(entry?.settings?.state) === normalizedState);
+          const canDeliverByRadius =
+            supportsDelivery &&
+            distanceKm !== null &&
+            deliveryRadiusKm !== null &&
+            deliveryRadiusKm > 0 &&
+            distanceKm <= deliveryRadiusKm;
+          const geoAvailability = supportsPostal
+            ? 'postal_everywhere'
+            : canDeliverByRadius
+              ? 'deliver_now'
+              : sameCity
+                ? (supportsPickup || supportsTable ? 'same_city_pickup' : 'same_city')
+                : distanceKm !== null
+                  ? 'outside_radius'
+                  : 'unknown';
+          return {
+            ...entry,
+            distanceKm,
+            geoAvailability,
+            deliveryRadiusKm,
+            sameCity,
+            supportsPostal,
+            supportsPickup,
+            supportsTable,
+          };
+        });
+
+      const sortByProximity = (items: any[]) =>
+        items.sort((a, b) => {
+          const openDelta = Number(Boolean(b?.openNow)) - Number(Boolean(a?.openNow));
+          if (openDelta !== 0) return openDelta;
+          const distanceA = Number.isFinite(Number(a?.distanceKm)) ? Number(a.distanceKm) : Number.MAX_SAFE_INTEGER;
+          const distanceB = Number.isFinite(Number(b?.distanceKm)) ? Number(b.distanceKm) : Number.MAX_SAFE_INTEGER;
+          if (distanceA !== distanceB) return distanceA - distanceB;
+          return Number(b?.reviewSummary?.avgStoreRating || 0) - Number(a?.reviewSummary?.avgStoreRating || 0);
+        });
+
+      const deliverableStores = sortByProximity(
+        hydrated.filter((entry: any) => entry.geoAvailability === 'deliver_now' || entry.geoAvailability === 'postal_everywhere')
+      );
+      const sameCityStores = sortByProximity(
+        hydrated.filter((entry: any) => !deliverableStores.some((item: any) => item.id === entry.id) && entry.sameCity)
+      );
+      const nearbyStores = sortByProximity(
+        hydrated.filter(
+          (entry: any) =>
+            !deliverableStores.some((item: any) => item.id === entry.id) &&
+            !sameCityStores.some((item: any) => item.id === entry.id) &&
+            Number.isFinite(Number(entry?.distanceKm))
+        )
+      );
+
+      const mode =
+        deliverableStores.length > 0
+          ? 'deliverable'
+          : sameCityStores.length > 0
+            ? 'same_city_fallback'
+            : nearbyStores.length > 0
+              ? 'nearby_fallback'
+              : 'no_coverage';
+      const visibleStores =
+        mode === 'deliverable'
+          ? deliverableStores
+          : mode === 'same_city_fallback'
+            ? sameCityStores
+            : mode === 'nearby_fallback'
+              ? nearbyStores.slice(0, 12)
+              : [];
+      const nearestStoreId = deliverableStores[0]?.id || sameCityStores[0]?.id || nearbyStores[0]?.id || null;
+
+      return res.json({
+        mode,
+        location: {
+          lat: userLat,
+          lng: userLng,
+          city: userCity || null,
+          state: userState || null,
+        },
+        summary: {
+          deliverableCount: deliverableStores.length,
+          sameCityCount: sameCityStores.length,
+          nearbyCount: nearbyStores.length,
+        },
+        stores: visibleStores.map((entry: any) => ({
+          ...entry,
+          isNearest: nearestStoreId ? entry.id === nearestStoreId : false,
+        })),
+      });
+    } catch (error: any) {
+      log.warn('Store discovery list failed', { error });
+      return respondWithError(req, res, error, 400);
     }
   }
 

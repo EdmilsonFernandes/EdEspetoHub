@@ -20,6 +20,7 @@ import {
   Pizza,
   Wine,
   ShoppingCart,
+  PaperPlaneTilt,
   Pill,
   Cookie,
   Buildings,
@@ -56,6 +57,10 @@ type MarketplaceStore = {
   id?: string;
   name?: string;
   slug?: string;
+  distanceKm?: number | null;
+  deliveryRadiusKm?: number | null;
+  geoAvailability?: string | null;
+  isNearest?: boolean | null;
   reviewSummary?: {
     totalReviews?: number;
     avgStoreRating?: number;
@@ -72,6 +77,8 @@ type MarketplaceStore = {
     isOrderingEnabled?: boolean;
     orderTypes?: string[] | null;
     postalEnabled?: boolean | null;
+    lat?: number | null;
+    lng?: number | null;
     openingHours?: Array<{
       day: number;
       enabled?: boolean;
@@ -80,6 +87,16 @@ type MarketplaceStore = {
   } | null;
   openNow?: boolean;
   nextOpeningLabel?: string | null;
+};
+
+type StoreDiscoveryResponse = {
+  mode?: 'deliverable' | 'same_city_fallback' | 'nearby_fallback' | 'no_coverage' | string;
+  stores?: MarketplaceStore[];
+  summary?: {
+    deliverableCount?: number;
+    sameCityCount?: number;
+    nearbyCount?: number;
+  } | null;
 };
 
 type HubCondominium = {
@@ -487,7 +504,9 @@ export function MarketplacePage() {
   const [featuredLoading, setFeaturedLoading] = useState(false);
   const [featuredOffset, setFeaturedOffset] = useState(0);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [userRegion, setUserRegion] = useState<{ city: string; state: string } | null>(null);
   const [locationLabel, setLocationLabel] = useState('Sua região');
+  const [geoDiscovery, setGeoDiscovery] = useState<StoreDiscoveryResponse | null>(null);
 
   useEffect(() => {
     if (!condominiumPickerOpen || !userLocation) return;
@@ -703,9 +722,15 @@ export function MarketplacePage() {
           '';
         const state = (addr.state_code || addr.state || '').toString();
         const nextLabel = [locality, state].filter(Boolean).join(' - ').trim();
-        if (!cancelled && nextLabel) setLocationLabel(nextLabel);
+        if (!cancelled) {
+          setUserRegion(locality ? { city: locality, state } : null);
+          if (nextLabel) setLocationLabel(nextLabel);
+        }
       } catch (_error) {
-        if (!cancelled) setLocationLabel('Sua região');
+        if (!cancelled) {
+          setLocationLabel('Sua região');
+          setUserRegion(null);
+        }
       }
     };
     resolveUserLabel();
@@ -737,13 +762,26 @@ export function MarketplacePage() {
     if (portfolioLoadInFlightRef.current) return;
     portfolioLoadInFlightRef.current = true;
     try {
-      const data = await storeService.listPortfolio();
-      setStores(Array.isArray(data) ? data : []);
+      const canRunGeoDiscovery = Boolean(userLocation?.lat && userLocation?.lng);
+      if (canRunGeoDiscovery) {
+        const discovery = (await storeService.discoverPortfolio({
+          lat: userLocation?.lat,
+          lng: userLocation?.lng,
+          city: userRegion?.city || null,
+          state: userRegion?.state || null,
+        })) as StoreDiscoveryResponse;
+        setGeoDiscovery(discovery || null);
+        setStores(Array.isArray(discovery?.stores) ? discovery.stores : []);
+      } else {
+        const data = await storeService.listPortfolio();
+        setGeoDiscovery(null);
+        setStores(Array.isArray(data) ? data : []);
+      }
       setError('');
     } finally {
       portfolioLoadInFlightRef.current = false;
     }
-  }, []);
+  }, [userLocation?.lat, userLocation?.lng, userRegion?.city, userRegion?.state]);
 
   const refreshHub = useCallback(async () => {
     if (portfolioLoadInFlightRef.current) return;
@@ -759,7 +797,7 @@ export function MarketplacePage() {
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
+    if (!stores.length) setLoading(true);
     loadPortfolio()
       .catch((err: any) => {
         if (!active) return;
@@ -1010,7 +1048,8 @@ export function MarketplacePage() {
         const rating = Number(store?.reviewSummary?.avgStoreRating || 0) > 0
           ? Number(store?.reviewSummary?.avgStoreRating)
           : 4.6 + ((seed % 5) * 0.1);
-        const distanceKm = 0.8 + (seed % 52) / 10;
+        const apiDistanceKm = Number((store as any)?.distanceKm);
+        const distanceKm = Number.isFinite(apiDistanceKm) ? apiDistanceKm : 0.8 + (seed % 52) / 10;
         const etaMin = 18 + (seed % 18);
         const etaMax = etaMin + 10;
         const rawOrderTypes = Array.isArray(store?.settings?.orderTypes)
@@ -1063,6 +1102,9 @@ export function MarketplacePage() {
           supportsPickup,
           supportsTable,
           supportsPostal,
+          geoAvailability: String((store as any)?.geoAvailability || '').trim(),
+          isNearest: Boolean((store as any)?.isNearest),
+          distanceSource: Number.isFinite(apiDistanceKm) ? 'server' : 'local',
           nextOpeningLabel: String(store?.nextOpeningLabel || '').trim(),
           primaryColor: String(store?.settings?.primaryColor || '').trim(),
           secondaryColor: String(store?.settings?.secondaryColor || '').trim(),
@@ -1096,6 +1138,9 @@ export function MarketplacePage() {
       supportsPickup: boolean;
       supportsTable: boolean;
       supportsPostal: boolean;
+      geoAvailability: string;
+      isNearest: boolean;
+      distanceSource: 'server' | 'local';
       nextOpeningLabel: string;
       primaryColor: string;
       secondaryColor: string;
@@ -1356,9 +1401,16 @@ export function MarketplacePage() {
 
     const loadApproxDistances = async () => {
       if (!userLocation || scopedEnrichedStores.length === 0) return;
+      if (scopedEnrichedStores.every((store) => store.distanceSource === 'server')) {
+        setDistanceByStore({});
+        return;
+      }
       setDistanceLoading(true);
       try {
-        const targets = scopedEnrichedStores.slice(0, 8).filter((store) => store.addressText.length >= 8);
+        const targets = scopedEnrichedStores
+          .filter((store) => store.distanceSource !== 'server')
+          .slice(0, 8)
+          .filter((store) => store.addressText.length >= 8);
         const settled = await Promise.allSettled(
           targets.map(async (store) => {
             const geo = await mapsService.geocode(store.addressText);
@@ -2540,6 +2592,57 @@ export function MarketplacePage() {
               </div>
             </div>
 
+            {geoDiscovery?.mode === 'deliverable' && (
+              <div className="rounded-[1.55rem] border border-emerald-100 bg-[linear-gradient(135deg,rgba(236,253,245,0.98)_0%,rgba(240,253,250,0.94)_100%)] px-4 py-3 shadow-[0_14px_34px_-26px_rgba(16,185,129,0.38)]">
+                <div className="flex items-start gap-3">
+                  <span className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
+                    <MapPinLine size={18} weight="duotone" />
+                  </span>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-700">Sua região</p>
+                    <p className="mt-1 text-sm font-bold text-slate-900">Mostrando lojas que entregam perto de você.</p>
+                    <p className="mt-1 text-xs font-medium text-slate-500">
+                      {geoDiscovery?.summary?.deliverableCount || 0} loja{geoDiscovery?.summary?.deliverableCount === 1 ? '' : 's'} com cobertura ativa{displayLocationLabel ? ` em ${displayLocationLabel}` : ''}.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {geoDiscovery?.mode === 'same_city_fallback' && (
+              <div className="rounded-[1.55rem] border border-amber-100 bg-[linear-gradient(135deg,rgba(255,251,235,0.98)_0%,rgba(255,247,237,0.94)_100%)] px-4 py-3 shadow-[0_14px_34px_-26px_rgba(245,158,11,0.28)]">
+                <div className="flex items-start gap-3">
+                  <span className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
+                    <Warning size={18} weight="duotone" />
+                  </span>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-700">Cobertura parcial</p>
+                    <p className="mt-1 text-sm font-bold text-slate-900">Ainda não encontramos entrega direta para essa região.</p>
+                    <p className="mt-1 text-xs font-medium text-slate-500">
+                      Mostrando lojas da mesma cidade para retirada ou envio quando disponível.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {geoDiscovery?.mode === 'nearby_fallback' && (
+              <div className="rounded-[1.55rem] border border-sky-100 bg-[linear-gradient(135deg,rgba(239,246,255,0.98)_0%,rgba(248,250,252,0.94)_100%)] px-4 py-3 shadow-[0_14px_34px_-26px_rgba(2,132,199,0.24)]">
+                <div className="flex items-start gap-3">
+                  <span className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-sky-100 text-sky-700">
+                    <MapPinLine size={18} weight="duotone" />
+                  </span>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-sky-700">Mais próximas</p>
+                    <p className="mt-1 text-sm font-bold text-slate-900">Não encontramos cobertura direta agora.</p>
+                    <p className="mt-1 text-xs font-medium text-slate-500">
+                      Estas são as lojas mais próximas da sua localização.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {loading && (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, idx) => (
@@ -2559,7 +2662,27 @@ export function MarketplacePage() {
 
             {!loading && !error && filteredStores.length === 0 && !(productSearchLoading && debouncedQuery) && (
               <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
-                <p className="text-slate-700 font-semibold">Nenhuma loja encontrada com esses filtros.</p>
+                <p className="text-slate-700 font-semibold">
+                  {geoDiscovery?.mode === 'no_coverage'
+                    ? 'Ainda não atendemos essa região com entrega.'
+                    : 'Nenhuma loja encontrada com esses filtros.'}
+                </p>
+                {geoDiscovery?.mode === 'no_coverage' && (
+                  <div className="mx-auto mt-4 max-w-sm rounded-[1.6rem] border border-[#336886]/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(239,247,255,0.92)_100%)] px-4 py-4 text-left shadow-[0_10px_28px_-18px_rgba(51,104,134,0.22)]">
+                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">Expansão da região</p>
+                    <p className="mt-1 text-sm font-black text-slate-900">Indique um lojista, restaurante ou operação perto de você.</p>
+                    <p className="mt-1 text-xs font-medium text-slate-500">
+                      Isso ajuda a plataforma a abrir cobertura local com mais rapidez.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/create')}
+                      className="mt-4 inline-flex w-full items-center justify-center rounded-[1.1rem] bg-[linear-gradient(135deg,#0f172a,#1e293b)] px-4 py-3 text-[11px] font-black uppercase tracking-[0.16em] text-white shadow-[0_16px_34px_-24px_rgba(15,23,42,0.65)]"
+                    >
+                      Indicar uma loja
+                    </button>
+                  </div>
+                )}
                 <button
                   type="button"
                   onClick={() => {
@@ -2774,6 +2897,24 @@ export function MarketplacePage() {
                         )}
                         {store.isOpen && (
                           <div className="mt-2.5 flex flex-wrap gap-1.5">
+                            {store.isNearest && geoDiscovery?.mode === 'deliverable' && (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-sky-100 bg-sky-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-sky-700 shadow-[0_6px_16px_-12px_rgba(2,132,199,0.42)]">
+                                <MapPinLine size={9} weight="fill" />
+                                Mais perto
+                              </span>
+                            )}
+                            {store.geoAvailability === 'same_city_pickup' && (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-amber-700 shadow-[0_6px_16px_-12px_rgba(245,158,11,0.34)]">
+                                <Storefront size={9} weight="fill" />
+                                Mesma cidade
+                              </span>
+                            )}
+                            {store.supportsPostal && (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-violet-100 bg-violet-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-violet-700 shadow-[0_6px_16px_-12px_rgba(124,58,237,0.32)]">
+                                <PaperPlaneTilt size={9} weight="fill" />
+                                Correios
+                              </span>
+                            )}
                             {store.rating >= 4.9 && (
                               <span className="inline-flex items-center gap-1 rounded-full border border-rose-100 bg-rose-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-rose-600 shadow-[0_6px_16px_-12px_rgba(225,29,72,0.5)]">
                                 <Sparkle size={9} weight="fill" />
