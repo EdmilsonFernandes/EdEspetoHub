@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
 import { UserCircle, Eye, EyeSlash, LockKey, WarningCircle, SealCheck, EnvelopeSimple } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
 import { AuthLayout } from '../layouts/AuthLayout';
@@ -48,6 +49,7 @@ const normalizeVerificationCodeError = (error: any) => {
 };
 
 export function ClientAuth() {
+  const isNativePlatform = Capacitor.isNativePlatform();
   const navigate = useNavigate();
   const location = useLocation();
   const [mode, setMode] = useState<'login' | 'register'>(getModeFromSearch(location.search));
@@ -506,12 +508,13 @@ export function ClientAuth() {
               e.preventDefault();
               submit();
             }}
+            autoComplete={isNativePlatform ? 'off' : 'on'}
             className="space-y-3"
           >
             {mode === 'register' && (
               <input
                 name="fullName"
-                autoComplete="name"
+                autoComplete={isNativePlatform ? 'off' : 'name'}
                 autoCapitalize="words"
                 value={form.fullName}
                 onChange={(e) => setForm((p) => ({ ...p, fullName: e.target.value }))}
@@ -522,7 +525,7 @@ export function ClientAuth() {
             {mode === 'register' && (
               <input
                 name="phone"
-                autoComplete="tel"
+                autoComplete={isNativePlatform ? 'off' : 'tel'}
                 inputMode="tel"
                 value={form.phone}
                 onChange={(e) => setForm((p) => ({ ...p, phone: formatPhoneBr(e.target.value) }))}
@@ -533,7 +536,7 @@ export function ClientAuth() {
             <input
               id="email"
               name="email"
-              autoComplete="email"
+              autoComplete={isNativePlatform ? 'off' : 'email'}
               type="email"
               value={form.email}
               onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
@@ -549,7 +552,7 @@ export function ClientAuth() {
               <input
                 id="password"
                 name="password"
-                autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
+                autoComplete={isNativePlatform ? 'off' : mode === 'register' ? 'new-password' : 'current-password'}
                 type={showPassword ? 'text' : 'password'}
                 value={form.password}
                 onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}

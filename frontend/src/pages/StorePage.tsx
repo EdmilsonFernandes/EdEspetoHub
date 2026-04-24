@@ -3095,7 +3095,7 @@ export function StorePage() {
                     value={customerAuthForm.fullName}
                     onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, fullName: e.target.value }))}
                     placeholder="Nome completo"
-                    autoComplete="name"
+                    autoComplete={isNativeRuntime ? 'off' : 'name'}
                     autoCapitalize="words"
                     enterKeyHint="next"
                     className="w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
@@ -3107,7 +3107,7 @@ export function StorePage() {
                     value={customerAuthForm.phone}
                     onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, phone: formatPhoneBr(e.target.value) }))}
                     placeholder="Telefone (opcional)"
-                    autoComplete="tel-national"
+                    autoComplete={isNativeRuntime ? 'off' : 'tel-national'}
                     inputMode="tel"
                     enterKeyHint="next"
                     className="w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
@@ -3118,7 +3118,7 @@ export function StorePage() {
                   value={customerAuthForm.email}
                   onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, email: e.target.value }))}
                   placeholder="E-mail"
-                  autoComplete="email"
+                  autoComplete={isNativeRuntime ? 'off' : 'email'}
                   inputMode="email"
                   autoCapitalize="none"
                   autoCorrect="off"
@@ -3133,7 +3133,7 @@ export function StorePage() {
                     value={customerAuthForm.password}
                     onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, password: e.target.value }))}
                     placeholder="Senha"
-                    autoComplete={customerAuthMode === 'register' ? 'new-password' : 'current-password'}
+                    autoComplete={isNativeRuntime ? 'off' : customerAuthMode === 'register' ? 'new-password' : 'current-password'}
                     autoCapitalize="none"
                     autoCorrect="off"
                     spellCheck={false}

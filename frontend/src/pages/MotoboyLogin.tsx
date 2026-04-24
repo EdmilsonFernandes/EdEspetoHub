@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
 import { ArrowSquareOut, Check, Eye, EyeSlash, LockKey, Scooter, ShieldCheck, SignOut, UserCircle, WarningCircle, WhatsappLogo } from '@phosphor-icons/react';
 import { authService } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
@@ -11,6 +12,7 @@ import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 
 export function MotoboyLogin() {
+  const isNativePlatform = Capacitor.isNativePlatform();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -330,7 +332,7 @@ export function MotoboyLogin() {
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} autoComplete={isNativePlatform ? 'off' : 'on'} className="space-y-5">
               <div className="flex items-center gap-3 rounded-2xl border border-[#336886]/10 bg-[#336886]/6 px-3.5 py-3 text-left">
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-[#0d4f66] shadow-sm ring-1 ring-[#336886]/10">
                   <Scooter size={22} weight="duotone" />
@@ -389,7 +391,7 @@ export function MotoboyLogin() {
                   <input
                     id="email"
                     name="email"
-                    autoComplete="username"
+                    autoComplete={isNativePlatform ? 'off' : 'username'}
                     type="text"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -407,7 +409,7 @@ export function MotoboyLogin() {
                   <input
                     id="password"
                     name="password"
-                    autoComplete="current-password"
+                    autoComplete={isNativePlatform ? 'off' : 'current-password'}
                     type={showPassword ? 'text' : 'password'}
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
