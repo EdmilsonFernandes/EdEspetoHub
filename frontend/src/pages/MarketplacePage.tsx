@@ -602,6 +602,7 @@ export function MarketplacePage() {
   const [locationLabel, setLocationLabel] = useState('Sua região');
   const [geoDiscovery, setGeoDiscovery] = useState<StoreDiscoveryResponse | null>(null);
   const [preferredDiscoveryAddress, setPreferredDiscoveryAddress] = useState<PreferredDiscoveryAddress | null>(null);
+  const [preferredDiscoveryAddressResolved, setPreferredDiscoveryAddressResolved] = useState(false);
   const [hubScopeOverride, setHubScopeOverride] = useState<'default' | 'all_stores'>('default');
   const hasPreferredAddressContext = Boolean(preferredDiscoveryAddress?.city || preferredDiscoveryAddress?.state);
   const hasPreferredAddressCoordinates =
@@ -699,21 +700,25 @@ export function MarketplacePage() {
     const resolvePreferredDiscoveryAddress = async () => {
       if (!customerSession?.token) {
         setPreferredDiscoveryAddress(null);
+        setPreferredDiscoveryAddressResolved(true);
         return;
       }
 
+      setPreferredDiscoveryAddressResolved(false);
       try {
         const rows = await customerAccountService.listAddresses();
         if (cancelled) return;
         const preferred = (Array.isArray(rows) ? rows : []).find((item: any) => item?.isDefault) || rows?.[0];
         if (!preferred) {
           setPreferredDiscoveryAddress(null);
+          setPreferredDiscoveryAddressResolved(true);
           return;
         }
 
         const normalized = buildCustomerAddressLookup(preferred);
         if (!normalized.city && !normalized.state) {
           setPreferredDiscoveryAddress(null);
+          setPreferredDiscoveryAddressResolved(true);
           return;
         }
 
@@ -734,6 +739,7 @@ export function MarketplacePage() {
         };
 
         setPreferredDiscoveryAddress(nextAddress);
+        setPreferredDiscoveryAddressResolved(true);
 
         if (nextAddress.lat != null && nextAddress.lng != null) {
           return;
@@ -762,7 +768,10 @@ export function MarketplacePage() {
           // keep same-city discovery when geocode is unavailable
         }
       } catch {
-        if (!cancelled) setPreferredDiscoveryAddress(null);
+        if (!cancelled) {
+          setPreferredDiscoveryAddress(null);
+          setPreferredDiscoveryAddressResolved(true);
+        }
       }
     };
 
@@ -962,6 +971,9 @@ export function MarketplacePage() {
       pendingPortfolioReloadRef.current = true;
       return;
     }
+    if (hubScopeOverride !== 'all_stores' && customerSession?.token && !preferredDiscoveryAddressResolved) {
+      return;
+    }
     portfolioLoadInFlightRef.current = true;
     try {
       const canRunGeoDiscovery = hubScopeOverride !== 'all_stores' && Boolean(
@@ -993,7 +1005,15 @@ export function MarketplacePage() {
         }, 0);
       }
     }
-  }, [activeLocation?.lat, activeLocation?.lng, activeRegion?.city, activeRegion?.state, hubScopeOverride]);
+  }, [
+    activeLocation?.lat,
+    activeLocation?.lng,
+    activeRegion?.city,
+    activeRegion?.state,
+    customerSession?.token,
+    hubScopeOverride,
+    preferredDiscoveryAddressResolved,
+  ]);
 
   const refreshHub = useCallback(async () => {
     if (portfolioLoadInFlightRef.current) return;
@@ -1009,6 +1029,12 @@ export function MarketplacePage() {
 
   useEffect(() => {
     let active = true;
+    if (hubScopeOverride !== 'all_stores' && customerSession?.token && !preferredDiscoveryAddressResolved) {
+      setLoading(true);
+      return () => {
+        active = false;
+      };
+    }
     if (!stores.length) setLoading(true);
     loadPortfolio()
       .catch((err: any) => {
@@ -1022,7 +1048,7 @@ export function MarketplacePage() {
     return () => {
       active = false;
     };
-  }, [loadPortfolio]);
+  }, [customerSession?.token, hubScopeOverride, loadPortfolio, preferredDiscoveryAddressResolved]);
 
   const refreshPublicCondominiums = useCallback(async (options?: { skipIfHidden?: boolean }) => {
     if (options?.skipIfHidden && typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
