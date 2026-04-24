@@ -157,6 +157,12 @@ export function StorePage() {
     if (digits.length <= 5) return digits;
     return `${digits.slice(0, 5)}-${digits.slice(5)}`;
   };
+  const normalizeGeoText = (value: string) =>
+    String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .toLowerCase();
   const [products, setProducts] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [view, setView] = useState('menu');
@@ -171,6 +177,8 @@ export function StorePage() {
   const [storeAddress, setStoreAddress] = useState('');
   const [storeDescription, setStoreDescription] = useState('');
   const [storeName, setStoreName] = useState('');
+  const [storeCity, setStoreCity] = useState('');
+  const [storeState, setStoreState] = useState('');
   const [storeSegment, setStoreSegment] = useState('outros');
   const [storePixKey, setStorePixKey] = useState('');
   const [deliveryRadiusKm, setDeliveryRadiusKm] = useState('');
@@ -469,6 +477,21 @@ export function StorePage() {
   );
   const deliveryValidation = useMemo(() => {
     if (customer.type !== 'delivery' || !deliveryRadiusValue) {
+      if (customer.type === 'delivery' && !isPostalDelivery) {
+        const normalizedStoreCity = normalizeGeoText(storeCity);
+        const normalizedStoreState = normalizeGeoText(storeState);
+        const normalizedCustomerCity = normalizeGeoText(customer.city || '');
+        const normalizedCustomerState = normalizeGeoText(customer.state || '');
+        if (!normalizedStoreCity || !normalizedStoreState) {
+          return { blocked: true, reason: 'A cidade de atendimento da loja ainda não foi configurada.' };
+        }
+        if (!normalizedCustomerCity || !normalizedCustomerState) {
+          return { blocked: true, reason: 'Informe cidade e estado do endereço para validar a entrega.' };
+        }
+        if (normalizedStoreCity !== normalizedCustomerCity || normalizedStoreState !== normalizedCustomerState) {
+          return { blocked: true, reason: 'Esta loja atende entregas apenas na cidade da operação até configurar o raio.' };
+        }
+      }
       if (customer.type === 'delivery' && !String(customer.number || '').trim()) {
         return { blocked: true, reason: 'Informe o número do endereço para finalizar a entrega.' };
       }
@@ -515,7 +538,7 @@ export function StorePage() {
       return { blocked: true, reason: 'Informe o número do endereço para finalizar a entrega.' };
     }
     return { blocked: false, reason: '' };
-  }, [customer.number, customer.type, customer.cep, deliveryCheck.status, deliveryRadiusValue, storeCoords, isPostalDelivery, selectedPostalService]);
+  }, [customer.number, customer.type, customer.cep, customer.city, customer.state, deliveryCheck.status, deliveryRadiusValue, storeCoords, isPostalDelivery, selectedPostalService, storeCity, storeState]);
 
   const resolveItemPrice = (item) => {
     const promoPrice = item?.promoPrice != null ? Number(item.promoPrice) : null;
@@ -807,6 +830,8 @@ export function StorePage() {
           setStoreAddress(data.settings?.address || data.owner?.address || '');
           setStoreDescription(data.settings?.description || '');
           setStoreName(data.name || '');
+          setStoreCity(String(data.settings?.city || '').trim());
+          setStoreState(String(data.settings?.state || '').trim().toUpperCase());
           setStoreSegment(String(data.settings?.segment || 'outros').toLowerCase());
           setPromoMessage(data.settings?.promoMessage || '');
           setStorePixKey(data.settings?.pixKey || '');

@@ -546,13 +546,12 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
           const canDeliverByRadius =
             supportsDelivery &&
             (
-              !hasExplicitRadius ||
-              (
+              (hasExplicitRadius &&
                 distanceKm !== null &&
                 deliveryRadiusKm !== null &&
                 deliveryRadiusKm > 0 &&
-                distanceKm <= deliveryRadiusKm
-              )
+                distanceKm <= deliveryRadiusKm) ||
+              (!hasExplicitRadius && sameCity)
             );
           const geoAvailability = supportsPostal
             ? 'postal_everywhere'

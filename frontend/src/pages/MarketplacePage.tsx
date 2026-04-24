@@ -1648,12 +1648,12 @@ export function MarketplacePage() {
         return true;
       })
       .sort((a, b) => {
+        const openDelta = Number(Boolean(b.isOpen)) - Number(Boolean(a.isOpen));
+        if (openDelta !== 0) return openDelta;
         const favoritesDelta = Number(favoriteStoreSlugs.includes(b.slug)) - Number(favoriteStoreSlugs.includes(a.slug));
         if (favoritesDelta !== 0) return favoritesDelta;
         const regionalDelta = storeRegionalPriority(a) - storeRegionalPriority(b);
         if (regionalDelta !== 0) return regionalDelta;
-        const openDelta = Number(b.isOpen) - Number(a.isOpen);
-        if (openDelta !== 0) return openDelta;
         const distanceA = distanceByStore[a.id] ?? a.distanceKm ?? Number.MAX_SAFE_INTEGER;
         const distanceB = distanceByStore[b.id] ?? b.distanceKm ?? Number.MAX_SAFE_INTEGER;
         if (distanceA !== distanceB) return distanceA - distanceB;
@@ -1712,7 +1712,7 @@ export function MarketplacePage() {
         const targets = scopedEnrichedStores
           .filter((store) => store.distanceSource !== 'server')
           .slice(0, 8)
-          .filter((store) => (store.storeLat != null && store.storeLng != null) || store.addressText.length >= 8);
+          .filter((store) => store.storeLat != null && store.storeLng != null);
         const cachedDistances =
           readHubCache<Record<string, number>>(`hub:store-distance:${contextKey}`, HUB_DISTANCE_CACHE_TTL_MS) || {};
 
@@ -1732,12 +1732,7 @@ export function MarketplacePage() {
         setDistanceLoading(true);
         const settled = await Promise.allSettled(
           missingTargets.map(async (store) => {
-            const km =
-              store.storeLat != null && store.storeLng != null
-                ? haversineKm(activeLocation, { lat: store.storeLat, lng: store.storeLng })
-                : await mapsService
-                    .geocode(store.addressText)
-                    .then((geo) => haversineKm(activeLocation, { lat: geo.lat, lng: geo.lng }));
+            const km = haversineKm(activeLocation, { lat: Number(store.storeLat), lng: Number(store.storeLng) });
             return [store.id, km] as const;
           })
         );
@@ -3107,6 +3102,7 @@ export function MarketplacePage() {
                     : `/${store.slug}`;
                   const shouldWarnCoverage =
                     !selectedCondominium &&
+                    store.supportsDelivery &&
                     !store.supportsPostal &&
                     [ 'outside_radius', 'same_city' ].includes(String(store.geoAvailability || '').toLowerCase());
                   const storeNavigationState = shouldWarnCoverage
@@ -3322,7 +3318,7 @@ export function MarketplacePage() {
                                 Correios
                               </span>
                             )}
-                            {!store.supportsPostal && [ 'outside_radius', 'same_city' ].includes(String(store.geoAvailability || '').toLowerCase()) && (
+                            {store.supportsDelivery && !store.supportsPostal && [ 'outside_radius', 'same_city' ].includes(String(store.geoAvailability || '').toLowerCase()) && (
                               <span className="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-amber-700 shadow-[0_6px_16px_-12px_rgba(245,158,11,0.34)]">
                                 <Warning size={9} weight="fill" />
                                 Fora do raio
