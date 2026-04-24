@@ -562,6 +562,7 @@ export function MarketplacePage() {
   const touchStartYRef = useRef<number | null>(null);
   const touchPullActiveRef = useRef(false);
   const pullDistanceRef = useRef(0);
+  const pendingPortfolioReloadRef = useRef(false);
 
   useEffect(() => {
     document.title = 'Hub Já no Caminho';
@@ -768,10 +769,17 @@ export function MarketplacePage() {
   }, []);
 
   const loadPortfolio = useCallback(async () => {
-    if (portfolioLoadInFlightRef.current) return;
+    if (portfolioLoadInFlightRef.current) {
+      pendingPortfolioReloadRef.current = true;
+      return;
+    }
     portfolioLoadInFlightRef.current = true;
     try {
-      const canRunGeoDiscovery = Boolean(userLocation?.lat && userLocation?.lng);
+      const canRunGeoDiscovery = Boolean(
+        userLocation?.lat &&
+        userLocation?.lng &&
+        (String(userRegion?.city || '').trim() || String(userRegion?.state || '').trim())
+      );
       if (canRunGeoDiscovery) {
         const discovery = (await storeService.discoverPortfolio({
           lat: userLocation?.lat,
@@ -789,6 +797,12 @@ export function MarketplacePage() {
       setError('');
     } finally {
       portfolioLoadInFlightRef.current = false;
+      if (pendingPortfolioReloadRef.current) {
+        pendingPortfolioReloadRef.current = false;
+        window.setTimeout(() => {
+          void loadPortfolio();
+        }, 0);
+      }
     }
   }, [userLocation?.lat, userLocation?.lng, userRegion?.city, userRegion?.state]);
 
