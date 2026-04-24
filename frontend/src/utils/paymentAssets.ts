@@ -21,6 +21,8 @@ const normalize = (value?: string) =>
 
 const METHOD_LABELS: Record<string, string> = {
   pix: 'Pix',
+  pix_loja: 'Pix da loja',
+  'pix-loja': 'Pix da loja',
   debito: 'Débito',
   debit: 'Débito',
   credito: 'Crédito',
@@ -34,6 +36,8 @@ const METHOD_LABELS: Record<string, string> = {
 
 const METHOD_ICONS: Record<string, string> = {
   pix: '/uploads/payment/pix.webp',
+  pix_loja: '/uploads/payment/pix.webp',
+  'pix-loja': '/uploads/payment/pix.webp',
   debito: '/uploads/payment/credit-card.webp',
   debit: '/uploads/payment/credit-card.webp',
   credito: '/uploads/payment/credit-card.webp',

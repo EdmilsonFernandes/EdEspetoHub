@@ -101,6 +101,7 @@ export const CartView = ({
   checkoutLoading = false,
   checkoutResume = null,
   pricingSummary,
+  paymentSummary = null,
   onChangeCustomer,
   onChangePayment,
   onUpdateCart,
@@ -180,10 +181,13 @@ export const CartView = ({
   const isDelivery = customer.type === "delivery";
   const isPostalDelivery = isDelivery && String(deliveryMode || "").toLowerCase() === "postal";
   const isOptionalPhoneMode = (customer.type === "table" || customer.type === "pickup") && !guestPhoneRequired;
-  const isPix = paymentMethod === "pix";
+  const isOnlinePix = paymentMethod === "pix";
+  const isManualPix = paymentMethod === "pix_loja";
+  const isPix = isOnlinePix || isManualPix;
   const isCredit = paymentMethod === "credito";
   const isDebit = paymentMethod === "debito";
   const isCash = paymentMethod === "dinheiro";
+  const isOnlinePaymentMethod = isOnlinePix || isCredit || isDebit;
   const deliveryFeeValue = isDelivery ? normalizeNumber(deliveryFee) || 0 : 0;
   const radiusValue = normalizeNumber(deliveryRadiusKm);
   const totalWithFee = total + deliveryFeeValue;
@@ -191,6 +195,47 @@ export const CartView = ({
   const cashChangeDue =
     isCash && cashTenderedValue !== null ? Number(cashTenderedValue) - Number(totalWithFee || 0) : null;
   const showSuggestedProducts = Boolean(isEndCustomerLogged && suggestedProducts.length > 0);
+  const fallbackPaymentMethods = useMemo(
+    () => [
+      { id: "pix", label: "Pix", description: "Via Mercado Pago", group: "online" },
+      { id: "debito", label: "Débito", description: "Via Mercado Pago", group: "online" },
+      { id: "credito", label: "Crédito", description: "Via Mercado Pago", group: "online" },
+      { id: "dinheiro", label: "Dinheiro", description: "Pagamento no atendimento", group: "local" },
+    ],
+    []
+  );
+  const resolvedPaymentMethods = useMemo(() => {
+    const methods = paymentSummary?.methods || null;
+    if (!methods) return fallbackPaymentMethods;
+    const next = [];
+    if (methods.pixOnline) {
+      next.push({ id: "pix", label: "Pix", description: "Via Mercado Pago", group: "online" });
+    }
+    if (methods.creditOnline) {
+      next.push({ id: "credito", label: "Crédito", description: "Via Mercado Pago", group: "online" });
+    }
+    if (methods.debitOnline) {
+      next.push({ id: "debito", label: "Débito", description: "Via Mercado Pago", group: "online" });
+    }
+    if (methods.manualPix) {
+      next.push({ id: "pix_loja", label: "Pix da loja", description: "Chave exibida após confirmar", group: "local" });
+    }
+    if (methods.cash !== false) {
+      next.push({ id: "dinheiro", label: "Dinheiro", description: "Pagamento no atendimento", group: "local" });
+    }
+    return next.length ? next : [ { id: "dinheiro", label: "Dinheiro", description: "Pagamento no atendimento", group: "local" } ];
+  }, [fallbackPaymentMethods, paymentSummary]);
+  const paymentGroups = useMemo(() => {
+    return resolvedPaymentMethods.reduce(
+      (acc, method) => {
+        const group = method.group === "online" ? "online" : "local";
+        acc[group].push(method);
+        return acc;
+      },
+      { online: [], local: [] } as Record<string, any[]>
+    );
+  }, [resolvedPaymentMethods]);
+  const showPaymentGroupLabels = paymentGroups.online.length > 0 && paymentGroups.local.length > 0;
 
   const cashValidation = useMemo(() => {
     if (!isCash) return { blocked: false, reason: "" };
@@ -203,16 +248,17 @@ export const CartView = ({
   }, [isCash, cashNeedsChange, cashTenderedValue, totalWithFee]);
 
   const actionLabel = useMemo(() => {
-    if (isPickup && isPix) return "Gerar Pix e enviar pedido";
+    if (isPickup && isOnlinePix) return "Gerar Pix e enviar pedido";
     if (isPickup) return "Enviar pedido para retirada";
-    if (isDelivery && isPix) return "Finalizar pedido (Pix)";
+    if (isDelivery && isOnlinePix) return "Finalizar pedido (Pix)";
     if (isDelivery) return "Finalizar pedido para entrega";
     if (isCredit) return "Finalizar pedido (Crédito)";
     if (isDebit) return "Finalizar pedido (Débito)";
     if (isCash) return "Finalizar pedido (Dinheiro)";
-    if (isPix) return "Finalizar pedido (Pix)";
+    if (isOnlinePix) return "Finalizar pedido (Pix)";
+    if (isManualPix) return "Finalizar pedido com Pix da loja";
     return "Finalizar pedido na mesa";
-  }, [isDelivery, isPickup, isPix, isCredit, isDebit, isCash]);
+  }, [isDelivery, isPickup, isOnlinePix, isManualPix, isCredit, isDebit, isCash]);
   const postalServices = useMemo(
     () => (Array.isArray(postalQuote?.quote?.services) ? postalQuote.quote.services : []),
     [postalQuote]
@@ -1934,50 +1980,100 @@ export const CartView = ({
           </h2>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { id: "pix", label: "Pix", description: "Registro rápido" },
-            { id: "debito", label: "Débito", description: "Pague no local" },
-            { id: "credito", label: "Crédito", description: "Pague no local" },
-            { id: "dinheiro", label: "Dinheiro", description: "Troco opcional" }
-          ].map((method) => (
-            <button
-              key={method.id}
-              onClick={() => onChangePayment(method.id)}
-              className={`rounded-2xl p-3 sm:p-4 text-left transition-all border active:scale-[0.98] ${
-                paymentMethod === method.id
-                  ? "border-brand-primary bg-gradient-to-br from-brand-primary/15 via-white to-white text-brand-primary shadow-lg ring-2 ring-brand-primary/30"
-                  : "border-gray-100 text-gray-500 bg-white/70 hover:border-brand-primary/40 hover:shadow-sm hover:-translate-y-0.5"
-              }`}
-            >
-              {(() => {
-                const methodMeta = getPaymentMethodMeta(method.id);
-                return (
-                  <div className="flex items-center gap-3">
-                    <span className={`h-10 w-10 rounded-xl flex items-center justify-center shadow-md ${paymentMethod === method.id ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-600'}`}>
-                      {methodMeta.icon ? (
-                        <img
-                          src={methodMeta.icon}
-                          alt={methodMeta.label}
-                          className="h-5 w-5 object-contain"
-                        />
-                      ) : (
-                        <CreditCard size={16} />
-                      )}
-                    </span>
-                    <div className="space-y-1">
-                      <div className="text-sm sm:text-base font-semibold tracking-tight">{method.label}</div>
-                      <div className={`text-[11px] sm:text-xs ${paymentMethod === method.id ? 'text-brand-primary/70' : 'text-gray-500'}`}>
-                        {method.description}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-            </button>
-          ))}
+        <div className="space-y-3">
+          {paymentGroups.online.length > 0 && (
+            <div className="space-y-2">
+              {showPaymentGroupLabels && (
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Online</p>
+              )}
+              <div className={`grid gap-3 ${paymentGroups.online.length === 1 ? "grid-cols-1" : "grid-cols-2 sm:grid-cols-3"}`}>
+                {paymentGroups.online.map((method) => (
+                  <button
+                    key={method.id}
+                    onClick={() => onChangePayment(method.id)}
+                    className={`rounded-2xl p-3 sm:p-4 text-left transition-all border active:scale-[0.98] ${
+                      paymentMethod === method.id
+                        ? "border-brand-primary bg-gradient-to-br from-brand-primary/15 via-white to-white text-brand-primary shadow-lg ring-2 ring-brand-primary/30"
+                        : "border-gray-100 text-gray-500 bg-white/70 hover:border-brand-primary/40 hover:shadow-sm hover:-translate-y-0.5"
+                    }`}
+                  >
+                    {(() => {
+                      const methodMeta = getPaymentMethodMeta(method.id);
+                      return (
+                        <div className="flex items-center gap-3">
+                          <span className={`h-10 w-10 rounded-xl flex items-center justify-center shadow-md ${paymentMethod === method.id ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-600'}`}>
+                            {methodMeta.icon ? (
+                              <img
+                                src={methodMeta.icon}
+                                alt={methodMeta.label}
+                                className="h-5 w-5 object-contain"
+                              />
+                            ) : (
+                              <CreditCard size={16} />
+                            )}
+                          </span>
+                          <div className="space-y-1">
+                            <div className="text-sm sm:text-base font-semibold tracking-tight">{method.label}</div>
+                            <div className={`text-[11px] sm:text-xs ${paymentMethod === method.id ? 'text-brand-primary/70' : 'text-gray-500'}`}>
+                              {method.description}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {paymentGroups.local.length > 0 && (
+            <div className="space-y-2">
+              {showPaymentGroupLabels && (
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Na loja</p>
+              )}
+              <div className={`grid gap-3 ${paymentGroups.local.length === 1 ? "grid-cols-1" : "grid-cols-2 sm:grid-cols-3"}`}>
+                {paymentGroups.local.map((method) => (
+                  <button
+                    key={method.id}
+                    onClick={() => onChangePayment(method.id)}
+                    className={`rounded-2xl p-3 sm:p-4 text-left transition-all border active:scale-[0.98] ${
+                      paymentMethod === method.id
+                        ? "border-brand-primary bg-gradient-to-br from-brand-primary/15 via-white to-white text-brand-primary shadow-lg ring-2 ring-brand-primary/30"
+                        : "border-gray-100 text-gray-500 bg-white/70 hover:border-brand-primary/40 hover:shadow-sm hover:-translate-y-0.5"
+                    }`}
+                  >
+                    {(() => {
+                      const methodMeta = getPaymentMethodMeta(method.id);
+                      return (
+                        <div className="flex items-center gap-3">
+                          <span className={`h-10 w-10 rounded-xl flex items-center justify-center shadow-md ${paymentMethod === method.id ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-600'}`}>
+                            {methodMeta.icon ? (
+                              <img
+                                src={methodMeta.icon}
+                                alt={methodMeta.label}
+                                className="h-5 w-5 object-contain"
+                              />
+                            ) : (
+                              <CreditCard size={16} />
+                            )}
+                          </span>
+                          <div className="space-y-1">
+                            <div className="text-sm sm:text-base font-semibold tracking-tight">{method.label}</div>
+                            <div className={`text-[11px] sm:text-xs ${paymentMethod === method.id ? 'text-brand-primary/70' : 'text-gray-500'}`}>
+                              {method.description}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-        {(isPix || isCredit || isDebit) && (
+        {isOnlinePaymentMethod && (
           <div className="mt-4 rounded-2xl border border-[#009ee3]/18 bg-gradient-to-r from-[#009ee3]/6 to-white p-3 flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white border border-[#009ee3]/20 shadow-sm overflow-hidden">
               {mercadoPagoMeta.icon ? (
@@ -1991,6 +2087,19 @@ export const CartView = ({
               <p className="text-[10px] text-slate-500 leading-tight flex items-center gap-1">
                 <ShieldCheck size={10} weight="duotone" className="shrink-0 text-emerald-500" />
                 Pagamento seguro e criptografado
+              </p>
+            </div>
+          </div>
+        )}
+        {isManualPix && (
+          <div className="mt-4 rounded-2xl border border-emerald-200/70 bg-gradient-to-r from-emerald-50/80 to-white p-3 flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white border border-emerald-200 shadow-sm overflow-hidden">
+              <img src={getPaymentMethodMeta("pix_loja").icon} alt="Pix da loja" className="h-5 w-5 object-contain" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[11px] font-black text-emerald-700">Pix da loja</p>
+              <p className="text-[10px] text-slate-500 leading-tight">
+                A chave Pix da loja será exibida após confirmar o pedido.
               </p>
             </div>
           </div>
@@ -2157,7 +2266,7 @@ export const CartView = ({
           <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
             <div className="flex items-center gap-3">
               <span className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ${
-                (isPix || isCredit || isDebit) ? 'bg-sky-50 text-[#009ee3]' : 'bg-slate-100 text-slate-600'
+                isOnlinePaymentMethod ? 'bg-sky-50 text-[#009ee3]' : isManualPix ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'
               }`}>
                 <CreditCard size={18} weight="duotone" />
               </span>
@@ -2179,8 +2288,10 @@ export const CartView = ({
                 {isCash && cashNeedsChange && cashTenderedValue !== null && cashTenderedValue >= totalWithFee ? (
                   <p className="mt-1 text-xs text-slate-500">Troco para {formatCurrency(cashTenderedValue)} • devolução {formatCurrency(cashChangeDue)}</p>
                 ) : null}
-                {(isPix || isCredit || isDebit) ? (
+                {isOnlinePaymentMethod ? (
                   <p className="mt-1 text-xs text-slate-500">Cobrança segura via Mercado Pago.</p>
+                ) : isManualPix ? (
+                  <p className="mt-1 text-xs text-slate-500">A chave Pix da loja será exibida após confirmar o pedido.</p>
                 ) : null}
               </div>
             </div>
@@ -2234,7 +2345,7 @@ export const CartView = ({
                 (checkoutStep === 4 && (checkoutLoading || checkoutDisabled || cashValidation.blocked))
                   ? "bg-slate-300 text-slate-600 cursor-not-allowed"
                   : checkoutStep === 4
-                  ? (isCredit || isDebit) ? "bg-[#009ee3] text-white cursor-pointer" : "bg-emerald-600 text-white cursor-pointer"
+                  ? isOnlinePaymentMethod ? "bg-[#009ee3] text-white cursor-pointer" : "bg-emerald-600 text-white cursor-pointer"
                   : "bg-slate-900 text-white cursor-pointer"
               }`}
               style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
@@ -2252,8 +2363,8 @@ export const CartView = ({
                 : <>
                     {checkoutLoading
                       ? 'Processando...'
-                      : (isCredit || isDebit)
-                      ? <><img src={mercadoPagoMeta.icon} alt="" className="h-5 w-5 object-contain brightness-0 invert" /> Pagar via Mercado Pago <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>
+                      : isOnlinePaymentMethod
+                      ? <><img src={mercadoPagoMeta.icon} alt="" className="h-5 w-5 object-contain brightness-0 invert" /> {isOnlinePix ? 'Gerar Pix via Mercado Pago' : 'Pagar via Mercado Pago'} <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>
                       : <>{isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />} {'Fazer pedido'} <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>
                     }
                   </>

@@ -24,10 +24,12 @@ import { respondWithError } from '../errors/respondWithError';
 import { resolvePlanFeatures } from '../config/planFeatures';
 import { publicStoreCache } from '../utils/publicStoreCache';
 import { In } from 'typeorm';
+import { StorePaymentAccountService } from '../services/StorePaymentAccountService';
 
 const storeService = new StoreService();
 const subscriptionService = new SubscriptionService();
 const orderReviewService = new OrderReviewService();
+const storePaymentAccountService = new StorePaymentAccountService();
 const DEMO_SLUGS = new Set([ 'demo', 'test-store' ]);
 const log = logger.child({ scope: 'StoreController' });
 const SAO_PAULO_TZ = 'America/Sao_Paulo';
@@ -354,6 +356,38 @@ export class StoreController {
             lng: store.settings.lng ?? null,
           }
         : null,
+    };
+  }
+
+  private static async buildPublicPaymentSummary(store: any) {
+    const manualPixEnabled = Boolean(String(store?.settings?.pixKey || '').trim());
+    let mpStatus: any = null;
+
+    try {
+      mpStatus = await storePaymentAccountService.getStatus(store.id);
+    } catch {
+      mpStatus = null;
+    }
+
+    const validation = mpStatus?.validation || null;
+    const pixOnline = Boolean(validation?.pix?.available);
+    const creditOnline = Boolean(validation?.credit?.available);
+    const debitOnline = Boolean(validation?.debit?.available);
+
+    return {
+      provider: 'MERCADO_PAGO',
+      onlineEnabled: Boolean(pixOnline || creditOnline || debitOnline),
+      manualPixEnabled,
+      cashEnabled: true,
+      providerConnected: Boolean(mpStatus?.connected),
+      providerStatus: validation?.overallStatus || null,
+      methods: {
+        pixOnline,
+        creditOnline,
+        debitOnline,
+        manualPix: manualPixEnabled,
+        cash: true,
+      },
     };
   }
     /**
@@ -690,6 +724,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
           }
           : null,
         openNow: StoreController.isStoreOpenNow(store),
+        paymentSummary: await StoreController.buildPublicPaymentSummary(store),
       };
       const payload = { ...sanitizedStore, subscription };
       publicStoreCache.setStoreBySlug(req.params.slug, payload);

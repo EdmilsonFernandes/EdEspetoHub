@@ -84,6 +84,8 @@ export const formatPaymentMethod = (payment?: string) => {
   const normalized = (payment || '').toString().toLowerCase();
   const map: Record<string, string> = {
     pix: 'Pix',
+    pix_loja: 'Pix da loja',
+    'pix-loja': 'Pix da loja',
     debito: 'Débito',
     debit: 'Débito',
     credito: 'Crédito',

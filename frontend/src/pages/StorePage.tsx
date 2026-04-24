@@ -21,7 +21,7 @@ import { useToast } from '../contexts/ToastContext';
 import { formatCurrency, formatOrderDisplayId, formatOrderStatus, formatOrderType, formatPaymentMethod } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
-import { getPersistedBranding, brandingStorageKey, defaultBranding, initialCustomer, defaultPaymentMethod, WHATSAPP_NUMBER, PIX_KEY } from '../constants';
+import { getPersistedBranding, brandingStorageKey, defaultBranding, initialCustomer, defaultPaymentMethod, WHATSAPP_NUMBER } from '../constants';
 import { isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
 import {
   formatSelectedModifiers,
@@ -38,6 +38,87 @@ const WEEKDAY_LABELS = [ 'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-fei
 const PUBLIC_ORDER_ALERT_TTL_MS = 3 * 60 * 60 * 1000;
 const CUSTOMER_REMEMBER_EMAIL_KEY = 'jnk_customer_auth_email';
 const NATIVE_NAV_VISIBILITY_EVENT = 'jnc:native-nav-visibility';
+
+const buildPublicPaymentSummary = (storeData: any) => {
+  const rawSummary = storeData?.paymentSummary || {};
+  const rawMethods = rawSummary?.methods || {};
+  const manualPixEnabled = Boolean(String(storeData?.settings?.pixKey || '').trim());
+  const cashEnabled = rawSummary?.cashEnabled !== false;
+
+  return {
+    provider: rawSummary?.provider || 'MERCADO_PAGO',
+    onlineEnabled: Boolean(rawMethods.pixOnline || rawMethods.creditOnline || rawMethods.debitOnline),
+    manualPixEnabled: Boolean(rawMethods.manualPix ?? manualPixEnabled),
+    cashEnabled,
+    providerConnected: Boolean(rawSummary?.providerConnected),
+    providerStatus: rawSummary?.providerStatus || null,
+    methods: {
+      pixOnline: Boolean(rawMethods.pixOnline),
+      creditOnline: Boolean(rawMethods.creditOnline),
+      debitOnline: Boolean(rawMethods.debitOnline),
+      manualPix: Boolean(rawMethods.manualPix ?? manualPixEnabled),
+      cash: cashEnabled,
+    },
+  };
+};
+
+const resolveCheckoutPaymentMethods = (paymentSummary: any) => {
+  const summary = paymentSummary || {};
+  const methods = summary?.methods || {};
+  const available = [];
+
+  if (methods.pixOnline) {
+    available.push({
+      id: 'pix',
+      label: 'Pix',
+      description: 'Via Mercado Pago',
+      group: 'online',
+    });
+  }
+  if (methods.creditOnline) {
+    available.push({
+      id: 'credito',
+      label: 'Crédito',
+      description: 'Via Mercado Pago',
+      group: 'online',
+    });
+  }
+  if (methods.debitOnline) {
+    available.push({
+      id: 'debito',
+      label: 'Débito',
+      description: 'Via Mercado Pago',
+      group: 'online',
+    });
+  }
+  if (methods.manualPix) {
+    available.push({
+      id: 'pix_loja',
+      label: 'Pix da loja',
+      description: 'Chave exibida apos confirmar',
+      group: 'local',
+    });
+  }
+  if (methods.cash !== false) {
+    available.push({
+      id: 'dinheiro',
+      label: 'Dinheiro',
+      description: 'Pagamento no atendimento',
+      group: 'local',
+    });
+  }
+
+  return available.length
+    ? available
+    : [
+        {
+          id: 'dinheiro',
+          label: 'Dinheiro',
+          description: 'Pagamento no atendimento',
+          group: 'local',
+        },
+      ];
+};
 
 const getOrderStatusTone = (status?: string) => {
   const normalized = String(status || '').trim().toLowerCase();
@@ -181,6 +262,7 @@ export function StorePage() {
   const [storeState, setStoreState] = useState('');
   const [storeSegment, setStoreSegment] = useState('outros');
   const [storePixKey, setStorePixKey] = useState('');
+  const [paymentSummary, setPaymentSummary] = useState<any | null>(null);
   const [deliveryRadiusKm, setDeliveryRadiusKm] = useState('');
   const [deliveryFee, setDeliveryFee] = useState('');
   const [postalEnabled, setPostalEnabled] = useState(false);
@@ -374,6 +456,10 @@ export function StorePage() {
     const exact = services.find((service: any) => String(service?.serviceCode || '') === String(selectedPostalServiceCode || ''));
     return exact || services[0];
   }, [isPostalDelivery, postalQuote, selectedPostalServiceCode]);
+  const availablePaymentMethods = useMemo(
+    () => resolveCheckoutPaymentMethods(paymentSummary),
+    [paymentSummary]
+  );
   const deliveryFeeValue = useMemo(() => {
     if (customer.type !== 'delivery') return 0;
     if (isPostalDelivery) {
@@ -384,6 +470,12 @@ export function StorePage() {
     if (!value || value <= 0) return 0;
     return value;
   }, [customer.type, deliveryFee, isPostalDelivery, selectedPostalService]);
+
+  useEffect(() => {
+    if (!availablePaymentMethods.length) return;
+    if (availablePaymentMethods.some((method: any) => method.id === paymentMethod)) return;
+    setPaymentMethod(availablePaymentMethods[0]?.id || defaultPaymentMethod);
+  }, [availablePaymentMethods, paymentMethod]);
   const isCondominiumCheckout = Boolean(condominiumCheckoutContext?.condominium?.slug);
   const condominiumFulfillmentMode = String(customer?.condominiumFulfillmentMode || 'pickup_at_stall');
   const condominiumApartmentFee = useMemo(() => {
@@ -835,6 +927,7 @@ export function StorePage() {
           setStoreSegment(String(data.settings?.segment || 'outros').toLowerCase());
           setPromoMessage(data.settings?.promoMessage || '');
           setStorePixKey(data.settings?.pixKey || '');
+          setPaymentSummary(buildPublicPaymentSummary(data));
           setDeliveryRadiusKm(data.settings?.deliveryRadiusKm ?? '');
           setDeliveryFee(data.settings?.deliveryFee ?? '');
           setPostalEnabled(Boolean(data.settings?.postalEnabled));
@@ -1746,7 +1839,7 @@ export function StorePage() {
 
     const sanitizedPhone = customer.phone.replace(/\D/g, '');
     const sanitizedPhoneKey = sanitizedPhone.length >= 10 ? `+55${sanitizedPhone}` : '';
-    const pixKey = storePixKey || PIX_KEY || sanitizedPhoneKey;
+    const pixKey = payment === 'pix_loja' ? storePixKey : '';
     const condominiumMode = String(condominiumOrderPayload?.fulfillmentMode || 'pickup_at_stall').toLowerCase();
     const isApartmentCondominiumDelivery = isCondominiumOrder && condominiumMode === 'apartment_delivery';
     const condominiumAddress = isCondominiumOrder
@@ -3042,6 +3135,7 @@ export function StorePage() {
             }}
             onChangeCustomer={handleCustomerChange}
             onChangePayment={setPaymentMethod}
+            paymentSummary={paymentSummary}
             onUpdateCart={updateCart}
             onCheckout={checkout}
             checkoutLoading={checkoutLoading}

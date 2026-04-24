@@ -370,8 +370,8 @@ export const SuccessView = ({
     onlinePayment?.qrCodeBase64 || onlinePayment?.qrCodeText || onlinePayment?.paymentLink
   );
   const isPix = Boolean(onlinePayment?.qrCodeBase64 || onlinePayment?.qrCodeText);
-  const isStaticPix = !hasOnlinePayment && paymentMethod === "pix";
-  const isLocalPayment = !hasOnlinePayment && paymentMethod !== "pix";
+  const isStaticPix = !hasOnlinePayment && (paymentMethod === "pix" || paymentMethod === "pix_loja");
+  const isLocalPayment = !hasOnlinePayment && paymentMethod !== "pix" && paymentMethod !== "pix_loja";
   const isPaid = String(paymentStatus || "").toUpperCase() === "PAID";
   const isFailed = String(paymentStatus || "").toUpperCase() === "FAILED";
   const isAwaitingPayment = hasOnlinePayment && !isPaid && !isFailed;
