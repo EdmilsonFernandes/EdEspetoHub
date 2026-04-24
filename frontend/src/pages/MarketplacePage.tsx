@@ -136,12 +136,7 @@ const buildCustomerAddressLookup = (address: any) => {
   ]
     .filter(Boolean)
     .join(', ');
-  const label = [
-    String(address?.label || 'Endereço principal').trim(),
-    streetLine || (city && state ? `${city} - ${state}` : ''),
-  ]
-    .filter(Boolean)
-    .join(' • ');
+  const label = streetLine || (city && state ? `${city} - ${state}` : city || 'Endereço principal');
 
   return {
     city,
