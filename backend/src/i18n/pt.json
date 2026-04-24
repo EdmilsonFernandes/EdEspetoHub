@@ -29,6 +29,7 @@
   "AUTH-S005": "E-mail já verificado.",
   "STORE-001": "Loja não encontrada.",
   "STORE-002": "Proprietário não encontrado.",
+  "STORE-003": "Endereço, cidade e UF da loja são obrigatórios para localização.",
   "SUB-001": "Assinatura não encontrada.",
   "SUB-002": "Assinatura inativa. Renove para continuar.",
   "SUB-003": "Plano inválido.",

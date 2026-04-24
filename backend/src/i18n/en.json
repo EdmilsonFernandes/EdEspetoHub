@@ -29,6 +29,7 @@
   "AUTH-S005": "Email already verified.",
   "STORE-001": "Store not found.",
   "STORE-002": "Owner not found.",
+  "STORE-003": "Store address, city and state are required for location.",
   "SUB-001": "Subscription not found.",
   "SUB-002": "Subscription inactive. Renew to continue.",
   "SUB-003": "Invalid plan.",

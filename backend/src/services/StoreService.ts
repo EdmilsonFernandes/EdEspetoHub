@@ -99,6 +99,21 @@ private normalizePostalZip(value?: string | null) {
     return digits || null;
   }
 
+  private normalizeCity(value?: string | null) {
+    if (value === undefined) return undefined;
+    if (value === null) return null;
+    const trimmed = String(value).trim();
+    return trimmed || null;
+  }
+
+  private normalizeState(value?: string | null) {
+    if (value === undefined) return undefined;
+    if (value === null) return null;
+    const trimmed = String(value).trim().toUpperCase();
+    if (!trimmed) return null;
+    return trimmed.slice(0, 2);
+  }
+
   private parseCoordinate(value?: any): number | null | undefined {
     if (value === undefined) return undefined;
     if (value === null) return null;
@@ -107,15 +122,44 @@ private normalizePostalZip(value?: string | null) {
     return parsed;
   }
 
+  private normalizeAddressForGeocode(value?: string | null) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    const parts = raw
+      .split('|')
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .filter((part) => !/^cep\b/i.test(part))
+      .filter((part) => !/^[A-Za-zÀ-ÿ\s.'-]+\s*-\s*[A-Z]{2}$/i.test(part));
+    return (parts.length ? parts : [ raw ]).join(', ').replace(/\s+/g, ' ').trim();
+  }
+
+  private assertLocationFields(payload: {
+    address?: string | null;
+    city?: string | null;
+    state?: string | null;
+  }) {
+    const address = this.normalizeAddressForGeocode(payload.address);
+    const city = this.normalizeCity(payload.city);
+    const state = this.normalizeState(payload.state);
+    if (!address || !city || !state || state.length !== 2) {
+      throw new AppError('STORE-003', 400, {
+        required: [ 'address', 'city', 'state' ],
+      });
+    }
+  }
+
   private buildGeocodeAddress(payload: {
     address?: string | null;
     city?: string | null;
     state?: string | null;
     fallbackAddress?: string | null;
   }) {
-    const address = String(payload.address || '').trim() || String(payload.fallbackAddress || '').trim();
-    const city = String(payload.city || '').trim();
-    const state = String(payload.state || '').trim().toUpperCase();
+    const address =
+      this.normalizeAddressForGeocode(payload.address) ||
+      this.normalizeAddressForGeocode(payload.fallbackAddress);
+    const city = this.normalizeCity(payload.city) || '';
+    const state = this.normalizeState(payload.state) || '';
     const parts = [address, city, state].filter(Boolean);
     return parts.length ? parts.join(', ') : '';
   }
@@ -204,13 +248,18 @@ private normalizePostalZip(value?: string | null) {
       const deliveryFee = this.parseNumber(input.deliveryFee);
       const orderNotificationSound = input.orderNotificationSound?.toString().trim() || null;
       const trimmedAddress = input.address?.toString().trim();
-      const trimmedCity = input.city?.toString().trim();
-      const trimmedState = input.state?.toString().trim().toUpperCase();
+      const trimmedCity = this.normalizeCity(input.city) || null;
+      const trimmedState = this.normalizeState(input.state) || null;
       const segment = sanitizeStoreSegment(input.segment);
       const segmentPreset = getStoreSegmentPreset(segment);
       const bannerPosition = this.normalizeBannerPosition(input.bannerPosition);
       const postalOriginZip = this.normalizePostalZip(input.postalOriginZip);
       const postalEnabled = Boolean(input.postalEnabled) && Boolean(postalOriginZip);
+      this.assertLocationFields({
+        address: trimmedAddress || owner.address || null,
+        city: trimmedCity,
+        state: trimmedState,
+      });
       const requestedLat = this.parseCoordinate(input.lat);
       const requestedLng = this.parseCoordinate(input.lng);
       let resolvedLat = Number.isFinite(Number(requestedLat)) ? Number(requestedLat) : null;
@@ -456,14 +505,20 @@ private normalizePostalZip(value?: string | null) {
       }
       if (data.city !== undefined)
       {
-        const trimmedCity = data.city?.toString().trim();
+        const trimmedCity = this.normalizeCity(data.city);
         store.settings.city = trimmedCity || null;
       }
       if (data.state !== undefined)
       {
-        const trimmedState = data.state?.toString().trim().toUpperCase();
+        const trimmedState = this.normalizeState(data.state);
         store.settings.state = trimmedState || null;
       }
+
+      this.assertLocationFields({
+        address: store.settings.address || store.owner?.address || null,
+        city: store.settings.city,
+        state: store.settings.state,
+      });
 
       const nextLat = this.parseCoordinate(data.lat);
       const nextLng = this.parseCoordinate(data.lng);

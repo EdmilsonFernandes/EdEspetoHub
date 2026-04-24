@@ -69,17 +69,33 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
       state,
     };
   };
-  const [addressForm, setAddressForm] = useState(() => parseAddress(branding.address || ""));
+  const buildAddressForm = (nextBranding) => {
+    const parsed = parseAddress(nextBranding.address || "");
+    return {
+      ...parsed,
+      city: String(nextBranding.city || parsed.city || "").trim(),
+      state: String(nextBranding.state || parsed.state || "").trim().toUpperCase().slice(0, 2),
+    };
+  };
+  const [addressForm, setAddressForm] = useState(() => buildAddressForm(branding));
 
   useEffect(() => {
-    setAddressForm(parseAddress(branding.address || ""));
-  }, [branding.address]);
+    setAddressForm(buildAddressForm(branding));
+  }, [branding.address, branding.city, branding.state]);
   const handleChange = (field, value) => {
     onChange((prev) => ({ ...prev, [field]: value }));
   };
   const handleAddressChange = (field, value) => {
     setAddressForm((prev) => {
-      const next = { ...prev, [field]: field === "cep" ? normalizeCep(value) : value };
+      const next = {
+        ...prev,
+        [field]:
+          field === "cep"
+            ? normalizeCep(value)
+            : field === "state"
+            ? value.toString().toUpperCase().replace(/[^A-Z]/g, "").slice(0, 2)
+            : value,
+      };
       const parts = [
         next.street && `${next.street}${next.number ? `, ${next.number}` : ""}`,
         next.neighborhood,
@@ -88,6 +104,8 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
         next.cep && `CEP ${next.cep}`,
       ].filter(Boolean);
       handleChange("address", parts.join(" | "));
+      handleChange("city", next.city);
+      handleChange("state", next.state);
       return next;
     });
   };
@@ -122,6 +140,8 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
           next.cep && `CEP ${next.cep}`,
         ].filter(Boolean);
         handleChange("address", parts.join(" | "));
+        handleChange("city", next.city);
+        handleChange("state", String(next.state || "").toUpperCase().slice(0, 2));
         return next;
       });
     } catch (error) {
@@ -497,8 +517,11 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                       type="text"
                       value={addressForm.city || ""}
                       onChange={(e) => handleAddressChange("city", e.target.value)}
-                      className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                      className={`w-full rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors ${
+                        addressForm.city ? 'border border-gray-200' : 'border border-amber-300'
+                      }`}
                       placeholder="Cidade"
+                      required
                     />
                   </div>
                   <div>
@@ -507,13 +530,17 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                       type="text"
                       value={addressForm.state || ""}
                       onChange={(e) => handleAddressChange("state", e.target.value)}
-                      className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                      className={`w-full rounded-xl p-3 bg-white/80 uppercase focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors ${
+                        addressForm.state ? 'border border-gray-200' : 'border border-amber-300'
+                      }`}
                       placeholder="UF"
+                      maxLength={2}
+                      required
                     />
                   </div>
                 </div>
               </div>
-              <p className="text-xs text-gray-500">Usado para mostrar localização e validação de entrega.</p>
+              <p className="text-xs text-gray-500">Usado para mostrar localização e validação de entrega. Cidade e UF são obrigatórias.</p>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Chave Pix da loja</label>

@@ -1684,6 +1684,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     promoMessage: session?.store?.settings?.promoMessage || '',
     isOrderingEnabled: session?.store?.settings?.isOrderingEnabled !== false,
     address: session?.store?.settings?.address || session?.store?.owner?.address || '',
+    city: session?.store?.settings?.city || '',
+    state: session?.store?.settings?.state || '',
     instagram: instagramHandle?.replace('@', '') || '',
     deliveryRadiusKm: session?.store?.settings?.deliveryRadiusKm || '',
     deliveryFee: session?.store?.settings?.deliveryFee || '',
@@ -1837,6 +1839,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       promoMessage: session?.store?.settings?.promoMessage || '',
       isOrderingEnabled: session?.store?.settings?.isOrderingEnabled !== false,
       address: session?.store?.settings?.address || session?.store?.owner?.address || '',
+      city: session?.store?.settings?.city || '',
+      state: session?.store?.settings?.state || '',
       instagram: instagramHandle?.replace('@', '') || '',
       deliveryRadiusKm: session?.store?.settings?.deliveryRadiusKm || '',
       deliveryFee: session?.store?.settings?.deliveryFee || '',
@@ -1860,6 +1864,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     session?.store?.settings?.promoMessage,
     session?.store?.settings?.isOrderingEnabled,
     session?.store?.settings?.address,
+    session?.store?.settings?.city,
+    session?.store?.settings?.state,
     session?.store?.owner?.address,
     session?.store?.settings?.deliveryRadiusKm,
     session?.store?.settings?.deliveryFee,
@@ -1886,6 +1892,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       promoMessage: normalize(session?.store?.settings?.promoMessage),
       isOrderingEnabled: session?.store?.settings?.isOrderingEnabled !== false ? 'true' : 'false',
       address: normalize(session?.store?.settings?.address || session?.store?.owner?.address || ''),
+      city: normalize(session?.store?.settings?.city),
+      state: normalize(session?.store?.settings?.state),
       instagram: normalize(instagramHandle?.replace('@', '') || ''),
       deliveryRadiusKm: normalize(session?.store?.settings?.deliveryRadiusKm),
       deliveryFee: normalize(session?.store?.settings?.deliveryFee),
@@ -1909,6 +1917,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       promoMessage: normalize(brandingDraft.promoMessage),
       isOrderingEnabled: brandingDraft.isOrderingEnabled !== false ? 'true' : 'false',
       address: normalize(brandingDraft.address),
+      city: normalize(brandingDraft.city),
+      state: normalize(brandingDraft.state),
       instagram: normalize(brandingDraft.instagram),
       deliveryRadiusKm: normalize(brandingDraft.deliveryRadiusKm),
       deliveryFee: normalize(brandingDraft.deliveryFee),
@@ -2470,6 +2480,14 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
   const handleSaveBranding = async () => {
     if (!storeId) return;
+    const normalizedCity = String(brandingDraft.city || '').trim();
+    const normalizedState = String(brandingDraft.state || '').trim().toUpperCase();
+    const normalizedAddress = String(brandingDraft.address || '').trim();
+    if (!normalizedAddress || !normalizedCity || normalizedState.length !== 2) {
+      setError('Preencha endereço, cidade e UF da loja para salvar a localização.');
+      showToast('Preencha endereço, cidade e UF da loja para salvar a localização.', 'error');
+      return;
+    }
     setSavingBranding(true);
     setError('');
     try {
@@ -2496,7 +2514,9 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         storePhone: brandingDraft.storePhone?.trim() ?? '',
         promoMessage: brandingDraft.promoMessage?.trim() ?? '',
         isOrderingEnabled: brandingDraft.isOrderingEnabled !== false,
-        address: brandingDraft.address?.trim() ?? '',
+        address: normalizedAddress,
+        city: normalizedCity,
+        state: normalizedState,
         deliveryRadiusKm: brandingDraft.deliveryRadiusKm,
         deliveryFee: brandingDraft.deliveryFee,
         orderNotificationSound: brandingDraft.orderNotificationSound?.trim() ?? '',
