@@ -185,9 +185,12 @@ export function AddressDistance() {
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Apelido</label>
                     <input
+                      name="addressLabel"
                       placeholder="Casa, trabalho, mãe..."
                       value={form.label}
                       onChange={e => setForm({...form, label: e.target.value})}
+                      autoCapitalize="words"
+                      enterKeyHint="next"
                       className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
                     />
                   </div>
@@ -196,9 +199,13 @@ export function AddressDistance() {
                     <div className="relative">
                       <User size={16} weight="duotone" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
+                        name="recipientName"
                         placeholder="Nome do recebedor"
                         value={form.recipientName}
                         onChange={e => setForm({...form, recipientName: e.target.value})}
+                        autoComplete="name"
+                        autoCapitalize="words"
+                        enterKeyHint="next"
                         className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
                       />
                     </div>
@@ -210,9 +217,13 @@ export function AddressDistance() {
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
                     <div className="relative">
                       <input
+                        name="postalCode"
                         placeholder="00000-000"
                         value={form.cep}
                         onChange={e => setForm({...form, cep: formatCepBr(e.target.value)})}
+                        autoComplete="postal-code"
+                        inputMode="numeric"
+                        enterKeyHint="next"
                         className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
                         disabled={isGeocoding}
                       />
@@ -247,11 +258,13 @@ export function AddressDistance() {
                 <div className="relative">
                   <Phone size={16} weight="duotone" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
+                    name="recipientPhone"
                     placeholder="Telefone do recebedor"
                     value={form.phone}
                     onChange={e => setForm({...form, phone: formatPhoneBr(e.target.value)})}
                     inputMode="tel"
-                    autoComplete="tel"
+                    autoComplete="tel-national"
+                    enterKeyHint="next"
                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
                   />
                 </div>
@@ -260,18 +273,25 @@ export function AddressDistance() {
                   <div className="relative">
                     <MapPinLine size={16} weight="duotone" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
+                      name="addressLine1"
                       placeholder="Rua / Logradouro"
                       value={form.street}
                       onChange={e => setForm({...form, street: e.target.value})}
+                      autoComplete="address-line1"
+                      autoCapitalize="words"
+                      enterKeyHint="next"
                       className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
                     />
                   </div>
                   <div className="relative">
                     <HashStraight size={16} weight="duotone" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
+                      name="addressNumber"
                       placeholder="Nº"
                       value={form.number}
                       onChange={e => setForm({...form, number: e.target.value})}
+                      autoComplete="address-line2"
+                      enterKeyHint="next"
                       className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-8 pr-2 text-center text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
                     />
                   </div>
@@ -279,31 +299,47 @@ export function AddressDistance() {
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_0.92fr_110px]">
                   <input
+                    name="addressNeighborhood"
                     placeholder="Bairro"
                     value={form.neighborhood}
                     onChange={e => setForm({...form, neighborhood: e.target.value})}
+                    autoComplete="address-level3"
+                    autoCapitalize="words"
+                    enterKeyHint="next"
                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
                   />
 
                   <input
+                    name="addressCity"
                     placeholder="Cidade"
                     value={form.city}
                     onChange={e => setForm({...form, city: e.target.value})}
+                    autoComplete="address-level2"
+                    autoCapitalize="words"
+                    enterKeyHint="next"
                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
                   />
 
                   <input
+                    name="addressState"
                     placeholder="UF"
                     value={form.state}
                     onChange={e => setForm({...form, state: String(e.target.value || '').toUpperCase().slice(0, 2)})}
+                    autoComplete="address-level1"
+                    autoCapitalize="characters"
+                    enterKeyHint="next"
                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
                   />
                 </div>
 
                 <input
+                  name="addressComplement"
                   placeholder="Complemento"
                   value={form.complement}
                   onChange={e => setForm({...form, complement: e.target.value})}
+                  autoComplete="address-line3"
+                  autoCapitalize="words"
+                  enterKeyHint="done"
                   className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
                 />
 
