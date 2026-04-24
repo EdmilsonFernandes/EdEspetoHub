@@ -97,6 +97,7 @@ export const CartView = ({
   onApplySavedAddress,
   onOpenAddressManager,
   onUseCurrentLocation,
+  onValidateDeliveryAddress,
   onChangeDeliveryMode,
   onCalculatePostalQuote,
   onSelectPostalService,
@@ -2233,7 +2234,7 @@ export const CartView = ({
         {useMultiStepFlow ? (
           <>
             <button
-              onClick={() => {
+              onClick={async () => {
                 setCtaPulse(true);
                 window.setTimeout(() => setCtaPulse(false), 220);
                 if (checkoutStep === 1) {
@@ -2245,6 +2246,10 @@ export const CartView = ({
                   if (isLoggedDeliveryFlow && !hasSavedAddress) {
                     onOpenAddressManager?.();
                     return;
+                  }
+                  if (isDeliveryValidationMode) {
+                    const validated = await Promise.resolve(onValidateDeliveryAddress?.());
+                    if (!validated) return;
                   }
                   setCheckoutStep(3);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2262,14 +2267,22 @@ export const CartView = ({
                 });
               }}
               disabled={checkoutStep === 2
-                ? (checkoutLoading || (customer.type === 'delivery' && deliveryCheck?.status === 'out') || (customer.type === 'table' && !String(customer.table || '').trim()))
+                ? (
+                    checkoutLoading ||
+                    (customer.type === 'delivery' && (deliveryCheck?.status === 'out' || deliveryCheck?.status === 'loading')) ||
+                    (customer.type === 'table' && !String(customer.table || '').trim())
+                  )
                 : checkoutStep === 3
                 ? (checkoutDisabled || cashValidation.blocked)
                 : checkoutStep === 4
                 ? (checkoutLoading || checkoutDisabled || cashValidation.blocked)
                 : false}
               className={`w-full font-bold text-lg py-4 rounded-2xl shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
-                (checkoutStep === 2 && (checkoutLoading || (customer.type === 'delivery' && deliveryCheck?.status === 'out') || (customer.type === 'table' && !String(customer.table || '').trim()))) ||
+                (checkoutStep === 2 && (
+                  checkoutLoading ||
+                  (customer.type === 'delivery' && (deliveryCheck?.status === 'out' || deliveryCheck?.status === 'loading')) ||
+                  (customer.type === 'table' && !String(customer.table || '').trim())
+                )) ||
                 (checkoutStep === 3 && (checkoutDisabled || cashValidation.blocked)) ||
                 (checkoutStep === 4 && (checkoutLoading || checkoutDisabled || cashValidation.blocked))
                   ? "bg-slate-300 text-slate-600 cursor-not-allowed"
@@ -2281,7 +2294,11 @@ export const CartView = ({
             >
               {checkoutStep < 3
                 ? <>
-                    {isLoggedDeliveryFlow && !hasSavedAddress && checkoutStep === 2 ? 'Cadastrar endereço' : 'Continuar'}
+                    {isLoggedDeliveryFlow && !hasSavedAddress && checkoutStep === 2
+                      ? 'Cadastrar endereço'
+                      : checkoutStep === 2 && isDeliveryValidationMode
+                      ? 'Validar endereço'
+                      : 'Continuar'}
                     <ArrowLeft size={18} weight="bold" className="rotate-180" />
                   </>
                 : checkoutStep === 3
@@ -2318,12 +2335,21 @@ export const CartView = ({
                 }
                 if (isDeliveryValidationMode) {
                   const rawCep = (customer.cep || "").replace(/\D/g, "");
-                  if (rawCep.length !== 8) {
+                  const hasStructuredAddress = Boolean(
+                    String(customer.street || "").trim() &&
+                    String(customer.city || "").trim() &&
+                    String(customer.state || "").trim()
+                  );
+                  if (!hasStructuredAddress && rawCep.length !== 8) {
                     setCepError("Informe um CEP válido para validar a entrega.");
                     cepInputRef.current?.focus();
                     return;
                   }
-                  await handleCepLookup();
+                  if (!hasStructuredAddress) {
+                    await handleCepLookup();
+                    return;
+                  }
+                  await Promise.resolve(onValidateDeliveryAddress?.());
                   return;
                 }
                 if (isPostalQuoteMode) {

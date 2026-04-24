@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -714,6 +714,18 @@ export function StorePage() {
     }
     return { blocked: false, reason: '' };
   }, [customer.number, customer.type, customer.cep, customer.city, customer.state, deliveryCheck.status, deliveryRadiusValue, storeCoords, isPostalDelivery, selectedPostalService, storeCity, storeState]);
+
+  const normalizeDeliveryCacheKey = useCallback((value: string) => {
+    return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  }, []);
+
+  const getDeliveryAddressCacheKey = useCallback((address: string) => {
+    if (!storeSlug) return '';
+    const normalized = normalizeDeliveryCacheKey(address);
+    return normalized ? `delivery:validation:${storeSlug}:${normalized}` : '';
+  }, [normalizeDeliveryCacheKey, storeSlug]);
+
+  const validatedDeliverySignatureRef = useRef('');
 
   const resolveItemPrice = (item) => {
     const promoPrice = item?.promoPrice != null ? Number(item.promoPrice) : null;
@@ -1494,83 +1506,156 @@ export function StorePage() {
     loadCoords();
   }, [storeAddress, storeCoords, storeSlug]);
 
+  const validateDeliveryAddress = useCallback(async () => {
+    if (customer.type !== 'delivery' || isPostalDelivery) {
+      setDeliveryCheck({ status: 'idle', distanceKm: null, durationMin: null });
+      setDeliveryCoords(null);
+      validatedDeliverySignatureRef.current = '';
+      return true;
+    }
+
+    if (!deliveryRadiusValue) {
+      setDeliveryCheck({ status: 'ok', distanceKm: null, durationMin: null });
+      validatedDeliverySignatureRef.current = '';
+      return true;
+    }
+
+    if (!storeCoords?.lat || !storeCoords?.lng) {
+      setDeliveryCheck({ status: 'error', distanceKm: null, durationMin: null });
+      setDeliveryCoords(null);
+      validatedDeliverySignatureRef.current = '';
+      return false;
+    }
+
+    const address = String(deliveryAddress || '').trim();
+    const hasManualCoords = Boolean(manualDeliveryCoords?.lat && manualDeliveryCoords?.lng);
+    if (!address && !hasManualCoords) {
+      setDeliveryCheck({ status: 'idle', distanceKm: null, durationMin: null });
+      setDeliveryCoords(null);
+      validatedDeliverySignatureRef.current = '';
+      return false;
+    }
+
+    const validationSignature = hasManualCoords
+      ? `gps:${Number(manualDeliveryCoords?.lat)}:${Number(manualDeliveryCoords?.lng)}`
+      : `address:${normalizeDeliveryCacheKey(address)}`;
+
+    setDeliveryCheck({ status: 'loading', distanceKm: null, durationMin: null });
+
+    try {
+      let coords = hasManualCoords ? manualDeliveryCoords : null;
+      let cachedRoute: { distanceKm: number; durationMin: number | null } | null = null;
+      const cacheKey = hasManualCoords ? '' : getDeliveryAddressCacheKey(address);
+
+      if (!coords && cacheKey) {
+        try {
+          const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+          if (cached?.coords?.lat && (cached?.coords?.lng || cached?.coords?.lon)) {
+            coords = {
+              lat: Number(cached.coords.lat),
+              lng: Number(cached.coords.lng ?? cached.coords.lon),
+            };
+          }
+          if (cached?.route?.distanceKm) {
+            cachedRoute = {
+              distanceKm: Number(cached.route.distanceKm),
+              durationMin: cached.route.durationMin == null ? null : Number(cached.route.durationMin),
+            };
+          }
+        } catch (error) {
+          console.error('Falha ao ler cache de validação de entrega', error);
+        }
+      }
+
+      if (!coords && !hasManualCoords) {
+        const geo = await mapsService.geocode(address);
+        coords = { lat: Number(geo.lat), lng: Number(geo.lng) };
+      }
+
+      if (!coords?.lat || !coords?.lng) {
+        throw new Error('Não foi possível localizar o endereço informado.');
+      }
+
+      setDeliveryCoords(coords);
+      const route = cachedRoute || await mapsService.route(storeCoords, coords);
+      const nextStatus = route.distanceKm <= deliveryRadiusValue ? 'ok' : 'out';
+
+      setDeliveryCheck({
+        status: nextStatus,
+        distanceKm: route.distanceKm,
+        durationMin: route.durationMin ?? null,
+      });
+      validatedDeliverySignatureRef.current = validationSignature;
+
+      if (!hasManualCoords && cacheKey) {
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify({ coords, route }));
+        } catch {
+          // ignore cache write failure
+        }
+      }
+
+      return nextStatus === 'ok';
+    } catch (error) {
+      console.error('Falha ao validar entrega', error);
+      setDeliveryCheck({ status: 'error', distanceKm: null, durationMin: null });
+      setDeliveryCoords(null);
+      validatedDeliverySignatureRef.current = '';
+      return false;
+    }
+  }, [
+    customer.type,
+    deliveryAddress,
+    deliveryRadiusValue,
+    getDeliveryAddressCacheKey,
+    isPostalDelivery,
+    manualDeliveryCoords,
+    normalizeDeliveryCacheKey,
+    storeCoords,
+  ]);
+
+  const deliveryValidationSignature = useMemo(() => {
+    if (customer.type !== 'delivery' || isPostalDelivery || !deliveryRadiusValue) return '';
+    if (manualDeliveryCoords?.lat && manualDeliveryCoords?.lng) {
+      return `gps:${Number(manualDeliveryCoords.lat)}:${Number(manualDeliveryCoords.lng)}`;
+    }
+    const normalized = normalizeDeliveryCacheKey(deliveryAddress || '');
+    return normalized ? `address:${normalized}` : '';
+  }, [customer.type, deliveryAddress, deliveryRadiusValue, isPostalDelivery, manualDeliveryCoords, normalizeDeliveryCacheKey]);
 
   useEffect(() => {
     if (customer.type !== 'delivery') {
+      validatedDeliverySignatureRef.current = '';
       setDeliveryCheck({ status: 'idle', distanceKm: null, durationMin: null });
       setDeliveryCoords(null);
       return;
     }
     if (isPostalDelivery) {
+      validatedDeliverySignatureRef.current = '';
       setDeliveryCheck({ status: 'idle', distanceKm: null, durationMin: null });
       setDeliveryCoords(null);
       return;
     }
     if (!deliveryRadiusValue) {
+      validatedDeliverySignatureRef.current = '';
       setDeliveryCheck({ status: 'ok', distanceKm: null, durationMin: null });
       return;
     }
-    const address = deliveryAddress?.trim() || '';
-    const hasManualCoords = Boolean(manualDeliveryCoords?.lat && manualDeliveryCoords?.lng);
-    if ((!address && !hasManualCoords) || !storeCoords) {
+    if (!deliveryValidationSignature) {
+      validatedDeliverySignatureRef.current = '';
       setDeliveryCheck({ status: 'idle', distanceKm: null, durationMin: null });
       setDeliveryCoords(null);
       return;
     }
-    setDeliveryCheck((prev) =>
-      prev.status === 'loading' ? prev : { status: 'loading', distanceKm: null, durationMin: null }
-    );
-
-    const normalized = address.toLowerCase().replace(/\s+/g, ' ').trim();
-    const cacheKey = storeSlug ? `delivery:coords:${storeSlug}:${normalized}` : '';
-    const resolveCachedRoute = async () => {
-      if (!cacheKey) return null;
-      const cached = localStorage.getItem(cacheKey);
-      if (!cached) return null;
-      try {
-        const parsed = JSON.parse(cached);
-        if (parsed?.lat && (parsed?.lng || parsed?.lon)) {
-          const coords = { lat: Number(parsed.lat), lng: Number(parsed.lng ?? parsed.lon) };
-          setDeliveryCoords(coords);
-          return coords;
-        }
-      } catch (error) {
-        console.error('Falha ao ler cache de entrega', error);
-      }
-      return null;
-    };
-
-    const timeout = window.setTimeout(async () => {
-      try {
-        let coords = hasManualCoords ? manualDeliveryCoords : await resolveCachedRoute();
-        if (!coords && !hasManualCoords) {
-          const geo = await mapsService.geocode(address);
-          coords = { lat: Number(geo.lat), lng: Number(geo.lng) };
-          if (cacheKey) {
-            localStorage.setItem(cacheKey, JSON.stringify(coords));
-          }
-        }
-        if (!coords) {
-          throw new Error('Não foi possível localizar o endereço informado.');
-        }
-        setDeliveryCoords(coords);
-        const route = await mapsService.route(storeCoords, coords);
-        setDeliveryCheck({
-          status: route.distanceKm <= deliveryRadiusValue ? 'ok' : 'out',
-          distanceKm: route.distanceKm,
-          durationMin: route.durationMin,
-        });
-      } catch (error) {
-        console.error('Falha ao validar entrega', error);
-        setDeliveryCheck({ status: 'error', distanceKm: null, durationMin: null });
-        setDeliveryCoords(null);
-      }
-    }, 250);
-
-    return () => {
-      window.clearTimeout(timeout);
-    };
-  }, [customer.type, deliveryAddress, deliveryRadiusValue, storeCoords, storeSlug, manualDeliveryCoords, isPostalDelivery]);
+    if (
+      validatedDeliverySignatureRef.current &&
+      validatedDeliverySignatureRef.current !== deliveryValidationSignature
+    ) {
+      validatedDeliverySignatureRef.current = '';
+      setDeliveryCheck({ status: 'idle', distanceKm: null, durationMin: null });
+      setDeliveryCoords(null);
+    }
+  }, [customer.type, deliveryRadiusValue, deliveryValidationSignature, isPostalDelivery]);
 
   useEffect(() => {
     if (!manualDeliveryCoords) return;
@@ -3183,6 +3268,7 @@ export function StorePage() {
             postalQuoteLoading={postalQuoteLoading}
             selectedPostalServiceCode={selectedPostalServiceCode}
             onUseCurrentLocation={handleUseCurrentLocation}
+            onValidateDeliveryAddress={validateDeliveryAddress}
             onChangeDeliveryMode={setDeliveryMode}
             onCalculatePostalQuote={handleCalculatePostalQuote}
             onSelectPostalService={setSelectedPostalServiceCode}
