@@ -49,6 +49,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/launch_subtitle_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -64,6 +65,23 @@
                 android:layout_marginTop="26dp"
                 android:indeterminate="true"
                 android:indeterminateTint="#7DD3FC" />
+
+            <Button
+                android:id="@+id/launch_retry_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:backgroundTint="#336886"
+                android:minWidth="160dp"
+                android:paddingLeft="24dp"
+                android:paddingTop="12dp"
+                android:paddingRight="24dp"
+                android:paddingBottom="12dp"
+                android:text="@string/launch_retry"
+                android:textAllCaps="false"
+                android:textColor="#F8FAFC"
+                android:textStyle="bold"
+                android:visibility="gone" />
         </LinearLayout>
     </FrameLayout>
 

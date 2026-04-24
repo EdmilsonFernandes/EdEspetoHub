@@ -5,24 +5,33 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.net.Uri;
 import android.content.pm.PackageManager;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.webkit.JavascriptInterface;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.Toast;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 import android.webkit.CookieManager;
 import android.webkit.GeolocationPermissions;
+import android.webkit.SslErrorHandler;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
-import android.webkit.WebViewClient;
 import android.webkit.WebView;
 import android.os.Build;
+import android.net.http.SslError;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -65,6 +74,7 @@ public class MainActivity extends BridgeActivity {
     private static final String BIOMETRIC_RESULT_EVENT = "jnc:android-biometric-result";
     private static final long NAV_ANIM_DURATION_MS = 220L;
     private static final long LAUNCH_OVERLAY_FADE_MS = 260L;
+    private static final long LAUNCH_OVERLAY_NETWORK_TIMEOUT_MS = 9000L;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 4401;
     private static final int MEDIA_PERMISSION_REQUEST_CODE = 4402;
     private static final int APP_UPDATE_REQUEST_CODE = 4403;
@@ -75,7 +85,11 @@ public class MainActivity extends BridgeActivity {
     private View launchOverlay;
     private ImageView launchLogo;
     private ProgressBar launchProgress;
+    private TextView launchSubtitleText;
+    private Button launchRetryButton;
     private boolean launchOverlayDismissed = false;
+    private final Handler launchOverlayHandler = new Handler(Looper.getMainLooper());
+    private Runnable launchOverlayTimeoutRunnable;
     private AppUpdateManager appUpdateManager;
     private InstallStateUpdatedListener installStateUpdatedListener;
     private boolean flexibleUpdatePromptVisible = false;
@@ -247,6 +261,7 @@ public class MainActivity extends BridgeActivity {
 
     // Override para interceptar URLs antes do WebView tentar carregar e falhar com esquema desconhecido
     @Override
+    @SuppressLint("SetJavaScriptEnabled")
     public void onStart() {
         super.onStart();
         configureWebViewPersistence();
@@ -292,6 +307,11 @@ public class MainActivity extends BridgeActivity {
                     super.onPageStarted(view, url, favicon);
                     if (normalizeTrustedWebUrl(url) == null) return;
 
+                    if (!launchOverlayDismissed) {
+                        showLaunchOverlayLoading(null);
+                        scheduleLaunchOverlayTimeout();
+                    }
+
                     String previous = lastKnownUrl == null ? HUB_URL : lastKnownUrl;
                     boolean fromHub = previous.contains("/hub");
                     boolean toHub = url.contains("/hub");
@@ -308,9 +328,46 @@ public class MainActivity extends BridgeActivity {
                     super.onPageFinished(view, url);
                     String trustedUrl = normalizeTrustedWebUrl(url);
                     if (trustedUrl != null) {
+                        cancelLaunchOverlayTimeout();
                         lastKnownUrl = trustedUrl;
                         dismissLaunchOverlay();
                     }
+                }
+
+                @Override
+                public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                    super.onReceivedError(view, request, error);
+                    if (launchOverlayDismissed || request == null || !request.isForMainFrame()) return;
+
+                    String failingUrl = request.getUrl() == null ? null : request.getUrl().toString();
+                    if (normalizeTrustedWebUrl(failingUrl) == null) return;
+
+                    showLaunchOverlayRecovery(getString(R.string.launch_timeout_message));
+                }
+
+                @Override
+                public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
+                    super.onReceivedHttpError(view, request, errorResponse);
+                    if (launchOverlayDismissed || request == null || !request.isForMainFrame()) return;
+
+                    String failingUrl = request.getUrl() == null ? null : request.getUrl().toString();
+                    if (normalizeTrustedWebUrl(failingUrl) == null) return;
+
+                    int statusCode = errorResponse == null ? 0 : errorResponse.getStatusCode();
+                    if (statusCode >= 400) {
+                        showLaunchOverlayRecovery(getString(R.string.launch_http_error_message));
+                    }
+                }
+
+                @Override
+                public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+                    if (launchOverlayDismissed) {
+                        super.onReceivedSslError(view, handler, error);
+                        return;
+                    }
+
+                    handler.cancel();
+                    showLaunchOverlayRecovery(getString(R.string.launch_ssl_error_message));
                 }
             });
         }
@@ -328,6 +385,8 @@ public class MainActivity extends BridgeActivity {
         launchOverlay = findViewById(R.id.launch_overlay);
         launchLogo = findViewById(R.id.launch_logo);
         launchProgress = findViewById(R.id.launch_progress);
+        launchSubtitleText = findViewById(R.id.launch_subtitle_text);
+        launchRetryButton = findViewById(R.id.launch_retry_button);
 
         View root = findViewById(R.id.main_root);
         if (root != null) {
@@ -337,6 +396,13 @@ public class MainActivity extends BridgeActivity {
         if (launchOverlay != null) {
             launchOverlay.setAlpha(1f);
             launchOverlay.setVisibility(View.VISIBLE);
+        }
+        if (launchRetryButton != null) {
+            launchRetryButton.setVisibility(View.GONE);
+            launchRetryButton.setOnClickListener((v) -> retryInitialPageLoad());
+        }
+        if (launchSubtitleText != null) {
+            launchSubtitleText.setText(getString(R.string.launch_subtitle));
         }
         if (launchLogo != null) {
             launchLogo.setScaleX(0.92f);
@@ -438,6 +504,7 @@ public class MainActivity extends BridgeActivity {
 
     private void dismissLaunchOverlay() {
         if (launchOverlayDismissed || launchOverlay == null) return;
+        cancelLaunchOverlayTimeout();
         launchOverlayDismissed = true;
         launchOverlay.animate()
             .alpha(0f)
@@ -448,6 +515,87 @@ public class MainActivity extends BridgeActivity {
                 launchOverlay.setAlpha(1f);
             })
             .start();
+    }
+
+    private void showLaunchOverlayLoading(String message) {
+        if (launchOverlay == null || launchOverlayDismissed) return;
+
+        launchOverlay.setVisibility(View.VISIBLE);
+        launchOverlay.setAlpha(1f);
+
+        if (launchSubtitleText != null) {
+            launchSubtitleText.setText(
+                message == null || message.trim().isEmpty()
+                    ? getString(R.string.launch_subtitle)
+                    : message
+            );
+        }
+
+        if (launchProgress != null) {
+            launchProgress.setVisibility(View.VISIBLE);
+            launchProgress.setAlpha(1f);
+        }
+
+        if (launchRetryButton != null) {
+            launchRetryButton.setVisibility(View.GONE);
+        }
+    }
+
+    private void showLaunchOverlayRecovery(String message) {
+        if (launchOverlay == null || launchOverlayDismissed) return;
+
+        cancelLaunchOverlayTimeout();
+        launchOverlay.setVisibility(View.VISIBLE);
+        launchOverlay.setAlpha(1f);
+
+        if (launchSubtitleText != null) {
+            launchSubtitleText.setText(
+                message == null || message.trim().isEmpty()
+                    ? getString(R.string.launch_timeout_message)
+                    : message
+            );
+        }
+
+        if (launchProgress != null) {
+            launchProgress.animate().cancel();
+            launchProgress.setVisibility(View.GONE);
+        }
+
+        if (launchRetryButton != null) {
+            launchRetryButton.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void scheduleLaunchOverlayTimeout() {
+        if (launchOverlayDismissed) return;
+
+        cancelLaunchOverlayTimeout();
+        launchOverlayTimeoutRunnable = () -> {
+            if (!launchOverlayDismissed) {
+                showLaunchOverlayRecovery(getString(R.string.launch_timeout_message));
+            }
+        };
+        launchOverlayHandler.postDelayed(launchOverlayTimeoutRunnable, LAUNCH_OVERLAY_NETWORK_TIMEOUT_MS);
+    }
+
+    private void cancelLaunchOverlayTimeout() {
+        if (launchOverlayTimeoutRunnable == null) return;
+        launchOverlayHandler.removeCallbacks(launchOverlayTimeoutRunnable);
+        launchOverlayTimeoutRunnable = null;
+    }
+
+    private void retryInitialPageLoad() {
+        if (bridge == null || bridge.getWebView() == null) return;
+
+        String retryUrl = normalizeTrustedWebUrl(lastKnownUrl);
+        if (retryUrl == null) {
+            retryUrl = HUB_URL;
+        }
+
+        showLaunchOverlayLoading(getString(R.string.launch_retrying_message));
+        scheduleLaunchOverlayTimeout();
+        bridge.getWebView().stopLoading();
+        bridge.getWebView().loadUrl(retryUrl);
     }
 
     private void animateSlideInFromRight(View view) {
@@ -484,6 +632,10 @@ public class MainActivity extends BridgeActivity {
         
         // Se não houver URL carregada ou se for a tela inicial branca, carrega a salva
         if (currentUrl == null || currentUrl.isEmpty() || currentUrl.equals("about:blank")) {
+            if (!launchOverlayDismissed) {
+                showLaunchOverlayLoading(null);
+                scheduleLaunchOverlayTimeout();
+            }
             webView.loadUrl(savedUrl);
             lastKnownUrl = savedUrl;
         }

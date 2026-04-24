@@ -5,4 +5,9 @@
     <string name="package_name">com.janocaminho.app</string>
     <string name="custom_url_scheme">com.janocaminho.app</string>
     <string name="launch_subtitle">Abrindo o Hub com mais rapidez</string>
+    <string name="launch_retry">Tentar novamente</string>
+    <string name="launch_retrying_message">Tentando reconectar ao Hub</string>
+    <string name="launch_timeout_message">A conexão demorou mais do que o esperado. Verifique sua internet e tente novamente.</string>
+    <string name="launch_http_error_message">Não foi possível abrir o app agora. Tente novamente em instantes.</string>
+    <string name="launch_ssl_error_message">Não foi possível validar a conexão segura. Tente novamente.</string>
 </resources>
