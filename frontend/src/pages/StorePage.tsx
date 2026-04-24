@@ -62,7 +62,50 @@ const buildPublicPaymentSummary = (storeData: any) => {
   };
 };
 
-const resolveCheckoutPaymentMethods = (paymentSummary: any) => {
+const PROFESSIONAL_LOCAL_PAYMENT_METHODS = [
+  {
+    id: 'debito_presencial',
+    label: 'Débito',
+    description: 'Pagamento no atendimento',
+    group: 'local',
+  },
+  {
+    id: 'credito_presencial',
+    label: 'Crédito',
+    description: 'Pagamento no atendimento',
+    group: 'local',
+  },
+  {
+    id: 'pix_presencial',
+    label: 'Pix',
+    description: 'Pagamento confirmado no atendimento',
+    group: 'local',
+  },
+  {
+    id: 'dinheiro',
+    label: 'Dinheiro',
+    description: 'Pagamento no atendimento',
+    group: 'local',
+  },
+];
+
+const PROFESSIONAL_PAYMENT_METHOD_MAP: Record<string, string> = {
+  pix: 'pix_presencial',
+  pix_presencial: 'pix_presencial',
+  debito: 'debito_presencial',
+  débito: 'debito_presencial',
+  debito_presencial: 'debito_presencial',
+  credito: 'credito_presencial',
+  crédito: 'credito_presencial',
+  credito_presencial: 'credito_presencial',
+  dinheiro: 'dinheiro',
+  cash: 'dinheiro',
+};
+
+const resolveCheckoutPaymentMethods = (paymentSummary: any, forceProfessionalLocal = false) => {
+  if (forceProfessionalLocal) {
+    return PROFESSIONAL_LOCAL_PAYMENT_METHODS;
+  }
   const summary = paymentSummary || {};
   const methods = summary?.methods || {};
   const available = [];
@@ -118,6 +161,33 @@ const resolveCheckoutPaymentMethods = (paymentSummary: any) => {
           group: 'local',
         },
       ];
+};
+
+const resolveCheckoutPaymentSelection = (
+  currentPaymentMethod: string,
+  availableMethods: Array<{ id: string }>,
+  forceProfessionalLocal = false
+) => {
+  const current = String(currentPaymentMethod || '').trim().toLowerCase();
+  if (availableMethods.some((method) => method.id === current)) {
+    return current;
+  }
+
+  if (forceProfessionalLocal) {
+    const mapped = PROFESSIONAL_PAYMENT_METHOD_MAP[current];
+    if (mapped && availableMethods.some((method) => method.id === mapped)) {
+      return mapped;
+    }
+    return availableMethods[0]?.id || 'debito_presencial';
+  }
+
+  return availableMethods[0]?.id || defaultPaymentMethod;
+};
+
+const resolveOrderPaymentMethodForCheckout = (paymentMethod: string, forceProfessionalLocal = false) => {
+  const current = String(paymentMethod || '').trim().toLowerCase();
+  if (!forceProfessionalLocal) return current;
+  return PROFESSIONAL_PAYMENT_METHOD_MAP[current] || 'dinheiro';
 };
 
 const getOrderStatusTone = (status?: string) => {
@@ -421,6 +491,14 @@ export function StorePage() {
   const showAdminWebReturnBar = isStoreAdmin && !isNativeRuntime && view !== 'menu';
   const showClientWebBottomNav = !isNativeRuntime && !isStoreAdmin && view === 'menu';
   const normalizedRole = String(user?.role || '').toLowerCase();
+  const isProfessionalCheckoutUser = [
+    'admin',
+    'operator',
+    'lojista',
+    'super_admin',
+    'motoboy',
+    'entregador',
+  ].includes(normalizedRole);
   const hasAdminPrintAccess = normalizedRole === 'admin';
   const canUseAdminPrintFlow = hasAdminPrintAccess || isStoreAdmin;
   const [showPrintPrompt, setShowPrintPrompt] = useState(false);
@@ -457,8 +535,8 @@ export function StorePage() {
     return exact || services[0];
   }, [isPostalDelivery, postalQuote, selectedPostalServiceCode]);
   const availablePaymentMethods = useMemo(
-    () => resolveCheckoutPaymentMethods(paymentSummary),
-    [paymentSummary]
+    () => resolveCheckoutPaymentMethods(paymentSummary, isProfessionalCheckoutUser),
+    [paymentSummary, isProfessionalCheckoutUser]
   );
   const deliveryFeeValue = useMemo(() => {
     if (customer.type !== 'delivery') return 0;
@@ -473,9 +551,14 @@ export function StorePage() {
 
   useEffect(() => {
     if (!availablePaymentMethods.length) return;
-    if (availablePaymentMethods.some((method: any) => method.id === paymentMethod)) return;
-    setPaymentMethod(availablePaymentMethods[0]?.id || defaultPaymentMethod);
-  }, [availablePaymentMethods, paymentMethod]);
+    const nextPaymentMethod = resolveCheckoutPaymentSelection(
+      paymentMethod,
+      availablePaymentMethods,
+      isProfessionalCheckoutUser
+    );
+    if (nextPaymentMethod === paymentMethod) return;
+    setPaymentMethod(nextPaymentMethod);
+  }, [availablePaymentMethods, isProfessionalCheckoutUser, paymentMethod]);
   const isCondominiumCheckout = Boolean(condominiumCheckoutContext?.condominium?.slug);
   const condominiumFulfillmentMode = String(customer?.condominiumFulfillmentMode || 'pickup_at_stall');
   const condominiumApartmentFee = useMemo(() => {
@@ -1831,7 +1914,7 @@ export function StorePage() {
       }
     }
 
-    const payment = paymentMethod;
+    const payment = resolveOrderPaymentMethodForCheckout(paymentMethod, isProfessionalCheckoutUser);
     const cashTendered =
       payment === 'dinheiro' && extra?.cashTendered !== undefined && extra?.cashTendered !== null
         ? Number(extra.cashTendered)
@@ -1932,7 +2015,7 @@ export function StorePage() {
       setDeliveryMode('distance');
       setPostalQuote(null);
       setSelectedPostalServiceCode('');
-      setPaymentMethod(defaultPaymentMethod);
+      setPaymentMethod(resolveCheckoutPaymentSelection(defaultPaymentMethod, availablePaymentMethods, isProfessionalCheckoutUser));
       setLastOrder({
         id: demoId,
         type: customer.type,
@@ -2101,7 +2184,7 @@ export function StorePage() {
     setDeliveryMode('distance');
     setPostalQuote(null);
     setSelectedPostalServiceCode('');
-    setPaymentMethod(defaultPaymentMethod);
+    setPaymentMethod(resolveCheckoutPaymentSelection(defaultPaymentMethod, availablePaymentMethods, isProfessionalCheckoutUser));
       setLastOrder({
         id: createdOrder?.id,
         type: customer.type,
@@ -2169,7 +2252,7 @@ export function StorePage() {
     const isAwaitingMpPayment = Boolean(
       createdOrder?.payment?.paymentLink && createdOrder?.status === 'awaiting_payment'
     );
-    const isMpCardPayment = isAwaitingMpPayment && (paymentMethod === 'credito' || paymentMethod === 'debito');
+    const isMpCardPayment = isAwaitingMpPayment && (payment === 'credito' || payment === 'debito');
     if (isStoreAdmin) {
       setView('menu');
     } else if (isMpCardPayment) {

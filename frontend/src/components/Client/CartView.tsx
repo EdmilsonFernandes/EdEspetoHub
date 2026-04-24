@@ -66,6 +66,13 @@ const buildPhoneFromParts = (ddd = "", local = "") => {
   return `(${safeDdd}) ${formatLocalPhoneNumber(localDigits)}`;
 };
 
+const PROFESSIONAL_PAYMENT_METHODS = [
+  { id: "debito_presencial", label: "Débito", description: "Pagamento no atendimento", group: "local" },
+  { id: "credito_presencial", label: "Crédito", description: "Pagamento no atendimento", group: "local" },
+  { id: "pix_presencial", label: "Pix", description: "Pagamento confirmado no atendimento", group: "local" },
+  { id: "dinheiro", label: "Dinheiro", description: "Pagamento no atendimento", group: "local" },
+];
+
 export const CartView = ({
   cart,
   customer,
@@ -205,6 +212,7 @@ export const CartView = ({
     []
   );
   const resolvedPaymentMethods = useMemo(() => {
+    if (isProfessionalUser) return PROFESSIONAL_PAYMENT_METHODS;
     const methods = paymentSummary?.methods || null;
     if (!methods) return fallbackPaymentMethods;
     const next = [];
@@ -224,7 +232,7 @@ export const CartView = ({
       next.push({ id: "dinheiro", label: "Dinheiro", description: "Pagamento no atendimento", group: "local" });
     }
     return next.length ? next : [ { id: "dinheiro", label: "Dinheiro", description: "Pagamento no atendimento", group: "local" } ];
-  }, [fallbackPaymentMethods, paymentSummary]);
+  }, [fallbackPaymentMethods, isProfessionalUser, paymentSummary]);
   const paymentGroups = useMemo(() => {
     return resolvedPaymentMethods.reduce(
       (acc, method) => {
