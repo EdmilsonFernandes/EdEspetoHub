@@ -243,7 +243,6 @@ export const CartView = ({
       { online: [], local: [] } as Record<string, any[]>
     );
   }, [resolvedPaymentMethods]);
-  const showPaymentGroupLabels = paymentGroups.online.length > 0 && paymentGroups.local.length > 0;
 
   const cashValidation = useMemo(() => {
     if (!isCash) return { blocked: false, reason: "" };
@@ -1980,36 +1979,59 @@ export const CartView = ({
       )}
 
       {/* Forma de Pagamento */}
-      {(!useMultiStepFlow || checkoutStep === 3) && <div className="relative overflow-hidden bg-gradient-to-br from-white via-blue-50/40 to-white rounded-2xl border border-blue-100 p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:-translate-y-0.5 active:scale-[0.99] shadow-[0_28px_56px_-44px_rgba(37,99,235,0.35)]">
-        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-400/80 via-brand-primary/70 to-white" />
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-black text-slate-900 text-base sm:text-lg flex items-center gap-2 tracking-tight">
-            <CreditCard size={18} className="text-brand-primary" /> Forma de Pagamento
-          </h2>
+      {(!useMultiStepFlow || checkoutStep === 3) && <div className="rounded-[1.75rem] border border-slate-200 bg-white p-4 sm:p-6 mb-4 sm:mb-6 shadow-[0_24px_60px_-48px_rgba(15,23,42,0.3)]">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <h2 className="font-black text-slate-900 text-base sm:text-lg flex items-center gap-2 tracking-tight">
+              <CreditCard size={18} className="text-slate-900" /> Forma de Pagamento
+            </h2>
+            <p className="mt-1 text-[11px] sm:text-xs text-slate-500">
+              Escolha como deseja confirmar este pedido.
+            </p>
+          </div>
         </div>
 
         <div className="space-y-3">
           {paymentGroups.online.length > 0 && (
-            <div className="space-y-2">
-              {showPaymentGroupLabels && (
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Online</p>
-              )}
+            <div className="rounded-[1.4rem] border border-slate-200 bg-slate-50/60 p-3 sm:p-4 space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Online</p>
+                  <p className="mt-1 text-[11px] text-slate-500">Cobrança processada com segurança.</p>
+                </div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-bold text-slate-600 shadow-sm">
+                  {mercadoPagoMeta.icon ? (
+                    <img src={mercadoPagoMeta.icon} alt={mercadoPagoMeta.label} className="h-4 w-4 object-contain" />
+                  ) : (
+                    <ShieldCheck size={12} weight="duotone" className="text-emerald-600" />
+                  )}
+                  <span className="hidden sm:inline">Mercado Pago</span>
+                  <span className="inline-flex items-center gap-1 text-slate-500">
+                    <ShieldCheck size={10} weight="duotone" className="text-emerald-600" />
+                    Seguro
+                  </span>
+                </div>
+              </div>
               <div className={`grid gap-3 ${paymentGroups.online.length === 1 ? "grid-cols-1" : "grid-cols-2 sm:grid-cols-3"}`}>
                 {paymentGroups.online.map((method) => (
                   <button
                     key={method.id}
                     onClick={() => onChangePayment(method.id)}
-                    className={`rounded-2xl p-3 sm:p-4 text-left transition-all border active:scale-[0.98] ${
+                    className={`rounded-[1.35rem] border p-4 text-left transition-all active:scale-[0.985] ${
                       paymentMethod === method.id
-                        ? "border-brand-primary bg-gradient-to-br from-brand-primary/15 via-white to-white text-brand-primary shadow-lg ring-2 ring-brand-primary/30"
-                        : "border-gray-100 text-gray-500 bg-white/70 hover:border-brand-primary/40 hover:shadow-sm hover:-translate-y-0.5"
+                        ? "border-orange-400 bg-orange-50/70 text-slate-900 shadow-[0_16px_36px_-28px_rgba(249,115,22,0.55)]"
+                        : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:shadow-[0_14px_30px_-30px_rgba(15,23,42,0.3)]"
                     }`}
                   >
                     {(() => {
                       const methodMeta = getPaymentMethodMeta(method.id);
                       return (
                         <div className="flex items-center gap-3">
-                          <span className={`h-10 w-10 rounded-xl flex items-center justify-center shadow-md ${paymentMethod === method.id ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-600'}`}>
+                          <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border ${
+                            paymentMethod === method.id
+                              ? "border-orange-200 bg-white text-orange-500"
+                              : "border-slate-200 bg-slate-50 text-slate-500"
+                          }`}>
                             {methodMeta.icon ? (
                               <img
                                 src={methodMeta.icon}
@@ -2020,9 +2042,9 @@ export const CartView = ({
                               <CreditCard size={16} />
                             )}
                           </span>
-                          <div className="space-y-1">
-                            <div className="text-sm sm:text-base font-semibold tracking-tight">{method.label}</div>
-                            <div className={`text-[11px] sm:text-xs ${paymentMethod === method.id ? 'text-brand-primary/70' : 'text-gray-500'}`}>
+                          <div className="min-w-0 space-y-1">
+                            <div className="text-sm sm:text-[15px] font-bold tracking-tight text-slate-900">{method.label}</div>
+                            <div className="text-[11px] leading-relaxed text-slate-500">
                               {method.description}
                             </div>
                           </div>
@@ -2036,26 +2058,31 @@ export const CartView = ({
           )}
 
           {paymentGroups.local.length > 0 && (
-            <div className="space-y-2">
-              {showPaymentGroupLabels && (
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Na loja</p>
-              )}
+            <div className="rounded-[1.4rem] border border-slate-200 bg-white p-3 sm:p-4 space-y-3">
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Na loja</p>
+                <p className="mt-1 text-[11px] text-slate-500">Pagamento confirmado no atendimento ou na retirada.</p>
+              </div>
               <div className={`grid gap-3 ${paymentGroups.local.length === 1 ? "grid-cols-1" : "grid-cols-2 sm:grid-cols-3"}`}>
                 {paymentGroups.local.map((method) => (
                   <button
                     key={method.id}
                     onClick={() => onChangePayment(method.id)}
-                    className={`rounded-2xl p-3 sm:p-4 text-left transition-all border active:scale-[0.98] ${
+                    className={`rounded-[1.35rem] border p-4 text-left transition-all active:scale-[0.985] ${
                       paymentMethod === method.id
-                        ? "border-brand-primary bg-gradient-to-br from-brand-primary/15 via-white to-white text-brand-primary shadow-lg ring-2 ring-brand-primary/30"
-                        : "border-gray-100 text-gray-500 bg-white/70 hover:border-brand-primary/40 hover:shadow-sm hover:-translate-y-0.5"
+                        ? "border-orange-400 bg-orange-50/70 text-slate-900 shadow-[0_16px_36px_-28px_rgba(249,115,22,0.55)]"
+                        : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:shadow-[0_14px_30px_-30px_rgba(15,23,42,0.3)]"
                     }`}
                   >
                     {(() => {
                       const methodMeta = getPaymentMethodMeta(method.id);
                       return (
                         <div className="flex items-center gap-3">
-                          <span className={`h-10 w-10 rounded-xl flex items-center justify-center shadow-md ${paymentMethod === method.id ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-600'}`}>
+                          <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border ${
+                            paymentMethod === method.id
+                              ? "border-orange-200 bg-white text-orange-500"
+                              : "border-slate-200 bg-slate-50 text-slate-500"
+                          }`}>
                             {methodMeta.icon ? (
                               <img
                                 src={methodMeta.icon}
@@ -2066,9 +2093,9 @@ export const CartView = ({
                               <CreditCard size={16} />
                             )}
                           </span>
-                          <div className="space-y-1">
-                            <div className="text-sm sm:text-base font-semibold tracking-tight">{method.label}</div>
-                            <div className={`text-[11px] sm:text-xs ${paymentMethod === method.id ? 'text-brand-primary/70' : 'text-gray-500'}`}>
+                          <div className="min-w-0 space-y-1">
+                            <div className="text-sm sm:text-[15px] font-bold tracking-tight text-slate-900">{method.label}</div>
+                            <div className="text-[11px] leading-relaxed text-slate-500">
                               {method.description}
                             </div>
                           </div>
@@ -2081,27 +2108,9 @@ export const CartView = ({
             </div>
           )}
         </div>
-        {isOnlinePaymentMethod && (
-          <div className="mt-4 rounded-2xl border border-[#009ee3]/18 bg-gradient-to-r from-[#009ee3]/6 to-white p-3 flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white border border-[#009ee3]/20 shadow-sm overflow-hidden">
-              {mercadoPagoMeta.icon ? (
-                <img src={mercadoPagoMeta.icon} alt={mercadoPagoMeta.label} className="h-7 w-7 object-contain" />
-              ) : (
-                <ShieldCheck size={18} weight="duotone" className="text-[#009ee3]" />
-              )}
-            </div>
-            <div className="min-w-0">
-              <p className="text-[11px] font-black text-[#009ee3]">Mercado Pago</p>
-              <p className="text-[10px] text-slate-500 leading-tight flex items-center gap-1">
-                <ShieldCheck size={10} weight="duotone" className="shrink-0 text-emerald-500" />
-                Pagamento seguro e criptografado
-              </p>
-            </div>
-          </div>
-        )}
         {isManualPix && (
-          <div className="mt-4 rounded-2xl border border-emerald-200/70 bg-gradient-to-r from-emerald-50/80 to-white p-3 flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white border border-emerald-200 shadow-sm overflow-hidden">
+          <div className="mt-4 rounded-2xl border border-emerald-200/80 bg-emerald-50/70 p-3 flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white border border-emerald-200 overflow-hidden">
               <img src={getPaymentMethodMeta("pix_loja").icon} alt="Pix da loja" className="h-5 w-5 object-contain" />
             </div>
             <div className="min-w-0">
