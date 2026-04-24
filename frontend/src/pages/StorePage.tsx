@@ -308,6 +308,19 @@ export function StorePage() {
     if (digits.length <= 5) return digits;
     return `${digits.slice(0, 5)}-${digits.slice(5)}`;
   };
+  const haversineKm = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
+    const toRad = (deg: number) => (deg * Math.PI) / 180;
+    const earthRadiusKm = 6371;
+    const dLat = toRad(b.lat - a.lat);
+    const dLng = toRad(b.lng - a.lng);
+    const lat1 = toRad(a.lat);
+    const lat2 = toRad(b.lat);
+    const x =
+      Math.sin(dLat / 2) ** 2 +
+      Math.sin(dLng / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
+    const c = 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+    return earthRadiusKm * c;
+  };
   const normalizeGeoText = (value: string) =>
     String(value || '')
       .normalize('NFD')
@@ -1539,6 +1552,14 @@ export function StorePage() {
     const validationSignature = hasManualCoords
       ? `gps:${Number(manualDeliveryCoords?.lat)}:${Number(manualDeliveryCoords?.lng)}`
       : `address:${normalizeDeliveryCacheKey(address)}`;
+    const normalizedStoreCity = normalizeGeoText(storeCity || '');
+    const normalizedStoreState = normalizeGeoText(storeState || '');
+    const normalizedCustomerCity = normalizeGeoText(customer.city || '');
+    const normalizedCustomerState = normalizeGeoText(customer.state || '');
+    const canFallbackByCity =
+      Boolean(normalizedStoreCity && normalizedStoreState && normalizedCustomerCity && normalizedCustomerState) &&
+      normalizedStoreCity === normalizedCustomerCity &&
+      normalizedStoreState === normalizedCustomerState;
 
     setDeliveryCheck({ status: 'loading', distanceKm: null, durationMin: null });
 
@@ -1577,7 +1598,16 @@ export function StorePage() {
       }
 
       setDeliveryCoords(coords);
-      const route = cachedRoute || await mapsService.route(storeCoords, coords);
+      let route = cachedRoute;
+      if (!route) {
+        try {
+          route = await mapsService.route(storeCoords, coords);
+        } catch (routeError) {
+          const approxKm = haversineKm(storeCoords, coords);
+          route = { distanceKm: approxKm, durationMin: null };
+          console.warn('Usando distância aproximada para validar entrega', routeError);
+        }
+      }
       const nextStatus = route.distanceKm <= deliveryRadiusValue ? 'ok' : 'out';
 
       setDeliveryCheck({
@@ -1598,6 +1628,12 @@ export function StorePage() {
       return nextStatus === 'ok';
     } catch (error) {
       console.error('Falha ao validar entrega', error);
+      if (canFallbackByCity) {
+        setDeliveryCheck({ status: 'ok', distanceKm: null, durationMin: null });
+        validatedDeliverySignatureRef.current = validationSignature;
+        showToast('Entrega validada pelo endereço da cidade da loja. A distância exata será confirmada na operação.', 'warning');
+        return true;
+      }
       setDeliveryCheck({ status: 'error', distanceKm: null, durationMin: null });
       setDeliveryCoords(null);
       validatedDeliverySignatureRef.current = '';
@@ -1605,13 +1641,19 @@ export function StorePage() {
     }
   }, [
     customer.type,
+    customer.city,
+    customer.state,
     deliveryAddress,
     deliveryRadiusValue,
     getDeliveryAddressCacheKey,
+    haversineKm,
     isPostalDelivery,
     manualDeliveryCoords,
     normalizeDeliveryCacheKey,
+    showToast,
     storeCoords,
+    storeCity,
+    storeState,
   ]);
 
   const deliveryValidationSignature = useMemo(() => {
@@ -1708,7 +1750,14 @@ export function StorePage() {
             street: prev.street || 'Localização atual',
             address: prev.address || 'Localização atual (GPS)',
           }));
-          const route = await mapsService.route(storeCoords, coords);
+          let route;
+          try {
+            route = await mapsService.route(storeCoords, coords);
+          } catch (routeError) {
+            const approxKm = haversineKm(storeCoords, coords);
+            route = { distanceKm: approxKm, durationMin: null };
+            console.warn('Usando distância aproximada com localização atual', routeError);
+          }
           setDeliveryCheck({
             status: route.distanceKm <= deliveryRadiusValue ? 'ok' : 'out',
             distanceKm: route.distanceKm,
