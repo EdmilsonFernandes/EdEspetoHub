@@ -7,14 +7,14 @@ const service = new StorePaymentAccountService();
 const log = logger.child({ scope: 'StorePaymentAccountController' });
 
 const appendGatewayContext = (target?: string | null, status: 'connected' | 'error' = 'connected') => {
-  const fallback = '/admin/dashboard?tab=config&section=gateway&paymentAccount=' + status;
+  const fallback = '/admin/dashboard?tab=gateway&paymentAccount=' + status;
   const raw = String(target || '').trim();
   if (!raw) return fallback;
 
   try {
     const url = new URL(raw);
-    url.searchParams.set('tab', 'config');
-    url.searchParams.set('section', 'gateway');
+    url.searchParams.set('tab', 'gateway');
+    url.searchParams.delete('section');
     url.searchParams.set('paymentAccount', status);
     return url.toString();
   } catch {
@@ -22,8 +22,8 @@ const appendGatewayContext = (target?: string | null, status: 'connected' | 'err
     const searchIndex = pathname.indexOf('?');
     const basePath = searchIndex >= 0 ? pathname.slice(0, searchIndex) : pathname;
     const params = new URLSearchParams(searchIndex >= 0 ? pathname.slice(searchIndex + 1) : '');
-    params.set('tab', 'config');
-    params.set('section', 'gateway');
+    params.set('tab', 'gateway');
+    params.delete('section');
     params.set('paymentAccount', status);
     return `${basePath || '/admin/dashboard'}?${params.toString()}${hash ? `#${hash}` : ''}`;
   }

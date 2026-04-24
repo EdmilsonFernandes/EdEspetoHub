@@ -4,6 +4,7 @@ import { env } from '../config/env';
 import { StorePaymentAccount } from '../entities/StorePaymentAccount';
 import { Store } from '../entities/Store';
 import { AppError } from '../errors/AppError';
+import { logger } from '../utils/logger';
 
 type MercadoPagoTokenResponse = {
   access_token?: string;
@@ -12,8 +13,16 @@ type MercadoPagoTokenResponse = {
   user_id?: string | number;
 };
 
+type MercadoPagoPaymentMethod = {
+  id?: string;
+  name?: string;
+  payment_type_id?: string;
+  status?: string;
+};
+
 export class StorePaymentAccountService {
   private repo = AppDataSource.getRepository(StorePaymentAccount);
+  private log = logger.child({ scope: 'StorePaymentAccountService' });
 
   private encryptionKey() {
     return crypto
@@ -50,6 +59,118 @@ export class StorePaymentAccountService {
     return env.mercadoPago.oauthRedirectUrl || `${env.appUrl.replace(/\/$/, '')}/api/payment-accounts/mercadopago/callback`;
   }
 
+  private buildMpHeaders(accessToken: string) {
+    return {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    };
+  }
+
+  private detectCredentialMode(accessToken: string) {
+    const normalized = String(accessToken || '').trim().toUpperCase();
+    if (normalized.startsWith('APP_USR-')) return 'production';
+    if (normalized.startsWith('TEST-')) return 'test';
+    return 'unknown';
+  }
+
+  private summarizeMethods(methods: MercadoPagoPaymentMethod[], paymentTypeId: string) {
+    return methods
+      .filter((entry) => String(entry?.payment_type_id || '').toLowerCase() === paymentTypeId)
+      .map((entry) => ({
+        id: String(entry?.id || ''),
+        name: String(entry?.name || entry?.id || '').trim(),
+        status: String(entry?.status || '').toLowerCase(),
+      }));
+  }
+
+  private normalizeCapability(available: boolean, methods: Array<{ id: string; name: string; status: string }>, detail: string, blockedDetail: string) {
+    return {
+      available,
+      status: available ? 'ready' : 'attention',
+      detail: available ? detail : blockedDetail,
+      methods: methods.filter((entry) => entry.status === 'active').map((entry) => entry.name || entry.id),
+    };
+  }
+
+  private async fetchPaymentMethods(accessToken: string) {
+    const response = await fetch(`${env.mercadoPago.apiBaseUrl}/v1/payment_methods`, {
+      headers: this.buildMpHeaders(accessToken),
+    });
+
+    if (!response.ok) {
+      const bodyText = await response.text().catch(() => '');
+      this.log.warn('Mercado Pago account validation failed', { status: response.status, body: bodyText });
+      throw new AppError('PAY-015', 400, {
+        message: 'Não foi possível validar a conta Mercado Pago conectada agora. Tente novamente em instantes.',
+        provider: 'MERCADO_PAGO',
+        providerStatus: response.status,
+      });
+    }
+
+    return (await response.json()) as MercadoPagoPaymentMethod[];
+  }
+
+  private async validateCapabilities(accessToken: string) {
+    const checkedAt = new Date().toISOString();
+    const credentialMode = this.detectCredentialMode(accessToken);
+    const methods = await this.fetchPaymentMethods(accessToken);
+
+    const creditMethods = this.summarizeMethods(methods, 'credit_card');
+    const debitMethods = this.summarizeMethods(methods, 'debit_card');
+    const bankTransferMethods = this.summarizeMethods(methods, 'bank_transfer');
+
+    const hasActiveCredit = creditMethods.some((entry) => entry.status === 'active');
+    const hasActiveDebit = debitMethods.some((entry) => entry.status === 'active');
+    const hasActivePix = bankTransferMethods.some((entry) => entry.status === 'active');
+
+    const notes: string[] = [];
+    if (credentialMode !== 'production') {
+      notes.push('A conta conectada não está em modo de produção.');
+    }
+    if (!hasActivePix) {
+      notes.push('Pix não apareceu como meio ativo. Verifique se a conta possui chave Pix cadastrada e ativa.');
+    }
+    if (!hasActiveCredit) {
+      notes.push('Crédito não apareceu como meio ativo nesta conta.');
+    }
+    if (!hasActiveDebit) {
+      notes.push('Débito não apareceu como meio ativo nesta conta.');
+    }
+
+    const pix = this.normalizeCapability(
+      hasActivePix,
+      bankTransferMethods,
+      'Pix listado como meio ativo nesta conta Mercado Pago.',
+      'Pix indisponível. A conta precisa de chave Pix ativa e habilitação no Mercado Pago.'
+    );
+    const credit = this.normalizeCapability(
+      hasActiveCredit,
+      creditMethods,
+      'Cartão de crédito listado como meio ativo.',
+      'Crédito não apareceu como meio ativo para esta conta.'
+    );
+    const debit = this.normalizeCapability(
+      hasActiveDebit,
+      debitMethods,
+      'Cartão de débito listado como meio ativo.',
+      'Débito não apareceu como meio ativo para esta conta.'
+    );
+
+    return {
+      checkedAt,
+      tokenValid: true,
+      credentialMode,
+      overallStatus:
+        credentialMode === 'production' && hasActivePix && hasActiveCredit && hasActiveDebit
+          ? 'READY'
+          : 'LIMITED',
+      pix,
+      credit,
+      debit,
+      notes,
+    };
+  }
+
   private signState(payload: Record<string, any>) {
     const encoded = Buffer.from(JSON.stringify(payload)).toString('base64url');
     const signature = crypto
@@ -82,6 +203,26 @@ export class StorePaymentAccountService {
     const account = await this.repo.findOne({
       where: { storeId, provider: 'MERCADO_PAGO' as any },
     });
+    let validation: any = null;
+    if (account?.status === 'CONNECTED') {
+      const accessToken = this.decrypt(account.accessTokenEncrypted);
+      if (accessToken) {
+        try {
+          validation = await this.validateCapabilities(accessToken);
+        } catch (error: any) {
+          validation = {
+            checkedAt: new Date().toISOString(),
+            tokenValid: false,
+            credentialMode: this.detectCredentialMode(accessToken),
+            overallStatus: 'ERROR',
+            pix: null,
+            credit: null,
+            debit: null,
+            notes: [error?.details?.message || 'Não foi possível validar a conta Mercado Pago agora.'],
+          };
+        }
+      }
+    }
     return {
       connected: Boolean(account && account.status === 'CONNECTED'),
       status: account?.status || 'DISCONNECTED',
@@ -90,6 +231,7 @@ export class StorePaymentAccountService {
       expiresAt: account?.expiresAt || null,
       updatedAt: account?.updatedAt || null,
       oauthConfigured: Boolean(env.mercadoPago.clientId && env.mercadoPago.clientSecret),
+      validation,
     };
   }
 
@@ -159,6 +301,12 @@ export class StorePaymentAccountService {
     account.refreshTokenEncrypted = data.refresh_token ? this.encrypt(data.refresh_token) : account.refreshTokenEncrypted || null;
     account.expiresAt = expiresAt;
     await this.repo.save(account);
+
+    try {
+      await this.validateCapabilities(data.access_token);
+    } catch (error) {
+      this.log.warn('Mercado Pago capability validation after OAuth failed', { storeId: store.id, error });
+    }
 
     return {
       storeId: store.id,

@@ -1,7 +1,7 @@
 // @ts-nocheck
 import * as React from 'react';
 import { ChartBar, BookOpen, Buildings, CheckSquare, ClipboardText, Clock, CreditCard, Package, Gear, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree, PlugsConnected, CheckCircle, SealCheck } from '@phosphor-icons/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
@@ -881,11 +881,16 @@ const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpg
 };
 
 const GatewayView = ({ storeId }) => {
+  const location = useLocation();
   const [mpAccount, setMpAccount] = useState<any>(null);
   const [mpLoading, setMpLoading] = useState(false);
   const [mpActionLoading, setMpActionLoading] = useState(false);
+  const oauthResult = useMemo(
+    () => String(new URLSearchParams(location.search || '').get('paymentAccount') || '').trim().toLowerCase(),
+    [location.search]
+  );
 
-  useEffect(() => {
+  const loadMpAccount = useCallback(() => {
     if (!storeId) return;
     let cancelled = false;
     setMpLoading(true);
@@ -897,14 +902,100 @@ const GatewayView = ({ storeId }) => {
     return () => { cancelled = true; };
   }, [storeId]);
 
+  useEffect(() => {
+    return loadMpAccount();
+  }, [loadMpAccount]);
+
   const isConnected = Boolean(!mpLoading && mpAccount?.connected);
   const oauthMissing = mpAccount?.oauthConfigured === false;
+  const validation = mpAccount?.validation || null;
+  const gatewayState = mpLoading
+    ? 'loading'
+    : !isConnected
+      ? oauthMissing ? 'pending' : 'available'
+      : validation?.overallStatus === 'READY'
+        ? 'ready'
+        : validation?.overallStatus === 'LIMITED'
+          ? 'limited'
+          : validation?.overallStatus === 'ERROR'
+            ? 'error'
+            : 'connected';
+  const stateTone =
+    gatewayState === 'ready'
+      ? {
+          badge: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+          dot: 'bg-emerald-500',
+          panel: 'border-emerald-100 bg-emerald-50/70',
+          text: 'text-emerald-950',
+          body: 'text-emerald-800/80',
+        }
+      : gatewayState === 'limited' || gatewayState === 'pending'
+        ? {
+            badge: 'bg-amber-50 text-amber-700 ring-amber-200',
+            dot: 'bg-amber-500',
+            panel: 'border-amber-100 bg-amber-50/70',
+            text: 'text-amber-950',
+            body: 'text-amber-800/80',
+          }
+        : gatewayState === 'error'
+          ? {
+              badge: 'bg-rose-50 text-rose-700 ring-rose-200',
+              dot: 'bg-rose-500',
+              panel: 'border-rose-100 bg-rose-50/70',
+              text: 'text-rose-950',
+              body: 'text-rose-800/80',
+            }
+          : {
+              badge: 'bg-slate-50 text-slate-600 ring-slate-200',
+              dot: 'bg-slate-400',
+              panel: 'border-slate-200 bg-slate-50/80',
+              text: 'text-slate-900',
+              body: 'text-slate-500',
+            };
+
   const paymentCapabilities = [
-    { label: 'Pix', detail: 'Confirmação online' },
-    { label: 'Crédito', detail: 'Checkout seguro' },
-    { label: 'Débito', detail: 'Cobrança direta' },
-    { label: 'Manual', detail: 'Fallback imediato' },
+    {
+      label: 'Pix',
+      detail: validation?.pix?.detail || 'Cobrança instantânea com QR e Pix copia e cola.',
+      available: Boolean(validation?.pix?.available),
+      methods: validation?.pix?.methods || [],
+    },
+    {
+      label: 'Crédito',
+      detail: validation?.credit?.detail || 'Checkout seguro para cartão de crédito.',
+      available: Boolean(validation?.credit?.available),
+      methods: validation?.credit?.methods || [],
+    },
+    {
+      label: 'Débito',
+      detail: validation?.debit?.detail || 'Cobrança direta quando o método estiver ativo na conta.',
+      available: Boolean(validation?.debit?.available),
+      methods: validation?.debit?.methods || [],
+    },
+    { label: 'Manual', detail: 'Fallback imediato quando a loja optar pelo fluxo convencional.', available: true, methods: [] },
   ];
+
+  const accountHeadline = mpLoading
+    ? 'Verificando conexão'
+    : !isConnected
+      ? 'Nenhuma conta conectada'
+      : gatewayState === 'ready'
+        ? 'Conta conectada e validada'
+        : gatewayState === 'limited'
+          ? 'Conta conectada com ajustes pendentes'
+          : gatewayState === 'error'
+            ? 'Conta conectada, mas a validação falhou'
+            : 'Conta Mercado Pago conectada';
+
+  const accountDescription = !isConnected
+    ? 'Conecte uma conta para liberar checkout online sem mudar a rotina dos pedidos manuais.'
+    : gatewayState === 'ready'
+      ? 'Pix, crédito e débito apareceram como meios ativos na validação automática desta conta.'
+      : gatewayState === 'limited'
+        ? 'A conta autorizou o acesso, mas alguns meios ainda precisam ser habilitados dentro do Mercado Pago.'
+        : gatewayState === 'error'
+          ? 'A conta conectou, porém não foi possível validar os meios automaticamente agora.'
+          : 'A conta está conectada. Use a validação automática para confirmar os meios ativos.';
 
   return (
     <div className="space-y-4">
@@ -925,40 +1016,66 @@ const GatewayView = ({ storeId }) => {
                 </div>
               </div>
 
-              <span className={`inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-black ring-1 ${
-                mpLoading ? 'bg-slate-50 text-slate-500 ring-slate-200'
-                : isConnected ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                : oauthMissing ? 'bg-amber-50 text-amber-700 ring-amber-200'
-                : 'bg-slate-50 text-slate-600 ring-slate-200'
-              }`}>
-                <span className={`h-2 w-2 rounded-full ${
-                  mpLoading ? 'bg-slate-400 animate-pulse'
-                  : isConnected ? 'bg-emerald-500'
-                  : oauthMissing ? 'bg-amber-500'
-                  : 'bg-slate-400'
-                }`} />
-                {mpLoading ? 'Verificando' : isConnected ? 'Ativo' : oauthMissing ? 'Pendente' : 'Disponível'}
+              <span className={`inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-black ring-1 ${stateTone.badge}`}>
+                <span className={`h-2 w-2 rounded-full ${mpLoading ? 'animate-pulse' : ''} ${stateTone.dot}`} />
+                {mpLoading
+                  ? 'Verificando'
+                  : gatewayState === 'ready'
+                    ? 'Validado'
+                    : gatewayState === 'limited'
+                      ? 'Revisar'
+                      : gatewayState === 'error'
+                        ? 'Erro'
+                        : oauthMissing
+                          ? 'Pendente'
+                          : isConnected
+                            ? 'Conectado'
+                            : 'Disponível'}
               </span>
             </div>
 
-            <div className={`rounded-2xl border px-4 py-4 ${
-              isConnected ? 'border-emerald-100 bg-emerald-50/70' : oauthMissing ? 'border-amber-100 bg-amber-50/70' : 'border-slate-200 bg-slate-50/80'
-            }`}>
+            {oauthResult === 'connected' && (
+              <div className="rounded-2xl border border-sky-100 bg-sky-50/80 px-4 py-3 text-xs font-semibold text-sky-700">
+                Conexão concluída. O painel está validando quais meios dessa conta realmente estão prontos para uso.
+              </div>
+            )}
+
+            {oauthResult === 'error' && (
+              <div className="rounded-2xl border border-rose-100 bg-rose-50/80 px-4 py-3 text-xs font-semibold text-rose-700">
+                O retorno do Mercado Pago falhou. Tente conectar novamente no mesmo navegador.
+              </div>
+            )}
+
+            <div className={`rounded-2xl border px-4 py-4 ${stateTone.panel}`}>
               <div className="flex gap-3">
-                {isConnected ? (
+                {gatewayState === 'ready' ? (
                   <SealCheck size={24} weight="duotone" className="mt-0.5 shrink-0 text-emerald-600" />
-                ) : oauthMissing ? (
+                ) : gatewayState === 'limited' || oauthMissing ? (
                   <WarningCircle size={24} weight="duotone" className="mt-0.5 shrink-0 text-amber-600" />
+                ) : gatewayState === 'error' ? (
+                  <WarningCircle size={24} weight="duotone" className="mt-0.5 shrink-0 text-rose-600" />
                 ) : (
                   <PlugsConnected size={24} weight="duotone" className="mt-0.5 shrink-0 text-[#009ee3]" />
                 )}
                 <div className="min-w-0">
-                  <p className={`text-sm font-black ${isConnected ? 'text-emerald-950' : oauthMissing ? 'text-amber-950' : 'text-slate-900'}`}>
-                    {isConnected ? 'Cobrança online ativa' : oauthMissing ? 'OAuth Mercado Pago pendente' : 'Pronto para conectar'}
+                  <p className={`text-sm font-black ${stateTone.text}`}>
+                    {gatewayState === 'ready'
+                      ? 'Cobrança online validada'
+                      : gatewayState === 'limited'
+                        ? 'Conta conectada, mas precisa de ajustes'
+                        : gatewayState === 'error'
+                          ? 'Validação automática indisponível'
+                          : oauthMissing
+                            ? 'OAuth Mercado Pago pendente'
+                            : 'Pronto para conectar'}
                   </p>
-                  <p className={`mt-1 text-xs leading-relaxed ${isConnected ? 'text-emerald-800/80' : oauthMissing ? 'text-amber-800/80' : 'text-slate-500'}`}>
-                    {isConnected
-                      ? 'Novos pedidos podem ser pagos online e o valor cai direto na conta Mercado Pago conectada.'
+                  <p className={`mt-1 text-xs leading-relaxed ${stateTone.body}`}>
+                    {gatewayState === 'ready'
+                      ? 'Novos pedidos podem usar cobrança online e o valor segue para a conta Mercado Pago conectada.'
+                      : gatewayState === 'limited'
+                        ? 'A autorização foi concluída, mas a conta ainda precisa habilitar os meios apontados abaixo antes de depender do checkout online.'
+                      : gatewayState === 'error'
+                        ? 'A conta está conectada, porém a validação automática não conseguiu confirmar os meios disponíveis.'
                       : oauthMissing
                         ? 'A conexão ainda precisa ser configurada no servidor. Enquanto isso, a loja segue no modo convencional.'
                         : 'Ao conectar, o cliente paga no fluxo do pedido e a operação continua com fallback manual quando necessário.'}
@@ -971,13 +1088,30 @@ const GatewayView = ({ storeId }) => {
               {paymentCapabilities.map((item) => (
                 <div key={item.label} className="rounded-2xl border border-slate-200/80 bg-white/80 px-3 py-3 shadow-[0_12px_24px_-22px_rgba(15,23,42,0.35)]">
                   <div className="flex items-center gap-2">
-                    <CheckCircle size={15} weight="duotone" className={isConnected ? 'text-emerald-500' : 'text-slate-300'} />
+                    <CheckCircle size={15} weight="duotone" className={item.available ? 'text-emerald-500' : 'text-slate-300'} />
                     <span className="text-xs font-black text-slate-800">{item.label}</span>
                   </div>
                   <p className="mt-1 text-[10px] font-semibold leading-tight text-slate-400">{item.detail}</p>
+                  {item.methods?.length ? (
+                    <p className="mt-1 text-[10px] font-semibold text-slate-500">{item.methods.slice(0, 2).join(' · ')}</p>
+                  ) : null}
                 </div>
               ))}
             </div>
+
+            {Array.isArray(validation?.notes) && validation.notes.length > 0 && (
+              <div className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3">
+                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Pontos de atenção</p>
+                <div className="mt-3 space-y-2">
+                  {validation.notes.map((note: string, index: number) => (
+                    <div key={`${note}-${index}`} className="flex gap-2 text-xs text-slate-600">
+                      <WarningCircle size={14} weight="fill" className="mt-0.5 shrink-0 text-amber-500" />
+                      <span>{note}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="space-y-4 border-t border-slate-200/80 pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
@@ -985,19 +1119,29 @@ const GatewayView = ({ storeId }) => {
               <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Status da conta</p>
               <div className="mt-3 flex items-start gap-3">
                 <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                  isConnected ? 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100' : 'bg-slate-50 text-slate-500 ring-1 ring-slate-200'
+                  gatewayState === 'ready'
+                    ? 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100'
+                    : gatewayState === 'limited'
+                      ? 'bg-amber-50 text-amber-600 ring-1 ring-amber-100'
+                      : gatewayState === 'error'
+                        ? 'bg-rose-50 text-rose-600 ring-1 ring-rose-100'
+                        : 'bg-slate-50 text-slate-500 ring-1 ring-slate-200'
                 }`}>
-                  {isConnected ? <SealCheck size={20} weight="duotone" /> : <CreditCard size={20} weight="duotone" />}
+                  {gatewayState === 'ready' ? <SealCheck size={20} weight="duotone" /> : <CreditCard size={20} weight="duotone" />}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-black text-slate-950">
-                    {mpLoading ? 'Verificando conexão' : isConnected ? 'Conta Mercado Pago conectada' : 'Nenhuma conta conectada'}
-                  </p>
-                  <p className="mt-1 text-xs leading-relaxed text-slate-500">
-                    {isConnected
-                      ? 'A cobrança online está liberada para os próximos pedidos elegíveis.'
-                      : 'Conecte uma conta para liberar checkout online sem mudar a rotina dos pedidos manuais.'}
-                  </p>
+                  <p className="text-sm font-black text-slate-950">{accountHeadline}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-500">{accountDescription}</p>
+                  {validation?.checkedAt ? (
+                    <p className="mt-2 text-[11px] font-semibold text-slate-400">
+                      Validado em {formatDateTime(validation.checkedAt)}
+                      {validation?.credentialMode === 'production'
+                        ? ' · Produção'
+                        : validation?.credentialMode === 'test'
+                          ? ' · Teste'
+                          : ''}
+                    </p>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -1050,6 +1194,17 @@ const GatewayView = ({ storeId }) => {
                   >
                     <X size={17} weight="bold" />
                     {mpActionLoading ? 'Desconectando...' : 'Desconectar gateway'}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!storeId || mpLoading || mpActionLoading}
+                    onClick={() => {
+                      loadMpAccount();
+                    }}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-black text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                  >
+                    <Clock size={17} weight="duotone" />
+                    {mpLoading ? 'Atualizando...' : 'Validar novamente'}
                   </button>
                 </div>
               )}
