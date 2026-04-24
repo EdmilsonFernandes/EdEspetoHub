@@ -2866,23 +2866,6 @@ export function MarketplacePage() {
               </div>
             )}
 
-            {geoDiscovery?.mode === 'same_city_fallback' && (
-              <div className="rounded-[1.55rem] border border-amber-100 bg-[linear-gradient(135deg,rgba(255,251,235,0.98)_0%,rgba(255,247,237,0.94)_100%)] px-4 py-3 shadow-[0_14px_34px_-26px_rgba(245,158,11,0.28)]">
-                <div className="flex items-start gap-3">
-                  <span className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
-                    <Warning size={18} weight="duotone" />
-                  </span>
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-700">Cobertura parcial</p>
-                    <p className="mt-1 text-sm font-bold text-slate-900">Ainda não encontramos entrega direta para essa região.</p>
-                    <p className="mt-1 text-xs font-medium text-slate-500">
-                      Mostrando lojas da mesma cidade para retirada ou envio quando disponível.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {geoDiscovery?.mode === 'nearby_fallback' && (
               <div className="rounded-[1.55rem] border border-sky-100 bg-[linear-gradient(135deg,rgba(239,246,255,0.98)_0%,rgba(248,250,252,0.94)_100%)] px-4 py-3 shadow-[0_14px_34px_-26px_rgba(2,132,199,0.24)]">
                 <div className="flex items-start gap-3">
@@ -3158,12 +3141,6 @@ export function MarketplacePage() {
                               <span className="inline-flex items-center gap-1 rounded-full border border-sky-100 bg-sky-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-sky-700 shadow-[0_6px_16px_-12px_rgba(2,132,199,0.42)]">
                                 <MapPinLine size={9} weight="fill" />
                                 Mais perto
-                              </span>
-                            )}
-                            {store.geoAvailability === 'same_city_pickup' && (
-                              <span className="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-amber-700 shadow-[0_6px_16px_-12px_rgba(245,158,11,0.34)]">
-                                <Storefront size={9} weight="fill" />
-                                Mesma cidade
                               </span>
                             )}
                             {store.supportsPostal && (
