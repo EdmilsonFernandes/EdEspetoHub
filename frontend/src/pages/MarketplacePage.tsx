@@ -99,6 +99,15 @@ type StoreDiscoveryResponse = {
   } | null;
 };
 
+const parseOptionalNumber = (value: unknown): number | null => {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  const normalized = String(value).replace(',', '.').trim();
+  if (!normalized) return null;
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
 type HubCondominium = {
   id?: string;
   name?: string;
@@ -1048,8 +1057,13 @@ export function MarketplacePage() {
         const rating = Number(store?.reviewSummary?.avgStoreRating || 0) > 0
           ? Number(store?.reviewSummary?.avgStoreRating)
           : 4.6 + ((seed % 5) * 0.1);
-        const apiDistanceKm = Number((store as any)?.distanceKm);
-        const distanceKm = Number.isFinite(apiDistanceKm) ? apiDistanceKm : 0.8 + (seed % 52) / 10;
+        const apiDistanceKm = parseOptionalNumber((store as any)?.distanceKm);
+        const distanceKm =
+          apiDistanceKm !== null
+            ? apiDistanceKm
+            : geoDiscovery
+              ? null
+              : 0.8 + (seed % 52) / 10;
         const etaMin = 18 + (seed % 18);
         const etaMax = etaMin + 10;
         const rawOrderTypes = Array.isArray(store?.settings?.orderTypes)
@@ -1104,7 +1118,7 @@ export function MarketplacePage() {
           supportsPostal,
           geoAvailability: String((store as any)?.geoAvailability || '').trim(),
           isNearest: Boolean((store as any)?.isNearest),
-          distanceSource: Number.isFinite(apiDistanceKm) ? 'server' : 'local',
+          distanceSource: apiDistanceKm !== null ? 'server' : 'local',
           nextOpeningLabel: String(store?.nextOpeningLabel || '').trim(),
           primaryColor: String(store?.settings?.primaryColor || '').trim(),
           secondaryColor: String(store?.settings?.secondaryColor || '').trim(),
@@ -1129,7 +1143,7 @@ export function MarketplacePage() {
       city: string;
       state: string;
       rating: number;
-      distanceKm: number;
+      distanceKm: number | null;
       etaMin: number;
       etaMax: number;
       freeShipping: boolean;
@@ -1150,7 +1164,7 @@ export function MarketplacePage() {
       searchIndex: string;
       productSearchIndex: string;
     }>;
-  }, [productSearchBySlug, stores]);
+  }, [geoDiscovery, productSearchBySlug, stores]);
 
   const scopedEnrichedStores = useMemo(() => {
     if (!selectedCondominiumSlug) return enrichedStores;
@@ -1360,7 +1374,7 @@ export function MarketplacePage() {
         if (debouncedQuery && !store.searchIndex.includes(debouncedQuery) && !store.productSearchIndex.includes(debouncedQuery)) return false;
         if (segmentFilter !== 'all' && store.segment !== segmentFilter) return false;
         if (quickFilter === 'free_shipping' && !store.freeShipping) return false;
-        if (quickFilter === 'nearby' && store.distanceKm > 2.5) return false;
+        if (quickFilter === 'nearby' && (store.distanceKm == null || store.distanceKm > 2.5)) return false;
         if (quickFilter === 'open_now' && !store.isOpen) return false;
         if (quickFilter === 'favorites' && !favoriteStoreSlugs.includes(store.slug)) return false;
         return true;
@@ -1535,11 +1549,12 @@ export function MarketplacePage() {
     return hasFoodHeavy ? 'Itens em destaque' : 'Produtos em destaque';
   }, [scopedEnrichedStores]);
 
-  const formatDistance = (km: number) => {
-    if (!Number.isFinite(km) || km <= 0) return 'Região';
-    if (km > 50) return 'Região';
-    if (km < 1) return `${Math.max(100, Math.round(km * 1000 / 100) * 100)} m`;
-    return `${km.toFixed(1)} km`;
+  const formatDistance = (km: number | null | undefined) => {
+    const normalizedKm = typeof km === 'number' && Number.isFinite(km) ? km : null;
+    if (normalizedKm === null || normalizedKm <= 0) return 'Região';
+    if (normalizedKm > 50) return 'Região';
+    if (normalizedKm < 1) return `${Math.max(100, Math.round(normalizedKm * 1000 / 100) * 100)} m`;
+    return `${normalizedKm.toFixed(1)} km`;
   };
 
   const displayedFeaturedProducts = useMemo(() => {

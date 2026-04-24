@@ -260,7 +260,11 @@ export class StoreController {
   }
 
   private static toQueryNumber(value: unknown) {
-    const parsed = Number(String(value ?? '').replace(',', '.').trim());
+    if (value === null || value === undefined) return null;
+    if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+    const normalized = String(value).replace(',', '.').trim();
+    if (!normalized) return null;
+    const parsed = Number(normalized);
     return Number.isFinite(parsed) ? parsed : null;
   }
 
@@ -502,9 +506,9 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
           const supportsPickup = orderTypes.some((type: string) => String(type || '').toLowerCase() === 'pickup');
           const supportsTable = orderTypes.some((type: string) => String(type || '').toLowerCase() === 'table');
           const supportsPostal = Boolean(entry?.settings?.postalEnabled) && supportsDelivery;
-          const storeLat = Number(entry?.settings?.lat);
-          const storeLng = Number(entry?.settings?.lng);
-          const hasStoreCoords = Number.isFinite(storeLat) && Number.isFinite(storeLng);
+          const storeLat = StoreController.toQueryNumber(entry?.settings?.lat);
+          const storeLng = StoreController.toQueryNumber(entry?.settings?.lng);
+          const hasStoreCoords = storeLat !== null && storeLng !== null;
           const distanceKm =
             hasUserCoords && hasStoreCoords
               ? StoreController.haversineKm({ lat: Number(userLat), lng: Number(userLng) }, { lat: storeLat, lng: storeLng })
@@ -545,9 +549,11 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
         items.sort((a, b) => {
           const openDelta = Number(Boolean(b?.openNow)) - Number(Boolean(a?.openNow));
           if (openDelta !== 0) return openDelta;
-          const distanceA = Number.isFinite(Number(a?.distanceKm)) ? Number(a.distanceKm) : Number.MAX_SAFE_INTEGER;
-          const distanceB = Number.isFinite(Number(b?.distanceKm)) ? Number(b.distanceKm) : Number.MAX_SAFE_INTEGER;
-          if (distanceA !== distanceB) return distanceA - distanceB;
+          const distanceA = StoreController.toQueryNumber(a?.distanceKm);
+          const distanceB = StoreController.toQueryNumber(b?.distanceKm);
+          const normalizedDistanceA = distanceA !== null ? distanceA : Number.MAX_SAFE_INTEGER;
+          const normalizedDistanceB = distanceB !== null ? distanceB : Number.MAX_SAFE_INTEGER;
+          if (normalizedDistanceA !== normalizedDistanceB) return normalizedDistanceA - normalizedDistanceB;
           return Number(b?.reviewSummary?.avgStoreRating || 0) - Number(a?.reviewSummary?.avgStoreRating || 0);
         });
 
@@ -562,7 +568,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
           (entry: any) =>
             !deliverableStores.some((item: any) => item.id === entry.id) &&
             !sameCityStores.some((item: any) => item.id === entry.id) &&
-            Number.isFinite(Number(entry?.distanceKm))
+            StoreController.toQueryNumber(entry?.distanceKm) !== null
         )
       );
 
