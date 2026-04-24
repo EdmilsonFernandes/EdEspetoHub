@@ -502,6 +502,24 @@ export function ClientAccount() {
     }
   };
 
+  const primaryAddress = addresses.find((address) => address?.isDefault) || addresses[0] || null;
+  const primaryAddressLine = primaryAddress
+    ? [
+        primaryAddress.street,
+        primaryAddress.number ? `, ${primaryAddress.number}` : '',
+        primaryAddress.complement ? ` • ${primaryAddress.complement}` : '',
+      ].join('')
+    : '';
+  const primaryAddressMeta = primaryAddress
+    ? [
+        primaryAddress.neighborhood,
+        primaryAddress.city && primaryAddress.state ? `${primaryAddress.city}/${primaryAddress.state}` : '',
+        primaryAddress.cep ? `CEP ${String(primaryAddress.cep).replace(/^(\d{5})(\d{3})$/, '$1-$2')}` : '',
+      ]
+        .filter(Boolean)
+        .join(' • ')
+    : '';
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#EEF2F7]">
@@ -636,37 +654,68 @@ export function ClientAccount() {
                     <MapPinLine size={16} weight="duotone" className="text-sky-500" />
                     Meus Endereços
                   </h3>
-                  <button 
-                    onClick={() => navigate('/cliente/enderecos')}
+                  <button
+                    onClick={() => navigate('/cliente/enderecos?mode=new')}
                     className="flex items-center gap-1.5 rounded-xl bg-sky-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-sky-700 active:scale-95"
                   >
                     <Plus size={12} weight="bold" />
-                    Cadastrar
+                    Novo
                   </button>
                 </div>
-                
-                <div className="space-y-2">
-                  {addresses.length === 0 ? (
-                    <div className="rounded-3xl border border-dashed border-slate-200 bg-white p-8 text-center">
-                      <p className="text-sm font-bold text-slate-400">Nenhum endereço cadastrado</p>
-                    </div>
-                  ) : (
-                    addresses.map(addr => (
-                      <div key={addr.id} className="group flex items-center justify-between rounded-3xl bg-white p-4 shadow-sm border border-slate-100">
-                        <div className="flex items-center gap-3">
-                          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-[#EEF2F7] text-slate-400 group-hover:bg-sky-50 group-hover:text-sky-600 transition-colors">
-                            <MapPinLine size={20} weight="duotone" />
+
+                <button
+                  type="button"
+                  onClick={() => navigate('/cliente/enderecos')}
+                  className="group w-full rounded-[2rem] border border-slate-100 bg-white p-5 text-left shadow-sm transition-all active:scale-[0.99]"
+                >
+                  {primaryAddress ? (
+                    <div className="space-y-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3">
+                          <div className="grid h-12 w-12 place-items-center rounded-[1.35rem] bg-emerald-50 text-emerald-600">
+                            <MapPinLine size={22} weight="duotone" />
                           </div>
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-black text-slate-900">{addr.label || 'Casa'}</p>
-                            <p className="truncate text-[11px] font-bold text-slate-400">{addr.street}, {addr.number}</p>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="text-sm font-black text-slate-900">{primaryAddress.label || 'Endereço principal'}</p>
+                              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-emerald-700">
+                                <CheckCircle size={11} weight="fill" />
+                                Principal
+                              </span>
+                            </div>
+                            <p className="mt-2 text-sm font-bold leading-5 text-slate-700">{primaryAddressLine}</p>
+                            <p className="mt-1 text-xs font-medium leading-5 text-slate-500">{primaryAddressMeta}</p>
                           </div>
                         </div>
-                        <CaretRight size={16} className="text-slate-300" />
+                        <CaretRight size={16} className="mt-1 text-slate-300 transition-colors group-hover:text-slate-500" />
                       </div>
-                    ))
+
+                      <div className="flex items-center justify-between rounded-[1.4rem] border border-slate-100 bg-slate-50/80 px-4 py-3">
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Gestão completa</p>
+                          <p className="mt-1 text-xs font-bold text-slate-600">
+                            {addresses.length} {addresses.length === 1 ? 'endereço salvo' : 'endereços salvos'} • editar, excluir e trocar principal
+                          </p>
+                        </div>
+                        <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-slate-700">
+                          Gerenciar
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="rounded-3xl border border-dashed border-slate-200 bg-white p-4 text-left">
+                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Entrega</p>
+                      <p className="mt-2 text-sm font-black text-slate-900">Você ainda não tem endereço salvo</p>
+                      <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">
+                        Cadastre seu primeiro endereço para agilizar a entrega e deixar um principal definido.
+                      </p>
+                      <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-slate-700">
+                        <Plus size={12} weight="bold" />
+                        Abrir meus endereços
+                      </div>
+                    </div>
                   )}
-                </div>
+                </button>
               </section>
 
               {/* Seção 3: Segurança */}
