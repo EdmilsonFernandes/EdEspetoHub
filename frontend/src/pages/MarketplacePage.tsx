@@ -602,6 +602,7 @@ export function MarketplacePage() {
   const [locationLabel, setLocationLabel] = useState('Sua região');
   const [geoDiscovery, setGeoDiscovery] = useState<StoreDiscoveryResponse | null>(null);
   const [preferredDiscoveryAddress, setPreferredDiscoveryAddress] = useState<PreferredDiscoveryAddress | null>(null);
+  const [hubScopeOverride, setHubScopeOverride] = useState<'default' | 'all_stores'>('default');
   const hasPreferredAddressContext = Boolean(preferredDiscoveryAddress?.city || preferredDiscoveryAddress?.state);
   const hasPreferredAddressCoordinates =
     hasPreferredAddressContext &&
@@ -618,6 +619,7 @@ export function MarketplacePage() {
       : userRegion;
   const activeLocationLabel = preferredDiscoveryAddress?.label || locationLabel;
   const isUsingSavedAddressForDiscovery = hasPreferredAddressContext;
+  const isShowingAllStores = hubScopeOverride === 'all_stores';
 
   useEffect(() => {
     if (!condominiumPickerOpen || !activeLocation) return;
@@ -962,7 +964,7 @@ export function MarketplacePage() {
     }
     portfolioLoadInFlightRef.current = true;
     try {
-      const canRunGeoDiscovery = Boolean(
+      const canRunGeoDiscovery = hubScopeOverride !== 'all_stores' && Boolean(
         (activeLocation?.lat && activeLocation?.lng) ||
         String(activeRegion?.city || '').trim() ||
         String(activeRegion?.state || '').trim()
@@ -991,7 +993,7 @@ export function MarketplacePage() {
         }, 0);
       }
     }
-  }, [activeLocation?.lat, activeLocation?.lng, activeRegion?.city, activeRegion?.state]);
+  }, [activeLocation?.lat, activeLocation?.lng, activeRegion?.city, activeRegion?.state, hubScopeOverride]);
 
   const refreshHub = useCallback(async () => {
     if (portfolioLoadInFlightRef.current) return;
@@ -1931,6 +1933,23 @@ export function MarketplacePage() {
     navigate('/terms?from=hub');
   }, [navigate]);
 
+  const clearHubFilters = useCallback(() => {
+    setQuery('');
+    setDebouncedQuery('');
+    setQuickFilter('all');
+    setSegmentFilter('all');
+    setSelectedCondominiumSlug('');
+  }, []);
+
+  const enableAllStoresView = useCallback(() => {
+    clearHubFilters();
+    setHubScopeOverride('all_stores');
+  }, [clearHubFilters]);
+
+  const restoreRegionalView = useCallback(() => {
+    setHubScopeOverride('default');
+  }, []);
+
   const openPrivacy = useCallback(() => {
     navigate('/terms?from=hub#lgpd');
   }, [navigate]);
@@ -2843,11 +2862,39 @@ export function MarketplacePage() {
                   <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
                     {productSearchLoading && debouncedQuery
                       ? 'Buscando também nos cardápios...'
-                      : `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} ${selectedCondominium ? 'no condomínio' : 'perto de você'}`}
+                      : isShowingAllStores
+                        ? `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} em outras regiões`
+                        : `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} ${selectedCondominium ? 'no condomínio' : 'perto de você'}`}
                   </p>
                 ) : null}
               </div>
             </div>
+
+            {isShowingAllStores && (
+              <div className="rounded-[1.55rem] border border-[#336886]/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(239,247,255,0.96)_100%)] px-4 py-3 shadow-[0_16px_34px_-24px_rgba(51,104,134,0.22)]">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[#336886]/10 text-[#336886]">
+                      <Sparkle size={18} weight="duotone" />
+                    </span>
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">Exploração ampliada</p>
+                      <p className="mt-1 text-sm font-bold text-slate-900">Você está vendo lojas fora da sua região principal.</p>
+                      <p className="mt-1 text-xs font-medium text-slate-500">
+                        Isso ajuda a conhecer o app enquanto a cobertura local ainda está chegando.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={restoreRegionalView}
+                    className="shrink-0 rounded-[1rem] border border-slate-200 bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.24)]"
+                  >
+                    Voltar
+                  </button>
+                </div>
+              </div>
+            )}
 
             {geoDiscovery?.mode === 'deliverable' && (
               <div className="rounded-[1.55rem] border border-emerald-100 bg-[linear-gradient(135deg,rgba(236,253,245,0.98)_0%,rgba(240,253,250,0.94)_100%)] px-4 py-3 shadow-[0_14px_34px_-26px_rgba(16,185,129,0.38)]">
@@ -2901,42 +2948,89 @@ export function MarketplacePage() {
             )}
 
             {!loading && !error && filteredStores.length === 0 && !(productSearchLoading && debouncedQuery) && (
-              <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
-                <p className="text-slate-700 font-semibold">
-                  {geoDiscovery?.mode === 'no_coverage'
-                    ? 'Ainda não atendemos essa região com entrega.'
-                    : 'Nenhuma loja encontrada com esses filtros.'}
-                </p>
-                {geoDiscovery?.mode === 'no_coverage' && (
-                  <div className="mx-auto mt-4 max-w-sm rounded-[1.6rem] border border-[#336886]/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(239,247,255,0.92)_100%)] px-4 py-4 text-left shadow-[0_10px_28px_-18px_rgba(51,104,134,0.22)]">
-                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">Expansão da região</p>
-                    <p className="mt-1 text-sm font-black text-slate-900">Indique um lojista, restaurante ou operação perto de você.</p>
-                    <p className="mt-1 text-xs font-medium text-slate-500">
-                      Isso ajuda a plataforma a abrir cobertura local com mais rapidez.
+              geoDiscovery?.mode === 'no_coverage' ? (
+                <div className="relative overflow-hidden rounded-[2rem] border border-[#336886]/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(239,247,255,0.96)_52%,rgba(248,250,252,0.98)_100%)] p-5 shadow-[0_24px_54px_-34px_rgba(51,104,134,0.28)]">
+                  <div className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rounded-full bg-[#336886]/10 blur-3xl" />
+                  <div className="pointer-events-none absolute -left-10 bottom-0 h-36 w-36 rounded-full bg-emerald-300/12 blur-3xl" />
+                  <div className="relative flex flex-col gap-5">
+                    <div className="flex items-start gap-4">
+                      <span className="inline-flex h-14 w-14 items-center justify-center rounded-[1.4rem] border border-white/70 bg-white/88 shadow-[0_18px_34px_-24px_rgba(15,23,42,0.24)]">
+                        <img
+                          src="/janocaminho.png"
+                          alt="Já no Caminho"
+                          className="h-9 w-9 rounded-full object-contain"
+                        />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Expansão da região</p>
+                        <h3 className="mt-1 text-lg font-black leading-tight text-slate-950">
+                          Ainda não atendemos {displayLocationLabel || 'essa região'} com entrega.
+                        </h3>
+                        <p className="mt-2 text-sm font-medium leading-relaxed text-slate-600">
+                          Indique um lojista, restaurante ou operação perto de você para acelerar a chegada do Já no Caminho.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                      <div className="rounded-[1.2rem] border border-white/80 bg-white/76 px-3 py-3 shadow-[0_12px_28px_-22px_rgba(15,23,42,0.22)]">
+                        <Storefront size={16} weight="duotone" className="text-[#336886]" />
+                        <p className="mt-2 text-[11px] font-black text-slate-900">Lojista local</p>
+                        <p className="mt-1 text-[11px] font-medium text-slate-500">Mercado, adega, conveniência.</p>
+                      </div>
+                      <div className="rounded-[1.2rem] border border-white/80 bg-white/76 px-3 py-3 shadow-[0_12px_28px_-22px_rgba(15,23,42,0.22)]">
+                        <ForkKnife size={16} weight="duotone" className="text-emerald-600" />
+                        <p className="mt-2 text-[11px] font-black text-slate-900">Restaurante</p>
+                        <p className="mt-1 text-[11px] font-medium text-slate-500">Delivery, retirada ou balcão.</p>
+                      </div>
+                      <div className="rounded-[1.2rem] border border-white/80 bg-white/76 px-3 py-3 shadow-[0_12px_28px_-22px_rgba(15,23,42,0.22)]">
+                        <Buildings size={16} weight="duotone" className="text-violet-600" />
+                        <p className="mt-2 text-[11px] font-black text-slate-900">Condomínio</p>
+                        <p className="mt-1 text-[11px] font-medium text-slate-500">Feira, evento ou operação local.</p>
+                      </div>
+                      <div className="rounded-[1.2rem] border border-white/80 bg-white/76 px-3 py-3 shadow-[0_12px_28px_-22px_rgba(15,23,42,0.22)]">
+                        <PaperPlaneTilt size={16} weight="duotone" className="text-sky-600" />
+                        <p className="mt-2 text-[11px] font-black text-slate-900">Seja o primeiro</p>
+                        <p className="mt-1 text-[11px] font-medium text-slate-500">Ajude a puxar a cobertura local.</p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <button
+                        type="button"
+                        onClick={() => navigate('/create')}
+                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-[1.15rem] bg-[linear-gradient(135deg,#0f172a,#1e293b)] px-4 py-3 text-[11px] font-black uppercase tracking-[0.16em] text-white shadow-[0_18px_34px_-24px_rgba(15,23,42,0.58)]"
+                      >
+                        <Storefront size={14} weight="fill" />
+                        Indicar um lojista da região
+                      </button>
+                      <button
+                        type="button"
+                        onClick={enableAllStoresView}
+                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-[1.15rem] border border-[#336886]/14 bg-white/88 px-4 py-3 text-[11px] font-black uppercase tracking-[0.16em] text-[#336886] shadow-[0_14px_28px_-24px_rgba(51,104,134,0.35)]"
+                      >
+                        <Sparkle size={14} weight="fill" />
+                        Explorar outras lojas
+                      </button>
+                    </div>
+
+                    <p className="text-[11px] font-medium text-slate-500">
+                      Quando a cobertura local abrir, sua região entra na frente da operação.
                     </p>
-                    <button
-                      type="button"
-                      onClick={() => navigate('/create')}
-                      className="mt-4 inline-flex w-full items-center justify-center rounded-[1.1rem] bg-[linear-gradient(135deg,#0f172a,#1e293b)] px-4 py-3 text-[11px] font-black uppercase tracking-[0.16em] text-white shadow-[0_16px_34px_-24px_rgba(15,23,42,0.65)]"
-                    >
-                      Indicar uma loja
-                    </button>
                   </div>
-                )}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setQuery('');
-                    setDebouncedQuery('');
-                    setQuickFilter('all');
-                    setSegmentFilter('all');
-                    setSelectedCondominiumSlug('');
-                  }}
-                  className="mt-3 rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600"
-                >
-                  Limpar filtros
-                </button>
-              </div>
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
+                  <p className="text-slate-700 font-semibold">Nenhuma loja encontrada com esses filtros.</p>
+                  <button
+                    type="button"
+                    onClick={clearHubFilters}
+                    className="mt-3 rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600"
+                  >
+                    Limpar filtros
+                  </button>
+                </div>
+              )
             )}
 
             {!loading && !error && filteredStores.length > 0 && (
