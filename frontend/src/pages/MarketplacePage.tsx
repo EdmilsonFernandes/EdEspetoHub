@@ -180,7 +180,7 @@ const buildPreferredAddressGeoCacheKey = (addressLine: string) =>
 const storeRegionalPriority = (store: { geoAvailability?: string | null; supportsPostal?: boolean; isNearest?: boolean }) => {
   const availability = String(store?.geoAvailability || '').trim().toLowerCase();
   if (store?.isNearest) return 0;
-  if (availability === 'deliver_now') return 1;
+  if (availability === 'deliver_now' || availability === 'deliver_unbounded') return 1;
   if (availability === 'postal_everywhere' || store?.supportsPostal) return 2;
   if (availability === 'same_city_pickup') return 3;
   if (availability === 'same_city') return 4;
@@ -3108,7 +3108,7 @@ export function MarketplacePage() {
                   const shouldWarnCoverage =
                     !selectedCondominium &&
                     !store.supportsPostal &&
-                    [ 'outside_radius', 'same_city', 'same_city_pickup' ].includes(String(store.geoAvailability || '').toLowerCase());
+                    [ 'outside_radius', 'same_city' ].includes(String(store.geoAvailability || '').toLowerCase());
                   const storeNavigationState = shouldWarnCoverage
                     ? {
                         hubCoverageWarning: {
@@ -3322,7 +3322,7 @@ export function MarketplacePage() {
                                 Correios
                               </span>
                             )}
-                            {!store.supportsPostal && [ 'outside_radius', 'same_city', 'same_city_pickup' ].includes(String(store.geoAvailability || '').toLowerCase()) && (
+                            {!store.supportsPostal && [ 'outside_radius', 'same_city' ].includes(String(store.geoAvailability || '').toLowerCase()) && (
                               <span className="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-amber-700 shadow-[0_6px_16px_-12px_rgba(245,158,11,0.34)]">
                                 <Warning size={9} weight="fill" />
                                 Fora do raio

@@ -538,20 +538,26 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
               ? StoreController.haversineKm({ lat: Number(userLat), lng: Number(userLng) }, { lat: storeLat, lng: storeLng })
               : null;
           const deliveryRadiusKm = StoreController.toQueryNumber(entry?.settings?.deliveryRadiusKm);
+          const hasExplicitRadius = deliveryRadiusKm !== null && deliveryRadiusKm > 0;
           const sameCity =
             normalizedCity &&
             StoreController.normalizeGeoText(entry?.settings?.city) === normalizedCity &&
             (!normalizedState || StoreController.normalizeGeoText(entry?.settings?.state) === normalizedState);
           const canDeliverByRadius =
             supportsDelivery &&
-            distanceKm !== null &&
-            deliveryRadiusKm !== null &&
-            deliveryRadiusKm > 0 &&
-            distanceKm <= deliveryRadiusKm;
+            (
+              !hasExplicitRadius ||
+              (
+                distanceKm !== null &&
+                deliveryRadiusKm !== null &&
+                deliveryRadiusKm > 0 &&
+                distanceKm <= deliveryRadiusKm
+              )
+            );
           const geoAvailability = supportsPostal
             ? 'postal_everywhere'
             : canDeliverByRadius
-              ? 'deliver_now'
+              ? (hasExplicitRadius ? 'deliver_now' : 'deliver_unbounded')
               : sameCity
                 ? (supportsPickup || supportsTable ? 'same_city_pickup' : 'same_city')
                 : distanceKm !== null
@@ -561,7 +567,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
             ...entry,
             distanceKm,
             geoAvailability,
-            deliveryRadiusKm,
+            deliveryRadiusKm: hasExplicitRadius ? deliveryRadiusKm : null,
             sameCity,
             supportsPostal,
             supportsPickup,
@@ -582,7 +588,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
         });
 
       const deliverableStores = sortByProximity(
-        hydrated.filter((entry: any) => entry.geoAvailability === 'deliver_now' || entry.geoAvailability === 'postal_everywhere')
+        hydrated.filter((entry: any) => [ 'deliver_now', 'deliver_unbounded', 'postal_everywhere' ].includes(String(entry.geoAvailability || '')))
       );
       const sameCityStores = sortByProximity(
         hydrated.filter((entry: any) => !deliverableStores.some((item: any) => item.id === entry.id) && entry.sameCity)
