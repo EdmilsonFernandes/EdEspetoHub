@@ -1259,6 +1259,30 @@ export function MarketplacePage() {
     if (!search) return items;
     return items.filter((item) => item.index.includes(search));
   }, [condominiums, condominiumSearch]);
+  const condominiumPickerCounts = useMemo(() => {
+    let live = 0;
+    let upcoming = 0;
+    let none = 0;
+
+    filteredCondominiums.forEach(({ event }) => {
+      if (event?.state === 'live') {
+        live += 1;
+        return;
+      }
+      if (event?.state === 'upcoming') {
+        upcoming += 1;
+        return;
+      }
+      none += 1;
+    });
+
+    return {
+      all: filteredCondominiums.length,
+      live,
+      upcoming,
+      none,
+    };
+  }, [filteredCondominiums]);
 
   const filteredStores = useMemo(() => {
     return scopedEnrichedStores
@@ -2907,101 +2931,140 @@ export function MarketplacePage() {
       </nav>
 
       {condominiumPickerOpen && (
-        <div className="fixed inset-0 z-[220] overflow-y-auto bg-[#f4f6f9] text-slate-950">
+        <div className="fixed inset-0 z-[220] overflow-y-auto bg-[radial-gradient(circle_at_top,rgba(51,104,134,0.10),transparent_26%),linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)] text-slate-950">
           <div className="mx-auto min-h-screen max-w-[640px] pb-28">
 
-            {/* ── Hero suave ── */}
-            <div className="relative px-4 pb-5 pt-[max(env(safe-area-inset-top),1rem)]">
-              {/* Orbs decorativos */}
-              <div className="pointer-events-none absolute -right-10 -top-6 h-52 w-52 rounded-full bg-[#336886]/10 blur-3xl" />
-              <div className="pointer-events-none absolute -left-14 top-16 h-40 w-40 rounded-full bg-emerald-300/12 blur-3xl" />
+            <div className="relative px-4 pb-6 pt-[max(env(safe-area-inset-top),1rem)]">
+              <div className="pointer-events-none absolute -right-12 -top-10 h-56 w-56 rounded-full bg-[#336886]/12 blur-3xl" />
+              <div className="pointer-events-none absolute left-0 top-24 h-40 w-40 rounded-full bg-emerald-300/14 blur-3xl" />
+              <div className="pointer-events-none absolute inset-x-4 top-16 h-36 rounded-[2.25rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.62)_0%,rgba(255,255,255,0.2)_100%)] blur-3xl" />
 
-              {/* Botão voltar */}
               <button
                 type="button"
                 onClick={() => { setCondominiumPickerOpen(false); setCondominiumSearch(''); setCondoPickerFilter('all'); }}
-                className="relative mb-5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-600 shadow-sm ring-1 ring-slate-200 transition-colors hover:bg-slate-50 active:scale-95"
+                className="relative mb-5 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/80 text-slate-700 shadow-[0_18px_36px_-22px_rgba(15,23,42,0.35)] backdrop-blur-xl transition-colors hover:bg-white active:scale-95"
                 aria-label="Voltar"
               >
                 <CaretRight size={16} weight="bold" className="rotate-180" />
               </button>
 
-              {/* Título */}
-              <div className="relative mb-5">
-                <div className="mb-2 flex items-center gap-2">
-                  <img
-                    src="/janocaminho.jpg"
-                    alt="Já no Caminho"
-                    className="h-5 w-5 rounded-full object-cover ring-1 ring-[#336886]/20"
-                  />
-                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]/70">Já no Caminho</p>
+              <div className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.82)_0%,rgba(255,255,255,0.52)_48%,rgba(239,246,255,0.68)_100%)] px-4 py-5 shadow-[0_26px_60px_-34px_rgba(15,23,42,0.28)] ring-1 ring-white/60 backdrop-blur-2xl">
+                <div className="pointer-events-none absolute inset-y-0 right-0 w-40 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.16),transparent_65%)]" />
+                <div className="pointer-events-none absolute -bottom-14 right-4 h-28 w-28 rounded-full bg-[#336886]/12 blur-3xl" />
+
+                <div className="relative mb-4 flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="mb-2 flex items-center gap-2">
+                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/90 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)] ring-1 ring-slate-200/80">
+                        <img
+                          src="/janocaminho.png"
+                          alt="Já no Caminho"
+                          className="h-5 w-5 rounded-full object-contain"
+                        />
+                      </span>
+                      <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">Já no Caminho</p>
+                    </div>
+                    <h2 className="max-w-[16rem] text-[1.9rem] font-black leading-[0.98] tracking-[-0.045em] text-slate-950">
+                      Escolha a feira do seu condomínio
+                    </h2>
+                    <p className="mt-2 max-w-[19rem] text-[13px] font-medium leading-snug text-slate-600">
+                      Veja o que está ao vivo, o que vem em seguida e entre com um toque no condomínio certo.
+                    </p>
+                  </div>
+                  <div className="shrink-0 rounded-[1.35rem] border border-emerald-200/70 bg-white/82 px-3 py-2 shadow-[0_16px_30px_-22px_rgba(16,185,129,0.42)] backdrop-blur-md">
+                    <p className="text-[9px] font-black uppercase tracking-[0.18em] text-emerald-600">Agora</p>
+                    <p className="mt-1 text-right text-lg font-black leading-none text-slate-950">
+                      {condominiumPickerCounts.live}
+                    </p>
+                    <p className="mt-1 text-[10px] font-semibold text-slate-500">feira{condominiumPickerCounts.live === 1 ? '' : 's'} ao vivo</p>
+                  </div>
                 </div>
-                <h2 className="text-[1.75rem] font-black tracking-tight text-slate-900 leading-none">Onde você está?</h2>
-                <p className="mt-2 text-[13px] font-medium text-slate-500 leading-snug max-w-xs">
-                  Escolha seu condomínio e veja as feiras ativas agora.
-                </p>
-              </div>
 
-              {/* Search */}
-              <div className="relative flex items-center gap-3 rounded-2xl border border-white bg-white px-4 py-3 shadow-[0_4px_20px_-8px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.9)] transition-all duration-200 focus-within:border-[#336886]/25 focus-within:shadow-[0_6px_24px_-8px_rgba(51,104,134,0.18)]">
-                <MagnifyingGlass size={16} weight="bold" className="shrink-0 text-slate-400" />
-                <input
-                  ref={condominiumSearchInputRef}
-                  type="text"
-                  value={condominiumSearch}
-                  onChange={(ev) => setCondominiumSearch(ev.target.value)}
-                  placeholder="Buscar por nome ou cidade..."
-                  autoComplete="off"
-                  className="min-h-0 min-w-0 flex-1 bg-transparent text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400"
-                />
-                {condominiumSearch ? (
-                  <button
-                    type="button"
-                    onClick={() => setCondominiumSearch('')}
-                    className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200 active:scale-95"
-                  >
-                    <X size={11} weight="bold" />
-                  </button>
-                ) : null}
-              </div>
+                <div className="mb-4 flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/72 px-3 py-1.5 text-[11px] font-bold text-slate-700 shadow-sm backdrop-blur-md">
+                    <MapPinLine size={12} weight="duotone" className={userLocation ? 'text-emerald-600' : 'text-[#336886]'} />
+                    {userLocation ? 'Localização ativa' : 'Busque por cidade'}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[#336886]/12 bg-[#336886]/8 px-3 py-1.5 text-[11px] font-bold text-[#336886] shadow-sm">
+                    <Buildings size={12} weight="duotone" />
+                    {condominiumPickerCounts.all} condomínio{condominiumPickerCounts.all === 1 ? '' : 's'}
+                  </span>
+                </div>
 
-              {/* ── Filter pills ── */}
-              <div className="-mx-4 mt-3.5 flex gap-2 overflow-x-auto px-4 pb-1 no-scrollbar">
-                {([
-                  { key: 'all' as const, label: 'Todos', dot: null },
-                  { key: 'live' as const, label: 'Ao vivo', dot: 'emerald' },
-                  { key: 'upcoming' as const, label: 'Em breve', dot: 'brand' },
-                  { key: 'none' as const, label: 'Sem agenda', dot: null },
-                ]).map(({ key, label, dot }) => {
-                  const isActive = condoPickerFilter === key;
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => setCondoPickerFilter(key)}
-                      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[11px] font-bold transition-all duration-200 active:scale-95 ${
-                        isActive
-                          ? key === 'live'
-                            ? 'border-emerald-400/40 bg-emerald-500 text-white shadow-[0_4px_14px_-6px_rgba(16,185,129,0.55)]'
-                            : key === 'upcoming'
-                            ? 'border-[#336886]/30 bg-[#336886] text-white shadow-[0_4px_14px_-6px_rgba(51,104,134,0.5)]'
-                            : key === 'none'
-                            ? 'border-slate-400/30 bg-slate-700 text-white shadow-sm'
-                            : 'border-slate-300/40 bg-slate-900 text-white shadow-sm'
-                          : key === 'live'
-                          ? 'border-emerald-100 bg-white text-emerald-700 hover:border-emerald-200'
-                          : key === 'upcoming'
-                          ? 'border-[#336886]/10 bg-white text-[#336886] hover:border-[#336886]/20'
-                          : 'border-slate-100 bg-white text-slate-500 hover:border-slate-200'
-                      }`}
-                    >
-                      {dot === 'emerald' && (
-                        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActive ? 'bg-white animate-pulse' : 'bg-emerald-400'}`} />
-                      )}
-                      {label}
-                    </button>
-                  );
-                })}
+                <div className="relative overflow-hidden rounded-[1.6rem] border border-white/70 bg-white/68 p-1.5 shadow-[0_18px_40px_-28px_rgba(15,23,42,0.28)] ring-1 ring-white/55 backdrop-blur-xl">
+                  <div className="flex items-center gap-3 rounded-[1.25rem] bg-white/72 px-4 py-3">
+                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100/90 text-slate-500">
+                      <MagnifyingGlass size={16} weight="bold" />
+                    </span>
+                    <input
+                      ref={condominiumSearchInputRef}
+                      type="text"
+                      value={condominiumSearch}
+                      onChange={(ev) => setCondominiumSearch(ev.target.value)}
+                      placeholder="Buscar por nome do condomínio ou cidade..."
+                      autoComplete="off"
+                      className="min-h-0 min-w-0 flex-1 bg-transparent text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400"
+                    />
+                    {condominiumSearch ? (
+                      <button
+                        type="button"
+                        onClick={() => setCondominiumSearch('')}
+                        className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200 active:scale-95"
+                      >
+                        <X size={12} weight="bold" />
+                      </button>
+                    ) : (
+                      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/10 bg-[#336886]/6 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">
+                        <MapPinLine size={11} weight="fill" />
+                        Map
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="-mx-1 mt-4 flex gap-2 overflow-x-auto px-1 pb-1 no-scrollbar">
+                  {([
+                    { key: 'all' as const, label: 'Todos', count: condominiumPickerCounts.all, tone: 'slate' as const },
+                    { key: 'live' as const, label: 'Ao vivo', count: condominiumPickerCounts.live, tone: 'emerald' as const },
+                    { key: 'upcoming' as const, label: 'Em breve', count: condominiumPickerCounts.upcoming, tone: 'brand' as const },
+                    { key: 'none' as const, label: 'Sem agenda', count: condominiumPickerCounts.none, tone: 'muted' as const },
+                  ]).map(({ key, label, count, tone }) => {
+                    const isActive = condoPickerFilter === key;
+                    const activeClasses =
+                      tone === 'emerald'
+                        ? 'border-emerald-400/40 bg-emerald-500 text-white shadow-[0_12px_28px_-18px_rgba(16,185,129,0.62)]'
+                        : tone === 'brand'
+                        ? 'border-[#336886]/30 bg-[#336886] text-white shadow-[0_12px_28px_-18px_rgba(51,104,134,0.52)]'
+                        : tone === 'muted'
+                        ? 'border-slate-400/30 bg-slate-700 text-white shadow-[0_12px_28px_-20px_rgba(51,65,85,0.5)]'
+                        : 'border-slate-300/30 bg-slate-950 text-white shadow-[0_12px_28px_-20px_rgba(15,23,42,0.55)]';
+                    const idleClasses =
+                      tone === 'emerald'
+                        ? 'border-emerald-100 bg-white/86 text-emerald-700 hover:border-emerald-200'
+                        : tone === 'brand'
+                        ? 'border-[#336886]/12 bg-white/86 text-[#336886] hover:border-[#336886]/20'
+                        : tone === 'muted'
+                        ? 'border-slate-200 bg-white/86 text-slate-500 hover:border-slate-300'
+                        : 'border-slate-200 bg-white/86 text-slate-700 hover:border-slate-300';
+
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setCondoPickerFilter(key)}
+                        className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2 text-[11px] font-black transition-all duration-200 active:scale-95 ${isActive ? activeClasses : idleClasses}`}
+                      >
+                        {tone === 'emerald' && (
+                          <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActive ? 'bg-white' : 'bg-emerald-500'}`} />
+                        )}
+                        <span>{label}</span>
+                        <span className={`inline-flex min-w-[1.35rem] items-center justify-center rounded-full px-1.5 py-0.5 text-[9px] font-black ${isActive ? 'bg-white/18 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
@@ -3082,10 +3145,13 @@ export function MarketplacePage() {
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                             <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
                           </span>
-                          <span className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-600">Acontecendo agora</span>
-                          <span className="ml-auto inline-flex items-center justify-center rounded-full bg-emerald-500 px-2 py-0.5 text-[9px] font-black text-white shadow-[0_2px_8px_-4px_rgba(16,185,129,0.6)]">{live.length}</span>
+                          <div>
+                            <span className="block text-[11px] font-black uppercase tracking-[0.18em] text-emerald-600">Acontecendo agora</span>
+                            <span className="text-[11px] font-medium text-slate-500">Entre direto na feira que já está rodando.</span>
+                          </div>
+                          <span className="ml-auto inline-flex items-center justify-center rounded-full bg-emerald-500 px-2.5 py-1 text-[9px] font-black text-white shadow-[0_6px_18px_-10px_rgba(16,185,129,0.7)]">{live.length}</span>
                         </div>
-                        <div className="flex flex-col gap-2.5">
+                        <div className="flex flex-col gap-3">
                           {live.map(({ condominium, slug, name, region, event }) => {
                             const active = selectedCondominiumSlug === slug;
                             const logoUrl = resolveAssetUrl(condominium.logoUrl || undefined) || getStoreAvatarUrl(slug, name);
@@ -3096,44 +3162,66 @@ export function MarketplacePage() {
                                 key={slug}
                                 type="button"
                                 onClick={() => handleClick(slug, name, event, condominium)}
-                                className={`group relative overflow-hidden flex w-full items-center gap-3.5 rounded-[1.4rem] border p-4 text-left transition-all duration-300 active:scale-[0.985] ${
+                                className={`group relative w-full overflow-hidden rounded-[1.9rem] border text-left transition-all duration-300 active:scale-[0.985] ${
                                   active
-                                    ? 'border-emerald-300/60 bg-emerald-50 shadow-[0_6px_24px_-8px_rgba(16,185,129,0.32)]'
-                                    : 'border-emerald-100 bg-white shadow-[0_4px_20px_-8px_rgba(16,185,129,0.18)] hover:border-emerald-200 hover:shadow-[0_8px_28px_-8px_rgba(16,185,129,0.28)]'
+                                    ? 'border-emerald-300/70 shadow-[0_24px_42px_-22px_rgba(16,185,129,0.42)] ring-1 ring-emerald-200/80'
+                                    : 'border-emerald-200/60 shadow-[0_20px_38px_-24px_rgba(16,185,129,0.28)] hover:border-emerald-300/70 hover:shadow-[0_26px_46px_-24px_rgba(16,185,129,0.36)]'
                                 }`}
                               >
-                                <img src={bannerUrl} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-[0.08] blur-xl saturate-75" />
-                                {/* Logo com pulse ring */}
-                                <div className="relative shrink-0">
-                                  <div className={`h-14 w-14 overflow-hidden rounded-[1rem] border-2 shadow-[0_4px_14px_-6px_rgba(16,185,129,0.3)] ${active ? 'border-emerald-300' : 'border-emerald-100'}`}>
-                                    <img src={logoUrl} alt={name} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
-                                  </div>
-                                  <span className="absolute -bottom-1 -right-1 flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-white bg-emerald-500 shadow-[0_2px_6px_-2px_rgba(16,185,129,0.6)]">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                                  </span>
-                                </div>
-
-                                {/* Texto */}
-                                <div className="relative min-w-0 flex-1">
-                                  <span className="block truncate text-[14.5px] font-black leading-tight text-slate-900">{name}</span>
-                                  {region && <span className="block truncate text-[11px] font-medium text-slate-400 mt-0.5">{region}</span>}
-                                  {timeLabel && (
-                                    <span className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600">
-                                      <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-emerald-500" />
-                                      {timeLabel}
+                                <img src={bannerUrl} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
+                                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(7,13,25,0.88)_0%,rgba(9,16,32,0.76)_38%,rgba(15,23,42,0.38)_100%)]" />
+                                <div className="pointer-events-none absolute inset-y-0 right-0 w-28 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.34),transparent_72%)]" />
+                                <div className="relative p-4">
+                                  <div className="flex items-start justify-between gap-3">
+                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/18 bg-white/14 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-white backdrop-blur-md">
+                                      <span className="relative flex h-2 w-2">
+                                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300 opacity-80" />
+                                        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-300" />
+                                      </span>
+                                      Ao vivo agora
                                     </span>
-                                  )}
-                                </div>
+                                    {active ? (
+                                      <span className="inline-flex items-center rounded-full border border-white/18 bg-white/14 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-white backdrop-blur-md">
+                                        Seu atual
+                                      </span>
+                                    ) : null}
+                                  </div>
 
-                                {/* CTA */}
-                                <span className={`relative shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[10px] font-black uppercase tracking-wide transition-all duration-200 ${
-                                  active
-                                    ? 'bg-emerald-500 text-white shadow-[0_4px_12px_-4px_rgba(16,185,129,0.5)]'
-                                    : 'bg-emerald-100 text-emerald-700 group-hover:bg-emerald-500 group-hover:text-white'
-                                }`}>
-                                  Entrar
-                                  <CaretRight size={9} weight="bold" />
-                                </span>
+                                  <div className="mt-4 flex items-center gap-3">
+                                    <div className="relative shrink-0">
+                                      <div className="h-16 w-16 overflow-hidden rounded-[1.25rem] border border-white/80 bg-white/94 p-2 shadow-[0_18px_32px_-24px_rgba(15,23,42,0.7)]">
+                                        <img src={logoUrl} alt={name} className="h-full w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
+                                      </div>
+                                      <span className="absolute -bottom-1.5 -right-1.5 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-emerald-500 text-white shadow-[0_10px_20px_-12px_rgba(16,185,129,0.88)]">
+                                        <Sparkle size={11} weight="fill" />
+                                      </span>
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <span className="block truncate text-[17px] font-black leading-tight tracking-[-0.03em] text-white">{name}</span>
+                                      {region ? <span className="mt-1 block truncate text-[11px] font-semibold text-white/70">{region}</span> : null}
+                                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                                        <span className="inline-flex items-center gap-1.5 rounded-full bg-white/16 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white backdrop-blur-sm">
+                                          <Clock size={11} weight="fill" />
+                                          {timeLabel || 'Feira aberta'}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="mt-4 flex items-center justify-between gap-3">
+                                    <span className="text-[11px] font-semibold text-white/72">
+                                      Pagamento, lojas abertas e pedido em fluxo.
+                                    </span>
+                                    <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em] transition-all duration-200 ${
+                                      active
+                                        ? 'bg-white text-emerald-700 shadow-[0_14px_28px_-18px_rgba(255,255,255,0.72)]'
+                                        : 'bg-emerald-500 text-white shadow-[0_16px_30px_-18px_rgba(16,185,129,0.85)] group-hover:bg-emerald-400'
+                                    }`}>
+                                      Entrar
+                                      <CaretRight size={10} weight="bold" />
+                                    </span>
+                                  </div>
+                                </div>
                               </button>
                             );
                           })}
@@ -3146,10 +3234,13 @@ export function MarketplacePage() {
                       <section>
                         <div className="mb-3 flex items-center gap-2">
                           <Clock size={13} weight="fill" className="text-[#336886]" />
-                          <span className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Em breve</span>
+                          <div>
+                            <span className="block text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Em breve</span>
+                            <span className="text-[11px] font-medium text-slate-500">Condomínios com agenda próxima.</span>
+                          </div>
                           <span className="ml-auto inline-flex items-center justify-center rounded-full bg-[#336886]/10 px-2 py-0.5 text-[9px] font-black text-[#336886]">{upcoming.length}</span>
                         </div>
-                        <div className="flex flex-col gap-2.5">
+                        <div className="flex flex-col gap-3">
                           {upcoming.map(({ condominium, slug, name, region, event }) => {
                             const active = selectedCondominiumSlug === slug;
                             const logoUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
@@ -3160,31 +3251,47 @@ export function MarketplacePage() {
                                 key={slug}
                                 type="button"
                                 onClick={() => handleClick(slug, name, event, condominium)}
-                                className={`group relative overflow-hidden flex w-full items-center gap-3.5 rounded-[1.4rem] border p-4 text-left transition-all duration-300 active:scale-[0.985] ${
+                                className={`group relative w-full overflow-hidden rounded-[1.65rem] border p-3 text-left transition-all duration-300 active:scale-[0.985] ${
                                   active
-                                    ? 'border-[#336886]/25 bg-[#336886]/6 shadow-[0_4px_20px_-8px_rgba(51,104,134,0.22)]'
-                                    : 'border-slate-100 bg-white shadow-[0_2px_12px_-6px_rgba(15,23,42,0.07)] hover:border-[#336886]/15 hover:shadow-[0_6px_20px_-8px_rgba(51,104,134,0.14)]'
+                                    ? 'border-[#336886]/26 bg-white shadow-[0_20px_38px_-26px_rgba(51,104,134,0.32)] ring-1 ring-[#336886]/10'
+                                    : 'border-white/80 bg-white/92 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.25)] hover:border-[#336886]/18 hover:shadow-[0_24px_40px_-28px_rgba(51,104,134,0.22)]'
                                 }`}
                               >
-                                <img src={bannerUrl} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-[0.07] blur-xl saturate-75" />
-                                <div className={`relative shrink-0 h-14 w-14 overflow-hidden rounded-[1rem] border ${active ? 'border-[#336886]/20' : 'border-slate-100'} bg-slate-50`}>
-                                  <img src={logoUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
-                                </div>
-                                <div className="relative flex min-w-0 flex-1 flex-col">
-                                  <div className="flex items-center gap-2">
-                                    <span className="truncate text-[14.5px] font-bold text-slate-900">{name}</span>
-                                    {active && <span className="shrink-0 rounded-full bg-[#336886] px-1.5 py-0.5 text-[7.5px] font-black uppercase tracking-widest text-white">Você aqui</span>}
+                                <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-[radial-gradient(circle_at_center,rgba(51,104,134,0.09),transparent_72%)]" />
+                                <div className="relative flex items-center gap-3">
+                                  <div className="relative h-[5.25rem] w-[6.8rem] shrink-0 overflow-hidden rounded-[1.3rem] border border-slate-200/80 bg-slate-100 shadow-[0_16px_28px_-24px_rgba(15,23,42,0.42)]">
+                                    <img src={bannerUrl} alt="" aria-hidden className="h-full w-full object-cover" />
+                                    <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(15,23,42,0.18)_0%,rgba(15,23,42,0.06)_45%,rgba(15,23,42,0.26)_100%)]" />
+                                    <div className="absolute bottom-2 left-2 h-10 w-10 overflow-hidden rounded-[0.95rem] border border-white/90 bg-white/95 p-1.5 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.52)]">
+                                      <img src={logoUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
+                                    </div>
                                   </div>
-                                  {region && <span className="block truncate text-[11px] font-medium text-slate-400 mt-0.5">{region}</span>}
-                                  <div className="mt-1.5 flex items-center gap-1.5">
-                                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#336886]/8 px-2 py-0.5 text-[9px] font-black text-[#336886]">
-                                      <Clock size={8} weight="fill" />
-                                      Agendado
-                                    </span>
-                                    {timeLabel && <span className="truncate text-[10px] font-medium text-slate-400">{timeLabel}</span>}
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div className="min-w-0">
+                                        <span className="block truncate text-[15px] font-black leading-tight text-slate-900">{name}</span>
+                                        {region ? <span className="mt-1 block truncate text-[11px] font-medium text-slate-500">{region}</span> : null}
+                                      </div>
+                                      {active ? <span className="shrink-0 rounded-full bg-[#336886] px-2 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-white">Atual</span> : null}
+                                    </div>
+                                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                                      <span className="inline-flex items-center gap-1 rounded-full bg-[#336886]/8 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-[#336886]">
+                                        <Clock size={10} weight="fill" />
+                                        Agendado
+                                      </span>
+                                      {timeLabel ? <span className="truncate text-[11px] font-semibold text-slate-500">{timeLabel}</span> : null}
+                                    </div>
+                                    <div className="mt-3 flex items-center justify-between gap-3">
+                                      <span className="text-[11px] font-medium text-slate-500">Acompanhe o início e entre na hora certa.</span>
+                                      <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-[10px] font-black uppercase tracking-[0.14em] ${
+                                        active ? 'bg-[#336886] text-white' : 'bg-slate-900 text-white'
+                                      }`}>
+                                        Ver agenda
+                                        <CaretRight size={10} weight="bold" />
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
-                                <CaretRight size={14} weight="bold" className={`relative shrink-0 transition-all duration-200 group-hover:translate-x-0.5 ${active ? 'text-[#336886]' : 'text-slate-300'}`} />
                               </button>
                             );
                           })}
@@ -3197,10 +3304,13 @@ export function MarketplacePage() {
                       <section>
                         <div className="mb-3 flex items-center gap-2">
                           <CalendarBlank size={12} weight="duotone" className="text-slate-400" />
-                          <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Outros condomínios</span>
+                          <div>
+                            <span className="block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Outros condomínios</span>
+                            <span className="text-[11px] font-medium text-slate-500">Descubra locais próximos e acompanhe quando abrirem agenda.</span>
+                          </div>
                           <span className="ml-auto rounded-full bg-slate-200/80 px-2 py-0.5 text-[9px] font-bold text-slate-500">{none.length}</span>
                         </div>
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-2.5">
                           {none.map(({ condominium, slug, name, region }) => {
                             const active = selectedCondominiumSlug === slug;
                             const logoUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
@@ -3210,26 +3320,37 @@ export function MarketplacePage() {
                                 key={slug}
                                 type="button"
                                 onClick={() => handleClick(slug, name, null, condominium)}
-                                className={`group relative overflow-hidden flex w-full items-center gap-3 rounded-[1.25rem] border p-3 text-left transition-all duration-200 active:scale-[0.99] ${
+                                className={`group relative w-full overflow-hidden rounded-[1.45rem] border p-3 text-left transition-all duration-200 active:scale-[0.99] ${
                                   active
-                                    ? 'border-[#336886]/15 bg-[#336886]/5'
-                                    : 'border-slate-100/90 bg-white/80 hover:bg-white hover:border-slate-200'
+                                    ? 'border-[#336886]/16 bg-white shadow-[0_16px_32px_-26px_rgba(51,104,134,0.22)]'
+                                    : 'border-white/80 bg-white/88 shadow-[0_14px_28px_-26px_rgba(15,23,42,0.22)] hover:border-slate-200 hover:bg-white'
                                 }`}
                               >
-                                <img src={bannerUrl} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-[0.06] blur-xl saturate-50" />
-                                <div className={`relative h-11 w-11 shrink-0 overflow-hidden rounded-[0.8rem] border bg-slate-50 transition-all duration-300 ${
-                                  active ? 'border-[#336886]/20' : 'border-slate-100 grayscale-[35%] opacity-70 group-hover:grayscale-0 group-hover:opacity-100'
-                                }`}>
-                                  <img src={logoUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
+                                <div className="relative flex items-center gap-3">
+                                  <div className="relative h-[4.65rem] w-[5.5rem] shrink-0 overflow-hidden rounded-[1.1rem] border border-slate-200/80 bg-slate-100">
+                                    <img src={bannerUrl} alt="" aria-hidden className="h-full w-full object-cover opacity-90" />
+                                    <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(15,23,42,0.12)_0%,rgba(255,255,255,0.02)_45%,rgba(15,23,42,0.18)_100%)]" />
+                                    <div className="absolute bottom-2 left-2 h-8 w-8 overflow-hidden rounded-[0.8rem] border border-white/90 bg-white/95 p-1 shadow-[0_10px_20px_-16px_rgba(15,23,42,0.55)]">
+                                      <img src={logoUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
+                                    </div>
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <span className={`block truncate text-[14px] font-black ${active ? 'text-[#336886]' : 'text-slate-800'}`}>{name}</span>
+                                    {region ? <span className="mt-1 block truncate text-[11px] font-medium text-slate-500">{region}</span> : null}
+                                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                                      <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-slate-500">
+                                        Sem agenda
+                                      </span>
+                                      <span className="text-[11px] font-medium text-slate-500">Receba novidades quando abrir.</span>
+                                    </div>
+                                  </div>
+                                  <span className={`relative shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.12em] ${
+                                    active ? 'bg-[#336886]/10 text-[#336886]' : 'bg-slate-100 text-slate-600'
+                                  }`}>
+                                    {active ? 'Aqui' : 'Ver mais'}
+                                    {!active && <CaretRight size={9} weight="bold" />}
+                                  </span>
                                 </div>
-                                <div className="relative min-w-0 flex-1">
-                                  <span className={`block truncate text-[13px] font-semibold ${active ? 'text-[#336886]' : 'text-slate-600'}`}>{name}</span>
-                                  {region && <span className="block truncate text-[10px] text-slate-400">{region}</span>}
-                                </div>
-                                <span className={`relative shrink-0 text-[9px] font-bold uppercase tracking-wide ${active ? 'text-[#336886]' : 'text-slate-300 group-hover:text-slate-400'}`}>
-                                  {active ? 'Aqui' : 'Ver'}
-                                  {!active && <CaretRight size={9} weight="bold" className="ml-0.5 inline" />}
-                                </span>
                               </button>
                             );
                           })}
