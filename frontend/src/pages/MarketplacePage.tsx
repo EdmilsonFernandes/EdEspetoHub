@@ -103,9 +103,13 @@ type PreferredDiscoveryAddress = {
   label: string;
   city: string;
   state: string;
+  addressLine?: string;
   lat?: number | null;
   lng?: number | null;
 };
+
+const HUB_DISTANCE_CACHE_TTL_MS = 12 * 60 * 60 * 1000;
+const HUB_ADDRESS_GEO_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 const parseOptionalNumber = (value: unknown): number | null => {
   if (value === null || value === undefined) return null;
@@ -119,9 +123,12 @@ const parseOptionalNumber = (value: unknown): number | null => {
 const buildCustomerAddressLookup = (address: any) => {
   const city = String(address?.city || '').trim();
   const state = String(address?.state || '').trim().toUpperCase();
+  const street = String(address?.street || '').trim();
+  const number = String(address?.number || '').trim();
+  const streetLine = [street, number].filter(Boolean).join(', ');
   const addressLine = [
-    String(address?.street || '').trim(),
-    String(address?.number || '').trim(),
+    street,
+    number,
     String(address?.neighborhood || '').trim(),
     city,
     state,
@@ -131,7 +138,7 @@ const buildCustomerAddressLookup = (address: any) => {
     .join(', ');
   const label = [
     String(address?.label || 'Endereço principal').trim(),
-    city && state ? `${city} - ${state}` : '',
+    streetLine || (city && state ? `${city} - ${state}` : ''),
   ]
     .filter(Boolean)
     .join(' • ');
@@ -142,6 +149,48 @@ const buildCustomerAddressLookup = (address: any) => {
     addressLine,
     label: label || 'Endereço principal',
   };
+};
+
+const readHubCache = <T,>(key: string, ttlMs: number): T | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const ts = Number(parsed?.ts || 0);
+    if (!ts || Date.now() - ts > ttlMs) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return (parsed?.data ?? null) as T | null;
+  } catch {
+    return null;
+  }
+};
+
+const writeHubCache = (key: string, data: unknown) => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
+  } catch {
+    // ignore
+  }
+};
+
+const buildPreferredAddressGeoCacheKey = (addressLine: string) =>
+  `hub:address-geo:${normalizeSearchText(addressLine || '')}`;
+
+const buildDistanceContextKey = (
+  savedAddress: PreferredDiscoveryAddress | null,
+  location: { lat: number; lng: number } | null,
+  region: { city: string; state: string } | null
+) => {
+  const savedAddressKey = normalizeSearchText(savedAddress?.addressLine || '');
+  if (savedAddressKey) return `saved:${savedAddressKey}`;
+  if (location) return `gps:${location.lat.toFixed(4)}:${location.lng.toFixed(4)}`;
+  const city = normalizeSearchText(region?.city || '');
+  const state = normalizeSearchText(region?.state || '');
+  return `region:${city}:${state}`;
 };
 
 type HubCondominium = {
@@ -553,16 +602,22 @@ export function MarketplacePage() {
   const [locationLabel, setLocationLabel] = useState('Sua região');
   const [geoDiscovery, setGeoDiscovery] = useState<StoreDiscoveryResponse | null>(null);
   const [preferredDiscoveryAddress, setPreferredDiscoveryAddress] = useState<PreferredDiscoveryAddress | null>(null);
-  const activeLocation =
-    preferredDiscoveryAddress && Number.isFinite(Number(preferredDiscoveryAddress.lat)) && Number.isFinite(Number(preferredDiscoveryAddress.lng))
-      ? { lat: Number(preferredDiscoveryAddress.lat), lng: Number(preferredDiscoveryAddress.lng) }
+  const hasPreferredAddressContext = Boolean(preferredDiscoveryAddress?.city || preferredDiscoveryAddress?.state);
+  const hasPreferredAddressCoordinates =
+    hasPreferredAddressContext &&
+    Number.isFinite(Number(preferredDiscoveryAddress?.lat)) &&
+    Number.isFinite(Number(preferredDiscoveryAddress?.lng));
+  const activeLocation = hasPreferredAddressCoordinates
+    ? { lat: Number(preferredDiscoveryAddress?.lat), lng: Number(preferredDiscoveryAddress?.lng) }
+    : hasPreferredAddressContext
+      ? null
       : userLocation;
   const activeRegion =
     preferredDiscoveryAddress?.city || preferredDiscoveryAddress?.state
       ? { city: preferredDiscoveryAddress?.city || '', state: preferredDiscoveryAddress?.state || '' }
       : userRegion;
   const activeLocationLabel = preferredDiscoveryAddress?.label || locationLabel;
-  const isUsingSavedAddressForDiscovery = Boolean(preferredDiscoveryAddress?.city || preferredDiscoveryAddress?.state);
+  const isUsingSavedAddressForDiscovery = hasPreferredAddressContext;
 
   useEffect(() => {
     if (!condominiumPickerOpen || !activeLocation) return;
@@ -610,6 +665,7 @@ export function MarketplacePage() {
   const touchPullActiveRef = useRef(false);
   const pullDistanceRef = useRef(0);
   const pendingPortfolioReloadRef = useRef(false);
+  const distanceCacheKeyRef = useRef<string>('');
 
   useEffect(() => {
     document.title = 'Hub Já no Caminho';
@@ -659,29 +715,50 @@ export function MarketplacePage() {
           return;
         }
 
-        let lat: number | null = null;
-        let lng: number | null = null;
-        if (normalized.addressLine) {
-          try {
-            const geo = await mapsService.geocode(normalized.addressLine);
-            if (!cancelled) {
-              lat = Number(geo?.lat);
-              lng = Number(geo?.lng);
-            }
-          } catch {
-            lat = null;
-            lng = null;
-          }
-        }
+        const cachedGeo = normalized.addressLine
+          ? readHubCache<{ lat?: number; lng?: number }>(
+              buildPreferredAddressGeoCacheKey(normalized.addressLine),
+              HUB_ADDRESS_GEO_CACHE_TTL_MS
+            )
+          : null;
 
-        if (cancelled) return;
-        setPreferredDiscoveryAddress({
+        const nextAddress: PreferredDiscoveryAddress = {
           label: normalized.label,
           city: normalized.city,
           state: normalized.state,
-          lat: Number.isFinite(Number(lat)) ? Number(lat) : null,
-          lng: Number.isFinite(Number(lng)) ? Number(lng) : null,
-        });
+          addressLine: normalized.addressLine,
+          lat: Number.isFinite(Number(cachedGeo?.lat)) ? Number(cachedGeo?.lat) : null,
+          lng: Number.isFinite(Number(cachedGeo?.lng)) ? Number(cachedGeo?.lng) : null,
+        };
+
+        setPreferredDiscoveryAddress(nextAddress);
+
+        if (nextAddress.lat != null && nextAddress.lng != null) {
+          return;
+        }
+        if (!normalized.addressLine) {
+          return;
+        }
+
+        try {
+          const geo = await mapsService.geocode(normalized.addressLine);
+          if (cancelled) return;
+          const lat = Number(geo?.lat);
+          const lng = Number(geo?.lng);
+          if (Number.isFinite(lat) && Number.isFinite(lng)) {
+            writeHubCache(buildPreferredAddressGeoCacheKey(normalized.addressLine), { lat, lng });
+            setPreferredDiscoveryAddress((current) => {
+              if (!current || current.addressLine !== normalized.addressLine) return current;
+              return {
+                ...current,
+                lat,
+                lng,
+              };
+            });
+          }
+        } catch {
+          // keep same-city discovery when geocode is unavailable
+        }
       } catch {
         if (!cancelled) setPreferredDiscoveryAddress(null);
       }
@@ -1548,18 +1625,45 @@ export function MarketplacePage() {
         setDistanceByStore({});
         return;
       }
+      const contextKey = buildDistanceContextKey(preferredDiscoveryAddress, activeLocation, activeRegion);
+      if (distanceCacheKeyRef.current !== contextKey) {
+        distanceCacheKeyRef.current = contextKey;
+        try {
+          const cached = readHubCache<Record<string, number>>(`hub:store-distance:${contextKey}`, HUB_DISTANCE_CACHE_TTL_MS);
+          setDistanceByStore(cached && typeof cached === 'object' ? cached : {});
+        } catch {
+          setDistanceByStore({});
+        }
+      }
       if (scopedEnrichedStores.every((store) => store.distanceSource === 'server')) {
         setDistanceByStore({});
         return;
       }
-      setDistanceLoading(true);
+
       try {
         const targets = scopedEnrichedStores
           .filter((store) => store.distanceSource !== 'server')
           .slice(0, 8)
           .filter((store) => (store.storeLat != null && store.storeLng != null) || store.addressText.length >= 8);
+        const cachedDistances =
+          readHubCache<Record<string, number>>(`hub:store-distance:${contextKey}`, HUB_DISTANCE_CACHE_TTL_MS) || {};
+
+        const missingTargets = targets.filter((store) => {
+          const cachedKm = Number(cachedDistances?.[store.id]);
+          return !Number.isFinite(cachedKm);
+        });
+
+        if (Object.keys(cachedDistances).length > 0 && !cancelled) {
+          setDistanceByStore(cachedDistances);
+        }
+        if (missingTargets.length === 0) {
+          setDistanceLoading(false);
+          return;
+        }
+
+        setDistanceLoading(true);
         const settled = await Promise.allSettled(
-          targets.map(async (store) => {
+          missingTargets.map(async (store) => {
             const km =
               store.storeLat != null && store.storeLng != null
                 ? haversineKm(activeLocation, { lat: store.storeLat, lng: store.storeLng })
@@ -1570,15 +1674,16 @@ export function MarketplacePage() {
           })
         );
         if (cancelled) return;
-        const next: Record<string, number> = {};
+        const next: Record<string, number> = { ...cachedDistances };
         settled.forEach((result) => {
           if (result.status === 'fulfilled') {
             next[result.value[0]] = result.value[1];
           }
         });
         setDistanceByStore(next);
+        writeHubCache(`hub:store-distance:${contextKey}`, next);
       } catch (_err) {
-        if (!cancelled) setDistanceByStore({});
+        // preserve the last valid cache instead of clearing the distance badge
       } finally {
         if (!cancelled) setDistanceLoading(false);
       }
@@ -1588,7 +1693,7 @@ export function MarketplacePage() {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [activeLocation, scopedEnrichedStores]);
+  }, [activeLocation, activeRegion?.city, activeRegion?.state, preferredDiscoveryAddress?.addressLine, scopedEnrichedStores]);
 
   useEffect(() => {
     let cancelled = false;
@@ -2718,7 +2823,7 @@ export function MarketplacePage() {
                       <Heart size={14} weight="fill" className="text-rose-500 shrink-0" />
                     </div>
                     <p className="mt-0.5 text-[11px] text-slate-600">
-                      {distanceLoading && activeLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)} • {store.etaMin}-{store.etaMax} min
+                      {distanceLoading && activeLocation && distanceByStore[store.id] == null ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)} • {store.etaMin}-{store.etaMax} min
                     </p>
                   </Link>
                 ))}
@@ -3040,7 +3145,7 @@ export function MarketplacePage() {
                           {store.rating > 0 ? <span className="text-slate-200">·</span> : null}
                           <span>{store.etaMin}–{store.etaMax} min</span>
                           <span className="text-slate-200">·</span>
-                          <span>{distanceLoading && activeLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)}</span>
+                          <span>{distanceLoading && activeLocation && distanceByStore[store.id] == null ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)}</span>
                         </div>
                         {!store.isOpen && (
                           <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-500">

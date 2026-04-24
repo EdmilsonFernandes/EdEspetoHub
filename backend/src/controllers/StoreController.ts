@@ -31,6 +31,8 @@ const orderReviewService = new OrderReviewService();
 const DEMO_SLUGS = new Set([ 'demo', 'test-store' ]);
 const log = logger.child({ scope: 'StoreController' });
 const SAO_PAULO_TZ = 'America/Sao_Paulo';
+let storeCoordinateBackfillPromise: Promise<void> | null = null;
+let storeCoordinateBackfillLastRunAt = 0;
 /**
  * Builds demo store.
  *
@@ -95,6 +97,26 @@ const buildDemoStore = (slug: string) => {
  * @date 2025-12-17
  */
 export class StoreController {
+  private static triggerStoreCoordinateBackfill() {
+    const now = Date.now();
+    if (storeCoordinateBackfillPromise) return;
+    if (now - storeCoordinateBackfillLastRunAt < 15 * 60 * 1000) return;
+    storeCoordinateBackfillLastRunAt = now;
+    storeCoordinateBackfillPromise = storeService
+      .backfillMissingStoreCoordinates(50)
+      .then((result) => {
+        if ((result?.updated || 0) > 0 || (result?.failed || 0) > 0) {
+          log.info('Store coordinate backfill completed', result);
+        }
+      })
+      .catch((error) => {
+        log.warn('Store coordinate backfill failed', { error });
+      })
+      .finally(() => {
+        storeCoordinateBackfillPromise = null;
+      });
+  }
+
   /**
    * Gets current Sao Paulo local day and minutes.
    *
@@ -452,6 +474,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
   static async listPortfolio(_req: Request, res: Response) {
     try {
       log.debug('Store portfolio list request');
+      StoreController.triggerStoreCoordinateBackfill();
       const cached = publicStoreCache.getPortfolio();
       if (cached) {
         return res.json(cached);
@@ -476,6 +499,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
 
   static async listDiscovery(req: Request, res: Response) {
     try {
+      StoreController.triggerStoreCoordinateBackfill();
       const userLat = StoreController.toQueryNumber(req.query?.lat);
       const userLng = StoreController.toQueryNumber(req.query?.lng);
       const userCity = String(req.query?.city || '').trim();

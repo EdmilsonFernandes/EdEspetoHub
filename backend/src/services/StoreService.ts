@@ -210,6 +210,42 @@ private normalizePostalZip(value?: string | null) {
     return store;
   }
 
+  public async backfillMissingStoreCoordinates(limit = 50) {
+    const safeLimit = Number.isFinite(Number(limit)) ? Math.max(1, Math.min(200, Number(limit))) : 50;
+    const stores = await this.storeRepository
+      .createQueryBuilder('store')
+      .leftJoinAndSelect('store.settings', 'settings')
+      .leftJoinAndSelect('store.owner', 'owner')
+      .where('settings.lat IS NULL OR settings.lng IS NULL')
+      .orderBy('store.createdAt', 'ASC')
+      .limit(safeLimit)
+      .getMany();
+
+    let updated = 0;
+    let failed = 0;
+    for (const store of stores) {
+      try {
+        const next = await this.ensureStoreCoordinates(store);
+        const lat = this.parseCoordinate(next?.settings?.lat);
+        const lng = this.parseCoordinate(next?.settings?.lng);
+        if (lat !== null && lng !== null) {
+          updated += 1;
+        } else {
+          failed += 1;
+        }
+      } catch (error) {
+        failed += 1;
+        this.log.warn('Store coordinate backfill failed', { storeId: store.id, slug: store.slug, error });
+      }
+    }
+
+    return {
+      total: stores.length,
+      updated,
+      failed,
+    };
+  }
+
   /* =========================
    * CREATE STORE
    * ========================= */
