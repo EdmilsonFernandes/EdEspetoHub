@@ -2303,7 +2303,7 @@ export const CartView = ({
                   </>
                 : checkoutStep === 3
                 ? <>
-                    Confirmar pedido
+                    Revisar pedido
                     <ArrowLeft size={18} weight="bold" className="rotate-180" />
                   </>
                 : <>
@@ -2311,7 +2311,7 @@ export const CartView = ({
                       ? 'Processando...'
                       : isOnlinePaymentMethod
                       ? <><img src={mercadoPagoMeta.icon} alt="" className="h-5 w-5 object-contain brightness-0 invert" /> {isOnlinePix ? 'Gerar Pix via Mercado Pago' : 'Pagar via Mercado Pago'} <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>
-                      : <>{isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />} {'Fazer pedido'} <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>
+                      : <>{isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />} {'Confirmar pedido'} <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>
                     }
                   </>
               }
