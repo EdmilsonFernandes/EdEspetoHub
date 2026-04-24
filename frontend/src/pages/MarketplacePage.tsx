@@ -99,6 +99,14 @@ type StoreDiscoveryResponse = {
   } | null;
 };
 
+type PreferredDiscoveryAddress = {
+  label: string;
+  city: string;
+  state: string;
+  lat?: number | null;
+  lng?: number | null;
+};
+
 const parseOptionalNumber = (value: unknown): number | null => {
   if (value === null || value === undefined) return null;
   if (typeof value === 'number') return Number.isFinite(value) ? value : null;
@@ -106,6 +114,34 @@ const parseOptionalNumber = (value: unknown): number | null => {
   if (!normalized) return null;
   const parsed = Number(normalized);
   return Number.isFinite(parsed) ? parsed : null;
+};
+
+const buildCustomerAddressLookup = (address: any) => {
+  const city = String(address?.city || '').trim();
+  const state = String(address?.state || '').trim().toUpperCase();
+  const addressLine = [
+    String(address?.street || '').trim(),
+    String(address?.number || '').trim(),
+    String(address?.neighborhood || '').trim(),
+    city,
+    state,
+    String(address?.cep || '').trim(),
+  ]
+    .filter(Boolean)
+    .join(', ');
+  const label = [
+    String(address?.label || 'Endereço principal').trim(),
+    city && state ? `${city} - ${state}` : '',
+  ]
+    .filter(Boolean)
+    .join(' • ');
+
+  return {
+    city,
+    state,
+    addressLine,
+    label: label || 'Endereço principal',
+  };
 };
 
 type HubCondominium = {
@@ -516,9 +552,20 @@ export function MarketplacePage() {
   const [userRegion, setUserRegion] = useState<{ city: string; state: string } | null>(null);
   const [locationLabel, setLocationLabel] = useState('Sua região');
   const [geoDiscovery, setGeoDiscovery] = useState<StoreDiscoveryResponse | null>(null);
+  const [preferredDiscoveryAddress, setPreferredDiscoveryAddress] = useState<PreferredDiscoveryAddress | null>(null);
+  const activeLocation =
+    preferredDiscoveryAddress && Number.isFinite(Number(preferredDiscoveryAddress.lat)) && Number.isFinite(Number(preferredDiscoveryAddress.lng))
+      ? { lat: Number(preferredDiscoveryAddress.lat), lng: Number(preferredDiscoveryAddress.lng) }
+      : userLocation;
+  const activeRegion =
+    preferredDiscoveryAddress?.city || preferredDiscoveryAddress?.state
+      ? { city: preferredDiscoveryAddress?.city || '', state: preferredDiscoveryAddress?.state || '' }
+      : userRegion;
+  const activeLocationLabel = preferredDiscoveryAddress?.label || locationLabel;
+  const isUsingSavedAddressForDiscovery = Boolean(preferredDiscoveryAddress?.city || preferredDiscoveryAddress?.state);
 
   useEffect(() => {
-    if (!condominiumPickerOpen || !userLocation) return;
+    if (!condominiumPickerOpen || !activeLocation) return;
     let cancelled = false;
     const liveCandos = condominiums.filter(c => c.eventSummary?.state === 'live');
     for (const condo of liveCandos) {
@@ -533,7 +580,7 @@ export function MarketplacePage() {
       });
     }
     return () => { cancelled = true; };
-  }, [condominiumPickerOpen, userLocation, condominiums]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [condominiumPickerOpen, activeLocation, condominiums]); // eslint-disable-line react-hooks/exhaustive-deps
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [customerSession, setCustomerSession] = useState(() => readCustomerSession());
   const [showDeactivateModal, setShowDeactivateModal] = useState(false);
@@ -587,6 +634,64 @@ export function MarketplacePage() {
       window.removeEventListener('jnc:customer-session-updated', syncCustomSession as EventListener);
     };
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const resolvePreferredDiscoveryAddress = async () => {
+      if (!customerSession?.token) {
+        setPreferredDiscoveryAddress(null);
+        return;
+      }
+
+      try {
+        const rows = await customerAccountService.listAddresses();
+        if (cancelled) return;
+        const preferred = (Array.isArray(rows) ? rows : []).find((item: any) => item?.isDefault) || rows?.[0];
+        if (!preferred) {
+          setPreferredDiscoveryAddress(null);
+          return;
+        }
+
+        const normalized = buildCustomerAddressLookup(preferred);
+        if (!normalized.city && !normalized.state) {
+          setPreferredDiscoveryAddress(null);
+          return;
+        }
+
+        let lat: number | null = null;
+        let lng: number | null = null;
+        if (normalized.addressLine) {
+          try {
+            const geo = await mapsService.geocode(normalized.addressLine);
+            if (!cancelled) {
+              lat = Number(geo?.lat);
+              lng = Number(geo?.lng);
+            }
+          } catch {
+            lat = null;
+            lng = null;
+          }
+        }
+
+        if (cancelled) return;
+        setPreferredDiscoveryAddress({
+          label: normalized.label,
+          city: normalized.city,
+          state: normalized.state,
+          lat: Number.isFinite(Number(lat)) ? Number(lat) : null,
+          lng: Number.isFinite(Number(lng)) ? Number(lng) : null,
+        });
+      } catch {
+        if (!cancelled) setPreferredDiscoveryAddress(null);
+      }
+    };
+
+    void resolvePreferredDiscoveryAddress();
+    return () => {
+      cancelled = true;
+    };
+  }, [customerSession?.token, customerSession?.user?.email]);
 
   useEffect(() => {
     const handleOpenProfileDrawer = () => setProfileDrawerOpen(true);
@@ -722,18 +827,23 @@ export function MarketplacePage() {
         window.clearTimeout(timeout);
         const data = await response.json().catch(() => null);
         const addr = data?.address || {};
-        const locality =
-          addr.suburb ||
-          addr.neighbourhood ||
-          addr.city_district ||
+        const city =
           addr.city ||
           addr.town ||
           addr.village ||
+          addr.municipality ||
+          addr.county ||
+          '';
+        const locality =
+          city ||
+          addr.city_district ||
+          addr.suburb ||
+          addr.neighbourhood ||
           '';
         const state = (addr.state_code || addr.state || '').toString();
         const nextLabel = [locality, state].filter(Boolean).join(' - ').trim();
         if (!cancelled) {
-          setUserRegion(locality ? { city: locality, state } : null);
+          setUserRegion((city || locality) ? { city: String(city || locality), state } : null);
           if (nextLabel) setLocationLabel(nextLabel);
         }
       } catch (_error) {
@@ -776,16 +886,16 @@ export function MarketplacePage() {
     portfolioLoadInFlightRef.current = true;
     try {
       const canRunGeoDiscovery = Boolean(
-        userLocation?.lat &&
-        userLocation?.lng &&
-        (String(userRegion?.city || '').trim() || String(userRegion?.state || '').trim())
+        (activeLocation?.lat && activeLocation?.lng) ||
+        String(activeRegion?.city || '').trim() ||
+        String(activeRegion?.state || '').trim()
       );
       if (canRunGeoDiscovery) {
         const discovery = (await storeService.discoverPortfolio({
-          lat: userLocation?.lat,
-          lng: userLocation?.lng,
-          city: userRegion?.city || null,
-          state: userRegion?.state || null,
+          lat: activeLocation?.lat,
+          lng: activeLocation?.lng,
+          city: activeRegion?.city || null,
+          state: activeRegion?.state || null,
         })) as StoreDiscoveryResponse;
         setGeoDiscovery(discovery || null);
         setStores(Array.isArray(discovery?.stores) ? discovery.stores : []);
@@ -804,7 +914,7 @@ export function MarketplacePage() {
         }, 0);
       }
     }
-  }, [userLocation?.lat, userLocation?.lng, userRegion?.city, userRegion?.state]);
+  }, [activeLocation?.lat, activeLocation?.lng, activeRegion?.city, activeRegion?.state]);
 
   const refreshHub = useCallback(async () => {
     if (portfolioLoadInFlightRef.current) return;
@@ -1434,7 +1544,7 @@ export function MarketplacePage() {
     };
 
     const loadApproxDistances = async () => {
-      if (!userLocation || scopedEnrichedStores.length === 0) {
+      if (!activeLocation || scopedEnrichedStores.length === 0) {
         setDistanceByStore({});
         return;
       }
@@ -1452,10 +1562,10 @@ export function MarketplacePage() {
           targets.map(async (store) => {
             const km =
               store.storeLat != null && store.storeLng != null
-                ? haversineKm(userLocation, { lat: store.storeLat, lng: store.storeLng })
+                ? haversineKm(activeLocation, { lat: store.storeLat, lng: store.storeLng })
                 : await mapsService
                     .geocode(store.addressText)
-                    .then((geo) => haversineKm(userLocation, { lat: geo.lat, lng: geo.lng }));
+                    .then((geo) => haversineKm(activeLocation, { lat: geo.lat, lng: geo.lng }));
             return [store.id, km] as const;
           })
         );
@@ -1478,7 +1588,7 @@ export function MarketplacePage() {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [userLocation, scopedEnrichedStores]);
+  }, [activeLocation, scopedEnrichedStores]);
 
   useEffect(() => {
     let cancelled = false;
@@ -1579,7 +1689,6 @@ export function MarketplacePage() {
   const formatDistance = (km: number | null | undefined) => {
     const normalizedKm = typeof km === 'number' && Number.isFinite(km) ? km : null;
     if (normalizedKm === null || normalizedKm <= 0) return 'Região';
-    if (normalizedKm > 50) return 'Região';
     if (normalizedKm < 1) return `${Math.max(100, Math.round(normalizedKm * 1000 / 100) * 100)} m`;
     return `${normalizedKm.toFixed(1)} km`;
   };
@@ -1612,7 +1721,8 @@ export function MarketplacePage() {
     customerSession?.user?.profileImageUrl,
     customerSession?.user?.profileImageVersion
   );
-  const displayLocationLabel = locationLabel === 'Sua região' && fallbackRegionLabel ? fallbackRegionLabel : locationLabel;
+  const displayLocationLabel =
+    activeLocationLabel === 'Sua região' && fallbackRegionLabel ? fallbackRegionLabel : activeLocationLabel;
 
   const openCustomerAccount = useCallback(() => {
     navigate('/cliente/conta');
@@ -2608,7 +2718,7 @@ export function MarketplacePage() {
                       <Heart size={14} weight="fill" className="text-rose-500 shrink-0" />
                     </div>
                     <p className="mt-0.5 text-[11px] text-slate-600">
-                      {distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)} • {store.etaMin}-{store.etaMax} min
+                      {distanceLoading && activeLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)} • {store.etaMin}-{store.etaMax} min
                     </p>
                   </Link>
                 ))}
@@ -2930,7 +3040,7 @@ export function MarketplacePage() {
                           {store.rating > 0 ? <span className="text-slate-200">·</span> : null}
                           <span>{store.etaMin}–{store.etaMax} min</span>
                           <span className="text-slate-200">·</span>
-                          <span>{distanceLoading && userLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)}</span>
+                          <span>{distanceLoading && activeLocation ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)}</span>
                         </div>
                         {!store.isOpen && (
                           <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-500">
@@ -3194,8 +3304,8 @@ export function MarketplacePage() {
 
                 <div className="mb-4 flex flex-wrap gap-2">
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/72 px-3 py-1.5 text-[11px] font-bold text-slate-700 shadow-sm backdrop-blur-md">
-                    <MapPinLine size={12} weight="duotone" className={userLocation ? 'text-emerald-600' : 'text-[#336886]'} />
-                    {userLocation ? 'Localização ativa' : 'Busque por cidade'}
+                    <MapPinLine size={12} weight="duotone" className={(activeLocation || activeRegion) ? 'text-emerald-600' : 'text-[#336886]'} />
+                    {isUsingSavedAddressForDiscovery ? 'Endereço principal' : activeLocation ? 'Localização ativa' : 'Busque por cidade'}
                   </span>
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-[#336886]/12 bg-[#336886]/8 px-3 py-1.5 text-[11px] font-bold text-[#336886] shadow-sm">
                     <Buildings size={12} weight="duotone" />
@@ -3307,13 +3417,13 @@ export function MarketplacePage() {
                     });
                     return;
                   }
-                  if (userLocation) {
+                  if (activeLocation) {
                     const coords = condoGeoCache[slug];
                     if (coords) {
                       const toRad = (d: number) => (d * Math.PI) / 180;
-                      const dLat = toRad(coords.lat - userLocation.lat);
-                      const dLng = toRad(coords.lng - userLocation.lng);
-                      const x = Math.sin(dLat / 2) ** 2 + Math.sin(dLng / 2) ** 2 * Math.cos(toRad(userLocation.lat)) * Math.cos(toRad(coords.lat));
+                      const dLat = toRad(coords.lat - activeLocation.lat);
+                      const dLng = toRad(coords.lng - activeLocation.lng);
+                      const x = Math.sin(dLat / 2) ** 2 + Math.sin(dLng / 2) ** 2 * Math.cos(toRad(activeLocation.lat)) * Math.cos(toRad(coords.lat));
                       const distKm = 6371 * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
                       if (distKm > CONDO_DISTANCE_LIMIT_KM) {
                         setCondoDistanceWarning({
