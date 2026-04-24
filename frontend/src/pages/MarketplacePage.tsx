@@ -36,7 +36,6 @@ import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import { customerAccountService } from '../services/customerAccountService';
 import { featuredService } from '../services/featuredService';
-import { mapsService } from '../services/mapsService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
 import { isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
@@ -111,7 +110,6 @@ type PreferredDiscoveryAddress = {
 const CUSTOMER_ADDRESS_UPDATED_EVENT = 'jnc:customer-addresses-updated';
 
 const HUB_DISTANCE_CACHE_TTL_MS = 12 * 60 * 60 * 1000;
-const HUB_ADDRESS_GEO_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 const parseOptionalNumber = (value: unknown): number | null => {
   if (value === null || value === undefined) return null;
@@ -173,9 +171,6 @@ const writeHubCache = (key: string, data: unknown) => {
     // ignore
   }
 };
-
-const buildPreferredAddressGeoCacheKey = (addressLine: string) =>
-  `hub:address-geo:${normalizeSearchText(addressLine || '')}`;
 
 const storeRegionalPriority = (store: { geoAvailability?: string | null; supportsPostal?: boolean; isNearest?: boolean }) => {
   const availability = String(store?.geoAvailability || '').trim().toLowerCase();
@@ -612,39 +607,20 @@ export function MarketplacePage() {
   const [preferredDiscoveryAddress, setPreferredDiscoveryAddress] = useState<PreferredDiscoveryAddress | null>(null);
   const [hubScopeOverride, setHubScopeOverride] = useState<'default' | 'all_stores'>('default');
   const hasPreferredAddressContext = Boolean(preferredDiscoveryAddress?.city || preferredDiscoveryAddress?.state);
-  const hasPreferredAddressCoordinates =
-    hasPreferredAddressContext &&
-    Number.isFinite(Number(preferredDiscoveryAddress?.lat)) &&
-    Number.isFinite(Number(preferredDiscoveryAddress?.lng));
-  const activeLocation = hasPreferredAddressCoordinates
-    ? { lat: Number(preferredDiscoveryAddress?.lat), lng: Number(preferredDiscoveryAddress?.lng) }
-    : hasPreferredAddressContext
-      ? null
-      : userLocation;
+  const activeLocation = userLocation;
   const activeRegion =
-    preferredDiscoveryAddress?.city || preferredDiscoveryAddress?.state
+    userRegion ||
+    (preferredDiscoveryAddress?.city || preferredDiscoveryAddress?.state
       ? { city: preferredDiscoveryAddress?.city || '', state: preferredDiscoveryAddress?.state || '' }
-      : userRegion;
+      : null);
   const activeLocationLabel = preferredDiscoveryAddress?.label || locationLabel;
   const isUsingSavedAddressForDiscovery = hasPreferredAddressContext;
   const isShowingAllStores = hubScopeOverride === 'all_stores';
 
   useEffect(() => {
-    if (!condominiumPickerOpen || !activeLocation) return;
-    let cancelled = false;
-    const liveCandos = condominiums.filter(c => c.eventSummary?.state === 'live');
-    for (const condo of liveCandos) {
-      const slug = String(condo.slug || '');
-      if (!slug) continue;
-      const address = [condo.address, condo.city, condo.state].filter(Boolean).join(', ');
-      if (!address) continue;
-      void mapsService.geocode(address).then((geo) => {
-        if (!cancelled) setCondoGeoCache(prev => ({ ...prev, [slug]: { lat: geo.lat, lng: geo.lng } }));
-      }).catch(() => {
-        if (!cancelled) setCondoGeoCache(prev => ({ ...prev, [slug]: null }));
-      });
-    }
-    return () => { cancelled = true; };
+    if (!condominiumPickerOpen) return;
+    setCondoGeoCache({});
+    return () => {};
   }, [condominiumPickerOpen, activeLocation, condominiums]); // eslint-disable-line react-hooks/exhaustive-deps
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [customerSession, setCustomerSession] = useState(() => readCustomerSession());
@@ -725,50 +701,16 @@ export function MarketplacePage() {
           return;
         }
 
-        const cachedGeo = normalized.addressLine
-          ? readHubCache<{ lat?: number; lng?: number }>(
-              buildPreferredAddressGeoCacheKey(normalized.addressLine),
-              HUB_ADDRESS_GEO_CACHE_TTL_MS
-            )
-          : null;
-
         const nextAddress: PreferredDiscoveryAddress = {
           label: normalized.label,
           city: normalized.city,
           state: normalized.state,
           addressLine: normalized.addressLine,
-          lat: Number.isFinite(Number(cachedGeo?.lat)) ? Number(cachedGeo?.lat) : null,
-          lng: Number.isFinite(Number(cachedGeo?.lng)) ? Number(cachedGeo?.lng) : null,
+          lat: null,
+          lng: null,
         };
 
         setPreferredDiscoveryAddress(nextAddress);
-
-        if (nextAddress.lat != null && nextAddress.lng != null) {
-          return;
-        }
-        if (!normalized.addressLine) {
-          return;
-        }
-
-        try {
-          const geo = await mapsService.geocode(normalized.addressLine);
-          if (cancelled) return;
-          const lat = Number(geo?.lat);
-          const lng = Number(geo?.lng);
-          if (Number.isFinite(lat) && Number.isFinite(lng)) {
-            writeHubCache(buildPreferredAddressGeoCacheKey(normalized.addressLine), { lat, lng });
-            setPreferredDiscoveryAddress((current) => {
-              if (!current || current.addressLine !== normalized.addressLine) return current;
-              return {
-                ...current,
-                lat,
-                lng,
-              };
-            });
-          }
-        } catch {
-          // keep same-city discovery when geocode is unavailable
-        }
       } catch {
         if (!cancelled) {
           setPreferredDiscoveryAddress(null);
@@ -981,65 +923,10 @@ export function MarketplacePage() {
     }
     portfolioLoadInFlightRef.current = true;
     try {
-      const canRunGeoDiscovery =
-        hubScopeOverride !== 'all_stores' &&
-        Number.isFinite(Number(activeLocation?.lat)) &&
-        Number.isFinite(Number(activeLocation?.lng));
-
-      const [basePortfolio, discoveryResult] = await Promise.all([
-        storeService.listPortfolio(),
-        canRunGeoDiscovery
-          ? storeService.discoverPortfolio({
-              lat: activeLocation?.lat,
-              lng: activeLocation?.lng,
-              city: activeRegion?.city || null,
-              state: activeRegion?.state || null,
-            })
-          : Promise.resolve(null),
-      ]);
-
+      const basePortfolio = await storeService.listPortfolio();
       const baseStores = Array.isArray(basePortfolio) ? basePortfolio : [];
-      const discovery = discoveryResult as StoreDiscoveryResponse | null;
-
-      if (discovery && Array.isArray(discovery?.stores) && discovery.stores.length > 0) {
-        const discoveryByStoreId = new Map(
-          discovery.stores
-            .map((store: any) => [String(store?.id || '').trim(), store] as const)
-            .filter((entry) => Boolean(entry[0]))
-        );
-
-        const merged = baseStores
-          .map((store: any) => {
-            const match = discoveryByStoreId.get(String(store?.id || '').trim());
-            if (!match) return store;
-            return {
-              ...store,
-              ...match,
-              settings: {
-                ...(store?.settings || {}),
-                ...(match?.settings || {}),
-              },
-            };
-          })
-          .sort((a: any, b: any) => {
-            const priorityDelta = storeRegionalPriority(a) - storeRegionalPriority(b);
-            if (priorityDelta !== 0) return priorityDelta;
-            const openDelta = Number(Boolean(b?.openNow)) - Number(Boolean(a?.openNow));
-            if (openDelta !== 0) return openDelta;
-            const distanceA = parseOptionalNumber(a?.distanceKm);
-            const distanceB = parseOptionalNumber(b?.distanceKm);
-            const normalizedDistanceA = distanceA ?? Number.MAX_SAFE_INTEGER;
-            const normalizedDistanceB = distanceB ?? Number.MAX_SAFE_INTEGER;
-            if (normalizedDistanceA !== normalizedDistanceB) return normalizedDistanceA - normalizedDistanceB;
-            return Number(b?.reviewSummary?.avgStoreRating || 0) - Number(a?.reviewSummary?.avgStoreRating || 0);
-          });
-
-        setGeoDiscovery(discovery || null);
-        setStores(merged);
-      } else {
-        setGeoDiscovery(null);
-        setStores(baseStores);
-      }
+      setGeoDiscovery(null);
+      setStores(baseStores);
       setError('');
     } finally {
       portfolioLoadInFlightRef.current = false;
@@ -1050,13 +937,7 @@ export function MarketplacePage() {
         }, 0);
       }
     }
-  }, [
-    activeLocation?.lat,
-    activeLocation?.lng,
-    activeRegion?.city,
-    activeRegion?.state,
-    hubScopeOverride,
-  ]);
+  }, []);
 
   const refreshHub = useCallback(async () => {
     if (portfolioLoadInFlightRef.current) return;
