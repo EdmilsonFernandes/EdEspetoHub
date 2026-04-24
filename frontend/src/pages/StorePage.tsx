@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft, Eye, EyeSlash, ClipboardText, House, Receipt, Buildings, UserCircle } from '@phosphor-icons/react';
+import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft, Eye, EyeSlash, ClipboardText, House, Receipt, Buildings, UserCircle, WarningCircle, X } from '@phosphor-icons/react';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import { customerService } from '../services/customerService';
@@ -70,7 +70,6 @@ export function StorePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
-  const coverageWarningShownRef = useRef(false);
   const [user, setUser] = useState(null);
   const [customerSession, setCustomerSession] = useState<any | null>(null);
   const [customerAddresses, setCustomerAddresses] = useState<any[]>([]);
@@ -103,6 +102,7 @@ export function StorePage() {
     }
   });
   const [showCustomerPassword, setShowCustomerPassword] = useState(false);
+  const [hubCoverageNotice, setHubCoverageNotice] = useState<{ message: string } | null>(null);
   const [newAddressForm, setNewAddressForm] = useState({
     label: 'Casa',
     recipientName: '',
@@ -118,15 +118,13 @@ export function StorePage() {
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
 
   useEffect(() => {
-    if (coverageWarningShownRef.current) return;
     const warning = location.state && (location.state as any).hubCoverageWarning;
-    if (!warning?.message) return;
-    coverageWarningShownRef.current = true;
-    const timer = window.setTimeout(() => {
-      showToast(String(warning.message), 'warning');
-    }, 180);
-    return () => window.clearTimeout(timer);
-  }, [location.state, showToast]);
+    if (!warning?.message) {
+      setHubCoverageNotice(null);
+      return;
+    }
+    setHubCoverageNotice({ message: String(warning.message) });
+  }, [location.state]);
 
   useEffect(() => {
     try {
@@ -2583,6 +2581,66 @@ export function StorePage() {
               <div className="w-2.5 h-2.5 rounded-full bg-white/80" />
               <div className="text-sm font-semibold">
                 {tableNotice.message}
+              </div>
+            </div>
+          </div>
+        )}
+        {!showInactiveState && !showClosedState && hubCoverageNotice && (view === 'menu' || view === 'cart') && (
+          <div className="mx-auto w-full max-w-6xl px-4 pt-4 sm:px-6">
+            <div className="relative overflow-hidden rounded-[1.8rem] border border-amber-200/70 bg-[linear-gradient(140deg,rgba(255,251,235,0.96)_0%,rgba(255,247,237,0.98)_56%,rgba(255,255,255,0.95)_100%)] px-4 py-4 shadow-[0_20px_42px_-28px_rgba(245,158,11,0.42)] ring-1 ring-amber-100/70 sm:px-5">
+              <div className="absolute inset-y-0 left-0 w-1.5 bg-[linear-gradient(180deg,#f59e0b_0%,#f97316_100%)]" />
+              <div className="flex items-start gap-3 pl-2 sm:gap-4">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.1rem] border border-amber-200/70 bg-white/90 text-amber-600 shadow-[0_14px_28px_-22px_rgba(245,158,11,0.6)]">
+                  <WarningCircle size={22} weight="fill" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-700">Atendimento da loja</p>
+                      <h2 className="mt-1 text-sm font-black text-slate-900 sm:text-[15px]">
+                        Esta loja pode não entregar no seu endereço principal
+                      </h2>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setHubCoverageNotice(null)}
+                      className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-amber-200/70 bg-white/80 text-slate-500 transition-colors hover:bg-white hover:text-slate-700"
+                      aria-label="Fechar aviso"
+                    >
+                      <X size={16} weight="bold" />
+                    </button>
+                  </div>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                    {hubCoverageNotice.message}
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {customerSession?.token && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCustomerAuthCheckoutPrompt(false);
+                          setCustomerVerifyPrompt(null);
+                          setCustomerVerifyCode('');
+                          setCustomerAccountError('');
+                          setCustomerAccountNotice('');
+                          setShowCustomerAccount(true);
+                        }}
+                        className="inline-flex items-center gap-2 rounded-full border border-amber-200/80 bg-white px-4 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-amber-700 shadow-[0_12px_22px_-18px_rgba(245,158,11,0.5)] transition-all hover:bg-amber-50"
+                      >
+                        <MapPinLine size={14} weight="bold" />
+                        Revisar endereços
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setHubCoverageNotice(null)}
+                      className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-slate-700 transition-all hover:bg-white"
+                    >
+                      <ClipboardText size={14} weight="bold" />
+                      Entendi
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
