@@ -2,6 +2,7 @@ import { apiClient } from '../config/apiClient';
 
 const PUBLIC_STORE_CACHE_TTL_MS = 60 * 1000;
 const publicStoreMemoryCache = new Map<string, { ts: number; data: any }>();
+const publicPortfolioMemoryCache = new Map<string, { ts: number; data: any }>();
 
 const getStoreCacheKey = (slug: string) => `public:store:${String(slug || '').trim().toLowerCase()}`;
 
@@ -46,6 +47,43 @@ const writePublicStoreCache = (slug: string, data: any) => {
   return data;
 };
 
+const readCollectionCache = (key: string, ttlMs: number) => {
+  const now = Date.now();
+  const memory = publicPortfolioMemoryCache.get(key);
+  if (memory && now - Number(memory.ts || 0) <= ttlMs) {
+    return memory.data;
+  }
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const ts = Number(parsed?.ts || 0);
+    if (!ts || now - ts > ttlMs) {
+      sessionStorage.removeItem(key);
+      publicPortfolioMemoryCache.delete(key);
+      return null;
+    }
+    publicPortfolioMemoryCache.set(key, { ts, data: parsed?.data ?? null });
+    return parsed?.data ?? null;
+  } catch {
+    return null;
+  }
+};
+
+const writeCollectionCache = (key: string, data: any) => {
+  const payload = { ts: Date.now(), data };
+  publicPortfolioMemoryCache.set(key, payload);
+  if (typeof window !== 'undefined') {
+    try {
+      sessionStorage.setItem(key, JSON.stringify(payload));
+    } catch {
+      // ignore cache write failure
+    }
+  }
+  return data;
+};
+
 const toJson = async (response: any) => {
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
@@ -76,8 +114,12 @@ export const storeService = {
   },
 
   async listPortfolio() {
+    const cacheKey = 'public:portfolio:list';
+    const cached = readCollectionCache(cacheKey, 45 * 1000);
+    if (cached) return cached;
     const response = await apiClient.rawGet('/public/stores');
-    return toJson(response);
+    const data = await toJson(response);
+    return writeCollectionCache(cacheKey, data);
   },
 
   async discoverPortfolio(params?: { lat?: number | null; lng?: number | null; city?: string | null; state?: string | null }) {
@@ -87,8 +129,12 @@ export const storeService = {
     if (params?.city) search.set('city', String(params.city).trim());
     if (params?.state) search.set('state', String(params.state).trim());
     const suffix = search.toString() ? `?${search.toString()}` : '';
+    const cacheKey = `public:portfolio:discovery:${suffix || 'default'}`;
+    const cached = readCollectionCache(cacheKey, 30 * 1000);
+    if (cached) return cached;
     const response = await apiClient.rawGet(`/public/stores/discovery${suffix}`);
-    return toJson(response);
+    const data = await toJson(response);
+    return writeCollectionCache(cacheKey, data);
   },
 
   async trackPublicVisit(slug: string, payload: any) {

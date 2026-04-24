@@ -20,6 +20,8 @@ import { customerAccountService } from '../services/customerAccountService';
 import { useToast } from '../contexts/ToastContext';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 
+const CUSTOMER_ADDRESS_UPDATED_EVENT = 'jnc:customer-addresses-updated';
+
 const createEmptyForm = () => ({
   label: 'Casa',
   street: '',
@@ -224,6 +226,7 @@ export function AddressDistance() {
         await customerAccountService.createAddress(form);
         showToast('Endereço adicionado!', 'success');
       }
+      window.dispatchEvent(new CustomEvent(CUSTOMER_ADDRESS_UPDATED_EVENT));
       resetFormState();
       await loadAddresses();
     } catch (err) {
@@ -237,6 +240,7 @@ export function AddressDistance() {
     try {
       await customerAccountService.setDefaultAddress(addressId);
       showToast('Endereço principal atualizado.', 'success');
+      window.dispatchEvent(new CustomEvent(CUSTOMER_ADDRESS_UPDATED_EVENT));
       await loadAddresses();
     } catch {
       showToast('Erro ao atualizar endereço principal.', 'error');
@@ -253,6 +257,7 @@ export function AddressDistance() {
         resetFormState();
       }
       setDeleteTarget(null);
+      window.dispatchEvent(new CustomEvent(CUSTOMER_ADDRESS_UPDATED_EVENT));
       await loadAddresses();
     } catch {
       showToast('Erro ao remover endereço', 'error');

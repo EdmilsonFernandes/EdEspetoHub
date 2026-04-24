@@ -108,6 +108,8 @@ type PreferredDiscoveryAddress = {
   lng?: number | null;
 };
 
+const CUSTOMER_ADDRESS_UPDATED_EVENT = 'jnc:customer-addresses-updated';
+
 const HUB_DISTANCE_CACHE_TTL_MS = 12 * 60 * 60 * 1000;
 const HUB_ADDRESS_GEO_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -174,6 +176,17 @@ const writeHubCache = (key: string, data: unknown) => {
 
 const buildPreferredAddressGeoCacheKey = (addressLine: string) =>
   `hub:address-geo:${normalizeSearchText(addressLine || '')}`;
+
+const storeRegionalPriority = (store: { geoAvailability?: string | null; supportsPostal?: boolean; isNearest?: boolean }) => {
+  const availability = String(store?.geoAvailability || '').trim().toLowerCase();
+  if (store?.isNearest) return 0;
+  if (availability === 'deliver_now') return 1;
+  if (availability === 'postal_everywhere' || store?.supportsPostal) return 2;
+  if (availability === 'same_city_pickup') return 3;
+  if (availability === 'same_city') return 4;
+  if (availability === 'outside_radius') return 5;
+  return 6;
+};
 
 const buildDistanceContextKey = (
   savedAddress: PreferredDiscoveryAddress | null,
@@ -597,7 +610,6 @@ export function MarketplacePage() {
   const [locationLabel, setLocationLabel] = useState('Sua região');
   const [geoDiscovery, setGeoDiscovery] = useState<StoreDiscoveryResponse | null>(null);
   const [preferredDiscoveryAddress, setPreferredDiscoveryAddress] = useState<PreferredDiscoveryAddress | null>(null);
-  const [preferredDiscoveryAddressResolved, setPreferredDiscoveryAddressResolved] = useState(false);
   const [hubScopeOverride, setHubScopeOverride] = useState<'default' | 'all_stores'>('default');
   const hasPreferredAddressContext = Boolean(preferredDiscoveryAddress?.city || preferredDiscoveryAddress?.state);
   const hasPreferredAddressCoordinates =
@@ -695,25 +707,21 @@ export function MarketplacePage() {
     const resolvePreferredDiscoveryAddress = async () => {
       if (!customerSession?.token) {
         setPreferredDiscoveryAddress(null);
-        setPreferredDiscoveryAddressResolved(true);
         return;
       }
 
-      setPreferredDiscoveryAddressResolved(false);
       try {
         const rows = await customerAccountService.listAddresses();
         if (cancelled) return;
         const preferred = (Array.isArray(rows) ? rows : []).find((item: any) => item?.isDefault) || rows?.[0];
         if (!preferred) {
           setPreferredDiscoveryAddress(null);
-          setPreferredDiscoveryAddressResolved(true);
           return;
         }
 
         const normalized = buildCustomerAddressLookup(preferred);
         if (!normalized.city && !normalized.state) {
           setPreferredDiscoveryAddress(null);
-          setPreferredDiscoveryAddressResolved(true);
           return;
         }
 
@@ -734,7 +742,6 @@ export function MarketplacePage() {
         };
 
         setPreferredDiscoveryAddress(nextAddress);
-        setPreferredDiscoveryAddressResolved(true);
 
         if (nextAddress.lat != null && nextAddress.lng != null) {
           return;
@@ -765,14 +772,20 @@ export function MarketplacePage() {
       } catch {
         if (!cancelled) {
           setPreferredDiscoveryAddress(null);
-          setPreferredDiscoveryAddressResolved(true);
         }
       }
     };
 
     void resolvePreferredDiscoveryAddress();
+    const refreshAddressContext = () => {
+      void resolvePreferredDiscoveryAddress();
+    };
+    window.addEventListener('focus', refreshAddressContext);
+    window.addEventListener(CUSTOMER_ADDRESS_UPDATED_EVENT, refreshAddressContext as EventListener);
     return () => {
       cancelled = true;
+      window.removeEventListener('focus', refreshAddressContext);
+      window.removeEventListener(CUSTOMER_ADDRESS_UPDATED_EVENT, refreshAddressContext as EventListener);
     };
   }, [customerSession?.token, customerSession?.user?.email]);
 
@@ -966,29 +979,66 @@ export function MarketplacePage() {
       pendingPortfolioReloadRef.current = true;
       return;
     }
-    if (hubScopeOverride !== 'all_stores' && customerSession?.token && !preferredDiscoveryAddressResolved) {
-      return;
-    }
     portfolioLoadInFlightRef.current = true;
     try {
-      const canRunGeoDiscovery = hubScopeOverride !== 'all_stores' && Boolean(
-        (activeLocation?.lat && activeLocation?.lng) ||
-        String(activeRegion?.city || '').trim() ||
-        String(activeRegion?.state || '').trim()
-      );
-      if (canRunGeoDiscovery) {
-        const discovery = (await storeService.discoverPortfolio({
-          lat: activeLocation?.lat,
-          lng: activeLocation?.lng,
-          city: activeRegion?.city || null,
-          state: activeRegion?.state || null,
-        })) as StoreDiscoveryResponse;
+      const canRunGeoDiscovery =
+        hubScopeOverride !== 'all_stores' &&
+        Number.isFinite(Number(activeLocation?.lat)) &&
+        Number.isFinite(Number(activeLocation?.lng));
+
+      const [basePortfolio, discoveryResult] = await Promise.all([
+        storeService.listPortfolio(),
+        canRunGeoDiscovery
+          ? storeService.discoverPortfolio({
+              lat: activeLocation?.lat,
+              lng: activeLocation?.lng,
+              city: activeRegion?.city || null,
+              state: activeRegion?.state || null,
+            })
+          : Promise.resolve(null),
+      ]);
+
+      const baseStores = Array.isArray(basePortfolio) ? basePortfolio : [];
+      const discovery = discoveryResult as StoreDiscoveryResponse | null;
+
+      if (discovery && Array.isArray(discovery?.stores) && discovery.stores.length > 0) {
+        const discoveryByStoreId = new Map(
+          discovery.stores
+            .map((store: any) => [String(store?.id || '').trim(), store] as const)
+            .filter((entry) => Boolean(entry[0]))
+        );
+
+        const merged = baseStores
+          .map((store: any) => {
+            const match = discoveryByStoreId.get(String(store?.id || '').trim());
+            if (!match) return store;
+            return {
+              ...store,
+              ...match,
+              settings: {
+                ...(store?.settings || {}),
+                ...(match?.settings || {}),
+              },
+            };
+          })
+          .sort((a: any, b: any) => {
+            const priorityDelta = storeRegionalPriority(a) - storeRegionalPriority(b);
+            if (priorityDelta !== 0) return priorityDelta;
+            const openDelta = Number(Boolean(b?.openNow)) - Number(Boolean(a?.openNow));
+            if (openDelta !== 0) return openDelta;
+            const distanceA = parseOptionalNumber(a?.distanceKm);
+            const distanceB = parseOptionalNumber(b?.distanceKm);
+            const normalizedDistanceA = distanceA ?? Number.MAX_SAFE_INTEGER;
+            const normalizedDistanceB = distanceB ?? Number.MAX_SAFE_INTEGER;
+            if (normalizedDistanceA !== normalizedDistanceB) return normalizedDistanceA - normalizedDistanceB;
+            return Number(b?.reviewSummary?.avgStoreRating || 0) - Number(a?.reviewSummary?.avgStoreRating || 0);
+          });
+
         setGeoDiscovery(discovery || null);
-        setStores(Array.isArray(discovery?.stores) ? discovery.stores : []);
+        setStores(merged);
       } else {
-        const data = await storeService.listPortfolio();
         setGeoDiscovery(null);
-        setStores(Array.isArray(data) ? data : []);
+        setStores(baseStores);
       }
       setError('');
     } finally {
@@ -1005,9 +1055,7 @@ export function MarketplacePage() {
     activeLocation?.lng,
     activeRegion?.city,
     activeRegion?.state,
-    customerSession?.token,
     hubScopeOverride,
-    preferredDiscoveryAddressResolved,
   ]);
 
   const refreshHub = useCallback(async () => {
@@ -1024,12 +1072,6 @@ export function MarketplacePage() {
 
   useEffect(() => {
     let active = true;
-    if (hubScopeOverride !== 'all_stores' && customerSession?.token && !preferredDiscoveryAddressResolved) {
-      setLoading(true);
-      return () => {
-        active = false;
-      };
-    }
     if (!stores.length) setLoading(true);
     loadPortfolio()
       .catch((err: any) => {
@@ -1043,7 +1085,7 @@ export function MarketplacePage() {
     return () => {
       active = false;
     };
-  }, [customerSession?.token, hubScopeOverride, loadPortfolio, preferredDiscoveryAddressResolved]);
+  }, [hubScopeOverride, loadPortfolio]);
 
   const refreshPublicCondominiums = useCallback(async (options?: { skipIfHidden?: boolean }) => {
     if (options?.skipIfHidden && typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
@@ -1282,12 +1324,7 @@ export function MarketplacePage() {
           ? Number(store?.reviewSummary?.avgStoreRating)
           : 4.6 + ((seed % 5) * 0.1);
         const apiDistanceKm = parseOptionalNumber((store as any)?.distanceKm);
-        const distanceKm =
-          apiDistanceKm !== null
-            ? apiDistanceKm
-            : geoDiscovery
-              ? null
-              : 0.8 + (seed % 52) / 10;
+        const distanceKm = apiDistanceKm;
         const etaMin = 18 + (seed % 18);
         const etaMax = etaMin + 10;
         const rawOrderTypes = Array.isArray(store?.settings?.orderTypes)
@@ -1604,7 +1641,8 @@ export function MarketplacePage() {
         if (debouncedQuery && !store.searchIndex.includes(debouncedQuery) && !store.productSearchIndex.includes(debouncedQuery)) return false;
         if (segmentFilter !== 'all' && store.segment !== segmentFilter) return false;
         if (quickFilter === 'free_shipping' && !store.freeShipping) return false;
-        if (quickFilter === 'nearby' && (store.distanceKm == null || store.distanceKm > 2.5)) return false;
+        const resolvedDistance = distanceByStore[store.id] ?? store.distanceKm;
+        if (quickFilter === 'nearby' && (resolvedDistance == null || resolvedDistance > 2.5)) return false;
         if (quickFilter === 'open_now' && !store.isOpen) return false;
         if (quickFilter === 'favorites' && !favoriteStoreSlugs.includes(store.slug)) return false;
         return true;
@@ -1612,9 +1650,16 @@ export function MarketplacePage() {
       .sort((a, b) => {
         const favoritesDelta = Number(favoriteStoreSlugs.includes(b.slug)) - Number(favoriteStoreSlugs.includes(a.slug));
         if (favoritesDelta !== 0) return favoritesDelta;
-        return Number(b.isOpen) - Number(a.isOpen);
+        const regionalDelta = storeRegionalPriority(a) - storeRegionalPriority(b);
+        if (regionalDelta !== 0) return regionalDelta;
+        const openDelta = Number(b.isOpen) - Number(a.isOpen);
+        if (openDelta !== 0) return openDelta;
+        const distanceA = distanceByStore[a.id] ?? a.distanceKm ?? Number.MAX_SAFE_INTEGER;
+        const distanceB = distanceByStore[b.id] ?? b.distanceKm ?? Number.MAX_SAFE_INTEGER;
+        if (distanceA !== distanceB) return distanceA - distanceB;
+        return b.rating - a.rating;
       });
-  }, [scopedEnrichedStores, debouncedQuery, segmentFilter, quickFilter, favoriteStoreSlugs]);
+  }, [scopedEnrichedStores, debouncedQuery, segmentFilter, quickFilter, favoriteStoreSlugs, distanceByStore]);
 
   const categoryTiles = useMemo(() => {
     return segmentOptions.map((segment) => categoryVisuals[segment] || { icon: Storefront, label: segment });
@@ -2885,7 +2930,7 @@ export function MarketplacePage() {
                       ? 'Buscando também nos cardápios...'
                       : isShowingAllStores
                         ? `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} em outras regiões`
-                        : `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} ${selectedCondominium ? 'no condomínio' : 'perto de você'}`}
+                        : `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} ${selectedCondominium ? 'no condomínio' : geoDiscovery ? 'priorizados para sua região' : 'disponíveis no app'}`}
                   </p>
                 ) : null}
               </div>
@@ -3060,12 +3105,24 @@ export function MarketplacePage() {
                   const storePath = selectedCondominiumSlug
                     ? `/${store.slug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}`
                     : `/${store.slug}`;
+                  const shouldWarnCoverage =
+                    !selectedCondominium &&
+                    !store.supportsPostal &&
+                    [ 'outside_radius', 'same_city', 'same_city_pickup' ].includes(String(store.geoAvailability || '').toLowerCase());
+                  const storeNavigationState = shouldWarnCoverage
+                    ? {
+                        hubCoverageWarning: {
+                          message: 'Essa loja ainda não atende o seu endereço principal com entrega. Você pode ver o cardápio e conferir outras opções como retirada.',
+                        },
+                      }
+                    : undefined;
 
                   if (selectedCondominium) {
                     return (
                       <Link
                         key={store.id}
                         to={storePath}
+                        state={storeNavigationState}
                         className={`group overflow-hidden rounded-[1.45rem] border bg-white transition-all duration-200 ease-out active:scale-[0.985] ${
                           store.isOpen
                             ? 'border-white shadow-[0_12px_30px_rgba(15,23,42,0.075)] md:hover:-translate-y-0.5 md:hover:shadow-[0_18px_38px_rgba(15,23,42,0.11)]'
@@ -3161,6 +3218,7 @@ export function MarketplacePage() {
                     <Link
                       key={store.id}
                       to={storePath}
+                      state={storeNavigationState}
                       className={`group relative overflow-hidden rounded-[1.75rem] border bg-white transition-all duration-300 ease-out active:scale-[0.982] ${
                         store.isOpen
                           ? 'border-white shadow-[0_10px_32px_rgba(15,23,42,0.08),0_2px_8px_rgba(15,23,42,0.04)] md:hover:-translate-y-1 md:hover:shadow-[0_20px_44px_rgba(15,23,42,0.11)]'
@@ -3262,6 +3320,12 @@ export function MarketplacePage() {
                               <span className="inline-flex items-center gap-1 rounded-full border border-violet-100 bg-violet-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-violet-700 shadow-[0_6px_16px_-12px_rgba(124,58,237,0.32)]">
                                 <PaperPlaneTilt size={9} weight="fill" />
                                 Correios
+                              </span>
+                            )}
+                            {!store.supportsPostal && [ 'outside_radius', 'same_city', 'same_city_pickup' ].includes(String(store.geoAvailability || '').toLowerCase()) && (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-amber-700 shadow-[0_6px_16px_-12px_rgba(245,158,11,0.34)]">
+                                <Warning size={9} weight="fill" />
+                                Fora do raio
                               </span>
                             )}
                             {store.rating >= 4.9 && (

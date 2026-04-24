@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft, Eye, EyeSlash, ClipboardText, House, Receipt, Buildings, UserCircle } from '@phosphor-icons/react';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
@@ -68,7 +68,9 @@ const isTerminalRecentOrder = (entry?: { status?: string; paymentStatus?: string
 export function StorePage() {
   const { storeSlug } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { showToast } = useToast();
+  const coverageWarningShownRef = useRef(false);
   const [user, setUser] = useState(null);
   const [customerSession, setCustomerSession] = useState<any | null>(null);
   const [customerAddresses, setCustomerAddresses] = useState<any[]>([]);
@@ -114,6 +116,17 @@ export function StorePage() {
     state: '',
   });
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+
+  useEffect(() => {
+    if (coverageWarningShownRef.current) return;
+    const warning = location.state && (location.state as any).hubCoverageWarning;
+    if (!warning?.message) return;
+    coverageWarningShownRef.current = true;
+    const timer = window.setTimeout(() => {
+      showToast(String(warning.message), 'warning');
+    }, 180);
+    return () => window.clearTimeout(timer);
+  }, [location.state, showToast]);
 
   useEffect(() => {
     try {
