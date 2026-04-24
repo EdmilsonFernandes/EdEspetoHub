@@ -3151,7 +3151,7 @@ export function MarketplacePage() {
                           </div>
                           <span className="ml-auto inline-flex items-center justify-center rounded-full bg-emerald-500 px-2.5 py-1 text-[9px] font-black text-white shadow-[0_6px_18px_-10px_rgba(16,185,129,0.7)]">{live.length}</span>
                         </div>
-                        <div className="flex flex-col gap-3">
+                        <div className={`${isNativePlatform ? 'flex flex-col gap-2.5' : 'flex flex-col gap-3'}`}>
                           {live.map(({ condominium, slug, name, region, event }) => {
                             const active = selectedCondominiumSlug === slug;
                             const logoUrl = resolveAssetUrl(condominium.logoUrl || undefined) || getStoreAvatarUrl(slug, name);
@@ -3162,7 +3162,9 @@ export function MarketplacePage() {
                                 key={slug}
                                 type="button"
                                 onClick={() => handleClick(slug, name, event, condominium)}
-                                className={`group relative w-full overflow-hidden rounded-[1.75rem] border text-left transition-all duration-300 active:scale-[0.985] ${
+                                className={`group relative w-full overflow-hidden border text-left transition-all duration-300 active:scale-[0.985] ${
+                                  isNativePlatform ? 'rounded-[1.45rem]' : 'rounded-[1.75rem]'
+                                } ${
                                   active
                                     ? 'border-emerald-300/70 shadow-[0_24px_42px_-22px_rgba(16,185,129,0.42)] ring-1 ring-emerald-200/80'
                                     : 'border-emerald-200/60 shadow-[0_20px_38px_-24px_rgba(16,185,129,0.28)] hover:border-emerald-300/70 hover:shadow-[0_26px_46px_-24px_rgba(16,185,129,0.36)]'
@@ -3171,7 +3173,7 @@ export function MarketplacePage() {
                                 <img src={bannerUrl} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
                                 <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(7,13,25,0.66)_0%,rgba(9,16,32,0.5)_36%,rgba(15,23,42,0.18)_100%)]" />
                                 <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.24),transparent_74%)]" />
-                                <div className="relative p-3.5">
+                                <div className={`relative ${isNativePlatform ? 'p-3' : 'p-3.5'}`}>
                                   <div className="flex items-start justify-between gap-3">
                                     <span className="inline-flex items-center gap-1.5 rounded-full border border-white/18 bg-white/14 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-white backdrop-blur-md">
                                       <span className="relative flex h-2 w-2">
@@ -3187,19 +3189,19 @@ export function MarketplacePage() {
                                     ) : null}
                                   </div>
 
-                                  <div className="mt-3 flex items-center gap-3">
+                                  <div className={`${isNativePlatform ? 'mt-2.5 flex items-center gap-2.5' : 'mt-3 flex items-center gap-3'}`}>
                                     <div className="relative shrink-0">
-                                      <div className="h-14 w-14 overflow-hidden rounded-[1.1rem] border border-white/80 bg-white/94 p-2 shadow-[0_18px_32px_-24px_rgba(15,23,42,0.7)]">
+                                      <div className={`${isNativePlatform ? 'h-12 w-12 rounded-[1rem] p-1.5' : 'h-14 w-14 rounded-[1.1rem] p-2'} overflow-hidden border border-white/80 bg-white/94 shadow-[0_18px_32px_-24px_rgba(15,23,42,0.7)]`}>
                                         <img src={logoUrl} alt={name} className="h-full w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
                                       </div>
-                                      <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-emerald-500 text-white shadow-[0_10px_20px_-12px_rgba(16,185,129,0.88)]">
-                                        <Sparkle size={10} weight="fill" />
+                                      <span className={`${isNativePlatform ? 'h-[18px] w-[18px]' : 'h-5 w-5'} absolute -bottom-1 -right-1 flex items-center justify-center rounded-full border-2 border-white bg-emerald-500 text-white shadow-[0_10px_20px_-12px_rgba(16,185,129,0.88)]`}>
+                                        <Sparkle size={isNativePlatform ? 9 : 10} weight="fill" />
                                       </span>
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                      <span className="block truncate text-[15px] font-black leading-tight tracking-[-0.025em] text-white">{name}</span>
-                                      {region ? <span className="mt-1 block truncate text-[11px] font-semibold text-white/70">{region}</span> : null}
-                                      <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                                      <span className={`block truncate font-black leading-tight tracking-[-0.025em] text-white ${isNativePlatform ? 'text-[14px]' : 'text-[15px]'}`}>{name}</span>
+                                      {region ? <span className={`mt-1 block truncate font-semibold text-white/70 ${isNativePlatform ? 'text-[10px]' : 'text-[11px]'}`}>{region}</span> : null}
+                                      <div className={`${isNativePlatform ? 'mt-2 flex flex-wrap items-center gap-1.5' : 'mt-2.5 flex flex-wrap items-center gap-2'}`}>
                                         <span className="inline-flex items-center gap-1.5 rounded-full bg-white/16 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.1em] text-white backdrop-blur-sm">
                                           <Clock size={11} weight="fill" />
                                           {timeLabel || 'Feira aberta'}
@@ -3208,17 +3210,17 @@ export function MarketplacePage() {
                                     </div>
                                   </div>
 
-                                  <div className="mt-3.5 flex items-center justify-between gap-3">
-                                    <span className="text-[10px] font-semibold text-white/78">
+                                  <div className={`${isNativePlatform ? 'mt-2.5 flex items-center justify-between gap-2.5' : 'mt-3.5 flex items-center justify-between gap-3'}`}>
+                                    <span className={`${isNativePlatform ? 'text-[9px]' : 'text-[10px]'} font-semibold text-white/78`}>
                                       Pagamento, lojas abertas e pedido em fluxo.
                                     </span>
-                                    <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[9px] font-black uppercase tracking-[0.14em] transition-all duration-200 ${
+                                    <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full ${isNativePlatform ? 'px-3 py-1.5 text-[8px]' : 'px-3.5 py-1.5 text-[9px]'} font-black uppercase tracking-[0.14em] transition-all duration-200 ${
                                       active
                                         ? 'bg-white text-emerald-700 shadow-[0_14px_28px_-18px_rgba(255,255,255,0.72)]'
                                         : 'bg-emerald-500 text-white shadow-[0_16px_30px_-18px_rgba(16,185,129,0.85)] group-hover:bg-emerald-400'
                                     }`}>
                                       Entrar
-                                      <CaretRight size={10} weight="bold" />
+                                      <CaretRight size={isNativePlatform ? 9 : 10} weight="bold" />
                                     </span>
                                   </div>
                                 </div>

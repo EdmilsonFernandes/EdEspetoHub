@@ -35,6 +35,16 @@ const typeLabels: Record<string, string> = {
   table: 'Comer no local',
 };
 
+const ONLINE_PAYMENT_METHODS = new Set([
+  'pix',
+  'credito',
+  'crédito',
+  'debito',
+  'débito',
+  'credit_card',
+  'debit_card',
+]);
+
 
 const buildDemoStatus = (createdAt: number) => {
   const diff = Date.now() - createdAt;
@@ -294,12 +304,21 @@ export function OrderTracking() {
   const storePhone = order?.store?.phone;
   const paymentValue = order?.paymentMethod || order?.payment;
   const paymentMeta = paymentValue ? getPaymentMethodMeta(paymentValue) : null;
+  const normalizedPaymentMethod = String(paymentValue || '').trim().toLowerCase();
   const pixKey =
     order?.store?.settings?.pixKey ||
     order?.pixKey ||
     '';
-  const isPixPayment = (paymentValue || '').toString().trim().toLowerCase() === 'pix';
-  const paymentStatusNormalized = String(order?.paymentStatus || '').toUpperCase();
+  const isPixPayment = normalizedPaymentMethod === 'pix';
+  const paymentStatusNormalized = (() => {
+    const direct = String(order?.paymentStatus || '').trim().toUpperCase();
+    const nested = String(order?.payment?.status || '').trim().toUpperCase();
+    if (direct === 'PAID' || nested === 'PAID') return 'PAID';
+    if (direct === 'FAILED' || nested === 'FAILED') return 'FAILED';
+    return direct || nested;
+  })();
+  const hasOnlinePayment = ONLINE_PAYMENT_METHODS.has(normalizedPaymentMethod);
+  const isPaymentApproved = paymentStatusNormalized === 'PAID';
   const showMercadoPagoApproved = paymentStatusNormalized === 'PAID';
   const shouldHidePixPaymentBlockBase =
     isPixPayment &&
@@ -780,6 +799,7 @@ export function OrderTracking() {
   const steps = useMemo(() => {
     if (normalizedStatus === 'cancelled') {
       return [
+        ...(hasOnlinePayment ? [{ id: 'payment', label: isPaymentApproved ? 'Pagamento confirmado' : 'Aguardando pagamento' }] : []),
         { id: 'pending', label: 'Pedido Recebido' },
         { id: 'cancelled', label: 'Pedido Cancelado' },
       ];
@@ -787,6 +807,7 @@ export function OrderTracking() {
     if (isDelivery) {
       if (isPostalDelivery) {
         return [
+          ...(hasOnlinePayment ? [{ id: 'payment', label: isPaymentApproved ? 'Pagamento confirmado' : 'Aguardando pagamento' }] : []),
           { id: 'pending', label: 'Pedido Recebido' },
           { id: 'preparing', label: 'Em Preparação' },
           { id: 'ready', label: 'Pronto para postagem' },
@@ -795,6 +816,7 @@ export function OrderTracking() {
         ];
       }
       return [
+        ...(hasOnlinePayment ? [{ id: 'payment', label: isPaymentApproved ? 'Pagamento confirmado' : 'Aguardando pagamento' }] : []),
         { id: 'pending', label: 'Pedido Recebido' },
         { id: 'preparing', label: 'Em Preparação' },
         { id: 'ready', label: 'Aguardando entregador' },
@@ -804,23 +826,27 @@ export function OrderTracking() {
     }
     if (order?.type === 'pickup') {
       return [
+        ...(hasOnlinePayment ? [{ id: 'payment', label: isPaymentApproved ? 'Pagamento confirmado' : 'Aguardando pagamento' }] : []),
         { id: 'pending', label: 'Pedido Recebido' },
         { id: 'preparing', label: 'Em Preparação' },
         { id: 'ready', label: 'Pronto para retirada' },
-        { id: 'done', label: 'Pago' },
+        { id: 'done', label: hasOnlinePayment ? 'Retirada concluída' : 'Pago' },
       ];
     }
     return [
+      ...(hasOnlinePayment ? [{ id: 'payment', label: isPaymentApproved ? 'Pagamento confirmado' : 'Aguardando pagamento' }] : []),
       { id: 'pending', label: 'Pedido Recebido' },
       { id: 'preparing', label: 'Em Preparação' },
       { id: 'done', label: order?.type === 'table' ? 'Pedido Pronto' : 'Pronto' },
     ];
-  }, [isDelivery, isPostalDelivery, order?.type, normalizedStatus]);
+  }, [hasOnlinePayment, isDelivery, isPaymentApproved, isPostalDelivery, order?.type, normalizedStatus]);
   const currentStep = (() => {
     if (normalizedStatus === 'cancelled') return 'cancelled';
+    if (hasOnlinePayment && !isPaymentApproved) return 'payment';
     if (!isDelivery) {
       const st = normalizedStatus;
       const known = new Set(steps.map((item) => item.id));
+      if (st === 'awaiting_payment' && hasOnlinePayment && isPaymentApproved) return 'pending';
       if (known.has(st)) return st;
       if (order?.type === 'pickup') {
         if ([ 'ready_for_pickup', 'ready_for_delivery', 'waiting_for_motoboy', 'ready' ].includes(st)) return 'ready';
@@ -835,6 +861,7 @@ export function OrderTracking() {
     }
     const deliveryStatus = String((order as any)?.delivery?.status || '').toUpperCase();
     if (isPostalDelivery) {
+      if (normalizedStatus === 'awaiting_payment' && hasOnlinePayment && isPaymentApproved) return 'pending';
       if (normalizedStatus === 'delivered' || normalizedStatus === 'finished') return 'delivered';
       if (normalizedStatus === 'dispatched' || normalizedStatus === 'waiting_for_motoboy' || normalizedStatus === 'in_delivery') return 'in_delivery';
       if (normalizedStatus === 'ready_for_delivery' || normalizedStatus === 'ready') return 'ready';
@@ -844,6 +871,7 @@ export function OrderTracking() {
     if (deliveryStatus === 'DELIVERED') return 'delivered';
     if (deliveryStatus === 'IN_TRANSIT') return 'in_delivery';
     if (deliveryStatus === 'ACCEPTED' || deliveryStatus === 'PICKED_UP') return 'ready';
+    if (normalizedStatus === 'awaiting_payment' && hasOnlinePayment && isPaymentApproved) return 'pending';
     if (normalizedStatus === 'ready_for_delivery' || normalizedStatus === 'waiting_for_motoboy' || normalizedStatus === 'ready') return 'ready';
     if (normalizedStatus === 'in_delivery') return 'in_delivery';
     if (normalizedStatus === 'delivered' || normalizedStatus === 'finished') return 'delivered';
