@@ -448,51 +448,6 @@ export const CartView = ({
     },
   };
 
-  const checkoutContextMeta = useMemo(() => {
-    if (customer.type === "pickup") {
-      return {
-        icon: <House size={20} weight="duotone" />,
-        title: "Retire no balcão com mais agilidade",
-        description: "Seu pedido segue para preparo e você acompanha tudo pelo app até o momento da retirada.",
-        toneClass: "border-emerald-200/80 bg-[linear-gradient(135deg,rgba(236,253,245,0.98)_0%,rgba(255,255,255,0.98)_52%,rgba(240,253,244,0.92)_100%)]",
-        iconClass: "bg-emerald-100 text-emerald-700",
-        chips: [
-          "Sem taxa de entrega",
-          "Pedido identificado",
-          "Acompanhamento no app",
-        ],
-      };
-    }
-
-    if (customer.type === "table") {
-      return {
-        icon: <ForkKnife size={20} weight="duotone" />,
-        title: "Pedido identificado para a mesa",
-        description: "A cozinha recebe seu pedido com identificação da mesa para acelerar a operação.",
-        toneClass: "border-amber-200/80 bg-[linear-gradient(135deg,rgba(255,251,235,0.98)_0%,rgba(255,255,255,0.98)_52%,rgba(254,249,195,0.9)_100%)]",
-        iconClass: "bg-amber-100 text-amber-700",
-        chips: [
-          customer.table ? `Mesa ${customer.table}` : "Mesa a confirmar",
-          "Fluxo mais ágil",
-          "Atualizações no app",
-        ],
-      };
-    }
-
-    return {
-      icon: <Bicycle size={20} weight="duotone" />,
-      title: "Entrega com validação inteligente",
-      description: "Confirme o endereço, visualize o frete e siga para o pagamento com mais segurança.",
-      toneClass: "border-sky-200/80 bg-[linear-gradient(135deg,rgba(239,246,255,0.98)_0%,rgba(255,255,255,0.98)_50%,rgba(239,248,255,0.92)_100%)]",
-      iconClass: "bg-sky-100 text-[#336886]",
-      chips: [
-        radiusValue ? `Até ${radiusValue} km` : "Entrega ativa",
-        deliveryFeeValue > 0 ? `Frete ${formatCurrency(deliveryFeeValue)}` : "Frete calculado no fluxo",
-        "Pagamento protegido",
-      ],
-    };
-  }, [customer.table, customer.type, deliveryFeeValue, radiusValue, storeAddress]);
-
   const buildDeliveryAddress = (data) => {
     const street = String(data.street || "").trim();
     const number = String(data.number || "").trim();
@@ -541,13 +496,6 @@ export const CartView = ({
         }
       : null,
   ].filter(Boolean);
-  const checkoutSummaryChips = [
-    customer.type === "pickup" ? (storeAddress || "Retirada no local") : null,
-    ...checkoutContextMeta.chips,
-  ]
-    .filter(Boolean)
-    .slice(0, 3);
-
   const updateDeliveryField = (field, value) => {
     const next = { ...customer, [field]: value };
     next.address = buildDeliveryAddress(next);
@@ -1128,42 +1076,6 @@ export const CartView = ({
               })}
             </div>
           </div>
-
-          {showCustomerFulfillmentInsights && (
-            <div className={`relative overflow-hidden rounded-[2rem] border p-4 sm:p-5 shadow-[0_24px_48px_-32px_rgba(15,23,42,0.25)] ${checkoutContextMeta.toneClass}`}>
-              <div className="pointer-events-none absolute -right-6 top-0 h-32 w-32 rounded-full bg-white/70 blur-3xl" />
-              <div className="pointer-events-none absolute bottom-0 left-0 h-24 w-24 rounded-full bg-white/60 blur-3xl" />
-              <div className="relative flex items-start gap-4">
-                <div className="relative shrink-0">
-                  <span className="absolute -inset-1 rounded-[1.35rem] bg-white/70 blur-md" />
-                  <span className={`relative flex h-12 w-12 items-center justify-center rounded-[1.2rem] shadow-sm ${checkoutContextMeta.iconClass}`}>
-                    {checkoutContextMeta.icon}
-                  </span>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Resumo da etapa</p>
-                    <span className="inline-flex rounded-full border border-white/70 bg-white/80 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-600 shadow-sm">
-                      {orderTypeVisuals[customer.type]?.label || "Pedido"}
-                    </span>
-                  </div>
-                  <h3 className="mt-2 text-[15px] font-black leading-tight text-slate-900">{checkoutContextMeta.title}</h3>
-                  <p className="mt-1.5 text-xs leading-relaxed text-slate-600">{checkoutContextMeta.description}</p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {checkoutSummaryChips.map((chip) => (
-                      <span
-                        key={chip}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/88 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm"
-                      >
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                        {chip}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Retirada info */}
           {showCustomerFulfillmentInsights && customer.type === "pickup" && (
