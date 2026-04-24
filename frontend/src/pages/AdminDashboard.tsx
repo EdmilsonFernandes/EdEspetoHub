@@ -2715,8 +2715,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       title: 'Pagamentos online',
       description: 'Conecte o Mercado Pago e acompanhe o status do gateway.',
       icon: PlugsConnected,
-      badge: mpLoading ? 'Verificando' : isConnected ? 'Ativo' : oauthMissing ? 'Pendente' : 'Disponível',
-      tone: mpLoading ? 'neutral' : isConnected ? 'success' : oauthMissing ? 'warning' : 'neutral',
+      badge: 'Abrir',
+      tone: 'neutral',
       action: () => runOrConfirmDiscard(() => setActiveTab('gateway')),
     },
     {
