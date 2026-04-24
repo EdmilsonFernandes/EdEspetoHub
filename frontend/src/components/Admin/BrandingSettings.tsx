@@ -6,19 +6,22 @@ import { formatPhoneInput } from "../../utils/format";
 const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
 const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e', '#065f46', '#4b5563' ];
 
-export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving }) => {
+export const BrandingSettings = ({
+  branding,
+  onChange,
+  storeSlug,
+  onSave,
+  saving,
+  title = "Identidade visual",
+  subtitle = "Defina a presença digital da sua marca com elegância.",
+  visibleSections,
+  hideSectionTabs = false,
+  expandVisibleSections = false,
+}) => {
   const fileInputRef = useRef(null);
   const bannerInputRef = useRef(null);
   const [storeCepLoading, setStoreCepLoading] = useState(false);
   const [storeCepError, setStoreCepError] = useState("");
-  const [sectionsOpen, setSectionsOpen] = useState({
-    identity: true,
-    promo: false,
-    contact: false,
-    delivery: false,
-    colors: false,
-    access: false,
-  });
   const sectionTabs = [
     { key: "identity", label: "Identidade" },
     { key: "promo", label: "Promo" },
@@ -27,6 +30,24 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
     { key: "colors", label: "Cores" },
     { key: "access", label: "Acesso" },
   ];
+  const resolvedSections = (Array.isArray(visibleSections) && visibleSections.length > 0
+    ? sectionTabs.filter((tab) => visibleSections.includes(tab.key))
+    : sectionTabs);
+  const visibleSectionsKey = resolvedSections.map((tab) => tab.key).join("|");
+  const createSectionsOpen = () => {
+    const visibleKeys = resolvedSections.map((tab) => tab.key);
+    const firstVisibleKey = visibleKeys[0] || "identity";
+    return {
+      identity: expandVisibleSections ? visibleKeys.includes("identity") : firstVisibleKey === "identity",
+      promo: expandVisibleSections ? visibleKeys.includes("promo") : firstVisibleKey === "promo",
+      contact: expandVisibleSections ? visibleKeys.includes("contact") : firstVisibleKey === "contact",
+      delivery: expandVisibleSections ? visibleKeys.includes("delivery") : firstVisibleKey === "delivery",
+      colors: expandVisibleSections ? visibleKeys.includes("colors") : firstVisibleKey === "colors",
+      access: expandVisibleSections ? visibleKeys.includes("access") : firstVisibleKey === "access",
+    };
+  };
+  const [sectionsOpen, setSectionsOpen] = useState(createSectionsOpen);
+  const isSectionVisible = (target) => resolvedSections.some((tab) => tab.key === target);
   const openSection = (target) => {
     setSectionsOpen({
       identity: target === "identity",
@@ -37,6 +58,9 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
       access: target === "access",
     });
   };
+  useEffect(() => {
+    setSectionsOpen(createSectionsOpen());
+  }, [visibleSectionsKey, expandVisibleSections]);
   const normalizeCep = (input = "") => {
     const digits = input.toString().replace(/\D/g, "").slice(0, 8);
     if (digits.length <= 5) return digits;
@@ -167,15 +191,16 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
     <div className="bg-white/95 rounded-2xl shadow-[0_16px_36px_-28px_rgba(15,23,42,0.35)] border border-slate-200 overflow-hidden">
       <div className="p-4 sm:p-5 border-b border-slate-100 bg-gradient-to-r from-white via-white to-slate-50/70 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h3 className="text-lg font-bold text-gray-800 mb-1">Identidade visual</h3>
-          <p className="text-sm text-gray-500">Defina a presença digital da sua marca com elegância.</p>
+          <h3 className="text-lg font-bold text-gray-800 mb-1">{title}</h3>
+          <p className="text-sm text-gray-500">{subtitle}</p>
         </div>
       </div>
 
       <div className="p-4 sm:p-5 space-y-5">
+        {!hideSectionTabs && resolvedSections.length > 1 && (
         <div className="overflow-x-auto pb-1">
           <div className="inline-flex min-w-full gap-2">
-            {sectionTabs.map((tab) => {
+            {resolvedSections.map((tab) => {
               const active = sectionsOpen[tab.key];
               return (
                 <button
@@ -194,7 +219,9 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             })}
           </div>
         </div>
+        )}
 
+        {isSectionVisible("identity") && (
         <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
           <button
             type="button"
@@ -367,7 +394,9 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
         </div>
           </div>
         </div>
+        )}
 
+        {isSectionVisible("promo") && (
         <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
           <button
             type="button"
@@ -400,7 +429,9 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             </div>
           </div>
         </div>
+        )}
 
+        {isSectionVisible("contact") && (
         <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
           <button
             type="button"
@@ -410,8 +441,8 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             <div className="flex items-start gap-2">
               <span className="h-2.5 w-2.5 rounded-full bg-sky-500" />
               <div>
-                <p className="text-sm font-semibold text-gray-800">Canais e pagamento</p>
-                <p className="text-xs text-gray-500">Contato oficial, endereço e chave Pix.</p>
+                <p className="text-sm font-semibold text-gray-800">Canais e Pix</p>
+                <p className="text-xs text-gray-500">Contato oficial, Instagram e recebimento manual.</p>
               </div>
             </div>
             <span className="text-xs text-gray-500">{sectionsOpen.contact ? 'Ativa' : 'Abrir'}</span>
@@ -439,6 +470,38 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
               />
               <p className="text-xs text-gray-500">Usado no contato oficial e WhatsApp da loja.</p>
             </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700">Chave Pix da loja</label>
+              <input
+                type="text"
+                value={branding.pixKey || ''}
+                onChange={(e) => handleChange("pixKey", e.target.value)}
+                className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                placeholder="+5511999999999 ou contato@pix.com"
+              />
+              <p className="text-xs text-gray-500">Usada para gerar o QR Code na confirmação de pagamento. Telefone com DDD pode começar com 0 que ajustamos para +55.</p>
+            </div>
+          </div>
+        </div>
+        )}
+
+        {isSectionVisible("delivery") && (
+        <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
+          <button
+            type="button"
+            onClick={() => openSection("delivery")}
+            className="w-full flex items-start justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left hover:bg-slate-50/70 transition"
+          >
+            <div className="flex items-start gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+              <div>
+                <p className="text-sm font-semibold text-gray-800">Endereço e logística</p>
+                <p className="text-xs text-gray-500">Localização da loja, alcance local e envio postal.</p>
+              </div>
+            </div>
+            <span className="text-xs text-gray-500">{sectionsOpen.delivery ? 'Ativa' : 'Abrir'}</span>
+          </button>
+          <div className={`${sectionsOpen.delivery ? 'block' : 'hidden'} px-4 pb-4 sm:px-5 sm:pb-5 space-y-5`}>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Endereço da loja</label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -542,36 +605,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
               </div>
               <p className="text-xs text-gray-500">Usado para mostrar localização e validação de entrega. Cidade e UF são obrigatórias.</p>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700">Chave Pix da loja</label>
-              <input
-                type="text"
-                value={branding.pixKey || ''}
-                onChange={(e) => handleChange("pixKey", e.target.value)}
-                className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-                placeholder="+5511999999999 ou contato@pix.com"
-              />
-              <p className="text-xs text-gray-500">Usada para gerar o QR Code na confirmação de pagamento. Telefone com DDD pode começar com 0 que ajustamos para +55.</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
-          <button
-            type="button"
-            onClick={() => openSection("delivery")}
-            className="w-full flex items-start justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left hover:bg-slate-50/70 transition"
-          >
-            <div className="flex items-start gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-              <div>
-                <p className="text-sm font-semibold text-gray-800">Entrega por raio</p>
-                <p className="text-xs text-gray-500">Defina alcance local e habilite envio postal.</p>
-              </div>
-            </div>
-            <span className="text-xs text-gray-500">{sectionsOpen.delivery ? 'Ativa' : 'Abrir'}</span>
-          </button>
-          <div className={`${sectionsOpen.delivery ? 'block' : 'hidden'} px-4 pb-4 sm:px-5 sm:pb-5 space-y-5`}>
             <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
               <div className="flex items-center justify-between gap-3">
                 <div>
@@ -665,7 +698,9 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             </div>
           </div>
         </div>
+        )}
 
+        {isSectionVisible("colors") && (
         <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
           <button
             type="button"
@@ -733,7 +768,9 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
         </div>
           </div>
         </div>
+        )}
 
+        {isSectionVisible("access") && (
         <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
           <button
             type="button"
@@ -822,6 +859,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             </div>
           </div>
         </div>
+        )}
       </div>
     </div>
   );

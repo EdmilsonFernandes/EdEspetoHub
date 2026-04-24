@@ -1,6 +1,6 @@
 // @ts-nocheck
 import * as React from 'react';
-import { ChartBar, BookOpen, Buildings, CheckSquare, ClipboardText, CreditCard, Package, Gear, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree, PlugsConnected, CheckCircle, SealCheck } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, Buildings, CheckSquare, ClipboardText, Clock, CreditCard, Package, Gear, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree, PlugsConnected, CheckCircle, SealCheck } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
@@ -1441,6 +1441,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     if (requestedTab === 'pedidos') return 'fila';
     return (requestedTab as any) || 'fila';
   });
+  const [configSection, setConfigSection] = useState('hub');
   const [menuVisible, setMenuVisible] = useState(() => {
     if (typeof window === 'undefined') return true;
     return localStorage.getItem('adminHeader:visible') !== 'false';
@@ -1516,6 +1517,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const whatsappNumber = session?.store?.owner?.phone || '';
   const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
   const instagramHandle = instagramLink ? `@${instagramLink.replace('@', '')}` : '';
+  const openConfigSection = React.useCallback((section = 'hub') => {
+    setConfigSection(section);
+    setActiveTab('config');
+  }, []);
 
   const desktopTabItems = useMemo(
     () =>
@@ -1538,7 +1543,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
             { id: 'condominios', label: 'Condomínios', icon: Buildings },
             { id: 'usuarios', label: 'Usuários', icon: UsersThree, standalone: true },
-            { id: 'config', label: 'Configurações', icon: Gear },
+            { id: 'config', label: 'Configurar loja', icon: Gear },
             { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
           ]),
     [canUseMotoboys, isOperatorUser]
@@ -1560,7 +1565,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       destaques: { title: 'Destaques patrocinados', subtitle: 'Solicite e acompanhe campanhas de destaque para o Hub.' },
       pagamentos: { title: 'Minha assinatura', subtitle: 'Controle assinatura, ciclo e eventos de cobrança da loja.' },
       gateway: { title: 'Pagamentos Online', subtitle: 'Conecte o Mercado Pago para aceitar Pix, crédito e débito online.' },
-      config: { title: 'Configurações', subtitle: 'Ajuste identidade, canais, tipos de pedido e horários da operação.' },
+      config: { title: 'Configurar loja', subtitle: 'Organize perfil, canais, logística, pedidos e horários em blocos separados.' },
       fila: { title: 'Gestor de Pedidos', subtitle: 'Acompanhe pedidos em andamento e a fila da loja em tempo real.' },
       motoboys: { title: 'Entregadores', subtitle: 'Vínculos, documentos, solicitações e status de entrega.' },
       condominios: { title: 'Condomínios e feiras', subtitle: 'Solicite participação em condomínios e acompanhe aprovações da loja.' },
@@ -1595,6 +1600,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             }
             if (item.id === 'destaques') {
               navigate('/admin/highlights');
+              return;
+            }
+            if (item.id === 'config') {
+              openConfigSection('hub');
               return;
             }
             if (item.id === 'usuarios') {
@@ -1632,7 +1641,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       const haystack = `${item.id} ${item.label} ${item.description}`.toLowerCase();
       return !haystack.includes('resumo executivo') && !/^tab-resumo$/.test(item.id) && item.label.toLowerCase() !== 'resumo';
     });
-  }, [desktopTabItems, tabMeta, storeSlug, navigate, openQueueMonitor]);
+  }, [desktopTabItems, tabMeta, storeSlug, navigate, openQueueMonitor, openConfigSection]);
   const filteredCommandActions = useMemo(() => {
     const q = commandQuery.trim().toLowerCase();
     if (!q) return commandActions;
@@ -1793,6 +1802,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       navigate('/admin/dashboard', { replace: true, state: {} });
       return;
     }
+    if (nextTab === 'config') {
+      const nextSectionFromQuery = String(new URLSearchParams(location.search || '').get('section') || '').trim();
+      setConfigSection(nextSectionFromQuery || 'hub');
+    }
     setActiveTab(nextTab as typeof activeTab);
     // Consome o estado de navegação para evitar "reaplicar" aba e causar pisca ao trocar de menu.
     navigate('/admin/dashboard', { replace: true, state: {} });
@@ -1800,11 +1813,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [savingBranding, setSavingBranding] = useState(false);
   const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
   const pendingNavigationActionRef = useRef<null | (() => void)>(null);
-  const [configPanels, setConfigPanels] = useState({
-    branding: true,
-    orderTypes: false,
-    hours: false,
-  });
 
   const updateAuthStore = (updates) => {
     if (!auth?.store) return;
@@ -2437,14 +2445,14 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       label: 'Logo da loja',
       done: Boolean(session?.store?.settings?.logoUrl),
       action: 'Adicionar logo',
-      onClick: () => setActiveTab('config'),
+      onClick: () => openConfigSection('profile'),
     },
     {
       id: 'description',
       label: 'Descrição da loja',
       done: Boolean(session?.store?.settings?.description?.trim()),
       action: 'Adicionar descrição',
-      onClick: () => setActiveTab('config'),
+      onClick: () => openConfigSection('profile'),
     },
     {
       id: 'products',
@@ -2458,21 +2466,21 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       label: 'Horário de funcionamento',
       done: Array.isArray(openingHours) && openingHours.length > 0,
       action: 'Definir horários',
-      onClick: () => setActiveTab('config'),
+      onClick: () => openConfigSection('hours'),
     },
     {
       id: 'orderTypes',
       label: 'Tipos de pedido',
       done: Array.isArray(orderTypes) && orderTypes.length > 0,
       action: 'Definir tipos',
-      onClick: () => setActiveTab('config'),
+      onClick: () => openConfigSection('ordering'),
     },
     {
       id: 'pix',
       label: 'Pix para recebimento',
       done: Boolean(session?.store?.settings?.pixKey),
       action: 'Configurar Pix',
-      onClick: () => setActiveTab('config'),
+      onClick: () => openConfigSection('channels'),
     },
   ];
 
@@ -2591,6 +2599,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         navigate('/admin/highlights');
         return;
       }
+      if (id === 'config') {
+        openConfigSection('hub');
+        return;
+      }
       if (id === 'motoboys' && !canUseMotoboys) {
         showToast('Disponível no plano Pro. Faça o upgrade para liberar entregadores.', 'info');
         navigate('/admin/renewal?focus=pro');
@@ -2602,6 +2614,128 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
   const activeNavItem = (navItems || []).find((item) => item.id === activeTab);
   const ActiveTabIcon = activeNavItem?.icon || null;
+  const hasStoreLocationConfigured = Boolean(
+    String(brandingDraft.address || '').trim() &&
+      String(brandingDraft.city || '').trim() &&
+      String(brandingDraft.state || '').trim().length === 2
+  );
+  const profileReady = Boolean(
+    String(brandingDraft.brandName || '').trim() &&
+      String(brandingDraft.description || '').trim() &&
+      (brandingDraft.logoUrl || brandingDraft.logoFile || brandingDraft.bannerUrl || brandingDraft.bannerFile)
+  );
+  const channelsReady = Boolean(
+    String(brandingDraft.promoMessage || '').trim() ||
+      String(brandingDraft.contactEmail || '').trim() ||
+      String(brandingDraft.storePhone || '').trim() ||
+      String(brandingDraft.pixKey || '').trim()
+  );
+  const configSectionMeta: Record<string, any> = {
+    profile: {
+      title: 'Perfil e marca',
+      subtitle: 'Nome, descrição, logo, banner e cores da loja.',
+      sections: ['identity', 'colors'],
+      saveLabel: 'Salvar perfil e marca',
+    },
+    channels: {
+      title: 'Promo e canais',
+      subtitle: 'Mensagem do dia, contato oficial, Pix e presença da loja.',
+      sections: ['promo', 'contact'],
+      saveLabel: 'Salvar promo e canais',
+    },
+    delivery: {
+      title: 'Entrega e logística',
+      subtitle: 'Endereço, raio, frete, CEP de origem e tempos de preparo.',
+      sections: ['delivery'],
+      saveLabel: 'Salvar logística',
+    },
+    ordering: {
+      title: 'Tipos de pedido',
+      subtitle: 'Escolha como o cliente pode comprar na vitrine da loja.',
+    },
+    hours: {
+      title: 'Horários de funcionamento',
+      subtitle: 'Defina abertura e fechamento por dia da semana.',
+    },
+    operation: {
+      title: 'Operação da loja',
+      subtitle: 'URL pública, pedidos online e vinheta da fila.',
+      sections: ['access'],
+      saveLabel: 'Salvar operação',
+    },
+  };
+  const configCards = [
+    {
+      id: 'profile',
+      title: 'Perfil e marca',
+      description: 'Nome, descrição, logo, banner e cores da vitrine.',
+      icon: Storefront,
+      badge: profileReady ? 'Configurado' : 'Revisar',
+      tone: profileReady ? 'success' : 'warning',
+      action: () => setConfigSection('profile'),
+    },
+    {
+      id: 'channels',
+      title: 'Promo e canais',
+      description: 'Mensagem do dia, contato, Instagram e Pix manual.',
+      icon: Star,
+      badge: channelsReady ? 'Configurado' : 'Opcional',
+      tone: channelsReady ? 'success' : 'neutral',
+      action: () => setConfigSection('channels'),
+    },
+    {
+      id: 'delivery',
+      title: 'Entrega e logística',
+      description: 'Endereço, raio, frete, envio postal e SLA da operação.',
+      icon: Truck,
+      badge: hasStoreLocationConfigured ? 'Configurado' : 'Obrigatório',
+      tone: hasStoreLocationConfigured ? 'success' : 'warning',
+      action: () => setConfigSection('delivery'),
+    },
+    {
+      id: 'ordering',
+      title: 'Tipos de pedido',
+      description: 'Entrega, retirada e mesa conforme o plano da loja.',
+      icon: CheckSquare,
+      badge: Array.isArray(orderTypes) && orderTypes.length > 0 ? 'Ativo' : 'Revisar',
+      tone: Array.isArray(orderTypes) && orderTypes.length > 0 ? 'success' : 'warning',
+      action: () => setConfigSection('ordering'),
+    },
+    {
+      id: 'hours',
+      title: 'Horários de funcionamento',
+      description: 'Abertura e fechamento por dia, com faixas de atendimento.',
+      icon: Clock,
+      badge: Array.isArray(openingHours) && openingHours.length > 0 ? 'Configurado' : 'Revisar',
+      tone: Array.isArray(openingHours) && openingHours.length > 0 ? 'success' : 'warning',
+      action: () => setConfigSection('hours'),
+    },
+    {
+      id: 'gateway',
+      title: 'Pagamentos online',
+      description: 'Conecte o Mercado Pago e acompanhe o status do gateway.',
+      icon: PlugsConnected,
+      badge: mpLoading ? 'Verificando' : isConnected ? 'Ativo' : oauthMissing ? 'Pendente' : 'Disponível',
+      tone: mpLoading ? 'neutral' : isConnected ? 'success' : oauthMissing ? 'warning' : 'neutral',
+      action: () => runOrConfirmDiscard(() => setActiveTab('gateway')),
+    },
+    {
+      id: 'operation',
+      title: 'Operação da loja',
+      description: 'Pedidos online, slug público e vinheta de novos pedidos.',
+      icon: Bell,
+      badge: brandingDraft.isOrderingEnabled !== false ? 'Pedidos online ativos' : 'Somente cardápio',
+      tone: brandingDraft.isOrderingEnabled !== false ? 'success' : 'neutral',
+      action: () => setConfigSection('operation'),
+    },
+  ];
+  const activeConfigMeta = activeTab === 'config' && configSection !== 'hub'
+    ? configSectionMeta[configSection] || tabMeta.config
+    : tabMeta.config;
+  const activeSurfaceMeta = activeTab === 'config' ? activeConfigMeta : tabMeta[activeTab];
+  const completedSetupSteps = setupChecklist.filter((item) => item.done).length;
+  const focusedBrandingSection = activeTab === 'config' && ['profile', 'channels', 'delivery', 'operation'].includes(configSection);
+  const showBrandingSaveBar = activeTab === 'config' && (configSection === 'hub' || focusedBrandingSection);
 
   return (
     <AdminLayout contextLabel="Painel da Loja" fluid>
@@ -2665,7 +2799,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           )}
           <div className="min-w-0">
             <p className="text-[9px] uppercase tracking-[0.22em] font-bold text-slate-400 leading-none mb-0.5">Seção atual</p>
-            <p className="text-[13px] font-bold text-slate-900 truncate leading-tight">{tabMeta[activeTab]?.title || 'Painel'}</p>
+            <p className="text-[13px] font-bold text-slate-900 truncate leading-tight">{activeSurfaceMeta?.title || 'Painel'}</p>
           </div>
         </div>
         <button
@@ -2680,8 +2814,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       <section className="hidden md:flex relative z-[220] items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white/90 backdrop-blur-sm px-4 py-3 shadow-[0_20px_45px_-36px_rgba(15,23,42,0.5)] overflow-visible">
         <div className="min-w-0">
           <p className="text-[10px] uppercase tracking-[0.24em] font-bold text-slate-400">Workspace</p>
-          <h2 className="text-lg font-black text-slate-900 leading-tight">{tabMeta[activeTab]?.title || 'Painel da loja'}</h2>
-          <p className="text-xs text-slate-500 mt-0.5 truncate">{tabMeta[activeTab]?.subtitle || 'Gestão centralizada dos pedidos da loja.'}</p>
+          <h2 className="text-lg font-black text-slate-900 leading-tight">{activeSurfaceMeta?.title || 'Painel da loja'}</h2>
+          <p className="text-xs text-slate-500 mt-0.5 truncate">{activeSurfaceMeta?.subtitle || 'Gestão centralizada dos pedidos da loja.'}</p>
         </div>
         <div className="relative z-[260] flex items-center gap-2 shrink-0" ref={notificationsRef}>
           <button
@@ -2724,10 +2858,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab('config')}
+            onClick={() => openConfigSection('hub')}
             className="ds-focus-ring rounded-xl bg-brand-gradient px-3 py-2 text-xs font-semibold text-white shadow-[0_14px_30px_-20px_rgba(15,23,42,0.7)] hover:opacity-95 transition"
           >
-            Ajustes rápidos
+            Configurar loja
           </button>
         </div>
       </section>
@@ -2941,167 +3075,181 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
         {activeTab === 'config' && (
           <FormSection
-            title="Configurações"
-            subtitle="Identidade visual, tipos de pedido e horários de funcionamento."
+            title={activeConfigMeta?.title || 'Configurar loja'}
+            subtitle={activeConfigMeta?.subtitle || 'Organize a operação da loja em blocos separados.'}
             variant="warning"
             className="premium-card-soft"
             contentClassName="space-y-4"
           >
             <div className="space-y-4 pb-24 sm:pb-4">
-              <div className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.35)]">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.22em] font-bold text-slate-400">Setup da loja</p>
-                    <p className="text-sm font-bold text-slate-800">Organize por etapas para configurar mais rápido</p>
+              {configSection === 'hub' ? (
+                <>
+                  <div className="rounded-[1.6rem] border border-slate-200 bg-white/95 px-4 py-4 shadow-[0_20px_45px_-30px_rgba(15,23,42,0.45)]">
+                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                      <div>
+                        <p className="text-[10px] uppercase tracking-[0.24em] font-black text-slate-400">Central de configuração</p>
+                        <h3 className="mt-1 text-base font-black text-slate-900">Ajuste a loja por responsabilidade</h3>
+                        <p className="mt-1 text-sm text-slate-500">Abra só o bloco que precisa editar e mantenha a operação mais organizada no web e no app.</p>
+                      </div>
+                      <div className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold text-slate-600">
+                        {completedSetupSteps}/{setupChecklist.length} itens base concluídos
+                      </div>
+                    </div>
+                    <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                      {setupChecklist.map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={item.onClick}
+                          className={`rounded-2xl border px-3 py-3 text-left transition hover:-translate-y-0.5 ${
+                            item.done
+                              ? 'border-emerald-100 bg-emerald-50/80'
+                              : 'border-slate-200 bg-white hover:bg-slate-50'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-xs font-bold text-slate-800">{item.label}</p>
+                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.16em] ${
+                              item.done ? 'bg-emerald-600 text-white' : 'bg-amber-100 text-amber-700'
+                            }`}>
+                              {item.done ? 'OK' : 'Pendente'}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-[11px] text-slate-500">{item.action}</p>
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-semibold text-slate-600">
-                    {hasBrandingChanges ? 'Alterações pendentes' : 'Tudo atualizado'}
-                  </span>
-                </div>
-                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
-                  <button
-                    type="button"
-                    onClick={() => setConfigPanels((prev) => ({ ...prev, branding: true, orderTypes: false, hours: false }))}
-                    className={`text-left rounded-xl border px-3 py-2 transition ${
-                      configPanels.branding ? 'border-brand-primary/40 bg-brand-primary-soft' : 'border-slate-200 bg-white hover:bg-slate-50'
-                    }`}
-                  >
-                    <p className="text-xs font-bold text-slate-800">1. Perfil da loja</p>
-                    <p className="text-[11px] text-slate-500">Marca, banner, contato e endereço</p>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setConfigPanels((prev) => ({ ...prev, branding: false, orderTypes: true, hours: false }))}
-                    className={`text-left rounded-xl border px-3 py-2 transition ${
-                      configPanels.orderTypes ? 'border-brand-primary/40 bg-brand-primary-soft' : 'border-slate-200 bg-white hover:bg-slate-50'
-                    }`}
-                  >
-                    <p className="text-xs font-bold text-slate-800">2. Tipos de pedido</p>
-                    <p className="text-[11px] text-slate-500">Entrega, retirada e mesa por plano</p>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setConfigPanels((prev) => ({ ...prev, branding: false, orderTypes: false, hours: true }))}
-                    className={`text-left rounded-xl border px-3 py-2 transition ${
-                      configPanels.hours ? 'border-brand-primary/40 bg-brand-primary-soft' : 'border-slate-200 bg-white hover:bg-slate-50'
-                    }`}
-                  >
-                    <p className="text-xs font-bold text-slate-800">3. Horários da loja</p>
-                    <p className="text-[11px] text-slate-500">Abertura e fechamento por dia</p>
-                  </button>
-                </div>
-              </div>
 
-              <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-[0_12px_28px_-24px_rgba(15,23,42,0.4)]">
-                <button
-                  type="button"
-                  onClick={() => setConfigPanels((prev) => ({ ...prev, branding: !prev.branding }))}
-                  className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-slate-50 transition"
-                >
-                  <div>
-                    <p className="text-sm font-bold text-slate-800">Perfil da loja</p>
-                    <p className="text-xs text-slate-500">Nome, logo, banner, cores e dados públicos.</p>
+                  <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+                    {configCards.map((card) => {
+                      const Icon = card.icon;
+                      const badgeClass =
+                        card.tone === 'success'
+                          ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                          : card.tone === 'warning'
+                          ? 'border-amber-200 bg-amber-50 text-amber-700'
+                          : 'border-slate-200 bg-slate-50 text-slate-600';
+                      const iconClass =
+                        card.tone === 'success'
+                          ? 'bg-emerald-50 text-emerald-600'
+                          : card.tone === 'warning'
+                          ? 'bg-amber-50 text-amber-600'
+                          : 'bg-slate-100 text-slate-600';
+                      return (
+                        <button
+                          key={card.id}
+                          type="button"
+                          onClick={card.action}
+                          className="w-full rounded-[1.4rem] border border-slate-200 bg-white px-4 py-4 text-left shadow-[0_16px_38px_-30px_rgba(15,23,42,0.4)] transition hover:-translate-y-0.5 hover:border-slate-300"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex min-w-0 items-start gap-3">
+                              <span className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${iconClass}`}>
+                                <Icon size={20} weight="duotone" />
+                              </span>
+                              <div className="min-w-0">
+                                <p className="text-sm font-black text-slate-900">{card.title}</p>
+                                <p className="mt-1 text-xs leading-relaxed text-slate-500">{card.description}</p>
+                              </div>
+                            </div>
+                            <span className={`inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] ${badgeClass}`}>
+                              {card.badge}
+                            </span>
+                          </div>
+                          <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
+                            <span className="text-xs font-semibold text-slate-500">
+                              {card.id === 'gateway' ? 'Abrir gateway' : 'Abrir ajustes'}
+                            </span>
+                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600">
+                              <CaretRight size={15} weight="bold" />
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
-                  <span
-                    className={`inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-transform ${
-                      configPanels.branding ? 'rotate-180' : ''
-                    }`}
-                  >
-                    <CaretRight size={14} weight="bold" />
-                  </span>
-                </button>
-                {configPanels.branding && (
-                  <div className="border-t border-slate-100 p-3 sm:p-4 bg-slate-50/40">
+                </>
+              ) : (
+                <>
+                  <div className="rounded-[1.5rem] border border-slate-200 bg-white px-4 py-4 shadow-[0_18px_42px_-32px_rgba(15,23,42,0.45)]">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex items-start gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setConfigSection('hub')}
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                          aria-label="Voltar para categorias"
+                        >
+                          <CaretRight size={16} weight="bold" className="rotate-180" />
+                        </button>
+                        <div>
+                          <p className="text-[10px] uppercase tracking-[0.22em] font-black text-slate-400">Bloco da loja</p>
+                          <h3 className="mt-1 text-base font-black text-slate-900">{activeConfigMeta?.title}</h3>
+                          <p className="mt-1 text-sm text-slate-500">{activeConfigMeta?.subtitle}</p>
+                        </div>
+                      </div>
+                      {focusedBrandingSection ? (
+                        <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-semibold text-slate-600">
+                          {hasBrandingChanges ? 'Alterações pendentes' : 'Tudo sincronizado'}
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  {focusedBrandingSection && (
                     <BrandingSettings
                       branding={brandingDraft}
                       onChange={setBrandingDraft}
                       storeSlug={storeSlug}
+                      title={activeConfigMeta?.title}
+                      subtitle={activeConfigMeta?.subtitle}
+                      visibleSections={activeConfigMeta?.sections}
+                      hideSectionTabs
+                      expandVisibleSections
                     />
-                  </div>
-                )}
-              </section>
-              <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-[0_12px_28px_-24px_rgba(15,23,42,0.4)]">
-                <button
-                  type="button"
-                  onClick={() => setConfigPanels((prev) => ({ ...prev, orderTypes: !prev.orderTypes }))}
-                  className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-slate-50 transition"
-                >
+                  )}
+                  {configSection === 'ordering' && <OrderTypeSettingsCard />}
+                  {configSection === 'hours' && <OpeningHoursCard />}
+                </>
+              )}
+            </div>
+            {showBrandingSaveBar && (
+              <>
+                <div className="hidden sm:flex sticky bottom-3 z-40 items-center justify-between rounded-2xl border border-slate-200 bg-white/95 backdrop-blur px-4 py-3 shadow-[0_16px_30px_-22px_rgba(15,23,42,0.45)]">
                   <div>
-                    <p className="text-sm font-bold text-slate-800">Tipos de pedido</p>
-                    <p className="text-xs text-slate-500">Entrega, retirada e mesa por plano e operação.</p>
+                    <p className="text-xs font-semibold text-slate-700">
+                      {hasBrandingChanges ? 'Alterações prontas para salvar' : 'Tudo sincronizado'}
+                    </p>
+                    <p className="text-[11px] text-slate-500">
+                      {focusedBrandingSection ? 'Salva apenas este bloco sem mexer no restante da operação.' : 'Salva os ajustes de perfil, canais, logística e operação da loja.'}
+                    </p>
                   </div>
-                  <span
-                    className={`inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-transform ${
-                      configPanels.orderTypes ? 'rotate-180' : ''
+                  <button
+                    type="button"
+                    onClick={handleSaveBranding}
+                    disabled={savingBranding || !hasBrandingChanges}
+                    className={`rounded-xl px-4 py-2 text-xs font-bold text-white shadow-[0_12px_26px_-18px_rgba(15,23,42,0.7)] hover:opacity-95 disabled:opacity-60 ${
+                      hasBrandingChanges ? 'bg-emerald-600 hover:bg-emerald-700 animate-pulse' : 'bg-brand-gradient'
                     }`}
                   >
-                    <CaretRight size={14} weight="bold" />
-                  </span>
-                </button>
-                {configPanels.orderTypes && (
-                  <div className="border-t border-slate-100 p-4">
-                    <OrderTypeSettingsCard />
-                  </div>
-                )}
-              </section>
-              <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-[0_12px_28px_-24px_rgba(15,23,42,0.4)]">
-                <button
-                  type="button"
-                  onClick={() => setConfigPanels((prev) => ({ ...prev, hours: !prev.hours }))}
-                  className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-slate-50 transition"
-                >
-                  <div>
-                    <p className="text-sm font-bold text-slate-800">Horários da operação</p>
-                    <p className="text-xs text-slate-500">Controle dias e horários de abertura da loja.</p>
-                  </div>
-                  <span
-                    className={`inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-transform ${
-                      configPanels.hours ? 'rotate-180' : ''
+                    {savingBranding ? 'Salvando...' : activeConfigMeta?.saveLabel || 'Salvar alterações'}
+                  </button>
+                </div>
+                <div className="sm:hidden fixed left-0 right-0 px-4 z-50 ds-safe-fab">
+                  <button
+                    type="button"
+                    onClick={handleSaveBranding}
+                    disabled={savingBranding || !hasBrandingChanges}
+                    className={`w-full rounded-2xl text-white py-4 text-sm font-semibold shadow-lg hover:opacity-90 disabled:opacity-60 ${
+                      hasBrandingChanges ? 'bg-emerald-600 animate-pulse' : 'bg-brand-gradient'
                     }`}
                   >
-                    <CaretRight size={14} weight="bold" />
-                  </span>
-                </button>
-                {configPanels.hours && (
-                  <div className="border-t border-slate-100 p-4">
-                    <OpeningHoursCard />
-                  </div>
-                )}
-              </section>
-
-            </div>
-            <div className="hidden sm:flex sticky bottom-3 z-40 items-center justify-between rounded-2xl border border-slate-200 bg-white/95 backdrop-blur px-4 py-3 shadow-[0_16px_30px_-22px_rgba(15,23,42,0.45)]">
-              <div>
-                <p className="text-xs font-semibold text-slate-700">
-                  {hasBrandingChanges ? 'Alterações prontas para salvar' : 'Tudo sincronizado'}
-                </p>
-                <p className="text-[11px] text-slate-500">Salva os dados de perfil e identidade visual da loja.</p>
-              </div>
-              <button
-                type="button"
-                onClick={handleSaveBranding}
-                disabled={savingBranding || !hasBrandingChanges}
-                className={`rounded-xl px-4 py-2 text-xs font-bold text-white shadow-[0_12px_26px_-18px_rgba(15,23,42,0.7)] hover:opacity-95 disabled:opacity-60 ${
-                  hasBrandingChanges ? 'bg-emerald-600 hover:bg-emerald-700 animate-pulse' : 'bg-brand-gradient'
-                }`}
-              >
-                {savingBranding ? 'Salvando...' : 'Salvar identidade'}
-              </button>
-            </div>
-            <div
-              className="sm:hidden fixed left-0 right-0 px-4 z-50 ds-safe-fab"
-            >
-              <button
-                type="button"
-                onClick={handleSaveBranding}
-                disabled={savingBranding || !hasBrandingChanges}
-                className={`w-full rounded-2xl text-white py-4 text-sm font-semibold shadow-lg hover:opacity-90 disabled:opacity-60 ${
-                  hasBrandingChanges ? 'bg-emerald-600 animate-pulse' : 'bg-brand-gradient'
-                }`}
-              >
-                {savingBranding ? 'Salvando...' : hasBrandingChanges ? 'Salvar alterações' : 'Sem alterações pendentes'}
-              </button>
-            </div>
+                    {savingBranding ? 'Salvando...' : hasBrandingChanges ? activeConfigMeta?.saveLabel || 'Salvar alterações' : 'Sem alterações pendentes'}
+                  </button>
+                </div>
+              </>
+            )}
           </FormSection>
         )}
 
@@ -3249,7 +3397,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             <p className="text-[11px] uppercase tracking-[0.22em] font-bold text-amber-700">Atenção</p>
             <h3 className="mt-2 text-lg font-black text-slate-900">Você tem alterações não salvas</h3>
             <p className="mt-2 text-sm text-slate-600">
-              Deseja sair mesmo assim? As mudanças em Configurações serão perdidas.
+              Deseja sair mesmo assim? As mudanças em Configurar loja serão perdidas.
             </p>
             <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-2">
               <button
