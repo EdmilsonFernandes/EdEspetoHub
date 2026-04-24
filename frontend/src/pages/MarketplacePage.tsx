@@ -252,6 +252,7 @@ const CATEGORY_COLORS: Record<string, { active: string; inactive: string; icon: 
 
 type FeaturedProduct = {
   id: string;
+  productId?: string;
   storeSlug: string;
   storeName: string;
   storeLogo: string;
@@ -388,6 +389,28 @@ export function MarketplacePage() {
   const publicCondominiumLoadInFlightRef = useRef(false);
   const activeOrdersLoadInFlightRef = useRef(false);
   const anonymousOrdersHydrationInFlightRef = useRef(false);
+
+  const stageFeaturedProductCheckout = (item: FeaturedProduct) => {
+    const storeSlug = String(item?.storeSlug || '').trim();
+    const productId = String(item?.productId || item?.id || '').trim();
+    if (!storeSlug || !productId) return;
+    try {
+      localStorage.setItem(
+        `reorder:${storeSlug}`,
+        JSON.stringify({
+          items: [
+            {
+              productId,
+              name: String(item?.name || 'Produto').trim(),
+              quantity: 1,
+            },
+          ],
+        })
+      );
+    } catch (error) {
+      console.error('Falha ao preparar item em destaque para a sacola', error);
+    }
+  };
 
   const SEARCH_PLACEHOLDERS = [
     'Buscar espetinho...',
@@ -1125,6 +1148,7 @@ export function MarketplacePage() {
                  )
                  .map((p: any) => ({
                    id: String(p.id || `${slug}-${p.name}`),
+                   productId: String(p.id || '').trim() || undefined,
                    storeSlug: slug,
                    storeName: store.name,
                    name: String(p.name || 'Produto'),
@@ -1159,6 +1183,7 @@ export function MarketplacePage() {
                   )
                   .map((p: any) => ({
                     id: String(p.id || `${store.slug}-${p.name}`),
+                    productId: String(p.id || '').trim() || undefined,
                     storeSlug: store.slug,
                     storeName: store.name,
                     name: String(p.name || 'Produto'),
@@ -1376,6 +1401,7 @@ export function MarketplacePage() {
           .filter((item: any) => String(item?.storeSlug || '').trim())
           .map((item: any) => ({
             id: String(item?.id || `${item?.storeSlug}-${item?.productId || item?.productName || 'sponsored'}`),
+            productId: String(item?.productId || '').trim() || undefined,
             storeSlug: String(item?.storeSlug || ''),
             storeName: String(item?.storeName || 'Loja'),
             name: String(item?.productName || 'Produto em destaque'),
@@ -1397,6 +1423,7 @@ export function MarketplacePage() {
               .filter((product: any) => Boolean(product?.name) && Number(product?.price || product?.promoPrice || 0) > 0)
               .map((product: any) => ({
                 id: String(product?.id || `${store.slug}-${product?.name}`),
+                productId: String(product?.id || '').trim() || undefined,
                 storeSlug: store.slug,
                 storeName: store.name,
                 name: String(product?.name || 'Produto'),
@@ -2398,6 +2425,7 @@ export function MarketplacePage() {
                     <Link
                       key={`${item.storeSlug}-${item.id}`}
                       to={featuredStorePath}
+                      onClick={() => stageFeaturedProductCheckout(item)}
                       className="group min-w-[154px] snap-start overflow-hidden rounded-[1.3rem] border border-white/90 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.072)] ring-1 ring-slate-100/70 transition-all duration-200 ease-out hover:scale-[1.012] hover:shadow-[0_14px_28px_rgba(15,23,42,0.1)] active:scale-[0.97]"
                     >
                       <div className="relative h-[76px] overflow-hidden bg-slate-100">
@@ -2798,6 +2826,7 @@ export function MarketplacePage() {
                   <Link
                     key={`search-res-${item.storeSlug}-${item.id}`}
                     to={selectedCondominiumSlug ? `/${item.storeSlug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}` : `/${item.storeSlug}`}
+                    onClick={() => stageFeaturedProductCheckout(item)}
                     className="group min-w-[160px] snap-start overflow-hidden rounded-[1.45rem] border border-white bg-white shadow-[0_8px_24px_rgba(15,23,42,0.06)] transition-all duration-200 ease-out hover:scale-[1.015] active:scale-[0.97]"
                   >
                     <div className="relative h-[90px] overflow-hidden bg-slate-100">
