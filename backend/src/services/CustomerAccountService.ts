@@ -13,6 +13,7 @@ import { PushNotificationService } from './PushNotificationService';
 import { saveBase64Image } from '../utils/imageStorage';
 import { OrderService } from './OrderService';
 import { OrderEtaServiceV2 } from './OrderEtaServiceV2';
+import { logger } from '../utils/logger';
 
 type AddressInput = {
   label?: string;
@@ -25,6 +26,8 @@ type AddressInput = {
   neighborhood?: string;
   city: string;
   state: string;
+  lat?: number | string | null;
+  lng?: number | string | null;
   isDefault?: boolean;
 };
 
@@ -33,6 +36,7 @@ export class CustomerAccountService {
   private pushService = new PushNotificationService();
   private orderService = new OrderService();
   private orderEtaService = new OrderEtaServiceV2();
+  private log = logger.child({ scope: 'CustomerAccountService' });
     /**
    * Executes normalize email business logic.
    *
@@ -49,6 +53,75 @@ private normalizeEmail(value: string) {
    */
 private sanitizePhone(value?: string | null) {
     return String(value || '').replace(/\D/g, '');
+  }
+
+private parseCoordinate(value?: any): number | null | undefined {
+    if (value === undefined) return undefined;
+    if (value === null) return null;
+    const parsed = Number(String(value).replace(',', '.').trim());
+    if (!Number.isFinite(parsed)) return null;
+    return parsed;
+  }
+
+private normalizeAddressPart(value?: string | null) {
+    if (value === undefined) return undefined;
+    if (value === null) return null;
+    const trimmed = String(value).trim();
+    return trimmed || null;
+  }
+
+private normalizeAddressForGeocode(value?: string | null) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    return raw.replace(/\s+/g, ' ').trim();
+  }
+
+private buildGeocodeAddress(payload: {
+    cep?: string | null;
+    street?: string | null;
+    number?: string | null;
+    complement?: string | null;
+    neighborhood?: string | null;
+    city?: string | null;
+    state?: string | null;
+  }) {
+    const parts = [
+      this.normalizeAddressForGeocode(payload.street),
+      this.normalizeAddressForGeocode(payload.number),
+      this.normalizeAddressForGeocode(payload.complement),
+      this.normalizeAddressForGeocode(payload.neighborhood),
+      this.normalizeAddressForGeocode(payload.city),
+      this.normalizeAddressForGeocode(payload.state),
+      String(payload.cep || '').replace(/\D/g, '').slice(0, 8) || '',
+    ].filter(Boolean);
+    return parts.join(', ');
+  }
+
+private async geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
+    const normalizedAddress = String(address || '').trim();
+    if (!normalizedAddress) return null;
+    try {
+      const response = await fetch(`${env.etaV2.mapsBaseUrl}/geocode`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: normalizedAddress }),
+      });
+      if (!response.ok) {
+        this.log.warn('Customer address geocode failed', {
+          address: normalizedAddress,
+          status: response.status,
+        });
+        return null;
+      }
+      const payload = (await response.json()) as { lat?: number; lng?: number };
+      const lat = Number(payload?.lat);
+      const lng = Number(payload?.lng);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+      return { lat, lng };
+    } catch (error) {
+      this.log.warn('Customer address geocode exception', { address: normalizedAddress, error });
+      return null;
+    }
   }
 
     /**
@@ -254,9 +327,77 @@ private mapAddress(entity: CustomerAddress) {
       neighborhood: entity.neighborhood || null,
       city: entity.city,
       state: entity.state,
+      lat: this.parseCoordinate(entity.lat) ?? null,
+      lng: this.parseCoordinate(entity.lng) ?? null,
       isDefault: Boolean(entity.isDefault),
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+    };
+  }
+
+  public async ensureAddressCoordinates(address: CustomerAddress) {
+    if (!address?.id) return address;
+    const currentLat = this.parseCoordinate(address.lat);
+    const currentLng = this.parseCoordinate(address.lng);
+    if (currentLat !== null && currentLng !== null) {
+      return address;
+    }
+    const geocoded = await this.geocodeAddress(
+      this.buildGeocodeAddress({
+        cep: address.cep,
+        street: address.street,
+        number: address.number,
+        complement: address.complement,
+        neighborhood: address.neighborhood,
+        city: address.city,
+        state: address.state,
+      })
+    );
+    if (!geocoded) return address;
+    address.lat = geocoded.lat;
+    address.lng = geocoded.lng;
+    await AppDataSource.getRepository(CustomerAddress).save(address);
+    return address;
+  }
+
+  public async backfillMissingAddressCoordinates(limit = 100) {
+    const safeLimit = Number.isFinite(Number(limit))
+      ? Math.max(1, Math.min(5000, Number(limit)))
+      : 100;
+    const repo = AppDataSource.getRepository(CustomerAddress);
+    const addresses = await repo
+      .createQueryBuilder('address')
+      .where('address.lat IS NULL OR address.lng IS NULL')
+      .orderBy('address.created_at', 'ASC')
+      .limit(safeLimit)
+      .getMany();
+
+    let updated = 0;
+    let failed = 0;
+    for (const address of addresses) {
+      try {
+        const next = await this.ensureAddressCoordinates(address);
+        const lat = this.parseCoordinate(next?.lat);
+        const lng = this.parseCoordinate(next?.lng);
+        if (lat !== null && lng !== null) {
+          updated += 1;
+        } else {
+          failed += 1;
+        }
+      } catch (error) {
+        failed += 1;
+        this.log.warn('Customer address coordinate backfill failed', {
+          addressId: address.id,
+          userId: address.userId,
+          error,
+        });
+      }
+    }
+
+    return {
+      total: addresses.length,
+      updated,
+      failed,
     };
   }
 
@@ -568,6 +709,30 @@ async createAddress(userId: string, input: AddressInput) {
       throw new AppError('GEN-002', 400, { message: 'Preencha CEP, rua, cidade e estado corretamente.' });
     }
 
+    const requestedLat = this.parseCoordinate(input?.lat);
+    const requestedLng = this.parseCoordinate(input?.lng);
+    const hasExplicitCoordinates = requestedLat !== null && requestedLng !== null;
+    let resolvedLat = hasExplicitCoordinates ? Number(requestedLat) : null;
+    let resolvedLng = hasExplicitCoordinates ? Number(requestedLng) : null;
+
+    if (!hasExplicitCoordinates) {
+      const geocoded = await this.geocodeAddress(
+        this.buildGeocodeAddress({
+          cep,
+          street,
+          number: input?.number,
+          complement: input?.complement,
+          neighborhood: input?.neighborhood,
+          city,
+          state,
+        })
+      );
+      if (geocoded) {
+        resolvedLat = geocoded.lat;
+        resolvedLng = geocoded.lng;
+      }
+    }
+
     return AppDataSource.transaction(async (manager) => {
       const repo = manager.getRepository(CustomerAddress);
       const hasAny = await repo.count({ where: { userId } });
@@ -589,6 +754,8 @@ async createAddress(userId: string, input: AddressInput) {
         neighborhood: input?.neighborhood ? String(input.neighborhood).trim() : undefined,
         city,
         state,
+        lat: resolvedLat,
+        lng: resolvedLng,
         isDefault: shouldBeDefault,
       } as Partial<CustomerAddress>);
       const saved = await repo.save(entity);
@@ -606,6 +773,19 @@ async updateAddress(userId: string, addressId: string, input: Partial<AddressInp
       const repo = manager.getRepository(CustomerAddress);
       const address = await repo.findOne({ where: { id: addressId, userId } });
       if (!address) throw new AppError('GEN-001', 404, { message: 'Endereço não encontrado.' });
+
+      const addressFieldsChanged =
+        input?.cep !== undefined ||
+        input?.street !== undefined ||
+        input?.number !== undefined ||
+        input?.complement !== undefined ||
+        input?.neighborhood !== undefined ||
+        input?.city !== undefined ||
+        input?.state !== undefined;
+      const hasExplicitLat = input?.lat !== undefined;
+      const hasExplicitLng = input?.lng !== undefined;
+      const nextLat = this.parseCoordinate(input?.lat);
+      const nextLng = this.parseCoordinate(input?.lng);
 
       if (input?.label !== undefined) address.label = input.label ? String(input.label).trim() : undefined;
       if (input?.recipientName !== undefined) {
@@ -627,10 +807,37 @@ async updateAddress(userId: string, addressId: string, input: Partial<AddressInp
       }
       if (input?.city !== undefined) address.city = String(input.city || '').trim();
       if (input?.state !== undefined) address.state = String(input.state || '').trim().toUpperCase().slice(0, 2);
+      if (hasExplicitLat) {
+        address.lat = nextLat !== null ? Number(nextLat) : null;
+      }
+      if (hasExplicitLng) {
+        address.lng = nextLng !== null ? Number(nextLng) : null;
+      }
 
       if (input?.isDefault === true && !address.isDefault) {
         await repo.createQueryBuilder().update(CustomerAddress).set({ isDefault: false }).where('user_id = :userId', { userId }).execute();
         address.isDefault = true;
+      }
+
+      if (addressFieldsChanged || hasExplicitLat || hasExplicitLng) {
+        if (!hasExplicitLat) address.lat = null;
+        if (!hasExplicitLng) address.lng = null;
+
+        const geocoded = await this.geocodeAddress(
+          this.buildGeocodeAddress({
+            cep: address.cep,
+            street: address.street,
+            number: address.number,
+            complement: address.complement,
+            neighborhood: address.neighborhood,
+            city: address.city,
+            state: address.state,
+          })
+        );
+        if (geocoded) {
+          if (!hasExplicitLat) address.lat = geocoded.lat;
+          if (!hasExplicitLng) address.lng = geocoded.lng;
+        }
       }
 
       const saved = await repo.save(address);

@@ -51,6 +51,12 @@ export class CustomerAddress {
   @Column({ type: 'varchar', length: 2 })
   state!: string;
 
+  @Column('decimal', { name: 'lat', precision: 10, scale: 7, nullable: true })
+  lat?: number | null;
+
+  @Column('decimal', { name: 'lng', precision: 10, scale: 7, nullable: true })
+  lng?: number | null;
+
   @Column({ name: 'is_default', type: 'boolean', default: false })
   isDefault!: boolean;
 

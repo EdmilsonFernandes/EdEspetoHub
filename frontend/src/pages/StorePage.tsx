@@ -870,6 +870,8 @@ export function StorePage() {
         neighborhood: address.neighborhood || prev?.neighborhood || '',
         city: address.city || prev?.city || '',
         state: address.state || prev?.state || '',
+        lat: getNumeric(address?.lat),
+        lng: getNumeric(address?.lng),
       };
       const street = String(next.street || '').trim();
       const number = String(next.number || '').trim();
@@ -1541,8 +1543,11 @@ export function StorePage() {
     }
 
     const address = String(deliveryAddress || '').trim();
+    const persistedLat = getNumeric(customer?.lat);
+    const persistedLng = getNumeric(customer?.lng);
+    const hasPersistedCoords = persistedLat !== null && persistedLng !== null;
     const hasManualCoords = Boolean(manualDeliveryCoords?.lat && manualDeliveryCoords?.lng);
-    if (!address && !hasManualCoords) {
+    if (!address && !hasManualCoords && !hasPersistedCoords) {
       setDeliveryCheck({ status: 'idle', distanceKm: null, durationMin: null });
       setDeliveryCoords(null);
       validatedDeliverySignatureRef.current = '';
@@ -1551,6 +1556,8 @@ export function StorePage() {
 
     const validationSignature = hasManualCoords
       ? `gps:${Number(manualDeliveryCoords?.lat)}:${Number(manualDeliveryCoords?.lng)}`
+      : hasPersistedCoords
+        ? `saved:${Number(persistedLat)}:${Number(persistedLng)}`
       : `address:${normalizeDeliveryCacheKey(address)}`;
     const normalizedStoreCity = normalizeGeoText(storeCity || '');
     const normalizedStoreState = normalizeGeoText(storeState || '');
@@ -1564,9 +1571,13 @@ export function StorePage() {
     setDeliveryCheck({ status: 'loading', distanceKm: null, durationMin: null });
 
     try {
-      let coords = hasManualCoords ? manualDeliveryCoords : null;
+      let coords = hasManualCoords
+        ? manualDeliveryCoords
+        : hasPersistedCoords
+          ? { lat: Number(persistedLat), lng: Number(persistedLng) }
+          : null;
       let cachedRoute: { distanceKm: number; durationMin: number | null } | null = null;
-      const cacheKey = hasManualCoords ? '' : getDeliveryAddressCacheKey(address);
+      const cacheKey = hasManualCoords || hasPersistedCoords ? '' : getDeliveryAddressCacheKey(address);
 
       if (!coords && cacheKey) {
         try {
@@ -1617,7 +1628,7 @@ export function StorePage() {
       });
       validatedDeliverySignatureRef.current = validationSignature;
 
-      if (!hasManualCoords && cacheKey) {
+      if (!hasManualCoords && !hasPersistedCoords && cacheKey) {
         try {
           localStorage.setItem(cacheKey, JSON.stringify({ coords, route }));
         } catch {
@@ -1643,6 +1654,8 @@ export function StorePage() {
     customer.type,
     customer.city,
     customer.state,
+    customer.lat,
+    customer.lng,
     deliveryAddress,
     deliveryRadiusValue,
     getDeliveryAddressCacheKey,
@@ -1661,9 +1674,14 @@ export function StorePage() {
     if (manualDeliveryCoords?.lat && manualDeliveryCoords?.lng) {
       return `gps:${Number(manualDeliveryCoords.lat)}:${Number(manualDeliveryCoords.lng)}`;
     }
+    const persistedLat = getNumeric(customer?.lat);
+    const persistedLng = getNumeric(customer?.lng);
+    if (persistedLat !== null && persistedLng !== null) {
+      return `saved:${Number(persistedLat)}:${Number(persistedLng)}`;
+    }
     const normalized = normalizeDeliveryCacheKey(deliveryAddress || '');
     return normalized ? `address:${normalized}` : '';
-  }, [customer.type, deliveryAddress, deliveryRadiusValue, isPostalDelivery, manualDeliveryCoords, normalizeDeliveryCacheKey]);
+  }, [customer.type, customer.lat, customer.lng, deliveryAddress, deliveryRadiusValue, isPostalDelivery, manualDeliveryCoords, normalizeDeliveryCacheKey]);
 
   useEffect(() => {
     if (customer.type !== 'delivery') {
@@ -1915,6 +1933,14 @@ export function StorePage() {
 
     const phoneFromMatch = !nextCustomer.phone && matchedCustomer?.phone ? matchedCustomer.phone : nextCustomer.phone;
     const updatedCustomer = { ...nextCustomer, phone: phoneFromMatch || '' };
+    const addressFields = [ 'address', 'cep', 'street', 'number', 'complement', 'neighborhood', 'city', 'state' ];
+    const addressChanged = addressFields.some(
+      (field) => String(customer?.[field] || '').trim() !== String(nextCustomer?.[field] || '').trim()
+    );
+    if (addressChanged) {
+      updatedCustomer.lat = null;
+      updatedCustomer.lng = null;
+    }
     if (!user?.token && nextCustomer.type === 'table') {
       setLastPublicOrderId('');
       if (storeSlug) {

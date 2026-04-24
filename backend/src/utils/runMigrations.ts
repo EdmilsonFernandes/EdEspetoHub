@@ -1210,6 +1210,8 @@ export async function runMigrations() {
       neighborhood TEXT,
       city TEXT NOT NULL,
       state VARCHAR(2) NOT NULL,
+      lat NUMERIC(10,7),
+      lng NUMERIC(10,7),
       is_default BOOLEAN NOT NULL DEFAULT FALSE,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -1273,6 +1275,14 @@ export async function runMigrations() {
     UPDATE customer_addresses
     SET state = UPPER(LEFT(COALESCE(state, ''), 2))
     WHERE state IS NOT NULL;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS customer_addresses
+    ADD COLUMN IF NOT EXISTS lat NUMERIC(10,7);
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS customer_addresses
+    ADD COLUMN IF NOT EXISTS lng NUMERIC(10,7);
   `);
   // Rebrand migration (idempotent): update legacy brand/domain mentions in persisted text settings.
   await AppDataSource.query(`
