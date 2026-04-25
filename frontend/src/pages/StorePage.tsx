@@ -511,6 +511,7 @@ export function StorePage() {
     'admin',
     'operator',
     'lojista',
+    'store_owner',
     'super_admin',
     'motoboy',
     'entregador',

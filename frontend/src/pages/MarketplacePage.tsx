@@ -3415,9 +3415,9 @@ export function MarketplacePage() {
                                 Fora da área
                               </span>
                             )}
-                            {!isCondominiumScope && !store.supportsDelivery && (store.acceptsPickup || store.supportsTable) && (
-                              <span className="inline-flex items-center gap-1 rounded-full border border-slate-100 bg-slate-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-slate-600 shadow-[0_6px_16px_-12px_rgba(15,23,42,0.18)]">
-                                <House size={9} weight="fill" />
+                            {!isCondominiumScope && (store.acceptsPickup || store.supportsTable) && (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-slate-800/80 bg-[linear-gradient(135deg,#0f172a_0%,#1f2937_100%)] px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-white shadow-[0_10px_22px_-14px_rgba(15,23,42,0.72)] ring-1 ring-white/10">
+                                <House size={9} weight="fill" className="text-amber-300" />
                                 Retirada disponível
                               </span>
                             )}
