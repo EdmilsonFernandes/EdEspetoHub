@@ -1937,9 +1937,9 @@ export function MarketplacePage() {
 
   const formatDistance = (km: number | null | undefined) => {
     const normalizedKm = typeof km === 'number' && Number.isFinite(km) ? km : null;
-    if (normalizedKm === null || normalizedKm <= 0) return 'Região';
-    if (normalizedKm < 1) return `${Math.max(100, Math.round(normalizedKm * 1000 / 100) * 100)} m`;
-    return `${normalizedKm.toFixed(1)} km`;
+    if (normalizedKm === null) return '-- km';
+    if (normalizedKm <= 0.05) return '< 0,1 km';
+    return `${normalizedKm.toFixed(1).replace('.', ',')} km`;
   };
 
   const displayedFeaturedProducts = useMemo(() => {
