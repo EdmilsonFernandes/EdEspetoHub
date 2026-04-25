@@ -108,6 +108,10 @@ type PreferredDiscoveryAddress = {
 };
 
 const CUSTOMER_ADDRESS_UPDATED_EVENT = 'jnc:customer-addresses-updated';
+const HUB_DEBUG_QUERY_PARAM = 'hubDebug';
+const HUB_DEBUG_STORAGE_KEY = 'jnc:hub-debug-enabled';
+const HUB_DEBUG_TRACE_KEY = 'jnc:hub-debug-trace';
+const HUB_DEBUG_TRACE_LIMIT = 80;
 
 const HUB_DISTANCE_CACHE_TTL_MS = 12 * 60 * 60 * 1000;
 
@@ -171,6 +175,21 @@ const writeHubCache = (key: string, data: unknown) => {
     localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
   } catch {
     // ignore
+  }
+};
+
+const appendHubDebugTrace = (entry: Record<string, any>) => {
+  if (typeof window === 'undefined') return;
+  try {
+    const raw = sessionStorage.getItem(HUB_DEBUG_TRACE_KEY);
+    const current = raw ? JSON.parse(raw) : [];
+    const next = Array.isArray(current) ? current.slice(-(HUB_DEBUG_TRACE_LIMIT - 1)) : [];
+    next.push(entry);
+    sessionStorage.setItem(HUB_DEBUG_TRACE_KEY, JSON.stringify(next));
+    (window as any).__jncHubDebugTrace = next;
+    (window as any).__jncHubDebugLast = entry;
+  } catch {
+    // ignore debug persistence failure
   }
 };
 
@@ -669,6 +688,35 @@ export function MarketplacePage() {
   const pullDistanceRef = useRef(0);
   const pendingPortfolioReloadRef = useRef(false);
   const distanceCacheKeyRef = useRef<string>('');
+  const hubDebugEnabled = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      const params = new URLSearchParams(location.search || '');
+      const queryFlag = params.get(HUB_DEBUG_QUERY_PARAM);
+      if (queryFlag === '1') {
+        localStorage.setItem(HUB_DEBUG_STORAGE_KEY, '1');
+        return true;
+      }
+      if (queryFlag === '0') {
+        localStorage.removeItem(HUB_DEBUG_STORAGE_KEY);
+        sessionStorage.removeItem(HUB_DEBUG_TRACE_KEY);
+        return false;
+      }
+      return localStorage.getItem(HUB_DEBUG_STORAGE_KEY) === '1';
+    } catch {
+      return false;
+    }
+  }, [location.search]);
+  const hubDebug = useCallback((event: string, payload?: Record<string, any>) => {
+    if (!hubDebugEnabled || typeof window === 'undefined') return;
+    const entry = {
+      ts: new Date().toISOString(),
+      event,
+      payload: payload || {},
+    };
+    appendHubDebugTrace(entry);
+    console.info('[HubDebug]', entry);
+  }, [hubDebugEnabled]);
 
   useEffect(() => {
     document.title = 'Hub Já no Caminho';
@@ -701,6 +749,7 @@ export function MarketplacePage() {
       if (!customerSession?.token) {
         setPreferredDiscoveryAddress(null);
         setPreferredAddressLoading(false);
+        hubDebug('preferred-address-cleared', { reason: 'no-customer-session' });
         return;
       }
 
@@ -711,12 +760,17 @@ export function MarketplacePage() {
         const preferred = (Array.isArray(rows) ? rows : []).find((item: any) => item?.isDefault) || rows?.[0];
         if (!preferred) {
           setPreferredDiscoveryAddress(null);
+          hubDebug('preferred-address-missing', { totalAddresses: Array.isArray(rows) ? rows.length : 0 });
           return;
         }
 
         const normalized = buildCustomerAddressLookup(preferred);
         if (!normalized.city && !normalized.state) {
           setPreferredDiscoveryAddress(null);
+          hubDebug('preferred-address-invalid', {
+            addressId: preferred?.id || null,
+            hasLatLng: normalized.lat != null && normalized.lng != null,
+          });
           return;
         }
 
@@ -730,9 +784,17 @@ export function MarketplacePage() {
         };
 
         setPreferredDiscoveryAddress(nextAddress);
+        hubDebug('preferred-address-loaded', {
+          addressId: preferred?.id || null,
+          label: nextAddress.label,
+          city: nextAddress.city,
+          state: nextAddress.state,
+          hasLatLng: nextAddress.lat != null && nextAddress.lng != null,
+        });
       } catch {
         if (!cancelled) {
           setPreferredDiscoveryAddress(null);
+          hubDebug('preferred-address-error');
         }
       } finally {
         if (!cancelled) {
@@ -752,7 +814,7 @@ export function MarketplacePage() {
       window.removeEventListener('focus', refreshAddressContext);
       window.removeEventListener(CUSTOMER_ADDRESS_UPDATED_EVENT, refreshAddressContext as EventListener);
     };
-  }, [customerSession?.token, customerSession?.user?.email]);
+  }, [customerSession?.token, customerSession?.user?.email, hubDebug]);
 
   useEffect(() => {
     const handleOpenProfileDrawer = () => setProfileDrawerOpen(true);
@@ -906,11 +968,22 @@ export function MarketplacePage() {
         if (!cancelled) {
           setUserRegion((city || locality) ? { city: String(city || locality), state } : null);
           if (nextLabel) setLocationLabel(nextLabel);
+          hubDebug('gps-region-resolved', {
+            lat: Number(userLocation.lat).toFixed(5),
+            lng: Number(userLocation.lng).toFixed(5),
+            city: String(city || locality || ''),
+            state,
+            label: nextLabel || 'Sua região',
+          });
         }
       } catch (_error) {
         if (!cancelled) {
           setLocationLabel('Sua região');
           setUserRegion(null);
+          hubDebug('gps-region-error', {
+            lat: Number(userLocation.lat).toFixed(5),
+            lng: Number(userLocation.lng).toFixed(5),
+          });
         }
       }
     };
@@ -918,35 +991,50 @@ export function MarketplacePage() {
     return () => {
       cancelled = true;
     };
-  }, [userLocation]);
+  }, [hubDebug, userLocation]);
 
   useEffect(() => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) return;
     if (customerSession?.token && preferredAddressLoading) return;
     if (savedAddressLocation) {
       setUserLocation(null);
+      hubDebug('gps-skip-saved-address', {
+        lat: Number(savedAddressLocation.lat).toFixed(5),
+        lng: Number(savedAddressLocation.lng).toFixed(5),
+      });
       return;
     }
     const timer = window.setTimeout(() => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation({
+          const nextLocation = {
             lat: Number(position.coords.latitude),
             lng: Number(position.coords.longitude),
+          };
+          setUserLocation({
+            lat: nextLocation.lat,
+            lng: nextLocation.lng,
+          });
+          hubDebug('gps-position-loaded', {
+            lat: nextLocation.lat.toFixed(5),
+            lng: nextLocation.lng.toFixed(5),
+            accuracyM: Number(position.coords.accuracy || 0).toFixed(0),
           });
         },
         () => {
           setUserLocation(null);
+          hubDebug('gps-position-error');
         },
         { enableHighAccuracy: false, timeout: 4500, maximumAge: 10 * 60 * 1000 }
       );
     }, 1400);
     return () => window.clearTimeout(timer);
-  }, [customerSession?.token, preferredAddressLoading, savedAddressLocation]);
+  }, [customerSession?.token, hubDebug, preferredAddressLoading, savedAddressLocation]);
 
   const loadPortfolio = useCallback(async () => {
     if (portfolioLoadInFlightRef.current) {
       pendingPortfolioReloadRef.current = true;
+      hubDebug('portfolio-load-skipped', { reason: 'in-flight' });
       return;
     }
     portfolioLoadInFlightRef.current = true;
@@ -956,6 +1044,15 @@ export function MarketplacePage() {
       setGeoDiscovery(null);
       setStores(baseStores);
       setError('');
+      hubDebug('portfolio-loaded', {
+        count: baseStores.length,
+        sample: baseStores.slice(0, 5).map((store: any) => ({
+          slug: String(store?.slug || ''),
+          hasStoreLatLng: Number.isFinite(Number(store?.settings?.lat)) && Number.isFinite(Number(store?.settings?.lng)),
+          city: String(store?.settings?.city || ''),
+          state: String(store?.settings?.state || ''),
+        })),
+      });
     } finally {
       portfolioLoadInFlightRef.current = false;
       if (pendingPortfolioReloadRef.current) {
@@ -965,7 +1062,7 @@ export function MarketplacePage() {
         }, 0);
       }
     }
-  }, []);
+  }, [hubDebug]);
 
   const refreshHub = useCallback(async () => {
     if (portfolioLoadInFlightRef.current) return;
@@ -1634,6 +1731,10 @@ export function MarketplacePage() {
           setDistanceByStore(cachedDistances);
         }
         if (missingTargets.length === 0) {
+          hubDebug('distance-cache-hit', {
+            contextKey,
+            cachedCount: Object.keys(cachedDistances).length,
+          });
           setDistanceLoading(false);
           return;
         }
@@ -1654,6 +1755,17 @@ export function MarketplacePage() {
         });
         setDistanceByStore(next);
         writeHubCache(`hub:store-distance:${contextKey}`, next);
+        hubDebug('distance-calculated', {
+          contextKey,
+          activeSource: savedAddressLocation ? 'saved_address' : activeLocation ? 'gps' : 'none',
+          targetCount: missingTargets.length,
+          sample: missingTargets.slice(0, 5).map((store) => ({
+            slug: store.slug,
+            km: next[store.id] ?? null,
+            storeLat: store.storeLat,
+            storeLng: store.storeLng,
+          })),
+        });
       } catch (_err) {
         // preserve the last valid cache instead of clearing the distance badge
       } finally {
@@ -1665,7 +1777,42 @@ export function MarketplacePage() {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [activeLocation, activeRegion?.city, activeRegion?.state, preferredDiscoveryAddress?.addressLine, scopedEnrichedStores]);
+  }, [activeLocation, activeRegion?.city, activeRegion?.state, hubDebug, preferredDiscoveryAddress?.addressLine, savedAddressLocation, scopedEnrichedStores]);
+
+  useEffect(() => {
+    hubDebug('location-source', {
+      source: savedAddressLocation ? 'saved_address' : activeLocation ? 'gps' : 'none',
+      isLoggedIn: Boolean(customerSession?.token),
+      label: activeLocationLabel,
+      lat: activeLocation ? Number(activeLocation.lat).toFixed(5) : null,
+      lng: activeLocation ? Number(activeLocation.lng).toFixed(5) : null,
+      regionCity: activeRegion?.city || null,
+      regionState: activeRegion?.state || null,
+    });
+  }, [
+    activeLocation,
+    activeLocationLabel,
+    activeRegion?.city,
+    activeRegion?.state,
+    customerSession?.token,
+    hubDebug,
+    savedAddressLocation,
+  ]);
+
+  useEffect(() => {
+    if (!hubDebugEnabled) return;
+    hubDebug('distance-snapshot', {
+      totalStores: scopedEnrichedStores.length,
+      computedLocalDistances: Object.keys(distanceByStore).length,
+      distanceLoading,
+      sample: scopedEnrichedStores.slice(0, 5).map((store) => ({
+        slug: store.slug,
+        source: distanceByStore[store.id] != null ? 'local_haversine' : store.distanceKm != null ? 'server' : 'none',
+        km: distanceByStore[store.id] ?? store.distanceKm ?? null,
+        hasStoreLatLng: store.storeLat != null && store.storeLng != null,
+      })),
+    });
+  }, [distanceByStore, distanceLoading, hubDebug, hubDebugEnabled, scopedEnrichedStores]);
 
   useEffect(() => {
     let cancelled = false;
