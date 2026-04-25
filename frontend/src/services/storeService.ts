@@ -113,11 +113,17 @@ export const storeService = {
     return writePublicStoreCache(slug, data);
   },
 
-  async listPortfolio() {
-    const cacheKey = 'public:portfolio:list';
+  async listPortfolio(params?: { lat?: number | null; lng?: number | null; city?: string | null; state?: string | null }) {
+    const search = new URLSearchParams();
+    if (params && Number.isFinite(Number(params.lat))) search.set('lat', String(params.lat));
+    if (params && Number.isFinite(Number(params.lng))) search.set('lng', String(params.lng));
+    if (params?.city) search.set('city', String(params.city).trim());
+    if (params?.state) search.set('state', String(params.state).trim());
+    const suffix = search.toString() ? `?${search.toString()}` : '';
+    const cacheKey = `public:portfolio:list:${suffix || 'default'}`;
     const cached = readCollectionCache(cacheKey, 45 * 1000);
     if (cached) return cached;
-    const response = await apiClient.rawGet('/public/stores');
+    const response = await apiClient.rawGet(`/public/stores${suffix}`);
     const data = await toJson(response);
     return writeCollectionCache(cacheKey, data);
   },

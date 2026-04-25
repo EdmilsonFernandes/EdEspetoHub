@@ -1730,4 +1730,30 @@ export async function runMigrations() {
     CREATE INDEX IF NOT EXISTS idx_guest_order_attempts_ip
     ON guest_order_attempts(ip_address);
   `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS zip_code_cache (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      zip_code VARCHAR(8) NOT NULL UNIQUE,
+      street TEXT,
+      district TEXT,
+      city TEXT,
+      state VARCHAR(2),
+      ibge_code TEXT,
+      latitude NUMERIC(10,7),
+      longitude NUMERIC(10,7),
+      provider VARCHAR(40),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_zip_code_cache_zip_code
+    ON zip_code_cache(zip_code);
+  `);
+  await AppDataSource.query(`
+    UPDATE store_settings
+    SET delivery_radius_km = 5
+    WHERE delivery_radius_km IS NULL
+      AND COALESCE(order_types, '[]'::jsonb) @> '["delivery"]'::jsonb;
+  `);
 }

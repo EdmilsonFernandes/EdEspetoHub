@@ -148,6 +148,14 @@ export const env = {
       ? Number(process.env.DEFAULT_ETA_BUFFER_MINUTES)
       : 3,
   },
+  delivery: {
+    defaultRadiusKm: numberEnv('DEFAULT_DELIVERY_RADIUS_KM', 5, 1),
+    minRadiusKm: numberEnv('MIN_DELIVERY_RADIUS_KM', 1, 1),
+    maxRadiusKm: numberEnv('MAX_DELIVERY_RADIUS_KM', 30, 1),
+  },
+  addressLookup: {
+    enableGoogleGeocodingFallback: process.env.ENABLE_GOOGLE_GEOCODING_FALLBACK === 'true',
+  },
   whatsapp: {
     notifyUrl: process.env.WHATSAPP_NOTIFY_URL || '',
   },

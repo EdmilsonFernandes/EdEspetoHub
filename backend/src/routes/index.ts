@@ -59,6 +59,8 @@ routes.post('/customer/auth/register', CustomerAccountController.register);
 routes.post('/customer/auth/login', authLoginRateLimit, CustomerAccountController.login);
 routes.post('/customer/auth/verify-email-code', authRecoveryRateLimit, CustomerAccountController.verifyEmailCode);
 routes.post('/customer/auth/resend-email-code', authRecoveryRateLimit, CustomerAccountController.resendEmailCode);
+routes.get('/addresses/lookup-zip-code/:cep', CustomerAccountController.lookupZipCode);
+routes.get('/public/addresses/lookup-zip-code/:cep', CustomerAccountController.lookupZipCode);
 routes.get('/customer/me', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.me);
 routes.patch('/customer/me', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.updateMe);
 routes.patch('/customer/me/deactivate', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.deactivate);

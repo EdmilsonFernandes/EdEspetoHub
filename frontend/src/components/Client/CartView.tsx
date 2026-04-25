@@ -27,6 +27,7 @@ import { getStoreAvatarUrl } from "../../utils/storeAvatar";
 import { formatSelectedModifiers, getModifiersTotal } from "../../utils/productModifiers";
 import { getBundleDiscountForCartItem, getCartPricing } from "../../utils/orderPricing";
 import { DddSelect } from "../common/DddSelect";
+import { addressLookupService } from "../../services/addressLookupService";
 
 const BRAZIL_DDDS = [
   "11", "12", "13", "14", "15", "16", "17", "18", "19",
@@ -514,24 +515,20 @@ export const CartView = ({
     setCepLoading(true);
     setCepError("");
     try {
-      const response = await fetch(`https://viacep.com.br/ws/${rawCep}/json/`);
-      const data = await response.json();
-      if (data?.erro) {
-        setCepError("CEP não encontrado.");
-        return;
-      }
+      const data = await addressLookupService.lookupZipCode(rawCep);
       const next = {
         ...customer,
-        street: data.logradouro || "",
-        neighborhood: data.bairro || "",
-        city: data.localidade || "",
-        state: data.uf || "",
-        complement: data.complemento || "",
+        street: data.street || "",
+        neighborhood: data.district || "",
+        city: data.city || "",
+        state: data.state || "",
+        lat: data.latitude ?? customer.lat ?? null,
+        lng: data.longitude ?? customer.lng ?? null,
       };
       next.address = buildDeliveryAddress(next);
       onChangeCustomer(next);
-    } catch (error) {
-      setCepError("Não foi possível consultar o CEP agora.");
+    } catch (error: any) {
+      setCepError(error?.message || "Não foi possível consultar o CEP agora.");
     } finally {
       cepLookupLockRef.current = false;
       setCepLoading(false);

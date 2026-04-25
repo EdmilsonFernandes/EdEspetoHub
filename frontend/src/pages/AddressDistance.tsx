@@ -17,6 +17,7 @@ import {
   Star,
 } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
+import { addressLookupService } from '../services/addressLookupService';
 import { useToast } from '../contexts/ToastContext';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 
@@ -33,6 +34,8 @@ const createEmptyForm = () => ({
   cep: '',
   recipientName: '',
   phone: '',
+  lat: null,
+  lng: null,
 });
 
 const formatCepBr = (value: string) => {
@@ -60,6 +63,8 @@ const normalizeAddressToForm = (address: any) => ({
   cep: formatCepBr(address?.cep || ''),
   recipientName: String(address?.recipientName || ''),
   phone: formatPhoneBr(address?.phone || ''),
+  lat: address?.lat ?? null,
+  lng: address?.lng ?? null,
 });
 
 const getAddressTone = (label: string, isDefault: boolean) => {
@@ -169,17 +174,17 @@ export function AddressDistance() {
 
       setIsGeocoding(true);
       try {
-        const response = await fetch(`https://viacep.com.br/ws/${cleanedCep}/json/`);
-        const addressData = await response.json();
-        if (!addressData?.erro) {
+        const addressData = await addressLookupService.lookupZipCode(cleanedCep);
+        if (addressData) {
           setForm(prev => ({
             ...prev,
             cep: formatCepBr(cleanedCep),
-            street: String(addressData?.logradouro || prev.street || ''),
-            neighborhood: String(addressData?.bairro || prev.neighborhood || ''),
-            city: String(addressData?.localidade || prev.city || ''),
-            state: String(addressData?.uf || prev.state || '').toUpperCase().slice(0, 2),
-            complement: prev.complement || String(addressData?.complemento || ''),
+            street: String(addressData?.street || prev.street || ''),
+            neighborhood: String(addressData?.district || prev.neighborhood || ''),
+            city: String(addressData?.city || prev.city || ''),
+            state: String(addressData?.state || prev.state || '').toUpperCase().slice(0, 2),
+            lat: addressData?.latitude ?? prev.lat ?? null,
+            lng: addressData?.longitude ?? prev.lng ?? null,
           }));
         }
       } catch {

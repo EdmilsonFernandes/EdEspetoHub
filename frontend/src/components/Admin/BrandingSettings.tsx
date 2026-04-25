@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { formatPhoneInput } from "../../utils/format";
+import { addressLookupService } from "../../services/addressLookupService";
 
 const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
 const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e', '#065f46', '#4b5563' ];
@@ -130,6 +131,8 @@ export const BrandingSettings = ({
       handleChange("address", parts.join(" | "));
       handleChange("city", next.city);
       handleChange("state", next.state);
+      handleChange("lat", null);
+      handleChange("lng", null);
       return next;
     });
   };
@@ -140,21 +143,16 @@ export const BrandingSettings = ({
     setStoreCepLoading(true);
     setStoreCepError("");
     try {
-      const response = await fetch(`https://viacep.com.br/ws/${rawCep}/json/`);
-      const data = await response.json();
-      if (data?.erro) {
-        setStoreCepError("CEP não encontrado.");
-        return;
-      }
+      const data = await addressLookupService.lookupZipCode(rawCep);
       setAddressForm((prev) => {
         const next = {
           ...prev,
           cep: normalizeCep(rawCep),
-          street: forceOverwrite ? (data.logradouro || "") : (prev.street || data.logradouro || ""),
-          neighborhood: forceOverwrite ? (data.bairro || "") : (prev.neighborhood || data.bairro || ""),
-          city: forceOverwrite ? (data.localidade || "") : (prev.city || data.localidade || ""),
-          state: forceOverwrite ? (data.uf || "") : (prev.state || data.uf || ""),
-          complement: forceOverwrite ? (data.complemento || "") : (prev.complement || data.complemento || ""),
+          street: forceOverwrite ? (data.street || "") : (prev.street || data.street || ""),
+          neighborhood: forceOverwrite ? (data.district || "") : (prev.neighborhood || data.district || ""),
+          city: forceOverwrite ? (data.city || "") : (prev.city || data.city || ""),
+          state: forceOverwrite ? (data.state || "") : (prev.state || data.state || ""),
+          complement: prev.complement || "",
         };
         const parts = [
           next.street && `${next.street}${next.number ? `, ${next.number}` : ""}`,
@@ -166,10 +164,12 @@ export const BrandingSettings = ({
         handleChange("address", parts.join(" | "));
         handleChange("city", next.city);
         handleChange("state", String(next.state || "").toUpperCase().slice(0, 2));
+        handleChange("lat", data?.latitude ?? null);
+        handleChange("lng", data?.longitude ?? null);
         return next;
       });
-    } catch (error) {
-      setStoreCepError("Não foi possível consultar o CEP agora.");
+    } catch (error: any) {
+      setStoreCepError(error?.message || "Não foi possível consultar o CEP agora.");
     } finally {
       setStoreCepLoading(false);
     }
@@ -648,13 +648,14 @@ export const BrandingSettings = ({
                 <input
                   type="number"
                   step="0.1"
-                  min="0"
+                  min="1"
+                  max="30"
                   value={branding.deliveryRadiusKm ?? ''}
                   onChange={(e) => handleChange("deliveryRadiusKm", e.target.value)}
                   className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-                  placeholder="20"
+                  placeholder="Ex: 5"
                 />
-                <p className="text-xs text-gray-500">Deixe vazio para aceitar entregas sem limite.</p>
+                <p className="text-xs text-gray-500">Usaremos essa distância para mostrar sua loja para clientes próximos.</p>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700">Frete fixo (R$)</label>

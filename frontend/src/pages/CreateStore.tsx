@@ -4,6 +4,7 @@ import { Capacitor } from '@capacitor/core';
 import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { storeService } from '../services/storeService';
+import { addressLookupService } from '../services/addressLookupService';
 import { authService } from '../services/authService';
 import { planService } from '../services/planService';
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, resolveMonthlyEquivalent } from '../constants/planCatalog';
@@ -244,9 +245,12 @@ export function CreateStore() {
     neighborhood: '',
     city: '',
     state: '',
+    lat: null,
+    lng: null,
     storeName: '',
     segment: 'outros',
     storeDescription: '',
+    deliveryRadiusKm: '',
     pixKey: '',
     logoFile: '',
     bannerFile: '',
@@ -506,24 +510,20 @@ export function CreateStore() {
     setIsCepLoading(true);
     setCepError('');
     try {
-      const response = await fetch(`https://viacep.com.br/ws/${rawCep}/json/`);
-      const data = await response.json();
-      if (data?.erro) {
-        setCepError('CEP não encontrado.');
-        return;
-      }
+      const data = await addressLookupService.lookupZipCode(rawCep);
       setRegisterForm((prev) => ({
         ...prev,
         cep: normalizeCep(rawCep),
-        street: data.logradouro || '',
-        neighborhood: data.bairro || '',
-        city: data.localidade || '',
-        state: String(data.uf || '').toUpperCase(),
-        complement: data.complemento || '',
+        street: data.street || '',
+        neighborhood: data.district || '',
+        city: data.city || '',
+        state: String(data.state || '').toUpperCase(),
+        lat: data.latitude ?? prev.lat ?? null,
+        lng: data.longitude ?? prev.lng ?? null,
       }));
       setCepAutofilled(true);
-    } catch (error) {
-      setCepError('Não foi possível consultar o CEP agora.');
+    } catch (error: any) {
+      setCepError(error?.message || 'Não foi possível consultar o CEP agora.');
     } finally {
       setIsCepLoading(false);
     }
@@ -720,6 +720,9 @@ export function CreateStore() {
           address: formatAddress(),
           city: registerForm.city,
           state: registerForm.state,
+          lat: registerForm.lat,
+          lng: registerForm.lng,
+          deliveryRadiusKm: registerForm.deliveryRadiusKm,
           pixKey: registerForm.pixKey,
           logoFile: registerForm.logoFile,
           bannerFile: registerForm.bannerFile,
@@ -1898,6 +1901,23 @@ export function CreateStore() {
               />
               <p className="text-xs text-gray-500">Telefone com DDD pode começar com 0 que ajustamos para +55.</p>
             </div>
+
+            {selectedSegmentPreset.orderTypes.includes('delivery') && (
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">Até quantos km você entrega?</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="30"
+                  step="0.1"
+                  value={registerForm.deliveryRadiusKm}
+                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, deliveryRadiusKm: e.target.value }))}
+                  className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all"
+                  placeholder="Ex: 5"
+                />
+                <p className="text-xs text-gray-500">Usaremos essa distância para mostrar sua loja para clientes próximos.</p>
+              </div>
+            )}
 
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700 block">Logo da loja (opcional)</label>

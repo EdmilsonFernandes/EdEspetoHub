@@ -14,6 +14,7 @@ import { saveBase64Image } from '../utils/imageStorage';
 import { OrderService } from './OrderService';
 import { OrderEtaServiceV2 } from './OrderEtaServiceV2';
 import { logger } from '../utils/logger';
+import { ZipCodeLookupService } from './ZipCodeLookupService';
 
 type AddressInput = {
   label?: string;
@@ -36,6 +37,7 @@ export class CustomerAccountService {
   private pushService = new PushNotificationService();
   private orderService = new OrderService();
   private orderEtaService = new OrderEtaServiceV2();
+  private zipCodeLookupService = new ZipCodeLookupService();
   private log = logger.child({ scope: 'CustomerAccountService' });
     /**
    * Executes normalize email business logic.
@@ -736,26 +738,17 @@ async createAddress(userId: string, input: AddressInput) {
     const hasExplicitCoordinates = requestedLat !== null && requestedLng !== null;
     let resolvedLat = hasExplicitCoordinates ? Number(requestedLat) : null;
     let resolvedLng = hasExplicitCoordinates ? Number(requestedLng) : null;
-
     if (!hasExplicitCoordinates) {
-      const geocoded = await this.geocodeAddress(
-        this.buildGeocodeAddress({
-          cep,
-          street,
-          number,
-          complement: input?.complement,
-          neighborhood: input?.neighborhood,
-          city,
-          state,
-        })
-      );
-      if (geocoded) {
-        resolvedLat = geocoded.lat;
-        resolvedLng = geocoded.lng;
+      try {
+        const lookedUp = await this.zipCodeLookupService.lookup(cep);
+        if (lookedUp.latitude !== null && lookedUp.longitude !== null) {
+          resolvedLat = Number(lookedUp.latitude);
+          resolvedLng = Number(lookedUp.longitude);
+        }
+      } catch {
+        // keep address save resilient even when zip providers are unavailable
       }
     }
-
-    this.assertResolvedAddressCoordinates(resolvedLat, resolvedLng);
 
     return AppDataSource.transaction(async (manager) => {
       const repo = manager.getRepository(CustomerAddress);
@@ -853,23 +846,19 @@ async updateAddress(userId: string, addressId: string, input: Partial<AddressInp
         });
         if (!hasExplicitLat) address.lat = null;
         if (!hasExplicitLng) address.lng = null;
-
-        const geocoded = await this.geocodeAddress(
-          this.buildGeocodeAddress({
-            cep: address.cep,
-            street: address.street,
-            number: address.number,
-            complement: address.complement,
-            neighborhood: address.neighborhood,
-            city: address.city,
-            state: address.state,
-          })
-        );
-        if (geocoded) {
-          if (!hasExplicitLat) address.lat = geocoded.lat;
-          if (!hasExplicitLng) address.lng = geocoded.lng;
+        if (!hasExplicitLat || !hasExplicitLng) {
+          try {
+            const lookedUp = await this.zipCodeLookupService.lookup(address.cep);
+            if (!hasExplicitLat && lookedUp.latitude !== null) {
+              address.lat = Number(lookedUp.latitude);
+            }
+            if (!hasExplicitLng && lookedUp.longitude !== null) {
+              address.lng = Number(lookedUp.longitude);
+            }
+          } catch {
+            // ignore lookup failures here; manual address entry must continue working
+          }
         }
-        this.assertResolvedAddressCoordinates(address.lat as number | null, address.lng as number | null);
       }
 
       const saved = await repo.save(address);

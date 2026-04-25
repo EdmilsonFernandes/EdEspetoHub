@@ -25,6 +25,8 @@ import { resolvePlanFeatures } from '../config/planFeatures';
 import { publicStoreCache } from '../utils/publicStoreCache';
 import { In } from 'typeorm';
 import { StorePaymentAccountService } from '../services/StorePaymentAccountService';
+import { env } from '../config/env';
+import { calculateDistanceKm, roundDistanceKm } from '../utils/geo';
 
 const storeService = new StoreService();
 const subscriptionService = new SubscriptionService();
@@ -292,19 +294,100 @@ export class StoreController {
     return Number.isFinite(parsed) ? parsed : null;
   }
 
-  private static haversineKm(
-    origin: { lat: number; lng: number },
-    destination: { lat: number; lng: number }
+  private static haversineKm(origin: { lat: number; lng: number }, destination: { lat: number; lng: number }) {
+    return calculateDistanceKm(origin, destination);
+  }
+
+  private static enrichStoreGeoPayload(
+    entry: any,
+    location: { lat: number | null; lng: number | null; city?: string | null; state?: string | null }
   ) {
-    const toRad = (deg: number) => (deg * Math.PI) / 180;
-    const dLat = toRad(destination.lat - origin.lat);
-    const dLng = toRad(destination.lng - origin.lng);
-    const lat1 = toRad(origin.lat);
-    const lat2 = toRad(destination.lat);
-    const x =
-      Math.sin(dLat / 2) ** 2 +
-      Math.sin(dLng / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
-    return 6371 * (2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x)));
+    const orderTypes = Array.isArray(entry?.settings?.orderTypes) ? entry.settings.orderTypes : [];
+    const acceptsDelivery = orderTypes.some((type: string) => String(type || '').toLowerCase() === 'delivery');
+    const acceptsPickup = orderTypes.some((type: string) => String(type || '').toLowerCase() === 'pickup');
+    const acceptsTable = orderTypes.some((type: string) => String(type || '').toLowerCase() === 'table');
+    const supportsPostal = Boolean(entry?.settings?.postalEnabled) && acceptsDelivery;
+    const latitude = StoreController.toQueryNumber(entry?.settings?.lat);
+    const longitude = StoreController.toQueryNumber(entry?.settings?.lng);
+    const hasUserCoords = location.lat !== null && location.lng !== null;
+    const hasStoreCoords = latitude !== null && longitude !== null;
+    const rawDistanceKm =
+      hasUserCoords && hasStoreCoords
+        ? StoreController.haversineKm(
+            { lat: Number(location.lat), lng: Number(location.lng) },
+            { lat: Number(latitude), lng: Number(longitude) }
+          )
+        : null;
+    const distanceKm = roundDistanceKm(rawDistanceKm, 1);
+    const configuredRadiusKm = StoreController.toQueryNumber(entry?.settings?.deliveryRadiusKm);
+    const effectiveDeliveryRadiusKm = acceptsDelivery
+      ? (configuredRadiusKm !== null && configuredRadiusKm > 0 ? configuredRadiusKm : Number(env.delivery.defaultRadiusKm || 5))
+      : null;
+    const normalizedCity = StoreController.normalizeGeoText(location.city);
+    const normalizedState = StoreController.normalizeGeoText(location.state);
+    const sameCity =
+      Boolean(normalizedCity) &&
+      StoreController.normalizeGeoText(entry?.settings?.city) === normalizedCity &&
+      (!normalizedState || StoreController.normalizeGeoText(entry?.settings?.state) === normalizedState);
+    const deliversToUserLocation = Boolean(
+      acceptsDelivery &&
+        hasUserCoords &&
+        hasStoreCoords &&
+        rawDistanceKm !== null &&
+        effectiveDeliveryRadiusKm !== null &&
+        rawDistanceKm <= effectiveDeliveryRadiusKm
+    );
+    const deliveryStatusLabel = !hasUserCoords
+      ? 'Distância indisponível'
+      : deliversToUserLocation
+        ? 'Entrega disponível'
+        : acceptsDelivery
+          ? 'Fora da área de entrega'
+          : (acceptsPickup || acceptsTable)
+            ? 'Retirada disponível'
+            : 'Distância indisponível';
+    const geoAvailability = supportsPostal
+      ? 'postal_everywhere'
+      : deliversToUserLocation
+        ? 'deliver_now'
+        : (acceptsPickup || acceptsTable)
+          ? (sameCity ? 'same_city_pickup' : 'pickup_available')
+          : acceptsDelivery
+            ? (distanceKm !== null ? 'outside_radius' : 'unknown')
+            : 'unknown';
+
+    return {
+      ...entry,
+      latitude,
+      longitude,
+      acceptsDelivery,
+      acceptsPickup,
+      acceptsTable,
+      supportsPostal,
+      sameCity,
+      geoAvailability,
+      deliveryRadiusKm: effectiveDeliveryRadiusKm,
+      distanceKm,
+      deliversToUserLocation,
+      deliveryStatusLabel,
+    };
+  }
+
+  private static sortStoresForLocation(entries: any[]) {
+    return entries.sort((a, b) => {
+      const rank = (entry: any) => {
+        if (entry?.openNow && entry?.deliversToUserLocation) return 0;
+        if (entry?.openNow && (entry?.acceptsPickup || entry?.acceptsTable)) return 1;
+        if (entry?.openNow) return 2;
+        return 3;
+      };
+      const rankDelta = rank(a) - rank(b);
+      if (rankDelta !== 0) return rankDelta;
+      const distanceA = StoreController.toQueryNumber(a?.distanceKm) ?? Number.MAX_SAFE_INTEGER;
+      const distanceB = StoreController.toQueryNumber(b?.distanceKm) ?? Number.MAX_SAFE_INTEGER;
+      if (distanceA !== distanceB) return distanceA - distanceB;
+      return Number(b?.reviewSummary?.avgStoreRating || 0) - Number(a?.reviewSummary?.avgStoreRating || 0);
+    });
   }
 
   private static async buildPublicStorePayload(
@@ -336,6 +419,8 @@ export class StoreController {
       nextOpeningLabel,
       productCount: publicProductCount,
       reviewSummary,
+      latitude: store.settings?.lat ?? null,
+      longitude: store.settings?.lng ?? null,
       settings: store.settings
         ? {
             logoUrl: store.settings.logoUrl || null,
@@ -509,7 +594,13 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
     try {
       log.debug('Store portfolio list request');
       StoreController.triggerStoreCoordinateBackfill();
-      const cached = publicStoreCache.getPortfolio();
+      const userLat = StoreController.toQueryNumber(_req.query?.lat);
+      const userLng = StoreController.toQueryNumber(_req.query?.lng);
+      const userCity = String(_req.query?.city || '').trim();
+      const userState = String(_req.query?.state || '').trim().toUpperCase();
+      const hasLocationContext = (userLat !== null && userLng !== null) || Boolean(userCity || userState);
+
+      const cached = !hasLocationContext ? publicStoreCache.getPortfolio() : null;
       if (cached) {
         return res.json(cached);
       }
@@ -523,8 +614,19 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
         })
       );
       const payload = entries.filter(Boolean);
-      publicStoreCache.setPortfolio(payload);
-      return res.json(payload);
+      if (!hasLocationContext) {
+        publicStoreCache.setPortfolio(payload);
+        return res.json(payload);
+      }
+      const enriched = payload.map((entry: any) =>
+        StoreController.enrichStoreGeoPayload(entry, {
+          lat: userLat,
+          lng: userLng,
+          city: userCity || null,
+          state: userState || null,
+        })
+      );
+      return res.json(StoreController.sortStoresForLocation(enriched));
     } catch (error: any) {
       log.warn('Store portfolio list failed', { error });
       return respondWithError(_req, res, error, 400);
@@ -554,59 +656,16 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
         })
       );
 
-      const normalizedCity = StoreController.normalizeGeoText(userCity);
-      const normalizedState = StoreController.normalizeGeoText(userState);
       const hydrated = payloads
         .filter(Boolean)
-        .map((entry: any) => {
-          const orderTypes = Array.isArray(entry?.settings?.orderTypes) ? entry.settings.orderTypes : [];
-          const supportsDelivery = orderTypes.some((type: string) => String(type || '').toLowerCase() === 'delivery');
-          const supportsPickup = orderTypes.some((type: string) => String(type || '').toLowerCase() === 'pickup');
-          const supportsTable = orderTypes.some((type: string) => String(type || '').toLowerCase() === 'table');
-          const supportsPostal = Boolean(entry?.settings?.postalEnabled) && supportsDelivery;
-          const storeLat = StoreController.toQueryNumber(entry?.settings?.lat);
-          const storeLng = StoreController.toQueryNumber(entry?.settings?.lng);
-          const hasStoreCoords = storeLat !== null && storeLng !== null;
-          const distanceKm =
-            hasUserCoords && hasStoreCoords
-              ? StoreController.haversineKm({ lat: Number(userLat), lng: Number(userLng) }, { lat: storeLat, lng: storeLng })
-              : null;
-          const deliveryRadiusKm = StoreController.toQueryNumber(entry?.settings?.deliveryRadiusKm);
-          const hasExplicitRadius = deliveryRadiusKm !== null && deliveryRadiusKm > 0;
-          const sameCity =
-            normalizedCity &&
-            StoreController.normalizeGeoText(entry?.settings?.city) === normalizedCity &&
-            (!normalizedState || StoreController.normalizeGeoText(entry?.settings?.state) === normalizedState);
-          const canDeliverByRadius =
-            supportsDelivery &&
-            (
-              (hasExplicitRadius &&
-                distanceKm !== null &&
-                deliveryRadiusKm !== null &&
-                deliveryRadiusKm > 0 &&
-                distanceKm <= deliveryRadiusKm) ||
-              (!hasExplicitRadius && sameCity)
-            );
-          const geoAvailability = supportsPostal
-            ? 'postal_everywhere'
-            : canDeliverByRadius
-              ? (hasExplicitRadius ? 'deliver_now' : 'deliver_unbounded')
-              : sameCity
-                ? (supportsPickup || supportsTable ? 'same_city_pickup' : 'same_city')
-                : distanceKm !== null
-                  ? 'outside_radius'
-                  : 'unknown';
-          return {
-            ...entry,
-            distanceKm,
-            geoAvailability,
-            deliveryRadiusKm: hasExplicitRadius ? deliveryRadiusKm : null,
-            sameCity,
-            supportsPostal,
-            supportsPickup,
-            supportsTable,
-          };
-        });
+        .map((entry: any) =>
+          StoreController.enrichStoreGeoPayload(entry, {
+            lat: userLat,
+            lng: userLng,
+            city: userCity || null,
+            state: userState || null,
+          })
+        );
 
       const sortByProximity = (items: any[]) =>
         items.sort((a, b) => {
@@ -621,7 +680,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
         });
 
       const deliverableStores = sortByProximity(
-        hydrated.filter((entry: any) => [ 'deliver_now', 'deliver_unbounded', 'postal_everywhere' ].includes(String(entry.geoAvailability || '')))
+        hydrated.filter((entry: any) => [ 'deliver_now', 'postal_everywhere' ].includes(String(entry.geoAvailability || '')))
       );
       const sameCityStores = sortByProximity(
         hydrated.filter((entry: any) => !deliverableStores.some((item: any) => item.id === entry.id) && entry.sameCity)

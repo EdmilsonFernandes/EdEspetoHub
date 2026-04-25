@@ -122,6 +122,28 @@ private normalizePostalZip(value?: string | null) {
     return parsed;
   }
 
+private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallbackValue?: number | null): number | null {
+    if (!acceptsDelivery) return null;
+    const defaultRadiusKm = Number(env.delivery.defaultRadiusKm || 5);
+    const minRadiusKm = Number(env.delivery.minRadiusKm || 1);
+    const maxRadiusKm = Number(env.delivery.maxRadiusKm || 30);
+    const parsed = this.parseNumber(value);
+    const resolved =
+      parsed === undefined
+        ? (fallbackValue ?? defaultRadiusKm)
+        : (parsed === null ? defaultRadiusKm : parsed);
+    if (!Number.isFinite(Number(resolved))) {
+      return defaultRadiusKm;
+    }
+    const numeric = Number(resolved);
+    if (numeric < minRadiusKm || numeric > maxRadiusKm) {
+      throw new AppError('GEN-002', 400, {
+        message: `O raio de entrega deve estar entre ${minRadiusKm} km e ${maxRadiusKm} km.`,
+      });
+    }
+    return numeric;
+  }
+
   private normalizeAddressForGeocode(value?: string | null) {
     const raw = String(value || '').trim();
     if (!raw) return '';
@@ -286,14 +308,18 @@ private normalizePostalZip(value?: string | null) {
       const trimmedBannerUrl = input.bannerUrl?.toString().trim();
 
       const socialLinks = sanitizeSocialLinks(input.socialLinks);
-      const deliveryRadiusKm = this.parseNumber(input.deliveryRadiusKm);
+      const segment = sanitizeStoreSegment(input.segment);
+      const segmentPreset = getStoreSegmentPreset(segment);
+      const requestedOrderTypes = Array.isArray(input.orderTypes) && input.orderTypes.length
+        ? input.orderTypes
+        : segmentPreset.orderTypes;
+      const supportsDelivery = requestedOrderTypes.some((type) => String(type || '').toLowerCase() === 'delivery');
+      const deliveryRadiusKm = this.normalizeDeliveryRadiusKm(input.deliveryRadiusKm, supportsDelivery);
       const deliveryFee = this.parseNumber(input.deliveryFee);
       const orderNotificationSound = input.orderNotificationSound?.toString().trim() || null;
       const trimmedAddress = input.address?.toString().trim();
       const trimmedCity = this.normalizeCity(input.city) || null;
       const trimmedState = this.normalizeState(input.state) || null;
-      const segment = sanitizeStoreSegment(input.segment);
-      const segmentPreset = getStoreSegmentPreset(segment);
       const bannerPosition = this.normalizeBannerPosition(input.bannerPosition);
       const postalOriginZip = this.normalizePostalZip(input.postalOriginZip);
       const postalEnabled = Boolean(input.postalEnabled) && Boolean(postalOriginZip);
@@ -349,7 +375,7 @@ private normalizePostalZip(value?: string | null) {
         postalOriginZip: postalOriginZip ?? null,
         socialLinks,
         openingHours: input.openingHours ?? [],
-        orderTypes: input.orderTypes ?? segmentPreset.orderTypes,
+        orderTypes: requestedOrderTypes,
       });
 
       // 4️⃣ Store
@@ -467,10 +493,6 @@ private normalizePostalZip(value?: string | null) {
       {
         store.settings.isOrderingEnabled = Boolean(data.isOrderingEnabled);
       }
-      if (data.deliveryRadiusKm !== undefined)
-      {
-        store.settings.deliveryRadiusKm = this.parseNumber(data.deliveryRadiusKm) ?? null;
-      }
       if (data.deliveryFee !== undefined)
       {
         store.settings.deliveryFee = this.parseNumber(data.deliveryFee) ?? null;
@@ -528,6 +550,14 @@ private normalizePostalZip(value?: string | null) {
       } else if (!Array.isArray(store.settings.orderTypes) || !store.settings.orderTypes.length) {
         store.settings.orderTypes = segmentPreset.orderTypes;
       }
+
+      const effectiveOrderTypes = Array.isArray(store.settings.orderTypes) ? store.settings.orderTypes : [];
+      const supportsDelivery = effectiveOrderTypes.some((type: string) => String(type || '').toLowerCase() === 'delivery');
+      store.settings.deliveryRadiusKm = this.normalizeDeliveryRadiusKm(
+        data.deliveryRadiusKm,
+        supportsDelivery,
+        this.parseNumber(store.settings.deliveryRadiusKm) ?? null
+      );
 
       let ownerNeedsSave = false;
       if (store.owner && data.storePhone !== undefined) {

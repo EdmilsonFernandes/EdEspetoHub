@@ -3,8 +3,10 @@ import { CustomerAccountService } from '../services/CustomerAccountService';
 import { respondWithError } from '../errors/respondWithError';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
+import { ZipCodeLookupService } from '../services/ZipCodeLookupService';
 
 const service = new CustomerAccountService();
+const zipCodeLookupService = new ZipCodeLookupService();
 const log = logger.child({ scope: 'CustomerAccountController' });
 
 export class CustomerAccountController {
@@ -197,6 +199,15 @@ static async deleteAddress(req: Request, res: Response) {
     try {
       if (!req.auth?.sub) throw new AppError('AUTH-001', 401);
       const result = await service.deleteAddress(req.auth.sub, req.params.addressId);
+      return res.json(result);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async lookupZipCode(req: Request, res: Response) {
+    try {
+      const result = await zipCodeLookupService.lookup(String(req.params.cep || ''));
       return res.json(result);
     } catch (error: any) {
       return respondWithError(req, res, error, 400);

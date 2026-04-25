@@ -58,6 +58,10 @@ type MarketplaceStore = {
   slug?: string;
   distanceKm?: number | null;
   deliveryRadiusKm?: number | null;
+  deliversToUserLocation?: boolean | null;
+  deliveryStatusLabel?: string | null;
+  acceptsDelivery?: boolean | null;
+  acceptsPickup?: boolean | null;
   geoAvailability?: string | null;
   isNearest?: boolean | null;
   reviewSummary?: {
@@ -198,6 +202,7 @@ const storeRegionalPriority = (store: { geoAvailability?: string | null; support
   if (store?.isNearest) return 0;
   if (availability === 'deliver_now' || availability === 'deliver_unbounded') return 1;
   if (availability === 'postal_everywhere' || store?.supportsPostal) return 2;
+  if (availability === 'pickup_available') return 3;
   if (availability === 'same_city_pickup') return 3;
   if (availability === 'same_city') return 4;
   if (availability === 'outside_radius') return 5;
@@ -1039,7 +1044,12 @@ export function MarketplacePage() {
     }
     portfolioLoadInFlightRef.current = true;
     try {
-      const basePortfolio = await storeService.listPortfolio();
+      const basePortfolio = await storeService.listPortfolio({
+        lat: savedAddressLocation?.lat ?? userLocation?.lat ?? null,
+        lng: savedAddressLocation?.lng ?? userLocation?.lng ?? null,
+        city: preferredDiscoveryAddress?.city || activeRegion?.city || null,
+        state: preferredDiscoveryAddress?.state || activeRegion?.state || null,
+      });
       const baseStores = Array.isArray(basePortfolio) ? basePortfolio : [];
       setGeoDiscovery(null);
       setStores(baseStores);
@@ -1062,7 +1072,7 @@ export function MarketplacePage() {
         }, 0);
       }
     }
-  }, [hubDebug]);
+  }, [activeRegion?.city, activeRegion?.state, hubDebug, preferredDiscoveryAddress?.city, preferredDiscoveryAddress?.state, savedAddressLocation?.lat, savedAddressLocation?.lng, userLocation?.lat, userLocation?.lng]);
 
   const refreshHub = useCallback(async () => {
     if (portfolioLoadInFlightRef.current) return;
@@ -1385,6 +1395,10 @@ export function MarketplacePage() {
           supportsPickup,
           supportsTable,
           supportsPostal,
+          deliversToUserLocation: Boolean((store as any)?.deliversToUserLocation),
+          deliveryStatusLabel: String((store as any)?.deliveryStatusLabel || '').trim(),
+          acceptsDelivery: Boolean((store as any)?.acceptsDelivery ?? supportsDelivery),
+          acceptsPickup: Boolean((store as any)?.acceptsPickup ?? supportsPickup),
           geoAvailability: String((store as any)?.geoAvailability || '').trim(),
           isNearest: Boolean((store as any)?.isNearest),
           distanceSource: apiDistanceKm !== null ? 'server' : 'local',
@@ -1423,6 +1437,10 @@ export function MarketplacePage() {
       supportsPickup: boolean;
       supportsTable: boolean;
       supportsPostal: boolean;
+      deliversToUserLocation: boolean;
+      deliveryStatusLabel: string;
+      acceptsDelivery: boolean;
+      acceptsPickup: boolean;
       geoAvailability: string;
       isNearest: boolean;
       distanceSource: 'server' | 'local';
@@ -3374,10 +3392,22 @@ export function MarketplacePage() {
                                 Correios
                               </span>
                             )}
-                            {store.supportsDelivery && !store.supportsPostal && [ 'outside_radius', 'same_city' ].includes(String(store.geoAvailability || '').toLowerCase()) && (
+                            {store.supportsDelivery && !store.supportsPostal && store.deliversToUserLocation && (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-emerald-700 shadow-[0_6px_16px_-12px_rgba(16,185,129,0.34)]">
+                                <PaperPlaneTilt size={9} weight="fill" />
+                                Entrega disponível
+                              </span>
+                            )}
+                            {store.supportsDelivery && !store.supportsPostal && !store.deliversToUserLocation && [ 'outside_radius', 'same_city' ].includes(String(store.geoAvailability || '').toLowerCase()) && (
                               <span className="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-amber-700 shadow-[0_6px_16px_-12px_rgba(245,158,11,0.34)]">
                                 <Warning size={9} weight="fill" />
-                                Fora do raio
+                                Fora da área
+                              </span>
+                            )}
+                            {!store.supportsDelivery && (store.acceptsPickup || store.supportsTable) && (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-slate-100 bg-slate-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-slate-600 shadow-[0_6px_16px_-12px_rgba(15,23,42,0.18)]">
+                                <House size={9} weight="fill" />
+                                Retirada disponível
                               </span>
                             )}
                             {store.rating >= 4.9 && (

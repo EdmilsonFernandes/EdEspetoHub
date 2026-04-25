@@ -8,6 +8,7 @@ import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import { customerService } from '../services/customerService';
 import { customerAccountService } from '../services/customerAccountService';
+import { addressLookupService } from '../services/addressLookupService';
 import { storeService } from '../services/storeService';
 import { mapsService } from '../services/mapsService';
 import { condominiumService } from '../services/condominiumService';
@@ -265,6 +266,8 @@ export function StorePage() {
     neighborhood: '',
     city: '',
     state: '',
+    lat: null,
+    lng: null,
   });
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
 
@@ -2670,6 +2673,8 @@ export function StorePage() {
         neighborhood: '',
         city: '',
         state: '',
+        lat: null,
+        lng: null,
       });
       setShowNewAddressForm(false);
       showToast('Endereço salvo.', 'success');
@@ -2686,22 +2691,18 @@ export function StorePage() {
     setCustomerAccountLoading(true);
     setCustomerAccountError('');
     try {
-      const response = await fetch(`https://viacep.com.br/ws/${rawCep}/json/`);
-      const data = await response.json();
-      if (data?.erro) {
-        setCustomerAccountError('CEP não encontrado.');
-        return;
-      }
+      const data = await addressLookupService.lookupZipCode(rawCep);
       setNewAddressForm((prev) => ({
         ...prev,
-        street: String(data?.logradouro || ''),
-        neighborhood: String(data?.bairro || ''),
-        city: String(data?.localidade || ''),
-        state: String(data?.uf || '').toUpperCase().slice(0, 2),
-        complement: prev?.complement || String(data?.complemento || ''),
+        street: String(data?.street || ''),
+        neighborhood: String(data?.district || ''),
+        city: String(data?.city || ''),
+        state: String(data?.state || '').toUpperCase().slice(0, 2),
+        lat: data?.latitude ?? prev?.lat ?? null,
+        lng: data?.longitude ?? prev?.lng ?? null,
       }));
-    } catch {
-      setCustomerAccountError('Não foi possível consultar o CEP agora.');
+    } catch (error: any) {
+      setCustomerAccountError(error?.message || 'Não foi possível consultar o CEP agora.');
     } finally {
       setCustomerAccountLoading(false);
     }
