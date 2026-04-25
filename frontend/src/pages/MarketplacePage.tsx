@@ -143,6 +143,8 @@ const buildCustomerAddressLookup = (address: any) => {
     state,
     addressLine,
     label: label || 'Endereço principal',
+    lat: parseOptionalNumber(address?.lat),
+    lng: parseOptionalNumber(address?.lng),
   };
 };
 
@@ -188,6 +190,9 @@ const buildDistanceContextKey = (
   location: { lat: number; lng: number } | null,
   region: { city: string; state: string } | null
 ) => {
+  if (savedAddress?.lat != null && savedAddress?.lng != null) {
+    return `saved:${Number(savedAddress.lat).toFixed(5)}:${Number(savedAddress.lng).toFixed(5)}`;
+  }
   const savedAddressKey = normalizeSearchText(savedAddress?.addressLine || '');
   if (savedAddressKey) return `saved:${savedAddressKey}`;
   if (location) return `gps:${location.lat.toFixed(4)}:${location.lng.toFixed(4)}`;
@@ -605,14 +610,26 @@ export function MarketplacePage() {
   const [locationLabel, setLocationLabel] = useState('Sua região');
   const [geoDiscovery, setGeoDiscovery] = useState<StoreDiscoveryResponse | null>(null);
   const [preferredDiscoveryAddress, setPreferredDiscoveryAddress] = useState<PreferredDiscoveryAddress | null>(null);
+  const [preferredAddressLoading, setPreferredAddressLoading] = useState(false);
   const [hubScopeOverride, setHubScopeOverride] = useState<'default' | 'all_stores'>('default');
-  const hasPreferredAddressContext = Boolean(preferredDiscoveryAddress?.city || preferredDiscoveryAddress?.state);
-  const activeLocation = userLocation;
+  const hasPreferredAddressContext = Boolean(
+    preferredDiscoveryAddress?.city ||
+      preferredDiscoveryAddress?.state ||
+      (preferredDiscoveryAddress?.lat != null && preferredDiscoveryAddress?.lng != null)
+  );
+  const savedAddressLocation = useMemo(() => {
+    if (preferredDiscoveryAddress?.lat == null || preferredDiscoveryAddress?.lng == null) return null;
+    return {
+      lat: Number(preferredDiscoveryAddress.lat),
+      lng: Number(preferredDiscoveryAddress.lng),
+    };
+  }, [preferredDiscoveryAddress?.lat, preferredDiscoveryAddress?.lng]);
+  const activeLocation = savedAddressLocation || userLocation;
   const activeRegion =
-    userRegion ||
     (preferredDiscoveryAddress?.city || preferredDiscoveryAddress?.state
       ? { city: preferredDiscoveryAddress?.city || '', state: preferredDiscoveryAddress?.state || '' }
-      : null);
+      : null) ||
+    userRegion;
   const activeLocationLabel = preferredDiscoveryAddress?.label || locationLabel;
   const isUsingSavedAddressForDiscovery = hasPreferredAddressContext;
   const isShowingAllStores = hubScopeOverride === 'all_stores';
@@ -683,10 +700,12 @@ export function MarketplacePage() {
     const resolvePreferredDiscoveryAddress = async () => {
       if (!customerSession?.token) {
         setPreferredDiscoveryAddress(null);
+        setPreferredAddressLoading(false);
         return;
       }
 
       try {
+        setPreferredAddressLoading(true);
         const rows = await customerAccountService.listAddresses();
         if (cancelled) return;
         const preferred = (Array.isArray(rows) ? rows : []).find((item: any) => item?.isDefault) || rows?.[0];
@@ -706,14 +725,18 @@ export function MarketplacePage() {
           city: normalized.city,
           state: normalized.state,
           addressLine: normalized.addressLine,
-          lat: null,
-          lng: null,
+          lat: normalized.lat,
+          lng: normalized.lng,
         };
 
         setPreferredDiscoveryAddress(nextAddress);
       } catch {
         if (!cancelled) {
           setPreferredDiscoveryAddress(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setPreferredAddressLoading(false);
         }
       }
     };
@@ -899,6 +922,11 @@ export function MarketplacePage() {
 
   useEffect(() => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) return;
+    if (customerSession?.token && preferredAddressLoading) return;
+    if (savedAddressLocation) {
+      setUserLocation(null);
+      return;
+    }
     const timer = window.setTimeout(() => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -914,7 +942,7 @@ export function MarketplacePage() {
       );
     }, 1400);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [customerSession?.token, preferredAddressLoading, savedAddressLocation]);
 
   const loadPortfolio = useCallback(async () => {
     if (portfolioLoadInFlightRef.current) {

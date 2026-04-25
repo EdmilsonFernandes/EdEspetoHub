@@ -97,6 +97,29 @@ private buildGeocodeAddress(payload: {
     return parts.join(', ');
   }
 
+private assertRequiredAddressFields(payload: {
+    cep?: string | null;
+    street?: string | null;
+    number?: string | null;
+    city?: string | null;
+    state?: string | null;
+  }) {
+    const cep = String(payload?.cep || '').replace(/\D/g, '').slice(0, 8);
+    const street = String(payload?.street || '').trim();
+    const number = String(payload?.number || '').trim();
+    const city = String(payload?.city || '').trim();
+    const state = String(payload?.state || '').trim().toUpperCase().slice(0, 2);
+    if (!cep || cep.length !== 8 || !street || !number || !city || !state) {
+      throw new AppError('ADDR-001', 400);
+    }
+  }
+
+private assertResolvedAddressCoordinates(lat?: number | null, lng?: number | null) {
+    if (!Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) {
+      throw new AppError('ADDR-002', 400);
+    }
+  }
+
 private async geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
     const normalizedAddress = String(address || '').trim();
     if (!normalizedAddress) return null;
@@ -704,10 +727,9 @@ async createAddress(userId: string, input: AddressInput) {
     const cep = String(input?.cep || '').replace(/\D/g, '').slice(0, 8);
     const state = String(input?.state || '').trim().toUpperCase().slice(0, 2);
     const street = String(input?.street || '').trim();
+    const number = String(input?.number || '').trim();
     const city = String(input?.city || '').trim();
-    if (!cep || cep.length !== 8 || !street || !city || !state) {
-      throw new AppError('GEN-002', 400, { message: 'Preencha CEP, rua, cidade e estado corretamente.' });
-    }
+    this.assertRequiredAddressFields({ cep, street, number, city, state });
 
     const requestedLat = this.parseCoordinate(input?.lat);
     const requestedLng = this.parseCoordinate(input?.lng);
@@ -720,7 +742,7 @@ async createAddress(userId: string, input: AddressInput) {
         this.buildGeocodeAddress({
           cep,
           street,
-          number: input?.number,
+          number,
           complement: input?.complement,
           neighborhood: input?.neighborhood,
           city,
@@ -732,6 +754,8 @@ async createAddress(userId: string, input: AddressInput) {
         resolvedLng = geocoded.lng;
       }
     }
+
+    this.assertResolvedAddressCoordinates(resolvedLat, resolvedLng);
 
     return AppDataSource.transaction(async (manager) => {
       const repo = manager.getRepository(CustomerAddress);
@@ -749,7 +773,7 @@ async createAddress(userId: string, input: AddressInput) {
         phone: this.sanitizePhone(input?.phone || null) || undefined,
         cep,
         street,
-        number: input?.number ? String(input.number).trim() : undefined,
+        number,
         complement: input?.complement ? String(input.complement).trim() : undefined,
         neighborhood: input?.neighborhood ? String(input.neighborhood).trim() : undefined,
         city,
@@ -820,6 +844,13 @@ async updateAddress(userId: string, addressId: string, input: Partial<AddressInp
       }
 
       if (addressFieldsChanged || hasExplicitLat || hasExplicitLng) {
+        this.assertRequiredAddressFields({
+          cep: address.cep,
+          street: address.street,
+          number: address.number,
+          city: address.city,
+          state: address.state,
+        });
         if (!hasExplicitLat) address.lat = null;
         if (!hasExplicitLng) address.lng = null;
 
@@ -838,6 +869,7 @@ async updateAddress(userId: string, addressId: string, input: Partial<AddressInp
           if (!hasExplicitLat) address.lat = geocoded.lat;
           if (!hasExplicitLng) address.lng = geocoded.lng;
         }
+        this.assertResolvedAddressCoordinates(address.lat as number | null, address.lng as number | null);
       }
 
       const saved = await repo.save(address);

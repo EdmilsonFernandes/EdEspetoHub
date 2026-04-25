@@ -149,6 +149,12 @@ private normalizePostalZip(value?: string | null) {
     }
   }
 
+  private assertResolvedCoordinates(lat?: number | null, lng?: number | null) {
+    if (!Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) {
+      throw new AppError('STORE-004', 400);
+    }
+  }
+
   private buildGeocodeAddress(payload: {
     address?: string | null;
     city?: string | null;
@@ -314,6 +320,7 @@ private normalizePostalZip(value?: string | null) {
           resolvedLng = geocoded.lng;
         }
       }
+      this.assertResolvedCoordinates(resolvedLat, resolvedLng);
 
       // 3️⃣ Settings
       const normalizedPix = this.normalizePixKey(input.pixKey);
@@ -571,19 +578,22 @@ private normalizePostalZip(value?: string | null) {
       if (data.lng !== undefined) {
         store.settings.lng = Number.isFinite(Number(nextLng)) ? Number(nextLng) : null;
       }
-      if (shouldRefreshCoordinates && (data.lat === undefined || data.lng === undefined)) {
-        const geocoded = await this.geocodeAddress(
-          this.buildGeocodeAddress({
-            address: store.settings.address,
-            city: store.settings.city,
-            state: store.settings.state,
-            fallbackAddress: store.owner?.address,
-          })
-        );
-        if (geocoded) {
-          if (data.lat === undefined) store.settings.lat = geocoded.lat;
-          if (data.lng === undefined) store.settings.lng = geocoded.lng;
+      if (shouldRefreshCoordinates) {
+        if (data.lat === undefined || data.lng === undefined) {
+          const geocoded = await this.geocodeAddress(
+            this.buildGeocodeAddress({
+              address: store.settings.address,
+              city: store.settings.city,
+              state: store.settings.state,
+              fallbackAddress: store.owner?.address,
+            })
+          );
+          if (geocoded) {
+            if (data.lat === undefined) store.settings.lat = geocoded.lat;
+            if (data.lng === undefined) store.settings.lng = geocoded.lng;
+          }
         }
+        this.assertResolvedCoordinates(store.settings.lat as number | null, store.settings.lng as number | null);
       }
 
       return storeRepo.save(store);

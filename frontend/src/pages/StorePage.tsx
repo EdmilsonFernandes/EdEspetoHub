@@ -1502,23 +1502,7 @@ export function StorePage() {
 
   useEffect(() => {
     if (!storeAddress || storeCoords || !storeSlug) return;
-    let attempts = 0;
-    const loadCoords = async () => {
-      try {
-        const data = await mapsService.geocode(storeAddress);
-        const next = { lat: Number(data.lat), lng: Number(data.lng) };
-        setStoreCoords(next);
-        localStorage.setItem(`store:coords:${storeSlug}`, JSON.stringify(next));
-        return;
-      } catch (error) {
-        console.error('Falha ao carregar coordenadas da loja', error);
-      }
-      attempts += 1;
-      if (attempts < 3) {
-        window.setTimeout(loadCoords, 1200);
-      }
-    };
-    loadCoords();
+    console.warn('Loja sem coordenadas persistidas para validar entrega.', { storeSlug, storeAddress });
   }, [storeAddress, storeCoords, storeSlug]);
 
   const validateDeliveryAddress = useCallback(async () => {
@@ -1610,14 +1594,8 @@ export function StorePage() {
 
       setDeliveryCoords(coords);
       let route = cachedRoute;
-      if (!route) {
-        try {
-          route = await mapsService.route(storeCoords, coords);
-        } catch (routeError) {
-          const approxKm = haversineKm(storeCoords, coords);
-          route = { distanceKm: approxKm, durationMin: null };
-          console.warn('Usando distância aproximada para validar entrega', routeError);
-        }
+      if (!route || !Number.isFinite(Number(route.distanceKm))) {
+        route = { distanceKm: haversineKm(storeCoords, coords), durationMin: null };
       }
       const nextStatus = route.distanceKm <= deliveryRadiusValue ? 'ok' : 'out';
 
@@ -1768,14 +1746,10 @@ export function StorePage() {
             street: prev.street || 'Localização atual',
             address: prev.address || 'Localização atual (GPS)',
           }));
-          let route;
-          try {
-            route = await mapsService.route(storeCoords, coords);
-          } catch (routeError) {
-            const approxKm = haversineKm(storeCoords, coords);
-            route = { distanceKm: approxKm, durationMin: null };
-            console.warn('Usando distância aproximada com localização atual', routeError);
-          }
+          const route = {
+            distanceKm: haversineKm(storeCoords, coords),
+            durationMin: null,
+          };
           setDeliveryCheck({
             status: route.distanceKm <= deliveryRadiusValue ? 'ok' : 'out',
             distanceKm: route.distanceKm,
@@ -2669,6 +2643,17 @@ export function StorePage() {
 
   const handleCreateAddress = async () => {
     if (!customerSession?.token || customerAccountLoading) return;
+    const cepDigits = String(newAddressForm.cep || '').replace(/\D/g, '');
+    if (
+      cepDigits.length !== 8 ||
+      !String(newAddressForm.street || '').trim() ||
+      !String(newAddressForm.number || '').trim() ||
+      !String(newAddressForm.city || '').trim() ||
+      !String(newAddressForm.state || '').trim()
+    ) {
+      setCustomerAccountError('Preencha CEP, rua, número, cidade e UF antes de salvar o endereço.');
+      return;
+    }
     setCustomerAccountLoading(true);
     setCustomerAccountError('');
     try {
