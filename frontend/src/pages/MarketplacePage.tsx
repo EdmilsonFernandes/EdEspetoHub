@@ -197,16 +197,25 @@ const appendHubDebugTrace = (entry: Record<string, any>) => {
   }
 };
 
-const storeRegionalPriority = (store: { geoAvailability?: string | null; supportsPostal?: boolean; isNearest?: boolean }) => {
+const storeRegionalPriority = (
+  store: {
+    geoAvailability?: string | null;
+    supportsPostal?: boolean;
+    deliversToUserLocation?: boolean | null;
+    isOpen?: boolean;
+    acceptsPickup?: boolean | null;
+    supportsTable?: boolean;
+  },
+  options?: { condominiumScope?: boolean }
+) => {
+  if (options?.condominiumScope) {
+    return store?.isOpen ? 0 : 1;
+  }
   const availability = String(store?.geoAvailability || '').trim().toLowerCase();
-  if (store?.isNearest) return 0;
-  if (availability === 'deliver_now' || availability === 'deliver_unbounded') return 1;
-  if (availability === 'postal_everywhere' || store?.supportsPostal) return 2;
-  if (availability === 'pickup_available') return 3;
-  if (availability === 'same_city_pickup') return 3;
-  if (availability === 'same_city') return 4;
-  if (availability === 'outside_radius') return 5;
-  return 6;
+  if (store?.isOpen && (store?.deliversToUserLocation || availability === 'deliver_now' || availability === 'postal_everywhere' || store?.supportsPostal)) return 0;
+  if (store?.isOpen && (availability === 'pickup_available' || availability === 'same_city_pickup' || store?.acceptsPickup || store?.supportsTable)) return 1;
+  if (store?.isOpen) return 2;
+  return 3;
 };
 
 const buildDistanceContextKey = (
@@ -566,15 +575,6 @@ export function MarketplacePage() {
   const [searchPlaceholderIndex, setSearchPlaceholderIndex] = useState(0);
   const [searchPlaceholderVisible, setSearchPlaceholderVisible] = useState(true);
   const [condoPickerFilter, setCondoPickerFilter] = useState<'all' | 'live' | 'upcoming' | 'none'>('all');
-  const [condoGeoCache, setCondoGeoCache] = useState<Record<string, { lat: number; lng: number } | null>>({});
-  const [condoDistanceWarning, setCondoDistanceWarning] = useState<{
-    slug: string;
-    name: string;
-    event: CondominiumEventSummary | null;
-    distanceKm: number;
-    logoUrl: string;
-    bannerUrl?: string;
-  } | null>(null);
   useEffect(() => {
     if (isSearchEditing) return;
     const cycle = window.setInterval(() => {
@@ -658,11 +658,6 @@ export function MarketplacePage() {
   const isUsingSavedAddressForDiscovery = hasPreferredAddressContext;
   const isShowingAllStores = hubScopeOverride === 'all_stores';
 
-  useEffect(() => {
-    if (!condominiumPickerOpen) return;
-    setCondoGeoCache({});
-    return () => {};
-  }, [condominiumPickerOpen, activeLocation, condominiums]); // eslint-disable-line react-hooks/exhaustive-deps
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [customerSession, setCustomerSession] = useState(() => readCustomerSession());
   const [showDeactivateModal, setShowDeactivateModal] = useState(false);
@@ -1044,11 +1039,19 @@ export function MarketplacePage() {
     }
     portfolioLoadInFlightRef.current = true;
     try {
+      const locationQuery = selectedCondominiumSlug
+        ? { lat: null, lng: null, city: null, state: null }
+        : {
+            lat: savedAddressLocation?.lat ?? userLocation?.lat ?? null,
+            lng: savedAddressLocation?.lng ?? userLocation?.lng ?? null,
+            city: preferredDiscoveryAddress?.city || activeRegion?.city || null,
+            state: preferredDiscoveryAddress?.state || activeRegion?.state || null,
+          };
       const basePortfolio = await storeService.listPortfolio({
-        lat: savedAddressLocation?.lat ?? userLocation?.lat ?? null,
-        lng: savedAddressLocation?.lng ?? userLocation?.lng ?? null,
-        city: preferredDiscoveryAddress?.city || activeRegion?.city || null,
-        state: preferredDiscoveryAddress?.state || activeRegion?.state || null,
+        lat: locationQuery.lat,
+        lng: locationQuery.lng,
+        city: locationQuery.city,
+        state: locationQuery.state,
       });
       const baseStores = Array.isArray(basePortfolio) ? basePortfolio : [];
       setGeoDiscovery(null);
@@ -1072,7 +1075,7 @@ export function MarketplacePage() {
         }, 0);
       }
     }
-  }, [activeRegion?.city, activeRegion?.state, hubDebug, preferredDiscoveryAddress?.city, preferredDiscoveryAddress?.state, savedAddressLocation?.lat, savedAddressLocation?.lng, userLocation?.lat, userLocation?.lng]);
+  }, [activeRegion?.city, activeRegion?.state, hubDebug, preferredDiscoveryAddress?.city, preferredDiscoveryAddress?.state, savedAddressLocation?.lat, savedAddressLocation?.lng, selectedCondominiumSlug, userLocation?.lat, userLocation?.lng]);
 
   const refreshHub = useCallback(async () => {
     if (portfolioLoadInFlightRef.current) return;
@@ -1462,6 +1465,7 @@ export function MarketplacePage() {
     const condominiumSlugSet = new Set(condominiumStoreSlugs);
     return enrichedStores.filter((store) => condominiumSlugSet.has(store.slug));
   }, [enrichedStores, condominiumStoreSlugs, selectedCondominiumSlug]);
+  const isCondominiumScope = Boolean(selectedCondominiumSlug);
 
   useEffect(() => {
     if (debouncedQuery.length < 2) {
@@ -1666,24 +1670,27 @@ export function MarketplacePage() {
         if (segmentFilter !== 'all' && store.segment !== segmentFilter) return false;
         if (quickFilter === 'free_shipping' && !store.freeShipping) return false;
         const resolvedDistance = distanceByStore[store.id] ?? store.distanceKm;
-        if (quickFilter === 'nearby' && (resolvedDistance == null || resolvedDistance > 2.5)) return false;
+        if (!isCondominiumScope && quickFilter === 'nearby' && (resolvedDistance == null || resolvedDistance > 2.5)) return false;
         if (quickFilter === 'open_now' && !store.isOpen) return false;
         if (quickFilter === 'favorites' && !favoriteStoreSlugs.includes(store.slug)) return false;
         return true;
       })
       .sort((a, b) => {
-        const openDelta = Number(Boolean(b.isOpen)) - Number(Boolean(a.isOpen));
-        if (openDelta !== 0) return openDelta;
+        const condominiumScope = Boolean(selectedCondominiumSlug);
+        const regionalDelta =
+          storeRegionalPriority(a, { condominiumScope }) -
+          storeRegionalPriority(b, { condominiumScope });
+        if (regionalDelta !== 0) return regionalDelta;
+        if (!condominiumScope) {
+          const distanceA = distanceByStore[a.id] ?? a.distanceKm ?? Number.MAX_SAFE_INTEGER;
+          const distanceB = distanceByStore[b.id] ?? b.distanceKm ?? Number.MAX_SAFE_INTEGER;
+          if (distanceA !== distanceB) return distanceA - distanceB;
+        }
         const favoritesDelta = Number(favoriteStoreSlugs.includes(b.slug)) - Number(favoriteStoreSlugs.includes(a.slug));
         if (favoritesDelta !== 0) return favoritesDelta;
-        const regionalDelta = storeRegionalPriority(a) - storeRegionalPriority(b);
-        if (regionalDelta !== 0) return regionalDelta;
-        const distanceA = distanceByStore[a.id] ?? a.distanceKm ?? Number.MAX_SAFE_INTEGER;
-        const distanceB = distanceByStore[b.id] ?? b.distanceKm ?? Number.MAX_SAFE_INTEGER;
-        if (distanceA !== distanceB) return distanceA - distanceB;
         return b.rating - a.rating;
       });
-  }, [scopedEnrichedStores, debouncedQuery, segmentFilter, quickFilter, favoriteStoreSlugs, distanceByStore]);
+  }, [scopedEnrichedStores, debouncedQuery, segmentFilter, quickFilter, favoriteStoreSlugs, distanceByStore, isCondominiumScope, selectedCondominiumSlug]);
 
   const categoryTiles = useMemo(() => {
     return segmentOptions.map((segment) => categoryVisuals[segment] || { icon: Storefront, label: segment });
@@ -1713,7 +1720,7 @@ export function MarketplacePage() {
     };
 
     const loadApproxDistances = async () => {
-      if (!activeLocation || scopedEnrichedStores.length === 0) {
+      if (isCondominiumScope || !activeLocation || scopedEnrichedStores.length === 0) {
         setDistanceByStore({});
         return;
       }
@@ -1795,7 +1802,7 @@ export function MarketplacePage() {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [activeLocation, activeRegion?.city, activeRegion?.state, hubDebug, preferredDiscoveryAddress?.addressLine, savedAddressLocation, scopedEnrichedStores]);
+  }, [activeLocation, activeRegion?.city, activeRegion?.state, hubDebug, isCondominiumScope, preferredDiscoveryAddress?.addressLine, savedAddressLocation, scopedEnrichedStores]);
 
   useEffect(() => {
     hubDebug('location-source', {
@@ -2329,7 +2336,7 @@ export function MarketplacePage() {
             >
               <div className="relative aspect-[16/6] bg-slate-950">
                 <img
-                  src="/marketing/integration-mp-popup.png"
+                  src="/marketing/mpv2.png"
                   alt="Banner de integração com Mercado Pago no Já no Caminho"
                   loading="eager"
                   fetchPriority="high"
@@ -3370,8 +3377,12 @@ export function MarketplacePage() {
                           ) : null}
                           {store.rating > 0 ? <span className="text-slate-200">·</span> : null}
                           <span>{store.etaMin}–{store.etaMax} min</span>
-                          <span className="text-slate-200">·</span>
-                          <span>{distanceLoading && activeLocation && distanceByStore[store.id] == null ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)}</span>
+                          {!isCondominiumScope && (
+                            <>
+                              <span className="text-slate-200">·</span>
+                              <span>{distanceLoading && activeLocation && distanceByStore[store.id] == null ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)}</span>
+                            </>
+                          )}
                         </div>
                         {!store.isOpen && (
                           <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-500">
@@ -3392,19 +3403,19 @@ export function MarketplacePage() {
                                 Correios
                               </span>
                             )}
-                            {store.supportsDelivery && !store.supportsPostal && store.deliversToUserLocation && (
+                            {!isCondominiumScope && store.supportsDelivery && !store.supportsPostal && store.deliversToUserLocation && (
                               <span className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-emerald-700 shadow-[0_6px_16px_-12px_rgba(16,185,129,0.34)]">
                                 <PaperPlaneTilt size={9} weight="fill" />
                                 Entrega disponível
                               </span>
                             )}
-                            {store.supportsDelivery && !store.supportsPostal && !store.deliversToUserLocation && [ 'outside_radius', 'same_city' ].includes(String(store.geoAvailability || '').toLowerCase()) && (
+                            {!isCondominiumScope && store.supportsDelivery && !store.supportsPostal && !store.deliversToUserLocation && [ 'outside_radius', 'same_city' ].includes(String(store.geoAvailability || '').toLowerCase()) && (
                               <span className="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-amber-700 shadow-[0_6px_16px_-12px_rgba(245,158,11,0.34)]">
                                 <Warning size={9} weight="fill" />
                                 Fora da área
                               </span>
                             )}
-                            {!store.supportsDelivery && (store.acceptsPickup || store.supportsTable) && (
+                            {!isCondominiumScope && !store.supportsDelivery && (store.acceptsPickup || store.supportsTable) && (
                               <span className="inline-flex items-center gap-1 rounded-full border border-slate-100 bg-slate-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-slate-600 shadow-[0_6px_16px_-12px_rgba(15,23,42,0.18)]">
                                 <House size={9} weight="fill" />
                                 Retirada disponível
@@ -3746,38 +3757,18 @@ export function MarketplacePage() {
                   ? filteredCondominiums.filter(c => !c.event?.state || (c.event.state !== 'live' && c.event.state !== 'upcoming'))
                   : [];
 
-                const CONDO_DISTANCE_LIMIT_KM = 2;
                 const selectCondominium = (slug: string) => {
                   setCondominiumPickerOpen(false);
                   setCondominiumSearch('');
                   setSelectedCondominiumSlug(slug);
                 };
-                const handleClick = (slug: string, name: string, event: typeof filteredCondominiums[0]['event'], condominium: HubCondominium) => {
+                const handleClick = (slug: string, name: string, event: typeof filteredCondominiums[0]['event']) => {
                   if (!event?.state || event.state !== 'live') {
                     setCondominiumAvailabilityModal({
                       name: name || 'Condomínio',
                       nextLabel: formatCondominiumPickerEventTime(event) || 'A confirmar',
                     });
                     return;
-                  }
-                  if (activeLocation) {
-                    const coords = condoGeoCache[slug];
-                    if (coords) {
-                      const toRad = (d: number) => (d * Math.PI) / 180;
-                      const dLat = toRad(coords.lat - activeLocation.lat);
-                      const dLng = toRad(coords.lng - activeLocation.lng);
-                      const x = Math.sin(dLat / 2) ** 2 + Math.sin(dLng / 2) ** 2 * Math.cos(toRad(activeLocation.lat)) * Math.cos(toRad(coords.lat));
-                      const distKm = 6371 * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
-                      if (distKm > CONDO_DISTANCE_LIMIT_KM) {
-                        setCondoDistanceWarning({
-                          slug, name, event,
-                          distanceKm: distKm,
-                          logoUrl: resolveAssetUrl(condominium.logoUrl || undefined) || getStoreAvatarUrl(slug, name),
-                          bannerUrl: resolveAssetUrl(condominium.bannerUrl || undefined) || undefined,
-                        });
-                        return;
-                      }
-                    }
                   }
                   selectCondominium(slug);
                 };
@@ -3826,7 +3817,7 @@ export function MarketplacePage() {
                               <button
                                 key={slug}
                                 type="button"
-                                onClick={() => handleClick(slug, name, event, condominium)}
+                                onClick={() => handleClick(slug, name, event)}
                                 className={`group relative w-full overflow-hidden border text-left transition-all duration-300 active:scale-[0.985] ${
                                   isNativePlatform ? 'rounded-[1.45rem]' : 'rounded-[1.75rem]'
                                 } ${
@@ -3917,7 +3908,7 @@ export function MarketplacePage() {
                               <button
                                 key={slug}
                                 type="button"
-                                onClick={() => handleClick(slug, name, event, condominium)}
+                                onClick={() => handleClick(slug, name, event)}
                                 className={`group relative w-full overflow-hidden rounded-[1.65rem] border p-3 text-left transition-all duration-300 active:scale-[0.985] ${
                                   active
                                     ? 'border-[#336886]/26 bg-white shadow-[0_20px_38px_-26px_rgba(51,104,134,0.32)] ring-1 ring-[#336886]/10'
@@ -3986,7 +3977,7 @@ export function MarketplacePage() {
                               <button
                                 key={slug}
                                 type="button"
-                                onClick={() => handleClick(slug, name, null, condominium)}
+                                onClick={() => handleClick(slug, name, null)}
                                 className={`group relative w-full overflow-hidden rounded-[1.45rem] border p-3 text-left transition-all duration-200 active:scale-[0.99] ${
                                   active
                                     ? 'border-[#336886]/16 bg-white shadow-[0_16px_32px_-26px_rgba(51,104,134,0.22)]'
@@ -4084,76 +4075,6 @@ export function MarketplacePage() {
                 </div>
               </div>
             </nav>
-          </div>
-        </div>
-      )}
-
-      {condoDistanceWarning && (
-        <div className="fixed inset-0 z-[260] flex items-end sm:items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom)+1.25rem)]">
-          <div className="absolute inset-0 bg-slate-950/55 backdrop-blur-sm" onClick={() => setCondoDistanceWarning(null)} />
-          <div className="relative w-full max-w-md overflow-hidden rounded-[2rem] bg-white shadow-[0_40px_80px_-20px_rgba(15,23,42,0.55)]">
-            {condoDistanceWarning.bannerUrl && (
-              <img src={condoDistanceWarning.bannerUrl} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-[0.06] blur-2xl" />
-            )}
-            <div className="relative">
-              {/* Header */}
-              <div className="relative overflow-hidden bg-amber-50/90 px-5 pt-6 pb-5">
-                <div className="pointer-events-none absolute -right-8 -top-8 h-36 w-36 rounded-full bg-amber-200/50 blur-3xl" />
-                <div className="pointer-events-none absolute -left-10 bottom-0 h-28 w-28 rounded-full bg-orange-100/60 blur-3xl" />
-                <div className="relative flex items-center gap-4">
-                  <div className="relative shrink-0">
-                    <div className="h-16 w-16 overflow-hidden rounded-[1.2rem] border-2 border-amber-200/70 shadow-[0_8px_20px_-8px_rgba(245,158,11,0.35)]">
-                      <img src={condoDistanceWarning.logoUrl} alt={condoDistanceWarning.name} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(condoDistanceWarning!.slug, condoDistanceWarning!.name); }} />
-                    </div>
-                    <span className="absolute -bottom-1.5 -right-1.5 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-amber-400 text-white shadow-sm">
-                      <Warning size={13} weight="fill" />
-                    </span>
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-600">Você está longe</p>
-                    <h3 className="mt-0.5 truncate text-[17px] font-black leading-tight text-slate-900">{condoDistanceWarning.name}</h3>
-                    <p className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-black text-amber-700">
-                      <MapPinLine size={11} weight="fill" />
-                      {condoDistanceWarning.distanceKm.toFixed(1).replace('.', ',')} km daqui
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Body */}
-              <div className="px-5 py-4">
-                <p className="text-[14px] leading-relaxed text-slate-600">
-                  Essa é uma <strong className="text-slate-900">feira presencial</strong> — você precisa estar no local para retirar ou receber seu pedido. Tem certeza que consegue ir até lá?
-                </p>
-                <div className="mt-3 rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-[12px] font-medium text-amber-700">
-                  A distância estimada entre você e esta feira é de <strong>{condoDistanceWarning.distanceKm.toFixed(1).replace('.', ',')} km</strong>. Pedimos que confirme antes de prosseguir.
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-2.5 border-t border-slate-100 px-5 py-4">
-                <button
-                  type="button"
-                  onClick={() => setCondoDistanceWarning(null)}
-                  className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 py-3 text-[13px] font-bold text-slate-600 transition-all active:scale-[0.98]"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const { slug } = condoDistanceWarning;
-                    setCondoDistanceWarning(null);
-                    setCondominiumPickerOpen(false);
-                    setCondominiumSearch('');
-                    setSelectedCondominiumSlug(slug);
-                  }}
-                  className="flex-1 rounded-2xl bg-[#153A4C] py-3 text-[13px] font-black text-white shadow-[0_8px_20px_-8px_rgba(21,58,76,0.5)] transition-all hover:bg-[#1e4d62] active:scale-[0.98]"
-                >
-                  Continuar mesmo assim
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       )}
