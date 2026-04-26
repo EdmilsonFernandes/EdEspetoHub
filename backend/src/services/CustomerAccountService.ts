@@ -15,7 +15,7 @@ import { OrderService } from './OrderService';
 import { OrderEtaServiceV2 } from './OrderEtaServiceV2';
 import { logger } from '../utils/logger';
 import { ZipCodeLookupService } from './ZipCodeLookupService';
-import { isDisposableEmailDomain } from '../utils/emailRisk';
+import { isAllowlistedEmail, isDisposableEmailDomain } from '../utils/emailRisk';
 import { CustomerSecurityService } from './CustomerSecurityService';
 
 type AddressInput = {
@@ -451,7 +451,10 @@ async register(
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(email)) {
       throw new AppError('GEN-002', 400, { message: 'Informe um e-mail válido.' });
     }
-    if (isDisposableEmailDomain(email, env.security.disposableEmailDomains)) {
+    if (
+      isDisposableEmailDomain(email, env.security.disposableEmailDomains) &&
+      !isAllowlistedEmail(email, env.security.allowlistedEmails)
+    ) {
       await this.securityService.recordRiskEvent({
         email,
         phone,

@@ -30,3 +30,11 @@ export const isDisposableEmailDomain = (email?: string | null, extraDomains: str
   if (BUILT_IN_DISPOSABLE_EMAIL_DOMAINS.has(domain)) return true;
   return extraDomains.map((entry) => String(entry || '').trim().toLowerCase()).includes(domain);
 };
+
+export const isAllowlistedEmail = (email?: string | null, allowlistedEmails: string[] = []) => {
+  const normalized = String(email || '').trim().toLowerCase();
+  if (!normalized) return false;
+  return allowlistedEmails
+    .map((entry) => String(entry || '').trim().toLowerCase())
+    .includes(normalized);
+};

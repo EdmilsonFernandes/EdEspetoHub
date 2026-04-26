@@ -42,7 +42,7 @@ import { CondominiumUser } from '../entities/CondominiumUser';
 import { getStoreSegmentPreset, sanitizeStoreSegment } from '../utils/storeSegment';
 import { resolvePlanFeatures, resolvePlanTier } from '../config/planFeatures';
 import { StoreUserRepository } from '../repositories/StoreUserRepository';
-import { isDisposableEmailDomain } from '../utils/emailRisk';
+import { isAllowlistedEmail, isDisposableEmailDomain } from '../utils/emailRisk';
 import { CustomerSecurityService } from './CustomerSecurityService';
 /**
  * Provides AuthService functionality.
@@ -233,7 +233,10 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       throw new AppError('AUTH-006', 400);
     }
-    if (isDisposableEmailDomain(email, env.security.disposableEmailDomains)) {
+    if (
+      isDisposableEmailDomain(email, env.security.disposableEmailDomains) &&
+      !isAllowlistedEmail(email, env.security.allowlistedEmails)
+    ) {
       await this.securityService.recordRiskEvent({
         email,
         phone: input?.phone,
@@ -406,7 +409,10 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     const normalizedEmail = userPayload.email
       .trim()
       .toLowerCase();
-    if (isDisposableEmailDomain(normalizedEmail, env.security.disposableEmailDomains)) {
+    if (
+      isDisposableEmailDomain(normalizedEmail, env.security.disposableEmailDomains) &&
+      !isAllowlistedEmail(normalizedEmail, env.security.allowlistedEmails)
+    ) {
       await this.securityService.recordRiskEvent({
         email: normalizedEmail,
         phone: userPayload.phone,
