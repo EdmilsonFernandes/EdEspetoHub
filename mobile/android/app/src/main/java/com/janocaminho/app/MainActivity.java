@@ -33,10 +33,14 @@ import android.webkit.WebView;
 import android.os.Build;
 import android.net.http.SslError;
 
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
 import androidx.core.splashscreen.SplashScreen;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.appcompat.app.AlertDialog;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
@@ -116,6 +120,10 @@ public class MainActivity extends BridgeActivity {
             });
             set.start();
         });
+        EdgeToEdge.enable(this);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            getWindow().setNavigationBarContrastEnforced(false);
+        }
         super.onCreate(savedInstanceState);
         initializeInAppUpdates();
         initializeLaunchOverlay();
@@ -396,6 +404,7 @@ public class MainActivity extends BridgeActivity {
         if (launchOverlay != null) {
             launchOverlay.setAlpha(1f);
             launchOverlay.setVisibility(View.VISIBLE);
+            applyLaunchOverlayInsets();
         }
         if (launchRetryButton != null) {
             launchRetryButton.setVisibility(View.GONE);
@@ -422,6 +431,27 @@ public class MainActivity extends BridgeActivity {
                 .setDuration(260L)
                 .start();
         }
+    }
+
+    private void applyLaunchOverlayInsets() {
+        if (launchOverlay == null) return;
+
+        final int baseLeft = launchOverlay.getPaddingLeft();
+        final int baseTop = launchOverlay.getPaddingTop();
+        final int baseRight = launchOverlay.getPaddingRight();
+        final int baseBottom = launchOverlay.getPaddingBottom();
+
+        ViewCompat.setOnApplyWindowInsetsListener(launchOverlay, (view, windowInsets) -> {
+            Insets systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            view.setPadding(
+                baseLeft,
+                baseTop + systemBars.top,
+                baseRight,
+                baseBottom + systemBars.bottom
+            );
+            return windowInsets;
+        });
+        ViewCompat.requestApplyInsets(launchOverlay);
     }
 
     private void initializeInAppUpdates() {
