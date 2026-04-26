@@ -149,13 +149,14 @@ export class OrderService
            AND type = 'pickup'
            AND payment_method = ANY($2::text[])
            AND status = ANY($3::text[])
+           AND store_id = $4
       `,
-      [userId, this.onSitePickupPaymentMethods, this.farPickupLocalOpenStatuses]
+      [userId, this.onSitePickupPaymentMethods, this.farPickupLocalOpenStatuses, store?.id || null]
     );
     const total = Number(row?.total || 0);
     if (total >= maxOpenOrders) {
       throw new AppError('ORDER-PICKUP-001', 409, {
-        message: 'Você já possui um pedido de retirada em aberto. Finalize ou cancele esse pedido antes de confirmar outra retirada distante.',
+        message: 'Você já possui um pedido de retirada em aberto nesta loja. Finalize ou cancele esse pedido antes de confirmar outra retirada distante aqui.',
       });
     }
   }
