@@ -2960,15 +2960,24 @@ export function StorePage() {
           </div>
         )}
         {tableNotice && (
-          <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-4">
+          <div className="fixed left-1/2 top-[max(calc(env(safe-area-inset-top)+0.9rem),1rem)] z-[85] w-full max-w-md -translate-x-1/2 px-4">
             <div
-              className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border border-white/10 text-white ${
-                tableNotice.tone === 'error' ? 'bg-rose-600' : 'bg-amber-600'
+              className={`flex items-start gap-3 rounded-[1.4rem] border px-4 py-3 text-white shadow-[0_26px_54px_-28px_rgba(15,23,42,0.58)] backdrop-blur-xl ${
+                tableNotice.tone === 'error'
+                  ? 'border-rose-400/35 bg-[linear-gradient(135deg,rgba(225,29,72,0.96)_0%,rgba(190,24,93,0.94)_100%)]'
+                  : 'border-amber-300/40 bg-[linear-gradient(135deg,rgba(217,119,6,0.96)_0%,rgba(245,158,11,0.94)_100%)]'
               }`}
             >
-              <div className="w-2.5 h-2.5 rounded-full bg-white/80" />
-              <div className="text-sm font-semibold">
-                {tableNotice.message}
+              <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-white/16 ring-1 ring-white/15">
+                <WarningCircle size={16} weight="fill" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/80">
+                  {tableNotice.tone === 'error' ? 'Atenção no pedido' : 'Confirmação necessária'}
+                </p>
+                <div className="mt-1 text-sm font-semibold leading-relaxed">
+                  {tableNotice.message}
+                </div>
               </div>
             </div>
           </div>
