@@ -30,6 +30,7 @@ import { Plan } from '../entities/Plan';
 import { Subscription } from '../entities/Subscription';
 import { Store } from '../entities/Store';
 import { PushNotificationService } from '../services/PushNotificationService';
+import { CustomerSecurityService } from '../services/CustomerSecurityService';
 
 const storeRepository = new StoreRepository();
 const subscriptionService = new SubscriptionService();
@@ -40,6 +41,7 @@ const subscriptionRepository = new SubscriptionRepository();
 const accessLogRepository = new AccessLogRepository();
 const settingsService = new SettingsService();
 const pushNotificationService = new PushNotificationService();
+const customerSecurityService = new CustomerSecurityService();
 const log = logger.child({ scope: 'PlatformAdminController' });
 /**
  * Provides PlatformAdminController functionality.
@@ -463,6 +465,222 @@ export class PlatformAdminController {
       return res.json(logs);
     } catch (error: any) {
       log.warn('Admin access logs failed', { error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async customerSecurityOverview(req: Request, res: Response) {
+    const search = String(req.query.search || '').trim().toLowerCase();
+    const blockStatus = String(req.query.blockStatus || 'active').trim().toLowerCase();
+    const severity = String(req.query.severity || 'all').trim().toLowerCase();
+    const blockType = String(req.query.blockType || 'all').trim().toLowerCase();
+    const eventType = String(req.query.eventType || 'all').trim().toLowerCase();
+    const limitBlocksRaw = Number(req.query.limitBlocks || 20);
+    const limitEventsRaw = Number(req.query.limitEvents || 25);
+    const limitBlocks = Number.isFinite(limitBlocksRaw) ? Math.max(5, Math.min(100, limitBlocksRaw)) : 20;
+    const limitEvents = Number.isFinite(limitEventsRaw) ? Math.max(5, Math.min(100, limitEventsRaw)) : 25;
+
+    try {
+      await customerSecurityService.expireElapsedBlocks();
+
+      const blockParams: any[] = [];
+      const blockWhere: string[] = [];
+      const eventParams: any[] = [];
+      const eventWhere: string[] = [];
+
+      if (blockStatus !== 'all') {
+        blockParams.push(blockStatus);
+        blockWhere.push(`b.status = $${blockParams.length}`);
+      }
+
+      if (severity !== 'all') {
+        blockParams.push(severity);
+        blockWhere.push(`b.severity = $${blockParams.length}`);
+      }
+
+      if (blockType !== 'all') {
+        blockParams.push(blockType);
+        blockWhere.push(`LOWER(b.block_type) = $${blockParams.length}`);
+      }
+
+      if (search) {
+        blockParams.push(`%${search}%`);
+        const searchIndex = blockParams.length;
+        blockWhere.push(
+          `(
+            LOWER(COALESCE(u.full_name, '')) LIKE $${searchIndex}
+            OR LOWER(COALESCE(b.email_snapshot, '')) LIKE $${searchIndex}
+            OR COALESCE(b.phone_snapshot, '') LIKE $${searchIndex}
+            OR COALESCE(CAST(b.user_id AS text), '') LIKE $${searchIndex}
+          )`
+        );
+      }
+
+      if (eventType !== 'all') {
+        eventParams.push(eventType);
+        eventWhere.push(`LOWER(e.event_type) = $${eventParams.length}`);
+      }
+
+      if (search) {
+        eventParams.push(`%${search}%`);
+        const searchIndex = eventParams.length;
+        eventWhere.push(
+          `(
+            LOWER(COALESCE(u.full_name, '')) LIKE $${searchIndex}
+            OR LOWER(COALESCE(e.email_snapshot, '')) LIKE $${searchIndex}
+            OR COALESCE(e.phone_snapshot, '') LIKE $${searchIndex}
+            OR LOWER(COALESCE(s.name, '')) LIKE $${searchIndex}
+            OR COALESCE(CAST(e.user_id AS text), '') LIKE $${searchIndex}
+          )`
+        );
+      }
+
+      blockParams.push(limitBlocks);
+      const blockLimitIndex = blockParams.length;
+      eventParams.push(limitEvents);
+      const eventLimitIndex = eventParams.length;
+
+      const blockFilterSql = blockWhere.length ? `WHERE ${blockWhere.join(' AND ')}` : '';
+      const eventFilterSql = eventWhere.length ? `WHERE ${eventWhere.join(' AND ')}` : '';
+
+      const [blocks, events, summaryRows] = await Promise.all([
+        AppDataSource.query(
+          `
+            SELECT
+              b.id,
+              b.user_id AS "userId",
+              u.full_name AS "userName",
+              b.email_snapshot AS "email",
+              b.phone_snapshot AS "phone",
+              b.block_type AS "blockType",
+              b.status,
+              b.severity,
+              b.reason,
+              b.metadata,
+              b.blocked_at AS "blockedAt",
+              b.blocked_until AS "blockedUntil",
+              b.created_by AS "createdBy",
+              b.reviewed_by AS "reviewedBy",
+              b.created_at AS "createdAt",
+              b.updated_at AS "updatedAt"
+            FROM customer_security_blocks b
+            LEFT JOIN users u ON u.id = b.user_id
+            ${blockFilterSql}
+            ORDER BY
+              CASE WHEN b.status = 'active' THEN 0 ELSE 1 END,
+              b.blocked_at DESC,
+              b.created_at DESC
+            LIMIT $${blockLimitIndex}
+          `,
+          blockParams
+        ),
+        AppDataSource.query(
+          `
+            SELECT
+              e.id,
+              e.user_id AS "userId",
+              u.full_name AS "userName",
+              e.email_snapshot AS "email",
+              e.phone_snapshot AS "phone",
+              e.event_type AS "eventType",
+              e.score,
+              e.ip_address AS "ipAddress",
+              e.store_id AS "storeId",
+              s.name AS "storeName",
+              s.slug AS "storeSlug",
+              e.order_id AS "orderId",
+              e.metadata,
+              e.created_at AS "createdAt"
+            FROM customer_risk_events e
+            LEFT JOIN users u ON u.id = e.user_id
+            LEFT JOIN stores s ON s.id = e.store_id
+            ${eventFilterSql}
+            ORDER BY e.created_at DESC
+            LIMIT $${eventLimitIndex}
+          `,
+          eventParams
+        ),
+        AppDataSource.query(
+          `
+            SELECT
+              (
+                SELECT COUNT(*)::int
+                  FROM customer_security_blocks
+                 WHERE status = 'active'
+              ) AS "activeBlocks",
+              (
+                SELECT COUNT(*)::int
+                  FROM customer_security_blocks
+                 WHERE status = 'active'
+                   AND severity = 'hard'
+              ) AS "hardActiveBlocks",
+              (
+                SELECT COUNT(*)::int
+                  FROM customer_security_blocks
+                 WHERE status = 'active'
+                   AND severity = 'soft'
+              ) AS "softActiveBlocks",
+              (
+                SELECT COUNT(*)::int
+                  FROM customer_security_blocks
+                 WHERE status = 'active'
+                   AND block_type = 'manual_review'
+              ) AS "manualReviewBlocks",
+              (
+                SELECT COUNT(*)::int
+                  FROM customer_risk_events
+                 WHERE created_at >= NOW() - INTERVAL '24 hours'
+              ) AS "eventsLast24h",
+              (
+                SELECT COUNT(*)::int
+                  FROM customer_risk_events
+                 WHERE created_at >= NOW() - INTERVAL '24 hours'
+                   AND event_type = 'rapid_far_pickup_multi_store'
+              ) AS "rapidFarPickupEventsLast24h"
+          `
+        ),
+      ]);
+
+      return res.json({
+        filters: {
+          search: search || '',
+          blockStatus,
+          severity,
+          blockType,
+          eventType,
+          limitBlocks,
+          limitEvents,
+        },
+        summary: summaryRows?.[0] || {
+          activeBlocks: 0,
+          hardActiveBlocks: 0,
+          softActiveBlocks: 0,
+          manualReviewBlocks: 0,
+          eventsLast24h: 0,
+          rapidFarPickupEventsLast24h: 0,
+        },
+        blocks,
+        events,
+      });
+    } catch (error: any) {
+      log.warn('Admin customer security overview failed', { search, blockStatus, severity, blockType, eventType, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async revokeCustomerSecurityBlock(req: Request, res: Response) {
+    const blockId = String(req.params.blockId || '').trim();
+    const revocationReason = String(req.body?.reason || '').trim() || null;
+
+    try {
+      const block = await customerSecurityService.revokeBlock({
+        blockId,
+        reviewedBy: req.auth?.sub || 'super_admin',
+        revocationReason,
+      });
+      return res.json(block);
+    } catch (error: any) {
+      log.warn('Admin customer security block revoke failed', { blockId, error });
       return respondWithError(req, res, error, 400);
     }
   }

@@ -68,6 +68,17 @@ export class CustomerSecurityService {
     await AppDataSource.getRepository(CustomerSecurityBlock).save(block);
   }
 
+  async expireElapsedBlocks() {
+    await AppDataSource
+      .createQueryBuilder()
+      .update(CustomerSecurityBlock)
+      .set({ status: 'expired' })
+      .where('status = :status', { status: 'active' })
+      .andWhere('blocked_until IS NOT NULL')
+      .andWhere('blocked_until <= NOW()')
+      .execute();
+  }
+
   async recordRiskEvent(input: RecordRiskEventInput) {
     const repo = AppDataSource.getRepository(CustomerRiskEvent);
     const event = repo.create({
@@ -173,6 +184,44 @@ export class CustomerSecurityService {
       });
 
     return saved;
+  }
+
+  async revokeBlock(input: {
+    blockId: string;
+    reviewedBy?: string | null;
+    revocationReason?: string | null;
+  }) {
+    const blockId = this.normalizeTrimmedText(input.blockId);
+    if (!blockId) {
+      throw new AppError('GEN-002', 400, { message: 'Bloqueio inválido para revogação.' });
+    }
+
+    const repo = AppDataSource.getRepository(CustomerSecurityBlock);
+    const block = await repo.findOne({ where: { id: blockId } });
+    if (!block) {
+      throw new AppError('GEN-002', 404, { message: 'Bloqueio de segurança não encontrado.' });
+    }
+
+    if (block.status === 'revoked') {
+      return block;
+    }
+
+    const reviewedBy = this.normalizeTrimmedText(input.reviewedBy) || 'super_admin';
+    const revocationReason = this.normalizeTrimmedText(input.revocationReason) || null;
+    const nextMetadata =
+      block.metadata && typeof block.metadata === 'object' ? { ...block.metadata } : {};
+
+    nextMetadata.revokedAt = new Date().toISOString();
+    nextMetadata.revokedBy = reviewedBy;
+    if (revocationReason) {
+      nextMetadata.revocationReason = revocationReason;
+    }
+
+    block.status = 'revoked';
+    block.reviewedBy = reviewedBy;
+    block.metadata = nextMetadata;
+
+    return repo.save(block);
   }
 
   async registerRapidFarPickupMultiStoreRisk(input: {

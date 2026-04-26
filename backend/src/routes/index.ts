@@ -98,6 +98,8 @@ routes.get('/admin/stores', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdm
 routes.get('/admin/queue-health', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.queueHealth);
 routes.get('/admin/payment-events', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.listPaymentEvents);
 routes.get('/admin/access-logs', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.listAccessLogs);
+routes.get('/admin/customer-security/overview', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.customerSecurityOverview);
+routes.patch('/admin/customer-security/blocks/:blockId/revoke', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.revokeCustomerSecurityBlock);
 routes.post('/admin/push/broadcast', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.broadcastPush);
 routes.get('/admin/condominiums/manage', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminOverview);
 routes.post('/admin/condominiums', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminCreate);

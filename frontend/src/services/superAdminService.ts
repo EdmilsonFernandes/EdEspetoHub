@@ -104,6 +104,42 @@ export const superAdminService = {
     });
     return handleResponse(response);
   },
+  async fetchCustomerSecurityOverview(
+    token: string,
+    filters: {
+      search?: string;
+      blockStatus?: string;
+      severity?: string;
+      blockType?: string;
+      eventType?: string;
+      limitBlocks?: number;
+      limitEvents?: number;
+    } = {}
+  ) {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === '') return;
+      params.set(key, String(value));
+    });
+    const suffix = params.toString() ? `?${params.toString()}` : '';
+    const response = await fetch(buildUrl(`/admin/customer-security/overview${suffix}`), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return handleResponse(response);
+  },
+  async revokeCustomerSecurityBlock(token: string, blockId: string, reason?: string) {
+    const response = await fetch(buildUrl(`/admin/customer-security/blocks/${blockId}/revoke`), {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ reason: reason || null }),
+    });
+    return handleResponse(response);
+  },
   async reprocessPayment(token: string, paymentId: string, providerId?: string) {
     const response = await fetch(buildUrl(`/admin/payments/${paymentId}/reprocess`), {
       method: 'POST',

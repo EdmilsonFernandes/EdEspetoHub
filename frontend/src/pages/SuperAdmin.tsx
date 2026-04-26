@@ -29,7 +29,6 @@ import {
   Sparkle,
   GitCommit,
   RocketLaunch,
-  ShieldCheck,
   Cpu,
 } from '@phosphor-icons/react';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
@@ -47,6 +46,7 @@ import { AdaptiveAvatar } from '../components/common/AdaptiveAvatar';
 import { PremiumTabs } from '../components/common/PremiumTabs';
 import { FormSection } from '../components/common/FormSection';
 import { APP_BUILD_INFO } from '../generated/buildInfo';
+import { CustomerSecuritySection } from '../components/Admin/CustomerSecuritySection';
 
 const STORAGE_KEY = 'superAdminToken';
 const STORAGE_USER_KEY = 'superAdminUser';
@@ -182,6 +182,11 @@ const SECTION_META: Record<string, { title: string; description: string; tone: s
     description: 'Acompanhamento financeiro, status e reconciliação.',
     tone: 'from-teal-500 to-teal-600 text-white border-teal-500',
   },
+  security: {
+    title: 'Segurança de clientes',
+    description: 'Bloqueios temporários, sinais de abuso e revisão operacional das contas.',
+    tone: 'from-rose-500 to-orange-500 text-white border-rose-500',
+  },
   logs: {
     title: 'Logs de acesso',
     description: 'Rastreamento de acesso, segurança e auditoria de uso.',
@@ -208,6 +213,19 @@ const SECTION_META: Record<string, { title: string; description: string; tone: s
     tone: 'from-cyan-600 to-blue-600 text-white border-cyan-600',
   },
 };
+
+const SUPER_ADMIN_SECTIONS = [
+  { id: 'executive', label: 'Resumo' },
+  { id: 'rankings', label: 'Rankings' },
+  { id: 'stores', label: 'Lojas' },
+  { id: 'payments', label: 'Pagamentos' },
+  { id: 'security', label: 'Segurança' },
+  { id: 'push', label: 'Push Global' },
+  { id: 'logs', label: 'Logs' },
+  { id: 'events', label: 'Eventos' },
+  { id: 'kyc', label: 'KYC' },
+  { id: 'versions', label: 'Versões' },
+];
 
 export function SuperAdmin() {
   const isNativePlatform = Capacitor.isNativePlatform();
@@ -1287,14 +1305,11 @@ export function SuperAdmin() {
               className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-800 shadow-sm outline-none transition focus:border-slate-900"
             >
               <option value="executive">Resumo</option>
-              <option value="rankings">Rankings</option>
-              <option value="stores">Lojas</option>
-              <option value="payments">Pagamentos</option>
-              <option value="push">Push Global</option>
-              <option value="logs">Logs</option>
-              <option value="events">Eventos</option>
-              <option value="kyc">KYC</option>
-              <option value="versions">Versões</option>
+              {SUPER_ADMIN_SECTIONS.filter((section) => section.id !== 'executive').map((section) => (
+                <option key={section.id} value={section.id}>
+                  {section.label}
+                </option>
+              ))}
             </select>
           </label>
         </div>
@@ -1302,17 +1317,7 @@ export function SuperAdmin() {
           containerClassName="hidden sm:block"
           listClassName="flex flex-nowrap gap-2 overflow-x-auto no-scrollbar scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           buttonClassName="shrink-0 whitespace-nowrap"
-          items={[
-            { id: 'executive', label: 'Resumo' },
-            { id: 'rankings', label: 'Rankings' },
-            { id: 'stores', label: 'Lojas' },
-            { id: 'payments', label: 'Pagamentos' },
-            { id: 'push', label: 'Push Global' },
-            { id: 'logs', label: 'Logs' },
-            { id: 'events', label: 'Eventos' },
-            { id: 'kyc', label: 'KYC' },
-            { id: 'versions', label: 'Versões' },
-          ]}
+          items={SUPER_ADMIN_SECTIONS}
           activeId={activeSection}
           onChange={(id) => setActiveSection(id)}
         />
@@ -1814,6 +1819,12 @@ export function SuperAdmin() {
             ) : null}
           </FormSection>
         )}
+
+        <CustomerSecuritySection
+          token={token}
+          isActive={activeSection === 'security'}
+          showToast={showToast}
+        />
 
         <FormSection
           title="Lojas e performance"
