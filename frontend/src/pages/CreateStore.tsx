@@ -198,6 +198,7 @@ export function CreateStore() {
   const [showTerms, setShowTerms] = useState(false);
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [validationMessage, setValidationMessage] = useState('');
+  const [validationItems, setValidationItems] = useState<string[]>([]);
   const [missingFields, setMissingFields] = useState<Record<string, boolean>>({});
   const [storeVerifyPrompt, setStoreVerifyPrompt] = useState<any | null>(null);
   const [storeCodeDigits, setStoreCodeDigits] = useState(['', '', '', '']);
@@ -676,14 +677,30 @@ export function CreateStore() {
       const effectivePlanId = resolveEffectivePlanId();
       if (!plans.length || effectivePlanId === 'test-plan-7days') {
         setStoreError('');
-        setValidationMessage('Aguarde carregar os planos disponíveis antes de criar sua loja.');
-        setShowValidationModal(true);
+        showValidationFeedback({
+          message: 'Aguarde carregar os planos disponíveis antes de criar sua loja.',
+          fields: { plan: true },
+          items: ['Esperar os planos carregarem para concluir a publicação.'],
+        });
         return;
       }
       if (!termsAccepted || !lgpdAccepted) {
         setStoreError('');
-        setValidationMessage('Marque os termos de uso e a política de privacidade para concluir a criação da loja.');
-        setShowValidationModal(true);
+        const fields: Record<string, boolean> = {};
+        const items: string[] = [];
+        if (!termsAccepted) {
+          fields.termsAccepted = true;
+          items.push('Aceitar os termos de uso da plataforma.');
+        }
+        if (!lgpdAccepted) {
+          fields.lgpdAccepted = true;
+          items.push('Aceitar a política de privacidade e LGPD.');
+        }
+        showValidationFeedback({
+          message: 'Marque os termos de uso e a política de privacidade para concluir a criação da loja.',
+          fields,
+          items,
+        });
         if (termsRef.current) {
           termsRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
@@ -772,8 +789,19 @@ export function CreateStore() {
       if (result.redirectUrl) {
         navigate(result.redirectUrl);
       }
-    } catch (error) {
-      setStoreError(resolveCreateStoreError(error));
+    } catch (error: any) {
+      const resolvedError = resolveCreateStoreError(error);
+      const code = String(error?.code || '').trim();
+      setStoreError(resolvedError);
+      if (code === 'AUTH-011' || /e-?mail/i.test(resolvedError)) {
+        updateFieldError('email', resolvedError);
+        setMissingFields({ email: true });
+        focusCreateStoreField('email');
+      } else if (code === 'AUTH-010' || /cpf|cnpj|documento/i.test(resolvedError)) {
+        updateFieldError('document', resolvedError);
+        setMissingFields({ document: true });
+        focusCreateStoreField('document');
+      }
     } finally {
       setIsRegistering(false);
     }
@@ -857,12 +885,39 @@ export function CreateStore() {
     });
   };
 
+  const showValidationFeedback = ({
+    message,
+    fields = {},
+    items = [],
+  }: {
+    message: string;
+    fields?: Record<string, boolean>;
+    items?: string[];
+  }) => {
+    setMissingFields(fields);
+    setValidationItems(items);
+    setValidationMessage(message);
+    setShowValidationModal(true);
+  };
+
   const getMissingFieldClass = (key: string) =>
     missingFields[key]
       ? '!border-amber-400 !bg-amber-50/80 ring-4 ring-amber-200/50 shadow-[0_18px_38px_-28px_rgba(245,158,11,0.65)]'
       : '';
 
+  const resolveCreateStoreStepForField = (key: string) => {
+    if (['fullName', 'email', 'phone', 'document', 'password'].includes(key)) return 1;
+    if (['cep', 'state', 'city', 'street', 'neighborhood', 'number'].includes(key)) return 2;
+    if (['storeName', 'segment'].includes(key)) return 3;
+    if (['plan', 'termsAccepted', 'lgpdAccepted'].includes(key)) return 4;
+    return null;
+  };
+
   const focusCreateStoreField = (key: string) => {
+    const targetStep = resolveCreateStoreStepForField(key);
+    if (targetStep) {
+      setCurrentStep(targetStep);
+    }
     window.setTimeout(() => {
       const target = document.querySelector(`[data-create-field="${key}"]`) as HTMLElement | null;
       target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -892,13 +947,26 @@ export function CreateStore() {
     const emailMessage = validateEmail(registerForm.email);
     const documentMessage = validateDocument(registerForm.document, registerForm.documentType);
     if (emailMessage || documentMessage) {
+      const fields: Record<string, boolean> = {};
+      const items: string[] = [];
+      if (emailMessage) {
+        fields.email = true;
+        items.push(emailMessage);
+      }
+      if (documentMessage) {
+        fields.document = true;
+        items.push(documentMessage);
+      }
       setFieldErrors((prev) => ({
         ...prev,
         email: emailMessage,
         document: documentMessage,
       }));
-      setValidationMessage(emailMessage || documentMessage);
-      setShowValidationModal(true);
+      showValidationFeedback({
+        message: emailMessage || documentMessage,
+        fields,
+        items,
+      });
       return false;
     }
 
@@ -915,14 +983,23 @@ export function CreateStore() {
     } catch (error: any) {
       const message = resolveCreateStoreError(error);
       const code = String(error?.code || '');
+      const fields: Record<string, boolean> = {};
+      const items: string[] = [];
       if (code === 'AUTH-011' || /e-?mail/i.test(message)) {
         updateFieldError('email', message);
+        fields.email = true;
+        items.push('Use outro e-mail ou entre na conta existente.');
       }
       if (code === 'AUTH-010' || /cpf|cnpj|documento/i.test(message)) {
         updateFieldError('document', message);
+        fields.document = true;
+        items.push('Corrija o CPF ou CNPJ informado.');
       }
-      setValidationMessage(message);
-      setShowValidationModal(true);
+      showValidationFeedback({
+        message,
+        fields,
+        items,
+      });
       return false;
     } finally {
       setIsPreflightingOwner(false);
@@ -1112,6 +1189,13 @@ export function CreateStore() {
     3: { icon: Storefront, hint: 'Identidade da loja' },
     4: { icon: CreditCard, hint: 'Plano e termos' },
   };
+  const finalReviewBlockingItems = [
+    missingFields.plan ? 'Escolha um plano disponível para liberar a criação da loja.' : '',
+    missingFields.termsAccepted ? 'Aceite os termos de uso antes de publicar.' : '',
+    missingFields.lgpdAccepted ? 'Confirme a política de privacidade e LGPD para concluir.' : '',
+  ].filter(Boolean);
+  const hasFinalReviewBlockingItems = finalReviewBlockingItems.length > 0;
+  const isEmailConflictError = /e-?mail.*cadastrado|entre na conta existente/i.test(storeError);
 
   const canAdvanceFromStep = (stepId: number) => {
     if (stepId === 1) {
@@ -1215,8 +1299,11 @@ export function CreateStore() {
 
   const showStepValidation = (stepId: number) => {
     const details = getStepValidationDetails(stepId);
-    setMissingFields(details.fields);
-    setValidationMessage(details.message || getStepValidationMessage(stepId));
+    showValidationFeedback({
+      message: details.message || getStepValidationMessage(stepId),
+      fields: details.fields,
+      items: details.items,
+    });
     const firstField = Object.keys(details.fields)[0];
     if (firstField) focusCreateStoreField(firstField);
   };
@@ -1452,8 +1539,21 @@ export function CreateStore() {
           </div>
 
           {storeError && (
-            <div className="bg-red-50 text-red-700 text-sm p-4 rounded-xl border border-red-100 mb-6">
-              {storeError}
+            <div className="mb-6 rounded-[1.6rem] border border-rose-200 bg-[linear-gradient(180deg,rgba(255,241,242,0.98),rgba(255,255,255,0.96))] p-4 shadow-[0_24px_48px_-34px_rgba(225,29,72,0.45)]">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-rose-100 text-rose-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+                  <WarningCircle size={22} weight="fill" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-rose-500">Cadastro bloqueado</p>
+                  <p className="mt-1 text-sm font-black leading-relaxed text-rose-900">{storeError}</p>
+                  {isEmailConflictError ? (
+                    <div className="mt-3 inline-flex rounded-full border border-rose-200 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-rose-700">
+                      Troque o e-mail ou entre na conta existente
+                    </div>
+                  ) : null}
+                </div>
+              </div>
             </div>
           )}
 
@@ -1494,6 +1594,9 @@ export function CreateStore() {
                         const next = e.target.value;
                         setRegisterForm((prev) => ({ ...prev, email: next }));
                         clearMissingField('email');
+                        if (storeError) {
+                          setStoreError('');
+                        }
                         if (fieldErrors.email) {
                           updateFieldError('email', '');
                         }
@@ -1556,6 +1659,9 @@ export function CreateStore() {
                           const nextType = e.target.value;
                           setRegisterForm((prev) => ({ ...prev, documentType: nextType }));
                           clearMissingField('document');
+                          if (storeError) {
+                            setStoreError('');
+                          }
                           if (registerForm.document) {
                             updateFieldError('document', validateDocument(registerForm.document, nextType));
                           }
@@ -1573,6 +1679,9 @@ export function CreateStore() {
                           const next = e.target.value;
                           setRegisterForm((prev) => ({ ...prev, document: next }));
                           clearMissingField('document');
+                          if (storeError) {
+                            setStoreError('');
+                          }
                           if (fieldErrors.document) {
                             updateFieldError('document', '');
                           }
@@ -2219,11 +2328,59 @@ export function CreateStore() {
             </div>
 
             <div ref={termsRef} className={`pt-6 border-t border-gray-100 space-y-3 ${currentStep === 4 ? '' : 'hidden'}`}>
-              <div className="rounded-[1.6rem] border border-slate-200 bg-white/88 p-4 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.35)]">
-                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">Confirmação final</p>
-                <p className="mt-1 text-sm font-bold text-slate-800">Revise e aceite para receber o código no e-mail.</p>
+              {hasFinalReviewBlockingItems ? (
+                <div className="rounded-[1.7rem] border border-rose-200 bg-[linear-gradient(180deg,rgba(255,241,242,0.98),rgba(255,255,255,0.96))] p-4 shadow-[0_28px_56px_-36px_rgba(225,29,72,0.45)]">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-rose-100 text-rose-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
+                      <WarningCircle size={22} weight="fill" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-rose-500">O que falta para publicar</p>
+                      <p className="mt-1 text-sm font-black leading-relaxed text-rose-950">
+                        Sua loja só é criada depois que estes pontos forem concluídos.
+                      </p>
+                    </div>
+                  </div>
+                  <ul className="mt-4 space-y-2">
+                    {finalReviewBlockingItems.map((item) => (
+                      <li
+                        key={item}
+                        className="flex items-start gap-3 rounded-2xl border border-rose-200/70 bg-white/88 px-3 py-3 text-sm font-semibold leading-relaxed text-rose-900"
+                      >
+                        <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-rose-500" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              <div
+                className={`rounded-[1.6rem] border p-4 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.35)] ${
+                  hasFinalReviewBlockingItems
+                    ? 'border-amber-200 bg-amber-50/90'
+                    : 'border-slate-200 bg-white/88'
+                }`}
+              >
+                <p className={`text-[10px] font-black uppercase tracking-[0.24em] ${
+                  hasFinalReviewBlockingItems ? 'text-amber-700' : 'text-slate-400'
+                }`}>
+                  Confirmação final
+                </p>
+                <p className={`mt-1 text-sm font-bold ${
+                  hasFinalReviewBlockingItems ? 'text-amber-950' : 'text-slate-800'
+                }`}>
+                  {hasFinalReviewBlockingItems
+                    ? 'Aceite as confirmações abaixo para liberar a criação da loja.'
+                    : 'Revise e aceite para receber o código no e-mail.'}
+                </p>
               </div>
-              <label className="create-store-check-card">
+              <label
+                className={`create-store-check-card ${
+                  missingFields.termsAccepted
+                    ? '!border-rose-300 !bg-rose-50/92 ring-4 ring-rose-200/60 shadow-[0_20px_42px_-30px_rgba(225,29,72,0.45)]'
+                    : ''
+                }`}
+              >
                 <input
                   type="checkbox"
                   data-create-field="termsAccepted"
@@ -2235,8 +2392,17 @@ export function CreateStore() {
                   ref={termsCheckboxRef}
                   className="mt-1 h-5 w-5 accent-[#0d4f66]"
                 />
-                <span>
-                  Li e aceito os{' '}
+                <span className="space-y-1">
+                  <span className="flex flex-wrap items-center gap-2 text-sm font-black text-slate-900">
+                    Aceitar os termos de uso
+                    {missingFields.termsAccepted ? (
+                      <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-rose-700">
+                        Obrigatório
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="block text-sm font-medium leading-relaxed text-slate-600">
+                    Li e aceito os{' '}
                   <button
                     type="button"
                     onClick={() => setShowTerms(true)}
@@ -2245,9 +2411,16 @@ export function CreateStore() {
                     termos de uso
                   </button>{' '}
                   da plataforma.
+                  </span>
                 </span>
               </label>
-              <label className="create-store-check-card">
+              <label
+                className={`create-store-check-card ${
+                  missingFields.lgpdAccepted
+                    ? '!border-rose-300 !bg-rose-50/92 ring-4 ring-rose-200/60 shadow-[0_20px_42px_-30px_rgba(225,29,72,0.45)]'
+                    : ''
+                }`}
+              >
                 <input
                   type="checkbox"
                   data-create-field="lgpdAccepted"
@@ -2258,16 +2431,26 @@ export function CreateStore() {
                   }}
                   className="mt-1 h-5 w-5 accent-[#0d4f66]"
                 />
-                <span>
-                  Concordo com o tratamento de dados pessoais conforme a LGPD e a{' '}
+                <span className="space-y-1">
+                  <span className="flex flex-wrap items-center gap-2 text-sm font-black text-slate-900">
+                    Aceitar a política de privacidade
+                    {missingFields.lgpdAccepted ? (
+                      <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-rose-700">
+                        Obrigatório
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="block text-sm font-medium leading-relaxed text-slate-600">
+                    Concordo com o tratamento de dados pessoais conforme a LGPD e a{' '}
                   <button
                     type="button"
                     onClick={() => setShowTerms(true)}
-                  className="text-[#0d4f66] font-black hover:underline"
-                >
+                    className="text-[#0d4f66] font-black hover:underline"
+                  >
                     política de privacidade
                   </button>
                   .
+                </span>
                 </span>
               </label>
             </div>
@@ -2576,20 +2759,65 @@ export function CreateStore() {
               </div>
             </div>
             <div className="space-y-4 px-6 py-5">
-              <div className="rounded-2xl border border-slate-200 bg-white/82 p-4 text-sm font-medium leading-relaxed text-slate-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                Se estiver no passo de plano, marque os termos de uso e a política de privacidade. O cadastro só cria a loja depois dessa confirmação.
+              <div
+                className={`rounded-2xl border p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] ${
+                  validationItems.length
+                    ? 'border-amber-200 bg-[linear-gradient(180deg,rgba(255,251,235,0.96),rgba(255,255,255,0.96))]'
+                    : 'border-slate-200 bg-white/82'
+                }`}
+              >
+                <p className={`text-[11px] font-black uppercase tracking-[0.2em] ${
+                  validationItems.length ? 'text-amber-700' : 'text-slate-500'
+                }`}>
+                  {validationItems.length ? 'Ação obrigatória' : 'Antes de continuar'}
+                </p>
+                <p className={`mt-1 text-sm font-semibold leading-relaxed ${
+                  validationItems.length ? 'text-amber-950' : 'text-slate-700'
+                }`}>
+                  {currentStep === 4
+                    ? 'Sua loja só é criada depois que essas confirmações forem aceitas.'
+                    : 'Corrija os pontos abaixo para continuar no cadastro.'}
+                </p>
+                {validationItems.length ? (
+                  <ul className="mt-3 space-y-2">
+                    {validationItems.map((item) => (
+                      <li
+                        key={item}
+                        className="flex items-start gap-3 rounded-2xl border border-amber-200/80 bg-white/92 px-3 py-3 text-sm font-semibold leading-relaxed text-amber-950"
+                      >
+                        <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-amber-500" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
               </div>
+              {(currentStep === 4 || missingFields.termsAccepted || missingFields.lgpdAccepted || missingFields.plan) ? (
+                <div className="rounded-2xl border border-rose-200 bg-rose-50/90 p-4 text-sm font-semibold leading-relaxed text-rose-800 shadow-[0_18px_36px_-30px_rgba(225,29,72,0.45)]">
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-rose-600">Publicação bloqueada</p>
+                  <p className="mt-1">
+                    Se estiver no passo de plano, marque os termos de uso e a política de privacidade. O cadastro só cria a loja depois dessa confirmação.
+                  </p>
+                </div>
+              ) : null}
               <button
                 type="button"
                 onClick={() => {
                   setShowValidationModal(false);
+                  const priorityField =
+                    Object.keys(missingFields)[0] ||
+                    (currentStep === 4 ? 'termsAccepted' : '');
+                  if (priorityField) {
+                    focusCreateStoreField(priorityField);
+                    return;
+                  }
                   if (currentStep === 4 && termsRef.current) {
                     window.setTimeout(() => termsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
                   }
                 }}
                 className="w-full rounded-2xl bg-[linear-gradient(135deg,#0f3b53,#0d4f66,#2c8c9f)] px-4 py-3.5 text-sm font-black text-white shadow-[0_22px_44px_-24px_rgba(15,59,83,0.65)] transition active:scale-[0.99]"
               >
-                Revisar agora
+                Corrigir agora
               </button>
             </div>
           </div>
