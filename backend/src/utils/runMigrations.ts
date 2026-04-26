@@ -1731,6 +1731,102 @@ export async function runMigrations() {
     ON guest_order_attempts(ip_address);
   `);
   await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS customer_security_blocks (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      email_snapshot TEXT,
+      phone_snapshot TEXT,
+      block_type VARCHAR(40) NOT NULL,
+      status VARCHAR(20) NOT NULL DEFAULT 'active',
+      severity VARCHAR(20) NOT NULL DEFAULT 'soft',
+      reason TEXT,
+      metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+      blocked_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      blocked_until TIMESTAMPTZ,
+      created_by TEXT,
+      reviewed_by TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_customer_security_blocks_user_status
+    ON customer_security_blocks(user_id, status, blocked_at DESC);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_customer_security_blocks_type
+    ON customer_security_blocks(block_type);
+  `);
+  await AppDataSource.query(`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1
+          FROM pg_constraint
+         WHERE conname = 'chk_customer_security_blocks_status'
+      ) THEN
+        ALTER TABLE customer_security_blocks
+          ADD CONSTRAINT chk_customer_security_blocks_status
+          CHECK (status IN ('active', 'expired', 'revoked'));
+      END IF;
+    END $$;
+  `);
+  await AppDataSource.query(`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1
+          FROM pg_constraint
+         WHERE conname = 'chk_customer_security_blocks_type'
+      ) THEN
+        ALTER TABLE customer_security_blocks
+          ADD CONSTRAINT chk_customer_security_blocks_type
+          CHECK (block_type IN ('far_pickup_abuse', 'payment_abuse', 'identity_risk', 'manual_review', 'chargeback_risk'));
+      END IF;
+    END $$;
+  `);
+  await AppDataSource.query(`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1
+          FROM pg_constraint
+         WHERE conname = 'chk_customer_security_blocks_severity'
+      ) THEN
+        ALTER TABLE customer_security_blocks
+          ADD CONSTRAINT chk_customer_security_blocks_severity
+          CHECK (severity IN ('soft', 'hard'));
+      END IF;
+    END $$;
+  `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS customer_risk_events (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+      email_snapshot TEXT,
+      phone_snapshot TEXT,
+      event_type VARCHAR(60) NOT NULL,
+      score NUMERIC(6,2) NOT NULL DEFAULT 0,
+      ip_address TEXT,
+      store_id UUID REFERENCES stores(id) ON DELETE SET NULL,
+      order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+      metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_customer_risk_events_user_created
+    ON customer_risk_events(user_id, created_at DESC);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_customer_risk_events_event_type
+    ON customer_risk_events(event_type);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_customer_risk_events_store
+    ON customer_risk_events(store_id);
+  `);
+  await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS zip_code_cache (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       zip_code VARCHAR(8) NOT NULL UNIQUE,

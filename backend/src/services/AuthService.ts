@@ -42,6 +42,8 @@ import { CondominiumUser } from '../entities/CondominiumUser';
 import { getStoreSegmentPreset, sanitizeStoreSegment } from '../utils/storeSegment';
 import { resolvePlanFeatures, resolvePlanTier } from '../config/planFeatures';
 import { StoreUserRepository } from '../repositories/StoreUserRepository';
+import { isDisposableEmailDomain } from '../utils/emailRisk';
+import { CustomerSecurityService } from './CustomerSecurityService';
 /**
  * Provides AuthService functionality.
  *
@@ -59,6 +61,7 @@ export class AuthService
   private subscriptionService = new SubscriptionService();
   private settingsService = new SettingsService();
   private storeUserRepository = new StoreUserRepository();
+  private securityService = new CustomerSecurityService();
 
     /**
    * Executes normalize phone business logic.
@@ -230,6 +233,18 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       throw new AppError('AUTH-006', 400);
     }
+    if (isDisposableEmailDomain(email, env.security.disposableEmailDomains)) {
+      await this.securityService.recordRiskEvent({
+        email,
+        phone: input?.phone,
+        eventType: 'disposable_email_attempt',
+        score: 45,
+        metadata: { flow: 'store_preflight' },
+      });
+      throw new AppError('AUTH-023', 400, {
+        message: 'Use um e-mail pessoal ou comercial válido. E-mails temporários não são aceitos.',
+      });
+    }
 
     const documentType = String(input?.documentType || 'CPF').trim().toUpperCase();
     const normalizedDocument = normalizeDocument(input?.document);
@@ -391,6 +406,19 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     const normalizedEmail = userPayload.email
       .trim()
       .toLowerCase();
+    if (isDisposableEmailDomain(normalizedEmail, env.security.disposableEmailDomains)) {
+      await this.securityService.recordRiskEvent({
+        email: normalizedEmail,
+        phone: userPayload.phone,
+        ipAddress: meta?.ipAddress,
+        eventType: 'disposable_email_attempt',
+        score: 45,
+        metadata: { flow: accountType === 'MOTOBOY' ? 'motoboy_register' : 'store_register' },
+      });
+      throw new AppError('AUTH-023', 400, {
+        message: 'Use um e-mail pessoal ou comercial válido. E-mails temporários não são aceitos.',
+      });
+    }
 
     if (!input.termsAccepted || !input.lgpdAccepted)
     {

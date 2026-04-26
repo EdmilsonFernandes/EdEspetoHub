@@ -34,6 +34,7 @@ import { PushNotificationService } from './PushNotificationService';
 import { OrderPaymentService } from './OrderPaymentService';
 import { calculateDistanceKm, roundDistanceKm } from '../utils/geo';
 import { env } from '../config/env';
+import { CustomerSecurityService } from './CustomerSecurityService';
 /**
  * Provides OrderService functionality.
  *
@@ -55,6 +56,7 @@ export class OrderService
   private storeUserRepository = new StoreUserRepository();
   private pushService = new PushNotificationService();
   private orderPaymentService = new OrderPaymentService();
+  private customerSecurityService = new CustomerSecurityService();
   private tz = process.env.APP_TZ || 'America/Sao_Paulo';
   private queueReconcileCooldownByStore = new Map<string, number>();
   private readonly queueReconcileCooldownMs = 20000;
@@ -126,6 +128,63 @@ export class OrderService
     return roundDistanceKm(calculateDistanceKm(customerCoords, storeCoords), 1);
   }
 
+  private async ensureRapidFarPickupMultiStoreRisk(
+    input: CreateOrderDto,
+    store: any,
+    pickupDistanceKm: number
+  ) {
+    const userId = this.normalizeTrimmedText(input?.customerUserId);
+    if (!userId) return;
+
+    const rapidWindowMinutes = Math.max(1, Number(env.security.customerRapidPickupWindowMinutes || 15));
+    const rows = await AppDataSource.query(
+      `
+        SELECT DISTINCT store_id
+          FROM orders
+         WHERE customer_user_id = $1
+           AND type = 'pickup'
+           AND payment_method = ANY($2::text[])
+           AND status = ANY($3::text[])
+           AND store_id <> $4
+           AND created_at >= NOW() - ($5::text || ' minutes')::interval
+         LIMIT 8
+      `,
+      [userId, this.onSitePickupPaymentMethods, this.farPickupLocalOpenStatuses, store?.id || null, String(rapidWindowMinutes)]
+    );
+
+    const recentOtherStoreIds = Array.from(
+      new Set(
+        (Array.isArray(rows) ? rows : [])
+          .map((row: any) => this.normalizeTrimmedText(row?.store_id))
+          .filter(Boolean)
+      )
+    );
+    if (!recentOtherStoreIds.length) return;
+
+    const { block } = await this.customerSecurityService.registerRapidFarPickupMultiStoreRisk({
+      userId,
+      phone: input?.phone,
+      ipAddress: input?.clientIp,
+      storeId: String(store?.id || ''),
+      pickupDistanceKm,
+      paymentMethod: input?.paymentMethod,
+      recentOtherStoreIds,
+    });
+
+    if (block) {
+      throw new AppError('AUTH-024', 403, {
+        message:
+          block.reason ||
+          'Sua conta foi temporariamente bloqueada por segurança. Entre em contato com o suporte.',
+        blockId: block.id,
+        blockType: block.blockType,
+        severity: block.severity,
+        blockedUntil: block.blockedUntil || null,
+        context: 'order',
+      });
+    }
+  }
+
   private async ensureFarPickupPolicy(input: CreateOrderDto, store: any) {
     const userId = this.normalizeTrimmedText(input?.customerUserId);
     if (!userId) return;
@@ -159,6 +218,8 @@ export class OrderService
         message: 'Você já possui um pedido de retirada em aberto nesta loja. Finalize ou cancele esse pedido antes de confirmar outra retirada distante aqui.',
       });
     }
+
+    await this.ensureRapidFarPickupMultiStoreRisk(input, store, pickupDistanceKm);
   }
 
   private async ensureAnonymousOrderPolicy(input: CreateOrderDto, storeId: string) {
@@ -968,6 +1029,7 @@ private async seedPostalShipmentFromCheckoutTx(
   {
     const store = await this.storeRepository.findById(input.storeId);
     if (!store) throw new AppError('STORE-001', 404);
+    await this.customerSecurityService.assertCustomerAllowed(input.customerUserId, 'order');
     await this.ensureAnonymousOrderPolicy(input, store.id);
     await this.ensureFarPickupPolicy(input, store);
     const saved = await AppDataSource.transaction(async (manager) => {
@@ -1016,6 +1078,7 @@ private async seedPostalShipmentFromCheckoutTx(
   {
     const store = await this.storeRepository.findBySlugWithOwner(input.storeSlug);
     if (!store) throw new AppError('STORE-001', 404);
+    await this.customerSecurityService.assertCustomerAllowed(input.customerUserId, 'order');
     await this.ensureAnonymousOrderPolicy({ ...input, storeId: store.id }, store.id);
     await this.ensureFarPickupPolicy({ ...input, storeId: store.id } as CreateOrderDto, store);
     const saved = await AppDataSource.transaction(async (manager) => {

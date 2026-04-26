@@ -22,6 +22,8 @@
   "AUTH-020": "SUPER_ADMIN não configurado no banco.",
   "AUTH-021": "Credenciais inválidas.",
   "AUTH-022": "Usuário sem loja vinculada.",
+  "AUTH-023": "Use um e-mail pessoal ou comercial válido.",
+  "AUTH-024": "Conta temporariamente bloqueada por segurança.",
   "AUTH-S001": "Se o e-mail existir, enviaremos instruções.",
   "AUTH-S002": "Se o e-mail existir, enviaremos instruções.",
   "AUTH-S003": "Senha atualizada com sucesso.",

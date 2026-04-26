@@ -15,6 +15,8 @@ import { OrderService } from './OrderService';
 import { OrderEtaServiceV2 } from './OrderEtaServiceV2';
 import { logger } from '../utils/logger';
 import { ZipCodeLookupService } from './ZipCodeLookupService';
+import { isDisposableEmailDomain } from '../utils/emailRisk';
+import { CustomerSecurityService } from './CustomerSecurityService';
 
 type AddressInput = {
   label?: string;
@@ -38,6 +40,7 @@ export class CustomerAccountService {
   private orderService = new OrderService();
   private orderEtaService = new OrderEtaServiceV2();
   private zipCodeLookupService = new ZipCodeLookupService();
+  private securityService = new CustomerSecurityService();
   private log = logger.child({ scope: 'CustomerAccountService' });
     /**
    * Executes normalize email business logic.
@@ -448,6 +451,19 @@ async register(
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(email)) {
       throw new AppError('GEN-002', 400, { message: 'Informe um e-mail válido.' });
     }
+    if (isDisposableEmailDomain(email, env.security.disposableEmailDomains)) {
+      await this.securityService.recordRiskEvent({
+        email,
+        phone,
+        ipAddress: meta?.ipAddress,
+        eventType: 'disposable_email_attempt',
+        score: 45,
+        metadata: { flow: 'customer_register' },
+      });
+      throw new AppError('AUTH-023', 400, {
+        message: 'Use um e-mail pessoal ou comercial válido. E-mails temporários não são aceitos.',
+      });
+    }
     if (password.length < 6) {
       throw new AppError('GEN-002', 400, { message: 'A senha precisa ter ao menos 6 caracteres.' });
     }
@@ -486,7 +502,7 @@ async register(
    *
    * @author Edmilson Lopes
    */
-async login(input: { email: string; password: string }) {
+async login(input: { email: string; password: string }, meta?: { ipAddress?: string | null }) {
     const email = this.normalizeEmail(input?.email || '');
     const password = String(input?.password || '');
     if (!email || !password) throw new AppError('AUTH-004', 401);
@@ -498,6 +514,8 @@ async login(input: { email: string; password: string }) {
     if (user.isActive === false) {
       throw new AppError('AUTH-004', 401, { message: 'Esta conta foi desativada.' });
     }
+
+    await this.securityService.assertCustomerAllowed(user.id, 'login');
 
     const valid = await bcrypt.compare(password, String(user.password || ''));
     if (!valid) throw new AppError('AUTH-004', 401);

@@ -22,6 +22,8 @@
   "AUTH-020": "SUPER_ADMIN not found in database.",
   "AUTH-021": "Invalid credentials.",
   "AUTH-022": "User has no linked store.",
+  "AUTH-023": "Use a valid personal or business email.",
+  "AUTH-024": "Account temporarily blocked for security reasons.",
   "AUTH-S001": "If the email exists, we will send instructions.",
   "AUTH-S002": "If the email exists, we will send instructions.",
   "AUTH-S003": "Password updated successfully.",

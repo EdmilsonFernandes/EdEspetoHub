@@ -449,6 +449,59 @@ private renderTemplate(template: string, vars: Record<string, string>) {
     await this.send({ to: email, subject, text, html });
   }
 
+  async sendCustomerSecurityBlockAlert(payload: {
+    email: string;
+    fullName: string;
+    phone?: string | null;
+    reason: string;
+    blockType: string;
+    severity: string;
+    blockedAt: Date;
+    blockedUntil?: Date | null;
+    metadata?: Record<string, unknown>;
+  }) {
+    const targets = this.getNotificationRecipients('');
+    if (!targets.length) return;
+
+    const subject = `Bloqueio de segurança - cliente ${payload.email || payload.fullName}`;
+    const metadataText = payload.metadata ? JSON.stringify(payload.metadata, null, 2) : '{}';
+    const text = [
+      'Um cliente entrou em bloqueio de segurança.',
+      `Nome: ${payload.fullName || '-'}`,
+      `E-mail: ${payload.email || '-'}`,
+      `Telefone: ${payload.phone || '-'}`,
+      `Tipo: ${payload.blockType}`,
+      `Severidade: ${payload.severity}`,
+      `Bloqueado em: ${payload.blockedAt.toISOString()}`,
+      `Bloqueado até: ${payload.blockedUntil ? payload.blockedUntil.toISOString() : 'indeterminado'}`,
+      `Motivo: ${payload.reason}`,
+      '',
+      metadataText,
+    ].join('\n');
+    const html = `
+      <div style="font-family: Arial, sans-serif; background: #f8fafc; padding: 24px;">
+        <div style="max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 22px;">
+          <p style="margin: 0 0 8px; color: #be123c; font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;">Segurança</p>
+          <h2 style="margin: 0 0 12px; color: #0f172a;">Cliente bloqueado para revisão</h2>
+          <ul style="padding-left: 18px; margin: 0 0 18px; color: #0f172a; line-height: 1.65;">
+            <li><strong>Nome:</strong> ${payload.fullName || '-'}</li>
+            <li><strong>E-mail:</strong> ${payload.email || '-'}</li>
+            <li><strong>Telefone:</strong> ${payload.phone || '-'}</li>
+            <li><strong>Tipo:</strong> ${payload.blockType}</li>
+            <li><strong>Severidade:</strong> ${payload.severity}</li>
+            <li><strong>Bloqueado em:</strong> ${payload.blockedAt.toISOString()}</li>
+            <li><strong>Bloqueado até:</strong> ${payload.blockedUntil ? payload.blockedUntil.toISOString() : 'indeterminado'}</li>
+          </ul>
+          <div style="padding: 14px 16px; border-radius: 14px; background: #fff1f2; border: 1px solid #fecdd3; color: #9f1239; font-size: 13px; line-height: 1.6;">
+            ${payload.reason}
+          </div>
+          <pre style="margin: 18px 0 0; padding: 14px 16px; border-radius: 14px; background: #0f172a; color: #e2e8f0; font-size: 12px; line-height: 1.6; white-space: pre-wrap;">${metadataText}</pre>
+        </div>
+      </div>
+    `;
+    await Promise.all(targets.map((target) => this.send({ to: target, subject, text, html })));
+  }
+
   async sendStoreVerificationCode(email: string, fullName: string, code: string) {
     const logoUrl = this.getLogoUrl();
     const appUrl = env.appUrl || 'https://janocaminho.com.br';

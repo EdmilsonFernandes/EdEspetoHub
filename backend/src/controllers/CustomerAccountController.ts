@@ -32,7 +32,7 @@ static async register(req: Request, res: Response) {
    */
 static async login(req: Request, res: Response) {
     try {
-      const result = await service.login(req.body || {});
+      const result = await service.login(req.body || {}, { ipAddress: req.ip });
       return res.json(result);
     } catch (error: any) {
       log.warn('Customer login failed', { error });
