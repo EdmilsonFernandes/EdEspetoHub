@@ -18,6 +18,7 @@ import { AppDataSource } from '../config/database';
 import { Motoboy } from '../entities/Motoboy';
 import { OrderDelivery } from '../entities/OrderDelivery';
 import { OrderPayment } from '../entities/OrderPayment';
+import { OrderPaymentService } from '../services/OrderPaymentService';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
@@ -26,6 +27,7 @@ import { createOrderAccessToken } from '../utils/orderAccessToken';
 
 const orderService = new OrderService();
 const orderEtaServiceV2 = new OrderEtaServiceV2();
+const orderPaymentService = new OrderPaymentService();
 const log = logger.child({ scope: 'OrderController' });
 /**
  * Provides OrderController functionality.
@@ -163,6 +165,27 @@ export class OrderController {
       return res.json(orders);
     } catch (error: any) {
       log.warn('Order queue by slug failed', { slug: req.params.slug, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async getPaymentAudit(req: Request, res: Response) {
+    try {
+      const includeTechnical = String(req.auth?.role || '').toUpperCase() === 'ADMIN';
+      const payload = await orderPaymentService.getAuditByOrderForStore(
+        req.params.orderId,
+        req.params.storeId,
+        req.auth?.storeId,
+        includeTechnical
+      );
+      return res.json(payload);
+    } catch (error: any) {
+      log.warn('Order payment audit failed', {
+        storeId: req.params.storeId,
+        orderId: req.params.orderId,
+        userId: req.auth?.sub,
+        error,
+      });
       return respondWithError(req, res, error, 400);
     }
   }

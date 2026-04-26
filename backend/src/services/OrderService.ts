@@ -27,14 +27,16 @@ import { UserRepository } from '../repositories/UserRepository';
 import { StoreUserRepository } from '../repositories/StoreUserRepository';
 import bcrypt from 'bcryptjs';
 import { randomUUID } from 'crypto';
-import { EntityManager } from 'typeorm';
+import { EntityManager, In } from 'typeorm';
 import { Product } from '../entities/Product';
 import { OrderShipment } from '../entities/OrderShipment';
+import { OrderPayment } from '../entities/OrderPayment';
 import { PushNotificationService } from './PushNotificationService';
 import { OrderPaymentService } from './OrderPaymentService';
 import { calculateDistanceKm, roundDistanceKm } from '../utils/geo';
 import { env } from '../config/env';
 import { CustomerSecurityService } from './CustomerSecurityService';
+import { resolveMercadoPagoStatusDetailLabel, resolveMercadoPagoStatusLabel } from '../utils/paymentAudit';
 /**
  * Provides OrderService functionality.
  *
@@ -77,6 +79,51 @@ export class OrderService
   private isStaffActor(role?: string | null) {
     const normalized = String(role || '').trim().toUpperCase();
     return [ 'ADMIN', 'OPERATOR', 'LOJISTA', 'STORE_OWNER', 'SUPER_ADMIN' ].includes(normalized);
+  }
+
+  private async attachOrderPaymentSnapshot(orders: any[]) {
+    const rows = Array.isArray(orders) ? orders : [];
+    const orderIds = Array.from(new Set(rows.map((order) => String(order?.id || '').trim()).filter(Boolean)));
+    if (!orderIds.length) return rows;
+
+    const payments = await AppDataSource.getRepository(OrderPayment).find({
+      where: { orderId: In(orderIds) },
+    });
+    const paymentMap = new Map<string, OrderPayment>();
+    (payments || []).forEach((payment) => {
+      paymentMap.set(String(payment.orderId), payment);
+    });
+
+    return rows.map((order) => {
+      const payment = paymentMap.get(String(order?.id || ''));
+      if (!payment) {
+        return { ...order, onlinePayment: null };
+      }
+      const providerStatus = String(payment.providerPayload?.status || '').trim().toLowerCase() || null;
+      const providerStatusDetail = String(payment.providerPayload?.status_detail || '').trim().toLowerCase() || null;
+      return {
+        ...order,
+        onlinePayment: {
+          id: payment.id,
+          paymentMethod: payment.paymentMethod,
+          paymentStatus: payment.paymentStatus,
+          paymentStatusLabel: resolveMercadoPagoStatusLabel(payment.paymentStatus),
+          amount: Number(payment.amount || 0),
+          provider: payment.provider,
+          providerId: payment.providerId || null,
+          providerStatus,
+          providerStatusLabel: resolveMercadoPagoStatusLabel(providerStatus),
+          providerStatusDetail,
+          providerStatusDetailLabel: resolveMercadoPagoStatusDetailLabel(providerStatusDetail),
+          paymentLink: payment.paymentLink || null,
+          qrCodeText: payment.qrCodeText || null,
+          expiresAt: payment.expiresAt || null,
+          paidAt: payment.paidAt || null,
+          failedAt: payment.failedAt || null,
+          updatedAt: payment.updatedAt || null,
+        },
+      };
+    });
   }
 
   private normalizeTrimmedText(value?: string | null) {
@@ -1141,7 +1188,8 @@ private async seedPostalShipmentFromCheckoutTx(
     const orders = await this.orderRepository.findByStoreId(store!.id);
     const withDelivery = await this.attachDeliverySnapshot(orders as any[]);
     const withShipment = await this.attachShipmentSnapshot(withDelivery as any[]);
-    return this.attachCancellationSnapshot(withShipment as any[]);
+    const withPayments = await this.attachOrderPaymentSnapshot(withShipment as any[]);
+    return this.attachCancellationSnapshot(withPayments as any[]);
   }
 
 
@@ -1161,7 +1209,8 @@ private async seedPostalShipmentFromCheckoutTx(
     const orders = await this.orderRepository.findByStoreId(store!.id);
     const withDelivery = await this.attachDeliverySnapshot(orders as any[]);
     const withShipment = await this.attachShipmentSnapshot(withDelivery as any[]);
-    return this.attachCancellationSnapshot(withShipment as any[]);
+    const withPayments = await this.attachOrderPaymentSnapshot(withShipment as any[]);
+    return this.attachCancellationSnapshot(withPayments as any[]);
   }
 
   async listQueueByStoreId(storeId: string, authStoreId?: string)
@@ -1177,7 +1226,8 @@ private async seedPostalShipmentFromCheckoutTx(
     );
     const withDelivery = await this.attachDeliverySnapshot(orders as any[]);
     const withShipment = await this.attachShipmentSnapshot(withDelivery as any[]);
-    return this.attachCancellationSnapshot(withShipment as any[]);
+    const withPayments = await this.attachOrderPaymentSnapshot(withShipment as any[]);
+    return this.attachCancellationSnapshot(withPayments as any[]);
   }
 
   async listQueueByStoreSlug(slug: string, authStoreId?: string)
@@ -1193,7 +1243,8 @@ private async seedPostalShipmentFromCheckoutTx(
     );
     const withDelivery = await this.attachDeliverySnapshot(orders as any[]);
     const withShipment = await this.attachShipmentSnapshot(withDelivery as any[]);
-    return this.attachCancellationSnapshot(withShipment as any[]);
+    const withPayments = await this.attachOrderPaymentSnapshot(withShipment as any[]);
+    return this.attachCancellationSnapshot(withPayments as any[]);
   }
 
 

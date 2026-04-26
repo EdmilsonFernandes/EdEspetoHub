@@ -15,6 +15,7 @@ import crypto from 'crypto';
 import { env } from '../config/env';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
+import { PaymentAuditService } from './PaymentAuditService';
 
 type MercadoPagoPreferenceResponse = {
   id: string;
@@ -49,6 +50,14 @@ type CreatePaymentInput = {
     name: string;
   };
   accessToken?: string;
+  auditContext?: {
+    flowType: string;
+    entityType: string;
+    entityId: string;
+    storeId?: string | null;
+    externalReference?: string | null;
+    eventStage?: string | null;
+  };
 };
 /**
  * Handles has credentials.
@@ -78,6 +87,7 @@ const buildHeaders = (accessToken?: string) => ({
  */
 export class MercadoPagoService {
   private log = logger.child({ scope: 'MercadoPagoService' });
+  private paymentAuditService = new PaymentAuditService();
   private buildCreatePaymentError(method: CreatePaymentInput['method'], status: number, bodyText: string) {
     const normalizedBody = String(bodyText || '').toLowerCase();
     const isPixQrKeyError =
@@ -107,6 +117,39 @@ export class MercadoPagoService {
     this.log.info(message, data || {});
   }
 
+  private async recordAudit(
+    input: CreatePaymentInput['auditContext'] | { flowType: string; entityType: string; entityId: string; storeId?: string | null; externalReference?: string | null; eventStage?: string | null } | undefined,
+    payload: {
+      providerPaymentId?: string | number | null;
+      providerStatus?: string | null;
+      providerStatusDetail?: string | null;
+      requestPayload?: Record<string, any> | null;
+      responsePayload?: Record<string, any> | null;
+      errorPayload?: Record<string, any> | null;
+      httpStatus?: number | null;
+      success?: boolean | null;
+    }
+  ) {
+    if (!input?.entityId || !input?.entityType || !input?.flowType) return;
+    await this.paymentAuditService.record({
+      provider: 'MERCADO_PAGO',
+      flowType: input.flowType,
+      eventStage: String(input.eventStage || 'PROVIDER_REQUEST'),
+      entityType: input.entityType,
+      entityId: input.entityId,
+      storeId: input.storeId || null,
+      externalReference: input.externalReference || null,
+      providerPaymentId: payload.providerPaymentId,
+      providerStatus: payload.providerStatus || null,
+      providerStatusDetail: payload.providerStatusDetail || null,
+      requestPayload: payload.requestPayload || null,
+      responsePayload: payload.responsePayload || null,
+      errorPayload: payload.errorPayload || null,
+      httpStatus: payload.httpStatus ?? null,
+      success: typeof payload.success === 'boolean' ? payload.success : null,
+    });
+  }
+
   /**
    * Creates payment.
    *
@@ -133,7 +176,18 @@ export class MercadoPagoService {
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-06
    */
-  async getPayment(paymentId: string, accessToken?: string) {
+  async getPayment(
+    paymentId: string,
+    accessToken?: string,
+    auditContext?: {
+      flowType: string;
+      entityType: string;
+      entityId: string;
+      storeId?: string | null;
+      externalReference?: string | null;
+      eventStage?: string | null;
+    }
+  ) {
     if (!hasCredentials(accessToken)) return null;
     const url = `${env.mercadoPago.apiBaseUrl}/v1/payments/${paymentId}`;
     this.debugLog('GET payment', { url, paymentId });
@@ -147,16 +201,26 @@ export class MercadoPagoService {
        */
       const body = await response.text().catch(() => '');
       this.log.error('GET payment failed', { status: response.status, body });
+      await this.recordAudit(auditContext, {
+        requestPayload: { method: 'GET', url, paymentId },
+        errorPayload: { body },
+        httpStatus: response.status,
+        success: false,
+      });
       throw new AppError('PAY-004', 400);
     }
     this.debugLog('GET payment ok', { status: response.status });
-    /**
-     * Executes return logic.
-     *
-     * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-     * @date 2026-01-06
-     */
-    return (await response.json()) as MercadoPagoPaymentResponse;
+    const data = (await response.json()) as MercadoPagoPaymentResponse;
+    await this.recordAudit(auditContext, {
+      providerPaymentId: data?.id || paymentId,
+      providerStatus: data?.status || null,
+      providerStatusDetail: data?.status_detail || null,
+      requestPayload: { method: 'GET', url, paymentId },
+      responsePayload: data as any,
+      httpStatus: response.status,
+      success: true,
+    });
+    return data;
   }
 
 
@@ -202,12 +266,25 @@ export class MercadoPagoService {
        */
       const bodyText = await response.text().catch(() => '');
       this.log.error('POST preference failed', { status: response.status, body: bodyText });
+      await this.recordAudit(input.auditContext, {
+        requestPayload: { method: 'POST', url, body },
+        errorPayload: { body: bodyText },
+        httpStatus: response.status,
+        success: false,
+      });
       throw this.buildCreatePaymentError('CREDIT_CARD', response.status, bodyText);
     }
 
     const data = (await response.json()) as MercadoPagoPreferenceResponse;
     const paymentLink = data.init_point || data.sandbox_init_point || null;
     this.debugLog('POST preference ok', { id: data.id, paymentLink });
+    await this.recordAudit(input.auditContext, {
+      providerPaymentId: data.id,
+      requestPayload: { method: 'POST', url, body },
+      responsePayload: data as any,
+      httpStatus: response.status,
+      success: true,
+    });
     return {
       paymentLink,
       qrCodeBase64: null,
@@ -266,11 +343,24 @@ export class MercadoPagoService {
        */
       const bodyText = await response.text().catch(() => '');
       this.log.error('POST boleto preference failed', { status: response.status, body: bodyText });
+      await this.recordAudit(input.auditContext, {
+        requestPayload: { method: 'POST', url, body },
+        errorPayload: { body: bodyText },
+        httpStatus: response.status,
+        success: false,
+      });
       throw this.buildCreatePaymentError('BOLETO', response.status, bodyText);
     }
 
     const data = (await response.json()) as MercadoPagoPreferenceResponse;
     this.debugLog('POST boleto preference ok', { id: data.id });
+    await this.recordAudit(input.auditContext, {
+      providerPaymentId: data.id,
+      requestPayload: { method: 'POST', url, body },
+      responsePayload: data as any,
+      httpStatus: response.status,
+      success: true,
+    });
     return {
       paymentLink: data.init_point || data.sandbox_init_point || null,
       qrCodeBase64: null,
@@ -322,11 +412,26 @@ export class MercadoPagoService {
        */
       const bodyText = await response.text().catch(() => '');
       this.log.error('POST pix failed', { status: response.status, body: bodyText });
+      await this.recordAudit(input.auditContext, {
+        requestPayload: { method: 'POST', url, body },
+        errorPayload: { body: bodyText },
+        httpStatus: response.status,
+        success: false,
+      });
       throw this.buildCreatePaymentError('PIX', response.status, bodyText);
     }
 
     const data = (await response.json()) as MercadoPagoPaymentResponse;
     this.debugLog('POST pix ok', { id: data.id });
+    await this.recordAudit(input.auditContext, {
+      providerPaymentId: data?.id || null,
+      providerStatus: data?.status || null,
+      providerStatusDetail: data?.status_detail || null,
+      requestPayload: { method: 'POST', url, body },
+      responsePayload: data as any,
+      httpStatus: response.status,
+      success: true,
+    });
     return {
       paymentLink: data.transaction_details?.external_resource_url || null,
       qrCodeBase64: data.point_of_interaction?.transaction_data?.qr_code_base64 || null,

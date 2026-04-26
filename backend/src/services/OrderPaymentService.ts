@@ -7,6 +7,8 @@ import { AppError } from '../errors/AppError';
 import { MercadoPagoService } from './MercadoPagoService';
 import { StorePaymentAccountService } from './StorePaymentAccountService';
 import { logger } from '../utils/logger';
+import { PaymentAuditService } from './PaymentAuditService';
+import { PAYMENT_AUDIT_ENTITY, PAYMENT_AUDIT_FLOW, PAYMENT_AUDIT_STAGE, resolveMercadoPagoStatusDetailLabel, resolveMercadoPagoStatusLabel } from '../utils/paymentAudit';
 
 const ONLINE_METHOD_MAP: Record<string, 'PIX' | 'CREDIT_CARD'> = {
   pix: 'PIX',
@@ -23,6 +25,7 @@ const ONLINE_METHOD_MAP: Record<string, 'PIX' | 'CREDIT_CARD'> = {
 export class OrderPaymentService {
   private mercadoPago = new MercadoPagoService();
   private accountService = new StorePaymentAccountService();
+  private paymentAuditService = new PaymentAuditService();
   private log = logger.child({ scope: 'OrderPaymentService' });
 
   private normalizeQrCode(qrCode?: string | null) {
@@ -73,6 +76,14 @@ export class OrderPaymentService {
           name: payerName,
         },
         accessToken,
+        auditContext: {
+          flowType: PAYMENT_AUDIT_FLOW.ORDER,
+          entityType: PAYMENT_AUDIT_ENTITY.ORDER_PAYMENT,
+          entityId: row.id,
+          storeId: order.store.id,
+          externalReference: `order_payment:${row.id}`,
+          eventStage: PAYMENT_AUDIT_STAGE.PROVIDER_REQUEST,
+        },
       });
 
       row.providerId = mpPayment?.providerId || row.providerId || null;
@@ -131,6 +142,24 @@ export class OrderPaymentService {
       if (mpQrText) row.qrCodeText = mpQrText;
       if (mpLink) row.paymentLink = mpLink;
       await repo.save(row);
+      await this.paymentAuditService.record({
+        provider: 'MERCADO_PAGO',
+        flowType: PAYMENT_AUDIT_FLOW.ORDER,
+        eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
+        entityType: PAYMENT_AUDIT_ENTITY.ORDER_PAYMENT,
+        entityId: row.id,
+        storeId: row.storeId,
+        externalReference: `order_payment:${row.id}`,
+        providerPaymentId: mpPayment?.id ? String(mpPayment.id) : row.providerId || null,
+        providerStatus: mpPayment?.status || 'approved',
+        providerStatusDetail: mpPayment?.status_detail || null,
+        responsePayload: {
+          localPaymentStatus: 'PAID',
+          localOrderStatus: 'PAID',
+          providerStatus: mpPayment?.status || 'approved',
+        },
+        success: true,
+      }, manager);
 
       // Update paymentStatus; promote awaiting_payment → pending so order enters the queue
       await manager.getRepository(Order).update({ id: row.orderId }, { paymentStatus: 'PAID' });
@@ -152,6 +181,24 @@ export class OrderPaymentService {
     row.providerPayload = mpPayment || null;
     if (mpPayment?.id) row.providerId = String(mpPayment.id);
     await repo.save(row);
+    await this.paymentAuditService.record({
+      provider: 'MERCADO_PAGO',
+      flowType: PAYMENT_AUDIT_FLOW.ORDER,
+      eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
+      entityType: PAYMENT_AUDIT_ENTITY.ORDER_PAYMENT,
+      entityId: row.id,
+      storeId: row.storeId,
+      externalReference: `order_payment:${row.id}`,
+      providerPaymentId: mpPayment?.id ? String(mpPayment.id) : row.providerId || null,
+      providerStatus: mpPayment?.status || 'failed',
+      providerStatusDetail: mpPayment?.status_detail || null,
+      responsePayload: {
+        localPaymentStatus: 'FAILED',
+        localOrderStatus: 'FAILED',
+        providerStatus: mpPayment?.status || 'failed',
+      },
+      success: false,
+    });
     // Update paymentStatus; cancel order if it was still awaiting payment
     await AppDataSource.getRepository(Order).update({ id: row.orderId }, { paymentStatus: 'FAILED' });
     await AppDataSource.getRepository(Order)
@@ -171,7 +218,14 @@ export class OrderPaymentService {
     if (!row.providerId) return row;
     const accessToken = await this.accountService.getActiveAccessToken(row.storeId);
     if (!accessToken || !env.mercadoPago.apiBaseUrl) return row;
-    const mpPayment: any = await this.mercadoPago.getPayment(row.providerId, accessToken);
+    const mpPayment: any = await this.mercadoPago.getPayment(row.providerId, accessToken, {
+      flowType: PAYMENT_AUDIT_FLOW.ORDER,
+      entityType: PAYMENT_AUDIT_ENTITY.ORDER_PAYMENT,
+      entityId: row.id,
+      storeId: row.storeId,
+      externalReference: `order_payment:${row.id}`,
+      eventStage: PAYMENT_AUDIT_STAGE.MANUAL_REFRESH,
+    });
     const status = String(mpPayment?.status || '').toLowerCase();
     if (status === 'approved') await this.markPaidFromWebhook(row.id, mpPayment);
     if ([ 'rejected', 'cancelled', 'charged_back', 'refunded', 'failed' ].includes(status)) {
@@ -185,7 +239,23 @@ export class OrderPaymentService {
       where: { providerId: String(mercadoPagoPaymentId), provider: 'MERCADO_PAGO' as any },
     });
     if (direct?.id) {
-      return this.refreshFromProvider(direct.id);
+      const accessToken = await this.accountService.getActiveAccessToken(direct.storeId);
+      if (!accessToken) return direct;
+      const mpPayment: any = await this.mercadoPago.getPayment(mercadoPagoPaymentId, accessToken, {
+        flowType: PAYMENT_AUDIT_FLOW.ORDER,
+        entityType: PAYMENT_AUDIT_ENTITY.ORDER_PAYMENT,
+        entityId: direct.id,
+        storeId: direct.storeId,
+        externalReference: `order_payment:${direct.id}`,
+        eventStage: PAYMENT_AUDIT_STAGE.WEBHOOK_LOOKUP,
+      });
+      const status = String(mpPayment?.status || '').toLowerCase();
+      if (status === 'approved') {
+        await this.markPaidFromWebhook(direct.id, mpPayment);
+      } else if ([ 'rejected', 'cancelled', 'charged_back', 'refunded', 'failed' ].includes(status)) {
+        await this.markFailedFromWebhook(direct.id, mpPayment);
+      }
+      return { status: mpPayment?.status || 'unknown', orderPaymentId: direct.id };
     }
 
     const accounts = await this.accountService.listActiveAccessTokens();
@@ -195,6 +265,21 @@ export class OrderPaymentService {
         const reference = String(mpPayment?.external_reference || '');
         if (!reference.startsWith('order_payment:')) continue;
         const orderPaymentId = reference.replace('order_payment:', '');
+        await this.paymentAuditService.record({
+          provider: 'MERCADO_PAGO',
+          flowType: PAYMENT_AUDIT_FLOW.ORDER,
+          eventStage: PAYMENT_AUDIT_STAGE.WEBHOOK_LOOKUP,
+          entityType: PAYMENT_AUDIT_ENTITY.ORDER_PAYMENT,
+          entityId: orderPaymentId,
+          storeId: account.storeId,
+          externalReference: reference,
+          providerPaymentId: mpPayment?.id ? String(mpPayment.id) : mercadoPagoPaymentId,
+          providerStatus: mpPayment?.status || null,
+          providerStatusDetail: mpPayment?.status_detail || null,
+          requestPayload: { method: 'GET', paymentId: mercadoPagoPaymentId },
+          responsePayload: mpPayment || null,
+          success: true,
+        });
         const status = String(mpPayment?.status || '').toLowerCase();
         if (status === 'approved') {
           await this.markPaidFromWebhook(orderPaymentId, mpPayment);
@@ -207,5 +292,47 @@ export class OrderPaymentService {
       }
     }
     return null;
+  }
+
+  async getAuditByOrderForStore(orderId: string, storeId: string, authStoreId?: string, includeTechnical = false) {
+    if (authStoreId && authStoreId !== storeId) {
+      throw new AppError('AUTH-003', 403, { message: 'Acesso negado para esta loja.' });
+    }
+    const row = await AppDataSource.getRepository(OrderPayment).findOne({
+      where: { orderId, storeId },
+    });
+    if (!row) {
+      return { summary: null, events: [], technical: includeTechnical ? null : undefined };
+    }
+    const rows = await this.paymentAuditService.listByEntity(PAYMENT_AUDIT_ENTITY.ORDER_PAYMENT, row.id, storeId, 20);
+    const payload = this.paymentAuditService.buildOverview(
+      {
+        provider: row.provider,
+        flowType: PAYMENT_AUDIT_FLOW.ORDER,
+        entityType: PAYMENT_AUDIT_ENTITY.ORDER_PAYMENT,
+        entityId: row.id,
+        externalReference: `order_payment:${row.id}`,
+        providerPaymentId: row.providerId || null,
+        providerStatus: row.providerPayload?.status || null,
+        providerStatusDetail: row.providerPayload?.status_detail || null,
+        paymentMethod: row.paymentMethod,
+        paymentStatus: row.paymentStatus,
+        amount: Number(row.amount || 0),
+        paidAt: row.paidAt || null,
+        failedAt: row.failedAt || null,
+        expiresAt: row.expiresAt || null,
+        updatedAt: row.updatedAt || null,
+      },
+      rows,
+      includeTechnical
+    );
+    if (payload.summary) {
+      payload.summary.providerStatusLabel =
+        payload.summary.providerStatusLabel || resolveMercadoPagoStatusLabel(payload.summary.providerStatus || null);
+      payload.summary.providerStatusDetailLabel =
+        payload.summary.providerStatusDetailLabel ||
+        resolveMercadoPagoStatusDetailLabel(payload.summary.providerStatusDetail || null);
+    }
+    return payload;
   }
 }

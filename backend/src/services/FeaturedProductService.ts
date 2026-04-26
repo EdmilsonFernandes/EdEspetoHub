@@ -7,6 +7,8 @@ import { Store } from '../entities/Store';
 import { User } from '../entities/User';
 import { AppError } from '../errors/AppError';
 import { MercadoPagoService } from './MercadoPagoService';
+import { PaymentAuditService } from './PaymentAuditService';
+import { PAYMENT_AUDIT_ENTITY, PAYMENT_AUDIT_FLOW, PAYMENT_AUDIT_STAGE } from '../utils/paymentAudit';
 
 const normalizeStatus = (value?: string) => String(value || '').trim().toUpperCase();
 const DURATION_OPTIONS = {
@@ -28,6 +30,7 @@ type PricingConfig = {
 export class FeaturedProductService {
   private repo = AppDataSource.getRepository(FeaturedProductRequest);
   private mercadoPago = new MercadoPagoService();
+  private paymentAuditService = new PaymentAuditService();
 
   private async resolveStore(storeId: string) {
     const store = await AppDataSource.getRepository(Store).findOne({ where: { id: storeId }, relations: ['owner'] });
@@ -240,6 +243,14 @@ export class FeaturedProductService {
             email: payerEmail,
             name: payerName,
           },
+          auditContext: {
+            flowType: PAYMENT_AUDIT_FLOW.FEATURED_REQUEST,
+            entityType: PAYMENT_AUDIT_ENTITY.FEATURED_REQUEST,
+            entityId: created.id,
+            storeId,
+            externalReference: `featured_request:${created.id}`,
+            eventStage: PAYMENT_AUDIT_STAGE.PROVIDER_REQUEST,
+          },
         });
         provider = 'MERCADO_PAGO';
         providerId = String(mp?.providerId || '');
@@ -324,7 +335,14 @@ export class FeaturedProductService {
     }
 
     try {
-      const mpPayment: any = await this.mercadoPago.getPayment(providerId);
+      const mpPayment: any = await this.mercadoPago.getPayment(providerId, undefined, {
+        flowType: PAYMENT_AUDIT_FLOW.FEATURED_REQUEST,
+        entityType: PAYMENT_AUDIT_ENTITY.FEATURED_REQUEST,
+        entityId: requestId,
+        storeId,
+        externalReference: `featured_request:${requestId}`,
+        eventStage: PAYMENT_AUDIT_STAGE.MANUAL_REFRESH,
+      });
       const mpStatus = String(mpPayment?.status || '').trim().toLowerCase();
       if (mpStatus === 'approved') {
         await this.markPaidFromWebhook(requestId, mpPayment);
@@ -380,6 +398,23 @@ export class FeaturedProductService {
         locked.endsAt = null;
       }
       await manager.save(locked);
+      await this.paymentAuditService.record({
+        provider: 'MERCADO_PAGO',
+        flowType: PAYMENT_AUDIT_FLOW.FEATURED_REQUEST,
+        eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
+        entityType: PAYMENT_AUDIT_ENTITY.FEATURED_REQUEST,
+        entityId: locked.id,
+        storeId: String((locked as any).storeId || ''),
+        externalReference: `featured_request:${locked.id}`,
+        providerPaymentId: mpPayment?.id ? String(mpPayment.id) : locked.paymentProviderId || null,
+        providerStatus: mpPayment?.status || 'approved',
+        providerStatusDetail: mpPayment?.status_detail || null,
+        responsePayload: {
+          localPaymentStatus: 'PAID',
+          localFeaturedStatus: locked.status,
+        },
+        success: true,
+      }, manager);
     });
   }
 
@@ -391,7 +426,24 @@ export class FeaturedProductService {
     row.status = 'PAYMENT_FAILED';
     row.paymentProvider = 'MERCADO_PAGO';
     if (mpPayment?.id) row.paymentProviderId = String(mpPayment.id);
-    await this.repo.save(row);
+    const saved = await this.repo.save(row);
+    await this.paymentAuditService.record({
+      provider: 'MERCADO_PAGO',
+      flowType: PAYMENT_AUDIT_FLOW.FEATURED_REQUEST,
+      eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
+      entityType: PAYMENT_AUDIT_ENTITY.FEATURED_REQUEST,
+      entityId: saved.id,
+      storeId: String((saved as any).store?.id || ''),
+      externalReference: `featured_request:${saved.id}`,
+      providerPaymentId: mpPayment?.id ? String(mpPayment.id) : saved.paymentProviderId || null,
+      providerStatus: mpPayment?.status || 'failed',
+      providerStatusDetail: mpPayment?.status_detail || null,
+      responsePayload: {
+        localPaymentStatus: 'FAILED',
+        localFeaturedStatus: 'PAYMENT_FAILED',
+      },
+      success: false,
+    });
   }
 
   async listForAdmin(filters: { status?: string; storeId?: string; limit?: number }) {
@@ -488,5 +540,36 @@ export class FeaturedProductService {
         badge: 'Patrocinado',
       };
     });
+  }
+
+  async getPaymentAuditByStore(storeId: string, requestId: string, authStoreId?: string, includeTechnical = false) {
+    if (authStoreId && authStoreId !== storeId) throw new AppError('AUTH-003', 403);
+    const row = await this.repo.findOne({
+      where: { id: requestId },
+      relations: [ 'store', 'product' ],
+    });
+    if (!row || String((row as any)?.store?.id || '') !== storeId) {
+      throw new AppError('GEN-001', 404, { message: 'Solicitação não encontrada.' });
+    }
+    const rows = await this.paymentAuditService.listByEntity(PAYMENT_AUDIT_ENTITY.FEATURED_REQUEST, row.id, storeId, 20);
+    return this.paymentAuditService.buildOverview(
+      {
+        provider: row.paymentProvider || 'MERCADO_PAGO',
+        flowType: PAYMENT_AUDIT_FLOW.FEATURED_REQUEST,
+        entityType: PAYMENT_AUDIT_ENTITY.FEATURED_REQUEST,
+        entityId: row.id,
+        externalReference: `featured_request:${row.id}`,
+        providerPaymentId: row.paymentProviderId || null,
+        paymentMethod: row.paymentMethod || null,
+        paymentStatus: row.paymentStatus || null,
+        amount: row.priceAmount != null ? Number(row.priceAmount) : null,
+        paidAt: row.paymentPaidAt || null,
+        failedAt: null,
+        expiresAt: row.paymentExpiresAt || null,
+        updatedAt: row.updatedAt || null,
+      },
+      rows,
+      includeTechnical
+    );
   }
 }

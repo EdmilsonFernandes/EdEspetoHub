@@ -381,6 +381,43 @@ export async function runMigrations() {
     ON order_payments(provider_id);
   `);
   await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS payment_audit_logs (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      provider TEXT NOT NULL,
+      flow_type TEXT NOT NULL,
+      event_stage TEXT NOT NULL,
+      entity_type TEXT NOT NULL,
+      entity_id TEXT NOT NULL,
+      store_id UUID REFERENCES stores(id) ON DELETE SET NULL,
+      external_reference TEXT,
+      provider_payment_id TEXT,
+      provider_status TEXT,
+      provider_status_detail TEXT,
+      request_payload JSONB,
+      response_payload JSONB,
+      error_payload JSONB,
+      http_status INT,
+      success BOOLEAN,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_payment_audit_logs_entity_created
+    ON payment_audit_logs(entity_type, entity_id, created_at DESC);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_payment_audit_logs_store_created
+    ON payment_audit_logs(store_id, created_at DESC);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_payment_audit_logs_provider_payment_id
+    ON payment_audit_logs(provider_payment_id);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_payment_audit_logs_external_reference
+    ON payment_audit_logs(external_reference);
+  `);
+  await AppDataSource.query(`
     ALTER TABLE IF EXISTS orders
     ADD COLUMN IF NOT EXISTS fulfillment_mode TEXT NOT NULL DEFAULT 'distance';
   `);

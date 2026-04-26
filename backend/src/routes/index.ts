@@ -187,6 +187,7 @@ routes.get('/stores/:storeId/featured-pricing', requireAuth, requireRole('ADMIN'
 routes.post('/stores/:storeId/featured-requests', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), FeaturedProductController.createStoreRequest);
 routes.patch('/stores/:storeId/featured-requests/:requestId/cancel', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), FeaturedProductController.cancelByStore);
 routes.patch('/stores/:storeId/featured-requests/:requestId/refresh-payment', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), FeaturedProductController.refreshPaymentByStore);
+routes.get('/stores/:storeId/featured-requests/:requestId/payment-audit', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), FeaturedProductController.getPaymentAuditByStore);
 routes.get('/stores/:storeId/condominiums', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), CondominiumController.listStoreOptions);
 routes.post('/stores/:storeId/condominium-requests', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), CondominiumController.createStoreRequest);
 routes.delete('/stores/:storeId/condominiums/:condominiumId', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), CondominiumController.removeStoreCondominium);
@@ -211,6 +212,7 @@ routes.post('/stores/slug/:slug/orders', hydrateAuthOptional, requireActiveSubsc
 // Orders - staff vê fila/histórico (lojista + admin)
 routes.get('/stores/:storeId/orders/queue', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.listQueue);
 routes.get('/stores/slug/:slug/orders/queue', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.listQueueBySlug);
+routes.get('/stores/:storeId/orders/:orderId/payment-audit', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.getPaymentAudit);
 routes.get('/stores/:storeId/orders', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.list);
 routes.get('/stores/slug/:slug/orders', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.listBySlug);
 routes.patch('/orders/:orderId/status', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.updateStatus);

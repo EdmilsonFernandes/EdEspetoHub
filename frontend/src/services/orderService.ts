@@ -33,6 +33,17 @@ const normalizeOrder = (order: any) => ({
   cashTendered: order.cashTendered ?? order.cash_tendered ?? null,
   deliveryFee: order.deliveryFee ?? order.delivery_fee ?? null,
   paymentStatus: order.paymentStatus ?? order.payment_status ?? 'PENDING',
+  onlinePayment: order.onlinePayment
+    ? {
+        ...order.onlinePayment,
+        amount: order.onlinePayment.amount != null ? Number(order.onlinePayment.amount) : null,
+        expiresAt: order.onlinePayment.expiresAt ?? null,
+        paidAt: order.onlinePayment.paidAt ?? null,
+        failedAt: order.onlinePayment.failedAt ?? null,
+        updatedAt: order.onlinePayment.updatedAt ?? null,
+        lastEventAt: order.onlinePayment.lastEventAt ?? null,
+      }
+    : null,
   fulfillmentMode: order.fulfillmentMode ?? order.fulfillment_mode ?? 'distance',
   condominiumOrder: order.condominiumOrder ?? order.condominium_order ?? (
     order.condominiumId || order.condominium_id || order.condominiumName || order.condominium_name
@@ -328,6 +339,14 @@ export const orderService = {
   async getPublicById(orderId: string)
   {
     return apiClient.get(`/orders/${orderId}/public`);
+  },
+
+  async getPaymentAudit(orderId: string, storeId?: string) {
+    const targetStore = resolveStoreIdentifier(storeId);
+    if (!targetStore) {
+      return Promise.reject(new Error('Sessão inválida'));
+    }
+    return apiClient.get(`/stores/${targetStore}/orders/${orderId}/payment-audit`);
   },
 
   async getTrackingV2(orderId: string) {

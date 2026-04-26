@@ -32,6 +32,8 @@ import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 import { FormSection } from '../components/common/FormSection';
 import { PremiumSelect } from '../components/common/PremiumSelect';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
+import { PaymentAuditPanel } from '../components/Admin/PaymentAuditPanel';
+import { PaymentTechnicalModal } from '../components/Admin/PaymentTechnicalModal';
 import mercadoPagoLogo from '../assets/mercado-pago-logo.svg';
 
 const formatPlanCycle = (days: number) => {
@@ -41,13 +43,17 @@ const formatPlanCycle = (days: number) => {
   return `${days} dias`;
 };
 
-const OrdersView = ({ orders, products, storeSlug }) => {
+const OrdersView = ({ orders, products, storeSlug, storeId, canViewTechnical, showToast }) => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [query, setQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [periodFilter, setPeriodFilter] = useState('all');
   const [ordersPage, setOrdersPage] = useState(1);
   const [ordersPageSize, setOrdersPageSize] = useState(10);
+  const [selectedOrderAudit, setSelectedOrderAudit] = useState<any>(null);
+  const [technicalOrderLabel, setTechnicalOrderLabel] = useState('');
+  const [technicalModalOpen, setTechnicalModalOpen] = useState(false);
+  const [loadingAuditOrderId, setLoadingAuditOrderId] = useState('');
   const productsById = useMemo(() => {
     const map = new Map();
     (products || []).forEach((product) => map.set(product.id, product));
@@ -244,6 +250,24 @@ const OrdersView = ({ orders, products, storeSlug }) => {
     );
   };
 
+  const loadTechnicalAudit = async (order: any) => {
+    const orderId = String(order?.id || '').trim();
+    if (!orderId) return;
+    setLoadingAuditOrderId(orderId);
+    try {
+      const payload = await orderService.getPaymentAudit(orderId, storeId);
+      setSelectedOrderAudit(payload || null);
+      setTechnicalOrderLabel(shortId(orderId));
+      setTechnicalModalOpen(true);
+    } catch (error: any) {
+      if (showToast) {
+        showToast(error?.message || 'Não foi possível carregar os detalhes técnicos do pagamento agora.', 'warning');
+      }
+    } finally {
+      setLoadingAuditOrderId('');
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
@@ -399,6 +423,15 @@ const OrdersView = ({ orders, products, storeSlug }) => {
 	                </div>
 	              </div>
 
+              {order?.onlinePayment && (
+                <PaymentAuditPanel
+                  summary={order.onlinePayment}
+                  showTechnicalButton={Boolean(canViewTechnical)}
+                  technicalLoading={loadingAuditOrderId === String(order?.id || '')}
+                  onTechnicalClick={() => loadTechnicalAudit(order)}
+                />
+              )}
+
               {groupedItems.length > 0 && (
                 <div className="border-t border-slate-100 pt-3">
                   <p className="text-xs uppercase text-slate-400 mb-2">Itens</p>
@@ -517,6 +550,12 @@ const OrdersView = ({ orders, products, storeSlug }) => {
           )}
         </div>
       )}
+      <PaymentTechnicalModal
+        open={technicalModalOpen}
+        title={technicalOrderLabel ? `Detalhes técnicos do pedido #${technicalOrderLabel}` : 'Detalhes técnicos do pagamento'}
+        audit={selectedOrderAudit}
+        onClose={() => setTechnicalModalOpen(false)}
+      />
     </div>
   );
 };
@@ -3179,7 +3218,14 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             variant="primary"
             className="bg-white premium-card"
           >
-            <OrdersView orders={orders} products={products} storeSlug={storeSlug} />
+            <OrdersView
+              orders={orders}
+              products={products}
+              storeSlug={storeSlug}
+              storeId={storeId}
+              canViewTechnical={!isOperatorUser}
+              showToast={showToast}
+            />
           </FormSection>
         )}
 

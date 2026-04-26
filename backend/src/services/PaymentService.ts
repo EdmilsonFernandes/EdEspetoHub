@@ -30,6 +30,8 @@ import { OrderReviewService } from './OrderReviewService';
 import { FeaturedProductService } from './FeaturedProductService';
 import { OrderPaymentService } from './OrderPaymentService';
 import { StorePaymentAccountService } from './StorePaymentAccountService';
+import { PaymentAuditService } from './PaymentAuditService';
+import { PAYMENT_AUDIT_ENTITY, PAYMENT_AUDIT_FLOW, PAYMENT_AUDIT_STAGE } from '../utils/paymentAudit';
 /**
  * Provides PaymentService functionality.
  *
@@ -45,6 +47,7 @@ export class PaymentService {
   private featuredProductService = new FeaturedProductService();
   private orderPaymentService = new OrderPaymentService();
   private accountService = new StorePaymentAccountService();
+  private paymentAuditService = new PaymentAuditService();
   private log = logger.child({ scope: 'PaymentService' });
   /**
    * Normalizes QR payload to Data URL format for consistent client rendering.
@@ -176,6 +179,14 @@ private resolvePlanChargeAmount(plan: Plan) {
           payer: {
             email: data.user.email,
             name: data.user.fullName,
+          },
+          auditContext: {
+            flowType: PAYMENT_AUDIT_FLOW.SUBSCRIPTION,
+            entityType: PAYMENT_AUDIT_ENTITY.PAYMENT,
+            entityId: payment.id,
+            storeId: data.store.id,
+            externalReference: payment.id,
+            eventStage: PAYMENT_AUDIT_STAGE.PROVIDER_REQUEST,
           },
         });
 
@@ -358,8 +369,25 @@ private resolvePlanChargeAmount(plan: Plan) {
   private async applyMercadoPagoStatus(mpPayment: any) {
     if (mpPayment.external_reference) {
       const paymentId = String(mpPayment.external_reference);
+      const auditByReference = async (flowType: string, entityType: string, entityId: string, storeId?: string | null) => {
+        await this.paymentAuditService.record({
+          provider: 'MERCADO_PAGO',
+          flowType,
+          eventStage: PAYMENT_AUDIT_STAGE.WEBHOOK_RECEIVED,
+          entityType,
+          entityId,
+          storeId: storeId || null,
+          externalReference: paymentId,
+          providerPaymentId: mpPayment?.id ? String(mpPayment.id) : null,
+          providerStatus: mpPayment?.status || null,
+          providerStatusDetail: mpPayment?.status_detail || null,
+          responsePayload: mpPayment || null,
+          success: String(mpPayment?.status || '').toLowerCase() === 'approved',
+        });
+      };
       if (paymentId.startsWith('delivery_cycle:')) {
         const cycleId = paymentId.replace('delivery_cycle:', '');
+        await auditByReference(PAYMENT_AUDIT_FLOW.DELIVERY_CYCLE, PAYMENT_AUDIT_ENTITY.DELIVERY_BILLING_CYCLE, cycleId);
         if (mpPayment.status === 'approved') {
           await this.deliveryBillingService.markPaidFromWebhook(cycleId, mpPayment);
         } else {
@@ -369,6 +397,7 @@ private resolvePlanChargeAmount(plan: Plan) {
       }
       if (paymentId.startsWith('review_tip:')) {
         const reviewId = paymentId.replace('review_tip:', '');
+        await auditByReference(PAYMENT_AUDIT_FLOW.TIP, PAYMENT_AUDIT_ENTITY.ORDER_REVIEW, reviewId);
         if (mpPayment.status === 'approved') {
           await this.orderReviewService.markTipPaidFromWebhook(reviewId, mpPayment);
         } else {
@@ -378,6 +407,7 @@ private resolvePlanChargeAmount(plan: Plan) {
       }
       if (paymentId.startsWith('featured_request:')) {
         const requestId = paymentId.replace('featured_request:', '');
+        await auditByReference(PAYMENT_AUDIT_FLOW.FEATURED_REQUEST, PAYMENT_AUDIT_ENTITY.FEATURED_REQUEST, requestId);
         if (mpPayment.status === 'approved') {
           await this.featuredProductService.markPaidFromWebhook(requestId, mpPayment);
         } else {
@@ -387,6 +417,7 @@ private resolvePlanChargeAmount(plan: Plan) {
       }
       if (paymentId.startsWith('order_payment:')) {
         const orderPaymentId = paymentId.replace('order_payment:', '');
+        await auditByReference(PAYMENT_AUDIT_FLOW.ORDER, PAYMENT_AUDIT_ENTITY.ORDER_PAYMENT, orderPaymentId);
         if (mpPayment.status === 'approved') {
           await this.orderPaymentService.markPaidFromWebhook(orderPaymentId, mpPayment);
         } else {
@@ -394,6 +425,7 @@ private resolvePlanChargeAmount(plan: Plan) {
         }
         return { status: mpPayment.status };
       }
+      await auditByReference(PAYMENT_AUDIT_FLOW.SUBSCRIPTION, PAYMENT_AUDIT_ENTITY.PAYMENT, paymentId);
       await this.paymentEventRepository.save(
         this.paymentEventRepository.create({
           payment: { id: paymentId } as any,
@@ -436,6 +468,21 @@ private resolvePlanChargeAmount(plan: Plan) {
     if (mpPayment.status !== 'approved') {
       if (mpPayment.external_reference) {
         await this.updatePaymentStatus(String(mpPayment.external_reference), mpPayment.status);
+        await this.paymentAuditService.record({
+          provider: 'MERCADO_PAGO',
+          flowType: PAYMENT_AUDIT_FLOW.SUBSCRIPTION,
+          eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
+          entityType: PAYMENT_AUDIT_ENTITY.PAYMENT,
+          entityId: String(mpPayment.external_reference),
+          externalReference: String(mpPayment.external_reference),
+          providerPaymentId: mpPayment?.id ? String(mpPayment.id) : null,
+          providerStatus: mpPayment?.status || null,
+          providerStatusDetail: mpPayment?.status_detail || null,
+          responsePayload: {
+            localPaymentStatus: 'FAILED',
+          },
+          success: false,
+        });
       }
       return { status: mpPayment.status };
     }
@@ -445,7 +492,25 @@ private resolvePlanChargeAmount(plan: Plan) {
       throw new AppError('GEN-002', 400);
     }
 
-    return this.confirmPayment(String(internalId));
+    const confirmed = await this.confirmPayment(String(internalId));
+    await this.paymentAuditService.record({
+      provider: 'MERCADO_PAGO',
+      flowType: PAYMENT_AUDIT_FLOW.SUBSCRIPTION,
+      eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
+      entityType: PAYMENT_AUDIT_ENTITY.PAYMENT,
+      entityId: String(internalId),
+      storeId: confirmed?.store?.id || null,
+      externalReference: String(internalId),
+      providerPaymentId: mpPayment?.id ? String(mpPayment.id) : null,
+      providerStatus: mpPayment?.status || null,
+      providerStatusDetail: mpPayment?.status_detail || null,
+      responsePayload: {
+        localPaymentStatus: confirmed?.status || 'PAID',
+        subscriptionStatus: confirmed?.subscription?.status || null,
+      },
+      success: true,
+    });
+    return confirmed;
   }
 
   /**

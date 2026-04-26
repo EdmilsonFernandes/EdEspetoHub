@@ -11,6 +11,8 @@ import { featuredService } from '../services/featuredService';
 import { formatCurrency, formatDateTime } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
+import { PaymentAuditPanel } from '../components/Admin/PaymentAuditPanel';
+import { PaymentTechnicalModal } from '../components/Admin/PaymentTechnicalModal';
 
 type DurationUnit = 'DAY' | 'WEEK' | 'MONTH';
 
@@ -73,6 +75,7 @@ export function AdminHighlights() {
   const storeSlug = String(auth?.store?.slug || '').trim();
   const userRole = String(auth?.user?.role || '').toUpperCase();
   const isOperatorUser = userRole === 'OPERATOR' || userRole === 'LOJISTA';
+  const canViewTechnical = userRole === 'ADMIN';
   const isVip = Boolean(auth?.store?.settings?.planExempt || auth?.subscription?.planExempt);
   const planName = String(auth?.subscription?.plan?.name || '').toLowerCase();
   const subscriptionStatus = String(auth?.subscription?.status || '').toUpperCase();
@@ -106,6 +109,9 @@ export function AdminHighlights() {
   const [createOpen, setCreateOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [selectedPaymentAudit, setSelectedPaymentAudit] = useState<any>(null);
+  const [paymentAuditLoading, setPaymentAuditLoading] = useState(false);
+  const [paymentTechnicalOpen, setPaymentTechnicalOpen] = useState(false);
   const [paymentCountdownMs, setPaymentCountdownMs] = useState(0);
   const paidToastShownRef = useRef<Set<string>>(new Set());
   const [form, setForm] = useState({
@@ -185,6 +191,7 @@ export function AdminHighlights() {
 
   const openPayment = (request: any) => {
     setSelectedRequest(request);
+    setSelectedPaymentAudit(null);
     setPaymentOpen(true);
     const paymentStatus = String(request?.paymentStatus || '').toUpperCase();
     const status = String(request?.status || '').toUpperCase();
@@ -195,6 +202,11 @@ export function AdminHighlights() {
       window.setTimeout(() => {
         void refreshPaymentStatusByRequest(String(request.id), true);
       }, 120);
+    }
+    if (request?.id) {
+      window.setTimeout(() => {
+        void loadPaymentAudit(String(request.id), true);
+      }, 60);
     }
   };
 
@@ -209,7 +221,27 @@ export function AdminHighlights() {
   const closePayment = () => {
     setPaymentOpen(false);
     setSelectedRequest(null);
+    setSelectedPaymentAudit(null);
+    setPaymentTechnicalOpen(false);
     setPaymentCountdownMs(0);
+  };
+
+  const loadPaymentAudit = async (requestIdRaw: string, silent = false) => {
+    const requestId = String(requestIdRaw || '').trim();
+    if (!requestId || !storeId) return null;
+    setPaymentAuditLoading(true);
+    try {
+      const payload = await featuredService.getPaymentAuditByStore(requestId, storeId);
+      setSelectedPaymentAudit(payload || null);
+      return payload;
+    } catch (error: any) {
+      if (!silent) {
+        showToast(error?.message || 'Não foi possível carregar os detalhes do pagamento agora.', 'warning');
+      }
+      return null;
+    } finally {
+      setPaymentAuditLoading(false);
+    }
   };
 
   const copyText = async (text: string, okMessage: string) => {
@@ -245,6 +277,8 @@ export function AdminHighlights() {
         }
         await loadAll();
         closePayment();
+      } else if (String(updated?.id || '').trim()) {
+        await loadPaymentAudit(String(updated.id), true);
       }
     } catch (error: any) {
       if (!silent) showToast(error?.message || 'Não foi possível atualizar o pagamento agora.', 'warning');
@@ -256,6 +290,23 @@ export function AdminHighlights() {
     if (!requestId) return;
     await refreshPaymentStatusByRequest(requestId, silent);
   };
+
+  const currentPaymentAuditSummary = useMemo(() => {
+    if (selectedPaymentAudit?.summary) return selectedPaymentAudit.summary;
+    if (!selectedRequest) return null;
+    return {
+      provider: selectedRequest?.paymentProvider || 'MERCADO_PAGO',
+      paymentMethod: selectedRequest?.paymentMethod || null,
+      paymentStatus: selectedRequest?.paymentStatus || null,
+      paymentStatusLabel: paymentStatusLabel(selectedRequest?.paymentStatus),
+      amount: selectedRequest?.priceAmount != null ? Number(selectedRequest.priceAmount) : null,
+      providerPaymentId: selectedRequest?.paymentProviderId || null,
+      expiresAt: selectedRequest?.paymentExpiresAt || null,
+      paidAt: selectedRequest?.paymentPaidAt || null,
+      updatedAt: selectedRequest?.updatedAt || selectedRequest?.createdAt || null,
+      lastEventAt: selectedRequest?.updatedAt || selectedRequest?.createdAt || null,
+    };
+  }, [selectedPaymentAudit, selectedRequest]);
 
   useEffect(() => {
     if (!paymentOpen || !selectedRequest?.id) return;
@@ -680,6 +731,19 @@ export function AdminHighlights() {
               </a>
             )}
 
+            <div className="mt-3">
+              <PaymentAuditPanel
+                summary={currentPaymentAuditSummary}
+                events={selectedPaymentAudit?.events || []}
+                showTechnicalButton={canViewTechnical}
+                technicalLoading={paymentAuditLoading}
+                onTechnicalClick={async () => {
+                  const payload = selectedPaymentAudit || (await loadPaymentAudit(String(selectedRequest?.id || ''), false));
+                  if (payload) setPaymentTechnicalOpen(true);
+                }}
+              />
+            </div>
+
             <div className="mt-3 flex justify-end gap-2">
               <button
                 type="button"
@@ -701,7 +765,13 @@ export function AdminHighlights() {
           </div>
         </div>
       )}
+
+      <PaymentTechnicalModal
+        open={paymentTechnicalOpen}
+        title="Detalhes técnicos do pagamento do destaque"
+        audit={selectedPaymentAudit}
+        onClose={() => setPaymentTechnicalOpen(false)}
+      />
     </AdminLayout>
   );
 }
-

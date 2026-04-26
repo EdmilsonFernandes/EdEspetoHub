@@ -20,6 +20,8 @@ import { SettingsService } from './SettingsService';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { MercadoPagoService } from './MercadoPagoService';
 import { logger } from '../utils/logger';
+import { PaymentAuditService } from './PaymentAuditService';
+import { PAYMENT_AUDIT_ENTITY, PAYMENT_AUDIT_FLOW, PAYMENT_AUDIT_STAGE } from '../utils/paymentAudit';
 
 type BillingConfig = {
   feeRate: number;
@@ -39,6 +41,7 @@ export class DeliveryBillingService {
   private settingsService = new SettingsService();
   private storeRepository = new StoreRepository();
   private mpService = new MercadoPagoService();
+  private paymentAuditService = new PaymentAuditService();
   private log = logger.child({ scope: 'DeliveryBillingService' });
 
     /**
@@ -172,6 +175,14 @@ private async ensurePayment(cycle: DeliveryBillingCycle) {
         email: store.owner.email,
         name: store.owner.fullName || store.name,
       },
+      auditContext: {
+        flowType: PAYMENT_AUDIT_FLOW.DELIVERY_CYCLE,
+        entityType: PAYMENT_AUDIT_ENTITY.DELIVERY_BILLING_CYCLE,
+        entityId: cycle.id,
+        storeId: cycle.storeId,
+        externalReference: `delivery_cycle:${cycle.id}`,
+        eventStage: PAYMENT_AUDIT_STAGE.PROVIDER_REQUEST,
+      },
     });
 
     if (mpPayment) {
@@ -289,7 +300,22 @@ async markPaidFromWebhook(cycleId: string, mpPayment: any) {
     cycle.paidAt = new Date();
     cycle.provider = 'MERCADO_PAGO';
     cycle.providerId = mpPayment?.id ? String(mpPayment.id) : cycle.providerId;
-    return repo.save(cycle);
+    const saved = await repo.save(cycle);
+    await this.paymentAuditService.record({
+      provider: 'MERCADO_PAGO',
+      flowType: PAYMENT_AUDIT_FLOW.DELIVERY_CYCLE,
+      eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
+      entityType: PAYMENT_AUDIT_ENTITY.DELIVERY_BILLING_CYCLE,
+      entityId: saved.id,
+      storeId: saved.storeId,
+      externalReference: `delivery_cycle:${saved.id}`,
+      providerPaymentId: mpPayment?.id ? String(mpPayment.id) : saved.providerId || null,
+      providerStatus: mpPayment?.status || 'approved',
+      providerStatusDetail: mpPayment?.status_detail || null,
+      responsePayload: { localPaymentStatus: 'PAID', localCycleStatus: 'PAID' },
+      success: true,
+    });
+    return saved;
   }
 
     /**
@@ -305,7 +331,22 @@ async markFailedFromWebhook(cycleId: string, mpPayment: any) {
     cycle.status = 'OVERDUE';
     cycle.provider = 'MERCADO_PAGO';
     cycle.providerId = mpPayment?.id ? String(mpPayment.id) : cycle.providerId;
-    return repo.save(cycle);
+    const saved = await repo.save(cycle);
+    await this.paymentAuditService.record({
+      provider: 'MERCADO_PAGO',
+      flowType: PAYMENT_AUDIT_FLOW.DELIVERY_CYCLE,
+      eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
+      entityType: PAYMENT_AUDIT_ENTITY.DELIVERY_BILLING_CYCLE,
+      entityId: saved.id,
+      storeId: saved.storeId,
+      externalReference: `delivery_cycle:${saved.id}`,
+      providerPaymentId: mpPayment?.id ? String(mpPayment.id) : saved.providerId || null,
+      providerStatus: mpPayment?.status || 'failed',
+      providerStatusDetail: mpPayment?.status_detail || null,
+      responsePayload: { localPaymentStatus: 'FAILED', localCycleStatus: 'OVERDUE' },
+      success: false,
+    });
+    return saved;
   }
 
     /**

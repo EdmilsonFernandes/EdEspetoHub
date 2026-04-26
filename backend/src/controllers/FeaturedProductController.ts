@@ -125,6 +125,27 @@ export class FeaturedProductController {
     }
   }
 
+  static async getPaymentAuditByStore(req: Request, res: Response) {
+    try {
+      const includeTechnical = String(req.auth?.role || '').toUpperCase() === 'ADMIN';
+      const payload = await service.getPaymentAuditByStore(
+        req.params.storeId,
+        req.params.requestId,
+        req.auth?.storeId,
+        includeTechnical
+      );
+      return res.json(payload);
+    } catch (error: any) {
+      log.warn('Featured request payment audit failed', {
+        storeId: req.params.storeId,
+        requestId: req.params.requestId,
+        userId: req.auth?.sub,
+        error,
+      });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
   /**
    * Lists featured product requests for platform admin review.
    *

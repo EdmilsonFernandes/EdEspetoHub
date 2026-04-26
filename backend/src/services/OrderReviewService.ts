@@ -25,6 +25,8 @@ import { resolvePlanFeatures } from '../config/planFeatures';
 import { verifyOrderAccessToken } from '../utils/orderAccessToken';
 import { StorePaymentAccountService } from './StorePaymentAccountService';
 import { logger } from '../utils/logger';
+import { PaymentAuditService } from './PaymentAuditService';
+import { PAYMENT_AUDIT_ENTITY, PAYMENT_AUDIT_FLOW, PAYMENT_AUDIT_STAGE } from '../utils/paymentAudit';
 
 type SubmitReviewInput = {
   storeRating: number;
@@ -50,6 +52,7 @@ export class OrderReviewService {
   private subscriptionRepository = new SubscriptionRepository();
   private orderDeliveryRepository = new OrderDeliveryRepository();
   private orderReviewRepository = new OrderReviewRepository();
+  private paymentAuditService = new PaymentAuditService();
   private log = logger.child({ scope: 'OrderReviewService' });
 
   private normalizeQrCode(qrCode?: string | null) {
@@ -170,6 +173,14 @@ private async ensureTipPayment(order: any, review: any) {
             name: payerName,
           },
           accessToken: connectedAccessToken || undefined,
+          auditContext: {
+            flowType: PAYMENT_AUDIT_FLOW.TIP,
+            entityType: PAYMENT_AUDIT_ENTITY.ORDER_REVIEW,
+            entityId: review.id,
+            storeId: order?.store?.id || null,
+            externalReference,
+            eventStage: PAYMENT_AUDIT_STAGE.PROVIDER_REQUEST,
+          },
         });
         if (mp) {
           provider = 'MERCADO_PAGO';
@@ -473,7 +484,21 @@ async markTipPaidFromWebhook(reviewId: string, mpPayment: any) {
         : `data:image/png;base64,${String(mpQrBase64)}`;
     }
     review.tipPaidAt = new Date();
-    return this.orderReviewRepository.saveReview(review);
+    const saved = await this.orderReviewRepository.saveReview(review);
+    await this.paymentAuditService.record({
+      provider: 'MERCADO_PAGO',
+      flowType: PAYMENT_AUDIT_FLOW.TIP,
+      eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
+      entityType: PAYMENT_AUDIT_ENTITY.ORDER_REVIEW,
+      entityId: saved.id,
+      externalReference: `review_tip:${saved.id}`,
+      providerPaymentId: mpPayment?.id ? String(mpPayment.id) : saved.tipProviderId || null,
+      providerStatus: mpPayment?.status || 'approved',
+      providerStatusDetail: mpPayment?.status_detail || null,
+      responsePayload: { localTipStatus: 'PAID' },
+      success: true,
+    });
+    return saved;
   }
 
     /**
@@ -488,6 +513,20 @@ async markTipFailedFromWebhook(reviewId: string, mpPayment: any) {
     review.tipProvider = 'MERCADO_PAGO';
     review.tipProviderId = mpPayment?.id ? String(mpPayment.id) : review.tipProviderId;
     review.tipPaymentLink = review.tipPaymentLink || mpPayment?.transaction_details?.external_resource_url || null;
-    return this.orderReviewRepository.saveReview(review);
+    const saved = await this.orderReviewRepository.saveReview(review);
+    await this.paymentAuditService.record({
+      provider: 'MERCADO_PAGO',
+      flowType: PAYMENT_AUDIT_FLOW.TIP,
+      eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
+      entityType: PAYMENT_AUDIT_ENTITY.ORDER_REVIEW,
+      entityId: saved.id,
+      externalReference: `review_tip:${saved.id}`,
+      providerPaymentId: mpPayment?.id ? String(mpPayment.id) : saved.tipProviderId || null,
+      providerStatus: mpPayment?.status || 'failed',
+      providerStatusDetail: mpPayment?.status_detail || null,
+      responsePayload: { localTipStatus: 'FAILED' },
+      success: false,
+    });
+    return saved;
   }
 }
