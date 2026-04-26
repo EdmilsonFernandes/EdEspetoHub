@@ -105,6 +105,9 @@ export const CartView = ({
   storeAddress = "",
   storeCoords = null,
   deliveryCoords = null,
+  pickupDistanceKm = null,
+  pickupDistanceWarningKm = 15,
+  pickupDistanceConfirmationKm = 40,
   checkoutDisabled = false,
   checkoutDisabledReason = "",
   checkoutLoading = false,
@@ -161,6 +164,8 @@ export const CartView = ({
   const [cashTenderedInput, setCashTenderedInput] = useState("");
   const [showOutOfRangeSheet, setShowOutOfRangeSheet] = useState(false);
   const [showEmptyCartSheet, setShowEmptyCartSheet] = useState(false);
+  const [showFarPickupSheet, setShowFarPickupSheet] = useState(false);
+  const [confirmedFarPickupContext, setConfirmedFarPickupContext] = useState("");
   const [hasTriedCheckout, setHasTriedCheckout] = useState(false);
   const [showOptionalPhoneFields, setShowOptionalPhoneFields] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState(1);
@@ -200,11 +205,46 @@ export const CartView = ({
   const isOnlinePaymentMethod = isOnlinePix || isCredit || isDebit;
   const deliveryFeeValue = isDelivery ? normalizeNumber(deliveryFee) || 0 : 0;
   const radiusValue = normalizeNumber(deliveryRadiusKm);
+  const pickupDistanceValue = normalizeNumber(pickupDistanceKm);
+  const pickupWarningThreshold = normalizeNumber(pickupDistanceWarningKm) || 15;
+  const pickupConfirmationThreshold = Math.max(
+    pickupWarningThreshold,
+    normalizeNumber(pickupDistanceConfirmationKm) || 40
+  );
   const totalWithFee = total + deliveryFeeValue;
   const cashTenderedValue = isCash ? normalizeNumber(cashTenderedInput) : null;
   const cashChangeDue =
     isCash && cashTenderedValue !== null ? Number(cashTenderedValue) - Number(totalWithFee || 0) : null;
   const showSuggestedProducts = Boolean(isEndCustomerLogged && suggestedProducts.length > 0);
+  const hasPickupDistanceWarning = isPickup && !isProfessionalUser && pickupDistanceValue !== null && pickupDistanceValue >= pickupWarningThreshold;
+  const requiresFarPickupConfirmation =
+    isPickup &&
+    !isProfessionalUser &&
+    pickupDistanceValue !== null &&
+    pickupDistanceValue >= pickupConfirmationThreshold;
+  const pickupDistanceContextKey = useMemo(
+    () =>
+      [
+        storeSlug,
+        String(customer?.type || ""),
+        String(paymentMethod || ""),
+        pickupDistanceValue !== null ? pickupDistanceValue.toFixed(1) : "none",
+        String(customer?.street || ""),
+        String(customer?.number || ""),
+        String(customer?.city || ""),
+        String(customer?.state || ""),
+      ].join("|"),
+    [
+      customer?.city,
+      customer?.number,
+      customer?.state,
+      customer?.street,
+      customer?.type,
+      paymentMethod,
+      pickupDistanceValue,
+      storeSlug,
+    ]
+  );
   const fallbackPaymentMethods = useMemo(
     () => [
       { id: "pix", label: "Pix", description: "Via Mercado Pago", group: "online" },
@@ -256,6 +296,11 @@ export const CartView = ({
     }
     return { blocked: false, reason: "" };
   }, [isCash, cashNeedsChange, cashTenderedValue, totalWithFee]);
+  const formatDistanceKm = (value) => {
+    const normalized = normalizeNumber(value);
+    if (normalized === null) return "-- km";
+    return `${Math.max(0.1, normalized).toFixed(1).replace(".", ",")} km`;
+  };
 
   const actionLabel = useMemo(() => {
     if (isPickup && isOnlinePix) return "Gerar Pix e enviar pedido";
@@ -750,6 +795,35 @@ export const CartView = ({
       nameInputRef.current.focus();
     }
   }, []);
+
+  useEffect(() => {
+    if (!requiresFarPickupConfirmation) {
+      setConfirmedFarPickupContext("");
+      setShowFarPickupSheet(false);
+      return;
+    }
+    if (confirmedFarPickupContext && confirmedFarPickupContext !== pickupDistanceContextKey) {
+      setConfirmedFarPickupContext("");
+    }
+  }, [confirmedFarPickupContext, pickupDistanceContextKey, requiresFarPickupConfirmation]);
+
+  const proceedCheckout = async () => {
+    await Promise.resolve(
+      onCheckout({
+        cashTendered:
+          isCash && cashNeedsChange && cashTenderedValue !== null ? Number(cashTenderedValue) : null,
+      })
+    );
+  };
+
+  const handleCheckoutAttempt = async () => {
+    setHasTriedCheckout(true);
+    if (requiresFarPickupConfirmation && confirmedFarPickupContext !== pickupDistanceContextKey) {
+      setShowFarPickupSheet(true);
+      return;
+    }
+    await proceedCheckout();
+  };
 
   return (
     <div className={`animate-in slide-in-from-right relative overflow-x-hidden no-x-scroll bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.10),transparent_34%),linear-gradient(180deg,#eef5f7_0%,#f8fafc_8.5rem,#f8fafc_100%)] ${checkoutTopPaddingClass} ${isNativePlatform ? "ds-native-nav-content-lg" : "pb-24"}`}>
@@ -2187,6 +2261,24 @@ export const CartView = ({
                   )}
                 </div>
               </div>
+              {hasPickupDistanceWarning && (
+                <div className="mt-3 rounded-[1.35rem] border border-amber-200/80 bg-[linear-gradient(135deg,rgba(255,251,235,0.98)_0%,rgba(255,247,237,0.98)_100%)] p-3 shadow-[0_18px_34px_-28px_rgba(245,158,11,0.55)]">
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-amber-600 ring-1 ring-amber-200/80">
+                      <MapPinLine size={18} weight="duotone" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-amber-700">Retirada com distância maior</p>
+                      <p className="mt-1 text-sm font-bold text-slate-900">
+                        Esta loja fica a {formatDistanceKm(pickupDistanceValue)} do seu endereço de referência.
+                      </p>
+                      <p className="mt-1 text-[12px] leading-relaxed text-slate-600">
+                        Confirme a retirada apenas se você realmente pretende buscar o pedido no local.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -2259,10 +2351,7 @@ export const CartView = ({
                   return;
                 }
                 // Step 4: final checkout
-                setHasTriedCheckout(true);
-                onCheckout({
-                  cashTendered: isCash && cashNeedsChange && cashTenderedValue !== null ? Number(cashTenderedValue) : null,
-                });
+                await handleCheckoutAttempt();
               }}
               disabled={checkoutStep === 2
                 ? (
@@ -2354,12 +2443,7 @@ export const CartView = ({
                   await Promise.resolve(onCalculatePostalQuote?.());
                   return;
                 }
-                await Promise.resolve(
-                  onCheckout({
-                  cashTendered:
-                    isCash && cashNeedsChange && cashTenderedValue !== null ? Number(cashTenderedValue) : null,
-                  })
-                );
+                await handleCheckoutAttempt();
               }}
               disabled={primaryCtaDisabled}
               className={`w-full font-bold text-lg py-4 rounded-2xl shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
@@ -2421,8 +2505,66 @@ export const CartView = ({
         </div>
       )}
 
-      {showEmptyCartSheet && (
+      {showFarPickupSheet && (
         <div className="fixed inset-0 z-[71]">
+          <button
+            type="button"
+            onClick={() => setShowFarPickupSheet(false)}
+            className="absolute inset-0 bg-slate-950/55 backdrop-blur-[2px]"
+            aria-label="Fechar confirmação de retirada"
+          />
+          <div className="absolute bottom-0 left-0 right-0 rounded-t-[2rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#fffaf1_100%)] p-4 pb-[max(env(safe-area-inset-bottom),1rem)] shadow-[0_-24px_54px_-28px_rgba(15,23,42,0.52)]">
+            <div className="flex items-start gap-3">
+              <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.35rem] bg-slate-900 text-white shadow-[0_16px_32px_-20px_rgba(15,23,42,0.7)]">
+                <House size={22} weight="duotone" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-amber-700">Confirmação de retirada</p>
+                <p className="mt-1 text-lg font-black leading-tight text-slate-950">
+                  Retirada a {formatDistanceKm(pickupDistanceValue)}
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                  {storeLabel ? `${storeLabel} fica` : 'Esta loja fica'} a uma distância grande do seu endereço de referência.
+                  Confirme apenas se você realmente pretende retirar o pedido no local.
+                </p>
+                {storeAddress ? (
+                  <div className="mt-3 rounded-2xl border border-amber-200/70 bg-white/85 px-3 py-2 shadow-[0_12px_24px_-20px_rgba(245,158,11,0.45)]">
+                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Local da retirada</p>
+                    <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-800">{storeAddress}</p>
+                  </div>
+                ) : null}
+                <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-amber-700">
+                  <ShieldCheck size={12} weight="duotone" />
+                  Confirmação extra para retirada distante
+                </div>
+              </div>
+            </div>
+            <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setShowFarPickupSheet(false)}
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700"
+              >
+                Revisar pedido
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  setConfirmedFarPickupContext(pickupDistanceContextKey);
+                  setShowFarPickupSheet(false);
+                  await proceedCheckout();
+                }}
+                className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-black text-white shadow-[0_18px_32px_-20px_rgba(15,23,42,0.65)]"
+              >
+                Confirmo que vou retirar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEmptyCartSheet && (
+        <div className="fixed inset-0 z-[72]">
           <button
             type="button"
             onClick={() => setShowEmptyCartSheet(false)}

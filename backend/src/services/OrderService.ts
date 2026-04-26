@@ -32,6 +32,8 @@ import { Product } from '../entities/Product';
 import { OrderShipment } from '../entities/OrderShipment';
 import { PushNotificationService } from './PushNotificationService';
 import { OrderPaymentService } from './OrderPaymentService';
+import { calculateDistanceKm, roundDistanceKm } from '../utils/geo';
+import { env } from '../config/env';
 /**
  * Provides OrderService functionality.
  *
@@ -42,6 +44,8 @@ export class OrderService
 {
   private readonly queueActiveStatuses = [ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ];
   private readonly queueRecentStatuses = [ 'done', 'delivered', 'finished', 'cancelled' ];
+  private readonly farPickupLocalOpenStatuses = [ 'pending', 'awaiting_payment', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy', 'in_delivery', 'dispatched' ];
+  private readonly onSitePickupPaymentMethods = [ 'dinheiro', 'pix_loja', 'pix_presencial', 'debito_presencial', 'credito_presencial' ];
   private orderRepository = new OrderRepository();
   private storeRepository = new StoreRepository();
   private productRepository = new ProductRepository();
@@ -70,7 +74,90 @@ export class OrderService
 
   private isStaffActor(role?: string | null) {
     const normalized = String(role || '').trim().toUpperCase();
-    return normalized === 'ADMIN' || normalized === 'OPERATOR';
+    return [ 'ADMIN', 'OPERATOR', 'LOJISTA', 'STORE_OWNER', 'SUPER_ADMIN' ].includes(normalized);
+  }
+
+  private normalizeTrimmedText(value?: string | null) {
+    return String(value || '').trim();
+  }
+
+  private normalizePaymentMethod(value?: string | null) {
+    return String(value || '').trim().toLowerCase();
+  }
+
+  private toFiniteNumber(value: unknown) {
+    if (value === null || value === undefined) return null;
+    const parsed = Number(String(value).replace(',', '.').trim());
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  private isOnSitePickupPayment(method?: string | null) {
+    return this.onSitePickupPaymentMethods.includes(this.normalizePaymentMethod(method));
+  }
+
+  private async getPreferredCustomerAddressCoords(userId: string) {
+    const [row] = await AppDataSource.query(
+      `
+        SELECT lat, lng
+          FROM customer_addresses
+         WHERE user_id = $1
+         ORDER BY is_default DESC, created_at DESC
+         LIMIT 1
+      `,
+      [userId]
+    );
+    const lat = this.toFiniteNumber(row?.lat);
+    const lng = this.toFiniteNumber(row?.lng);
+    if (lat === null || lng === null) return null;
+    return { lat, lng };
+  }
+
+  private resolveStoreCoords(store: any) {
+    const lat = this.toFiniteNumber(store?.settings?.lat);
+    const lng = this.toFiniteNumber(store?.settings?.lng);
+    if (lat === null || lng === null) return null;
+    return { lat, lng };
+  }
+
+  private async resolvePickupDistanceKmForCustomer(userId: string, store: any) {
+    const customerCoords = await this.getPreferredCustomerAddressCoords(userId);
+    const storeCoords = this.resolveStoreCoords(store);
+    if (!customerCoords || !storeCoords) return null;
+    return roundDistanceKm(calculateDistanceKm(customerCoords, storeCoords), 1);
+  }
+
+  private async ensureFarPickupPolicy(input: CreateOrderDto, store: any) {
+    const userId = this.normalizeTrimmedText(input?.customerUserId);
+    if (!userId) return;
+    if (this.isStaffActor(input?.actorRole)) return;
+    if (this.normalizeTrimmedText(input?.type).toLowerCase() !== 'pickup') return;
+    if ((input as any)?.condominiumOrder) return;
+
+    const confirmationDistanceKm = Number(env.pickup.confirmationDistanceKm || 40);
+    if (!Number.isFinite(confirmationDistanceKm) || confirmationDistanceKm <= 0) return;
+
+    const pickupDistanceKm = await this.resolvePickupDistanceKmForCustomer(userId, store);
+    if (pickupDistanceKm === null || pickupDistanceKm < confirmationDistanceKm) return;
+    if (!this.isOnSitePickupPayment(input?.paymentMethod)) return;
+
+    const maxOpenOrders = Math.max(1, Number(env.pickup.maxOpenLocalOrdersForFarPickup || 1));
+    const [row] = await AppDataSource.query(
+      `
+        SELECT COUNT(*)::int AS total
+          FROM orders
+         WHERE customer_user_id = $1
+           AND type = 'pickup'
+           AND payment_method = ANY($2::text[])
+           AND status = ANY($3::text[])
+      `,
+      [userId, this.onSitePickupPaymentMethods, this.farPickupLocalOpenStatuses]
+    );
+    const total = Number(row?.total || 0);
+    if (total >= maxOpenOrders) {
+      throw new AppError('ORDER-PICKUP-001', 409, {
+        message: 'Você já possui um pedido de retirada em aberto. Finalize ou cancele esse pedido antes de confirmar outra retirada distante.',
+      });
+    }
   }
 
   private async ensureAnonymousOrderPolicy(input: CreateOrderDto, storeId: string) {
@@ -881,6 +968,7 @@ private async seedPostalShipmentFromCheckoutTx(
     const store = await this.storeRepository.findById(input.storeId);
     if (!store) throw new AppError('STORE-001', 404);
     await this.ensureAnonymousOrderPolicy(input, store.id);
+    await this.ensureFarPickupPolicy(input, store);
     const saved = await AppDataSource.transaction(async (manager) => {
       const order = await this.buildOrder(input, store, manager, randomUUID());
       const saved = await manager.getRepository(Order).save(order);
@@ -928,6 +1016,7 @@ private async seedPostalShipmentFromCheckoutTx(
     const store = await this.storeRepository.findBySlugWithOwner(input.storeSlug);
     if (!store) throw new AppError('STORE-001', 404);
     await this.ensureAnonymousOrderPolicy({ ...input, storeId: store.id }, store.id);
+    await this.ensureFarPickupPolicy({ ...input, storeId: store.id } as CreateOrderDto, store);
     const saved = await AppDataSource.transaction(async (manager) => {
       const order = await this.buildOrder(input, store, manager, randomUUID());
       const saved = await manager.getRepository(Order).save(order);

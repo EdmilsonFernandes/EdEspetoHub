@@ -1938,8 +1938,8 @@ export function MarketplacePage() {
   const formatDistance = (km: number | null | undefined) => {
     const normalizedKm = typeof km === 'number' && Number.isFinite(km) ? km : null;
     if (normalizedKm === null) return '-- km';
-    if (normalizedKm <= 0.05) return '< 0,1 km';
-    return `${normalizedKm.toFixed(1).replace('.', ',')} km`;
+    const displayKm = Math.max(0.1, normalizedKm);
+    return `${displayKm.toFixed(1).replace('.', ',')} km`;
   };
 
   const displayedFeaturedProducts = useMemo(() => {
@@ -3186,13 +3186,20 @@ export function MarketplacePage() {
                     store.supportsDelivery &&
                     !store.supportsPostal &&
                     [ 'outside_radius', 'same_city' ].includes(String(store.geoAvailability || '').toLowerCase());
-                  const storeNavigationState = shouldWarnCoverage
-                    ? {
-                        hubCoverageWarning: {
-                          message: 'Essa loja ainda não atende o seu endereço principal com entrega. Você pode ver o cardápio e conferir outras opções como retirada.',
-                        },
-                      }
-                    : undefined;
+                  const navigationDistanceKm = distanceByStore[store.id] ?? store.distanceKm ?? null;
+                  const storeNavigationState =
+                    shouldWarnCoverage || navigationDistanceKm !== null
+                      ? {
+                          ...(shouldWarnCoverage
+                            ? {
+                                hubCoverageWarning: {
+                                  message: 'Essa loja ainda não atende o seu endereço principal com entrega. Você pode ver o cardápio e conferir outras opções como retirada.',
+                                },
+                              }
+                            : {}),
+                          hubDistanceKm: navigationDistanceKm,
+                        }
+                      : undefined;
 
                   if (selectedCondominium) {
                     return (

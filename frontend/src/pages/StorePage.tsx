@@ -22,7 +22,16 @@ import { useToast } from '../contexts/ToastContext';
 import { formatCurrency, formatOrderDisplayId, formatOrderStatus, formatOrderType, formatPaymentMethod } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
-import { getPersistedBranding, brandingStorageKey, defaultBranding, initialCustomer, defaultPaymentMethod, WHATSAPP_NUMBER } from '../constants';
+import {
+  getPersistedBranding,
+  brandingStorageKey,
+  defaultBranding,
+  initialCustomer,
+  defaultPaymentMethod,
+  WHATSAPP_NUMBER,
+  PICKUP_DISTANCE_WARNING_KM,
+  PICKUP_DISTANCE_CONFIRMATION_KM,
+} from '../constants';
 import { isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
 import {
   formatSelectedModifiers,
@@ -629,6 +638,37 @@ export function StorePage() {
     ].filter(Boolean);
     return parts.join(' | ') || customer.address || '';
   }, [customer, customer.type]);
+  const preferredCustomerCoords = useMemo(() => {
+    const customerLat = getNumeric(customer?.lat);
+    const customerLng = getNumeric(customer?.lng);
+    if (customerLat !== null && customerLng !== null) {
+      return { lat: customerLat, lng: customerLng };
+    }
+    const preferredAddress =
+      customerAddresses.find((item: any) => item?.isDefault) ||
+      customerAddresses[0] ||
+      null;
+    const preferredLat = getNumeric(preferredAddress?.lat);
+    const preferredLng = getNumeric(preferredAddress?.lng);
+    if (preferredLat !== null && preferredLng !== null) {
+      return { lat: preferredLat, lng: preferredLng };
+    }
+    return null;
+  }, [customer?.lat, customer?.lng, customerAddresses]);
+  const pickupDistanceFromHubState = useMemo(() => {
+    const raw = getNumeric((location.state as any)?.hubDistanceKm);
+    return raw !== null && raw >= 0 ? Number(raw.toFixed(1)) : null;
+  }, [location.state]);
+  const pickupDistanceKm = useMemo(() => {
+    if (customer.type !== 'pickup') return null;
+    if (storeCoords && preferredCustomerCoords) {
+      const distance = haversineDistanceKm(storeCoords, preferredCustomerCoords);
+      if (distance !== null && Number.isFinite(distance)) {
+        return Number(distance.toFixed(1));
+      }
+    }
+    return pickupDistanceFromHubState;
+  }, [customer.type, haversineDistanceKm, pickupDistanceFromHubState, preferredCustomerCoords, storeCoords]);
   const orderTotal = useMemo(
     () => cartItemsTotal + deliveryFeeValue + condominiumFeeValue,
     [cartItemsTotal, deliveryFeeValue, condominiumFeeValue]
@@ -3337,6 +3377,9 @@ export function StorePage() {
             storeAddress={storeAddress}
             storeCoords={storeCoords}
             deliveryCoords={deliveryCoords}
+            pickupDistanceKm={pickupDistanceKm}
+            pickupDistanceWarningKm={PICKUP_DISTANCE_WARNING_KM}
+            pickupDistanceConfirmationKm={PICKUP_DISTANCE_CONFIRMATION_KM}
             isCustomerLogged={Boolean(customerSession?.token)}
             savedAddresses={customerAddresses}
             onApplySavedAddress={(address: any) => {

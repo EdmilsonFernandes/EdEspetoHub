@@ -5,6 +5,8 @@ export const initialCustomer = { name: '', phone: '', address: '', table: '', ty
 export const defaultPaymentMethod = 'debito';
 export const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '5512996797210';
 export const PIX_KEY = import.meta.env.VITE_PIX_KEY || '';
+export const PICKUP_DISTANCE_WARNING_KM = 15;
+export const PICKUP_DISTANCE_CONFIRMATION_KM = 40;
 
 export const defaultBranding = {
   brandName: 'Já no Caminho',

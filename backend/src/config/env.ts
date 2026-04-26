@@ -153,6 +153,11 @@ export const env = {
     minRadiusKm: numberEnv('MIN_DELIVERY_RADIUS_KM', 1, 1),
     maxRadiusKm: numberEnv('MAX_DELIVERY_RADIUS_KM', 30, 1),
   },
+  pickup: {
+    warningDistanceKm: numberEnv('PICKUP_DISTANCE_WARNING_KM', 15, 1),
+    confirmationDistanceKm: numberEnv('PICKUP_DISTANCE_CONFIRMATION_KM', 40, 1),
+    maxOpenLocalOrdersForFarPickup: numberEnv('MAX_OPEN_FAR_PICKUP_LOCAL_ORDERS', 1, 1),
+  },
   addressLookup: {
     enableGoogleGeocodingFallback: process.env.ENABLE_GOOGLE_GEOCODING_FALLBACK === 'true',
   },
