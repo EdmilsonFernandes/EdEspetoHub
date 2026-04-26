@@ -218,6 +218,137 @@ const storeRegionalPriority = (
   return 3;
 };
 
+type StoreCardBadge = {
+  key: string;
+  label: string;
+  icon: typeof PaperPlaneTilt;
+  className: string;
+  iconClassName?: string;
+};
+
+const getPrimaryStoreCardBadge = (
+  store: {
+    supportsPostal?: boolean;
+    supportsDelivery?: boolean;
+    deliversToUserLocation?: boolean;
+    geoAvailability?: string;
+    acceptsPickup?: boolean;
+    supportsTable?: boolean;
+  },
+  options?: { condominiumScope?: boolean }
+): StoreCardBadge | null => {
+  const availability = String(store?.geoAvailability || '').trim().toLowerCase();
+  const pickupEnabled = Boolean(store?.acceptsPickup || store?.supportsTable);
+
+  if (!options?.condominiumScope && store?.supportsDelivery && !store?.supportsPostal && store?.deliversToUserLocation) {
+    return {
+      key: 'delivery',
+      label: 'Entrega disponível',
+      icon: PaperPlaneTilt,
+      className:
+        'border-emerald-100 bg-emerald-50 text-emerald-700 shadow-[0_8px_18px_-14px_rgba(16,185,129,0.38)]',
+    };
+  }
+
+  if (pickupEnabled) {
+    return {
+      key: 'pickup',
+      label: 'Retirada no local',
+      icon: House,
+      className:
+        'border-slate-800/85 bg-[linear-gradient(135deg,#0f172a_0%,#1e293b_100%)] text-white shadow-[0_12px_24px_-16px_rgba(15,23,42,0.78)] ring-1 ring-white/10',
+      iconClassName: 'text-amber-300',
+    };
+  }
+
+  if (store?.supportsPostal) {
+    return {
+      key: 'postal',
+      label: 'Correios',
+      icon: PaperPlaneTilt,
+      className:
+        'border-violet-100 bg-violet-50 text-violet-700 shadow-[0_8px_18px_-14px_rgba(124,58,237,0.3)]',
+    };
+  }
+
+  if (!options?.condominiumScope && store?.supportsDelivery && [ 'outside_radius', 'same_city' ].includes(availability)) {
+    return {
+      key: 'outside',
+      label: 'Fora da área',
+      icon: Warning,
+      className:
+        'border-amber-100 bg-amber-50 text-amber-700 shadow-[0_8px_18px_-14px_rgba(245,158,11,0.34)]',
+    };
+  }
+
+  return null;
+};
+
+const getSecondaryStoreCardBadge = (
+  store: {
+    freeShipping?: boolean;
+    isNearest?: boolean;
+    rating?: number;
+    slug?: string;
+    sponsored?: boolean;
+  },
+  primaryBadgeKey: string | null,
+  favoriteStoreSlugs: string[],
+  options?: { condominiumScope?: boolean; geoMode?: string | null }
+): StoreCardBadge | null => {
+  if (store?.freeShipping && primaryBadgeKey !== 'outside') {
+    return {
+      key: 'free_shipping',
+      label: 'Frete grátis',
+      icon: Bicycle,
+      className:
+        'border-emerald-100 bg-emerald-50 text-emerald-700 shadow-[0_8px_18px_-14px_rgba(16,185,129,0.32)]',
+    };
+  }
+
+  if (!options?.condominiumScope && store?.isNearest && String(options?.geoMode || '').toLowerCase() === 'deliverable') {
+    return {
+      key: 'nearest',
+      label: 'Mais perto',
+      icon: MapPinLine,
+      className:
+        'border-sky-100 bg-sky-50 text-sky-700 shadow-[0_8px_18px_-14px_rgba(2,132,199,0.28)]',
+    };
+  }
+
+  if (Number(store?.rating || 0) >= 4.9) {
+    return {
+      key: 'highlight',
+      label: 'Destaque',
+      icon: Sparkle,
+      className:
+        'border-rose-100 bg-rose-50 text-rose-600 shadow-[0_8px_18px_-14px_rgba(225,29,72,0.32)]',
+    };
+  }
+
+  if (!favoriteStoreSlugs.includes(String(store?.slug || '')) && Number(store?.rating || 0) >= 4.7) {
+    return {
+      key: 'favorite_hint',
+      label: 'Favorita',
+      icon: Star,
+      className:
+        'border-amber-100 bg-amber-50 text-amber-700 shadow-[0_8px_18px_-14px_rgba(245,158,11,0.28)]',
+    };
+  }
+
+  if (store?.sponsored) {
+    return {
+      key: 'sponsored',
+      label: 'Patrocinada',
+      icon: Sparkle,
+      className:
+        'border-slate-100 bg-slate-50 text-slate-500 shadow-[0_8px_18px_-14px_rgba(15,23,42,0.18)]',
+    };
+  }
+
+  return null;
+};
+
 const buildDistanceContextKey = (
   savedAddress: PreferredDiscoveryAddress | null,
   location: { lat: number; lng: number } | null,
@@ -3200,6 +3331,20 @@ export function MarketplacePage() {
                           hubDistanceKm: navigationDistanceKm,
                         }
                       : undefined;
+                  const primaryBadge = store.isOpen
+                    ? getPrimaryStoreCardBadge(store, { condominiumScope: isCondominiumScope })
+                    : null;
+                  const secondaryBadge = store.isOpen
+                    ? getSecondaryStoreCardBadge(
+                        store as any,
+                        primaryBadge?.key || null,
+                        favoriteStoreSlugs,
+                        {
+                          condominiumScope: isCondominiumScope,
+                          geoMode: geoDiscovery?.mode || null,
+                        }
+                      )
+                    : null;
 
                   if (selectedCondominium) {
                     return (
@@ -3303,15 +3448,15 @@ export function MarketplacePage() {
                       key={store.id}
                       to={storePath}
                       state={storeNavigationState}
-                      className={`group relative overflow-hidden rounded-[1.75rem] border bg-white transition-all duration-300 ease-out active:scale-[0.982] ${
+                      className={`group relative overflow-hidden rounded-[1.45rem] border bg-white transition-all duration-300 ease-out active:scale-[0.985] ${
                         store.isOpen
-                          ? 'border-white shadow-[0_10px_32px_rgba(15,23,42,0.08),0_2px_8px_rgba(15,23,42,0.04)] md:hover:-translate-y-1 md:hover:shadow-[0_20px_44px_rgba(15,23,42,0.11)]'
-                          : 'border-slate-100 bg-slate-50/70 shadow-[0_6px_18px_rgba(15,23,42,0.04)]'
+                          ? 'border-white shadow-[0_10px_28px_rgba(15,23,42,0.07),0_1px_6px_rgba(15,23,42,0.04)] md:hover:-translate-y-0.5 md:hover:shadow-[0_18px_36px_rgba(15,23,42,0.1)]'
+                          : 'border-slate-100 bg-slate-50/80 shadow-[0_6px_18px_rgba(15,23,42,0.04)]'
                       }`}
                     >
                       {/* Banner + overlapping logo wrapper */}
                       <div className="relative">
-                        <div className="relative h-[90px] overflow-hidden rounded-t-[1.75rem] bg-slate-100">
+                        <div className="relative h-[72px] overflow-hidden rounded-t-[1.45rem] bg-slate-100">
                           <img
                             src={store.banner || store.logo}
                             alt=""
@@ -3325,12 +3470,12 @@ export function MarketplacePage() {
 
                           {/* Open/closed status badge */}
                           {store.isOpen ? (
-                            <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-emerald-500/90 px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.14em] text-white shadow-[0_4px_10px_-4px_rgba(16,185,129,0.7)] backdrop-blur-sm">
+                            <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-emerald-500/90 px-2 py-0.5 text-[7.5px] font-black uppercase tracking-[0.14em] text-white shadow-[0_4px_10px_-4px_rgba(16,185,129,0.7)] backdrop-blur-sm">
                               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
                               Aberto
                             </span>
                           ) : (
-                            <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-slate-800/65 px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.14em] text-white/90 backdrop-blur-sm">
+                            <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-slate-800/65 px-2 py-0.5 text-[7.5px] font-black uppercase tracking-[0.14em] text-white/90 backdrop-blur-sm">
                               Fechado
                             </span>
                           )}
@@ -3343,14 +3488,14 @@ export function MarketplacePage() {
                               event.stopPropagation();
                               toggleFavoriteStore(store.slug);
                             }}
-                            className={`absolute right-2.5 top-2.5 inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ease-out active:scale-[0.86] ${
+                            className={`absolute right-2.5 top-2.5 inline-flex h-7 w-7 items-center justify-center rounded-full transition-all duration-200 ease-out active:scale-[0.86] ${
                               favoriteStoreSlugs.includes(store.slug)
                                 ? 'scale-[1.06] bg-rose-500 text-white shadow-[0_4px_18px_-4px_rgba(244,63,94,0.72)]'
                                 : 'border border-white/20 bg-black/28 text-white backdrop-blur-md hover:bg-black/42'
                             }`}
                             aria-label={`Favoritar ${store.name}`}
                           >
-                            <Heart size={14} weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'} />
+                            <Heart size={12} weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'} />
                           </button>
                         </div>
 
@@ -3360,22 +3505,17 @@ export function MarketplacePage() {
                           alt=""
                           loading="lazy"
                           decoding="async"
-                          className={`absolute -bottom-5 left-3.5 z-10 h-12 w-12 rounded-[0.9rem] border-[2.5px] border-white bg-white object-cover shadow-[0_10px_22px_-10px_rgba(15,23,42,0.5)] ${store.isOpen ? '' : 'grayscale opacity-55'}`}
+                          className={`absolute -bottom-4 left-3.5 z-10 h-10 w-10 rounded-[0.8rem] border-[2px] border-white bg-white object-cover shadow-[0_10px_22px_-10px_rgba(15,23,42,0.42)] ${store.isOpen ? '' : 'grayscale opacity-55'}`}
                           onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
                         />
                       </div>
 
                       {/* Content */}
-                      <div className="px-3.5 pb-3.5 pt-8">
-                        <h3 className={`truncate text-[15.5px] font-black leading-tight tracking-[-0.01em] ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>
+                      <div className="px-3.5 pb-3.5 pt-[1.65rem]">
+                        <h3 className={`truncate text-[14.5px] font-black leading-tight ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>
                           {store.name}
                         </h3>
-                        {store.segment && (
-                          <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-400">
-                            {store.segment}
-                          </p>
-                        )}
-                        <div className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] font-medium text-slate-500">
+                        <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[10.5px] font-medium text-slate-500">
                           {store.rating > 0 ? (
                             <span className="inline-flex items-center gap-0.5">
                               <Star size={10} weight="fill" className="text-amber-400" />
@@ -3392,65 +3532,25 @@ export function MarketplacePage() {
                           )}
                         </div>
                         {!store.isOpen && (
-                          <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-500">
+                          <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-[9.5px] font-bold text-slate-500">
                             {store.nextOpeningLabel || 'Sem horário cadastrado'}
                           </p>
                         )}
-                        {store.isOpen && (
+                        {store.isOpen && (primaryBadge || secondaryBadge) && (
                           <div className="mt-2.5 flex flex-wrap gap-1.5">
-                            {store.isNearest && geoDiscovery?.mode === 'deliverable' && (
-                              <span className="inline-flex items-center gap-1 rounded-full border border-sky-100 bg-sky-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-sky-700 shadow-[0_6px_16px_-12px_rgba(2,132,199,0.42)]">
-                                <MapPinLine size={9} weight="fill" />
-                                Mais perto
-                              </span>
-                            )}
-                            {store.supportsPostal && (
-                              <span className="inline-flex items-center gap-1 rounded-full border border-violet-100 bg-violet-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-violet-700 shadow-[0_6px_16px_-12px_rgba(124,58,237,0.32)]">
-                                <PaperPlaneTilt size={9} weight="fill" />
-                                Correios
-                              </span>
-                            )}
-                            {!isCondominiumScope && store.supportsDelivery && !store.supportsPostal && store.deliversToUserLocation && (
-                              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-emerald-700 shadow-[0_6px_16px_-12px_rgba(16,185,129,0.34)]">
-                                <PaperPlaneTilt size={9} weight="fill" />
-                                Entrega disponível
-                              </span>
-                            )}
-                            {!isCondominiumScope && store.supportsDelivery && !store.supportsPostal && !store.deliversToUserLocation && [ 'outside_radius', 'same_city' ].includes(String(store.geoAvailability || '').toLowerCase()) && (
-                              <span className="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-amber-700 shadow-[0_6px_16px_-12px_rgba(245,158,11,0.34)]">
-                                <Warning size={9} weight="fill" />
-                                Fora da área
-                              </span>
-                            )}
-                            {!isCondominiumScope && (store.acceptsPickup || store.supportsTable) && (
-                              <span className="inline-flex items-center gap-1 rounded-full border border-slate-800/80 bg-[linear-gradient(135deg,#0f172a_0%,#1f2937_100%)] px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-white shadow-[0_10px_22px_-14px_rgba(15,23,42,0.72)] ring-1 ring-white/10">
-                                <House size={9} weight="fill" className="text-amber-300" />
-                                Retirada disponível
-                              </span>
-                            )}
-                            {store.rating >= 4.9 && (
-                              <span className="inline-flex items-center gap-1 rounded-full border border-rose-100 bg-rose-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-rose-600 shadow-[0_6px_16px_-12px_rgba(225,29,72,0.5)]">
-                                <Sparkle size={9} weight="fill" />
-                                Destaque
-                              </span>
-                            )}
-                            {store.freeShipping && (
-                              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-emerald-700 shadow-[0_6px_16px_-12px_rgba(16,185,129,0.5)]">
-                                <Bicycle size={9} weight="fill" />
-                                Grátis
-                              </span>
-                            )}
-                            {store.rating >= 4.7 && !favoriteStoreSlugs.includes(store.slug) && (
-                              <span className="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 px-2.5 py-0.5 text-[9.5px] font-bold text-amber-700">
-                                <Star size={9} weight="fill" className="text-amber-400" />
-                                Favorita
-                              </span>
-                            )}
-                            {(store as any).sponsored && (
-                              <span className="inline-flex rounded-full border border-slate-100 bg-slate-50 px-2.5 py-0.5 text-[9.5px] font-medium text-slate-400">
-                                Patrocinado
-                              </span>
-                            )}
+                            {[primaryBadge, secondaryBadge].filter(Boolean).map((badge) => {
+                              if (!badge) return null;
+                              const BadgeIcon = badge.icon;
+                              return (
+                                <span
+                                  key={`${store.id}-${badge.key}`}
+                                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] ${badge.className}`}
+                                >
+                                  <BadgeIcon size={9} weight="fill" className={badge.iconClassName || ''} />
+                                  {badge.label}
+                                </span>
+                              );
+                            })}
                           </div>
                         )}
                       </div>
