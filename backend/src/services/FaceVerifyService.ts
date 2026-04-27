@@ -1,7 +1,7 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2026 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2026 Já no Caminho - All Rights Reserved.
  *
  * Assisted verification: compares selfie vs CNH face and returns a score.
  */

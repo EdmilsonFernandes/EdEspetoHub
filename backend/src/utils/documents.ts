@@ -1,21 +1,21 @@
 /**
  * Handles only digits.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-08
  */
 const onlyDigits = (value: string) => value.replace(/\D/g, '');
 /**
  * Handles is repeated.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-08
  */
 const isRepeated = (value: string) => /^(\d)\1+$/.test(value);
 /**
  * Validates cpf.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-08
  */
 const validateCpf = (cpf: string) => {
@@ -36,7 +36,7 @@ const validateCpf = (cpf: string) => {
 /**
  * Validates cnpj.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-08
  */
 const validateCnpj = (cnpj: string) => {
@@ -46,7 +46,7 @@ const validateCnpj = (cnpj: string) => {
   /**
    * Handles calc.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-08
    */
   const calc = (base: number[]) => {
@@ -67,14 +67,14 @@ const validateCnpj = (cnpj: string) => {
 /**
  * Handles normalize document.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-08
  */
 export const normalizeDocument = (value?: string) => (value ? onlyDigits(value) : '');
 /**
  * Validates document.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-08
  */
 export const validateDocument = (value: string, type: string) => {

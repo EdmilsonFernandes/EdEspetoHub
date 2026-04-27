@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: MotoboyController.ts
  * @Date: 2026-01-29
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { Request, Response } from 'express';
@@ -28,7 +28,7 @@ const log = logger.child({ scope: 'MotoboyController' });
 /**
  * Provides MotoboyController functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-29
  */
 export class MotoboyController {
@@ -69,7 +69,7 @@ export class MotoboyController {
   /**
    * Lists available orders for motoboy.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async listAvailableOrders(req: Request, res: Response) {
@@ -86,7 +86,7 @@ export class MotoboyController {
   /**
    * Lists motoboy delivery history.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async listHistory(req: Request, res: Response) {
@@ -147,7 +147,7 @@ export class MotoboyController {
   /**
    * Lists store requests for motoboy.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async listStoreRequests(req: Request, res: Response) {
@@ -178,7 +178,7 @@ export class MotoboyController {
   /**
    * Creates store requests for motoboy.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async createStoreRequest(req: Request, res: Response) {
@@ -210,7 +210,7 @@ export class MotoboyController {
   /**
    * Lists motoboys linked to a store.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async listByStore(req: Request, res: Response) {
@@ -272,7 +272,7 @@ export class MotoboyController {
   /**
    * Uploads a motoboy document (selfie/CPF/CNH).
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async uploadDocument(req: Request, res: Response) {
@@ -288,7 +288,7 @@ export class MotoboyController {
   /**
    * Lists documents for motoboy itself.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async listOwnDocuments(req: Request, res: Response) {
@@ -304,7 +304,7 @@ export class MotoboyController {
   /**
    * Gets motoboy profile.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async getProfile(req: Request, res: Response) {
@@ -319,7 +319,7 @@ export class MotoboyController {
   /**
    * Updates motoboy profile.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async updateProfile(req: Request, res: Response) {
@@ -335,7 +335,7 @@ export class MotoboyController {
   /**
    * Lists documents for a motoboy.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async listDocuments(req: Request, res: Response) {
@@ -350,7 +350,7 @@ export class MotoboyController {
   /**
    * Approves a motoboy document.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async approveDocument(req: Request, res: Response) {
@@ -371,7 +371,7 @@ export class MotoboyController {
   /**
    * Rejects a motoboy document.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async rejectDocument(req: Request, res: Response) {
@@ -414,7 +414,7 @@ export class MotoboyController {
   /**
    * Accepts order for delivery.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async acceptOrder(req: Request, res: Response) {
@@ -459,7 +459,7 @@ export class MotoboyController {
   /**
    * Confirms payment.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async confirmPayment(req: Request, res: Response) {
@@ -480,7 +480,7 @@ export class MotoboyController {
   /**
    * Marks order delivered.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async markDelivered(req: Request, res: Response) {
@@ -497,7 +497,7 @@ export class MotoboyController {
   /**
    * Finishes order.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async finishOrder(req: Request, res: Response) {
@@ -514,7 +514,7 @@ export class MotoboyController {
   /**
    * Creates motoboy profile for store.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async createForStore(req: Request, res: Response) {
@@ -533,7 +533,7 @@ export class MotoboyController {
   /**
    * Links motoboy to store.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async linkStore(req: Request, res: Response) {
@@ -549,7 +549,7 @@ export class MotoboyController {
   /**
    * Unlinks motoboy from store.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async unlinkStore(req: Request, res: Response) {
@@ -565,7 +565,7 @@ export class MotoboyController {
   /**
    * Approves motoboy.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async approve(req: Request, res: Response) {
@@ -581,7 +581,7 @@ export class MotoboyController {
   /**
    * Suspends motoboy.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async suspend(req: Request, res: Response) {
@@ -597,7 +597,7 @@ export class MotoboyController {
   /**
    * Lists store requests for a store owner.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async listStoreRequestsForStore(req: Request, res: Response) {
@@ -633,7 +633,7 @@ export class MotoboyController {
   /**
    * Approves a store request.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async approveStoreRequest(req: Request, res: Response) {
@@ -654,7 +654,7 @@ export class MotoboyController {
   /**
    * Rejects a store request.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   static async rejectStoreRequest(req: Request, res: Response) {

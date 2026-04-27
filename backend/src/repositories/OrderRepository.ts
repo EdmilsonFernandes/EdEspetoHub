@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: OrderRepository.ts
  * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { In, MoreThanOrEqual, Repository } from 'typeorm';
@@ -18,7 +18,7 @@ import { OrderItem } from '../entities/OrderItem';
 /**
  * Provides OrderRepository functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2025-12-17
  */
 export class OrderRepository
@@ -28,7 +28,7 @@ export class OrderRepository
   /**
    * Creates a new OrderRepository.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   constructor()
@@ -42,7 +42,7 @@ export class OrderRepository
   /**
    * Executes create logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   create(data: Partial<Order>)
@@ -56,7 +56,7 @@ export class OrderRepository
   /**
    * Executes save logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   save(order: Order)
@@ -70,13 +70,13 @@ export class OrderRepository
   /**
    * Executes find by store id logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   /**
    * Finds by store id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   findByStoreId(storeId: string)
@@ -93,13 +93,13 @@ export class OrderRepository
   /**
    * Executes find by id logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   /**
    * Finds by id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   findById(orderId: string)
@@ -116,7 +116,7 @@ export class OrderRepository
   /**
    * Counts by store and statuses.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   countByStoreAndStatuses(storeId: string, statuses: string[])
@@ -134,7 +134,7 @@ export class OrderRepository
   /**
    * Counts queue ahead.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   countQueueAhead(storeId: string, statuses: string[], createdAt: Date)
@@ -153,7 +153,7 @@ export class OrderRepository
   /**
    * Counts active orders for a table.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-17
    */
   countActiveByTable(storeId: string, tableNumber: string, statuses: string[])
@@ -169,7 +169,7 @@ export class OrderRepository
   /**
    * Finds active occupied tables for a store.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-03-12
    */
   async findActiveTablesByStore(storeId: string, statuses: string[])
@@ -195,13 +195,13 @@ export class OrderRepository
   /**
    * Executes find queue by store id logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   /**
    * Finds queue by store id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   findQueueByStoreId(storeId: string)
@@ -245,7 +245,7 @@ export class OrderRepository
   /**
    * Finds top items since a date.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-21
    */
   async findTopItemsByStoreSince(storeId: string, since: Date, limit = 3)
@@ -332,7 +332,7 @@ async markItemsAsPrinted(orderId: string, itemIds?: string[]) {
   /**
    * Counts all orders.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   countAll()
@@ -346,7 +346,7 @@ async markItemsAsPrinted(orderId: string, itemIds?: string[]) {
   /**
    * Counts orders since a date.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   countSince(since: Date)
@@ -363,7 +363,7 @@ async markItemsAsPrinted(orderId: string, itemIds?: string[]) {
   /**
    * Aggregates orders by store.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async aggregateByStore()
@@ -391,7 +391,7 @@ async markItemsAsPrinted(orderId: string, itemIds?: string[]) {
   /**
    * Sums total revenue from orders.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async sumAllRevenue()
@@ -409,7 +409,7 @@ async markItemsAsPrinted(orderId: string, itemIds?: string[]) {
   /**
    * Sums revenue from orders since a date.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async sumRevenueSince(since: Date)

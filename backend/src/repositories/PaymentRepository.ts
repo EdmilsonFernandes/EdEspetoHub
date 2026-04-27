@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: PaymentRepository.ts
  * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { Repository } from 'typeorm';
@@ -17,7 +17,7 @@ import { Payment } from '../entities/Payment';
 /**
  * Provides PaymentRepository functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2025-12-17
  */
 export class PaymentRepository {
@@ -25,7 +25,7 @@ export class PaymentRepository {
   /**
    * Creates a new instance.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   constructor() {
@@ -35,7 +35,7 @@ export class PaymentRepository {
   /**
    * Creates data.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   create(data: Partial<Payment>) {
@@ -45,7 +45,7 @@ export class PaymentRepository {
   /**
    * Saves data.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   save(payment: Payment) {
@@ -55,7 +55,7 @@ export class PaymentRepository {
   /**
    * Handles find by id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   findById(id: string) {
@@ -65,7 +65,7 @@ export class PaymentRepository {
   /**
    * Handles find latest by store id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   findLatestByStoreId(storeId: string) {
@@ -90,7 +90,7 @@ findLatestPaidByStoreId(storeId: string) {
   /**
    * Handles find latest pending by store id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   findLatestPendingByStoreId(storeId: string) {
@@ -104,7 +104,7 @@ findLatestPaidByStoreId(storeId: string) {
   /**
    * Handles sum paid amounts.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async sumPaidAmounts() {
@@ -119,7 +119,7 @@ findLatestPaidByStoreId(storeId: string) {
   /**
    * Handles count by status.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async countByStatus(status: string) {
@@ -132,7 +132,7 @@ findLatestPaidByStoreId(storeId: string) {
   /**
    * Handles find recent.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   findRecent(limit = 50) {
@@ -146,7 +146,7 @@ findLatestPaidByStoreId(storeId: string) {
   /**
    * Handles count recent by store id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async countRecentByStoreId(storeId: string, since: Date) {
@@ -160,7 +160,7 @@ findLatestPaidByStoreId(storeId: string) {
   /**
    * Handles find by store id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   findByStoreId(storeId: string, limit = 20) {

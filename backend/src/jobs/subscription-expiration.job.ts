@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: subscription-expiration.job.ts
  * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { SubscriptionService } from '../services/SubscriptionService';
@@ -18,7 +18,7 @@ const DAY_IN_MS = 24 * 60 * 60 * 1000;
 /**
  * Handles schedule subscription expiration job.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2025-12-17
  */
 export const scheduleSubscriptionExpirationJob = () => {
@@ -27,7 +27,7 @@ export const scheduleSubscriptionExpirationJob = () => {
   /**
    * Handles run.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   const run = async () => {
@@ -38,7 +38,7 @@ export const scheduleSubscriptionExpirationJob = () => {
   /**
    * Sets interval.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   setInterval(() => {

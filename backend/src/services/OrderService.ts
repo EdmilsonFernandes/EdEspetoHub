@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: OrderService.ts
  * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { CreateOrderDto, CreateOrderItemInput } from '../dto/CreateOrderDto';
@@ -40,7 +40,7 @@ import { resolveMercadoPagoStatusDetailLabel, resolveMercadoPagoStatusLabel } fr
 /**
  * Provides OrderService functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2025-12-17
  */
 export class OrderService
@@ -740,7 +740,7 @@ private async attachShipmentSnapshot(orders: any[]) {
   /**
    * Resolves the price used for an item.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-22
    */
   private resolveItemPrice(product: Awaited<ReturnType<ProductRepository[ 'findById' ]>>)
@@ -850,7 +850,7 @@ private resolveSelectedModifiers(
   /**
    * Ensures store access.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private ensureStoreAccess(store: Awaited<ReturnType<StoreRepository[ 'findById' ]>>, authStoreId?: string)
@@ -1069,7 +1069,7 @@ private async seedPostalShipmentFromCheckoutTx(
   /**
    * Creates a new order using store ID context and applies stock, ETA, and delivery side effects.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async create(input: CreateOrderDto)
@@ -1118,7 +1118,7 @@ private async seedPostalShipmentFromCheckoutTx(
   /**
    * Creates a new order using store slug context and resolves store internally.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async createBySlug(input: Omit<CreateOrderDto, 'storeId'> & { storeSlug: string })
@@ -1177,7 +1177,7 @@ private async seedPostalShipmentFromCheckoutTx(
   /**
    * Lists store orders and appends delivery/shipment snapshots for operations.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async listByStoreId(storeId: string, authStoreId?: string)
@@ -1198,7 +1198,7 @@ private async seedPostalShipmentFromCheckoutTx(
   /**
    * Lists store orders by slug for staff dashboards and queue screens.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async listByStoreSlug(slug: string, authStoreId?: string)
@@ -1253,7 +1253,7 @@ private async seedPostalShipmentFromCheckoutTx(
   /**
    * Returns most ordered items for storefront highlights.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-21
    */
   async listTopItemsBySlug(slug: string, limit = 3)
@@ -1274,7 +1274,7 @@ private async seedPostalShipmentFromCheckoutTx(
   /**
    * Returns current table occupancy/status for public table mode.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-03-12
    */
   async listTableStatusBySlug(slug: string)
@@ -1295,7 +1295,7 @@ private async seedPostalShipmentFromCheckoutTx(
   /**
    * Updates operational order status and applies workflow side effects.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async updateStatus(orderId: string, status: string, authStoreId?: string, reason?: string | null)
@@ -1586,7 +1586,7 @@ async reopenOrder(
   /**
    * Replaces editable order items and recalculates totals with stock reconciliation.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async updateItems(orderId: string, items: CreateOrderItemInput[], authStoreId?: string)
@@ -1715,7 +1715,7 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
   /**
    * Gets public by id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async getPublicById(orderId: string)
@@ -1761,7 +1761,7 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
   /**
    * Builds order.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private async buildOrder(

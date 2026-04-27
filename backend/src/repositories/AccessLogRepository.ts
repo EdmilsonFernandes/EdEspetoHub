@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: AccessLogRepository.ts
  * @Date: 2026-01-15
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { Repository } from 'typeorm';
@@ -30,7 +30,7 @@ type AccessLogFilters = {
 /**
  * Provides AccessLogRepository functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-15
  */
 export class AccessLogRepository {
@@ -38,7 +38,7 @@ export class AccessLogRepository {
   /**
    * Creates a new instance.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-15
    */
   constructor() {
@@ -48,7 +48,7 @@ export class AccessLogRepository {
   /**
    * Saves data.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-15
    */
   save(payload: Partial<AccessLog>) {
@@ -58,7 +58,7 @@ export class AccessLogRepository {
   /**
    * Lists data.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-15
    */
   async list(filters: AccessLogFilters) {

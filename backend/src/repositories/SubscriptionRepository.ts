@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: SubscriptionRepository.ts
  * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { Repository } from 'typeorm';
@@ -17,7 +17,7 @@ import { Subscription } from '../entities/Subscription';
 /**
  * Provides SubscriptionRepository functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2025-12-17
  */
 export class SubscriptionRepository {
@@ -25,7 +25,7 @@ export class SubscriptionRepository {
   /**
    * Creates a new instance.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   constructor() {
@@ -35,7 +35,7 @@ export class SubscriptionRepository {
   /**
    * Creates data.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   create(data: Partial<Subscription>) {
@@ -45,7 +45,7 @@ export class SubscriptionRepository {
   /**
    * Saves data.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   save(subscription: Subscription) {
@@ -55,7 +55,7 @@ export class SubscriptionRepository {
   /**
    * Handles find latest by store id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   findLatestByStoreId(storeId: string) {
@@ -121,7 +121,7 @@ findCurrentByStoreId(storeId: string) {
   /**
    * Handles find by id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   findById(id: string) {
@@ -131,7 +131,7 @@ findCurrentByStoreId(storeId: string) {
   /**
    * Handles find all.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   findAll() {
@@ -144,7 +144,7 @@ findCurrentByStoreId(storeId: string) {
   /**
    * Counts subscriptions by status list.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   countByStatuses(statuses: string[])
@@ -161,7 +161,7 @@ findCurrentByStoreId(storeId: string) {
   /**
    * Counts active subscriptions updated since a date.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   countActiveUpdatedSince(since: Date)
@@ -179,7 +179,7 @@ findCurrentByStoreId(storeId: string) {
   /**
    * Counts subscriptions started since a date.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   countStartedSince(since: Date)

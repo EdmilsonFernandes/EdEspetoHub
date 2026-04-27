@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: StoreRepository.ts
  * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { Repository } from 'typeorm';
@@ -17,7 +17,7 @@ import { Store } from '../entities/Store';
 /**
  * Provides StoreRepository functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2025-12-17
  */
 export class StoreRepository {
@@ -25,7 +25,7 @@ export class StoreRepository {
   /**
    * Creates a new instance.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   constructor() {
@@ -35,7 +35,7 @@ export class StoreRepository {
   /**
    * Creates data.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   create(data: Partial<Store>) {
@@ -45,7 +45,7 @@ export class StoreRepository {
   /**
    * Saves data.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   save(store: Store) {
@@ -55,7 +55,7 @@ export class StoreRepository {
   /**
    * Handles find by slug.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   findBySlug(slug: string) {
@@ -65,7 +65,7 @@ export class StoreRepository {
   /**
    * Handles find by slug with owner.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-03-16
    */
   findBySlugWithOwner(slug: string) {
@@ -75,7 +75,7 @@ export class StoreRepository {
   /**
    * Handles find by id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   findById(identifier: string) {
@@ -85,7 +85,7 @@ export class StoreRepository {
   /**
    * Handles find by id with owner.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   findByIdWithOwner(identifier: string) {
@@ -95,7 +95,7 @@ export class StoreRepository {
   /**
    * Handles find by owner id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   findByOwnerId(ownerId: string) {
@@ -105,7 +105,7 @@ export class StoreRepository {
   /**
    * Handles find by name.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   findByName(name: string) {
@@ -115,7 +115,7 @@ export class StoreRepository {
   /**
    * Handles find all.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   findAll() {
@@ -125,7 +125,7 @@ export class StoreRepository {
   /**
    * Counts all stores.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-22
    */
   countAll() {

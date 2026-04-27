@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: SettingsService.ts
  * @Date: 2026-01-08
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { AppDataSource } from '../config/database';
@@ -16,7 +16,7 @@ import { SiteSetting } from '../entities/SiteSetting';
 /**
  * Provides SettingsService functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-08
  */
 export class SettingsService {
@@ -24,7 +24,7 @@ export class SettingsService {
   /**
    * Gets value.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-08
    */
   async getValue(key: string) {
@@ -35,7 +35,7 @@ export class SettingsService {
   /**
    * Gets number.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-08
    */
   async getNumber(key: string, fallback: number) {
@@ -48,7 +48,7 @@ export class SettingsService {
   /**
    * Sets value.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-08
    */
   async setValue(key: string, value: string) {

@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: PlanService.ts
  * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { PlanRepository } from '../repositories/PlanRepository';
@@ -34,7 +34,7 @@ const LEGACY_PLANS: PlanName[] = ['monthly', 'yearly'];
 /**
  * Provides PlanService functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2025-12-17
  */
 export class PlanService {
@@ -53,7 +53,7 @@ private resolveMonthlyPrice(byName: Map<string, Plan>, planName: 'basic_monthly'
   /**
    * Lists enabled.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async listEnabled() {
@@ -64,7 +64,7 @@ private resolveMonthlyPrice(byName: Map<string, Plan>, planName: 'basic_monthly'
   /**
    * Ensures seeded plans.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async ensureSeededPlans() {
@@ -72,7 +72,7 @@ private resolveMonthlyPrice(byName: Map<string, Plan>, planName: 'basic_monthly'
     /**
      * Handles by name.
      *
-     * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+     * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
      * @date 2025-12-17
      */
     const byName = new Map(existing.map((plan) => [plan.name, plan]));

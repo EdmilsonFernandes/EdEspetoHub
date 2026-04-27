@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: OrderController.ts
  * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { Request, Response } from 'express';
@@ -32,14 +32,14 @@ const log = logger.child({ scope: 'OrderController' });
 /**
  * Provides OrderController functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2025-12-17
  */
 export class OrderController {
   /**
    * Executes create logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async create(req: Request, res: Response) {
@@ -76,7 +76,7 @@ export class OrderController {
   /**
    * Executes list logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async list(req: Request, res: Response) {
@@ -107,7 +107,7 @@ export class OrderController {
   /**
    * Creates by slug.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async createBySlug(req: Request, res: Response) {
@@ -144,7 +144,7 @@ export class OrderController {
   /**
    * Lists by slug.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async listBySlug(req: Request, res: Response) {
@@ -196,7 +196,7 @@ export class OrderController {
   /**
    * Lists highlights by slug.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-21
    */
   static async listHighlightsBySlug(req: Request, res: Response) {
@@ -213,7 +213,7 @@ export class OrderController {
   /**
    * Lists public table occupancy by slug.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-03-12
    */
   static async listTableStatusBySlug(req: Request, res: Response) {
@@ -233,7 +233,7 @@ export class OrderController {
   /**
    * Updates status.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async updateStatus(req: Request, res: Response) {
@@ -255,7 +255,7 @@ export class OrderController {
   /**
    * Updates items.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async updateItems(req: Request, res: Response) {
@@ -369,7 +369,7 @@ static async markItemsAsPrinted(req: Request, res: Response) {
   /**
    * Gets public.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async getPublic(req: Request, res: Response) {
@@ -539,7 +539,7 @@ static async markItemsAsPrinted(req: Request, res: Response) {
   /**
    * Gets order tracking (V2).
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-28
    */
   static async getTrackingV2(req: Request, res: Response) {

@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: CondominiumRepository.ts
  * @Date: 2026-04-12
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { Repository } from 'typeorm';
@@ -25,7 +25,7 @@ import { CondominiumAccessRequest } from '../entities/CondominiumAccessRequest';
 /**
  * Provides CondominiumRepository functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-04-12
  */
 export class CondominiumRepository {
@@ -40,7 +40,7 @@ export class CondominiumRepository {
   /**
    * Creates a new instance.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-04-12
    */
   constructor() {
@@ -90,7 +90,7 @@ export class CondominiumRepository {
   /**
    * Lists active condominiums.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-04-12
    */
   listActive() {
@@ -182,7 +182,7 @@ export class CondominiumRepository {
   /**
    * Finds an active condominium by slug.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-04-12
    */
   findActiveBySlug(slug: string) {
@@ -209,7 +209,7 @@ export class CondominiumRepository {
   /**
    * Lists active store links for a condominium slug.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-04-12
    */
   listActiveStoreLinksBySlug(slug: string) {

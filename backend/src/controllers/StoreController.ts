@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: StoreController.ts
  * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { Request, Response } from 'express';
@@ -40,7 +40,7 @@ let storeCoordinateBackfillLastRunAt = 0;
 /**
  * Builds demo store.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2025-12-17
  */
 const buildDemoStore = (slug: string) => {
@@ -97,7 +97,7 @@ const buildDemoStore = (slug: string) => {
 /**
  * Provides StoreController functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2025-12-17
  */
 export class StoreController {
@@ -495,13 +495,13 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
   /**
    * Executes is store open now logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   /**
    * Checks store open now.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private static isStoreOpenNow(store: any) {
@@ -587,7 +587,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
   /**
    * Lists portfolio.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async listPortfolio(_req: Request, res: Response) {
@@ -741,7 +741,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
   /**
    * Gets by slug.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async getBySlug(req: Request, res: Response) {
@@ -800,7 +800,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
   /**
    * Tracks store link hit.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-22
    */
   static async trackLink(req: Request, res: Response)
@@ -840,7 +840,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
   /**
    * Gets store link stats.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-22
    */
   static async getLinkStats(req: Request, res: Response)
@@ -865,7 +865,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
   /**
    * Executes update logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async update(req: Request, res: Response) {
@@ -887,7 +887,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
   /**
    * Updates status.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async updateStatus(req: Request, res: Response) {

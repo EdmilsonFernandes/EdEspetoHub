@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: SubscriptionService.ts
  * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { CreateSubscriptionDto } from '../dto/CreateSubscriptionDto';
@@ -29,7 +29,7 @@ import { MercadoPagoService } from './MercadoPagoService';
 /**
  * Provides SubscriptionService functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2025-12-17
  */
 export class SubscriptionService {
@@ -45,7 +45,7 @@ export class SubscriptionService {
   /**
    * Creates data.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async create(input: CreateSubscriptionDto) {
@@ -57,7 +57,7 @@ export class SubscriptionService {
     /**
      * Handles resolved plan.
      *
-     * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+     * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
      * @date 2025-12-17
      */
     const resolvedPlan = plan || (await this.planRepository.findAll()).find((p) => p.id === input.planId);
@@ -85,7 +85,7 @@ export class SubscriptionService {
   /**
    * Gets current by store.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async getCurrentByStore(storeId: string) {
@@ -133,7 +133,7 @@ export class SubscriptionService {
   /**
    * Gets current by store slug.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async getCurrentByStoreSlug(slug: string) {
@@ -145,7 +145,7 @@ export class SubscriptionService {
   /**
    * Handles renew.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async renew(subscriptionId: string, input: RenewSubscriptionDto) {
@@ -163,7 +163,7 @@ export class SubscriptionService {
       /**
        * Handles resolved.
        *
-       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+       * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
        * @date 2025-12-17
        */
       const resolved = otherPlan || (await this.planRepository.findAll()).find((p) => p.id === input.planId);
@@ -186,7 +186,7 @@ export class SubscriptionService {
   /**
    * Creates renewal payment.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async createRenewalPayment(storeId: string, input: RenewSubscriptionDto, authStoreId?: string) {
@@ -257,7 +257,7 @@ export class SubscriptionService {
   /**
    * Checks if a pending payment is still valid.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private async isPaymentStillValid(payment: any, blockUntil?: Date) {
@@ -293,7 +293,7 @@ export class SubscriptionService {
   /**
    * Updates statuses for all.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async updateStatusesForAll() {
@@ -368,7 +368,7 @@ export class SubscriptionService {
   /**
    * Handles suspend.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async suspend(subscriptionId: string) {
@@ -381,7 +381,7 @@ export class SubscriptionService {
   /**
    * Handles activate.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async activate(subscriptionId: string) {
@@ -394,7 +394,7 @@ export class SubscriptionService {
   /**
    * Handles assert store is active.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async assertStoreIsActive(storeId: string) {
@@ -405,7 +405,7 @@ export class SubscriptionService {
   /**
    * Handles is active subscription.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   isActiveSubscription(subscription?: Subscription | null) {
@@ -415,7 +415,7 @@ export class SubscriptionService {
   /**
    * Adds days.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private addDays(date: Date, days: number) {
@@ -427,7 +427,7 @@ export class SubscriptionService {
   /**
    * Handles resolve status.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private resolveStatus(subscription: Subscription): SubscriptionStatus {
@@ -453,7 +453,7 @@ export class SubscriptionService {
   /**
    * Handles is subscription active.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private isSubscriptionActive(subscription: Subscription) {
@@ -461,7 +461,7 @@ export class SubscriptionService {
     /**
      * Executes return logic.
      *
-     * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+     * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
      * @date 2025-12-17
      */
     return (

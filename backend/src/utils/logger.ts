@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: logger.ts
  * @Date: 2026-01-09
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
@@ -22,7 +22,7 @@ const levelRank: Record<LogLevel, number> = {
 /**
  * Handles resolve level.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-09
  */
 const resolveLevel = (): LogLevel => {
@@ -43,7 +43,7 @@ let errorStream: import('fs').WriteStream | null = null;
 /**
  * Ensures streams.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-09
  */
 const ensureStreams = async () => {
@@ -63,7 +63,7 @@ const ensureStreams = async () => {
 /**
  * Handles write to file.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-09
  */
 const writeToFile = async (level: LogLevel, payload: string) => {
@@ -93,7 +93,7 @@ const redactKeys = new Set([
 /**
  * Handles normalize error.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-09
  */
 const normalizeError = (value: unknown) => {
@@ -107,7 +107,7 @@ const normalizeError = (value: unknown) => {
 /**
  * Handles sanitize meta.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-09
  */
 const sanitizeMeta = (meta?: Record<string, any>) => {
@@ -129,7 +129,7 @@ const sanitizeMeta = (meta?: Record<string, any>) => {
 /**
  * Provides Logger functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-09
  */
 export class Logger {
@@ -138,7 +138,7 @@ export class Logger {
   /**
    * Creates a new instance.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-09
    */
   constructor(context?: string, baseMeta: Record<string, any> = {}) {
@@ -149,7 +149,7 @@ export class Logger {
   /**
    * Handles child.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-09
    */
   child(meta: Record<string, any> = {}, context?: string) {
@@ -160,7 +160,7 @@ export class Logger {
   /**
    * Handles log.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-09
    */
   log(level: LogLevel, message: string, meta?: Record<string, any>) {
@@ -193,7 +193,7 @@ export class Logger {
   /**
    * Handles debug.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-09
    */
   debug(message: string, meta?: Record<string, any>) {
@@ -203,7 +203,7 @@ export class Logger {
   /**
    * Handles info.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-09
    */
   info(message: string, meta?: Record<string, any>) {
@@ -213,7 +213,7 @@ export class Logger {
   /**
    * Handles warn.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-09
    */
   warn(message: string, meta?: Record<string, any>) {
@@ -223,7 +223,7 @@ export class Logger {
   /**
    * Handles error.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-09
    */
   error(message: string, meta?: Record<string, any>) {

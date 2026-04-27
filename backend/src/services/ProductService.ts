@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: ProductService.ts
  * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { CreateProductDto } from '../dto/CreateProductDto';
@@ -22,7 +22,7 @@ import { EntityManager } from 'typeorm';
 /**
  * Provides ProductService functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2025-12-17
  */
 export class ProductService
@@ -221,7 +221,7 @@ private resolveBundlePromo(input: Partial<CreateProductDto>, baseUnitPrice: numb
   /**
    * Ensures store access.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private ensureStoreAccess(store: Awaited<ReturnType<StoreRepository[ 'findById' ]>>, authStoreId?: string)
@@ -380,7 +380,7 @@ private async appendInventoryMovementTx(
   /**
    * Executes create logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async create(input: CreateProductDto, authStoreId?: string)
@@ -446,7 +446,7 @@ private async appendInventoryMovementTx(
   /**
    * Lists by store id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async listByStoreId(storeId: string, authStoreId?: string)
@@ -560,7 +560,7 @@ async getInventoryAlertsByStoreId(storeId: string, authStoreId?: string) {
   /**
    * Lists by store slug.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async listByStoreSlug(slug: string, authStoreId?: string)
@@ -577,7 +577,7 @@ async getInventoryAlertsByStoreId(storeId: string, authStoreId?: string) {
   /**
    * Lists active by store slug.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-23
    */
   async listActiveByStoreSlug(slug: string)
@@ -691,7 +691,7 @@ async setCategoryPriority(
   /**
    * Executes update logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async update(storeId: string, productId: string, data: Partial<CreateProductDto>, authStoreId?: string)
@@ -972,7 +972,7 @@ async listInventoryMovementsByStoreId(
   /**
    * Executes remove logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async remove(storeId: string, productId: string, authStoreId?: string)

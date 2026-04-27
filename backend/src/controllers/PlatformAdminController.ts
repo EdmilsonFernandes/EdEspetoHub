@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: PlatformAdminController.ts
  * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { Request, Response } from 'express';
@@ -46,14 +46,14 @@ const log = logger.child({ scope: 'PlatformAdminController' });
 /**
  * Provides PlatformAdminController functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2025-12-17
  */
 export class PlatformAdminController {
   /**
    * Builds VIP subscription payload.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-28
    */
   private static buildVipSubscription(store: any) {
@@ -78,7 +78,7 @@ export class PlatformAdminController {
   /**
    * Lists stores.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async listStores(_req: Request, res: Response) {
@@ -112,7 +112,7 @@ export class PlatformAdminController {
   /**
    * Executes overview logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async overview(_req: Request, res: Response) {
@@ -146,7 +146,7 @@ export class PlatformAdminController {
       /**
        * Handles order aggregate map.
        *
-       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+       * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
        * @date 2025-12-17
        */
       const orderAggregateMap = new Map(orderAggregates.map((row) => [ row.storeId, row ]));
@@ -175,7 +175,7 @@ export class PlatformAdminController {
       /**
        * Handles store metrics.
        *
-       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+       * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
        * @date 2025-12-17
        */
       const storeMetrics = enriched.map((store) => {
@@ -286,7 +286,7 @@ export class PlatformAdminController {
   /**
    * Executes suspend store logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async suspendStore(req: Request, res: Response) {
@@ -307,7 +307,7 @@ export class PlatformAdminController {
   /**
    * Executes reactivate store logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async reactivateStore(req: Request, res: Response) {
@@ -325,7 +325,7 @@ export class PlatformAdminController {
   /**
    * Updates VIP plan exemption.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-28
    */
   static async updatePlanExempt(req: Request, res: Response) {
@@ -404,7 +404,7 @@ export class PlatformAdminController {
   /**
    * Lists payment events.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async listPaymentEvents(req: Request, res: Response) {
@@ -433,7 +433,7 @@ export class PlatformAdminController {
   /**
    * Lists access logs.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async listAccessLogs(req: Request, res: Response) {

@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: StoreService.ts
  * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { AppDataSource } from '../config/database';
@@ -30,7 +30,7 @@ import { logger } from '../utils/logger';
 /**
  * Provides StoreService functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2025-12-17
  */
 export class StoreService
@@ -280,7 +280,7 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
   /**
    * Executes create logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async create(input: CreateStoreDto)
@@ -398,7 +398,7 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
   /**
    * Lists all.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async listAll() {
@@ -411,7 +411,7 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
   /**
    * Executes update logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async update(storeId: string, data: Partial<CreateStoreDto>)
@@ -636,7 +636,7 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
   /**
    * Executes set status logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async setStatus(storeId: string, open: boolean)
@@ -667,7 +667,7 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
   /**
    * Gets by slug.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async getBySlug(slug: string)
@@ -686,7 +686,7 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
   /**
    * Generates unique slug.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private async generateUniqueSlug(
@@ -711,7 +711,7 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
   /**
    * Tracks store link hit.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-22
    */
   async trackLinkHit(storeId: string, payload: { source?: string; medium?: string; campaign?: string; referrer?: string })
@@ -731,7 +731,7 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
   /**
    * Gets link stats.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-22
    */
   async getLinkStats(storeId: string, days: number)

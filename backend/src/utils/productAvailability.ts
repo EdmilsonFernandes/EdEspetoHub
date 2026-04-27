@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: productAvailability.ts
  * @Date: 2026-01-24
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 export type DayKey = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
@@ -20,7 +20,7 @@ const DAY_KEYS: DayKey[] = [ 'sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat' ];
 /**
  * Resolves the current day key (mon..sun).
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-24
  */
 export const resolveDayKey = (now: Date = new Date()): DayKey =>
@@ -31,7 +31,7 @@ export const resolveDayKey = (now: Date = new Date()): DayKey =>
 /**
  * Normalizes availability days payload.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-24
  */
 export const normalizeAvailabilityDays = (input: unknown): AvailabilityDays | null =>
@@ -56,7 +56,7 @@ export const normalizeAvailabilityDays = (input: unknown): AvailabilityDays | nu
 /**
  * Validates product availability for today.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-24
  */
 export const isProductAvailableToday = (

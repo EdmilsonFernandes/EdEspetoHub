@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: MotoboyStoreRepository.ts
  * @Date: 2026-01-29
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { Repository } from 'typeorm';
@@ -17,7 +17,7 @@ import { MotoboyStore } from '../entities/MotoboyStore';
 /**
  * Provides MotoboyStoreRepository functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-29
  */
 export class MotoboyStoreRepository {
@@ -26,7 +26,7 @@ export class MotoboyStoreRepository {
   /**
    * Creates a new MotoboyStoreRepository.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   constructor() {
@@ -36,7 +36,7 @@ export class MotoboyStoreRepository {
   /**
    * Creates data.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   create(data: Partial<MotoboyStore>) {
@@ -46,7 +46,7 @@ export class MotoboyStoreRepository {
   /**
    * Saves data.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   save(link: MotoboyStore) {
@@ -56,7 +56,7 @@ export class MotoboyStoreRepository {
   /**
    * Finds active store link.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   findActiveLink(motoboyId: string, storeId: string) {
@@ -66,7 +66,7 @@ export class MotoboyStoreRepository {
   /**
    * Finds link.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   findLink(motoboyId: string, storeId: string) {
@@ -76,7 +76,7 @@ export class MotoboyStoreRepository {
   /**
    * Lists store ids for motoboy.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async listStoreIds(motoboyId: string) {
@@ -87,7 +87,7 @@ export class MotoboyStoreRepository {
   /**
    * Lists motoboy links by store.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   listByStoreId(storeId: string) {

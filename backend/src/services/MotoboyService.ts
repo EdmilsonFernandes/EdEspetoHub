@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: MotoboyService.ts
  * @Date: 2026-01-29
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { AppError } from '../errors/AppError';
@@ -31,7 +31,7 @@ import { normalizeDocument, validateDocument } from '../utils/documents';
 /**
  * Provides MotoboyService functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-29
  */
 export class MotoboyService {
@@ -558,7 +558,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   /**
    * Gets active motoboy by user id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async getActiveMotoboyByUserId(userId: string) {
@@ -571,7 +571,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   /**
    * Gets motoboy profile by user id (any status).
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async getMotoboyByUserId(userId: string) {
@@ -583,7 +583,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   /**
    * Updates courier profile, vehicle, and compliance-sensitive attributes.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async updateProfile(
@@ -667,7 +667,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   /**
    * Gets or creates motoboy profile for a user.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async getOrCreateMotoboyByUserId(userId: string) {
@@ -693,7 +693,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   /**
    * Creates courier profile under store-owner initiated onboarding flow.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async createProfile(storeId: string, createdByUserId: string, payload: { userId?: string; email?: string }) {
@@ -730,7 +730,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   /**
    * Links motoboy to store.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async linkStore(storeId: string, motoboyId: string, userId: string) {
@@ -769,7 +769,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   /**
    * Unlinks motoboy from store.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async unlinkStore(storeId: string, motoboyId: string, userId: string) {
@@ -816,7 +816,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   /**
    * Approves motoboy.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async approveMotoboy(storeId: string, motoboyId: string, userId: string) {
@@ -848,7 +848,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   /**
    * Suspends motoboy.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async suspendMotoboy(storeId: string, motoboyId: string, userId: string) {
@@ -881,7 +881,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   /**
    * Lists store IDs currently linked to the courier.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async listStoreIds(motoboyId: string) {
@@ -891,7 +891,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   /**
    * Lists couriers linked to a store for admin management.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async listByStore(storeId: string, ownerId: string) {
@@ -905,7 +905,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   /**
    * Uploads a motoboy document.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async uploadDocument(motoboy: Motoboy, input: { docType?: string; fileBase64?: string }) {
@@ -948,7 +948,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   /**
    * Lists courier documents for store-admin review screens.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async listDocuments(storeId: string, motoboyId: string, ownerId: string) {
@@ -963,7 +963,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   /**
    * Lists courier own uploaded documents with statuses.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async listOwnDocuments(motoboy: Motoboy) {
@@ -974,7 +974,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   /**
    * Reviews a motoboy document.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async reviewDocument(
@@ -1014,7 +1014,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   /**
    * Creates courier requests to join one or more stores.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async createStoreRequests(motoboy: Motoboy, storeIds: string[]) {
@@ -1062,7 +1062,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   /**
    * Lists courier own store-link requests.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async listStoreRequests(motoboy: Motoboy) {
@@ -1077,7 +1077,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   /**
    * Lists store incoming courier requests for decision.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async listRequestsForStore(storeId: string, ownerId: string) {
@@ -1096,7 +1096,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
   /**
    * Reviews a store request (approve/reject).
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async reviewStoreRequest(

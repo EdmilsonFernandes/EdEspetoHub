@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: MotoboyOrderService.ts
  * @Date: 2026-01-29
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { AppDataSource } from '../config/database';
@@ -25,7 +25,7 @@ import { deliveryService } from './DeliveryService';
 /**
  * Provides MotoboyOrderService functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-29
  */
 export class MotoboyOrderService {
@@ -48,7 +48,7 @@ private isDeliveryOrder(order: Order) {
   /**
    * Lists available orders for a motoboy.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async listAvailable(motoboy: Motoboy) {
@@ -113,7 +113,7 @@ private isDeliveryOrder(order: Order) {
   /**
    * Lists delivery history for a motoboy.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async listHistory(motoboy: Motoboy, days = 7) {
@@ -227,7 +227,7 @@ private isDeliveryOrder(order: Order) {
   /**
    * Accepts an order for delivery.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async acceptOrder(orderId: string, motoboy: Motoboy) {
@@ -256,7 +256,7 @@ async startOrder(orderId: string, motoboy: Motoboy) {
   /**
    * Confirms payment.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async confirmPayment(orderId: string, motoboy: Motoboy, cashTendered?: number | null) {
@@ -286,7 +286,7 @@ async startOrder(orderId: string, motoboy: Motoboy) {
   /**
    * Marks order delivered.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async markDelivered(orderId: string, motoboy: Motoboy) {
@@ -313,7 +313,7 @@ async startOrder(orderId: string, motoboy: Motoboy) {
   /**
    * Finishes order.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async finishOrder(orderId: string, motoboy: Motoboy) {

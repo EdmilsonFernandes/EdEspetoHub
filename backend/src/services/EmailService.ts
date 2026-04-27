@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: EmailService.ts
  * @Date: 2026-01-06
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import nodemailer from 'nodemailer';
@@ -25,7 +25,7 @@ type EmailPayload = {
 /**
  * Provides EmailService functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-06
  */
 export class EmailService {
@@ -41,7 +41,7 @@ export class EmailService {
   /**
    * Gets logo url.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-06
    */
   private getLogoUrl() {
@@ -109,7 +109,7 @@ export class EmailService {
   /**
    * Gets transporter.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-06
    */
   private getTransporter() {
@@ -131,7 +131,7 @@ export class EmailService {
   /**
    * Sends data.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-06
    */
   async send(payload: EmailPayload) {
@@ -204,7 +204,7 @@ private renderTemplate(template: string, vars: Record<string, string>) {
   /**
    * Sends password reset.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-06
    */
   async sendPasswordReset(email: string, link: string) {
@@ -236,7 +236,7 @@ private renderTemplate(template: string, vars: Record<string, string>) {
   /**
    * Sends email verification.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-06
    */
   async sendEmailVerification(email: string, link: string, token: string) {
@@ -275,7 +275,7 @@ private renderTemplate(template: string, vars: Record<string, string>) {
   /**
    * Sends motoboy verification email.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   async sendMotoboyVerification(email: string, link: string, token: string) {
@@ -318,7 +318,7 @@ private renderTemplate(template: string, vars: Record<string, string>) {
   /**
    * Sends activation email.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-06
    */
   async sendActivationEmail(email: string, slug: string) {
@@ -556,7 +556,7 @@ private renderTemplate(template: string, vars: Record<string, string>) {
   /**
    * Sends subscription reminder.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-06
    */
   async sendSubscriptionReminder(email: string, storeName: string, slug: string, daysLeft: number) {
@@ -617,7 +617,7 @@ private renderTemplate(template: string, vars: Record<string, string>) {
   /**
    * Sends signup notification.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-06
    */
   async sendSignupNotification(payload: {

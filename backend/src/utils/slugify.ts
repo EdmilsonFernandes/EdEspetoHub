@@ -1,7 +1,7 @@
 /**
  * Handles slugify.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2025-12-17
  */
 export function slugify(input: string) {

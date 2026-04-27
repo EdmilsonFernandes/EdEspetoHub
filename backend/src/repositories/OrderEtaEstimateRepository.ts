@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: OrderEtaEstimateRepository.ts
  * @Date: 2026-01-28
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { Repository } from 'typeorm';
@@ -18,7 +18,7 @@ import { OrderEtaEstimate } from '../entities/OrderEtaEstimate';
 /**
  * Provides OrderEtaEstimateRepository functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-28
  */
 export class OrderEtaEstimateRepository {
@@ -27,7 +27,7 @@ export class OrderEtaEstimateRepository {
   /**
    * Creates a new OrderEtaEstimateRepository.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-28
    */
   constructor() {
@@ -37,7 +37,7 @@ export class OrderEtaEstimateRepository {
   /**
    * Finds latest estimate by order id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-28
    */
   findLatestByOrderId(orderId: string) {
@@ -51,7 +51,7 @@ export class OrderEtaEstimateRepository {
   /**
    * Saves estimate entity.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-28
    */
   save(estimate: OrderEtaEstimate) {

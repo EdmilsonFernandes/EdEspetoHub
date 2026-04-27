@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: CondominiumController.ts
  * @Date: 2026-04-12
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { Request, Response } from 'express';
@@ -22,7 +22,7 @@ const log = logger.child({ scope: 'CondominiumController' });
 /**
  * Provides CondominiumController functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-04-12
  */
 export class CondominiumController {
@@ -302,7 +302,7 @@ export class CondominiumController {
   /**
    * Lists public condominiums.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-04-12
    */
   static async listPublic(req: Request, res: Response) {
@@ -319,7 +319,7 @@ export class CondominiumController {
   /**
    * Gets public condominium by slug.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-04-12
    */
   static async getPublicBySlug(req: Request, res: Response) {
@@ -336,7 +336,7 @@ export class CondominiumController {
   /**
    * Lists public stores linked to one condominium.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-04-12
    */
   static async listPublicStoresBySlug(req: Request, res: Response) {

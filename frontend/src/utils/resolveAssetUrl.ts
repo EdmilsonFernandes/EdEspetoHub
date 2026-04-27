@@ -21,10 +21,10 @@ export const resolveAssetUrl = (value?: string) => {
   // 1. Se for uma URL absoluta
   if (isAbsoluteUrl(value)) {
     // Se for um dos nossos domínios, garante HTTPS, domínio novo e REMOVE 'www.'
-    if (value.includes('janocaminho.com.br') || value.includes('chamanoespeto.com.br')) {
+    if (value.includes('janocaminho.com.br') || value.includes('janocaminho.com.br')) {
       let normalized = value.replace(/^http:\/\//i, 'https://');
       normalized = normalized.replace('www.janocaminho.com.br', 'janocaminho.com.br');
-      normalized = normalized.replace('chamanoespeto.com.br', 'janocaminho.com.br');
+      normalized = normalized.replace('janocaminho.com.br', 'janocaminho.com.br');
       return normalized;
     }
     return value;

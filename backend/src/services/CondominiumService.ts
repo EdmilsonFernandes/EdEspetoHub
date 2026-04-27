@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: CondominiumService.ts
  * @Date: 2026-04-12
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import bcrypt from 'bcryptjs';
@@ -24,7 +24,7 @@ import { SubscriptionService } from './SubscriptionService';
 /**
  * Provides CondominiumService functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-04-12
  */
 export class CondominiumService {
@@ -625,7 +625,7 @@ export class CondominiumService {
   /**
    * Lists active condominiums for public Hub discovery.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-04-12
    */
   async listPublic() {
@@ -637,7 +637,7 @@ export class CondominiumService {
   /**
    * Gets one public condominium by slug.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-04-12
    */
   async getPublicBySlug(slug: string) {
@@ -650,7 +650,7 @@ export class CondominiumService {
   /**
    * Lists public stores linked to one active condominium.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-04-12
    */
   async listPublicStoresBySlug(slug: string) {
@@ -774,7 +774,7 @@ export class CondominiumService {
   /**
    * Serializes condominium public payload.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-04-12
    */
   private toPublicCondominium(condominium: any, event?: any | null) {

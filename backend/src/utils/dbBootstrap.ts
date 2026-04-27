@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: dbBootstrap.ts
  * @Date: 2026-02-09
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import fs from 'fs';
@@ -34,7 +34,7 @@ const qIdent = (name: string) => `"${String(name).replace(/"/g, '""')}"`;
  * Ensures the target database exists. If it doesn't, creates it.
  * Uses an admin connection to the 'postgres' database.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-02-09
  */
 export async function ensureDatabaseExists(conn: PgConn) {
@@ -68,7 +68,7 @@ export async function ensureDatabaseExists(conn: PgConn) {
  * Applies schema.sql if base tables are missing. This is intentionally a "gambiarra"
  * to keep the stack booting even if the database is dropped.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-02-09
  */
 export async function ensureBaseSchema(dataSource: DataSource) {

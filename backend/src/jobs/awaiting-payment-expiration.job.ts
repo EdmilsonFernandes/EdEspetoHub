@@ -1,11 +1,11 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2026 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2026 Já no Caminho - All Rights Reserved.
  *
  * @file: awaiting-payment-expiration.job.ts
  * @Date: 2026-04-21
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { AppDataSource } from '../config/database';

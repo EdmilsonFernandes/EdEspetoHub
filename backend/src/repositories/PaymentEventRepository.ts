@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: PaymentEventRepository.ts
  * @Date: 2026-01-06
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { Repository } from 'typeorm';
@@ -17,7 +17,7 @@ import { PaymentEvent } from '../entities/PaymentEvent';
 /**
  * Provides PaymentEventRepository functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-06
  */
 export class PaymentEventRepository {
@@ -25,7 +25,7 @@ export class PaymentEventRepository {
   /**
    * Creates a new instance.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-06
    */
   constructor() {
@@ -35,7 +35,7 @@ export class PaymentEventRepository {
   /**
    * Creates data.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-06
    */
   create(data: Partial<PaymentEvent>) {
@@ -45,7 +45,7 @@ export class PaymentEventRepository {
   /**
    * Saves data.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-06
    */
   save(event: PaymentEvent) {
@@ -55,7 +55,7 @@ export class PaymentEventRepository {
   /**
    * Handles find recent.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-06
    */
   findRecent(limit = 50, offset = 0) {
@@ -70,7 +70,7 @@ export class PaymentEventRepository {
   /**
    * Handles find by payment id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-06
    */
   findByPaymentId(paymentId: string, limit = 50, offset = 0) {
@@ -86,7 +86,7 @@ export class PaymentEventRepository {
   /**
    * Handles find by store id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-06
    */
   findByStoreId(storeId: string, limit = 50, offset = 0) {

@@ -1,7 +1,7 @@
 /**
  * Provides AppError functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-12
  */
 export class AppError extends Error {
@@ -11,14 +11,14 @@ export class AppError extends Error {
   /**
    * Creates a new instance.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-12
    */
   constructor(code: string, status = 400, details?: Record<string, any>) {
     /**
      * Executes super logic.
      *
-     * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+     * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
      * @date 2026-01-12
      */
     super(code);

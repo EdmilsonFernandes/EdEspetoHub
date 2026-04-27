@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: MercadoPagoService.ts
  * @Date: 2026-01-06
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import crypto from 'crypto';
@@ -62,7 +62,7 @@ type CreatePaymentInput = {
 /**
  * Handles has credentials.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-06
  */
 const hasCredentials = (accessToken?: string) =>
@@ -71,7 +71,7 @@ const hasCredentials = (accessToken?: string) =>
 /**
  * Builds headers.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-06
  */
 const buildHeaders = (accessToken?: string) => ({
@@ -82,7 +82,7 @@ const buildHeaders = (accessToken?: string) => ({
 /**
  * Provides MercadoPagoService functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2026-01-06
  */
 export class MercadoPagoService {
@@ -109,7 +109,7 @@ export class MercadoPagoService {
   /**
    * Handles debug log.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-06
    */
   private debugLog(message: string, data?: Record<string, any>) {
@@ -153,7 +153,7 @@ export class MercadoPagoService {
   /**
    * Creates payment.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-06
    */
   async createPayment(input: CreatePaymentInput) {
@@ -173,7 +173,7 @@ export class MercadoPagoService {
   /**
    * Gets payment.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-06
    */
   async getPayment(
@@ -196,7 +196,7 @@ export class MercadoPagoService {
       /**
        * Handles body.
        *
-       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+       * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
        * @date 2026-01-06
        */
       const body = await response.text().catch(() => '');
@@ -229,7 +229,7 @@ export class MercadoPagoService {
   /**
    * Creates card preference.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-06
    */
   private async createCardPreference(input: CreatePaymentInput) {
@@ -261,7 +261,7 @@ export class MercadoPagoService {
       /**
        * Handles body text.
        *
-       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+       * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
        * @date 2026-01-06
        */
       const bodyText = await response.text().catch(() => '');
@@ -299,7 +299,7 @@ export class MercadoPagoService {
   /**
    * Creates boleto preference.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-06
    */
   private async createBoletoPreference(input: CreatePaymentInput) {
@@ -338,7 +338,7 @@ export class MercadoPagoService {
       /**
        * Handles body text.
        *
-       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+       * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
        * @date 2026-01-06
        */
       const bodyText = await response.text().catch(() => '');
@@ -375,7 +375,7 @@ export class MercadoPagoService {
   /**
    * Creates pix payment.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-06
    */
   private async createPixPayment(input: CreatePaymentInput) {
@@ -407,7 +407,7 @@ export class MercadoPagoService {
       /**
        * Handles body text.
        *
-       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+       * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
        * @date 2026-01-06
        */
       const bodyText = await response.text().catch(() => '');

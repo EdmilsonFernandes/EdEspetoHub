@@ -1,14 +1,14 @@
 /*
- * Chama no espeto CONFIDENTIAL
+ * Já no Caminho CONFIDENTIAL
  * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ * Copyright (C) 2025 Já no Caminho - All Rights Reserved.
  *
  * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
+ * the express permission of Já no Caminho.
  *
  * @file: PaymentController.ts
  * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { Request, Response } from 'express';
@@ -33,14 +33,14 @@ const log = logger.child({ scope: 'PaymentController' });
 /**
  * Provides PaymentController functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2025-12-17
  */
 export class PaymentController {
   /**
    * Executes confirm logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async confirm(req: Request, res: Response) {
@@ -73,7 +73,7 @@ export class PaymentController {
   /**
    * Executes mercado pago webhook logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async mercadoPagoWebhook(req: Request, res: Response) {
@@ -89,7 +89,7 @@ export class PaymentController {
       /**
        * Handles parts.
        *
-       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+       * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
        * @date 2025-12-17
        */
       const parts = signature.split(',').reduce((acc, chunk) => {
@@ -144,7 +144,7 @@ export class PaymentController {
   /**
    * Gets by id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async getById(req: Request, res: Response) {
@@ -186,7 +186,7 @@ export class PaymentController {
   /**
    * Gets events.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async getEvents(req: Request, res: Response) {
@@ -200,7 +200,7 @@ export class PaymentController {
       /**
        * Handles payload.
        *
-       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+       * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
        * @date 2025-12-17
        */
       const payload = events.map((event) => ({
@@ -223,7 +223,7 @@ export class PaymentController {
   /**
    * Lists payments by store.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async listByStore(req: Request, res: Response) {
@@ -245,7 +245,7 @@ export class PaymentController {
       /**
        * Handles payload.
        *
-       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+       * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
        * @date 2025-12-17
        */
       const payload = payments.map((payment) => ({
@@ -274,7 +274,7 @@ export class PaymentController {
   /**
    * Executes reprocess logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async reprocess(req: Request, res: Response) {
@@ -298,7 +298,7 @@ export class PaymentController {
   /**
    * Creates a new renewal payment from a failed/expired payment.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   static async renewFromPayment(req: Request, res: Response) {
