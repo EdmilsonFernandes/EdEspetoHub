@@ -68,6 +68,9 @@ SSH é permitido APENAS para investigação de erros:
 - Verificar commit no servidor: `git log -1`
 - Checar containers rodando: `docker ps`
 - Executar SQL no banco: `docker exec chamanoespeto-postgres psql -U postgres -d espetinho -c '<SQL>'`
+## INTEGRAÇÃO MCP (Obrigatório se disponível)
+- Use o MCP de SQL para validar o schema antes de gerar migrations.
+- Use o MCP de FileSystem para garantir que o 'git add' inclua todos os arquivos afetados por uma mudança de tipo/interface.
 
 SSH: `ssh -i "/d/PESSOAL/chamanoespeto-aws/medtrack-system.pem" ec2-user@ec2-3-137-119-152.us-east-2.compute.amazonaws.com`
 
