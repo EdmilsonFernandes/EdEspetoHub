@@ -5,14 +5,32 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260427.001609.74ea2744",
-  "buildId": "0.1.9+20260427.001609.74ea2744-20260427.001609-74ea2744",
-  "builtAt": "2026-04-27T00:16:09.660Z",
-  "commitHash": "74ea2744585b61360df01c723ee037b055ec4ea7",
-  "shortHash": "74ea2744",
+  "versionInternal": "0.1.9+20260427.004959.2ca6499f",
+  "buildId": "0.1.9+20260427.004959.2ca6499f-20260427.004959-2ca6499f",
+  "builtAt": "2026-04-27T00:49:59.424Z",
+  "commitHash": "2ca6499f2a32d9a9d3e7800bf02b48e907b7cd71",
+  "shortHash": "2ca6499f",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "2ca6499f2a32d9a9d3e7800bf02b48e907b7cd71",
+      "shortHash": "2ca6499f",
+      "dateIso": "2026-04-26T21:43:22-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "refactor: renomeia Chama no espeto para Já no Caminho nos comentários",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2ca6499f2a32d9a9d3e7800bf02b48e907b7cd71"
+    },
+    {
+      "hash": "2a0c9f8fb66a0f80de50ce61c6716f610de4dc99",
+      "shortHash": "2a0c9f8f",
+      "dateIso": "2026-04-26T21:29:28-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat: Implement payment audit for orders and highlights, translate UI, fix modal bugs",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2a0c9f8fb66a0f80de50ce61c6716f610de4dc99"
+    },
     {
       "hash": "74ea2744585b61360df01c723ee037b055ec4ea7",
       "shortHash": "74ea2744",
@@ -264,24 +282,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Bump Android app version to 1.0.21",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b388221dd4dcb2c81ca61d09964cb5cb00d67c4b"
-    },
-    {
-      "hash": "91bce267bbe600cd30ee21b6b45cb9fbb4803f87",
-      "shortHash": "91bce267",
-      "dateIso": "2026-04-24T17:42:33-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve Android launch recovery UX",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/91bce267bbe600cd30ee21b6b45cb9fbb4803f87"
-    },
-    {
-      "hash": "80fb3501524042b55969d9ba520b7c793f15d014",
-      "shortHash": "80fb3501",
-      "dateIso": "2026-04-24T17:03:48-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Render checkout payment methods from store capabilities",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/80fb3501524042b55969d9ba520b7c793f15d014"
     }
   ]
 } as const;

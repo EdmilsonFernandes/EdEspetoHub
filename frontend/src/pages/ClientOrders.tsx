@@ -743,7 +743,7 @@ function OrderHelpScreen({
           </button>
           <div className="flex flex-col items-center gap-0.5">
             <div className="flex items-center gap-1.5">
-              <img src="/janocaminho.png" alt="Já no Caminho" className="h-5 w-5 rounded-[0.5rem] object-cover shadow-sm ring-1 ring-slate-200" />
+              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-5 w-5 rounded-[0.5rem] object-cover shadow-sm ring-1 ring-slate-200" />
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Atendimento</p>
             </div>
             <h1 className="text-[15px] font-semibold text-slate-900">Ajuda com pedido</h1>
@@ -797,7 +797,7 @@ function OrderHelpScreen({
           <div className="mt-4 rounded-[26px] border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.32)]">
             <div className="flex items-start gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <img src="/janocaminho.png" alt="Já no Caminho" className="h-full w-full object-cover" />
+                <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
               </div>
               <div>
                 <p className="text-sm font-black text-slate-900">Como funciona o atendimento</p>

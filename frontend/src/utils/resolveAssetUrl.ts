@@ -40,9 +40,9 @@ export const resolveAssetUrl = (value?: string) => {
                        path === '/favicon.svg' || 
                        path === '/logo.svg' || 
                        path === '/mercado-pago.svg' ||
-                       path === '/janocaminho-logo.png' ||
                        path === '/janocaminho.jpg' ||
-                       path === '/jnc.png';
+                       path === '/janocaminho.jpg' ||
+                       path === '/janocaminho.jpg';
 
   // Se estivermos no APK e NÃO for um asset local, forçamos a resolução contra o servidor
   if (isMobile && !isLocalAsset) {

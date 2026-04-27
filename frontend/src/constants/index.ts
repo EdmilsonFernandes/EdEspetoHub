@@ -11,7 +11,7 @@ export const PICKUP_DISTANCE_CONFIRMATION_KM = 40;
 export const defaultBranding = {
   brandName: 'Já no Caminho',
   espetoId: import.meta.env.VITE_DEFAULT_STORE || 'espetinhodatony',
-  logoUrl: '/janocaminho-logo.png',
+  logoUrl: '/janocaminho.jpg',
   bannerUrl: '',
   primaryColor: '#2f9df7',
   accentColor: '#5fd35a',

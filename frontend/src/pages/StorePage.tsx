@@ -3092,7 +3092,7 @@ export function StorePage() {
                   <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.92)_0%,rgba(241,247,246,0.9)_54%,rgba(255,255,255,0.94)_100%)] shadow-[0_26px_60px_-38px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
                     <div className="relative h-40 overflow-hidden sm:h-48">
                       <img
-                        src={branding?.bannerUrl || branding?.logoUrl || '/janocaminho.png'}
+                        src={branding?.bannerUrl || branding?.logoUrl || '/janocaminho.jpg'}
                         alt={closedStateStoreName}
                         className="h-full w-full object-cover"
                         onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(storeSlug, branding?.brandName); }}
@@ -3102,7 +3102,7 @@ export function StorePage() {
                         <div className="flex items-end gap-4">
                           <div className="h-18 w-18 shrink-0 overflow-hidden rounded-[1.35rem] border border-white/65 bg-white/90 shadow-[0_16px_30px_-18px_rgba(15,23,42,0.45)] sm:h-20 sm:w-20">
                             <img
-                              src={branding?.logoUrl || '/janocaminho.png'}
+                              src={branding?.logoUrl || '/janocaminho.jpg'}
                               alt={closedStateStoreName}
                               className="h-full w-full object-cover"
                               onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(storeSlug, branding?.brandName); }}

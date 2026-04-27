@@ -25,7 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const applyDocumentBranding = (session: AuthSession | null) => {
     const storeName = String(session?.store?.name || '').trim();
-    const logoUrl = resolveAssetUrl(session?.store?.settings?.logoUrl || '') || '/janocaminho-logo.png';
+    const logoUrl = resolveAssetUrl(session?.store?.settings?.logoUrl || '') || '/janocaminho.jpg';
     const title = storeName ? `${storeName} | Admin | Já no Caminho` : 'Admin | Já no Caminho';
     document.title = title;
 

@@ -100,7 +100,7 @@ export function NativePushPermissionBanner() {
     <div className="fixed bottom-[88px] left-1/2 z-[290] w-[calc(100%-1rem)] max-w-md -translate-x-1/2 rounded-2xl border border-sky-200/70 bg-white/95 px-3 py-2 shadow-lg backdrop-blur">
       <div className="flex items-center gap-2">
         <img
-          src="/janocaminho-logo.png"
+          src="/janocaminho.jpg"
           alt="Já no Caminho"
           className="h-8 w-8 rounded-lg border border-slate-200 object-cover"
           loading="eager"

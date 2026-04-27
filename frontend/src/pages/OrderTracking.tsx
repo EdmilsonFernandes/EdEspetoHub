@@ -277,7 +277,7 @@ export function OrderTracking() {
     navigate(storeHomePath);
   };
   const storeLogo =
-    resolveAssetUrl(order?.store?.settings?.logoUrl) || '/janocaminho-logo.png';
+    resolveAssetUrl(order?.store?.settings?.logoUrl) || '/janocaminho.jpg';
   const isPostalDelivery = isDelivery && String((order as any)?.fulfillmentMode || '').toLowerCase() === 'postal';
   const statusLabel = useMemo(() => {
     if (normalizedStatus === 'cancelled') return 'Cancelado';
@@ -1439,17 +1439,16 @@ export function OrderTracking() {
                       )
                     ) : null}
                   {storeWhatsappLink && (
-                    <div className="flex flex-col gap-2">
-                      {storeWhatsappLink && (
-                        <a
-                          href={storeWhatsappLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#16a34a,#15803d)] px-4 py-3 text-[13px] font-black text-white shadow-[0_8px_20px_-10px_rgba(22,163,74,0.45)] active:scale-[0.98] transition-transform"
-                        >
-                          Falar com a loja no WhatsApp
-                        </a>
-                      )}
+                    <div className="pt-1">
+                      <a
+                        href={storeWhatsappLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-[12px] font-bold text-emerald-700 active:scale-[0.98] transition-transform"
+                      >
+                        <span className="h-4 w-4 shrink-0">💬</span>
+                        Falar com a loja
+                      </a>
                     </div>
                   )}
                   {isDelivery && !isPostalDelivery && storeCoords?.lat && deliveryCoords?.lat && (
@@ -1530,7 +1529,7 @@ export function OrderTracking() {
                         window.setTimeout(() => setCtaPulse(false), 220);
                         handleRepeatOrder();
                       }}
-                      className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3 text-[13px] font-black text-white shadow-[0_8px_20px_-10px_rgba(21,58,76,0.5)] active:scale-[0.98] transition-transform"
+                      className="inline-flex items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-3.5 py-2 text-[12px] font-bold text-white shadow-[0_4px_12px_-4px_rgba(21,58,76,0.4)] active:scale-[0.98] transition-transform"
                       style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
                     >
                       Pedir de novo

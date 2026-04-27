@@ -104,7 +104,7 @@ export function CondominiumAccessRequest() {
             <ArrowLeft size={16} weight="bold" />
           </button>
           <div className="mx-auto mt-4 grid h-[4.75rem] w-[4.75rem] place-items-center overflow-hidden rounded-full border-[4px] border-white bg-white p-0.5 shadow-[0_16px_38px_-18px_rgba(13,79,102,0.5)] ring-1 ring-[#336886]/12">
-            <img src="/janocaminho.png" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
+            <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
           </div>
           <h1 className="mt-3 text-[2rem] font-black tracking-[-0.03em] text-slate-900 sm:text-[2.25rem]">Solicitar acesso</h1>
           <p className="mx-auto mt-2 max-w-lg text-sm font-semibold leading-6 text-slate-500">

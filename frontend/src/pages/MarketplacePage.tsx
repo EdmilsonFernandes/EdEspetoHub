@@ -1988,7 +1988,7 @@ export function MarketplacePage() {
             storeSlug: String(item?.storeSlug || ''),
             storeName: String(item?.storeName || 'Loja'),
             name: String(item?.productName || 'Produto em destaque'),
-            storeLogo: resolveAssetUrl(item?.storeLogoUrl || undefined) || '/janocaminho-logo.png',
+            storeLogo: resolveAssetUrl(item?.storeLogoUrl || undefined) || '/janocaminho.jpg',
             imageUrl:
               resolveAssetUrl(item?.imageUrl || undefined) ||
               resolveAssetUrl(item?.storeLogoUrl || undefined) ||
@@ -3229,7 +3229,7 @@ export function MarketplacePage() {
                     <div className="flex items-start gap-4">
                       <span className="inline-flex h-14 w-14 items-center justify-center rounded-[1.4rem] border border-white/70 bg-white/88 shadow-[0_18px_34px_-24px_rgba(15,23,42,0.24)]">
                         <img
-                          src="/janocaminho.png"
+                          src="/janocaminho.jpg"
                           alt="Já no Caminho"
                           className="h-9 w-9 rounded-full object-contain"
                         />
@@ -3740,7 +3740,7 @@ export function MarketplacePage() {
                     <div className="mb-2 flex items-center gap-2">
                       <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/90 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)] ring-1 ring-slate-200/80">
                         <img
-                          src="/janocaminho.png"
+                          src="/janocaminho.jpg"
                           alt="Já no Caminho"
                           className="h-5 w-5 rounded-full object-contain"
                         />

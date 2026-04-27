@@ -543,7 +543,7 @@ export function ClientAccount() {
           </button>
           <div className="flex flex-col items-center gap-0.5">
             <div className="flex items-center gap-1.5">
-              <img src="/janocaminho.png" alt="Já no Caminho" className="h-5 w-5 rounded-[0.45rem] object-cover shadow-sm" />
+              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-5 w-5 rounded-[0.45rem] object-cover shadow-sm" />
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">{settingsOnly ? 'Configurações' : 'Minha conta'}</p>
             </div>
             <h1 className="text-[15px] font-black text-slate-900">{settingsOnly ? 'Preferências' : 'Perfil e dados'}</h1>

@@ -62,7 +62,7 @@ export function PremiumSplashScreen() {
               className="relative h-[50px] w-[50px] rounded-[0.9rem] object-contain p-0.5 shadow-[0_12px_24px_-18px_rgba(15,49,84,0.72)]"
               onError={(event) => {
                 event.currentTarget.onerror = null;
-                event.currentTarget.src = '/janocaminho-logo.png';
+                event.currentTarget.src = '/janocaminho.jpg';
               }}
             />
           </div>

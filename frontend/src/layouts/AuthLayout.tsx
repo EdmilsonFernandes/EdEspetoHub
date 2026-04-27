@@ -32,7 +32,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             {/* Brand lockup */}
             <div className="flex items-center gap-3.5">
               <div className="h-[3.4rem] w-[3.4rem] shrink-0 overflow-hidden rounded-full border-[3px] border-white bg-white p-0.5 shadow-[0_14px_34px_-16px_rgba(0,0,0,0.5)]">
-                <img src="/janocaminho.png" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
+                <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
               </div>
               <div className="leading-tight">
                 <p className="text-lg font-black tracking-tight text-white">Já no Caminho</p>
@@ -81,7 +81,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
       <div className="mx-auto mt-6 flex items-center justify-center gap-2 text-center text-[12px] font-medium text-slate-400 relative z-10">
         <span className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full border border-white bg-white p-0.5 shadow-sm">
-          <img src="/janocaminho.png" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
+          <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
         </span>
         <span>
           Desenvolvido com excelência por <span className="text-slate-500 font-bold">Já no Caminho</span> <AppVersionBadge prefix=" | " />
