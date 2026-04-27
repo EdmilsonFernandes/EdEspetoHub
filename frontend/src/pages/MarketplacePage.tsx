@@ -766,6 +766,7 @@ export function MarketplacePage() {
   const [geoDiscovery, setGeoDiscovery] = useState<StoreDiscoveryResponse | null>(null);
   const [preferredDiscoveryAddress, setPreferredDiscoveryAddress] = useState<PreferredDiscoveryAddress | null>(null);
   const [preferredAddressLoading, setPreferredAddressLoading] = useState(false);
+  const [hubScopeOverride, setHubScopeOverride] = useState<'default' | 'all_stores'>('default');
   const savedAddressLocation = useMemo(() => {
     if (preferredDiscoveryAddress?.lat == null || preferredDiscoveryAddress?.lng == null) return null;
     return {
