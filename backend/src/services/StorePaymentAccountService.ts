@@ -56,7 +56,10 @@ export class StorePaymentAccountService {
   }
 
   private redirectUrl() {
-    return env.mercadoPago.oauthRedirectUrl || `${env.appUrl.replace(/\/$/, '')}/api/payment-accounts/mercadopago/callback`;
+    if (env.mercadoPago.oauthRedirectUrl) return env.mercadoPago.oauthRedirectUrl;
+    // Sempre usar non-www para garantir match com o cadastro no Mercado Pago
+    const base = env.appUrl.replace(/\/$/, '').replace('https://www.', 'https://');
+    return `${base}/api/payment-accounts/mercadopago/callback`;
   }
 
   private buildMpHeaders(accessToken: string) {
@@ -257,9 +260,18 @@ export class StorePaymentAccountService {
 
   async handleCallback(code: string, state: string) {
     if (!code) throw new AppError('PAY-012', 400, { message: 'Código OAuth ausente.' });
+
+    this.log.info('MP OAuth callback received', { code: code.slice(0, 12) + '...', stateLength: state?.length });
+
     const parsedState = this.verifyState(state);
+    this.log.info('MP OAuth state verified', { storeId: parsedState.storeId, returnTo: parsedState.returnTo });
+
     const store = await AppDataSource.getRepository(Store).findOne({ where: { id: parsedState.storeId } });
     if (!store) throw new AppError('STORE-001', 404);
+    this.log.info('MP OAuth store identified', { storeId: store.id, storeName: store.name });
+
+    const redirectUri = this.redirectUrl();
+    this.log.info('MP OAuth token exchange', { redirectUri });
 
     const response = await fetch(`${env.mercadoPago.apiBaseUrl}/oauth/token`, {
       method: 'POST',
@@ -269,16 +281,20 @@ export class StorePaymentAccountService {
         client_id: env.mercadoPago.clientId,
         grant_type: 'authorization_code',
         code,
-        redirect_uri: this.redirectUrl(),
+        redirect_uri: redirectUri,
       }),
     });
 
     if (!response.ok) {
+      const body = await response.text().catch(() => '');
+      this.log.warn('MP OAuth token exchange failed', { status: response.status, body });
       throw new AppError('PAY-013', 400, { message: 'Mercado Pago recusou a autorização.' });
     }
 
     const data = (await response.json()) as MercadoPagoTokenResponse;
     if (!data.access_token) throw new AppError('PAY-013', 400);
+
+    this.log.info('MP OAuth token received', { userId: data.user_id, expiresIn: data.expires_in });
 
     const expiresAt = data.expires_in
       ? new Date(Date.now() + Math.max(60, Number(data.expires_in)) * 1000)
@@ -301,6 +317,8 @@ export class StorePaymentAccountService {
     account.refreshTokenEncrypted = data.refresh_token ? this.encrypt(data.refresh_token) : account.refreshTokenEncrypted || null;
     account.expiresAt = expiresAt;
     await this.repo.save(account);
+
+    this.log.info('MP OAuth token saved successfully', { storeId: store.id, providerUserId: account.providerUserId });
 
     try {
       await this.validateCapabilities(data.access_token);

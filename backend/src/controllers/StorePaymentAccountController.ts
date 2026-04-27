@@ -7,25 +7,20 @@ const service = new StorePaymentAccountService();
 const log = logger.child({ scope: 'StorePaymentAccountController' });
 
 const appendGatewayContext = (target?: string | null, status: 'connected' | 'error' = 'connected') => {
-  const fallback = '/admin/dashboard?tab=gateway&paymentAccount=' + status;
+  const fallback = 'https://janocaminho.com.br/admin/dashboard?tab=gateway&paymentAccount=' + status;
   const raw = String(target || '').trim();
   if (!raw) return fallback;
 
   try {
     const url = new URL(raw);
+    // Forçar sempre non-www
+    url.hostname = url.hostname.replace(/^www\./, '');
     url.searchParams.set('tab', 'gateway');
     url.searchParams.delete('section');
     url.searchParams.set('paymentAccount', status);
     return url.toString();
   } catch {
-    const [pathname, hash = ''] = raw.split('#');
-    const searchIndex = pathname.indexOf('?');
-    const basePath = searchIndex >= 0 ? pathname.slice(0, searchIndex) : pathname;
-    const params = new URLSearchParams(searchIndex >= 0 ? pathname.slice(searchIndex + 1) : '');
-    params.set('tab', 'gateway');
-    params.delete('section');
-    params.set('paymentAccount', status);
-    return `${basePath || '/admin/dashboard'}?${params.toString()}${hash ? `#${hash}` : ''}`;
+    return fallback;
   }
 };
 
@@ -57,11 +52,12 @@ export class StorePaymentAccountController {
     try {
       const result = await service.handleCallback(String(req.query?.code || ''), String(req.query?.state || ''));
       const returnTo = appendGatewayContext(result.returnTo, 'connected');
-      log.info('Mercado Pago callback success', { storeId: result.storeId, returnTo });
+      log.info('Mercado Pago callback success — redirecting', { storeId: result.storeId, returnTo });
       return res.redirect(returnTo);
     } catch (error: any) {
-      log.warn('Mercado Pago callback failed', { error });
-      return res.redirect(appendGatewayContext(null, 'error'));
+      const returnTo = appendGatewayContext(null, 'error');
+      log.warn('Mercado Pago callback failed — redirecting to error', { error: error?.message, returnTo });
+      return res.redirect(returnTo);
     }
   }
 

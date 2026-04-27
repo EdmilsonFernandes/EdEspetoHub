@@ -945,6 +945,16 @@ const GatewayView = ({ storeId }) => {
     return loadMpAccount();
   }, [loadMpAccount]);
 
+  // Após retorno do OAuth, recarregar status e limpar parâmetro da URL
+  useEffect(() => {
+    if (!oauthResult) return;
+    loadMpAccount();
+    const url = new URL(window.location.href);
+    url.searchParams.delete('paymentAccount');
+    url.searchParams.delete('tab');
+    window.history.replaceState({}, '', url.toString());
+  }, [oauthResult]);
+
   const isConnected = Boolean(!mpLoading && mpAccount?.connected);
   const oauthMissing = mpAccount?.oauthConfigured === false;
   const validation = mpAccount?.validation || null;
