@@ -651,7 +651,7 @@ function OrderCard({
             <button
               type="button"
               onClick={() => onOpenHelp(order)}
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 active:scale-95 transition-transform"
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#153A4C]/8 text-[#153A4C] active:scale-95 transition-transform"
               title="Ajuda com este pedido"
             >
               <ChatCircleDots size={17} weight="duotone" />

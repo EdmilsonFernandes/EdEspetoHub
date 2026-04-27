@@ -1137,7 +1137,7 @@ export function OrderTracking() {
                               isCurrent
                                 ? isCancelled
                                   ? 'border-rose-500 bg-rose-500 text-white shadow-[0_0_0_3px_rgba(244,63,94,0.15)]'
-                                  : 'border-[#336886] bg-[#336886] text-white shadow-[0_0_0_3px_rgba(51,104,134,0.18)] animate-pulse'
+                                  : 'border-[#336886] bg-[#336886] text-white shadow-[0_0_0_3px_rgba(51,104,134,0.18)]'
                                 : isCompleted
                                   ? isCancelled
                                     ? 'border-rose-200 bg-rose-100 text-rose-600'
@@ -1261,15 +1261,10 @@ export function OrderTracking() {
                     </span>
                   </div>
                 </div>
-                <div id="order-info-section" className="rounded-3xl premium-card border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] p-6 space-y-4">
-                  <p className="text-sm font-semibold text-slate-900">Informações</p>
-                  <div className="text-sm text-slate-600 space-y-3">
-                    <div className="flex items-start gap-2.5">
-                      <User size={16} weight="duotone" className="text-slate-400 mt-0.5 shrink-0" />
-                      <p>
-                        <span className="font-semibold text-slate-700">Cliente:</span> {order.customerName || 'Cliente'}
-                      </p>
-                    </div>
+                <div id="order-info-section" className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]">
+                  <div className="border-b border-slate-100 px-5 py-3.5"><p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">Informações do pedido</p></div>
+                  <div className="divide-y divide-slate-100 px-5 text-sm text-slate-600">
+                    <div className="flex items-center gap-3 py-3"><User size={15} weight="duotone" className="text-slate-400 shrink-0" /><span className="text-[13px] font-semibold text-slate-700">{order.customerName || 'Cliente'}</span></div>
                     {paymentMeta?.label && (
                       <p className="flex items-center gap-2.5">
                         <CreditCard size={16} weight="duotone" className="text-slate-400 shrink-0" />
@@ -1449,7 +1444,7 @@ export function OrderTracking() {
                           href={storeWhatsappLink}
                           target="_blank"
                           rel="noreferrer"
-                          className="w-full min-h-[48px] inline-flex items-center justify-center px-3 py-2 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-600 text-sm font-semibold hover:bg-emerald-100 transition-all duration-200 active:scale-[0.98]"
+                          className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#16a34a,#15803d)] px-4 py-3 text-[13px] font-black text-white shadow-[0_8px_20px_-10px_rgba(22,163,74,0.45)] active:scale-[0.98] transition-transform"
                         >
                           Falar com a loja no WhatsApp
                         </a>
