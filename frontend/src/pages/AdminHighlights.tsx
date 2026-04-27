@@ -197,6 +197,7 @@ export function AdminHighlights() {
 
   useEffect(() => {
     loadAll();
+    void loadPushes();
   }, [storeId]);
 
   const formatCountdown = (ms: number) => {

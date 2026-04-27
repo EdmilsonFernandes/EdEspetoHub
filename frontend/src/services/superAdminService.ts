@@ -240,4 +240,29 @@ export const superAdminService = {
     });
     return handleResponse(response);
   },
+
+  async listPendingPromoPushes(token: string) {
+    const response = await fetch(buildUrl('/admin/promo-pushes/pending'), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return handleResponse(response);
+  },
+
+  async approvePromoPush(token: string, pushId: string) {
+    const response = await fetch(buildUrl(`/admin/promo-pushes/${pushId}/approve`), {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: '{}',
+    });
+    return handleResponse(response);
+  },
+
+  async rejectPromoPush(token: string, pushId: string, reason: string) {
+    const response = await fetch(buildUrl(`/admin/promo-pushes/${pushId}/reject`), {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason }),
+    });
+    return handleResponse(response);
+  },
 };

@@ -1,6 +1,5 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { promoPushService } from '../services/promoPushService';
 import { Capacitor } from '@capacitor/core';
 import {
   ArrowClockwise,
@@ -324,7 +323,7 @@ export function SuperAdmin() {
 
   useEffect(() => {
     if (activeSection !== 'push' || !token) return;
-    promoPushService.listPending().then((data) => setPendingPushes(Array.isArray(data) ? data : [])).catch(() => {});
+    superAdminService.listPendingPromoPushes(token).then((data) => setPendingPushes(Array.isArray(data) ? data : [])).catch(() => {});
   }, [activeSection, token]);
   const [broadcastLastResult, setBroadcastLastResult] = useState<any | null>(null);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -1840,7 +1839,7 @@ export function SuperAdmin() {
             <div className="flex items-center justify-between gap-2">
               <p className="text-sm text-slate-600">Pushes pagos aguardando sua aprovação para envio.</p>
               <button type="button" onClick={async () => {
-                try { const data = await promoPushService.listPending(); setPendingPushes(Array.isArray(data) ? data : []); }
+                try { const data = await superAdminService.listPendingPromoPushes(token); setPendingPushes(Array.isArray(data) ? data : []); }
                 catch { showToast('Erro ao carregar pushes.', 'error'); }
               }} className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700">Atualizar</button>
             </div>
@@ -1866,7 +1865,7 @@ export function SuperAdmin() {
                           <button type="button" disabled={!rejectReason.trim() || pushActionId === push.id} onClick={async () => {
                             setPushActionId(push.id);
                             try {
-                              await promoPushService.reject(push.id, rejectReason);
+                              await superAdminService.rejectPromoPush(token, push.id, rejectReason);
                               setPendingPushes((prev) => prev.filter((p) => p.id !== push.id));
                               setRejectingId(''); setRejectReason('');
                               showToast('Push rejeitado.', 'success');
@@ -1881,7 +1880,7 @@ export function SuperAdmin() {
                         <button type="button" disabled={pushActionId === push.id} onClick={async () => {
                           setPushActionId(push.id);
                           try {
-                            const result = await promoPushService.approve(push.id);
+                            const result = await superAdminService.approvePromoPush(token, push.id);
                             setPendingPushes((prev) => prev.filter((p) => p.id !== push.id));
                             showToast(`Push aprovado e enviado para ${result.sentCount ?? '?'} usuários!`, 'success');
                           } catch (err: any) { showToast(err?.message || 'Erro ao aprovar.', 'error'); }

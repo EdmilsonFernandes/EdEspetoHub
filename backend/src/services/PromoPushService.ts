@@ -42,7 +42,7 @@ export class PromoPushService {
 
     // Criar pagamento MP da plataforma
     const mpEnabled = Boolean(env.mercadoPago.accessToken);
-    const payerEmail = String(store.owner?.email || env.email.smtpUser || '').trim();
+    const payerEmail = String(store.owner?.email || env.email.smtpUser || 'contato@janocaminho.com.br').trim();
     const payerName = String(store.owner?.fullName || store.name || 'Lojista').trim();
 
     let providerId: string | null = null;
@@ -70,8 +70,8 @@ export class PromoPushService {
           const parsed = new Date(mp.expiresAt);
           if (Number.isFinite(parsed.getTime())) providerExpiresAt = parsed;
         }
-      } catch (err) {
-        log.warn('PromoPush MP payment creation failed, using mock QR', { storeId, error: err });
+      } catch (err: any) {
+        log.warn('PromoPush MP payment creation failed, using mock QR', { storeId, payerEmail, error: err?.message || err });
       }
     }
 
