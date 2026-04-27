@@ -26,7 +26,12 @@ export const applyApiSecurityHeaders = (_req: Request, res: Response, next: Next
   res.setHeader('X-DNS-Prefetch-Control', 'off');
   res.setHeader('X-Download-Options', 'noopen');
   res.setHeader('X-Permitted-Cross-Domain-Policies', 'none');
-  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+
+  // Não aplicar COOP na rota de callback OAuth para não bloquear o redirect do Mercado Pago
+  const isOAuthCallback = String(_req.path || '').includes('/callback');
+  if (!isOAuthCallback) {
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  }
 
   const forwardedProto = String(res.req.headers['x-forwarded-proto'] || '').toLowerCase();
   if (res.req.secure || forwardedProto === 'https') {
