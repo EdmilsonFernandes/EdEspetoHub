@@ -312,11 +312,7 @@ export function PaymentPage() {
                         {new Date(payment.expiresAt).toLocaleString('pt-BR')}
                       </p>
                     )}
-                    {isPixPending ? (
-                      <p>
-                        <span className="font-semibold">Tempo para confirmação:</span> {pixPolling.remainingLabel}
-                      </p>
-                    ) : null}
+
                   </div>
                 </div>
 
