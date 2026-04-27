@@ -344,6 +344,7 @@ export function AdminHighlights() {
     if (!paymentOpen || !selectedRequest?.id) return;
     const paymentStatus = String(selectedRequest?.paymentStatus || '').toUpperCase();
     if (paymentStatus === 'PAID') return;
+    if (paymentStatus === 'FAILED' || paymentStatus === 'PAYMENT_FAILED') return;
     if (paymentCountdownMs > 0) return;
     showToast('Tempo de tentativa expirado. Reabra o pagamento para tentar novamente.', 'warning');
     closePayment();
