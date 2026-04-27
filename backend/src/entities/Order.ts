@@ -26,6 +26,7 @@ import { Store } from './Store';
 import { OrderItem } from './OrderItem';
 import { OrderShipment } from './OrderShipment';
 import { User } from './User';
+import { OrderPayment } from './OrderPayment';
 
 @Entity({ name: 'orders' })
 /**
@@ -117,6 +118,9 @@ export class Order {
 
   @OneToOne(() => OrderShipment, (shipment) => shipment.order, { nullable: true })
   shipment?: OrderShipment | null;
+
+  @OneToOne(() => OrderPayment, (op) => op.order, { nullable: true })
+  orderPayment?: OrderPayment | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
