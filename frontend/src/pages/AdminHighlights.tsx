@@ -13,6 +13,8 @@ import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 import { PaymentAuditPanel } from '../components/Admin/PaymentAuditPanel';
 import { PaymentTechnicalModal } from '../components/Admin/PaymentTechnicalModal';
+import { promoPushService } from '../services/promoPushService';
+import { BellRinging, PaperPlaneTilt } from '@phosphor-icons/react';
 
 type DurationUnit = 'DAY' | 'WEEK' | 'MONTH';
 
@@ -108,6 +110,14 @@ export function AdminHighlights() {
 
   const [createOpen, setCreateOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
+
+  // Push promocional
+  const [pushes, setPushes] = useState<any[]>([]);
+  const [pushFormOpen, setPushFormOpen] = useState(false);
+  const [pushPaymentOpen, setPushPaymentOpen] = useState(false);
+  const [activePush, setActivePush] = useState<any | null>(null);
+  const [pushForm, setPushForm] = useState({ title: '', message: '' });
+  const [pushSubmitting, setPushSubmitting] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [selectedPaymentAudit, setSelectedPaymentAudit] = useState<any>(null);
   const [paymentAuditLoading, setPaymentAuditLoading] = useState(false);
@@ -153,6 +163,14 @@ export function AdminHighlights() {
         .sort((a: any, b: any) => String(a?.name || '').localeCompare(String(b?.name || ''), 'pt-BR')),
     [products]
   );
+
+  const loadPushes = async () => {
+    if (!storeId) return;
+    try {
+      const data = await promoPushService.listByStore(storeId);
+      setPushes(Array.isArray(data) ? data : []);
+    } catch { /* silencioso */ }
+  };
 
   const loadAll = async () => {
     if (!storeId) return;
@@ -571,6 +589,54 @@ export function AdminHighlights() {
               </div>
             )}
           </section>
+
+          {/* Seção Push Promocional */}
+          <section className="rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
+            <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Visibilidade</p>
+                <h2 className="text-xl font-black text-slate-900">Push Promocional</h2>
+                <p className="text-sm text-slate-600 mt-1">Envie uma notificação para todos os usuários do app. R$ 4,90 por envio.</p>
+              </div>
+              <button type="button" onClick={() => setPushFormOpen(true)} className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white active:scale-[0.97] transition">
+                <BellRinging size={14} weight="bold" />
+                Novo push
+              </button>
+            </div>
+            {pushes.length === 0 ? (
+              <p className="text-sm text-slate-500">Nenhum push enviado ainda.</p>
+            ) : (
+              <div className="space-y-2">
+                {pushes.map((push: any) => {
+                  const statusLabel = push.status === 'PENDING_PAYMENT' ? 'Aguardando pagamento' : push.status === 'PENDING_APPROVAL' ? 'Aguardando aprovação' : push.status === 'SENT' ? 'Enviado' : push.status === 'REJECTED' ? 'Rejeitado' : push.status === 'CANCELLED' ? 'Cancelado' : push.status;
+                  const statusColor = push.status === 'SENT' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : push.status === 'PENDING_APPROVAL' ? 'bg-sky-100 text-sky-700 border-sky-200' : push.status === 'REJECTED' ? 'bg-rose-100 text-rose-700 border-rose-200' : 'bg-slate-100 text-slate-700 border-slate-200';
+                  return (
+                    <div key={push.id} className="rounded-2xl border border-slate-200 bg-slate-50/60 p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-slate-900 truncate">{push.title}</p>
+                          <p className="text-xs text-slate-500 mt-0.5 truncate">{push.body}</p>
+                          <p className="text-xs text-slate-400 mt-1">{new Date(push.createdAt).toLocaleString('pt-BR')}</p>
+                          {push.status === 'SENT' && push.sentCount != null && (
+                            <p className="text-xs font-semibold text-emerald-700 mt-1">Enviado para {push.sentCount} usuários</p>
+                          )}
+                          {push.rejectionReason && (
+                            <p className="text-xs text-rose-600 mt-1">Motivo: {push.rejectionReason}</p>
+                          )}
+                        </div>
+                        <div className="flex flex-col items-end gap-1 shrink-0">
+                          <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${statusColor}`}>{statusLabel}</span>
+                          {push.status === 'PENDING_PAYMENT' && (
+                            <button type="button" onClick={() => { setActivePush(push); setPushPaymentOpen(true); }} className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700">Pagar</button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
         </div>
       </div>
 
@@ -768,6 +834,115 @@ export function AdminHighlights() {
         audit={selectedPaymentAudit}
         onClose={() => setPaymentTechnicalOpen(false)}
       />
+
+      {/* Modal criar push */}
+      {pushFormOpen && (
+        <div className="fixed inset-0 z-[320] bg-slate-950/55 backdrop-blur-[1px] flex items-end sm:items-center justify-center p-3">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-2xl">
+            <div className="mb-4">
+              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Push Promocional</p>
+              <h3 className="text-lg font-black text-slate-900">Criar notificação</h3>
+              <p className="text-xs text-slate-500 mt-1">Enviado para todos os usuários do app após aprovação. Valor: <strong>R$ 4,90</strong></p>
+            </div>
+            <div className="space-y-3">
+              <label className="block space-y-1">
+                <span className="text-xs font-semibold text-slate-600">Título <span className="text-slate-400">({pushForm.title.length}/80)</span></span>
+                <input
+                  type="text"
+                  maxLength={80}
+                  value={pushForm.title}
+                  onChange={(e) => setPushForm((p) => ({ ...p, title: e.target.value }))}
+                  placeholder={`Ex: ${auth?.store?.name || 'Sua Loja'} — Promoção especial!`}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
+                />
+              </label>
+              <label className="block space-y-1">
+                <span className="text-xs font-semibold text-slate-600">Mensagem <span className="text-slate-400">({pushForm.message.length}/160)</span></span>
+                <textarea
+                  maxLength={160}
+                  rows={3}
+                  value={pushForm.message}
+                  onChange={(e) => setPushForm((p) => ({ ...p, message: e.target.value }))}
+                  placeholder="Ex: Estamos abertos hoje com promoção especial. Venha conferir!"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm resize-none outline-none focus:border-slate-400"
+                />
+              </label>
+              <div className="rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                ⚠️ O push será revisado antes do envio. Conteúdo ofensivo ou spam será rejeitado sem reembolso.
+              </div>
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button type="button" onClick={() => setPushFormOpen(false)} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700">Cancelar</button>
+              <button
+                type="button"
+                disabled={pushSubmitting || !pushForm.title.trim() || !pushForm.message.trim()}
+                onClick={async () => {
+                  if (!storeId) return;
+                  setPushSubmitting(true);
+                  try {
+                    const created = await promoPushService.create(storeId, { title: pushForm.title.trim(), message: pushForm.message.trim() });
+                    showToast('Push criado! Faça o pagamento para enviar à aprovação.', 'success');
+                    setPushFormOpen(false);
+                    setPushForm({ title: '', message: '' });
+                    setPushes((prev) => [created, ...prev]);
+                    setActivePush(created);
+                    setPushPaymentOpen(true);
+                  } catch (err: any) {
+                    showToast(err?.message || 'Erro ao criar push.', 'error');
+                  } finally {
+                    setPushSubmitting(false);
+                  }
+                }}
+                className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+              >
+                {pushSubmitting ? 'Criando...' : 'Gerar cobrança — R$ 4,90'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal pagamento push */}
+      {pushPaymentOpen && activePush && (
+        <div className="fixed inset-0 z-[320] bg-slate-950/55 backdrop-blur-[1px] flex items-end sm:items-center justify-center p-3">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-2xl">
+            <div className="mb-3">
+              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Pagamento do Push</p>
+              <h3 className="text-base font-black text-slate-900 truncate">{activePush.title}</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Status: <strong>{activePush.paymentStatus === 'PAID' ? 'Pago ✅' : activePush.paymentStatus === 'FAILED' ? 'Falhou ❌' : 'Aguardando pagamento'}</strong></p>
+            </div>
+            {activePush.paymentQrCodeBase64 && activePush.paymentStatus !== 'PAID' && (
+              <div className="rounded-2xl border border-slate-200 bg-white p-3 flex justify-center">
+                <img src={activePush.paymentQrCodeBase64} alt="QR Code PIX" className="h-48 w-48 object-contain" />
+              </div>
+            )}
+            {activePush.paymentQrCodeText && activePush.paymentStatus !== 'PAID' && (
+              <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">PIX copia e cola</p>
+                <p className="mt-1 break-all text-xs text-slate-700">{activePush.paymentQrCodeText}</p>
+                <button type="button" onClick={() => navigator.clipboard.writeText(activePush.paymentQrCodeText).then(() => showToast('Código PIX copiado.', 'success'))} className="mt-2 inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700">Copiar código PIX</button>
+              </div>
+            )}
+            {activePush.paymentStatus === 'PAID' && (
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">✅ Pagamento confirmado! Aguardando aprovação da plataforma.</div>
+            )}
+            <div className="mt-3 flex justify-end gap-2">
+              {activePush.paymentStatus !== 'PAID' && (
+                <button type="button" onClick={async () => {
+                  if (!storeId) return;
+                  try {
+                    const updated = await promoPushService.refreshPayment(activePush.id, storeId);
+                    setActivePush(updated);
+                    setPushes((prev) => prev.map((p) => p.id === updated.id ? updated : p));
+                    if (updated.paymentStatus === 'PAID') showToast('Pagamento confirmado!', 'success');
+                  } catch { showToast('Não foi possível atualizar.', 'warning'); }
+                }} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700">Atualizar status</button>
+              )}
+              <button type="button" onClick={() => setPushPaymentOpen(false)} className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white">Fechar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }

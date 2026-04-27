@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { promoPushService } from '../services/promoPushService';
 import { Capacitor } from '@capacitor/core';
 import {
   ArrowClockwise,
@@ -316,6 +317,15 @@ export function SuperAdmin() {
     limit: 1500,
   });
   const [broadcastSending, setBroadcastSending] = useState(false);
+  const [pendingPushes, setPendingPushes] = useState<any[]>([]);
+  const [pushActionId, setPushActionId] = useState('');
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejectingId, setRejectingId] = useState('');
+
+  useEffect(() => {
+    if (activeSection !== 'push' || !token) return;
+    promoPushService.listPending().then((data) => setPendingPushes(Array.isArray(data) ? data : [])).catch(() => {});
+  }, [activeSection, token]);
   const [broadcastLastResult, setBroadcastLastResult] = useState<any | null>(null);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
@@ -1743,6 +1753,7 @@ export function SuperAdmin() {
         )}
 
         {activeSection === 'push' && (
+          <>
           <FormSection
             title="Push Global"
             variant="primary"
@@ -1818,6 +1829,74 @@ export function SuperAdmin() {
               </div>
             ) : null}
           </FormSection>
+
+          {/* Aprovação de Pushes Promocionais */}
+          <FormSection
+            title="Pushes Promocionais Pendentes"
+            variant="primary"
+            className="bg-gradient-to-br from-violet-50/70 via-white to-white border-violet-100"
+            contentClassName="space-y-3"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm text-slate-600">Pushes pagos aguardando sua aprovação para envio.</p>
+              <button type="button" onClick={async () => {
+                try { const data = await promoPushService.listPending(); setPendingPushes(Array.isArray(data) ? data : []); }
+                catch { showToast('Erro ao carregar pushes.', 'error'); }
+              }} className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700">Atualizar</button>
+            </div>
+            {pendingPushes.length === 0 ? (
+              <p className="text-sm text-slate-400">Nenhum push aguardando aprovação.</p>
+            ) : (
+              <div className="space-y-3">
+                {pendingPushes.map((push: any) => (
+                  <div key={push.id} className="rounded-2xl border border-violet-100 bg-white p-3 space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-xs text-slate-400">{push.storeName} · {new Date(push.createdAt).toLocaleString('pt-BR')}</p>
+                        <p className="text-sm font-bold text-slate-900 mt-0.5">{push.title}</p>
+                        <p className="text-sm text-slate-600">{push.body}</p>
+                      </div>
+                      <span className="shrink-0 rounded-full bg-violet-100 px-2.5 py-0.5 text-[11px] font-bold text-violet-700">R$ {Number(push.priceAmount).toFixed(2)}</span>
+                    </div>
+                    {rejectingId === push.id ? (
+                      <div className="space-y-2">
+                        <input type="text" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="Motivo da rejeição..." className="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-sm" />
+                        <div className="flex gap-2">
+                          <button type="button" onClick={() => { setRejectingId(''); setRejectReason(''); }} className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600">Cancelar</button>
+                          <button type="button" disabled={!rejectReason.trim() || pushActionId === push.id} onClick={async () => {
+                            setPushActionId(push.id);
+                            try {
+                              await promoPushService.reject(push.id, rejectReason);
+                              setPendingPushes((prev) => prev.filter((p) => p.id !== push.id));
+                              setRejectingId(''); setRejectReason('');
+                              showToast('Push rejeitado.', 'success');
+                            } catch { showToast('Erro ao rejeitar.', 'error'); }
+                            finally { setPushActionId(''); }
+                          }} className="rounded-lg bg-rose-500 px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50">Confirmar rejeição</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <button type="button" onClick={() => { setRejectingId(push.id); setRejectReason(''); }} className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-600">Rejeitar</button>
+                        <button type="button" disabled={pushActionId === push.id} onClick={async () => {
+                          setPushActionId(push.id);
+                          try {
+                            const result = await promoPushService.approve(push.id);
+                            setPendingPushes((prev) => prev.filter((p) => p.id !== push.id));
+                            showToast(`Push aprovado e enviado para ${result.sentCount ?? '?'} usuários!`, 'success');
+                          } catch (err: any) { showToast(err?.message || 'Erro ao aprovar.', 'error'); }
+                          finally { setPushActionId(''); }
+                        }} className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50">
+                          {pushActionId === push.id ? 'Enviando...' : '✅ Aprovar e Enviar'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </FormSection>
+          </>
         )}
 
         <CustomerSecuritySection

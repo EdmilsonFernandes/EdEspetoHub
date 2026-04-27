@@ -635,3 +635,29 @@ ON store_condominiums(store_id);
 
 CREATE INDEX IF NOT EXISTS idx_store_condominiums_active
 ON store_condominiums(active);
+
+-- Promo Pushes (push promocional pago pelo lojista)
+CREATE TABLE IF NOT EXISTS promo_pushes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  title VARCHAR(80) NOT NULL,
+  body VARCHAR(160) NOT NULL,
+  status VARCHAR(32) NOT NULL DEFAULT 'PENDING_PAYMENT',
+  price_amount NUMERIC(10,2) NOT NULL DEFAULT 4.90,
+  payment_method VARCHAR(32) NOT NULL DEFAULT 'PIX',
+  payment_status VARCHAR(32) NOT NULL DEFAULT 'PENDING',
+  payment_provider_id VARCHAR(255),
+  payment_link TEXT,
+  payment_qr_code_base64 TEXT,
+  payment_qr_code_text TEXT,
+  payment_expires_at TIMESTAMPTZ,
+  payment_paid_at TIMESTAMPTZ,
+  rejection_reason TEXT,
+  sent_at TIMESTAMPTZ,
+  sent_count INT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_promo_pushes_store ON promo_pushes(store_id);
+CREATE INDEX IF NOT EXISTS idx_promo_pushes_status ON promo_pushes(status);

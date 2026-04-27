@@ -20,6 +20,7 @@ import { OrderReviewController } from '../controllers/OrderReviewController';
 import { PlanController } from '../controllers/PlanController';
 import { SubscriptionController } from '../controllers/SubscriptionController';
 import { PlatformAdminController } from '../controllers/PlatformAdminController';
+import { PromoPushController } from '../controllers/PromoPushController';
 import { PlatformPublicController } from '../controllers/PlatformPublicController';
 import { PaymentController } from '../controllers/PaymentController';
 import { MotoboyController } from '../controllers/MotoboyController';
@@ -101,6 +102,17 @@ routes.get('/admin/access-logs', requireAuth, requireRole('SUPER_ADMIN'), Platfo
 routes.get('/admin/customer-security/overview', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.customerSecurityOverview);
 routes.patch('/admin/customer-security/blocks/:blockId/revoke', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.revokeCustomerSecurityBlock);
 routes.post('/admin/push/broadcast', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.broadcastPush);
+
+// Promo Push (lojista)
+routes.post('/stores/:storeId/promo-pushes', requireAuth, requireRole('ADMIN'), PromoPushController.create);
+routes.get('/stores/:storeId/promo-pushes', requireAuth, requireRole('ADMIN'), PromoPushController.listByStore);
+routes.post('/stores/:storeId/promo-pushes/:pushId/refresh-payment', requireAuth, requireRole('ADMIN'), PromoPushController.refreshPayment);
+routes.delete('/stores/:storeId/promo-pushes/:pushId', requireAuth, requireRole('ADMIN'), PromoPushController.cancel);
+
+// Promo Push (super admin)
+routes.get('/admin/promo-pushes/pending', requireAuth, requireRole('SUPER_ADMIN'), PromoPushController.listPending);
+routes.post('/admin/promo-pushes/:pushId/approve', requireAuth, requireRole('SUPER_ADMIN'), PromoPushController.approve);
+routes.post('/admin/promo-pushes/:pushId/reject', requireAuth, requireRole('SUPER_ADMIN'), PromoPushController.reject);
 routes.get('/admin/condominiums/manage', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminOverview);
 routes.post('/admin/condominiums', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminCreate);
 routes.patch('/admin/condominiums/:condominiumId', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminUpdate);
