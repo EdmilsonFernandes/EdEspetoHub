@@ -118,6 +118,21 @@ export function AdminHighlights() {
   const [activePush, setActivePush] = useState<any | null>(null);
   const [pushForm, setPushForm] = useState({ title: '', message: '' });
   const [pushSubmitting, setPushSubmitting] = useState(false);
+  const [pushCountdownMs, setPushCountdownMs] = useState(0);
+
+  useEffect(() => {
+    if (!pushPaymentOpen || !activePush?.id || !storeId) return;
+    if (activePush.paymentStatus === 'PAID' || activePush.paymentStatus === 'FAILED') return;
+    const timer = window.setInterval(async () => {
+      try {
+        const updated = await promoPushService.refreshPayment(activePush.id, storeId);
+        setActivePush(updated);
+        setPushes((prev) => prev.map((p) => p.id === updated.id ? updated : p));
+        if (updated.paymentStatus === 'PAID') showToast('Pagamento confirmado! Aguardando aprovação.', 'success');
+      } catch { /* silencioso */ }
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, [pushPaymentOpen, activePush?.id, activePush?.paymentStatus, storeId]);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [selectedPaymentAudit, setSelectedPaymentAudit] = useState<any>(null);
   const [paymentAuditLoading, setPaymentAuditLoading] = useState(false);
@@ -628,7 +643,14 @@ export function AdminHighlights() {
                         <div className="flex flex-col items-end gap-1 shrink-0">
                           <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${statusColor}`}>{statusLabel}</span>
                           {push.status === 'PENDING_PAYMENT' && (
-                            <button type="button" onClick={() => { setActivePush(push); setPushPaymentOpen(true); }} className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700">Pagar</button>
+                            <button type="button" onClick={() => {
+                              setActivePush(push);
+                              setPushPaymentOpen(true);
+                              if (push.paymentExpiresAt) {
+                                const remaining = Math.max(0, new Date(push.paymentExpiresAt).getTime() - Date.now());
+                                setPushCountdownMs(remaining);
+                              }
+                            }} className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700">Pagar</button>
                           )}
                         </div>
                       </div>
@@ -911,6 +933,9 @@ export function AdminHighlights() {
               <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Pagamento do Push</p>
               <h3 className="text-base font-black text-slate-900 truncate">{activePush.title}</h3>
               <p className="text-xs text-slate-500 mt-0.5">Status: <strong>{activePush.paymentStatus === 'PAID' ? 'Pago ✅' : activePush.paymentStatus === 'FAILED' ? 'Falhou ❌' : 'Aguardando pagamento'}</strong></p>
+              {activePush.paymentStatus !== 'PAID' && activePush.paymentStatus !== 'FAILED' && activePush.paymentExpiresAt && (
+                <p className="text-xs text-amber-700 mt-1">Expira em: <strong>{new Date(activePush.paymentExpiresAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</strong></p>
+              )}
             </div>
             {activePush.paymentQrCodeBase64 && activePush.paymentStatus !== 'PAID' && (
               <div className="rounded-2xl border border-slate-200 bg-white p-3 flex justify-center">
