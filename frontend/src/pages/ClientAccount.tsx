@@ -534,19 +534,26 @@ export function ClientAccount() {
       <div className="pointer-events-none fixed bottom-[5%] left-[-6%] h-[24%] w-[32%] rounded-full bg-[#336886]/7 blur-[100px] -z-10" />
       <div className="mx-auto max-w-2xl">
         {/* Header Fixo Premium */}
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white/80 px-4 py-4 backdrop-blur-md">
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200/60 bg-white/95 px-4 py-3.5 backdrop-blur-xl">
           <button
             onClick={() => navigate(-1)}
-            className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-all active:scale-90"
+            className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-all active:scale-95"
           >
-            <ArrowLeft size={20} weight="bold" />
+            <ArrowLeft size={18} weight="bold" />
           </button>
-          <h1 className="text-base font-black text-slate-900 uppercase tracking-widest">{settingsOnly ? 'Configurações' : 'Minha Conta'}</h1>
+          <div className="flex flex-col items-center gap-0.5">
+            <div className="flex items-center gap-1.5">
+              <img src="/janocaminho.png" alt="Já no Caminho" className="h-5 w-5 rounded-[0.45rem] object-cover shadow-sm" />
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">{settingsOnly ? 'Configurações' : 'Minha conta'}</p>
+            </div>
+            <h1 className="text-[15px] font-black text-slate-900">{settingsOnly ? 'Preferências' : 'Perfil e dados'}</h1>
+          </div>
           <button
             onClick={logout}
-            className="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 transition-all active:scale-90"
+            className="flex h-9 w-9 items-center justify-center rounded-2xl bg-rose-50 text-rose-500 transition-all active:scale-95"
+            title="Sair"
           >
-            <SignOut size={20} weight="bold" />
+            <SignOut size={17} weight="duotone" />
           </button>
         </header>
 

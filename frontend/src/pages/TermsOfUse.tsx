@@ -1,6 +1,5 @@
-import { ArrowLeft, ShieldCheck } from '@phosphor-icons/react';
+import { ArrowLeft } from '@phosphor-icons/react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { AppVersionBadge } from '../components/common/AppVersionBadge';
 
 const LAST_UPDATE = '22 de abril de 2026';
 
@@ -24,31 +23,24 @@ export function TermsOfUse() {
   return (
     <div className="min-h-screen bg-slate-50 pb-[env(safe-area-inset-bottom)]">
       <header
-        className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-slate-200"
+        className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200/60 bg-white/95 px-4 py-3.5 backdrop-blur-xl"
         style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <button
             onClick={() => navigate(fromHub ? '/hub' : -1 as any)}
-            className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-all active:scale-90"
+            className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-all active:scale-95"
             aria-label="Voltar"
           >
-            <ArrowLeft size={20} weight="bold" />
+            <ArrowLeft size={18} weight="bold" />
           </button>
-
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[0.6rem] border border-slate-100 bg-white shadow-sm">
-              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
+          <div className="flex flex-col items-center gap-0.5">
+            <div className="flex items-center gap-1.5">
+              <img src="/janocaminho.png" alt="Já no Caminho" className="h-5 w-5 rounded-[0.45rem] object-cover shadow-sm" />
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Legal</p>
             </div>
-            <div className="hidden sm:block text-left">
-              <p className="text-[13px] font-black text-slate-900 leading-tight">Já no Caminho</p>
-              <p className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
-                <ShieldCheck size={10} weight="fill" className="text-emerald-500" />
-                <AppVersionBadge />
-              </p>
-            </div>
+            <h1 className="text-[15px] font-black text-slate-900">Termos e Privacidade</h1>
           </div>
-        </div>
+          <div className="w-9" />
       </header>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-6">
