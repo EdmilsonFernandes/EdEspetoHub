@@ -36,10 +36,10 @@ yarn-error.log*
 
 # Lock files (opcional – escolha UM)
 # Se usar npm:
-# yarn.lock
+yarn.lock
 
 # Se usar yarn:
-# package-lock.json
+package-lock.json
 
 # ========================
 # Build
@@ -90,3 +90,5 @@ backend/keys/
 *.aab
 
 !frontend/public/marketing/promo-marketing-lite.jpg
+
+.claude/
