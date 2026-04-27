@@ -4,17 +4,7 @@ import { ClockCounterClockwise, CreditCard, ShieldCheck, WarningCircle, Code } f
 import { formatCurrency, formatDateTime } from '../../utils/format';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../../utils/paymentAssets';
 
-const stageLabel = (value: string) => {
-  const normalized = String(value || '').trim().toUpperCase();
-  if (normalized === 'PROVIDER_REQUEST') return 'Cobrança criada';
-  if (normalized === 'PROVIDER_LOOKUP') return 'Consulta ao provedor';
-  if (normalized === 'MANUAL_REFRESH') return 'Atualização manual';
-  if (normalized === 'WEBHOOK_LOOKUP') return 'Consulta via webhook';
-  if (normalized === 'WEBHOOK_RECEIVED') return 'Webhook recebido';
-  if (normalized === 'STATUS_APPLIED') return 'Status aplicado';
-  if (normalized === 'ERROR') return 'Erro técnico';
-  return normalized || 'Atualização';
-};
+
 
 const statusTone = (summary: any) => {
   const normalized = String(summary?.paymentStatus || summary?.providerStatus || '').trim().toUpperCase();
@@ -138,7 +128,7 @@ export function PaymentAuditPanel({
               </span>
               <div className="min-w-0">
                 <p className="text-xs font-bold text-slate-800">
-                  {stageLabel(event?.eventStage)}
+                  {event?.eventStageLabel}
                   {event?.providerStatusLabel ? ` • ${event.providerStatusLabel}` : ''}
                 </p>
                 <p className="mt-0.5 text-xs text-slate-500">

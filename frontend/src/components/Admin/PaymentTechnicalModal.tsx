@@ -41,11 +41,11 @@ export function PaymentTechnicalModal({ open, title, audit, onClose }) {
         <div className="space-y-4 overflow-y-auto px-4 py-4">
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">Payment ID</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">ID do Pagamento</p>
               <p className="mt-1 text-sm font-black text-slate-900 break-all">{summary?.providerPaymentId || '—'}</p>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">External reference</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">Referência Externa</p>
               <p className="mt-1 text-sm font-black text-slate-900 break-all">{summary?.externalReference || '—'}</p>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
@@ -63,7 +63,7 @@ export function PaymentTechnicalModal({ open, title, audit, onClose }) {
                 {events.map((event: any) => (
                   <div key={event.id} className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <p className="text-xs font-bold text-slate-800">{event?.eventStage || 'EVENT'}</p>
+                      <p className="text-xs font-bold text-slate-800">{event?.eventStageLabel || 'Evento'}</p>
                       <p className="text-[11px] text-slate-500">{formatDateTime(event?.createdAt)}</p>
                     </div>
                     <p className="mt-1 text-xs text-slate-600">
@@ -77,19 +77,19 @@ export function PaymentTechnicalModal({ open, title, audit, onClose }) {
 
           <div className="grid gap-3 lg:grid-cols-3">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3">
-              <p className="text-sm font-black text-slate-900">Request</p>
+              <p className="text-sm font-black text-slate-900">Dados Enviados (Request)</p>
               <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap break-words text-[11px] leading-relaxed text-slate-600">
                 {renderJson(technical?.latestRequestPayload)}
               </pre>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3">
-              <p className="text-sm font-black text-slate-900">Response</p>
+              <p className="text-sm font-black text-slate-900">Resposta Recebida (Response)</p>
               <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap break-words text-[11px] leading-relaxed text-slate-600">
                 {renderJson(technical?.latestResponsePayload)}
               </pre>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3">
-              <p className="text-sm font-black text-slate-900">Erro</p>
+              <p className="text-sm font-black text-slate-900">Erro Registrado</p>
               <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap break-words text-[11px] leading-relaxed text-slate-600">
                 {renderJson(technical?.latestErrorPayload)}
               </pre>

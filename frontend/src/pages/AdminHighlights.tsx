@@ -276,7 +276,7 @@ export function AdminHighlights() {
           showToast('Pagamento confirmado. Seu destaque foi atualizado.', 'success');
         }
         await loadAll();
-        closePayment();
+
       } else if (String(updated?.id || '').trim()) {
         await loadPaymentAudit(String(updated.id), true);
       }

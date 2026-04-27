@@ -12,6 +12,8 @@ import { Hash, Storefront, Truck, ChartBar, ClipboardText, CreditCard, Package, 
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
+import { PaymentAuditPanel } from '../components/Admin/PaymentAuditPanel';
+import { PaymentTechnicalModal } from '../components/Admin/PaymentTechnicalModal';
 
 export function AdminOrders() {
   const { auth, logout } = useAuth();
@@ -30,6 +32,13 @@ export function AdminOrders() {
     if (typeof window === 'undefined') return 'cards';
     return localStorage.getItem('adminOrdersView') === 'table' ? 'table' : 'cards';
   });
+
+  // Payment audit states
+  const [orderPaymentOpen, setOrderPaymentOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+  const [selectedOrderPaymentAudit, setSelectedOrderPaymentAudit] = useState<any | null>(null);
+  const [orderPaymentAuditLoading, setOrderPaymentAuditLoading] = useState(false);
+  const [orderPaymentTechnicalOpen, setOrderPaymentTechnicalOpen] = useState(false);
 
   const storeId = auth?.store?.id;
   const storeSlug = auth?.store?.slug;
@@ -358,6 +367,39 @@ export function AdminOrders() {
     }
   };
 
+  const openOrderPayment = (order: any) => {
+    if (!order?.id || !storeId) return;
+    setSelectedOrder(order);
+    setSelectedOrderPaymentAudit(null);
+    setOrderPaymentOpen(true);
+    void loadOrderPaymentAudit(order.id, true);
+  };
+
+  const closeOrderPayment = () => {
+    setOrderPaymentOpen(false);
+    setSelectedOrder(null);
+    setSelectedOrderPaymentAudit(null);
+    setOrderPaymentTechnicalOpen(false);
+  };
+
+  const loadOrderPaymentAudit = async (orderIdRaw: string, silent = false) => {
+    const orderId = String(orderIdRaw || '').trim();
+    if (!orderId || !storeId) return null;
+    setOrderPaymentAuditLoading(true);
+    try {
+      const payload = await orderService.getPaymentAudit(orderId, storeId);
+      setSelectedOrderPaymentAudit(payload || null);
+      return payload;
+    } catch (error: any) {
+      if (!silent) {
+        alert(error?.message || 'Não foi possível carregar os detalhes do pagamento agora.');
+      }
+      return null;
+    } finally {
+      setOrderPaymentAuditLoading(false);
+    }
+  };
+
   useEffect(() => {
     try {
       localStorage.setItem('adminOrdersView', viewMode);
@@ -553,6 +595,15 @@ export function AdminOrders() {
                         <span className="font-semibold">{paymentMeta.label}</span>
                         <span className="text-slate-400">•</span>
                         <span>{order.phone || 'Sem telefone'}</span>
+                        {order?.payment && order?.paymentMethod === 'MERCADO_PAGO' && (
+                          <button
+                            type="button"
+                            onClick={() => openOrderPayment(order)}
+                            className="ml-auto px-2.5 py-1 rounded-full text-[11px] font-semibold border border-slate-200 bg-white text-slate-700"
+                          >
+                            Ver pagamento
+                          </button>
+                        )}
                       </div>
                       {String(order?.type || '').toLowerCase() === 'delivery' && (
                         <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 space-y-2">
@@ -685,9 +736,18 @@ export function AdminOrders() {
                                 )}
                                 {paymentMeta.label}
                               </p>
-                              <span className="text-xs text-slate-500">
+                              <span className="text-xs text-slate-500 mb-2">
                                 {formatPaymentStatus(order.paymentStatus)}
                               </span>
+                              {order?.payment && order?.paymentMethod === 'MERCADO_PAGO' && (
+                                <button
+                                  type="button"
+                                  onClick={() => openOrderPayment(order)}
+                                  className="px-2.5 py-1 rounded-full text-[11px] font-semibold border border-slate-200 bg-white text-slate-700"
+                                >
+                                  Ver pagamento
+                                </button>
+                              )}
                             </div>
                           );
                         })()}
@@ -849,16 +909,30 @@ export function AdminOrders() {
 	                          </span>
 	                        </td>
 	                        <td className="py-3 pr-4 whitespace-nowrap hidden lg:table-cell">
-	                          <span className="inline-flex items-center gap-2">
-	                            {paymentMeta.icon && (
-	                              <img
-                                src={paymentMeta.icon}
-                                alt={paymentMeta.label}
-                                className="h-4 w-4 object-contain"
-                              />
-                            )}
-                            {paymentMeta.label}
-                          </span>
+	                          <div className="flex flex-col gap-1">
+	                            <span className="inline-flex items-center gap-2">
+	                              {paymentMeta.icon && (
+	                                <img
+	                                  src={paymentMeta.icon}
+	                                  alt={paymentMeta.label}
+	                                  className="h-4 w-4 object-contain"
+	                                />
+	                              )}
+	                              {paymentMeta.label}
+	                            </span>
+	                            <span className="text-xs text-slate-500 mb-2">
+	                              {formatPaymentStatus(order.paymentStatus)}
+	                            </span>
+                              {order?.payment && order?.paymentMethod === 'MERCADO_PAGO' && (
+                                <button
+                                  type="button"
+                                  onClick={() => openOrderPayment(order)}
+                                  className="px-2.5 py-1 rounded-full text-[11px] font-semibold border border-slate-200 bg-white text-slate-700"
+                                >
+                                  Ver pagamento
+                                </button>
+                              )}
+                            </div>
                         </td>
                         <td className="py-3 pr-4 text-xs text-slate-600 min-w-[180px] hidden lg:table-cell">
                           {(order.items || []).length === 0
@@ -885,6 +959,51 @@ export function AdminOrders() {
         </div>
         </div>
       </div>
+      {orderPaymentOpen && selectedOrder && (
+        <div className="fixed inset-0 z-[320] bg-slate-950/55 backdrop-blur-[1px] flex items-end sm:items-center justify-center p-3">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-2xl">
+            <div className="mb-3">
+              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Pagamento do pedido</p>
+              <h3 className="text-lg font-black text-slate-900">{selectedOrder?.customerName || selectedOrder?.name || 'Pedido'}</h3>
+              <p className="text-xs text-slate-600 mt-1">
+                Status: <strong>{formatPaymentStatus(selectedOrder?.paymentStatus)}</strong>
+                {selectedOrder?.paymentExpiresAt ? ` • expira em ${formatDateTime(selectedOrder.paymentExpiresAt)}` : ''}
+              </p>
+            </div>
+
+            <div className="mt-3">
+              <PaymentAuditPanel
+                title="Informações de pagamento do pedido"
+                summary={selectedOrderPaymentAudit?.summary}
+                events={selectedOrderPaymentAudit?.events || []}
+                showTechnicalButton={true}
+                technicalLoading={orderPaymentAuditLoading}
+                onTechnicalClick={async () => {
+                  const payload = selectedOrderPaymentAudit || (await loadOrderPaymentAudit(String(selectedOrder?.id || ''), false));
+                  if (payload) setOrderPaymentTechnicalOpen(true);
+                }}
+              />
+            </div>
+
+            <div className="mt-3 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={closeOrderPayment}
+                className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <PaymentTechnicalModal
+        open={orderPaymentTechnicalOpen}
+        title="Detalhes técnicos do pagamento do pedido"
+        audit={selectedOrderPaymentAudit}
+        onClose={() => setOrderPaymentTechnicalOpen(false)}
+      />
     </AdminLayout>
   );
 }

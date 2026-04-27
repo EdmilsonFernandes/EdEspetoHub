@@ -4,6 +4,9 @@ import { PaymentAuditLog } from '../entities/PaymentAuditLog';
 import {
   resolveMercadoPagoStatusDetailLabel,
   resolveMercadoPagoStatusLabel,
+  resolvePaymentAuditEntityLabel,
+  resolvePaymentAuditFlowLabel,
+  resolvePaymentAuditStageLabel,
   sanitizePaymentAuditPayload,
 } from '../utils/paymentAudit';
 import { logger } from '../utils/logger';
@@ -116,7 +119,9 @@ export class PaymentAuditService {
     const summary = {
       provider: latestProviderRow?.provider || base.provider || 'MERCADO_PAGO',
       flowType: latestProviderRow?.flowType || base.flowType || null,
+      flowTypeLabel: resolvePaymentAuditFlowLabel(latestProviderRow?.flowType || base.flowType || null),
       entityType: base.entityType,
+      entityTypeLabel: resolvePaymentAuditEntityLabel(base.entityType),
       entityId: base.entityId,
       externalReference: latestProviderRow?.externalReference || base.externalReference || null,
       providerPaymentId: latestProviderRow?.providerPaymentId || base.providerPaymentId || null,
@@ -134,13 +139,16 @@ export class PaymentAuditService {
       updatedAt: base.updatedAt || null,
       lastEventAt: latestRow?.createdAt || base.updatedAt || null,
       latestEventStage: latestRow?.eventStage || null,
+      latestEventStageLabel: resolvePaymentAuditStageLabel(latestRow?.eventStage || null),
     };
 
     const events = rows.map((row) => ({
       id: row.id,
       provider: row.provider,
       flowType: row.flowType,
+      flowTypeLabel: resolvePaymentAuditFlowLabel(row.flowType),
       eventStage: row.eventStage,
+      eventStageLabel: resolvePaymentAuditStageLabel(row.eventStage),
       externalReference: row.externalReference || null,
       providerPaymentId: row.providerPaymentId || null,
       providerStatus: row.providerStatus || null,

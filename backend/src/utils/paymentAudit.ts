@@ -24,43 +24,69 @@ export const PAYMENT_AUDIT_STAGE = {
   ERROR: 'ERROR',
 } as const;
 
+const FLOW_LABELS: Record<string, string> = {
+  SUBSCRIPTION: 'Assinatura de Plano',
+  ORDER: 'Pagamento de Pedido',
+  TIP: 'Gorjeta',
+  FEATURED_REQUEST: 'Destaque de Produto',
+  DELIVERY_CYCLE: 'Ciclo de Entrega',
+};
+
+const ENTITY_LABELS: Record<string, string> = {
+  PAYMENT: 'Pagamento Comercial',
+  ORDER_PAYMENT: 'Pagamento de Pedido',
+  ORDER_REVIEW: 'Avaliação de Pedido',
+  FEATURED_REQUEST: 'Solicitação de Destaque',
+  DELIVERY_BILLING_CYCLE: 'Faturamento de Entregas',
+};
+
+const STAGE_LABELS: Record<string, string> = {
+  PROVIDER_REQUEST: 'Solicitação enviada ao banco',
+  PROVIDER_LOOKUP: 'Verificação de status (automática)',
+  MANUAL_REFRESH: 'Atualização solicitada pelo lojista',
+  WEBHOOK_LOOKUP: 'Verificação via notificação (webhook)',
+  WEBHOOK_RECEIVED: 'Notificação recebida do Mercado Pago',
+  STATUS_APPLIED: 'Status atualizado no sistema',
+  ERROR: 'Falha técnica no processamento',
+};
+
 const STATUS_LABELS: Record<string, string> = {
   approved: 'Aprovado',
   authorized: 'Autorizado',
   paid: 'Pago',
-  pending: 'Pendente',
-  in_process: 'Em análise',
-  in_mediation: 'Em mediação',
-  rejected: 'Recusado',
+  pending: 'Aguardando Pagamento',
+  in_process: 'Em análise pelo banco',
+  in_mediation: 'Em disputa/mediação',
+  rejected: 'Recusado pelo banco',
   cancelled: 'Cancelado',
-  charged_back: 'Contestação / chargeback',
-  refunded: 'Estornado',
-  failed: 'Falhou',
+  charged_back: 'Contestação (Chargeback)',
+  refunded: 'Estornado/Devolvido',
+  failed: 'Falha na transação',
 };
 
 const STATUS_DETAIL_LABELS: Record<string, string> = {
   cc_rejected_bad_filled_card_number: 'Número do cartão inválido',
-  cc_rejected_bad_filled_date: 'Validade do cartão incorreta',
-  cc_rejected_bad_filled_other: 'Dados do cartão inválidos',
-  cc_rejected_bad_filled_security_code: 'CVV incorreto',
-  cc_rejected_blacklist: 'Pagamento bloqueado por segurança',
-  cc_rejected_call_for_authorize: 'O banco pediu autorização do pagamento',
-  cc_rejected_card_disabled: 'Cartão desabilitado',
-  cc_rejected_duplicated_payment: 'Pagamento duplicado',
-  cc_rejected_high_risk: 'Pagamento barrado pelo antifraude',
-  cc_rejected_insufficient_amount: 'Cartão com saldo insuficiente',
-  cc_rejected_invalid_installments: 'Parcelamento inválido',
+  cc_rejected_bad_filled_date: 'Data de validade incorreta',
+  cc_rejected_bad_filled_other: 'Dados do cartão inconsistentes',
+  cc_rejected_bad_filled_security_code: 'Código de segurança (CVV) inválido',
+  cc_rejected_blacklist: 'Transação bloqueada por segurança',
+  cc_rejected_call_for_authorize: 'O banco requer autorização por telefone',
+  cc_rejected_card_disabled: 'O cartão informado está desativado',
+  cc_rejected_duplicated_payment: 'Pagamento identificado como duplicado',
+  cc_rejected_high_risk: 'Recusado pelo sistema antifraude',
+  cc_rejected_insufficient_amount: 'Saldo ou limite insuficiente',
+  cc_rejected_invalid_installments: 'Quantidade de parcelas inválida',
   cc_rejected_max_attempts: 'Limite de tentativas excedido',
-  cc_rejected_other_reason: 'Pagamento recusado pelo banco',
-  pending_contingency: 'Pagamento em análise',
-  pending_review_manual: 'Pagamento em análise manual',
-  pending_waiting_payment: 'Aguardando pagamento',
-  pending_waiting_transfer: 'Aguardando compensação',
-  rejected_insufficient_data: 'Dados insuficientes para processar o pagamento',
+  cc_rejected_other_reason: 'Recusado pela operadora do cartão',
+  pending_contingency: 'Pagamento em processamento tardio',
+  pending_review_manual: 'Pagamento aguardando revisão manual',
+  pending_waiting_payment: 'Aguardando ação do cliente (Pagamento pendente)',
+  pending_waiting_transfer: 'Aguardando compensação bancária',
+  rejected_insufficient_data: 'Dados incompletos para processar a transação',
 };
 
-const REDACTED = '[redacted]';
-const QR_OMITTED = '[omitted]';
+const REDACTED = '[RESERVADO]';
+const QR_OMITTED = '[QR CODE OMITIDO NO LOG]';
 
 const shouldRedactKey = (key: string, parentKey?: string | null) => {
   const normalized = String(key || '').trim().toLowerCase();
@@ -104,12 +130,28 @@ export const sanitizePaymentAuditPayload = (payload: any) => {
   return sanitizeRecursive(payload);
 };
 
+export const resolvePaymentAuditFlowLabel = (flow?: string | null) => {
+  const normalized = String(flow || '').trim().toUpperCase();
+  return FLOW_LABELS[normalized] || normalized;
+};
+
+export const resolvePaymentAuditEntityLabel = (entity?: string | null) => {
+  const normalized = String(entity || '').trim().toUpperCase();
+  return ENTITY_LABELS[normalized] || normalized;
+};
+
+export const resolvePaymentAuditStageLabel = (stage?: string | null) => {
+  const normalized = String(stage || '').trim().toUpperCase();
+  return STAGE_LABELS[normalized] || normalized;
+};
+
 export const resolveMercadoPagoStatusLabel = (status?: string | null) => {
   const normalized = String(status || '').trim().toLowerCase();
-  return STATUS_LABELS[normalized] || (normalized ? normalized.replace(/_/g, ' ') : null);
+  return STATUS_LABELS[normalized] || (normalized ? normalized.replace(/_/g, ' ') : 'Pendente');
 };
 
 export const resolveMercadoPagoStatusDetailLabel = (statusDetail?: string | null) => {
   const normalized = String(statusDetail || '').trim().toLowerCase();
   return STATUS_DETAIL_LABELS[normalized] || (normalized ? normalized.replace(/_/g, ' ') : null);
 };
+
