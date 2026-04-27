@@ -191,7 +191,6 @@ export function AdminHighlights() {
 
   const openPayment = (request: any) => {
     const _status = String(request?.status || '').toUpperCase();
-    if (_status === 'CANCELLED') return;
     setSelectedRequest(request);
     setSelectedPaymentAudit(null);
     setPaymentOpen(true);

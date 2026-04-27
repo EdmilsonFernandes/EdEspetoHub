@@ -1200,7 +1200,7 @@ const GatewayView = ({ storeId }) => {
                 <div className="space-y-3">
                   <button
                     type="button"
-                    disabled={!storeId || mpActionLoading || oauthMissing || mpLoading}
+                    disabled={!storeId || mpActionLoading || oauthMissing}
                     onClick={async () => {
                       if (!storeId) return;
                       setMpActionLoading(true);
