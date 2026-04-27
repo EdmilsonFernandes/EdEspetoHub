@@ -588,23 +588,25 @@ export function AdminOrders() {
                           {renderMoneyBreakdown(order, true)}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-slate-600">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
                         {paymentMeta.icon && (
                           <img src={paymentMeta.icon} alt={paymentMeta.label} className="h-4 w-4 object-contain" />
                         )}
                         <span className="font-semibold">{paymentMeta.label}</span>
                         <span className="text-slate-400">•</span>
                         <span>{order.phone || 'Sem telefone'}</span>
-                        {order?.payment && order?.paymentMethod === 'MERCADO_PAGO' && (
+                      </div>
+                      {order?.payment && order?.paymentMethod === 'MERCADO_PAGO' && (
+                        <div className="mt-1">
                           <button
                             type="button"
                             onClick={() => openOrderPayment(order)}
-                            className="ml-auto px-2.5 py-1 rounded-full text-[11px] font-semibold border border-slate-200 bg-white text-slate-700"
+                            className="px-2.5 py-1 rounded-full text-[11px] font-semibold border border-slate-200 bg-white text-slate-700"
                           >
                             Ver pagamento
                           </button>
-                        )}
-                      </div>
+                        </div>
+                      )}
                       {String(order?.type || '').toLowerCase() === 'delivery' && (
                         <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 space-y-2">
                           <div className="flex items-center justify-between gap-2">
