@@ -84,7 +84,6 @@ export class OrderRepository
     return this.repository.find({
       where: { store: { id: storeId } },
       order: { createdAt: 'DESC' },
-      relations: ['payment'],
     });
   }
 
