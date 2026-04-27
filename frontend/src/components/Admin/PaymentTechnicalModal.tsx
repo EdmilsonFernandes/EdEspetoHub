@@ -13,7 +13,7 @@ const renderJson = (value: any) => {
 };
 
 export function PaymentTechnicalModal({ open, title, audit, onClose }) {
-  if (!open || !audit) return null;
+  if (!open) return null;
   const summary = audit?.summary || null;
   const technical = audit?.technical || null;
   const events = Array.isArray(audit?.events) ? audit.events : [];

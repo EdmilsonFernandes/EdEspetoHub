@@ -191,7 +191,7 @@ export function AdminHighlights() {
 
   const openPayment = (request: any) => {
     const _status = String(request?.status || '').toUpperCase();
-    if (_status === 'CANCELLED' || _status === 'EXPIRED') return;
+    if (_status === 'CANCELLED') return;
     setSelectedRequest(request);
     setSelectedPaymentAudit(null);
     setPaymentOpen(true);
@@ -545,7 +545,7 @@ export function AdminHighlights() {
                           <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-bold ${statusTone(status)}`}>
                             {statusLabel(status)}
                           </span>
-                          {(request?.paymentQrCodeBase64 || request?.paymentLink || request?.paymentQrCodeText) && (
+                          {(request?.paymentQrCodeBase64 || request?.paymentLink || request?.paymentQrCodeText || String(request?.paymentStatus || '').toUpperCase() === 'PAID') && (
                             <button
                               type="button"
                               onClick={() => openPayment(request)}
