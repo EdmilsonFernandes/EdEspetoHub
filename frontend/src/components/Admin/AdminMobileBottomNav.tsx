@@ -290,7 +290,7 @@ export function AdminMobileBottomNav() {
           transform: effectiveVisibility ? 'translateY(0)' : 'translateY(calc(100% - 4px))',
         }}
       >
-        <ul className={`pointer-events-auto mx-auto grid w-full max-w-md ${superItems.length === 3 ? 'grid-cols-3' : 'grid-cols-4'} gap-1 rounded-t-3xl border-t border-x border-slate-200/50 bg-white/86 p-1.5 pb-[max(env(safe-area-inset-bottom),4px)] shadow-[0_-12px_48px_-24px_rgba(15,23,42,0.42)] backdrop-blur-2xl`}>
+        <ul className={`pointer-events-auto mx-auto grid w-full max-w-md ${superItems.length === 3 ? 'grid-cols-3' : 'grid-cols-4'} gap-0.5 border-t border-slate-200/60 bg-white/95 px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)] shadow-[0_-8px_32px_-16px_rgba(15,23,42,0.18)] backdrop-blur-xl`}>
           {superItems.map((item) => {
             const Icon = item.icon;
             const danger = item.tone === 'danger';
@@ -299,18 +299,22 @@ export function AdminMobileBottomNav() {
                 <button
                   type="button"
                   onClick={item.onClick}
-                  className={`w-full min-h-12 rounded-xl py-1 text-[8px] font-black uppercase tracking-[0.1em] flex flex-col items-center justify-center gap-0.5 transition ${
+                  className={`w-full flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-[9px] font-bold uppercase tracking-[0.08em] transition-all active:scale-95 ${
                     item.active
-                      ? 'bg-slate-950 text-white shadow-[0_12px_24px_-18px_rgba(15,23,42,0.5)]'
+                      ? 'text-[#153A4C]'
                       : danger
-                        ? 'bg-rose-50 text-rose-700 hover:bg-rose-100'
-                        : 'bg-transparent text-slate-500 hover:bg-slate-100/80 hover:text-slate-800'
+                        ? 'text-rose-500'
+                        : 'text-slate-400'
                   }`}
                 >
-                  <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${
-                    item.active ? 'bg-white/12 text-white' : danger ? 'bg-white text-rose-600 ring-1 ring-rose-100' : 'bg-slate-100 text-slate-600'
+                  <span className={`inline-flex h-8 w-8 items-center justify-center rounded-2xl transition-all ${
+                    item.active
+                      ? 'bg-[#153A4C]/10 text-[#153A4C]'
+                      : danger
+                        ? 'bg-rose-50 text-rose-500'
+                        : 'text-slate-400'
                   }`}>
-                    <Icon size={17} weight={item.active ? 'fill' : 'duotone'} />
+                    <Icon size={18} weight={item.active ? 'fill' : 'duotone'} />
                   </span>
                   <span className="leading-none">{item.label}</span>
                 </button>
@@ -331,30 +335,29 @@ export function AdminMobileBottomNav() {
         transform: effectiveVisibility ? 'translateY(0)' : 'translateY(calc(100% - 4px))',
       }}
     >
-      <ul className={`pointer-events-auto mx-auto grid ${navItems.length <= 2 ? 'grid-cols-2' : navItems.length === 3 ? 'grid-cols-3' : navItems.length === 4 ? 'grid-cols-4' : 'grid-cols-5'} gap-1 w-full max-w-lg sm:max-w-xl md:max-w-2xl rounded-t-3xl border-t border-x border-slate-200/40 bg-white/72 p-1.5 pb-[max(env(safe-area-inset-bottom),4px)] shadow-[0_-12px_48px_-20px_rgba(15,23,42,0.45)] backdrop-blur-2xl`}>
+      <ul className={`pointer-events-auto mx-auto grid ${navItems.length <= 2 ? 'grid-cols-2' : navItems.length === 3 ? 'grid-cols-3' : navItems.length === 4 ? 'grid-cols-4' : 'grid-cols-5'} gap-0.5 w-full max-w-lg sm:max-w-xl md:max-w-2xl border-t border-slate-200/60 bg-white/95 px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)] shadow-[0_-8px_32px_-16px_rgba(15,23,42,0.18)] backdrop-blur-xl`}>
         {navItems.map((item) => {
           const Icon = item.icon;
+          const isLogout = item.id === 'logout';
           return (
             <li key={item.id}>
               <button
                 type="button"
                 onClick={item.onClick}
-                className={`w-full min-h-12 rounded-xl py-1 text-[8px] font-black uppercase tracking-[0.1em] flex flex-col items-center justify-center gap-0.5 transition ${
-                  item.active
-                    ? 'shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)]'
-                    : 'bg-transparent text-slate-500 hover:bg-slate-100/80 hover:text-slate-800'
+                className={`w-full flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-[9px] font-bold uppercase tracking-[0.08em] transition-all active:scale-95 ${
+                  item.active ? '' : isLogout ? 'text-rose-400' : 'text-slate-400'
                 }`}
-                style={item.active ? { backgroundColor: activePillColor, color: activeTextColor } : undefined}
+                style={item.active ? { color: activeTextColor } : undefined}
               >
                 <span
-                  className={`relative inline-flex h-6 w-6 items-center justify-center rounded-full ${
-                    item.active ? '' : 'bg-slate-100 text-slate-600'
+                  className={`relative inline-flex h-8 w-8 items-center justify-center rounded-2xl transition-all ${
+                    item.active ? '' : isLogout ? 'text-rose-400' : 'text-slate-400'
                   }`}
-                  style={item.active ? { backgroundColor: activeIconBg, color: activeIconColor } : undefined}
+                  style={item.active ? { backgroundColor: activePillColor, color: activeIconBg } : undefined}
                 >
-                  <Icon size={17} weight={item.active ? 'fill' : 'duotone'} />
+                  <Icon size={18} weight={item.active ? 'fill' : 'duotone'} />
                   {item.badge ? (
-                    <span className="absolute -top-2 -right-3 min-w-[18px] h-[18px] rounded-full bg-rose-500 px-1 text-[10px] font-black text-white flex items-center justify-center">
+                    <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 rounded-full bg-rose-500 px-1 text-[9px] font-black text-white flex items-center justify-center">
                       {item.badge}
                     </span>
                   ) : null}
