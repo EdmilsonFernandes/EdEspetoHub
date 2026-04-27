@@ -55,25 +55,25 @@ export function AdminLayout({
     () =>
       (isOperatorUser
         ? [
-            { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
+            { id: 'fila', label: 'Fila ao Vivo', icon: CheckSquare },
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'cardapio', label: 'Loja Online', icon: Package },
             { id: 'condominios', label: 'Condomínios', icon: Buildings },
           ]
         : [
-            { id: 'resumo', label: 'Resumo', icon: ChartBar },
-            { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
-            { id: 'vendas', label: 'Histórico de Pedidos', icon: ClipboardText },
+            { id: 'resumo', label: 'Visão Geral', icon: ChartBar },
+            { id: 'fila', label: 'Fila ao Vivo', icon: CheckSquare },
+            { id: 'vendas', label: 'Histórico de Vendas', icon: ClipboardText },
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'estoque', label: 'Estoque', icon: Package },
-            { id: 'destaques', label: 'Destaques', icon: Star },
+            { id: 'destaques', label: 'Destaques no Hub', icon: Star },
             { id: 'cardapio', label: 'Loja Online', icon: ShoppingCart },
-            { id: 'pagamentos', label: 'Minha assinatura', icon: CreditCard },
+            { id: 'pagamentos', label: 'Minha Assinatura', icon: CreditCard },
             { id: 'gateway', label: 'Pagamentos Online', icon: CreditCard },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
             { id: 'condominios', label: 'Condomínios', icon: Buildings },
             { id: 'usuarios', label: 'Usuários', icon: UsersThree },
-            { id: 'config', label: 'Configurações', icon: Gear },
+            { id: 'config', label: 'Configurações da Loja', icon: Gear },
             { id: 'avaliacoes', label: 'Avaliações', icon: Star },
           ]),
     [isOperatorUser, canUseMotoboys]
@@ -98,15 +98,15 @@ export function AdminLayout({
     const principal = consume('resumo');
     if (principal) sections.push({ type: 'item', item: principal });
     const vendas = ['fila', 'vendas', 'avaliacoes'].map(consume).filter(Boolean);
-    if (vendas.length) sections.push({ type: 'group', id: 'vendas', label: 'Vendas', children: vendas });
+    if (vendas.length) sections.push({ type: 'group', id: 'vendas', label: 'Pedidos e Vendas', children: vendas });
     const catalogo = ['produtos', 'estoque', 'cardapio'].map(consume).filter(Boolean);
-    if (catalogo.length) sections.push({ type: 'group', id: 'catalogo', label: 'Produtos e Loja', children: catalogo });
+    if (catalogo.length) sections.push({ type: 'group', id: 'catalogo', label: 'Cardápio e Loja', children: catalogo });
     const marketing = ['destaques'].map(consume).filter(Boolean);
-    if (marketing.length) sections.push({ type: 'group', id: 'marketing', label: 'Marketing', children: marketing });
+    if (marketing.length) sections.push({ type: 'group', id: 'marketing', label: 'Visibilidade', children: marketing });
     const financeiro = ['pagamentos', 'gateway'].map(consume).filter(Boolean);
-    if (financeiro.length) sections.push({ type: 'group', id: 'financeiro', label: 'Financeiro', children: financeiro });
+    if (financeiro.length) sections.push({ type: 'group', id: 'financeiro', label: 'Plano e Pagamentos', children: financeiro });
     const gestao = ['motoboys', 'condominios', 'usuarios'].map(consume).filter(Boolean);
-    if (gestao.length) sections.push({ type: 'group', id: 'gestao', label: 'Gestão', children: gestao });
+    if (gestao.length) sections.push({ type: 'group', id: 'gestao', label: 'Equipe e Operação', children: gestao });
     const sistema = consume('config');
     if (sistema) sections.push({ type: 'item', item: sistema });
     const leftovers = (mobileNavItems || []).filter((item) => !consumeIds.has(item.id));
@@ -217,7 +217,7 @@ export function AdminLayout({
                   <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[9px] uppercase tracking-[0.22em] text-[#336886]/80 font-bold">Painel</p>
+                  <p className="text-[9px] uppercase tracking-[0.22em] text-[#336886]/80 font-bold truncate">{auth?.store?.name || 'Painel'</p>
                   <p className="text-[13px] font-bold text-white truncate leading-tight">{auth?.user?.fullName || auth?.user?.name || auth?.user?.email || 'Usuário'}</p>
                 </div>
               </div>
