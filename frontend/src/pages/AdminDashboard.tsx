@@ -1205,7 +1205,7 @@ const GatewayView = ({ storeId }) => {
                       if (!storeId) return;
                       setMpActionLoading(true);
                       try {
-                        const data = await storeService.createMercadoPagoConnectUrl(storeId, window.location.href);
+                        const data = await storeService.createMercadoPagoConnectUrl(storeId, window.location.href.replace('https://www.', 'https://'));
                         if (data?.authUrl) window.location.href = data.authUrl;
                       } finally {
                         setMpActionLoading(false);
