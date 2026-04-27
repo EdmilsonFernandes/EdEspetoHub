@@ -39,7 +39,7 @@ yarn-error.log*
 yarn.lock
 
 # Se usar yarn:
-package-lock.json
+# package-lock.json
 
 # ========================
 # Build
