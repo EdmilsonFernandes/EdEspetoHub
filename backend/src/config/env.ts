@@ -103,11 +103,11 @@ export const env = {
     publicKey: process.env.MP_PUBLIC_KEY || '',
     clientId: process.env.MP_CLIENT_ID || '',
     clientSecret: process.env.MP_CLIENT_SECRET || '',
-    oauthRedirectUrl: process.env.MP_OAUTH_REDIRECT_URL || '',
+    oauthRedirectUrl: (process.env.MP_OAUTH_REDIRECT_URL || '').replace('https://www.', 'https://'),
     encryptionKey: process.env.MP_OAUTH_ENCRYPTION_KEY || '',
     webhookSecret: process.env.MP_WEBHOOK_SECRET || '',
     apiBaseUrl: process.env.MP_API_BASE_URL || 'https://api.mercadopago.com',
-    webhookUrl: process.env.MP_WEBHOOK_URL || '',
+    webhookUrl: (process.env.MP_WEBHOOK_URL || '').replace('https://www.', 'https://'),
     debug: process.env.MP_DEBUG === 'true',
   },
   email: {
