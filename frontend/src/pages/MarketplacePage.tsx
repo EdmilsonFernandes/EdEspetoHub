@@ -3764,10 +3764,6 @@ export function MarketplacePage() {
                 </div>
 
                 <div className="mb-4 flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/72 px-3 py-1.5 text-[11px] font-bold text-slate-700 shadow-sm backdrop-blur-md">
-                    <MapPinLine size={12} weight="duotone" className={(activeLocation || activeRegion) ? 'text-emerald-600' : 'text-[#336886]'} />
-                    {isUsingSavedAddressForDiscovery ? 'Endereço principal' : activeLocation ? 'Localização ativa' : 'Busque por cidade'}
-                  </span>
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-[#336886]/12 bg-[#336886]/8 px-3 py-1.5 text-[11px] font-bold text-[#336886] shadow-sm">
                     <Buildings size={12} weight="duotone" />
                     {condominiumPickerCounts.all} condomínio{condominiumPickerCounts.all === 1 ? '' : 's'}
@@ -3775,10 +3771,8 @@ export function MarketplacePage() {
                 </div>
 
                 <div className="relative overflow-hidden rounded-[1.6rem] border border-white/70 bg-white/68 p-1.5 shadow-[0_18px_40px_-28px_rgba(15,23,42,0.28)] ring-1 ring-white/55 backdrop-blur-xl">
-                  <div className="flex items-center gap-3 rounded-[1.25rem] bg-white/72 px-4 py-3">
-                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100/90 text-slate-500">
-                      <MagnifyingGlass size={16} weight="bold" />
-                    </span>
+                  <div className="flex items-center gap-3 rounded-[1.25rem] bg-white/90 px-4 py-3">
+                    <MagnifyingGlass size={16} weight="bold" className="shrink-0 text-slate-400" />
                     <input
                       ref={condominiumSearchInputRef}
                       type="text"
@@ -3796,12 +3790,7 @@ export function MarketplacePage() {
                       >
                         <X size={12} weight="bold" />
                       </button>
-                    ) : (
-                      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/10 bg-[#336886]/6 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">
-                        <MapPinLine size={11} weight="fill" />
-                        Map
-                      </span>
-                    )}
+                    ) : null}
                   </div>
                 </div>
 
