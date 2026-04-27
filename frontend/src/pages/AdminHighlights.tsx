@@ -160,7 +160,7 @@ export function AdminHighlights() {
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'estoque', label: 'Estoque', icon: Package },
             { id: 'cardapio', label: 'Loja Online', icon: BookOpen },
-            { id: 'destaques', label: 'Destaques', icon: Star },
+            { id: 'destaques', label: 'Visibilidade', icon: Star },
             { id: 'pagamentos', label: 'Minha assinatura', icon: CreditCard },
             { id: 'gateway', label: 'Pagamentos Online', icon: PlugsConnected },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
@@ -458,7 +458,7 @@ export function AdminHighlights() {
   };
 
   return (
-    <AdminLayout contextLabel="Destaques" fluid>
+    <AdminLayout contextLabel="Visibilidade" fluid>
       <div
         className={`w-full lg:grid lg:items-start lg:gap-0 ${
           sidebarCompact ? 'lg:grid-cols-[80px_minmax(0,1fr)]' : 'lg:grid-cols-[260px_minmax(0,1fr)]'
@@ -488,11 +488,9 @@ export function AdminHighlights() {
           <section className="rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Hub Já no Caminho</p>
-                <h1 className="text-xl font-black text-slate-900">Destaques patrocinados</h1>
-                <p className="text-sm text-slate-600 mt-1">
-                  A ativação ocorre automaticamente após pagamento confirmado. Validade começa no momento da aprovação do pagamento.
-                </p>
+                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Já no Caminho</p>
+                <h1 className="text-xl font-black text-slate-900">Visibilidade</h1>
+                <p className="text-sm text-slate-600 mt-1">Destaque produtos no Hub e envie push para todos os usuários do app.</p>
               </div>
               <button
                 type="button"

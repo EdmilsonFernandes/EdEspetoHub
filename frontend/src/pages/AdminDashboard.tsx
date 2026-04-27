@@ -1742,7 +1742,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             { id: 'avaliacoes', label: 'Avaliações', icon: Star },
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'estoque', label: 'Estoque', icon: Package },
-            { id: 'destaques', label: 'Destaques', icon: Star },
+            { id: 'destaques', label: 'Visibilidade', icon: Star },
             { id: 'pagamentos', label: 'Minha assinatura', icon: CreditCard },
             { id: 'gateway', label: 'Pagamentos Online', icon: PlugsConnected },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },

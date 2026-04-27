@@ -66,7 +66,7 @@ export function AdminLayout({
             { id: 'vendas', label: 'Histórico de Vendas', icon: ClipboardText },
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'estoque', label: 'Estoque', icon: Package },
-            { id: 'destaques', label: 'Destaques no Hub', icon: Star },
+            { id: 'destaques', label: 'Visibilidade', icon: Star },
             { id: 'cardapio', label: 'Loja Online', icon: ShoppingCart },
             { id: 'pagamentos', label: 'Minha Assinatura', icon: CreditCard },
             { id: 'gateway', label: 'Pagamentos Online', icon: CreditCard },
@@ -241,7 +241,7 @@ export function AdminLayout({
                       key={item.id}
                       type="button"
                       onClick={() => handleNavSelect(item.id)}
-                      className={`w-full min-h-[42px] px-2.5 py-2 rounded-xl text-left text-[13px] font-medium flex items-center justify-between transition-all duration-150 active:scale-[0.98] ${
+                      className={`w-full min-h-[44px] px-3 py-2.5 rounded-xl text-left text-[14px] font-medium flex items-center justify-between transition-all duration-150 active:scale-[0.98] ${
                         item.disabled
                           ? 'bg-violet-500/[0.12] text-violet-300'
                           : isActive
@@ -270,7 +270,7 @@ export function AdminLayout({
                     <button
                       type="button"
                       onClick={() => setMobileOpenGroup((prev) => (prev === section.id ? null : section.id))}
-                      className={`w-full px-2.5 py-1.5 rounded-lg text-left text-[10px] font-black uppercase tracking-[0.18em] flex items-center justify-between transition-colors ${
+                      className={`w-full px-3 py-2 rounded-lg text-left text-[11px] font-black uppercase tracking-[0.14em] flex items-center justify-between transition-colors ${
                         hasActiveChild ? 'text-white' : 'text-slate-400/70 hover:text-slate-200'
                       }`}
                       aria-expanded={isOpen}
@@ -288,7 +288,7 @@ export function AdminLayout({
                               key={item.id}
                               type="button"
                               onClick={() => handleNavSelect(item.id)}
-                              className={`w-full min-h-[40px] px-2.5 py-2 rounded-xl text-left text-[13px] flex items-center justify-between transition-all duration-150 active:scale-[0.98] ${
+                              className={`w-full min-h-[42px] px-3 py-2 rounded-xl text-left text-[14px] flex items-center justify-between transition-all duration-150 active:scale-[0.98] ${
                                 item.disabled
                                   ? 'bg-violet-500/[0.12] text-violet-300 font-medium'
                                   : isActive
