@@ -596,7 +596,7 @@ export function AdminOrders() {
                         <span className="text-slate-400">•</span>
                         <span>{order.phone || 'Sem telefone'}</span>
                       </div>
-                      {order?.payment && order?.paymentMethod === 'MERCADO_PAGO' && (
+                      {order?.paymentMethod === 'MERCADO_PAGO' && (
                         <div className="mt-1">
                           <button
                             type="button"
@@ -741,7 +741,7 @@ export function AdminOrders() {
                               <span className="text-xs text-slate-500 mb-2">
                                 {formatPaymentStatus(order.paymentStatus)}
                               </span>
-                              {order?.payment && order?.paymentMethod === 'MERCADO_PAGO' && (
+                              {order?.paymentMethod === 'MERCADO_PAGO' && (
                                 <button
                                   type="button"
                                   onClick={() => openOrderPayment(order)}
@@ -925,7 +925,7 @@ export function AdminOrders() {
 	                            <span className="text-xs text-slate-500 mb-2">
 	                              {formatPaymentStatus(order.paymentStatus)}
 	                            </span>
-                              {order?.payment && order?.paymentMethod === 'MERCADO_PAGO' && (
+                              {order?.paymentMethod === 'MERCADO_PAGO' && (
                                 <button
                                   type="button"
                                   onClick={() => openOrderPayment(order)}
