@@ -737,7 +737,7 @@ function OrderHelpScreen({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-slate-600 shadow-sm ring-1 ring-slate-200 transition-all active:scale-95"
+            className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-all active:scale-95"
           >
             <ArrowLeft size={20} weight="bold" />
           </button>

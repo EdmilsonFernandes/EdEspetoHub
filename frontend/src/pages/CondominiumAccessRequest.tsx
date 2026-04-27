@@ -100,8 +100,8 @@ export function CondominiumAccessRequest() {
     <AuthLayout>
       <div className="w-full max-w-3xl space-y-4 ds-login-card-enter">
         <div className="text-center">
-          <button type="button" onClick={() => navigate('/condominio/login')} className="mx-auto inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-black text-slate-600 shadow-sm">
-            <ArrowLeft size={14} weight="bold" /> Login do condomínio
+          <button type="button" onClick={() => navigate('/condominio/login')} className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-all active:scale-95">
+            <ArrowLeft size={16} weight="bold" />
           </button>
           <div className="mx-auto mt-4 grid h-[4.75rem] w-[4.75rem] place-items-center overflow-hidden rounded-full border-[4px] border-white bg-white p-0.5 shadow-[0_16px_38px_-18px_rgba(13,79,102,0.5)] ring-1 ring-[#336886]/12">
             <img src="/janocaminho.png" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
