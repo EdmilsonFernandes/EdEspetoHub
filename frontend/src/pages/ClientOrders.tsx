@@ -639,7 +639,7 @@ function OrderCard({
       <div className="flex items-center gap-2 border-t border-slate-100 px-4 py-3">
         {isActive && isDelayed ? (
           <button type="button" onClick={() => onOpenHelp(order)} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl border border-amber-200 bg-amber-50 py-2.5 text-[13px] font-semibold text-amber-700 active:scale-[0.98] transition-transform">
-            <ArrowSquareOut size={14} weight="bold" />
+            <ChatCircleDots size={15} weight="duotone" />
             Falar com a loja
           </button>
         ) : isActive ? (
@@ -648,8 +648,16 @@ function OrderCard({
           </button>
         ) : (
           <>
-            <button type="button" onClick={() => onOpenHelp(order)} className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 active:scale-95 transition-transform">
-              <ArrowSquareOut size={16} weight="bold" />
+            <button
+              type="button"
+              onClick={() => onOpenHelp(order)}
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 active:scale-95 transition-transform"
+              title="Ajuda com este pedido"
+            >
+              <ChatCircleDots size={17} weight="duotone" />
+            </button>
+            <button type="button" onClick={() => onOpenOrder(order.id)} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white py-2.5 text-[13px] font-semibold text-slate-700 active:scale-[0.98] transition-transform">
+              Ver detalhes
             </button>
             {canCancel && (
               <button type="button" onClick={() => onCancelRequest(order)} className="inline-flex flex-1 items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 py-2.5 text-[13px] font-semibold text-rose-600 active:scale-[0.98] transition-transform">
