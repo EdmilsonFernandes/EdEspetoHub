@@ -202,29 +202,29 @@ export function AdminLayout({
       </div>
       <AdminMobileBottomNav />
       {mobileNavOpen && (
-        <div className="lg:hidden fixed inset-0 z-[9999] bg-black/55 backdrop-blur-sm" onClick={() => setMobileNavOpen(false)}>
+        <div className="lg:hidden fixed inset-0 z-[9999] bg-slate-950/40 backdrop-blur-[2px]" onClick={() => setMobileNavOpen(false)}>
           <aside
-            className="h-full w-[85%] max-w-[360px] border-r border-white/[0.07] shadow-[2px_0_40px_rgba(0,0,0,0.55)] px-4 pb-4 flex flex-col"
+            className="h-full w-[85%] max-w-[360px] border-r border-white/[0.1] shadow-[4px_0_32px_rgba(15,23,42,0.5)] px-4 pb-4 flex flex-col"
             style={{
               paddingTop: 'calc(1rem + env(safe-area-inset-top))',
-              background: `linear-gradient(180deg, ${hexToRgba(primaryColor, 0.18)} 0px, #111114 100px, #111114 100%)`,
+              background: `linear-gradient(160deg, #1a3a52 0%, #153A4C 40%, #0f2535 100%)`,
             }}
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex items-center justify-between gap-2 pb-3 border-b border-white/[0.08]">
+            <div className="flex items-center justify-between gap-2 pb-3 border-b border-white/[0.12]">
               <div className="min-w-0 flex items-center gap-2.5">
                 <div className="h-8 w-8 shrink-0 overflow-hidden rounded-[0.6rem] border border-white/15 bg-white/10">
                   <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[9px] uppercase tracking-[0.22em] text-slate-500 font-bold">Painel</p>
-                  <p className="text-[13px] font-bold text-slate-100 truncate leading-tight">{auth?.user?.fullName || auth?.user?.name || auth?.user?.email || 'Usuário'}</p>
+                  <p className="text-[9px] uppercase tracking-[0.22em] text-[#336886]/80 font-bold">Painel</p>
+                  <p className="text-[13px] font-bold text-white truncate leading-tight">{auth?.user?.fullName || auth?.user?.name || auth?.user?.email || 'Usuário'}</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setMobileNavOpen(false)}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.1] bg-white/[0.07] text-slate-400 active:scale-95"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.15] bg-white/[0.1] text-slate-300 active:scale-95"
                 aria-label="Fechar menu"
               >
                 <X size={15} weight="bold" />
@@ -246,7 +246,7 @@ export function AdminLayout({
                           ? 'bg-violet-500/[0.12] text-violet-300'
                           : isActive
                           ? 'text-white font-semibold'
-                          : 'text-slate-400 hover:bg-white/[0.06] hover:text-slate-200'
+                          : 'text-slate-300/80 hover:bg-white/[0.08] hover:text-white'
                       }`}
                       style={isActive && !item.disabled ? { backgroundColor: hexToRgba(primaryColor, 0.18) } : undefined}
                     >
@@ -271,7 +271,7 @@ export function AdminLayout({
                       type="button"
                       onClick={() => setMobileOpenGroup((prev) => (prev === section.id ? null : section.id))}
                       className={`w-full px-2.5 py-1.5 rounded-lg text-left text-[10px] font-black uppercase tracking-[0.18em] flex items-center justify-between transition-colors ${
-                        hasActiveChild ? 'text-slate-200' : 'text-slate-600 hover:text-slate-400'
+                        hasActiveChild ? 'text-white' : 'text-slate-400/70 hover:text-slate-200'
                       }`}
                       aria-expanded={isOpen}
                     >
@@ -279,7 +279,7 @@ export function AdminLayout({
                       <CaretDown size={12} weight="bold" className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
                     </button>
                     {isOpen && (
-                      <div className="space-y-0.5 ml-1 pl-3 border-l border-white/[0.07]">
+                      <div className="space-y-0.5 ml-1 pl-3 border-l border-white/[0.12]">
                         {section.children.map((item: any) => {
                           const Icon = item.icon;
                           const isActive = activeMobileId === item.id;
@@ -293,7 +293,7 @@ export function AdminLayout({
                                   ? 'bg-violet-500/[0.12] text-violet-300 font-medium'
                                   : isActive
                                   ? 'text-white font-semibold'
-                                  : 'text-slate-400 hover:bg-white/[0.06] hover:text-slate-200 font-normal'
+                                  : 'text-slate-300/80 hover:bg-white/[0.08] hover:text-white font-normal'
                               }`}
                               style={isActive && !item.disabled ? { backgroundColor: hexToRgba(primaryColor, 0.18) } : undefined}
                             >
