@@ -198,7 +198,7 @@ export function AdminHighlights() {
     const paymentStatus = String(request?.paymentStatus || '').toUpperCase();
     const status = String(request?.status || '').toUpperCase();
     const terminalStatus = status === 'CANCELLED' || status === 'EXPIRED' || status === 'REJECTED';
-    const shouldStartCountdown = paymentStatus !== 'PAID' && !terminalStatus;
+    const shouldStartCountdown = paymentStatus !== 'PAID' && paymentStatus !== 'FAILED' && paymentStatus !== 'PAYMENT_FAILED' && !terminalStatus;
     setPaymentCountdownMs(shouldStartCountdown ? 5 * 60 * 1000 : 0);
     if (shouldStartCountdown && request?.id) {
       window.setTimeout(() => {
@@ -315,7 +315,7 @@ export function AdminHighlights() {
     const paymentStatus = String(selectedRequest?.paymentStatus || '').toUpperCase();
     const status = String(selectedRequest?.status || '').toUpperCase();
     const terminalStatus = status === 'CANCELLED' || status === 'EXPIRED' || status === 'REJECTED';
-    const shouldPoll = !terminalStatus && paymentStatus !== 'PAID' && paymentCountdownMs > 0;
+    const shouldPoll = !terminalStatus && paymentStatus !== 'PAID' && paymentStatus !== 'FAILED' && paymentStatus !== 'PAYMENT_FAILED' && paymentCountdownMs > 0;
     if (!shouldPoll) return;
     const first = window.setTimeout(() => {
       void refreshSelectedPaymentStatus(true);
