@@ -268,6 +268,12 @@ export function OrderTracking() {
       navigate('/admin/queue');
       return;
     }
+    // Se veio do histórico do cliente, volta para lá
+    const customerSession = typeof window !== 'undefined' ? localStorage.getItem('customerSession') : null;
+    if (customerSession) {
+      navigate('/cliente/pedidos');
+      return;
+    }
     navigate(storeHomePath);
   };
   const storeLogo =
@@ -895,28 +901,23 @@ export function OrderTracking() {
           />
         </div>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-3 py-3 sm:py-3.5">
-            {/* Store identity — also back button */}
-            <button onClick={handleBack} className="flex min-w-0 items-center gap-2.5">
-              <div className="h-9 w-9 shrink-0 overflow-hidden rounded-[0.75rem] border border-white bg-white shadow-[0_8px_18px_-10px_rgba(51,104,134,0.35)]">
+          <div className="flex items-center justify-between gap-3 py-3">
+            <button onClick={handleBack} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-all active:scale-95">
+              <ArrowLeft size={18} weight="bold" />
+            </button>
+            <button onClick={handleBack} className="flex min-w-0 items-center gap-2 text-left">
+              <div className="h-8 w-8 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                 <img src={storeLogo} alt={storeName} className="h-full w-full object-cover" />
               </div>
-              <div className="min-w-0 text-left leading-tight">
-                <p className="truncate text-[13px] font-black text-slate-900 sm:text-[15px]">{storeName}</p>
-                <p className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                  <img src="/janocaminho.jpg" alt="" className="h-[10px] w-[10px] rounded-[0.2rem] object-cover" />
+              <div className="min-w-0 leading-tight">
+                <p className="truncate text-[13px] font-black text-slate-900">{storeName}</p>
+                <p className="flex items-center gap-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  <img src="/janocaminho.jpg" alt="" className="h-[9px] w-[9px] rounded-[0.2rem] object-cover" />
                   Já no Caminho
                 </p>
               </div>
             </button>
-            {/* Voltar */}
-            <button
-              onClick={handleBack}
-              className="flex shrink-0 items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-[12px] font-semibold text-slate-600 shadow-sm transition-all hover:bg-slate-50 active:scale-95"
-            >
-              <ArrowLeft size={13} weight="bold" />
-              Voltar
-            </button>
+            <div className="w-9" />
           </div>
         </div>
       </header>
@@ -1529,10 +1530,10 @@ export function OrderTracking() {
                         window.setTimeout(() => setCtaPulse(false), 220);
                         handleRepeatOrder();
                       }}
-                      className="w-full min-h-[48px] inline-flex items-center justify-center px-3 py-2 rounded-xl border border-slate-200 bg-white shadow-sm text-slate-700 text-sm font-medium hover:bg-slate-50 transition-all duration-200 active:scale-[0.98]"
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3 text-[13px] font-black text-white shadow-[0_8px_20px_-10px_rgba(21,58,76,0.5)] active:scale-[0.98] transition-transform"
                       style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
                     >
-                      Pedir novamente
+                      Pedir de novo
                     </button>
                   )}
                     {order.createdAt ? (
