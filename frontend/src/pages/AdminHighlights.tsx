@@ -190,6 +190,8 @@ export function AdminHighlights() {
   };
 
   const openPayment = (request: any) => {
+    const _status = String(request?.status || '').toUpperCase();
+    if (_status === 'CANCELLED' || _status === 'EXPIRED') return;
     setSelectedRequest(request);
     setSelectedPaymentAudit(null);
     setPaymentOpen(true);
@@ -276,7 +278,7 @@ export function AdminHighlights() {
           showToast('Pagamento confirmado. Seu destaque foi atualizado.', 'success');
         }
         await loadAll();
-
+        closePayment();
       } else if (String(updated?.id || '').trim()) {
         await loadPaymentAudit(String(updated.id), true);
       }
@@ -347,13 +349,7 @@ export function AdminHighlights() {
     closePayment();
   }, [paymentOpen, selectedRequest?.id, selectedRequest?.paymentStatus, paymentCountdownMs]);
 
-  useEffect(() => {
-    if (!paymentOpen || !selectedRequest) return;
-    const paymentStatus = String(selectedRequest?.paymentStatus || '').toUpperCase();
-    if (paymentStatus !== 'PAID') return;
-    setPaymentOpen(false);
-    setSelectedRequest(null);
-  }, [paymentOpen, selectedRequest]);
+  // Removido: useEffect que fechava modal automaticamente ao PAID causava piscar
 
   const handleCreate = async (event: React.FormEvent) => {
     event.preventDefault();
