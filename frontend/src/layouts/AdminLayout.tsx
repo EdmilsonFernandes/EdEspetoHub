@@ -217,7 +217,7 @@ export function AdminLayout({
                   <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[9px] uppercase tracking-[0.22em] text-[#336886]/80 font-bold truncate">{auth?.store?.name || 'Painel'</p>
+                  <p className="text-[9px] uppercase tracking-[0.22em] text-[#336886]/80 font-bold truncate">{auth?.store?.name || 'Painel'}</p>
                   <p className="text-[13px] font-bold text-white truncate leading-tight">{auth?.user?.fullName || auth?.user?.name || auth?.user?.email || 'Usuário'}</p>
                 </div>
               </div>
