@@ -177,8 +177,10 @@ export const bootstrapNativeApp = async () => {
       navigateFromPayload({ url });
     });
     await App.addListener('appStateChange', ({ isActive }) => {
-      if (isActive && MOBILE_PUSH_ENABLED) {
-        syncPushTokenNow();
+      if (isActive) {
+        if (MOBILE_PUSH_ENABLED) syncPushTokenNow();
+        // Disparar evento de reconexão para que as telas recarreguem dados
+        window.dispatchEvent(new CustomEvent('jnc:app-foreground'));
       }
     });
   } catch {

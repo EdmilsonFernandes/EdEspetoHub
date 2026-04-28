@@ -2387,11 +2387,13 @@ export function MarketplacePage() {
     const interval = window.setInterval(refreshIfVisible, 30000);
     window.addEventListener('focus', refreshIfVisible);
     document.addEventListener('visibilitychange', refreshIfVisible);
+    window.addEventListener('jnc:app-foreground', refreshIfVisible as EventListener);
     return () => {
       window.clearTimeout(timer);
       window.clearInterval(interval);
       window.removeEventListener('focus', refreshIfVisible);
       document.removeEventListener('visibilitychange', refreshIfVisible);
+      window.removeEventListener('jnc:app-foreground', refreshIfVisible as EventListener);
     };
   }, [isCustomerLogged, loadActiveOrders]);
 
@@ -3713,7 +3715,6 @@ export function MarketplacePage() {
 
             <div className="relative overflow-x-hidden px-4 pb-6 pt-[max(env(safe-area-inset-top),1rem)]">
               <div className="pointer-events-none absolute -right-12 -top-10 h-56 w-56 rounded-full bg-[#336886]/12 blur-3xl" />
-              <div className="pointer-events-none absolute left-0 top-24 h-40 w-40 rounded-full bg-emerald-300/14 blur-3xl" />
               <div className="pointer-events-none absolute inset-x-4 top-16 h-36 rounded-[2.25rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.62)_0%,rgba(255,255,255,0.2)_100%)] blur-3xl" />
 
               <button

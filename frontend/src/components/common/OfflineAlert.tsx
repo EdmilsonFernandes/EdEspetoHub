@@ -10,6 +10,8 @@ export function OfflineAlert() {
       setIsOffline(false);
       setShowReconnected(true);
       setTimeout(() => setShowReconnected(false), 3000);
+      // Disparar evento para que as telas recarreguem dados após reconexão
+      window.dispatchEvent(new CustomEvent('jnc:app-foreground'));
     };
     const handleOffline = () => {
       setIsOffline(true);

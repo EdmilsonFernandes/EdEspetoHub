@@ -1127,10 +1127,12 @@ export function ClientOrders() {
     const timer = window.setInterval(refreshIfVisible, ACTIVE_REFRESH_MS);
     window.addEventListener('focus', refreshIfVisible);
     document.addEventListener('visibilitychange', refreshIfVisible);
+    window.addEventListener('jnc:app-foreground', refreshIfVisible as EventListener);
     return () => {
       window.clearInterval(timer);
       window.removeEventListener('focus', refreshIfVisible);
       document.removeEventListener('visibilitychange', refreshIfVisible);
+      window.removeEventListener('jnc:app-foreground', refreshIfVisible as EventListener);
     };
   }, [activeOrderIds, activeOrders.length, loadOrders]);
 
