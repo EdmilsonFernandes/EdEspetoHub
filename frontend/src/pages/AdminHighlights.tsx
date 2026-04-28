@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { BookOpen, ChartBar, CheckSquare, ClipboardText, CreditCard, Gear, Package, PlugsConnected, Plus, Scooter, Star, UsersThree } from '@phosphor-icons/react';
+import { BookOpen, ChartBar, CheckCircle, CheckSquare, ClipboardText, CreditCard, Gear, Package, PlugsConnected, Plus, Scooter, Star, UsersThree } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
@@ -620,36 +620,99 @@ export function AdminHighlights() {
             {pushes.length === 0 ? (
               <p className="text-sm text-slate-500">Nenhum push enviado ainda.</p>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {pushes.map((push: any) => {
-                  const statusLabel = push.status === 'PENDING_PAYMENT' ? 'Aguardando pagamento' : push.status === 'PENDING_APPROVAL' ? 'Aguardando aprovação' : push.status === 'SENT' ? 'Enviado' : push.status === 'REJECTED' ? 'Rejeitado' : push.status === 'CANCELLED' ? 'Cancelado' : push.status;
-                  const statusColor = push.status === 'SENT' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : push.status === 'PENDING_APPROVAL' ? 'bg-sky-100 text-sky-700 border-sky-200' : push.status === 'REJECTED' ? 'bg-rose-100 text-rose-700 border-rose-200' : 'bg-slate-100 text-slate-700 border-slate-200';
+                  const isSent = push.status === 'SENT';
+                  const isPendingPayment = push.status === 'PENDING_PAYMENT';
+                  const isPendingApproval = push.status === 'PENDING_APPROVAL';
+                  const isRejected = push.status === 'REJECTED';
+                  const statusLabel = isPendingPayment ? 'Aguardando pagamento' : isPendingApproval ? 'Aguardando aprovação' : isSent ? 'Enviado' : isRejected ? 'Rejeitado' : push.status === 'CANCELLED' ? 'Cancelado' : push.status;
+                  const statusColor = isSent
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    : isPendingApproval
+                    ? 'bg-sky-50 text-sky-700 border-sky-200'
+                    : isRejected
+                    ? 'bg-rose-50 text-rose-700 border-rose-200'
+                    : 'bg-slate-100 text-slate-600 border-slate-200';
+                  const storeLogo = resolveAssetUrl(auth?.store?.settings?.logoUrl || '');
+                  const storeName = String(auth?.store?.name || 'Loja');
                   return (
-                    <div key={push.id} className="rounded-2xl border border-slate-200 bg-slate-50/60 p-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="text-sm font-bold text-slate-900 truncate">{push.title}</p>
-                          <p className="text-xs text-slate-500 mt-0.5 truncate">{push.body}</p>
-                          <p className="text-xs text-slate-400 mt-1">{new Date(push.createdAt).toLocaleString('pt-BR')}</p>
-                          {push.status === 'SENT' && push.sentCount != null && (
-                            <p className="text-xs font-semibold text-emerald-700 mt-1">Enviado para {push.sentCount} usuários</p>
-                          )}
-                          {push.rejectionReason && (
-                            <p className="text-xs text-rose-600 mt-1">Motivo: {push.rejectionReason}</p>
-                          )}
-                        </div>
-                        <div className="flex flex-col items-end gap-1 shrink-0">
-                          <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${statusColor}`}>{statusLabel}</span>
-                          {push.status === 'PENDING_PAYMENT' && (
-                            <button type="button" onClick={() => {
-                              setActivePush(push);
-                              setPushPaymentOpen(true);
-                              if (push.paymentExpiresAt) {
-                                const remaining = Math.max(0, new Date(push.paymentExpiresAt).getTime() - Date.now());
-                                setPushCountdownMs(remaining);
-                              }
-                            }} className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700">Pagar</button>
-                          )}
+                    <div
+                      key={push.id}
+                      className={`relative overflow-hidden rounded-2xl border bg-white shadow-[0_4px_20px_-8px_rgba(15,23,42,0.12)] transition-shadow hover:shadow-[0_8px_28px_-10px_rgba(15,23,42,0.18)] ${
+                        isSent ? 'border-emerald-100' : isPendingPayment ? 'border-amber-100' : 'border-slate-100'
+                      }`}
+                    >
+                      {/* Barra de status no topo */}
+                      <div className={`h-[3px] w-full ${isSent ? 'bg-gradient-to-r from-emerald-400 to-emerald-500' : isPendingApproval ? 'bg-gradient-to-r from-sky-400 to-sky-500' : isPendingPayment ? 'bg-gradient-to-r from-amber-400 to-amber-500' : isRejected ? 'bg-rose-400' : 'bg-slate-200'}`} />
+
+                      <div className="p-4">
+                        <div className="flex items-start gap-3">
+                          {/* Logo da loja */}
+                          <div className="relative shrink-0">
+                            <div className="h-11 w-11 overflow-hidden rounded-2xl border border-slate-100 bg-slate-100 shadow-sm">
+                              {storeLogo ? (
+                                <img src={storeLogo} alt={storeName} className="h-full w-full object-cover" />
+                              ) : (
+                                <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-xs font-black text-white">
+                                  {storeName.slice(0, 2).toUpperCase()}
+                                </div>
+                              )}
+                            </div>
+                            {isSent && (
+                              <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-emerald-500">
+                                <CheckCircle size={9} weight="fill" className="text-white" />
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Conteúdo */}
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-black text-slate-900">{push.title}</p>
+                                <p className="mt-0.5 line-clamp-2 text-xs font-medium leading-5 text-slate-500">{push.body}</p>
+                              </div>
+                              <span className={`shrink-0 inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.1em] ${statusColor}`}>
+                                {statusLabel}
+                              </span>
+                            </div>
+
+                            <div className="mt-2.5 flex flex-wrap items-center gap-3">
+                              {isSent && push.sentCount != null && (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-black text-emerald-700">
+                                  <UsersThree size={12} weight="fill" />
+                                  {push.sentCount} usuários alcançados
+                                </span>
+                              )}
+                              <span className="text-[11px] font-medium text-slate-400">
+                                {new Date(push.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
+
+                            {isRejected && push.rejectionReason && (
+                              <div className="mt-2 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-[11px] font-semibold text-rose-700">
+                                Motivo: {push.rejectionReason}
+                              </div>
+                            )}
+
+                            {isPendingPayment && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setActivePush(push);
+                                  setPushPaymentOpen(true);
+                                  if (push.paymentExpiresAt) {
+                                    const remaining = Math.max(0, new Date(push.paymentExpiresAt).getTime() - Date.now());
+                                    setPushCountdownMs(remaining);
+                                  }
+                                }}
+                                className="mt-2.5 inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-3 py-1.5 text-[12px] font-black text-white shadow-[0_6px_16px_-8px_rgba(245,158,11,0.6)] transition hover:bg-amber-600 active:scale-[0.97]"
+                              >
+                                Pagar agora
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
