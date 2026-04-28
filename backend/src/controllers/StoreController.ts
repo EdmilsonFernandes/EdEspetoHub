@@ -756,6 +756,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
       }
       const store = await storeService.getBySlug(req.params.slug);
       if (!store) return respondWithError(req, res, new AppError('STORE-001', 404), 404);
+      await storeService.ensureStoreCoordinatesWithOpenStreetMap(store);
       const subscription = await subscriptionService.getCurrentByStore(store.id);
       const orderTypes = StoreController.sanitizeOrderTypesByPlan(store.settings?.orderTypes, {
         planName: subscription?.plan?.name,

@@ -38,6 +38,7 @@ export class StoreService
   private subscriptionService = new SubscriptionService();
   private storeRepository = AppDataSource.getRepository(Store);
   private log = logger.child({ scope: 'StoreService' });
+  private nextOpenStreetMapGeocodeAt = 0;
     /**
    * Executes parse number business logic.
    *
@@ -216,6 +217,52 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
     }
   }
 
+  private async waitForOpenStreetMapGeocodeWindow() {
+    const waitMs = Math.max(0, this.nextOpenStreetMapGeocodeAt - Date.now());
+    if (waitMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+    }
+    this.nextOpenStreetMapGeocodeAt = Date.now() + 1100;
+  }
+
+  private async geocodeAddressWithOpenStreetMap(address: string): Promise<{ lat: number; lng: number } | null> {
+    const normalizedAddress = String(address || '').trim();
+    if (!normalizedAddress) return null;
+
+    try {
+      await this.waitForOpenStreetMapGeocodeWindow();
+      const params = new URLSearchParams({
+        format: 'jsonv2',
+        limit: '1',
+        countrycodes: 'br',
+        q: normalizedAddress,
+      });
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`, {
+        headers: {
+          Accept: 'application/json',
+          'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
+          'User-Agent': `JaNoCaminhoStoreMap/1.0 (+${env.appUrl || 'https://janocaminho.com.br'})`,
+        },
+      });
+      if (!response.ok) {
+        this.log.warn('Store geocode via OpenStreetMap failed', {
+          address: normalizedAddress,
+          status: response.status,
+        });
+        return null;
+      }
+      const payload = (await response.json()) as Array<{ lat?: string; lon?: string }>;
+      const candidate = Array.isArray(payload) ? payload[0] : null;
+      const lat = Number(candidate?.lat);
+      const lng = Number(candidate?.lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+      return { lat, lng };
+    } catch (error) {
+      this.log.warn('Store geocode via OpenStreetMap exception', { address: normalizedAddress, error });
+      return null;
+    }
+  }
+
   public async ensureStoreCoordinates(store: Store) {
     if (!store?.id || !store?.settings) return store;
     const currentLat = this.parseCoordinate(store.settings.lat);
@@ -232,6 +279,31 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
     if (!address) return store;
     const geo = await this.geocodeAddress(address);
     if (!geo) return store;
+    store.settings.lat = geo.lat;
+    store.settings.lng = geo.lng;
+    await this.storeRepository.save(store);
+    return store;
+  }
+
+  public async ensureStoreCoordinatesWithOpenStreetMap(store: Store) {
+    if (!store?.id || !store?.settings) return store;
+    const currentLat = this.parseCoordinate(store.settings.lat);
+    const currentLng = this.parseCoordinate(store.settings.lng);
+    if (Number.isFinite(Number(currentLat)) && Number.isFinite(Number(currentLng))) {
+      return store;
+    }
+
+    const address = this.buildGeocodeAddress({
+      address: store.settings.address,
+      city: store.settings.city,
+      state: store.settings.state,
+      fallbackAddress: store.owner?.address,
+    });
+    if (!address) return store;
+
+    const geo = await this.geocodeAddressWithOpenStreetMap(address);
+    if (!geo) return store;
+
     store.settings.lat = geo.lat;
     store.settings.lng = geo.lng;
     await this.storeRepository.save(store);

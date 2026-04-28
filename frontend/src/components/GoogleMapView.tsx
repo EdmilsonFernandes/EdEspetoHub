@@ -1,7 +1,4 @@
-// @ts-nocheck
-import { useEffect, useRef, useState } from 'react';
-import { Loader } from '@googlemaps/js-api-loader';
-import { mapsService } from '../services/mapsService';
+import { useMemo } from 'react';
 
 type MarkerInput = {
   lat: number;
@@ -14,99 +11,80 @@ type GoogleMapViewProps = {
   zoom?: number;
 };
 
-export function GoogleMapView({ markers, zoom = 12 }: GoogleMapViewProps) {
-  const mapRef = useRef<HTMLDivElement | null>(null);
-  const mapInstanceRef = useRef<any>(null);
-  const markersRef = useRef<any[]>([]);
-  const loaderRef = useRef<Loader | null>(null);
-  const [apiKey, setApiKey] = useState<string | null>(
-    import.meta.env.VITE_GOOGLE_MAPS_JS_KEY || null
+const clampCoordinate = (value: number, min: number, max: number) => {
+  if (value < min) return min;
+  if (value > max) return max;
+  return value;
+};
+
+const buildOpenStreetMapEmbedUrl = (markers: MarkerInput[], zoom = 15) => {
+  const safeMarkers = (Array.isArray(markers) ? markers : []).filter(
+    (item) => Number.isFinite(Number(item?.lat)) && Number.isFinite(Number(item?.lng))
   );
+  if (!safeMarkers.length) return null;
 
-  useEffect(() => {
-    if (!apiKey) {
-      let active = true;
-      mapsService.getJsKey().then((key) => {
-        if (active) setApiKey(key);
-      });
-      return () => {
-        active = false;
-      };
-    }
-    return () => {};
-  }, [apiKey]);
+  const lats = safeMarkers.map((item) => Number(item.lat));
+  const lngs = safeMarkers.map((item) => Number(item.lng));
+  const minLat = Math.min(...lats);
+  const maxLat = Math.max(...lats);
+  const minLng = Math.min(...lngs);
+  const maxLng = Math.max(...lngs);
+  const basePadding = safeMarkers.length > 1 ? 0.006 : 0.0035;
+  const latPadding = Math.max((maxLat - minLat) * 0.45, basePadding);
+  const lngPadding = Math.max((maxLng - minLng) * 0.45, basePadding);
+  const south = clampCoordinate(minLat - latPadding, -90, 90);
+  const north = clampCoordinate(maxLat + latPadding, -90, 90);
+  const west = clampCoordinate(minLng - lngPadding, -180, 180);
+  const east = clampCoordinate(maxLng + lngPadding, -180, 180);
+  const primaryMarker = safeMarkers[0];
 
-  useEffect(() => {
-    if (!apiKey) return () => {};
-    let active = true;
-    if (!mapRef.current) return () => {};
+  const params = new URLSearchParams({
+    bbox: `${west.toFixed(6)},${south.toFixed(6)},${east.toFixed(6)},${north.toFixed(6)}`,
+    layer: 'mapnik',
+  });
 
-    if (!loaderRef.current) {
-      loaderRef.current = new Loader({
-        apiKey,
-        version: 'weekly',
-      });
-    }
+  if (safeMarkers.length === 1) {
+    params.set('marker', `${Number(primaryMarker.lat).toFixed(6)},${Number(primaryMarker.lng).toFixed(6)}`);
+  }
 
-    loaderRef.current
-      .load()
-      .then(() => {
-        if (!active || !mapRef.current) return;
-        if (!mapInstanceRef.current) {
-          mapInstanceRef.current = new google.maps.Map(mapRef.current, {
-            center: { lat: markers[0]?.lat || -23.55052, lng: markers[0]?.lng || -46.633308 },
-            zoom,
-            mapTypeControl: false,
-            streetViewControl: false,
-            fullscreenControl: false,
-          });
-        }
+  return {
+    embedUrl: `https://www.openstreetmap.org/export/embed.html?${params.toString()}`,
+    detailsUrl: `https://www.openstreetmap.org/?mlat=${Number(primaryMarker.lat).toFixed(6)}&mlon=${Number(primaryMarker.lng).toFixed(6)}#map=${Math.max(10, Math.min(18, zoom))}/${Number(primaryMarker.lat).toFixed(6)}/${Number(primaryMarker.lng).toFixed(6)}`,
+  };
+};
 
-        markersRef.current.forEach((marker) => marker.setMap(null));
-        markersRef.current = markers.map((item) => {
-          return new google.maps.Marker({
-            position: { lat: item.lat, lng: item.lng },
-            label: item.label,
-            map: mapInstanceRef.current,
-          });
-        });
+export function GoogleMapView({ markers, zoom = 12 }: GoogleMapViewProps) {
+  const mapData = useMemo(() => buildOpenStreetMapEmbedUrl(markers, zoom), [markers, zoom]);
 
-        if (markers.length > 1) {
-          const bounds = new google.maps.LatLngBounds();
-          markers.forEach((item) => bounds.extend({ lat: item.lat, lng: item.lng }));
-          mapInstanceRef.current.fitBounds(bounds, 60);
-        } else if (markers.length === 1) {
-          mapInstanceRef.current.setCenter({ lat: markers[0].lat, lng: markers[0].lng });
-          mapInstanceRef.current.setZoom(zoom);
-        }
-
-        // Ensure map renders after container becomes visible.
-        window.setTimeout(() => {
-          if (mapInstanceRef.current) {
-            google.maps.event.trigger(mapInstanceRef.current, 'resize');
-          }
-        }, 0);
-      })
-      .catch((error) => {
-        console.error('Google Maps load failed', error);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [markers, zoom, apiKey]);
-
-  if (!apiKey) {
+  if (!mapData) {
     return (
-      <div className="w-full min-h-[280px] rounded-2xl border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-sm text-slate-500">
-        Carregando mapa...
+      <div className="flex min-h-[280px] w-full items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 text-sm text-slate-500">
+        Localização indisponível no momento.
       </div>
     );
   }
 
   return (
-    <div className="w-full h-[220px] sm:h-[260px] rounded-2xl overflow-hidden border border-slate-200">
-      <div ref={mapRef} className="w-full h-full" />
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      <div className="h-[220px] w-full sm:h-[260px]">
+        <iframe
+          title="Mapa da loja"
+          src={mapData.embedUrl}
+          className="h-full w-full border-0"
+          loading="lazy"
+        />
+      </div>
+      <div className="flex items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 px-3 py-2 text-[11px] text-slate-500">
+        <span>&copy; OpenStreetMap contributors</span>
+        <a
+          href={mapData.detailsUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="font-semibold text-slate-700 hover:text-slate-900"
+        >
+          Abrir mapa maior
+        </a>
+      </div>
     </div>
   );
 }
