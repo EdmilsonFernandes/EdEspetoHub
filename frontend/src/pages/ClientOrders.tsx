@@ -638,10 +638,17 @@ function OrderCard({
       {/* Rodapé com ações */}
       <div className="flex items-center gap-2 border-t border-slate-100 px-4 py-3">
         {isActive && isDelayed ? (
-          <button type="button" onClick={() => onOpenHelp(order)} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl border border-amber-200 bg-amber-50 py-2.5 text-[13px] font-semibold text-amber-700 active:scale-[0.98] transition-transform">
-            <ChatCircleDots size={15} weight="duotone" />
-            Falar com a loja
-          </button>
+          <>
+            <button type="button" onClick={() => onOpenHelp(order)} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl border border-amber-200 bg-amber-50 py-2.5 text-[13px] font-semibold text-amber-700 active:scale-[0.98] transition-transform">
+              <ChatCircleDots size={15} weight="duotone" />
+              Falar com a loja
+            </button>
+            {canCancel && (
+              <button type="button" onClick={() => onCancelRequest(order)} className="inline-flex flex-1 items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 py-2.5 text-[13px] font-semibold text-rose-600 active:scale-[0.98] transition-transform">
+                Solicitar cancelamento
+              </button>
+            )}
+          </>
         ) : isActive ? (
           <button type="button" onClick={() => onOpenOrder(order.id)} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] py-2.5 text-[13px] font-bold text-white shadow-[0_8px_20px_-10px_rgba(21,58,76,0.5)] active:scale-[0.98] transition-transform">
             Acompanhar pedido
