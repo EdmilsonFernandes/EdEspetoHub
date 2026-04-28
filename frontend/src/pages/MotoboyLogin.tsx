@@ -332,7 +332,7 @@ export function MotoboyLogin() {
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} autoComplete={isNativePlatform ? 'off' : 'on'} className="space-y-5">
+            <form onSubmit={handleSubmit} autoComplete="on" className="space-y-5">
               <div className="flex items-center gap-3 rounded-2xl border border-[#336886]/10 bg-[#336886]/6 px-3.5 py-3 text-left">
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-[#0d4f66] shadow-sm ring-1 ring-[#336886]/10">
                   <Scooter size={22} weight="duotone" />
@@ -391,7 +391,7 @@ export function MotoboyLogin() {
                   <input
                     id="email"
                     name="email"
-                    autoComplete={isNativePlatform ? 'off' : 'username'}
+                    autoComplete="username"
                     type="text"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -409,7 +409,7 @@ export function MotoboyLogin() {
                   <input
                     id="password"
                     name="password"
-                    autoComplete={isNativePlatform ? 'off' : 'current-password'}
+                    autoComplete="current-password"
                     type={showPassword ? 'text' : 'password'}
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}

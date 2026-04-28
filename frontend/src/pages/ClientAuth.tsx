@@ -508,13 +508,13 @@ export function ClientAuth() {
               e.preventDefault();
               submit();
             }}
-            autoComplete={isNativePlatform ? 'off' : 'on'}
+            autoComplete="on"
             className="space-y-3"
           >
             {mode === 'register' && (
               <input
                 name="fullName"
-                autoComplete={isNativePlatform ? 'off' : 'name'}
+                autoComplete="name"
                 autoCapitalize="words"
                 value={form.fullName}
                 onChange={(e) => setForm((p) => ({ ...p, fullName: e.target.value }))}
@@ -525,7 +525,7 @@ export function ClientAuth() {
             {mode === 'register' && (
               <input
                 name="phone"
-                autoComplete={isNativePlatform ? 'off' : 'tel'}
+                autoComplete="tel"
                 inputMode="tel"
                 value={form.phone}
                 onChange={(e) => setForm((p) => ({ ...p, phone: formatPhoneBr(e.target.value) }))}
@@ -536,7 +536,7 @@ export function ClientAuth() {
             <input
               id="email"
               name="email"
-              autoComplete={isNativePlatform ? 'off' : 'email'}
+              autoComplete="email"
               type="email"
               value={form.email}
               onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
@@ -552,7 +552,7 @@ export function ClientAuth() {
               <input
                 id="password"
                 name="password"
-                autoComplete={isNativePlatform ? 'off' : mode === 'register' ? 'new-password' : 'current-password'}
+                autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
                 type={showPassword ? 'text' : 'password'}
                 value={form.password}
                 onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}

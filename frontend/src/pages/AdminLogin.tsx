@@ -397,7 +397,7 @@ export function AdminLogin() {
           </div>
         ) : null}
 
-        <form onSubmit={handleLogin} autoComplete={isNativePlatform ? 'off' : 'on'} className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40">
+        <form onSubmit={handleLogin} autoComplete="on" className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40">
           {biometricAvailable ? (
             <button
               type="button"
@@ -446,7 +446,7 @@ export function AdminLogin() {
               <input
                 id="email"
                 name="email"
-                autoComplete={isNativePlatform ? 'off' : 'username'}
+                autoComplete="username"
                 type="text"
                 value={loginForm.identifier}
                 onChange={e => setLoginForm(prev => ({ ...prev, identifier: e.target.value }))}
@@ -464,7 +464,7 @@ export function AdminLogin() {
               <input
                 id="password"
                 name="password"
-                autoComplete={isNativePlatform ? 'off' : 'current-password'}
+                autoComplete="current-password"
                 type={showPassword ? 'text' : 'password'}
                 value={loginForm.password}
                 onChange={e => setLoginForm(prev => ({ ...prev, password: e.target.value }))}

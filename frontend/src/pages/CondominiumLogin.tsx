@@ -58,7 +58,7 @@ export function CondominiumLogin() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} autoComplete={isNativePlatform ? 'off' : 'on'} className="ds-card-elevated space-y-5 border-white/40 bg-white/84 p-6 shadow-[0_26px_70px_-46px_rgba(15,23,42,0.55)] backdrop-blur-xl sm:p-8">
+        <form onSubmit={handleSubmit} autoComplete="on" className="ds-card-elevated space-y-5 border-white/40 bg-white/84 p-6 shadow-[0_26px_70px_-46px_rgba(15,23,42,0.55)] backdrop-blur-xl sm:p-8">
           <div className="rounded-[1.35rem] border border-[#336886]/10 bg-[#336886]/7 p-4">
             <div className="flex items-center gap-3">
               <span className="grid h-11 w-11 place-items-center rounded-2xl bg-white text-[#336886] shadow-sm">
@@ -77,7 +77,7 @@ export function CondominiumLogin() {
               type="text"
               value={form.email}
               onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
-              autoComplete={isNativePlatform ? 'off' : 'username'}
+              autoComplete="username"
               placeholder="spazio.azuli"
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886] focus:bg-white"
             />
@@ -90,7 +90,7 @@ export function CondominiumLogin() {
                 type={showPassword ? 'text' : 'password'}
                 value={form.password}
                 onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
-                autoComplete={isNativePlatform ? 'off' : 'current-password'}
+                autoComplete="current-password"
                 placeholder="Sua senha"
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 pr-12 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886] focus:bg-white"
               />

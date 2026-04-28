@@ -1105,7 +1105,7 @@ export function SuperAdmin() {
           </div>
           <p className="text-center text-[11px] font-semibold text-slate-500">Acesso Super Admin restrito</p>
 
-          <form onSubmit={handleLogin} autoComplete={isNativePlatform ? 'off' : 'on'} className="login-card-premium p-6 sm:p-7 space-y-3">
+          <form onSubmit={handleLogin} autoComplete="on" className="login-card-premium p-6 sm:p-7 space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-600">
               <ShieldCheck size={14} weight="duotone" />
               Administração da plataforma
@@ -1122,7 +1122,7 @@ export function SuperAdmin() {
               <input
                 id="superadmin-user"
                 name="username"
-                autoComplete={isNativePlatform ? 'off' : 'username'}
+                autoComplete="username"
                 type="text"
                 value={loginForm.email}
                 onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
@@ -1139,7 +1139,7 @@ export function SuperAdmin() {
               <input
                 id="superadmin-password"
                 name="password"
-                autoComplete={isNativePlatform ? 'off' : 'current-password'}
+                autoComplete="current-password"
                 type={showPassword ? 'text' : 'password'}
                 value={loginForm.password}
                 onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
