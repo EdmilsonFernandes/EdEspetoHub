@@ -517,6 +517,60 @@ export function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════════
+          PAGAMENTO ONLINE
+      ══════════════════════════════════════════════════════════════ */}
+      <section className="bg-white py-16 sm:py-20">
+        <div className="mx-auto max-w-4xl px-4 text-center">
+          <p className="text-[11px] font-black uppercase tracking-[0.4em] text-sky-600">Pagamentos online</p>
+          <h2 className="mt-3 text-3xl font-black leading-tight tracking-tight text-slate-950 sm:text-4xl">
+            Cobranças dentro do pedido,<br className="hidden sm:block" /> dinheiro direto na conta da loja.
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-sm font-medium leading-7 text-slate-500 sm:text-base">
+            O lojista conecta a própria conta Mercado Pago via OAuth e libera Pix, crédito e débito no fluxo do pedido. Quem preferir manter atendimento presencial continua operando normalmente.
+          </p>
+
+          {/* Logo + badges */}
+          <div className="mt-8 flex flex-col items-center gap-5">
+            <div className="inline-flex items-center justify-center rounded-[1.5rem] border border-slate-200 bg-white px-6 py-4 shadow-[0_16px_40px_-20px_rgba(0,158,227,0.25)]">
+              <img src={mercadoPagoLandingLogo} alt="Mercado Pago" className="h-10 w-auto object-contain" />
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {[
+                { icon: QrCode, label: 'Pix', color: 'text-emerald-700 border-emerald-200 bg-emerald-50' },
+                { icon: CreditCard, label: 'Crédito', color: 'text-sky-700 border-sky-200 bg-sky-50' },
+                { icon: CurrencyDollar, label: 'Débito', color: 'text-indigo-700 border-indigo-200 bg-indigo-50' },
+                { icon: Storefront, label: 'Presencial', color: 'text-slate-600 border-slate-200 bg-slate-50' },
+              ].map(({ icon: Icon, label, color }) => (
+                <span key={label} className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-black ${color}`}>
+                  <Icon size={13} weight="duotone" />
+                  {label}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Detalhe técnico */}
+          <div className="mx-auto mt-6 flex max-w-sm items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#0d1930,#0b4d72)] text-white">
+              <Lock size={16} weight="duotone" />
+            </div>
+            <p className="text-left text-xs font-semibold leading-5 text-slate-600">
+              Autorização OAuth segura — o dinheiro cai direto na conta do lojista, sem repasse manual.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => navigate('/create?plan=trial')}
+            className="mt-7 inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-7 py-3.5 text-sm font-black text-white shadow-[0_16px_32px_-16px_rgba(15,23,42,0.6)] transition-all hover:scale-[1.01] active:scale-[0.98]"
+          >
+            Ativar minha loja
+            <ArrowRight size={15} weight="bold" />
+          </button>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════
           FEATURES GRID
       ══════════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden bg-slate-950 py-24 sm:py-32">
