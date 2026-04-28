@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { Buildings, CaretDown, CreditCard, CurrencyDollar, DownloadSimple, House, List, MagnifyingGlass, Moon, QrCode, ShieldCheck, SignOut, Storefront, Sun, Truck, X } from '@phosphor-icons/react';
+import { Buildings, CaretDown, CreditCard, CurrencyDollar, GooglePlayLogo, House, List, MagnifyingGlass, Moon, QrCode, ShieldCheck, SignOut, Storefront, Sun, Truck, X } from '@phosphor-icons/react';
 interface LandingPageLayoutProps {
   children: React.ReactNode;
 }
@@ -266,11 +266,11 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                   ) : null}
                 </div>
                 <button
-                  onClick={() => navigate('/instalar')}
+                  onClick={() => window.open('https://play.google.com/store/apps/details?id=com.janocaminho.app', '_blank', 'noopener,noreferrer')}
                   className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium tracking-[-0.02em] text-slate-300 transition-all hover:text-white"
                 >
-                  <DownloadSimple size={16} weight="duotone" className="text-sky-300" />
-                  Instalar app
+                  <GooglePlayLogo size={16} weight="fill" className="text-emerald-400" />
+                  Google Play
                 </button>
               </nav>
             </div>
@@ -357,14 +357,6 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             </button>
             <button
               type="button"
-              onClick={() => navigate('/instalar')}
-              className="w-full inline-flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200"
-            >
-              Instalar app
-              <DownloadSimple size={18} weight="duotone" />
-            </button>
-            <button
-              type="button"
               onClick={() => navigate('/condominio/solicitar')}
               className="w-full inline-flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200"
             >
@@ -390,14 +382,6 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 ))}
               </div>
             </div>
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="w-full inline-flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200"
-            >
-              {theme === 'light' ? 'Modo escuro' : 'Modo claro'}
-              {theme === 'light' ? <Moon size={18} weight="duotone" /> : <Sun size={18} weight="duotone" />}
-            </button>
             {auth && (
               <button
                 type="button"

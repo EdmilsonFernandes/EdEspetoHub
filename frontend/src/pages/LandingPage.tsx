@@ -39,7 +39,6 @@ import { storeService } from '../services/storeService';
 import { customerAccountService } from '../services/customerAccountService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { SocialProofMarquee } from '../components/Landing/SocialProofMarquee';
-import { SegmentPromoCarousel } from '../components/common/SegmentPromoCarousel';
 const mercadoPagoLandingLogo = '/mercado-pago-horizontal.png';
 
 const upsertMeta = (name: string, content: string, attr: 'name' | 'property' = 'name') => {
@@ -439,15 +438,6 @@ export function LandingPage() {
       {featuredStores.length > 0 && <SocialProofMarquee clients={featuredStores} />}
 
       {/* ══════════════════════════════════════════════════════════════
-          SEGMENT PROMO CAROUSEL
-      ══════════════════════════════════════════════════════════════ */}
-      <section className="bg-[linear-gradient(180deg,#edf6ff_0%,#ffffff_100%)] py-12 sm:py-14">
-        <div className="mx-auto max-w-6xl px-4">
-          <SegmentPromoCarousel className="shadow-[0_22px_46px_-34px_rgba(15,23,42,0.42)]" />
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════════════════
           COMO FUNCIONA
       ══════════════════════════════════════════════════════════════ */}
       <section className="border-y border-slate-100 bg-white py-24 sm:py-32">
@@ -726,113 +716,44 @@ export function LandingPage() {
       {/* ══════════════════════════════════════════════════════════════
           HUB DE CONDOMÍNIOS
       ══════════════════════════════════════════════════════════════ */}
-      <section className="overflow-hidden bg-white py-20 sm:py-28">
+      <section className="bg-white py-10 sm:py-12">
         <div className="mx-auto max-w-7xl px-4">
-          <div className="grid items-center gap-12 lg:grid-cols-[0.95fr_1.05fr]">
-
-            {/* Copy */}
-            <div className="space-y-7">
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-emerald-700">
-                <Buildings size={13} weight="duotone" />
-                Comércio hiperlocal
+          <div className="flex flex-col items-start justify-between gap-6 rounded-[2rem] border border-emerald-100 bg-[linear-gradient(135deg,#f0fdf4_0%,#ffffff_60%,#ecfdf5_100%)] p-6 shadow-[0_16px_40px_-24px_rgba(16,185,129,0.2)] sm:flex-row sm:items-center sm:p-8">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
+                <Buildings size={24} weight="duotone" />
               </div>
-              <div className="space-y-4">
-                <h2 className="text-3xl font-black leading-tight tracking-tight text-slate-950 sm:text-5xl">
-                  Sua loja também pode vender dentro de condomínios.
-                </h2>
-                <p className="text-base font-medium leading-relaxed text-slate-600 sm:text-lg">
-                  Feiras, eventos internos e comércios de bairro ganham uma vitrine própria dentro do Hub. O cliente escolhe o condomínio, vê as lojas disponíveis e faz o pedido pelo mesmo fluxo profissional.
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-600">Comércio hiperlocal</p>
+                <h3 className="mt-1 text-lg font-black leading-tight text-slate-950 sm:text-xl">Sua loja também vende dentro de condomínios.</h3>
+                <p className="mt-1.5 max-w-lg text-sm font-medium leading-relaxed text-slate-600">
+                  Feiras, eventos e comércios de bairro ganham vitrine própria no Hub. Cliente escolhe o condomínio e faz o pedido pelo mesmo fluxo.
                 </p>
-              </div>
-
-              <div className="grid gap-2.5 sm:grid-cols-2">
-                {[
-                  'Lojas por condomínio',
-                  'Feiras com curadoria',
-                  'Retirada na barraca',
-                  'Entrega no apartamento',
-                ].map((item) => (
-                  <div key={item} className="flex items-center gap-2.5 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 shadow-sm">
-                    <CheckCircle size={16} weight="fill" className="shrink-0 text-emerald-500" />
-                    <span className="text-sm font-black text-slate-800">{item}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex flex-col gap-3 pt-1 sm:flex-row">
-                <a
-                  href={ctaPrimaryHref}
-                  rel="noreferrer"
-                  className="inline-flex items-center justify-center rounded-2xl bg-slate-950 px-6 py-3.5 text-sm font-black text-white shadow-[0_18px_36px_-18px_rgba(15,23,42,0.8)] transition-all hover:scale-[1.01] active:scale-[0.98]"
-                >
-                  Quero levar para meu condomínio
-                </a>
-                <button
-                  type="button"
-                  onClick={() => navigate('/hub')}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-black text-slate-800 transition-all hover:bg-slate-50 active:scale-[0.98]"
-                >
-                  Ver Hub
-                  <ArrowRight size={15} weight="bold" />
-                </button>
-              </div>
-            </div>
-
-            {/* Visual mock */}
-            <div className="relative">
-              <div className="rounded-[2.25rem] border border-slate-200/80 bg-[linear-gradient(145deg,#f8fafc,#ffffff)] p-4 shadow-[0_32px_64px_-40px_rgba(15,23,42,0.4)] sm:p-5">
-                <div className="rounded-[1.7rem] border border-slate-100 bg-white p-4 shadow-sm">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Comprando na feira</p>
-                      <p className="mt-0.5 text-lg font-black text-slate-950">Condomínio Spazio Campo Azuli</p>
-                    </div>
-                    <span className="rounded-xl bg-[#336886]/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]">Trocar</span>
-                  </div>
-
-                  <div className="mt-4 flex items-center gap-3 rounded-[1.25rem] border border-[#336886]/15 bg-white p-3 shadow-[0_10px_24px_rgba(15,23,42,0.05)]">
-                    <img
-                      src="/uploads/condominiums/azuli.png"
-                      alt="Condomínio Spazio Campo Azuli"
-                      loading="lazy"
-                      className="h-12 w-12 rounded-[1rem] border border-slate-100 object-cover"
-                      onError={(e) => { (e.target as HTMLImageElement).src = '/janocaminho.jpg'; }}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-black text-slate-950">Lojas deste condomínio</p>
-                      <p className="mt-0.5 text-[11px] font-semibold text-slate-500">Feira aberta — pedidos pelo app</p>
-                    </div>
-                    <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-black text-emerald-700">Ativo</span>
-                  </div>
-
-                  <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
-                    {[
-                      { title: 'Churrasquinho', desc: 'Retirar na barraca' },
-                      { title: 'Queijos artesanais', desc: 'Entrega no apartamento' },
-                      { title: 'Verduras frescas', desc: 'Pedido antecipado' },
-                      { title: 'Brechó da Brisa', desc: 'Compra local' },
-                    ].map((item) => (
-                      <div key={item.title} className="rounded-[1.2rem] border border-slate-100 bg-slate-50 p-3">
-                        <p className="text-sm font-black text-slate-900">{item.title}</p>
-                        <p className="mt-0.5 text-[11px] font-semibold text-slate-500">{item.desc}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-3 grid gap-2.5 sm:grid-cols-3">
-                  {[
-                    { value: '1 app', label: 'Hub geral e condomínio' },
-                    { value: '0 atrito', label: 'Cliente escolhe onde está' },
-                    { value: '+vendas', label: 'Comunidade perto da loja' },
-                  ].map((item) => (
-                    <div key={item.label} className="rounded-2xl bg-slate-950 px-4 py-3 text-white">
-                      <p className="text-lg font-black">{item.value}</p>
-                      <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{item.label}</p>
-                    </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {['Lojas por condomínio', 'Retirada na barraca', 'Entrega no apartamento'].map((item) => (
+                    <span key={item} className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white px-3 py-1 text-[11px] font-bold text-emerald-700">
+                      <CheckCircle size={11} weight="fill" />
+                      {item}
+                    </span>
                   ))}
                 </div>
               </div>
+            </div>
+            <div className="flex shrink-0 flex-col gap-2 sm:items-end">
+              <a
+                href="/condominio/solicitar"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-[0_12px_28px_-14px_rgba(15,23,42,0.6)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                Quero para meu condomínio
+                <ArrowRight size={14} weight="bold" />
+              </a>
+              <button
+                type="button"
+                onClick={() => navigate('/hub')}
+                className="inline-flex items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Ver Hub
+              </button>
             </div>
           </div>
         </div>
