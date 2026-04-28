@@ -1233,7 +1233,11 @@ export function ClientOrders() {
             >
               <ArrowLeft size={18} weight="bold" />
             </button>
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center gap-0.5">
+              <div className="flex items-center gap-1.5">
+                <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-5 w-5 rounded-[0.45rem] object-cover shadow-sm" />
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Histórico</p>
+              </div>
               <h1 className="text-[15px] font-black text-slate-900">Meus pedidos</h1>
               {activeOrders.length > 0 && (
                 <span className="mt-0.5 inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">

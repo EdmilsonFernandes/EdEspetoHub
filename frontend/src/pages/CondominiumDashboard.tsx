@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from '@phosphor-icons/react';
 import {
   ArrowSquareOut,
   Buildings,
@@ -377,6 +378,15 @@ export function CondominiumDashboard() {
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#eef5f7_0%,#f8fafc_12rem,#f8fafc_100%)] px-4 py-[max(1.2rem,env(safe-area-inset-top))] text-slate-900">
       <div className="mx-auto max-w-7xl space-y-5">
+        <div className="flex items-center gap-3 mb-3">
+          <button type="button" onClick={() => navigate('/hub')} className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-all active:scale-95">
+            <ArrowLeft size={18} weight="bold" />
+          </button>
+          <div className="flex items-center gap-1.5">
+            <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-5 w-5 rounded-[0.45rem] object-cover shadow-sm" />
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Condomínio</p>
+          </div>
+        </div>
         <header className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white shadow-[0_30px_80px_-52px_rgba(15,23,42,0.45)]">
           <div className="absolute inset-0">
             {bannerUrl ? (
