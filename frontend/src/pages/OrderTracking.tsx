@@ -103,7 +103,63 @@ const buildWhatsAppContactUrl = (phone?: string | null, native = false, message?
     : `https://wa.me/55${normalizedPhone}`;
 };
 
-const buildOrderReceiptItemLine = (item: any) => {
+const RECEIPT_LINE_WIDTH = 32;
+
+const sanitizeReceiptText = (value: unknown) =>
+  String(value ?? '')
+    .replace(/\r/g, ' ')
+    .replace(/\n/g, ' ')
+    .trim();
+
+const wrapReceiptWords = (value: unknown, width = RECEIPT_LINE_WIDTH) => {
+  const text = sanitizeReceiptText(value);
+  if (!text) return [''];
+
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+  let current = '';
+
+  for (const word of words) {
+    if (!current) {
+      current = word.slice(0, width);
+      continue;
+    }
+
+    const candidate = `${current} ${word}`;
+    if (candidate.length <= width) {
+      current = candidate;
+      continue;
+    }
+
+    lines.push(current);
+    current = word.slice(0, width);
+  }
+
+  if (current) lines.push(current);
+  return lines;
+};
+
+const centerReceiptText = (value: unknown, width = RECEIPT_LINE_WIDTH) =>
+  wrapReceiptWords(value, width).map((line) => {
+    if (line.length >= width) return line;
+    const left = Math.floor((width - line.length) / 2);
+    const right = width - line.length - left;
+    return `${' '.repeat(left)}${line}${' '.repeat(right)}`;
+  });
+
+const receiptSeparator = (char = '-', width = RECEIPT_LINE_WIDTH) => char.repeat(width);
+
+const fitReceiptColumns = (left: unknown, right: unknown, width = RECEIPT_LINE_WIDTH) => {
+  const safeLeft = sanitizeReceiptText(left);
+  const safeRight = sanitizeReceiptText(right);
+  if (!safeRight) return safeLeft.slice(0, width);
+
+  const rightWidth = Math.min(12, Math.max(8, safeRight.length));
+  const leftWidth = Math.max(8, width - rightWidth);
+  return `${safeLeft.slice(0, leftWidth).padEnd(leftWidth, '.')} ${safeRight.padStart(rightWidth - 1, ' ')}`;
+};
+
+const buildOrderReceiptItemLines = (item: any) => {
   const quantity = Math.max(1, Number(item?.quantity ?? item?.qty ?? 1));
   const name = String(item?.name || item?.product?.name || 'Item do pedido').trim();
   const detailParts = [];
@@ -114,11 +170,33 @@ const buildOrderReceiptItemLine = (item: any) => {
   const modifiers = formatSelectedModifiers(item?.selectedModifiers || []);
   if (modifiers.length) detailParts.push(`+ ${modifiers.join(', ')}`);
 
-  const unitLabel = Number.isFinite(Number(item?.price))
-    ? ` - ${formatCurrency(Number(item.price))}`
-    : '';
+  const lineTotalValue = Number(item?.lineTotal ?? item?.price ?? 0);
+  const lineTotalLabel =
+    Number.isFinite(lineTotalValue) && lineTotalValue > 0
+      ? formatCurrency(lineTotalValue)
+      : '';
 
-  return `${quantity}x ${name}${detailParts.length ? ` (${detailParts.join(' • ')})` : ''}${unitLabel}`;
+  const leftWidth = lineTotalLabel
+    ? Math.max(8, RECEIPT_LINE_WIDTH - Math.min(12, Math.max(8, lineTotalLabel.length)))
+    : RECEIPT_LINE_WIDTH;
+
+  const nameLines = wrapReceiptWords(`${quantity}x ${name}`, leftWidth);
+  const lines = nameLines.slice(0, -1);
+  const lastNameLine = nameLines[nameLines.length - 1] || '';
+
+  if (lineTotalLabel) {
+    lines.push(fitReceiptColumns(lastNameLine, lineTotalLabel));
+  } else {
+    lines.push(lastNameLine);
+  }
+
+  if (detailParts.length) {
+    wrapReceiptWords(detailParts.join(' | '), RECEIPT_LINE_WIDTH - 4).forEach((line, index) => {
+      lines.push(index === 0 ? `  - ${line}` : `    ${line}`);
+    });
+  }
+
+  return lines;
 };
 
 const buildOrderWhatsappReceiptMessage = ({
@@ -148,39 +226,52 @@ const buildOrderWhatsappReceiptMessage = ({
   addressLabel?: string;
   condominiumLabel?: string;
 }) => {
-  const lines = [
-    `Olá, ${storeName}!`,
-    '',
-    'Segue o resumo do pedido para facilitar o atendimento:',
-    '',
-    'COMPROVANTE DO PEDIDO',
-    `Loja: ${storeName}`,
-    `Cliente: ${customerName}`,
-    `Pedido: #${orderDisplayId}`,
-    `Data: ${orderCreatedAtLabel || '-'}`,
-    `Status: ${statusLabel}`,
-    `Atendimento: ${typeLabel}`,
-    paymentLabel ? `Pagamento: ${paymentLabel}` : '',
-    condominiumLabel ? `Local: ${condominiumLabel}` : '',
-    addressLabel ? `Endereco: ${addressLabel}` : '',
-    '',
-    'Itens:',
+  const receiptLines = [
+    receiptSeparator('='),
+    ...centerReceiptText('COMPROVANTE DO PEDIDO'),
+    ...centerReceiptText(String(storeName || '').toUpperCase()),
+    receiptSeparator('='),
+    ...wrapReceiptWords(`PEDIDO: #${orderDisplayId}`),
+    ...wrapReceiptWords(`CLIENTE: ${customerName}`),
+    ...wrapReceiptWords(`DATA: ${orderCreatedAtLabel || '-'}`),
+    ...wrapReceiptWords(`STATUS: ${statusLabel}`),
+    ...wrapReceiptWords(`ATENDIMENTO: ${typeLabel}`),
+    ...(paymentLabel ? wrapReceiptWords(`PAGAMENTO: ${paymentLabel}`) : []),
+    ...(condominiumLabel ? wrapReceiptWords(`LOCAL: ${condominiumLabel}`) : []),
+    ...(addressLabel ? wrapReceiptWords(`ENDERECO: ${addressLabel}`) : []),
+    receiptSeparator(),
+    'ITENS',
+    receiptSeparator(),
   ];
 
   if (Array.isArray(items) && items.length > 0) {
     items.forEach((item) => {
-      lines.push(`- ${buildOrderReceiptItemLine(item)}`);
+      receiptLines.push(...buildOrderReceiptItemLines(item), '');
     });
   } else {
-    lines.push('- Itens indisponiveis no momento');
+    receiptLines.push('Itens indisponiveis no momento', '');
   }
 
-  lines.push('', `Total: ${totalLabel}`);
+  receiptLines.push(receiptSeparator());
 
   if (deliveryFeeLabel) {
-    lines.push(`Frete: ${deliveryFeeLabel}`);
+    receiptLines.push(fitReceiptColumns('FRETE:', deliveryFeeLabel));
   }
 
+  receiptLines.push(
+    fitReceiptColumns('TOTAL:', totalLabel),
+    receiptSeparator('=')
+  );
+
+  const lines = [
+    `Ola, ${storeName}!`,
+    '',
+    'Segue o cupom do meu pedido para facilitar o atendimento:',
+    '',
+    '```',
+    ...receiptLines,
+    '```',
+  ];
   lines.push('', 'Pode me ajudar com esse pedido?');
 
   return lines.filter(Boolean).join('\n');
