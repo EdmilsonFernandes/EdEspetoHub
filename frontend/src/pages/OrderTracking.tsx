@@ -3,7 +3,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowClockwise, Bicycle, CheckCircle, Clock, CircleNotch, MapPin, Package, Phone, SealCheck, Star, User, WhatsappLogo } from '@phosphor-icons/react';
 import { Capacitor } from '@capacitor/core';
-import { Browser } from '@capacitor/browser';
 import { orderService } from '../services/orderService';
 import { mapsService } from '../services/mapsService';
 import { formatAddress, formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId } from '../utils/format';
@@ -80,6 +79,111 @@ const addBusinessDays = (startDate: Date, businessDays: number) => {
     if (day !== 0 && day !== 6) added += 1;
   }
   return result;
+};
+
+const normalizeWhatsAppPhone = (phone?: string | null) =>
+  String(phone || '').replace(/\D/g, '').replace(/^55/, '');
+
+const buildWhatsAppContactUrl = (phone?: string | null, native = false, message?: string) => {
+  const normalizedPhone = normalizeWhatsAppPhone(phone);
+  if (!normalizedPhone) return '';
+
+  const encodedMessage = String(message || '').trim()
+    ? encodeURIComponent(String(message || '').trim())
+    : '';
+
+  if (native) {
+    return encodedMessage
+      ? `whatsapp://send?phone=55${normalizedPhone}&text=${encodedMessage}`
+      : `whatsapp://send?phone=55${normalizedPhone}`;
+  }
+
+  return encodedMessage
+    ? `https://wa.me/55${normalizedPhone}?text=${encodedMessage}`
+    : `https://wa.me/55${normalizedPhone}`;
+};
+
+const buildOrderReceiptItemLine = (item: any) => {
+  const quantity = Math.max(1, Number(item?.quantity ?? item?.qty ?? 1));
+  const name = String(item?.name || item?.product?.name || 'Item do pedido').trim();
+  const detailParts = [];
+
+  if (item?.cookingPoint) detailParts.push(String(item.cookingPoint).trim());
+  if (item?.passSkewer) detailParts.push('passar farinha');
+
+  const modifiers = formatSelectedModifiers(item?.selectedModifiers || []);
+  if (modifiers.length) detailParts.push(`+ ${modifiers.join(', ')}`);
+
+  const unitLabel = Number.isFinite(Number(item?.price))
+    ? ` - ${formatCurrency(Number(item.price))}`
+    : '';
+
+  return `${quantity}x ${name}${detailParts.length ? ` (${detailParts.join(' • ')})` : ''}${unitLabel}`;
+};
+
+const buildOrderWhatsappReceiptMessage = ({
+  storeName,
+  customerName,
+  orderDisplayId,
+  orderCreatedAtLabel,
+  statusLabel,
+  typeLabel,
+  paymentLabel,
+  items,
+  totalLabel,
+  deliveryFeeLabel,
+  addressLabel,
+  condominiumLabel,
+}: {
+  storeName: string;
+  customerName: string;
+  orderDisplayId: string;
+  orderCreatedAtLabel?: string;
+  statusLabel: string;
+  typeLabel: string;
+  paymentLabel?: string;
+  items: any[];
+  totalLabel: string;
+  deliveryFeeLabel?: string;
+  addressLabel?: string;
+  condominiumLabel?: string;
+}) => {
+  const lines = [
+    `Olá, ${storeName}!`,
+    '',
+    'Segue o resumo do pedido para facilitar o atendimento:',
+    '',
+    'COMPROVANTE DO PEDIDO',
+    `Loja: ${storeName}`,
+    `Cliente: ${customerName}`,
+    `Pedido: #${orderDisplayId}`,
+    `Data: ${orderCreatedAtLabel || '-'}`,
+    `Status: ${statusLabel}`,
+    `Atendimento: ${typeLabel}`,
+    paymentLabel ? `Pagamento: ${paymentLabel}` : '',
+    condominiumLabel ? `Local: ${condominiumLabel}` : '',
+    addressLabel ? `Endereco: ${addressLabel}` : '',
+    '',
+    'Itens:',
+  ];
+
+  if (Array.isArray(items) && items.length > 0) {
+    items.forEach((item) => {
+      lines.push(`- ${buildOrderReceiptItemLine(item)}`);
+    });
+  } else {
+    lines.push('- Itens indisponiveis no momento');
+  }
+
+  lines.push('', `Total: ${totalLabel}`);
+
+  if (deliveryFeeLabel) {
+    lines.push(`Frete: ${deliveryFeeLabel}`);
+  }
+
+  lines.push('', 'Pode me ajudar com esse pedido?');
+
+  return lines.filter(Boolean).join('\n');
 };
 
 function TrackingMetaCard({
@@ -364,11 +468,13 @@ export function OrderTracking() {
   const canRateDelivery = Boolean(reviewState?.features?.deliveryFeedbackEnabled ?? reviewState?.isDelivery ?? isDelivery);
   const canUseTipFlow = Boolean(reviewState?.features?.tipEnabled ?? canRateDelivery);
   const storePhone = order?.store?.phone;
+  const customerName = String(order?.customerName || order?.customer?.name || order?.customer?.fullName || 'Cliente').trim();
   const paymentValue = order?.paymentMethod || order?.payment;
   const paymentMeta = paymentValue ? getPaymentMethodMeta(paymentValue) : null;
   const normalizedPaymentMethod = String(paymentValue || '').trim().toLowerCase();
   const orderDisplayId = formatOrderDisplayId(order?.id, storeSlug) || String(order?.id || '-');
   const orderCreatedAtLabel = order?.createdAt ? formatDateTime(order.createdAt) : '';
+  const deliveryAddressLabel = isDelivery ? formatAddress(order.address || order.deliveryAddress) : '';
   const pixKey =
     order?.store?.settings?.pixKey ||
     order?.pixKey ||
@@ -467,6 +573,44 @@ export function OrderTracking() {
     cashTenderedValue !== null
       ? Math.max(0, Number(cashTenderedValue) - Number(order?.total || 0))
       : null;
+  const whatsappPaymentLabel = paymentMeta?.label
+    ? `${paymentMeta.label}${isPaymentApproved ? ' (confirmado)' : ''}`
+    : '';
+  const whatsappCondominiumLabel = isCondominiumOrder
+    ? [
+        condominiumOrder?.condominiumName || (order as any)?.condominiumName,
+        condominiumFulfillmentLabel,
+      ].filter(Boolean).join(' - ')
+    : '';
+  const whatsappReceiptMessage = useMemo(() => {
+    return buildOrderWhatsappReceiptMessage({
+      storeName,
+      customerName,
+      orderDisplayId,
+      orderCreatedAtLabel,
+      statusLabel,
+      typeLabel,
+      paymentLabel: whatsappPaymentLabel,
+      items: Array.isArray(order?.items) ? order.items : [],
+      totalLabel: formatCurrency(order?.total || 0),
+      deliveryFeeLabel: deliveryFeeValue !== null ? formatCurrency(deliveryFeeValue) : '',
+      addressLabel: deliveryAddressLabel,
+      condominiumLabel: whatsappCondominiumLabel,
+    });
+  }, [
+    customerName,
+    deliveryAddressLabel,
+    deliveryFeeValue,
+    order?.items,
+    order?.total,
+    orderCreatedAtLabel,
+    orderDisplayId,
+    statusLabel,
+    storeName,
+    typeLabel,
+    whatsappCondominiumLabel,
+    whatsappPaymentLabel,
+  ]);
   const routeDurationMinutes = useMemo(() => {
     const routeDuration = Number(deliveryRoute?.durationMin || 0);
     if (Number.isFinite(routeDuration) && routeDuration > 0) return Math.round(routeDuration);
@@ -548,16 +692,15 @@ export function OrderTracking() {
     }
     return null;
   }, [isDelivery, isReady, isPostalDelivery, postalExpectedDeliveryDate, routeEtaRemainingMinutes, remainingEstimateMinutes]);
-  const storeWhatsappLink = storePhone
-    ? `https://wa.me/55${String(storePhone || '').replace(/\D/g, '').replace(/^55/, '')}`
-    : '';
+  const storeWhatsappLink = buildWhatsAppContactUrl(storePhone, false, whatsappReceiptMessage);
+  const storeWhatsappNativeLink = buildWhatsAppContactUrl(storePhone, true, whatsappReceiptMessage);
   const openWhatsApp = () => {
     if (!storeWhatsappLink) return;
-    if (Capacitor.isNativePlatform()) {
-      void Browser.open({ url: storeWhatsappLink });
-    } else {
-      window.open(storeWhatsappLink, '_blank', 'noopener,noreferrer');
+    if (Capacitor.isNativePlatform() && storeWhatsappNativeLink) {
+      window.location.href = storeWhatsappNativeLink;
+      return;
     }
+    window.open(storeWhatsappLink, '_blank', 'noopener,noreferrer');
   };
   const handleRepeatOrder = () => {
     if (!storeSlug || !order?.items?.length) return;
@@ -1971,5 +2114,3 @@ export function OrderTracking() {
     </div>
   );
 }
-
-
