@@ -159,7 +159,7 @@ const fitReceiptColumns = (left: unknown, right: unknown, width = RECEIPT_LINE_W
   return `${safeLeft.slice(0, leftWidth).padEnd(leftWidth, '.')} ${safeRight.padStart(rightWidth - 1, ' ')}`;
 };
 
-const buildOrderReceiptItemLines = (item: any) => {
+const buildOrderWhatsappHighlightItemLines = (item: any) => {
   const quantity = Math.max(1, Number(item?.quantity ?? item?.qty ?? 1));
   const name = String(item?.name || item?.product?.name || 'Item do pedido').trim();
   const detailParts = [];
@@ -176,24 +176,12 @@ const buildOrderReceiptItemLines = (item: any) => {
       ? formatCurrency(lineTotalValue)
       : '';
 
-  const leftWidth = lineTotalLabel
-    ? Math.max(8, RECEIPT_LINE_WIDTH - Math.min(12, Math.max(8, lineTotalLabel.length)))
-    : RECEIPT_LINE_WIDTH;
-
-  const nameLines = wrapReceiptWords(`${quantity}x ${name}`, leftWidth);
-  const lines = nameLines.slice(0, -1);
-  const lastNameLine = nameLines[nameLines.length - 1] || '';
-
-  if (lineTotalLabel) {
-    lines.push(fitReceiptColumns(lastNameLine, lineTotalLabel));
-  } else {
-    lines.push(lastNameLine);
-  }
+  const lines = [
+    `• *${quantity}x ${name}*${lineTotalLabel ? ` - ${lineTotalLabel}` : ''}`,
+  ];
 
   if (detailParts.length) {
-    wrapReceiptWords(detailParts.join(' | '), RECEIPT_LINE_WIDTH - 4).forEach((line, index) => {
-      lines.push(index === 0 ? `  - ${line}` : `    ${line}`);
-    });
+    lines.push(`  ${detailParts.join(' | ')}`);
   }
 
   return lines;
@@ -240,17 +228,9 @@ const buildOrderWhatsappReceiptMessage = ({
     ...(condominiumLabel ? wrapReceiptWords(`LOCAL: ${condominiumLabel}`) : []),
     ...(addressLabel ? wrapReceiptWords(`ENDERECO: ${addressLabel}`) : []),
     receiptSeparator(),
-    'ITENS',
-    receiptSeparator(),
+    ...wrapReceiptWords(`ITENS: ${Array.isArray(items) ? items.length : 0}`),
+    ...wrapReceiptWords('DETALHES COMPLETOS LOGO ABAIXO'),
   ];
-
-  if (Array.isArray(items) && items.length > 0) {
-    items.forEach((item) => {
-      receiptLines.push(...buildOrderReceiptItemLines(item), '');
-    });
-  } else {
-    receiptLines.push('Itens indisponiveis no momento', '');
-  }
 
   receiptLines.push(receiptSeparator());
 
@@ -272,6 +252,17 @@ const buildOrderWhatsappReceiptMessage = ({
     ...receiptLines,
     '```',
   ];
+
+  lines.push('', '*ITENS DO PEDIDO*');
+
+  if (Array.isArray(items) && items.length > 0) {
+    items.forEach((item) => {
+      lines.push(...buildOrderWhatsappHighlightItemLines(item));
+    });
+  } else {
+    lines.push('• *Itens indisponiveis no momento*');
+  }
+
   lines.push('', 'Pode me ajudar com esse pedido?');
 
   return lines.filter(Boolean).join('\n');
