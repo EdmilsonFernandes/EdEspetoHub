@@ -1495,62 +1495,71 @@ export function OrderTracking() {
                       </span>
                     )}
                   </div>
-                  <div className="space-y-3 text-sm text-slate-600">
+                  <div className="space-y-2 text-sm text-slate-600">
                     {itemsToRender.map((item) => (
-                      <div key={item.id || item.productId} className="flex items-center justify-between gap-3 rounded-2xl border border-amber-100/80 bg-white/92 px-3 py-2.5 shadow-[0_12px_24px_-24px_rgba(120,53,15,0.14)]">
-                        <div className="flex items-center gap-3 min-w-0">
-                          {item.imageUrl || item.image || item.product?.imageUrl ? (
-                            <img
-                              src={resolveAssetUrl(item.imageUrl || item.image || item.product?.imageUrl)}
-                              alt={item.name}
-                              className="h-11 w-11 rounded-full border border-amber-100 object-cover transition-opacity duration-300"
-                            />
-                          ) : (
-                            <div className="flex h-11 w-11 items-center justify-center rounded-full border border-amber-100 bg-amber-50 text-xs text-amber-700">
-                              🍖
-                            </div>
-                          )}
-                          <div className="flex flex-col min-w-0">
-                            <span className="break-words font-semibold text-stone-900">
-                              <span className="mr-1.5 inline-flex min-w-[28px] items-center justify-center rounded-md border border-amber-100 bg-amber-50 px-2 py-0.5 text-xs font-bold text-amber-800">
-                                {item.quantity}x
-                              </span>
-                              {item.name}
+                      <div key={item.id || item.productId} className="flex items-start gap-3 rounded-2xl border border-amber-100/80 bg-white/92 px-3 py-3 shadow-[0_12px_24px_-24px_rgba(120,53,15,0.14)]">
+                        {/* Imagem */}
+                        {item.imageUrl || item.image || item.product?.imageUrl ? (
+                          <img
+                            src={resolveAssetUrl(item.imageUrl || item.image || item.product?.imageUrl)}
+                            alt={item.name}
+                            className="h-10 w-10 shrink-0 rounded-xl border border-amber-100 object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-100 bg-amber-50 text-base">
+                            🍖
+                          </div>
+                        )}
+
+                        {/* Nome + badges */}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="shrink-0 rounded-md border border-amber-100 bg-amber-50 px-1.5 py-0.5 text-[11px] font-black text-amber-800">
+                              {item.quantity}x
                             </span>
-                            <div className="flex flex-wrap gap-1 mt-1">
+                            <span className="font-semibold leading-snug text-stone-900">{item.name}</span>
+                          </div>
+                          {(item?.cookingPoint || item?.passSkewer || formatSelectedModifiers(item?.selectedModifiers || []).length > 0) && (
+                            <div className="mt-1.5 flex flex-wrap gap-1">
                               {item?.cookingPoint && (
-                                <span className="rounded-full border border-amber-100 bg-amber-50/65 px-2 py-0.5 text-xs font-medium text-stone-600">
+                                <span className="rounded-full border border-amber-100 bg-amber-50/65 px-2 py-0.5 text-[11px] font-medium text-stone-500">
                                   {item.cookingPoint}
                                 </span>
                               )}
                               {item?.passSkewer && (
-                                <span className="rounded-full border border-amber-100 bg-amber-50/65 px-2 py-0.5 text-xs font-medium text-stone-600">
+                                <span className="rounded-full border border-amber-100 bg-amber-50/65 px-2 py-0.5 text-[11px] font-medium text-stone-500">
                                   passar farinha
                                 </span>
                               )}
                               {formatSelectedModifiers(item?.selectedModifiers || []).map((modifierName) => (
                                 <span
                                   key={`${item.id || item.productId}-${modifierName}`}
-                                  className="rounded-full border border-amber-100 bg-amber-50/65 px-2 py-0.5 text-xs font-medium text-stone-600"
+                                  className="rounded-full border border-amber-100 bg-amber-50/65 px-2 py-0.5 text-[11px] font-medium text-stone-500"
                                 >
                                   + {modifierName}
                                 </span>
                               ))}
                             </div>
-                          </div>
+                          )}
                         </div>
-                        {item.originalPrice && Number(item.originalPrice) > Number(item.price) ? (
-                          <span className="flex flex-col items-end gap-0.5 flex-shrink-0">
-                            <span className="text-[11px] line-through text-slate-400">
-                              {formatCurrency(Number(item.originalPrice) * (item.quantity || 1))}
-                            </span>
-                            <span className="font-semibold text-emerald-600 tracking-tight">
-                              {formatCurrency(Number(item.price))}
-                            </span>
-                          </span>
-                        ) : (
-                          <span className="font-semibold text-slate-800 tracking-tight flex-shrink-0">R$ {Number(item.price).toFixed(2)}</span>
-                        )}
+
+                        {/* Preço */}
+                        <div className="shrink-0 text-right">
+                          {item.originalPrice && Number(item.originalPrice) > Number(item.price) ? (
+                            <>
+                              <p className="text-[11px] leading-none line-through text-slate-400">
+                                {formatCurrency(Number(item.originalPrice) * (item.quantity || 1))}
+                              </p>
+                              <p className="mt-0.5 text-sm font-black text-emerald-600">
+                                {formatCurrency(Number(item.price))}
+                              </p>
+                            </>
+                          ) : (
+                            <p className="text-sm font-black text-stone-800">
+                              {formatCurrency(Number(item.price) * (item.quantity || 1))}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
