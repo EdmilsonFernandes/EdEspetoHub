@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Capacitor } from '@capacitor/core';
 import { ArrowSquareOut, Check, Eye, EyeSlash, LockKey, Scooter, ShieldCheck, SignOut, UserCircle, WarningCircle, WhatsappLogo } from '@phosphor-icons/react';
 import { authService } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
@@ -12,7 +11,6 @@ import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 
 export function MotoboyLogin() {
-  const isNativePlatform = Capacitor.isNativePlatform();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -535,4 +533,3 @@ export function MotoboyLogin() {
   );
 
 }
-
