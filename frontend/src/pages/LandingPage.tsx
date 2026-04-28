@@ -10,7 +10,6 @@ import {
   CreditCard,
   CurrencyDollar,
   Desktop,
-  DeviceMobile,
   EnvelopeSimple,
   Eye,
   EyeSlash,
@@ -65,8 +64,8 @@ const formatPhoneBr = (value: string) => {
 
 export function LandingPage() {
   const navigate = useNavigate();
-  const appStorePreviewSrc = '/marketing/google-play-preview.jpg';
   const googlePlayUrl = 'https://play.google.com/store/apps/details?id=com.janocaminho.app';
+  const googlePlayQrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=4&data=${encodeURIComponent(googlePlayUrl)}`;
   const [featuredStores, setFeaturedStores] = useState<Array<{ id: string; name: string; slug: string; logoUrl?: string | null }>>([]);
   const [showCustomerAuth, setShowCustomerAuth] = useState(false);
   const [hasCustomerSession, setHasCustomerSession] = useState(false);
@@ -903,6 +902,8 @@ export function LandingPage() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(51,104,134,0.16),_transparent_44%)]" />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-slate-300/70 to-transparent" />
         <div className="relative mx-auto max-w-7xl px-4">
+
+          {/* Header */}
           <div className="mb-12 max-w-3xl space-y-3">
             <p className="text-[11px] font-black uppercase tracking-[0.4em] text-[#336886]">App + web hub</p>
             <h2 className="text-3xl font-black leading-tight text-slate-950 sm:text-5xl">
@@ -913,34 +914,38 @@ export function LandingPage() {
             </p>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-            {/* Preview card */}
-            <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_30px_70px_-44px_rgba(15,23,42,0.5)] sm:p-6">
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(95,211,90,0.10),transparent_32%),radial-gradient(circle_at_86%_20%,rgba(51,104,134,0.12),transparent_34%)]" />
-              <div className="relative overflow-hidden rounded-[1.55rem] bg-slate-950 p-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]">
+          <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+
+            {/* Coluna esquerda — imagens reais da Play Store */}
+            <div className="flex flex-col gap-4">
+              {/* Banner do app na Play Store */}
+              <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_30px_70px_-44px_rgba(15,23,42,0.45)]">
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(95,211,90,0.08),transparent_32%),radial-gradient(circle_at_86%_20%,rgba(51,104,134,0.10),transparent_34%)]" />
                 <img
-                  src={appStorePreviewSrc}
+                  src="/marketing/playstore.png"
                   alt="Já no Caminho na Google Play Store"
                   loading="lazy"
-                  className="aspect-[1011/500] w-full rounded-[1.25rem] object-cover"
+                  className="w-full rounded-[2rem] object-cover"
                 />
               </div>
-              <div className="relative mt-5 grid gap-3 sm:grid-cols-3">
-                {[
-                  { icon: GooglePlayLogo, title: 'Google Play', text: 'Disponível agora', highlight: true },
-                  { icon: DeviceMobile, title: 'Android', text: 'Instalação oficial' },
-                  { icon: Desktop, title: 'iPhone e web', text: 'Em breve na App Store' },
-                ].map(({ icon: Icon, title, text, highlight }) => (
-                  <div key={title} className={`rounded-2xl border p-3 ${highlight ? 'border-emerald-200 bg-emerald-50/80' : 'border-slate-100 bg-slate-50/80'}`}>
-                    <Icon size={18} weight="duotone" className={highlight ? 'text-emerald-600' : 'text-[#336886]'} />
-                    <p className="mt-2 text-xs font-black text-slate-950">{title}</p>
-                    <p className={`mt-0.5 text-[11px] font-semibold leading-4 ${highlight ? 'text-emerald-700' : 'text-slate-500'}`}>{text}</p>
-                  </div>
-                ))}
+              {/* Screenshot da página da Play Store */}
+              <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-3 shadow-[0_20px_50px_-30px_rgba(15,23,42,0.35)]">
+                <div className="overflow-hidden rounded-[1.5rem] border border-slate-100">
+                  <img
+                    src="/marketing/playstore-aberto.png"
+                    alt="Página do Já no Caminho na Google Play Store"
+                    loading="lazy"
+                    className="w-full object-cover"
+                  />
+                </div>
+                <div className="mt-3 flex items-center gap-2 px-1">
+                  <GooglePlayLogo size={14} weight="fill" className="text-[#01875f]" />
+                  <span className="text-[11px] font-black text-slate-500 uppercase tracking-[0.18em]">Google Play Store — Oficial</span>
+                </div>
               </div>
             </div>
 
-            {/* CTA card */}
+            {/* Coluna direita — CTA + QR code */}
             <div className="rounded-[2rem] border border-slate-200/80 bg-white/90 p-6 shadow-[0_24px_52px_-30px_rgba(15,23,42,0.32)] backdrop-blur-xl sm:p-8">
               <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-emerald-700">
                 <ShieldCheck size={13} weight="duotone" />
@@ -950,9 +955,10 @@ export function LandingPage() {
                 Um app para comprar, vender e acompanhar pedidos.
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">
-                Baixe agora pelo canal oficial na Google Play. Lojista, cliente e entregador — tudo em um só app.
+                Baixe agora pelo canal oficial. Lojista, cliente e entregador — tudo em um só app.
               </p>
 
+              {/* Botões */}
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 <a
                   href={googlePlayUrl}
@@ -973,6 +979,28 @@ export function LandingPage() {
                 </button>
               </div>
 
+              {/* QR Code */}
+              <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50/80 p-4">
+                <div className="flex items-center gap-4">
+                  <div className="shrink-0 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
+                    <img
+                      src={googlePlayQrSrc}
+                      alt="QR Code para baixar o app na Google Play"
+                      loading="lazy"
+                      className="h-24 w-24 rounded-lg sm:h-28 sm:w-28"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Escaneie para baixar</p>
+                    <p className="mt-1 text-xs leading-5 text-slate-600">Aponte a câmera do celular para o QR code e instale direto pela Google Play.</p>
+                    <div className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-black text-emerald-700">
+                      <GooglePlayLogo size={11} weight="fill" />
+                      Google Play oficial
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Apple badge */}
               <div className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-900">
@@ -988,7 +1016,7 @@ export function LandingPage() {
 
               <ol className="mt-5 space-y-3 text-sm text-slate-600">
                 {[
-                  <span>Android: baixe pelo botão acima ou busque <strong className="font-black text-slate-800">"Já no Caminho"</strong> na Google Play.</span>,
+                  <span>Android: baixe pelo botão acima ou escaneie o QR code.</span>,
                   <span>iPhone: acesse pelo Safari e adicione o Hub à tela inicial.</span>,
                   <span>Lojista e cliente entram pelo mesmo app, cada um com sua área.</span>,
                 ].map((text, i) => (
