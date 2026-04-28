@@ -34,6 +34,7 @@ import { CustomerAccountController } from '../controllers/CustomerAccountControl
 import { FeaturedProductController } from '../controllers/FeaturedProductController';
 import { CondominiumController } from '../controllers/CondominiumController';
 import { StorePaymentAccountController } from '../controllers/StorePaymentAccountController';
+import { MapsController } from '../controllers/MapsController';
 
 import { hydrateAuthOptional, requireAuth, requireRole } from '../middleware/authGuard';
 import { authLoginRateLimit, authRecoveryRateLimit } from '../middleware/rateLimit';
@@ -62,6 +63,8 @@ routes.post('/customer/auth/verify-email-code', authRecoveryRateLimit, CustomerA
 routes.post('/customer/auth/resend-email-code', authRecoveryRateLimit, CustomerAccountController.resendEmailCode);
 routes.get('/addresses/lookup-zip-code/:cep', CustomerAccountController.lookupZipCode);
 routes.get('/public/addresses/lookup-zip-code/:cep', CustomerAccountController.lookupZipCode);
+routes.post('/maps/geocode', MapsController.geocode);
+routes.post('/maps/route', MapsController.route);
 routes.get('/customer/me', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.me);
 routes.patch('/customer/me', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.updateMe);
 routes.patch('/customer/me/deactivate', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.deactivate);

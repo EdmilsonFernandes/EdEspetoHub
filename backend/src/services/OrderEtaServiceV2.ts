@@ -19,6 +19,7 @@ import { OrderEtaEstimate } from '../entities/OrderEtaEstimate';
 import { OrderEtaEstimateRepository } from '../repositories/OrderEtaEstimateRepository';
 import { AppDataSource } from '../config/database';
 import { OrderDelivery } from '../entities/OrderDelivery';
+import { GeoLocationService } from './GeoLocationService';
 
 type MapsCoords = { lat: number; lng: number; formattedAddress?: string };
 type MapsRoute = { distanceKm: number; durationMin: number };
@@ -47,6 +48,7 @@ export class OrderEtaServiceV2 {
   private log = logger.child({ scope: 'OrderEtaServiceV2' });
   private repo = new OrderEtaEstimateRepository();
   private algoVersion = 'eta_v2.0';
+  private geoLocationService = new GeoLocationService();
 
   /**
    * Calculates ETA for an order (V2).
@@ -263,18 +265,15 @@ private resolveRemainingTravelMinutes(travelMinutes: number | null, startedAt: D
    * @author Edmilson Lopes
    */
 private async geocode(address: string, correlationId?: string): Promise<MapsCoords | null> {
-    const response = await fetch(`${env.etaV2.mapsBaseUrl}/geocode`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ address }),
-    });
-    if (!response.ok) {
-      this.log.warn('Maps geocode failed', { correlationId, status: response.status });
+    try {
+      const payload = await this.geoLocationService.geocodeAddress(address);
+      if (!payload) return null;
+      if (!Number.isFinite(Number(payload.lat)) || !Number.isFinite(Number(payload.lng))) return null;
+      return payload;
+    } catch (error) {
+      this.log.warn('Maps geocode failed', { correlationId, error });
       return null;
     }
-    const payload = (await response.json()) as MapsCoords;
-    if (!payload?.lat || !payload?.lng) return null;
-    return payload;
   }
 
     /**
@@ -283,18 +282,18 @@ private async geocode(address: string, correlationId?: string): Promise<MapsCoor
    * @author Edmilson Lopes
    */
 private async route(origin: MapsCoords, destination: MapsCoords, correlationId?: string): Promise<MapsRoute | null> {
-    const response = await fetch(`${env.etaV2.mapsBaseUrl}/route`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ origin: { lat: origin.lat, lng: origin.lng }, destination: { lat: destination.lat, lng: destination.lng } }),
-    });
-    if (!response.ok) {
-      this.log.warn('Maps route failed', { correlationId, status: response.status });
+    try {
+      const payload = this.geoLocationService.estimateRoute(
+        { lat: Number(origin.lat), lng: Number(origin.lng) },
+        { lat: Number(destination.lat), lng: Number(destination.lng) }
+      );
+      if (!payload) return null;
+      if (!Number.isFinite(Number(payload.durationMin)) || !Number.isFinite(Number(payload.distanceKm))) return null;
+      return payload;
+    } catch (error) {
+      this.log.warn('Maps route failed', { correlationId, error });
       return null;
     }
-    const payload = (await response.json()) as MapsRoute;
-    if (!payload?.durationMin || !payload?.distanceKm) return null;
-    return payload;
   }
 
     /**

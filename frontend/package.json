@@ -22,7 +22,6 @@
     "@capacitor/camera": "^7.0.0",
     "@capacitor/core": "^7.4.3",
     "@capacitor/push-notifications": "^7.0.0",
-    "@googlemaps/js-api-loader": "^1.16.10",
     "@phosphor-icons/react": "^2.1.10",
     "firebase": "^12.6.0",
     "lottie-react": "^2.4.1",

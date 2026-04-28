@@ -6,7 +6,7 @@ type MarkerInput = {
   label?: string;
 };
 
-type GoogleMapViewProps = {
+type StoreMapViewProps = {
   markers: MarkerInput[];
   zoom?: number;
 };
@@ -53,7 +53,7 @@ const buildOpenStreetMapEmbedUrl = (markers: MarkerInput[], zoom = 15) => {
   };
 };
 
-export function GoogleMapView({ markers, zoom = 12 }: GoogleMapViewProps) {
+export function StoreMapView({ markers, zoom = 12 }: StoreMapViewProps) {
   const mapData = useMemo(() => buildOpenStreetMapEmbedUrl(markers, zoom), [markers, zoom]);
 
   if (!mapData) {

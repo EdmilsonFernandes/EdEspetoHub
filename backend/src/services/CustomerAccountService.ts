@@ -17,6 +17,7 @@ import { logger } from '../utils/logger';
 import { ZipCodeLookupService } from './ZipCodeLookupService';
 import { isAllowlistedEmail, isDisposableEmailDomain } from '../utils/emailRisk';
 import { CustomerSecurityService } from './CustomerSecurityService';
+import { GeoLocationService } from './GeoLocationService';
 
 type AddressInput = {
   label?: string;
@@ -41,6 +42,7 @@ export class CustomerAccountService {
   private orderEtaService = new OrderEtaServiceV2();
   private zipCodeLookupService = new ZipCodeLookupService();
   private securityService = new CustomerSecurityService();
+  private geoLocationService = new GeoLocationService();
   private log = logger.child({ scope: 'CustomerAccountService' });
     /**
    * Executes normalize email business logic.
@@ -129,23 +131,9 @@ private async geocodeAddress(address: string): Promise<{ lat: number; lng: numbe
     const normalizedAddress = String(address || '').trim();
     if (!normalizedAddress) return null;
     try {
-      const response = await fetch(`${env.etaV2.mapsBaseUrl}/geocode`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ address: normalizedAddress }),
-      });
-      if (!response.ok) {
-        this.log.warn('Customer address geocode failed', {
-          address: normalizedAddress,
-          status: response.status,
-        });
-        return null;
-      }
-      const payload = (await response.json()) as { lat?: number; lng?: number };
-      const lat = Number(payload?.lat);
-      const lng = Number(payload?.lng);
-      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-      return { lat, lng };
+      const payload = await this.geoLocationService.geocodeAddress(normalizedAddress);
+      if (!payload) return null;
+      return { lat: Number(payload.lat), lng: Number(payload.lng) };
     } catch (error) {
       this.log.warn('Customer address geocode exception', { address: normalizedAddress, error });
       return null;

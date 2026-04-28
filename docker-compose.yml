@@ -17,7 +17,6 @@ services:
       - "${FRONTEND_PORT:-8080}:80"
     depends_on:
       - api
-      - maps
     restart: always
 
   api:

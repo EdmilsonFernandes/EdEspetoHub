@@ -21,7 +21,7 @@ import {
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
 import { getPaymentMethodMeta, getPaymentProviderMeta } from "../../utils/paymentAssets";
-import { GoogleRouteMapView } from "../GoogleRouteMapView";
+import { RouteMapView } from "../RouteMapView";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { getStoreAvatarUrl } from "../../utils/storeAvatar";
 import { formatSelectedModifiers, getModifiersTotal } from "../../utils/productModifiers";
@@ -1635,7 +1635,7 @@ export const CartView = ({
                   )}
                   {showRouteMap && (
                     <div className="rounded-[1.2rem] border border-slate-200 bg-white p-2 shadow-[0_18px_30px_-28px_rgba(15,23,42,0.28)]">
-                      <GoogleRouteMapView
+                      <RouteMapView
                         origin={{ lat: Number(storeCoords.lat), lng: Number(storeCoords.lng) }}
                         destination={{ lat: Number(deliveryCoords.lat), lng: Number(deliveryCoords.lng) }}
                       />

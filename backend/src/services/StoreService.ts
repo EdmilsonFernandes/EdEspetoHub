@@ -27,6 +27,7 @@ import { getStoreSegmentPreset, sanitizeStoreSegment } from '../utils/storeSegme
 import { resolvePlanFeatures } from '../config/planFeatures';
 import { env } from '../config/env';
 import { logger } from '../utils/logger';
+import { GeoLocationService } from './GeoLocationService';
 /**
  * Provides StoreService functionality.
  *
@@ -38,7 +39,7 @@ export class StoreService
   private subscriptionService = new SubscriptionService();
   private storeRepository = AppDataSource.getRepository(Store);
   private log = logger.child({ scope: 'StoreService' });
-  private nextOpenStreetMapGeocodeAt = 0;
+  private geoLocationService = new GeoLocationService();
     /**
    * Executes parse number business logic.
    *
@@ -197,32 +198,13 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
     const normalizedAddress = String(address || '').trim();
     if (!normalizedAddress) return null;
     try {
-      const response = await fetch(`${env.etaV2.mapsBaseUrl}/geocode`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ address: normalizedAddress }),
-      });
-      if (!response.ok) {
-        this.log.warn('Store geocode failed', { address: normalizedAddress, status: response.status });
-        return null;
-      }
-      const payload = (await response.json()) as { lat?: number; lng?: number };
-      const lat = Number(payload?.lat);
-      const lng = Number(payload?.lng);
-      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-      return { lat, lng };
+      const payload = await this.geoLocationService.geocodeAddress(normalizedAddress);
+      if (!payload) return null;
+      return { lat: Number(payload.lat), lng: Number(payload.lng) };
     } catch (error) {
       this.log.warn('Store geocode exception', { address: normalizedAddress, error });
       return null;
     }
-  }
-
-  private async waitForOpenStreetMapGeocodeWindow() {
-    const waitMs = Math.max(0, this.nextOpenStreetMapGeocodeAt - Date.now());
-    if (waitMs > 0) {
-      await new Promise((resolve) => setTimeout(resolve, waitMs));
-    }
-    this.nextOpenStreetMapGeocodeAt = Date.now() + 1100;
   }
 
   private async geocodeAddressWithOpenStreetMap(address: string): Promise<{ lat: number; lng: number } | null> {
@@ -230,33 +212,9 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
     if (!normalizedAddress) return null;
 
     try {
-      await this.waitForOpenStreetMapGeocodeWindow();
-      const params = new URLSearchParams({
-        format: 'jsonv2',
-        limit: '1',
-        countrycodes: 'br',
-        q: normalizedAddress,
-      });
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`, {
-        headers: {
-          Accept: 'application/json',
-          'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
-          'User-Agent': `JaNoCaminhoStoreMap/1.0 (+${env.appUrl || 'https://janocaminho.com.br'})`,
-        },
-      });
-      if (!response.ok) {
-        this.log.warn('Store geocode via OpenStreetMap failed', {
-          address: normalizedAddress,
-          status: response.status,
-        });
-        return null;
-      }
-      const payload = (await response.json()) as Array<{ lat?: string; lon?: string }>;
-      const candidate = Array.isArray(payload) ? payload[0] : null;
-      const lat = Number(candidate?.lat);
-      const lng = Number(candidate?.lon);
-      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-      return { lat, lng };
+      const payload = await this.geoLocationService.geocodeAddress(normalizedAddress);
+      if (!payload) return null;
+      return { lat: Number(payload.lat), lng: Number(payload.lng) };
     } catch (error) {
       this.log.warn('Store geocode via OpenStreetMap exception', { address: normalizedAddress, error });
       return null;

@@ -10,7 +10,7 @@ import { getPaymentMethodMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { applyBrandTheme } from '../utils/brandTheme';
 import { buildPixPayload } from '../utils/pixPayload';
-import { GoogleRouteMapView } from '../components/GoogleRouteMapView';
+import { RouteMapView } from '../components/RouteMapView';
 import { formatSelectedModifiers } from '../utils/productModifiers';
 import { usePollingPaymentStatus } from '../hooks/usePollingPaymentStatus';
 
@@ -1772,7 +1772,7 @@ export function OrderTracking() {
                           ) : null}
                         </div>
                         <div className="mt-3">
-                          <GoogleRouteMapView
+                          <RouteMapView
                             origin={{ lat: Number(storeCoords.lat), lng: Number(storeCoords.lng) }}
                             destination={{ lat: Number(deliveryCoords.lat), lng: Number(deliveryCoords.lng) }}
                             compact

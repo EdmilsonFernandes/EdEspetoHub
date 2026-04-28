@@ -133,7 +133,6 @@ export const env = {
   },
   etaV2: {
     enabled: process.env.ENABLE_ORDER_ETA_V2 !== 'false',
-    mapsBaseUrl: process.env.MAPS_BASE_URL || 'http://maps:5050/api/maps',
     defaultPrepMinutes: process.env.DEFAULT_PREP_MINUTES ? Number(process.env.DEFAULT_PREP_MINUTES) : 15,
     defaultPrepPerItemMinutes: process.env.DEFAULT_PREP_PER_ITEM_MINUTES
       ? Number(process.env.DEFAULT_PREP_PER_ITEM_MINUTES)
@@ -159,7 +158,10 @@ export const env = {
     maxOpenLocalOrdersForFarPickup: numberEnv('MAX_OPEN_FAR_PICKUP_LOCAL_ORDERS', 1, 1),
   },
   addressLookup: {
-    enableGoogleGeocodingFallback: process.env.ENABLE_GOOGLE_GEOCODING_FALLBACK === 'true',
+    enableCoordinateFallback:
+      process.env.ENABLE_FREE_GEOCODING_FALLBACK === 'true' ||
+      process.env.ENABLE_OPENSTREETMAP_GEOCODING_FALLBACK === 'true' ||
+      process.env.ENABLE_GOOGLE_GEOCODING_FALLBACK === 'true',
   },
   whatsapp: {
     notifyUrl: process.env.WHATSAPP_NOTIFY_URL || '',

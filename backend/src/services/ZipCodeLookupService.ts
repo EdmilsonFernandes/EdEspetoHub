@@ -3,6 +3,7 @@ import { env } from '../config/env';
 import { AppError } from '../errors/AppError';
 import { ZipCodeCache } from '../entities/ZipCodeCache';
 import { logger } from '../utils/logger';
+import { GeoLocationService } from './GeoLocationService';
 
 export type ZipCodeLookupResult = {
   zipCode: string;
@@ -51,6 +52,7 @@ const normalizeLookupPayload = (payload: Partial<ZipCodeLookupResult> & { zipCod
 export class ZipCodeLookupService {
   private cacheRepo = AppDataSource.getRepository(ZipCodeCache);
   private log = logger.child({ scope: 'ZipCodeLookupService' });
+  private geoLocationService = new GeoLocationService();
 
   private async fromCache(zipCode: string): Promise<ZipCodeLookupResult | null> {
     const row = await this.cacheRepo.findOne({ where: { zipCode } });
@@ -142,18 +144,12 @@ export class ZipCodeLookupService {
     });
   }
 
-  private async lookupGoogleFallback(result: ZipCodeLookupResult): Promise<ZipCodeLookupResult | null> {
-    if (!env.addressLookup.enableGoogleGeocodingFallback) return null;
+  private async lookupCoordinateFallback(result: ZipCodeLookupResult): Promise<ZipCodeLookupResult | null> {
+    if (!env.addressLookup.enableCoordinateFallback) return null;
     const parts = [ result.street, result.city, result.state, result.zipCode ].filter(Boolean);
     if (!parts.length) return null;
     try {
-      const response = await fetch(`${env.etaV2.mapsBaseUrl}/geocode`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ address: parts.join(', ') }),
-      });
-      if (!response.ok) return null;
-      const payload = (await response.json()) as { lat?: number; lng?: number };
+      const payload = await this.geoLocationService.geocodeAddress(parts.join(', '));
       const latitude = parseCoordinate(payload?.lat);
       const longitude = parseCoordinate(payload?.lng);
       if (latitude === null || longitude === null) return null;
@@ -161,10 +157,10 @@ export class ZipCodeLookupService {
         ...result,
         latitude,
         longitude,
-        provider: `${result.provider}+google`,
+        provider: `${result.provider}+fallback`,
       });
     } catch (error) {
-      this.log.warn('Google zip fallback failed', { zipCode: result.zipCode, error });
+      this.log.warn('Zip coordinate fallback failed', { zipCode: result.zipCode, error });
       return null;
     }
   }
@@ -210,7 +206,7 @@ export class ZipCodeLookupService {
     }
 
     if (bestResult) {
-      const fallback = await this.lookupGoogleFallback(bestResult);
+      const fallback = await this.lookupCoordinateFallback(bestResult);
       const resolved = fallback || bestResult;
       await this.persist(resolved);
       return resolved;

@@ -29,7 +29,7 @@ import { formatCurrency } from "../../utils/format";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { getStoreAvatarUrl } from "../../utils/storeAvatar";
 import { ProductModal } from "../Cart/ProductModal";
-import { GoogleMapView } from "../GoogleMapView";
+import { StoreMapView } from "../StoreMapView";
 import { PlatformTrustFooter } from "../common/PlatformTrustFooter";
 import { ConfirmationModal } from "../common/ConfirmationModal";
 
@@ -1754,7 +1754,7 @@ export const MenuView = ({
 
                     {mapMarkers.length > 0 ? (
                       <div className="overflow-hidden rounded-[24px] border border-slate-100 bg-white p-2 shadow-sm">
-                        <GoogleMapView markers={mapMarkers} zoom={15} />
+                        <StoreMapView markers={mapMarkers} zoom={15} />
                       </div>
                     ) : null}
 
