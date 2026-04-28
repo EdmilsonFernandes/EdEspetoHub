@@ -345,7 +345,7 @@ export function CreateStore() {
       const message = String(error?.message || '').toLowerCase();
       if (message.includes('cancel')) return;
       console.error('Falha ao abrir galeria no app', error);
-      setStoreError('Não foi possível abrir a galeria. Verifique a permissão de fotos do aplicativo.');
+      setStoreError('Não foi possível abrir o seletor de imagem agora. Se você tentou tirar uma foto, confira a permissão de câmera do aplicativo.');
     }
   };
 

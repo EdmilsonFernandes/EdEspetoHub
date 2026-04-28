@@ -13,7 +13,6 @@ import {
   Phone,
   EnvelopeSimple,
   Camera,
-  ImagesSquare,
   CheckCircle,
   XCircle,
   BellSimpleRinging,
@@ -66,7 +65,6 @@ export function ClientAccount() {
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileMessage, setProfileMessage] = useState('');
   const [pushEnabled, setPushEnabled] = useState(false);
-  const [photoPermission, setPhotoPermission] = useState<'granted' | 'denied' | 'unknown'>('unknown');
   const [cameraPermission, setCameraPermission] = useState<'granted' | 'denied' | 'unknown'>('unknown');
   const [biometricSupported, setBiometricSupported] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
@@ -148,7 +146,6 @@ export function ClientAccount() {
   const refreshNativePermissions = async () => {
     if (!Capacitor.isNativePlatform()) {
       setPushEnabled(false);
-      setPhotoPermission('unknown');
       setCameraPermission('unknown');
       return;
     }
@@ -166,16 +163,12 @@ export function ClientAccount() {
     try {
       if (Capacitor.isPluginAvailable('Camera')) {
         const status = await CapCamera.checkPermissions();
-        const photosStatus = status?.photos === 'granted' || status?.photos === 'limited' ? 'granted' : status?.photos === 'denied' ? 'denied' : 'unknown';
         const cameraStatus = status?.camera === 'granted' ? 'granted' : status?.camera === 'denied' ? 'denied' : 'unknown';
-        setPhotoPermission(photosStatus);
         setCameraPermission(cameraStatus);
       } else {
-        setPhotoPermission('unknown');
         setCameraPermission('unknown');
       }
     } catch {
-      setPhotoPermission('unknown');
       setCameraPermission('unknown');
     }
   };
@@ -320,7 +313,6 @@ export function ClientAccount() {
       setMe(updated || null);
       syncCustomerSession(updated || null, { bustProfileImage: true });
       setProfileMessage('Foto atualizada!');
-      setPhotoPermission('granted');
     } catch (e: any) {
       setProfileMessage(e?.message || 'Não foi possível atualizar a foto.');
     } finally {
@@ -372,7 +364,7 @@ export function ClientAccount() {
       if (image.base64String) {
         const dataUrl = `data:image/${image.format};base64,${image.base64String}`;
         await updateProfileImageFromDataUrl(dataUrl);
-        setCameraPermission('granted');
+        void refreshNativePermissions();
       }
     } catch {
       setProfileSaving(false);
@@ -414,7 +406,7 @@ export function ClientAccount() {
     setProfileMessage('Abra as permissões do aplicativo nas configurações do celular para alterar este acesso.');
   };
 
-  const handlePermissionAction = async (type: 'push' | 'photos' | 'camera', isGranted: boolean) => {
+  const handlePermissionAction = async (type: 'push' | 'camera', isGranted: boolean) => {
     setProfileMessage('');
     
     if (!Capacitor.isNativePlatform()) {
@@ -437,7 +429,7 @@ export function ClientAccount() {
       }
       
       // Mensagem explicativa pois o app não pode desligar permissão de sistema sozinho
-      setProfileMessage(`Para desativar a ${type === 'push' ? 'notificação' : type === 'camera' ? 'câmera' : 'galeria'}, você deve desmarcá-la nas configurações do sistema que vamos abrir agora.`);
+      setProfileMessage(`Para desativar a ${type === 'push' ? 'notificação' : 'câmera'}, você deve desmarcá-la nas configurações do sistema que vamos abrir agora.`);
       
       // Pequeno delay para o usuário ler a mensagem antes de abrir as configurações
       setTimeout(async () => {
@@ -455,7 +447,7 @@ export function ClientAccount() {
         } else {
           await openAppSettings();
         }
-      } else if ((type === 'photos' || type === 'camera') && Capacitor.isPluginAvailable('Camera')) {
+      } else if (type === 'camera' && Capacitor.isPluginAvailable('Camera')) {
         const requested = await CapCamera.requestPermissions({ permissions: [type] });
         if (requested[type] !== 'granted') {
           await openAppSettings();
@@ -771,7 +763,7 @@ export function ClientAccount() {
                 </h3>
                 <p className="mt-2 text-base font-black text-slate-900">Permissões do aplicativo</p>
                 <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">
-                  Toque em gerenciar para abrir o controle do aparelho. O app consegue solicitar acesso, mas quem desliga a permissão é o sistema.
+                  Fotos da galeria agora usam o seletor do sistema. Aqui ficam apenas os acessos contínuos que o app realmente mantém.
                 </p>
               </div>
             </div>
@@ -823,15 +815,6 @@ export function ClientAccount() {
                   icon: <BellSimpleRinging size={18} weight="duotone" className="text-[#336886]" />,
                   checked: pushEnabled,
                   action: () => handlePermissionAction('push', pushEnabled),
-                },
-                {
-                  id: 'photos',
-                  label: 'Galeria',
-                  description: 'Escolher uma imagem salva no celular.',
-                  state: permissionMeta(photoPermission),
-                  icon: <ImagesSquare size={18} weight="duotone" className="text-[#336886]" />,
-                  checked: photoPermission === 'granted',
-                  action: () => handlePermissionAction('photos', photoPermission === 'granted'),
                 },
                 {
                   id: 'camera',

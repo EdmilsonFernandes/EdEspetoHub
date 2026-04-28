@@ -80,7 +80,6 @@ public class MainActivity extends BridgeActivity {
     private static final long LAUNCH_OVERLAY_FADE_MS = 260L;
     private static final long LAUNCH_OVERLAY_NETWORK_TIMEOUT_MS = 9000L;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 4401;
-    private static final int MEDIA_PERMISSION_REQUEST_CODE = 4402;
     private static final int APP_UPDATE_REQUEST_CODE = 4403;
 
     private String lastKnownUrl = HUB_URL;
@@ -127,34 +126,6 @@ public class MainActivity extends BridgeActivity {
         super.onCreate(savedInstanceState);
         initializeInAppUpdates();
         initializeLaunchOverlay();
-    }
-
-    private void checkAndRequestMediaPermissionsOnce() {
-        String[] permissions;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            permissions = new String[]{
-                Manifest.permission.CAMERA,
-                Manifest.permission.READ_MEDIA_IMAGES
-            };
-        } else {
-            permissions = new String[]{
-                Manifest.permission.CAMERA,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            };
-        }
-
-        boolean needRequest = false;
-        for (String p : permissions) {
-            if (ContextCompat.checkSelfPermission(this, p) != PackageManager.PERMISSION_GRANTED) {
-                needRequest = true;
-                break;
-            }
-        }
-
-        if (needRequest) {
-            ActivityCompat.requestPermissions(this, permissions, MEDIA_PERMISSION_REQUEST_CODE);
-        }
     }
 
     @Override
