@@ -1,7 +1,9 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Bicycle, CheckCircle, Clock, CircleNotch, CreditCard, MapPin, Package, Phone, SealCheck, Star, User } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowClockwise, Bicycle, CheckCircle, Clock, CircleNotch, CreditCard, MapPin, Package, Phone, SealCheck, Star, User, WhatsappLogo } from '@phosphor-icons/react';
+import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 import { orderService } from '../services/orderService';
 import { mapsService } from '../services/mapsService';
 import { formatAddress, formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId } from '../utils/format';
@@ -477,6 +479,14 @@ export function OrderTracking() {
   const storeWhatsappLink = storePhone
     ? `https://wa.me/55${String(storePhone || '').replace(/\D/g, '').replace(/^55/, '')}`
     : '';
+  const openWhatsApp = () => {
+    if (!storeWhatsappLink) return;
+    if (Capacitor.isNativePlatform()) {
+      void Browser.open({ url: storeWhatsappLink });
+    } else {
+      window.open(storeWhatsappLink, '_blank', 'noopener,noreferrer');
+    }
+  };
   const handleRepeatOrder = () => {
     if (!storeSlug || !order?.items?.length) return;
     const payload = {
@@ -1263,18 +1273,29 @@ export function OrderTracking() {
                   </div>
                 </div>
                 <div id="order-info-section" className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]">
-                  <div className="border-b border-slate-100 px-5 py-3.5"><p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">Informações do pedido</p></div>
-                  <div className="divide-y divide-slate-100 px-5 text-sm text-slate-600">
-                    <div className="flex items-center gap-3 py-3"><User size={15} weight="duotone" className="text-slate-400 shrink-0" /><span className="text-[13px] font-semibold text-slate-700">{order.customerName || 'Cliente'}</span></div>
+                  <div className="border-b border-slate-100 px-5 py-3.5">
+                    <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">Informações do pedido</p>
+                  </div>
+                  <div className="divide-y divide-slate-100">
+                    {/* Cliente */}
+                    <div className="flex items-center gap-3 px-5 py-3.5">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500"><User size={15} weight="duotone" /></span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Cliente</p>
+                        <p className="text-[13px] font-semibold text-slate-800">{order.customerName || 'Cliente'}</p>
+                      </div>
+                    </div>
+                    {/* Pagamento */}
                     {paymentMeta?.label && (
-                      <p className="flex items-center gap-2.5">
-                        <CreditCard size={16} weight="duotone" className="text-slate-400 shrink-0" />
-                        <span className="font-semibold text-slate-700">Pagamento:</span>
-                        {paymentMeta.icon && (
-                          <img src={paymentMeta.icon} alt={paymentMeta.label} className="h-4 w-4 object-contain" />
-                        )}
-                        <span>{paymentMeta.label}</span>
-                      </p>
+                      <div className="flex items-center gap-3 px-5 py-3.5">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
+                          {paymentMeta.icon ? <img src={paymentMeta.icon} alt={paymentMeta.label} className="h-4 w-4 object-contain" /> : <CreditCard size={15} weight="duotone" />}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Pagamento</p>
+                          <p className="text-[13px] font-semibold text-slate-800">{paymentMeta.label}</p>
+                        </div>
+                      </div>
                     )}
                     {showMercadoPagoApproved && (
                       <div className="overflow-hidden rounded-[22px] border border-[#009ee3]/20 bg-[linear-gradient(135deg,#f8fdff_0%,#ffffff_52%,#eefaff_100%)] p-[1px] shadow-[0_18px_34px_-30px_rgba(0,158,227,0.68)]">
@@ -1314,16 +1335,25 @@ export function OrderTracking() {
                         )}
                       </>
                     ) : null}
+                    {/* Telefone */}
                     {order.phone && (
-                      <p className="flex items-center gap-2.5">
-                        <Phone size={16} weight="duotone" className="text-slate-400 shrink-0" />
-                        <span><span className="font-semibold text-slate-700">Telefone:</span> {order.phone}</span>
-                      </p>
+                      <div className="flex items-center gap-3 px-5 py-3.5">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500"><Phone size={15} weight="duotone" /></span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Telefone</p>
+                          <p className="text-[13px] font-semibold text-slate-800">{order.phone}</p>
+                        </div>
+                      </div>
                     )}
+                    {/* Mesa */}
                     {order.type === 'table' && (
-                      <p>
-                        <span className="font-semibold">Mesa:</span> {order.table || '-'}
-                      </p>
+                      <div className="flex items-center gap-3 px-5 py-3.5">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500"><Package size={15} weight="duotone" /></span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Mesa</p>
+                          <p className="text-[13px] font-semibold text-slate-800">{order.table || '-'}</p>
+                        </div>
+                      </div>
                     )}
                     {isCondominiumOrder && (
                       <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-3 text-sm text-emerald-900">
@@ -1337,11 +1367,15 @@ export function OrderTracking() {
                         )}
                       </div>
                     )}
+                    {/* Endereço */}
                     {isDelivery && formatAddress(order.address || order.deliveryAddress) && (
-                      <p className="flex items-start gap-2">
-                        <MapPin size={16} weight="duotone" className="text-slate-400 mt-0.5" />
-                        <span>{formatAddress(order.address || order.deliveryAddress)}</span>
-                      </p>
+                      <div className="flex items-start gap-3 px-5 py-3.5">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500"><MapPin size={15} weight="duotone" /></span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Endereço de entrega</p>
+                          <p className="text-[13px] font-semibold leading-5 text-slate-800">{formatAddress(order.address || order.deliveryAddress)}</p>
+                        </div>
+                      </div>
                     )}
                     {isPostalDelivery && (
                       <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-2">
@@ -1440,15 +1474,14 @@ export function OrderTracking() {
                     ) : null}
                   {storeWhatsappLink && (
                     <div className="pt-1">
-                      <a
-                        href={storeWhatsappLink}
-                        target="_blank"
-                        rel="noreferrer"
+                      <button
+                        type="button"
+                        onClick={openWhatsApp}
                         className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-[12px] font-bold text-emerald-700 active:scale-[0.98] transition-transform"
                       >
-                        <span className="h-4 w-4 shrink-0">💬</span>
+                        <WhatsappLogo size={15} weight="fill" className="text-emerald-600" />
                         Falar com a loja
-                      </a>
+                      </button>
                     </div>
                   )}
                   {isDelivery && !isPostalDelivery && storeCoords?.lat && deliveryCoords?.lat && (
@@ -1522,61 +1555,84 @@ export function OrderTracking() {
                     </div>
                   )}
                   {order?.items?.length && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCtaPulse(true);
-                        window.setTimeout(() => setCtaPulse(false), 220);
-                        handleRepeatOrder();
-                      }}
-                      className="inline-flex items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-3.5 py-2 text-[12px] font-bold text-white shadow-[0_4px_12px_-4px_rgba(21,58,76,0.4)] active:scale-[0.98] transition-transform"
-                      style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
-                    >
-                      Pedir de novo
-                    </button>
+                    <div className="flex gap-2 border-t border-slate-100 px-5 py-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCtaPulse(true);
+                          window.setTimeout(() => setCtaPulse(false), 220);
+                          handleRepeatOrder();
+                        }}
+                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3 text-[13px] font-bold text-white shadow-[0_8px_20px_-10px_rgba(21,58,76,0.5)] active:scale-[0.98] transition-transform"
+                        style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
+                      >
+                        <ArrowClockwise size={15} weight="bold" />
+                        Pedir de novo
+                      </button>
+                      {storeWhatsappLink && (
+                        <button
+                          type="button"
+                          onClick={openWhatsApp}
+                          className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-[13px] font-bold text-emerald-700 active:scale-[0.98] transition-transform"
+                        >
+                          <WhatsappLogo size={15} weight="fill" />
+                          Falar com a loja
+                        </button>
+                      )}
+                    </div>
                   )}
+                    {/* Rows de status/data */}
                     {order.createdAt ? (
-                      <p className="text-slate-500">
-                        <span className="font-semibold">Pedido feito em:</span> {formatDateTime(order.createdAt)}
-                      </p>
+                      <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100">
+                        <p className="text-[12px] font-semibold text-slate-500">Pedido feito em</p>
+                        <p className="text-[12px] font-semibold text-slate-800">{formatDateTime(order.createdAt)}</p>
+                      </div>
                     ) : null}
-                    <p>
-                      <span className="font-semibold">Status:</span> {statusLabel}
-                    </p>
+                    <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100">
+                      <p className="text-[12px] font-semibold text-slate-500">Status</p>
+                      <p className="text-[12px] font-semibold text-slate-800">{statusLabel}</p>
+                    </div>
                     {isReady && elapsedMs > 0 && (
-                      <p>
-                        <span className="font-semibold">Tempo total:</span> {formatDuration(elapsedMs)}
-                      </p>
+                      <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100">
+                        <p className="text-[12px] font-semibold text-slate-500">Tempo total</p>
+                        <p className="text-[12px] font-semibold text-slate-800">{formatDuration(elapsedMs)}</p>
+                      </div>
                     )}
                     {remainingEstimateMinutes !== null && !isReady && (
-                      <p>
-                        <span className="font-semibold">{etaPhaseLabel} restante:</span> ~{remainingEstimateMinutes} min
-                      </p>
+                      <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100">
+                        <p className="text-[12px] font-semibold text-slate-500">{etaPhaseLabel} restante</p>
+                        <p className="text-[12px] font-semibold text-slate-800">~{remainingEstimateMinutes} min</p>
+                      </div>
                     )}
                     {isPostalDelivery && !isReady && postalRemainingDays !== null && (
-                      <p>
-                        <span className="font-semibold">Prazo restante:</span> ~{postalRemainingDays} dia(s)
-                      </p>
+                      <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100">
+                        <p className="text-[12px] font-semibold text-slate-500">Prazo restante</p>
+                        <p className="text-[12px] font-semibold text-slate-800">~{postalRemainingDays} dia(s)</p>
+                      </div>
                     )}
                     {isEstimateDelayed && (
-                      <p>
-                        <span className="font-semibold">Status da previsão:</span> Em atraso (acompanhamento em tempo real)
-                      </p>
+                      <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100">
+                        <p className="text-[12px] font-semibold text-slate-500">Previsão</p>
+                        <p className="text-[12px] font-semibold text-amber-600">Em atraso</p>
+                      </div>
                     )}
                   {!isPostalDelivery && etaWindowMin && etaWindowMax && !isReady && (
-                    <p>
-                      <span className="font-semibold">Janela prevista:</span> {etaWindowMin}–{etaWindowMax} min
-                    </p>
+                    <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100">
+                      <p className="text-[12px] font-semibold text-slate-500">Janela prevista</p>
+                      <p className="text-[12px] font-semibold text-slate-800">{etaWindowMin}–{etaWindowMax} min</p>
+                    </div>
                   )}
                   {isPostalDelivery && postalExpectedDeliveryDate && !isReady && (
-                    <p>
-                      <span className="font-semibold">Previsão de entrega:</span> {postalExpectedDeliveryDate.toLocaleDateString('pt-BR')}
-                    </p>
+                    <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100">
+                      <p className="text-[12px] font-semibold text-slate-500">Previsão de entrega</p>
+                      <p className="text-[12px] font-semibold text-slate-800">{postalExpectedDeliveryDate.toLocaleDateString('pt-BR')}</p>
+                    </div>
                   )}
                   {deliveryFeeValue !== null && (
-                    <p>
-                      <span className="font-semibold">Frete:</span> {formatCurrency(deliveryFeeValue)}
-                    </p>
+                    <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100">
+                      <p className="text-[12px] font-semibold text-slate-500">Frete</p>
+                      <p className="text-[12px] font-semibold text-slate-800">{formatCurrency(deliveryFeeValue)}</p>
+                    </div>
                   )}
                   </div>
                   {isReady && !isDelivery && (
@@ -1859,43 +1915,6 @@ export function OrderTracking() {
         </div>
       </main>
 
-      {!loading && !error && order ? (
-        <div
-          className="sm:hidden fixed inset-x-0 z-30 px-3"
-          style={{ bottom: mobileStatusDockBottom }}
-        >
-          <div className={`overflow-hidden rounded-[1.4rem] border backdrop-blur-2xl shadow-[0_8px_32px_-12px_rgba(15,23,42,0.3)] ${
-            isCancelled
-              ? 'border-rose-200/60 bg-white/92'
-              : isReady
-              ? 'border-emerald-200/60 bg-white/92'
-              : 'border-[#336886]/15 bg-white/92'
-          }`}>
-            <div
-              className="h-[3px] w-full transition-all duration-700"
-              style={{ width: `${progress}%`, background: isCancelled ? '#f43f5e' : isReady ? '#10b981' : 'linear-gradient(90deg,#336886,#10b981)' }}
-            />
-            <div className="flex items-center justify-between gap-3 px-4 py-3">
-              <div className="flex min-w-0 items-center gap-2.5">
-                <span className={`flex h-2 w-2 shrink-0 rounded-full ${
-                  isCancelled ? 'bg-rose-500' : isReady ? 'bg-emerald-500' : 'animate-pulse bg-[#336886]'
-                }`} />
-                <span className="truncate text-[12.5px] font-black text-slate-900">{statusLabel}</span>
-                <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                  isCancelled
-                    ? 'bg-rose-50 text-rose-600'
-                    : isReady
-                    ? 'bg-emerald-50 text-emerald-700'
-                    : 'bg-[#336886]/8 text-[#336886]'
-                }`}>{typeLabel}</span>
-              </div>
-              <span className="shrink-0 text-[15px] font-black tracking-tight text-slate-900">
-                {formatCurrency(order?.total || 0)}
-              </span>
-            </div>
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 }
