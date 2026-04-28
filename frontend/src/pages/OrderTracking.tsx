@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, ArrowClockwise, Bicycle, CheckCircle, Clock, CircleNotch, CreditCard, MapPin, Package, Phone, SealCheck, Star, User, WhatsappLogo } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowClockwise, Bicycle, CheckCircle, Clock, CircleNotch, MapPin, Package, Phone, SealCheck, Star, User, WhatsappLogo } from '@phosphor-icons/react';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { orderService } from '../services/orderService';
@@ -81,6 +81,60 @@ const addBusinessDays = (startDate: Date, businessDays: number) => {
   }
   return result;
 };
+
+function TrackingMetaCard({
+  label,
+  value,
+  detail,
+  accent = 'default',
+}: {
+  label: string;
+  value: React.ReactNode;
+  detail?: React.ReactNode;
+  accent?: 'default' | 'primary' | 'success' | 'warning';
+}) {
+  const accentClass =
+    accent === 'success'
+      ? 'text-emerald-700'
+      : accent === 'warning'
+      ? 'text-amber-600'
+      : accent === 'primary'
+      ? 'text-[#153A4C]'
+      : 'text-slate-900';
+
+  return (
+    <div className="rounded-[1.35rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] px-4 py-3 shadow-[0_18px_36px_-28px_rgba(15,23,42,0.22)]">
+      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">{label}</p>
+      <div className={`mt-1.5 text-sm font-black leading-tight ${accentClass}`}>{value}</div>
+      {detail ? <div className="mt-1 text-xs font-medium leading-5 text-slate-500">{detail}</div> : null}
+    </div>
+  );
+}
+
+function TrackingInfoRow({
+  icon,
+  label,
+  value,
+  detail,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+  detail?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-start gap-3 rounded-[1.35rem] border border-slate-200 bg-slate-50/75 px-4 py-3 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.2)]">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 shadow-sm">
+        {icon}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">{label}</p>
+        <div className="mt-1 text-[13px] font-black leading-5 text-slate-900">{value}</div>
+        {detail ? <div className="mt-1 text-xs font-medium leading-5 text-slate-500">{detail}</div> : null}
+      </div>
+    </div>
+  );
+}
 
 export function OrderTracking() {
   const { orderId } = useParams();
@@ -313,6 +367,8 @@ export function OrderTracking() {
   const paymentValue = order?.paymentMethod || order?.payment;
   const paymentMeta = paymentValue ? getPaymentMethodMeta(paymentValue) : null;
   const normalizedPaymentMethod = String(paymentValue || '').trim().toLowerCase();
+  const orderDisplayId = formatOrderDisplayId(order?.id, storeSlug) || String(order?.id || '-');
+  const orderCreatedAtLabel = order?.createdAt ? formatDateTime(order.createdAt) : '';
   const pixKey =
     order?.store?.settings?.pixKey ||
     order?.pixKey ||
@@ -395,6 +451,22 @@ export function OrderTracking() {
   }, [isPostalDelivery, isReady, postalExpectedDeliveryDate]);
   const estimateMinutes = etaTotalMinutes;
   const deliveryFeeValue = hasDeliveryFee ? Number(order?.deliveryFee || 0) : null;
+  const orderLifecycleLabel = isCancelled ? 'Pedido cancelado' : isReady ? 'Pedido concluido' : 'Pedido em andamento';
+  const paymentSummaryDetail = showMercadoPagoApproved
+    ? 'Confirmado pelo Mercado Pago'
+    : normalizedPaymentMethod === 'dinheiro'
+    ? 'Pagamento combinado no atendimento'
+    : hasOnlinePayment
+    ? 'Forma usada na compra online'
+    : 'Forma escolhida para este pedido';
+  const cashTenderedValue =
+    normalizedPaymentMethod === 'dinheiro' && order?.cashTendered !== null && order?.cashTendered !== undefined
+      ? Number(order.cashTendered)
+      : null;
+  const cashChangeValue =
+    cashTenderedValue !== null
+      ? Math.max(0, Number(cashTenderedValue) - Number(order?.total || 0))
+      : null;
   const routeDurationMinutes = useMemo(() => {
     const routeDuration = Number(deliveryRoute?.durationMin || 0);
     if (Number.isFinite(routeDuration) && routeDuration > 0) return Math.round(routeDuration);
@@ -961,7 +1033,7 @@ export function OrderTracking() {
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div>
                     <p className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/80 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 shadow-sm">
-                      Pedido #{formatOrderDisplayId(order.id, storeSlug)}
+                        Pedido #{orderDisplayId}
                     </p>
                     <div className="mt-3 flex items-center gap-3 flex-wrap">
                       <h1 className="text-[1.65rem] leading-none sm:text-3xl font-black text-slate-900">{statusLabel}</h1>
@@ -1273,33 +1345,72 @@ export function OrderTracking() {
                   </div>
                 </div>
                 <div id="order-info-section" className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]">
-                  <div className="border-b border-slate-100 px-5 py-3.5">
+                  <div className="border-b border-slate-100 px-5 py-4">
                     <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">Informações do pedido</p>
+                    <p className="mt-1 text-sm font-medium text-slate-500">Resumo visual com os dados principais e ações deste pedido.</p>
                   </div>
-                  <div className="divide-y divide-slate-100">
-                    {/* Cliente */}
-                    <div className="flex items-center gap-3 px-5 py-3.5">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500"><User size={15} weight="duotone" /></span>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Cliente</p>
-                        <p className="text-[13px] font-semibold text-slate-800">{order.customerName || 'Cliente'}</p>
-                      </div>
+                  <div className="space-y-4 px-4 py-4 sm:px-5">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <TrackingMetaCard
+                        label="Pedido"
+                        value={`#${orderDisplayId}`}
+                        detail={orderCreatedAtLabel || typeLabel}
+                        accent="primary"
+                      />
+                      <TrackingMetaCard
+                        label="Status"
+                        value={statusLabel}
+                        detail={orderLifecycleLabel}
+                        accent={isCancelled ? 'warning' : isReady ? 'success' : 'primary'}
+                      />
+                      <TrackingMetaCard
+                        label="Pagamento"
+                        value={paymentMeta?.label || 'Sem informacao'}
+                        detail={paymentSummaryDetail}
+                      />
+                      <TrackingMetaCard
+                        label="Total"
+                        value={formatCurrency(order.total || 0)}
+                        detail={deliveryFeeValue !== null ? `Frete ${formatCurrency(deliveryFeeValue)}` : isDelivery ? 'Entrega' : 'Retirada'}
+                        accent="primary"
+                      />
                     </div>
-                    {/* Pagamento */}
-                    {paymentMeta?.label && (
-                      <div className="flex items-center gap-3 px-5 py-3.5">
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
-                          {paymentMeta.icon ? <img src={paymentMeta.icon} alt={paymentMeta.label} className="h-4 w-4 object-contain" /> : <CreditCard size={15} weight="duotone" />}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Pagamento</p>
-                          <p className="text-[13px] font-semibold text-slate-800">{paymentMeta.label}</p>
-                        </div>
-                      </div>
-                    )}
+
+                    <div className="space-y-3">
+                      <TrackingInfoRow
+                        icon={<User size={16} weight="duotone" />}
+                        label="Cliente"
+                        value={order.customerName || 'Cliente'}
+                      />
+
+                      {order.phone ? (
+                        <TrackingInfoRow
+                          icon={<Phone size={16} weight="duotone" />}
+                          label="Telefone"
+                          value={order.phone}
+                        />
+                      ) : null}
+
+                      {order.type === 'table' ? (
+                        <TrackingInfoRow
+                          icon={<Package size={16} weight="duotone" />}
+                          label="Mesa"
+                          value={order.table || '-'}
+                        />
+                      ) : null}
+
+                      {isDelivery && formatAddress(order.address || order.deliveryAddress) ? (
+                        <TrackingInfoRow
+                          icon={<MapPin size={16} weight="duotone" />}
+                          label="Endereco de entrega"
+                          value={formatAddress(order.address || order.deliveryAddress)}
+                        />
+                      ) : null}
+                    </div>
+
                     {showMercadoPagoApproved && (
-                      <div className="overflow-hidden rounded-[22px] border border-[#009ee3]/20 bg-[linear-gradient(135deg,#f8fdff_0%,#ffffff_52%,#eefaff_100%)] p-[1px] shadow-[0_18px_34px_-30px_rgba(0,158,227,0.68)]">
-                        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[21px] bg-white/94 px-3 py-3">
+                      <div className="overflow-hidden rounded-[1.35rem] border border-[#009ee3]/20 bg-[linear-gradient(135deg,#f8fdff_0%,#ffffff_52%,#eefaff_100%)] p-[1px] shadow-[0_18px_34px_-30px_rgba(0,158,227,0.68)]">
+                        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[1.3rem] bg-white/94 px-4 py-3">
                           <div className="flex min-w-0 items-center gap-2.5">
                             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[15px] bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
                               <SealCheck size={21} weight="fill" />
@@ -1319,133 +1430,85 @@ export function OrderTracking() {
                         </div>
                       </div>
                     )}
-                    {order.payment?.toString().toLowerCase() === 'dinheiro' && order.cashTendered ? (
-                      <>
-                        <p>
-                          <span className="font-semibold">Cliente paga com:</span>{' '}
-                          {formatCurrency(Number(order.cashTendered))}
-                        </p>
-                        {Number(order.cashTendered) > Number(order.total || 0) ? (
-                          <p>
-                            <span className="font-semibold">Troco:</span>{' '}
-                            {formatCurrency(Number(order.cashTendered) - Number(order.total || 0))}
-                          </p>
-                        ) : (
-                          <p className="text-[12px] text-slate-500 font-semibold">Sem troco</p>
-                        )}
-                      </>
+
+                    {cashTenderedValue !== null ? (
+                      <div className="rounded-[1.35rem] border border-slate-200 bg-slate-50/80 p-4 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.2)]">
+                        <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Pagamento em dinheiro</p>
+                        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                          <TrackingMetaCard
+                            label="Cliente paga com"
+                            value={formatCurrency(cashTenderedValue)}
+                            detail="Valor informado para o troco"
+                          />
+                          <TrackingMetaCard
+                            label="Troco"
+                            value={cashChangeValue && cashChangeValue > 0 ? formatCurrency(cashChangeValue) : 'Sem troco'}
+                            detail={cashChangeValue && cashChangeValue > 0 ? 'Troco previsto para o atendimento' : 'Nao ha troco para este pedido'}
+                          />
+                        </div>
+                      </div>
                     ) : null}
-                    {/* Telefone */}
-                    {order.phone && (
-                      <div className="flex items-center gap-3 px-5 py-3.5">
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500"><Phone size={15} weight="duotone" /></span>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Telefone</p>
-                          <p className="text-[13px] font-semibold text-slate-800">{order.phone}</p>
-                        </div>
-                      </div>
-                    )}
-                    {/* Mesa */}
-                    {order.type === 'table' && (
-                      <div className="flex items-center gap-3 px-5 py-3.5">
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500"><Package size={15} weight="duotone" /></span>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Mesa</p>
-                          <p className="text-[13px] font-semibold text-slate-800">{order.table || '-'}</p>
-                        </div>
-                      </div>
-                    )}
+
                     {isCondominiumOrder && (
-                      <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-3 text-sm text-emerald-900">
-                        <p className="text-[11px] font-black uppercase tracking-[0.14em] text-emerald-700">Feira no condomínio</p>
-                        <p className="mt-1 font-bold">{condominiumOrder?.condominiumName || (order as any)?.condominiumName}</p>
+                      <div className="rounded-[1.35rem] border border-emerald-100 bg-emerald-50/70 p-4 text-sm text-emerald-900 shadow-[0_18px_36px_-30px_rgba(16,185,129,0.22)]">
+                        <p className="text-[11px] font-black uppercase tracking-[0.14em] text-emerald-700">Feira no condominio</p>
+                        <p className="mt-1 font-black">{condominiumOrder?.condominiumName || (order as any)?.condominiumName}</p>
                         <p className="mt-1 text-xs font-semibold text-emerald-800">{condominiumFulfillmentLabel}</p>
                         {(condominiumUnit?.block || condominiumUnit?.tower || condominiumUnit?.apartment || condominiumUnit?.reference) && (
-                          <p className="mt-1 text-xs text-emerald-800">
+                          <p className="mt-1 text-xs leading-5 text-emerald-800">
                             {[condominiumUnit?.block && `Bloco/Torre ${condominiumUnit.block}`, condominiumUnit?.apartment && `Apto ${condominiumUnit.apartment}`, condominiumUnit?.reference].filter(Boolean).join(' | ')}
                           </p>
                         )}
                       </div>
                     )}
-                    {/* Endereço */}
-                    {isDelivery && formatAddress(order.address || order.deliveryAddress) && (
-                      <div className="flex items-start gap-3 px-5 py-3.5">
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500"><MapPin size={15} weight="duotone" /></span>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Endereço de entrega</p>
-                          <p className="text-[13px] font-semibold leading-5 text-slate-800">{formatAddress(order.address || order.deliveryAddress)}</p>
-                        </div>
-                      </div>
-                    )}
+
                     {isPostalDelivery && (
-                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-2">
-                        <p className="text-xs font-bold uppercase tracking-[0.08em] text-slate-500">
-                          Envio postal
-                        </p>
-                        <p className="text-sm text-slate-700">
-                          <span className="font-semibold">Status:</span>{' '}
-                          {shipment?.shipmentStatus === 'posted' ? 'Postado' : 'Aguardando postagem'}
-                        </p>
-                        <p className="text-sm text-slate-700">
-                          <span className="font-semibold">Serviço:</span>{' '}
-                          {shipmentServiceName || shipmentServiceCode || 'A confirmar'}
-                        </p>
-                        {postalEstimatedDays ? (
-                          <p className="text-sm text-slate-700">
-                            <span className="font-semibold">Prazo estimado:</span> {postalEstimatedDays} dia(s) úteis
-                          </p>
-                        ) : null}
-                        {postalExpectedDeliveryDate ? (
-                          <p className="text-sm text-slate-700">
-                            <span className="font-semibold">Previsão de entrega:</span>{' '}
-                            {postalExpectedDeliveryDate.toLocaleDateString('pt-BR')}
-                          </p>
-                        ) : null}
-                        {shipmentTrackingCode ? (
-                          <p className="text-sm text-slate-700 break-all">
-                            <span className="font-semibold">Código:</span> {shipmentTrackingCode}
-                          </p>
-                        ) : (
-                          <p className="text-sm text-slate-500">Código de rastreio ainda não informado.</p>
-                        )}
+                      <div className="rounded-[1.35rem] border border-slate-200 bg-slate-50/80 p-4 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.2)]">
+                        <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Envio postal</p>
+                        <div className="mt-3 space-y-2 text-sm text-slate-700">
+                          <p><span className="font-semibold">Status:</span> {shipment?.shipmentStatus === 'posted' ? 'Postado' : 'Aguardando postagem'}</p>
+                          <p><span className="font-semibold">Servico:</span> {shipmentServiceName || shipmentServiceCode || 'A confirmar'}</p>
+                          {postalEstimatedDays ? <p><span className="font-semibold">Prazo estimado:</span> {postalEstimatedDays} dia(s) uteis</p> : null}
+                          {postalExpectedDeliveryDate ? <p><span className="font-semibold">Previsao de entrega:</span> {postalExpectedDeliveryDate.toLocaleDateString('pt-BR')}</p> : null}
+                          {shipmentTrackingCode ? (
+                            <p className="break-all"><span className="font-semibold">Codigo:</span> {shipmentTrackingCode}</p>
+                          ) : (
+                            <p className="text-slate-500">Codigo de rastreio ainda nao informado.</p>
+                          )}
+                        </div>
                         {shipmentTrackingUrl ? (
                           <a
                             href={shipmentTrackingUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+                            className="mt-3 inline-flex items-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
                           >
                             Acompanhar entrega
                           </a>
                         ) : null}
                       </div>
                     )}
-                    {hasDeliveryFee ? (
-                      <p className="flex items-center gap-2">
-                        <span className="font-semibold text-slate-700">Frete:</span>
-                        <span className="text-emerald-700 font-semibold">{formatCurrency(order.deliveryFee)}</span>
-                      </p>
-                    ) : null}
+
                     {isPixPayment ? (
                       shouldHidePixPaymentBlockBase || progress >= 100 ? (
-                        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
+                        <div className="rounded-[1.35rem] border border-emerald-200 bg-emerald-50 p-4">
                           <span className="inline-flex items-center rounded-full border border-emerald-300 bg-white px-3 py-1 text-xs font-bold text-emerald-700">
                             Pagamento confirmado
                           </span>
                         </div>
                       ) : (
-                        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-3">
-                          <div className="flex items-center justify-between">
-                            <span className="font-semibold text-slate-700">Pagamento via Pix</span>
-                            <span className="text-xs text-slate-400">Use o QR Code ou chave</span>
+                        <div className="rounded-[1.35rem] border border-slate-200 bg-slate-50/80 p-4 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.2)]">
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-sm font-black text-slate-800">Pagamento via Pix</span>
+                            <span className="text-xs font-semibold text-slate-400">Use o QR Code ou chave</span>
                           </div>
                           {pixKey ? (
                             <>
-                              <div className="flex items-center justify-center">
+                              <div className="mt-4 flex items-center justify-center">
                                 <img
                                   src={pixQrUrl}
                                   alt="QR Code Pix"
-                                  className="w-40 h-40 rounded-xl bg-white border border-slate-200 object-contain"
+                                  className="h-40 w-40 rounded-2xl border border-slate-200 bg-white object-contain"
                                 />
                               </div>
                               <button
@@ -1459,181 +1522,171 @@ export function OrderTracking() {
                                     console.error('Falha ao copiar Pix', err);
                                   }
                                 }}
-                                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-100 transition-all duration-200 active:scale-[0.97] active:opacity-80"
+                                className="mt-4 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition-all duration-200 hover:bg-slate-100 active:scale-[0.97] active:opacity-80"
                               >
-                                {pixCopied ? 'Copiado!' : 'Copiar código Pix'}
+                                {pixCopied ? 'Copiado!' : 'Copiar codigo Pix'}
                               </button>
                             </>
                           ) : (
-                            <div className="text-xs text-slate-500">
-                              A chave Pix da loja ainda não foi cadastrada.
+                            <div className="mt-3 text-xs text-slate-500">
+                              A chave Pix da loja ainda nao foi cadastrada.
                             </div>
                           )}
                         </div>
                       )
                     ) : null}
-                  {storeWhatsappLink && (
-                    <div className="pt-1">
-                      <button
-                        type="button"
-                        onClick={openWhatsApp}
-                        className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-[12px] font-bold text-emerald-700 active:scale-[0.98] transition-transform"
-                      >
-                        <WhatsappLogo size={15} weight="fill" className="text-emerald-600" />
-                        Falar com a loja
-                      </button>
-                    </div>
-                  )}
-                  {isDelivery && !isPostalDelivery && storeCoords?.lat && deliveryCoords?.lat && (
-                    <div className="rounded-2xl border border-slate-200 bg-white p-3 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-semibold text-slate-600">Rota da entrega</span>
-                        {deliveryRoute?.distanceKm ? (
-                          <span className="text-xs font-semibold text-emerald-600">
-                            {deliveryRoute.distanceKm.toFixed(1)} km
+
+                    {isDelivery && !isPostalDelivery && storeCoords?.lat && deliveryCoords?.lat && (
+                      <div className="rounded-[1.35rem] border border-slate-200 bg-white p-4 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.2)]">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-black text-slate-800">Rota da entrega</span>
+                          {deliveryRoute?.distanceKm ? (
+                            <span className="text-xs font-semibold text-emerald-600">
+                              {deliveryRoute.distanceKm.toFixed(1)} km
+                            </span>
+                          ) : null}
+                        </div>
+                        <div className="mt-3">
+                          <GoogleRouteMapView
+                            origin={{ lat: Number(storeCoords.lat), lng: Number(storeCoords.lng) }}
+                            destination={{ lat: Number(deliveryCoords.lat), lng: Number(deliveryCoords.lng) }}
+                            compact
+                          />
+                        </div>
+                        <div className="mt-3 flex items-center justify-between text-xs text-slate-600">
+                          <span>Tempo de trajeto</span>
+                          <span className="font-semibold text-slate-800">
+                            {routeDurationMinutes !== null ? `${routeDurationMinutes} min` : routeLoading ? 'Calculando...' : '-'}
                           </span>
+                        </div>
+                        {deliveryEta ? (
+                          <div className="mt-2 text-xs font-semibold text-emerald-700">
+                            {etaForecastLabel}: {deliveryEta.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        ) : null}
+                        {etaDetails ? (
+                          <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50 p-3 space-y-2">
+                            <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
+                              <span>{isInTransitPhase ? 'Tempo de trajeto estimado' : 'Tempo de preparo estimado'}</span>
+                              <span className="text-slate-900">
+                                {etaTotalMinutes ? `~${etaTotalMinutes} min` : '-'}
+                              </span>
+                            </div>
+                            {(etaDetails.prepMinutes !== undefined || etaDetails.queueMinutes !== undefined) && (
+                              <div className="flex flex-wrap gap-2 text-[11px] font-semibold text-slate-600">
+                                {etaDetails.prepMinutes !== undefined && (
+                                  <span className="rounded-full border border-slate-200 bg-white px-2 py-1">
+                                    Tempo de preparo: {etaDetails.prepMinutes} min
+                                  </span>
+                                )}
+                                {etaDetails.queueMinutes !== undefined && (
+                                  <span className="rounded-full border border-slate-200 bg-white px-2 py-1">
+                                    Fila: {etaDetails.queueMinutes} min
+                                  </span>
+                                )}
+                                {etaDetails.travelMinutes !== undefined && etaDetails.travelMinutes !== null && (
+                                  <span className="rounded-full border border-slate-200 bg-white px-2 py-1">
+                                    Tempo de trajeto: {etaDetails.travelMinutes} min
+                                  </span>
+                                )}
+                                {etaDetails.bufferMinutes !== undefined && (
+                                  <span className="rounded-full border border-slate-200 bg-white px-2 py-1">
+                                    Buffer: {etaDetails.bufferMinutes} min
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            {etaWindowMin && etaWindowMax ? (
+                              <div className="text-[11px] text-slate-500">
+                                Janela prevista: {etaWindowMin}–{etaWindowMax} min
+                              </div>
+                            ) : null}
+                            {trackingLoading ? (
+                              <div className="text-[11px] text-slate-400">Atualizando ETA...</div>
+                            ) : null}
+                          </div>
                         ) : null}
                       </div>
-                      <GoogleRouteMapView
-                        origin={{ lat: Number(storeCoords.lat), lng: Number(storeCoords.lng) }}
-                        destination={{ lat: Number(deliveryCoords.lat), lng: Number(deliveryCoords.lng) }}
-                        compact
-                      />
-                      <div className="flex items-center justify-between text-xs text-slate-600">
-                        <span>Tempo de trajeto</span>
-                        <span className="font-semibold text-slate-800">
-                          {routeDurationMinutes !== null ? `${routeDurationMinutes} min` : routeLoading ? 'Calculando...' : '-'}
-                        </span>
-                      </div>
-                      {deliveryEta && (
-                        <div className="text-xs font-semibold text-emerald-700">
-                          {etaForecastLabel}: {deliveryEta.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                        </div>
-                      )}
-                      {etaDetails && (
-                        <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 space-y-2">
-                          <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
-                            <span>{isInTransitPhase ? 'Tempo de trajeto estimado' : 'Tempo de preparo estimado'}</span>
-                            <span className="text-slate-900">
-                              {etaTotalMinutes ? `~${etaTotalMinutes} min` : '-'}
-                            </span>
-                          </div>
-                          {(etaDetails.prepMinutes !== undefined || etaDetails.queueMinutes !== undefined) && (
-                            <div className="flex flex-wrap gap-2 text-[11px] font-semibold text-slate-600">
-                              {etaDetails.prepMinutes !== undefined && (
-                                <span className="px-2 py-1 rounded-full bg-white border border-slate-200">
-                                  Tempo de preparo: {etaDetails.prepMinutes} min
-                                </span>
-                              )}
-                              {etaDetails.queueMinutes !== undefined && (
-                                <span className="px-2 py-1 rounded-full bg-white border border-slate-200">
-                                  Fila: {etaDetails.queueMinutes} min
-                                </span>
-                              )}
-                              {etaDetails.travelMinutes !== undefined && etaDetails.travelMinutes !== null && (
-                                <span className="px-2 py-1 rounded-full bg-white border border-slate-200">
-                                  Tempo de trajeto: {etaDetails.travelMinutes} min
-                                </span>
-                              )}
-                              {etaDetails.bufferMinutes !== undefined && (
-                                <span className="px-2 py-1 rounded-full bg-white border border-slate-200">
-                                  Buffer: {etaDetails.bufferMinutes} min
-                                </span>
-                              )}
-                            </div>
-                          )}
-                          {etaWindowMin && etaWindowMax && (
-                            <div className="text-[11px] text-slate-500">
-                              Janela prevista: {etaWindowMin}–{etaWindowMax} min
-                            </div>
-                          )}
-                          {trackingLoading && (
-                            <div className="text-[11px] text-slate-400">Atualizando ETA...</div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {order?.items?.length && (
-                    <div className="flex gap-2 border-t border-slate-100 px-5 py-4">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setCtaPulse(true);
-                          window.setTimeout(() => setCtaPulse(false), 220);
-                          handleRepeatOrder();
-                        }}
-                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3 text-[13px] font-bold text-white shadow-[0_8px_20px_-10px_rgba(21,58,76,0.5)] active:scale-[0.98] transition-transform"
-                        style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
-                      >
-                        <ArrowClockwise size={15} weight="bold" />
-                        Pedir de novo
-                      </button>
-                      {storeWhatsappLink && (
-                        <button
-                          type="button"
-                          onClick={openWhatsApp}
-                          className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-[13px] font-bold text-emerald-700 active:scale-[0.98] transition-transform"
-                        >
-                          <WhatsappLogo size={15} weight="fill" />
-                          Falar com a loja
-                        </button>
-                      )}
-                    </div>
-                  )}
-                    {/* Rows de status/data */}
-                    {order.createdAt ? (
-                      <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100">
-                        <p className="text-[12px] font-semibold text-slate-500">Pedido feito em</p>
-                        <p className="text-[12px] font-semibold text-slate-800">{formatDateTime(order.createdAt)}</p>
+                    )}
+
+                    {(isReady && elapsedMs > 0) || (remainingEstimateMinutes !== null && !isReady) || (isPostalDelivery && !isReady && postalRemainingDays !== null) || isEstimateDelayed || (!isPostalDelivery && etaWindowMin && etaWindowMax && !isReady) || (isPostalDelivery && postalExpectedDeliveryDate && !isReady) ? (
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {isReady && elapsedMs > 0 ? (
+                          <TrackingMetaCard
+                            label="Tempo total"
+                            value={formatDuration(elapsedMs)}
+                            detail="Tempo total ate a conclusao do pedido"
+                          />
+                        ) : null}
+                        {remainingEstimateMinutes !== null && !isReady ? (
+                          <TrackingMetaCard
+                            label={`${etaPhaseLabel} restante`}
+                            value={`~${remainingEstimateMinutes} min`}
+                            detail={etaForecastLabel}
+                            accent={isEstimateDelayed ? 'warning' : 'primary'}
+                          />
+                        ) : null}
+                        {isPostalDelivery && !isReady && postalRemainingDays !== null ? (
+                          <TrackingMetaCard
+                            label="Prazo restante"
+                            value={`~${postalRemainingDays} dia(s)`}
+                            detail="Estimativa atual para o envio postal"
+                          />
+                        ) : null}
+                        {isEstimateDelayed ? (
+                          <TrackingMetaCard
+                            label="Previsao"
+                            value="Em atraso"
+                            detail="O pedido passou da estimativa inicial."
+                            accent="warning"
+                          />
+                        ) : null}
+                        {!isPostalDelivery && etaWindowMin && etaWindowMax && !isReady ? (
+                          <TrackingMetaCard
+                            label="Janela prevista"
+                            value={`${etaWindowMin}–${etaWindowMax} min`}
+                            detail="Faixa atual informada para este pedido"
+                          />
+                        ) : null}
+                        {isPostalDelivery && postalExpectedDeliveryDate && !isReady ? (
+                          <TrackingMetaCard
+                            label="Previsao de entrega"
+                            value={postalExpectedDeliveryDate.toLocaleDateString('pt-BR')}
+                            detail="Estimativa atual dos Correios"
+                          />
+                        ) : null}
                       </div>
                     ) : null}
-                    <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100">
-                      <p className="text-[12px] font-semibold text-slate-500">Status</p>
-                      <p className="text-[12px] font-semibold text-slate-800">{statusLabel}</p>
-                    </div>
-                    {isReady && elapsedMs > 0 && (
-                      <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100">
-                        <p className="text-[12px] font-semibold text-slate-500">Tempo total</p>
-                        <p className="text-[12px] font-semibold text-slate-800">{formatDuration(elapsedMs)}</p>
+
+                    {(order?.items?.length || storeWhatsappLink) ? (
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        {order?.items?.length ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCtaPulse(true);
+                              window.setTimeout(() => setCtaPulse(false), 220);
+                              handleRepeatOrder();
+                            }}
+                            className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3 text-[13px] font-bold text-white shadow-[0_8px_20px_-10px_rgba(21,58,76,0.5)] transition-transform active:scale-[0.98]"
+                            style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
+                          >
+                            <ArrowClockwise size={15} weight="bold" />
+                            Pedir de novo
+                          </button>
+                        ) : null}
+                        {storeWhatsappLink ? (
+                          <button
+                            type="button"
+                            onClick={openWhatsApp}
+                            className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-[13px] font-bold text-emerald-700 transition-transform active:scale-[0.98]"
+                          >
+                            <WhatsappLogo size={15} weight="fill" />
+                            Falar com a loja
+                          </button>
+                        ) : null}
                       </div>
-                    )}
-                    {remainingEstimateMinutes !== null && !isReady && (
-                      <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100">
-                        <p className="text-[12px] font-semibold text-slate-500">{etaPhaseLabel} restante</p>
-                        <p className="text-[12px] font-semibold text-slate-800">~{remainingEstimateMinutes} min</p>
-                      </div>
-                    )}
-                    {isPostalDelivery && !isReady && postalRemainingDays !== null && (
-                      <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100">
-                        <p className="text-[12px] font-semibold text-slate-500">Prazo restante</p>
-                        <p className="text-[12px] font-semibold text-slate-800">~{postalRemainingDays} dia(s)</p>
-                      </div>
-                    )}
-                    {isEstimateDelayed && (
-                      <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100">
-                        <p className="text-[12px] font-semibold text-slate-500">Previsão</p>
-                        <p className="text-[12px] font-semibold text-amber-600">Em atraso</p>
-                      </div>
-                    )}
-                  {!isPostalDelivery && etaWindowMin && etaWindowMax && !isReady && (
-                    <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100">
-                      <p className="text-[12px] font-semibold text-slate-500">Janela prevista</p>
-                      <p className="text-[12px] font-semibold text-slate-800">{etaWindowMin}–{etaWindowMax} min</p>
-                    </div>
-                  )}
-                  {isPostalDelivery && postalExpectedDeliveryDate && !isReady && (
-                    <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100">
-                      <p className="text-[12px] font-semibold text-slate-500">Previsão de entrega</p>
-                      <p className="text-[12px] font-semibold text-slate-800">{postalExpectedDeliveryDate.toLocaleDateString('pt-BR')}</p>
-                    </div>
-                  )}
-                  {deliveryFeeValue !== null && (
-                    <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100">
-                      <p className="text-[12px] font-semibold text-slate-500">Frete</p>
-                      <p className="text-[12px] font-semibold text-slate-800">{formatCurrency(deliveryFeeValue)}</p>
-                    </div>
-                  )}
+                    ) : null}
                   </div>
                   {isReady && !isDelivery && (
                     <div className="rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700">
@@ -1918,7 +1971,5 @@ export function OrderTracking() {
     </div>
   );
 }
-
-
 
 
