@@ -59,7 +59,7 @@ export default defineConfig({
     open: true,
     proxy: {
       '/api/maps': {
-        target: 'http://localhost:5050',
+        target: 'http://localhost:4000',
         changeOrigin: true,
       },
     },

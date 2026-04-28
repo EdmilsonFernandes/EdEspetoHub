@@ -232,60 +232,41 @@ Serviços locais:
 - Front-end: `http://localhost:3000`
 - API: `http://localhost:4000`
 
-## Google Maps Platform (migracao do mapa)
+## Mapas e Geocoding
 
-### APIs necessarias (Google Cloud)
-- Maps JavaScript API
-- Geocoding API
-- Routes API
+### Stack atual
+- Mapa da loja: OpenStreetMap embed no frontend.
+- Geocoding: OpenStreetMap/Nominatim via backend principal.
+- Rota/ETA: estimativa local no backend para evitar custo e dependência externa.
 
-### Chaves e restricoes
-- **Front (apenas mapa)**: use `VITE_GOOGLE_MAPS_JS_KEY` com restricao por dominio.
-  - Habilitar somente **Maps JavaScript API** nessa chave.
-- **Backend (geocode/rota)**: use `GOOGLE_MAPS_API_KEY` com restricao por IP/servidor.
-  - Habilitar **Geocoding API** e **Routes API**.
-
-### Estrutura
-- `server/`: microservico de mapas (Express + TypeScript).
-- `frontend/`: renderiza o mapa com `@googlemaps/js-api-loader`.
-- Endpoints locais:
-  - `POST /api/maps/geocode` → `{ lat, lng, formattedAddress }`
-  - `POST /api/maps/route` → `{ distanceKm, durationMin }`
+### Endpoints locais
+- `POST /api/maps/geocode` → `{ lat, lng, formattedAddress }`
+- `POST /api/maps/route` → `{ distanceKm, durationMin, estimated }`
 
 ### Variaveis de ambiente
 
-Front (`frontend/.env`):
+Frontend (`frontend/.env`):
 ```
-VITE_GOOGLE_MAPS_JS_KEY=xxx
 VITE_STORE_ORIGIN_LAT=-23.55052
 VITE_STORE_ORIGIN_LNG=-46.633308
 VITE_STORE_ORIGIN_LABEL=Loja
 ```
 
-Backend maps server (`server/.env`):
+Backend (`backend/.env.docker`):
 ```
-PORT=5050
-CORS_ORIGIN=http://localhost:3000
-GOOGLE_MAPS_API_KEY=xxx
+ENABLE_FREE_GEOCODING_FALLBACK=false
+DEFAULT_PREP_MINUTES=15
+DEFAULT_PREP_PER_ITEM_MINUTES=2
+DEFAULT_QUEUE_MINUTES_PER_ORDER=5
+DEFAULT_QUEUE_BUFFER_MINUTES=0
+DEFAULT_ETA_BUFFER_MINUTES=3
 ```
 
-Produção (Docker):
-```
-server/.env.docker:
-PORT=5050
-CORS_ORIGIN=https://www.janocaminho.com.br
-SSM_PARAMETER_NAME=/janocaminho/prod
-AWS_REGION=us-east-2
-SSM_OVERRIDE=true
-GOOGLE_MAPS_API_KEY=
-```
-O `GOOGLE_MAPS_API_KEY` vem do SSM (JSON).
-
-### Rodar local (Vite + Maps server)
+### Rodar local
 
 ```bash
 npm install
-cd server && npm install
+cd backend && npm install
 cd ../frontend && npm install
 cd ..
 npm run dev
@@ -293,12 +274,11 @@ npm run dev
 
 Rotas:
 - Front: `http://localhost:3000`
-- Maps server: `http://localhost:5050`
-- Tela de teste: `http://localhost:3000/maps`
+- API: `http://localhost:4000`
 
 ### Producao
-- `docker-compose` sobe o serviço `maps`.
-- Nginx faz proxy `/api/maps` → `maps:5050`.
+- O proxy `/api/maps` aponta para a API principal.
+- O serviço Docker `maps` foi aposentado.
 - Para subir tudo: `docker compose --env-file .env.prod up --build -d`.
 
 ## Modulo de entrega + motoboy (novo)
@@ -1041,7 +1021,7 @@ Variáveis de configuração (backend):
 
 ```
 ENABLE_ORDER_ETA_V2=true
-MAPS_BASE_URL=http://maps:5050/api/maps
+ENABLE_FREE_GEOCODING_FALLBACK=false
 DEFAULT_PREP_MINUTES=15
 DEFAULT_PREP_PER_ITEM_MINUTES=2
 DEFAULT_QUEUE_MINUTES_PER_ORDER=5

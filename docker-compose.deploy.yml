@@ -7,7 +7,3 @@ services:
 
   face-worker:
     pull_policy: always
-
-  maps:
-    pull_policy: always
-

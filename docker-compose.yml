@@ -47,18 +47,6 @@ services:
       FACE_MODEL_NAME: "${FACE_MODEL_NAME:-buffalo_l}"
     restart: always
 
-  maps:
-    container_name: chamanoespeto-maps
-    image: "${IMAGE_REGISTRY:-ghcr.io}/${IMAGE_NAMESPACE:-edmilsonfernandes}/edespetohub-maps:${IMAGE_TAG:-main}"
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-    env_file:
-      - ./server/.env.docker
-    ports:
-      - "5051:5050"
-    restart: always
-
   postgres:
     container_name: chamanoespeto-postgres
     image: postgres:16

@@ -84,7 +84,6 @@ scripts/./deploy-api.sh && scripts/./deploy-frontend.sh
 | `chamanoespeto-postgres` | `postgres:16` | 5432 | Banco de dados |
 | `chamanoespeto-pgadmin` | `pgadmin4:8.13` | 5050 | Admin do banco |
 | `chamanoespeto-face-worker` | `edespetohub-face-worker:main` | — | Verificação facial |
-| `chamanoespeto-maps` | `edespetohub-maps:main` | 5051 | Proxy Google Maps |
 
 ```bash
 # Ver containers rodando
@@ -102,6 +101,8 @@ docker restart chamanoespeto-api
 # Reiniciar tudo
 cd ~/EdEspetoHub && docker compose up -d
 ```
+
+> O container `chamanoespeto-maps` foi aposentado. Se ainda existir no servidor por legado, pode ser parado e removido.
 
 ---
 
