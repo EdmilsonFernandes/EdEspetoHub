@@ -101,6 +101,16 @@ export class PromoPushService {
     return rows.map((r) => this.serialize(r));
   }
 
+  async listHistory(limit = 50) {
+    const rows = await this.repo.find({
+      where: [{ status: 'SENT' }, { status: 'REJECTED' }],
+      relations: ['store'],
+      order: { updatedAt: 'DESC' },
+      take: limit,
+    });
+    return rows.map((r) => this.serialize(r));
+  }
+
   async listPending() {
     const rows = await this.repo.find({
       where: { status: 'PENDING_APPROVAL' },

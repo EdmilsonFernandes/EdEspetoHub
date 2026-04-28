@@ -320,10 +320,12 @@ export function SuperAdmin() {
   const [pushActionId, setPushActionId] = useState('');
   const [rejectReason, setRejectReason] = useState('');
   const [rejectingId, setRejectingId] = useState('');
+  const [pushHistory, setPushHistory] = useState<any[]>([]);
 
   useEffect(() => {
     if (activeSection !== 'push' || !token) return;
     superAdminService.listPendingPromoPushes(token).then((data) => setPendingPushes(Array.isArray(data) ? data : [])).catch(() => {});
+    superAdminService.listPromoPushHistory(token).then((data) => setPushHistory(Array.isArray(data) ? data : [])).catch(() => {});
   }, [activeSection, token]);
   const [broadcastLastResult, setBroadcastLastResult] = useState<any | null>(null);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -1890,6 +1892,43 @@ export function SuperAdmin() {
                         </button>
                       </div>
                     )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </FormSection>
+
+          <FormSection
+            title="Histórico de Pushes"
+            variant="primary"
+            className="bg-gradient-to-br from-slate-50/70 via-white to-white border-slate-200"
+            contentClassName="space-y-3"
+          >
+            {pushHistory.length === 0 ? (
+              <p className="text-sm text-slate-400">Nenhum push aprovado ou rejeitado ainda.</p>
+            ) : (
+              <div className="space-y-2">
+                {pushHistory.map((push: any) => (
+                  <div key={push.id} className="rounded-2xl border border-slate-100 bg-white p-3">
+                    <div className="flex items-start gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${push.status === 'SENT' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                            {push.status === 'SENT' ? '✅ Enviado' : '❌ Rejeitado'}
+                          </span>
+                          <span className="text-xs text-slate-400">{push.storeName}</span>
+                          {push.status === 'SENT' && push.sentCount != null && (
+                            <span className="text-xs font-semibold text-emerald-600">{push.sentCount} usuários</span>
+                          )}
+                        </div>
+                        <p className="text-sm font-bold text-slate-900 mt-1">{push.title}</p>
+                        <p className="text-xs text-slate-500">{push.body}</p>
+                        {push.rejectionReason && (
+                          <p className="text-xs text-rose-600 mt-1 font-semibold">Motivo: {push.rejectionReason}</p>
+                        )}
+                        <p className="text-[10px] text-slate-400 mt-1">{new Date(push.updatedAt).toLocaleString('pt-BR')}</p>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>

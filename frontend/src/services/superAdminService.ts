@@ -241,6 +241,13 @@ export const superAdminService = {
     return handleResponse(response);
   },
 
+  async listPromoPushHistory(token: string) {
+    const response = await fetch(buildUrl('/admin/promo-pushes/history'), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return handleResponse(response);
+  },
+
   async listPendingPromoPushes(token: string) {
     const response = await fetch(buildUrl('/admin/promo-pushes/pending'), {
       headers: { Authorization: `Bearer ${token}` },

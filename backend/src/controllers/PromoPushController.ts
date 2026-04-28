@@ -41,6 +41,15 @@ export class PromoPushController {
     }
   }
 
+  static async listHistory(req: Request, res: Response) {
+    try {
+      const result = await service.listHistory();
+      return res.json(result);
+    } catch (err: any) {
+      return respondWithError(req, res, err, 400);
+    }
+  }
+
   static async listPending(req: Request, res: Response) {
     try {
       const result = await service.listPending();

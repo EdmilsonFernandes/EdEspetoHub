@@ -111,6 +111,7 @@ routes.delete('/stores/:storeId/promo-pushes/:pushId', requireAuth, requireRole(
 
 // Promo Push (super admin)
 routes.get('/admin/promo-pushes/pending', requireAuth, requireRole('SUPER_ADMIN'), PromoPushController.listPending);
+routes.get('/admin/promo-pushes/history', requireAuth, requireRole('SUPER_ADMIN'), PromoPushController.listHistory);
 routes.post('/admin/promo-pushes/:pushId/approve', requireAuth, requireRole('SUPER_ADMIN'), PromoPushController.approve);
 routes.post('/admin/promo-pushes/:pushId/reject', requireAuth, requireRole('SUPER_ADMIN'), PromoPushController.reject);
 routes.get('/admin/condominiums/manage', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminOverview);
