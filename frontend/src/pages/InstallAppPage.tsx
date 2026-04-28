@@ -1,5 +1,7 @@
-import { AndroidLogo, AppleLogo, ArrowSquareOut, GooglePlayLogo } from '@phosphor-icons/react';
+import { AppleLogo, ArrowSquareOut, GooglePlayLogo } from '@phosphor-icons/react';
 import { LandingPageLayout } from '../layouts/LandingPageLayout';
+
+const GOOGLE_PLAY_URL = 'https://play.google.com/store/apps/details?id=com.janocaminho.app';
 
 export function InstallAppPage() {
   return (
@@ -8,66 +10,74 @@ export function InstallAppPage() {
         <div className="max-w-5xl mx-auto px-4">
           <div className="text-center mb-8 sm:mb-10">
             <p className="text-xs uppercase tracking-[0.28em] text-sky-200 font-semibold">Instale o app</p>
-            <h1 className="mt-2 text-3xl sm:text-4xl font-black text-white">Já no Caminho no seu Android e iPhone</h1>
+            <h1 className="mt-2 text-3xl sm:text-4xl font-black text-white">Já no Caminho no seu celular</h1>
             <p className="mt-3 text-sm sm:text-base text-slate-200">
-              Instale em poucos toques e use como aplicativo, com atalho na tela inicial.
+              Android: baixe pela Google Play. iPhone: adicione ao Safari como app.
             </p>
           </div>
 
           <div className="grid gap-4 sm:gap-5 md:grid-cols-2">
-            <article className="rounded-2xl border border-white/15 bg-white/5 backdrop-blur-md p-5 sm:p-6">
+            {/* Android — Google Play oficial */}
+            <article className="rounded-2xl border border-emerald-400/20 bg-emerald-500/5 backdrop-blur-md p-5 sm:p-6">
               <div className="flex items-center gap-3">
-                <div className="h-11 w-11 rounded-2xl bg-black/30 border border-white/20 grid place-items-center">
-                  <GooglePlayLogo size={24} weight="fill" className="text-emerald-300" />
+                <div className="h-11 w-11 rounded-2xl bg-[#01875f] grid place-items-center shadow-[0_8px_24px_-8px_rgba(1,135,95,0.6)]">
+                  <GooglePlayLogo size={24} weight="fill" className="text-white" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-black text-white">Android (Chrome)</h2>
-                  <p className="text-xs text-slate-300">Google Play style</p>
+                  <h2 className="text-lg font-black text-white">Android</h2>
+                  <p className="text-xs text-emerald-300 font-semibold">Disponível na Google Play ✓</p>
                 </div>
               </div>
-              <ol className="mt-4 space-y-2 text-sm text-slate-100 list-decimal list-inside">
-                <li>Abra `janocaminho.com.br` no Chrome.</li>
-                <li>Toque em `Instalar app` ou no menu `⋮`.</li>
-                <li>Confirme em `Instalar`.</li>
-              </ol>
+              <p className="mt-4 text-sm text-slate-200 leading-relaxed">
+                Baixe o app oficial pelo canal seguro da Google Play Store.
+              </p>
               <a
-                href="https://janocaminho.com.br/"
-                className="mt-5 inline-flex items-center gap-2 rounded-xl border border-emerald-300/30 bg-emerald-500/10 px-4 py-2 text-sm font-bold text-emerald-200 hover:bg-emerald-500/20 transition"
+                href={GOOGLE_PLAY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#01875f] px-5 py-3 text-sm font-black text-white shadow-[0_12px_28px_-10px_rgba(1,135,95,0.7)] hover:bg-[#017a56] transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
-                <AndroidLogo size={18} weight="duotone" />
-                Abrir no Chrome
-                <ArrowSquareOut size={16} weight="bold" />
+                <GooglePlayLogo size={18} weight="fill" />
+                Baixar na Google Play
+                <ArrowSquareOut size={15} weight="bold" />
               </a>
+              <p className="mt-3 text-[11px] text-slate-400">
+                Busque <strong className="text-slate-200">"Já no Caminho"</strong> na Play Store ou use o botão acima.
+              </p>
             </article>
 
+            {/* iPhone — PWA Safari */}
             <article className="rounded-2xl border border-white/15 bg-white/5 backdrop-blur-md p-5 sm:p-6">
               <div className="flex items-center gap-3">
-                <div className="h-11 w-11 rounded-2xl bg-black/30 border border-white/20 grid place-items-center">
+                <div className="h-11 w-11 rounded-2xl bg-slate-800 border border-white/20 grid place-items-center">
                   <AppleLogo size={24} weight="fill" className="text-slate-100" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-black text-white">iPhone (Safari)</h2>
-                  <p className="text-xs text-slate-300">Apple style</p>
+                  <h2 className="text-lg font-black text-white">iPhone</h2>
+                  <p className="text-xs text-slate-300">App Store em breve · Use pelo Safari</p>
                 </div>
               </div>
               <ol className="mt-4 space-y-2 text-sm text-slate-100 list-decimal list-inside">
-                <li>Abra `janocaminho.com.br` no Safari.</li>
-                <li>Toque em `Compartilhar`.</li>
-                <li>Selecione `Adicionar à Tela de Início`.</li>
+                <li>Abra <strong className="text-white">janocaminho.com.br</strong> no Safari.</li>
+                <li>Toque em <strong className="text-white">Compartilhar</strong> (ícone de caixa com seta).</li>
+                <li>Selecione <strong className="text-white">Adicionar à Tela de Início</strong>.</li>
               </ol>
               <a
                 href="https://janocaminho.com.br/"
-                className="mt-5 inline-flex items-center gap-2 rounded-xl border border-slate-300/30 bg-white/10 px-4 py-2 text-sm font-bold text-slate-100 hover:bg-white/15 transition"
+                className="mt-5 inline-flex items-center gap-2 rounded-xl border border-slate-300/30 bg-white/10 px-4 py-2.5 text-sm font-bold text-slate-100 hover:bg-white/15 transition"
               >
                 <AppleLogo size={18} weight="duotone" />
                 Abrir no Safari
                 <ArrowSquareOut size={16} weight="bold" />
               </a>
+              <div className="mt-4 rounded-xl border border-sky-400/20 bg-sky-400/10 px-3 py-2 text-[11px] text-sky-200">
+                A versão nativa para iOS está em desenvolvimento e chegará em breve na App Store.
+              </div>
             </article>
           </div>
 
           <div className="mt-5 rounded-2xl border border-sky-300/25 bg-sky-400/10 px-4 py-3 text-xs sm:text-sm text-sky-100">
-            Dica: se o app já estiver instalado, o botão de instalação pode não aparecer novamente.
+            Dica: se o app já estiver instalado no Android, o botão de instalação pode não aparecer novamente no Chrome.
           </div>
         </div>
       </section>
