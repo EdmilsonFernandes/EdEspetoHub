@@ -575,49 +575,52 @@ export const DashboardView = ({
           .map(
             (customer, index) => `
               <tr>
-                <td>${index + 1}</td>
-                <td>${escapeHtml(customer.name || "Cliente")}</td>
-                <td>${escapeHtml(customer.phone || "-")}</td>
-                <td>${Number(customer.ordersCount || 0)}</td>
-                <td>${escapeHtml(formatCurrency(customer.avgTicket || 0))}</td>
-                <td>${escapeHtml(formatCurrency(customer.totalSpent || 0))}</td>
-                <td>${escapeHtml(formatDate(customer.lastOrderAt) || "-")}</td>
+                <td data-label="#">${index + 1}</td>
+                <td data-label="Cliente">${escapeHtml(customer.name || "Cliente")}</td>
+                <td data-label="Contato">${escapeHtml(customer.phone || "-")}</td>
+                <td data-label="Pedidos">${Number(customer.ordersCount || 0)}</td>
+                <td data-label="Ticket médio">${escapeHtml(formatCurrency(customer.avgTicket || 0))}</td>
+                <td data-label="Total gasto">${escapeHtml(formatCurrency(customer.totalSpent || 0))}</td>
+                <td data-label="Último pedido">${escapeHtml(formatDate(customer.lastOrderAt) || "-")}</td>
               </tr>
             `
           )
           .join("")
-      : `<tr><td colspan="7">Sem clientes para o periodo selecionado.</td></tr>`;
+      : `<tr class="report-table-empty"><td colspan="7">Sem clientes para o periodo selecionado.</td></tr>`;
     const topProductsMarkup = productRows.length
       ? productRows
           .map(
             (product, index) => `
               <tr>
-                <td>${index + 1}</td>
-                <td>${escapeHtml(product.name || "Produto")}</td>
-                <td>${Number(product.qty || 0)}</td>
-                <td>${escapeHtml(formatCurrency(product.revenue || 0))}</td>
+                <td data-label="#">${index + 1}</td>
+                <td data-label="Produto">${escapeHtml(product.name || "Produto")}</td>
+                <td data-label="Qtd">${Number(product.qty || 0)}</td>
+                <td data-label="Receita">${escapeHtml(formatCurrency(product.revenue || 0))}</td>
               </tr>
             `
           )
           .join("")
-      : `<tr><td colspan="4">Sem vendas no periodo selecionado.</td></tr>`;
+      : `<tr class="report-table-empty"><td colspan="4">Sem vendas no periodo selecionado.</td></tr>`;
 
     printWindow.document.write(`
       <!doctype html>
       <html lang="pt-BR">
         <head>
           <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
           <title>Relatorio Gerencial - ${escapeHtml(storeName)}</title>
           <style>
-            body { margin: 0; background: #f6f3ee; color: #1f2937; font-family: Arial, sans-serif; }
-            .page { padding: 28px; }
+            * { box-sizing: border-box; }
+            body { margin: 0; background: #f6f3ee; color: #1f2937; font-family: Arial, sans-serif; -webkit-text-size-adjust: 100%; }
+            .page { max-width: 1120px; margin: 0 auto; padding: 28px; }
             .hero { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start; margin-bottom: 20px; }
-            .brand { display: flex; gap: 16px; align-items: center; }
+            .brand { display: flex; gap: 16px; align-items: center; min-width: 0; }
             .brand img { width: 68px; height: 68px; object-fit: cover; border-radius: 18px; border: 1px solid #e5ded3; background: #fff; }
             .brand-fallback { width: 68px; height: 68px; border-radius: 18px; border: 1px solid #e5ded3; background: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; }
             .eyebrow { margin: 0 0 6px; font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: #a16207; font-weight: 700; }
             .title { margin: 0; font-size: 28px; font-weight: 800; color: #111827; }
             .subtitle { margin: 8px 0 0; font-size: 13px; color: #6b7280; }
+            .subtitle span { display: inline; }
             .meta { min-width: 220px; border: 1px solid #eadfce; background: #fffaf3; border-radius: 20px; padding: 16px 18px; }
             .meta strong { display: block; font-size: 13px; margin-bottom: 4px; }
             .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 20px 0; }
@@ -628,14 +631,47 @@ export const DashboardView = ({
             .section { margin-top: 18px; background: #fff; border: 1px solid #e5e7eb; border-radius: 20px; padding: 18px; }
             .section h2 { margin: 0 0 6px; font-size: 18px; }
             .section p { margin: 0 0 14px; font-size: 12px; color: #6b7280; }
-            table { width: 100%; border-collapse: collapse; font-size: 12px; }
-            th, td { padding: 10px 8px; border-bottom: 1px solid #eceff3; text-align: left; }
+            table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }
+            th, td { padding: 10px 8px; border-bottom: 1px solid #eceff3; text-align: left; vertical-align: top; overflow-wrap: anywhere; word-break: break-word; }
             th { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #6b7280; }
             .muted { color: #6b7280; }
+            .report-table-empty td { text-align: center; color: #6b7280; }
+            @page { size: A4; margin: 12mm; }
+            @media screen and (max-width: 760px) {
+              body { background: #fffaf6; }
+              .page { padding: 16px; }
+              .hero { flex-direction: column; gap: 14px; }
+              .brand { align-items: flex-start; }
+              .brand img, .brand-fallback { width: 56px; height: 56px; border-radius: 16px; }
+              .title { font-size: 22px; line-height: 1.15; }
+              .subtitle { font-size: 12px; line-height: 1.5; }
+              .subtitle span { display: block; }
+              .meta { width: 100%; min-width: 0; border-radius: 18px; }
+              .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+              .metric { padding: 14px; border-radius: 16px; }
+              .metric strong { font-size: 19px; line-height: 1.15; }
+              .section { padding: 14px; border-radius: 18px; overflow: hidden; }
+              .section h2 { font-size: 16px; }
+              .section p { font-size: 11px; line-height: 1.5; }
+              .report-table { table-layout: auto; font-size: 11px; }
+              .report-table thead { display: none; }
+              .report-table,
+              .report-table tbody,
+              .report-table tr,
+              .report-table td { display: block; width: 100%; }
+              .report-table tr { margin-bottom: 10px; padding: 10px 12px; border: 1px solid #eceff3; border-radius: 16px; background: #fffaf7; }
+              .report-table tbody tr:last-child { margin-bottom: 0; }
+              .report-table td { border: 0; padding: 6px 0; display: grid; grid-template-columns: minmax(92px, 40%) minmax(0, 1fr); gap: 10px; align-items: start; }
+              .report-table td::before { content: attr(data-label); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #6b7280; font-weight: 700; }
+              .report-table-empty { padding: 14px 12px !important; }
+              .report-table-empty td { display: block; padding: 0; }
+              .report-table-empty td::before { content: none; }
+            }
             @media print {
               body { background: #fff; }
               .page { padding: 0; }
               .section, .metric, .meta { box-shadow: none; }
+              .hero, .metrics, .section { break-inside: avoid; page-break-inside: avoid; }
             }
           </style>
         </head>
@@ -651,7 +687,10 @@ export const DashboardView = ({
                 <div>
                   <p class="eyebrow">Relatorio Gerencial</p>
                   <h1 class="title">${escapeHtml(storeName)}</h1>
-                  <p class="subtitle">Periodo analisado: ${escapeHtml(metrics.periodLabel)} · Mês de referencia: ${escapeHtml(formatMonthLabel(selectedMonth))}</p>
+                  <p class="subtitle">
+                    <span>Periodo analisado: ${escapeHtml(metrics.periodLabel)}</span>
+                    <span>Mês de referencia: ${escapeHtml(formatMonthLabel(selectedMonth))}</span>
+                  </p>
                 </div>
               </div>
               <div class="meta">
@@ -688,7 +727,7 @@ export const DashboardView = ({
             <div class="section">
               <h2>Itens mais vendidos do período</h2>
               <p>Ranking calculado com base no período atualmente selecionado no dashboard.</p>
-              <table>
+              <table class="report-table">
                 <thead>
                   <tr>
                     <th>#</th>
@@ -704,7 +743,7 @@ export const DashboardView = ({
             <div class="section">
               <h2>Clientes em destaque</h2>
               <p>Base capturada automaticamente a partir dos pedidos da loja.</p>
-              <table>
+              <table class="report-table">
                 <thead>
                   <tr>
                     <th>#</th>
