@@ -78,28 +78,28 @@ jobs:
 
           git log -n 30 --date=iso-strict --pretty=format:'%H|%h|%cI|%an|%ae|%s' > /tmp/frontend-commits.txt
           COMMITS_B64="$(
-            python3 - <<'PY'
-import base64
-import json
+          python3 - <<'PY'
+          import base64
+          import json
 
-rows = []
-with open('/tmp/frontend-commits.txt', 'r', encoding='utf-8') as handle:
-    for line in handle:
-        parts = line.rstrip('\n').split('|')
-        if len(parts) < 6:
-            continue
-        rows.append({
-            "hash": parts[0],
-            "shortHash": parts[1],
-            "dateIso": parts[2],
-            "authorName": parts[3],
-            "authorEmail": parts[4],
-            "subject": "|".join(parts[5:]).strip(),
-        })
+          rows = []
+          with open('/tmp/frontend-commits.txt', 'r', encoding='utf-8') as handle:
+              for line in handle:
+                  parts = line.rstrip('\n').split('|')
+                  if len(parts) < 6:
+                      continue
+                  rows.append({
+                      "hash": parts[0],
+                      "shortHash": parts[1],
+                      "dateIso": parts[2],
+                      "authorName": parts[3],
+                      "authorEmail": parts[4],
+                      "subject": "|".join(parts[5:]).strip(),
+                  })
 
-payload = json.dumps(rows, ensure_ascii=True, separators=(',', ':')).encode('utf-8')
-print(base64.b64encode(payload).decode('ascii'))
-PY
+          payload = json.dumps(rows, ensure_ascii=True, separators=(',', ':')).encode('utf-8')
+          print(base64.b64encode(payload).decode('ascii'))
+          PY
           )"
           echo "build_commits_b64=${COMMITS_B64}" >> "$GITHUB_OUTPUT"
 
