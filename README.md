@@ -1225,9 +1225,13 @@ GHCR_USERNAME=<seu-usuario-github>
 GHCR_TOKEN=<pat-com-read-packages>
 ```
 
-4) Deploy por release específica:
+4) Deploy por release específica ou pela `main` mais recente:
 
 ```bash
+sh scripts/deploy-release-api.sh
+sh scripts/deploy-release-frontend.sh
+
+# ou travando em uma release específica
 sh scripts/deploy-release-api.sh 3a254581
 sh scripts/deploy-release-frontend.sh 3a254581
 ```
@@ -1235,6 +1239,9 @@ sh scripts/deploy-release-frontend.sh 3a254581
 Ou tudo em um passo:
 
 ```bash
+sh scripts/deploy-release.sh
+
+# ou travando tag e serviços
 sh scripts/deploy-release.sh 3a254581 api frontend face-worker
 ```
 
@@ -1269,6 +1276,10 @@ sh scripts/compose-prod-pull.sh
 Deploy por release pronta do GHCR:
 
 ```bash
+sh scripts/deploy-release-api.sh
+sh scripts/deploy-release-frontend.sh
+
+# opcional: fixar uma release
 sh scripts/deploy-release-api.sh <sha-curta>
 sh scripts/deploy-release-frontend.sh <sha-curta>
 ```

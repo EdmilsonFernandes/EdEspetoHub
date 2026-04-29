@@ -15,23 +15,29 @@ export DOCKER_CONFIG="${DOCKER_CONFIG:-$HOME/.docker}"
 export PATH="/usr/local/bin:$PATH"
 
 usage() {
-  echo "Uso: scripts/./deploy-release.sh <image-tag> [service ...]" >&2
+  echo "Uso: scripts/./deploy-release.sh [image-tag] [service ...]" >&2
+  echo "Padrão sem image-tag: main" >&2
+  echo "Exemplo: scripts/./deploy-release.sh" >&2
+  echo "Exemplo: scripts/./deploy-release.sh frontend" >&2
   echo "Exemplo: scripts/./deploy-release.sh 3a254581 api face-worker" >&2
-  echo "Exemplo: scripts/./deploy-release.sh main frontend" >&2
 }
 
-if [ $# -lt 1 ]; then
-  usage
-  exit 1
-fi
+IMAGE_TAG_ARG="main"
 
-IMAGE_TAG_ARG="$1"
-shift || true
-
-if [ -z "$IMAGE_TAG_ARG" ]; then
-  usage
-  exit 1
-fi
+case "${1:-}" in
+  "" )
+    ;;
+  api|frontend|face-worker)
+    ;;
+  -*)
+    usage
+    exit 1
+    ;;
+  *)
+    IMAGE_TAG_ARG="$1"
+    shift || true
+    ;;
+esac
 
 if [ ! -f "$ENV_FILE" ]; then
   echo "Missing $ENV_FILE. Create it from .env.prod.example." >&2
