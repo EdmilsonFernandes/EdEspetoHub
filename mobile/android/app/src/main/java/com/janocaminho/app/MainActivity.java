@@ -358,17 +358,6 @@ public class MainActivity extends BridgeActivity {
                     showLaunchOverlayRecovery(getString(R.string.launch_ssl_error_message));
                 }
 
-                @Override
-                public void onPageFinished(WebView view, String url) {
-                    super.onPageFinished(view, url);
-                    String trustedUrl = normalizeTrustedWebUrl(url);
-                    if (trustedUrl != null) {
-                        pageFailedToLoad = false;
-                        cancelLaunchOverlayTimeout();
-                        lastKnownUrl = trustedUrl;
-                        dismissLaunchOverlay();
-                    }
-                }
             });
         }
     }
