@@ -15,9 +15,9 @@ export DOCKER_CONFIG="${DOCKER_CONFIG:-$HOME/.docker}"
 export PATH="/usr/local/bin:$PATH"
 
 usage() {
-  echo "Uso: sh scripts/deploy-release.sh <image-tag> [service ...]" >&2
-  echo "Exemplo: sh scripts/deploy-release.sh 3a254581 api face-worker" >&2
-  echo "Exemplo: sh scripts/deploy-release.sh main frontend" >&2
+  echo "Uso: scripts/./deploy-release.sh <image-tag> [service ...]" >&2
+  echo "Exemplo: scripts/./deploy-release.sh 3a254581 api face-worker" >&2
+  echo "Exemplo: scripts/./deploy-release.sh main frontend" >&2
 }
 
 if [ $# -lt 1 ]; then
@@ -104,6 +104,6 @@ $COMPOSE_CMD \
   -f "$ROOT_DIR/docker-compose.prod.yml" \
   -f "$ROOT_DIR/docker-compose.deploy.yml" \
   --env-file "$ENV_FILE" \
-  up -d --no-build "$@"
+  up -d --no-build --no-deps "$@"
 
 echo "Release deploy done."
