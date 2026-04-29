@@ -169,6 +169,19 @@ const bootstrapPushNotifications = async () => {
   }
 };
 
+// Verifica se a página carregou corretamente. Se estiver em branco ou com erro,
+// tenta recarregar silenciosamente após um pequeno delay.
+const schedulePageHealthCheck = () => {
+  window.setTimeout(() => {
+    const body = document.body;
+    const isEmpty = !body || body.children.length === 0 || body.innerHTML.trim() === '';
+    const hasError = document.title.toLowerCase().includes('error') || document.title === '';
+    if (isEmpty || hasError) {
+      window.location.reload();
+    }
+  }, 2500);
+};
+
 export const bootstrapNativeApp = async () => {
   if (!Capacitor.isNativePlatform()) return;
 
@@ -179,8 +192,9 @@ export const bootstrapNativeApp = async () => {
     await App.addListener('appStateChange', ({ isActive }) => {
       if (isActive) {
         if (MOBILE_PUSH_ENABLED) syncPushTokenNow();
-        // Disparar evento de reconexão para que as telas recarreguem dados
         window.dispatchEvent(new CustomEvent('jnc:app-foreground'));
+        // Se a página está em branco ou com erro, recarrega silenciosamente
+        schedulePageHealthCheck();
       }
     });
   } catch {
@@ -194,6 +208,7 @@ export const bootstrapNativeApp = async () => {
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         syncPushTokenNow();
+        schedulePageHealthCheck();
       }
     });
     window.addEventListener('storage', (event) => {

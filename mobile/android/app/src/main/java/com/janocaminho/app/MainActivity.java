@@ -91,6 +91,7 @@ public class MainActivity extends BridgeActivity {
     private TextView launchSubtitleText;
     private Button launchRetryButton;
     private boolean launchOverlayDismissed = false;
+    private boolean pageFailedToLoad = false;
     private final Handler launchOverlayHandler = new Handler(Looper.getMainLooper());
     private Runnable launchOverlayTimeoutRunnable;
     private AppUpdateManager appUpdateManager;
@@ -131,7 +132,13 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onResume() {
         super.onResume();
-        restoreLastVisitedUrl();
+        // Se a página falhou (deploy, idle, sem rede), reativa o overlay e tenta recarregar
+        if (pageFailedToLoad) {
+            launchOverlayDismissed = false;
+            retryInitialPageLoad();
+        } else {
+            restoreLastVisitedUrl();
+        }
         checkForAppUpdates();
     }
 
@@ -307,6 +314,7 @@ public class MainActivity extends BridgeActivity {
                     super.onPageFinished(view, url);
                     String trustedUrl = normalizeTrustedWebUrl(url);
                     if (trustedUrl != null) {
+                        pageFailedToLoad = false;
                         cancelLaunchOverlayTimeout();
                         lastKnownUrl = trustedUrl;
                         dismissLaunchOverlay();
@@ -316,37 +324,50 @@ public class MainActivity extends BridgeActivity {
                 @Override
                 public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                     super.onReceivedError(view, request, error);
-                    if (launchOverlayDismissed || request == null || !request.isForMainFrame()) return;
+                    if (request == null || !request.isForMainFrame()) return;
 
                     String failingUrl = request.getUrl() == null ? null : request.getUrl().toString();
                     if (normalizeTrustedWebUrl(failingUrl) == null) return;
 
+                    pageFailedToLoad = true;
+                    launchOverlayDismissed = false;
                     showLaunchOverlayRecovery(getString(R.string.launch_timeout_message));
                 }
 
                 @Override
                 public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
                     super.onReceivedHttpError(view, request, errorResponse);
-                    if (launchOverlayDismissed || request == null || !request.isForMainFrame()) return;
+                    if (request == null || !request.isForMainFrame()) return;
 
                     String failingUrl = request.getUrl() == null ? null : request.getUrl().toString();
                     if (normalizeTrustedWebUrl(failingUrl) == null) return;
 
                     int statusCode = errorResponse == null ? 0 : errorResponse.getStatusCode();
-                    if (statusCode >= 400) {
+                    if (statusCode >= 500) {
+                        pageFailedToLoad = true;
+                        launchOverlayDismissed = false;
                         showLaunchOverlayRecovery(getString(R.string.launch_http_error_message));
                     }
                 }
 
                 @Override
                 public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-                    if (launchOverlayDismissed) {
-                        super.onReceivedSslError(view, handler, error);
-                        return;
-                    }
-
                     handler.cancel();
+                    pageFailedToLoad = true;
+                    launchOverlayDismissed = false;
                     showLaunchOverlayRecovery(getString(R.string.launch_ssl_error_message));
+                }
+
+                @Override
+                public void onPageFinished(WebView view, String url) {
+                    super.onPageFinished(view, url);
+                    String trustedUrl = normalizeTrustedWebUrl(url);
+                    if (trustedUrl != null) {
+                        pageFailedToLoad = false;
+                        cancelLaunchOverlayTimeout();
+                        lastKnownUrl = trustedUrl;
+                        dismissLaunchOverlay();
+                    }
                 }
             });
         }
