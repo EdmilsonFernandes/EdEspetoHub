@@ -118,7 +118,7 @@ export class StoreDashboardAnalyticsService {
         )
         SELECT
           customer_key AS key,
-          MIN(customer_user_id)::text AS "customerUserId",
+          MAX(customer_user_id::text) AS "customerUserId",
           MAX(resolved_name) AS name,
           MAX(resolved_phone) AS phone,
           COUNT(*)::int AS "ordersCount",
@@ -341,9 +341,6 @@ export class StoreDashboardAnalyticsService {
     const normalizedPeriodDays = this.normalizePeriodDays(options.periodDays);
     const periodStart = this.resolvePeriodStart(normalizedPeriodDays);
 
-    const customersPromise = this.queryCustomers(store.id, null);
-    const periodCustomersPromise = this.queryCustomers(store.id, periodStart);
-
     let aggregates: DashboardAggregatePayload;
     try {
       await this.snapshotService.ensureStoreSnapshots(store.id);
@@ -356,7 +353,10 @@ export class StoreDashboardAnalyticsService {
       aggregates = await this.getLiveAggregates(store.id, monthKey, periodStart);
     }
 
-    const [customers, periodCustomers] = await Promise.all([customersPromise, periodCustomersPromise]);
+    const [customers, periodCustomers] = await Promise.all([
+      this.queryCustomers(store.id, null),
+      this.queryCustomers(store.id, periodStart),
+    ]);
 
     return this.buildReport({
       aggregates,

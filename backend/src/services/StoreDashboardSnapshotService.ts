@@ -139,17 +139,17 @@ export class StoreDashboardSnapshotService {
           ),
           daily AS (
             SELECT
-              do.store_id,
-              do.snapshot_date,
-              do.orders_count,
-              do.revenue_total,
+              dor.store_id,
+              dor.snapshot_date,
+              dor.orders_count,
+              dor.revenue_total,
               COALESCE(dc.customers_count, 0)::int AS customers_count,
-              do.first_order_at,
-              do.last_order_at,
-              do.source_updated_at
-            FROM daily_orders do
+              dor.first_order_at,
+              dor.last_order_at,
+              dor.source_updated_at
+            FROM daily_orders dor
             LEFT JOIN daily_customers dc
-              ON dc.snapshot_date = do.snapshot_date
+              ON dc.snapshot_date = dor.snapshot_date
           )
           INSERT INTO store_dashboard_daily_metrics (
             store_id,
