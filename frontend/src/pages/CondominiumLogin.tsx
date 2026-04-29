@@ -119,6 +119,13 @@ export function CondominiumLogin() {
           </button>
           <button
             type="button"
+            onClick={() => navigate('/entrar')}
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-600 transition hover:bg-slate-50"
+          >
+            Escolher outro tipo de acesso
+          </button>
+          <button
+            type="button"
             onClick={() => navigate('/condominio/solicitar')}
             className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-[#153A4C] transition hover:bg-slate-50"
           >

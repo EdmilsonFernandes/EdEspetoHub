@@ -48,6 +48,7 @@ const MotoboyProfile = lazyPage(() => import('./pages/MotoboyProfile'), 'Motoboy
 const ArchitecturePage = lazyPage(() => import('./pages/ArchitecturePage'), 'ArchitecturePage');
 const InstallAppPage = lazyPage(() => import('./pages/InstallAppPage'), 'InstallAppPage');
 const ClientAuth = lazyPage(() => import('./pages/ClientAuth'), 'ClientAuth');
+const AccessPortal = lazyPage(() => import('./pages/AccessPortal'), 'AccessPortal');
 const ClientAccount = lazyPage(() => import('./pages/ClientAccount'), 'ClientAccount');
 const ClientOrders = lazyPage(() => import('./pages/ClientOrders'), 'ClientOrders');
 const MarketplacePage = lazyPage(() => import('./pages/MarketplacePage'), 'MarketplacePage');
@@ -98,6 +99,8 @@ function App() {
               <Route path="/guia" element={<SystemGuidePage />} />
               <Route path="/docs" element={<Navigate to="/guia" replace />} />
               <Route path="/create" element={<CreateStore />} />
+              <Route path="/entrar" element={<AccessPortal />} />
+              <Route path="/login" element={<Navigate to="/entrar" replace />} />
               <Route path="/cliente" element={<ClientAuth />} />
               <Route path="/cliente/login" element={<Navigate to="/cliente?mode=login" replace />} />
               <Route path="/cliente/cadastro" element={<Navigate to="/cliente?mode=register" replace />} />

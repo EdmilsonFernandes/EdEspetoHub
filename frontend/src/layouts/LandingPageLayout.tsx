@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { Buildings, CaretDown, CreditCard, CurrencyDollar, GooglePlayLogo, House, List, MagnifyingGlass, Moon, QrCode, ShieldCheck, SignOut, Storefront, Sun, Truck, X } from '@phosphor-icons/react';
+import { Buildings, CaretDown, CreditCard, CurrencyDollar, DownloadSimple, GooglePlayLogo, House, List, MagnifyingGlass, Moon, QrCode, ShieldCheck, SignOut, Storefront, Sun, UserCircle, X } from '@phosphor-icons/react';
 interface LandingPageLayoutProps {
   children: React.ReactNode;
 }
@@ -147,7 +147,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
     navigate('/');
   };
 
-  const goToCondominiumLogin = () => navigate('/condominio/login');
+  const goToAccessPortal = () => navigate('/entrar');
   const goToCondominiumRequest = () => navigate('/condominio/solicitar');
 
   const solutionsLinks = [
@@ -176,22 +176,28 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
         active: location.pathname === '/hub' || location.pathname === '/marketplace' || location.pathname === '/descobrir' || location.pathname === '/praca',
       },
       {
-        id: 'admin',
-        label: 'Admin',
-        icon: Storefront,
-        onClick: () => navigate('/admin'),
-        active: location.pathname.startsWith('/admin'),
+        id: 'access',
+        label: 'Entrar',
+        icon: UserCircle,
+        onClick: goToAccessPortal,
+        active:
+          location.pathname === '/entrar' ||
+          location.pathname === '/login' ||
+          location.pathname.startsWith('/admin') ||
+          location.pathname.startsWith('/cliente') ||
+          location.pathname.startsWith('/motoboy') ||
+          location.pathname.startsWith('/condominio/login'),
       },
       {
-        id: 'motoboy',
-        label: 'Entregador',
-        icon: Truck,
-        onClick: () => navigate('/motoboy/login'),
-        active: location.pathname.startsWith('/motoboy'),
+        id: 'create',
+        label: 'Criar',
+        icon: Storefront,
+        onClick: () => navigate('/create?plan=trial'),
+        active: location.pathname.startsWith('/create'),
       },
       { id: 'menu', label: 'Menu', icon: List, onClick: () => setMobileMenuOpen(true), active: mobileMenuOpen },
     ],
-    [location.pathname, mobileMenuOpen, navigate]
+    [goToAccessPortal, location.pathname, mobileMenuOpen, navigate]
   );
 
   return (
@@ -267,30 +273,20 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                       </div>
                       <div className="mt-2 border-t border-white/6 px-3.5 pb-2 pt-3">
                         <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Condomínio</p>
-                        <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSolutionsMenuOpen(false);
-                              goToCondominiumLogin();
-                            }}
-                            className="inline-flex items-center justify-center gap-2 rounded-[0.95rem] border border-white/10 bg-white/[0.04] px-3 py-2.5 text-xs font-black text-white transition hover:bg-white/[0.08]"
-                          >
-                            <ShieldCheck size={14} weight="duotone" className="text-sky-300" />
-                            Entrar no condomínio
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSolutionsMenuOpen(false);
-                              goToCondominiumRequest();
-                            }}
-                            className="inline-flex items-center justify-center gap-2 rounded-[0.95rem] border border-emerald-400/18 bg-emerald-400/10 px-3 py-2.5 text-xs font-black text-emerald-200 transition hover:bg-emerald-400/16"
-                          >
-                            <Buildings size={14} weight="duotone" />
-                            Solicitar acesso
-                          </button>
-                        </div>
+                        <p className="mt-2 text-xs font-medium leading-5 text-slate-400">
+                          Responsaveis ja cadastrados entram pelo botao <span className="font-black text-white">Entrar</span>. Novos condominios comecam pela solicitacao.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSolutionsMenuOpen(false);
+                            goToCondominiumRequest();
+                          }}
+                          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-[0.95rem] border border-emerald-400/18 bg-emerald-400/10 px-3 py-2.5 text-xs font-black text-emerald-200 transition hover:bg-emerald-400/16"
+                        >
+                          <Buildings size={14} weight="duotone" />
+                          Solicitar acesso
+                        </button>
                       </div>
                     </div>
                   ) : null}
@@ -307,16 +303,10 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
 
             <div className="flex items-center gap-2 sm:gap-3">
               <button
-                onClick={() => navigate('/admin')}
+                onClick={goToAccessPortal}
                 className="hidden md:inline-flex items-center rounded-full px-3 py-2.5 text-sm font-medium tracking-[-0.02em] text-slate-300 transition-all hover:text-[#84cc16]"
               >
-                Login lojista
-              </button>
-              <button
-                onClick={goToCondominiumLogin}
-                className="hidden lg:inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-2.5 text-sm font-semibold tracking-[-0.02em] text-slate-200 transition-all hover:bg-white/[0.08] hover:text-white"
-              >
-                Login condomínio
+                Entrar
               </button>
               <button
                 onClick={() => navigate('/create?plan=trial')}
@@ -393,11 +383,11 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             </button>
             <button
               type="button"
-              onClick={goToCondominiumLogin}
+              onClick={goToAccessPortal}
               className="w-full inline-flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200"
             >
-              Entrar no condomínio
-              <ShieldCheck size={18} weight="duotone" />
+              Entrar
+              <UserCircle size={18} weight="duotone" />
             </button>
             <button
               type="button"
@@ -580,8 +570,8 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 <a href="mailto:contato@janocaminho.com.br" className="block hover:text-white transition-colors">
                   contato@janocaminho.com.br
                 </a>
-                <button onClick={() => navigate('/admin')} className="block hover:text-white transition-colors">
-                  Acesso administrativo
+                <button onClick={goToAccessPortal} className="block hover:text-white transition-colors">
+                  Entrar na plataforma
                 </button>
               </div>
             </div>

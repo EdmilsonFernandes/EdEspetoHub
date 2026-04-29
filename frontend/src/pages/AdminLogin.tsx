@@ -75,6 +75,7 @@ export function AdminLogin() {
     if (nextPath) params.set('next', nextPath);
     return params.toString() ? `?${params.toString()}` : '';
   })();
+  const accessPortalPath = `/entrar${hubSuffix}`;
 
   const finishAdminLogin = (sessionData: any) => {
     const redirectTab = sessionStorage.getItem('admin:redirectTab');
@@ -387,14 +388,13 @@ export function AdminLogin() {
         </div>
 
         {!hubMode ? (
-          <div className="auth-segment">
-            <button type="button" className="auth-segment-btn active">Lojista</button>
-            <button type="button" onClick={() => navigate(`/cliente?mode=login${nextPath ? `&next=${encodeURIComponent(nextPath)}` : ''}`)} className="auth-segment-btn">Cliente</button>
-            <button type="button" onClick={() => navigate(`/motoboy/login${hubSuffix}`)} className="auth-segment-btn">Entregador</button>
-            {superAdminUnlocked ? (
-              <button type="button" onClick={() => navigate('/superadmin')} className="auth-segment-btn">Master</button>
-            ) : null}
-          </div>
+          <button
+            type="button"
+            onClick={() => navigate(accessPortalPath)}
+            className="mx-auto inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/75 px-4 py-2 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 shadow-[0_14px_32px_-26px_rgba(15,23,42,0.45)] transition hover:border-slate-300 hover:text-slate-700"
+          >
+            Escolher outro tipo de acesso
+          </button>
         ) : null}
 
         <form onSubmit={handleLogin} autoComplete="on" className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40">
