@@ -102,6 +102,10 @@ const datePart = nowIso.slice(0, 10).replace(/-/g, '');
 const timePart = nowIso.slice(11, 19).replace(/:/g, '');
 const envBuildVersion = String(process.env.BUILD_VERSION || '').trim();
 const normalizeSemver = (value) => String(value || '').trim().replace(/^v/i, '').split('+')[0].trim();
+const extractGhBuildNumber = (value) => {
+  const match = String(value || '').match(/(?:^|[+.-])gha\.(\d+)(?:[.-]|$)/i);
+  return match?.[1] || '';
+};
 const versionBase = normalizeSemver(pkg?.version || existing?.version || '0.0.0') || '0.0.0';
 const version = normalizeSemver(envBuildVersion) || versionBase;
 const buildMeta = envBuildVersion.includes('+')
@@ -109,6 +113,9 @@ const buildMeta = envBuildVersion.includes('+')
   : `${datePart}.${timePart}.${shortHash}`;
 const versionInternal = `${version}+${buildMeta}`;
 const buildId = `${versionInternal}-${datePart}.${timePart}-${shortHash}`;
+const versionDisplaySuffix = extractGhBuildNumber(versionInternal) || shortHash;
+const versionBaseLabel = `v${version.split('+')[0]}`;
+const versionLabel = versionDisplaySuffix ? `${versionBaseLabel}.${versionDisplaySuffix}` : versionBaseLabel;
 
 const repositoryUrl = resolveGithubRepoUrl();
 const commitsRaw = safeExecFile('git', ['log', '-n', '30', '--date=iso-strict', '--pretty=format:%H|%h|%cI|%an|%ae|%s']);
@@ -139,7 +146,9 @@ const commits =
 const payload = {
   appName: 'Já no Caminho',
   version,
-  versionLabel: `v${version.split('+')[0]}`,
+  versionBaseLabel,
+  versionDisplaySuffix,
+  versionLabel,
   versionInternal,
   buildId,
   builtAt: nowIso,

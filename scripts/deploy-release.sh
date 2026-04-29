@@ -158,7 +158,7 @@ format_image_summary() {
   summary=""
   if [ -n "$version_label" ]; then
     summary="$version_label"
-    if [ -n "$build_number" ]; then
+    if [ -n "$build_number" ] && ! printf '%s' "$version_label" | grep -Eq "(^|[^0-9])${build_number}$"; then
       summary="${summary}.${build_number}"
     fi
   elif [ -n "$short_sha" ]; then

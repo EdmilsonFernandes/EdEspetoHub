@@ -206,7 +206,7 @@ jobs:
           TIME_PART="${TIME_PART//:/}"
 
           if [ -n "$VERSION" ]; then
-            VERSION_LABEL="v${VERSION}"
+            VERSION_LABEL="v${VERSION}.${GITHUB_RUN_NUMBER}"
             VERSION_INTERNAL="${VERSION}+gha.${GITHUB_RUN_NUMBER}.${SHORT_SHA}"
           else
             VERSION_LABEL="${{ matrix.name }}"
