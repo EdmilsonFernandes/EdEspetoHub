@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, ArrowClockwise, Bicycle, CheckCircle, Clock, CircleNotch, MapPin, Package, Phone, SealCheck, Star, User, WhatsappLogo } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowClockwise, Bicycle, CheckCircle, Clock, CircleNotch, CopySimple, MapPin, Package, Phone, SealCheck, Star, User, WhatsappLogo } from '@phosphor-icons/react';
 import { Capacitor } from '@capacitor/core';
 import { orderService } from '../services/orderService';
 import { mapsService } from '../services/mapsService';
@@ -349,6 +349,7 @@ export function OrderTracking() {
   const [reviewAccessDenied, setReviewAccessDenied] = useState(false);
   const [orderAccessToken, setOrderAccessToken] = useState('');
   const [tipPixCopied, setTipPixCopied] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const [reviewForm, setReviewForm] = useState({
     storeRating: 0,
     deliveryRating: 0,
@@ -1224,7 +1225,25 @@ export function OrderTracking() {
                 </p>
               </div>
             </button>
-            <div className="w-9" />
+            <button
+              type="button"
+              onClick={async () => {
+                const url = `${window.location.origin}/pedido/${orderId}`;
+                try {
+                  if (navigator.share) {
+                    await navigator.share({ title: `Pedido — ${storeName}`, url });
+                  } else {
+                    await navigator.clipboard.writeText(url);
+                    setLinkCopied(true);
+                    window.setTimeout(() => setLinkCopied(false), 2200);
+                  }
+                } catch { /* usuário cancelou share */ }
+              }}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-amber-200/70 bg-white/85 text-stone-700 shadow-[0_12px_24px_-22px_rgba(120,53,15,0.35)] transition-all active:scale-95"
+              title="Compartilhar pedido"
+            >
+              {linkCopied ? <CheckCircle size={16} weight="fill" className="text-emerald-600" /> : <CopySimple size={16} weight="bold" />}
+            </button>
           </div>
         </div>
       </header>

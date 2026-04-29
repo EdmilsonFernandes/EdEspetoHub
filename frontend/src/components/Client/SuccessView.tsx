@@ -376,6 +376,20 @@ export const SuccessView = ({
   const isFailed = String(paymentStatus || "").toUpperCase() === "FAILED";
   const isAwaitingPayment = hasOnlinePayment && !isPaid && !isFailed;
   const isNativePlatform = Capacitor.isNativePlatform();
+  const shouldCelebrate = !isAwaitingPayment && !isFailed;
+
+  // Overlay de celebração curto para pedidos concluídos sem falha/pagamento pendente.
+  const [showCelebration, setShowCelebration] = useState(() => shouldCelebrate);
+  useEffect(() => {
+    if (!shouldCelebrate) {
+      setShowCelebration(false);
+      return;
+    }
+
+    setShowCelebration(true);
+    const t = window.setTimeout(() => setShowCelebration(false), 1600);
+    return () => window.clearTimeout(t);
+  }, [shouldCelebrate]);
 
   // ── Dedicated PIX screen ──────────────────────────────────────────────────
   if (isPix) {
@@ -403,6 +417,35 @@ export const SuccessView = ({
 
   return (
     <div className={`animate-in fade-in duration-300 relative overflow-x-clip min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.10),transparent_34%),linear-gradient(180deg,#eef5f7_0%,#f8fafc_8.5rem,#f8fafc_100%)] ${checkoutTopPaddingClass} ${isNativePlatform ? "ds-native-nav-content-lg" : "pb-24"}`}>
+      {showCelebration && (
+        <div className="pointer-events-none fixed inset-x-0 top-0 z-[75] flex justify-center px-4 pt-20 sm:pt-24">
+          <div className="relative w-full max-w-sm overflow-hidden rounded-[2rem] border border-emerald-200/80 bg-[radial-gradient(circle_at_top,rgba(52,211,153,0.28),rgba(255,255,255,0.98)_48%)] px-5 py-5 shadow-[0_40px_100px_-52px_rgba(5,150,105,0.65)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-300">
+            <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-emerald-300/35 blur-3xl" />
+            <div className="absolute -left-6 bottom-0 h-20 w-20 rounded-full bg-sky-200/35 blur-3xl" />
+            <span className="absolute left-5 top-4 h-2.5 w-2.5 rounded-full bg-amber-300 shadow-[0_0_0_6px_rgba(252,211,77,0.18)]" />
+            <span className="absolute right-8 top-6 h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_0_5px_rgba(52,211,153,0.18)]" />
+            <span className="absolute bottom-5 right-12 h-2.5 w-2.5 rounded-full bg-sky-300 shadow-[0_0_0_6px_rgba(125,211,252,0.16)]" />
+            <div className="relative flex items-center gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[1.4rem] bg-emerald-100 text-emerald-700 shadow-inner shadow-emerald-200/70 ring-1 ring-emerald-200/70">
+                <CheckCircle size={30} weight="duotone" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-emerald-700/80">
+                  Pedido enviado
+                </p>
+                <h3 className="mt-1 text-lg font-black leading-tight text-slate-950">
+                  {isPaid ? "Pagamento confirmado!" : "Tudo certo com o pedido"}
+                </h3>
+                <p className="mt-1 text-xs leading-relaxed text-slate-600">
+                  {storeLabel
+                    ? `${storeLabel} já recebeu seu pedido.`
+                    : "Seu pedido já foi recebido e seguirá para produção."}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[max(env(safe-area-inset-top),0.85rem)] bg-[linear-gradient(180deg,rgba(238,245,247,0.98),rgba(238,245,247,0.74))]" />
       {/* Sticky header */}
       <div className={`sticky ${checkoutStickyTopClass} z-40 mb-4`}>
