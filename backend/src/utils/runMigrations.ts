@@ -1884,6 +1884,50 @@ export async function runMigrations() {
     ON zip_code_cache(zip_code);
   `);
   await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS store_dashboard_daily_metrics (
+      store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+      snapshot_date DATE NOT NULL,
+      orders_count INT NOT NULL DEFAULT 0,
+      revenue_total NUMERIC(10,2) NOT NULL DEFAULT 0,
+      customers_count INT NOT NULL DEFAULT 0,
+      first_order_at TIMESTAMPTZ,
+      last_order_at TIMESTAMPTZ,
+      source_updated_at TIMESTAMPTZ,
+      refreshed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      CONSTRAINT pk_store_dashboard_daily_metrics PRIMARY KEY (store_id, snapshot_date)
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_store_dashboard_daily_metrics_store_date
+    ON store_dashboard_daily_metrics(store_id, snapshot_date DESC);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_store_dashboard_daily_metrics_source_updated
+    ON store_dashboard_daily_metrics(source_updated_at);
+  `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS store_dashboard_daily_products (
+      store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+      snapshot_date DATE NOT NULL,
+      product_ref TEXT NOT NULL,
+      product_id UUID,
+      product_name TEXT NOT NULL,
+      quantity INT NOT NULL DEFAULT 0,
+      revenue_total NUMERIC(10,2) NOT NULL DEFAULT 0,
+      source_updated_at TIMESTAMPTZ,
+      refreshed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      CONSTRAINT pk_store_dashboard_daily_products PRIMARY KEY (store_id, snapshot_date, product_ref)
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_store_dashboard_daily_products_store_date
+    ON store_dashboard_daily_products(store_id, snapshot_date DESC);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_store_dashboard_daily_products_name
+    ON store_dashboard_daily_products(product_name);
+  `);
+  await AppDataSource.query(`
     UPDATE store_settings
     SET delivery_radius_km = 5
     WHERE delivery_radius_km IS NULL

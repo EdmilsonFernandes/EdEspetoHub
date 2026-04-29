@@ -1,6 +1,8 @@
 import { AppDataSource } from '../config/database';
 import { AppError } from '../errors/AppError';
 import { StoreRepository } from '../repositories/StoreRepository';
+import { StoreDashboardSnapshotService } from './StoreDashboardSnapshotService';
+import { logger } from '../utils/logger';
 
 type DashboardOptions = {
   monthKey?: string | null;
@@ -19,9 +21,17 @@ type DashboardCustomerRow = {
   lastOrderAt: string | null;
 };
 
+type DashboardAggregatePayload = {
+  summaryRow: Record<string, unknown>;
+  salesRows: Array<Record<string, unknown>>;
+  topRows: Array<Record<string, unknown>>;
+};
+
 export class StoreDashboardAnalyticsService {
   private storeRepository = new StoreRepository();
+  private snapshotService = new StoreDashboardSnapshotService();
   private timezone = process.env.APP_TZ || 'America/Sao_Paulo';
+  private log = logger.child({ scope: 'StoreDashboardAnalyticsService' });
 
   private ensureStoreAccess(storeId: string, authStoreId?: string) {
     if (authStoreId && storeId !== authStoreId) {
@@ -53,6 +63,16 @@ export class StoreDashboardAnalyticsService {
     return new Date(Date.now() - normalizedDays * 24 * 60 * 60 * 1000);
   }
 
+  private formatDateInTimezone(value: Date | null) {
+    if (!value) return null;
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: this.timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(value);
+  }
+
   private toNumber(value: unknown) {
     const numeric = Number(value);
     return Number.isFinite(numeric) ? numeric : 0;
@@ -61,6 +81,15 @@ export class StoreDashboardAnalyticsService {
   private toInt(value: unknown) {
     const numeric = Number(value);
     return Number.isFinite(numeric) ? Math.trunc(numeric) : 0;
+  }
+
+  private normalizeDateKey(value: unknown) {
+    if (value instanceof Date) {
+      return value.toISOString().slice(0, 10);
+    }
+    const raw = String(value || '').trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+    return '';
   }
 
   private async queryCustomers(storeId: string, periodStart: Date | null) {
@@ -119,16 +148,8 @@ export class StoreDashboardAnalyticsService {
     );
   }
 
-  async getReport(storeId: string, authStoreId?: string, options: DashboardOptions = {}) {
-    const store = await this.storeRepository.findById(storeId);
-    if (!store) throw new AppError('STORE-001', 404);
-    this.ensureStoreAccess(store.id, authStoreId);
-
-    const monthKey = this.normalizeMonthKey(options.monthKey);
-    const normalizedPeriodDays = this.normalizePeriodDays(options.periodDays);
-    const periodStart = this.resolvePeriodStart(normalizedPeriodDays);
-
-    const [summaryRow, salesRows, topRows, customers, periodCustomers] = await Promise.all([
+  private async getLiveAggregates(storeId: string, monthKey: string, periodStart: Date | null): Promise<DashboardAggregatePayload> {
+    const [summaryRow, salesRows, topRows] = await Promise.all([
       AppDataSource.query(
         `
           SELECT
@@ -156,7 +177,7 @@ export class StoreDashboardAnalyticsService {
           FROM orders o
           WHERE o.store_id = $1
         `,
-        [store.id, this.timezone, monthKey, periodStart]
+        [storeId, this.timezone, monthKey, periodStart]
       ).then((rows) => (Array.isArray(rows) && rows.length ? rows[0] : {})),
       AppDataSource.query(
         `
@@ -169,7 +190,7 @@ export class StoreDashboardAnalyticsService {
           GROUP BY 1
           ORDER BY 1 ASC
         `,
-        [store.id, this.timezone, periodStart]
+        [storeId, this.timezone, periodStart]
       ),
       AppDataSource.query(
         `
@@ -188,12 +209,95 @@ export class StoreDashboardAnalyticsService {
           ORDER BY qty DESC, revenue DESC, name ASC
           LIMIT 8
         `,
-        [store.id, periodStart]
+        [storeId, periodStart]
       ),
-      this.queryCustomers(store.id, null),
-      this.queryCustomers(store.id, periodStart),
     ]);
 
+    return {
+      summaryRow: summaryRow || {},
+      salesRows: Array.isArray(salesRows) ? salesRows : [],
+      topRows: Array.isArray(topRows) ? topRows : [],
+    };
+  }
+
+  private async getSnapshotAggregates(storeId: string, monthKey: string, periodStart: Date | null): Promise<DashboardAggregatePayload> {
+    const periodStartDate = this.formatDateInTimezone(periodStart);
+
+    const [summaryRow, salesRows, topRows] = await Promise.all([
+      AppDataSource.query(
+        `
+          SELECT
+            COALESCE(SUM(sdm.orders_count), 0)::int AS "totalOrders",
+            COALESCE(SUM(sdm.revenue_total), 0) AS "totalRevenue",
+            COALESCE(
+              SUM(
+                CASE
+                  WHEN to_char(sdm.snapshot_date, 'YYYY-MM') = $2 THEN sdm.revenue_total
+                  ELSE 0
+                END
+              ),
+              0
+            ) AS "monthRevenue",
+            COALESCE(
+              SUM(
+                CASE
+                  WHEN $3::date IS NULL OR sdm.snapshot_date >= $3::date THEN sdm.revenue_total
+                  ELSE 0
+                END
+              ),
+              0
+            ) AS "periodRevenue",
+            MIN(sdm.first_order_at) AS "firstOrderAt"
+          FROM store_dashboard_daily_metrics sdm
+          WHERE sdm.store_id = $1
+        `,
+        [storeId, monthKey, periodStartDate]
+      ).then((rows) => (Array.isArray(rows) && rows.length ? rows[0] : {})),
+      AppDataSource.query(
+        `
+          SELECT
+            sdm.snapshot_date AS date,
+            COALESCE(sdm.revenue_total, 0) AS total
+          FROM store_dashboard_daily_metrics sdm
+          WHERE sdm.store_id = $1
+            AND ($2::date IS NULL OR sdm.snapshot_date >= $2::date)
+          ORDER BY sdm.snapshot_date ASC
+        `,
+        [storeId, periodStartDate]
+      ),
+      AppDataSource.query(
+        `
+          SELECT
+            sdp.product_name AS name,
+            COALESCE(SUM(sdp.quantity), 0)::int AS qty,
+            COALESCE(SUM(sdp.revenue_total), 0) AS revenue
+          FROM store_dashboard_daily_products sdp
+          WHERE sdp.store_id = $1
+            AND ($2::date IS NULL OR sdp.snapshot_date >= $2::date)
+          GROUP BY sdp.product_name
+          ORDER BY qty DESC, revenue DESC, name ASC
+          LIMIT 8
+        `,
+        [storeId, periodStartDate]
+      ),
+    ]);
+
+    return {
+      summaryRow: summaryRow || {},
+      salesRows: Array.isArray(salesRows) ? salesRows : [],
+      topRows: Array.isArray(topRows) ? topRows : [],
+    };
+  }
+
+  private buildReport(params: {
+    aggregates: DashboardAggregatePayload;
+    customers: DashboardCustomerRow[];
+    periodCustomers: DashboardCustomerRow[];
+    monthKey: string;
+    normalizedPeriodDays: number | null;
+  }) {
+    const { aggregates, customers, periodCustomers, monthKey, normalizedPeriodDays } = params;
+    const summaryRow = aggregates.summaryRow || {};
     const totalOrders = this.toInt(summaryRow?.totalOrders);
     const totalRevenue = this.toNumber(summaryRow?.totalRevenue);
     const avgTicket = totalOrders > 0 ? totalRevenue / totalOrders : 0;
@@ -212,11 +316,13 @@ export class StoreDashboardAnalyticsService {
         allTimeCustomerCount: customers.length,
         periodCustomerCount: periodCustomers.length,
       },
-      salesByDay: (Array.isArray(salesRows) ? salesRows : []).map((row) => ({
-        date: String(row?.date || ''),
-        total: this.toNumber(row?.total),
-      })),
-      topProducts: (Array.isArray(topRows) ? topRows : []).map((row) => ({
+      salesByDay: (Array.isArray(aggregates.salesRows) ? aggregates.salesRows : [])
+        .map((row) => ({
+          date: this.normalizeDateKey(row?.date),
+          total: this.toNumber(row?.total),
+        }))
+        .filter((row) => row.date),
+      topProducts: (Array.isArray(aggregates.topRows) ? aggregates.topRows : []).map((row) => ({
         name: String(row?.name || 'Produto'),
         qty: this.toInt(row?.qty),
         revenue: this.toNumber(row?.revenue),
@@ -224,5 +330,40 @@ export class StoreDashboardAnalyticsService {
       customers,
       periodCustomers,
     };
+  }
+
+  async getReport(storeId: string, authStoreId?: string, options: DashboardOptions = {}) {
+    const store = await this.storeRepository.findById(storeId);
+    if (!store) throw new AppError('STORE-001', 404);
+    this.ensureStoreAccess(store.id, authStoreId);
+
+    const monthKey = this.normalizeMonthKey(options.monthKey);
+    const normalizedPeriodDays = this.normalizePeriodDays(options.periodDays);
+    const periodStart = this.resolvePeriodStart(normalizedPeriodDays);
+
+    const customersPromise = this.queryCustomers(store.id, null);
+    const periodCustomersPromise = this.queryCustomers(store.id, periodStart);
+
+    let aggregates: DashboardAggregatePayload;
+    try {
+      await this.snapshotService.ensureStoreSnapshots(store.id);
+      aggregates = await this.getSnapshotAggregates(store.id, monthKey, periodStart);
+    } catch (error: any) {
+      this.log.warn('Dashboard snapshot unavailable, falling back to live aggregation', {
+        storeId: store.id,
+        error: error?.message || String(error),
+      });
+      aggregates = await this.getLiveAggregates(store.id, monthKey, periodStart);
+    }
+
+    const [customers, periodCustomers] = await Promise.all([customersPromise, periodCustomersPromise]);
+
+    return this.buildReport({
+      aggregates,
+      customers,
+      periodCustomers,
+      monthKey,
+      normalizedPeriodDays,
+    });
   }
 }

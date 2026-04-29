@@ -37,6 +37,7 @@ async function bootstrap()
 	  const { scheduleDeliveryExpirationJob } = await import('./jobs/delivery-expiration.job');
 	  const { scheduleFaceVerifyJob } = await import('./jobs/face-verify.job');
 	  const { scheduleAwaitingPaymentExpirationJob } = await import('./jobs/awaiting-payment-expiration.job');
+	  const { scheduleStoreDashboardSnapshotJob } = await import('./jobs/store-dashboard-snapshot.job');
 	  const { runMigrations } = await import('./utils/runMigrations');
   const { applyApiSecurityHeaders } = await import('./middleware/apiSecurity');
   const { requestLogger } = await import('./middleware/requestLogger');
@@ -140,6 +141,7 @@ async function bootstrap()
 	  scheduleDeliveryExpirationJob();
 	  scheduleFaceVerifyJob();
 	  scheduleAwaitingPaymentExpirationJob();
+	  scheduleStoreDashboardSnapshotJob();
 
   app.listen(env.port, () =>
   {
