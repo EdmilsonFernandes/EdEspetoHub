@@ -86,9 +86,28 @@ jobs:
           fi
 
           install -m 700 -d ~/.ssh
-          printf '%s\n' "$PROD_SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$PROD_SSH_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -p "${PROD_SSH_PORT:-22}" -H "$PROD_SSH_HOST" >> ~/.ssh/known_hosts
+
+      - name: Test SSH access
+        shell: bash
+        env:
+          PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+          PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
+          PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
+        run: |
+          ssh_user="${PROD_SSH_USER:-ec2-user}"
+          ssh_port="${PROD_SSH_PORT:-22}"
+
+          ssh \
+            -i ~/.ssh/id_ed25519 \
+            -p "$ssh_port" \
+            -o BatchMode=yes \
+            -o ConnectTimeout=10 \
+            -o StrictHostKeyChecking=yes \
+            "${ssh_user}@${PROD_SSH_HOST}" \
+            "echo github-actions-ssh-ok"
 
       - name: Deploy on EC2
         shell: bash
@@ -104,6 +123,8 @@ jobs:
           ssh \
             -i ~/.ssh/id_ed25519 \
             -p "$ssh_port" \
+            -o BatchMode=yes \
+            -o ConnectTimeout=10 \
             -o StrictHostKeyChecking=yes \
             "${ssh_user}@${PROD_SSH_HOST}" \
             "set -eu; \
