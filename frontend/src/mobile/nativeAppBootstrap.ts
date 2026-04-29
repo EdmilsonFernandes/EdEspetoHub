@@ -27,6 +27,7 @@ const normalizeInternalUrl = (rawUrl: string): string | null => {
     // no-op
   }
 
+  // Push/deep links no app podem chegar pelo esquema customizado em vez da URL web.
   if (rawUrl.startsWith('janocaminho://')) {
     const value = rawUrl.replace('janocaminho://', '').trim();
     if (!value) return '/hub';

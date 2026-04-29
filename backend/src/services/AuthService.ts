@@ -69,6 +69,7 @@ export class AuthService
    * @author Edmilson Lopes
    */
 private normalizePhone(value?: string | null) {
+    // Mantém só dígitos para evitar diferenças de máscara em login, cadastro e auditoria.
     return String(value || '').replace(/\D/g, '');
   }
 
