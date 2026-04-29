@@ -194,6 +194,7 @@ export const bootstrapNativeApp = async () => {
     window.addEventListener('focus', syncPushTokenNow);
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
+        // Em foreground, revalida o token sem interferir na navegação atual.
         syncPushTokenNow();
       }
     });
