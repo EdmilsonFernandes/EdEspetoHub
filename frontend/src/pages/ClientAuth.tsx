@@ -1,7 +1,6 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Capacitor } from '@capacitor/core';
 import { UserCircle, Eye, EyeSlash, LockKey, WarningCircle, SealCheck, EnvelopeSimple } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
 import { AuthLayout } from '../layouts/AuthLayout';
@@ -49,7 +48,6 @@ const normalizeVerificationCodeError = (error: any) => {
 };
 
 export function ClientAuth() {
-  const isNativePlatform = Capacitor.isNativePlatform();
   const navigate = useNavigate();
   const location = useLocation();
   const [mode, setMode] = useState<'login' | 'register'>(getModeFromSearch(location.search));
@@ -174,7 +172,7 @@ export function ClientAuth() {
       navigate(nextPath, { replace: true });
       return;
     }
-    navigate(hubMode ? '/hub' : '/cliente/conta', { replace: true });
+    navigate('/hub', { replace: true });
   };
 
   const finishAuthenticatedCustomerSession = (result: any) => {
