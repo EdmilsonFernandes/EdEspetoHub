@@ -200,6 +200,7 @@ export const bootstrapNativeApp = async () => {
     });
     window.addEventListener('storage', (event) => {
       if (event.key === 'customerSession') {
+        // Mantém o token sincronizado quando a sessão muda em outra aba/contexto.
         syncPushTokenNow();
       }
     });
