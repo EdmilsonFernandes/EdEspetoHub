@@ -32,7 +32,7 @@ load_value_if_missing() {
     return 0
   fi
 
-  for file in "$SECRETS_FILE" "$ENV_FILE"; do
+  for file in "$SECRETS_FILE" "$ENV_FILE" "$API_ENV_FILE"; do
     value="$(get_file_var "$key" "$file")"
     if [ -n "$value" ]; then
       export "$key=$value"

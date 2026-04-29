@@ -1232,6 +1232,8 @@ AWS_REGION=us-east-2
 SSM_PARAMETER_NAME=/chamanoespeto/prod
 ```
 
+Se o seu `backend/.env.docker` já usa esse `SSM_PARAMETER_NAME`, o script de release agora também reaproveita esse arquivo e você não precisa duplicar a configuração no `.env.prod`.
+
 4) Deploy por release específica ou pela `main` mais recente:
 
 ```bash
@@ -1302,7 +1304,7 @@ aws ssm put-parameter \
   --region us-east-2
 ```
 
-Apontar o `.env.prod`:
+Se ainda não estiver definido em `backend/.env.docker`, aponte no `.env.prod`:
 
 ```bash
 cat >> .env.prod <<'EOF'

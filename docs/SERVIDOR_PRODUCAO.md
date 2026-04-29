@@ -113,6 +113,7 @@ Observações:
 - sem argumento, os scripts usam `main`.
 - para produção mais sensível, o mais seguro continua sendo usar a SHA curta.
 - Recomendado: coloque `GHCR_USERNAME` e `GHCR_TOKEN` dentro do JSON `SecureString` já usado em `SSM_PARAMETER_NAME`, por exemplo `/chamanoespeto/prod`.
+- O script de release reaproveita `AWS_REGION` e `SSM_PARAMETER_NAME` de `backend/.env.docker` se eles já estiverem definidos lá.
 - Fallback: se preferir local, use `.env.prod.secrets`.
 - Se o fluxo novo falhar, o deploy antigo com `deploy-api.sh` e `deploy-frontend.sh` continua funcionando.
 
@@ -158,7 +159,7 @@ aws ssm put-parameter \
   --region us-east-2
 ```
 
-4. Configurar o `.env.prod` para o deploy ler esse JSON:
+4. Se `backend/.env.docker` ainda não tiver isso, configurar o `.env.prod` para o deploy ler esse JSON:
 
 ```bash
 cd ~/EdEspetoHub
