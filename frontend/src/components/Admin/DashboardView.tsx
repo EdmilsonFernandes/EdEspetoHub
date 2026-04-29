@@ -612,6 +612,13 @@ export const DashboardView = ({
           <style>
             * { box-sizing: border-box; }
             body { margin: 0; background: #f6f3ee; color: #1f2937; font-family: Arial, sans-serif; -webkit-text-size-adjust: 100%; }
+            .screen-toolbar { position: sticky; top: 0; z-index: 20; display: flex; justify-content: space-between; gap: 16px; align-items: center; padding: 14px 18px; border-bottom: 1px solid #e5e7eb; background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); }
+            .screen-toolbar__meta { min-width: 0; }
+            .screen-toolbar__meta strong { display: block; font-size: 13px; color: #111827; }
+            .screen-toolbar__meta span { display: block; margin-top: 2px; font-size: 11px; color: #6b7280; }
+            .screen-toolbar__actions { display: flex; flex-wrap: wrap; gap: 10px; }
+            .screen-toolbar button { border: 0; border-radius: 999px; padding: 11px 16px; font-size: 12px; font-weight: 800; cursor: pointer; color: #fff; background: linear-gradient(135deg,#0f172a,#334155); }
+            .screen-toolbar button.secondary { color: #334155; background: #f8fafc; box-shadow: inset 0 0 0 1px #cbd5e1; }
             .page { max-width: 1120px; margin: 0 auto; padding: 28px; }
             .hero { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start; margin-bottom: 20px; }
             .brand { display: flex; gap: 16px; align-items: center; min-width: 0; }
@@ -639,6 +646,9 @@ export const DashboardView = ({
             @page { size: A4; margin: 12mm; }
             @media screen and (max-width: 760px) {
               body { background: #fffaf6; }
+              .screen-toolbar { align-items: stretch; flex-direction: column; padding: 12px 14px; }
+              .screen-toolbar__actions { width: 100%; }
+              .screen-toolbar button { flex: 1 1 0; justify-content: center; }
               .page { padding: 16px; }
               .hero { flex-direction: column; gap: 14px; }
               .brand { align-items: flex-start; }
@@ -668,6 +678,7 @@ export const DashboardView = ({
               .report-table-empty td::before { content: none; }
             }
             @media print {
+              .screen-toolbar { display: none !important; }
               body { background: #fff; }
               .page { padding: 0; }
               .section, .metric, .meta { box-shadow: none; }
@@ -676,6 +687,16 @@ export const DashboardView = ({
           </style>
         </head>
         <body>
+          <div class="screen-toolbar">
+            <div class="screen-toolbar__meta">
+              <strong>Relatório pronto para exportação</strong>
+              <span>Imprima, salve em PDF e depois feche ou volte para o painel.</span>
+            </div>
+            <div class="screen-toolbar__actions">
+              <button type="button" class="secondary" onclick="window.handleCloseReport()">Fechar</button>
+              <button type="button" onclick="window.handlePrintReport()">Imprimir / salvar PDF</button>
+            </div>
+          </div>
           <div class="page">
             <div class="hero">
               <div class="brand">
@@ -760,9 +781,24 @@ export const DashboardView = ({
             </div>
           </div>
           <script>
-            window.onload = () => {
+            window.handlePrintReport = () => {
               window.focus();
               window.print();
+            };
+            window.handleCloseReport = () => {
+              if (window.opener && !window.opener.closed) {
+                window.close();
+                return;
+              }
+              if (window.history.length > 1) {
+                window.history.back();
+                return;
+              }
+              window.location.replace("${window.location.origin}");
+            };
+            window.onload = () => {
+              window.focus();
+              window.setTimeout(() => window.handlePrintReport(), 120);
             };
           </script>
         </body>
@@ -785,15 +821,39 @@ export const DashboardView = ({
           <title>QR da Vitrine - ${safeStoreName}</title>
           <style>
             body { margin: 0; font-family: Arial, sans-serif; background: #f8fafc; color: #0f172a; }
+            .screen-toolbar { position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; gap: 16px; align-items: center; padding: 14px 18px; border-bottom: 1px solid #e2e8f0; background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); }
+            .screen-toolbar__meta strong { display: block; font-size: 13px; }
+            .screen-toolbar__meta span { display: block; margin-top: 2px; font-size: 11px; color: #64748b; }
+            .screen-toolbar__actions { display: flex; flex-wrap: wrap; gap: 10px; }
+            .screen-toolbar button { border: 0; border-radius: 999px; padding: 11px 16px; font-size: 12px; font-weight: 800; cursor: pointer; color: #fff; background: linear-gradient(135deg,#0f172a,#334155); }
+            .screen-toolbar button.secondary { color: #334155; background: #f8fafc; box-shadow: inset 0 0 0 1px #cbd5e1; }
             .page { padding: 40px 24px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
             .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; padding: 32px; text-align: center; box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08); }
             .title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
             .subtitle { font-size: 14px; color: #475569; margin-bottom: 24px; }
             .qr { width: 300px; height: 300px; object-fit: contain; }
             .link { font-size: 12px; color: #64748b; margin-top: 18px; word-break: break-all; }
+            @media screen and (max-width: 760px) {
+              .screen-toolbar { align-items: stretch; flex-direction: column; padding: 12px 14px; }
+              .screen-toolbar__actions { width: 100%; }
+              .screen-toolbar button { flex: 1 1 0; justify-content: center; }
+            }
+            @media print {
+              .screen-toolbar { display: none !important; }
+            }
           </style>
         </head>
         <body>
+          <div class="screen-toolbar">
+            <div class="screen-toolbar__meta">
+              <strong>QR pronto para impressão</strong>
+              <span>Imprima, salve e depois feche ou volte para o painel.</span>
+            </div>
+            <div class="screen-toolbar__actions">
+              <button type="button" class="secondary" onclick="window.handleCloseQr()">Fechar</button>
+              <button type="button" onclick="window.handlePrintQr()">Imprimir / salvar PDF</button>
+            </div>
+          </div>
           <div class="page">
             <div class="card">
               <div class="title">Vitrine ${safeStoreName}</div>
@@ -803,9 +863,24 @@ export const DashboardView = ({
             </div>
           </div>
           <script>
-            window.onload = () => {
+            window.handlePrintQr = () => {
               window.focus();
               window.print();
+            };
+            window.handleCloseQr = () => {
+              if (window.opener && !window.opener.closed) {
+                window.close();
+                return;
+              }
+              if (window.history.length > 1) {
+                window.history.back();
+                return;
+              }
+              window.location.replace("${window.location.origin}");
+            };
+            window.onload = () => {
+              window.focus();
+              window.setTimeout(() => window.handlePrintQr(), 120);
             };
           </script>
         </body>

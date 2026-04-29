@@ -1196,30 +1196,30 @@ export function OrderTracking() {
   const itemsToRender = Array.isArray(order?.items) ? order.items : [];
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#f8f4ec_0%,#f2ebde_100%)] pt-[env(safe-area-inset-top)]">
-      <div className="pointer-events-none fixed top-[-12%] right-[-8%] h-[42%] w-[50%] rounded-full bg-amber-300/18 blur-[120px] -z-10" />
-      <div className="pointer-events-none fixed bottom-[10%] left-[-6%] h-[28%] w-[36%] rounded-full bg-stone-900/10 blur-[100px] -z-10" />
+    <div className="min-h-screen bg-[linear-gradient(180deg,#f4f8fb_0%,#ebf2f7_100%)] pt-[env(safe-area-inset-top)]">
+      <div className="pointer-events-none fixed top-[-12%] right-[-8%] h-[42%] w-[50%] rounded-full bg-[#336886]/14 blur-[120px] -z-10" />
+      <div className="pointer-events-none fixed bottom-[10%] left-[-6%] h-[28%] w-[36%] rounded-full bg-sky-300/16 blur-[100px] -z-10" />
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
-      <header className="sticky top-0 z-50 border-b border-amber-200/50 bg-[rgba(248,244,236,0.94)] backdrop-blur-xl shadow-[0_12px_30px_-24px_rgba(120,53,15,0.24)]">
+      <header className="sticky top-0 z-50 border-b border-[#d5e3ec]/90 bg-[rgba(244,248,251,0.94)] backdrop-blur-xl shadow-[0_12px_30px_-24px_rgba(51,104,134,0.18)]">
         {/* Barra de progresso dinâmica do pedido */}
-        <div className="h-[2.5px] w-full bg-amber-100/70 overflow-hidden">
+        <div className="h-[2.5px] w-full bg-[#dce9f1]/80 overflow-hidden">
           <div
             className="h-full transition-all duration-700 ease-out"
-            style={{ width: `${progress}%`, background: isCancelled ? '#f43f5e' : 'linear-gradient(90deg,#f59e0b,#f97316)' }}
+            style={{ width: `${progress}%`, background: isCancelled ? '#f43f5e' : 'linear-gradient(90deg,#336886,#009ee3)' }}
           />
         </div>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-3 py-3">
-            <button onClick={handleBack} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-amber-200/70 bg-white/85 text-stone-700 shadow-[0_12px_24px_-22px_rgba(120,53,15,0.35)] transition-all active:scale-95">
+            <button onClick={handleBack} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-[#c9dbe7]/80 bg-white/90 text-stone-700 shadow-[0_12px_24px_-22px_rgba(51,104,134,0.25)] transition-all active:scale-95">
               <ArrowLeft size={18} weight="bold" />
             </button>
             <button onClick={handleBack} className="flex min-w-0 items-center gap-2 text-left">
-              <div className="h-8 w-8 shrink-0 overflow-hidden rounded-xl border border-amber-200/70 bg-white shadow-[0_12px_24px_-22px_rgba(120,53,15,0.25)]">
+              <div className="h-8 w-8 shrink-0 overflow-hidden rounded-xl border border-[#c9dbe7]/80 bg-white shadow-[0_12px_24px_-22px_rgba(51,104,134,0.22)]">
                 <img src={storeLogo} alt={storeName} className="h-full w-full object-cover" />
               </div>
               <div className="min-w-0 leading-tight">
                 <p className="truncate text-[13px] font-black text-stone-950">{storeName}</p>
-                <p className="flex items-center gap-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-amber-700">
+                <p className="flex items-center gap-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-[#336886]">
                   <img src="/janocaminho.jpg" alt="" className="h-[9px] w-[9px] rounded-[0.2rem] object-cover" />
                   Já no Caminho
                 </p>
@@ -1239,7 +1239,7 @@ export function OrderTracking() {
                   }
                 } catch { /* usuário cancelou share */ }
               }}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-amber-200/70 bg-white/85 text-stone-700 shadow-[0_12px_24px_-22px_rgba(120,53,15,0.35)] transition-all active:scale-95"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-[#c9dbe7]/80 bg-white/90 text-stone-700 shadow-[0_12px_24px_-22px_rgba(51,104,134,0.25)] transition-all active:scale-95"
               title="Compartilhar pedido"
             >
               {linkCopied ? <CheckCircle size={16} weight="fill" className="text-emerald-600" /> : <CopySimple size={16} weight="bold" />}
@@ -1271,12 +1271,12 @@ export function OrderTracking() {
                   ? 'border-rose-100 bg-[linear-gradient(145deg,#fff6f7,#fff)]'
                   : isReady
                   ? 'border-emerald-100 bg-[linear-gradient(145deg,#f4fbf6,#fffefb)]'
-                  : 'border-amber-200/70 bg-[linear-gradient(145deg,#fffaf0,#fff7ed_52%,#ffffff_100%)]'
+                  : 'border-[#d5e3ec] bg-[linear-gradient(145deg,#f8fbfd,#eef5fa_52%,#ffffff_100%)]'
               }`}>
-                <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full blur-3xl opacity-40" style={{ background: isCancelled ? '#fecdd3' : isReady ? '#bbf7d0' : '#fcd34d' }} />
+                <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full blur-3xl opacity-40" style={{ background: isCancelled ? '#fecdd3' : isReady ? '#bbf7d0' : '#bfdbfe' }} />
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div>
-                    <p className="inline-flex items-center gap-1.5 rounded-full border border-amber-200/80 bg-white/85 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-800 shadow-[0_12px_22px_-20px_rgba(245,158,11,0.35)]">
+                    <p className="inline-flex items-center gap-1.5 rounded-full border border-[#cfe0ea]/90 bg-white/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#336886] shadow-[0_12px_22px_-20px_rgba(51,104,134,0.18)]">
                         Pedido #{orderDisplayId}
                     </p>
                     <div className="mt-3 flex items-center gap-3 flex-wrap">
@@ -1315,8 +1315,8 @@ export function OrderTracking() {
                     ) : null}
 
                     {estimatedReadyAt && !isTerminal ? (
-                      <div className="mt-3 rounded-2xl border border-amber-100/80 bg-white/70 px-4 py-3 shadow-[0_16px_30px_-26px_rgba(245,158,11,0.28)]">
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-700">{etaForecastLabel}</p>
+                      <div className="mt-3 rounded-2xl border border-[#d5e3ec] bg-white/80 px-4 py-3 shadow-[0_16px_30px_-26px_rgba(51,104,134,0.18)]">
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#336886]">{etaForecastLabel}</p>
                         <p className="mt-1 text-xl font-extrabold text-stone-950">
                           {etaForecastPrefix}{' '}
                           {isPostalDelivery
@@ -1332,7 +1332,7 @@ export function OrderTracking() {
                     ) : null}
 
                     {isDelivery && !isPostalDelivery && motoboyFirst && ['ACCEPTED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED'].includes(deliveryStatus) ? (
-                      <div className="mt-3 rounded-2xl border border-[#eadfce] bg-[linear-gradient(135deg,#fffdf7,#f8f2e9)] px-4 py-3 text-sm text-stone-800 shadow-[0_18px_32px_-28px_rgba(120,53,15,0.2)]">
+                      <div className="mt-3 rounded-2xl border border-[#d5e3ec] bg-[linear-gradient(135deg,#f9fcfe,#eef5fa)] px-4 py-3 text-sm text-stone-800 shadow-[0_18px_32px_-28px_rgba(51,104,134,0.16)]">
                         <div className="flex items-start gap-3">
                           {motoboyProfileImageUrl ? (
                             <img
@@ -1384,15 +1384,15 @@ export function OrderTracking() {
                 </div>
               )}
 
-              <div id="order-status-section" className="rounded-[1.7rem] border border-[#eadfce] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(252,248,241,0.98))] p-5 shadow-[0_22px_42px_-34px_rgba(120,53,15,0.24)]">
+              <div id="order-status-section" className="rounded-[1.7rem] border border-[#d5e3ec] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(239,246,251,0.96))] p-5 shadow-[0_22px_42px_-34px_rgba(51,104,134,0.18)]">
                 <div className="mb-4">
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-amber-100/70">
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-[#dce9f1]/80">
                     <div
                       className="h-full transition-all duration-700 ease-out"
                       style={{
                         width: `${progress}%`,
                         backgroundImage:
-                          'linear-gradient(90deg, #f97316, #ea580c)',
+                          'linear-gradient(90deg, #336886, #009ee3)',
                       }}
                     />
                   </div>
@@ -1437,18 +1437,18 @@ export function OrderTracking() {
                   </div>
                 ) : null}
 
-                <div className="rounded-2xl border border-amber-100/70 bg-white/90 px-4 py-4 shadow-[0_12px_28px_-24px_rgba(120,53,15,0.18)]">
-                  <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-amber-700">Linha do pedido</p>
+                <div className="rounded-2xl border border-[#d9e6ee] bg-white/92 px-4 py-4 shadow-[0_12px_28px_-24px_rgba(51,104,134,0.14)]">
+                  <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]">Linha do pedido</p>
                   <div className="relative pl-1">
                     {/* Trilho de fundo */}
-                    <span className="pointer-events-none absolute left-[10px] top-3 bottom-3 w-[2px] rounded-full bg-amber-100/65" />
+                    <span className="pointer-events-none absolute left-[10px] top-3 bottom-3 w-[2px] rounded-full bg-[#dce9f1]/85" />
                     {/* Trilho preenchido (concluído) */}
                     {currentIndex > 0 && (
                       <span
                         className="pointer-events-none absolute left-[10px] top-3 w-[2px] rounded-full transition-all duration-700"
                         style={{
                           height: `${(currentIndex / Math.max(steps.length - 1, 1)) * 100}%`,
-                          background: isCancelled ? '#fda4af' : 'linear-gradient(180deg,#f59e0b,#f97316)',
+                          background: isCancelled ? '#fda4af' : 'linear-gradient(180deg,#336886,#009ee3)',
                         }}
                       />
                     )}
@@ -1501,7 +1501,7 @@ export function OrderTracking() {
               <div className="grid sm:grid-cols-2 gap-4">
                 <div
                   id="order-items-section"
-                  className="rounded-3xl border border-[#eadfce] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(252,248,241,0.98))] p-6 shadow-[0_22px_42px_-34px_rgba(120,53,15,0.24)]"
+                  className="rounded-3xl border border-[#d5e3ec] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(239,246,251,0.98))] p-6 shadow-[0_22px_42px_-34px_rgba(51,104,134,0.18)]"
                 >
                   <div className="flex items-center justify-between gap-3 mb-4">
                     <p className="text-sm font-semibold text-stone-950">Resumo do pedido</p>
@@ -1597,9 +1597,9 @@ export function OrderTracking() {
                     </span>
                   </div>
                 </div>
-                <div id="order-info-section" className="overflow-hidden rounded-3xl border border-[#eadfce] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(252,248,241,0.98))] shadow-[0_22px_42px_-34px_rgba(120,53,15,0.24)]">
-                  <div className="border-b border-amber-100/80 px-5 py-4">
-                    <p className="text-[11px] font-black uppercase tracking-[0.16em] text-amber-700">Informações do pedido</p>
+                <div id="order-info-section" className="overflow-hidden rounded-3xl border border-[#d5e3ec] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(239,246,251,0.98))] shadow-[0_22px_42px_-34px_rgba(51,104,134,0.18)]">
+                  <div className="border-b border-[#dce9f1] px-5 py-4">
+                    <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#336886]">Informações do pedido</p>
                     <p className="mt-1 text-sm font-medium text-stone-500">Resumo visual com os dados principais e ações deste pedido.</p>
                   </div>
                   <div className="space-y-4 px-4 py-4 sm:px-5">

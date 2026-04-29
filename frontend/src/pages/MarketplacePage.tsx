@@ -3727,7 +3727,7 @@ export function MarketplacePage() {
               </button>
 
               <div className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.82)_0%,rgba(255,255,255,0.52)_48%,rgba(239,246,255,0.68)_100%)] px-4 py-5 shadow-[0_26px_60px_-34px_rgba(15,23,42,0.28)] ring-1 ring-white/60 backdrop-blur-2xl">
-                <div className="pointer-events-none absolute inset-y-0 right-0 w-40 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.16),transparent_65%)]" />
+                <div className="pointer-events-none absolute inset-y-0 right-0 w-40 bg-[radial-gradient(circle_at_center,rgba(51,104,134,0.18),transparent_65%)]" />
                 <div className="pointer-events-none absolute -bottom-14 right-4 h-28 w-28 rounded-full bg-[#336886]/12 blur-3xl" />
 
                 <div className="relative mb-4 flex items-start justify-between gap-3">
@@ -3749,8 +3749,8 @@ export function MarketplacePage() {
                       Veja o que está ao vivo, o que vem em seguida e entre com um toque no condomínio certo.
                     </p>
                   </div>
-                  <div className="shrink-0 min-w-[5.75rem] rounded-[1.35rem] border border-emerald-200/70 bg-white/82 px-3 py-2 text-center shadow-[0_16px_30px_-22px_rgba(16,185,129,0.42)] backdrop-blur-md">
-                    <p className="text-[9px] font-black uppercase tracking-[0.18em] text-emerald-600">Agora</p>
+                  <div className="shrink-0 min-w-[5.75rem] rounded-[1.35rem] border border-[#bfd6e4]/80 bg-white/82 px-3 py-2 text-center shadow-[0_16px_30px_-22px_rgba(51,104,134,0.28)] backdrop-blur-md">
+                    <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#336886]">Agora</p>
                     <p className="mt-1 text-lg font-black leading-none text-slate-950">
                       {condominiumPickerCounts.live}
                     </p>
@@ -3792,22 +3792,22 @@ export function MarketplacePage() {
                 <div className="-mx-1 mt-4 flex gap-2 overflow-x-auto px-1 pb-1 no-scrollbar">
                   {([
                     { key: 'all' as const, label: 'Todos', count: condominiumPickerCounts.all, tone: 'slate' as const },
-                    { key: 'live' as const, label: 'Ao vivo', count: condominiumPickerCounts.live, tone: 'emerald' as const },
+                    { key: 'live' as const, label: 'Ao vivo', count: condominiumPickerCounts.live, tone: 'live' as const },
                     { key: 'upcoming' as const, label: 'Em breve', count: condominiumPickerCounts.upcoming, tone: 'brand' as const },
                     { key: 'none' as const, label: 'Sem agenda', count: condominiumPickerCounts.none, tone: 'muted' as const },
                   ]).map(({ key, label, count, tone }) => {
                     const isActive = condoPickerFilter === key;
                     const activeClasses =
-                      tone === 'emerald'
-                        ? 'border-emerald-400/40 bg-emerald-500 text-white shadow-[0_12px_28px_-18px_rgba(16,185,129,0.62)]'
+                      tone === 'live'
+                        ? 'border-[#336886]/35 bg-[#336886] text-white shadow-[0_12px_28px_-18px_rgba(51,104,134,0.52)]'
                         : tone === 'brand'
                         ? 'border-[#336886]/30 bg-[#336886] text-white shadow-[0_12px_28px_-18px_rgba(51,104,134,0.52)]'
                         : tone === 'muted'
                         ? 'border-slate-400/30 bg-slate-700 text-white shadow-[0_12px_28px_-20px_rgba(51,65,85,0.5)]'
                         : 'border-slate-300/30 bg-slate-950 text-white shadow-[0_12px_28px_-20px_rgba(15,23,42,0.55)]';
                     const idleClasses =
-                      tone === 'emerald'
-                        ? 'border-emerald-100 bg-white/86 text-emerald-700 hover:border-emerald-200'
+                      tone === 'live'
+                        ? 'border-[#d7e4ec] bg-white/86 text-[#336886] hover:border-[#bdd2de]'
                         : tone === 'brand'
                         ? 'border-[#336886]/12 bg-white/86 text-[#336886] hover:border-[#336886]/20'
                         : tone === 'muted'
@@ -3821,8 +3821,8 @@ export function MarketplacePage() {
                         onClick={() => setCondoPickerFilter(key)}
                         className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2 text-[11px] font-black transition-all duration-200 active:scale-95 ${isActive ? activeClasses : idleClasses}`}
                       >
-                        {tone === 'emerald' && (
-                          <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActive ? 'bg-white' : 'bg-emerald-500'}`} />
+                        {tone === 'live' && (
+                          <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActive ? 'bg-white' : 'bg-[#009ee3]'}`} />
                         )}
                         <span>{label}</span>
                         <span className={`inline-flex min-w-[1.35rem] items-center justify-center rounded-full px-1.5 py-0.5 text-[9px] font-black ${isActive ? 'bg-white/18 text-white' : 'bg-slate-100 text-slate-500'}`}>
@@ -3889,14 +3889,14 @@ export function MarketplacePage() {
                       <section>
                         <div className="mb-3 flex items-center gap-2">
                           <span className="relative flex h-2.5 w-2.5 shrink-0">
-                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75" />
+                            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#009ee3]" />
                           </span>
                           <div>
-                            <span className="block text-[11px] font-black uppercase tracking-[0.18em] text-emerald-600">Acontecendo agora</span>
+                            <span className="block text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Acontecendo agora</span>
                             <span className="text-[11px] font-medium text-slate-500">Entre direto na feira que já está rodando.</span>
                           </div>
-                          <span className="ml-auto inline-flex items-center justify-center rounded-full bg-emerald-500 px-2.5 py-1 text-[9px] font-black text-white shadow-[0_6px_18px_-10px_rgba(16,185,129,0.7)]">{live.length}</span>
+                          <span className="ml-auto inline-flex items-center justify-center rounded-full bg-[#336886] px-2.5 py-1 text-[9px] font-black text-white shadow-[0_6px_18px_-10px_rgba(51,104,134,0.62)]">{live.length}</span>
                         </div>
                         <div className={`${isNativePlatform ? 'flex flex-col gap-2.5' : 'flex flex-col gap-3'}`}>
                           {live.map(({ condominium, slug, name, region, event }) => {
@@ -3913,19 +3913,19 @@ export function MarketplacePage() {
                                   isNativePlatform ? 'rounded-[1.45rem]' : 'rounded-[1.75rem]'
                                 } ${
                                   active
-                                    ? 'border-emerald-300/70 shadow-[0_24px_42px_-22px_rgba(16,185,129,0.42)] ring-1 ring-emerald-200/80'
-                                    : 'border-emerald-200/60 shadow-[0_20px_38px_-24px_rgba(16,185,129,0.28)] hover:border-emerald-300/70 hover:shadow-[0_26px_46px_-24px_rgba(16,185,129,0.36)]'
+                                    ? 'border-[#8fc2dc]/80 shadow-[0_24px_42px_-22px_rgba(51,104,134,0.34)] ring-1 ring-[#cfe0ea]/90'
+                                    : 'border-[#cfe0ea] shadow-[0_20px_38px_-24px_rgba(51,104,134,0.22)] hover:border-[#8fc2dc]/80 hover:shadow-[0_26px_46px_-24px_rgba(51,104,134,0.3)]'
                                 }`}
                               >
                                 <img src={bannerUrl} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
                                 <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(7,13,25,0.66)_0%,rgba(9,16,32,0.5)_36%,rgba(15,23,42,0.18)_100%)]" />
-                                <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.24),transparent_74%)]" />
+                                <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-[radial-gradient(circle_at_center,rgba(0,158,227,0.24),transparent_74%)]" />
                                 <div className={`relative ${isNativePlatform ? 'p-3' : 'p-3.5'}`}>
                                   <div className="flex items-start justify-between gap-3">
                                     <span className="inline-flex items-center gap-1.5 rounded-full border border-white/18 bg-white/14 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-white backdrop-blur-md">
                                       <span className="relative flex h-2 w-2">
-                                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300 opacity-80" />
-                                        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-300" />
+                                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-300 opacity-80" />
+                                        <span className="relative inline-flex h-2 w-2 rounded-full bg-sky-300" />
                                       </span>
                                       Ao vivo agora
                                     </span>
