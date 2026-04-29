@@ -478,6 +478,7 @@ async register(
     } as Partial<User>);
     const saved = await userRepo.save(user);
     await this.sendCustomerEmailOtp(saved, meta);
+    void this.notifySignupAdmin(saved);
 
     return {
       user: this.sanitizeUser(saved),
@@ -1150,5 +1151,18 @@ async setDefaultAddress(userId: string, addressId: string) {
    */
   async unregisterGuestPushToken(guestId: string, input: { token?: string | null }) {
     return this.pushService.unregisterGuestToken(guestId, input?.token || null);
+  }
+
+  private async notifySignupAdmin(user: { fullName?: string | null; email: string }) {
+    const raw = env.email.notifyOnSignup || '';
+    const emails = raw.split(',').map((e: string) => e.trim()).filter(Boolean);
+    if (!emails.length) return;
+    await this.emailService.sendSignupNotification({
+      emails,
+      type: 'cliente',
+      ownerName: user.fullName || user.email,
+      ownerEmail: user.email,
+      createdAt: new Date(),
+    });
   }
 }

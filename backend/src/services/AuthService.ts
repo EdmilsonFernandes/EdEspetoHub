@@ -495,6 +495,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       });
 
       await this.sendMotoboyVerificationEmail(result.user, meta?.ipAddress);
+      void this.notifySignupAdmin({ type: 'motoboy', user: result.user });
       this.log.info('Register motoboy success', { userId: result.user.id });
 
       const token = jwt.sign(
@@ -1397,6 +1398,7 @@ async changePassword(userId: string, currentPassword: string, newPassword: strin
     if (!emails.length) return;
     await this.emailService.sendSignupNotification({
       emails,
+      type: 'lojista',
       storeName: store.name,
       ownerName: user.fullName,
       ownerEmail: user.email,
@@ -1405,6 +1407,20 @@ async changePassword(userId: string, currentPassword: string, newPassword: strin
       acquisitionAttribution: acquisitionAttribution || null,
     });
   }
+
+  private async notifySignupAdmin({ type, user }: { type: 'lojista' | 'motoboy' | 'cliente'; user: User }) {
+    const raw = env.email.notifyOnSignup || '';
+    const emails = raw.split(',').map((e) => e.trim()).filter(Boolean);
+    if (!emails.length) return;
+    await this.emailService.sendSignupNotification({
+      emails,
+      type,
+      ownerName: user.fullName || user.email,
+      ownerEmail: user.email,
+      createdAt: new Date(),
+    });
+  }
+
 
 
 

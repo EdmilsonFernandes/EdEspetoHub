@@ -622,68 +622,34 @@ private renderTemplate(template: string, vars: Record<string, string>) {
    */
   async sendSignupNotification(payload: {
     emails: string[];
-    storeName: string;
+    type: 'lojista' | 'motoboy' | 'cliente';
+    storeName?: string;
     ownerName: string;
     ownerEmail: string;
-    slug: string;
+    slug?: string;
     createdAt: Date;
     acquisitionAttribution?: Record<string, unknown> | null;
   }) {
     if (!payload.emails.length) return;
-    const subject = 'Novo cadastro - Jano Caminho';
+    const typeLabel = payload.type === 'lojista' ? '🏪 Novo lojista' : payload.type === 'motoboy' ? '🛵 Novo motoboy' : '👤 Novo cliente';
+    const subject = `${typeLabel} - Jano Caminho`;
     const attribution = payload.acquisitionAttribution && typeof payload.acquisitionAttribution === 'object'
-      ? payload.acquisitionAttribution
-      : null;
-    const attributionLines = attribution
-      ? [
-          `Origem: ${String(attribution.utm_source || 'direto')}`,
-          `Meio: ${String(attribution.utm_medium || '-')}`,
-          `Campanha: ${String(attribution.utm_campaign || '-')}`,
-          `Landing: ${String(attribution.landingPath || '-')}`,
-          `Referrer: ${String(attribution.referrer || '-')}`,
-          `gclid: ${String(attribution.gclid || '-')}`,
-          `fbclid: ${String(attribution.fbclid || '-')}`,
-        ]
-      : [ 'Origem: não informada' ];
-    const text = [
-      'Novo cadastro recebido.',
-      `Loja: ${payload.storeName}`,
-      `Slug: ${payload.slug}`,
-      `Cliente: ${payload.ownerName} (${payload.ownerEmail})`,
-      `Criado em: ${payload.createdAt.toISOString()}`,
-      '',
-      ...attributionLines,
-    ].join('\n');
-    const attributionHtml = attribution
-      ? `
-          <li><strong>Origem:</strong> ${String(attribution.utm_source || 'direto')}</li>
-          <li><strong>Meio:</strong> ${String(attribution.utm_medium || '-')}</li>
-          <li><strong>Campanha:</strong> ${String(attribution.utm_campaign || '-')}</li>
-          <li><strong>Landing:</strong> ${String(attribution.landingPath || '-')}</li>
-          <li><strong>Referrer:</strong> ${String(attribution.referrer || '-')}</li>
-          <li><strong>gclid:</strong> ${String(attribution.gclid || '-')}</li>
-          <li><strong>fbclid:</strong> ${String(attribution.fbclid || '-')}</li>
-        `
+      ? payload.acquisitionAttribution : null;
+    const attrLines = attribution
+      ? [`Origem: ${String(attribution.utm_source || 'direto')}`, `Meio: ${String(attribution.utm_medium || '-')}`, `Campanha: ${String(attribution.utm_campaign || '-')}`, `Landing: ${String(attribution.landingPath || '-')}`]
+      : ['Origem: não informada'];
+    const extraLines = payload.type === 'lojista' && payload.storeName
+      ? [`Loja: ${payload.storeName}`, `Slug: ${payload.slug || '-'}`] : [];
+    const text = [`Novo cadastro: ${payload.type}.`, `Nome: ${payload.ownerName}`, `Email: ${payload.ownerEmail}`, ...extraLines, `Criado em: ${payload.createdAt.toISOString()}`, '', ...attrLines].join('\n');
+    const extraHtml = payload.type === 'lojista' && payload.storeName
+      ? `<li><strong>Loja:</strong> ${payload.storeName}</li><li><strong>Slug:</strong> ${payload.slug || '-'}</li>` : '';
+    const attrHtml = attribution
+      ? `<li><strong>Origem:</strong> ${String(attribution.utm_source || 'direto')}</li><li><strong>Meio:</strong> ${String(attribution.utm_medium || '-')}</li><li><strong>Campanha:</strong> ${String(attribution.utm_campaign || '-')}</li>`
       : '<li><strong>Origem:</strong> não informada</li>';
-    const html = `
-      <div style="font-family: Arial, sans-serif; background: #f8fafc; padding: 24px;">
-        <div style="max-width: 520px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px;">
-          <h2 style="margin: 0 0 8px; color: #0f172a;">Novo cadastro</h2>
-          <p style="margin: 0 0 12px; color: #475569;">Um novo cliente criou loja na plataforma.</p>
-          <ul style="padding-left: 18px; margin: 0; color: #0f172a;">
-            <li><strong>Loja:</strong> ${payload.storeName}</li>
-            <li><strong>Slug:</strong> ${payload.slug}</li>
-            <li><strong>Cliente:</strong> ${payload.ownerName} (${payload.ownerEmail})</li>
-            <li><strong>Criado em:</strong> ${payload.createdAt.toISOString()}</li>
-            ${attributionHtml}
-          </ul>
-        </div>
-      </div>
-    `;
-    await Promise.all(
-      payload.emails.map((email) => this.send({ to: email, subject, text, html }))
-    );
+    const html = `<div style="font-family:Arial,sans-serif;background:#f8fafc;padding:24px"><div style="max-width:520px;margin:0 auto;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:20px"><h2 style="margin:0 0 8px;color:#0f172a">${typeLabel}</h2><ul style="padding-left:18px;margin:0;color:#0f172a"><li><strong>Nome:</strong> ${payload.ownerName}</li><li><strong>Email:</strong> ${payload.ownerEmail}</li>${extraHtml}<li><strong>Criado em:</strong> ${payload.createdAt.toLocaleString('pt-BR')}</li>${attrHtml}</ul></div></div>`;
+    await Promise.all(payload.emails.map((email) => this.send({ to: email, subject, text, html })));
   }
+
 
   async sendCondominiumAccessRequestNotification(payload: {
     to?: string;
