@@ -121,20 +121,30 @@ jobs:
               printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GH_ACTOR" --password-stdin >/dev/null
 
               services=""
-              for service in api frontend face-worker; do
-                case "$service" in
-                  api) image="edespetohub-api" ;;
-                  frontend) image="edespetohub-frontend" ;;
-                  face-worker) image="edespetohub-face-worker" ;;
-                esac
+              for attempt in 1 2 3 4 5 6; do
+                services=""
+                for service in api frontend face-worker; do
+                  case "$service" in
+                    api) image="edespetohub-api" ;;
+                    frontend) image="edespetohub-frontend" ;;
+                    face-worker) image="edespetohub-face-worker" ;;
+                  esac
 
-                image_ref="ghcr.io/${GH_REPOSITORY_OWNER}/${image}:${IMAGE_TAG}"
-                if docker manifest inspect "$image_ref" >/dev/null 2>&1; then
-                  if [ -n "$services" ]; then
-                    services="$services "
+                  image_ref="ghcr.io/${GH_REPOSITORY_OWNER}/${image}:${IMAGE_TAG}"
+                  if docker manifest inspect "$image_ref" >/dev/null 2>&1; then
+                    if [ -n "$services" ]; then
+                      services="$services "
+                    fi
+                    services="${services}${service}"
                   fi
-                  services="${services}${service}"
+                done
+
+                if [ -n "$services" ] || [ "$attempt" -eq 6 ]; then
+                  break
                 fi
+
+                echo "No deployable image found yet for tag ${IMAGE_TAG}. Retrying in 10s (attempt ${attempt}/6)..."
+                sleep 10
               done
               ;;
             *)
