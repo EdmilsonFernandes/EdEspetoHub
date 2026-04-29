@@ -17,17 +17,27 @@ A tarefa só está concluída quando:
 Servidor:
 cd ~/EdEspetoHub
 
-Scripts de deploy (o usuário executa):
+Deploy principal por imagem pronta (GHCR, o usuário executa):
+scripts/./deploy-release-frontend.sh  
+scripts/./deploy-release-api.sh  
+
+Fallback legado (se o fluxo novo falhar):
 scripts/./deploy-frontend.sh  
 scripts/./deploy-api.sh  
+
+Workflow de release:
+.github/workflows/publish-ghcr.yml
+Nome no GitHub Actions: `Publish Docker Images (GHCR)`
 
 ---
 
 ## DECISÃO DE DEPLOY (informar ao usuário)
 
-- frontend alterado → rodar deploy-frontend.sh
-- api alterada → rodar deploy-api.sh
-- ambos alterados → deploy-api.sh e depois deploy-frontend.sh
+- frontend alterado → preferir `scripts/./deploy-release-frontend.sh`
+- api alterada → preferir `scripts/./deploy-release-api.sh`
+- ambos alterados → `scripts/./deploy-release-api.sh` e depois `scripts/./deploy-release-frontend.sh`
+- scripts/compose/infra alterados → avisar que o servidor pode precisar de `git pull` antes do deploy novo
+- se o fluxo GHCR não estiver pronto ou falhar → informar fallback com `deploy-api.sh` / `deploy-frontend.sh`
 
 ---
 
@@ -46,6 +56,10 @@ scripts/./deploy-api.sh
 ### 4. VALIDAR
 - Revisar diff
 - Validar lógica
+- Se o deploy recomendado for via GHCR, validar antes:
+  1. workflow `Publish Docker Images (GHCR)` concluído com sucesso para o commit
+  2. imagens de `api`, `frontend` e `face-worker` publicadas com tag `main` e/ou SHA curta
+  3. só depois avisar o usuário que já pode deployar
 
 ### 5. GIT LOCAL
 git status  
@@ -58,6 +72,10 @@ Após o push, reportar:
 - Commit hash (ex: `a1b2c3d`)
 - Escopo: frontend / api / ambos
 - Script(s) a rodar no servidor
+- Se GHCR for o caminho principal, informar também se:
+  - as imagens já estão prontas
+  - ainda precisa aguardar o workflow
+  - será necessário `git pull` no servidor por mudança de infra/scripts
 
 ---
 
@@ -95,6 +113,7 @@ NÃO usar SSH para rodar deploy ou git pull proativamente.
 - NÃO esconder erro
 - NÃO dizer que concluiu sem validar
 - SEMPRE informar o commit e qual deploy rodar
+- NÃO mandar deployar via GHCR sem antes confirmar que a Action terminou e as imagens estão prontas
 
 ---
 
@@ -106,7 +125,9 @@ NÃO usar SSH para rodar deploy ou git pull proativamente.
 - O que foi feito:
 - Commit: `<hash>`
 - Push: ✅
-- Deploy necessário: `scripts/./deploy-frontend.sh` e/ou `scripts/./deploy-api.sh`
+- Deploy necessário: `scripts/./deploy-release-frontend.sh` e/ou `scripts/./deploy-release-api.sh`
+- Status das imagens GHCR: `prontas` / `aguardando workflow`
+- Precisa `git pull` no servidor?: `sim` / `não`
 
 ---
 
