@@ -1118,13 +1118,27 @@ export function StorePage() {
       }
     };
 
+    const PRODUCTS_CACHE_KEY = `products_cache:${storeSlug}`;
+    const PRODUCTS_CACHE_TTL = 60 * 60 * 1000; // 1h
+
     const loadProducts = async () => {
+      // Serve cache imediatamente se existir (stale-while-revalidate)
+      let cacheExpired = true;
       try {
-        const loadedProducts = await productService.listPublicBySlug(storeSlug);
-        setProducts(loadedProducts || []);
-      } catch (error) {
-        console.error('Erro ao carregar produtos', error);
-      }
+        const raw = localStorage.getItem(PRODUCTS_CACHE_KEY);
+        if (raw) {
+          const { data, ts } = JSON.parse(raw);
+          if (Array.isArray(data) && data.length > 0) setProducts(data);
+          cacheExpired = Date.now() - ts >= PRODUCTS_CACHE_TTL;
+          if (!cacheExpired) return; // cache fresco, não precisa buscar
+        }
+      } catch { /* no-op */ }
+
+      try {
+        const list = (await productService.listPublicBySlug(storeSlug)) || [];
+        setProducts(list);
+        try { localStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify({ data: list, ts: Date.now() })); } catch { /* storage cheio */ }
+      } catch { /* offline — mantém o que foi setado do cache acima */ }
     };
 
     loadStore(false);
