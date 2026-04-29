@@ -61,20 +61,50 @@ jobs:
             type=raw,value=main,enable={{is_default_branch}}
             type=sha,format=short,prefix=
 
-      - name: Prepare frontend build metadata
-        if: matrix.name == 'frontend'
-        id: frontend_meta
+      - name: Prepare image build metadata
+        id: image_meta
         run: |
-          VERSION="$(node -p "require('./frontend/package.json').version")"
+          VERSION=""
+          if [ -f "${{ matrix.context }}/package.json" ]; then
+            VERSION="$(node -p "require('${{ matrix.context }}/package.json').version")"
+          fi
           SHORT_SHA="${GITHUB_SHA::8}"
           BUILD_TIME="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          DATE_PART="${BUILD_TIME:0:10}"
+          DATE_PART="${DATE_PART//-/}"
+          TIME_PART="${BUILD_TIME:11:8}"
+          TIME_PART="${TIME_PART//:/}"
 
-          echo "build_version=${VERSION}+gha.${GITHUB_RUN_NUMBER}.${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          if [ -n "$VERSION" ]; then
+            VERSION_LABEL="v${VERSION}"
+            VERSION_INTERNAL="${VERSION}+gha.${GITHUB_RUN_NUMBER}.${SHORT_SHA}"
+          else
+            VERSION_LABEL="${{ matrix.name }}"
+            VERSION_INTERNAL="${{ matrix.name }}+gha.${GITHUB_RUN_NUMBER}.${SHORT_SHA}"
+          fi
+          BUILD_ID="${VERSION_INTERNAL}-${DATE_PART}.${TIME_PART}-${SHORT_SHA}"
+
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "version_label=${VERSION_LABEL}" >> "$GITHUB_OUTPUT"
+          echo "version_internal=${VERSION_INTERNAL}" >> "$GITHUB_OUTPUT"
+          echo "build_id=${BUILD_ID}" >> "$GITHUB_OUTPUT"
+          echo "build_version=${VERSION_INTERNAL}" >> "$GITHUB_OUTPUT"
           echo "build_git_sha=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
           echo "build_git_short_sha=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
           echo "build_git_branch=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
           echo "build_git_remote_url=https://github.com/${GITHUB_REPOSITORY}" >> "$GITHUB_OUTPUT"
           echo "build_time_iso=${BUILD_TIME}" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare frontend build metadata
+        if: matrix.name == 'frontend'
+        id: frontend_meta
+        run: |
+          echo "build_version=${{ steps.image_meta.outputs.build_version }}" >> "$GITHUB_OUTPUT"
+          echo "build_git_sha=${{ steps.image_meta.outputs.build_git_sha }}" >> "$GITHUB_OUTPUT"
+          echo "build_git_short_sha=${{ steps.image_meta.outputs.build_git_short_sha }}" >> "$GITHUB_OUTPUT"
+          echo "build_git_branch=${{ steps.image_meta.outputs.build_git_branch }}" >> "$GITHUB_OUTPUT"
+          echo "build_git_remote_url=${{ steps.image_meta.outputs.build_git_remote_url }}" >> "$GITHUB_OUTPUT"
+          echo "build_time_iso=${{ steps.image_meta.outputs.build_time_iso }}" >> "$GITHUB_OUTPUT"
 
           git log -n 30 --date=iso-strict --pretty=format:'%H|%h|%cI|%an|%ae|%s' > /tmp/frontend-commits.txt
           COMMITS_B64="$(
@@ -111,7 +141,16 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          labels: |
+            ${{ steps.meta.outputs.labels }}
+            io.janocaminho.build.version=${{ steps.image_meta.outputs.version }}
+            io.janocaminho.build.version_label=${{ steps.image_meta.outputs.version_label }}
+            io.janocaminho.build.version_internal=${{ steps.image_meta.outputs.version_internal }}
+            io.janocaminho.build.build_id=${{ steps.image_meta.outputs.build_id }}
+            io.janocaminho.build.commit_sha=${{ steps.image_meta.outputs.build_git_sha }}
+            io.janocaminho.build.short_sha=${{ steps.image_meta.outputs.build_git_short_sha }}
+            io.janocaminho.build.branch=${{ steps.image_meta.outputs.build_git_branch }}
+            io.janocaminho.build.time_iso=${{ steps.image_meta.outputs.build_time_iso }}
           build-args: |
             BUILD_VERSION=${{ steps.frontend_meta.outputs.build_version }}
             BUILD_GIT_SHA=${{ steps.frontend_meta.outputs.build_git_sha }}

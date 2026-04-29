@@ -102,6 +102,97 @@ PY
   return 1
 }
 
+resolve_service_image_name() {
+  case "$1" in
+    api) printf '%s' 'edespetohub-api' ;;
+    frontend) printf '%s' 'edespetohub-frontend' ;;
+    face-worker) printf '%s' 'edespetohub-face-worker' ;;
+    *) return 1 ;;
+  esac
+}
+
+resolve_service_container_name() {
+  case "$1" in
+    api) printf '%s' 'chamanoespeto-api' ;;
+    frontend) printf '%s' 'chamanoespeto-frontend' ;;
+    face-worker) printf '%s' 'chamanoespeto-face-worker' ;;
+    *) return 1 ;;
+  esac
+}
+
+inspect_image_label() {
+  image_ref="$1"
+  label_key="$2"
+  docker image inspect --format "{{ index .Config.Labels \"$label_key\" }}" "$image_ref" 2>/dev/null || true
+}
+
+inspect_container_image_id() {
+  container_name="$1"
+  docker inspect --format '{{.Image}}' "$container_name" 2>/dev/null || true
+}
+
+inspect_container_image_ref() {
+  container_name="$1"
+  docker inspect --format '{{.Config.Image}}' "$container_name" 2>/dev/null || true
+}
+
+format_image_summary() {
+  image_ref="$1"
+
+  version_label="$(inspect_image_label "$image_ref" 'io.janocaminho.build.version_label')"
+  build_id="$(inspect_image_label "$image_ref" 'io.janocaminho.build.build_id')"
+  short_sha="$(inspect_image_label "$image_ref" 'io.janocaminho.build.short_sha')"
+  built_at="$(inspect_image_label "$image_ref" 'io.janocaminho.build.time_iso')"
+  revision="$(inspect_image_label "$image_ref" 'org.opencontainers.image.revision')"
+
+  if [ -z "$short_sha" ] && [ -n "$revision" ]; then
+    short_sha="$(printf '%.8s' "$revision")"
+  fi
+
+  summary=""
+  if [ -n "$version_label" ]; then
+    summary="$version_label"
+  elif [ -n "$short_sha" ]; then
+    summary="commit $short_sha"
+  else
+    summary="-"
+  fi
+
+  if [ -n "$build_id" ]; then
+    summary="$summary | $build_id"
+  elif [ -n "$short_sha" ]; then
+    summary="$summary | $short_sha"
+  fi
+
+  if [ -n "$built_at" ]; then
+    summary="$summary | $built_at"
+  fi
+
+  printf '%s' "$summary"
+}
+
+show_release_comparison() {
+  service_name="$1"
+  service_image_name="$(resolve_service_image_name "$service_name")" || return 0
+  container_name="$(resolve_service_container_name "$service_name")" || return 0
+  incoming_image_ref="${IMAGE_REGISTRY:-ghcr.io}/${IMAGE_NAMESPACE:-edmilsonfernandes}/${service_image_name}:${IMAGE_TAG}"
+  current_image_id="$(inspect_container_image_id "$container_name")"
+  current_image_ref="$(inspect_container_image_ref "$container_name")"
+
+  printf '%s\n' "--- ${service_name} ---"
+  if [ -n "$current_image_id" ]; then
+    printf 'Atual: %s\n' "$(format_image_summary "$current_image_id")"
+    if [ -n "$current_image_ref" ]; then
+      printf 'Imagem atual: %s\n' "$current_image_ref"
+    fi
+  else
+    printf 'Atual: %s\n' 'nenhum container rodando'
+  fi
+
+  printf 'Novo : %s\n' "$(format_image_summary "$incoming_image_ref")"
+  printf 'Imagem nova: %s\n' "$incoming_image_ref"
+}
+
 usage() {
   echo "Uso: scripts/./deploy-release.sh [image-tag] [service ...]" >&2
   echo "Padrão sem image-tag: main" >&2
@@ -248,6 +339,10 @@ $COMPOSE_CMD \
   -f "$ROOT_DIR/docker-compose.deploy.yml" \
   --env-file "$ENV_FILE" \
   pull "$@"
+
+for service_name in "$@"; do
+  show_release_comparison "$service_name"
+done
 
 $COMPOSE_CMD \
   -f "$ROOT_DIR/docker-compose.yml" \
