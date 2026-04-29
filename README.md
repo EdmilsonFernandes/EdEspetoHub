@@ -1194,29 +1194,56 @@ git pull
 
 O `deploy-api.sh` usa o codigo local recem-atualizado, executa `docker compose up -d --build --no-deps --force-recreate api` e imprime o commit que esta sendo implantado. Isso ajuda a confirmar que a API subiu com o codigo novo.
 
-### Deploy sem build no servidor (opcional para EC2 pequeno)
+### Deploy sem build no servidor (fase 1, conservadora)
 
 Em instâncias pequenas (ex: `t3.small`) o `docker compose up --build` pode travar o SSH por falta de CPU/RAM/créditos.
-Como alternativa, o projeto pode publicar imagens no **GHCR** via GitHub Actions e o servidor apenas **puxar** as imagens.
+O caminho novo mantém o deploy antigo intacto, mas adiciona uma trilha paralela:
 
-1) Verifique se o workflow `.github/workflows/publish-ghcr.yml` está rodando após `git push` (GitHub Actions).
+```text
+git push -> GitHub Actions builda -> GHCR publica -> EC2 só faz pull + up -d
+```
 
-2) No servidor, crie/ajuste `.env.prod` com:
+Fluxo:
+
+1) Verifique se o workflow `.github/workflows/publish-ghcr.yml` rodou após o `git push`.
+2) No servidor, mantenha `.env.prod` com:
 
 - `IMAGE_REGISTRY=ghcr.io`
 - `IMAGE_NAMESPACE=edmilsonfernandes`
-- `IMAGE_TAG=main`
+- `IMAGE_TAG=main` ou uma SHA curta
 
-3) Suba usando pull-only:
-
-```bash
-sh scripts/compose-prod-pull.sh
-```
-
-Se o repositório for privado, faça login antes:
+3) Faça login no GHCR no servidor se o repositório for privado:
 
 ```bash
 docker login ghcr.io
+```
+
+Ou configure em `.env.prod.secrets`:
+
+```env
+GHCR_USERNAME=<seu-usuario-github>
+GHCR_TOKEN=<pat-com-read-packages>
+```
+
+4) Deploy por release específica:
+
+```bash
+sh scripts/deploy-release-api.sh 3a254581
+sh scripts/deploy-release-frontend.sh 3a254581
+```
+
+Ou tudo em um passo:
+
+```bash
+sh scripts/deploy-release.sh 3a254581 api frontend face-worker
+```
+
+Fallback:
+- Se esse fluxo novo falhar, o deploy antigo continua disponível:
+
+```bash
+./scripts/deploy-api.sh
+./scripts/deploy-frontend.sh
 ```
 
 ### Atalhos (scripts)
@@ -1237,6 +1264,13 @@ Execução produção opcional (pull-only, sem build):
 
 ```bash
 sh scripts/compose-prod-pull.sh
+```
+
+Deploy por release pronta do GHCR:
+
+```bash
+sh scripts/deploy-release-api.sh <sha-curta>
+sh scripts/deploy-release-frontend.sh <sha-curta>
 ```
 
 Deploy direto por serviço (EC2):

@@ -5,6 +5,10 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+concurrency:
+  group: publish-ghcr-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   packages: write
@@ -24,10 +28,6 @@ jobs:
             context: ./frontend
             dockerfile: ./frontend/Dockerfile
             image: edespetohub-frontend
-          - name: maps
-            context: ./server
-            dockerfile: ./server/Dockerfile
-            image: edespetohub-maps
           - name: face-worker
             context: ./face-worker
             dockerfile: ./face-worker/Dockerfile
@@ -36,6 +36,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -53,8 +58,50 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
           tags: |
-            type=raw,value=main
-            type=sha,format=short,prefix=sha-
+            type=raw,value=main,enable={{is_default_branch}}
+            type=sha,format=short,prefix=
+
+      - name: Prepare frontend build metadata
+        if: matrix.name == 'frontend'
+        id: frontend_meta
+        run: |
+          VERSION="$(node -p "require('./frontend/package.json').version")"
+          SHORT_SHA="${GITHUB_SHA::8}"
+          BUILD_TIME="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+
+          echo "build_version=${VERSION}+gha.${GITHUB_RUN_NUMBER}.${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "build_git_sha=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+          echo "build_git_short_sha=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "build_git_branch=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          echo "build_git_remote_url=https://github.com/${GITHUB_REPOSITORY}" >> "$GITHUB_OUTPUT"
+          echo "build_time_iso=${BUILD_TIME}" >> "$GITHUB_OUTPUT"
+
+          git log -n 30 --date=iso-strict --pretty=format:'%H|%h|%cI|%an|%ae|%s' > /tmp/frontend-commits.txt
+          COMMITS_B64="$(
+            python3 - <<'PY'
+import base64
+import json
+
+rows = []
+with open('/tmp/frontend-commits.txt', 'r', encoding='utf-8') as handle:
+    for line in handle:
+        parts = line.rstrip('\n').split('|')
+        if len(parts) < 6:
+            continue
+        rows.append({
+            "hash": parts[0],
+            "shortHash": parts[1],
+            "dateIso": parts[2],
+            "authorName": parts[3],
+            "authorEmail": parts[4],
+            "subject": "|".join(parts[5:]).strip(),
+        })
+
+payload = json.dumps(rows, ensure_ascii=True, separators=(',', ':')).encode('utf-8')
+print(base64.b64encode(payload).decode('ascii'))
+PY
+          )"
+          echo "build_commits_b64=${COMMITS_B64}" >> "$GITHUB_OUTPUT"
 
       - name: Build and Push
         uses: docker/build-push-action@v6
@@ -65,6 +112,13 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
+          build-args: |
+            BUILD_VERSION=${{ steps.frontend_meta.outputs.build_version }}
+            BUILD_GIT_SHA=${{ steps.frontend_meta.outputs.build_git_sha }}
+            BUILD_GIT_SHORT_SHA=${{ steps.frontend_meta.outputs.build_git_short_sha }}
+            BUILD_GIT_BRANCH=${{ steps.frontend_meta.outputs.build_git_branch }}
+            BUILD_GIT_REMOTE_URL=${{ steps.frontend_meta.outputs.build_git_remote_url }}
+            BUILD_TIME_ISO=${{ steps.frontend_meta.outputs.build_time_iso }}
+            BUILD_COMMITS_B64=${{ steps.frontend_meta.outputs.build_commits_b64 }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}

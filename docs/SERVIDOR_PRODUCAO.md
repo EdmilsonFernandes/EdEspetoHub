@@ -73,6 +73,37 @@ scripts/./deploy-frontend.sh
 scripts/./deploy-api.sh && scripts/./deploy-frontend.sh
 ```
 
+### Deploy por imagem pronta (GHCR, sem build pesado no EC2)
+
+Fluxo novo, conservador, em paralelo ao deploy atual:
+
+1. `git push` no `main`
+2. GitHub Actions publica imagens no GHCR
+3. No EC2, o servidor apenas faz `pull` e recria os containers
+
+Os scripts antigos continuam válidos como fallback.
+
+```bash
+# API + face-worker de uma release específica
+cd ~/EdEspetoHub
+scripts/./deploy-release-api.sh 3a254581
+
+# Frontend da mesma release
+scripts/./deploy-release-frontend.sh 3a254581
+```
+
+Ou em um único passo:
+
+```bash
+scripts/./deploy-release.sh 3a254581 api frontend face-worker
+```
+
+Observações:
+- `3a254581` é a tag curta do commit publicada pelo workflow do GHCR.
+- `main` continua disponível, mas para produção o mais seguro é usar a SHA curta.
+- Se o repositório for privado, faça `docker login ghcr.io` no servidor ou configure `GHCR_USERNAME` e `GHCR_TOKEN` em `.env.prod.secrets`.
+- Se o fluxo novo falhar, o deploy antigo com `deploy-api.sh` e `deploy-frontend.sh` continua funcionando.
+
 ---
 
 ## Containers Docker
@@ -103,6 +134,20 @@ cd ~/EdEspetoHub && docker compose up -d
 ```
 
 > O container `chamanoespeto-maps` foi aposentado. Se ainda existir no servidor por legado, pode ser parado e removido.
+
+### GHCR
+
+Workflow responsável:
+- `.github/workflows/publish-ghcr.yml`
+
+Imagens publicadas:
+- `ghcr.io/edmilsonfernandes/edespetohub-api:<tag>`
+- `ghcr.io/edmilsonfernandes/edespetohub-frontend:<tag>`
+- `ghcr.io/edmilsonfernandes/edespetohub-face-worker:<tag>`
+
+Tags publicadas:
+- `main`
+- SHA curta do commit, por exemplo `3a254581`
 
 ---
 
