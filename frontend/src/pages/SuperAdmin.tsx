@@ -165,66 +165,66 @@ const SECTION_META: Record<string, { title: string; description: string; tone: s
   executive: {
     title: 'Resumo executivo',
     description: 'Visão rápida dos principais números da plataforma.',
-    tone: 'from-slate-900 to-slate-700 text-white border-slate-800',
+    tone: 'from-[#0d1f35] to-[#153A4C] text-white border-[#153A4C]',
   },
   rankings: {
     title: 'Rankings',
     description: 'Comparativo de lojas por receita e volume de pedidos.',
-    tone: 'from-emerald-500 to-emerald-600 text-white border-emerald-500',
+    tone: 'from-[#153A4C] to-[#336886] text-white border-[#336886]',
   },
   stores: {
     title: 'Lojas e performance',
     description: 'Filtros, plano, VIP, métricas e saúde operacional das lojas.',
-    tone: 'from-indigo-500 to-indigo-600 text-white border-indigo-500',
+    tone: 'from-[#153A4C] to-[#1e4d6b] text-white border-[#153A4C]',
   },
   payments: {
     title: 'Pagamentos',
     description: 'Acompanhamento financeiro, status e reconciliação.',
-    tone: 'from-teal-500 to-teal-600 text-white border-teal-500',
+    tone: 'from-[#0d3347] to-[#336886] text-white border-[#336886]',
   },
   security: {
     title: 'Segurança de clientes',
     description: 'Bloqueios temporários, sinais de abuso e revisão operacional das contas.',
-    tone: 'from-rose-500 to-orange-500 text-white border-rose-500',
+    tone: 'from-rose-700 to-rose-600 text-white border-rose-700',
   },
   logs: {
     title: 'Logs de acesso',
     description: 'Rastreamento de acesso, segurança e auditoria de uso.',
-    tone: 'from-slate-600 to-slate-700 text-white border-slate-600',
+    tone: 'from-slate-700 to-slate-800 text-white border-slate-700',
   },
   events: {
     title: 'Eventos',
     description: 'Fila de eventos e histórico técnico da plataforma.',
-    tone: 'from-blue-500 to-blue-600 text-white border-blue-500',
+    tone: 'from-slate-700 to-slate-800 text-white border-slate-700',
   },
   kyc: {
     title: 'KYC de entregadores',
     description: 'Validação documental, score facial e decisões da plataforma.',
-    tone: 'from-violet-500 to-violet-600 text-white border-violet-500',
+    tone: 'from-[#153A4C] to-[#336886] text-white border-[#336886]',
   },
   versions: {
     title: 'Versões',
     description: 'Versão atual, build e histórico técnico de mudanças.',
-    tone: 'from-slate-700 to-slate-900 text-white border-slate-700',
+    tone: 'from-slate-800 to-slate-900 text-white border-slate-800',
   },
   push: {
-    title: 'Push Global',
-    description: 'Disparo de notificação para toda a base de apps ativos.',
-    tone: 'from-cyan-600 to-blue-600 text-white border-cyan-600',
+    title: 'Push Promocional',
+    description: 'Aprovação e histórico de notificações pagas pelas lojas.',
+    tone: 'from-[#153A4C] to-[#336886] text-white border-[#336886]',
   },
 };
 
 const SUPER_ADMIN_SECTIONS = [
-  { id: 'executive', label: 'Resumo' },
-  { id: 'rankings', label: 'Rankings' },
-  { id: 'stores', label: 'Lojas' },
-  { id: 'payments', label: 'Pagamentos' },
-  { id: 'security', label: 'Segurança' },
-  { id: 'push', label: 'Push Global' },
-  { id: 'logs', label: 'Logs' },
-  { id: 'events', label: 'Eventos' },
-  { id: 'kyc', label: 'KYC' },
-  { id: 'versions', label: 'Versões' },
+  { id: 'executive', label: 'Resumo',     icon: ChartBar,          group: 'operacional' },
+  { id: 'rankings',  label: 'Rankings',   icon: TrendUp,           group: 'operacional' },
+  { id: 'stores',    label: 'Lojas',      icon: Storefront,        group: 'operacional' },
+  { id: 'payments',  label: 'Pagamentos', icon: CurrencyDollar,    group: 'operacional' },
+  { id: 'push',      label: 'Push',       icon: Megaphone,         group: 'plataforma'  },
+  { id: 'kyc',       label: 'KYC',        icon: IdentificationCard,group: 'plataforma'  },
+  { id: 'security',  label: 'Segurança',  icon: ShieldCheck,       group: 'plataforma'  },
+  { id: 'logs',      label: 'Logs',       icon: GitCommit,         group: 'tecnico'     },
+  { id: 'events',    label: 'Eventos',    icon: Sparkle,           group: 'tecnico'     },
+  { id: 'versions',  label: 'Versões',    icon: RocketLaunch,      group: 'tecnico'     },
 ];
 
 export function SuperAdmin() {
@@ -1304,34 +1304,59 @@ export function SuperAdmin() {
         </div>
       </div>
 
-      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-white/92 backdrop-blur border-b border-slate-200 shadow-[0_4px_24px_-8px_rgba(15,23,42,0.09)]">
+      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-[#0d1f35]/97 backdrop-blur border-b border-white/8 shadow-[0_4px_24px_-8px_rgba(0,0,0,0.4)]">
+        {/* Mobile select */}
         <div className="sm:hidden">
-          <label className="block">
-            <span className="mb-1 block text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">
-              Seções
-            </span>
-            <select
-              value={activeSection}
-              onChange={(event) => setActiveSection(event.target.value)}
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-800 shadow-sm outline-none transition focus:border-slate-900"
-            >
-              <option value="executive">Resumo</option>
-              {SUPER_ADMIN_SECTIONS.filter((section) => section.id !== 'executive').map((section) => (
-                <option key={section.id} value={section.id}>
-                  {section.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <select
+            value={activeSection}
+            onChange={(event) => setActiveSection(event.target.value)}
+            className="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-sm font-bold text-white outline-none"
+          >
+            {[
+              { label: '— Operacional —', disabled: true },
+              ...SUPER_ADMIN_SECTIONS.filter(s => s.group === 'operacional'),
+              { label: '— Plataforma —', disabled: true },
+              ...SUPER_ADMIN_SECTIONS.filter(s => s.group === 'plataforma'),
+              { label: '— Técnico —', disabled: true },
+              ...SUPER_ADMIN_SECTIONS.filter(s => s.group === 'tecnico'),
+            ].map((s: any) => (
+              s.disabled
+                ? <option key={s.label} disabled>{s.label}</option>
+                : <option key={s.id} value={s.id}>{s.label}</option>
+            ))}
+          </select>
         </div>
-        <PremiumTabs
-          containerClassName="hidden sm:block"
-          listClassName="flex flex-nowrap gap-2 overflow-x-auto no-scrollbar scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-          buttonClassName="shrink-0 whitespace-nowrap"
-          items={SUPER_ADMIN_SECTIONS}
-          activeId={activeSection}
-          onChange={(id) => setActiveSection(id)}
-        />
+
+        {/* Desktop nav com grupos */}
+        <div className="hidden sm:flex items-center gap-4 overflow-x-auto no-scrollbar">
+          {(['operacional', 'plataforma', 'tecnico'] as const).map((group, gi) => {
+            const items = SUPER_ADMIN_SECTIONS.filter(s => s.group === group);
+            const groupLabel = group === 'operacional' ? 'Operacional' : group === 'plataforma' ? 'Plataforma' : 'Técnico';
+            return (
+              <div key={group} className={`flex items-center gap-1 ${gi > 0 ? 'border-l border-white/10 pl-4' : ''}`}>
+                <span className="mr-1 text-[9px] font-black uppercase tracking-[0.2em] text-white/30 hidden lg:block">{groupLabel}</span>
+                {items.map(({ id, label, icon: Icon }) => {
+                  const isActive = activeSection === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => setActiveSection(id)}
+                      className={`inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-[12px] font-bold transition-all ${
+                        isActive
+                          ? 'bg-[#336886] text-white shadow-[0_4px_12px_-4px_rgba(51,104,134,0.6)]'
+                          : 'text-white/55 hover:text-white hover:bg-white/8'
+                      }`}
+                    >
+                      <Icon size={13} weight={isActive ? 'fill' : 'duotone'} />
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       <div
@@ -1850,48 +1875,74 @@ export function SuperAdmin() {
             ) : (
               <div className="space-y-3">
                 {pendingPushes.map((push: any) => (
-                  <div key={push.id} className="rounded-2xl border border-violet-100 bg-white p-3 space-y-2">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="text-xs text-slate-400">{push.storeName} · {new Date(push.createdAt).toLocaleString('pt-BR')}</p>
-                        <p className="text-sm font-bold text-slate-900 mt-0.5">{push.title}</p>
-                        <p className="text-sm text-slate-600">{push.body}</p>
-                      </div>
-                      <span className="shrink-0 rounded-full bg-violet-100 px-2.5 py-0.5 text-[11px] font-bold text-violet-700">R$ {Number(push.priceAmount).toFixed(2)}</span>
-                    </div>
-                    {rejectingId === push.id ? (
-                      <div className="space-y-2">
-                        <input type="text" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="Motivo da rejeição..." className="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-sm" />
-                        <div className="flex gap-2">
-                          <button type="button" onClick={() => { setRejectingId(''); setRejectReason(''); }} className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600">Cancelar</button>
-                          <button type="button" disabled={!rejectReason.trim() || pushActionId === push.id} onClick={async () => {
-                            setPushActionId(push.id);
-                            try {
-                              await superAdminService.rejectPromoPush(token, push.id, rejectReason);
-                              setPendingPushes((prev) => prev.filter((p) => p.id !== push.id));
-                              setRejectingId(''); setRejectReason('');
-                              showToast('Push rejeitado.', 'success');
-                            } catch { showToast('Erro ao rejeitar.', 'error'); }
-                            finally { setPushActionId(''); }
-                          }} className="rounded-lg bg-rose-500 px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50">Confirmar rejeição</button>
+                  <div key={push.id} className="overflow-hidden rounded-2xl border border-[#336886]/20 bg-white shadow-[0_4px_20px_-8px_rgba(21,58,76,0.15)]">
+                    <div className="h-[3px] bg-gradient-to-r from-[#153A4C] to-[#336886]" />
+                    <div className="p-4">
+                      <div className="flex items-start gap-3">
+                        {/* Logo da loja */}
+                        <div className="h-11 w-11 shrink-0 overflow-hidden rounded-2xl border border-slate-100 bg-slate-100 shadow-sm">
+                          {push.storeLogoUrl ? (
+                            <img src={resolveAssetUrl(push.storeLogoUrl)} alt={push.storeName} className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-xs font-black text-white">
+                              {String(push.storeName || 'L').slice(0, 2).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">{push.storeName}</p>
+                              <p className="mt-0.5 text-sm font-black text-slate-900">{push.title}</p>
+                              <p className="mt-0.5 text-xs font-medium leading-5 text-slate-500">{push.body}</p>
+                            </div>
+                            <span className="shrink-0 rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-black text-emerald-700">
+                              R$ {Number(push.priceAmount).toFixed(2)}
+                            </span>
+                          </div>
+                          <p className="mt-2 text-[10px] text-slate-400">{new Date(push.createdAt).toLocaleString('pt-BR')}</p>
                         </div>
                       </div>
-                    ) : (
-                      <div className="flex gap-2">
-                        <button type="button" onClick={() => { setRejectingId(push.id); setRejectReason(''); }} className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-600">Rejeitar</button>
-                        <button type="button" disabled={pushActionId === push.id} onClick={async () => {
-                          setPushActionId(push.id);
-                          try {
-                            const result = await superAdminService.approvePromoPush(token, push.id);
-                            setPendingPushes((prev) => prev.filter((p) => p.id !== push.id));
-                            showToast(`Push aprovado e enviado para ${result.sentCount ?? '?'} usuários!`, 'success');
-                          } catch (err: any) { showToast(err?.message || 'Erro ao aprovar.', 'error'); }
-                          finally { setPushActionId(''); }
-                        }} className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50">
-                          {pushActionId === push.id ? 'Enviando...' : '✅ Aprovar e Enviar'}
-                        </button>
+
+                      <div className="mt-3">
+                        {rejectingId === push.id ? (
+                          <div className="space-y-2">
+                            <input type="text" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="Motivo da rejeição..." className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-[#336886]" />
+                            <div className="flex gap-2">
+                              <button type="button" onClick={() => { setRejectingId(''); setRejectReason(''); }} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600">Cancelar</button>
+                              <button type="button" disabled={!rejectReason.trim() || pushActionId === push.id} onClick={async () => {
+                                setPushActionId(push.id);
+                                try {
+                                  await superAdminService.rejectPromoPush(token, push.id, rejectReason);
+                                  setPendingPushes((prev) => prev.filter((p) => p.id !== push.id));
+                                  setRejectingId(''); setRejectReason('');
+                                  showToast('Push rejeitado.', 'success');
+                                } catch { showToast('Erro ao rejeitar.', 'error'); }
+                                finally { setPushActionId(''); }
+                              }} className="rounded-xl bg-rose-500 px-3 py-2 text-xs font-black text-white shadow-[0_4px_12px_-4px_rgba(239,68,68,0.5)] disabled:opacity-50">Confirmar rejeição</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex gap-2">
+                            <button type="button" onClick={() => { setRejectingId(push.id); setRejectReason(''); }} className="inline-flex flex-1 items-center justify-center rounded-xl border border-rose-200 bg-rose-50 py-2.5 text-xs font-black text-rose-600 transition hover:bg-rose-100">
+                              Rejeitar
+                            </button>
+                            <button type="button" disabled={pushActionId === push.id} onClick={async () => {
+                              setPushActionId(push.id);
+                              try {
+                                const result = await superAdminService.approvePromoPush(token, push.id);
+                                setPendingPushes((prev) => prev.filter((p) => p.id !== push.id));
+                                showToast(`Push aprovado e enviado para ${result.sentCount ?? '?'} usuários!`, 'success');
+                              } catch (err: any) { showToast(err?.message || 'Erro ao aprovar.', 'error'); }
+                              finally { setPushActionId(''); }
+                            }} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[linear-gradient(135deg,#153A4C,#336886)] py-2.5 text-xs font-black text-white shadow-[0_6px_16px_-6px_rgba(21,58,76,0.5)] disabled:opacity-50 transition hover:brightness-110">
+                              <CheckCircle size={13} weight="fill" />
+                              {pushActionId === push.id ? 'Enviando...' : 'Aprovar e Enviar'}
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1907,27 +1958,63 @@ export function SuperAdmin() {
             {pushHistory.length === 0 ? (
               <p className="text-sm text-slate-400">Nenhum push aprovado ou rejeitado ainda.</p>
             ) : (
-              <div className="space-y-2">
-                {pushHistory.map((push: any) => (
-                  <div key={push.id} className="rounded-2xl border border-slate-100 bg-white p-3">
-                    <div className="flex items-start gap-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${push.status === 'SENT' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
-                            {push.status === 'SENT' ? '✅ Enviado' : '❌ Rejeitado'}
-                          </span>
-                          <span className="text-xs text-slate-400">{push.storeName}</span>
-                          {push.status === 'SENT' && push.sentCount != null && (
-                            <span className="text-xs font-semibold text-emerald-600">{push.sentCount} usuários</span>
-                          )}
-                        </div>
-                        <p className="text-sm font-bold text-slate-900 mt-1">{push.title}</p>
-                        <p className="text-xs text-slate-500">{push.body}</p>
-                        {push.rejectionReason && (
-                          <p className="text-xs text-rose-600 mt-1 font-semibold">Motivo: {push.rejectionReason}</p>
+              <div className="space-y-4">
+                {/* Agrupar por loja */}
+                {Object.values(
+                  pushHistory.reduce((acc: Record<string, { storeName: string; storeLogoUrl?: string; pushes: any[] }>, push: any) => {
+                    const key = push.storeId || push.storeName || 'unknown';
+                    if (!acc[key]) acc[key] = { storeName: push.storeName || 'Loja', storeLogoUrl: push.storeLogoUrl, pushes: [] };
+                    acc[key].pushes.push(push);
+                    return acc;
+                  }, {})
+                ).map((group: any) => (
+                  <div key={group.storeName} className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+                    {/* Header da loja */}
+                    <div className="flex items-center gap-3 border-b border-slate-100 bg-slate-50/80 px-4 py-3">
+                      <div className="h-9 w-9 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+                        {group.storeLogoUrl ? (
+                          <img src={resolveAssetUrl(group.storeLogoUrl)} alt={group.storeName} className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-[10px] font-black text-white">
+                            {String(group.storeName).slice(0, 2).toUpperCase()}
+                          </div>
                         )}
-                        <p className="text-[10px] text-slate-400 mt-1">{new Date(push.updatedAt).toLocaleString('pt-BR')}</p>
                       </div>
+                      <div>
+                        <p className="text-sm font-black text-slate-900">{group.storeName}</p>
+                        <p className="text-[10px] font-semibold text-slate-400">{group.pushes.length} push{group.pushes.length !== 1 ? 'es' : ''}</p>
+                      </div>
+                    </div>
+
+                    {/* Pushes da loja */}
+                    <div className="divide-y divide-slate-50">
+                      {group.pushes.map((push: any) => {
+                        const isSent = push.status === 'SENT';
+                        return (
+                          <div key={push.id} className="px-4 py-3">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-black text-slate-900">{push.title}</p>
+                                <p className="mt-0.5 text-xs font-medium text-slate-500">{push.body}</p>
+                                {push.rejectionReason && (
+                                  <p className="mt-1 text-[11px] font-semibold text-rose-600">Motivo: {push.rejectionReason}</p>
+                                )}
+                                <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                                  {isSent && push.sentCount != null && (
+                                    <span className="text-[11px] font-black text-[#336886]">{push.sentCount} usuários</span>
+                                  )}
+                                  <span className="text-[10px] text-slate-400">{new Date(push.updatedAt).toLocaleString('pt-BR')}</span>
+                                </div>
+                              </div>
+                              <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.1em] ${
+                                isSent ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-rose-200 bg-rose-50 text-rose-600'
+                              }`}>
+                                {isSent ? 'Enviado' : 'Rejeitado'}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}
