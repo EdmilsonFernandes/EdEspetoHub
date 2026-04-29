@@ -186,6 +186,31 @@ SUPER_ADMIN_EMAIL=admin@chamanoespeto.com.br
 
 > 💡 Os secrets sensíveis (JWT, MP keys, etc.) ficam no **AWS SSM Parameter Store** em `/chamanoespeto/prod` e são carregados automaticamente no boot da API.
 
+### Jobs agendados
+
+Os jobs do backend rodam dentro do próprio processo da API e sobem no boot da aplicação.
+Guia técnico: [`docs/BACKEND_JOBS.md`](./BACKEND_JOBS.md)
+
+Variáveis úteis de operação:
+
+```env
+DELIVERY_EXPIRATION_JOB_ENABLED=true
+DELIVERY_EXPIRATION_INTERVAL_MS=120000
+
+FACE_VERIFY_JOB_ENABLED=true
+FACE_VERIFY_JOB_INTERVAL_MS=30000
+
+AWAITING_PAYMENT_EXPIRATION_JOB_ENABLED=true
+AWAITING_PAYMENT_EXPIRATION_INTERVAL_MS=120000
+AWAITING_PAYMENT_EXPIRATION_THRESHOLD_MINUTES=40
+
+STORE_DASHBOARD_SNAPSHOT_JOB_ENABLED=true
+STORE_DASHBOARD_SNAPSHOT_INTERVAL_MS=600000
+STORE_DASHBOARD_SNAPSHOT_MAX_DATES=500
+```
+
+> Se a API subir em mais de uma instância, cada instância executará esses jobs também. Hoje não há lock distribuído global.
+
 ---
 
 ## AWS SSM Parameter Store
