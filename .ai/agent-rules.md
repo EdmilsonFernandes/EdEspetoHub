@@ -21,6 +21,10 @@ Deploy principal por imagem pronta (GHCR, o usuário executa):
 scripts/./deploy-release-frontend.sh  
 scripts/./deploy-release-api.sh  
 
+Deploy preferido em produção com aprovação:
+.github/workflows/deploy-production.yml
+Nome no GitHub Actions: `Deploy to EC2 (Approval)`
+
 Fallback legado (se o fluxo novo falhar):
 scripts/./deploy-frontend.sh  
 scripts/./deploy-api.sh  
@@ -36,6 +40,7 @@ Nome no GitHub Actions: `Publish Docker Images (GHCR)`
 - frontend alterado → preferir `scripts/./deploy-release-frontend.sh`
 - api alterada → preferir `scripts/./deploy-release-api.sh`
 - ambos alterados → `scripts/./deploy-release-api.sh` e depois `scripts/./deploy-release-frontend.sh`
+- se o workflow `Deploy to EC2 (Approval)` estiver configurado e pronto → preferir mandar o usuário aprovar esse workflow
 - scripts/compose/infra alterados → avisar que o servidor pode precisar de `git pull` antes do deploy novo
 - se o fluxo GHCR não estiver pronto ou falhar → informar fallback com `deploy-api.sh` / `deploy-frontend.sh`
 
@@ -75,7 +80,8 @@ Após o push, reportar:
 - Se GHCR for o caminho principal, informar também se:
   - as imagens já estão prontas
   - ainda precisa aguardar o workflow
-  - será necessário `git pull` no servidor por mudança de infra/scripts
+  - o usuário já pode aprovar `Deploy to EC2 (Approval)` ou ainda precisa esperar
+  - será necessário `git pull` no servidor por mudança de infra/scripts caso o workflow aprovado ainda não esteja configurado
 
 ---
 
@@ -114,6 +120,7 @@ NÃO usar SSH para rodar deploy ou git pull proativamente.
 - NÃO dizer que concluiu sem validar
 - SEMPRE informar o commit e qual deploy rodar
 - NÃO mandar deployar via GHCR sem antes confirmar que a Action terminou e as imagens estão prontas
+- Se `Deploy to EC2 (Approval)` estiver disponível e a imagem estiver pronta, preferir esse caminho ao invés de mandar o usuário entrar no EC2
 
 ---
 
@@ -126,6 +133,7 @@ NÃO usar SSH para rodar deploy ou git pull proativamente.
 - Commit: `<hash>`
 - Push: ✅
 - Deploy necessário: `scripts/./deploy-release-frontend.sh` e/ou `scripts/./deploy-release-api.sh`
+- ou aprovar o workflow `Deploy to EC2 (Approval)` quando esse caminho estiver configurado
 - Status das imagens GHCR: `prontas` / `aguardando workflow`
 - Precisa `git pull` no servidor?: `sim` / `não`
 

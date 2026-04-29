@@ -117,6 +117,36 @@ Observações:
 - Fallback: se preferir local, use `.env.prod.secrets`.
 - Se o fluxo novo falhar, o deploy antigo com `deploy-api.sh` e `deploy-frontend.sh` continua funcionando.
 
+### Deploy com approval no GitHub
+
+Workflow novo:
+- `.github/workflows/deploy-production.yml`
+- Nome: `Deploy to EC2 (Approval)`
+
+Fluxo:
+1. `git push` na `main`
+2. `Publish Docker Images (GHCR)` termina com sucesso
+3. `Deploy to EC2 (Approval)` entra em espera no environment `production`
+4. Você aprova em `Review deployments`
+5. O workflow conecta no EC2, roda `git pull --ff-only` e depois:
+   - `scripts/./deploy-release-api.sh <sha-curta>`
+   - `scripts/./deploy-release-frontend.sh <sha-curta>`
+
+Configuração necessária no GitHub:
+- Criar o environment `production`
+- Configurar pelo menos 1 reviewer obrigatório
+- Configurar secrets nesse environment:
+  - `PROD_SSH_HOST`
+  - `PROD_SSH_USER`
+  - `PROD_SSH_KEY`
+  - `PROD_SSH_PORT` (opcional, default `22`)
+
+Observações:
+- Esse caminho elimina a necessidade de entrar no servidor para deploy comum.
+- O workflow usa a SHA curta do commit publicado pelo GHCR, não só `main`.
+- Se um commit mais novo chegar antes da aprovação, o pendente antigo é cancelado e fica valendo o último.
+- Para rollback ou redeploy manual, dá para abrir `Deploy to EC2 (Approval)` e usar `Run workflow` com `image_tag`.
+
 ### Teste manual rápido no EC2
 
 1. Atualizar o repositório do servidor:

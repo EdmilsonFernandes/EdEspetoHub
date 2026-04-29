@@ -1,0 +1,103 @@
+name: Deploy to EC2 (Approval)
+
+on:
+  workflow_run:
+    workflows: ["Publish Docker Images (GHCR)"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Tag da imagem no GHCR (main ou SHA curta)"
+        required: false
+        default: "main"
+
+concurrency:
+  group: deploy-production-main
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'main'
+      )
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://www.janocaminho.com.br
+
+    steps:
+      - name: Resolve release
+        id: release
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            head_sha="${{ github.event.workflow_run.head_sha }}"
+            image_tag="${head_sha::8}"
+            source_run_url="${{ github.event.workflow_run.html_url }}"
+            trigger_label="workflow_run"
+          else
+            image_tag="${{ inputs.image_tag }}"
+            source_run_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            trigger_label="workflow_dispatch"
+          fi
+
+          if [ -z "$image_tag" ]; then
+            image_tag="main"
+          fi
+
+          echo "image_tag=$image_tag" >> "$GITHUB_OUTPUT"
+          echo "source_run_url=$source_run_url" >> "$GITHUB_OUTPUT"
+          echo "trigger_label=$trigger_label" >> "$GITHUB_OUTPUT"
+
+      - name: Write deployment summary
+        shell: bash
+        run: |
+          cat <<EOF >> "$GITHUB_STEP_SUMMARY"
+          ## Production deployment
+
+          - Trigger: \`${{ steps.release.outputs.trigger_label }}\`
+          - Image tag: \`${{ steps.release.outputs.image_tag }}\`
+          - Source workflow: ${{ steps.release.outputs.source_run_url }}
+          - Target host: production EC2
+          EOF
+
+      - name: Prepare SSH
+        shell: bash
+        env:
+          PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+          PROD_SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+          PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$PROD_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p "${PROD_SSH_PORT:-22}" -H "$PROD_SSH_HOST" >> ~/.ssh/known_hosts
+
+      - name: Deploy on EC2
+        shell: bash
+        env:
+          PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+          PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
+          PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
+          IMAGE_TAG: ${{ steps.release.outputs.image_tag }}
+        run: |
+          ssh_user="${PROD_SSH_USER:-ec2-user}"
+          ssh_port="${PROD_SSH_PORT:-22}"
+
+          ssh \
+            -i ~/.ssh/id_ed25519 \
+            -p "$ssh_port" \
+            -o StrictHostKeyChecking=yes \
+            "${ssh_user}@${PROD_SSH_HOST}" \
+            "set -eu; \
+             cd ~/EdEspetoHub; \
+             git pull --ff-only; \
+             scripts/./deploy-release-api.sh '$IMAGE_TAG'; \
+             scripts/./deploy-release-frontend.sh '$IMAGE_TAG'"
