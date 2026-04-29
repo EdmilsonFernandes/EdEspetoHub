@@ -32,7 +32,7 @@ permissions:
   packages: read
 
 jobs:
-  deploy:
+  resolve:
     if: >
       github.event_name == 'workflow_dispatch' ||
       (
@@ -41,9 +41,14 @@ jobs:
         github.event.workflow_run.head_branch == 'main'
       )
     runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: https://www.janocaminho.com.br
+    outputs:
+      image_tag: ${{ steps.release.outputs.image_tag }}
+      source_run_url: ${{ steps.release.outputs.source_run_url }}
+      trigger_label: ${{ steps.release.outputs.trigger_label }}
+      has_services: ${{ steps.services.outputs.has_services }}
+      services: ${{ steps.services.outputs.services }}
+      services_display: ${{ steps.services.outputs.services_display }}
+      requested_scope: ${{ steps.services.outputs.requested_scope }}
 
     steps:
       - name: Resolve release
@@ -161,8 +166,26 @@ jobs:
           - Services: \`${{ steps.services.outputs.services_display }}\`
           EOF
 
+      - name: Skip deploy when no image changed
+        if: steps.services.outputs.has_services != 'true'
+        shell: bash
+        run: |
+          cat <<EOF >> "$GITHUB_STEP_SUMMARY"
+
+          No published image found for the requested tag/scope.
+          This workflow finished without creating a production approval gate.
+          EOF
+
+  deploy:
+    needs: resolve
+    if: needs.resolve.outputs.has_services == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://www.janocaminho.com.br
+
+    steps:
       - name: Prepare SSH
-        if: steps.services.outputs.has_services == 'true'
         shell: bash
         env:
           PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
@@ -185,7 +208,6 @@ jobs:
           ssh-keyscan -p "${PROD_SSH_PORT:-22}" -H "$PROD_SSH_HOST" >> ~/.ssh/known_hosts
 
       - name: Test SSH access
-        if: steps.services.outputs.has_services == 'true'
         shell: bash
         env:
           PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
@@ -204,15 +226,28 @@ jobs:
             "${ssh_user}@${PROD_SSH_HOST}" \
             "echo github-actions-ssh-ok"
 
+      - name: Write approved deploy summary
+        shell: bash
+        run: |
+          cat <<EOF >> "$GITHUB_STEP_SUMMARY"
+          ## Approved production deployment
+
+          - Trigger: \`${{ needs.resolve.outputs.trigger_label }}\`
+          - Image tag: \`${{ needs.resolve.outputs.image_tag }}\`
+          - Source workflow: ${{ needs.resolve.outputs.source_run_url }}
+          - Deploy scope: \`${{ needs.resolve.outputs.requested_scope }}\`
+          - Services: \`${{ needs.resolve.outputs.services_display }}\`
+          - Target host: production EC2
+          EOF
+
       - name: Deploy on EC2
-        if: steps.services.outputs.has_services == 'true'
         shell: bash
         env:
           PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
           PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
           PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
-          IMAGE_TAG: ${{ steps.release.outputs.image_tag }}
-          SERVICES: ${{ steps.services.outputs.services }}
+          IMAGE_TAG: ${{ needs.resolve.outputs.image_tag }}
+          SERVICES: ${{ needs.resolve.outputs.services }}
         run: |
           ssh_user="${PROD_SSH_USER:-ec2-user}"
           ssh_port="${PROD_SSH_PORT:-22}"
@@ -228,9 +263,3 @@ jobs:
              cd ~/EdEspetoHub; \
              git pull --ff-only; \
              scripts/./deploy-release.sh '$IMAGE_TAG' $SERVICES"
-
-      - name: Skip deploy when no image changed
-        if: steps.services.outputs.has_services != 'true'
-        shell: bash
-        run: |
-          echo "No published image found for the requested tag/scope. Nothing to deploy." >> "$GITHUB_STEP_SUMMARY"
