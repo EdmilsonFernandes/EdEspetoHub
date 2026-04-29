@@ -115,6 +115,64 @@ Observações:
 - Se o repositório for privado, faça `docker login ghcr.io` no servidor ou configure `GHCR_USERNAME` e `GHCR_TOKEN` em `.env.prod.secrets`.
 - Se o fluxo novo falhar, o deploy antigo com `deploy-api.sh` e `deploy-frontend.sh` continua funcionando.
 
+### Teste manual rápido no EC2
+
+1. Atualizar o repositório do servidor:
+
+```bash
+cd ~/EdEspetoHub
+git pull
+```
+
+2. Criar `.env.prod.secrets` no projeto com um PAT classic do GitHub com `read:packages`:
+
+```bash
+cd ~/EdEspetoHub
+cat > .env.prod.secrets <<'EOF'
+GHCR_USERNAME=<seu-usuario-github>
+GHCR_TOKEN=<pat-classic-com-read-packages>
+EOF
+```
+
+3. Testar acesso ao GHCR:
+
+```bash
+cd ~/EdEspetoHub
+set -a
+. ./.env.prod.secrets
+set +a
+printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+docker pull ghcr.io/edmilsonfernandes/edespetohub-api:main
+docker pull ghcr.io/edmilsonfernandes/edespetohub-frontend:main
+docker pull ghcr.io/edmilsonfernandes/edespetohub-face-worker:main
+```
+
+4. Rodar o deploy novo:
+
+```bash
+cd ~/EdEspetoHub
+scripts/./deploy-release-api.sh
+scripts/./deploy-release-frontend.sh
+```
+
+5. Validar:
+
+```bash
+docker ps
+docker logs chamanoespeto-api --tail 50
+docker logs chamanoespeto-frontend --tail 50
+```
+
+Fallback:
+
+```bash
+cd ~/EdEspetoHub
+scripts/./deploy-api.sh
+scripts/./deploy-frontend.sh
+```
+
+Se usar token só para QA, revogue depois do teste.
+
 ---
 
 ## Containers Docker

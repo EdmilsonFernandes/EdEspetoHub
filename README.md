@@ -1253,6 +1253,39 @@ Fallback:
 ./scripts/deploy-frontend.sh
 ```
 
+5) Teste manual rápido no EC2:
+
+```bash
+cd ~/EdEspetoHub
+git pull
+```
+
+Criar `./.env.prod.secrets` com um PAT classic do GitHub com `read:packages`:
+
+```bash
+cat > .env.prod.secrets <<'EOF'
+GHCR_USERNAME=<seu-usuario-github>
+GHCR_TOKEN=<pat-classic-com-read-packages>
+EOF
+```
+
+Testar acesso e deploy:
+
+```bash
+set -a
+. ./.env.prod.secrets
+set +a
+printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+docker pull ghcr.io/edmilsonfernandes/edespetohub-api:main
+docker pull ghcr.io/edmilsonfernandes/edespetohub-frontend:main
+docker pull ghcr.io/edmilsonfernandes/edespetohub-face-worker:main
+sh scripts/deploy-release-api.sh
+sh scripts/deploy-release-frontend.sh
+docker ps
+```
+
+Se usar token só para QA, revogue depois do teste.
+
 ### Atalhos (scripts)
 
 Execução local (porta 8080):
