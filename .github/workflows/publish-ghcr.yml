@@ -13,6 +13,9 @@ permissions:
   contents: read
   packages: write
 
+env:
+  DOCKER_METADATA_SHORT_SHA_LENGTH: 8
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
