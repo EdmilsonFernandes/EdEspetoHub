@@ -853,6 +853,13 @@ export const DashboardView = ({
       iconTone: "text-brand-primary bg-brand-primary-soft border-brand-primary/20",
     },
   ];
+  const periodOptions = [
+    { id: "30", label: "30d" },
+    { id: "60", label: "60d" },
+    { id: "90", label: "90d" },
+    { id: "custom", label: "Personalizado" },
+    { id: "all", label: "Tudo" },
+  ];
 
 
   return (
@@ -1027,7 +1034,7 @@ export const DashboardView = ({
       )}
       <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div>
+          <div className="flex-1">
             <p className="text-[11px] uppercase tracking-[0.28em] text-amber-700 font-black">Gestão</p>
             <h3 className="mt-2 text-lg font-black text-slate-900">Relatório gerencial da operação</h3>
             <p className="mt-1 text-sm text-slate-500">
@@ -1040,6 +1047,64 @@ export const DashboardView = ({
             ) : analyticsLoading ? (
               <p className="mt-2 text-xs font-semibold text-slate-500">Atualizando visão consolidada do período...</p>
             ) : null}
+            <div className="mt-4 rounded-2xl border border-amber-100 bg-amber-50/70 p-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-amber-700 font-black">Período do relatório e PDF</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-800">{metrics.periodLabel}</p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Esse período alimenta o PDF gerencial, o gráfico diário, os itens mais vendidos e os clientes do período.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {periodOptions.map((option) => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => {
+                        if (option.id === "custom") {
+                          activateCustomRange();
+                          return;
+                        }
+                        setPeriodDays(option.id);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all hover:-translate-y-0.5 active:scale-95 ${
+                        periodDays === option.id
+                          ? "bg-brand-primary text-white border-brand-primary"
+                          : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {isCustomPeriod ? (
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <label className="block">
+                    <span className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-bold">Data inicial</span>
+                    <input
+                      type="date"
+                      value={customRange?.startDate || customStartDate}
+                      max={customRange?.endDate || customEndDate || todayDateKey}
+                      onChange={(event) => handleCustomStartDateChange(event.target.value)}
+                      className="ds-focus-ring mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-bold">Data final</span>
+                    <input
+                      type="date"
+                      value={customRange?.endDate || customEndDate}
+                      min={customRange?.startDate || customStartDate}
+                      max={todayDateKey}
+                      onChange={(event) => handleCustomEndDateChange(event.target.value)}
+                      className="ds-focus-ring mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                    />
+                  </label>
+                </div>
+              ) : null}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -1291,60 +1356,14 @@ export const DashboardView = ({
         {/* Faturamento por dia */}
         <div className={`bg-white p-6 rounded-2xl shadow-sm border border-slate-200 ${isMobile ? 'h-48' : 'h-80'} overflow-hidden flex flex-col`}>
           <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-            <h4 className="font-bold text-gray-700">Vendas por dia</h4>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { id: "30", label: "30d" },
-                { id: "60", label: "60d" },
-                { id: "90", label: "90d" },
-                { id: "custom", label: "Personalizado" },
-                { id: "all", label: "Tudo" },
-              ].map((option) => (
-                <button
-                  key={option.id}
-                  onClick={() => {
-                    if (option.id === "custom") {
-                      activateCustomRange();
-                      return;
-                    }
-                    setPeriodDays(option.id);
-                  }}
-                  className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all hover:-translate-y-0.5 active:scale-95 ${
-                    periodDays === option.id
-                      ? "bg-brand-primary text-white border-brand-primary"
-                      : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
+            <div>
+              <h4 className="font-bold text-gray-700">Vendas por dia</h4>
+              <p className="mt-1 text-[11px] text-slate-500">Segue o período definido no relatório gerencial.</p>
             </div>
+            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-semibold text-slate-600">
+              {metrics.periodLabel}
+            </span>
           </div>
-          {isCustomPeriod ? (
-            <div className="mb-4 grid gap-3 sm:grid-cols-2">
-              <label className="block">
-                <span className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-bold">Data inicial</span>
-                <input
-                  type="date"
-                  value={customRange?.startDate || customStartDate}
-                  max={customRange?.endDate || customEndDate || todayDateKey}
-                  onChange={(event) => handleCustomStartDateChange(event.target.value)}
-                  className="ds-focus-ring mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
-                />
-              </label>
-              <label className="block">
-                <span className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-bold">Data final</span>
-                <input
-                  type="date"
-                  value={customRange?.endDate || customEndDate}
-                  min={customRange?.startDate || customStartDate}
-                  max={todayDateKey}
-                  onChange={(event) => handleCustomEndDateChange(event.target.value)}
-                  className="ds-focus-ring mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
-                />
-              </label>
-            </div>
-          ) : null}
           {chartSource.length === 0 ? (
             <div className="flex-1 flex items-center justify-center text-sm text-gray-400">
               <div className="text-center space-y-2">
