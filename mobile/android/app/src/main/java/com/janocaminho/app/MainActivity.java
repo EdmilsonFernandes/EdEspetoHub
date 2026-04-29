@@ -30,6 +30,7 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.RenderProcessGoneDetail;
 import android.os.Build;
 import android.net.http.SslError;
 
@@ -79,6 +80,7 @@ public class MainActivity extends BridgeActivity {
     private static final long NAV_ANIM_DURATION_MS = 220L;
     private static final long LAUNCH_OVERLAY_FADE_MS = 260L;
     private static final long LAUNCH_OVERLAY_NETWORK_TIMEOUT_MS = 9000L;
+    private static final long RESUME_WEBVIEW_HEALTH_CHECK_DELAY_MS = 1800L;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 4401;
     private static final int APP_UPDATE_REQUEST_CODE = 4403;
 
@@ -92,8 +94,11 @@ public class MainActivity extends BridgeActivity {
     private Button launchRetryButton;
     private boolean launchOverlayDismissed = false;
     private boolean pageFailedToLoad = false;
+    private boolean mainFrameLoadInProgress = false;
+    private boolean webViewClientConfigured = false;
     private final Handler launchOverlayHandler = new Handler(Looper.getMainLooper());
     private Runnable launchOverlayTimeoutRunnable;
+    private Runnable resumeWebViewHealthCheckRunnable;
     private AppUpdateManager appUpdateManager;
     private InstallStateUpdatedListener installStateUpdatedListener;
     private boolean flexibleUpdatePromptVisible = false;
@@ -138,6 +143,7 @@ public class MainActivity extends BridgeActivity {
             retryInitialPageLoad();
         } else {
             restoreLastVisitedUrl();
+            scheduleResumeWebViewHealthCheck();
         }
         checkForAppUpdates();
     }
@@ -145,6 +151,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onPause() {
         super.onPause();
+        cancelResumeWebViewHealthCheck();
         saveLastVisitedUrl();
     }
 
@@ -255,10 +262,13 @@ public class MainActivity extends BridgeActivity {
         restoreLastVisitedUrl();
         openDeepLinkIfAny();
         checkForAppUpdates();
-        
-        // Ajuste no WebView para aceitar intents de apps externos
-        if (bridge != null && bridge.getWebView() != null) {
-            bridge.getWebView().setWebViewClient(new com.getcapacitor.BridgeWebViewClient(bridge) {
+
+        if (webViewClientConfigured || bridge == null || bridge.getWebView() == null) {
+            return;
+        }
+
+        webViewClientConfigured = true;
+        bridge.getWebView().setWebViewClient(new com.getcapacitor.BridgeWebViewClient(bridge) {
                 @Override
                 public boolean shouldOverrideUrlLoading(WebView view, String url) {
                     if (url == null) return false;
@@ -292,6 +302,8 @@ public class MainActivity extends BridgeActivity {
                 public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
                     super.onPageStarted(view, url, favicon);
                     if (normalizeTrustedWebUrl(url) == null) return;
+                    mainFrameLoadInProgress = true;
+                    cancelResumeWebViewHealthCheck();
 
                     if (!launchOverlayDismissed) {
                         showLaunchOverlayLoading(null);
@@ -314,8 +326,10 @@ public class MainActivity extends BridgeActivity {
                     super.onPageFinished(view, url);
                     String trustedUrl = normalizeTrustedWebUrl(url);
                     if (trustedUrl != null) {
+                        mainFrameLoadInProgress = false;
                         pageFailedToLoad = false;
                         cancelLaunchOverlayTimeout();
+                        cancelResumeWebViewHealthCheck();
                         lastKnownUrl = trustedUrl;
                         dismissLaunchOverlay();
                     }
@@ -329,6 +343,7 @@ public class MainActivity extends BridgeActivity {
                     String failingUrl = request.getUrl() == null ? null : request.getUrl().toString();
                     if (normalizeTrustedWebUrl(failingUrl) == null) return;
 
+                    mainFrameLoadInProgress = false;
                     pageFailedToLoad = true;
                     launchOverlayDismissed = false;
                     showLaunchOverlayRecovery(getString(R.string.launch_timeout_message));
@@ -344,6 +359,7 @@ public class MainActivity extends BridgeActivity {
 
                     int statusCode = errorResponse == null ? 0 : errorResponse.getStatusCode();
                     if (statusCode >= 500) {
+                        mainFrameLoadInProgress = false;
                         pageFailedToLoad = true;
                         launchOverlayDismissed = false;
                         showLaunchOverlayRecovery(getString(R.string.launch_http_error_message));
@@ -353,13 +369,36 @@ public class MainActivity extends BridgeActivity {
                 @Override
                 public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
                     handler.cancel();
+                    mainFrameLoadInProgress = false;
                     pageFailedToLoad = true;
                     launchOverlayDismissed = false;
                     showLaunchOverlayRecovery(getString(R.string.launch_ssl_error_message));
                 }
 
+                @Override
+                public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
+                    mainFrameLoadInProgress = false;
+                    pageFailedToLoad = true;
+                    launchOverlayDismissed = false;
+                    cancelLaunchOverlayTimeout();
+                    cancelResumeWebViewHealthCheck();
+                    showLaunchOverlayLoading(getString(R.string.launch_retrying_message));
+                    restartActivityAfterRendererGone();
+                    return true;
+                }
+
+                @Override
+                public void onPageCommitVisible(WebView view, String url) {
+                    super.onPageCommitVisible(view, url);
+                    if (normalizeTrustedWebUrl(url) == null) return;
+                    mainFrameLoadInProgress = false;
+                    pageFailedToLoad = false;
+                    cancelLaunchOverlayTimeout();
+                    cancelResumeWebViewHealthCheck();
+                    lastKnownUrl = url;
+                    dismissLaunchOverlay();
+                }
             });
-        }
     }
 
     @Override
@@ -605,8 +644,52 @@ public class MainActivity extends BridgeActivity {
 
         showLaunchOverlayLoading(getString(R.string.launch_retrying_message));
         scheduleLaunchOverlayTimeout();
+        cancelResumeWebViewHealthCheck();
+        mainFrameLoadInProgress = true;
         bridge.getWebView().stopLoading();
         bridge.getWebView().loadUrl(retryUrl);
+    }
+
+    private void scheduleResumeWebViewHealthCheck() {
+        if (bridge == null || bridge.getWebView() == null) return;
+
+        cancelResumeWebViewHealthCheck();
+        resumeWebViewHealthCheckRunnable = () -> {
+            if (bridge == null || bridge.getWebView() == null) return;
+
+            WebView webView = bridge.getWebView();
+            String currentTrustedUrl = normalizeTrustedWebUrl(webView.getUrl());
+            boolean missingUrl = currentTrustedUrl == null || currentTrustedUrl.trim().isEmpty();
+            boolean stillLoading = mainFrameLoadInProgress || webView.getProgress() < 100;
+            boolean noVisibleContent = webView.getContentHeight() <= 0;
+
+            if (stillLoading) {
+                scheduleResumeWebViewHealthCheck();
+                return;
+            }
+
+            if (pageFailedToLoad || missingUrl || noVisibleContent) {
+                launchOverlayDismissed = false;
+                retryInitialPageLoad();
+            }
+        };
+        launchOverlayHandler.postDelayed(
+            resumeWebViewHealthCheckRunnable,
+            RESUME_WEBVIEW_HEALTH_CHECK_DELAY_MS
+        );
+    }
+
+    private void cancelResumeWebViewHealthCheck() {
+        if (resumeWebViewHealthCheckRunnable == null) return;
+        launchOverlayHandler.removeCallbacks(resumeWebViewHealthCheckRunnable);
+        resumeWebViewHealthCheckRunnable = null;
+    }
+
+    private void restartActivityAfterRendererGone() {
+        launchOverlayHandler.post(() -> {
+            if (isFinishing() || isDestroyed()) return;
+            recreate();
+        });
     }
 
     private void animateSlideInFromRight(View view) {
