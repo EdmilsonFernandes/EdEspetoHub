@@ -3349,45 +3349,64 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
                     {configCards.map((card) => {
                       const Icon = card.icon;
-                      const badgeClass =
-                        card.tone === 'success'
-                          ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                          : card.tone === 'warning'
-                          ? 'border-amber-200 bg-amber-50 text-amber-700'
-                          : 'border-slate-200 bg-slate-50 text-slate-600';
-                      const iconClass =
-                        card.tone === 'success'
-                          ? 'bg-emerald-50 text-emerald-600'
-                          : card.tone === 'warning'
-                          ? 'bg-amber-50 text-amber-600'
-                          : 'bg-slate-100 text-slate-600';
+                      const isSuccess = card.tone === 'success';
+                      const isWarning = card.tone === 'warning';
                       return (
                         <button
                           key={card.id}
                           type="button"
                           onClick={card.action}
-                          className="w-full rounded-[1.4rem] border border-slate-200 bg-white px-4 py-4 text-left shadow-[0_16px_38px_-30px_rgba(15,23,42,0.4)] transition hover:-translate-y-0.5 hover:border-slate-300"
+                          className={`group relative w-full overflow-hidden rounded-[1.4rem] border bg-white px-4 py-4 text-left shadow-[0_8px_28px_-16px_rgba(15,23,42,0.18)] transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_36px_-18px_rgba(15,23,42,0.28)] ${
+                            isSuccess ? 'border-emerald-100' : isWarning ? 'border-amber-200' : 'border-slate-200'
+                          }`}
                         >
+                          {/* Barra lateral de status */}
+                          <div className={`absolute left-0 top-0 h-full w-1 rounded-l-[1.4rem] ${
+                            isSuccess ? 'bg-emerald-400' : isWarning ? 'bg-amber-400' : 'bg-slate-200'
+                          }`} />
+
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex min-w-0 items-start gap-3">
-                              <span className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${iconClass}`}>
-                                <Icon size={20} weight="duotone" />
-                              </span>
+                              {/* Ícone com badge de status sobreposto */}
+                              <div className="relative shrink-0">
+                                <span className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ${
+                                  isSuccess ? 'bg-emerald-50 text-emerald-600' : isWarning ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-500'
+                                }`}>
+                                  <Icon size={20} weight="duotone" />
+                                </span>
+                                {isSuccess && (
+                                  <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-emerald-500">
+                                    <CheckCircle size={9} weight="fill" className="text-white" />
+                                  </span>
+                                )}
+                                {isWarning && (
+                                  <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-amber-400">
+                                    <WarningCircle size={9} weight="fill" className="text-white" />
+                                  </span>
+                                )}
+                              </div>
                               <div className="min-w-0">
                                 <p className="text-sm font-black text-slate-900">{card.title}</p>
-                                <p className="mt-1 text-xs leading-relaxed text-slate-500">{card.description}</p>
+                                <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{card.description}</p>
                               </div>
                             </div>
-                            <span className={`inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] ${badgeClass}`}>
+                            <span className={`inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] ${
+                              isSuccess ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : isWarning ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-slate-200 bg-slate-50 text-slate-600'
+                            }`}>
                               {card.badge}
                             </span>
                           </div>
-                          <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
-                            <span className="text-xs font-semibold text-slate-500">
-                              {card.id === 'gateway' ? 'Abrir gateway' : 'Abrir ajustes'}
+
+                          <div className={`mt-4 flex items-center justify-between border-t pt-3 ${
+                            isWarning ? 'border-amber-100' : 'border-slate-100'
+                          }`}>
+                            <span className={`text-xs font-semibold ${isWarning ? 'text-amber-600' : 'text-slate-500'}`}>
+                              {isWarning ? 'Configurar agora' : card.id === 'gateway' ? 'Abrir gateway' : 'Ver ajustes'}
                             </span>
-                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600">
-                              <CaretRight size={15} weight="bold" />
+                            <span className={`inline-flex h-8 w-8 items-center justify-center rounded-xl border transition-transform group-hover:translate-x-0.5 ${
+                              isWarning ? 'border-amber-200 bg-amber-50 text-amber-600' : 'border-slate-200 bg-slate-50 text-slate-500'
+                            }`}>
+                              <CaretRight size={13} weight="bold" />
                             </span>
                           </div>
                         </button>
