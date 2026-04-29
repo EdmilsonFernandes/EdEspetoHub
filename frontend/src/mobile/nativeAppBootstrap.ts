@@ -180,6 +180,7 @@ export const bootstrapNativeApp = async () => {
     await App.addListener('appStateChange', ({ isActive }) => {
       if (isActive) {
         if (MOBILE_PUSH_ENABLED) syncPushTokenNow();
+        // O app usa esse evento para reidratar telas nativas sem forçar reload da WebView.
         window.dispatchEvent(new CustomEvent('jnc:app-foreground'));
       }
     });
