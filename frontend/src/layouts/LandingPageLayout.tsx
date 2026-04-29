@@ -147,9 +147,12 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
     navigate('/');
   };
 
+  const goToCondominiumLogin = () => navigate('/condominio/login');
+  const goToCondominiumRequest = () => navigate('/condominio/solicitar');
+
   const solutionsLinks = [
     { id: 'marketplace', label: 'Hub', helper: 'Cliente, lojista e entregador no mesmo fluxo', onClick: () => navigate('/hub') },
-    { id: 'condominiums', label: 'Condomínios', helper: 'Solicite acesso e gerencie feiras do condomínio', onClick: () => navigate('/condominio/solicitar') },
+    { id: 'condominiums', label: 'Condomínios', helper: 'Área para condomínios, feiras e operação local', onClick: goToCondominiumRequest },
     { id: 'guide', label: 'Guia', helper: 'Fluxos, recursos e visão operacional da plataforma', onClick: () => navigate('/guia') },
     { id: 'architecture', label: 'Arquitetura', helper: 'Base técnica, produto e evolução da solução', onClick: () => navigate('/arquitetura') },
   ];
@@ -262,6 +265,33 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                           </button>
                         ))}
                       </div>
+                      <div className="mt-2 border-t border-white/6 px-3.5 pb-2 pt-3">
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Condomínio</p>
+                        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSolutionsMenuOpen(false);
+                              goToCondominiumLogin();
+                            }}
+                            className="inline-flex items-center justify-center gap-2 rounded-[0.95rem] border border-white/10 bg-white/[0.04] px-3 py-2.5 text-xs font-black text-white transition hover:bg-white/[0.08]"
+                          >
+                            <ShieldCheck size={14} weight="duotone" className="text-sky-300" />
+                            Entrar no condomínio
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSolutionsMenuOpen(false);
+                              goToCondominiumRequest();
+                            }}
+                            className="inline-flex items-center justify-center gap-2 rounded-[0.95rem] border border-emerald-400/18 bg-emerald-400/10 px-3 py-2.5 text-xs font-black text-emerald-200 transition hover:bg-emerald-400/16"
+                          >
+                            <Buildings size={14} weight="duotone" />
+                            Solicitar acesso
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   ) : null}
                 </div>
@@ -280,7 +310,13 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 onClick={() => navigate('/admin')}
                 className="hidden md:inline-flex items-center rounded-full px-3 py-2.5 text-sm font-medium tracking-[-0.02em] text-slate-300 transition-all hover:text-[#84cc16]"
               >
-                Entrar
+                Login lojista
+              </button>
+              <button
+                onClick={goToCondominiumLogin}
+                className="hidden lg:inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-2.5 text-sm font-semibold tracking-[-0.02em] text-slate-200 transition-all hover:bg-white/[0.08] hover:text-white"
+              >
+                Login condomínio
               </button>
               <button
                 onClick={() => navigate('/create?plan=trial')}
@@ -357,10 +393,18 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             </button>
             <button
               type="button"
-              onClick={() => navigate('/condominio/solicitar')}
+              onClick={goToCondominiumLogin}
               className="w-full inline-flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200"
             >
-              Sou condomínio
+              Entrar no condomínio
+              <ShieldCheck size={18} weight="duotone" />
+            </button>
+            <button
+              type="button"
+              onClick={goToCondominiumRequest}
+              className="w-full inline-flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/20 dark:text-emerald-300"
+            >
+              Solicitar acesso do condomínio
               <Buildings size={18} weight="duotone" />
             </button>
             <div className="rounded-2xl border border-slate-200/80 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950/70">

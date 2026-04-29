@@ -647,6 +647,9 @@ export function LandingPage() {
                 <p className="mt-1.5 max-w-lg text-sm font-medium leading-relaxed text-slate-600">
                   Feiras, eventos e comércios de bairro ganham vitrine própria no Hub. Cliente escolhe o condomínio e faz o pedido pelo mesmo fluxo.
                 </p>
+                <p className="mt-2 text-xs font-semibold text-slate-500">
+                  Já é responsável por um condomínio? Use o login do condomínio para entrar no painel. Se ainda não recebeu acesso, faça a solicitação.
+                </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {['Lojas por condomínio', 'Retirada na barraca', 'Entrega no apartamento'].map((item) => (
                     <span key={item} className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white px-3 py-1 text-[11px] font-bold text-emerald-700">
@@ -658,12 +661,20 @@ export function LandingPage() {
               </div>
             </div>
             <div className="flex shrink-0 flex-col gap-2 sm:items-end">
-              <a
-                href="/condominio/solicitar"
+              <button
+                type="button"
+                onClick={() => navigate('/condominio/login')}
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-[0_12px_28px_-14px_rgba(15,23,42,0.6)] transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
-                Quero para meu condomínio
+                Entrar no condomínio
                 <ArrowRight size={14} weight="bold" />
+              </button>
+              <a
+                href="/condominio/solicitar"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-white px-5 py-2.5 text-sm font-black text-emerald-800 transition-all hover:bg-emerald-50 active:scale-[0.98]"
+              >
+                Solicitar acesso
+                <Buildings size={14} weight="duotone" />
               </a>
               <button
                 type="button"
