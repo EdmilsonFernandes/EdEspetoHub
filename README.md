@@ -1225,6 +1225,14 @@ GHCR_USERNAME=<seu-usuario-github>
 GHCR_TOKEN=<pat-com-read-packages>
 ```
 
+Recomendado em produção: guardar esses dois valores em `SecureString` no AWS SSM e apontar no `.env.prod`:
+
+```env
+AWS_REGION=us-east-2
+GHCR_USERNAME_SSM_PARAMETER=/janocaminho/prod/ghcr/username
+GHCR_TOKEN_SSM_PARAMETER=/janocaminho/prod/ghcr/token
+```
+
 4) Deploy por release específica ou pela `main` mais recente:
 
 ```bash
@@ -1260,22 +1268,43 @@ cd ~/EdEspetoHub
 git pull
 ```
 
-Criar `./.env.prod.secrets` com um PAT classic do GitHub com `read:packages`:
+Criar os parâmetros do GHCR no SSM:
 
 ```bash
-cat > .env.prod.secrets <<'EOF'
-GHCR_USERNAME=<seu-usuario-github>
-GHCR_TOKEN=<pat-classic-com-read-packages>
+aws ssm put-parameter \
+  --name "/janocaminho/prod/ghcr/username" \
+  --value "EdmilsonFernandes" \
+  --type SecureString \
+  --overwrite \
+  --region us-east-2
+
+aws ssm put-parameter \
+  --name "/janocaminho/prod/ghcr/token" \
+  --value "<pat-classic-com-read-packages>" \
+  --type SecureString \
+  --overwrite \
+  --region us-east-2
+```
+
+Permissões mínimas para a role/usuário AWS usado no EC2:
+- `ssm:GetParameter`
+- `kms:Decrypt`
+
+Apontar o `.env.prod`:
+
+```bash
+cat >> .env.prod <<'EOF'
+AWS_REGION=us-east-2
+GHCR_USERNAME_SSM_PARAMETER=/janocaminho/prod/ghcr/username
+GHCR_TOKEN_SSM_PARAMETER=/janocaminho/prod/ghcr/token
 EOF
 ```
 
 Testar acesso e deploy:
 
 ```bash
-set -a
-. ./.env.prod.secrets
-set +a
-printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+aws ssm get-parameter --name /janocaminho/prod/ghcr/username --with-decryption --region us-east-2
+aws ssm get-parameter --name /janocaminho/prod/ghcr/token --with-decryption --region us-east-2
 docker pull ghcr.io/edmilsonfernandes/edespetohub-api:main
 docker pull ghcr.io/edmilsonfernandes/edespetohub-frontend:main
 docker pull ghcr.io/edmilsonfernandes/edespetohub-face-worker:main
@@ -1284,7 +1313,7 @@ sh scripts/deploy-release-frontend.sh
 docker ps
 ```
 
-Se usar token só para QA, revogue depois do teste.
+Se quiser, `.env.prod.secrets` continua funcionando como fallback local.
 
 ### Atalhos (scripts)
 

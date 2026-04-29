@@ -112,7 +112,8 @@ Observações:
 - `3a254581` é a tag curta do commit publicada pelo workflow do GHCR.
 - sem argumento, os scripts usam `main`.
 - para produção mais sensível, o mais seguro continua sendo usar a SHA curta.
-- Se o repositório for privado, faça `docker login ghcr.io` no servidor ou configure `GHCR_USERNAME` e `GHCR_TOKEN` em `.env.prod.secrets`.
+- Recomendado: configure `GHCR_USERNAME_SSM_PARAMETER` e `GHCR_TOKEN_SSM_PARAMETER` em `.env.prod` e deixe o token no AWS SSM Parameter Store (`SecureString`).
+- Fallback: se preferir local, use `.env.prod.secrets`.
 - Se o fluxo novo falhar, o deploy antigo com `deploy-api.sh` e `deploy-frontend.sh` continua funcionando.
 
 ### Teste manual rápido no EC2
@@ -124,30 +125,50 @@ cd ~/EdEspetoHub
 git pull
 ```
 
-2. Criar `.env.prod.secrets` no projeto com um PAT classic do GitHub com `read:packages`:
+2. Configurar os parâmetros do GHCR no SSM:
+
+```bash
+aws ssm put-parameter \
+  --name "/janocaminho/prod/ghcr/username" \
+  --value "EdmilsonFernandes" \
+  --type SecureString \
+  --overwrite \
+  --region us-east-2
+
+aws ssm put-parameter \
+  --name "/janocaminho/prod/ghcr/token" \
+  --value "<pat-classic-com-read-packages>" \
+  --type SecureString \
+  --overwrite \
+  --region us-east-2
+```
+
+Permissões mínimas para a role/usuário AWS usado no EC2:
+- `ssm:GetParameter`
+- `kms:Decrypt`
+
+3. Configurar o `.env.prod` para o deploy ler esses parâmetros:
 
 ```bash
 cd ~/EdEspetoHub
-cat > .env.prod.secrets <<'EOF'
-GHCR_USERNAME=<seu-usuario-github>
-GHCR_TOKEN=<pat-classic-com-read-packages>
+cat >> .env.prod <<'EOF'
+AWS_REGION=us-east-2
+GHCR_USERNAME_SSM_PARAMETER=/janocaminho/prod/ghcr/username
+GHCR_TOKEN_SSM_PARAMETER=/janocaminho/prod/ghcr/token
 EOF
 ```
 
-3. Testar acesso ao GHCR:
+4. Testar acesso ao SSM e ao GHCR:
 
 ```bash
-cd ~/EdEspetoHub
-set -a
-. ./.env.prod.secrets
-set +a
-printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+aws ssm get-parameter --name /janocaminho/prod/ghcr/username --with-decryption --region us-east-2
+aws ssm get-parameter --name /janocaminho/prod/ghcr/token --with-decryption --region us-east-2
 docker pull ghcr.io/edmilsonfernandes/edespetohub-api:main
 docker pull ghcr.io/edmilsonfernandes/edespetohub-frontend:main
 docker pull ghcr.io/edmilsonfernandes/edespetohub-face-worker:main
 ```
 
-4. Rodar o deploy novo:
+5. Rodar o deploy novo:
 
 ```bash
 cd ~/EdEspetoHub
@@ -155,7 +176,7 @@ scripts/./deploy-release-api.sh
 scripts/./deploy-release-frontend.sh
 ```
 
-5. Validar:
+6. Validar:
 
 ```bash
 docker ps
@@ -171,7 +192,7 @@ scripts/./deploy-api.sh
 scripts/./deploy-frontend.sh
 ```
 
-Se usar token só para QA, revogue depois do teste.
+Se precisar testar rápido sem SSM, `.env.prod.secrets` continua aceito como fallback local.
 
 ---
 

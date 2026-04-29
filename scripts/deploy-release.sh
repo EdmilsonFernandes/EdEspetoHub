@@ -14,6 +14,59 @@ export HOME="$CURRENT_HOME"
 export DOCKER_CONFIG="${DOCKER_CONFIG:-$HOME/.docker}"
 export PATH="/usr/local/bin:$PATH"
 
+get_env_var() {
+  eval "printf '%s' \"\${$1:-}\""
+}
+
+get_file_var() {
+  key="$1"
+  file="$2"
+  [ -f "$file" ] || return 0
+  sed -n "s/^${key}=//p" "$file" | tail -n 1
+}
+
+load_value_if_missing() {
+  key="$1"
+  current_value="$(get_env_var "$key")"
+  if [ -n "$current_value" ]; then
+    return 0
+  fi
+
+  for file in "$SECRETS_FILE" "$ENV_FILE"; do
+    value="$(get_file_var "$key" "$file")"
+    if [ -n "$value" ]; then
+      export "$key=$value"
+      return 0
+    fi
+  done
+}
+
+fetch_ssm_parameter() {
+  parameter_name="$1"
+  region="$2"
+
+  if [ -z "$parameter_name" ]; then
+    return 0
+  fi
+
+  if [ -z "$region" ]; then
+    echo "AWS_REGION is required to load GHCR credentials from SSM." >&2
+    return 1
+  fi
+
+  if ! command -v aws >/dev/null 2>&1; then
+    echo "aws CLI not found; cannot load GHCR credentials from SSM." >&2
+    return 1
+  fi
+
+  aws ssm get-parameter \
+    --name "$parameter_name" \
+    --with-decryption \
+    --query 'Parameter.Value' \
+    --output text \
+    --region "$region"
+}
+
 usage() {
   echo "Uso: scripts/./deploy-release.sh [image-tag] [service ...]" >&2
   echo "Padrão sem image-tag: main" >&2
@@ -67,11 +120,12 @@ else
   exit 1
 fi
 
-if [ -f "$SECRETS_FILE" ]; then
-  set -a
-  . "$SECRETS_FILE"
-  set +a
-fi
+load_value_if_missing AWS_REGION
+load_value_if_missing AWS_DEFAULT_REGION
+load_value_if_missing GHCR_USERNAME
+load_value_if_missing GHCR_TOKEN
+load_value_if_missing GHCR_USERNAME_SSM_PARAMETER
+load_value_if_missing GHCR_TOKEN_SSM_PARAMETER
 
 if [ $# -eq 0 ]; then
   set -- api frontend face-worker
@@ -79,10 +133,47 @@ fi
 
 case "${IMAGE_REGISTRY:-ghcr.io}" in
   ghcr.io)
+    GHCR_REGION="${AWS_REGION:-${AWS_DEFAULT_REGION:-}}"
+    ghcr_from_ssm="false"
+    ghcr_ssm_failed="false"
+
+    if [ -n "${GHCR_USERNAME_SSM_PARAMETER:-}" ]; then
+      if ghcr_username_from_ssm="$(fetch_ssm_parameter "$GHCR_USERNAME_SSM_PARAMETER" "$GHCR_REGION")"; then
+        export "GHCR_USERNAME=$ghcr_username_from_ssm"
+        ghcr_from_ssm="true"
+      else
+        ghcr_ssm_failed="true"
+      fi
+    fi
+
+    if [ -n "${GHCR_TOKEN_SSM_PARAMETER:-}" ]; then
+      if ghcr_token_from_ssm="$(fetch_ssm_parameter "$GHCR_TOKEN_SSM_PARAMETER" "$GHCR_REGION")"; then
+        export "GHCR_TOKEN=$ghcr_token_from_ssm"
+        ghcr_from_ssm="true"
+      else
+        ghcr_ssm_failed="true"
+      fi
+    fi
+
+    if [ "$ghcr_ssm_failed" = "true" ] && { [ -z "${GHCR_USERNAME:-}" ] || [ -z "${GHCR_TOKEN:-}" ]; }; then
+      echo "Failed to load GHCR credentials from SSM and no local fallback was found." >&2
+      exit 1
+    fi
+
+    if { [ -n "${GHCR_USERNAME_SSM_PARAMETER:-}" ] || [ -n "${GHCR_TOKEN_SSM_PARAMETER:-}" ]; } && { [ -z "${GHCR_USERNAME:-}" ] || [ -z "${GHCR_TOKEN:-}" ]; }; then
+      echo "Incomplete GHCR credentials after loading AWS SSM/local fallback." >&2
+      exit 1
+    fi
+
     if [ -n "${GHCR_USERNAME:-}" ] && [ -n "${GHCR_TOKEN:-}" ]; then
+      if [ "$ghcr_from_ssm" = "true" ]; then
+        echo "Authenticating to GHCR using AWS SSM Parameter Store."
+      else
+        echo "Authenticating to GHCR using local deploy secrets."
+      fi
       printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin >/dev/null
     else
-      echo "GHCR credentials not found in .env.prod.secrets; assuming docker login ghcr.io was already done."
+      echo "GHCR credentials not found in AWS SSM or .env.prod.secrets; assuming docker login ghcr.io was already done."
     fi
     ;;
 esac
