@@ -1032,12 +1032,12 @@ export const DashboardView = ({
           )}
         </div>
       )}
-      <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div className="rounded-[28px] border border-amber-100/80 bg-[linear-gradient(135deg,rgba(255,251,235,0.92),rgba(255,255,255,0.98)_42%,rgba(248,250,252,0.96))] p-5 shadow-[0_18px_45px_rgba(15,23,42,0.06)]">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex-1">
             <p className="text-[11px] uppercase tracking-[0.28em] text-amber-700 font-black">Gestão</p>
-            <h3 className="mt-2 text-lg font-black text-slate-900">Relatório gerencial da operação</h3>
-            <p className="mt-1 text-sm text-slate-500">
+            <h3 className="mt-2 text-xl font-black tracking-tight text-slate-900">Relatório gerencial da operação</h3>
+            <p className="mt-1 text-sm leading-6 text-slate-500">
               Consolida financeiro, itens mais vendidos e leitura da base de clientes sem depender só do cálculo no navegador.
             </p>
             {analyticsError ? (
@@ -1047,16 +1047,41 @@ export const DashboardView = ({
             ) : analyticsLoading ? (
               <p className="mt-2 text-xs font-semibold text-slate-500">Atualizando visão consolidada do período...</p>
             ) : null}
-            <div className="mt-4 rounded-2xl border border-amber-100 bg-amber-50/70 p-4">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.24em] text-amber-700 font-black">Período do relatório e PDF</p>
-                  <p className="mt-1 text-sm font-semibold text-slate-800">{metrics.periodLabel}</p>
-                  <p className="mt-1 text-xs text-slate-500">
+            <div className="mt-5 overflow-hidden rounded-[26px] border border-amber-200/70 bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,0.18),transparent_32%),linear-gradient(135deg,rgba(255,255,255,0.97),rgba(255,248,235,0.95))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+              <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                <div className="min-w-0 flex-1">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/80 px-3 py-1 text-[10px] font-black uppercase tracking-[0.24em] text-amber-700 shadow-sm backdrop-blur">
+                    <CalendarBlank size={13} weight="duotone" />
+                    Período do relatório e PDF
+                  </span>
+                  <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <p className="text-lg font-black tracking-tight text-slate-900 sm:text-xl">{metrics.periodLabel}</p>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-white shadow-sm">
+                      <TrendUp size={12} weight="fill" />
+                      Aplica no PDF
+                    </span>
+                  </div>
+                  <p className="mt-2 text-xs leading-5 text-slate-500">
                     Esse período alimenta o PDF gerencial, o gráfico diário, os itens mais vendidos e os clientes do período.
                   </p>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    <div className="rounded-2xl border border-white/90 bg-white/85 px-4 py-3 shadow-sm">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">Receita analisada</p>
+                      <p className="mt-2 text-base font-black tracking-tight text-slate-900">{formatCurrency(metrics.periodRevenue)}</p>
+                    </div>
+                    <div className="rounded-2xl border border-white/90 bg-white/85 px-4 py-3 shadow-sm">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">Clientes ativos</p>
+                      <p className="mt-2 text-base font-black tracking-tight text-slate-900">
+                        {metrics.periodCustomerCount != null ? metrics.periodCustomerCount : customerSource.length}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-white/90 bg-white/85 px-4 py-3 shadow-sm sm:col-span-2 xl:col-span-1">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">Mês de referência</p>
+                      <p className="mt-2 text-base font-black tracking-tight text-slate-900">{formatMonthLabel(selectedMonth)}</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 xl:max-w-[320px] xl:justify-end">
                   {periodOptions.map((option) => (
                     <button
                       key={option.id}
@@ -1068,10 +1093,10 @@ export const DashboardView = ({
                         }
                         setPeriodDays(option.id);
                       }}
-                      className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all hover:-translate-y-0.5 active:scale-95 ${
+                      className={`px-3 py-2 rounded-full text-[11px] font-semibold border transition-all hover:-translate-y-0.5 active:scale-95 shadow-sm ${
                         periodDays === option.id
-                          ? "bg-brand-primary text-white border-brand-primary"
-                          : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                          ? "bg-slate-900 text-white border-slate-900"
+                          : "bg-white/85 text-slate-600 border-white/80 hover:bg-white"
                       }`}
                     >
                       {option.label}
@@ -1081,17 +1106,17 @@ export const DashboardView = ({
               </div>
               {isCustomPeriod ? (
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <label className="block">
+                  <label className="block rounded-2xl border border-white/90 bg-white/85 p-3 shadow-sm">
                     <span className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-bold">Data inicial</span>
                     <input
                       type="date"
                       value={customRange?.startDate || customStartDate}
                       max={customRange?.endDate || customEndDate || todayDateKey}
                       onChange={(event) => handleCustomStartDateChange(event.target.value)}
-                      className="ds-focus-ring mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                      className="ds-focus-ring mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
                     />
                   </label>
-                  <label className="block">
+                  <label className="block rounded-2xl border border-white/90 bg-white/85 p-3 shadow-sm">
                     <span className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-bold">Data final</span>
                     <input
                       type="date"
@@ -1099,22 +1124,35 @@ export const DashboardView = ({
                       min={customRange?.startDate || customStartDate}
                       max={todayDateKey}
                       onChange={(event) => handleCustomEndDateChange(event.target.value)}
-                      className="ds-focus-ring mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                      className="ds-focus-ring mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
                     />
                   </label>
                 </div>
               ) : null}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handlePrintManagementReport}
-              disabled={analyticsLoading}
-              className="px-4 py-2.5 rounded-xl bg-brand-primary text-white text-xs font-extrabold shadow-sm hover:opacity-95 disabled:opacity-60"
-            >
-              {analyticsLoading ? "Atualizando..." : "Gerar PDF gerencial"}
-            </button>
+          <div className="w-full shrink-0 lg:w-[250px]">
+            <div className="rounded-[24px] border border-slate-200/90 bg-white/90 p-4 shadow-[0_14px_30px_rgba(15,23,42,0.06)] backdrop-blur">
+              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">Exportação</p>
+              <p className="mt-2 text-sm font-black text-slate-900">Gerar PDF gerencial</p>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Exporta o consolidado com o período ativo acima, sem surpresa entre tela e PDF.
+              </p>
+              <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold">Período atual</p>
+                <p className="mt-1 text-sm font-semibold text-slate-800">{metrics.periodLabel}</p>
+              </div>
+              <div className="mt-4 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handlePrintManagementReport}
+                  disabled={analyticsLoading}
+                  className="w-full px-4 py-3 rounded-2xl bg-slate-900 text-white text-xs font-extrabold shadow-[0_16px_30px_rgba(15,23,42,0.24)] transition-all hover:-translate-y-0.5 hover:opacity-95 disabled:opacity-60"
+                >
+                  {analyticsLoading ? "Atualizando..." : "Gerar PDF gerencial"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
