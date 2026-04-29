@@ -75,6 +75,16 @@ jobs:
           PROD_SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
           PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
         run: |
+          if [ -z "${PROD_SSH_HOST:-}" ]; then
+            echo "Missing required GitHub environment secret: PROD_SSH_HOST" >&2
+            exit 1
+          fi
+
+          if [ -z "${PROD_SSH_KEY:-}" ]; then
+            echo "Missing required GitHub environment secret: PROD_SSH_KEY" >&2
+            exit 1
+          fi
+
           install -m 700 -d ~/.ssh
           printf '%s\n' "$PROD_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
