@@ -153,13 +153,27 @@ export const storeService = {
     return toJson(response);
   },
 
-  async getDashboardAnalytics(storeId: string, params?: { periodDays?: string | number | null; monthKey?: string | null }) {
+  async getDashboardAnalytics(
+    storeId: string,
+    params?: {
+      periodDays?: string | number | null;
+      monthKey?: string | null;
+      startDate?: string | null;
+      endDate?: string | null;
+    }
+  ) {
     const search = new URLSearchParams();
     if (params?.periodDays !== undefined && params?.periodDays !== null && String(params.periodDays).trim() !== '') {
       search.set('periodDays', String(params.periodDays).trim());
     }
     if (params?.monthKey) {
       search.set('monthKey', String(params.monthKey).trim());
+    }
+    if (params?.startDate) {
+      search.set('startDate', String(params.startDate).trim());
+    }
+    if (params?.endDate) {
+      search.set('endDate', String(params.endDate).trim());
     }
     const suffix = search.toString() ? `?${search.toString()}` : '';
     const response = await apiClient.rawGet(`/stores/${storeId}/dashboard-analytics${suffix}`);

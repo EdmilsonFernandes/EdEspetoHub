@@ -7,6 +7,8 @@ import { logger } from '../utils/logger';
 type DashboardOptions = {
   monthKey?: string | null;
   periodDays?: number | null;
+  startDate?: string | null;
+  endDate?: string | null;
 };
 
 type DashboardCustomerRow = {
@@ -57,10 +59,40 @@ export class StoreDashboardAnalyticsService {
     return Math.min(parsed, 3660);
   }
 
+  private normalizeDateInput(value?: string | null) {
+    const normalized = String(value || '').trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(normalized)) return normalized;
+    return null;
+  }
+
+  private resolveCustomRange(startDate?: string | null, endDate?: string | null) {
+    const normalizedStart = this.normalizeDateInput(startDate);
+    const normalizedEnd = this.normalizeDateInput(endDate);
+    if (!normalizedStart || !normalizedEnd) return null;
+    return normalizedStart <= normalizedEnd
+      ? { startDate: normalizedStart, endDate: normalizedEnd }
+      : { startDate: normalizedEnd, endDate: normalizedStart };
+  }
+
   private resolvePeriodStart(periodDays?: number | null) {
     const normalizedDays = this.normalizePeriodDays(periodDays);
     if (!normalizedDays) return null;
     return new Date(Date.now() - normalizedDays * 24 * 60 * 60 * 1000);
+  }
+
+  private formatDateKeyLabel(dateKey: string) {
+    const [year, month, day] = dateKey.split('-').map((value) => Number(value));
+    if (!year || !month || !day) return dateKey;
+    return new Intl.DateTimeFormat('pt-BR', {
+      timeZone: this.timezone,
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    }).format(new Date(Date.UTC(year, month - 1, day, 12, 0, 0)));
+  }
+
+  private formatRangeLabel(startDate: string, endDate: string) {
+    return `${this.formatDateKeyLabel(startDate)} a ${this.formatDateKeyLabel(endDate)}`;
   }
 
   private formatDateInTimezone(value: Date | null) {
@@ -92,7 +124,17 @@ export class StoreDashboardAnalyticsService {
     return '';
   }
 
-  private async queryCustomers(storeId: string, periodStart: Date | null) {
+  private async queryCustomers(
+    storeId: string,
+    filters: {
+      periodStart?: Date | null;
+      startDate?: string | null;
+      endDate?: string | null;
+    } = {}
+  ) {
+    const periodStart = filters.periodStart || null;
+    const startDate = this.normalizeDateInput(filters.startDate);
+    const endDate = this.normalizeDateInput(filters.endDate);
     const rows = await AppDataSource.query(
       `
         WITH customer_orders AS (
@@ -114,7 +156,11 @@ export class StoreDashboardAnalyticsService {
           LEFT JOIN users u
             ON u.id = o.customer_user_id
           WHERE o.store_id = $1
-            AND ($2::timestamptz IS NULL OR o.created_at >= $2)
+            AND (
+              ($2::date IS NOT NULL AND $3::date IS NOT NULL AND timezone($4, o.created_at)::date BETWEEN $2::date AND $3::date)
+              OR
+              ($2::date IS NULL AND $3::date IS NULL AND ($5::timestamptz IS NULL OR o.created_at >= $5))
+            )
         )
         SELECT
           customer_key AS key,
@@ -130,7 +176,7 @@ export class StoreDashboardAnalyticsService {
         GROUP BY customer_key
         ORDER BY "totalSpent" DESC, "ordersCount" DESC, "lastOrderAt" DESC, name ASC
       `,
-      [storeId, periodStart]
+      [storeId, startDate, endDate, this.timezone, periodStart]
     );
 
     return (Array.isArray(rows) ? rows : []).map(
@@ -148,70 +194,142 @@ export class StoreDashboardAnalyticsService {
     );
   }
 
-  private async getLiveAggregates(storeId: string, monthKey: string, periodStart: Date | null): Promise<DashboardAggregatePayload> {
-    const [summaryRow, salesRows, topRows] = await Promise.all([
-      AppDataSource.query(
-        `
-          SELECT
-            COUNT(*)::int AS "totalOrders",
-            COALESCE(SUM(o.total), 0) AS "totalRevenue",
-            COALESCE(
-              SUM(
-                CASE
-                  WHEN to_char(timezone($2, o.created_at), 'YYYY-MM') = $3 THEN o.total
-                  ELSE 0
-                END
-              ),
-              0
-            ) AS "monthRevenue",
-            COALESCE(
-              SUM(
-                CASE
-                  WHEN $4::timestamptz IS NULL OR o.created_at >= $4 THEN o.total
-                  ELSE 0
-                END
-              ),
-              0
-            ) AS "periodRevenue",
-            MIN(o.created_at) AS "firstOrderAt"
-          FROM orders o
-          WHERE o.store_id = $1
-        `,
-        [storeId, this.timezone, monthKey, periodStart]
-      ).then((rows) => (Array.isArray(rows) && rows.length ? rows[0] : {})),
-      AppDataSource.query(
-        `
-          SELECT
-            to_char(timezone($2, o.created_at), 'YYYY-MM-DD') AS date,
-            COALESCE(SUM(o.total), 0) AS total
-          FROM orders o
-          WHERE o.store_id = $1
-            AND ($3::timestamptz IS NULL OR o.created_at >= $3)
-          GROUP BY 1
-          ORDER BY 1 ASC
-        `,
-        [storeId, this.timezone, periodStart]
-      ),
-      AppDataSource.query(
-        `
-          SELECT
-            COALESCE(NULLIF(trim(p.name), ''), 'Produto') AS name,
-            COALESCE(SUM(oi.quantity), 0)::int AS qty,
-            COALESCE(SUM(oi.price), 0) AS revenue
-          FROM order_items oi
-          INNER JOIN orders o
-            ON o.id = oi.order_id
-          LEFT JOIN products p
-            ON p.id = oi.product_id
-          WHERE o.store_id = $1
-            AND ($2::timestamptz IS NULL OR o.created_at >= $2)
-          GROUP BY 1
-          ORDER BY qty DESC, revenue DESC, name ASC
-          LIMIT 8
-        `,
-        [storeId, periodStart]
-      ),
-    ]);
+  private async getLiveAggregates(
+    storeId: string,
+    monthKey: string,
+    periodStart: Date | null,
+    customRange?: { startDate: string; endDate: string } | null
+  ): Promise<DashboardAggregatePayload> {
+    const summaryPromise = customRange
+      ? AppDataSource.query(
+          `
+            SELECT
+              COUNT(*)::int AS "totalOrders",
+              COALESCE(SUM(o.total), 0) AS "totalRevenue",
+              COALESCE(
+                SUM(
+                  CASE
+                    WHEN to_char(timezone($2, o.created_at), 'YYYY-MM') = $3 THEN o.total
+                    ELSE 0
+                  END
+                ),
+                0
+              ) AS "monthRevenue",
+              COALESCE(
+                SUM(
+                  CASE
+                    WHEN timezone($2, o.created_at)::date BETWEEN $4::date AND $5::date THEN o.total
+                    ELSE 0
+                  END
+                ),
+                0
+              ) AS "periodRevenue",
+              MIN(o.created_at) AS "firstOrderAt"
+            FROM orders o
+            WHERE o.store_id = $1
+          `,
+          [storeId, this.timezone, monthKey, customRange.startDate, customRange.endDate]
+        )
+      : AppDataSource.query(
+          `
+            SELECT
+              COUNT(*)::int AS "totalOrders",
+              COALESCE(SUM(o.total), 0) AS "totalRevenue",
+              COALESCE(
+                SUM(
+                  CASE
+                    WHEN to_char(timezone($2, o.created_at), 'YYYY-MM') = $3 THEN o.total
+                    ELSE 0
+                  END
+                ),
+                0
+              ) AS "monthRevenue",
+              COALESCE(
+                SUM(
+                  CASE
+                    WHEN $4::timestamptz IS NULL OR o.created_at >= $4 THEN o.total
+                    ELSE 0
+                  END
+                ),
+                0
+              ) AS "periodRevenue",
+              MIN(o.created_at) AS "firstOrderAt"
+            FROM orders o
+            WHERE o.store_id = $1
+          `,
+          [storeId, this.timezone, monthKey, periodStart]
+        );
+
+    const salesPromise = customRange
+      ? AppDataSource.query(
+          `
+            SELECT
+              to_char(timezone($2, o.created_at), 'YYYY-MM-DD') AS date,
+              COALESCE(SUM(o.total), 0) AS total
+            FROM orders o
+            WHERE o.store_id = $1
+              AND timezone($2, o.created_at)::date BETWEEN $3::date AND $4::date
+            GROUP BY 1
+            ORDER BY 1 ASC
+          `,
+          [storeId, this.timezone, customRange.startDate, customRange.endDate]
+        )
+      : AppDataSource.query(
+          `
+            SELECT
+              to_char(timezone($2, o.created_at), 'YYYY-MM-DD') AS date,
+              COALESCE(SUM(o.total), 0) AS total
+            FROM orders o
+            WHERE o.store_id = $1
+              AND ($3::timestamptz IS NULL OR o.created_at >= $3)
+            GROUP BY 1
+            ORDER BY 1 ASC
+          `,
+          [storeId, this.timezone, periodStart]
+        );
+
+    const topPromise = customRange
+      ? AppDataSource.query(
+          `
+            SELECT
+              COALESCE(NULLIF(trim(p.name), ''), 'Produto') AS name,
+              COALESCE(SUM(oi.quantity), 0)::int AS qty,
+              COALESCE(SUM(oi.price), 0) AS revenue
+            FROM order_items oi
+            INNER JOIN orders o
+              ON o.id = oi.order_id
+            LEFT JOIN products p
+              ON p.id = oi.product_id
+            WHERE o.store_id = $1
+              AND timezone($2, o.created_at)::date BETWEEN $3::date AND $4::date
+            GROUP BY 1
+            ORDER BY qty DESC, revenue DESC, name ASC
+            LIMIT 8
+          `,
+          [storeId, this.timezone, customRange.startDate, customRange.endDate]
+        )
+      : AppDataSource.query(
+          `
+            SELECT
+              COALESCE(NULLIF(trim(p.name), ''), 'Produto') AS name,
+              COALESCE(SUM(oi.quantity), 0)::int AS qty,
+              COALESCE(SUM(oi.price), 0) AS revenue
+            FROM order_items oi
+            INNER JOIN orders o
+              ON o.id = oi.order_id
+            LEFT JOIN products p
+              ON p.id = oi.product_id
+            WHERE o.store_id = $1
+              AND ($2::timestamptz IS NULL OR o.created_at >= $2)
+            GROUP BY 1
+            ORDER BY qty DESC, revenue DESC, name ASC
+            LIMIT 8
+          `,
+          [storeId, periodStart]
+        );
+
+    const [summaryRows, salesRows, topRows] = await Promise.all([summaryPromise, salesPromise, topPromise]);
+    const summaryRow = Array.isArray(summaryRows) && summaryRows.length ? summaryRows[0] : {};
 
     return {
       summaryRow: summaryRow || {},
@@ -220,67 +338,134 @@ export class StoreDashboardAnalyticsService {
     };
   }
 
-  private async getSnapshotAggregates(storeId: string, monthKey: string, periodStart: Date | null): Promise<DashboardAggregatePayload> {
+  private async getSnapshotAggregates(
+    storeId: string,
+    monthKey: string,
+    periodStart: Date | null,
+    customRange?: { startDate: string; endDate: string } | null
+  ): Promise<DashboardAggregatePayload> {
     const periodStartDate = this.formatDateInTimezone(periodStart);
 
-    const [summaryRow, salesRows, topRows] = await Promise.all([
-      AppDataSource.query(
-        `
-          SELECT
-            COALESCE(SUM(sdm.orders_count), 0)::int AS "totalOrders",
-            COALESCE(SUM(sdm.revenue_total), 0) AS "totalRevenue",
-            COALESCE(
-              SUM(
-                CASE
-                  WHEN to_char(sdm.snapshot_date, 'YYYY-MM') = $2 THEN sdm.revenue_total
-                  ELSE 0
-                END
-              ),
-              0
-            ) AS "monthRevenue",
-            COALESCE(
-              SUM(
-                CASE
-                  WHEN $3::date IS NULL OR sdm.snapshot_date >= $3::date THEN sdm.revenue_total
-                  ELSE 0
-                END
-              ),
-              0
-            ) AS "periodRevenue",
-            MIN(sdm.first_order_at) AS "firstOrderAt"
-          FROM store_dashboard_daily_metrics sdm
-          WHERE sdm.store_id = $1
-        `,
-        [storeId, monthKey, periodStartDate]
-      ).then((rows) => (Array.isArray(rows) && rows.length ? rows[0] : {})),
-      AppDataSource.query(
-        `
-          SELECT
-            sdm.snapshot_date AS date,
-            COALESCE(sdm.revenue_total, 0) AS total
-          FROM store_dashboard_daily_metrics sdm
-          WHERE sdm.store_id = $1
-            AND ($2::date IS NULL OR sdm.snapshot_date >= $2::date)
-          ORDER BY sdm.snapshot_date ASC
-        `,
-        [storeId, periodStartDate]
-      ),
-      AppDataSource.query(
-        `
-          SELECT
-            sdp.product_name AS name,
-            COALESCE(SUM(sdp.quantity), 0)::int AS qty,
-            COALESCE(SUM(sdp.revenue_total), 0) AS revenue
-          FROM store_dashboard_daily_products sdp
-          WHERE sdp.store_id = $1
-            AND ($2::date IS NULL OR sdp.snapshot_date >= $2::date)
-          GROUP BY sdp.product_name
-          ORDER BY qty DESC, revenue DESC, name ASC
-          LIMIT 8
-        `,
-        [storeId, periodStartDate]
-      ),
-    ]);
+    const summaryPromise = customRange
+      ? AppDataSource.query(
+          `
+            SELECT
+              COALESCE(SUM(sdm.orders_count), 0)::int AS "totalOrders",
+              COALESCE(SUM(sdm.revenue_total), 0) AS "totalRevenue",
+              COALESCE(
+                SUM(
+                  CASE
+                    WHEN to_char(sdm.snapshot_date, 'YYYY-MM') = $2 THEN sdm.revenue_total
+                    ELSE 0
+                  END
+                ),
+                0
+              ) AS "monthRevenue",
+              COALESCE(
+                SUM(
+                  CASE
+                    WHEN sdm.snapshot_date BETWEEN $3::date AND $4::date THEN sdm.revenue_total
+                    ELSE 0
+                  END
+                ),
+                0
+              ) AS "periodRevenue",
+              MIN(sdm.first_order_at) AS "firstOrderAt"
+            FROM store_dashboard_daily_metrics sdm
+            WHERE sdm.store_id = $1
+          `,
+          [storeId, monthKey, customRange.startDate, customRange.endDate]
+        )
+      : AppDataSource.query(
+          `
+            SELECT
+              COALESCE(SUM(sdm.orders_count), 0)::int AS "totalOrders",
+              COALESCE(SUM(sdm.revenue_total), 0) AS "totalRevenue",
+              COALESCE(
+                SUM(
+                  CASE
+                    WHEN to_char(sdm.snapshot_date, 'YYYY-MM') = $2 THEN sdm.revenue_total
+                    ELSE 0
+                  END
+                ),
+                0
+              ) AS "monthRevenue",
+              COALESCE(
+                SUM(
+                  CASE
+                    WHEN $3::date IS NULL OR sdm.snapshot_date >= $3::date THEN sdm.revenue_total
+                    ELSE 0
+                  END
+                ),
+                0
+              ) AS "periodRevenue",
+              MIN(sdm.first_order_at) AS "firstOrderAt"
+            FROM store_dashboard_daily_metrics sdm
+            WHERE sdm.store_id = $1
+          `,
+          [storeId, monthKey, periodStartDate]
+        );
+
+    const salesPromise = customRange
+      ? AppDataSource.query(
+          `
+            SELECT
+              sdm.snapshot_date AS date,
+              COALESCE(sdm.revenue_total, 0) AS total
+            FROM store_dashboard_daily_metrics sdm
+            WHERE sdm.store_id = $1
+              AND sdm.snapshot_date BETWEEN $2::date AND $3::date
+            ORDER BY sdm.snapshot_date ASC
+          `,
+          [storeId, customRange.startDate, customRange.endDate]
+        )
+      : AppDataSource.query(
+          `
+            SELECT
+              sdm.snapshot_date AS date,
+              COALESCE(sdm.revenue_total, 0) AS total
+            FROM store_dashboard_daily_metrics sdm
+            WHERE sdm.store_id = $1
+              AND ($2::date IS NULL OR sdm.snapshot_date >= $2::date)
+            ORDER BY sdm.snapshot_date ASC
+          `,
+          [storeId, periodStartDate]
+        );
+
+    const topPromise = customRange
+      ? AppDataSource.query(
+          `
+            SELECT
+              sdp.product_name AS name,
+              COALESCE(SUM(sdp.quantity), 0)::int AS qty,
+              COALESCE(SUM(sdp.revenue_total), 0) AS revenue
+            FROM store_dashboard_daily_products sdp
+            WHERE sdp.store_id = $1
+              AND sdp.snapshot_date BETWEEN $2::date AND $3::date
+            GROUP BY sdp.product_name
+            ORDER BY qty DESC, revenue DESC, name ASC
+            LIMIT 8
+          `,
+          [storeId, customRange.startDate, customRange.endDate]
+        )
+      : AppDataSource.query(
+          `
+            SELECT
+              sdp.product_name AS name,
+              COALESCE(SUM(sdp.quantity), 0)::int AS qty,
+              COALESCE(SUM(sdp.revenue_total), 0) AS revenue
+            FROM store_dashboard_daily_products sdp
+            WHERE sdp.store_id = $1
+              AND ($2::date IS NULL OR sdp.snapshot_date >= $2::date)
+            GROUP BY sdp.product_name
+            ORDER BY qty DESC, revenue DESC, name ASC
+            LIMIT 8
+          `,
+          [storeId, periodStartDate]
+        );
+
+    const [summaryRows, salesRows, topRows] = await Promise.all([summaryPromise, salesPromise, topPromise]);
+    const summaryRow = Array.isArray(summaryRows) && summaryRows.length ? summaryRows[0] : {};
 
     return {
       summaryRow: summaryRow || {},
@@ -295,8 +480,9 @@ export class StoreDashboardAnalyticsService {
     periodCustomers: DashboardCustomerRow[];
     monthKey: string;
     normalizedPeriodDays: number | null;
+    periodLabel: string;
   }) {
-    const { aggregates, customers, periodCustomers, monthKey, normalizedPeriodDays } = params;
+    const { aggregates, customers, periodCustomers, monthKey, normalizedPeriodDays, periodLabel } = params;
     const summaryRow = aggregates.summaryRow || {};
     const totalOrders = this.toInt(summaryRow?.totalOrders);
     const totalRevenue = this.toNumber(summaryRow?.totalRevenue);
@@ -312,7 +498,7 @@ export class StoreDashboardAnalyticsService {
         firstOrderAt: summaryRow?.firstOrderAt ? String(summaryRow.firstOrderAt) : null,
         monthKey,
         periodDays: normalizedPeriodDays,
-        periodLabel: normalizedPeriodDays ? `${normalizedPeriodDays} dias` : 'Todo período',
+        periodLabel,
         allTimeCustomerCount: customers.length,
         periodCustomerCount: periodCustomers.length,
       },
@@ -338,24 +524,32 @@ export class StoreDashboardAnalyticsService {
     this.ensureStoreAccess(store.id, authStoreId);
 
     const monthKey = this.normalizeMonthKey(options.monthKey);
+    const customRange = this.resolveCustomRange(options.startDate, options.endDate);
     const normalizedPeriodDays = this.normalizePeriodDays(options.periodDays);
     const periodStart = this.resolvePeriodStart(normalizedPeriodDays);
+    const periodLabel = customRange
+      ? this.formatRangeLabel(customRange.startDate, customRange.endDate)
+      : normalizedPeriodDays
+        ? `${normalizedPeriodDays} dias`
+        : 'Todo período';
 
     let aggregates: DashboardAggregatePayload;
     try {
       await this.snapshotService.ensureStoreSnapshots(store.id);
-      aggregates = await this.getSnapshotAggregates(store.id, monthKey, periodStart);
+      aggregates = await this.getSnapshotAggregates(store.id, monthKey, periodStart, customRange);
     } catch (error: any) {
       this.log.warn('Dashboard snapshot unavailable, falling back to live aggregation', {
         storeId: store.id,
         error: error?.message || String(error),
       });
-      aggregates = await this.getLiveAggregates(store.id, monthKey, periodStart);
+      aggregates = await this.getLiveAggregates(store.id, monthKey, periodStart, customRange);
     }
 
     const [customers, periodCustomers] = await Promise.all([
-      this.queryCustomers(store.id, null),
-      this.queryCustomers(store.id, periodStart),
+      this.queryCustomers(store.id),
+      this.queryCustomers(store.id, customRange
+        ? { startDate: customRange.startDate, endDate: customRange.endDate }
+        : { periodStart }),
     ]);
 
     return this.buildReport({
@@ -364,6 +558,7 @@ export class StoreDashboardAnalyticsService {
       periodCustomers,
       monthKey,
       normalizedPeriodDays,
+      periodLabel,
     });
   }
 }

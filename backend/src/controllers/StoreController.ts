@@ -873,9 +873,13 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
       const periodRaw = String(req.query?.periodDays || '').trim().toLowerCase();
       const periodDays = !periodRaw || periodRaw === 'all' ? null : Number(periodRaw);
       const monthKey = String(req.query?.monthKey || '').trim() || undefined;
+      const startDate = String(req.query?.startDate || '').trim() || undefined;
+      const endDate = String(req.query?.endDate || '').trim() || undefined;
       const payload = await storeDashboardAnalyticsService.getReport(storeId, req.auth?.storeId, {
         periodDays,
         monthKey,
+        startDate,
+        endDate,
       });
       return res.json(payload);
     } catch (error: any) {
@@ -883,6 +887,8 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
         storeId: req.params.storeId,
         periodDays: req.query?.periodDays,
         monthKey: req.query?.monthKey,
+        startDate: req.query?.startDate,
+        endDate: req.query?.endDate,
         error,
       });
       return respondWithError(req, res, error, 400);

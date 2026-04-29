@@ -16,6 +16,22 @@ import { exportToCsv } from "../../utils/export";
 import { storeService } from "../../services/storeService";
 
 const TOP_PRODUCT_BAR_COLORS = ["#1d4ed8", "#2563eb", "#3b82f6", "#60a5fa", "#93c5fd"];
+const toDateInputValue = (date) =>
+  new Intl.DateTimeFormat("en-CA", {
+    timeZone: APP_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+const formatDateKey = (dateKey, options = {}) => {
+  if (!dateKey) return "";
+  const [year, month, day] = String(dateKey).split("-").map((value) => Number(value));
+  if (!year || !month || !day) return String(dateKey);
+  return new Intl.DateTimeFormat("pt-BR", {
+    timeZone: APP_TIMEZONE,
+    ...options,
+  }).format(new Date(Date.UTC(year, month - 1, day, 12, 0, 0)));
+};
 
 export const DashboardView = ({
   storeId = "",
@@ -43,11 +59,15 @@ export const DashboardView = ({
     if (typeof window === "undefined") return true;
     return !window.matchMedia("(max-width: 767px)").matches;
   });
+  const todayDateKey = toDateInputValue(new Date());
+  const defaultCustomStartDate = toDateInputValue(new Date(Date.now() - 29 * 24 * 60 * 60 * 1000));
   const utmStorageKey = useMemo(() => (storeUrl ? `utm:store:${storeUrl}` : "utm:store"), [storeUrl]);
   const [utmSource, setUtmSource] = useState("instagram");
   const [utmMedium, setUtmMedium] = useState("bio");
   const [utmCampaign, setUtmCampaign] = useState("organico");
   const [periodDays, setPeriodDays] = useState("30");
+  const [customStartDate, setCustomStartDate] = useState(defaultCustomStartDate);
+  const [customEndDate, setCustomEndDate] = useState(todayDateKey);
   const nowDate = new Date();
   const currentMonthKey = `${nowDate.getFullYear()}-${String(nowDate.getMonth() + 1).padStart(2, "0")}`;
   const [selectedMonth, setSelectedMonth] = useState(currentMonthKey);
@@ -73,7 +93,18 @@ export const DashboardView = ({
       return {};
     }
   });
-  const periodLabel = periodDays === "all" ? "Todo período" : `${periodDays} dias`;
+  const isCustomPeriod = periodDays === "custom";
+  const customRange = useMemo(() => {
+    if (!isCustomPeriod || !customStartDate || !customEndDate) return null;
+    return customStartDate <= customEndDate
+      ? { startDate: customStartDate, endDate: customEndDate }
+      : { startDate: customEndDate, endDate: customStartDate };
+  }, [customEndDate, customStartDate, isCustomPeriod]);
+  const periodLabel = customRange
+    ? `${formatDateKey(customRange.startDate)} a ${formatDateKey(customRange.endDate)}`
+    : periodDays === "all"
+      ? "Todo período"
+      : `${periodDays} dias`;
   const checklistDoneCount = setupChecklist.filter((item) => item.done).length;
   const checklistPendingCount = Math.max(0, setupChecklist.length - checklistDoneCount);
   const checklistProgress = setupChecklist.length === 0 ? 0 : Math.round((checklistDoneCount / setupChecklist.length) * 100);
@@ -184,6 +215,30 @@ export const DashboardView = ({
     return date.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
   };
 
+  const activateCustomRange = () => {
+    if (!customStartDate || !customEndDate) {
+      setCustomStartDate(defaultCustomStartDate);
+      setCustomEndDate(todayDateKey);
+    }
+    setPeriodDays("custom");
+  };
+
+  const handleCustomStartDateChange = (value) => {
+    if (!value) return;
+    setCustomStartDate(value);
+    if (customEndDate && value > customEndDate) {
+      setCustomEndDate(value);
+    }
+  };
+
+  const handleCustomEndDateChange = (value) => {
+    if (!value) return;
+    setCustomEndDate(value);
+    if (customStartDate && value < customStartDate) {
+      setCustomStartDate(value);
+    }
+  };
+
   useEffect(() => {
     if (!storeId) {
       setAnalyticsReport(null);
@@ -197,8 +252,10 @@ export const DashboardView = ({
 
     storeService
       .getDashboardAnalytics(storeId, {
-        periodDays,
+        periodDays: customRange ? null : periodDays,
         monthKey: selectedMonth,
+        startDate: customRange?.startDate || null,
+        endDate: customRange?.endDate || null,
       })
       .then((payload) => {
         if (active) {
@@ -217,7 +274,7 @@ export const DashboardView = ({
     return () => {
       active = false;
     };
-  }, [storeId, periodDays, selectedMonth]);
+  }, [storeId, periodDays, selectedMonth, customRange]);
 
   const resolveDateKey = (order) => {
     const raw = order.createdAt || order.created_at;
@@ -234,10 +291,8 @@ export const DashboardView = ({
 
   const resolveDateLabel = (key) => {
     if (!key) return "";
-    const date = new Date(`${key}T00:00:00`);
-    if (Number.isNaN(date.getTime())) return key;
-    const weekday = date.toLocaleDateString("pt-BR", { weekday: "short" });
-    const day = date.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+    const weekday = formatDateKey(key, { weekday: "short" });
+    const day = formatDateKey(key, { day: "2-digit", month: "2-digit" });
     return `${weekday} ${day}`;
   };
 
@@ -293,7 +348,7 @@ export const DashboardView = ({
 
   const stats = useMemo(() => {
     const now = Date.now();
-    const rangeDays = periodDays === "all" ? null : Number(periodDays);
+    const rangeDays = !customRange && periodDays !== "all" ? Number(periodDays) : null;
     const startPeriod = rangeDays ? now - rangeDays * 24 * 60 * 60 * 1000 : null;
     const monthKey = selectedMonth || currentMonthKey;
 
@@ -308,18 +363,27 @@ export const DashboardView = ({
       if (min === null) return entry.ts;
       return entry.ts < min ? entry.ts : min;
     }, null as number | null);
-    const periodOrders = rangeDays
-      ? ordersWithDate.filter((entry) => entry.ts >= startPeriod)
-      : ordersWithDate;
+    const periodOrders = customRange
+      ? ordersWithDate.filter((entry) => {
+          const key = resolveDateKey(entry.order);
+          return key && key >= customRange.startDate && key <= customRange.endDate;
+        })
+      : rangeDays
+        ? ordersWithDate.filter((entry) => entry.ts >= startPeriod)
+        : ordersWithDate;
     const periodRevenue = periodOrders.reduce((acc, curr) => acc + resolveOrderTotal(curr.order), 0);
     const monthRevenue = ordersWithDate.reduce((acc, curr) => {
-      const key = new Date(curr.ts).toISOString().slice(0, 7);
+      const key = new Intl.DateTimeFormat('en-CA', {
+        timeZone: APP_TIMEZONE,
+        year: 'numeric',
+        month: '2-digit',
+      }).format(new Date(curr.ts));
       if (key !== monthKey) return acc;
       return acc + resolveOrderTotal(curr.order);
     }, 0);
 
     const productCount = {};
-    orders.forEach((order) => {
+    periodOrders.forEach(({ order }) => {
       const items =
         order.items ||
         order.products ||
@@ -362,7 +426,7 @@ export const DashboardView = ({
 
     const avgTicket = totalOrders > 0 ? totalSales / totalOrders : 0;
     return { totalSales, totalOrders, topProducts, chartData, periodRevenue, monthRevenue, avgTicket, firstOrderAt };
-  }, [orders, periodDays, selectedMonth, currentMonthKey]);
+  }, [orders, periodDays, selectedMonth, currentMonthKey, customRange]);
 
   const analyticsSummary = analyticsReport?.summary || null;
   const chartSource = useMemo(() => {
@@ -1194,11 +1258,18 @@ export const DashboardView = ({
                 { id: "30", label: "30d" },
                 { id: "60", label: "60d" },
                 { id: "90", label: "90d" },
+                { id: "custom", label: "Personalizado" },
                 { id: "all", label: "Tudo" },
               ].map((option) => (
                 <button
                   key={option.id}
-                  onClick={() => setPeriodDays(option.id)}
+                  onClick={() => {
+                    if (option.id === "custom") {
+                      activateCustomRange();
+                      return;
+                    }
+                    setPeriodDays(option.id);
+                  }}
                   className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all hover:-translate-y-0.5 active:scale-95 ${
                     periodDays === option.id
                       ? "bg-brand-primary text-white border-brand-primary"
@@ -1210,6 +1281,31 @@ export const DashboardView = ({
               ))}
             </div>
           </div>
+          {isCustomPeriod ? (
+            <div className="mb-4 grid gap-3 sm:grid-cols-2">
+              <label className="block">
+                <span className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-bold">Data inicial</span>
+                <input
+                  type="date"
+                  value={customRange?.startDate || customStartDate}
+                  max={customRange?.endDate || customEndDate || todayDateKey}
+                  onChange={(event) => handleCustomStartDateChange(event.target.value)}
+                  className="ds-focus-ring mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                />
+              </label>
+              <label className="block">
+                <span className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-bold">Data final</span>
+                <input
+                  type="date"
+                  value={customRange?.endDate || customEndDate}
+                  min={customRange?.startDate || customStartDate}
+                  max={todayDateKey}
+                  onChange={(event) => handleCustomEndDateChange(event.target.value)}
+                  className="ds-focus-ring mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                />
+              </label>
+            </div>
+          ) : null}
           {chartSource.length === 0 ? (
             <div className="flex-1 flex items-center justify-center text-sm text-gray-400">
               <div className="text-center space-y-2">
