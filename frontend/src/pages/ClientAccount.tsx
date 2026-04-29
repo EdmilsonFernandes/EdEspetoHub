@@ -27,6 +27,7 @@ import { App as CapacitorApp } from '@capacitor/app';
 import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { nativeBiometricService } from '../services/nativeBiometricService';
+import { navigateBackOrFallback } from '../utils/navigation';
 
 // Componente Switch Simples
 function Switch({ checked, onChange, disabled }: { checked: boolean; onChange: () => void; disabled?: boolean }) {
@@ -528,7 +529,7 @@ export function ClientAccount() {
         {/* Header Fixo Premium */}
         <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200/60 bg-white/95 px-4 py-3.5 backdrop-blur-xl">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigateBackOrFallback(navigate, '/hub?profile=1')}
             className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-all active:scale-95"
           >
             <ArrowLeft size={18} weight="bold" />

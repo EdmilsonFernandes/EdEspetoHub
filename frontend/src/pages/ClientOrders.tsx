@@ -34,6 +34,7 @@ import { formatCurrency, formatOrderDisplayId } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getPaymentProviderMeta } from '../utils/paymentAssets';
 import { formatSelectedModifiers } from '../utils/productModifiers';
+import { navigateBackOrFallback } from '../utils/navigation';
 
 const TERMINAL_STATUSES = [ 'DELIVERED', 'CANCELLED', 'FINISHED', 'REJECTED', 'DONE' ];
 const ACTIVE_REFRESH_MS = 10_000;
@@ -1228,7 +1229,7 @@ export function ClientOrders() {
         <header className="sticky top-0 z-20 border-b border-slate-200/60 bg-white/90 backdrop-blur-xl">
           <div className="flex items-center justify-between px-4 py-3.5">
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => navigateBackOrFallback(navigate, '/hub?profile=1')}
               className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-all active:scale-95"
             >
               <ArrowLeft size={18} weight="bold" />

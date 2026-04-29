@@ -20,6 +20,7 @@ import { customerAccountService } from '../services/customerAccountService';
 import { addressLookupService } from '../services/addressLookupService';
 import { useToast } from '../contexts/ToastContext';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
+import { navigateBackOrFallback } from '../utils/navigation';
 
 const CUSTOMER_ADDRESS_UPDATED_EVENT = 'jnc:customer-addresses-updated';
 
@@ -278,7 +279,7 @@ export function AddressDistance() {
       <div className="mx-auto max-w-2xl">
         <header className="sticky top-0 z-20 flex items-center gap-4 border-b border-slate-200/70 bg-white/85 px-4 py-4 backdrop-blur-xl">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigateBackOrFallback(navigate, '/hub?profile=1')}
             className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-all active:scale-90"
           >
             <ArrowLeft size={20} weight="bold" />
