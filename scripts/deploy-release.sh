@@ -67,6 +67,41 @@ fetch_ssm_parameter() {
     --region "$region"
 }
 
+parse_json_key() {
+  json_raw="$1"
+  key="$2"
+
+  if command -v python3 >/dev/null 2>&1; then
+    JSON_RAW="$json_raw" python3 - "$key" <<'PY'
+import json
+import os
+import sys
+
+key = sys.argv[1]
+raw = os.environ.get("JSON_RAW", "")
+try:
+    data = json.loads(raw)
+except Exception:
+    sys.exit(1)
+
+value = data.get(key)
+if value is None:
+    sys.exit(2)
+
+print(value)
+PY
+    return $?
+  fi
+
+  if command -v node >/dev/null 2>&1; then
+    JSON_RAW="$json_raw" node -e "const key = process.argv[1]; const raw = process.env.JSON_RAW || ''; const data = JSON.parse(raw); if (data[key] == null) process.exit(2); process.stdout.write(String(data[key]));" "$key"
+    return $?
+  fi
+
+  echo "Neither python3 nor node is available to parse JSON from SSM." >&2
+  return 1
+}
+
 usage() {
   echo "Uso: scripts/./deploy-release.sh [image-tag] [service ...]" >&2
   echo "Padrão sem image-tag: main" >&2
@@ -124,6 +159,8 @@ load_value_if_missing AWS_REGION
 load_value_if_missing AWS_DEFAULT_REGION
 load_value_if_missing GHCR_USERNAME
 load_value_if_missing GHCR_TOKEN
+load_value_if_missing SSM_PARAMETER_NAME
+load_value_if_missing GHCR_SSM_PARAMETER_NAME
 load_value_if_missing GHCR_USERNAME_SSM_PARAMETER
 load_value_if_missing GHCR_TOKEN_SSM_PARAMETER
 
@@ -136,6 +173,7 @@ case "${IMAGE_REGISTRY:-ghcr.io}" in
     GHCR_REGION="${AWS_REGION:-${AWS_DEFAULT_REGION:-}}"
     ghcr_from_ssm="false"
     ghcr_ssm_failed="false"
+    ghcr_json_parameter="${GHCR_SSM_PARAMETER_NAME:-${SSM_PARAMETER_NAME:-}}"
 
     if [ -n "${GHCR_USERNAME_SSM_PARAMETER:-}" ]; then
       if ghcr_username_from_ssm="$(fetch_ssm_parameter "$GHCR_USERNAME_SSM_PARAMETER" "$GHCR_REGION")"; then
@@ -155,12 +193,27 @@ case "${IMAGE_REGISTRY:-ghcr.io}" in
       fi
     fi
 
+    if [ -n "$ghcr_json_parameter" ] && { [ -z "${GHCR_USERNAME:-}" ] || [ -z "${GHCR_TOKEN:-}" ]; }; then
+      if ghcr_json_raw="$(fetch_ssm_parameter "$ghcr_json_parameter" "$GHCR_REGION")"; then
+        if [ -z "${GHCR_USERNAME:-}" ] && ghcr_username_from_json="$(parse_json_key "$ghcr_json_raw" GHCR_USERNAME)"; then
+          export "GHCR_USERNAME=$ghcr_username_from_json"
+          ghcr_from_ssm="true"
+        fi
+        if [ -z "${GHCR_TOKEN:-}" ] && ghcr_token_from_json="$(parse_json_key "$ghcr_json_raw" GHCR_TOKEN)"; then
+          export "GHCR_TOKEN=$ghcr_token_from_json"
+          ghcr_from_ssm="true"
+        fi
+      else
+        ghcr_ssm_failed="true"
+      fi
+    fi
+
     if [ "$ghcr_ssm_failed" = "true" ] && { [ -z "${GHCR_USERNAME:-}" ] || [ -z "${GHCR_TOKEN:-}" ]; }; then
       echo "Failed to load GHCR credentials from SSM and no local fallback was found." >&2
       exit 1
     fi
 
-    if { [ -n "${GHCR_USERNAME_SSM_PARAMETER:-}" ] || [ -n "${GHCR_TOKEN_SSM_PARAMETER:-}" ]; } && { [ -z "${GHCR_USERNAME:-}" ] || [ -z "${GHCR_TOKEN:-}" ]; }; then
+    if { [ -n "${GHCR_USERNAME_SSM_PARAMETER:-}" ] || [ -n "${GHCR_TOKEN_SSM_PARAMETER:-}" ] || [ -n "$ghcr_json_parameter" ]; } && { [ -z "${GHCR_USERNAME:-}" ] || [ -z "${GHCR_TOKEN:-}" ]; }; then
       echo "Incomplete GHCR credentials after loading AWS SSM/local fallback." >&2
       exit 1
     fi

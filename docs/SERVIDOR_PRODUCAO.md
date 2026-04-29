@@ -112,7 +112,7 @@ Observações:
 - `3a254581` é a tag curta do commit publicada pelo workflow do GHCR.
 - sem argumento, os scripts usam `main`.
 - para produção mais sensível, o mais seguro continua sendo usar a SHA curta.
-- Recomendado: configure `GHCR_USERNAME_SSM_PARAMETER` e `GHCR_TOKEN_SSM_PARAMETER` em `.env.prod` e deixe o token no AWS SSM Parameter Store (`SecureString`).
+- Recomendado: coloque `GHCR_USERNAME` e `GHCR_TOKEN` dentro do JSON `SecureString` já usado em `SSM_PARAMETER_NAME`, por exemplo `/chamanoespeto/prod`.
 - Fallback: se preferir local, use `.env.prod.secrets`.
 - Se o fluxo novo falhar, o deploy antigo com `deploy-api.sh` e `deploy-frontend.sh` continua funcionando.
 
@@ -125,50 +125,59 @@ cd ~/EdEspetoHub
 git pull
 ```
 
-2. Configurar os parâmetros do GHCR no SSM:
+2. Ler o JSON do parâmetro SSM já existente:
 
 ```bash
-aws ssm put-parameter \
-  --name "/janocaminho/prod/ghcr/username" \
-  --value "EdmilsonFernandes" \
-  --type SecureString \
-  --overwrite \
-  --region us-east-2
-
-aws ssm put-parameter \
-  --name "/janocaminho/prod/ghcr/token" \
-  --value "<pat-classic-com-read-packages>" \
-  --type SecureString \
-  --overwrite \
-  --region us-east-2
+aws ssm get-parameter \
+  --name "/chamanoespeto/prod" \
+  --with-decryption \
+  --region us-east-2 \
+  --query 'Parameter.Value' \
+  --output text
 ```
 
 Permissões mínimas para a role/usuário AWS usado no EC2:
 - `ssm:GetParameter`
 - `kms:Decrypt`
 
-3. Configurar o `.env.prod` para o deploy ler esses parâmetros:
+3. Adicionar `GHCR_USERNAME` e `GHCR_TOKEN` nesse JSON e gravar o parâmetro atualizado:
+
+```json
+{
+  "GHCR_USERNAME": "EdmilsonFernandes",
+  "GHCR_TOKEN": "<pat-classic-com-read-packages>"
+}
+```
+
+```bash
+aws ssm put-parameter \
+  --name "/chamanoespeto/prod" \
+  --value '<JSON_COMPLETO_ATUALIZADO>' \
+  --type SecureString \
+  --overwrite \
+  --region us-east-2
+```
+
+4. Configurar o `.env.prod` para o deploy ler esse JSON:
 
 ```bash
 cd ~/EdEspetoHub
 cat >> .env.prod <<'EOF'
 AWS_REGION=us-east-2
-GHCR_USERNAME_SSM_PARAMETER=/janocaminho/prod/ghcr/username
-GHCR_TOKEN_SSM_PARAMETER=/janocaminho/prod/ghcr/token
+SSM_PARAMETER_NAME=/chamanoespeto/prod
 EOF
 ```
 
-4. Testar acesso ao SSM e ao GHCR:
+5. Testar acesso ao SSM e ao GHCR:
 
 ```bash
-aws ssm get-parameter --name /janocaminho/prod/ghcr/username --with-decryption --region us-east-2
-aws ssm get-parameter --name /janocaminho/prod/ghcr/token --with-decryption --region us-east-2
+aws ssm get-parameter --name /chamanoespeto/prod --with-decryption --region us-east-2 --query 'Parameter.Value' --output text
 docker pull ghcr.io/edmilsonfernandes/edespetohub-api:main
 docker pull ghcr.io/edmilsonfernandes/edespetohub-frontend:main
 docker pull ghcr.io/edmilsonfernandes/edespetohub-face-worker:main
 ```
 
-5. Rodar o deploy novo:
+6. Rodar o deploy novo:
 
 ```bash
 cd ~/EdEspetoHub
@@ -176,7 +185,7 @@ scripts/./deploy-release-api.sh
 scripts/./deploy-release-frontend.sh
 ```
 
-6. Validar:
+7. Validar:
 
 ```bash
 docker ps
