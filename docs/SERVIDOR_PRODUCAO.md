@@ -129,8 +129,8 @@ Fluxo:
 3. `Deploy to EC2 (Approval)` entra em espera no environment `production`
 4. Você aprova em `Review deployments`
 5. O workflow conecta no EC2, roda `git pull --ff-only` e depois:
-   - `scripts/./deploy-release-api.sh <sha-curta>`
-   - `scripts/./deploy-release-frontend.sh <sha-curta>`
+   - `scripts/./deploy-release.sh <sha-curta> <serviços>`
+6. Em modo `auto`, o deploy só aplica os serviços cuja imagem foi publicada para aquela SHA.
 
 Configuração necessária no GitHub:
 - Criar o environment `production`
@@ -144,8 +144,13 @@ Configuração necessária no GitHub:
 Observações:
 - Esse caminho elimina a necessidade de entrar no servidor para deploy comum.
 - O workflow usa a SHA curta do commit publicado pelo GHCR, não só `main`.
+- O publish também pode pular serviços não alterados.
+- Se uma mudança for só em `frontend/`, o deploy automático não precisa subir `api`.
+- `face-worker` só entra quando houver imagem dele para a mesma SHA.
 - Se um commit mais novo chegar antes da aprovação, o pendente antigo é cancelado e fica valendo o último.
-- Para rollback ou redeploy manual, dá para abrir `Deploy to EC2 (Approval)` e usar `Run workflow` com `image_tag`.
+- Para rollback ou redeploy manual, dá para abrir `Deploy to EC2 (Approval)` e usar `Run workflow` com:
+  - `image_tag`
+  - `deploy_scope` (`auto`, `frontend`, `api`, `face-worker`, `api+frontend`, `all`)
 
 ### Teste manual rápido no EC2
 

@@ -10,6 +10,18 @@ on:
         description: "Tag da imagem no GHCR (main ou SHA curta)"
         required: false
         default: "main"
+      deploy_scope:
+        description: "Quais serviços publicar em produção"
+        required: false
+        default: "auto"
+        type: choice
+        options:
+          - auto
+          - frontend
+          - api
+          - face-worker
+          - api+frontend
+          - all
 
 concurrency:
   group: deploy-production-main
@@ -17,6 +29,7 @@ concurrency:
 
 permissions:
   contents: read
+  packages: read
 
 jobs:
   deploy:
@@ -68,7 +81,88 @@ jobs:
           - Target host: production EC2
           EOF
 
+      - name: Resolve deploy services
+        id: services
+        shell: bash
+        env:
+          IMAGE_TAG: ${{ steps.release.outputs.image_tag }}
+          DEPLOY_SCOPE: ${{ inputs.deploy_scope }}
+          GH_REPOSITORY_OWNER: ${{ github.repository_owner }}
+          GH_ACTOR: ${{ github.actor }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          requested_scope="$DEPLOY_SCOPE"
+          if [ -z "$requested_scope" ]; then
+            requested_scope="auto"
+          fi
+
+          case "$requested_scope" in
+            frontend)
+              services="frontend"
+              ;;
+            api)
+              services="api"
+              ;;
+            face-worker)
+              services="face-worker"
+              ;;
+            api+frontend)
+              services="api frontend"
+              ;;
+            all)
+              services="api frontend face-worker"
+              ;;
+            auto)
+              printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GH_ACTOR" --password-stdin >/dev/null
+
+              services=""
+              for service in api frontend face-worker; do
+                case "$service" in
+                  api) image="edespetohub-api" ;;
+                  frontend) image="edespetohub-frontend" ;;
+                  face-worker) image="edespetohub-face-worker" ;;
+                esac
+
+                image_ref="ghcr.io/${GH_REPOSITORY_OWNER}/${image}:${IMAGE_TAG}"
+                if docker manifest inspect "$image_ref" >/dev/null 2>&1; then
+                  if [ -n "$services" ]; then
+                    services="$services "
+                  fi
+                  services="${services}${service}"
+                fi
+              done
+              ;;
+            *)
+              echo "Unsupported deploy_scope: $requested_scope" >&2
+              exit 1
+              ;;
+          esac
+
+          if [ -n "$services" ]; then
+            echo "has_services=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_services=false" >> "$GITHUB_OUTPUT"
+          fi
+          if [ -n "$services" ]; then
+            services_display="$services"
+          else
+            services_display="none"
+          fi
+          echo "services=$services" >> "$GITHUB_OUTPUT"
+          echo "services_display=$services_display" >> "$GITHUB_OUTPUT"
+          echo "requested_scope=$requested_scope" >> "$GITHUB_OUTPUT"
+
+      - name: Write service summary
+        shell: bash
+        run: |
+          cat <<EOF >> "$GITHUB_STEP_SUMMARY"
+
+          - Deploy scope: \`${{ steps.services.outputs.requested_scope }}\`
+          - Services: \`${{ steps.services.outputs.services_display }}\`
+          EOF
+
       - name: Prepare SSH
+        if: steps.services.outputs.has_services == 'true'
         shell: bash
         env:
           PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
@@ -91,6 +185,7 @@ jobs:
           ssh-keyscan -p "${PROD_SSH_PORT:-22}" -H "$PROD_SSH_HOST" >> ~/.ssh/known_hosts
 
       - name: Test SSH access
+        if: steps.services.outputs.has_services == 'true'
         shell: bash
         env:
           PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
@@ -110,12 +205,14 @@ jobs:
             "echo github-actions-ssh-ok"
 
       - name: Deploy on EC2
+        if: steps.services.outputs.has_services == 'true'
         shell: bash
         env:
           PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
           PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
           PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
           IMAGE_TAG: ${{ steps.release.outputs.image_tag }}
+          SERVICES: ${{ steps.services.outputs.services }}
         run: |
           ssh_user="${PROD_SSH_USER:-ec2-user}"
           ssh_port="${PROD_SSH_PORT:-22}"
@@ -130,5 +227,10 @@ jobs:
             "set -eu; \
              cd ~/EdEspetoHub; \
              git pull --ff-only; \
-             scripts/./deploy-release-api.sh '$IMAGE_TAG'; \
-             scripts/./deploy-release-frontend.sh '$IMAGE_TAG'"
+             scripts/./deploy-release.sh '$IMAGE_TAG' $SERVICES"
+
+      - name: Skip deploy when no image changed
+        if: steps.services.outputs.has_services != 'true'
+        shell: bash
+        run: |
+          echo "No published image found for the requested tag/scope. Nothing to deploy." >> "$GITHUB_STEP_SUMMARY"

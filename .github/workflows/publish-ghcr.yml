@@ -4,6 +4,19 @@ on:
   push:
     branches: [ "main" ]
   workflow_dispatch:
+    inputs:
+      build_scope:
+        description: "Quais imagens publicar"
+        required: false
+        default: "auto"
+        type: choice
+        options:
+          - auto
+          - frontend
+          - api
+          - face-worker
+          - api+frontend
+          - all
 
 concurrency:
   group: publish-ghcr-${{ github.ref }}
@@ -17,24 +30,138 @@ env:
   DOCKER_METADATA_SHORT_SHA_LENGTH: 8
 
 jobs:
+  detect-targets:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.detect.outputs.matrix }}
+      has_targets: ${{ steps.detect.outputs.has_targets }}
+      services: ${{ steps.detect.outputs.services }}
+      services_display: ${{ steps.detect.outputs.services_display }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect publish targets
+        id: detect
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BUILD_SCOPE: ${{ inputs.build_scope }}
+          BEFORE_SHA: ${{ github.event.before }}
+          CURRENT_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          if [ -z "${BUILD_SCOPE:-}" ]; then
+            BUILD_SCOPE="auto"
+          fi
+
+          frontend_changed=false
+          api_changed=false
+          face_worker_changed=false
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            case "$BUILD_SCOPE" in
+              ""|auto|all)
+                frontend_changed=true
+                api_changed=true
+                face_worker_changed=true
+                ;;
+              frontend)
+                frontend_changed=true
+                ;;
+              api)
+                api_changed=true
+                ;;
+              face-worker)
+                face_worker_changed=true
+                ;;
+              api+frontend)
+                api_changed=true
+                frontend_changed=true
+                ;;
+              *)
+                echo "Unsupported build_scope: $BUILD_SCOPE" >&2
+                exit 1
+                ;;
+            esac
+          else
+            if [ -z "$BEFORE_SHA" ] || [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
+              frontend_changed=true
+              api_changed=true
+              face_worker_changed=true
+            else
+              changed_files="$(git diff --name-only "$BEFORE_SHA" "$CURRENT_SHA")"
+
+              if printf '%s\n' "$changed_files" | grep -Eq '^frontend/'; then
+                frontend_changed=true
+              fi
+
+              if printf '%s\n' "$changed_files" | grep -Eq '^backend/'; then
+                api_changed=true
+              fi
+
+              if printf '%s\n' "$changed_files" | grep -Eq '^face-worker/'; then
+                face_worker_changed=true
+              fi
+            fi
+          fi
+
+          FRONTEND_CHANGED="$frontend_changed" \
+          API_CHANGED="$api_changed" \
+          FACE_WORKER_CHANGED="$face_worker_changed" \
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import os
+
+          changed = {
+              "frontend": os.environ.get("FRONTEND_CHANGED") == "true",
+              "api": os.environ.get("API_CHANGED") == "true",
+              "face-worker": os.environ.get("FACE_WORKER_CHANGED") == "true",
+          }
+
+          service_order = ["api", "frontend", "face-worker"]
+          services = [name for name in service_order if changed[name]]
+
+          config = {
+              "api": {
+                  "name": "api",
+                  "context": "./backend",
+                  "dockerfile": "./backend/Dockerfile",
+                  "image": "edespetohub-api",
+              },
+              "frontend": {
+                  "name": "frontend",
+                  "context": "./frontend",
+                  "dockerfile": "./frontend/Dockerfile",
+                  "image": "edespetohub-frontend",
+              },
+              "face-worker": {
+                  "name": "face-worker",
+                  "context": "./face-worker",
+                  "dockerfile": "./face-worker/Dockerfile",
+                  "image": "edespetohub-face-worker",
+              },
+          }
+
+          matrix = [config[name] for name in services]
+          services_display = " ".join(services) if services else "none"
+
+          print(f"matrix={json.dumps(matrix, separators=(',', ':'))}")
+          print(f"has_targets={'true' if services else 'false'}")
+          print(f"services={' '.join(services)}")
+          print(f"services_display={services_display}")
+          PY
+
   build-and-push:
+    needs: detect-targets
+    if: needs.detect-targets.outputs.has_targets == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: api
-            context: ./backend
-            dockerfile: ./backend/Dockerfile
-            image: edespetohub-api
-          - name: frontend
-            context: ./frontend
-            dockerfile: ./frontend/Dockerfile
-            image: edespetohub-frontend
-          - name: face-worker
-            context: ./face-worker
-            dockerfile: ./face-worker/Dockerfile
-            image: edespetohub-face-worker
+        include: ${{ fromJson(needs.detect-targets.outputs.matrix) }}
 
     steps:
       - name: Checkout
@@ -164,3 +291,17 @@ jobs:
             BUILD_COMMITS_B64=${{ steps.frontend_meta.outputs.build_commits_b64 }}
           cache-from: type=gha,scope=${{ matrix.image }}
           cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+  publish-summary:
+    needs: detect-targets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write publish summary
+        shell: bash
+        run: |
+          cat <<EOF >> "$GITHUB_STEP_SUMMARY"
+          ## Publish targets
+
+          - Services: \`${{ needs.detect-targets.outputs.services_display }}\`
+          - Has targets: \`${{ needs.detect-targets.outputs.has_targets }}\`
+          EOF

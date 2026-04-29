@@ -1276,13 +1276,12 @@ Workflow:
 
 Como funciona:
 1. Você faz `git push` na `main`.
-2. O workflow `Publish Docker Images (GHCR)` publica as imagens.
+2. O workflow `Publish Docker Images (GHCR)` publica apenas as imagens dos serviços alterados.
 3. Quando esse workflow termina com sucesso, nasce um run de `Deploy to EC2 (Approval)`.
 4. Esse run fica parado no environment `production`.
 5. No GitHub, você clica em `Review deployments` -> `Approve and deploy`.
-6. O workflow entra no EC2, faz `git pull --ff-only` e roda:
-   - `scripts/./deploy-release-api.sh <sha-curta>`
-   - `scripts/./deploy-release-frontend.sh <sha-curta>`
+6. O workflow entra no EC2, faz `git pull --ff-only` e roda `scripts/./deploy-release.sh <sha-curta> <serviços>`.
+7. Em modo `auto`, ele só deploya os serviços cuja imagem daquela SHA realmente existe.
 
 Setup mínimo no GitHub:
 - Crie o environment `production`.
@@ -1295,8 +1294,12 @@ Setup mínimo no GitHub:
 
 Observações:
 - O deploy automático por approval usa a SHA curta do commit que acabou de publicar a imagem.
+- Se o commit mexer só em `frontend/`, ele não precisa deployar `api`.
+- `face-worker` só entra quando a imagem dele também tiver sido publicada para aquela SHA.
 - Se entrar um commit novo antes da aprovação, o deploy pendente antigo é cancelado e fica valendo o mais recente da `main`.
-- Se quiser redeploy manual ou rollback, também pode usar `Run workflow` em `Deploy to EC2 (Approval)` e informar `image_tag` (`main` ou SHA curta).
+- Se quiser redeploy manual ou rollback, também pode usar `Run workflow` em `Deploy to EC2 (Approval)` e informar:
+  - `image_tag` (`main` ou SHA curta)
+  - `deploy_scope` (`auto`, `frontend`, `api`, `face-worker`, `api+frontend`, `all`)
 
 5) Teste manual rápido no EC2:
 

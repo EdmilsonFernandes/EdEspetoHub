@@ -41,6 +41,7 @@ Nome no GitHub Actions: `Publish Docker Images (GHCR)`
 - api alterada → preferir `scripts/./deploy-release-api.sh`
 - ambos alterados → `scripts/./deploy-release-api.sh` e depois `scripts/./deploy-release-frontend.sh`
 - se o workflow `Deploy to EC2 (Approval)` estiver configurado e pronto → preferir mandar o usuário aprovar esse workflow
+- ao recomendar o workflow aprovado, considerar o escopo real da mudança (`frontend`, `api`, `face-worker` ou combinação), evitando subir serviço sem imagem nova
 - scripts/compose/infra alterados → avisar que o servidor pode precisar de `git pull` antes do deploy novo
 - se o fluxo GHCR não estiver pronto ou falhar → informar fallback com `deploy-api.sh` / `deploy-frontend.sh`
 
@@ -81,6 +82,7 @@ Após o push, reportar:
   - as imagens já estão prontas
   - ainda precisa aguardar o workflow
   - o usuário já pode aprovar `Deploy to EC2 (Approval)` ou ainda precisa esperar
+  - quais serviços foram publicados/deployados para aquela SHA
   - será necessário `git pull` no servidor por mudança de infra/scripts caso o workflow aprovado ainda não esteja configurado
 
 ---
