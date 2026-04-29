@@ -90,8 +90,11 @@ jobs:
         id: services
         shell: bash
         env:
+          EVENT_NAME: ${{ github.event_name }}
+          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
           IMAGE_TAG: ${{ steps.release.outputs.image_tag }}
           DEPLOY_SCOPE: ${{ inputs.deploy_scope }}
+          GH_REPOSITORY: ${{ github.repository }}
           GH_REPOSITORY_OWNER: ${{ github.repository_owner }}
           GH_ACTOR: ${{ github.actor }}
           GH_TOKEN: ${{ github.token }}
@@ -118,34 +121,73 @@ jobs:
               services="api frontend face-worker"
               ;;
             auto)
-              printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GH_ACTOR" --password-stdin >/dev/null
+              if [ "$EVENT_NAME" = "workflow_run" ] && [ -n "${SOURCE_RUN_ID:-}" ]; then
+                services="$(
+                  python3 - <<'PY'
+import json
+import os
+import re
+import urllib.request
 
-              services=""
-              for attempt in 1 2 3 4 5 6; do
+repo = os.environ["GH_REPOSITORY"]
+token = os.environ["GH_TOKEN"]
+run_id = os.environ["SOURCE_RUN_ID"]
+url = f"https://api.github.com/repos/{repo}/actions/runs/{run_id}/jobs?per_page=100"
+req = urllib.request.Request(url, headers={
+    "Accept": "application/vnd.github+json",
+    "Authorization": f"Bearer {token}",
+    "X-GitHub-Api-Version": "2022-11-28",
+})
+with urllib.request.urlopen(req) as response:
+    payload = json.load(response)
+
+services = []
+seen = set()
+pattern = re.compile(r"^build-and-push \(([^,]+),")
+for job in payload.get("jobs", []):
+    if job.get("conclusion") != "success":
+        continue
+    match = pattern.match(str(job.get("name", "")))
+    if not match:
+        continue
+    service = match.group(1).strip()
+    if service and service not in seen:
+        seen.add(service)
+        services.append(service)
+
+print(" ".join(services))
+PY
+                )"
+              else
+                printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GH_ACTOR" --password-stdin >/dev/null
+
                 services=""
-                for service in api frontend face-worker; do
-                  case "$service" in
-                    api) image="edespetohub-api" ;;
-                    frontend) image="edespetohub-frontend" ;;
-                    face-worker) image="edespetohub-face-worker" ;;
-                  esac
+                for attempt in 1 2 3 4 5 6; do
+                  services=""
+                  for service in api frontend face-worker; do
+                    case "$service" in
+                      api) image="edespetohub-api" ;;
+                      frontend) image="edespetohub-frontend" ;;
+                      face-worker) image="edespetohub-face-worker" ;;
+                    esac
 
-                  image_ref="ghcr.io/${GH_REPOSITORY_OWNER}/${image}:${IMAGE_TAG}"
-                  if docker manifest inspect "$image_ref" >/dev/null 2>&1; then
-                    if [ -n "$services" ]; then
-                      services="$services "
+                    image_ref="ghcr.io/${GH_REPOSITORY_OWNER}/${image}:${IMAGE_TAG}"
+                    if docker manifest inspect "$image_ref" >/dev/null 2>&1; then
+                      if [ -n "$services" ]; then
+                        services="$services "
+                      fi
+                      services="${services}${service}"
                     fi
-                    services="${services}${service}"
+                  done
+
+                  if [ -n "$services" ] || [ "$attempt" -eq 6 ]; then
+                    break
                   fi
+
+                  echo "No deployable image found yet for tag ${IMAGE_TAG}. Retrying in 10s (attempt ${attempt}/6)..."
+                  sleep 10
                 done
-
-                if [ -n "$services" ] || [ "$attempt" -eq 6 ]; then
-                  break
-                fi
-
-                echo "No deployable image found yet for tag ${IMAGE_TAG}. Retrying in 10s (attempt ${attempt}/6)..."
-                sleep 10
-              done
+              fi
               ;;
             *)
               echo "Unsupported deploy_scope: $requested_scope" >&2
