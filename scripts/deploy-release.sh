@@ -120,6 +120,11 @@ resolve_service_container_name() {
   esac
 }
 
+extract_build_number() {
+  raw_value="$1"
+  printf '%s' "$raw_value" | sed -n 's/.*gha\.\([0-9][0-9]*\)\..*/\1/p' | head -n 1
+}
+
 inspect_image_label() {
   image_ref="$1"
   label_key="$2"
@@ -144,6 +149,7 @@ format_image_summary() {
   short_sha="$(inspect_image_label "$image_ref" 'io.janocaminho.build.short_sha')"
   built_at="$(inspect_image_label "$image_ref" 'io.janocaminho.build.time_iso')"
   revision="$(inspect_image_label "$image_ref" 'org.opencontainers.image.revision')"
+  build_number="$(extract_build_number "$build_id")"
 
   if [ -z "$short_sha" ] && [ -n "$revision" ]; then
     short_sha="$(printf '%.8s' "$revision")"
@@ -152,6 +158,9 @@ format_image_summary() {
   summary=""
   if [ -n "$version_label" ]; then
     summary="$version_label"
+    if [ -n "$build_number" ]; then
+      summary="${summary}.${build_number}"
+    fi
   elif [ -n "$short_sha" ]; then
     summary="commit $short_sha"
   else

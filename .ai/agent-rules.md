@@ -44,6 +44,7 @@ Nome no GitHub Actions: `Publish Docker Images (GHCR)`
 - ao recomendar o workflow aprovado, considerar o escopo real da mudança (`frontend`, `api`, `face-worker` ou combinação), evitando subir serviço sem imagem nova
 - scripts/compose/infra alterados → avisar que o servidor pode precisar de `git pull` antes do deploy novo
 - se o fluxo GHCR não estiver pronto ou falhar → informar fallback com `deploy-api.sh` / `deploy-frontend.sh`
+- não é obrigatório acompanhar o workflow/deploy depois do push, a menos que o usuário peça isso explicitamente
 
 ---
 
@@ -62,10 +63,6 @@ Nome no GitHub Actions: `Publish Docker Images (GHCR)`
 ### 4. VALIDAR
 - Revisar diff
 - Validar lógica
-- Se o deploy recomendado for via GHCR, validar antes:
-  1. workflow `Publish Docker Images (GHCR)` concluído com sucesso para o commit
-  2. imagens de `api`, `frontend` e `face-worker` publicadas com tag `main` e/ou SHA curta
-  3. só depois avisar o usuário que já pode deployar
 
 ### 5. GIT LOCAL
 git status  
@@ -78,12 +75,8 @@ Após o push, reportar:
 - Commit hash (ex: `a1b2c3d`)
 - Escopo: frontend / api / ambos
 - Script(s) a rodar no servidor
-- Se GHCR for o caminho principal, informar também se:
-  - as imagens já estão prontas
-  - ainda precisa aguardar o workflow
-  - o usuário já pode aprovar `Deploy to EC2 (Approval)` ou ainda precisa esperar
-  - quais serviços foram publicados/deployados para aquela SHA
-  - será necessário `git pull` no servidor por mudança de infra/scripts caso o workflow aprovado ainda não esteja configurado
+- Se o usuário pedir acompanhamento de deploy, informar o status do workflow/imagens/aprovação
+- Se houver mudança de infra/scripts, avisar se será necessário `git pull` no servidor
 
 ---
 
@@ -121,8 +114,8 @@ NÃO usar SSH para rodar deploy ou git pull proativamente.
 - NÃO esconder erro
 - NÃO dizer que concluiu sem validar
 - SEMPRE informar o commit e qual deploy rodar
-- NÃO mandar deployar via GHCR sem antes confirmar que a Action terminou e as imagens estão prontas
-- Se `Deploy to EC2 (Approval)` estiver disponível e a imagem estiver pronta, preferir esse caminho ao invés de mandar o usuário entrar no EC2
+- NÃO assumir status de deploy/workflow sem conferir, quando o usuário pedir esse acompanhamento
+- Se `Deploy to EC2 (Approval)` estiver disponível, pode ser sugerido como caminho preferencial sem precisar monitorar ele por padrão
 
 ---
 
@@ -136,7 +129,6 @@ NÃO usar SSH para rodar deploy ou git pull proativamente.
 - Push: ✅
 - Deploy necessário: `scripts/./deploy-release-frontend.sh` e/ou `scripts/./deploy-release-api.sh`
 - ou aprovar o workflow `Deploy to EC2 (Approval)` quando esse caminho estiver configurado
-- Status das imagens GHCR: `prontas` / `aguardando workflow`
 - Precisa `git pull` no servidor?: `sim` / `não`
 
 ---
