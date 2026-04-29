@@ -25,6 +25,7 @@ import { resolvePlanFeatures } from '../config/planFeatures';
 import { publicStoreCache } from '../utils/publicStoreCache';
 import { In } from 'typeorm';
 import { StorePaymentAccountService } from '../services/StorePaymentAccountService';
+import { StoreDashboardAnalyticsService } from '../services/StoreDashboardAnalyticsService';
 import { env } from '../config/env';
 import { calculateDistanceKm, roundDistanceKm } from '../utils/geo';
 
@@ -32,6 +33,7 @@ const storeService = new StoreService();
 const subscriptionService = new SubscriptionService();
 const orderReviewService = new OrderReviewService();
 const storePaymentAccountService = new StorePaymentAccountService();
+const storeDashboardAnalyticsService = new StoreDashboardAnalyticsService();
 const DEMO_SLUGS = new Set([ 'demo', 'test-store' ]);
 const log = logger.child({ scope: 'StoreController' });
 const SAO_PAULO_TZ = 'America/Sao_Paulo';
@@ -857,6 +859,32 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
     catch (error: any)
     {
       log.warn('Store link stats failed', { storeId: req.params.storeId, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Gets consolidated dashboard analytics for the store.
+   */
+  static async getDashboardAnalytics(req: Request, res: Response) {
+    try {
+      const storeId = req.params.storeId;
+      if (!storeId) throw new AppError('STORE-001', 404);
+      const periodRaw = String(req.query?.periodDays || '').trim().toLowerCase();
+      const periodDays = !periodRaw || periodRaw === 'all' ? null : Number(periodRaw);
+      const monthKey = String(req.query?.monthKey || '').trim() || undefined;
+      const payload = await storeDashboardAnalyticsService.getReport(storeId, req.auth?.storeId, {
+        periodDays,
+        monthKey,
+      });
+      return res.json(payload);
+    } catch (error: any) {
+      log.warn('Store dashboard analytics failed', {
+        storeId: req.params.storeId,
+        periodDays: req.query?.periodDays,
+        monthKey: req.query?.monthKey,
+        error,
+      });
       return respondWithError(req, res, error, 400);
     }
   }

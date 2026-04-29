@@ -153,6 +153,19 @@ export const storeService = {
     return toJson(response);
   },
 
+  async getDashboardAnalytics(storeId: string, params?: { periodDays?: string | number | null; monthKey?: string | null }) {
+    const search = new URLSearchParams();
+    if (params?.periodDays !== undefined && params?.periodDays !== null && String(params.periodDays).trim() !== '') {
+      search.set('periodDays', String(params.periodDays).trim());
+    }
+    if (params?.monthKey) {
+      search.set('monthKey', String(params.monthKey).trim());
+    }
+    const suffix = search.toString() ? `?${search.toString()}` : '';
+    const response = await apiClient.rawGet(`/stores/${storeId}/dashboard-analytics${suffix}`);
+    return toJson(response);
+  },
+
   async getMercadoPagoAccount(storeId: string) {
     const response = await apiClient.rawGet(`/stores/${storeId}/payment-accounts/mercadopago`);
     return toJson(response);

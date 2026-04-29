@@ -3209,6 +3209,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           )}
 
           <DashboardView
+            storeId={storeId}
             orders={orders}
             customers={customers}
             setupChecklist={setupChecklist}

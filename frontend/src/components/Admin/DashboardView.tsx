@@ -10,13 +10,15 @@ import {
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
 } from "recharts";
-import { formatCurrency, formatPhoneInput } from "../../utils/format";
+import { formatCurrency, formatDate, formatPhoneInput } from "../../utils/format";
 import { APP_TIMEZONE } from "../../utils/format";
 import { exportToCsv } from "../../utils/export";
+import { storeService } from "../../services/storeService";
 
 const TOP_PRODUCT_BAR_COLORS = ["#1d4ed8", "#2563eb", "#3b82f6", "#60a5fa", "#93c5fd"];
 
 export const DashboardView = ({
+  storeId = "",
   orders = [],
   customers = [],
   setupChecklist = [],
@@ -54,6 +56,9 @@ export const DashboardView = ({
   const [editingCustomerKey, setEditingCustomerKey] = useState(null);
   const [editingName, setEditingName] = useState("");
   const [editingPhone, setEditingPhone] = useState("");
+  const [analyticsReport, setAnalyticsReport] = useState(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [analyticsError, setAnalyticsError] = useState("");
   const [hiddenCustomers, setHiddenCustomers] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem("customer-hidden") || "{}");
@@ -99,6 +104,29 @@ export const DashboardView = ({
     const query = params.toString();
     return query ? `${storeUrl}?${query}` : storeUrl;
   }, [storeUrl, utmSource, utmMedium, utmCampaign]);
+
+  const copyUtm = async (overrides = {}) => {
+    if (!storeUrl || typeof navigator === "undefined" || !navigator.clipboard) return;
+    const params = new URLSearchParams();
+    const source = overrides.utmSource ?? utmSource;
+    const medium = overrides.utmMedium ?? utmMedium;
+    const campaign = overrides.utmCampaign ?? utmCampaign;
+    if (source) params.set("utm_source", source);
+    if (medium) params.set("utm_medium", medium);
+    if (campaign) params.set("utm_campaign", campaign);
+    const query = params.toString();
+    const url = query ? `${storeUrl}?${query}` : storeUrl;
+    await navigator.clipboard.writeText(url);
+    setQrCopied(true);
+    setTimeout(() => setQrCopied(false), 1500);
+  };
+
+  const escapeHtml = (value) =>
+    String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
 
   useEffect(() => {
     if (!setupChecklist.length) return;
@@ -155,6 +183,41 @@ export const DashboardView = ({
     if (Number.isNaN(date.getTime())) return key;
     return date.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
   };
+
+  useEffect(() => {
+    if (!storeId) {
+      setAnalyticsReport(null);
+      setAnalyticsError("");
+      return;
+    }
+
+    let active = true;
+    setAnalyticsLoading(true);
+    setAnalyticsError("");
+
+    storeService
+      .getDashboardAnalytics(storeId, {
+        periodDays,
+        monthKey: selectedMonth,
+      })
+      .then((payload) => {
+        if (active) {
+          setAnalyticsReport(payload || null);
+        }
+      })
+      .catch((error) => {
+        if (!active) return;
+        setAnalyticsReport(null);
+        setAnalyticsError(error?.message || "Não foi possível atualizar o resumo consolidado agora.");
+      })
+      .finally(() => {
+        if (active) setAnalyticsLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [storeId, periodDays, selectedMonth]);
 
   const resolveDateKey = (order) => {
     const raw = order.createdAt || order.created_at;
@@ -301,24 +364,73 @@ export const DashboardView = ({
     return { totalSales, totalOrders, topProducts, chartData, periodRevenue, monthRevenue, avgTicket, firstOrderAt };
   }, [orders, periodDays, selectedMonth, currentMonthKey]);
 
+  const analyticsSummary = analyticsReport?.summary || null;
+  const chartSource = useMemo(() => {
+    if (Array.isArray(analyticsReport?.salesByDay) && analyticsReport.salesByDay.length > 0) {
+      return analyticsReport.salesByDay
+        .map((entry) => ({
+          date: entry.date,
+          label: resolveDateLabel(entry.date),
+          total: Number(entry.total || 0),
+        }))
+        .sort((a, b) => (a.date > b.date ? 1 : -1));
+    }
+    return stats.chartData;
+  }, [analyticsReport, stats.chartData]);
+
+  const topProductsSource = useMemo(() => {
+    if (Array.isArray(analyticsReport?.topProducts) && analyticsReport.topProducts.length > 0) {
+      return analyticsReport.topProducts.map((product) => ({
+        name: product.name,
+        qty: Number(product.qty || 0),
+        revenue: Number(product.revenue || 0),
+      }));
+    }
+    return stats.topProducts;
+  }, [analyticsReport, stats.topProducts]);
+
+  const customerSource = useMemo(() => {
+    if (Array.isArray(analyticsReport?.customers)) {
+      return analyticsReport.customers;
+    }
+    return customers;
+  }, [analyticsReport, customers]);
+
+  const metrics = useMemo(() => {
+    const totalSales = analyticsSummary ? Number(analyticsSummary.totalRevenue || 0) : stats.totalSales;
+    const totalOrders = analyticsSummary ? Number(analyticsSummary.totalOrders || 0) : stats.totalOrders;
+    const avgTicket = analyticsSummary ? Number(analyticsSummary.avgTicket || 0) : stats.avgTicket;
+    return {
+      totalSales,
+      totalOrders,
+      avgTicket,
+      monthRevenue: analyticsSummary ? Number(analyticsSummary.monthRevenue || 0) : stats.monthRevenue,
+      periodRevenue: analyticsSummary ? Number(analyticsSummary.periodRevenue || 0) : stats.periodRevenue,
+      firstOrderAt: analyticsSummary?.firstOrderAt || stats.firstOrderAt || null,
+      allTimeCustomerCount: analyticsSummary ? Number(analyticsSummary.allTimeCustomerCount || 0) : customerSource.length,
+      periodCustomerCount: analyticsSummary?.periodCustomerCount != null ? Number(analyticsSummary.periodCustomerCount || 0) : null,
+      periodLabel: analyticsSummary?.periodLabel || periodLabel,
+    };
+  }, [analyticsSummary, customerSource.length, periodLabel, stats]);
+
   const firstOrderLabel = useMemo(() => {
-    if (!stats.firstOrderAt) return "Sem pedidos ainda";
-    const date = new Date(stats.firstOrderAt);
+    if (!metrics.firstOrderAt) return "Sem pedidos ainda";
+    const date = new Date(metrics.firstOrderAt);
     if (Number.isNaN(date.getTime())) return "Sem pedidos ainda";
     return `Desde ${date.toLocaleDateString("pt-BR")}`;
-  }, [stats.firstOrderAt]);
+  }, [metrics.firstOrderAt]);
 
   const sortedTopProducts = useMemo(() => {
-    const list = [...stats.topProducts];
+    const list = [...topProductsSource];
     if (topSort === "name") {
       return list.sort((a, b) => a.name.localeCompare(b.name)).slice(0, 5);
     }
     return list.sort((a, b) => b.qty - a.qty).slice(0, 5);
-  }, [stats.topProducts, topSort]);
+  }, [topProductsSource, topSort]);
 
   const filteredCustomers = useMemo(() => {
     const normalized = customerQuery.trim().toLowerCase();
-    const visible = customers
+    const visible = customerSource
       .map(applyOverride)
       .filter((customer) => !hiddenCustomers[customer.__key]);
     if (!normalized) return visible;
@@ -326,7 +438,7 @@ export const DashboardView = ({
       const haystack = [customer.name, customer.phone].filter(Boolean).join(" ").toLowerCase();
       return haystack.includes(normalized);
     });
-  }, [customers, customerQuery, hiddenCustomers, customerOverrides]);
+  }, [customerSource, customerQuery, hiddenCustomers, customerOverrides]);
 
   const sortedCustomers = useMemo(() => {
     return [...filteredCustomers].sort((a, b) =>
@@ -338,11 +450,19 @@ export const DashboardView = ({
     const headers = [
       { key: "nome", label: "Nome" },
       { key: "telefone", label: "Telefone" },
+      { key: "pedidos", label: "Pedidos" },
+      { key: "ticketMedio", label: "Ticket medio" },
+      { key: "totalGasto", label: "Total gasto" },
+      { key: "ultimoPedido", label: "Ultimo pedido" },
     ];
 
     const rows = sortedCustomers.map((c) => ({
       nome: c.name,
       telefone: c.phone,
+      pedidos: Number(c.ordersCount || 0),
+      ticketMedio: formatCurrency(c.avgTicket || 0),
+      totalGasto: formatCurrency(c.totalSpent || 0),
+      ultimoPedido: formatDate(c.lastOrderAt),
     }));
 
     exportToCsv("clientes", headers, rows);
@@ -374,6 +494,178 @@ export const DashboardView = ({
     const next = { ...hiddenCustomers, [key]: true };
     setHiddenCustomers(next);
     localStorage.setItem("customer-hidden", JSON.stringify(next));
+  };
+
+  const handlePrintManagementReport = () => {
+    if (typeof window === "undefined") return;
+    const printWindow = window.open("", "_blank", "width=980,height=1280");
+    if (!printWindow) return;
+
+    const reportCustomers =
+      Array.isArray(analyticsReport?.periodCustomers) && analyticsReport.periodCustomers.length > 0
+        ? analyticsReport.periodCustomers.slice(0, 20)
+        : sortedCustomers.slice(0, 20);
+    const productRows = sortedTopProducts.slice(0, 10);
+    const customerRowsMarkup = reportCustomers.length
+      ? reportCustomers
+          .map(
+            (customer, index) => `
+              <tr>
+                <td>${index + 1}</td>
+                <td>${escapeHtml(customer.name || "Cliente")}</td>
+                <td>${escapeHtml(customer.phone || "-")}</td>
+                <td>${Number(customer.ordersCount || 0)}</td>
+                <td>${escapeHtml(formatCurrency(customer.avgTicket || 0))}</td>
+                <td>${escapeHtml(formatCurrency(customer.totalSpent || 0))}</td>
+                <td>${escapeHtml(formatDate(customer.lastOrderAt) || "-")}</td>
+              </tr>
+            `
+          )
+          .join("")
+      : `<tr><td colspan="7">Sem clientes para o periodo selecionado.</td></tr>`;
+    const topProductsMarkup = productRows.length
+      ? productRows
+          .map(
+            (product, index) => `
+              <tr>
+                <td>${index + 1}</td>
+                <td>${escapeHtml(product.name || "Produto")}</td>
+                <td>${Number(product.qty || 0)}</td>
+                <td>${escapeHtml(formatCurrency(product.revenue || 0))}</td>
+              </tr>
+            `
+          )
+          .join("")
+      : `<tr><td colspan="4">Sem vendas no periodo selecionado.</td></tr>`;
+
+    printWindow.document.write(`
+      <!doctype html>
+      <html lang="pt-BR">
+        <head>
+          <meta charset="utf-8" />
+          <title>Relatorio Gerencial - ${escapeHtml(storeName)}</title>
+          <style>
+            body { margin: 0; background: #f6f3ee; color: #1f2937; font-family: Arial, sans-serif; }
+            .page { padding: 28px; }
+            .hero { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start; margin-bottom: 20px; }
+            .brand { display: flex; gap: 16px; align-items: center; }
+            .brand img { width: 68px; height: 68px; object-fit: cover; border-radius: 18px; border: 1px solid #e5ded3; background: #fff; }
+            .brand-fallback { width: 68px; height: 68px; border-radius: 18px; border: 1px solid #e5ded3; background: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+            .eyebrow { margin: 0 0 6px; font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: #a16207; font-weight: 700; }
+            .title { margin: 0; font-size: 28px; font-weight: 800; color: #111827; }
+            .subtitle { margin: 8px 0 0; font-size: 13px; color: #6b7280; }
+            .meta { min-width: 220px; border: 1px solid #eadfce; background: #fffaf3; border-radius: 20px; padding: 16px 18px; }
+            .meta strong { display: block; font-size: 13px; margin-bottom: 4px; }
+            .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 20px 0; }
+            .metric { background: #fff; border: 1px solid #e5e7eb; border-radius: 18px; padding: 16px; }
+            .metric label { display: block; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #6b7280; font-weight: 700; }
+            .metric strong { display: block; margin-top: 8px; font-size: 24px; color: #111827; }
+            .metric span { display: block; margin-top: 6px; font-size: 12px; color: #6b7280; }
+            .section { margin-top: 18px; background: #fff; border: 1px solid #e5e7eb; border-radius: 20px; padding: 18px; }
+            .section h2 { margin: 0 0 6px; font-size: 18px; }
+            .section p { margin: 0 0 14px; font-size: 12px; color: #6b7280; }
+            table { width: 100%; border-collapse: collapse; font-size: 12px; }
+            th, td { padding: 10px 8px; border-bottom: 1px solid #eceff3; text-align: left; }
+            th { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #6b7280; }
+            .muted { color: #6b7280; }
+            @media print {
+              body { background: #fff; }
+              .page { padding: 0; }
+              .section, .metric, .meta { box-shadow: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="page">
+            <div class="hero">
+              <div class="brand">
+                ${
+                  storeLogo
+                    ? `<img src="${escapeHtml(storeLogo)}" alt="${escapeHtml(storeName)}" />`
+                    : `<div class="brand-fallback">${escapeHtml(String(storeName || "LO").slice(0, 2).toUpperCase())}</div>`
+                }
+                <div>
+                  <p class="eyebrow">Relatorio Gerencial</p>
+                  <h1 class="title">${escapeHtml(storeName)}</h1>
+                  <p class="subtitle">Periodo analisado: ${escapeHtml(metrics.periodLabel)} · Mês de referencia: ${escapeHtml(formatMonthLabel(selectedMonth))}</p>
+                </div>
+              </div>
+              <div class="meta">
+                <strong>Base de clientes</strong>
+                <div class="muted">${metrics.allTimeCustomerCount} na base${metrics.periodCustomerCount != null ? ` · ${metrics.periodCustomerCount} ativos no periodo` : ""}</div>
+                <strong style="margin-top: 12px;">Primeiro pedido</strong>
+                <div class="muted">${escapeHtml(formatDate(metrics.firstOrderAt) || "Sem pedidos ainda")}</div>
+              </div>
+            </div>
+
+            <div class="metrics">
+              <div class="metric">
+                <label>Receita total</label>
+                <strong>${escapeHtml(formatCurrency(metrics.totalSales))}</strong>
+                <span>${escapeHtml(firstOrderLabel)}</span>
+              </div>
+              <div class="metric">
+                <label>Receita do mês</label>
+                <strong>${escapeHtml(formatCurrency(metrics.monthRevenue))}</strong>
+                <span>${escapeHtml(formatMonthLabel(selectedMonth))}</span>
+              </div>
+              <div class="metric">
+                <label>Receita do período</label>
+                <strong>${escapeHtml(formatCurrency(metrics.periodRevenue))}</strong>
+                <span>${escapeHtml(metrics.periodLabel)}</span>
+              </div>
+              <div class="metric">
+                <label>Pedidos realizados</label>
+                <strong>${escapeHtml(String(metrics.totalOrders))}</strong>
+                <span>Ticket médio: ${escapeHtml(formatCurrency(metrics.avgTicket))}</span>
+              </div>
+            </div>
+
+            <div class="section">
+              <h2>Itens mais vendidos do período</h2>
+              <p>Ranking calculado com base no período atualmente selecionado no dashboard.</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Produto</th>
+                    <th>Qtd</th>
+                    <th>Receita</th>
+                  </tr>
+                </thead>
+                <tbody>${topProductsMarkup}</tbody>
+              </table>
+            </div>
+
+            <div class="section">
+              <h2>Clientes em destaque</h2>
+              <p>Base capturada automaticamente a partir dos pedidos da loja.</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Cliente</th>
+                    <th>Contato</th>
+                    <th>Pedidos</th>
+                    <th>Ticket médio</th>
+                    <th>Total gasto</th>
+                    <th>Último pedido</th>
+                  </tr>
+                </thead>
+                <tbody>${customerRowsMarkup}</tbody>
+              </table>
+            </div>
+          </div>
+          <script>
+            window.onload = () => {
+              window.focus();
+              window.print();
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   const handlePrintQr = () => {
@@ -423,7 +715,7 @@ export const DashboardView = ({
     {
       id: "total",
       label: "Receita total",
-      value: formatCurrency(stats.totalSales),
+      value: formatCurrency(metrics.totalSales),
       helper: firstOrderLabel,
       icon: CurrencyDollar,
       tone: "ds-metric-card-neutral",
@@ -432,7 +724,7 @@ export const DashboardView = ({
     {
       id: "month",
       label: "Receita do mês",
-      value: formatCurrency(stats.monthRevenue),
+      value: formatCurrency(metrics.monthRevenue),
       helper: formatMonthLabel(selectedMonth),
       icon: CalendarBlank,
       tone: "ds-metric-card-success",
@@ -442,8 +734,8 @@ export const DashboardView = ({
     {
       id: "period",
       label: "Receita do período",
-      value: formatCurrency(stats.periodRevenue),
-      helper: `Período: ${periodLabel}`,
+      value: formatCurrency(metrics.periodRevenue),
+      helper: `Período: ${metrics.periodLabel}`,
       icon: TrendUp,
       tone: "ds-metric-card-warning",
       iconTone: "text-amber-700 bg-amber-100 border-amber-200",
@@ -451,8 +743,8 @@ export const DashboardView = ({
     {
       id: "orders",
       label: "Pedidos realizados",
-      value: String(stats.totalOrders),
-      helper: `Ticket médio: ${formatCurrency(stats.avgTicket)}`,
+      value: String(metrics.totalOrders),
+      helper: `Ticket médio: ${formatCurrency(metrics.avgTicket)}`,
       icon: Package,
       tone: "ds-metric-card-neutral",
       iconTone: "text-brand-primary bg-brand-primary-soft border-brand-primary/20",
@@ -630,6 +922,34 @@ export const DashboardView = ({
           )}
         </div>
       )}
+      <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.28em] text-amber-700 font-black">Gestão</p>
+            <h3 className="mt-2 text-lg font-black text-slate-900">Relatório gerencial da operação</h3>
+            <p className="mt-1 text-sm text-slate-500">
+              Consolida financeiro, itens mais vendidos e leitura da base de clientes sem depender só do cálculo no navegador.
+            </p>
+            {analyticsError ? (
+              <p className="mt-2 text-xs font-semibold text-amber-700">
+                {analyticsError} Usando a leitura local como fallback nesta sessão.
+              </p>
+            ) : analyticsLoading ? (
+              <p className="mt-2 text-xs font-semibold text-slate-500">Atualizando visão consolidada do período...</p>
+            ) : null}
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handlePrintManagementReport}
+              disabled={analyticsLoading}
+              className="px-4 py-2.5 rounded-xl bg-brand-primary text-white text-xs font-extrabold shadow-sm hover:opacity-95 disabled:opacity-60"
+            >
+              {analyticsLoading ? "Atualizando..." : "Gerar PDF gerencial"}
+            </button>
+          </div>
+        </div>
+      </div>
       {/* ---------- CARDS RESUMO ---------- */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {metricCards.map((card) => {
@@ -890,7 +1210,7 @@ export const DashboardView = ({
               ))}
             </div>
           </div>
-          {stats.chartData.length === 0 ? (
+          {chartSource.length === 0 ? (
             <div className="flex-1 flex items-center justify-center text-sm text-gray-400">
               <div className="text-center space-y-2">
                 <div className="text-4xl">📊</div>
@@ -901,7 +1221,7 @@ export const DashboardView = ({
           ) : (
             <div className="flex-1">
               <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats.chartData} barSize={24}>
+              <BarChart data={chartSource} barSize={24}>
                 <defs>
                   <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#2563eb" stopOpacity={0.96} />
@@ -948,7 +1268,7 @@ export const DashboardView = ({
         <div className={`bg-white p-6 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-indigo-400 ${isMobile ? 'h-48' : 'h-80'} overflow-hidden`}>
           <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
             <h4 className="font-bold text-gray-700">
-              Top 5 Produtos Mais Vendidos
+              Top 5 Produtos do Período
             </h4>
             <div className="flex items-center gap-2 text-xs">
               <span className="text-slate-400 uppercase tracking-wide">Ordenar</span>
@@ -1055,8 +1375,10 @@ export const DashboardView = ({
           <div>
             <h4 className="font-bold text-gray-700">Clientes</h4>
             <span className="text-sm text-gray-500">
-              {filteredCustomers.length} cadastrados
+              {metrics.allTimeCustomerCount} na base
+              {metrics.periodCustomerCount != null ? ` · ${metrics.periodCustomerCount} ativos no período` : ""}
             </span>
+            <p className="mt-1 text-xs text-slate-400">Base viva capturada automaticamente a partir dos pedidos.</p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -1119,7 +1441,15 @@ export const DashboardView = ({
                         <p className="text-sm font-semibold text-slate-800 truncate">{customer.name}</p>
                         <p className="text-xs text-slate-500">
                           {customer.phone ? 'Contato cadastrado' : 'Sem telefone'}
+                          {customer.ordersCount ? ` · ${customer.ordersCount} pedido(s)` : ''}
                         </p>
+                        {(customer.totalSpent || customer.lastOrderAt) ? (
+                          <p className="mt-1 text-[11px] text-slate-500">
+                            {customer.totalSpent ? `Total ${formatCurrency(customer.totalSpent)}` : 'Sem total consolidado'}
+                            {customer.avgTicket ? ` · Ticket ${formatCurrency(customer.avgTicket)}` : ''}
+                            {customer.lastOrderAt ? ` · Último ${formatDate(customer.lastOrderAt)}` : ''}
+                          </p>
+                        ) : null}
                       </>
                     )}
                   </div>
@@ -1190,19 +1520,4 @@ export const DashboardView = ({
 };
 
 export default DashboardView;
-  const copyUtm = async (overrides = {}) => {
-    if (!storeUrl) return;
-    const params = new URLSearchParams();
-    const source = overrides.utmSource ?? utmSource;
-    const medium = overrides.utmMedium ?? utmMedium;
-    const campaign = overrides.utmCampaign ?? utmCampaign;
-    if (source) params.set("utm_source", source);
-    if (medium) params.set("utm_medium", medium);
-    if (campaign) params.set("utm_campaign", campaign);
-    const query = params.toString();
-    const url = query ? `${storeUrl}?${query}` : storeUrl;
-    await navigator.clipboard.writeText(url);
-    setQrCopied(true);
-    setTimeout(() => setQrCopied(false), 1500);
-  };
 
