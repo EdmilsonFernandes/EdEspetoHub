@@ -534,12 +534,12 @@ function OrderCard({
 }) {
   const statusMeta = getStatusMeta(order.status, order.type);
   const items = Array.isArray(order.items) ? order.items : [];
-  const visibleItems = items.slice(0, 2);
-  const extraItems = Math.max(0, items.length - visibleItems.length);
+  const primaryItem = items[0] || null;
+  const extraItems = Math.max(0, items.length - 1);
   const thumbnails = items
     .map((item: any) => resolveAssetUrl(item.imageUrl || ''))
     .filter(Boolean)
-    .slice(0, 3);
+    .slice(0, 2);
   const logoUrl = resolveAssetUrl(order.store?.settings?.logoUrl || '');
   const storeName = order.store?.name || 'Loja parceira';
   const orderDate = formatTime(order.createdAt);
@@ -589,12 +589,12 @@ function OrderCard({
       <button
         type="button"
         onClick={() => onOpenOrder(order.id)}
-        className="flex w-full items-center gap-3 px-4 pt-4 pb-3 text-left"
+        className="flex w-full items-center gap-3 px-4 pt-4 pb-2.5 text-left"
       >
         {/* Logo da loja */}
         <div
           onClick={(e) => { e.stopPropagation(); onOpenStore(order.store?.slug); }}
-          className={`relative h-12 w-12 shrink-0 overflow-hidden rounded-2xl border-2 bg-slate-100 transition-transform active:scale-95 ${isActive ? 'border-emerald-300 shadow-[0_0_0_3px_rgba(52,211,153,0.15)]' : 'border-slate-200'}`}
+          className={`relative h-11 w-11 shrink-0 overflow-hidden rounded-2xl border-2 bg-slate-100 transition-transform active:scale-95 ${isActive ? 'border-emerald-300 shadow-[0_0_0_3px_rgba(52,211,153,0.15)]' : 'border-slate-200'}`}
         >
           {logoUrl ? (
             <img src={logoUrl} alt={storeName} className="h-full w-full object-cover" />
@@ -611,7 +611,7 @@ function OrderCard({
         {/* Nome + status */}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="truncate text-[15px] font-black text-slate-900">{storeName}</h3>
+            <h3 className="truncate text-[14px] font-black text-slate-900">{storeName}</h3>
           </div>
           <div className="mt-0.5 flex items-center gap-1.5">
             {isActive ? (
@@ -630,7 +630,7 @@ function OrderCard({
             <span className="text-slate-300">·</span>
             <span className="text-[11px] text-slate-400">{orderDate || formatGroupDate(order.createdAt)}</span>
           </div>
-          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
             <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">
               #{orderDisplayId}
             </span>
@@ -642,7 +642,7 @@ function OrderCard({
             </span>
           </div>
           {condominiumOrder?.condominiumName ? (
-            <p className="mt-1 inline-flex max-w-full rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">
+            <p className="mt-1 inline-flex max-w-full rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-emerald-700">
               <span className="truncate">{condominiumLabel} • {condominiumOrder.condominiumName}</span>
             </p>
           ) : null}
@@ -650,11 +650,11 @@ function OrderCard({
 
         {/* Valor */}
         <div className="shrink-0 text-right">
-          <p className="text-base font-black text-slate-900">{formatCurrency(order.total || 0)}</p>
+          <p className="text-[15px] font-black text-slate-900">{formatCurrency(order.total || 0)}</p>
           {thumbnails.length > 0 && (
             <div className="mt-1 flex justify-end">
               {thumbnails.map((src, index) => (
-                <img key={`${order.id}-th-${index}`} src={src} alt="" className={`h-5 w-5 rounded-full border border-white object-cover ${index > 0 ? '-ml-1.5' : ''}`} />
+                <img key={`${order.id}-th-${index}`} src={src} alt="" className={`h-4.5 w-4.5 rounded-full border border-white object-cover ${index > 0 ? '-ml-1.5' : ''}`} />
               ))}
             </div>
           )}
@@ -698,28 +698,31 @@ function OrderCard({
               </span>
             </div>
           )}
-          {visibleItems.map((item: any, index: number) => {
-            const itemDetails = getOrderItemDetails(item);
-            const isLast = index === visibleItems.length - 1 && extraItems === 0;
-            return (
-              <div key={item.id || `${order.id}-item-${index}`} className={`flex items-center gap-3 px-3 py-2.5 ${!isLast ? 'border-b border-slate-100' : ''}`}>
+          {primaryItem ? (
+            <div className="px-3 py-2.5">
+              <div className="flex items-center gap-3">
                 <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-200 text-[10px] font-black text-slate-600">
-                  {getOrderItemQty(item)}
+                  {getOrderItemQty(primaryItem)}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px] font-semibold text-slate-800">{item.name || 'Item do pedido'}</span>
-                  {itemDetails ? <span className="block truncate text-[11px] text-slate-400">{itemDetails}</span> : null}
+                  <span className="block truncate text-[13px] font-semibold text-slate-800">{primaryItem.name || 'Item do pedido'}</span>
+                  {getOrderItemDetails(primaryItem) ? (
+                    <span className="block truncate text-[11px] text-slate-400">{getOrderItemDetails(primaryItem)}</span>
+                  ) : null}
                 </div>
+                {extraItems > 0 ? (
+                  <span className="inline-flex shrink-0 rounded-full bg-white px-2 py-1 text-[10px] font-black text-[#336886] ring-1 ring-slate-200">
+                    +{extraItems}
+                  </span>
+                ) : null}
               </div>
-            );
-          })}
-          <div className="border-t border-slate-100 px-3 py-2.5">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-400">
-              <span className="font-semibold text-slate-500">{orderMoment || formatGroupDate(order.createdAt)}</span>
-              <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:inline-flex" />
-              <span>{itemsCount} {itemsCount === 1 ? 'item no pedido' : 'itens no pedido'}</span>
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-400">
+                <span className="font-semibold text-slate-500">{orderMoment || formatGroupDate(order.createdAt)}</span>
+                <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:inline-flex" />
+                <span>{itemsCount} {itemsCount === 1 ? 'item no pedido' : 'itens no pedido'}</span>
+              </div>
             </div>
-          </div>
+          ) : null}
           {extraItems > 0 && (
             <div className="border-t border-slate-100 px-3 py-2">
               <span className="text-[11px] font-semibold text-[#336886]">+{extraItems} {extraItems === 1 ? 'item' : 'itens'} no pedido</span>
@@ -749,7 +752,7 @@ function OrderCard({
       </button>
 
       {/* Rodapé com ações */}
-      <div className="flex items-center gap-2 border-t border-slate-100 px-4 py-3">
+      <div className="flex items-center gap-2 border-t border-slate-100 px-4 py-2.5">
         {isActive && isDelayed ? (
           <>
             <button type="button" onClick={() => onOpenHelp(order)} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl border border-[#cfe0ea] bg-[linear-gradient(135deg,#f8fbfd,#e9f3f8)] py-2.5 text-[13px] font-black text-[#153A4C] shadow-[0_14px_28px_-18px_rgba(51,104,134,0.32)] active:scale-[0.98] transition-all hover:-translate-y-0.5">
@@ -771,7 +774,7 @@ function OrderCard({
             <button
               type="button"
               onClick={() => onOpenHelp(order)}
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#cfe0ea] bg-[linear-gradient(135deg,#f8fbfd,#e9f3f8)] text-[#336886] shadow-[0_16px_30px_-22px_rgba(51,104,134,0.34)] active:scale-95 transition-all hover:-translate-y-0.5"
+              className="inline-flex h-9.5 w-9.5 shrink-0 items-center justify-center rounded-2xl border border-[#cfe0ea] bg-[linear-gradient(135deg,#f8fbfd,#e9f3f8)] text-[#336886] shadow-[0_16px_30px_-22px_rgba(51,104,134,0.34)] active:scale-95 transition-all hover:-translate-y-0.5"
               title="Ajuda com este pedido"
             >
               <ChatCircleDots size={17} weight="duotone" />
@@ -1440,14 +1443,14 @@ export function ClientOrders() {
         </header>
 
         <div className="px-4 py-4">
-          <section className="mb-5 overflow-hidden rounded-[30px] border border-[#d6e3eb] bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(244,248,251,0.98)_48%,rgba(235,243,248,0.98)_100%)] p-4 shadow-[0_26px_54px_-42px_rgba(21,58,76,0.3)]">
+          <section className="mb-5 overflow-hidden rounded-[28px] border border-[#d6e3eb] bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(244,248,251,0.98)_48%,rgba(235,243,248,0.98)_100%)] p-4 shadow-[0_22px_48px_-42px_rgba(21,58,76,0.28)]">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#336886]">Resumo da conta</p>
-                <h2 className="mt-1 text-lg font-black tracking-tight text-slate-950">
+                <h2 className="mt-1 text-[17px] font-black tracking-tight text-slate-950">
                   {activeOrders.length > 0 ? 'Acompanhe seus pedidos em tempo real' : 'Seu histórico está organizado'}
                 </h2>
-                <p className="mt-1 text-sm leading-6 text-slate-500">
+                <p className="mt-1 text-[13px] leading-5 text-slate-500">
                   {lastOrder
                     ? `Seu pedido mais recente foi ${formatOrderMoment(lastOrder.createdAt)?.toLowerCase() || 'registrado recentemente'}.`
                     : 'Quando você fizer o primeiro pedido, ele aparece aqui com status, valor e atendimento.'}
@@ -1459,20 +1462,20 @@ export function ClientOrders() {
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="rounded-[1.3rem] border border-white/80 bg-white/92 px-4 py-3 shadow-[0_18px_34px_-26px_rgba(15,23,42,0.16)]">
+            <div className="mt-3 flex gap-2 overflow-x-auto no-scrollbar">
+              <div className="min-w-[10.75rem] rounded-[1.2rem] border border-white/80 bg-white/92 px-4 py-3 shadow-[0_18px_34px_-26px_rgba(15,23,42,0.16)]">
                 <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Pedidos totais</p>
-                <p className="mt-1 text-2xl font-black tracking-tight text-slate-950">{orders.length}</p>
+                <p className="mt-1 text-[24px] font-black tracking-tight text-slate-950">{orders.length}</p>
                 <p className="mt-1 text-xs font-medium text-slate-500">Histórico completo da conta</p>
               </div>
-              <div className="rounded-[1.3rem] border border-emerald-100 bg-[linear-gradient(145deg,#ffffff,#edf9f3)] px-4 py-3 shadow-[0_18px_34px_-26px_rgba(16,185,129,0.16)]">
+              <div className="min-w-[10.75rem] rounded-[1.2rem] border border-emerald-100 bg-[linear-gradient(145deg,#ffffff,#edf9f3)] px-4 py-3 shadow-[0_18px_34px_-26px_rgba(16,185,129,0.16)]">
                 <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-500">Em andamento</p>
-                <p className="mt-1 text-2xl font-black tracking-tight text-slate-950">{activeOrders.length}</p>
+                <p className="mt-1 text-[24px] font-black tracking-tight text-slate-950">{activeOrders.length}</p>
                 <p className="mt-1 text-xs font-medium text-emerald-700">{activeOrders.length > 0 ? 'Pedidos pedindo atenção agora' : 'Nenhum pedido ativo no momento'}</p>
               </div>
-              <div className="rounded-[1.3rem] border border-sky-100 bg-[linear-gradient(145deg,#ffffff,#eef7ff)] px-4 py-3 shadow-[0_18px_34px_-26px_rgba(14,165,233,0.16)]">
+              <div className="min-w-[10.75rem] rounded-[1.2rem] border border-sky-100 bg-[linear-gradient(145deg,#ffffff,#eef7ff)] px-4 py-3 shadow-[0_18px_34px_-26px_rgba(14,165,233,0.16)]">
                 <p className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-500">Concluídos</p>
-                <p className="mt-1 text-2xl font-black tracking-tight text-slate-950">{deliveredOrdersCount}</p>
+                <p className="mt-1 text-[24px] font-black tracking-tight text-slate-950">{deliveredOrdersCount}</p>
                 <p className="mt-1 text-xs font-medium text-sky-700">{cancelledOrdersCount > 0 ? `${cancelledOrdersCount} cancelado${cancelledOrdersCount === 1 ? '' : 's'} no histórico` : 'Sem cancelamentos recentes'}</p>
               </div>
             </div>
