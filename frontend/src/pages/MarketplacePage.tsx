@@ -3813,7 +3813,8 @@ export function MarketplacePage() {
                   </div>
                 </div>
 
-                <div className="-mx-1 mt-4 flex gap-2 overflow-x-auto px-1 pb-1 no-scrollbar">
+                <div className="mt-4 rounded-[1.4rem] border border-slate-200/75 bg-slate-50/85 p-1.5 shadow-[0_14px_30px_-26px_rgba(15,23,42,0.16)]">
+                <div className="-mx-0.5 flex gap-2 overflow-x-auto px-0.5 pb-0.5 no-scrollbar">
                   {([
                     { key: 'all' as const, label: 'Todos', count: condominiumPickerCounts.all, tone: 'slate' as const },
                     { key: 'live' as const, label: 'Ao vivo', count: condominiumPickerCounts.live, tone: 'live' as const },
@@ -3823,38 +3824,39 @@ export function MarketplacePage() {
                     const isActive = condoPickerFilter === key;
                     const activeClasses =
                       tone === 'live'
-                        ? 'border-[#336886]/35 bg-[#336886] text-white shadow-[0_12px_28px_-18px_rgba(51,104,134,0.52)]'
+                        ? 'border-[#336886]/28 bg-[#336886] text-white shadow-[0_12px_22px_-18px_rgba(51,104,134,0.46)]'
                         : tone === 'brand'
-                        ? 'border-[#336886]/30 bg-[#336886] text-white shadow-[0_12px_28px_-18px_rgba(51,104,134,0.52)]'
+                        ? 'border-[#336886]/28 bg-[#336886] text-white shadow-[0_12px_22px_-18px_rgba(51,104,134,0.46)]'
                         : tone === 'muted'
-                        ? 'border-slate-400/30 bg-slate-700 text-white shadow-[0_12px_28px_-20px_rgba(51,65,85,0.5)]'
-                        : 'border-slate-300/30 bg-slate-950 text-white shadow-[0_12px_28px_-20px_rgba(15,23,42,0.55)]';
+                        ? 'border-slate-400/24 bg-slate-700 text-white shadow-[0_12px_22px_-18px_rgba(51,65,85,0.42)]'
+                        : 'border-slate-300/24 bg-slate-900 text-white shadow-[0_12px_22px_-18px_rgba(15,23,42,0.46)]';
                     const idleClasses =
                       tone === 'live'
-                        ? 'border-[#d7e4ec] bg-white/86 text-[#336886] hover:border-[#bdd2de]'
+                        ? 'border-slate-200 bg-white text-[#336886] hover:border-[#bfd6e4] hover:bg-white'
                         : tone === 'brand'
-                        ? 'border-[#336886]/12 bg-white/86 text-[#336886] hover:border-[#336886]/20'
+                        ? 'border-slate-200 bg-white text-[#336886] hover:border-[#336886]/16 hover:bg-white'
                         : tone === 'muted'
-                        ? 'border-slate-200 bg-white/86 text-slate-500 hover:border-slate-300'
-                        : 'border-slate-200 bg-white/86 text-slate-700 hover:border-slate-300';
+                        ? 'border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-white'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-white';
 
                     return (
                       <button
                         key={key}
                         type="button"
                         onClick={() => setCondoPickerFilter(key)}
-                        className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2 text-[11px] font-black transition-all duration-200 active:scale-95 ${isActive ? activeClasses : idleClasses}`}
+                        className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3.25 py-1.75 text-[10px] font-black transition-all duration-200 active:scale-95 ${isActive ? activeClasses : idleClasses}`}
                       >
                         {tone === 'live' && (
                           <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActive ? 'bg-white' : 'bg-[#009ee3]'}`} />
                         )}
                         <span>{label}</span>
-                        <span className={`inline-flex min-w-[1.35rem] items-center justify-center rounded-full px-1.5 py-0.5 text-[9px] font-black ${isActive ? 'bg-white/18 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                        <span className={`inline-flex min-w-[1.3rem] items-center justify-center rounded-full px-1.5 py-0.5 text-[8px] font-black ${isActive ? 'bg-white/16 text-white' : 'bg-slate-100 text-slate-500'}`}>
                           {count}
                         </span>
                       </button>
                     );
                   })}
+                </div>
                 </div>
               </div>
             </div>
