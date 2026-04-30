@@ -3933,66 +3933,62 @@ export function MarketplacePage() {
                                 key={slug}
                                 type="button"
                                 onClick={() => handleClick(slug, name, event)}
-                                className={`group relative w-full overflow-hidden border text-left transition-all duration-300 active:scale-[0.985] ${
-                                  isNativePlatform ? 'rounded-[1.45rem]' : 'rounded-[1.75rem]'
-                                } ${
+                                className={`group relative w-full overflow-hidden rounded-[1.65rem] border p-3 text-left transition-all duration-300 active:scale-[0.985] ${
                                   active
-                                    ? 'border-[#8fc2dc]/80 shadow-[0_24px_42px_-22px_rgba(51,104,134,0.34)] ring-1 ring-[#cfe0ea]/90'
-                                    : 'border-[#cfe0ea] shadow-[0_20px_38px_-24px_rgba(51,104,134,0.22)] hover:border-[#8fc2dc]/80 hover:shadow-[0_26px_46px_-24px_rgba(51,104,134,0.3)]'
+                                    ? 'border-[#336886]/24 bg-white shadow-[0_22px_42px_-26px_rgba(51,104,134,0.3)] ring-1 ring-[#336886]/10'
+                                    : 'border-slate-200/85 bg-white shadow-[0_18px_34px_-28px_rgba(15,23,42,0.22)] hover:border-[#336886]/18 hover:shadow-[0_24px_40px_-28px_rgba(51,104,134,0.24)]'
                                 }`}
                               >
-                                <img src={bannerUrl} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
-                                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(7,13,25,0.66)_0%,rgba(9,16,32,0.5)_36%,rgba(15,23,42,0.18)_100%)]" />
-                                <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-[radial-gradient(circle_at_center,rgba(0,158,227,0.24),transparent_74%)]" />
-                                <div className={`relative ${isNativePlatform ? 'p-3' : 'p-3.5'}`}>
-                                  <div className="flex items-start justify-between gap-3">
-                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/18 bg-white/14 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-white backdrop-blur-md">
+                                <div className="relative flex items-center gap-3">
+                                  <div className="relative h-[5.25rem] w-[6.8rem] shrink-0 overflow-hidden rounded-[1.3rem] border border-slate-200/80 bg-slate-100 shadow-[0_16px_28px_-24px_rgba(15,23,42,0.34)]">
+                                    <img src={bannerUrl} alt="" aria-hidden className="h-full w-full object-cover" />
+                                    <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(15,23,42,0.18)_0%,rgba(15,23,42,0.06)_45%,rgba(15,23,42,0.24)_100%)]" />
+                                    <div className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/92 px-2 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-[#336886] shadow-[0_10px_24px_-18px_rgba(15,23,42,0.32)]">
                                       <span className="relative flex h-2 w-2">
-                                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-300 opacity-80" />
-                                        <span className="relative inline-flex h-2 w-2 rounded-full bg-sky-300" />
+                                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#009ee3] opacity-75" />
+                                        <span className="relative inline-flex h-2 w-2 rounded-full bg-[#009ee3]" />
                                       </span>
-                                      Ao vivo agora
-                                    </span>
-                                    {active ? (
-                                      <span className="inline-flex items-center rounded-full border border-white/18 bg-white/14 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-white backdrop-blur-md">
-                                        Seu atual
-                                      </span>
-                                    ) : null}
-                                  </div>
-
-                                  <div className={`${isNativePlatform ? 'mt-2.5 flex items-center gap-2.5' : 'mt-3 flex items-center gap-3'}`}>
-                                    <div className="relative shrink-0">
-                                      <div className={`${isNativePlatform ? 'h-12 w-12 rounded-[1rem] p-1.5' : 'h-14 w-14 rounded-[1.1rem] p-2'} overflow-hidden border border-white/80 bg-white/94 shadow-[0_18px_32px_-24px_rgba(15,23,42,0.7)]`}>
-                                        <img src={logoUrl} alt={name} className="h-full w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
-                                      </div>
-                                      <span className={`${isNativePlatform ? 'h-[18px] w-[18px]' : 'h-5 w-5'} absolute -bottom-1 -right-1 flex items-center justify-center rounded-full border-2 border-white bg-emerald-500 text-white shadow-[0_10px_20px_-12px_rgba(16,185,129,0.88)]`}>
-                                        <Sparkle size={isNativePlatform ? 9 : 10} weight="fill" />
-                                      </span>
+                                      Ao vivo
                                     </div>
-                                    <div className="min-w-0 flex-1">
-                                      <span className={`block truncate font-black leading-tight tracking-[-0.025em] text-white ${isNativePlatform ? 'text-[14px]' : 'text-[15px]'}`}>{name}</span>
-                                      {region ? <span className={`mt-1 block truncate font-semibold text-white/70 ${isNativePlatform ? 'text-[10px]' : 'text-[11px]'}`}>{region}</span> : null}
-                                      <div className={`${isNativePlatform ? 'mt-2 flex flex-wrap items-center gap-1.5' : 'mt-2.5 flex flex-wrap items-center gap-2'}`}>
-                                        <span className="inline-flex items-center gap-1.5 rounded-full bg-white/16 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.1em] text-white backdrop-blur-sm">
-                                          <Clock size={11} weight="fill" />
-                                          {timeLabel || 'Feira aberta'}
+                                    <div className="absolute bottom-2 left-2 h-10 w-10 overflow-hidden rounded-[0.95rem] border border-white/90 bg-white/95 p-1.5 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.52)]">
+                                      <img src={logoUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
+                                    </div>
+                                    <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-emerald-500 text-white shadow-[0_10px_20px_-12px_rgba(16,185,129,0.88)]">
+                                      <Sparkle size={10} weight="fill" />
+                                    </span>
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div className="min-w-0">
+                                        <span className="block truncate text-[15px] font-black leading-tight text-slate-900">{name}</span>
+                                        {region ? <span className="mt-1 block truncate text-[11px] font-medium text-slate-500">{region}</span> : null}
+                                      </div>
+                                      {active ? (
+                                        <span className="shrink-0 rounded-full bg-[#336886] px-2 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-white">
+                                          Atual
                                         </span>
-                                      </div>
+                                      ) : null}
                                     </div>
-                                  </div>
-
-                                  <div className={`${isNativePlatform ? 'mt-2.5 flex items-center justify-between gap-2.5' : 'mt-3.5 flex items-center justify-between gap-3'}`}>
-                                    <span className={`${isNativePlatform ? 'text-[9px]' : 'text-[10px]'} font-semibold text-white/78`}>
+                                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                                      <span className="inline-flex items-center gap-1 rounded-full bg-[#336886]/8 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-[#336886]">
+                                        <Clock size={10} weight="fill" />
+                                        {timeLabel || 'Feira aberta'}
+                                      </span>
+                                      <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-emerald-700">
+                                        Pedidos liberados
+                                      </span>
+                                    </div>
+                                    <div className="mt-3 flex items-center justify-between gap-3">
+                                      <span className="text-[11px] font-medium text-slate-500">
                                       Pagamento, lojas abertas e pedido em fluxo.
-                                    </span>
-                                    <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full ${isNativePlatform ? 'px-3 py-1.5 text-[8px]' : 'px-3.5 py-1.5 text-[9px]'} font-black uppercase tracking-[0.14em] transition-all duration-200 ${
-                                      active
-                                        ? 'bg-white text-emerald-700 shadow-[0_14px_28px_-18px_rgba(255,255,255,0.72)]'
-                                        : 'bg-emerald-500 text-white shadow-[0_16px_30px_-18px_rgba(16,185,129,0.85)] group-hover:bg-emerald-400'
-                                    }`}>
-                                      Entrar
-                                      <CaretRight size={isNativePlatform ? 9 : 10} weight="bold" />
-                                    </span>
+                                      </span>
+                                      <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-[10px] font-black uppercase tracking-[0.14em] ${
+                                        active ? 'bg-[#336886] text-white' : 'bg-slate-900 text-white'
+                                      }`}>
+                                        Entrar
+                                        <CaretRight size={10} weight="bold" />
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
                               </button>
