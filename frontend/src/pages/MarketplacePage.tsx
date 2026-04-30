@@ -3764,7 +3764,7 @@ export function MarketplacePage() {
                           className="h-5 w-5 rounded-full object-contain"
                         />
                       </span>
-                      <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">Já no Caminho</p>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]">Já no Caminho</p>
                     </div>
                     <h2 className="max-w-[16rem] text-[1.9rem] font-black leading-[0.98] tracking-[-0.045em] text-slate-950">
                       Escolha a feira do seu condomínio
@@ -3774,7 +3774,7 @@ export function MarketplacePage() {
                     </p>
                   </div>
                   <div className="shrink-0 min-w-[5.75rem] rounded-[1.35rem] border border-[#bfd6e4]/80 bg-white/82 px-3 py-2 text-center shadow-[0_16px_30px_-22px_rgba(51,104,134,0.28)] backdrop-blur-md">
-                    <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#336886]">Agora</p>
+                    <p className="text-[9px] font-black uppercase tracking-[0.14em] text-[#336886]">Agora</p>
                     <p className="mt-1 text-lg font-black leading-none text-slate-950">
                       {condominiumPickerCounts.live}
                     </p>
@@ -3919,7 +3919,7 @@ export function MarketplacePage() {
                             <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#009ee3]" />
                           </span>
                           <div>
-                            <span className="block text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Acontecendo agora</span>
+                            <span className="block text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">Acontecendo agora</span>
                             <span className="text-[11px] font-medium text-slate-500">Entre direto na feira que já está rodando.</span>
                           </div>
                           <span className="ml-auto inline-flex items-center justify-center rounded-full bg-[#336886] px-2.5 py-1 text-[9px] font-black text-white shadow-[0_6px_18px_-10px_rgba(51,104,134,0.62)]">{live.length}</span>
@@ -3945,7 +3945,7 @@ export function MarketplacePage() {
                                   <div className="relative h-[5.25rem] w-[6.8rem] shrink-0 overflow-hidden rounded-[1.3rem] border border-slate-200/80 bg-slate-100 shadow-[0_16px_28px_-24px_rgba(15,23,42,0.34)]">
                                     <img src={bannerUrl} alt="" aria-hidden className="h-full w-full object-cover" />
                                     <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(15,23,42,0.18)_0%,rgba(15,23,42,0.06)_45%,rgba(15,23,42,0.24)_100%)]" />
-                                    <div className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/92 px-2 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-[#336886] shadow-[0_10px_24px_-18px_rgba(15,23,42,0.32)]">
+                                    <div className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/92 px-2 py-1 text-[8px] font-black uppercase tracking-[0.09em] text-[#336886] shadow-[0_10px_24px_-18px_rgba(15,23,42,0.32)]">
                                       <span className="relative flex h-2 w-2">
                                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#009ee3] opacity-75" />
                                         <span className="relative inline-flex h-2 w-2 rounded-full bg-[#009ee3]" />
@@ -3966,17 +3966,17 @@ export function MarketplacePage() {
                                         {region ? <span className="mt-1 block truncate text-[11px] font-medium text-slate-500">{region}</span> : null}
                                       </div>
                                       {active ? (
-                                        <span className="shrink-0 rounded-full bg-[#336886] px-2 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-white">
+                                        <span className="shrink-0 rounded-full bg-[#336886] px-2 py-1 text-[8px] font-black uppercase tracking-[0.1em] text-white">
                                           Atual
                                         </span>
                                       ) : null}
                                     </div>
                                     <div className="mt-3 flex flex-wrap items-center gap-2">
-                                      <span className="inline-flex items-center gap-1 rounded-full bg-[#336886]/8 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-[#336886]">
+                                      <span className="inline-flex items-center gap-1 rounded-full bg-[#336886]/8 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.08em] text-[#336886]">
                                         <Clock size={10} weight="fill" />
                                         {timeLabel || 'Feira aberta'}
                                       </span>
-                                      <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-emerald-700">
+                                      <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.08em] text-emerald-700">
                                         Pedidos liberados
                                       </span>
                                     </div>
@@ -3984,7 +3984,7 @@ export function MarketplacePage() {
                                       <span className="text-[11px] font-medium text-slate-500">
                                       Pagamento, lojas abertas e pedido em fluxo.
                                       </span>
-                                      <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-[10px] font-black uppercase tracking-[0.14em] ${
+                                      <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-[10px] font-black uppercase tracking-[0.1em] ${
                                         active ? 'bg-[#336886] text-white' : 'bg-slate-900 text-white'
                                       }`}>
                                         Entrar
@@ -4006,7 +4006,7 @@ export function MarketplacePage() {
                         <div className="mb-3 flex items-center gap-2">
                           <Clock size={13} weight="fill" className="text-[#336886]" />
                           <div>
-                            <span className="block text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Em breve</span>
+                            <span className="block text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">Em breve</span>
                             <span className="text-[11px] font-medium text-slate-500">Condomínios com agenda próxima.</span>
                           </div>
                           <span className="ml-auto inline-flex items-center justify-center rounded-full bg-[#336886]/10 px-2 py-0.5 text-[9px] font-black text-[#336886]">{upcoming.length}</span>
@@ -4043,10 +4043,10 @@ export function MarketplacePage() {
                                         <span className="block truncate text-[15px] font-black leading-tight text-slate-900">{name}</span>
                                         {region ? <span className="mt-1 block truncate text-[11px] font-medium text-slate-500">{region}</span> : null}
                                       </div>
-                                      {active ? <span className="shrink-0 rounded-full bg-[#336886] px-2 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-white">Atual</span> : null}
+                                      {active ? <span className="shrink-0 rounded-full bg-[#336886] px-2 py-1 text-[8px] font-black uppercase tracking-[0.1em] text-white">Atual</span> : null}
                                     </div>
                                     <div className="mt-3 flex flex-wrap items-center gap-2">
-                                      <span className="inline-flex items-center gap-1 rounded-full bg-[#336886]/8 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-[#336886]">
+                                      <span className="inline-flex items-center gap-1 rounded-full bg-[#336886]/8 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.08em] text-[#336886]">
                                         <Clock size={10} weight="fill" />
                                         Agendado
                                       </span>
@@ -4054,7 +4054,7 @@ export function MarketplacePage() {
                                     </div>
                                     <div className="mt-3 flex items-center justify-between gap-3">
                                       <span className="text-[11px] font-medium text-slate-500">Acompanhe o início e entre na hora certa.</span>
-                                      <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-[10px] font-black uppercase tracking-[0.14em] ${
+                                      <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-[10px] font-black uppercase tracking-[0.1em] ${
                                         active ? 'bg-[#336886] text-white' : 'bg-slate-900 text-white'
                                       }`}>
                                         Ver agenda
@@ -4076,7 +4076,7 @@ export function MarketplacePage() {
                         <div className="mb-3 flex items-center gap-2">
                           <CalendarBlank size={12} weight="duotone" className="text-slate-400" />
                           <div>
-                            <span className="block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Outros condomínios</span>
+                            <span className="block text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">Outros condomínios</span>
                             <span className="text-[11px] font-medium text-slate-500">Descubra locais próximos e acompanhe quando abrirem agenda.</span>
                           </div>
                           <span className="ml-auto rounded-full bg-slate-200/80 px-2 py-0.5 text-[9px] font-bold text-slate-500">{none.length}</span>
@@ -4109,13 +4109,13 @@ export function MarketplacePage() {
                                     <span className={`block truncate text-[14px] font-black ${active ? 'text-[#336886]' : 'text-slate-800'}`}>{name}</span>
                                     {region ? <span className="mt-1 block truncate text-[11px] font-medium text-slate-500">{region}</span> : null}
                                     <div className="mt-2 flex flex-wrap items-center gap-2">
-                                      <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-slate-500">
+                                      <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.08em] text-slate-500">
                                         Sem agenda
                                       </span>
                                       <span className="text-[11px] font-medium text-slate-500">Receba novidades quando abrir.</span>
                                     </div>
                                   </div>
-                                  <span className={`relative shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.12em] ${
+                                  <span className={`relative shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.08em] ${
                                     active ? 'bg-[#336886]/10 text-[#336886]' : 'bg-slate-100 text-slate-600'
                                   }`}>
                                     {active ? 'Aqui' : 'Ver mais'}
