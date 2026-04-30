@@ -53,6 +53,40 @@ const formatGroupDate = (value?: string) => {
   });
 };
 
+const formatRelativeGroupLabel = (value?: string) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfTarget = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const diffDays = Math.round((startOfToday.getTime() - startOfTarget.getTime()) / 86_400_000);
+
+  if (diffDays === 0) return 'Hoje';
+  if (diffDays === 1) return 'Ontem';
+  if (diffDays > 1 && diffDays < 7) {
+    return date.toLocaleDateString('pt-BR', {
+      weekday: 'long',
+      day: '2-digit',
+      month: '2-digit',
+    });
+  }
+
+  if (date.getFullYear() === now.getFullYear()) {
+    return date.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: 'long',
+    });
+  }
+
+  return date.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
+};
+
 const formatTime = (value?: string) => {
   if (!value) return '';
   const date = new Date(value);
@@ -73,6 +107,9 @@ const getStoreInitials = (name?: string) => {
 };
 
 const getOrderItemQty = (item: any) => Math.max(1, Number(item?.quantity ?? item?.qty ?? 1));
+
+const getOrderItemsCount = (items: any[]) =>
+  (Array.isArray(items) ? items : []).reduce((sum, item) => sum + getOrderItemQty(item), 0);
 
 const getOrderItemImageUrl = (item: any) => resolveAssetUrl(item?.imageUrl || item?.product?.imageUrl || '');
 
@@ -331,26 +368,76 @@ const getOrderHelpSections = (isDelivery: boolean) => [
 ];
 
 const groupOrdersByDate = (orders: any[]) => {
-  const groups: Array<{ key: string; label: string; orders: any[] }> = [];
-  const byKey = new Map<string, { key: string; label: string; orders: any[] }>();
+  const groups: Array<{ key: string; label: string; caption: string; orders: any[]; totalAmount: number }> = [];
+  const byKey = new Map<string, { key: string; label: string; caption: string; orders: any[]; totalAmount: number }>();
 
   orders.forEach((order) => {
     const key = new Date(order.createdAt).toISOString().slice(0, 10);
     const existing = byKey.get(key);
     if (existing) {
       existing.orders.push(order);
+      existing.totalAmount += Number(order?.total || 0);
       return;
     }
     const next = {
       key,
-      label: formatGroupDate(order.createdAt),
+      label: formatRelativeGroupLabel(order.createdAt),
+      caption: formatGroupDate(order.createdAt),
       orders: [ order ],
+      totalAmount: Number(order?.total || 0),
     };
     byKey.set(key, next);
     groups.push(next);
   });
 
   return groups;
+};
+
+const getOrderFulfillmentMeta = (order: any) => {
+  const normalizedType = String(order?.type || '').trim().toLowerCase();
+  const normalizedCondominiumMode = String(
+    order?.condominiumOrder?.fulfillmentMode ||
+    order?.condominiumFulfillmentMode ||
+    ''
+  ).trim().toLowerCase();
+
+  if (
+    normalizedType === 'delivery' ||
+    normalizedCondominiumMode === 'apartment_delivery' ||
+    normalizedCondominiumMode === 'condominium_apartment'
+  ) {
+    return {
+      label: 'Entrega',
+      toneClass: 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-100',
+    };
+  }
+
+  if (normalizedType === 'table') {
+    return {
+      label: 'Mesa',
+      toneClass: 'bg-amber-50 text-amber-700 ring-1 ring-amber-100',
+    };
+  }
+
+  return {
+    label: 'Retirada',
+    toneClass: 'bg-sky-50 text-sky-700 ring-1 ring-sky-100',
+  };
+};
+
+const formatOrderMoment = (value?: string) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfTarget = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const diffDays = Math.round((startOfToday.getTime() - startOfTarget.getTime()) / 86_400_000);
+
+  if (diffDays === 0) return `Hoje, ${formatTime(value)}`;
+  if (diffDays === 1) return `Ontem, ${formatTime(value)}`;
+  return formatSupportDateTime(value);
 };
 
 const getStatusMeta = (status: string, orderType?: string) => {
@@ -456,8 +543,15 @@ function OrderCard({
   const logoUrl = resolveAssetUrl(order.store?.settings?.logoUrl || '');
   const storeName = order.store?.name || 'Loja parceira';
   const orderDate = formatTime(order.createdAt);
+  const orderMoment = formatOrderMoment(order.createdAt);
+  const orderDisplayId =
+    formatOrderDisplayId(String(order?.id || '').trim(), String(order?.store?.slug || order?.storeSlug || '').trim()) ||
+    String(order?.id || '').trim() ||
+    '-';
   const etaWindowLabel = getEtaWindowLabel(details?.eta);
   const etaDeadlineMs = getEtaDeadlineMs(order, details);
+  const itemsCount = getOrderItemsCount(items);
+  const fulfillmentMeta = getOrderFulfillmentMeta(order);
   const condominiumOrder = order?.condominiumOrder || (order?.condominiumId ? {
     condominiumName: order?.condominiumName,
     fulfillmentMode: order?.condominiumFulfillmentMode,
@@ -536,6 +630,17 @@ function OrderCard({
             <span className="text-slate-300">·</span>
             <span className="text-[11px] text-slate-400">{orderDate || formatGroupDate(order.createdAt)}</span>
           </div>
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">
+              #{orderDisplayId}
+            </span>
+            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] ${fulfillmentMeta.toneClass}`}>
+              {fulfillmentMeta.label}
+            </span>
+            <span className="inline-flex items-center rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-slate-400 ring-1 ring-slate-200">
+              {itemsCount} {itemsCount === 1 ? 'item' : 'itens'}
+            </span>
+          </div>
           {condominiumOrder?.condominiumName ? (
             <p className="mt-1 inline-flex max-w-full rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">
               <span className="truncate">{condominiumLabel} • {condominiumOrder.condominiumName}</span>
@@ -608,6 +713,13 @@ function OrderCard({
               </div>
             );
           })}
+          <div className="border-t border-slate-100 px-3 py-2.5">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-400">
+              <span className="font-semibold text-slate-500">{orderMoment || formatGroupDate(order.createdAt)}</span>
+              <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:inline-flex" />
+              <span>{itemsCount} {itemsCount === 1 ? 'item no pedido' : 'itens no pedido'}</span>
+            </div>
+          </div>
           {extraItems > 0 && (
             <div className="border-t border-slate-100 px-3 py-2">
               <span className="text-[11px] font-semibold text-[#336886]">+{extraItems} {extraItems === 1 ? 'item' : 'itens'} no pedido</span>
@@ -1107,6 +1219,15 @@ export function ClientOrders() {
     [filteredOrders]
   );
   const groupedFilteredPastOrders = useMemo(() => groupOrdersByDate(filteredPastOrders), [filteredPastOrders]);
+  const deliveredOrdersCount = useMemo(
+    () => orders.filter((order) => [ 'DELIVERED', 'FINISHED', 'DONE' ].includes(normalizeStatus(order.status))).length,
+    [orders]
+  );
+  const cancelledOrdersCount = useMemo(
+    () => orders.filter((order) => [ 'CANCELLED', 'REJECTED' ].includes(normalizeStatus(order.status))).length,
+    [orders]
+  );
+  const lastOrder = useMemo(() => orders[0] || null, [orders]);
   const customerDisplayName = useMemo(() => {
     try {
       const sessionRaw = localStorage.getItem('customerSession');
@@ -1221,6 +1342,48 @@ export function ClientOrders() {
     );
   }
 
+  const orderFilters: Array<{
+    key: 'all' | 'active' | 'finished' | 'cancelled';
+    label: string;
+    count: number;
+    icon: JSX.Element;
+    selectedClass: string;
+    idleClass: string;
+  }> = [
+    {
+      key: 'all',
+      label: 'Todos',
+      count: orders.length,
+      icon: <Receipt size={13} weight="duotone" />,
+      selectedClass: 'bg-[#153A4C] text-white shadow-[0_4px_12px_-4px_rgba(21,58,76,0.45)]',
+      idleClass: 'bg-slate-100 text-slate-600',
+    },
+    {
+      key: 'active',
+      label: 'Em andamento',
+      count: activeOrders.length,
+      icon: <Timer size={13} weight="duotone" />,
+      selectedClass: 'bg-emerald-500 text-white shadow-[0_4px_12px_-4px_rgba(16,185,129,0.45)]',
+      idleClass: 'bg-emerald-50 text-emerald-700',
+    },
+    {
+      key: 'finished',
+      label: 'Finalizados',
+      count: deliveredOrdersCount,
+      icon: <CheckCircle size={13} weight="duotone" />,
+      selectedClass: 'bg-sky-500 text-white shadow-[0_4px_12px_-4px_rgba(14,165,233,0.45)]',
+      idleClass: 'bg-sky-50 text-sky-700',
+    },
+    {
+      key: 'cancelled',
+      label: 'Cancelados',
+      count: cancelledOrdersCount,
+      icon: <XCircle size={13} weight="duotone" />,
+      selectedClass: 'bg-rose-500 text-white shadow-[0_4px_12px_-4px_rgba(244,63,94,0.45)]',
+      idleClass: 'bg-rose-50 text-rose-600',
+    },
+  ];
+
   return (
     <main className="min-h-screen bg-[#EEF2F7] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] pt-[env(safe-area-inset-top)]">
       <div className="pointer-events-none fixed top-[-10%] right-[-8%] h-[38%] w-[46%] rounded-full bg-[#153A4C]/13 blur-[120px] -z-10" />
@@ -1254,29 +1417,20 @@ export function ClientOrders() {
           </div>
 
           <div className="flex gap-2 overflow-x-auto px-4 pb-3 no-scrollbar">
-            {(['all', 'active', 'finished', 'cancelled'] as const).map((f) => {
-              const count = f === 'all' ? orders.length : f === 'active' ? activeOrders.length : f === 'finished' ? orders.filter(o => ['DELIVERED','FINISHED','DONE'].includes(normalizeStatus(o.status))).length : orders.filter(o => ['CANCELLED','REJECTED'].includes(normalizeStatus(o.status))).length;
-              const label = f === 'all' ? 'Todos' : f === 'active' ? 'Em andamento' : f === 'finished' ? 'Finalizados' : 'Cancelados';
-              const isSelected = statusFilter === f;
-              const selectedCls = f === 'all' ? 'bg-[#153A4C] text-white shadow-[0_4px_12px_-4px_rgba(21,58,76,0.45)]'
-                : f === 'active' ? 'bg-emerald-500 text-white shadow-[0_4px_12px_-4px_rgba(16,185,129,0.45)]'
-                : f === 'finished' ? 'bg-sky-500 text-white shadow-[0_4px_12px_-4px_rgba(14,165,233,0.45)]'
-                : 'bg-rose-500 text-white shadow-[0_4px_12px_-4px_rgba(244,63,94,0.45)]';
-              const idleCls = f === 'all' ? 'bg-slate-100 text-slate-600'
-                : f === 'active' ? 'bg-emerald-50 text-emerald-700'
-                : f === 'finished' ? 'bg-sky-50 text-sky-700'
-                : 'bg-rose-50 text-rose-600';
+            {orderFilters.map((filter) => {
+              const isSelected = statusFilter === filter.key;
               return (
                 <button
-                  key={f}
+                  key={filter.key}
                   type="button"
-                  onClick={() => setStatusFilter(f)}
-                  className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1.5 text-[12px] font-bold transition-all duration-200 active:scale-[0.97] ${isSelected ? selectedCls : idleCls}`}
+                  onClick={() => setStatusFilter(filter.key)}
+                  className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1.5 text-[12px] font-bold transition-all duration-200 active:scale-[0.97] ${isSelected ? filter.selectedClass : filter.idleClass}`}
                 >
-                  {label}
-                  {count > 0 && (
+                  {filter.icon}
+                  {filter.label}
+                  {filter.count > 0 && (
                     <span className={`inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full px-1 text-[10px] font-black ${isSelected ? 'bg-white/25 text-white' : 'bg-white/60 text-current'}`}>
-                      {count}
+                      {filter.count}
                     </span>
                   )}
                 </button>
@@ -1286,6 +1440,44 @@ export function ClientOrders() {
         </header>
 
         <div className="px-4 py-4">
+          <section className="mb-5 overflow-hidden rounded-[30px] border border-[#d6e3eb] bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(244,248,251,0.98)_48%,rgba(235,243,248,0.98)_100%)] p-4 shadow-[0_26px_54px_-42px_rgba(21,58,76,0.3)]">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#336886]">Resumo da conta</p>
+                <h2 className="mt-1 text-lg font-black tracking-tight text-slate-950">
+                  {activeOrders.length > 0 ? 'Acompanhe seus pedidos em tempo real' : 'Seu histórico está organizado'}
+                </h2>
+                <p className="mt-1 text-sm leading-6 text-slate-500">
+                  {lastOrder
+                    ? `Seu pedido mais recente foi ${formatOrderMoment(lastOrder.createdAt)?.toLowerCase() || 'registrado recentemente'}.`
+                    : 'Quando você fizer o primeiro pedido, ele aparece aqui com status, valor e atendimento.'}
+                </p>
+              </div>
+              <div className="hidden rounded-[1.15rem] bg-white/80 px-3 py-2 text-right shadow-[0_14px_28px_-22px_rgba(21,58,76,0.18)] ring-1 ring-slate-200/70 sm:block">
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Último pedido</p>
+                <p className="mt-1 text-xs font-semibold text-slate-600">{lastOrder ? formatOrderMoment(lastOrder.createdAt) : 'Sem pedidos ainda'}</p>
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="rounded-[1.3rem] border border-white/80 bg-white/92 px-4 py-3 shadow-[0_18px_34px_-26px_rgba(15,23,42,0.16)]">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Pedidos totais</p>
+                <p className="mt-1 text-2xl font-black tracking-tight text-slate-950">{orders.length}</p>
+                <p className="mt-1 text-xs font-medium text-slate-500">Histórico completo da conta</p>
+              </div>
+              <div className="rounded-[1.3rem] border border-emerald-100 bg-[linear-gradient(145deg,#ffffff,#edf9f3)] px-4 py-3 shadow-[0_18px_34px_-26px_rgba(16,185,129,0.16)]">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-500">Em andamento</p>
+                <p className="mt-1 text-2xl font-black tracking-tight text-slate-950">{activeOrders.length}</p>
+                <p className="mt-1 text-xs font-medium text-emerald-700">{activeOrders.length > 0 ? 'Pedidos pedindo atenção agora' : 'Nenhum pedido ativo no momento'}</p>
+              </div>
+              <div className="rounded-[1.3rem] border border-sky-100 bg-[linear-gradient(145deg,#ffffff,#eef7ff)] px-4 py-3 shadow-[0_18px_34px_-26px_rgba(14,165,233,0.16)]">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-500">Concluídos</p>
+                <p className="mt-1 text-2xl font-black tracking-tight text-slate-950">{deliveredOrdersCount}</p>
+                <p className="mt-1 text-xs font-medium text-sky-700">{cancelledOrdersCount > 0 ? `${cancelledOrdersCount} cancelado${cancelledOrdersCount === 1 ? '' : 's'} no histórico` : 'Sem cancelamentos recentes'}</p>
+              </div>
+            </div>
+          </section>
+
           {error ? (
             <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
               {error}
@@ -1294,12 +1486,20 @@ export function ClientOrders() {
 
           {filteredActiveOrders.length > 0 ? (
             <section className="mb-7">
-              <div className="mb-3 flex items-center gap-2 px-1">
-                <span className="relative inline-flex h-2.5 w-2.5 shrink-0">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+              <div className="mb-3 flex items-center justify-between gap-3 px-1">
+                <div className="flex items-center gap-2">
+                  <span className="relative inline-flex h-2.5 w-2.5 shrink-0">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                  </span>
+                  <div>
+                    <h2 className="text-sm font-semibold text-slate-800">Em andamento</h2>
+                    <p className="text-[11px] text-slate-400">Priorize estes pedidos primeiro.</p>
+                  </div>
+                </div>
+                <span className="inline-flex shrink-0 rounded-full bg-white px-2.5 py-1 text-[11px] font-black text-emerald-600 ring-1 ring-emerald-100 shadow-[0_10px_20px_-18px_rgba(16,185,129,0.5)]">
+                  {filteredActiveOrders.length} ativo{filteredActiveOrders.length === 1 ? '' : 's'}
                 </span>
-                <h2 className="text-sm font-semibold text-slate-800">Em andamento</h2>
               </div>
               <div className="space-y-3">
                 {filteredActiveOrders.map((order) => (
@@ -1319,9 +1519,19 @@ export function ClientOrders() {
           ) : null}
 
           <section>
-            <div className="mb-3 flex items-center gap-2 px-1">
-              <Package size={15} weight="duotone" className="text-slate-500" />
-              <h2 className="text-sm font-semibold text-slate-800">Histórico</h2>
+            <div className="mb-3 flex items-center justify-between gap-3 px-1">
+              <div className="flex items-center gap-2">
+                <Package size={15} weight="duotone" className="text-slate-500" />
+                <div>
+                  <h2 className="text-sm font-semibold text-slate-800">Histórico</h2>
+                  <p className="text-[11px] text-slate-400">Pedidos organizados do mais recente para trás.</p>
+                </div>
+              </div>
+              {filteredPastOrders.length > 0 ? (
+                <span className="inline-flex shrink-0 rounded-full bg-white px-2.5 py-1 text-[11px] font-black text-slate-500 ring-1 ring-slate-200 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.28)]">
+                  {filteredPastOrders.length} no histórico
+                </span>
+              ) : null}
             </div>
 
             {filteredPastOrders.length === 0 && filteredActiveOrders.length === 0 ? (
@@ -1342,7 +1552,16 @@ export function ClientOrders() {
               <div className="space-y-6">
                 {groupedFilteredPastOrders.map((group) => (
                   <section key={group.key}>
-                    <p className="mb-3 px-1 text-sm font-medium text-slate-500">{group.label}</p>
+                    <div className="mb-3 flex items-center justify-between gap-3 px-1">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-700">{group.label}</p>
+                        <p className="text-[11px] text-slate-400">{group.caption}</p>
+                      </div>
+                      <div className="rounded-full bg-white px-2.5 py-1 text-right shadow-[0_10px_20px_-18px_rgba(15,23,42,0.24)] ring-1 ring-slate-200">
+                        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">{group.orders.length} pedido{group.orders.length === 1 ? '' : 's'}</p>
+                        <p className="text-[11px] font-semibold text-slate-600">{formatCurrency(group.totalAmount)}</p>
+                      </div>
+                    </div>
                     <div className="space-y-3">
                       {group.orders.map((order) => (
                         <OrderCard
