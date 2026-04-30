@@ -69,6 +69,11 @@ const blobToDataUrl = (blob) =>
     reader.onerror = reject;
     reader.readAsDataURL(blob);
   });
+const blobToBase64 = async (blob) => {
+  const dataUrl = await blobToDataUrl(blob);
+  const [, base64 = ""] = String(dataUrl || "").split(",", 2);
+  return base64;
+};
 const fetchAssetAsDataUrl = async (value) => {
   const assetUrl = toAbsoluteAssetUrl(value);
   if (!assetUrl || typeof fetch !== "function") return "";
@@ -131,6 +136,50 @@ const sharePdfBlob = async ({ blob, fileName, title }) => {
     files: [file],
   });
   return true;
+};
+const sharePdfWithNativeFile = async ({ blob, fileName, title }) => {
+  if (!isNativePdfRuntime()) return false;
+  const [{ Directory, Filesystem }, { Share }] = await Promise.all([
+    import("@capacitor/filesystem"),
+    import("@capacitor/share"),
+  ]);
+  const shareCapability = await Share.canShare().catch(() => ({ value: false }));
+  if (!shareCapability?.value) return false;
+  const normalizedBaseName = sanitizeFileSegment(String(fileName || "").replace(/\.pdf$/i, ""), "relatorio-gerencial");
+  const nativePath = `reports/${Date.now()}-${normalizedBaseName}.pdf`;
+  const base64Pdf = await blobToBase64(blob);
+  const writeResult = await Filesystem.writeFile({
+    path: nativePath,
+    data: base64Pdf,
+    directory: Directory.Cache,
+    recursive: true,
+  });
+  const fileUri =
+    writeResult?.uri ||
+    (
+      await Filesystem.getUri({
+        path: nativePath,
+        directory: Directory.Cache,
+      })
+    ).uri;
+  if (!fileUri) return false;
+  try {
+    await Share.share({
+      title,
+      text: title,
+      files: [fileUri],
+      dialogTitle: title,
+    });
+    return true;
+  } catch {
+    await Share.share({
+      title,
+      text: title,
+      url: fileUri,
+      dialogTitle: title,
+    });
+    return true;
+  }
 };
 
 export const DashboardView = ({
@@ -922,8 +971,18 @@ export const DashboardView = ({
       }
 
       const pdfBlob = doc.output("blob");
-      const shouldShareFirst = compactViewport || isNativePdfRuntime();
-      if (shouldShareFirst) {
+      if (isNativePdfRuntime()) {
+        const shared = await sharePdfWithNativeFile({
+          blob: pdfBlob,
+          fileName,
+          title: `Relatório gerencial - ${storeName}`,
+        });
+        if (!shared) {
+          throw new Error("native-pdf-share-failed");
+        }
+        return;
+      }
+      if (compactViewport) {
         try {
           const shared = await sharePdfBlob({
             blob: pdfBlob,
@@ -936,7 +995,7 @@ export const DashboardView = ({
           throw error;
         }
       }
-      if (compactViewport || isNativePdfRuntime()) {
+      if (compactViewport) {
         const saved = await savePdfDocument(doc, fileName);
         if (!saved) {
           throw new Error("pdf-save-failed");

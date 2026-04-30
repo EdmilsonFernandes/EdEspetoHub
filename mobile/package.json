@@ -17,7 +17,9 @@
     "@capacitor/browser": "^7.0.5",
     "@capacitor/camera": "^7.0.0",
     "@capacitor/core": "^7.4.3",
+    "@capacitor/filesystem": "^7.1.8",
     "@capacitor/push-notifications": "file:../frontend/node_modules/@capacitor/push-notifications",
+    "@capacitor/share": "^7.0.4",
     "edespetohub": "file:.."
   },
   "devDependencies": {
