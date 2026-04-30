@@ -3743,7 +3743,6 @@ export function MarketplacePage() {
 
             <div className="relative overflow-x-hidden px-4 pb-6 pt-[max(env(safe-area-inset-top),1rem)]">
               <div className="pointer-events-none absolute -right-12 -top-10 h-56 w-56 rounded-full bg-[#336886]/12 blur-3xl" />
-              <div className="pointer-events-none absolute inset-x-4 top-16 h-36 rounded-[2.25rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.62)_0%,rgba(255,255,255,0.2)_100%)] blur-3xl" />
 
               <button
                 type="button"
@@ -3754,10 +3753,7 @@ export function MarketplacePage() {
                 <CaretRight size={16} weight="bold" className="rotate-180" />
               </button>
 
-              <div className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.82)_0%,rgba(255,255,255,0.52)_48%,rgba(239,246,255,0.68)_100%)] px-4 py-5 shadow-[0_26px_60px_-34px_rgba(15,23,42,0.28)] ring-1 ring-white/60 backdrop-blur-2xl">
-                <div className="pointer-events-none absolute inset-y-0 right-0 w-40 bg-[radial-gradient(circle_at_center,rgba(51,104,134,0.18),transparent_65%)]" />
-                <div className="pointer-events-none absolute -bottom-14 right-4 h-28 w-28 rounded-full bg-[#336886]/12 blur-3xl" />
-
+              <div className="relative rounded-[2rem] border border-slate-200/80 bg-white px-4 py-5 shadow-[0_24px_52px_-36px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/55">
                 <div className="relative mb-4 flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="mb-2 flex items-center gap-2">
