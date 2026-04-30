@@ -512,6 +512,8 @@ export function ClientAccount() {
         .filter(Boolean)
         .join(' • ')
     : '';
+  const normalizedPhoneLabel = String(formatPhoneInput(phoneDraft || me?.phone || '') || '').trim();
+  const memberSinceLabel = me?.createdAt ? formatDate(me.createdAt) : '';
   const accountOverviewCards = [
     {
       id: 'orders',
@@ -653,6 +655,24 @@ export function ClientAccount() {
                     <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">
                       Centralize seu perfil, endereços e preferências do aplicativo no mesmo lugar.
                     </p>
+                    <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-emerald-700">
+                        <CheckCircle size={11} weight="fill" />
+                        Conta ativa
+                      </span>
+                      {normalizedPhoneLabel ? (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/90 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600">
+                          <Phone size={11} weight="duotone" />
+                          {normalizedPhoneLabel}
+                        </span>
+                      ) : null}
+                      {memberSinceLabel ? (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/90 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600">
+                          <Package size={11} weight="duotone" />
+                          Desde {memberSinceLabel}
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
 
@@ -751,10 +771,15 @@ export function ClientAccount() {
               {/* Seção 2: Endereços */}
               <section className="space-y-3">
                 <div className="flex items-center justify-between px-2">
-                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                    <MapPinLine size={16} weight="duotone" className="text-sky-500" />
-                    Meus Endereços
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                      <MapPinLine size={16} weight="duotone" className="text-sky-500" />
+                      Meus Endereços
+                    </h3>
+                    <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">
+                      {addresses.length}
+                    </span>
+                  </div>
                   <button
                     onClick={() => navigate('/cliente/enderecos?mode=new')}
                     className="flex items-center gap-1.5 rounded-xl bg-sky-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-sky-700 active:scale-95"

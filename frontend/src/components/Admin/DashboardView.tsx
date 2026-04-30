@@ -1,5 +1,6 @@
 ﻿// @ts-nocheck
 import React, { useEffect, useMemo, useState } from "react";
+import { Capacitor } from "@capacitor/core";
 import { Package, CurrencyDollar, CheckCircle, CircleDashed, LinkSimple, CalendarBlank, TrendUp, CaretDown } from "@phosphor-icons/react";
 import {
   BarChart,
@@ -45,6 +46,13 @@ const isCompactPdfViewport = () =>
   typeof window !== "undefined" && typeof window.matchMedia === "function"
     ? window.matchMedia("(max-width: 760px)").matches
     : false;
+const isNativePdfRuntime = () => {
+  try {
+    return Capacitor.isNativePlatform();
+  } catch {
+    return false;
+  }
+};
 const toAbsoluteAssetUrl = (value) => {
   const normalized = String(value || "").trim();
   if (!normalized || typeof window === "undefined") return normalized;
@@ -97,6 +105,18 @@ const openPdfBlob = ({ blob, fileName }) => {
   anchor.remove();
   cleanup();
   return true;
+};
+const savePdfDocument = async (doc, fileName) => {
+  if (!doc || typeof doc.save !== "function") return false;
+  try {
+    const result = doc.save(fileName, { returnPromise: true });
+    if (result && typeof result.then === "function") {
+      await result;
+    }
+    return true;
+  } catch {
+    return false;
+  }
 };
 const sharePdfBlob = async ({ blob, fileName, title }) => {
   if (typeof navigator === "undefined" || typeof navigator.share !== "function" || typeof File === "undefined") {
@@ -902,7 +922,7 @@ export const DashboardView = ({
       }
 
       const pdfBlob = doc.output("blob");
-      const shouldShareFirst = compactViewport;
+      const shouldShareFirst = compactViewport || isNativePdfRuntime();
       if (shouldShareFirst) {
         try {
           const shared = await sharePdfBlob({
@@ -916,10 +936,22 @@ export const DashboardView = ({
           throw error;
         }
       }
-      openPdfBlob({
+      if (compactViewport || isNativePdfRuntime()) {
+        const saved = await savePdfDocument(doc, fileName);
+        if (!saved) {
+          throw new Error("pdf-save-failed");
+        }
+        return;
+      }
+      const opened = openPdfBlob({
         blob: pdfBlob,
         fileName,
       });
+      if (opened) return;
+      const saved = await savePdfDocument(doc, fileName);
+      if (!saved) {
+        throw new Error("pdf-open-failed");
+      }
     } catch (error) {
       console.error("management report pdf export failed", error);
       setReportExportError("Não foi possível gerar o PDF gerencial agora.");
