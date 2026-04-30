@@ -593,6 +593,11 @@ export function OrderTracking() {
   const shipmentServiceName = String(shipment?.serviceName || '').trim();
   const shipmentTrackingCode = String(shipment?.trackingCode || '').trim();
   const shipmentTrackingUrl = String(shipment?.trackingUrl || '').trim();
+  const shipmentStatusNormalized = String(shipment?.shipmentStatus || '').trim().toLowerCase();
+  const isShipmentPosted =
+    shipmentStatusNormalized === 'posted' ||
+    Boolean(shipmentTrackingCode) ||
+    Boolean(shipment?.postedAt);
   const pixPayload = pixKey
     ? buildPixPayload({
         key: pixKey,
@@ -646,8 +651,30 @@ export function OrderTracking() {
   }, [isPostalDelivery, isReady, postalExpectedDeliveryDate]);
   const estimateMinutes = etaTotalMinutes;
   const deliveryFeeValue = hasDeliveryFee ? Number(order?.deliveryFee || 0) : null;
-  const orderLifecycleLabel = isCancelled ? 'Pedido cancelado' : isReady ? 'Pedido concluido' : 'Pedido em andamento';
-  const paymentSummaryDetail = showMercadoPagoApproved
+  const cancelledFlowDetail = useMemo(() => {
+    if (!isCancelled) return '';
+    if (isPostalDelivery) {
+      return isShipmentPosted ? 'Pedido cancelado após a postagem' : 'Pedido cancelado antes da postagem';
+    }
+    if (isDelivery) {
+      if (deliveryStatus === 'IN_TRANSIT') return 'Pedido cancelado durante a entrega';
+      return 'Pedido cancelado antes da entrega';
+    }
+    if (order?.type === 'pickup') return 'Pedido cancelado antes da retirada';
+    if (order?.type === 'table') return 'Pedido cancelado antes da finalização';
+    return 'Pedido cancelado';
+  }, [deliveryStatus, isCancelled, isDelivery, isPostalDelivery, isShipmentPosted, order?.type]);
+  const orderLifecycleLabel = isCancelled ? cancelledFlowDetail || 'Pedido cancelado' : isReady ? 'Pedido concluido' : 'Pedido em andamento';
+  const mercadoPagoApprovalDetail = isCancelled
+    ? 'Pago via Mercado Pago antes do cancelamento'
+    : 'Confirmado pelo Mercado Pago';
+  const paymentSummaryDetail = isCancelled && showMercadoPagoApproved
+    ? mercadoPagoApprovalDetail
+    : isCancelled && isPaymentApproved && paymentProviderMeta?.label
+    ? `Pago via ${paymentProviderMeta.label} antes do cancelamento`
+    : isCancelled && isPaymentApproved
+    ? 'Pagamento confirmado antes do cancelamento'
+    : showMercadoPagoApproved
     ? 'Confirmado pelo Mercado Pago'
     : isPaymentApproved && paymentProviderMeta?.label
     ? `Confirmado por ${paymentProviderMeta.label}`
@@ -658,6 +685,16 @@ export function OrderTracking() {
     : hasOnlinePayment
     ? 'Forma usada na compra online'
     : 'Forma escolhida para este pedido';
+  const postalStatusLabel = isCancelled
+    ? 'Cancelado'
+    : isShipmentPosted
+    ? 'Postado'
+    : 'Aguardando postagem';
+  const postalStatusDetail = isCancelled
+    ? (isShipmentPosted ? 'Pedido cancelado após a postagem.' : 'Pedido cancelado antes da postagem.')
+    : isShipmentPosted
+    ? 'Objeto entregue aos Correios e aguardando movimentação.'
+    : 'Pedido aguardando despacho da loja.';
   const cashTenderedValue =
     normalizedPaymentMethod === 'dinheiro' && order?.cashTendered !== null && order?.cashTendered !== undefined
       ? Number(order.cashTendered)
@@ -1700,7 +1737,7 @@ export function OrderTracking() {
                                 Pagamento aprovado
                               </span>
                               <span className="mt-0.5 block text-[11px] font-semibold leading-tight text-slate-500">
-                                Confirmado pelo Mercado Pago
+                                {mercadoPagoApprovalDetail}
                               </span>
                             </span>
                           </div>
@@ -1746,17 +1783,18 @@ export function OrderTracking() {
                       <div className="rounded-[1.35rem] border border-amber-100/80 bg-[linear-gradient(135deg,#fffdf7,#faf6ee)] p-4 shadow-[0_18px_36px_-30px_rgba(120,53,15,0.16)]">
                         <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-700">Envio postal</p>
                         <div className="mt-3 space-y-2 text-sm text-stone-700">
-                          <p><span className="font-semibold">Status:</span> {shipment?.shipmentStatus === 'posted' ? 'Postado' : 'Aguardando postagem'}</p>
+                          <p><span className="font-semibold">Status:</span> {postalStatusLabel}</p>
+                          <p className="text-stone-500">{postalStatusDetail}</p>
                           <p><span className="font-semibold">Servico:</span> {shipmentServiceName || shipmentServiceCode || 'A confirmar'}</p>
-                          {postalEstimatedDays ? <p><span className="font-semibold">Prazo estimado:</span> {postalEstimatedDays} dia(s) uteis</p> : null}
-                          {postalExpectedDeliveryDate ? <p><span className="font-semibold">Previsao de entrega:</span> {postalExpectedDeliveryDate.toLocaleDateString('pt-BR')}</p> : null}
+                          {!isCancelled && postalEstimatedDays ? <p><span className="font-semibold">Prazo estimado:</span> {postalEstimatedDays} dia(s) uteis</p> : null}
+                          {!isCancelled && postalExpectedDeliveryDate ? <p><span className="font-semibold">Previsao de entrega:</span> {postalExpectedDeliveryDate.toLocaleDateString('pt-BR')}</p> : null}
                           {shipmentTrackingCode ? (
                             <p className="break-all"><span className="font-semibold">Codigo:</span> {shipmentTrackingCode}</p>
-                          ) : (
+                          ) : !isCancelled ? (
                             <p className="text-stone-500">Codigo de rastreio ainda nao informado.</p>
-                          )}
+                          ) : null}
                         </div>
-                        {shipmentTrackingUrl ? (
+                        {shipmentTrackingUrl && !isCancelled ? (
                           <a
                             href={shipmentTrackingUrl}
                             target="_blank"
@@ -1770,10 +1808,16 @@ export function OrderTracking() {
                     )}
 
                     {isPixPayment ? (
-                      shouldHidePixPaymentBlockBase || progress >= 100 ? (
+                      shouldHidePixPaymentBlockBase ? (
                         <div className="rounded-[1.35rem] border border-emerald-200 bg-emerald-50 p-4">
                           <span className="inline-flex items-center rounded-full border border-emerald-300 bg-white px-3 py-1 text-xs font-bold text-emerald-700">
-                            Pagamento confirmado
+                            {isCancelled ? 'Pagamento confirmado antes do cancelamento' : 'Pagamento confirmado'}
+                          </span>
+                        </div>
+                      ) : isCancelled ? (
+                        <div className="rounded-[1.35rem] border border-rose-200 bg-rose-50 p-4">
+                          <span className="inline-flex items-center rounded-full border border-rose-200 bg-white px-3 py-1 text-xs font-bold text-rose-700">
+                            Pagamento nao concluido
                           </span>
                         </div>
                       ) : (
