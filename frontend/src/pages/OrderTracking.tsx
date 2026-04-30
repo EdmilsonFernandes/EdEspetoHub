@@ -1125,7 +1125,7 @@ export function OrderTracking() {
       return [
         ...(hasOnlinePayment ? [{ id: 'payment', label: isPaymentApproved ? 'Pagamento confirmado' : 'Aguardando pagamento' }] : []),
         { id: 'pending', label: 'Pedido Recebido' },
-        { id: 'cancelled', label: 'Pedido Cancelado' },
+        { id: 'cancelled', label: 'Cancelado' },
       ];
     }
     if (isDelivery) {
