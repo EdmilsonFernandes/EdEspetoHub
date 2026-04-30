@@ -637,9 +637,6 @@ function OrderCard({
             <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] ${fulfillmentMeta.toneClass}`}>
               {fulfillmentMeta.label}
             </span>
-            <span className="inline-flex items-center rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-slate-400 ring-1 ring-slate-200">
-              {itemsCount} {itemsCount === 1 ? 'item' : 'itens'}
-            </span>
           </div>
           {condominiumOrder?.condominiumName ? (
             <p className="mt-1 inline-flex max-w-full rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-emerald-700">
@@ -720,14 +717,15 @@ function OrderCard({
                 <span className="font-semibold text-slate-500">{orderMoment || formatGroupDate(order.createdAt)}</span>
                 <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:inline-flex" />
                 <span>{itemsCount} {itemsCount === 1 ? 'item no pedido' : 'itens no pedido'}</span>
+                {extraItems > 0 ? (
+                  <>
+                    <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:inline-flex" />
+                    <span className="font-semibold text-[#336886]">+{extraItems} adicional{extraItems === 1 ? '' : 'is'}</span>
+                  </>
+                ) : null}
               </div>
             </div>
           ) : null}
-          {extraItems > 0 && (
-            <div className="border-t border-slate-100 px-3 py-2">
-              <span className="text-[11px] font-semibold text-[#336886]">+{extraItems} {extraItems === 1 ? 'item' : 'itens'} no pedido</span>
-            </div>
-          )}
           {isCancelled && String(order.canceledReason || '').trim() && (
             <div className="border-t border-rose-100 bg-rose-50 px-3 py-2 text-[11px] text-rose-600">
               <span className="font-semibold">Motivo: </span>{order.canceledReason}
@@ -1443,41 +1441,45 @@ export function ClientOrders() {
         </header>
 
         <div className="px-4 py-4">
-          <section className="mb-5 overflow-hidden rounded-[28px] border border-[#d6e3eb] bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(244,248,251,0.98)_48%,rgba(235,243,248,0.98)_100%)] p-4 shadow-[0_22px_48px_-42px_rgba(21,58,76,0.28)]">
+          <section className="mb-5 overflow-hidden rounded-[26px] border border-[#d6e3eb] bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(246,249,251,0.98)_52%,rgba(238,245,249,0.98)_100%)] px-4 py-3.5 shadow-[0_18px_36px_-34px_rgba(21,58,76,0.24)]">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#336886]">Resumo da conta</p>
-                <h2 className="mt-1 text-[17px] font-black tracking-tight text-slate-950">
+                <h2 className="mt-1 text-[16px] font-black tracking-tight text-slate-950">
                   {activeOrders.length > 0 ? 'Acompanhe seus pedidos em tempo real' : 'Seu histórico está organizado'}
                 </h2>
-                <p className="mt-1 text-[13px] leading-5 text-slate-500">
+                <p className="mt-1 text-[12px] leading-5 text-slate-500">
                   {lastOrder
                     ? `Seu pedido mais recente foi ${formatOrderMoment(lastOrder.createdAt)?.toLowerCase() || 'registrado recentemente'}.`
                     : 'Quando você fizer o primeiro pedido, ele aparece aqui com status, valor e atendimento.'}
                 </p>
               </div>
-              <div className="hidden rounded-[1.15rem] bg-white/80 px-3 py-2 text-right shadow-[0_14px_28px_-22px_rgba(21,58,76,0.18)] ring-1 ring-slate-200/70 sm:block">
-                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Último pedido</p>
-                <p className="mt-1 text-xs font-semibold text-slate-600">{lastOrder ? formatOrderMoment(lastOrder.createdAt) : 'Sem pedidos ainda'}</p>
-              </div>
+              {lastOrder ? (
+                <span className="hidden shrink-0 rounded-full bg-white/88 px-3 py-1.5 text-[11px] font-semibold text-slate-600 shadow-[0_12px_24px_-22px_rgba(21,58,76,0.2)] ring-1 ring-slate-200/70 sm:inline-flex">
+                  {formatOrderMoment(lastOrder.createdAt)}
+                </span>
+              ) : null}
             </div>
 
-            <div className="mt-3 flex gap-2 overflow-x-auto no-scrollbar">
-              <div className="min-w-[10.75rem] rounded-[1.2rem] border border-white/80 bg-white/92 px-4 py-3 shadow-[0_18px_34px_-26px_rgba(15,23,42,0.16)]">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Pedidos totais</p>
-                <p className="mt-1 text-[24px] font-black tracking-tight text-slate-950">{orders.length}</p>
-                <p className="mt-1 text-xs font-medium text-slate-500">Histórico completo da conta</p>
-              </div>
-              <div className="min-w-[10.75rem] rounded-[1.2rem] border border-emerald-100 bg-[linear-gradient(145deg,#ffffff,#edf9f3)] px-4 py-3 shadow-[0_18px_34px_-26px_rgba(16,185,129,0.16)]">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-500">Em andamento</p>
-                <p className="mt-1 text-[24px] font-black tracking-tight text-slate-950">{activeOrders.length}</p>
-                <p className="mt-1 text-xs font-medium text-emerald-700">{activeOrders.length > 0 ? 'Pedidos pedindo atenção agora' : 'Nenhum pedido ativo no momento'}</p>
-              </div>
-              <div className="min-w-[10.75rem] rounded-[1.2rem] border border-sky-100 bg-[linear-gradient(145deg,#ffffff,#eef7ff)] px-4 py-3 shadow-[0_18px_34px_-26px_rgba(14,165,233,0.16)]">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-500">Concluídos</p>
-                <p className="mt-1 text-[24px] font-black tracking-tight text-slate-950">{deliveredOrdersCount}</p>
-                <p className="mt-1 text-xs font-medium text-sky-700">{cancelledOrdersCount > 0 ? `${cancelledOrdersCount} cancelado${cancelledOrdersCount === 1 ? '' : 's'} no histórico` : 'Sem cancelamentos recentes'}</p>
-              </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/92 px-3 py-2 text-[11px] font-semibold text-slate-600 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.16)] ring-1 ring-white/90">
+                <span className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Total</span>
+                <span className="text-sm font-black text-slate-950">{orders.length}</span>
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-2 text-[11px] font-semibold text-emerald-700 shadow-[0_12px_24px_-20px_rgba(16,185,129,0.15)] ring-1 ring-emerald-100">
+                <span className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-500">Ativos</span>
+                <span className="text-sm font-black text-slate-950">{activeOrders.length}</span>
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-2 text-[11px] font-semibold text-sky-700 shadow-[0_12px_24px_-20px_rgba(14,165,233,0.15)] ring-1 ring-sky-100">
+                <span className="text-[10px] font-black uppercase tracking-[0.16em] text-sky-500">Concluídos</span>
+                <span className="text-sm font-black text-slate-950">{deliveredOrdersCount}</span>
+              </span>
+              {cancelledOrdersCount > 0 ? (
+                <span className="inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-2 text-[11px] font-semibold text-rose-600 shadow-[0_12px_24px_-20px_rgba(244,63,94,0.14)] ring-1 ring-rose-100">
+                  <span className="text-[10px] font-black uppercase tracking-[0.16em] text-rose-500">Cancelados</span>
+                  <span className="text-sm font-black text-slate-950">{cancelledOrdersCount}</span>
+                </span>
+              ) : null}
             </div>
           </section>
 
@@ -1560,10 +1562,12 @@ export function ClientOrders() {
                         <p className="text-sm font-semibold text-slate-700">{group.label}</p>
                         <p className="text-[11px] text-slate-400">{group.caption}</p>
                       </div>
-                      <div className="rounded-full bg-white px-2.5 py-1 text-right shadow-[0_10px_20px_-18px_rgba(15,23,42,0.24)] ring-1 ring-slate-200">
-                        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">{group.orders.length} pedido{group.orders.length === 1 ? '' : 's'}</p>
-                        <p className="text-[11px] font-semibold text-slate-600">{formatCurrency(group.totalAmount)}</p>
-                      </div>
+                      {group.orders.length > 1 ? (
+                        <div className="text-right">
+                          <p className="text-[11px] font-semibold text-slate-500">{group.orders.length} pedidos</p>
+                          <p className="text-[11px] font-black text-slate-700">{formatCurrency(group.totalAmount)}</p>
+                        </div>
+                      ) : null}
                     </div>
                     <div className="space-y-3">
                       {group.orders.map((order) => (
