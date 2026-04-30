@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { UserCircle, Eye, EyeSlash, LockKey, WarningCircle, SealCheck, EnvelopeSimple } from '@phosphor-icons/react';
+import { UserCircle, Eye, EyeSlash, LockKey, WarningCircle, SealCheck, EnvelopeSimple, Phone } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { nativeBiometricService } from '../services/nativeBiometricService';
@@ -458,9 +458,22 @@ export function ClientAuth() {
               <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#336886]/80">Área do cliente</p>
             </div>
           </button>
-          <div className="flex items-center justify-center gap-3">
-            <LockKey size={32} weight="duotone" className="text-[#0d4f66]" />
-            <h2 className="text-[2rem] sm:text-[2.2rem] font-black text-slate-800 tracking-[-0.03em]">Login</h2>
+          <div className="space-y-3">
+            <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-[#153A4C]/10 bg-white/75 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-[#153A4C] shadow-[0_16px_34px_-26px_rgba(21,58,76,0.4)]">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(34,197,94,0.14)]" />
+              Conta protegida
+            </div>
+            <div className="flex items-center justify-center gap-3">
+              <LockKey size={32} weight="duotone" className="text-[#0d4f66]" />
+              <h2 className="text-[2rem] sm:text-[2.2rem] font-black text-slate-800 tracking-[-0.03em]">
+                {mode === 'register' ? 'Criar conta' : 'Entrar'}
+              </h2>
+            </div>
+            <p className="mx-auto max-w-md text-sm font-semibold leading-6 text-slate-500">
+              {mode === 'register'
+                ? 'Cadastre seu acesso para acompanhar pedidos, salvar endereços e voltar com tudo pronto no próximo pedido.'
+                : 'Entre para acompanhar pedidos, revisar compras e continuar direto pelo hub do cliente.'}
+            </p>
           </div>
         </div>
 
@@ -474,11 +487,24 @@ export function ClientAuth() {
           </button>
         ) : null}
 
-        <div className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40">
- 
-
+        <div className="ds-card-elevated space-y-5 border-white/40 bg-white/82 p-6 backdrop-blur-xl sm:p-8">
+          <div className="rounded-[1.45rem] border border-[#153A4C]/10 bg-[linear-gradient(135deg,rgba(21,58,76,0.06),rgba(255,255,255,0.92)_58%,rgba(51,104,134,0.06)_100%)] px-4 py-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center rounded-full border border-white/80 bg-white/82 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-[#153A4C]">
+                Conta do cliente
+              </span>
+              <span className="inline-flex items-center rounded-full border border-slate-200 bg-white/82 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-slate-500">
+                Hub, pedidos e endereços
+              </span>
+            </div>
+            <p className="mt-3 text-sm font-semibold leading-6 text-slate-600">
+              {mode === 'register'
+                ? 'Use seu e-mail para ativar a conta e concluir tudo no mesmo fluxo.'
+                : 'O acesso segue simples: e-mail, senha e, quando houver, biometria neste aparelho.'}
+            </p>
+          </div>
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-slate-100 inline-flex items-center justify-center shadow-inner">
+            <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 shadow-inner">
               <UserCircle size={22} weight="duotone" />
             </div>
             <div>
@@ -487,18 +513,18 @@ export function ClientAuth() {
             </div>
           </div>
 
-          <div className="flex gap-2 rounded-xl bg-slate-100 p-1 border border-slate-200">
+          <div className="flex gap-2 rounded-[1.1rem] border border-slate-200 bg-slate-100 p-1.5">
             <button
               type="button"
               onClick={() => setMode('login')}
-              className={`flex-1 rounded-lg px-3 py-2 text-xs font-bold transition-all ${mode === 'login' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-700 hover:bg-white/70'}`}
+              className={`flex-1 rounded-[0.9rem] px-3 py-2.5 text-xs font-bold transition-all ${mode === 'login' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-700 hover:bg-white/70'}`}
             >
               Login
             </button>
             <button
               type="button"
               onClick={() => setMode('register')}
-              className={`flex-1 rounded-lg px-3 py-2 text-xs font-bold transition-all ${mode === 'register' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-700 hover:bg-white/70'}`}
+              className={`flex-1 rounded-[0.9rem] px-3 py-2.5 text-xs font-bold transition-all ${mode === 'register' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-700 hover:bg-white/70'}`}
             >
               Cadastro
             </button>
@@ -513,43 +539,53 @@ export function ClientAuth() {
             className="space-y-3"
           >
             {mode === 'register' && (
-              <input
-                name="fullName"
-                autoComplete="name"
-                autoCapitalize="words"
-                value={form.fullName}
-                onChange={(e) => setForm((p) => ({ ...p, fullName: e.target.value }))}
-                placeholder="Nome completo"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
-              />
+              <div className="relative">
+                <UserCircle size={18} weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  name="fullName"
+                  autoComplete="name"
+                  autoCapitalize="words"
+                  value={form.fullName}
+                  onChange={(e) => setForm((p) => ({ ...p, fullName: e.target.value }))}
+                  placeholder="Nome completo"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                />
+              </div>
             )}
             {mode === 'register' && (
-              <input
-                name="phone"
-                autoComplete="tel"
-                inputMode="tel"
-                value={form.phone}
-                onChange={(e) => setForm((p) => ({ ...p, phone: formatPhoneBr(e.target.value) }))}
-                placeholder="Telefone (opcional)"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
-              />
+              <div className="relative">
+                <Phone size={18} weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  name="phone"
+                  autoComplete="tel"
+                  inputMode="tel"
+                  value={form.phone}
+                  onChange={(e) => setForm((p) => ({ ...p, phone: formatPhoneBr(e.target.value) }))}
+                  placeholder="Telefone (opcional)"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                />
+              </div>
             )}
-            <input
-              id="email"
-              name="email"
-              autoComplete="email"
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-              placeholder="E-mail"
-              inputMode="email"
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              enterKeyHint={mode === 'register' ? 'next' : 'done'}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
-            />
             <div className="relative">
+              <EnvelopeSimple size={18} weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                id="email"
+                name="email"
+                autoComplete="email"
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+                placeholder="E-mail"
+                inputMode="email"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                enterKeyHint={mode === 'register' ? 'next' : 'done'}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
+              />
+            </div>
+            <div className="relative">
+              <LockKey size={18} weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 id="password"
                 name="password"
@@ -562,7 +598,7 @@ export function ClientAuth() {
                 autoCorrect="off"
                 spellCheck={false}
                 enterKeyHint="done"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 pr-12 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-12 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
               />
               <button
                 type="button"
@@ -600,8 +636,8 @@ export function ClientAuth() {
               </div>
             )}
 
-            {error ? <p className="text-sm text-rose-600">{error}</p> : null}
-            {message ? <p className="text-sm text-emerald-600">{message}</p> : null}
+            {error ? <p className="rounded-2xl border border-rose-200 bg-rose-50 px-3 py-3 text-sm font-semibold text-rose-600">{error}</p> : null}
+            {message ? <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm font-semibold text-emerald-600">{message}</p> : null}
 
             {mode === 'login' && biometricAvailable ? (
               <>
@@ -615,7 +651,7 @@ export function ClientAuth() {
                     type="button"
                     onClick={handleBiometricLogin}
                     disabled={biometricLoading || loading}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#336886]/20 bg-[#336886]/10 px-4 py-3 text-sm font-black text-[#336886] transition-all active:scale-[0.98] hover:bg-[#336886]/15 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#336886]/20 bg-[#336886]/10 px-4 py-3 text-sm font-black text-[#336886] transition-all active:scale-[0.98] hover:bg-[#336886]/15 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <LockKey size={18} weight="duotone" />
                     {biometricLoading ? 'Lendo biometria...' : 'Entrar com biometria'}
@@ -633,7 +669,7 @@ export function ClientAuth() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-[linear-gradient(120deg,#0f172a,#1e293b)] px-4 py-3 text-sm font-black text-white shadow-[0_14px_26px_-16px_rgba(15,23,42,0.6)] active:scale-[0.99] disabled:opacity-60"
+              className="w-full rounded-2xl bg-[linear-gradient(120deg,#0f172a,#1e293b)] px-4 py-3.5 text-sm font-black text-white shadow-[0_14px_26px_-16px_rgba(15,23,42,0.6)] active:scale-[0.99] disabled:opacity-60"
             >
               {loading ? 'Processando...' : mode === 'register' ? 'Criar conta' : 'Entrar'}
             </button>

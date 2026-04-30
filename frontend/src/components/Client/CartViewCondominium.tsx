@@ -123,6 +123,9 @@ export const CartViewCondominium = ({
   const apartmentDeliveryAllowed = condominiumCheckoutContext?.link?.allowApartmentDelivery !== false;
   const condominiumFeeValue = isApartmentDelivery ? (normalizeNumber(condominiumCheckoutContext?.feeValue) || 0) : 0;
   const totalWithFee = total + condominiumFeeValue;
+  const checkoutAudienceLabel = isApartmentDelivery ? 'Morador' : 'Visitante';
+  const fulfillmentSummaryLabel = isApartmentDelivery ? 'Entrega no apartamento' : 'Retirada na barraca';
+  const checkoutEventLabel = String(condominiumCheckoutContext?.event?.name || '').trim();
 
   useEffect(() => {
     if (!apartmentDeliveryAllowed && isApartmentDelivery) {
@@ -246,8 +249,9 @@ export const CartViewCondominium = ({
       </div>
 
       {/* Dados do cliente */}
-      <div className="relative overflow-hidden bg-white rounded-3xl border border-slate-100 p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
+      <div className="relative mb-4 overflow-hidden rounded-[2rem] border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(244,248,252,0.94)_58%,rgba(255,255,255,0.94)_100%)] p-4 shadow-[0_24px_52px_-38px_rgba(15,23,42,0.24)] sm:mb-6 sm:p-6">
+        <div className="pointer-events-none absolute -right-10 top-0 h-24 w-24 rounded-full bg-[#336886]/10 blur-3xl" />
+        <div className="relative flex items-start justify-between gap-4 mb-4">
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
               {condominiumLogo ? (
@@ -257,18 +261,26 @@ export const CartViewCondominium = ({
               )}
             </div>
             <div className="min-w-0">
-            <h2 className="font-black text-slate-900 text-base sm:text-lg tracking-tight">Checkout Condomínio</h2>
-            <p className="truncate text-xs text-slate-500">{condominiumCheckoutContext?.condominium?.name || 'Seja bem-vindo!'}</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Pedido do condomínio</p>
+              <h2 className="font-black text-slate-900 text-base sm:text-lg tracking-tight">Quem vai receber</h2>
+              <p className="truncate text-xs text-slate-500">
+                {checkoutEventLabel || condominiumCheckoutContext?.condominium?.name || 'Finalize seu pedido com contexto completo'}
+              </p>
             </div>
           </div>
-          <span className="text-[11px] font-extrabold text-brand-primary bg-brand-primary-soft px-3 py-1 rounded-full border border-brand-primary/20">
-            {isApartmentDelivery ? 'Morador' : 'Visitante'}
-          </span>
+          <div className="flex flex-col items-end gap-2">
+            <span className="rounded-full border border-[#336886]/12 bg-white/88 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#336886] shadow-sm">
+              {checkoutAudienceLabel}
+            </span>
+            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+              {fulfillmentSummaryLabel}
+            </span>
+          </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="relative space-y-4">
           {/* Nome */}
-          <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
+          <div className="rounded-[1.55rem] border border-slate-100 bg-white/90 p-3 shadow-[0_16px_28px_-26px_rgba(15,23,42,0.22)] sm:p-4">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Seu Nome</label>
             <div className="relative mt-2">
               <input
@@ -283,7 +295,7 @@ export const CartViewCondominium = ({
           </div>
 
           {/* WhatsApp */}
-          <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
+          <div className="rounded-[1.55rem] border border-slate-100 bg-white/90 p-3 shadow-[0_16px_28px_-26px_rgba(15,23,42,0.22)] sm:p-4">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               WhatsApp {guestPhoneRequired ? <span className="text-rose-500 font-extrabold">Obrigatório</span> : null}
             </label>
@@ -309,7 +321,7 @@ export const CartViewCondominium = ({
           </div>
 
           {/* Modo de Entrega */}
-          <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
+          <div className="rounded-[1.55rem] border border-slate-100 bg-white/90 p-3 shadow-[0_16px_28px_-26px_rgba(15,23,42,0.22)] sm:p-4">
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Como deseja receber?</p>
             <div className="flex gap-1 rounded-2xl bg-slate-100 p-1">
               <button
@@ -346,7 +358,7 @@ export const CartViewCondominium = ({
           {isApartmentDelivery && (
             <div className="animate-in fade-in slide-in-from-top-2 duration-300 space-y-3">
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-2xl border border-slate-100 p-3 bg-white">
+                <div className="rounded-[1.4rem] border border-slate-100 p-3 bg-white/90 shadow-[0_14px_24px_-26px_rgba(15,23,42,0.2)]">
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Bloco/Torre</label>
                   <input
                     value={customer.block || ""}
@@ -355,7 +367,7 @@ export const CartViewCondominium = ({
                     className="w-full mt-1 bg-transparent text-lg font-bold outline-none"
                   />
                 </div>
-                <div className="rounded-2xl border border-slate-100 p-3 bg-white">
+                <div className="rounded-[1.4rem] border border-slate-100 p-3 bg-white/90 shadow-[0_14px_24px_-26px_rgba(15,23,42,0.2)]">
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Apartamento</label>
                   <input
                     value={customer.apartment || ""}
@@ -365,7 +377,7 @@ export const CartViewCondominium = ({
                   />
                 </div>
               </div>
-              <div className="rounded-2xl border border-slate-100 p-3 bg-white">
+              <div className="rounded-[1.4rem] border border-slate-100 p-3 bg-white/90 shadow-[0_14px_24px_-26px_rgba(15,23,42,0.2)]">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Ponto de Referência</label>
                 <input
                   value={customer.reference || ""}
@@ -386,8 +398,16 @@ export const CartViewCondominium = ({
       </div>
 
       {/* Resumo */}
-      <div className="bg-white rounded-2xl border border-slate-100 p-4 sm:p-6 mb-4 shadow-sm">
-        <h2 className="font-black text-slate-900 mb-4 text-base tracking-tight">Resumo do Pedido</h2>
+      <div className="mb-4 rounded-[2rem] border border-slate-100 bg-white p-4 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.2)] sm:p-6">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Resumo da compra</p>
+            <h2 className="mt-1 text-base font-black tracking-tight text-slate-900">Pedido pronto para confirmar</h2>
+          </div>
+          <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">
+            {cartItems.length} {cartItems.length === 1 ? 'item' : 'itens'}
+          </span>
+        </div>
         {cartItems.map((item) => (
           <div key={item.key || item.id} className="flex justify-between items-center gap-2 py-2 border-b border-slate-50 last:border-0">
             <div className="flex min-w-0 items-center gap-3">
@@ -436,7 +456,7 @@ export const CartViewCondominium = ({
       </div>
 
       {/* Pagamento */}
-      <div className="bg-white rounded-2xl border border-slate-100 p-4 sm:p-6 mb-4 shadow-sm">
+      <div className="mb-4 rounded-[2rem] border border-slate-100 bg-white p-4 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.2)] sm:p-6">
         <h2 className="font-black text-slate-900 mb-4 text-base flex items-center gap-2">
           <CreditCard size={18} className="text-brand-primary" /> Forma de Pagamento
         </h2>
@@ -478,7 +498,8 @@ export const CartViewCondominium = ({
       )}
 
       {/* Botão Finalizar */}
-      <div className={`fixed left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-slate-100 z-50 ${isNativePlatform ? "ds-native-nav-dock" : "bottom-0"}`}>
+      <div className={`fixed left-0 right-0 z-50 border-t border-slate-100 bg-white/90 p-4 backdrop-blur-md ${isNativePlatform ? "ds-native-nav-dock" : "bottom-0"}`}>
+        <div className="mx-auto max-w-lg rounded-[1.65rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(248,250,252,0.94))] p-3 shadow-[0_18px_34px_-26px_rgba(15,23,42,0.22)]">
         <button
           onClick={() => {
             setHasTriedCheckout(true);
@@ -513,6 +534,9 @@ export const CartViewCondominium = ({
           <PaperPlaneTilt size={20} weight="bold" />
           {checkoutLoading ? 'Enviando...' : isApartmentDelivery ? 'Pedir no Apartamento' : 'Pedir e Retirar'}
         </button>
+        <p className="mt-2 text-center text-[11px] font-semibold text-slate-500">
+          {isApartmentDelivery ? 'A loja receberá seus dados do morador e o ponto de entrega.' : 'A retirada ficará vinculada ao seu nome e WhatsApp.'}
+        </p>
         {hasTriedCheckout && validationError && (
           <p className="mt-2 text-center text-xs font-bold text-rose-600">{validationError}</p>
         )}
@@ -521,6 +545,7 @@ export const CartViewCondominium = ({
             {cashValidation.reason || checkoutDisabledReason}
           </p>
         )}
+        </div>
       </div>
     </div>
   );

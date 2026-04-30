@@ -377,6 +377,9 @@ export const SuccessView = ({
   const isAwaitingPayment = hasOnlinePayment && !isPaid && !isFailed;
   const isNativePlatform = Capacitor.isNativePlatform();
   const shouldCelebrate = !isAwaitingPayment && !isFailed;
+  const paymentMeta = paymentMethod ? getPaymentMethodMeta(paymentMethod) : null;
+  const orderTypeLabel =
+    orderType === 'delivery' ? 'Entrega' : orderType === 'table' ? `Mesa ${table || '—'}` : 'Retirada';
 
   // Overlay de celebração curto para pedidos concluídos sem falha/pagamento pendente.
   const [showCelebration, setShowCelebration] = useState(() => shouldCelebrate);
@@ -501,12 +504,15 @@ export const SuccessView = ({
       {/* Content */}
       <div className="space-y-4 px-4 sm:px-6">
         {!isAwaitingPayment && (
-          <div className={`rounded-3xl border p-5 shadow-sm ${isPaid ? 'bg-gradient-to-b from-emerald-50 to-white border-emerald-200' : 'bg-gradient-to-b from-sky-50 to-white border-sky-200'}`}>
+          <div className={`rounded-[2rem] border p-5 shadow-[0_20px_42px_-32px_rgba(15,23,42,0.22)] ${isPaid ? 'bg-[linear-gradient(145deg,rgba(236,253,245,0.98),rgba(255,255,255,0.98)_48%,rgba(236,253,245,0.9)_100%)] border-emerald-200' : 'bg-[linear-gradient(145deg,rgba(239,246,255,0.98),rgba(255,255,255,0.98)_52%,rgba(238,245,247,0.94)_100%)] border-sky-200'}`}>
             <div className="flex items-center gap-3">
               <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-inner ${isPaid ? 'bg-emerald-100' : 'bg-sky-100'}`}>
                 <CheckCircle size={28} weight="duotone" className={isPaid ? 'text-emerald-600' : 'text-sky-600'} />
               </div>
               <div className="min-w-0">
+                <p className={`text-[10px] font-black uppercase tracking-[0.18em] ${isPaid ? 'text-emerald-700/75' : 'text-sky-700/75'}`}>
+                  {isPaid ? 'Pagamento aprovado' : 'Pedido recebido'}
+                </p>
                 <h2 className={`text-lg font-black leading-tight ${isPaid ? 'text-emerald-800' : 'text-slate-900'}`}>
                   {isPaid ? 'Pedido confirmado!' : 'Pedido realizado!'}
                 </h2>
@@ -520,6 +526,22 @@ export const SuccessView = ({
                     : 'Seu pedido foi recebido e seguirá para produção.'}
                 </p>
               </div>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="inline-flex items-center rounded-full border border-white/80 bg-white/82 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600 shadow-sm">
+                {orderTypeLabel}
+              </span>
+              {paymentMeta?.label ? (
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/82 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600 shadow-sm">
+                  {paymentMeta.icon ? <img src={paymentMeta.icon} alt={paymentMeta.label} className="h-3.5 w-3.5 object-contain" /> : null}
+                  {paymentMeta.label}
+                </span>
+              ) : null}
+              {storeLabel ? (
+                <span className="inline-flex items-center rounded-full border border-white/80 bg-white/82 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600 shadow-sm">
+                  {storeLabel}
+                </span>
+              ) : null}
             </div>
           </div>
         )}
@@ -548,6 +570,8 @@ export const SuccessView = ({
           </div>
         )}
 
+        <div className="rounded-[2rem] border border-slate-200/80 bg-white/86 p-3 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.2)] backdrop-blur-xl">
+          <p className="px-2 pb-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Próximos passos</p>
         <div className="flex flex-col gap-3">
           {onMyOrders && (
             <button
@@ -561,9 +585,9 @@ export const SuccessView = ({
             <button
               onClick={onNewOrder}
               className="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 py-4 text-base font-black text-white shadow-sm transition hover:bg-slate-800 active:scale-[0.98]"
-            >
-              <ArrowLeft size={20} weight="duotone" /> Fazer novo pedido
-            </button>
+              >
+                <ArrowLeft size={20} weight="duotone" /> Fazer novo pedido
+              </button>
           )}
           <div className="flex gap-3">
             {orderId && onTrackOrder && !isAwaitingPayment && (
@@ -591,6 +615,7 @@ export const SuccessView = ({
               </button>
             )}
           </div>
+        </div>
         </div>
       </div>
     </div>

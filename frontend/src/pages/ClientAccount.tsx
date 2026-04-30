@@ -512,6 +512,55 @@ export function ClientAccount() {
         .filter(Boolean)
         .join(' • ')
     : '';
+  const accountOverviewCards = [
+    {
+      id: 'orders',
+      label: 'Pedidos',
+      value: String(orders.length),
+      helper: orders.length === 1 ? 'pedido no histórico' : 'pedidos no histórico',
+      icon: Package,
+      iconTone: 'bg-sky-50 text-sky-700',
+      onClick: () => navigate('/cliente/pedidos'),
+    },
+    {
+      id: 'addresses',
+      label: 'Endereços',
+      value: String(addresses.length),
+      helper: addresses.length ? 'base de entrega pronta' : 'cadastre seu principal',
+      icon: MapPinLine,
+      iconTone: 'bg-emerald-50 text-emerald-700',
+      onClick: () => navigate('/cliente/enderecos'),
+    },
+    {
+      id: 'access',
+      label: 'Acesso',
+      value: biometricEnabled || pushEnabled ? 'Pronto' : 'Ajustar',
+      helper: biometricEnabled ? 'biometria ativa no aparelho' : 'push, câmera e biometria',
+      icon: ShieldCheck,
+      iconTone: 'bg-indigo-50 text-indigo-700',
+      onClick: () => navigate('/cliente/conta?section=settings'),
+    },
+  ];
+  const quickAccountActions = [
+    {
+      id: 'orders',
+      label: 'Meus pedidos',
+      icon: Package,
+      onClick: () => navigate('/cliente/pedidos'),
+    },
+    {
+      id: 'addresses',
+      label: 'Meus endereços',
+      icon: MapPinLine,
+      onClick: () => navigate('/cliente/enderecos'),
+    },
+    {
+      id: 'settings',
+      label: 'Ajustes do app',
+      icon: ShieldCheck,
+      onClick: () => navigate('/cliente/conta?section=settings'),
+    },
+  ];
 
   if (loading) {
     return (
@@ -554,8 +603,13 @@ export function ClientAccount() {
           {!settingsOnly && (
             <>
               {/* Seção 1: Avatar e Dados Básicos */}
-              <section className="relative overflow-hidden rounded-[2.5rem] bg-white p-6 shadow-sm border border-slate-100">
-                <div className="flex flex-col items-center text-center space-y-4">
+              <section className="relative overflow-hidden rounded-[2.45rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(244,248,252,0.96)_56%,rgba(255,255,255,0.94)_100%)] p-5 shadow-[0_26px_60px_-42px_rgba(15,23,42,0.28)]">
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,rgba(51,104,134,0.16),transparent_72%)]" />
+                <div className="relative flex flex-col items-center text-center space-y-4">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-[#153A4C]/10 bg-white/78 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-[#153A4C] shadow-[0_14px_30px_-24px_rgba(21,58,76,0.42)]">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(34,197,94,0.14)]" />
+                    Área pessoal
+                  </div>
                   <div className="relative">
                     <div className="h-24 w-24 overflow-hidden rounded-[2rem] border-4 border-slate-50 shadow-md">
                       {cachedProfileImage ? (
@@ -596,10 +650,55 @@ export function ClientAccount() {
                   <div>
                     <h2 className="text-xl font-black text-slate-900">{me?.fullName || 'Usuário'}</h2>
                     <p className="text-sm font-bold text-slate-400">{me?.email}</p>
+                    <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">
+                      Centralize seu perfil, endereços e preferências do aplicativo no mesmo lugar.
+                    </p>
                   </div>
                 </div>
 
-                <div className="mt-8 space-y-3">
+                <div className="relative mt-6 grid gap-3 sm:grid-cols-3">
+                  {accountOverviewCards.map((card) => {
+                    const Icon = card.icon;
+                    return (
+                      <button
+                        key={card.id}
+                        type="button"
+                        onClick={card.onClick}
+                        className="rounded-[1.55rem] border border-slate-200/80 bg-white/88 px-4 py-4 text-left shadow-[0_18px_34px_-28px_rgba(15,23,42,0.2)] transition-all hover:-translate-y-0.5 hover:border-slate-300 active:scale-[0.99]"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">{card.label}</p>
+                            <p className="mt-2 text-lg font-black tracking-tight text-slate-950">{card.value}</p>
+                            <p className="mt-1 text-[11px] font-semibold leading-5 text-slate-500">{card.helper}</p>
+                          </div>
+                          <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl ${card.iconTone}`}>
+                            <Icon size={18} weight="duotone" />
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="relative mt-4 grid gap-2 sm:grid-cols-3">
+                  {quickAccountActions.map((action) => {
+                    const Icon = action.icon;
+                    return (
+                      <button
+                        key={action.id}
+                        type="button"
+                        onClick={action.onClick}
+                        className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/86 px-4 py-3 text-xs font-black text-slate-700 shadow-[0_12px_26px_-22px_rgba(15,23,42,0.22)] transition hover:bg-white active:scale-[0.99]"
+                      >
+                        <Icon size={16} weight="duotone" />
+                        {action.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="relative mt-8 space-y-3">
                   <div className="grid gap-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Nome Completo</label>
                     <div className="relative">
@@ -611,27 +710,29 @@ export function ClientAccount() {
                       />
                     </div>
                   </div>
-                  <div className="grid gap-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">E-mail da conta</label>
-                    <div className="relative">
-                      <EnvelopeSimple size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input
-                        value={me?.email || ''}
-                        readOnly
-                        className="w-full cursor-not-allowed rounded-2xl border border-slate-100 bg-slate-100/80 py-3 pl-11 pr-4 text-sm font-bold text-slate-500 outline-none"
-                      />
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="grid gap-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">E-mail da conta</label>
+                      <div className="relative">
+                        <EnvelopeSimple size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          value={me?.email || ''}
+                          readOnly
+                          className="w-full cursor-not-allowed rounded-2xl border border-slate-100 bg-slate-100/80 py-3 pl-11 pr-4 text-sm font-bold text-slate-500 outline-none"
+                        />
+                      </div>
+                      <p className="ml-2 text-[10px] font-semibold text-slate-400">Alteração de e-mail segue fluxo validado por segurança.</p>
                     </div>
-                    <p className="ml-2 text-[10px] font-semibold text-slate-400">Por segurança, a alteração de e-mail será liberada em fluxo validado.</p>
-                  </div>
-                  <div className="grid gap-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Telefone para Contato</label>
-                    <div className="relative">
-                      <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input
-                        value={phoneDraft}
-                        onChange={e => setPhoneDraft(e.target.value)}
-                        className="w-full rounded-2xl border border-slate-100 bg-[#EEF2F7] py-3 pl-11 pr-4 text-sm font-bold text-slate-700 focus:border-slate-900/20 focus:outline-none"
-                      />
+                    <div className="grid gap-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Telefone para Contato</label>
+                      <div className="relative">
+                        <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          value={phoneDraft}
+                          onChange={e => setPhoneDraft(e.target.value)}
+                          className="w-full rounded-2xl border border-slate-100 bg-[#EEF2F7] py-3 pl-11 pr-4 text-sm font-bold text-slate-700 focus:border-slate-900/20 focus:outline-none"
+                        />
+                      </div>
                     </div>
                   </div>
                   <button
@@ -642,7 +743,7 @@ export function ClientAccount() {
                     {profileSaving ? 'Salvando...' : 'Salvar Alterações'}
                   </button>
                   {profileMessage && (
-                    <p className="text-center text-[11px] font-bold text-emerald-600">{profileMessage}</p>
+                    <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-center text-[11px] font-bold text-emerald-600">{profileMessage}</p>
                   )}
                 </div>
               </section>
@@ -719,24 +820,27 @@ export function ClientAccount() {
               </section>
 
               {/* Seção 3: Segurança */}
-              <section className="rounded-[2rem] bg-white p-5 border border-slate-100 shadow-sm space-y-4">
+              <section className="rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm space-y-4">
                 <div className="space-y-4">
                   <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
                     <ShieldCheck size={16} weight="duotone" className="text-indigo-500" />
                     Segurança
                   </h3>
+                  <p className="text-xs font-semibold leading-5 text-slate-500">
+                    Ajuste sua senha da conta e mantenha seu acesso pessoal sob controle.
+                  </p>
                   <div className="space-y-2">
                     <input
                       type="password"
                       placeholder="Nova senha"
                       value={pwdForm.newPassword}
                       onChange={e => setPwdForm(p => ({...p, newPassword: e.target.value}))}
-                      className="w-full rounded-xl border border-slate-100 bg-[#EEF2F7] px-3 py-2 text-[13px] font-bold focus:outline-none"
+                      className="w-full rounded-2xl border border-slate-100 bg-[#EEF2F7] px-4 py-3 text-[13px] font-bold focus:outline-none"
                     />
                     <button
                       onClick={handleChangePassword}
                       disabled={pwdLoading}
-                      className="w-full rounded-xl bg-slate-100 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 active:scale-95 transition-all"
+                      className="w-full rounded-2xl bg-slate-100 py-3 text-[10px] font-black uppercase tracking-widest text-slate-600 active:scale-95 transition-all"
                     >
                       Trocar Senha
                     </button>
