@@ -1377,7 +1377,7 @@ export function ClientOrders() {
     },
     {
       key: 'cancelled',
-      label: 'Cancelados',
+      label: 'Cancelado',
       count: cancelledOrdersCount,
       icon: <XCircle size={13} weight="duotone" />,
       selectedClass: 'bg-rose-500 text-white shadow-[0_4px_12px_-4px_rgba(244,63,94,0.45)]',
@@ -1457,27 +1457,6 @@ export function ClientOrders() {
               {lastOrder ? (
                 <span className="hidden shrink-0 rounded-full bg-white/88 px-3 py-1.5 text-[11px] font-semibold text-slate-600 shadow-[0_12px_24px_-22px_rgba(21,58,76,0.2)] ring-1 ring-slate-200/70 sm:inline-flex">
                   {formatOrderMoment(lastOrder.createdAt)}
-                </span>
-              ) : null}
-            </div>
-
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/92 px-3 py-2 text-[11px] font-semibold text-slate-600 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.16)] ring-1 ring-white/90">
-                <span className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Total</span>
-                <span className="text-sm font-black text-slate-950">{orders.length}</span>
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-2 text-[11px] font-semibold text-emerald-700 shadow-[0_12px_24px_-20px_rgba(16,185,129,0.15)] ring-1 ring-emerald-100">
-                <span className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-500">Ativos</span>
-                <span className="text-sm font-black text-slate-950">{activeOrders.length}</span>
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-2 text-[11px] font-semibold text-sky-700 shadow-[0_12px_24px_-20px_rgba(14,165,233,0.15)] ring-1 ring-sky-100">
-                <span className="text-[10px] font-black uppercase tracking-[0.16em] text-sky-500">Concluídos</span>
-                <span className="text-sm font-black text-slate-950">{deliveredOrdersCount}</span>
-              </span>
-              {cancelledOrdersCount > 0 ? (
-                <span className="inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-2 text-[11px] font-semibold text-rose-600 shadow-[0_12px_24px_-20px_rgba(244,63,94,0.14)] ring-1 ring-rose-100">
-                  <span className="text-[10px] font-black uppercase tracking-[0.16em] text-rose-500">Cancelados</span>
-                  <span className="text-sm font-black text-slate-950">{cancelledOrdersCount}</span>
                 </span>
               ) : null}
             </div>
