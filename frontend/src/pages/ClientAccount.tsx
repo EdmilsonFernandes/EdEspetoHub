@@ -19,7 +19,7 @@ import {
   Trash
 } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
-import { formatCurrency, formatOrderDisplayId } from '../utils/format';
+import { formatCurrency, formatDate, formatOrderDisplayId, formatPhoneInput } from '../utils/format';
 import { useCachedCustomerProfileImage } from '../hooks/useCachedCustomerProfileImage';
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
