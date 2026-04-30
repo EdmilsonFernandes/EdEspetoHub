@@ -321,24 +321,24 @@ const StaticPixBlock = ({ pixKey, phone }) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 w-full mb-8">
+    <div className="mb-8 w-full rounded-[2rem] border border-[#d8e5ee] bg-[linear-gradient(145deg,#ffffff_0%,#f4f8fb_100%)] p-6 shadow-[0_22px_42px_-30px_rgba(51,104,134,0.18)]">
       <div className="flex flex-col items-center gap-3 mb-4 text-center">
-        <div className="p-3 bg-gray-50 rounded-full">
-          <QrCode size={24} weight="duotone" className="text-gray-700" />
+        <div className="rounded-full bg-[#edf5fa] p-3 shadow-inner">
+          <QrCode size={24} weight="duotone" className="text-[#336886]" />
         </div>
-        <span className="font-bold text-gray-700">Pix para pagamento</span>
-        <p className="text-xs text-gray-500">Use o QR Code ou copie a chave abaixo.</p>
+        <span className="text-sm font-black text-slate-900">Pix para pagamento</span>
+        <p className="text-xs text-slate-500">Use o QR Code ou copie a chave abaixo.</p>
       </div>
       <div className="flex justify-center mb-4">
-        <img src={qrUrl} alt="QR Code Pix" className="w-48 h-48 rounded-lg border" />
+        <img src={qrUrl} alt="QR Code Pix" className="h-48 w-48 rounded-2xl border border-slate-200 bg-white p-2" />
       </div>
-      <div className="bg-gray-50 p-4 rounded-xl font-mono text-xs text-gray-700 break-all select-all border border-gray-200 mb-3">
+      <div className="mb-3 break-all rounded-2xl border border-slate-200 bg-white px-4 py-4 font-mono text-xs text-slate-700 shadow-sm select-all">
         {qrData}
       </div>
       <button
         type="button"
         onClick={handleCopy}
-        className={`flex w-full items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all active:scale-[0.98] ${copied ? "bg-emerald-600 text-white" : "bg-brand-primary text-white hover:opacity-90"}`}
+        className={`flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-black transition-all active:scale-[0.98] ${copied ? "bg-emerald-600 text-white" : "bg-[linear-gradient(135deg,#153A4C,#336886)] text-white hover:opacity-95"}`}
       >
         {copied ? <Check size={16} weight="bold" /> : <Copy size={16} weight="bold" />}
         {copied ? "Copiado!" : "Copiar chave Pix"}
@@ -380,6 +380,67 @@ export const SuccessView = ({
   const paymentMeta = paymentMethod ? getPaymentMethodMeta(paymentMethod) : null;
   const orderTypeLabel =
     orderType === 'delivery' ? 'Entrega' : orderType === 'table' ? `Mesa ${table || '—'}` : 'Retirada';
+  const showTrackAction = Boolean(orderId && onTrackOrder && !isAwaitingPayment);
+  const showOrdersAction = Boolean(onMyOrders);
+  const showReceiptAction = Boolean(orderId && onPrintReceipt);
+  const showWhatsAppAction = Boolean(onWhatsApp && !isAwaitingPayment);
+  const primaryAction = showTrackAction
+    ? {
+        label: 'Acompanhar pedido',
+        icon: <CheckCircle size={20} weight="duotone" />,
+        onClick: onTrackOrder,
+      }
+    : showOrdersAction
+      ? {
+          label: 'Meus pedidos',
+          icon: <ListBullets size={20} weight="duotone" />,
+          onClick: onMyOrders,
+        }
+      : {
+          label: 'Fazer novo pedido',
+          icon: <ArrowLeft size={20} weight="duotone" />,
+          onClick: onNewOrder,
+        };
+  const secondaryActions = [
+    showOrdersAction && !showTrackAction
+      ? null
+      : showOrdersAction
+        ? {
+            key: 'orders',
+            label: 'Meus pedidos',
+            icon: <ListBullets size={18} weight="duotone" />,
+            onClick: onMyOrders,
+            tone: 'slate',
+          }
+        : null,
+    !showOrdersAction
+      ? {
+          key: 'new-order',
+          label: 'Novo pedido',
+          icon: <ArrowLeft size={18} weight="duotone" />,
+          onClick: onNewOrder,
+          tone: 'slate',
+        }
+      : null,
+    showReceiptAction
+      ? {
+          key: 'receipt',
+          label: 'Comprovante',
+          icon: <Printer size={18} weight="duotone" />,
+          onClick: onPrintReceipt,
+          tone: 'slate',
+        }
+      : null,
+    showWhatsAppAction
+      ? {
+          key: 'whatsapp',
+          label: 'WhatsApp',
+          icon: <WhatsappLogo size={18} weight="duotone" />,
+          onClick: onWhatsApp,
+          tone: 'emerald',
+        }
+      : null,
+  ].filter(Boolean);
 
   // Overlay de celebração curto para pedidos concluídos sem falha/pagamento pendente.
   const [showCelebration, setShowCelebration] = useState(() => shouldCelebrate);
@@ -553,8 +614,8 @@ export const SuccessView = ({
         {isStaticPix && <StaticPixBlock pixKey={pixKey} phone={phone} />}
 
         {isLocalPayment && (
-          <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Forma de pagamento</p>
+          <div className="rounded-[2rem] border border-[#d8e5ee] bg-[linear-gradient(145deg,#ffffff_0%,#f4f8fb_100%)] p-4 shadow-[0_20px_40px_-34px_rgba(51,104,134,0.18)]">
+            <p className="mb-2 text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Forma de pagamento</p>
             <div className="flex items-center gap-2">
               {(() => {
                 const methodMeta = getPaymentMethodMeta(paymentMethod);
@@ -572,50 +633,31 @@ export const SuccessView = ({
 
         <div className="rounded-[2rem] border border-slate-200/80 bg-white/86 p-3 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.2)] backdrop-blur-xl">
           <p className="px-2 pb-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Próximos passos</p>
-        <div className="flex flex-col gap-3">
-          {onMyOrders && (
+          <div className="flex flex-col gap-3">
             <button
-              onClick={onMyOrders}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 py-4 text-base font-black text-white shadow-sm transition hover:bg-slate-800 active:scale-[0.98]"
+              onClick={primaryAction.onClick}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] py-4 text-base font-black text-white shadow-[0_18px_34px_-22px_rgba(51,104,134,0.45)] transition hover:opacity-95 active:scale-[0.98]"
             >
-              <ListBullets size={20} weight="duotone" /> Meus pedidos
+              {primaryAction.icon} {primaryAction.label}
             </button>
-          )}
-          {!onMyOrders && (
-            <button
-              onClick={onNewOrder}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 py-4 text-base font-black text-white shadow-sm transition hover:bg-slate-800 active:scale-[0.98]"
-              >
-                <ArrowLeft size={20} weight="duotone" /> Fazer novo pedido
-              </button>
-          )}
-          <div className="flex gap-3">
-            {orderId && onTrackOrder && !isAwaitingPayment && (
-              <button
-                onClick={onTrackOrder}
-                className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 py-3.5 text-sm font-bold text-emerald-800 transition hover:bg-emerald-100 active:scale-[0.98]"
-              >
-                <CheckCircle size={18} weight="duotone" /> Acompanhar
-              </button>
-            )}
-            {orderId && onPrintReceipt && (
-              <button
-                onClick={onPrintReceipt}
-                className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 py-3.5 text-sm font-bold text-amber-800 transition hover:bg-amber-100 active:scale-[0.98]"
-              >
-                <Printer size={18} weight="duotone" /> Comprovante
-              </button>
-            )}
-            {onWhatsApp && !isAwaitingPayment && (
-              <button
-                onClick={onWhatsApp}
-                className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 py-3.5 text-sm font-bold text-emerald-800 transition hover:bg-emerald-100 active:scale-[0.98]"
-              >
-                <WhatsappLogo size={18} weight="duotone" /> WhatsApp
-              </button>
-            )}
+            {secondaryActions.length > 0 ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {secondaryActions.map((action) => (
+                  <button
+                    key={action.key}
+                    onClick={action.onClick}
+                    className={`flex items-center justify-center gap-2 rounded-2xl border py-3.5 text-sm font-bold transition active:scale-[0.98] ${
+                      action.tone === 'emerald'
+                        ? 'border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+                        : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    {action.icon} {action.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </div>
-        </div>
         </div>
       </div>
     </div>

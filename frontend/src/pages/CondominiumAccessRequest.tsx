@@ -13,7 +13,7 @@ const readFileAsDataUrl = (file: File) =>
     reader.readAsDataURL(file);
   });
 
-const fieldClass = 'w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886] focus:bg-white';
+const fieldClass = 'w-full rounded-2xl border border-slate-200 bg-[#f5f8fb] px-4 py-3.5 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886] focus:bg-white focus:ring-2 focus:ring-[#d8e5ee]';
 
 export function CondominiumAccessRequest() {
   const navigate = useNavigate();
@@ -79,6 +79,7 @@ export function CondominiumAccessRequest() {
             <div className="mx-auto grid h-16 w-16 place-items-center rounded-3xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
               <CheckCircle size={34} weight="fill" />
             </div>
+            <p className="mt-5 text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Condomínio em análise</p>
             <h1 className="mt-5 text-2xl font-black tracking-[-0.03em] text-slate-950">Solicitação enviada</h1>
             <p className="mx-auto mt-2 max-w-sm text-sm font-semibold leading-6 text-slate-500">
               Recebemos os dados do condomínio. A equipe vai analisar e liberar o acesso do responsável após aprovação.
@@ -112,10 +113,31 @@ export function CondominiumAccessRequest() {
           </p>
         </div>
 
+        <section className="overflow-hidden rounded-[2rem] border border-white/50 bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(241,247,251,0.92)_58%,rgba(255,255,255,0.94)_100%)] px-5 py-5 shadow-[0_24px_60px_-42px_rgba(15,23,42,0.35)] backdrop-blur-xl">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Fluxo guiado</p>
+              <h2 className="mt-1 text-lg font-black text-slate-950">Tudo que o condomínio precisa, em uma única entrada</h2>
+              <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">
+                Dados do condomínio, identidade visual e responsável ficam organizados no mesmo envio.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center rounded-full border border-[#d8e5ee] bg-[#edf5fa] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">
+                Painel exclusivo
+              </span>
+              <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600">
+                Aprovação assistida
+              </span>
+            </div>
+          </div>
+        </section>
+
         <form onSubmit={submit} className="ds-card-elevated space-y-5 border-white/40 bg-white/86 p-5 shadow-[0_26px_70px_-46px_rgba(15,23,42,0.55)] backdrop-blur-xl sm:p-7">
-          <section className="grid gap-3 md:grid-cols-2">
+          <section className="grid gap-3 rounded-[1.75rem] border border-slate-200/80 bg-[#f8fbfd]/90 p-4 md:grid-cols-2">
             <div className="md:col-span-2">
-              <p className="mb-3 text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Dados do condomínio</p>
+              <p className="mb-1 text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Dados do condomínio</p>
+              <p className="mb-3 text-xs font-semibold leading-5 text-slate-500">Nome, localização e contexto básico para análise da operação.</p>
               <input value={form.condominiumName} onChange={(event) => update('condominiumName', event.target.value)} placeholder="Nome do condomínio" className={fieldClass} />
             </div>
             <input value={form.city} onChange={(event) => update('city', event.target.value)} placeholder="Cidade" className={fieldClass} />
@@ -125,8 +147,11 @@ export function CondominiumAccessRequest() {
             <textarea value={form.description} onChange={(event) => update('description', event.target.value)} placeholder="Breve descrição do condomínio" className={`${fieldClass} min-h-[96px] md:col-span-2`} />
           </section>
 
-          <section className="grid gap-3 md:grid-cols-2">
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886] md:col-span-2">Identidade visual</p>
+          <section className="grid gap-3 rounded-[1.75rem] border border-slate-200/80 bg-[#f8fbfd]/90 p-4 md:grid-cols-2">
+            <div className="md:col-span-2">
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Identidade visual</p>
+              <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">Logo e banner ajudam a deixar a futura área do condomínio já alinhada com a marca local.</p>
+            </div>
             {[
               { key: 'logoFile', label: 'Logo do condomínio', icon: ImageSquare },
               { key: 'bannerFile', label: 'Banner de capa', icon: Buildings },
@@ -134,10 +159,10 @@ export function CondominiumAccessRequest() {
               const Icon = item.icon;
               const preview = form[item.key];
               return (
-                <label key={item.key} className="group cursor-pointer overflow-hidden rounded-[1.35rem] border border-dashed border-slate-300 bg-slate-50 p-3 transition hover:border-[#336886] hover:bg-white">
+                <label key={item.key} className="group cursor-pointer overflow-hidden rounded-[1.35rem] border border-dashed border-slate-300 bg-white p-3 transition hover:border-[#336886] hover:bg-[#fafdff]">
                   <input type="file" accept="image/*" className="hidden" onChange={(event) => handleAsset(item.key as any, event.target.files?.[0])} />
                   <div className="flex items-center gap-3">
-                    <div className="grid h-16 w-16 place-items-center overflow-hidden rounded-2xl bg-white text-[#336886] ring-1 ring-slate-100">
+                    <div className="grid h-16 w-16 place-items-center overflow-hidden rounded-2xl bg-[#edf5fa] text-[#336886] ring-1 ring-[#d8e5ee]">
                       {preview ? <img src={preview} alt={item.label} className="h-full w-full object-cover" /> : <Icon size={24} weight="duotone" />}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -152,8 +177,11 @@ export function CondominiumAccessRequest() {
             })}
           </section>
 
-          <section className="grid gap-3 md:grid-cols-2">
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886] md:col-span-2">Responsável</p>
+          <section className="grid gap-3 rounded-[1.75rem] border border-slate-200/80 bg-[#f8fbfd]/90 p-4 md:grid-cols-2">
+            <div className="md:col-span-2">
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Responsável</p>
+              <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">Esse será o ponto de contato para aprovação, retorno comercial e liberação do acesso.</p>
+            </div>
             <input value={form.responsibleName} onChange={(event) => update('responsibleName', event.target.value)} placeholder="Nome do responsável" className={fieldClass} />
             <input value={form.responsibleRole} onChange={(event) => update('responsibleRole', event.target.value)} placeholder="Cargo: síndico, administradora..." className={fieldClass} />
             <input type="email" value={form.responsibleEmail} onChange={(event) => update('responsibleEmail', event.target.value)} placeholder="E-mail" className={fieldClass} />

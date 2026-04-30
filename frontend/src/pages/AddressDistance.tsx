@@ -71,11 +71,11 @@ const normalizeAddressToForm = (address: any) => ({
 const getAddressTone = (label: string, isDefault: boolean) => {
   if (isDefault) {
     return {
-      iconWrap: 'bg-emerald-50 text-emerald-600',
-      accent: 'from-emerald-500 via-lime-400 to-sky-300',
-      badge: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-      border: 'border-emerald-200/80',
-      glow: 'shadow-[0_26px_60px_-42px_rgba(16,185,129,0.34)]',
+      iconWrap: 'bg-[#edf5fa] text-[#336886]',
+      accent: 'from-[#153A4C] via-[#336886] to-sky-300',
+      badge: 'border-[#cfe0ea] bg-[#edf5fa] text-[#336886]',
+      border: 'border-[#d6e3eb]',
+      glow: 'shadow-[0_24px_52px_-38px_rgba(51,104,134,0.28)]',
     };
   }
 
@@ -91,9 +91,9 @@ const getAddressTone = (label: string, isDefault: boolean) => {
 
   if (label === 'Trabalho') {
     return {
-      iconWrap: 'bg-amber-50 text-amber-600',
-      accent: 'from-amber-500 via-orange-300 to-white',
-      badge: 'border-amber-200 bg-amber-50 text-amber-700',
+      iconWrap: 'bg-slate-100 text-slate-700',
+      accent: 'from-[#153A4C] via-[#7ea0b6] to-white',
+      badge: 'border-slate-200 bg-slate-100 text-slate-700',
       border: 'border-slate-200/70',
       glow: 'shadow-[0_22px_45px_-36px_rgba(15,23,42,0.28)]',
     };
@@ -285,7 +285,7 @@ export function AddressDistance() {
             <ArrowLeft size={20} weight="bold" />
           </button>
           <div className="min-w-0">
-            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-sky-600">Minha conta</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">Área do cliente</p>
             <h1 className="text-lg font-black leading-tight text-slate-900">Meus Endereços</h1>
             <p className="text-[11px] font-medium text-slate-500">Edite, escolha o principal e mantenha o checkout alinhado.</p>
           </div>
@@ -294,12 +294,12 @@ export function AddressDistance() {
         <div className="space-y-4 p-4">
           <section className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white px-5 py-5 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.3)]">
             <div className="flex items-start gap-4">
-              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-[1.5rem] bg-sky-50 text-sky-600 shadow-inner">
+              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-[1.5rem] bg-[#edf5fa] text-[#336886] shadow-inner">
                 <MapPinLine size={26} weight="duotone" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Base de entrega</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Central de endereços</p>
                   <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600">
                     {addresses.length} {addresses.length === 1 ? 'endereço salvo' : 'endereços salvos'}
                   </span>
@@ -310,6 +310,16 @@ export function AddressDistance() {
                     ? `${defaultAddress.label || 'Endereço principal'} • ${buildAddressTitle(defaultAddress)}`
                     : 'Cadastre um endereço principal para acelerar pedidos com entrega.'}
                 </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="inline-flex items-center rounded-full border border-[#d6e3eb] bg-[#f5f9fc] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">
+                    Checkout alinhado
+                  </span>
+                  {defaultAddress ? (
+                    <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700">
+                      Principal definido
+                    </span>
+                  ) : null}
+                </div>
               </div>
             </div>
           </section>
@@ -318,7 +328,7 @@ export function AddressDistance() {
             <button
               type="button"
               onClick={handleOpenNewForm}
-              className="flex w-full items-center justify-center gap-2 rounded-[1.6rem] bg-[linear-gradient(135deg,#0f172a,#1e293b)] py-4 text-xs font-black uppercase tracking-[0.22em] text-white shadow-[0_20px_45px_-28px_rgba(15,23,42,0.7)] transition-all active:scale-[0.98]"
+              className="flex w-full items-center justify-center gap-2 rounded-[1.6rem] bg-[linear-gradient(135deg,#153A4C,#336886)] py-4 text-xs font-black uppercase tracking-[0.22em] text-white shadow-[0_20px_45px_-28px_rgba(51,104,134,0.55)] transition-all active:scale-[0.98]"
             >
               <Plus size={16} weight="bold" />
               Novo endereço
@@ -521,7 +531,7 @@ export function AddressDistance() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full rounded-[1.5rem] bg-[linear-gradient(135deg,#0f172a,#1e293b)] py-4 text-xs font-black uppercase tracking-[0.22em] text-white shadow-[0_20px_45px_-28px_rgba(15,23,42,0.7)] transition-all active:scale-95 disabled:opacity-50"
+                  className="w-full rounded-[1.5rem] bg-[linear-gradient(135deg,#153A4C,#336886)] py-4 text-xs font-black uppercase tracking-[0.22em] text-white shadow-[0_20px_45px_-28px_rgba(51,104,134,0.55)] transition-all active:scale-95 disabled:opacity-50"
                 >
                   {isSubmitting ? 'Salvando...' : editingAddressId ? 'Salvar alterações' : 'Salvar endereço'}
                 </button>
