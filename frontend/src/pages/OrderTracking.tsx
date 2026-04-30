@@ -285,14 +285,14 @@ function TrackingMetaCard({
       : accent === 'warning'
       ? 'text-amber-700'
       : accent === 'primary'
-      ? 'text-stone-950'
-      : 'text-stone-900';
+      ? 'text-[#153A4C]'
+      : 'text-slate-900';
 
   return (
-    <div className="rounded-[1.35rem] border border-[#eadfce] bg-[linear-gradient(180deg,#ffffff_0%,#fcf8f1_100%)] px-4 py-3 shadow-[0_18px_36px_-28px_rgba(120,53,15,0.18)]">
-      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-stone-500">{label}</p>
+    <div className="rounded-[1.2rem] border border-[#d6e4ed] bg-[linear-gradient(180deg,#ffffff_0%,#f5f9fc_100%)] px-4 py-3 shadow-[0_18px_36px_-30px_rgba(51,104,134,0.16)]">
+      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">{label}</p>
       <div className={`mt-1.5 text-sm font-black leading-tight ${accentClass}`}>{value}</div>
-      {detail ? <div className="mt-1 text-xs font-medium leading-5 text-stone-500">{detail}</div> : null}
+      {detail ? <div className="mt-1 text-xs font-medium leading-5 text-slate-500">{detail}</div> : null}
     </div>
   );
 }
@@ -309,14 +309,14 @@ function TrackingInfoRow({
   detail?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-[1.35rem] border border-[#eadfce] bg-[linear-gradient(180deg,#fffdf7_0%,#faf6ee_100%)] px-4 py-3 shadow-[0_18px_36px_-30px_rgba(120,53,15,0.16)]">
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-amber-200/70 bg-[linear-gradient(135deg,#fff7e7,#f3e0b9)] text-amber-800 shadow-[0_12px_24px_-20px_rgba(245,158,11,0.35)]">
+    <div className="flex items-start gap-3 rounded-[1.2rem] border border-[#d6e4ed] bg-[linear-gradient(180deg,#ffffff_0%,#f5f9fc_100%)] px-4 py-3 shadow-[0_18px_36px_-30px_rgba(51,104,134,0.14)]">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#cfe0ea] bg-[linear-gradient(135deg,#f8fbfd,#e7f1f7)] text-[#336886] shadow-[0_12px_24px_-20px_rgba(51,104,134,0.28)]">
         {icon}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-stone-500">{label}</p>
-        <div className="mt-1 text-[13px] font-black leading-5 text-stone-950">{value}</div>
-        {detail ? <div className="mt-1 text-xs font-medium leading-5 text-stone-500">{detail}</div> : null}
+        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">{label}</p>
+        <div className="mt-1 text-[13px] font-black leading-5 text-slate-950">{value}</div>
+        {detail ? <div className="mt-1 text-xs font-medium leading-5 text-slate-500">{detail}</div> : null}
       </div>
     </div>
   );
@@ -1266,11 +1266,11 @@ export function OrderTracking() {
 
           {!loading && !error && order && (
             <div className="space-y-3 sm:space-y-4">
-              <div className={`relative overflow-hidden rounded-[1.75rem] border p-5 shadow-[0_28px_60px_-42px_rgba(120,53,15,0.22)] ring-1 ring-white/80 sm:p-6 ${
+              <div className={`relative overflow-hidden rounded-[1.6rem] border p-4 shadow-[0_24px_52px_-40px_rgba(51,104,134,0.22)] ring-1 ring-white/80 sm:p-5 ${
                 isCancelled
                   ? 'border-rose-100 bg-[linear-gradient(145deg,#fff6f7,#fff)]'
                   : isReady
-                  ? 'border-emerald-100 bg-[linear-gradient(145deg,#f4fbf6,#fffefb)]'
+                  ? 'border-emerald-100 bg-[linear-gradient(145deg,#f5fbf7,#ffffff)]'
                   : 'border-[#d5e3ec] bg-[linear-gradient(145deg,#f8fbfd,#eef5fa_52%,#ffffff_100%)]'
               }`}>
                 <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full blur-3xl opacity-40" style={{ background: isCancelled ? '#fecdd3' : isReady ? '#bbf7d0' : '#bfdbfe' }} />
@@ -1280,7 +1280,7 @@ export function OrderTracking() {
                         Pedido #{orderDisplayId}
                     </p>
                     <div className="mt-3 flex items-center gap-3 flex-wrap">
-                      <h1 className="text-[1.65rem] font-black leading-none text-stone-950 sm:text-3xl">{statusLabel}</h1>
+                      <h1 className="text-[1.45rem] font-black leading-none text-slate-950 sm:text-[2rem]">{statusLabel}</h1>
                       {isDelivery && (
                         String((order as any)?.delivery?.status || '').toUpperCase() === 'IN_TRANSIT' ||
                         status === 'in_delivery' ||
@@ -1306,7 +1306,21 @@ export function OrderTracking() {
                       {isCancelled ? 'Cancelado' : isReady ? 'Finalizado' : 'Em andamento'}
                     </span>
                     </div>
-                    <p className="mt-1.5 text-sm text-stone-500">{typeLabel}</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <span className="inline-flex rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-slate-600 ring-1 ring-[#d5e3ec]">
+                        {typeLabel}
+                      </span>
+                      {orderCreatedAtLabel ? (
+                        <span className="inline-flex rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-slate-500 ring-1 ring-slate-200">
+                          {orderCreatedAtLabel}
+                        </span>
+                      ) : null}
+                      {paymentMeta?.label ? (
+                        <span className="inline-flex rounded-full bg-[#edf5fa] px-2.5 py-1 text-[11px] font-semibold text-[#336886] ring-1 ring-[#d5e3ec]">
+                          {paymentMeta.label}
+                        </span>
+                      ) : null}
+                    </div>
                     {isCancelled && order?.canceledReason ? (
                       <div className="mt-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3">
                         <p className="text-xs font-bold uppercase tracking-[0.16em] text-rose-700">Motivo do cancelamento</p>
@@ -1384,7 +1398,7 @@ export function OrderTracking() {
                 </div>
               )}
 
-              <div id="order-status-section" className="rounded-[1.7rem] border border-[#d5e3ec] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(239,246,251,0.96))] p-5 shadow-[0_22px_42px_-34px_rgba(51,104,134,0.18)]">
+              <div id="order-status-section" className="rounded-[1.55rem] border border-[#d5e3ec] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(239,246,251,0.96))] p-4 shadow-[0_20px_40px_-34px_rgba(51,104,134,0.18)]">
                 <div className="mb-4">
                   <div className="h-2 w-full overflow-hidden rounded-full bg-[#dce9f1]/80">
                     <div
@@ -1396,7 +1410,10 @@ export function OrderTracking() {
                       }}
                     />
                   </div>
-                  <div className="mt-2 text-xs text-stone-500">{progress}% completo</div>
+                  <div className="mt-2 flex items-center justify-between gap-3 text-xs text-slate-500">
+                    <span>Etapa atual do pedido</span>
+                    <span className="font-semibold text-[#336886]">{progress}% completo</span>
+                  </div>
                 </div>
                 {(isReady && elapsedMs > 0) ||
                 (remainingEstimateMinutes !== null && !isTerminal) ||
@@ -1501,12 +1518,12 @@ export function OrderTracking() {
               <div className="grid sm:grid-cols-2 gap-4">
                 <div
                   id="order-items-section"
-                  className="rounded-3xl border border-[#d5e3ec] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(239,246,251,0.98))] p-6 shadow-[0_22px_42px_-34px_rgba(51,104,134,0.18)]"
+                  className="rounded-3xl border border-[#d5e3ec] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(239,246,251,0.98))] p-5 shadow-[0_22px_42px_-34px_rgba(51,104,134,0.18)]"
                 >
                   <div className="flex items-center justify-between gap-3 mb-4">
                     <p className="text-sm font-semibold text-stone-950">Resumo do pedido</p>
                     {paymentMeta?.label && (
-                      <span className="inline-flex items-center gap-2 rounded-full border border-amber-200/80 bg-[linear-gradient(135deg,#fffbed,#fbf4d4)] px-3 py-1 text-[11px] font-semibold text-amber-900">
+                      <span className="inline-flex items-center gap-2 rounded-full border border-[#d6e4ed] bg-[linear-gradient(135deg,#ffffff,#edf5fa)] px-3 py-1 text-[11px] font-semibold text-[#336886]">
                         {paymentMeta.icon && (
                           <img src={paymentMeta.icon} alt={paymentMeta.label} className="h-4 w-4 object-contain" />
                         )}
@@ -1516,16 +1533,16 @@ export function OrderTracking() {
                   </div>
                   <div className="space-y-2 text-sm text-slate-600">
                     {itemsToRender.map((item) => (
-                      <div key={item.id || item.productId} className="flex items-start gap-3 rounded-2xl border border-amber-100/80 bg-white/92 px-3 py-3 shadow-[0_12px_24px_-24px_rgba(120,53,15,0.14)]">
+                      <div key={item.id || item.productId} className="flex items-start gap-3 rounded-2xl border border-[#dce9f1] bg-white/92 px-3 py-3 shadow-[0_12px_24px_-24px_rgba(51,104,134,0.12)]">
                         {/* Imagem */}
                         {item.imageUrl || item.image || item.product?.imageUrl ? (
                           <img
                             src={resolveAssetUrl(item.imageUrl || item.image || item.product?.imageUrl)}
                             alt={item.name}
-                            className="h-10 w-10 shrink-0 rounded-xl border border-amber-100 object-cover"
+                            className="h-10 w-10 shrink-0 rounded-xl border border-[#dce9f1] object-cover"
                           />
                         ) : (
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-100 bg-amber-50 text-base">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#dce9f1] bg-[#edf5fa] text-base">
                             🍖
                           </div>
                         )}
@@ -1533,27 +1550,27 @@ export function OrderTracking() {
                         {/* Nome + badges */}
                         <div className="min-w-0 flex-1">
                           <div className="flex items-baseline gap-1.5">
-                            <span className="shrink-0 rounded-md border border-amber-100 bg-amber-50 px-1.5 py-0.5 text-[11px] font-black text-amber-800">
+                            <span className="shrink-0 rounded-md border border-[#dce9f1] bg-[#edf5fa] px-1.5 py-0.5 text-[11px] font-black text-[#336886]">
                               {item.quantity}x
                             </span>
-                            <span className="font-semibold leading-snug text-stone-900">{item.name}</span>
+                            <span className="font-semibold leading-snug text-slate-900">{item.name}</span>
                           </div>
                           {(item?.cookingPoint || item?.passSkewer || formatSelectedModifiers(item?.selectedModifiers || []).length > 0) && (
                             <div className="mt-1.5 flex flex-wrap gap-1">
                               {item?.cookingPoint && (
-                                <span className="rounded-full border border-amber-100 bg-amber-50/65 px-2 py-0.5 text-[11px] font-medium text-stone-500">
+                                <span className="rounded-full border border-[#dce9f1] bg-[#f4f8fb] px-2 py-0.5 text-[11px] font-medium text-slate-500">
                                   {item.cookingPoint}
                                 </span>
                               )}
                               {item?.passSkewer && (
-                                <span className="rounded-full border border-amber-100 bg-amber-50/65 px-2 py-0.5 text-[11px] font-medium text-stone-500">
+                                <span className="rounded-full border border-[#dce9f1] bg-[#f4f8fb] px-2 py-0.5 text-[11px] font-medium text-slate-500">
                                   passar farinha
                                 </span>
                               )}
                               {formatSelectedModifiers(item?.selectedModifiers || []).map((modifierName) => (
                                 <span
                                   key={`${item.id || item.productId}-${modifierName}`}
-                                  className="rounded-full border border-amber-100 bg-amber-50/65 px-2 py-0.5 text-[11px] font-medium text-stone-500"
+                                  className="rounded-full border border-[#dce9f1] bg-[#f4f8fb] px-2 py-0.5 text-[11px] font-medium text-slate-500"
                                 >
                                   + {modifierName}
                                 </span>
@@ -1569,12 +1586,12 @@ export function OrderTracking() {
                               <p className="text-[11px] leading-none line-through text-slate-400">
                                 {formatCurrency(Number(item.originalPrice) * (item.quantity || 1))}
                               </p>
-                              <p className="mt-0.5 text-sm font-black text-emerald-600">
+                              <p className="mt-0.5 text-sm font-black text-[#336886]">
                                 {formatCurrency(Number(item.price))}
                               </p>
                             </>
                           ) : (
-                            <p className="text-sm font-black text-stone-800">
+                            <p className="text-sm font-black text-slate-800">
                               {formatCurrency(Number(item.price) * (item.quantity || 1))}
                             </p>
                           )}
@@ -1583,16 +1600,16 @@ export function OrderTracking() {
                     ))}
                   </div>
                   {hasDeliveryFee ? (
-                    <div className="mt-5 flex items-center justify-between border-t border-amber-100 pt-4 text-xs font-semibold text-stone-600">
+                    <div className="mt-5 flex items-center justify-between border-t border-[#dce9f1] pt-4 text-xs font-semibold text-slate-600">
                       <span>Frete</span>
-                      <span className="rounded-full border border-amber-100 bg-amber-50 px-2 py-1 text-amber-800">
+                      <span className="rounded-full border border-[#dce9f1] bg-[#edf5fa] px-2 py-1 text-[#336886]">
                         {formatCurrency(order.deliveryFee)}
                       </span>
                     </div>
                   ) : null}
-                  <div className="mt-3 flex items-center justify-between border-t border-amber-100 pt-4">
-                    <span className="text-lg font-bold text-stone-950">Total</span>
-                    <span className="text-lg font-bold tracking-tight text-stone-950">
+                  <div className="mt-3 flex items-center justify-between border-t border-[#dce9f1] pt-4">
+                    <span className="text-lg font-bold text-slate-950">Total</span>
+                    <span className="text-lg font-bold tracking-tight text-[#153A4C]">
                       {formatCurrency(order.total || 0)}
                     </span>
                   </div>
@@ -1921,7 +1938,7 @@ export function OrderTracking() {
                               window.setTimeout(() => setCtaPulse(false), 220);
                               handleRepeatOrder();
                             }}
-                            className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#1f2937,#44403c)] px-4 py-3 text-[13px] font-bold text-white shadow-[0_18px_34px_-20px_rgba(28,25,23,0.46)] transition-transform active:scale-[0.98]"
+                            className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3 text-[13px] font-bold text-white shadow-[0_18px_34px_-20px_rgba(51,104,134,0.46)] transition-transform active:scale-[0.98]"
                             style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
                           >
                             <ArrowClockwise size={15} weight="bold" />
