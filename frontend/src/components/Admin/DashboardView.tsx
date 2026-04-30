@@ -564,6 +564,11 @@ export const DashboardView = ({
     if (typeof window === "undefined") return;
     const printWindow = window.open("", "_blank", "width=980,height=1280");
     if (!printWindow) return;
+    const reportReturnUrl = window.location.href;
+    const shouldAutoPrintOnLoad =
+      typeof window.matchMedia === "function"
+        ? !window.matchMedia("(max-width: 760px)").matches
+        : true;
 
     const reportCustomers =
       Array.isArray(analyticsReport?.periodCustomers) && analyticsReport.periodCustomers.length > 0
@@ -617,6 +622,7 @@ export const DashboardView = ({
             .screen-toolbar__meta strong { display: block; font-size: 13px; color: #111827; }
             .screen-toolbar__meta span { display: block; margin-top: 2px; font-size: 11px; color: #6b7280; }
             .screen-toolbar__actions { display: flex; flex-wrap: wrap; gap: 10px; }
+            .mobile-action-bar { display: none; }
             .screen-toolbar button { border: 0; border-radius: 999px; padding: 11px 16px; font-size: 12px; font-weight: 800; cursor: pointer; color: #fff; background: linear-gradient(135deg,#0f172a,#334155); }
             .screen-toolbar button.secondary { color: #334155; background: #f8fafc; box-shadow: inset 0 0 0 1px #cbd5e1; }
             .page { max-width: 1120px; margin: 0 auto; padding: 28px; }
@@ -649,7 +655,7 @@ export const DashboardView = ({
               .screen-toolbar { align-items: stretch; flex-direction: column; padding: 12px 14px; }
               .screen-toolbar__actions { width: 100%; }
               .screen-toolbar button { flex: 1 1 0; justify-content: center; }
-              .page { padding: 16px; }
+              .page { padding: 16px 16px calc(88px + env(safe-area-inset-bottom)); }
               .hero { flex-direction: column; gap: 14px; }
               .brand { align-items: flex-start; }
               .brand img, .brand-fallback { width: 56px; height: 56px; border-radius: 16px; }
@@ -676,9 +682,24 @@ export const DashboardView = ({
               .report-table-empty { padding: 14px 12px !important; }
               .report-table-empty td { display: block; padding: 0; }
               .report-table-empty td::before { content: none; }
+              .mobile-action-bar {
+                position: fixed;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 30;
+                display: flex;
+                gap: 10px;
+                padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+                background: linear-gradient(180deg,rgba(255,250,246,0.86),rgba(255,255,255,0.98));
+                border-top: 1px solid #e5e7eb;
+                backdrop-filter: blur(14px);
+              }
+              .mobile-action-bar button { flex: 1 1 0; }
             }
             @media print {
               .screen-toolbar { display: none !important; }
+              .mobile-action-bar { display: none !important; }
               body { background: #fff; }
               .page { padding: 0; }
               .section, .metric, .meta { box-shadow: none; }
@@ -690,12 +711,16 @@ export const DashboardView = ({
           <div class="screen-toolbar">
             <div class="screen-toolbar__meta">
               <strong>Relatório pronto para exportação</strong>
-              <span>Imprima, salve em PDF e depois feche ou volte para o painel.</span>
+              <span>Imprima, salve em PDF e depois feche para retornar ao painel.</span>
             </div>
             <div class="screen-toolbar__actions">
-              <button type="button" class="secondary" onclick="window.handleCloseReport()">Fechar</button>
+              <button type="button" class="secondary" onclick="window.handleCloseReport()">Fechar relatório</button>
               <button type="button" onclick="window.handlePrintReport()">Imprimir / salvar PDF</button>
             </div>
+          </div>
+          <div class="mobile-action-bar">
+            <button type="button" class="secondary" onclick="window.handleCloseReport()">Fechar relatório</button>
+            <button type="button" onclick="window.handlePrintReport()">Imprimir / salvar PDF</button>
           </div>
           <div class="page">
             <div class="hero">
@@ -790,15 +815,13 @@ export const DashboardView = ({
                 window.close();
                 return;
               }
-              if (window.history.length > 1) {
-                window.history.back();
-                return;
-              }
-              window.location.replace("${window.location.origin}");
+              window.location.replace("${escapeHtml(reportReturnUrl)}");
             };
             window.onload = () => {
               window.focus();
-              window.setTimeout(() => window.handlePrintReport(), 120);
+              if (${shouldAutoPrintOnLoad ? "true" : "false"}) {
+                window.setTimeout(() => window.handlePrintReport(), 120);
+              }
             };
           </script>
         </body>

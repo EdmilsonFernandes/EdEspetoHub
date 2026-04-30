@@ -119,6 +119,38 @@ const HUB_DEBUG_TRACE_LIMIT = 80;
 
 const HUB_DISTANCE_CACHE_TTL_MS = 12 * 60 * 60 * 1000;
 
+const appendAssetCacheKey = (value?: string | null, cacheKey?: string) => {
+  const normalized = String(value || '').trim();
+  if (!normalized || !cacheKey || /^data:|^blob:/i.test(normalized)) return normalized;
+  try {
+    const baseOrigin =
+      typeof window !== 'undefined' && window.location?.origin
+        ? window.location.origin
+        : 'https://janocaminho.com.br';
+    const parsed = new URL(normalized, baseOrigin);
+    parsed.searchParams.set('assetKey', cacheKey);
+    if (/^https?:\/\//i.test(normalized)) return parsed.toString();
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return normalized;
+  }
+};
+
+const resolveCondominiumAssetUrl = (
+  condominium: { slug?: string | null; name?: string | null; logoUrl?: string | null; bannerUrl?: string | null } | null | undefined,
+  variant: 'logo' | 'banner'
+) => {
+  const slug = String(condominium?.slug || 'condominio').trim() || 'condominio';
+  const name = String(condominium?.name || 'Condomínio').trim() || 'Condomínio';
+  const preferredSource =
+    variant === 'banner'
+      ? condominium?.bannerUrl || condominium?.logoUrl || undefined
+      : condominium?.logoUrl || condominium?.bannerUrl || undefined;
+  const fallback = getStoreAvatarUrl(slug, name);
+  const resolved = resolveAssetUrl(preferredSource) || fallback;
+  return appendAssetCacheKey(resolved, `${slug}-${variant}`);
+};
+
 const parseOptionalNumber = (value: unknown): number | null => {
   if (value === null || value === undefined) return null;
   if (typeof value === 'number') return Number.isFinite(value) ? value : null;
@@ -1735,17 +1767,13 @@ export function MarketplacePage() {
   const hasUpcomingCondominiumEvent = activeCondominiumEvent?.state === 'upcoming';
   const condominiumEventTimeLabel = formatCondominiumEventTime(activeCondominiumEvent);
   const selectedCondominiumLogoUrl = selectedCondominium
-    ? resolveAssetUrl(selectedCondominium.logoUrl || selectedCondominium.bannerUrl || undefined) || getStoreAvatarUrl(selectedCondominium.slug || 'condominio', selectedCondominium.name || 'Condomínio')
+    ? resolveCondominiumAssetUrl(selectedCondominium, 'logo')
     : '';
   const selectedCondominiumBannerUrl = selectedCondominium
-    ? resolveAssetUrl(selectedCondominium.bannerUrl || selectedCondominium.logoUrl || undefined) || ''
+    ? resolveCondominiumAssetUrl(selectedCondominium, 'banner')
     : '';
   const condominiumPreviewLogos = useMemo(() => {
-    return condominiums.slice(0, 3).map((condominium) => {
-      const slug = String(condominium?.slug || 'condominio');
-      const name = String(condominium?.name || 'Condomínio');
-      return resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
-    });
+    return condominiums.slice(0, 3).map((condominium) => resolveCondominiumAssetUrl(condominium, 'logo'));
   }, [condominiums]);
 
   const filteredCondominiums = useMemo(() => {
@@ -3901,8 +3929,8 @@ export function MarketplacePage() {
                         <div className={`${isNativePlatform ? 'flex flex-col gap-2.5' : 'flex flex-col gap-3'}`}>
                           {live.map(({ condominium, slug, name, region, event }) => {
                             const active = selectedCondominiumSlug === slug;
-                            const logoUrl = resolveAssetUrl(condominium.logoUrl || undefined) || getStoreAvatarUrl(slug, name);
-                            const bannerUrl = resolveAssetUrl(condominium.bannerUrl || condominium.logoUrl || undefined) || logoUrl;
+                            const logoUrl = resolveCondominiumAssetUrl(condominium, 'logo');
+                            const bannerUrl = resolveCondominiumAssetUrl(condominium, 'banner') || logoUrl;
                             const timeLabel = formatCondominiumPickerEventTime(event) || formatCondominiumEventTime(event);
                             return (
                               <button
@@ -3992,8 +4020,8 @@ export function MarketplacePage() {
                         <div className="flex flex-col gap-3">
                           {upcoming.map(({ condominium, slug, name, region, event }) => {
                             const active = selectedCondominiumSlug === slug;
-                            const logoUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
-                            const bannerUrl = resolveAssetUrl(condominium.bannerUrl || condominium.logoUrl || undefined) || logoUrl;
+                            const logoUrl = resolveCondominiumAssetUrl(condominium, 'logo');
+                            const bannerUrl = resolveCondominiumAssetUrl(condominium, 'banner') || logoUrl;
                             const timeLabel = formatCondominiumPickerEventTime(event) || formatCondominiumEventTime(event);
                             return (
                               <button
@@ -4062,8 +4090,8 @@ export function MarketplacePage() {
                         <div className="flex flex-col gap-2.5">
                           {none.map(({ condominium, slug, name, region }) => {
                             const active = selectedCondominiumSlug === slug;
-                            const logoUrl = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || undefined) || getStoreAvatarUrl(slug, name);
-                            const bannerUrl = resolveAssetUrl(condominium.bannerUrl || condominium.logoUrl || undefined) || logoUrl;
+                            const logoUrl = resolveCondominiumAssetUrl(condominium, 'logo');
+                            const bannerUrl = resolveCondominiumAssetUrl(condominium, 'banner') || logoUrl;
                             return (
                               <button
                                 key={slug}
@@ -4178,8 +4206,8 @@ export function MarketplacePage() {
             onClose={() => setCondominiumAvailabilityModal(null)}
             name={condominiumAvailabilityModal.name}
             nextLabel={condominiumAvailabilityModal.nextLabel}
-            logoUrl={condo ? (resolveAssetUrl(condo.logoUrl || condo.bannerUrl || undefined) || getStoreAvatarUrl(condo.slug || 'condominio', condo.name || 'Condomínio')) : undefined}
-            bannerUrl={condo ? (resolveAssetUrl(condo.bannerUrl || condo.logoUrl || undefined) || undefined) : undefined}
+            logoUrl={condo ? resolveCondominiumAssetUrl(condo, 'logo') : undefined}
+            bannerUrl={condo ? resolveCondominiumAssetUrl(condo, 'banner') : undefined}
           />
         );
       })()}

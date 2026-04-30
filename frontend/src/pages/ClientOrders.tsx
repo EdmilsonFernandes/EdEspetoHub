@@ -640,7 +640,7 @@ function OrderCard({
       <div className="flex items-center gap-2 border-t border-slate-100 px-4 py-3">
         {isActive && isDelayed ? (
           <>
-            <button type="button" onClick={() => onOpenHelp(order)} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl border border-amber-200/80 bg-[linear-gradient(135deg,#fffbed,#fbf4d4)] py-2.5 text-[13px] font-black text-amber-900 shadow-[0_14px_28px_-18px_rgba(245,158,11,0.42)] active:scale-[0.98] transition-all hover:-translate-y-0.5">
+            <button type="button" onClick={() => onOpenHelp(order)} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl border border-[#cfe0ea] bg-[linear-gradient(135deg,#f8fbfd,#e9f3f8)] py-2.5 text-[13px] font-black text-[#153A4C] shadow-[0_14px_28px_-18px_rgba(51,104,134,0.32)] active:scale-[0.98] transition-all hover:-translate-y-0.5">
               <ChatCircleDots size={15} weight="duotone" />
               Falar com a loja
             </button>
@@ -659,7 +659,7 @@ function OrderCard({
             <button
               type="button"
               onClick={() => onOpenHelp(order)}
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-amber-200/80 bg-[linear-gradient(135deg,#fffbed,#fbf4d4)] text-amber-800 shadow-[0_16px_30px_-22px_rgba(245,158,11,0.52)] active:scale-95 transition-all hover:-translate-y-0.5"
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#cfe0ea] bg-[linear-gradient(135deg,#f8fbfd,#e9f3f8)] text-[#336886] shadow-[0_16px_30px_-22px_rgba(51,104,134,0.34)] active:scale-95 transition-all hover:-translate-y-0.5"
               title="Ajuda com este pedido"
             >
               <ChatCircleDots size={17} weight="duotone" />
@@ -736,23 +736,23 @@ function OrderHelpScreen({
   };
 
   return (
-    <div className="fixed inset-0 z-[90] bg-[linear-gradient(180deg,#f8f4ec_0%,#f2ebde_100%)]">
-      <div className="pointer-events-none absolute right-[-12%] top-[-10%] h-[34%] w-[48%] rounded-full bg-amber-300/18 blur-[120px]" />
-      <div className="pointer-events-none absolute bottom-[4%] left-[-8%] h-[26%] w-[34%] rounded-full bg-stone-900/10 blur-[110px]" />
+    <div className="fixed inset-0 z-[90] bg-[linear-gradient(180deg,#eef5fa_0%,#f8fbfd_100%)]">
+      <div className="pointer-events-none absolute right-[-12%] top-[-10%] h-[34%] w-[48%] rounded-full bg-[#336886]/14 blur-[120px]" />
+      <div className="pointer-events-none absolute bottom-[4%] left-[-8%] h-[26%] w-[34%] rounded-full bg-sky-300/12 blur-[110px]" />
 
       <div className="relative mx-auto flex h-full max-w-2xl flex-col">
-        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-amber-200/50 bg-[rgba(248,244,236,0.94)] px-4 py-4 backdrop-blur-md">
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[#d5e3ec]/70 bg-[rgba(244,248,251,0.94)] px-4 py-4 backdrop-blur-md">
           <button
             type="button"
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-2xl border border-amber-200/70 bg-white/80 text-stone-700 shadow-[0_12px_24px_-22px_rgba(120,53,15,0.35)] transition-all active:scale-95"
+            className="flex h-9 w-9 items-center justify-center rounded-2xl border border-[#cfe0ea] bg-white/85 text-[#153A4C] shadow-[0_12px_24px_-22px_rgba(51,104,134,0.28)] transition-all active:scale-95"
           >
             <ArrowLeft size={20} weight="bold" />
           </button>
           <div className="flex flex-col items-center gap-0.5">
             <div className="flex items-center gap-1.5">
               <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-5 w-5 rounded-[0.5rem] object-cover shadow-sm ring-1 ring-slate-200" />
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-amber-700">Atendimento</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#336886]">Atendimento</p>
             </div>
             <h1 className="text-[15px] font-semibold text-stone-950">Ajuda com pedido</h1>
           </div>
@@ -760,13 +760,13 @@ function OrderHelpScreen({
         </header>
 
         <div className="flex-1 overflow-y-auto px-4 py-5">
-          <div className="rounded-[30px] border border-amber-200/70 bg-[linear-gradient(140deg,rgba(255,251,235,0.96)_0%,rgba(255,247,237,0.98)_56%,rgba(255,255,255,0.96)_100%)] p-4 text-slate-900 shadow-[0_28px_60px_-40px_rgba(180,83,9,0.28)] ring-1 ring-white/80">
+          <div className="rounded-[30px] border border-[#d5e3ec] bg-[linear-gradient(140deg,rgba(248,251,253,0.98)_0%,rgba(236,245,250,0.98)_56%,rgba(255,255,255,0.98)_100%)] p-4 text-slate-900 shadow-[0_28px_60px_-40px_rgba(51,104,134,0.24)] ring-1 ring-white/80">
             <div className="flex items-start gap-3">
-              <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[1.2rem] border border-amber-200/70 bg-white shadow-[0_18px_34px_-24px_rgba(120,53,15,0.25)]">
+              <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[1.2rem] border border-[#cfe0ea] bg-white shadow-[0_18px_34px_-24px_rgba(51,104,134,0.22)]">
                 {logoUrl ? (
                   <img src={logoUrl} alt={storeName} className="h-full w-full object-cover" />
                 ) : (
-                  <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#1f2937,#44403c)] text-sm font-black text-white">
+                  <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-sm font-black text-white">
                     {getStoreInitials(storeName)}
                   </div>
                 )}
@@ -774,7 +774,7 @@ function OrderHelpScreen({
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="truncate text-lg font-black text-stone-950">{storeName}</p>
-                  <span className="inline-flex items-center gap-1 rounded-full border border-amber-200/80 bg-white/90 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-amber-800 shadow-[0_12px_22px_-20px_rgba(245,158,11,0.42)]">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[#cfe0ea] bg-white/92 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#336886] shadow-[0_12px_22px_-20px_rgba(51,104,134,0.2)]">
                     {statusMeta.icon}
                     {statusMeta.label}
                   </span>
@@ -784,10 +784,10 @@ function OrderHelpScreen({
             </div>
 
             <div className="mt-4 grid gap-2 sm:grid-cols-3">
-              <div className="rounded-[1.15rem] border border-amber-200/70 bg-white/90 px-4 py-3 shadow-[0_16px_30px_-24px_rgba(120,53,15,0.16)]">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-700">Resumo</p>
+              <div className="rounded-[1.15rem] border border-[#cfe0ea] bg-white/92 px-4 py-3 shadow-[0_16px_30px_-24px_rgba(51,104,134,0.16)]">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Resumo</p>
                 <p className="mt-1 text-sm font-black text-stone-900">{totalLabel}</p>
-                <p className="mt-1 text-base font-black text-amber-800">{formatCurrency(order?.total || 0)}</p>
+                <p className="mt-1 text-base font-black text-[#153A4C]">{formatCurrency(order?.total || 0)}</p>
               </div>
               <div className="rounded-[1.15rem] border border-stone-200/80 bg-white/88 px-4 py-3 shadow-[0_16px_30px_-24px_rgba(15,23,42,0.12)]">
                 <p className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-500">Atendimento</p>
@@ -802,9 +802,9 @@ function OrderHelpScreen({
             </div>
           </div>
 
-          <div className="mt-4 rounded-[26px] border border-amber-100/80 bg-[linear-gradient(135deg,#fffef8,#ffffff)] p-4 shadow-[0_18px_40px_-32px_rgba(180,83,9,0.2)]">
+          <div className="mt-4 rounded-[26px] border border-[#dbe7ef] bg-[linear-gradient(135deg,#f8fbfd,#ffffff)] p-4 shadow-[0_18px_40px_-32px_rgba(51,104,134,0.18)]">
             <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-amber-200/70 bg-white shadow-[0_14px_28px_-22px_rgba(245,158,11,0.35)]">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#cfe0ea] bg-white shadow-[0_14px_28px_-22px_rgba(51,104,134,0.22)]">
                 <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
               </div>
               <div>
@@ -826,9 +826,9 @@ function OrderHelpScreen({
               {supportSections.map((section) => {
                 const Icon = section.icon;
                 return (
-                  <div key={section.id} className="overflow-hidden rounded-[28px] border border-[#eadfce] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(252,248,241,0.98))] shadow-[0_18px_36px_-32px_rgba(120,53,15,0.24)]">
-                    <div className="flex items-start gap-3 border-b border-amber-100/70 px-4 py-4">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-amber-200/70 bg-[linear-gradient(135deg,#fff7e7,#f3e0b9)] text-amber-800 shadow-[0_14px_28px_-22px_rgba(245,158,11,0.35)]">
+                  <div key={section.id} className="overflow-hidden rounded-[28px] border border-[#dbe7ef] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(241,247,250,0.98))] shadow-[0_18px_36px_-32px_rgba(51,104,134,0.18)]">
+                    <div className="flex items-start gap-3 border-b border-[#dbe7ef] px-4 py-4">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#cfe0ea] bg-[linear-gradient(135deg,#f6fbfe,#e5f2f8)] text-[#336886] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.24)]">
                         <Icon size={20} weight="duotone" />
                       </div>
                       <div>
@@ -841,11 +841,11 @@ function OrderHelpScreen({
                       {section.items.map((item) => {
                         const isExpanded = expandedTopicId === item.id;
                         return (
-                          <div key={item.id} className="border-t border-amber-100/70 first:border-t-0">
+                          <div key={item.id} className="border-t border-[#dbe7ef] first:border-t-0">
                             <button
                               type="button"
                               onClick={() => setExpandedTopicId((prev) => (prev === item.id ? null : item.id))}
-                              className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left transition-colors hover:bg-amber-50/50"
+                              className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left transition-colors hover:bg-[#edf6fb]"
                             >
                               <div className="min-w-0">
                                 <p className="text-sm font-semibold text-stone-900">{item.title}</p>
@@ -858,10 +858,10 @@ function OrderHelpScreen({
                             </button>
 
                             {isExpanded ? (
-                              <div className="border-t border-amber-100/70 bg-[linear-gradient(180deg,rgba(255,251,235,0.55),rgba(255,255,255,0.92))] px-4 py-4">
-                                <div className="rounded-[1.2rem] border border-amber-100/80 bg-[linear-gradient(135deg,#fffef8,#ffffff)] px-4 py-3 shadow-[0_14px_28px_-24px_rgba(120,53,15,0.18)]">
+                              <div className="border-t border-[#dbe7ef] bg-[linear-gradient(180deg,rgba(240,247,251,0.72),rgba(255,255,255,0.94))] px-4 py-4">
+                                <div className="rounded-[1.2rem] border border-[#dbe7ef] bg-[linear-gradient(135deg,#f9fcfe,#ffffff)] px-4 py-3 shadow-[0_14px_28px_-24px_rgba(51,104,134,0.16)]">
                                   <div className="flex items-start gap-2.5">
-                                    <WarningCircle size={18} weight="duotone" className="mt-0.5 shrink-0 text-amber-600" />
+                                    <WarningCircle size={18} weight="duotone" className="mt-0.5 shrink-0 text-[#336886]" />
                                     <p className="text-sm font-medium leading-6 text-stone-600">{item.answer}</p>
                                   </div>
                                 </div>
@@ -883,7 +883,7 @@ function OrderHelpScreen({
                                         onClose();
                                         onOpenStore(order?.store?.slug);
                                       }}
-                                      className="inline-flex items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#1f2937,#44403c)] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-20px_rgba(28,25,23,0.46)] transition-all hover:brightness-105 active:scale-[0.98]"
+                                      className="inline-flex items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-20px_rgba(51,104,134,0.4)] transition-all hover:brightness-105 active:scale-[0.98]"
                                     >
                                       <ArrowSquareOut size={16} weight="bold" />
                                       Abrir loja
@@ -901,9 +901,9 @@ function OrderHelpScreen({
               })}
             </div>
 
-            <div className="mt-4 rounded-[24px] border border-amber-100/80 bg-[linear-gradient(135deg,#fffdf5,#ffffff)] p-4 shadow-[0_16px_36px_-32px_rgba(180,83,9,0.22)]">
+            <div className="mt-4 rounded-[24px] border border-[#dbe7ef] bg-[linear-gradient(135deg,#f8fbfd,#ffffff)] p-4 shadow-[0_16px_36px_-32px_rgba(51,104,134,0.18)]">
               <div className="flex items-start gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-amber-200/70 bg-[linear-gradient(135deg,#fff7e7,#f3e0b9)] text-amber-800 shadow-[0_14px_28px_-22px_rgba(245,158,11,0.35)]">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#cfe0ea] bg-[linear-gradient(135deg,#f6fbfe,#e5f2f8)] text-[#336886] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.24)]">
                   <ChatCircleDots size={20} weight="duotone" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -928,7 +928,7 @@ function OrderHelpScreen({
                           onClose();
                           onOpenStore(order?.store?.slug);
                         }}
-                        className="inline-flex items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#1f2937,#44403c)] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-20px_rgba(28,25,23,0.46)] transition-all hover:brightness-105 active:scale-[0.98]"
+                        className="inline-flex items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-20px_rgba(51,104,134,0.4)] transition-all hover:brightness-105 active:scale-[0.98]"
                       >
                         <ArrowSquareOut size={16} weight="bold" />
                         Abrir loja

@@ -11,6 +11,14 @@ import { NativePushPermissionBanner } from './components/common/NativePushPermis
 import { NativeAppNavigator } from './components/common/NativeAppNavigator';
 import { OfflineAlert } from './components/common/OfflineAlert';
 import { PremiumSplashScreen } from './components/common/PremiumSplashScreen';
+import { AccessPortal } from './pages/AccessPortal';
+import { AdminLogin } from './pages/AdminLogin';
+import { ClientAuth } from './pages/ClientAuth';
+import { CondominiumLogin } from './pages/CondominiumLogin';
+import { ForgotPassword } from './pages/ForgotPassword';
+import { MotoboyLogin } from './pages/MotoboyLogin';
+import { ResetPassword } from './pages/ResetPassword';
+import { VerifyEmail } from './pages/VerifyEmail';
 import './index.css';
 import { MotoboyLayout } from './layouts/MotoboyLayout';
 
@@ -19,7 +27,6 @@ const lazyPage = (loader: () => Promise<any>, exportName: string) =>
 
 const LandingPage = lazyPage(() => import('./pages/LandingPage'), 'LandingPage');
 const CreateStore = lazyPage(() => import('./pages/CreateStore'), 'CreateStore');
-const AdminLogin = lazyPage(() => import('./pages/AdminLogin'), 'AdminLogin');
 const StorePage = lazyPage(() => import('./pages/StorePage'), 'StorePage');
 const OrdersQueue = lazyPage(() => import('./pages/OrdersQueue'), 'OrdersQueue');
 const AdminDashboard = lazyPage(() => import('./pages/AdminDashboard'), 'AdminDashboard');
@@ -30,9 +37,6 @@ const AdminDemo = lazyPage(() => import('./pages/AdminDemo'), 'AdminDemo');
 const PaymentPage = lazyPage(() => import('./pages/PaymentPage'), 'PaymentPage');
 const SuperAdmin = lazyPage(() => import('./pages/SuperAdmin'), 'SuperAdmin');
 const SuperAdminCondominiums = lazyPage(() => import('./pages/SuperAdminCondominiums'), 'SuperAdminCondominiums');
-const ForgotPassword = lazyPage(() => import('./pages/ForgotPassword'), 'ForgotPassword');
-const ResetPassword = lazyPage(() => import('./pages/ResetPassword'), 'ResetPassword');
-const VerifyEmail = lazyPage(() => import('./pages/VerifyEmail'), 'VerifyEmail');
 const TermsOfUse = lazyPage(() => import('./pages/TermsOfUse'), 'TermsOfUse');
 const OrderTracking = lazyPage(() => import('./pages/OrderTracking'), 'OrderTracking');
 const AddressDistance = lazyPage(() => import('./pages/AddressDistance'), 'AddressDistance');
@@ -42,17 +46,13 @@ const MotoboyCurrent = lazyPage(() => import('./pages/MotoboyCurrent'), 'Motoboy
 const MotoboyHome = lazyPage(() => import('./pages/MotoboyHome'), 'MotoboyHome');
 const MotoboyEarnings = lazyPage(() => import('./pages/MotoboyEarnings'), 'MotoboyEarnings');
 const MotoboyDone = lazyPage(() => import('./pages/MotoboyDone'), 'MotoboyDone');
-const MotoboyLogin = lazyPage(() => import('./pages/MotoboyLogin'), 'MotoboyLogin');
 const MotoboyRegister = lazyPage(() => import('./pages/MotoboyRegister'), 'MotoboyRegister');
 const MotoboyProfile = lazyPage(() => import('./pages/MotoboyProfile'), 'MotoboyProfile');
 const ArchitecturePage = lazyPage(() => import('./pages/ArchitecturePage'), 'ArchitecturePage');
 const InstallAppPage = lazyPage(() => import('./pages/InstallAppPage'), 'InstallAppPage');
-const ClientAuth = lazyPage(() => import('./pages/ClientAuth'), 'ClientAuth');
-const AccessPortal = lazyPage(() => import('./pages/AccessPortal'), 'AccessPortal');
 const ClientAccount = lazyPage(() => import('./pages/ClientAccount'), 'ClientAccount');
 const ClientOrders = lazyPage(() => import('./pages/ClientOrders'), 'ClientOrders');
 const MarketplacePage = lazyPage(() => import('./pages/MarketplacePage'), 'MarketplacePage');
-const CondominiumLogin = lazyPage(() => import('./pages/CondominiumLogin'), 'CondominiumLogin');
 const CondominiumAccessRequest = lazyPage(() => import('./pages/CondominiumAccessRequest'), 'CondominiumAccessRequest');
 const CondominiumDashboard = lazyPage(() => import('./pages/CondominiumDashboard'), 'CondominiumDashboard');
 const AdminHighlights = lazyPage(() => import('./pages/AdminHighlights'), 'AdminHighlights');
