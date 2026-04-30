@@ -247,9 +247,9 @@ export function ProfileDrawer({
           ? <CheckCircle size={13} weight="fill" />
           : <CaretRight size={13} weight="bold" />,
       icon: <Storefront size={23} weight="duotone" />,
-      shell: 'border-emerald-100 bg-[linear-gradient(135deg,#f6fff9_0%,#eef9f3_100%)] text-emerald-950 shadow-[0_14px_28px_-24px_rgba(16,185,129,0.42)]',
-      iconClass: 'bg-white/82 text-emerald-700 ring-1 ring-emerald-100',
-      stateClass: savedAccessProfiles.admin.biometric || savedAccessProfiles.admin.hasSession ? 'text-emerald-700' : 'text-slate-500',
+      shell: 'border-[#d8e5ee] bg-[linear-gradient(135deg,#ffffff_0%,#f1f7fb_100%)] text-slate-950 shadow-[0_14px_28px_-24px_rgba(51,104,134,0.28)]',
+      iconClass: 'bg-white/88 text-[#336886] ring-1 ring-[#d8e5ee]',
+      stateClass: savedAccessProfiles.admin.biometric || savedAccessProfiles.admin.hasSession ? 'text-[#336886]' : 'text-slate-500',
       onClick: () => {
         onOpenAdminLogin();
         onClose();
@@ -266,9 +266,9 @@ export function ProfileDrawer({
           ? <CheckCircle size={13} weight="fill" />
           : <CaretRight size={13} weight="bold" />,
       icon: <Motorcycle size={23} weight="duotone" />,
-      shell: 'border-amber-100 bg-[linear-gradient(135deg,#fffdf3_0%,#fbf5dc_100%)] text-amber-950 shadow-[0_14px_28px_-24px_rgba(245,158,11,0.42)]',
-      iconClass: 'bg-white/80 text-amber-700 ring-1 ring-amber-100',
-      stateClass: savedAccessProfiles.motoboy.biometric || savedAccessProfiles.motoboy.hasSession ? 'text-amber-700' : 'text-slate-500',
+      shell: 'border-slate-200 bg-[linear-gradient(135deg,#ffffff_0%,#f6f9fb_100%)] text-slate-950 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.22)]',
+      iconClass: 'bg-white/88 text-slate-700 ring-1 ring-slate-200',
+      stateClass: savedAccessProfiles.motoboy.biometric || savedAccessProfiles.motoboy.hasSession ? 'text-slate-700' : 'text-slate-500',
       onClick: () => {
         onOpenMotoboyLogin();
         onClose();
@@ -289,22 +289,40 @@ export function ProfileDrawer({
     }
     if (item.id === 'store') {
       return {
-        shell: 'border-emerald-100/85 bg-[linear-gradient(135deg,#f3fff8_0%,#e9f9f0_100%)] text-emerald-950 shadow-[0_16px_30px_-24px_rgba(16,185,129,0.34)]',
-        icon: 'border-emerald-100 bg-emerald-100/78 text-emerald-700',
+        shell: 'border-[#d8e5ee] bg-[linear-gradient(135deg,#ffffff_0%,#f0f6fa_100%)] text-slate-950 shadow-[0_16px_30px_-24px_rgba(51,104,134,0.28)]',
+        icon: 'border-[#d8e5ee] bg-[#edf5fa] text-[#336886]',
         title: 'text-slate-950',
         subtitle: 'text-slate-600',
-        badge: 'bg-emerald-100/90 text-emerald-700',
-        caret: 'border-emerald-100 bg-white/54 text-emerald-700/60',
+        badge: 'bg-[#edf5fa] text-[#336886]',
+        caret: 'border-[#d8e5ee] bg-white/54 text-[#336886]/60',
       };
     }
     return {
-      shell: 'border-amber-100/85 bg-[linear-gradient(135deg,#fffbed_0%,#fbf4d4_100%)] text-amber-950 shadow-[0_16px_30px_-24px_rgba(245,158,11,0.34)]',
-      icon: 'border-amber-100 bg-amber-100/78 text-amber-700',
+      shell: 'border-slate-200 bg-[linear-gradient(135deg,#ffffff_0%,#f6f9fb_100%)] text-slate-950 shadow-[0_16px_30px_-24px_rgba(15,23,42,0.22)]',
+      icon: 'border-slate-200 bg-slate-100/88 text-slate-700',
       title: 'text-slate-950',
       subtitle: 'text-slate-600',
-      badge: 'bg-lime-100/90 text-lime-700',
-      caret: 'border-amber-100 bg-white/54 text-amber-700/60',
+      badge: 'bg-slate-100 text-slate-700',
+      caret: 'border-slate-200 bg-white/54 text-slate-500',
     };
+  };
+  const getActionHelper = (actionId: string) => {
+    switch (actionId) {
+      case 'account':
+        return 'Perfil, endereços e preferências';
+      case 'orders':
+        return 'Histórico e acompanhamento dos pedidos';
+      case 'settings':
+        return 'Permissões, biometria e segurança';
+      case 'legal':
+        return 'Termos, dados e proteção da conta';
+      case 'help':
+        return 'Suporte e dúvidas sobre seus pedidos';
+      case 'logout':
+        return 'Encerra somente a sessão neste aparelho';
+      default:
+        return '';
+    }
   };
 
   return (
@@ -322,7 +340,7 @@ export function ProfileDrawer({
       >
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -left-12 top-8 h-28 w-28 rounded-full bg-[#336886]/12 blur-3xl" />
-          <div className="absolute right-0 top-24 h-36 w-36 rounded-full bg-emerald-100/50 blur-3xl" />
+          <div className="absolute right-0 top-24 h-36 w-36 rounded-full bg-sky-100/60 blur-3xl" />
         </div>
         <div className="border-b border-slate-100/80 bg-white/50 p-6 pb-4">
           {isLogged ? (
@@ -349,14 +367,23 @@ export function ProfileDrawer({
                   <p className="truncate text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]/80">Conta conectada</p>
                   <p className="mt-1 truncate text-base font-black leading-tight text-slate-950">{userName}</p>
                   <p className="mt-0.5 truncate text-xs font-bold text-slate-500">{userEmail}</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-emerald-700">
+                      <CheckCircle size={10} weight="fill" />
+                      Cliente no hub
+                    </span>
+                    <span className="inline-flex items-center rounded-full border border-slate-200 bg-white/90 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-slate-500">
+                      Conta e pedidos
+                    </span>
+                  </div>
                 </div>
               </div>
               <section className="relative overflow-hidden rounded-[1.55rem] border border-[#336886]/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(243,248,251,0.96)_100%)] p-3.5 shadow-[0_18px_34px_-26px_rgba(51,104,134,0.24)]">
                 <div className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-[#336886]/10 blur-3xl" />
                 <div className="relative mb-3">
                   <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Alternar acesso</p>
-                  <p className="mt-0.5 text-sm font-black leading-tight text-slate-950">Loja ou entrega</p>
-                  <p className="mt-1 text-[11px] font-semibold leading-snug text-slate-500">Sua conta de cliente continua conectada no Hub.</p>
+                  <p className="mt-0.5 text-sm font-black leading-tight text-slate-950">Abrir outra área</p>
+                  <p className="mt-1 text-[11px] font-semibold leading-snug text-slate-500">Sua conta de cliente segue ativa no hub enquanto você entra na operação.</p>
                 </div>
 
                 <div className="relative grid gap-2">
@@ -485,8 +512,10 @@ export function ProfileDrawer({
                 </div>
                 <div className="min-w-0 flex-1 text-left">
                   <span className={`block text-[15px] leading-tight ${action.tone === 'danger' ? 'font-black text-rose-700' : 'font-semibold'}`}>{action.label}</span>
-                  {action.id === 'logout' ? (
-                    <span className="mt-0.5 block text-[11px] font-semibold text-rose-700/46">Encerra somente a sessão neste aparelho</span>
+                  {getActionHelper(action.id) ? (
+                    <span className={`mt-0.5 block text-[11px] font-semibold ${action.tone === 'danger' ? 'text-rose-700/46' : 'text-slate-500'}`}>
+                      {getActionHelper(action.id)}
+                    </span>
                   ) : null}
                 </div>
               </button>
@@ -498,11 +527,9 @@ export function ProfileDrawer({
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <p className="text-[11px] font-black text-slate-900 tracking-tight">Ja no Caminho</p>
-              <div className="inline-flex items-center rounded-full border border-[#336886]/12 bg-[#336886]/6 px-3 py-1.5 shadow-[0_10px_22px_-18px_rgba(51,104,134,0.28)]">
-                <span className="text-[11px] font-black uppercase tracking-[0.16em] text-[#336886]">
-                  Versão {versionLabel || 'v0.0.0'}
-                </span>
-              </div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                Versão {versionLabel || 'v0.0.0'}
+              </p>
             </div>
             <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-white bg-white p-0.5 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.55)]">
               <img src="/janocaminho.jpg" alt="Logo" loading="eager" fetchPriority="high" decoding="async" className="h-full w-full rounded-full object-cover opacity-95" />
