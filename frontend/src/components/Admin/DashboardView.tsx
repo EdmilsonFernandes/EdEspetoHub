@@ -32,6 +32,86 @@ const formatDateKey = (dateKey, options = {}) => {
     ...options,
   }).format(new Date(Date.UTC(year, month - 1, day, 12, 0, 0)));
 };
+const sanitizeFileSegment = (value, fallback = "relatorio") => {
+  const normalized = String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .toLowerCase();
+  return normalized || fallback;
+};
+const isCompactPdfViewport = () =>
+  typeof window !== "undefined" && typeof window.matchMedia === "function"
+    ? window.matchMedia("(max-width: 760px)").matches
+    : false;
+const toAbsoluteAssetUrl = (value) => {
+  const normalized = String(value || "").trim();
+  if (!normalized || typeof window === "undefined") return normalized;
+  try {
+    return new URL(normalized, window.location.origin).toString();
+  } catch {
+    return normalized;
+  }
+};
+const blobToDataUrl = (blob) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(typeof reader.result === "string" ? reader.result : "");
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+const fetchAssetAsDataUrl = async (value) => {
+  const assetUrl = toAbsoluteAssetUrl(value);
+  if (!assetUrl || typeof fetch !== "function") return "";
+  try {
+    const response = await fetch(assetUrl, { credentials: "omit" });
+    if (!response.ok) return "";
+    const blob = await response.blob();
+    return await blobToDataUrl(blob);
+  } catch {
+    return "";
+  }
+};
+const resolveImageFormat = (dataUrl) => {
+  if (dataUrl.startsWith("data:image/jpeg") || dataUrl.startsWith("data:image/jpg")) return "JPEG";
+  if (dataUrl.startsWith("data:image/webp")) return "WEBP";
+  return "PNG";
+};
+const openPdfBlob = ({ blob, fileName }) => {
+  if (typeof window === "undefined" || typeof document === "undefined") return false;
+  const blobUrl = URL.createObjectURL(blob);
+  const cleanup = () => window.setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+  const popup = window.open(blobUrl, "_blank", "noopener,noreferrer");
+  if (popup) {
+    cleanup();
+    return true;
+  }
+  const anchor = document.createElement("a");
+  anchor.href = blobUrl;
+  anchor.download = fileName;
+  anchor.target = "_blank";
+  anchor.rel = "noopener noreferrer";
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  cleanup();
+  return true;
+};
+const sharePdfBlob = async ({ blob, fileName, title }) => {
+  if (typeof navigator === "undefined" || typeof navigator.share !== "function" || typeof File === "undefined") {
+    return false;
+  }
+  const file = new File([blob], fileName, { type: "application/pdf" });
+  if (typeof navigator.canShare === "function" && !navigator.canShare({ files: [file] })) {
+    return false;
+  }
+  await navigator.share({
+    title,
+    files: [file],
+  });
+  return true;
+};
 
 export const DashboardView = ({
   storeId = "",
@@ -79,6 +159,8 @@ export const DashboardView = ({
   const [analyticsReport, setAnalyticsReport] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [analyticsError, setAnalyticsError] = useState("");
+  const [reportExporting, setReportExporting] = useState(false);
+  const [reportExportError, setReportExportError] = useState("");
   const [hiddenCustomers, setHiddenCustomers] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem("customer-hidden") || "{}");
@@ -151,13 +233,6 @@ export const DashboardView = ({
     setQrCopied(true);
     setTimeout(() => setQrCopied(false), 1500);
   };
-
-  const escapeHtml = (value) =>
-    String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
 
   useEffect(() => {
     if (!setupChecklist.length) return;
@@ -560,269 +635,297 @@ export const DashboardView = ({
     localStorage.setItem("customer-hidden", JSON.stringify(next));
   };
 
-  const handlePrintManagementReport = () => {
+  const handlePrintManagementReport = async () => {
     if (typeof window === "undefined") return;
-    const printWindow = window.open("", "_blank", "width=980,height=1280");
-    if (!printWindow) return;
-    const reportReturnUrl = window.location.href;
-    const toAbsoluteAssetUrl = (value) => {
-      const normalized = String(value || "").trim();
-      if (!normalized) return "";
-      try {
-        return new URL(normalized, window.location.origin).toString();
-      } catch {
-        return normalized;
-      }
-    };
-    const reportStoreLogo = toAbsoluteAssetUrl(storeLogo);
-    const reportReturnUrlLiteral = JSON.stringify(reportReturnUrl);
-    const shouldAutoPrintOnLoad =
-      typeof window.matchMedia === "function"
-        ? !window.matchMedia("(max-width: 760px)").matches
-        : true;
-
     const reportCustomers =
       Array.isArray(analyticsReport?.periodCustomers) && analyticsReport.periodCustomers.length > 0
         ? analyticsReport.periodCustomers.slice(0, 20)
         : sortedCustomers.slice(0, 20);
     const productRows = sortedTopProducts.slice(0, 10);
-    const customerRowsMarkup = reportCustomers.length
-      ? reportCustomers
-          .map(
-            (customer, index) => `
-              <tr>
-                <td data-label="#">${index + 1}</td>
-                <td data-label="Cliente">${escapeHtml(customer.name || "Cliente")}</td>
-                <td data-label="Contato">${escapeHtml(customer.phone || "-")}</td>
-                <td data-label="Pedidos">${Number(customer.ordersCount || 0)}</td>
-                <td data-label="Ticket médio">${escapeHtml(formatCurrency(customer.avgTicket || 0))}</td>
-                <td data-label="Total gasto">${escapeHtml(formatCurrency(customer.totalSpent || 0))}</td>
-                <td data-label="Último pedido">${escapeHtml(formatDate(customer.lastOrderAt) || "-")}</td>
-              </tr>
-            `
-          )
-          .join("")
-      : `<tr class="report-table-empty"><td colspan="7">Sem clientes para o periodo selecionado.</td></tr>`;
-    const topProductsMarkup = productRows.length
-      ? productRows
-          .map(
-            (product, index) => `
-              <tr>
-                <td data-label="#">${index + 1}</td>
-                <td data-label="Produto">${escapeHtml(product.name || "Produto")}</td>
-                <td data-label="Qtd">${Number(product.qty || 0)}</td>
-                <td data-label="Receita">${escapeHtml(formatCurrency(product.revenue || 0))}</td>
-              </tr>
-            `
-          )
-          .join("")
-      : `<tr class="report-table-empty"><td colspan="4">Sem vendas no periodo selecionado.</td></tr>`;
+    const reportCustomersRows = reportCustomers.length
+      ? reportCustomers.map((customer, index) => [
+          index + 1,
+          customer.name || "Cliente",
+          customer.phone || "-",
+          Number(customer.ordersCount || 0),
+          formatCurrency(customer.avgTicket || 0),
+          formatCurrency(customer.totalSpent || 0),
+          formatDate(customer.lastOrderAt) || "-",
+        ])
+      : [["-", "Sem clientes para o período selecionado.", "-", "-", "-", "-", "-"]];
+    const reportTopProductsRows = productRows.length
+      ? productRows.map((product, index) => [
+          index + 1,
+          product.name || "Produto",
+          Number(product.qty || 0),
+          formatCurrency(product.revenue || 0),
+        ])
+      : [["-", "Sem vendas no período selecionado.", "-", "-"]];
 
-    printWindow.document.write(`
-      <!doctype html>
-      <html lang="pt-BR">
-        <head>
-          <meta charset="utf-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <title>Relatorio Gerencial - ${escapeHtml(storeName)}</title>
-          <style>
-            * { box-sizing: border-box; }
-            body { margin: 0; background: #f6f3ee; color: #1f2937; font-family: Arial, sans-serif; -webkit-text-size-adjust: 100%; }
-            .screen-toolbar { position: sticky; top: 0; z-index: 20; display: flex; justify-content: space-between; gap: 16px; align-items: center; padding: 14px 18px; border-bottom: 1px solid #e5e7eb; background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); }
-            .screen-toolbar__meta { min-width: 0; }
-            .screen-toolbar__meta strong { display: block; font-size: 13px; color: #111827; }
-            .screen-toolbar__meta span { display: block; margin-top: 2px; font-size: 11px; color: #6b7280; }
-            .screen-toolbar__actions { display: flex; flex-wrap: wrap; gap: 10px; }
-            .screen-toolbar button { border: 0; border-radius: 999px; padding: 11px 16px; font-size: 12px; font-weight: 800; cursor: pointer; color: #fff; background: linear-gradient(135deg,#0f172a,#334155); }
-            .screen-toolbar button.secondary { color: #334155; background: #f8fafc; box-shadow: inset 0 0 0 1px #cbd5e1; }
-            .page { max-width: 1120px; margin: 0 auto; padding: 28px; }
-            .hero { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start; margin-bottom: 20px; }
-            .brand { display: flex; gap: 16px; align-items: center; min-width: 0; }
-            .brand img { width: 68px; height: 68px; object-fit: cover; border-radius: 18px; border: 1px solid #e5ded3; background: #fff; }
-            .brand-fallback { width: 68px; height: 68px; border-radius: 18px; border: 1px solid #e5ded3; background: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; }
-            .eyebrow { margin: 0 0 6px; font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: #a16207; font-weight: 700; }
-            .title { margin: 0; font-size: 28px; font-weight: 800; color: #111827; }
-            .subtitle { margin: 8px 0 0; font-size: 13px; color: #6b7280; }
-            .subtitle span { display: inline; }
-            .meta { min-width: 220px; border: 1px solid #eadfce; background: #fffaf3; border-radius: 20px; padding: 16px 18px; }
-            .meta strong { display: block; font-size: 13px; margin-bottom: 4px; }
-            .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 20px 0; }
-            .metric { background: #fff; border: 1px solid #e5e7eb; border-radius: 18px; padding: 16px; }
-            .metric label { display: block; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #6b7280; font-weight: 700; }
-            .metric strong { display: block; margin-top: 8px; font-size: 24px; color: #111827; }
-            .metric span { display: block; margin-top: 6px; font-size: 12px; color: #6b7280; }
-            .section { margin-top: 18px; background: #fff; border: 1px solid #e5e7eb; border-radius: 20px; padding: 18px; }
-            .section h2 { margin: 0 0 6px; font-size: 18px; }
-            .section p { margin: 0 0 14px; font-size: 12px; color: #6b7280; }
-            table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }
-            th, td { padding: 10px 8px; border-bottom: 1px solid #eceff3; text-align: left; vertical-align: top; overflow-wrap: anywhere; word-break: break-word; }
-            th { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #6b7280; }
-            .muted { color: #6b7280; }
-            .report-table-empty td { text-align: center; color: #6b7280; }
-            @page { size: A4; margin: 12mm; }
-            @media screen and (max-width: 760px) {
-              body { background: #fffaf6; }
-              .screen-toolbar { align-items: stretch; flex-direction: column; padding: 12px 14px; }
-              .screen-toolbar__actions { width: 100%; }
-              .screen-toolbar button { flex: 1 1 0; justify-content: center; }
-              .page { padding: 16px; }
-              .hero { flex-direction: column; gap: 14px; }
-              .brand { align-items: flex-start; }
-              .brand img, .brand-fallback { width: 56px; height: 56px; border-radius: 16px; }
-              .title { font-size: 22px; line-height: 1.15; }
-              .subtitle { font-size: 12px; line-height: 1.5; }
-              .subtitle span { display: block; }
-              .meta { width: 100%; min-width: 0; border-radius: 18px; }
-              .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-              .metric { padding: 14px; border-radius: 16px; }
-              .metric strong { font-size: 19px; line-height: 1.15; }
-              .section { padding: 14px; border-radius: 18px; overflow: hidden; }
-              .section h2 { font-size: 16px; }
-              .section p { font-size: 11px; line-height: 1.5; }
-              .report-table { table-layout: auto; font-size: 11px; }
-              .report-table thead { display: none; }
-              .report-table,
-              .report-table tbody,
-              .report-table tr,
-              .report-table td { display: block; width: 100%; }
-              .report-table tr { margin-bottom: 10px; padding: 10px 12px; border: 1px solid #eceff3; border-radius: 16px; background: #fffaf7; }
-              .report-table tbody tr:last-child { margin-bottom: 0; }
-              .report-table td { border: 0; padding: 6px 0; display: grid; grid-template-columns: minmax(92px, 40%) minmax(0, 1fr); gap: 10px; align-items: start; }
-              .report-table td::before { content: attr(data-label); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #6b7280; font-weight: 700; }
-              .report-table-empty { padding: 14px 12px !important; }
-              .report-table-empty td { display: block; padding: 0; }
-              .report-table-empty td::before { content: none; }
-            }
-            @media print {
-              .screen-toolbar { display: none !important; }
-              body { background: #fff; }
-              .page { padding: 0; }
-              .section, .metric, .meta { box-shadow: none; }
-              .hero, .metrics, .section { break-inside: avoid; page-break-inside: avoid; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="screen-toolbar">
-            <div class="screen-toolbar__meta">
-              <strong>Relatório pronto para exportação</strong>
-              <span>Imprima, salve em PDF e depois feche para retornar ao painel.</span>
-            </div>
-            <div class="screen-toolbar__actions">
-              <button type="button" class="secondary" onclick="window.handleCloseReport()">Fechar relatório</button>
-              <button type="button" onclick="window.handlePrintReport()">Imprimir / salvar PDF</button>
-            </div>
-          </div>
-          <div class="page">
-            <div class="hero">
-              <div class="brand">
-                ${
-                  reportStoreLogo
-                    ? `<img src="${escapeHtml(reportStoreLogo)}" alt="${escapeHtml(storeName)}" />`
-                    : `<div class="brand-fallback">${escapeHtml(String(storeName || "LO").slice(0, 2).toUpperCase())}</div>`
-                }
-                <div>
-                  <p class="eyebrow">Relatorio Gerencial</p>
-                  <h1 class="title">${escapeHtml(storeName)}</h1>
-                  <p class="subtitle">
-                    <span>Periodo analisado: ${escapeHtml(metrics.periodLabel)}</span>
-                    <span>Mês de referencia: ${escapeHtml(formatMonthLabel(selectedMonth))}</span>
-                  </p>
-                </div>
-              </div>
-              <div class="meta">
-                <strong>Base de clientes</strong>
-                <div class="muted">${metrics.allTimeCustomerCount} na base${metrics.periodCustomerCount != null ? ` · ${metrics.periodCustomerCount} ativos no periodo` : ""}</div>
-                <strong style="margin-top: 12px;">Primeiro pedido</strong>
-                <div class="muted">${escapeHtml(formatDate(metrics.firstOrderAt) || "Sem pedidos ainda")}</div>
-              </div>
-            </div>
+    setReportExporting(true);
+    setReportExportError("");
+    try {
+      const [{ jsPDF }, { default: autoTable }] = await Promise.all([
+        import("jspdf"),
+        import("jspdf-autotable"),
+      ]);
+      const logoDataUrl = await fetchAssetAsDataUrl(storeLogo);
+      const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "pt",
+        format: "a4",
+      });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const marginX = 38;
+      const contentWidth = pageWidth - marginX * 2;
+      const compactViewport = isCompactPdfViewport();
+      const generatedAtLabel = new Date().toLocaleString("pt-BR", {
+        timeZone: APP_TIMEZONE,
+        dateStyle: "short",
+        timeStyle: "short",
+      });
+      const headerTop = 34;
+      const headerHeight = 122;
+      const headerX = marginX;
+      const metaBoxWidth = 176;
+      const metaBoxHeight = 86;
+      const gap = 12;
+      const metricWidth = (contentWidth - gap) / 2;
+      const metricHeight = 78;
+      const fileName = `relatorio-gerencial-${sanitizeFileSegment(storeName, "loja")}-${sanitizeFileSegment(
+        customRange ? `${customRange.startDate}-${customRange.endDate}` : periodDays === "all" ? "todo-periodo" : metrics.periodLabel,
+        "periodo"
+      )}.pdf`;
 
-            <div class="metrics">
-              <div class="metric">
-                <label>Receita total</label>
-                <strong>${escapeHtml(formatCurrency(metrics.totalSales))}</strong>
-                <span>${escapeHtml(firstOrderLabel)}</span>
-              </div>
-              <div class="metric">
-                <label>Receita do mês</label>
-                <strong>${escapeHtml(formatCurrency(metrics.monthRevenue))}</strong>
-                <span>${escapeHtml(formatMonthLabel(selectedMonth))}</span>
-              </div>
-              <div class="metric">
-                <label>Receita do período</label>
-                <strong>${escapeHtml(formatCurrency(metrics.periodRevenue))}</strong>
-                <span>${escapeHtml(metrics.periodLabel)}</span>
-              </div>
-              <div class="metric">
-                <label>Pedidos realizados</label>
-                <strong>${escapeHtml(String(metrics.totalOrders))}</strong>
-                <span>Ticket médio: ${escapeHtml(formatCurrency(metrics.avgTicket))}</span>
-              </div>
-            </div>
+      const drawMetricCard = (x, y, label, value, helper) => {
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(x, y, metricWidth, metricHeight, 18, 18, "F");
+        doc.setDrawColor(226, 232, 240);
+        doc.roundedRect(x, y, metricWidth, metricHeight, 18, 18, "S");
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9);
+        doc.setTextColor(100, 116, 139);
+        doc.text(String(label || "").toUpperCase(), x + 16, y + 18);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(20);
+        doc.setTextColor(15, 23, 42);
+        doc.text(String(value || "-"), x + 16, y + 46);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(100, 116, 139);
+        const helperLines = doc.splitTextToSize(String(helper || ""), metricWidth - 32);
+        doc.text(helperLines, x + 16, y + 61);
+      };
 
-            <div class="section">
-              <h2>Itens mais vendidos do período</h2>
-              <p>Ranking calculado com base no período atualmente selecionado no dashboard.</p>
-              <table class="report-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Produto</th>
-                    <th>Qtd</th>
-                    <th>Receita</th>
-                  </tr>
-                </thead>
-                <tbody>${topProductsMarkup}</tbody>
-              </table>
-            </div>
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(headerX, headerTop, contentWidth, headerHeight, 24, 24, "F");
+      doc.setDrawColor(226, 232, 240);
+      doc.roundedRect(headerX, headerTop, contentWidth, headerHeight, 24, 24, "S");
 
-            <div class="section">
-              <h2>Clientes em destaque</h2>
-              <p>Base capturada automaticamente a partir dos pedidos da loja.</p>
-              <table class="report-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Cliente</th>
-                    <th>Contato</th>
-                    <th>Pedidos</th>
-                    <th>Ticket médio</th>
-                    <th>Total gasto</th>
-                    <th>Último pedido</th>
-                  </tr>
-                </thead>
-                <tbody>${customerRowsMarkup}</tbody>
-              </table>
-            </div>
-          </div>
-          <script>
-            window.handlePrintReport = () => {
-              window.focus();
-              window.print();
-            };
-            window.handleCloseReport = () => {
-              if (window.opener && !window.opener.closed) {
-                window.close();
-                return;
-              }
-              if (window.history.length > 1) {
-                window.history.back();
-                return;
-              }
-              window.location.replace(${reportReturnUrlLiteral});
-            };
-            window.onload = () => {
-              window.focus();
-              if (${shouldAutoPrintOnLoad ? "true" : "false"}) {
-                window.setTimeout(() => window.handlePrintReport(), 120);
-              }
-            };
-          </script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
+      if (logoDataUrl) {
+        doc.addImage(
+          logoDataUrl,
+          resolveImageFormat(logoDataUrl),
+          headerX + 18,
+          headerTop + 20,
+          56,
+          56
+        );
+      } else {
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(headerX + 18, headerTop + 20, 56, 56, 18, 18, "F");
+        doc.setDrawColor(226, 232, 240);
+        doc.roundedRect(headerX + 18, headerTop + 20, 56, 56, 18, 18, "S");
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(18);
+        doc.setTextColor(15, 23, 42);
+        doc.text(String(storeName || "LO").slice(0, 2).toUpperCase(), headerX + 46, headerTop + 55, { align: "center" });
+      }
+
+      const textStartX = headerX + 92;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(71, 85, 105);
+      doc.text("RELATÓRIO GERENCIAL", textStartX, headerTop + 24);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(24);
+      doc.setTextColor(15, 23, 42);
+      doc.text(String(storeName || "Já no Caminho"), textStartX, headerTop + 50, {
+        maxWidth: contentWidth - metaBoxWidth - 126,
+      });
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(100, 116, 139);
+      const subtitleLines = doc.splitTextToSize(
+        `Período analisado: ${metrics.periodLabel} · Mês de referência: ${formatMonthLabel(selectedMonth)}`,
+        contentWidth - metaBoxWidth - 126
+      );
+      doc.text(subtitleLines, textStartX, headerTop + 72);
+
+      const metaX = headerX + contentWidth - metaBoxWidth - 18;
+      const metaY = headerTop + 18;
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(metaX, metaY, metaBoxWidth, metaBoxHeight, 18, 18, "F");
+      doc.setDrawColor(226, 232, 240);
+      doc.roundedRect(metaX, metaY, metaBoxWidth, metaBoxHeight, 18, 18, "S");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(15, 23, 42);
+      doc.text("Base de clientes", metaX + 14, metaY + 20);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(100, 116, 139);
+      doc.text(
+        doc.splitTextToSize(
+          `${metrics.allTimeCustomerCount} na base${metrics.periodCustomerCount != null ? ` · ${metrics.periodCustomerCount} ativos no período` : ""}`,
+          metaBoxWidth - 28
+        ),
+        metaX + 14,
+        metaY + 36
+      );
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(15, 23, 42);
+      doc.text("Primeiro pedido", metaX + 14, metaY + 60);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(100, 116, 139);
+      doc.text(formatDate(metrics.firstOrderAt) || "Sem pedidos ainda", metaX + 14, metaY + 76);
+
+      const metricTop = headerTop + headerHeight + 16;
+      drawMetricCard(headerX, metricTop, "Receita total", formatCurrency(metrics.totalSales), firstOrderLabel);
+      drawMetricCard(headerX + metricWidth + gap, metricTop, "Receita do mês", formatCurrency(metrics.monthRevenue), formatMonthLabel(selectedMonth));
+      drawMetricCard(headerX, metricTop + metricHeight + gap, "Receita do período", formatCurrency(metrics.periodRevenue), metrics.periodLabel);
+      drawMetricCard(
+        headerX + metricWidth + gap,
+        metricTop + metricHeight + gap,
+        "Pedidos realizados",
+        String(metrics.totalOrders),
+        `Ticket médio: ${formatCurrency(metrics.avgTicket)}`
+      );
+
+      let cursorY = metricTop + metricHeight * 2 + gap + 28;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(17);
+      doc.setTextColor(15, 23, 42);
+      doc.text("Itens mais vendidos do período", headerX, cursorY);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(100, 116, 139);
+      doc.text("Ranking calculado com base no período atualmente selecionado no dashboard.", headerX, cursorY + 16);
+
+      autoTable(doc, {
+        startY: cursorY + 28,
+        margin: { left: headerX, right: headerX },
+        head: [["#", "Produto", "Qtd", "Receita"]],
+        body: reportTopProductsRows,
+        theme: "grid",
+        styles: {
+          font: "helvetica",
+          fontSize: 10,
+          lineColor: [226, 232, 240],
+          lineWidth: 1,
+          cellPadding: 8,
+          textColor: [15, 23, 42],
+        },
+        headStyles: {
+          fillColor: [15, 23, 42],
+          textColor: [255, 255, 255],
+          fontStyle: "bold",
+          fontSize: 9,
+          halign: "left",
+        },
+        alternateRowStyles: {
+          fillColor: [248, 250, 252],
+        },
+        columnStyles: {
+          0: { cellWidth: 28, halign: "center" },
+          2: { cellWidth: 48, halign: "center" },
+          3: { cellWidth: 92, halign: "right" },
+        },
+      });
+
+      cursorY = (doc.lastAutoTable?.finalY || cursorY + 120) + 28;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(17);
+      doc.setTextColor(15, 23, 42);
+      doc.text("Clientes em destaque", headerX, cursorY);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(100, 116, 139);
+      doc.text("Base capturada automaticamente a partir dos pedidos da loja.", headerX, cursorY + 16);
+
+      autoTable(doc, {
+        startY: cursorY + 28,
+        margin: { left: headerX, right: headerX },
+        head: [["#", "Cliente", "Contato", "Pedidos", "Ticket médio", "Total gasto", "Último pedido"]],
+        body: reportCustomersRows,
+        theme: "grid",
+        styles: {
+          font: "helvetica",
+          fontSize: 9,
+          lineColor: [226, 232, 240],
+          lineWidth: 1,
+          cellPadding: 7,
+          textColor: [15, 23, 42],
+        },
+        headStyles: {
+          fillColor: [15, 23, 42],
+          textColor: [255, 255, 255],
+          fontStyle: "bold",
+          fontSize: 8,
+          halign: "left",
+        },
+        alternateRowStyles: {
+          fillColor: [248, 250, 252],
+        },
+        columnStyles: {
+          0: { cellWidth: 24, halign: "center" },
+          3: { cellWidth: 42, halign: "center" },
+          4: { cellWidth: 74, halign: "right" },
+          5: { cellWidth: 74, halign: "right" },
+          6: { cellWidth: 72, halign: "center" },
+        },
+      });
+
+      const pageCount = doc.getNumberOfPages();
+      for (let page = 1; page <= pageCount; page += 1) {
+        doc.setPage(page);
+        doc.setDrawColor(226, 232, 240);
+        doc.line(headerX, pageHeight - 28, pageWidth - headerX, pageHeight - 28);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(148, 163, 184);
+        doc.text(`Gerado em ${generatedAtLabel}`, headerX, pageHeight - 14);
+        doc.text(`Página ${page} de ${pageCount}`, pageWidth - headerX, pageHeight - 14, { align: "right" });
+      }
+
+      const pdfBlob = doc.output("blob");
+      const shouldShareFirst = compactViewport;
+      if (shouldShareFirst) {
+        try {
+          const shared = await sharePdfBlob({
+            blob: pdfBlob,
+            fileName,
+            title: `Relatório gerencial - ${storeName}`,
+          });
+          if (shared) return;
+        } catch (error) {
+          if (error?.name === "AbortError") return;
+          throw error;
+        }
+      }
+      openPdfBlob({
+        blob: pdfBlob,
+        fileName,
+      });
+    } catch (error) {
+      console.error("management report pdf export failed", error);
+      setReportExportError("Não foi possível gerar o PDF gerencial agora.");
+    } finally {
+      setReportExporting(false);
+    }
   };
 
   const handlePrintQr = () => {
@@ -1229,20 +1332,23 @@ export const DashboardView = ({
               <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">Exportação</p>
               <p className="mt-2 text-sm font-black text-slate-900">Gerar PDF gerencial</p>
               <p className="mt-1 text-xs leading-5 text-slate-500">
-                Exporta o consolidado com o período ativo acima, sem surpresa entre tela e PDF.
+                Gera um PDF real para compartilhar, baixar ou imprimir sem abrir uma tela separada no mobile.
               </p>
               <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
                 <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold">Período atual</p>
                 <p className="mt-1 text-sm font-semibold text-slate-800">{metrics.periodLabel}</p>
               </div>
+              {reportExportError ? (
+                <p className="mt-3 text-xs font-semibold text-rose-600">{reportExportError}</p>
+              ) : null}
               <div className="mt-4 flex items-center gap-2">
                 <button
                   type="button"
                   onClick={handlePrintManagementReport}
-                  disabled={analyticsLoading}
+                  disabled={analyticsLoading || reportExporting}
                   className="w-full px-4 py-3 rounded-2xl bg-slate-900 text-white text-xs font-extrabold shadow-[0_16px_30px_rgba(15,23,42,0.24)] transition-all hover:-translate-y-0.5 hover:opacity-95 disabled:opacity-60"
                 >
-                  {analyticsLoading ? "Atualizando..." : "Gerar PDF gerencial"}
+                  {reportExporting ? "Gerando PDF..." : analyticsLoading ? "Atualizando..." : "Gerar PDF gerencial"}
                 </button>
               </div>
             </div>

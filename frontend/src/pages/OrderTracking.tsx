@@ -6,7 +6,7 @@ import { Capacitor } from '@capacitor/core';
 import { orderService } from '../services/orderService';
 import { mapsService } from '../services/mapsService';
 import { formatAddress, formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId } from '../utils/format';
-import { getPaymentMethodMeta } from '../utils/paymentAssets';
+import { getPaymentMethodMeta, getPaymentProviderMeta, mercadoPagoHorizontal } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { applyBrandTheme } from '../utils/brandTheme';
 import { buildPixPayload } from '../utils/pixPayload';
@@ -45,6 +45,9 @@ const ONLINE_PAYMENT_METHODS = new Set([
   'credit_card',
   'debit_card',
 ]);
+
+const normalizePaymentProvider = (value?: string | null) =>
+  String(value || '').trim().toLowerCase();
 
 
 const buildDemoStatus = (createdAt: number) => {
@@ -554,6 +557,9 @@ export function OrderTracking() {
   const customerName = String(order?.customerName || order?.customer?.name || order?.customer?.fullName || 'Cliente').trim();
   const paymentValue = order?.paymentMethod || order?.payment;
   const paymentMeta = paymentValue ? getPaymentMethodMeta(paymentValue) : null;
+  const paymentProviderValue = String(order?.payment?.provider || '').trim();
+  const paymentProviderMeta = paymentProviderValue ? getPaymentProviderMeta(paymentProviderValue) : null;
+  const normalizedPaymentProvider = normalizePaymentProvider(paymentProviderValue);
   const normalizedPaymentMethod = String(paymentValue || '').trim().toLowerCase();
   const orderDisplayId = formatOrderDisplayId(order?.id, storeSlug) || String(order?.id || '-');
   const orderCreatedAtLabel = order?.createdAt ? formatDateTime(order.createdAt) : '';
@@ -572,7 +578,7 @@ export function OrderTracking() {
   })();
   const hasOnlinePayment = ONLINE_PAYMENT_METHODS.has(normalizedPaymentMethod);
   const isPaymentApproved = paymentStatusNormalized === 'PAID';
-  const showMercadoPagoApproved = paymentStatusNormalized === 'PAID';
+  const showMercadoPagoApproved = isPaymentApproved && [ 'mercado_pago', 'mercadopago' ].includes(normalizedPaymentProvider);
   const shouldHidePixPaymentBlockBase =
     isPixPayment &&
     (
@@ -643,6 +649,10 @@ export function OrderTracking() {
   const orderLifecycleLabel = isCancelled ? 'Pedido cancelado' : isReady ? 'Pedido concluido' : 'Pedido em andamento';
   const paymentSummaryDetail = showMercadoPagoApproved
     ? 'Confirmado pelo Mercado Pago'
+    : isPaymentApproved && paymentProviderMeta?.label
+    ? `Confirmado por ${paymentProviderMeta.label}`
+    : isPaymentApproved
+    ? 'Pagamento confirmado'
     : normalizedPaymentMethod === 'dinheiro'
     ? 'Pagamento combinado no atendimento'
     : hasOnlinePayment
@@ -1695,7 +1705,7 @@ export function OrderTracking() {
                             </span>
                           </div>
                           <span className="ml-auto flex h-11 w-[142px] shrink-0 items-center justify-center rounded-[16px] border border-slate-200/85 bg-white px-2.5 shadow-[0_10px_24px_-20px_rgba(10,0,128,0.42)]">
-                            <img src="/mercado-pago-horizontal.png" alt="Mercado Pago" className="h-8 w-[118px] object-contain" />
+                            <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-8 w-[118px] object-contain" />
                           </span>
                         </div>
                       </div>
