@@ -46,6 +46,21 @@ Nome no GitHub Actions: `Publish Docker Images (GHCR)`
 - se o fluxo GHCR não estiver pronto ou falhar → informar fallback com `deploy-api.sh` / `deploy-frontend.sh`
 - não é obrigatório acompanhar o workflow/deploy depois do push, a menos que o usuário peça isso explicitamente
 
+### ANDROID / AAB
+- se a mudança tocar código nativo mobile, Capacitor, plugins nativos, `MainActivity`, `AndroidManifest`, `build.gradle`, `capacitor.config`, `res/` Android ou qualquer fluxo que exija novo binário Android → gerar novo `AAB`
+- ao gerar novo `AAB`, subir sempre:
+  - `versionCode` +1
+  - `versionName` compatível com a nova versão
+- validar com:
+  - `npm --prefix frontend run build`
+  - `npm --prefix mobile run android:sync`
+  - `mobile/android/gradlew.bat clean bundleRelease`
+- informar no fechamento:
+  - caminho do `.aab`
+  - `versionCode`
+  - `versionName`
+- não esperar o usuário pedir o `AAB` quando ele for claramente necessário
+
 ---
 
 ## FLUXO OBRIGATÓRIO
