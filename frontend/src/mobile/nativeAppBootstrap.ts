@@ -15,6 +15,12 @@ const PUSH_TOKEN_KEY = 'jnk_mobile_push_token';
 const PUSH_LAST_SYNC_TOKEN_KEY = 'jnk_mobile_push_last_sync_token';
 const PUSH_LAST_SYNC_STORE_TOKEN_KEY = 'jnk_mobile_push_last_sync_store_token';
 const PUSH_GUEST_ID_KEY = 'jnk_mobile_push_guest_id';
+const STORE_NEW_ORDER_PUSH_TYPE = 'store_new_online_order';
+const STORE_NEW_ORDER_CHANNEL_ID = 'store_new_orders_v1';
+const STORE_NEW_ORDER_CHANNEL_SOUND = 'jnc_store_new_order.wav';
+
+let lastStoreForegroundAlertAt = 0;
+let foregroundAudioContext: AudioContext | null = null;
 
 const normalizeInternalUrl = (rawUrl: string): string | null => {
   try {
@@ -52,6 +58,81 @@ const navigateFromPayload = (payload?: unknown) => {
   if (!internal) return;
   if (window.location.pathname + window.location.search + window.location.hash === internal) return;
   window.location.assign(internal);
+};
+
+const isStoreNewOrderPush = (payload?: unknown) => {
+  const data = (payload && typeof payload === 'object' ? payload : {}) as Record<string, unknown>;
+  return String(data.notificationType || data.pushType || '').trim() === STORE_NEW_ORDER_PUSH_TYPE;
+};
+
+const ensureStoreOrderPushChannel = async () => {
+  if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') return;
+  try {
+    await PushNotifications.createChannel({
+      id: STORE_NEW_ORDER_CHANNEL_ID,
+      name: 'Novos pedidos',
+      description: 'Alerta alto para novos pedidos online da sua loja',
+      importance: 5,
+      visibility: 1,
+      vibration: true,
+      sound: STORE_NEW_ORDER_CHANNEL_SOUND,
+      lights: true,
+      lightColor: '#1D4ED8',
+    });
+  } catch {
+    // no-op
+  }
+};
+
+const playStoreOrderForegroundAlert = async () => {
+  if (typeof window === 'undefined') return;
+  if (document.visibilityState !== 'visible') return;
+  const now = Date.now();
+  if ((now - lastStoreForegroundAlertAt) < 1200) return;
+  lastStoreForegroundAlertAt = now;
+
+  try {
+    navigator.vibrate?.([180, 70, 260, 70, 320]);
+  } catch {
+    // no-op
+  }
+
+  try {
+    const AudioContextCtor =
+      window.AudioContext ||
+      (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextCtor) return;
+    if (!foregroundAudioContext) {
+      foregroundAudioContext = new AudioContextCtor();
+    }
+    if (foregroundAudioContext.state === 'suspended') {
+      await foregroundAudioContext.resume();
+    }
+
+    const sequence = [
+      { frequency: 784, duration: 0.11, gain: 0.04 },
+      { frequency: 988, duration: 0.11, gain: 0.045 },
+      { frequency: 1175, duration: 0.14, gain: 0.05 },
+      { frequency: 1568, duration: 0.24, gain: 0.06 },
+    ];
+    let cursor = foregroundAudioContext.currentTime + 0.01;
+    for (const step of sequence) {
+      const oscillator = foregroundAudioContext.createOscillator();
+      const gainNode = foregroundAudioContext.createGain();
+      oscillator.type = 'triangle';
+      oscillator.frequency.setValueAtTime(step.frequency, cursor);
+      gainNode.gain.setValueAtTime(0.0001, cursor);
+      gainNode.gain.exponentialRampToValueAtTime(step.gain, cursor + 0.015);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, cursor + step.duration);
+      oscillator.connect(gainNode);
+      gainNode.connect(foregroundAudioContext.destination);
+      oscillator.start(cursor);
+      oscillator.stop(cursor + step.duration + 0.04);
+      cursor += step.duration + 0.045;
+    }
+  } catch {
+    // no-op
+  }
 };
 
 const getCustomerSessionToken = () => {
@@ -157,6 +238,8 @@ const bootstrapPushNotifications = async () => {
   if (!MOBILE_PUSH_ENABLED) return;
   if (!Capacitor.isPluginAvailable('PushNotifications')) return;
   try {
+    await ensureStoreOrderPushChannel();
+
     await PushNotifications.addListener('registration', (token) => {
       const value = String(token?.value || '').trim();
       try {
@@ -175,8 +258,10 @@ const bootstrapPushNotifications = async () => {
       navigateFromPayload(event?.notification?.data);
     });
 
-    await PushNotifications.addListener('pushNotificationReceived', () => {
-      // no-op
+    await PushNotifications.addListener('pushNotificationReceived', (notification) => {
+      if (isStoreNewOrderPush(notification?.data)) {
+        void playStoreOrderForegroundAlert();
+      }
     });
 
     const promptAlreadyDone =

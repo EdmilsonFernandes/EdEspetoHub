@@ -8,6 +8,9 @@ type CustomerPushPayload = {
   title: string;
   body: string;
   data?: Record<string, string>;
+  android?: {
+    channelId?: string;
+  };
 };
 
 type FirebaseServiceAccount = {
@@ -419,6 +422,14 @@ export class PushNotificationService {
 
     try {
       const accessToken = await this.getFcmV1AccessToken(config);
+      const android: Record<string, any> = { priority: 'high' };
+      const channelId = String(payload.android?.channelId || '').trim();
+      if (channelId) {
+        android.notification = {
+          channel_id: channelId,
+        };
+      }
+
       const response = await fetch(
         `https://fcm.googleapis.com/v1/projects/${encodeURIComponent(config.projectId)}/messages:send`,
         {
@@ -435,7 +446,7 @@ export class PushNotificationService {
                 body: payload.body,
               },
               data: payload.data || {},
-              android: { priority: 'high' },
+              android,
             },
           }),
         }
@@ -472,6 +483,15 @@ export class PushNotificationService {
     if (!serverKey) return { ok: false, errorCode: 'FCM_LEGACY_KEY_MISSING' };
 
     try {
+      const notification: Record<string, any> = {
+        title: payload.title,
+        body: payload.body,
+      };
+      const channelId = String(payload.android?.channelId || '').trim();
+      if (channelId) {
+        notification.android_channel_id = channelId;
+      }
+
       const response = await fetch('https://fcm.googleapis.com/fcm/send', {
         method: 'POST',
         headers: {
@@ -481,10 +501,7 @@ export class PushNotificationService {
         body: JSON.stringify({
           to: token,
           priority: 'high',
-          notification: {
-            title: payload.title,
-            body: payload.body,
-          },
+          notification,
           data: payload.data || {},
         }),
       });

@@ -500,6 +500,8 @@ export class OrderService
       String(order?.store?.id || '').trim();
     if (!storeId) return;
 
+    const storeNotificationType = 'store_new_online_order';
+    const storeNotificationChannelId = 'store_new_orders_v1';
     const shortOrderId = `#${String(order?.id || '').slice(0, 8)}`;
     const typeLabel = this.resolveStoreOrderTypeLabel(order);
     const paymentLabel = this.resolveStorePaymentPushLabel(order);
@@ -515,6 +517,10 @@ export class OrderService
         orderId,
         storeId,
         status: String(order.status || ''),
+        notificationType: storeNotificationType,
+      },
+      android: {
+        channelId: storeNotificationChannelId,
       },
     };
 
