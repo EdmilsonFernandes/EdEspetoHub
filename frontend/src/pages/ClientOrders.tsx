@@ -1228,7 +1228,6 @@ export function ClientOrders() {
     () => orders.filter((order) => [ 'CANCELLED', 'REJECTED' ].includes(normalizeStatus(order.status))).length,
     [orders]
   );
-  const lastOrder = useMemo(() => orders[0] || null, [orders]);
   const customerDisplayName = useMemo(() => {
     try {
       const sessionRaw = localStorage.getItem('customerSession');
@@ -1441,27 +1440,6 @@ export function ClientOrders() {
         </header>
 
         <div className="px-4 py-4">
-          <section className="mb-5 overflow-hidden rounded-[26px] border border-[#d6e3eb] bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(246,249,251,0.98)_52%,rgba(238,245,249,0.98)_100%)] px-4 py-3.5 shadow-[0_18px_36px_-34px_rgba(21,58,76,0.24)]">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#336886]">Resumo da conta</p>
-                <h2 className="mt-1 text-[16px] font-black tracking-tight text-slate-950">
-                  {activeOrders.length > 0 ? 'Acompanhe seus pedidos em tempo real' : 'Seu histórico está organizado'}
-                </h2>
-                <p className="mt-1 text-[12px] leading-5 text-slate-500">
-                  {lastOrder
-                    ? `Seu pedido mais recente foi ${formatOrderMoment(lastOrder.createdAt)?.toLowerCase() || 'registrado recentemente'}.`
-                    : 'Quando você fizer o primeiro pedido, ele aparece aqui com status, valor e atendimento.'}
-                </p>
-              </div>
-              {lastOrder ? (
-                <span className="hidden shrink-0 rounded-full bg-white/88 px-3 py-1.5 text-[11px] font-semibold text-slate-600 shadow-[0_12px_24px_-22px_rgba(21,58,76,0.2)] ring-1 ring-slate-200/70 sm:inline-flex">
-                  {formatOrderMoment(lastOrder.createdAt)}
-                </span>
-              ) : null}
-            </div>
-          </section>
-
           {error ? (
             <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
               {error}
