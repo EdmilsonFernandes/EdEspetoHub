@@ -3774,7 +3774,7 @@ export function MarketplacePage() {
                     </p>
                   </div>
                   <div className="shrink-0 min-w-[5.75rem] rounded-[1.35rem] border border-[#bfd6e4]/80 bg-white/82 px-3 py-2 text-center shadow-[0_16px_30px_-22px_rgba(51,104,134,0.28)] backdrop-blur-md">
-                    <p className="text-[9px] font-black uppercase tracking-[0.14em] text-[#336886]">Agora</p>
+                    <p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#336886]">Ao vivo</p>
                     <p className="mt-1 text-lg font-black leading-none text-slate-950">
                       {condominiumPickerCounts.live}
                     </p>
@@ -3782,11 +3782,19 @@ export function MarketplacePage() {
                   </div>
                 </div>
 
-                <div className="mb-4 flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[#336886]/12 bg-[#336886]/8 px-3 py-1.5 text-[11px] font-bold text-[#336886] shadow-sm">
-                    <Buildings size={12} weight="duotone" />
-                    {condominiumPickerCounts.all} condomínio{condominiumPickerCounts.all === 1 ? '' : 's'}
-                  </span>
+                <div className="mb-4 grid grid-cols-3 gap-2">
+                  <div className="rounded-[1.15rem] border border-[#336886]/10 bg-[#336886]/6 px-3 py-2.5 shadow-[0_14px_28px_-26px_rgba(51,104,134,0.38)]">
+                    <p className="text-[9px] font-black uppercase tracking-[0.11em] text-[#336886]">Ao vivo</p>
+                    <p className="mt-1 text-base font-black leading-none text-slate-950">{condominiumPickerCounts.live}</p>
+                  </div>
+                  <div className="rounded-[1.15rem] border border-slate-200 bg-slate-50/90 px-3 py-2.5 shadow-[0_14px_28px_-28px_rgba(15,23,42,0.18)]">
+                    <p className="text-[9px] font-black uppercase tracking-[0.11em] text-slate-500">Em breve</p>
+                    <p className="mt-1 text-base font-black leading-none text-slate-900">{condominiumPickerCounts.upcoming}</p>
+                  </div>
+                  <div className="rounded-[1.15rem] border border-slate-200 bg-white px-3 py-2.5 shadow-[0_14px_28px_-28px_rgba(15,23,42,0.14)]">
+                    <p className="text-[9px] font-black uppercase tracking-[0.11em] text-slate-500">Condomínios</p>
+                    <p className="mt-1 text-base font-black leading-none text-slate-900">{condominiumPickerCounts.all}</p>
+                  </div>
                 </div>
 
                 <div className="relative overflow-hidden rounded-[1.6rem] border border-white/70 bg-white/68 p-1.5 shadow-[0_18px_40px_-28px_rgba(15,23,42,0.28)] ring-1 ring-white/55 backdrop-blur-xl">
@@ -3912,7 +3920,7 @@ export function MarketplacePage() {
 
                     {/* ── AO VIVO ── */}
                     {live.length > 0 && (
-                      <section>
+                      <section className="rounded-[1.8rem] border border-[#336886]/10 bg-white/78 p-3.5 shadow-[0_24px_46px_-34px_rgba(51,104,134,0.2)] ring-1 ring-white/70 backdrop-blur-sm">
                         <div className="mb-3 flex items-center gap-2">
                           <span className="relative flex h-2.5 w-2.5 shrink-0">
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75" />
@@ -4002,7 +4010,7 @@ export function MarketplacePage() {
 
                     {/* ── EM BREVE ── */}
                     {upcoming.length > 0 && (
-                      <section>
+                      <section className="rounded-[1.7rem] border border-slate-200/80 bg-white/72 p-3.5 shadow-[0_20px_38px_-32px_rgba(15,23,42,0.16)] ring-1 ring-white/65 backdrop-blur-sm">
                         <div className="mb-3 flex items-center gap-2">
                           <Clock size={13} weight="fill" className="text-[#336886]" />
                           <div>
@@ -4030,10 +4038,10 @@ export function MarketplacePage() {
                               >
                                 <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-[radial-gradient(circle_at_center,rgba(51,104,134,0.09),transparent_72%)]" />
                                 <div className="relative flex items-center gap-3">
-                                  <div className="relative h-[5.25rem] w-[6.8rem] shrink-0 overflow-hidden rounded-[1.3rem] border border-slate-200/80 bg-slate-100 shadow-[0_16px_28px_-24px_rgba(15,23,42,0.42)]">
+                                  <div className="relative h-[4.95rem] w-[6.2rem] shrink-0 overflow-hidden rounded-[1.2rem] border border-slate-200/80 bg-slate-100 shadow-[0_16px_28px_-24px_rgba(15,23,42,0.42)]">
                                     <img src={bannerUrl} alt="" aria-hidden className="h-full w-full object-cover" />
                                     <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(15,23,42,0.18)_0%,rgba(15,23,42,0.06)_45%,rgba(15,23,42,0.26)_100%)]" />
-                                    <div className="absolute bottom-2 left-2 h-10 w-10 overflow-hidden rounded-[0.95rem] border border-white/90 bg-white/95 p-1.5 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.52)]">
+                                    <div className="absolute bottom-2 left-2 h-9 w-9 overflow-hidden rounded-[0.9rem] border border-white/90 bg-white/95 p-1.5 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.52)]">
                                       <img src={logoUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
                                     </div>
                                   </div>
@@ -4054,10 +4062,10 @@ export function MarketplacePage() {
                                     </div>
                                     <div className="mt-3 flex items-center justify-between gap-3">
                                       <span className="text-[11px] font-medium text-slate-500">Acompanhe o início e entre na hora certa.</span>
-                                      <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-[10px] font-black uppercase tracking-[0.1em] ${
+                                      <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.75 text-[10px] font-black uppercase tracking-[0.1em] ${
                                         active ? 'bg-[#336886] text-white' : 'bg-slate-900 text-white'
                                       }`}>
-                                        Ver agenda
+                                        Agenda
                                         <CaretRight size={10} weight="bold" />
                                       </span>
                                     </div>
@@ -4072,7 +4080,7 @@ export function MarketplacePage() {
 
                     {/* ── SEM AGENDA ── */}
                     {none.length > 0 && (
-                      <section>
+                      <section className="rounded-[1.65rem] border border-slate-200/75 bg-slate-50/76 p-3.5 shadow-[0_18px_34px_-32px_rgba(15,23,42,0.12)] ring-1 ring-white/55">
                         <div className="mb-3 flex items-center gap-2">
                           <CalendarBlank size={12} weight="duotone" className="text-slate-400" />
                           <div>

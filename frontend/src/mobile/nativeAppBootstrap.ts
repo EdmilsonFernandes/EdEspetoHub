@@ -2,6 +2,8 @@ import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { customerAccountService } from '../services/customerAccountService';
+import { ADMIN_SESSION_EVENT, CUSTOMER_SESSION_EVENT } from '../services/nativeBiometricService';
+import { storePushService } from '../services/storePushService';
 
 const MOBILE_PUSH_ENABLED =
   String(
@@ -11,6 +13,7 @@ const MOBILE_PUSH_ENABLED =
 const PUSH_PROMPTED_KEY = 'jnk_mobile_push_prompted';
 const PUSH_TOKEN_KEY = 'jnk_mobile_push_token';
 const PUSH_LAST_SYNC_TOKEN_KEY = 'jnk_mobile_push_last_sync_token';
+const PUSH_LAST_SYNC_STORE_TOKEN_KEY = 'jnk_mobile_push_last_sync_store_token';
 const PUSH_GUEST_ID_KEY = 'jnk_mobile_push_guest_id';
 
 const normalizeInternalUrl = (rawUrl: string): string | null => {
@@ -62,6 +65,21 @@ const getCustomerSessionToken = () => {
   }
 };
 
+const getAdminSessionContext = () => {
+  try {
+    const raw = localStorage.getItem('adminSession');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const token = String(parsed?.token || '').trim();
+    const storeId = String(parsed?.store?.id || '').trim();
+    const userId = String(parsed?.user?.id || '').trim();
+    if (!token || !storeId || !userId) return null;
+    return { token, storeId, userId };
+  } catch {
+    return null;
+  }
+};
+
 const getOrCreateGuestPushId = () => {
   try {
     const existing = String(localStorage.getItem(PUSH_GUEST_ID_KEY) || '').trim();
@@ -84,29 +102,53 @@ const syncPushTokenNow = () => {
 const syncPushTokenWithBackend = async (tokenRaw?: string | null) => {
   const token = String(tokenRaw || localStorage.getItem(PUSH_TOKEN_KEY) || '').trim();
   if (!token) return;
+
   const customerToken = getCustomerSessionToken();
   const guestId = getOrCreateGuestPushId();
-  const mode = customerToken ? 'customer' : 'guest';
-  const syncKey = `${mode}:${customerToken ? 'auth' : guestId}:${token}`;
+  const syncKey = `${customerToken ? 'customer:auth' : `guest:${guestId}`}:${token}`;
 
   const lastSynced = String(localStorage.getItem(PUSH_LAST_SYNC_TOKEN_KEY) || '').trim();
-  if (lastSynced === syncKey) return;
+  const syncTasks: Promise<unknown>[] = [];
 
-  try {
-    if (customerToken) {
-      await customerAccountService.registerPushToken({
-        token,
-        platform: Capacitor.getPlatform(),
-      });
-    } else {
-      await customerAccountService.registerGuestPushToken({
-        guestId,
-        token,
-        platform: Capacitor.getPlatform(),
-      });
+  if (lastSynced !== syncKey) {
+    syncTasks.push((async () => {
+      if (customerToken) {
+        await customerAccountService.registerPushToken({
+          token,
+          platform: Capacitor.getPlatform(),
+        });
+      } else {
+        await customerAccountService.registerGuestPushToken({
+          guestId,
+          token,
+          platform: Capacitor.getPlatform(),
+        });
+      }
+      localStorage.setItem(PUSH_LAST_SYNC_TOKEN_KEY, syncKey);
+    })());
+  }
+
+  const adminSession = getAdminSessionContext();
+  if (adminSession) {
+    const storeSyncKey = `store:${adminSession.storeId}:${adminSession.userId}:${token}`;
+    const lastStoreSync = String(localStorage.getItem(PUSH_LAST_SYNC_STORE_TOKEN_KEY) || '').trim();
+    if (lastStoreSync !== storeSyncKey) {
+      syncTasks.push((async () => {
+        await storePushService.registerPushToken(adminSession.storeId, {
+          token,
+          platform: Capacitor.getPlatform(),
+        });
+        localStorage.setItem(PUSH_LAST_SYNC_STORE_TOKEN_KEY, storeSyncKey);
+      })());
     }
-    localStorage.setItem(PUSH_LAST_SYNC_TOKEN_KEY, syncKey);
-  } catch {
+  } else {
+    localStorage.removeItem(PUSH_LAST_SYNC_STORE_TOKEN_KEY);
+  }
+
+  if (!syncTasks.length) return;
+
+  const results = await Promise.allSettled(syncTasks);
+  if (results.some((result) => result.status === 'rejected')) {
     // no-op
   }
 };
@@ -199,11 +241,12 @@ export const bootstrapNativeApp = async () => {
       }
     });
     window.addEventListener('storage', (event) => {
-      if (event.key === 'customerSession') {
+      if (event.key === 'customerSession' || event.key === 'adminSession') {
         // Mantém o token sincronizado quando a sessão muda em outra aba/contexto.
         syncPushTokenNow();
       }
     });
-    window.addEventListener('jnc:customer-session-updated', syncPushTokenNow as EventListener);
+    window.addEventListener(CUSTOMER_SESSION_EVENT, syncPushTokenNow as EventListener);
+    window.addEventListener(ADMIN_SESSION_EVENT, syncPushTokenNow as EventListener);
   }
 };

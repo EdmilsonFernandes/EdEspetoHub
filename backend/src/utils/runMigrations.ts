@@ -1722,6 +1722,33 @@ export async function runMigrations() {
     ON motoboy_push_tokens(is_active);
   `);
   await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS store_user_push_tokens (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+      user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      token TEXT NOT NULL,
+      platform TEXT NOT NULL DEFAULT 'android',
+      app_version TEXT,
+      device_model TEXT,
+      is_active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE(token)
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_store_user_push_tokens_store_id
+    ON store_user_push_tokens(store_id);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_store_user_push_tokens_user_id
+    ON store_user_push_tokens(user_id);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_store_user_push_tokens_is_active
+    ON store_user_push_tokens(is_active);
+  `);
+  await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS guest_order_phone_blocks (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,

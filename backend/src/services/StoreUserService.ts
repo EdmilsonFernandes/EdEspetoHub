@@ -3,11 +3,13 @@ import { AppError } from '../errors/AppError';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { StoreUserRepository } from '../repositories/StoreUserRepository';
 import { UserRepository } from '../repositories/UserRepository';
+import { PushNotificationService } from './PushNotificationService';
 
 export class StoreUserService {
   private storeRepository = new StoreRepository();
   private storeUserRepository = new StoreUserRepository();
   private userRepository = new UserRepository();
+  private pushService = new PushNotificationService();
 
     /**
    * Executes ensure store access business logic.
@@ -18,6 +20,25 @@ private ensureStoreAccess(storeId: string, authStoreId?: string) {
     if (!authStoreId || authStoreId !== storeId) {
       throw new AppError('AUTH-003', 403);
     }
+  }
+
+  private async ensureStorePushAccess(storeId: string, userId: string, authStoreId?: string) {
+    this.ensureStoreAccess(storeId, authStoreId);
+    const store = await this.storeRepository.findByIdWithOwner(storeId);
+    if (!store) throw new AppError('STORE-001', 404);
+
+    const normalizedUserId = String(userId || '').trim();
+    if (!normalizedUserId) throw new AppError('AUTH-001', 401);
+
+    if (String(store.owner?.id || '').trim() === normalizedUserId) {
+      return store;
+    }
+
+    const membership = await this.storeUserRepository.findByStoreAndUser(storeId, normalizedUserId);
+    if (!membership?.isActive) {
+      throw new AppError('AUTH-003', 403);
+    }
+    return store;
   }
 
     /**
@@ -168,5 +189,35 @@ async removeForStore(storeId: string, userId: string, authStoreId?: string, auth
 
     await this.storeUserRepository.remove(membership as any);
     return { id: targetUserId, removed: true };
+  }
+
+  /**
+   * Registers the store staff mobile push token for one authenticated user.
+   *
+   * @author Edmilson Lopes
+   */
+  async registerPushToken(
+    storeId: string,
+    userId: string,
+    input: { token?: string; platform?: string; appVersion?: string; deviceModel?: string },
+    authStoreId?: string
+  ) {
+    await this.ensureStorePushAccess(storeId, userId, authStoreId);
+    return this.pushService.registerStoreUserToken(storeId, userId, input as any);
+  }
+
+  /**
+   * Unregisters one store staff push token or all tokens for the authenticated user.
+   *
+   * @author Edmilson Lopes
+   */
+  async unregisterPushToken(
+    storeId: string,
+    userId: string,
+    input: { token?: string | null },
+    authStoreId?: string
+  ) {
+    await this.ensureStorePushAccess(storeId, userId, authStoreId);
+    return this.pushService.unregisterStoreUserToken(storeId, userId, input?.token || null);
   }
 }

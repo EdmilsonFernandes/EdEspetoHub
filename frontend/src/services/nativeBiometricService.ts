@@ -2,7 +2,8 @@ import { Capacitor } from '@capacitor/core';
 import { clearAllCustomerSessions } from '../utils/customerSessionStorage';
 
 const BIOMETRIC_RESULT_EVENT = 'jnc:android-biometric-result';
-const CUSTOMER_SESSION_EVENT = 'jnc:customer-session-updated';
+export const CUSTOMER_SESSION_EVENT = 'jnc:customer-session-updated';
+export const ADMIN_SESSION_EVENT = 'jnc:admin-session-updated';
 
 type CustomerSession = {
   token: string;
@@ -142,9 +143,11 @@ const syncAdminSession = (session: AdminSession | null) => {
   if (typeof window === 'undefined') return;
   if (session?.token) {
     localStorage.setItem('adminSession', JSON.stringify(session));
+    window.dispatchEvent(new CustomEvent(ADMIN_SESSION_EVENT, { detail: session }));
     return;
   }
   localStorage.removeItem('adminSession');
+  window.dispatchEvent(new CustomEvent(ADMIN_SESSION_EVENT));
 };
 
 const syncMotoboySession = (session: MotoboySession | null) => {

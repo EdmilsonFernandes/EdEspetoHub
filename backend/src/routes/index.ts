@@ -199,6 +199,8 @@ routes.get('/stores/:storeId/users', requireAuth, requireRole('ADMIN'), StoreUse
 routes.post('/stores/:storeId/users', requireAuth, requireRole('ADMIN'), StoreUserController.create);
 routes.patch('/stores/:storeId/users/:userId/password', requireAuth, requireRole('ADMIN'), StoreUserController.updatePassword);
 routes.delete('/stores/:storeId/users/:userId', requireAuth, requireRole('ADMIN'), StoreUserController.remove);
+routes.post('/stores/:storeId/push/register', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), StoreUserController.registerPushToken);
+routes.post('/stores/:storeId/push/unregister', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), StoreUserController.unregisterPushToken);
 routes.get('/stores/:storeId/featured-requests', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), FeaturedProductController.listByStore);
 routes.get('/stores/:storeId/featured-pricing', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), FeaturedProductController.getStorePricing);
 routes.post('/stores/:storeId/featured-requests', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), FeaturedProductController.createStoreRequest);

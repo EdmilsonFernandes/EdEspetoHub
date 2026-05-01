@@ -424,6 +424,99 @@ export class OrderService
     return dictionary[normalized] || `Pedido ${orderDisplayId} teve atualização de status.`;
   }
 
+  private isOnlineCustomerOrder(
+    order: Pick<Order, 'customerUserId' | 'guestPushId'>
+  ) {
+    return Boolean(String(order?.customerUserId || '').trim() || String(order?.guestPushId || '').trim());
+  }
+
+  private resolveStoreOrderTypeLabel(
+    order: Pick<Order, 'type' | 'fulfillmentMode' | 'condominiumFulfillmentMode'>
+  ) {
+    const type = String(order?.type || '').toLowerCase();
+    const fulfillmentMode = String(order?.fulfillmentMode || '').toLowerCase();
+    const condominiumMode = String(order?.condominiumFulfillmentMode || '').toLowerCase();
+    if (type === 'delivery' && fulfillmentMode === 'postal') return 'Correios';
+    if (type === 'pickup' || condominiumMode === 'pickup_at_stall' || fulfillmentMode === 'condominium_pickup') {
+      return 'Retirada';
+    }
+    if (type === 'table') return 'Mesa';
+    return 'Entrega';
+  }
+
+  private resolveStorePaymentPushLabel(
+    order: Pick<Order, 'status' | 'paymentMethod' | 'paymentStatus'>
+  ) {
+    const normalizedStatus = String(order?.status || '').trim().toLowerCase();
+    const normalizedPaymentStatus = String(order?.paymentStatus || '').trim().toUpperCase();
+    const paymentMethod = String(order?.paymentMethod || '').trim().toLowerCase();
+    const isPix = paymentMethod.includes('pix');
+    const isCashOnDelivery = paymentMethod === 'dinheiro';
+
+    if (normalizedStatus === 'awaiting_payment' || normalizedPaymentStatus !== 'PAID') {
+      if (isPix) return 'Pix pendente';
+      if (isCashOnDelivery) return 'Pagamento na entrega';
+      return 'Pagamento pendente';
+    }
+
+    if (isPix) return 'Pix pago';
+    return 'Pago';
+  }
+
+  private resolveCurrencyLabel(value: number) {
+    return `R$ ${Number(value || 0).toFixed(2).replace('.', ',')}`;
+  }
+
+  /**
+   * Dispatches "new online order" push to store owner and active staff tokens.
+   *
+   * @author Edmilson Lopes
+   */
+  private dispatchStoreNewOnlineOrderPush(
+    order: Pick<
+      Order,
+      | 'id'
+      | 'status'
+      | 'type'
+      | 'fulfillmentMode'
+      | 'condominiumFulfillmentMode'
+      | 'paymentMethod'
+      | 'paymentStatus'
+      | 'customerName'
+      | 'customerUserId'
+      | 'guestPushId'
+      | 'total'
+    > & {
+      storeId?: string | null;
+      store?: { id?: string; name?: string | null } | null;
+    }
+  ) {
+    if (!this.isOnlineCustomerOrder(order)) return;
+
+    const storeId =
+      String(order?.storeId || '').trim() ||
+      String(order?.store?.id || '').trim();
+    if (!storeId) return;
+
+    const shortOrderId = `#${String(order?.id || '').slice(0, 8)}`;
+    const typeLabel = this.resolveStoreOrderTypeLabel(order);
+    const paymentLabel = this.resolveStorePaymentPushLabel(order);
+    const totalLabel = this.resolveCurrencyLabel(Number(order?.total || 0));
+    const customerName = String(order?.customerName || '').trim() || 'Cliente online';
+
+    void this.pushService.notifyStoreUsersNewOnlineOrder(storeId, {
+      title: 'Novo pedido online',
+      body: `${customerName} • ${shortOrderId} • ${typeLabel} • ${paymentLabel} • ${totalLabel}`,
+      data: {
+        url: 'https://janocaminho.com.br/admin/queue',
+        screen: 'admin_queue',
+        orderId: String(order.id),
+        storeId,
+        status: String(order.status || ''),
+      },
+    });
+  }
+
   /**
    * Dispatches customer/guest push notification for order status update.
    *
@@ -1105,6 +1198,16 @@ private async seedPostalShipmentFromCheckoutTx(
       return saved;
     });
     await this.registerAnonymousOrderAttempt(input, store.id);
+    if (!this.isStaffActor(input?.actorRole)) {
+      this.dispatchStoreNewOnlineOrderPush({
+        ...(saved as any),
+        storeId: store.id,
+        store: { id: store.id, name: store.name },
+        customerName: (saved as any)?.customerName || input.customerName,
+        paymentMethod: (saved as any)?.paymentMethod || input.paymentMethod,
+        paymentStatus: (saved as any)?.paymentStatus || input.paymentStatus,
+      });
+    }
     // Only notify admin queue when order is already active (cash / no MP)
     if (saved.status !== 'awaiting_payment') {
       this.dispatchOrderUpdatePush(saved as any);
@@ -1164,6 +1267,16 @@ private async seedPostalShipmentFromCheckoutTx(
       return saved;
     });
     await this.registerAnonymousOrderAttempt({ ...input, storeId: store.id }, store.id);
+    if (!this.isStaffActor(input?.actorRole)) {
+      this.dispatchStoreNewOnlineOrderPush({
+        ...(saved as any),
+        storeId: store.id,
+        store: { id: store.id, name: store.name },
+        customerName: (saved as any)?.customerName || input.customerName,
+        paymentMethod: (saved as any)?.paymentMethod || input.paymentMethod,
+        paymentStatus: (saved as any)?.paymentStatus || input.paymentStatus,
+      });
+    }
     // Only notify admin queue when order is already active (cash / no MP)
     if (saved.status !== 'awaiting_payment') {
       this.dispatchOrderUpdatePush(saved as any);

@@ -235,6 +235,88 @@ export class PushNotificationService {
     return { ok: true };
   }
 
+  /**
+   * Registers or reactivates one store user push token.
+   *
+   * @author Edmilson Lopes
+   */
+  async registerStoreUserToken(
+    storeId: string,
+    userId: string,
+    input: { token: string; platform?: string; appVersion?: string; deviceModel?: string }
+  ) {
+    const token = String(input?.token || '').trim();
+    if (!token || token.length < 24) {
+      return { ok: false, reason: 'invalid_token' as const };
+    }
+    const normalizedStoreId = String(storeId || '').trim();
+    const normalizedUserId = String(userId || '').trim();
+    if (!normalizedStoreId || !normalizedUserId) {
+      return { ok: false, reason: 'missing_identity' as const };
+    }
+
+    const platform = String(input?.platform || 'android').trim().toLowerCase() || 'android';
+    const appVersion = String(input?.appVersion || '').trim() || null;
+    const deviceModel = String(input?.deviceModel || '').trim() || null;
+
+    await AppDataSource.query(
+      `
+        INSERT INTO store_user_push_tokens
+          (store_id, user_id, token, platform, app_version, device_model, is_active, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, TRUE, NOW())
+        ON CONFLICT (token)
+        DO UPDATE SET
+          store_id = EXCLUDED.store_id,
+          user_id = EXCLUDED.user_id,
+          platform = EXCLUDED.platform,
+          app_version = EXCLUDED.app_version,
+          device_model = EXCLUDED.device_model,
+          is_active = TRUE,
+          updated_at = NOW()
+      `,
+      [normalizedStoreId, normalizedUserId, token, platform, appVersion, deviceModel]
+    );
+    return { ok: true };
+  }
+
+  /**
+   * Deactivates one token or all tokens for a store user within one store.
+   *
+   * @author Edmilson Lopes
+   */
+  async unregisterStoreUserToken(storeId: string, userId: string, token?: string | null) {
+    const normalizedStoreId = String(storeId || '').trim();
+    const normalizedUserId = String(userId || '').trim();
+    if (!normalizedStoreId || !normalizedUserId) {
+      return { ok: false, reason: 'missing_identity' as const };
+    }
+    const normalizedToken = String(token || '').trim();
+    if (normalizedToken) {
+      await AppDataSource.query(
+        `
+          UPDATE store_user_push_tokens
+          SET is_active = FALSE, updated_at = NOW()
+          WHERE store_id = $1
+            AND user_id = $2
+            AND token = $3
+        `,
+        [normalizedStoreId, normalizedUserId, normalizedToken]
+      );
+      return { ok: true };
+    }
+
+    await AppDataSource.query(
+      `
+        UPDATE store_user_push_tokens
+        SET is_active = FALSE, updated_at = NOW()
+        WHERE store_id = $1
+          AND user_id = $2
+      `,
+      [normalizedStoreId, normalizedUserId]
+    );
+    return { ok: true };
+  }
+
   private base64Url(input: string) {
     return Buffer.from(input).toString('base64url');
   }
@@ -602,6 +684,90 @@ export class PushNotificationService {
     }
 
     log.info('Motoboy push dispatch finished', {
+      storeId: normalizedStoreId,
+      sent,
+      attempted: rows.length,
+    });
+    return { ok: true, sent, attempted: rows.length };
+  }
+
+  /**
+   * Dispatches "new online order" push to store owner and active store users.
+   *
+   * @author Edmilson Lopes
+   */
+  async notifyStoreUsersNewOnlineOrder(storeId: string, payload: CustomerPushPayload) {
+    const normalizedStoreId = String(storeId || '').trim();
+    if (!normalizedStoreId) return { ok: false, sent: 0, skipped: true };
+
+    const hasV1 = Boolean(this.resolveFcmV1Config());
+    const hasLegacy = Boolean(String(env.push?.fcmServerKey || '').trim());
+    if (!hasV1 && !hasLegacy) {
+      log.info('Store user push skipped (missing FCM config)', { storeId: normalizedStoreId });
+      return { ok: false, sent: 0, skipped: true };
+    }
+
+    const rows: Array<{ token: string; user_id: string }> = await AppDataSource.query(
+      `
+        SELECT DISTINCT ON (rows.token) rows.token, rows.user_id
+        FROM (
+          SELECT supt.token, supt.user_id, supt.updated_at
+          FROM store_user_push_tokens supt
+          INNER JOIN stores s
+            ON s.id = supt.store_id
+           AND s.owner_id = supt.user_id
+          WHERE supt.store_id = $1
+            AND supt.is_active = TRUE
+
+          UNION ALL
+
+          SELECT supt.token, supt.user_id, supt.updated_at
+          FROM store_user_push_tokens supt
+          INNER JOIN store_users su
+            ON su.store_id = supt.store_id
+           AND su.user_id = supt.user_id
+           AND su.is_active = TRUE
+          WHERE supt.store_id = $1
+            AND supt.is_active = TRUE
+        ) rows
+        ORDER BY rows.token, rows.updated_at DESC
+        LIMIT 100
+      `,
+      [normalizedStoreId]
+    );
+
+    if (!rows.length) {
+      log.info('Store user push skipped (no active tokens for store)', { storeId: normalizedStoreId });
+      return { ok: true, sent: 0, skipped: true };
+    }
+
+    let sent = 0;
+    for (const row of rows) {
+      const token = String(row?.token || '').trim();
+      const userId = String(row?.user_id || '').trim();
+      if (!token || !userId) continue;
+
+      const result = await this.sendToToken(token, payload);
+      if (result.ok) {
+        sent += 1;
+        continue;
+      }
+
+      log.warn('Store user push send failed', {
+        storeId: normalizedStoreId,
+        userId,
+        tokenSuffix: token.slice(-8),
+        status: result.status,
+        errorCode: result.errorCode,
+        body: result.body,
+      });
+
+      if (result.deactivateToken) {
+        await this.unregisterStoreUserToken(normalizedStoreId, userId, token);
+      }
+    }
+
+    log.info('Store user push dispatch finished', {
       storeId: normalizedStoreId,
       sent,
       attempted: rows.length,
