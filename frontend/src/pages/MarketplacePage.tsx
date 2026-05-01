@@ -3740,14 +3740,13 @@ export function MarketplacePage() {
       {condominiumPickerOpen && (
         <div className="fixed inset-0 z-[220] overflow-x-hidden overflow-y-auto overscroll-x-none bg-[radial-gradient(circle_at_top,rgba(51,104,134,0.10),transparent_26%),linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)] text-slate-950">
           <div className="mx-auto min-h-screen w-full max-w-[640px] overflow-x-hidden pb-28">
-
-            <div className="relative overflow-x-hidden px-4 pb-6 pt-[max(env(safe-area-inset-top),1rem)]">
+            <div className="relative overflow-x-hidden px-4 pb-4 pt-[max(env(safe-area-inset-top),0.6rem)]">
               <div className="pointer-events-none absolute -right-12 -top-10 h-56 w-56 rounded-full bg-[#336886]/12 blur-3xl" />
 
               <button
                 type="button"
                 onClick={() => { setCondominiumPickerOpen(false); setCondominiumSearch(''); setCondoPickerFilter('all'); }}
-                className="relative mb-5 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/80 text-slate-700 shadow-[0_18px_36px_-22px_rgba(15,23,42,0.35)] backdrop-blur-xl transition-colors hover:bg-white active:scale-95"
+                className="relative mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/80 text-slate-700 shadow-[0_18px_36px_-22px_rgba(15,23,42,0.35)] backdrop-blur-xl transition-colors hover:bg-white active:scale-95"
                 aria-label="Voltar"
               >
                 <CaretRight size={16} weight="bold" className="rotate-180" />
@@ -3779,21 +3778,6 @@ export function MarketplacePage() {
                       {condominiumPickerCounts.live}
                     </p>
                     <p className="mt-1 text-[10px] font-semibold text-slate-500">feira{condominiumPickerCounts.live === 1 ? '' : 's'} ao vivo</p>
-                  </div>
-                </div>
-
-                <div className="mb-4 grid grid-cols-3 gap-2">
-                  <div className="rounded-[1.15rem] border border-[#336886]/10 bg-[#336886]/6 px-3 py-2.5 shadow-[0_14px_28px_-26px_rgba(51,104,134,0.38)]">
-                    <p className="text-[9px] font-black uppercase tracking-[0.11em] text-[#336886]">Ao vivo</p>
-                    <p className="mt-1 text-base font-black leading-none text-slate-950">{condominiumPickerCounts.live}</p>
-                  </div>
-                  <div className="rounded-[1.15rem] border border-slate-200 bg-slate-50/90 px-3 py-2.5 shadow-[0_14px_28px_-28px_rgba(15,23,42,0.18)]">
-                    <p className="text-[9px] font-black uppercase tracking-[0.11em] text-slate-500">Em breve</p>
-                    <p className="mt-1 text-base font-black leading-none text-slate-900">{condominiumPickerCounts.upcoming}</p>
-                  </div>
-                  <div className="rounded-[1.15rem] border border-slate-200 bg-white px-3 py-2.5 shadow-[0_14px_28px_-28px_rgba(15,23,42,0.14)]">
-                    <p className="text-[9px] font-black uppercase tracking-[0.11em] text-slate-500">Condomínios</p>
-                    <p className="mt-1 text-base font-black leading-none text-slate-900">{condominiumPickerCounts.all}</p>
                   </div>
                 </div>
 
