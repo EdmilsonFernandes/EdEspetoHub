@@ -154,14 +154,20 @@ const resolveStoreIdentifier = (storeId?: string): string | null =>
   storeId || getStoreIdentifierFromSession();
 
 export const orderService = {
-  async createBySlug(orderData: any, storeSlug: string)
+  async createBySlug(
+    orderData: any,
+    storeSlug: string,
+    options?: { authMode?: 'auto' | 'none' | 'admin' | 'customer' | 'motoboy' }
+  )
   {
     if (!storeSlug)
     {
       return Promise.reject(new Error("Loja inválida"));
     }
 
-    return apiClient.post(`/stores/slug/${storeSlug}/orders`, orderData);
+    return apiClient.post(`/stores/slug/${storeSlug}/orders`, orderData, {
+      authMode: options?.authMode || 'auto',
+    });
   },
   async fetchHighlightsBySlug(storeSlug: string)
   {

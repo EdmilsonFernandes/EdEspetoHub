@@ -2278,12 +2278,21 @@ export function StorePage() {
       return;
     }
 
-    let createdOrder;
-    try {
-      createdOrder = await orderService.createBySlug(order, storeSlug);
-    } catch (error) {
-      const backendMessage =
-        error?.details?.message ||
+      const createOrderAuthMode =
+        isStoreAdmin
+          ? 'admin'
+          : customerSession?.token
+            ? 'customer'
+            : 'none';
+
+      let createdOrder;
+      try {
+      createdOrder = await orderService.createBySlug(order, storeSlug, {
+        authMode: createOrderAuthMode,
+      });
+      } catch (error) {
+        const backendMessage =
+          error?.details?.message ||
         error?.error?.details?.message ||
         error?.error?.message ||
         error?.message;
@@ -3959,5 +3968,4 @@ export function StorePage() {
     const planName = String(subscription?.plan?.name || '').toLowerCase();
     return planName.includes('pro') || planName.includes('vip');
   };
-
 

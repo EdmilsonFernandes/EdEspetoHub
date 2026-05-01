@@ -127,6 +127,32 @@ const getAdminRole = (): string =>
   }
 };
 
+const resolveAuthToken = (
+  path: string,
+  authMode: 'auto' | 'none' | 'admin' | 'customer' | 'motoboy' = 'auto'
+) => {
+  const isMotoboyRoute = path.startsWith('/motoboy') || path.startsWith('motoboy');
+  const isCustomerRoute = path.startsWith('/customer') || path.startsWith('customer');
+
+  const motoboyToken = getMotoboyToken();
+  const adminToken = getAdminToken();
+  const customerToken = getCustomerToken();
+
+  if (authMode === 'none') return null;
+  if (authMode === 'admin') return adminToken;
+  if (authMode === 'customer') return customerToken;
+  if (authMode === 'motoboy') return motoboyToken;
+
+  let token = adminToken || customerToken;
+  if (isMotoboyRoute) {
+    token = motoboyToken;
+  } else if (isCustomerRoute) {
+    token = customerToken || adminToken;
+  }
+
+  return token;
+};
+
 const request = async (path: string, options: any = {}) =>
 {
   const url = buildUrl(path);
@@ -143,13 +169,13 @@ const request = async (path: string, options: any = {}) =>
   const motoboyToken = getMotoboyToken();
   const adminToken = getAdminToken();
   const customerToken = getCustomerToken();
-  
-  let token = adminToken || customerToken;
-  if (isMotoboyRoute) {
-    token = motoboyToken;
-  } else if (isCustomerRoute) {
-    token = customerToken || adminToken;
-  }
+  const authMode = String(options?.authMode || 'auto').trim().toLowerCase() as
+    | 'auto'
+    | 'none'
+    | 'admin'
+    | 'customer'
+    | 'motoboy';
+  const token = resolveAuthToken(path, authMode);
 
   const finalOptions: any = {
     ...options,
@@ -162,6 +188,7 @@ const request = async (path: string, options: any = {}) =>
     },
   };
   delete finalOptions.timeoutMs;
+  delete finalOptions.authMode;
 
   if (finalOptions.body && typeof finalOptions.body === 'object')
   {
@@ -215,19 +242,13 @@ const request = async (path: string, options: any = {}) =>
 const rawRequest = async (path: string, options: any = {}) =>
 {
   const url = buildUrl(path);
-  const isMotoboyRoute = path.startsWith('/motoboy') || path.startsWith('motoboy');
-  const isCustomerRoute = path.startsWith('/customer') || path.startsWith('customer');
-  
-  const motoboyToken = getMotoboyToken();
-  const adminToken = getAdminToken();
-  const customerToken = getCustomerToken();
-
-  let token = adminToken || customerToken;
-  if (isMotoboyRoute) {
-    token = motoboyToken;
-  } else if (isCustomerRoute) {
-    token = customerToken || adminToken;
-  }
+  const authMode = String(options?.authMode || 'auto').trim().toLowerCase() as
+    | 'auto'
+    | 'none'
+    | 'admin'
+    | 'customer'
+    | 'motoboy';
+  const token = resolveAuthToken(path, authMode);
 
   const finalOptions: any = {
     ...options,
@@ -238,6 +259,7 @@ const rawRequest = async (path: string, options: any = {}) =>
       'X-Lang': getLang(),
     },
   };
+  delete finalOptions.authMode;
 
   if (finalOptions.body && typeof finalOptions.body === 'object')
   {
