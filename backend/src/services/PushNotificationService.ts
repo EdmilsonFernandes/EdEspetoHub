@@ -700,79 +700,87 @@ export class PushNotificationService {
     const normalizedStoreId = String(storeId || '').trim();
     if (!normalizedStoreId) return { ok: false, sent: 0, skipped: true };
 
-    const hasV1 = Boolean(this.resolveFcmV1Config());
-    const hasLegacy = Boolean(String(env.push?.fcmServerKey || '').trim());
-    if (!hasV1 && !hasLegacy) {
-      log.info('Store user push skipped (missing FCM config)', { storeId: normalizedStoreId });
-      return { ok: false, sent: 0, skipped: true };
-    }
-
-    const rows: Array<{ token: string; user_id: string }> = await AppDataSource.query(
-      `
-        SELECT DISTINCT ON (rows.token) rows.token, rows.user_id
-        FROM (
-          SELECT supt.token, supt.user_id, supt.updated_at
-          FROM store_user_push_tokens supt
-          INNER JOIN stores s
-            ON s.id = supt.store_id
-           AND s.owner_id = supt.user_id
-          WHERE supt.store_id = $1
-            AND supt.is_active = TRUE
-
-          UNION ALL
-
-          SELECT supt.token, supt.user_id, supt.updated_at
-          FROM store_user_push_tokens supt
-          INNER JOIN store_users su
-            ON su.store_id = supt.store_id
-           AND su.user_id = supt.user_id
-           AND su.is_active = TRUE
-          WHERE supt.store_id = $1
-            AND supt.is_active = TRUE
-        ) rows
-        ORDER BY rows.token, rows.updated_at DESC
-        LIMIT 100
-      `,
-      [normalizedStoreId]
-    );
-
-    if (!rows.length) {
-      log.info('Store user push skipped (no active tokens for store)', { storeId: normalizedStoreId });
-      return { ok: true, sent: 0, skipped: true };
-    }
-
-    let sent = 0;
-    for (const row of rows) {
-      const token = String(row?.token || '').trim();
-      const userId = String(row?.user_id || '').trim();
-      if (!token || !userId) continue;
-
-      const result = await this.sendToToken(token, payload);
-      if (result.ok) {
-        sent += 1;
-        continue;
+    try {
+      const hasV1 = Boolean(this.resolveFcmV1Config());
+      const hasLegacy = Boolean(String(env.push?.fcmServerKey || '').trim());
+      if (!hasV1 && !hasLegacy) {
+        log.info('Store user push skipped (missing FCM config)', { storeId: normalizedStoreId });
+        return { ok: false, sent: 0, skipped: true };
       }
 
-      log.warn('Store user push send failed', {
+      const rows: Array<{ token: string; user_id: string }> = await AppDataSource.query(
+        `
+          SELECT DISTINCT ON (rows.token) rows.token, rows.user_id
+          FROM (
+            SELECT supt.token, supt.user_id, supt.updated_at
+            FROM store_user_push_tokens supt
+            INNER JOIN stores s
+              ON s.id = supt.store_id
+             AND s.owner_id = supt.user_id
+            WHERE supt.store_id = $1
+              AND supt.is_active = TRUE
+
+            UNION ALL
+
+            SELECT supt.token, supt.user_id, supt.updated_at
+            FROM store_user_push_tokens supt
+            INNER JOIN store_users su
+              ON su.store_id = supt.store_id
+             AND su.user_id = supt.user_id
+             AND su.is_active = TRUE
+            WHERE supt.store_id = $1
+              AND supt.is_active = TRUE
+          ) rows
+          ORDER BY rows.token, rows.updated_at DESC
+          LIMIT 100
+        `,
+        [normalizedStoreId]
+      );
+
+      if (!rows.length) {
+        log.info('Store user push skipped (no active tokens for store)', { storeId: normalizedStoreId });
+        return { ok: true, sent: 0, skipped: true };
+      }
+
+      let sent = 0;
+      for (const row of rows) {
+        const token = String(row?.token || '').trim();
+        const userId = String(row?.user_id || '').trim();
+        if (!token || !userId) continue;
+
+        const result = await this.sendToToken(token, payload);
+        if (result.ok) {
+          sent += 1;
+          continue;
+        }
+
+        log.warn('Store user push send failed', {
+          storeId: normalizedStoreId,
+          userId,
+          tokenSuffix: token.slice(-8),
+          status: result.status,
+          errorCode: result.errorCode,
+          body: result.body,
+        });
+
+        if (result.deactivateToken) {
+          await this.unregisterStoreUserToken(normalizedStoreId, userId, token);
+        }
+      }
+
+      log.info('Store user push dispatch finished', {
         storeId: normalizedStoreId,
-        userId,
-        tokenSuffix: token.slice(-8),
-        status: result.status,
-        errorCode: result.errorCode,
-        body: result.body,
+        sent,
+        attempted: rows.length,
       });
-
-      if (result.deactivateToken) {
-        await this.unregisterStoreUserToken(normalizedStoreId, userId, token);
-      }
+      return { ok: true, sent, attempted: rows.length };
+    } catch (error) {
+      log.warn('Store user push dispatch crashed', {
+        storeId: normalizedStoreId,
+        error,
+      });
+      return { ok: false, sent: 0, skipped: false };
     }
-
-    log.info('Store user push dispatch finished', {
-      storeId: normalizedStoreId,
-      sent,
-      attempted: rows.length,
-    });
-    return { ok: true, sent, attempted: rows.length };
   }
 
   /**

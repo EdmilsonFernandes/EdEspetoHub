@@ -37,6 +37,7 @@ import { calculateDistanceKm, roundDistanceKm } from '../utils/geo';
 import { env } from '../config/env';
 import { CustomerSecurityService } from './CustomerSecurityService';
 import { resolveMercadoPagoStatusDetailLabel, resolveMercadoPagoStatusLabel } from '../utils/paymentAudit';
+import { logger } from '../utils/logger';
 /**
  * Provides OrderService functionality.
  *
@@ -45,6 +46,7 @@ import { resolveMercadoPagoStatusDetailLabel, resolveMercadoPagoStatusLabel } fr
  */
 export class OrderService
 {
+  private readonly log = logger.child({ scope: 'OrderService' });
   private readonly queueActiveStatuses = [ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ];
   private readonly queueRecentStatuses = [ 'done', 'delivered', 'finished', 'cancelled' ];
   private readonly farPickupLocalOpenStatuses = [ 'pending', 'awaiting_payment', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy', 'in_delivery', 'dispatched' ];
@@ -503,17 +505,34 @@ export class OrderService
     const paymentLabel = this.resolveStorePaymentPushLabel(order);
     const totalLabel = this.resolveCurrencyLabel(Number(order?.total || 0));
     const customerName = String(order?.customerName || '').trim() || 'Cliente online';
-
-    void this.pushService.notifyStoreUsersNewOnlineOrder(storeId, {
+    const orderId = String(order?.id || '').trim();
+    const payload = {
       title: 'Novo pedido online',
       body: `${customerName} • ${shortOrderId} • ${typeLabel} • ${paymentLabel} • ${totalLabel}`,
       data: {
         url: 'https://janocaminho.com.br/admin/queue',
         screen: 'admin_queue',
-        orderId: String(order.id),
+        orderId,
         storeId,
         status: String(order.status || ''),
       },
+    };
+
+    this.log.info('Dispatching store user push for online order', {
+      orderId,
+      storeId,
+      status: String(order?.status || '').trim() || null,
+      paymentStatus: String(order?.paymentStatus || '').trim() || null,
+      customerUserId: String(order?.customerUserId || '').trim() || null,
+      guestPushId: String(order?.guestPushId || '').trim() || null,
+    });
+
+    void this.pushService.notifyStoreUsersNewOnlineOrder(storeId, payload).catch((error) => {
+      this.log.warn('Store user push dispatch failed', {
+        orderId,
+        storeId,
+        error,
+      });
     });
   }
 
@@ -1198,16 +1217,22 @@ private async seedPostalShipmentFromCheckoutTx(
       return saved;
     });
     await this.registerAnonymousOrderAttempt(input, store.id);
-    if (!this.isStaffActor(input?.actorRole)) {
-      this.dispatchStoreNewOnlineOrderPush({
-        ...(saved as any),
-        storeId: store.id,
-        store: { id: store.id, name: store.name },
-        customerName: (saved as any)?.customerName || input.customerName,
-        paymentMethod: (saved as any)?.paymentMethod || input.paymentMethod,
-        paymentStatus: (saved as any)?.paymentStatus || input.paymentStatus,
-      });
-    }
+      if (!this.isStaffActor(input?.actorRole)) {
+        this.dispatchStoreNewOnlineOrderPush({
+          ...(saved as any),
+          storeId: store.id,
+          store: { id: store.id, name: store.name },
+          customerName: (saved as any)?.customerName || input.customerName,
+          paymentMethod: (saved as any)?.paymentMethod || input.paymentMethod,
+          paymentStatus: (saved as any)?.paymentStatus || input.paymentStatus,
+        });
+      } else {
+        this.log.info('Store user push skipped for staff-origin order', {
+          orderId: String((saved as any)?.id || '').trim() || null,
+          storeId: store.id,
+          actorRole: String(input?.actorRole || '').trim().toUpperCase() || null,
+        });
+      }
     // Only notify admin queue when order is already active (cash / no MP)
     if (saved.status !== 'awaiting_payment') {
       this.dispatchOrderUpdatePush(saved as any);
@@ -1267,16 +1292,22 @@ private async seedPostalShipmentFromCheckoutTx(
       return saved;
     });
     await this.registerAnonymousOrderAttempt({ ...input, storeId: store.id }, store.id);
-    if (!this.isStaffActor(input?.actorRole)) {
-      this.dispatchStoreNewOnlineOrderPush({
-        ...(saved as any),
-        storeId: store.id,
-        store: { id: store.id, name: store.name },
-        customerName: (saved as any)?.customerName || input.customerName,
-        paymentMethod: (saved as any)?.paymentMethod || input.paymentMethod,
-        paymentStatus: (saved as any)?.paymentStatus || input.paymentStatus,
-      });
-    }
+      if (!this.isStaffActor(input?.actorRole)) {
+        this.dispatchStoreNewOnlineOrderPush({
+          ...(saved as any),
+          storeId: store.id,
+          store: { id: store.id, name: store.name },
+          customerName: (saved as any)?.customerName || input.customerName,
+          paymentMethod: (saved as any)?.paymentMethod || input.paymentMethod,
+          paymentStatus: (saved as any)?.paymentStatus || input.paymentStatus,
+        });
+      } else {
+        this.log.info('Store user push skipped for staff-origin order', {
+          orderId: String((saved as any)?.id || '').trim() || null,
+          storeId: store.id,
+          actorRole: String(input?.actorRole || '').trim().toUpperCase() || null,
+        });
+      }
     // Only notify admin queue when order is already active (cash / no MP)
     if (saved.status !== 'awaiting_payment') {
       this.dispatchOrderUpdatePush(saved as any);
