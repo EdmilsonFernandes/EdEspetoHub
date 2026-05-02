@@ -1161,6 +1161,12 @@ async setDefaultAddress(userId: string, addressId: string) {
     });
 
     const storeId = String((result as any)?.store_id || '').trim();
+    this.log.info('Customer confirmed order receipt', {
+      orderId: String(result?.id || orderId),
+      userId,
+      storeId: storeId || null,
+      status: String(result?.status || '').trim().toLowerCase(),
+    });
     if (storeId) {
       const orderDisplayId = `#${String(result.id || '').slice(0, 8)}`;
       void this.pushService

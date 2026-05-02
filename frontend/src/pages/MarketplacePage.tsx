@@ -428,6 +428,12 @@ type CondominiumAvailabilityModalState = {
   nextLabel: string;
 };
 
+type CondominiumPromoModalState = {
+  slug: string;
+  name: string;
+  timeLabel: string;
+};
+
 const normalizeSegment = (segment?: string | null) =>
   String(segment || '')
     .normalize('NFD')
@@ -691,6 +697,7 @@ export function MarketplacePage() {
   const [condominiumPickerOpen, setCondominiumPickerOpen] = useState(false);
   const [condominiumSearch, setCondominiumSearch] = useState('');
   const [condominiumAvailabilityModal, setCondominiumAvailabilityModal] = useState<CondominiumAvailabilityModalState | null>(null);
+  const [condominiumPromoModal, setCondominiumPromoModal] = useState<CondominiumPromoModalState | null>(null);
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
@@ -3866,11 +3873,6 @@ export function MarketplacePage() {
                   ? filteredCondominiums.filter(c => !c.event?.state || (c.event.state !== 'live' && c.event.state !== 'upcoming'))
                   : [];
 
-                const selectCondominium = (slug: string) => {
-                  setCondominiumPickerOpen(false);
-                  setCondominiumSearch('');
-                  setSelectedCondominiumSlug(slug);
-                };
                 const handleClick = (slug: string, name: string, event: typeof filteredCondominiums[0]['event']) => {
                   if (!event?.state || event.state !== 'live') {
                     setCondominiumAvailabilityModal({
@@ -3879,7 +3881,14 @@ export function MarketplacePage() {
                     });
                     return;
                   }
-                  selectCondominium(slug);
+                  setCondominiumPromoModal({
+                    slug,
+                    name: name || 'Condomínio',
+                    timeLabel:
+                      formatCondominiumPickerEventTime(event) ||
+                      formatCondominiumEventTime(event) ||
+                      'Feira aberta agora',
+                  });
                 };
 
                 const hasResults = live.length > 0 || upcoming.length > 0 || none.length > 0;
@@ -4195,6 +4204,102 @@ export function MarketplacePage() {
             logoUrl={condo ? resolveCondominiumAssetUrl(condo, 'logo') : undefined}
             bannerUrl={condo ? resolveCondominiumAssetUrl(condo, 'banner') : undefined}
           />
+        );
+      })()}
+
+      {condominiumPromoModal && (() => {
+        const condo = condominiums.find((item) => String(item?.slug || '').trim() === condominiumPromoModal.slug) || null;
+        const logoUrl = condo ? resolveCondominiumAssetUrl(condo, 'logo') : '';
+        const bannerUrl = condo ? resolveCondominiumAssetUrl(condo, 'banner') : '';
+        return (
+          <div
+            className="fixed inset-0 z-[255] flex items-center justify-center bg-slate-950/58 px-4 py-[max(1rem,env(safe-area-inset-top))] backdrop-blur-md animate-in fade-in duration-200"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Feira do condomínio ${condominiumPromoModal.name}`}
+          >
+            <div className="relative w-full max-w-[430px] overflow-hidden rounded-[2rem] border border-white/80 bg-white shadow-[0_32px_74px_-34px_rgba(15,23,42,0.74)] animate-in zoom-in-95 duration-200">
+              <button
+                type="button"
+                onClick={() => setCondominiumPromoModal(null)}
+                className="absolute right-3 top-3 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/85 bg-white/94 text-slate-700 shadow-[0_12px_28px_-16px_rgba(15,23,42,0.48)] transition-all duration-150 hover:bg-white active:scale-95"
+                aria-label="Fechar banner da feira"
+                title="Fechar"
+              >
+                <X size={18} weight="bold" />
+              </button>
+
+              <div className="relative aspect-[16/10] overflow-hidden bg-slate-950">
+                <img
+                  src="/marketing/marketing_condominum.png"
+                  alt="Banner promocional da feira do condomínio"
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-slate-950/55 via-slate-950/10 to-transparent" />
+                {bannerUrl ? (
+                  <img
+                    src={bannerUrl}
+                    alt=""
+                    aria-hidden
+                    className="absolute right-4 top-4 h-16 w-24 rounded-[1.2rem] border border-white/70 object-cover shadow-[0_18px_30px_-20px_rgba(15,23,42,0.52)]"
+                  />
+                ) : null}
+              </div>
+
+              <div className="relative px-5 pb-5 pt-4">
+                <div className="flex items-start gap-3">
+                  <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[1.15rem] border border-slate-200 bg-white shadow-[0_16px_28px_-22px_rgba(15,23,42,0.24)]">
+                    {logoUrl ? (
+                      <img src={logoUrl} alt={condominiumPromoModal.name} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-sm font-black text-white">
+                        {String(condominiumPromoModal.name || 'C').trim().slice(0, 1).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Feira liberada</p>
+                    <h3 className="mt-1 text-lg font-black leading-tight text-slate-950">{condominiumPromoModal.name}</h3>
+                    <p className="mt-1 text-sm font-medium text-slate-500">{condominiumPromoModal.timeLabel}</p>
+                  </div>
+                </div>
+
+                <div className="mt-4 rounded-[1.35rem] border border-[#d8e4ec] bg-[linear-gradient(135deg,#f8fbfd,#ffffff)] px-4 py-3 shadow-[0_18px_30px_-24px_rgba(51,104,134,0.16)]">
+                  <p className="text-sm font-black text-slate-900">Sua feira está pronta para receber pedidos.</p>
+                  <p className="mt-1 text-xs font-medium leading-5 text-slate-600">
+                    Entre para ver as lojas participantes, horários da agenda e as opções de retirada na barraca ou entrega no apartamento quando disponíveis.
+                  </p>
+                </div>
+
+                <div className="mt-4 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCondominiumPromoModal(null);
+                      setCondominiumPickerOpen(false);
+                      setCondominiumSearch('');
+                      setSelectedCondominiumSlug(condominiumPromoModal.slug);
+                    }}
+                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-22px_rgba(21,58,76,0.52)] transition-all hover:brightness-105 active:scale-[0.98]"
+                  >
+                    Entrar na feira
+                    <CaretRight size={14} weight="bold" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCondominiumPromoModal(null)}
+                    className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 shadow-[0_14px_24px_-20px_rgba(15,23,42,0.28)] transition-all hover:text-slate-700 active:scale-[0.98]"
+                    aria-label="Fechar"
+                  >
+                    <X size={18} weight="bold" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         );
       })()}
 

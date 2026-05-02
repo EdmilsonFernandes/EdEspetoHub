@@ -610,6 +610,13 @@ export class OrderService
     const total = Number(order?.total || 0);
     const totalLabel = Number.isFinite(total) && total > 0 ? ` • R$ ${total.toFixed(2).replace('.', ',')}` : '';
 
+    this.log.info('Dispatching motoboy available-order push', {
+      orderId: String(order?.id || '').trim(),
+      storeId,
+      status: normalizedStatus,
+      storeName,
+    });
+
     void this.pushService.notifyStoreMotoboysAvailableOrder(storeId, {
       title: 'TEM ENTREGA DISPONÍVEL 🚚',
       body: `Existe um pedido aguardando retirada na loja ${storeName}. ${shortOrderId}${totalLabel}`,
@@ -621,6 +628,12 @@ export class OrderService
         storeId,
         status: normalizedStatus,
       },
+    }).catch((error) => {
+      this.log.warn('Motoboy available-order push dispatch crashed', {
+        orderId: String(order?.id || '').trim(),
+        storeId,
+        error,
+      });
     });
   }
 

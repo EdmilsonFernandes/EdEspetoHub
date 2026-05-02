@@ -16,6 +16,7 @@ import { Motoboy } from '../entities/Motoboy';
 import { Order } from '../entities/Order';
 import { OrderDelivery } from '../entities/OrderDelivery';
 import { PushNotificationService } from './PushNotificationService';
+import { logger } from '../utils/logger';
 
 const ACTIVE_DELIVERY_STATUSES = [ 'ACCEPTED', 'PICKED_UP', 'IN_TRANSIT' ] as const;
 type ActiveDeliveryStatus = (typeof ACTIVE_DELIVERY_STATUSES)[number];
@@ -44,6 +45,7 @@ const normalizeStatus = (value: any): DeliveryStatus => {
 };
 
 export class DeliveryService {
+  private readonly log = logger.child({ scope: 'DeliveryService' });
   private pushService = new PushNotificationService();
 
   private deliveryExpireMinutes =
@@ -279,13 +281,21 @@ async acceptDelivery(orderId: string, motoboy: Motoboy) {
         toStatus: 'ACCEPTED',
       });
 
-      // As soon as a courier accepts, the store should see the order in the
-      // "em rota" operational lane, even before pickup.
-      order.status = 'in_delivery';
-      await orderRepo.save(order);
+      const normalizedOrderStatus = String(order.status || '').trim().toLowerCase();
+      if (normalizedOrderStatus !== 'waiting_for_motoboy') {
+        order.status = 'waiting_for_motoboy';
+        await orderRepo.save(order);
+      }
 
       const updated = await deliveryRepo.findOne({ where: { orderId } });
       return { order, delivery: updated };
+    });
+    this.log.info('Delivery accepted; order remains waiting_for_motoboy until pickup', {
+      orderId,
+      storeId: String(result?.order?.store?.id || '').trim() || null,
+      motoboyId: motoboy.id,
+      orderStatus: String(result?.order?.status || '').trim().toLowerCase(),
+      deliveryStatus: String(result?.delivery?.status || '').trim().toUpperCase(),
     });
     this.dispatchDeliveryProgressPush(result?.order as any, 'ACCEPTED', motoboy);
     return result;
@@ -360,6 +370,12 @@ async pickupAndStart(orderId: string, motoboy: Motoboy) {
 
       return { order, delivery };
     });
+    this.log.info('Delivery pickup confirmed; order moved to in_delivery', {
+      orderId,
+      motoboyId: motoboy.id,
+      orderStatus: String((result as any)?.order?.status || '').trim().toLowerCase(),
+      deliveryStatus: String((result as any)?.delivery?.status || '').trim().toUpperCase(),
+    });
     this.dispatchDeliveryProgressPush((result as any)?.order, 'IN_TRANSIT', motoboy);
     return result.delivery;
   }
@@ -409,6 +425,12 @@ private async advance(orderId: string, motoboy: Motoboy, to: DeliveryStatus) {
       return { order, delivery };
     });
     if (to === 'IN_TRANSIT') {
+      this.log.info('Delivery route started via explicit transition', {
+        orderId,
+        motoboyId: motoboy.id,
+        orderStatus: String(result?.order?.status || '').trim().toLowerCase(),
+        deliveryStatus: String(result?.delivery?.status || '').trim().toUpperCase(),
+      });
       this.dispatchDeliveryProgressPush(result.order as any, 'IN_TRANSIT', motoboy);
     }
     return result.delivery;
@@ -462,6 +484,12 @@ async complete(orderId: string, motoboy: Motoboy) {
       });
 
       return { order, delivery };
+    });
+    this.log.info('Delivery marked as delivered by motoboy', {
+      orderId,
+      motoboyId: motoboy.id,
+      orderStatus: String(result?.order?.status || '').trim().toLowerCase(),
+      deliveryStatus: String(result?.delivery?.status || '').trim().toUpperCase(),
     });
     this.dispatchDeliveryProgressPush(result?.order as any, 'DELIVERED', motoboy);
     return result;

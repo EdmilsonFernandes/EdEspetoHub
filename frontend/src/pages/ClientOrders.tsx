@@ -520,6 +520,8 @@ function OrderCard({
   isActive,
   details,
   onCancelRequest,
+  onConfirmReceipt,
+  confirmReceiptLoading,
   onOpenHelp,
   onOpenOrder,
   onOpenStore,
@@ -528,6 +530,8 @@ function OrderCard({
   isActive: boolean;
   details?: any;
   onCancelRequest: (order: any) => void;
+  onConfirmReceipt: (order: any) => void;
+  confirmReceiptLoading?: boolean;
   onOpenHelp: (order: any) => void;
   onOpenOrder: (orderId: string) => void;
   onOpenStore: (slug?: string) => void;
@@ -582,6 +586,11 @@ function OrderCard({
   };
 
   const isCancelled = ['CANCELLED', 'REJECTED'].includes(normalizeStatus(order.status));
+  const canConfirmReceipt =
+    !isActive &&
+    normalizeStatus(order.status) === 'DELIVERED' &&
+    String(order?.type || '').trim().toLowerCase() === 'delivery' &&
+    !order?.customerReceivedAt;
 
   return (
     <article className={`overflow-hidden rounded-[28px] bg-white shadow-[0_8px_32px_-16px_rgba(15,23,42,0.18)] ${isActive ? 'ring-1 ring-emerald-200' : 'ring-1 ring-slate-100'}`}>
@@ -785,10 +794,22 @@ function OrderCard({
                 Cancelar
               </button>
             )}
-            <button type="button" onClick={handleRepeatOrder} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] py-2.5 text-[13px] font-bold text-white shadow-[0_8px_20px_-10px_rgba(21,58,76,0.5)] active:scale-[0.98] transition-transform">
-              <ArrowClockwise size={14} weight="bold" />
-              Pedir de novo
-            </button>
+            {canConfirmReceipt ? (
+              <button
+                type="button"
+                onClick={() => onConfirmReceipt(order)}
+                disabled={confirmReceiptLoading}
+                className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-emerald-600 py-2.5 text-[13px] font-bold text-white shadow-[0_8px_20px_-10px_rgba(5,150,105,0.5)] active:scale-[0.98] transition-transform disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {confirmReceiptLoading ? <SpinnerGap size={14} weight="bold" className="animate-spin" /> : <CheckCircle size={14} weight="fill" />}
+                Confirmar recebimento
+              </button>
+            ) : (
+              <button type="button" onClick={handleRepeatOrder} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] py-2.5 text-[13px] font-bold text-white shadow-[0_8px_20px_-10px_rgba(21,58,76,0.5)] active:scale-[0.98] transition-transform">
+                <ArrowClockwise size={14} weight="bold" />
+                Pedir de novo
+              </button>
+            )}
           </>
         )}
       </div>
@@ -1074,6 +1095,7 @@ export function ClientOrders() {
     reason: '',
     submitting: false,
   });
+  const [confirmingReceiptOrderId, setConfirmingReceiptOrderId] = useState<string | null>(null);
   const requestIdRef = useRef(0);
   const inFlightRef = useRef(false);
   const prevAwaitingIdsRef = useRef<Set<string>>(new Set());
@@ -1334,6 +1356,22 @@ export function ClientOrders() {
     }
   };
 
+  const handleConfirmReceiptFromList = useCallback(async (order: any) => {
+    const orderId = String(order?.id || '').trim();
+    if (!orderId || confirmingReceiptOrderId) return;
+
+    try {
+      setConfirmingReceiptOrderId(orderId);
+      await customerAccountService.confirmOrderReceived(orderId);
+      showToast('Recebimento confirmado com sucesso.', 'success');
+      await loadOrders({ silent: true });
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível confirmar o recebimento agora.', 'error');
+    } finally {
+      setConfirmingReceiptOrderId(null);
+    }
+  }, [confirmingReceiptOrderId, loadOrders, showToast]);
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#EEF2F7]">
@@ -1471,6 +1509,8 @@ export function ClientOrders() {
                     isActive
                     details={orderDetails[order.id]}
                     onCancelRequest={(selectedOrder) => setCancelModal({ order: selectedOrder, reason: '', submitting: false })}
+                    onConfirmReceipt={handleConfirmReceiptFromList}
+                    confirmReceiptLoading={confirmingReceiptOrderId === String(order.id)}
                     onOpenHelp={setHelpOrder}
                     onOpenOrder={(orderId) => navigate(`/pedido/${orderId}`)}
                     onOpenStore={openStore}
@@ -1534,6 +1574,8 @@ export function ClientOrders() {
                           isActive={false}
                           details={orderDetails[order.id]}
                           onCancelRequest={() => {}}
+                          onConfirmReceipt={handleConfirmReceiptFromList}
+                          confirmReceiptLoading={confirmingReceiptOrderId === String(order.id)}
                           onOpenHelp={setHelpOrder}
                           onOpenOrder={(orderId) => navigate(`/pedido/${orderId}`)}
                           onOpenStore={openStore}
