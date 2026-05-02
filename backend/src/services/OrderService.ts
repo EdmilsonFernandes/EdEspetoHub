@@ -47,7 +47,15 @@ import { logger } from '../utils/logger';
 export class OrderService
 {
   private readonly log = logger.child({ scope: 'OrderService' });
-  private readonly queueActiveStatuses = [ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ];
+  private readonly queueActiveStatuses = [
+    'pending',
+    'preparing',
+    'ready',
+    'ready_for_delivery',
+    'waiting_for_motoboy',
+    'in_delivery',
+    'dispatched',
+  ];
   private readonly queueRecentStatuses = [ 'done', 'delivered', 'finished', 'cancelled' ];
   private readonly farPickupLocalOpenStatuses = [ 'pending', 'awaiting_payment', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy', 'in_delivery', 'dispatched' ];
   private readonly onSitePickupPaymentMethods = [ 'dinheiro', 'pix_loja', 'pix_presencial', 'debito_presencial', 'credito_presencial' ];

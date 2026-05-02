@@ -843,7 +843,6 @@ export function AdminMotoboys() {
         title="Repasse de gorjetas"
         subtitle="Controle de pendentes e pagos com comprovante."
         variant="warning"
-        className="hidden"
         actions={
           <button
             type="button"
