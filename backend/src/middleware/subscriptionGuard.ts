@@ -97,16 +97,11 @@ export const requireActiveSubscription = async (
       : await storeRepository.findBySlug(slug!);
 
     const storeIdentifier = store?.id || storeId;
-    const isPublicRequest = !role;
-    const requestedOrderType = String(
-      req.body?.type || req.body?.orderType || req.body?.customer?.type || ''
-    )
-      .trim()
-      .toLowerCase();
     const isOrderCreationRoute = /\/orders(?:\/|$)/i.test(String(req.path || ''));
-    const mustCheckDeliveryBilling = !isOrderCreationRoute || requestedOrderType === 'delivery';
-
-    if (storeIdentifier && mustCheckDeliveryBilling && !isPublicRequest) {
+    // Delivery billing is an internal store settlement flow. It should not block
+    // customer checkout while collection and reconciliation rules are still manual/
+    // transitional, otherwise authenticated customers get blocked inconsistently.
+    if (storeIdentifier && !isOrderCreationRoute) {
       const blockedByDelivery = await deliveryBillingService.isStoreBlocked(storeIdentifier);
       if (blockedByDelivery) {
         return respondWithError(
