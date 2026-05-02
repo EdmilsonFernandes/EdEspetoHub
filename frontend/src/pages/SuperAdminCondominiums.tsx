@@ -90,6 +90,13 @@ const toDateTimeLocalInput = (value?: string) => {
   return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
 };
 
+const toUtcIsoFromDateTimeLocal = (value: string) => {
+  if (!value) return value;
+  const localDate = new Date(value);
+  if (Number.isNaN(localDate.getTime())) return value;
+  return localDate.toISOString();
+};
+
 export function SuperAdminCondominiums() {
   const [data, setData] = useState<any>({ condominiums: [], stores: [], requests: [], accessRequests: [] });
   const [loading, setLoading] = useState(true);
@@ -376,12 +383,16 @@ export function SuperAdminCondominiums() {
         status: 'scheduled',
       };
       if (editingEventId) {
-        await condominiumService.adminUpdateEvent(editingEventId, payload);
+        await condominiumService.adminUpdateEvent(editingEventId, {
+          ...payload,
+          startsAt: toUtcIsoFromDateTimeLocal(eventForm.startsAt),
+          endsAt: toUtcIsoFromDateTimeLocal(eventForm.endsAt),
+        });
       } else {
         await condominiumService.adminCreateEvent(condominiumId, {
           title: eventForm.title || `Feira do ${condominiums.find((item: any) => item.id === condominiumId)?.name || 'condomínio'}`,
-          startsAt: eventForm.startsAt,
-          endsAt: eventForm.endsAt,
+          startsAt: toUtcIsoFromDateTimeLocal(eventForm.startsAt),
+          endsAt: toUtcIsoFromDateTimeLocal(eventForm.endsAt),
           pickupLocation: eventForm.pickupLocation,
           status: 'scheduled',
           bannerUrl: eventForm.bannerUrl,

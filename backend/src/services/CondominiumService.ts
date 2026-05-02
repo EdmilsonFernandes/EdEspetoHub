@@ -271,6 +271,8 @@ export class CondominiumService {
     this.log.info('Creating condominium agenda event', {
       condominiumId,
       title,
+      rawStartsAt: payload?.startsAt || null,
+      rawEndsAt: payload?.endsAt || null,
       startsAt: startsAt.toISOString(),
       endsAt: endsAt.toISOString(),
     });
@@ -346,6 +348,8 @@ export class CondominiumService {
       eventId,
       condominiumId: event.condominiumId,
       title,
+      rawStartsAt: payload?.startsAt || null,
+      rawEndsAt: payload?.endsAt || null,
       startsAt: startsAt.toISOString(),
       endsAt: endsAt.toISOString(),
     });
@@ -734,6 +738,13 @@ export class CondominiumService {
   async listPublic() {
     const rows = await this.condominiumRepository.listActive();
     const summaries = await this.condominiumRepository.getEventSummaryByCondominiumIds(rows.map((condominium) => condominium.id));
+    this.log.info('Listing public condominiums for hub', {
+      count: rows.length,
+      liveOrUpcomingWithBanner: rows.filter((condominium) => {
+        const event = summaries.get(condominium.id);
+        return Boolean(event?.bannerUrl);
+      }).length,
+    });
     return rows.map((condominium) => this.toPublicCondominium(condominium, summaries.get(condominium.id) || null));
   }
 
@@ -747,7 +758,15 @@ export class CondominiumService {
     const condominium = await this.condominiumRepository.findActiveBySlug(slug);
     if (!condominium) throw new AppError('CONDO-001', 404, { message: 'Condominio nao encontrado.' });
     const events = await this.condominiumRepository.listActiveEventsBySlug(slug);
-    return this.toPublicCondominium(condominium, this.pickCurrentOrNextEvent(events) || null);
+    const selectedEvent = this.pickCurrentOrNextEvent(events) || null;
+    this.log.info('Loaded public condominium detail', {
+      slug,
+      condominiumId: condominium.id,
+      eventId: selectedEvent?.id || null,
+      eventState: selectedEvent ? this.getEventState(selectedEvent) : 'none',
+      hasAgendaBanner: Boolean(selectedEvent?.bannerUrl),
+    });
+    return this.toPublicCondominium(condominium, selectedEvent);
   }
 
   /**
@@ -784,6 +803,14 @@ export class CondominiumService {
           canOrderInCondominium,
         }
       : null;
+    this.log.info('Loaded public condominium stores by slug', {
+      slug,
+      eventId: selectedEvent?.id || null,
+      eventState: selectedEvent ? this.getEventState(selectedEvent) : 'none',
+      hasAgendaBanner: Boolean(selectedEvent?.bannerUrl),
+      eventStoreCount: eventLinks.length,
+      condominiumStoreCount: condominiumLinks.length,
+    });
 
     const stores = await Promise.all(
       links.map(async (link) => {

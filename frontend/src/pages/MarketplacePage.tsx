@@ -3881,7 +3881,9 @@ export function MarketplacePage() {
                   : [];
 
                 const handleClick = (slug: string, name: string, event: typeof filteredCondominiums[0]['event']) => {
-                  if (!event?.state || event.state !== 'live') {
+                  const eventState = String(event?.state || '').trim().toLowerCase();
+                  const hasActiveAgenda = eventState === 'live' || eventState === 'upcoming';
+                  if (!hasActiveAgenda) {
                     setCondominiumAvailabilityModal({
                       name: name || 'Condomínio',
                       nextLabel: formatCondominiumPickerEventTime(event) || 'A confirmar',
@@ -3889,24 +3891,31 @@ export function MarketplacePage() {
                     return;
                   }
                   const agendaBannerUrl = resolveAssetUrl(event?.bannerUrl || '') || '';
-                  if (!agendaBannerUrl) {
-                    setCondominiumPickerOpen(false);
-                    setCondominiumSearch('');
-                    setSelectedCondominiumSlug(slug);
+                  if (agendaBannerUrl) {
+                    setCondominiumPromoModal({
+                      slug,
+                      name: name || 'Condomínio',
+                      timeLabel:
+                        formatCondominiumPickerEventTime(event) ||
+                        formatCondominiumEventTime(event) ||
+                        (eventState === 'live' ? 'Feira aberta agora' : 'Agenda confirmada'),
+                      eventTitle: event?.title || 'Feira do condomínio',
+                      bannerTitle: event?.bannerTitle || null,
+                      bannerDescription: event?.bannerDescription || null,
+                      bannerUrl: agendaBannerUrl,
+                    });
                     return;
                   }
-                  setCondominiumPromoModal({
-                    slug,
-                    name: name || 'Condomínio',
-                    timeLabel:
-                      formatCondominiumPickerEventTime(event) ||
-                      formatCondominiumEventTime(event) ||
-                      'Feira aberta agora',
-                    eventTitle: event?.title || 'Feira do condomínio',
-                    bannerTitle: event?.bannerTitle || null,
-                    bannerDescription: event?.bannerDescription || null,
-                    bannerUrl: agendaBannerUrl,
-                  });
+                  if (eventState !== 'live') {
+                    setCondominiumAvailabilityModal({
+                      name: name || 'Condomínio',
+                      nextLabel: formatCondominiumPickerEventTime(event) || 'A confirmar',
+                    });
+                    return;
+                  }
+                  setCondominiumPickerOpen(false);
+                  setCondominiumSearch('');
+                  setSelectedCondominiumSlug(slug);
                 };
 
                 const hasResults = live.length > 0 || upcoming.length > 0 || none.length > 0;
@@ -4241,7 +4250,7 @@ export function MarketplacePage() {
             aria-modal="true"
             aria-label={`Feira do condomínio ${condominiumPromoModal.name}`}
           >
-            <div className="relative w-full max-w-[430px] overflow-hidden rounded-[2rem] border border-white/80 bg-white shadow-[0_32px_74px_-34px_rgba(15,23,42,0.74)] animate-in zoom-in-95 duration-200">
+            <div className="relative w-full max-w-[430px] max-h-[calc(100vh-2rem)] overflow-y-auto rounded-[2rem] border border-white/80 bg-white shadow-[0_32px_74px_-34px_rgba(15,23,42,0.74)] animate-in zoom-in-95 duration-200">
               <button
                 type="button"
                 onClick={() => setCondominiumPromoModal(null)}
@@ -4252,22 +4261,22 @@ export function MarketplacePage() {
                 <X size={18} weight="bold" />
               </button>
 
-              <div className="relative aspect-[16/10] overflow-hidden bg-slate-950">
+              <div className="relative overflow-hidden bg-slate-950">
                 <img
                   src={promoImageUrl}
                   alt={`Banner da agenda do condomínio ${condominiumPromoModal.name}`}
                   loading="eager"
                   fetchPriority="high"
                   decoding="async"
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className="block max-h-[46vh] w-full object-contain"
                 />
-                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-slate-950/55 via-slate-950/10 to-transparent" />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-slate-950/55 via-slate-950/10 to-transparent" />
                 {condominiumBannerUrl ? (
                   <img
                     src={condominiumBannerUrl}
                     alt=""
                     aria-hidden
-                    className="absolute right-4 top-4 h-16 w-24 rounded-[1.2rem] border border-white/70 object-cover shadow-[0_18px_30px_-20px_rgba(15,23,42,0.52)]"
+                    className="absolute right-4 top-4 h-14 w-20 rounded-[1rem] border border-white/70 object-cover shadow-[0_18px_30px_-20px_rgba(15,23,42,0.52)] sm:h-16 sm:w-24"
                   />
                 ) : null}
               </div>

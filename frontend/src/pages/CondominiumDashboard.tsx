@@ -79,6 +79,13 @@ const toDateTimeLocalInput = (value?: string) => {
   return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
 };
 
+const toUtcIsoFromDateTimeLocal = (value: string) => {
+  if (!value) return value;
+  const localDate = new Date(value);
+  if (Number.isNaN(localDate.getTime())) return value;
+  return localDate.toISOString();
+};
+
 const readFileAsDataUrl = (file: File) =>
   new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -317,8 +324,8 @@ export function CondominiumDashboard() {
     try {
       const payload = {
         title: eventForm.title || `Feira do ${condominium.name || 'condomínio'}`,
-        startsAt: eventForm.startsAt,
-        endsAt: eventForm.endsAt,
+        startsAt: toUtcIsoFromDateTimeLocal(eventForm.startsAt),
+        endsAt: toUtcIsoFromDateTimeLocal(eventForm.endsAt),
         pickupLocation: eventForm.pickupLocation,
         status: 'scheduled',
         bannerUrl: eventForm.bannerUrl,
