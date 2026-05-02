@@ -203,16 +203,51 @@ export function LandingPage() {
   const features = [
     { icon: ListChecks,    title: 'Pedidos em tempo real',   desc: 'Novos pedidos chegam na hora, atualizados em todos os dispositivos.', accent: 'sky' },
     { icon: Package,       title: 'Fila de produção',        desc: 'Pendente, produzindo, pronto — controle visual de cada etapa.', accent: 'amber' },
-    { icon: Motorcycle,    title: 'Entregadores integrados', desc: 'Cadastre entregadores, gerencie vínculos e acompanhe ganhos.', accent: 'violet' },
+    { icon: Motorcycle,    title: 'Entregadores integrados', desc: 'Vincule entregadores à loja, ofereça corridas e acompanhe aceite, retirada e entrega.', accent: 'violet' },
     { icon: CurrencyDollar,title: 'Pagamento online',        desc: 'Pix, crédito e débito com Mercado Pago da própria loja.', accent: 'emerald' },
     { icon: ChartLine,     title: 'Dashboard analítico',     desc: 'Faturamento, ticket médio e comparativos por período.', accent: 'sky' },
     { icon: MapPin,        title: 'Rastreamento',            desc: 'Clientes acompanham o pedido do preparo até a porta.', accent: 'rose' },
     { icon: Buildings,     title: 'Hub de condomínios',      desc: 'Vitrine própria em feiras e condomínios. Retirada ou entrega.', accent: 'indigo' },
     { icon: Desktop,       title: 'Multi-dispositivo',       desc: 'Admin no PC, app mobile para o time, PWA instalável.', accent: 'sky' },
-    { icon: Bell,          title: 'Notificações push',       desc: 'Alerta automático de novos pedidos. Nunca perca uma venda.', accent: 'amber' },
+    { icon: Bell,          title: 'Notificações push',       desc: 'Lojista, entregador e cliente recebem o alerta certo em cada etapa do pedido.', accent: 'amber' },
     { icon: UsersThree,    title: 'Multi-usuário',           desc: 'Admin, operador e lojista com acessos distintos.', accent: 'violet' },
     { icon: Star,          title: 'Destaque na plataforma',  desc: 'Promova sua loja com destaque pago no marketplace.', accent: 'amber' },
     { icon: TrendUp,       title: 'Marketplace público',     desc: 'Sua loja visível para todos os clientes da plataforma.', accent: 'emerald' },
+  ];
+
+  const notificationFlow = [
+    {
+      step: '01',
+      title: 'Pedido entra e a loja é avisada na hora',
+      desc: 'Assim que o cliente finaliza o pedido online, a operação recebe o alerta no app e no painel.',
+      badge: 'Lojista',
+      icon: Bell,
+      accent: 'sky',
+    },
+    {
+      step: '02',
+      title: 'Quando fica pronto, os entregadores recebem a oferta',
+      desc: 'O sistema avisa todos os entregadores vinculados àquela loja que existe uma entrega disponível.',
+      badge: 'Entregador',
+      icon: Motorcycle,
+      accent: 'violet',
+    },
+    {
+      step: '03',
+      title: 'O primeiro que aceitar assume a corrida',
+      desc: 'Sem confusão manual. O pedido fica vinculado ao entregador certo e o cliente já é informado.',
+      badge: 'Operação',
+      icon: CheckCircle,
+      accent: 'emerald',
+    },
+    {
+      step: '04',
+      title: 'Cliente acompanha até a entrega final',
+      desc: 'Aceite, retirada, saída para entrega e confirmação final acontecem com push e rastreio no mesmo fluxo.',
+      badge: 'Cliente',
+      icon: UserCircle,
+      accent: 'amber',
+    },
   ];
 
   const accentMap: Record<string, { bg: string; icon: string }> = {
@@ -425,6 +460,120 @@ export function LandingPage() {
                       ))}
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════
+          ORQUESTRAÇÃO DE ALERTAS
+      ══════════════════════════════════════════════════════════════ */}
+      <section className="relative overflow-hidden bg-[linear-gradient(180deg,#f8fbfd_0%,#eef5fa_100%)] py-20 sm:py-24">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(51,104,134,0.10),_transparent_34%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,_rgba(16,185,129,0.08),_transparent_30%)]" />
+        <div className="relative mx-auto max-w-7xl px-4">
+          <div className="grid gap-8 lg:grid-cols-[1.02fr_0.98fr] lg:items-start">
+            <div className="space-y-5">
+              <div className="space-y-3">
+                <p className="text-[11px] font-black uppercase tracking-[0.36em] text-[#336886]">Fluxo inteligente</p>
+                <h2 className="max-w-2xl text-3xl font-black leading-tight tracking-tight text-slate-950 sm:text-5xl">
+                  O sistema chama a pessoa certa na hora certa.
+                </h2>
+                <p className="max-w-2xl text-sm font-medium leading-7 text-slate-600 sm:text-base">
+                  Para o lojista, isso significa menos improviso. Para o cliente, mais confiança. Para o entregador, uma operação clara, rápida e sem ruído.
+                </p>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                {notificationFlow.map(({ step, title, desc, badge, icon: Icon, accent }) => {
+                  const colors = accentMap[accent] || accentMap.sky;
+                  return (
+                    <article
+                      key={step}
+                      className="group rounded-[1.75rem] border border-white/80 bg-white/90 p-5 shadow-[0_24px_48px_-34px_rgba(51,104,134,0.18)] transition-all hover:-translate-y-0.5 hover:shadow-[0_28px_56px_-34px_rgba(51,104,134,0.24)]"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${colors.bg}`}>
+                          <Icon size={20} weight="duotone" className={colors.icon} />
+                        </div>
+                        <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">
+                          {badge}
+                        </span>
+                      </div>
+                      <p className="mt-4 text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">{step}</p>
+                      <h3 className="mt-2 text-base font-black leading-tight text-slate-950">{title}</h3>
+                      <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{desc}</p>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="pointer-events-none absolute -inset-4 rounded-[2.2rem] bg-[radial-gradient(circle_at_top,rgba(51,104,134,0.14),transparent_60%)] blur-2xl" />
+              <div className="relative overflow-hidden rounded-[2rem] border border-[#d7e6ef] bg-[linear-gradient(160deg,#0d1930_0%,#10223f_44%,#12314e_100%)] p-4 shadow-[0_34px_70px_-40px_rgba(15,23,42,0.55)] sm:p-5">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,188,255,0.18),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(95,211,90,0.12),transparent_26%)]" />
+                <div className="relative flex items-center justify-between gap-3 rounded-[1.35rem] border border-white/10 bg-white/[0.05] px-4 py-3 backdrop-blur-xl">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-sky-200">Central de alertas</p>
+                    <p className="mt-1 text-sm font-black text-white">Operação sincronizada do pedido ao pós-entrega</p>
+                  </div>
+                  <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-emerald-200">
+                    Push ativo
+                  </div>
+                </div>
+
+                <div className="relative mt-4 space-y-3">
+                  {[
+                    {
+                      actor: 'Loja',
+                      title: 'NOVO PEDIDO ONLINE',
+                      body: 'O pedido entrou e a equipe recebe o alerta na hora para iniciar a produção.',
+                      accent: 'from-sky-400/22 to-sky-500/8',
+                      icon: Storefront,
+                    },
+                    {
+                      actor: 'Entrega',
+                      title: 'TEM ENTREGA DISPONÍVEL 🚚',
+                      body: 'Os entregadores vinculados à loja recebem a corrida disponível e o primeiro aceite assume.',
+                      accent: 'from-violet-400/22 to-violet-500/8',
+                      icon: Motorcycle,
+                    },
+                    {
+                      actor: 'Cliente',
+                      title: 'SEU PEDIDO SAIU PARA ENTREGA',
+                      body: 'O cliente acompanha a etapa exata no app e recebe aviso quando o entregador avança.',
+                      accent: 'from-emerald-400/22 to-emerald-500/8',
+                      icon: UserCircle,
+                    },
+                  ].map(({ actor, title, body, accent, icon: Icon }) => (
+                    <div
+                      key={title}
+                      className={`rounded-[1.45rem] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.10),rgba(255,255,255,0.05))] p-4 shadow-[0_20px_42px_-30px_rgba(2,6,23,0.6)] backdrop-blur-xl`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${accent}`}>
+                          <Icon size={20} weight="duotone" className="text-white" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-slate-200">
+                              {actor}
+                            </span>
+                            <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">Automação em tempo real</span>
+                          </div>
+                          <p className="mt-2 text-sm font-black leading-tight text-white">{title}</p>
+                          <p className="mt-1 text-xs font-medium leading-6 text-slate-300">{body}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="relative mt-4 rounded-[1.4rem] border border-white/10 bg-white/[0.05] px-4 py-3 text-xs font-semibold leading-6 text-slate-300">
+                  Resultado para o lojista: menos ligação, menos improviso, menos pedido perdido e mais sensação de aplicativo profissional para quem compra.
                 </div>
               </div>
             </div>
