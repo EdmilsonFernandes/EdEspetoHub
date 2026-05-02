@@ -23,6 +23,7 @@ import { productService } from '../services/productService';
 import { storeService } from '../services/storeService';
 import { subscriptionService } from '../services/subscriptionService';
 import { paymentService } from '../services/paymentService';
+import { deliveryBillingService } from '../services/deliveryBillingService';
 import { motoboyAdminService } from '../services/motoboyAdminService';
 import { formatAddress, formatCurrency, formatDateTime, formatOrderDisplayId, formatOrderStatus, formatOrderType } from '../utils/format';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
@@ -1266,7 +1267,17 @@ const GatewayView = ({ storeId }) => {
   );
 };
 
-const PaymentsView = ({ subscription, loading, error, payments }) => {
+const PaymentsView = ({
+  subscription,
+  loading,
+  error,
+  payments,
+  deliveryBillingCycle,
+  deliveryBillingLoading,
+  deliveryBillingError,
+  deliveryBillingActionLoading,
+  onOpenDeliveryBillingPayment,
+}) => {
   const navigate = useNavigate();
   const [showAllHistory, setShowAllHistory] = useState(false);
   const planSectionRef = useRef<HTMLDivElement | null>(null);
@@ -1402,6 +1413,53 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
 
   return (
     <div className="space-y-3">
+      {!deliveryBillingLoading && deliveryBillingCycle && String(deliveryBillingCycle?.paymentStatus || '').toUpperCase() !== 'PAID' && (
+        <div className="rounded-3xl border border-amber-200 bg-amber-50/90 p-4 shadow-[0_18px_40px_-32px_rgba(245,158,11,0.4)]">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-amber-700">Taxa de entregas pendente</p>
+              <h3 className="mt-1 text-base font-black text-amber-950">
+                Regularize este ciclo sem travar o checkout da loja
+              </h3>
+              <p className="mt-1 text-sm text-amber-900/80">
+                Esta cobrança é interna da operação. O cliente continua comprando, mas o dono da loja precisa acompanhar este ciclo no painel.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-bold text-amber-900/80">
+                <span className="rounded-full border border-amber-200 bg-white px-3 py-1">
+                  Status: {String(deliveryBillingCycle?.status || 'PENDING_PAYMENT').replace(/_/g, ' ')}
+                </span>
+                <span className="rounded-full border border-amber-200 bg-white px-3 py-1">
+                  Total: {formatCurrency(Number(deliveryBillingCycle?.totalDue || 0))}
+                </span>
+                <span className="rounded-full border border-amber-200 bg-white px-3 py-1">
+                  Entregas: {Number(deliveryBillingCycle?.deliveryCount || 0)}
+                </span>
+                {deliveryBillingCycle?.endDate && (
+                  <span className="rounded-full border border-amber-200 bg-white px-3 py-1">
+                    Fechamento: {formatDateTime(deliveryBillingCycle.endDate)}
+                  </span>
+                )}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={onOpenDeliveryBillingPayment}
+              disabled={deliveryBillingActionLoading}
+              className="btn-press rounded-2xl border border-amber-300 bg-white px-4 py-3 text-sm font-black text-amber-800 shadow-[0_16px_32px_-24px_rgba(245,158,11,0.55)] hover:bg-amber-100 disabled:opacity-60"
+            >
+              {deliveryBillingActionLoading
+                ? 'Abrindo cobrança...'
+                : deliveryBillingCycle?.paymentLink
+                ? 'Abrir cobrança'
+                : 'Gerar cobrança'}
+            </button>
+          </div>
+          {deliveryBillingError ? (
+            <p className="mt-3 text-xs font-semibold text-amber-800/80">{deliveryBillingError}</p>
+          ) : null}
+        </div>
+      )}
+
       <div className="md:hidden sticky top-2 z-20 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur px-3 py-2 shadow-sm">
         <p className="text-[10px] font-black tracking-[0.18em] uppercase text-slate-500">Acesso rápido</p>
         <div className="mt-2 grid grid-cols-3 gap-2">
@@ -1637,6 +1695,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [linkStats, setLinkStats] = useState<any>(null);
   const [subscriptionError, setSubscriptionError] = useState('');
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
+  const [deliveryBillingCycle, setDeliveryBillingCycle] = useState<any>(null);
+  const [deliveryBillingError, setDeliveryBillingError] = useState('');
+  const [deliveryBillingLoading, setDeliveryBillingLoading] = useState(false);
+  const [deliveryBillingActionLoading, setDeliveryBillingActionLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'avaliacoes' | 'produtos' | 'estoque' | 'config' | 'fila' | 'pagamentos' | 'gateway' | 'motoboys' | 'usuarios' | 'condominios'>(() => {
     const requestedTabFromState = String((location.state as any)?.activeTab || '').trim();
     const requestedTabFromQuery = String(new URLSearchParams(location.search || '').get('tab') || '').trim();
@@ -2451,10 +2513,26 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     const loadSubscription = async () => {
       setSubscriptionLoading(true);
       setSubscriptionError('');
+      if (!isOperatorUser) {
+        setDeliveryBillingLoading(true);
+        setDeliveryBillingError('');
+      }
       try {
-        const data = await subscriptionService.getByStore(storeId);
+        const [data, billingResponse] = await Promise.all([
+          subscriptionService.getByStore(storeId),
+          isOperatorUser ? Promise.resolve(null) : deliveryBillingService.getCurrentCycle(storeId).catch((error) => ({ __error: error })),
+        ]);
         if (active) {
           setSubscriptionDetails(data);
+          if (!isOperatorUser) {
+            if (billingResponse && (billingResponse as any).__error) {
+              setDeliveryBillingCycle(null);
+              setDeliveryBillingError((billingResponse as any).__error?.message || 'Não foi possível carregar a cobrança de entregas agora.');
+            } else {
+              setDeliveryBillingCycle((billingResponse as any)?.cycle || null);
+              setDeliveryBillingError('');
+            }
+          }
           if (auth?.token && auth?.store) {
             const status = String(data?.status || '').toUpperCase();
             const planName = String(data?.plan?.name || '').toLowerCase();
@@ -2480,7 +2558,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           setSubscriptionError(err.message || 'Não foi possível carregar a assinatura agora.');
         }
       } finally {
-        if (active) setSubscriptionLoading(false);
+        if (active) {
+          setSubscriptionLoading(false);
+          if (!isOperatorUser) setDeliveryBillingLoading(false);
+        }
       }
     };
 
@@ -2489,7 +2570,30 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     return () => {
       active = false;
     };
-  }, [storeId]);
+  }, [storeId, isOperatorUser]);
+
+  const handleOpenDeliveryBillingPayment = useCallback(async () => {
+    if (!storeId || isOperatorUser) return;
+    setDeliveryBillingActionLoading(true);
+    setDeliveryBillingError('');
+    try {
+      const response = await deliveryBillingService.ensurePayment(storeId);
+      const cycle = response?.cycle || null;
+      setDeliveryBillingCycle(cycle);
+      const paymentLink = String(cycle?.paymentLink || '').trim();
+      if (paymentLink) {
+        window.open(paymentLink, '_blank', 'noopener,noreferrer');
+        showToast('Cobrança aberta em nova aba.', 'success');
+      } else {
+        showToast('Cobrança atualizada no painel.', 'success');
+      }
+    } catch (error: any) {
+      setDeliveryBillingError(error?.message || 'Não foi possível abrir a cobrança de entregas agora.');
+      showToast(error?.message || 'Não foi possível abrir a cobrança de entregas agora.', 'error');
+    } finally {
+      setDeliveryBillingActionLoading(false);
+    }
+  }, [isOperatorUser, showToast, storeId]);
 
   useEffect(() => {
     if (!subscriptionDetails || !auth?.user) return;
@@ -3283,6 +3387,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               loading={subscriptionLoading}
               error={subscriptionError}
               payments={paymentsHistory}
+              deliveryBillingCycle={deliveryBillingCycle}
+              deliveryBillingLoading={deliveryBillingLoading}
+              deliveryBillingError={deliveryBillingError}
+              deliveryBillingActionLoading={deliveryBillingActionLoading}
+              onOpenDeliveryBillingPayment={handleOpenDeliveryBillingPayment}
             />
           </FormSection>
         )}
