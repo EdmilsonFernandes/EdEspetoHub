@@ -1606,6 +1606,9 @@ export async function runMigrations() {
       starts_at TIMESTAMPTZ NOT NULL,
       ends_at TIMESTAMPTZ NOT NULL,
       pickup_location TEXT,
+      banner_url TEXT,
+      banner_title TEXT,
+      banner_description TEXT,
       notes TEXT,
       active BOOLEAN NOT NULL DEFAULT TRUE,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -1625,8 +1628,24 @@ export async function runMigrations() {
     ON condominium_events(status);
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS condominium_events
+    ADD COLUMN IF NOT EXISTS banner_url TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS condominium_events
+    ADD COLUMN IF NOT EXISTS banner_title TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS condominium_events
+    ADD COLUMN IF NOT EXISTS banner_description TEXT;
+  `);
+  await AppDataSource.query(`
+    DROP INDEX IF EXISTS uq_condominium_events_condominium_start;
+  `);
+  await AppDataSource.query(`
     CREATE UNIQUE INDEX IF NOT EXISTS uq_condominium_events_condominium_start
-    ON condominium_events(condominium_id, starts_at);
+    ON condominium_events(condominium_id, starts_at)
+    WHERE active = TRUE AND status <> 'cancelled';
   `);
   await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS condominium_event_stores (

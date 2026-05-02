@@ -118,6 +118,10 @@ export function SuperAdminCondominiums() {
     endsAt: '',
     pickupLocation: '',
     status: 'scheduled',
+    bannerUrl: '',
+    bannerFile: '',
+    bannerTitle: '',
+    bannerDescription: '',
     notes: '',
   });
   const [eventFormError, setEventFormError] = useState('');
@@ -335,6 +339,17 @@ export function SuperAdminCondominiums() {
     }
   };
 
+  const handleEventBannerUpload = async (file?: File | null) => {
+    if (!file) return;
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      setEventForm((prev) => ({ ...prev, bannerFile: dataUrl }));
+      setEventFormError('');
+    } catch {
+      setEventFormError('Não foi possível carregar o banner da agenda.');
+    }
+  };
+
   const saveEvent = async () => {
     const condominiumId = eventForm.condominiumId || selectedAgendaCondominiumId;
     if (!condominiumId) {
@@ -369,11 +384,27 @@ export function SuperAdminCondominiums() {
           endsAt: eventForm.endsAt,
           pickupLocation: eventForm.pickupLocation,
           status: 'scheduled',
+          bannerUrl: eventForm.bannerUrl,
+          bannerFile: eventForm.bannerFile,
+          bannerTitle: eventForm.bannerTitle,
+          bannerDescription: eventForm.bannerDescription,
           notes: eventForm.notes,
         });
       }
       setEditingEventId('');
-      setEventForm({ condominiumId, title: '', startsAt: '', endsAt: '', pickupLocation: '', status: 'scheduled', notes: '' });
+      setEventForm({
+        condominiumId,
+        title: '',
+        startsAt: '',
+        endsAt: '',
+        pickupLocation: '',
+        status: 'scheduled',
+        bannerUrl: '',
+        bannerFile: '',
+        bannerTitle: '',
+        bannerDescription: '',
+        notes: '',
+      });
       await load();
     } catch (err: any) {
       setEventFormError(err?.message || 'Falha ao salvar feira.');
@@ -391,6 +422,10 @@ export function SuperAdminCondominiums() {
       endsAt: toDateTimeLocalInput(event.endsAt),
       pickupLocation: event.pickupLocation || '',
       status: event.status || 'scheduled',
+      bannerUrl: event.bannerUrl || '',
+      bannerFile: '',
+      bannerTitle: event.bannerTitle || '',
+      bannerDescription: event.bannerDescription || '',
       notes: event.notes || '',
     });
     setEventFormError('');
@@ -399,7 +434,19 @@ export function SuperAdminCondominiums() {
 
   const cancelEventEdit = () => {
     setEditingEventId('');
-    setEventForm({ condominiumId: selectedAgendaCondominiumId, title: '', startsAt: '', endsAt: '', pickupLocation: '', status: 'scheduled', notes: '' });
+    setEventForm({
+      condominiumId: selectedAgendaCondominiumId,
+      title: '',
+      startsAt: '',
+      endsAt: '',
+      pickupLocation: '',
+      status: 'scheduled',
+      bannerUrl: '',
+      bannerFile: '',
+      bannerTitle: '',
+      bannerDescription: '',
+      notes: '',
+    });
     setEventFormError('');
   };
 
@@ -499,6 +546,7 @@ export function SuperAdminCondominiums() {
 
   const logoPreview = condominiumForm.logoFile || resolveAssetUrl(condominiumForm.logoUrl) || '';
   const bannerPreview = condominiumForm.bannerFile || resolveAssetUrl(condominiumForm.bannerUrl) || '';
+  const eventBannerPreview = eventForm.bannerFile || resolveAssetUrl(eventForm.bannerUrl) || '';
   const workspaceTabs = [
     { id: 'overview', label: 'Visão geral', helper: 'Resumo e atalhos' },
     { id: 'setup', label: 'Cadastros', helper: 'Condomínio, feira e acessos' },
@@ -801,6 +849,43 @@ export function SuperAdminCondominiums() {
                 <input type="datetime-local" value={eventForm.endsAt} onChange={(event) => handleEventEndsAtChange(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
               </div>
               <input value={eventForm.pickupLocation} onChange={(event) => handleEventPickupLocationChange(event.target.value)} placeholder="Ex: praça central, entrada social, lounge gourmet" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
+              <div className="overflow-hidden rounded-[1.6rem] border border-slate-200 bg-slate-50">
+                <div className="relative h-36 bg-[linear-gradient(135deg,#eff6ff_0%,#ffffff_55%,#f8fafc_100%)]">
+                  {eventBannerPreview ? (
+                    <img src={eventBannerPreview} alt="Banner da agenda" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-slate-300">
+                      <ImageSquare size={34} weight="duotone" />
+                    </div>
+                  )}
+                  <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/18 to-transparent" />
+                  <div className="absolute left-4 top-4 rounded-full bg-white/94 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#336886] shadow-sm ring-1 ring-white/70">
+                    Banner promocional
+                  </div>
+                </div>
+                <div className="space-y-3 p-4">
+                  <div className="flex flex-wrap gap-2">
+                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 shadow-sm">
+                      <UploadSimple size={14} weight="bold" />
+                      Upload banner da agenda
+                      <input type="file" accept="image/*" className="hidden" onChange={(event) => handleEventBannerUpload(event.target.files?.[0])} />
+                    </label>
+                    {eventBannerPreview ? (
+                      <button
+                        type="button"
+                        onClick={() => setEventForm((prev) => ({ ...prev, bannerUrl: '', bannerFile: '' }))}
+                        className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-600 shadow-sm"
+                      >
+                        <Trash size={14} weight="bold" />
+                        Remover banner
+                      </button>
+                    ) : null}
+                  </div>
+                  <input value={eventForm.bannerUrl} onChange={(event) => setEventForm((prev) => ({ ...prev, bannerUrl: event.target.value }))} placeholder="URL opcional do banner da agenda" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
+                  <input value={eventForm.bannerTitle} onChange={(event) => setEventForm((prev) => ({ ...prev, bannerTitle: event.target.value }))} placeholder="Título opcional do banner" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
+                  <textarea value={eventForm.bannerDescription} onChange={(event) => setEventForm((prev) => ({ ...prev, bannerDescription: event.target.value }))} placeholder="Descrição opcional do banner" className="min-h-[88px] w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
+                </div>
+              </div>
               <textarea value={eventForm.notes} onChange={(event) => setEventForm((prev) => ({ ...prev, notes: event.target.value }))} placeholder="Observações da agenda" className="min-h-[96px] w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
               {eventFormError ? <p className="rounded-2xl border border-rose-100 bg-rose-50 px-3 py-2.5 text-xs font-bold text-rose-700">{eventFormError}</p> : null}
               <div className="flex flex-col gap-2">

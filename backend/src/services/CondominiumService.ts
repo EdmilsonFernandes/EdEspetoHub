@@ -268,25 +268,68 @@ export class CondominiumService {
     if (!title || Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime()) || endsAt <= startsAt) {
       throw new AppError('CONDO-003', 400, { message: 'Informe titulo, inicio e fim validos para a feira.' });
     }
+    this.log.info('Creating condominium agenda event', {
+      condominiumId,
+      title,
+      startsAt: startsAt.toISOString(),
+      endsAt: endsAt.toISOString(),
+    });
     const sameDayEvent = await this.condominiumRepository.findSameDayEventForCondominium(condominiumId, startsAt);
     if (sameDayEvent) {
+      this.log.warn('Condominium agenda create blocked by same-day event', {
+        condominiumId,
+        startsAt: startsAt.toISOString(),
+        sameDayEventId: sameDayEvent.id,
+      });
       throw new AppError('CONDO-009', 400, { message: 'Ja existe uma feira cadastrada para esse condominio nesse dia.' });
     }
     const conflictingEvent = await this.condominiumRepository.findOverlappingEventForCondominium(condominiumId, startsAt, endsAt);
     if (conflictingEvent) {
+      this.log.warn('Condominium agenda create blocked by overlapping event', {
+        condominiumId,
+        startsAt: startsAt.toISOString(),
+        endsAt: endsAt.toISOString(),
+        conflictingEventId: conflictingEvent.id,
+      });
       throw new AppError('CONDO-008', 400, { message: 'Ja existe uma feira ativa nesse horario para o condominio.' });
     }
-    const event = await this.condominiumRepository.saveEvent({
-      condominiumId,
-      title,
-      startsAt,
-      endsAt,
-      status: String(payload?.status || 'scheduled').trim() || 'scheduled',
-      pickupLocation: payload?.pickupLocation || null,
-      notes: payload?.notes || null,
-      active: payload?.active !== false,
-    });
-    return this.toPublicEvent(event);
+    const uploadedBanner = await saveBase64Image(
+      payload?.bannerFile,
+      this.buildEventBannerKey(condominium.slug || condominium.name || condominiumId, startsAt),
+      'condominiums'
+    );
+    try {
+      const event = await this.condominiumRepository.saveEvent({
+        condominiumId,
+        title,
+        startsAt,
+        endsAt,
+        status: String(payload?.status || 'scheduled').trim() || 'scheduled',
+        pickupLocation: this.normalizeOptionalText(payload?.pickupLocation),
+        bannerUrl: uploadedBanner || this.normalizeOptionalText(payload?.bannerUrl),
+        bannerTitle: this.normalizeOptionalText(payload?.bannerTitle),
+        bannerDescription: this.normalizeOptionalText(payload?.bannerDescription),
+        notes: this.normalizeOptionalText(payload?.notes),
+        active: payload?.active !== false,
+      });
+      this.log.info('Condominium agenda event created', {
+        eventId: event.id,
+        condominiumId,
+        startsAt: startsAt.toISOString(),
+        hasBanner: Boolean(event.bannerUrl),
+      });
+      return this.toPublicEvent(event);
+    } catch (error: any) {
+      if (this.isAgendaStartConstraintError(error)) {
+        this.log.warn('Condominium agenda create blocked by start-time unique constraint', {
+          condominiumId,
+          startsAt: startsAt.toISOString(),
+          error,
+        });
+        throw new AppError('CONDO-009', 400, { message: 'Ja existe uma feira cadastrada para esse condominio nesse horario.' });
+      }
+      throw error;
+    }
   }
 
   async adminUpdateEvent(eventId: string, payload: any) {
@@ -299,27 +342,87 @@ export class CondominiumService {
     if (!title || Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime()) || endsAt <= startsAt) {
       throw new AppError('CONDO-003', 400, { message: 'Informe titulo, inicio e fim validos para a feira.' });
     }
+    this.log.info('Updating condominium agenda event', {
+      eventId,
+      condominiumId: event.condominiumId,
+      title,
+      startsAt: startsAt.toISOString(),
+      endsAt: endsAt.toISOString(),
+    });
     const sameDayEvent = await this.condominiumRepository.findSameDayEventForCondominium(event.condominiumId, startsAt, eventId);
     if (sameDayEvent) {
+      this.log.warn('Condominium agenda update blocked by same-day event', {
+        eventId,
+        condominiumId: event.condominiumId,
+        startsAt: startsAt.toISOString(),
+        sameDayEventId: sameDayEvent.id,
+      });
       throw new AppError('CONDO-009', 400, { message: 'Ja existe outra feira cadastrada para esse condominio nesse dia.' });
     }
     const conflictingEvent = await this.condominiumRepository.findOverlappingEventForCondominium(event.condominiumId, startsAt, endsAt, eventId);
     if (conflictingEvent) {
+      this.log.warn('Condominium agenda update blocked by overlapping event', {
+        eventId,
+        condominiumId: event.condominiumId,
+        startsAt: startsAt.toISOString(),
+        endsAt: endsAt.toISOString(),
+        conflictingEventId: conflictingEvent.id,
+      });
       throw new AppError('CONDO-008', 400, { message: 'Ja existe outra feira ativa nesse horario para o condominio.' });
     }
+    const uploadedBanner = await saveBase64Image(
+      payload?.bannerFile,
+      this.buildEventBannerKey(event.condominium?.slug || event.condominiumId, startsAt, eventId),
+      'condominiums'
+    );
 
-    const saved = await this.condominiumRepository.saveEvent({
-      ...event,
-      title,
-      startsAt,
-      endsAt,
-      status: String(payload?.status || event.status || 'scheduled').trim() || 'scheduled',
-      pickupLocation: payload?.pickupLocation ?? event.pickupLocation ?? null,
-      notes: payload?.notes ?? event.notes ?? null,
-      active: payload?.active !== false,
-    });
-    const refreshed = await this.condominiumRepository.findEventById(saved.id);
-    return this.toPublicEvent(refreshed || saved);
+    try {
+      const saved = await this.condominiumRepository.saveEvent({
+        ...event,
+        title,
+        startsAt,
+        endsAt,
+        status: String(payload?.status || event.status || 'scheduled').trim() || 'scheduled',
+        pickupLocation:
+          payload?.pickupLocation !== undefined
+            ? this.normalizeOptionalText(payload?.pickupLocation)
+            : event.pickupLocation ?? null,
+        bannerUrl:
+          uploadedBanner ||
+          (payload?.bannerUrl !== undefined || payload?.bannerFile !== undefined
+            ? this.normalizeOptionalText(payload?.bannerUrl)
+            : event.bannerUrl ?? null),
+        bannerTitle:
+          payload?.bannerTitle !== undefined
+            ? this.normalizeOptionalText(payload?.bannerTitle)
+            : event.bannerTitle ?? null,
+        bannerDescription:
+          payload?.bannerDescription !== undefined
+            ? this.normalizeOptionalText(payload?.bannerDescription)
+            : event.bannerDescription ?? null,
+        notes: payload?.notes !== undefined ? this.normalizeOptionalText(payload?.notes) : event.notes ?? null,
+        active: payload?.active !== false,
+      });
+      const refreshed = await this.condominiumRepository.findEventById(saved.id);
+      this.log.info('Condominium agenda event updated', {
+        eventId,
+        condominiumId: event.condominiumId,
+        startsAt: startsAt.toISOString(),
+        hasBanner: Boolean((refreshed || saved).bannerUrl),
+      });
+      return this.toPublicEvent(refreshed || saved);
+    } catch (error: any) {
+      if (this.isAgendaStartConstraintError(error)) {
+        this.log.warn('Condominium agenda update blocked by start-time unique constraint', {
+          eventId,
+          condominiumId: event.condominiumId,
+          startsAt: startsAt.toISOString(),
+          error,
+        });
+        throw new AppError('CONDO-009', 400, { message: 'Ja existe outra feira cadastrada para esse condominio nesse horario.' });
+      }
+      throw error;
+    }
   }
 
   async adminDeactivateEvent(eventId: string) {
@@ -841,6 +944,9 @@ export class CondominiumService {
       startsAt: event.startsAt instanceof Date ? event.startsAt.toISOString() : event.startsAt,
       endsAt: event.endsAt instanceof Date ? event.endsAt.toISOString() : event.endsAt,
       pickupLocation: event.pickupLocation || null,
+      bannerUrl: event.bannerUrl || null,
+      bannerTitle: event.bannerTitle || null,
+      bannerDescription: event.bannerDescription || null,
       notes: event.notes || null,
       stores: storeLinks
         .filter((link: any) => link?.active !== false && link?.store)
@@ -958,5 +1064,23 @@ export class CondominiumService {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
+  }
+
+  private normalizeOptionalText(value: unknown) {
+    if (value === null || value === undefined) return null;
+    const normalized = String(value).trim();
+    return normalized || null;
+  }
+
+  private buildEventBannerKey(condominiumSlugOrName: string, startsAt: Date, eventId?: string) {
+    const safeCondominium = this.slugify(condominiumSlugOrName) || 'condominio';
+    const safeStart = startsAt.toISOString().replace(/[^0-9]/g, '').slice(0, 12) || Date.now().toString();
+    const safeEvent = this.slugify(eventId || '') || 'agenda';
+    return `condominium-event-banner-${safeCondominium}-${safeEvent}-${safeStart}`;
+  }
+
+  private isAgendaStartConstraintError(error: any) {
+    const constraint = String(error?.constraint || '');
+    return String(error?.code || '') === '23505' && constraint === 'uq_condominium_events_condominium_start';
   }
 }

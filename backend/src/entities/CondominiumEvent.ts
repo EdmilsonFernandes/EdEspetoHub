@@ -51,6 +51,15 @@ export class CondominiumEvent {
   @Column({ name: 'pickup_location', type: 'text', nullable: true })
   pickupLocation?: string | null;
 
+  @Column({ name: 'banner_url', type: 'text', nullable: true })
+  bannerUrl?: string | null;
+
+  @Column({ name: 'banner_title', type: 'text', nullable: true })
+  bannerTitle?: string | null;
+
+  @Column({ name: 'banner_description', type: 'text', nullable: true })
+  bannerDescription?: string | null;
+
   @Column({ type: 'text', nullable: true })
   notes?: string | null;
 

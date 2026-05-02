@@ -109,6 +109,10 @@ export function CondominiumDashboard() {
     startsAt: '',
     endsAt: '',
     pickupLocation: '',
+    bannerUrl: '',
+    bannerFile: '',
+    bannerTitle: '',
+    bannerDescription: '',
     notes: '',
   });
   const [profileForm, setProfileForm] = useState({
@@ -185,6 +189,7 @@ export function CondominiumDashboard() {
   const fairStoresCount = events.reduce((acc: number, event: any) => acc + (Array.isArray(event?.stores) ? event.stores.length : 0), 0);
   const profileLogoPreview = profileForm.logoFile || resolveAssetUrl(profileForm.logoUrl) || '';
   const profileBannerPreview = profileForm.bannerFile || resolveAssetUrl(profileForm.bannerUrl) || '';
+  const eventBannerPreview = eventForm.bannerFile || resolveAssetUrl(eventForm.bannerUrl) || '';
 
   const metrics = [
     { label: 'Feiras na agenda', value: events.length, tone: 'bg-[#153A4C] text-white' },
@@ -256,6 +261,17 @@ export function CondominiumDashboard() {
     }
   };
 
+  const handleEventBannerUpload = async (file?: File | null) => {
+    if (!file) return;
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      setEventForm((prev) => ({ ...prev, bannerFile: dataUrl }));
+      setError('');
+    } catch {
+      setError('Não foi possível carregar o banner da agenda.');
+    }
+  };
+
   const saveProfile = async () => {
     if (!profileForm.name.trim() || !profileForm.slug.trim()) {
       setError('Nome e slug do condomínio são obrigatórios.');
@@ -305,6 +321,10 @@ export function CondominiumDashboard() {
         endsAt: eventForm.endsAt,
         pickupLocation: eventForm.pickupLocation,
         status: 'scheduled',
+        bannerUrl: eventForm.bannerUrl,
+        bannerFile: eventForm.bannerFile,
+        bannerTitle: eventForm.bannerTitle,
+        bannerDescription: eventForm.bannerDescription,
         notes: eventForm.notes,
       };
       if (editingEventId) {
@@ -314,7 +334,17 @@ export function CondominiumDashboard() {
       }
       const wasEditing = Boolean(editingEventId);
       setEditingEventId('');
-      setEventForm({ title: '', startsAt: '', endsAt: '', pickupLocation: '', notes: '' });
+      setEventForm({
+        title: '',
+        startsAt: '',
+        endsAt: '',
+        pickupLocation: '',
+        bannerUrl: '',
+        bannerFile: '',
+        bannerTitle: '',
+        bannerDescription: '',
+        notes: '',
+      });
       await load();
       showToast(wasEditing ? 'Feira atualizada com sucesso.' : 'Feira criada com sucesso.', 'success');
     } catch (err: any) {
@@ -332,6 +362,10 @@ export function CondominiumDashboard() {
       startsAt: toDateTimeLocalInput(event.startsAt),
       endsAt: toDateTimeLocalInput(event.endsAt),
       pickupLocation: event.pickupLocation || '',
+      bannerUrl: event.bannerUrl || '',
+      bannerFile: '',
+      bannerTitle: event.bannerTitle || '',
+      bannerDescription: event.bannerDescription || '',
       notes: event.notes || '',
     });
     setActiveTab('agenda');
@@ -340,7 +374,17 @@ export function CondominiumDashboard() {
 
   const cancelEventEdit = () => {
     setEditingEventId('');
-    setEventForm({ title: '', startsAt: '', endsAt: '', pickupLocation: '', notes: '' });
+    setEventForm({
+      title: '',
+      startsAt: '',
+      endsAt: '',
+      pickupLocation: '',
+      bannerUrl: '',
+      bannerFile: '',
+      bannerTitle: '',
+      bannerDescription: '',
+      notes: '',
+    });
   };
 
   const deactivateEvent = async (eventId: string) => {
@@ -613,6 +657,43 @@ export function CondominiumDashboard() {
                   <input type="datetime-local" value={eventForm.endsAt} onChange={(event) => setEventForm((prev) => ({ ...prev, endsAt: event.target.value }))} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none focus:border-[#336886] focus:bg-white" />
                 </div>
                 <input value={eventForm.pickupLocation} onChange={(event) => setEventForm((prev) => ({ ...prev, pickupLocation: event.target.value }))} placeholder="Local: praça, salão, entrada social..." className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none focus:border-[#336886] focus:bg-white" />
+                <div className="overflow-hidden rounded-[1.6rem] border border-slate-200 bg-slate-50">
+                  <div className="relative h-36 bg-[linear-gradient(135deg,#eef6ff_0%,#ffffff_56%,#f8fafc_100%)]">
+                    {eventBannerPreview ? (
+                      <img src={eventBannerPreview} alt="Banner da agenda" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-slate-300">
+                        <ImageSquare size={34} weight="duotone" />
+                      </div>
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/18 to-transparent" />
+                    <div className="absolute left-4 top-4 rounded-full bg-white/94 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#336886] shadow-sm ring-1 ring-white/70">
+                      Banner da feira
+                    </div>
+                  </div>
+                  <div className="space-y-3 p-4">
+                    <div className="flex flex-wrap gap-2">
+                      <label className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 shadow-sm">
+                        <UploadSimple size={14} weight="bold" />
+                        Upload do banner
+                        <input type="file" accept="image/*" className="hidden" onChange={(event) => handleEventBannerUpload(event.target.files?.[0])} />
+                      </label>
+                      {eventBannerPreview ? (
+                        <button
+                          type="button"
+                          onClick={() => setEventForm((prev) => ({ ...prev, bannerUrl: '', bannerFile: '' }))}
+                          className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-600 shadow-sm"
+                        >
+                          <Trash size={14} weight="bold" />
+                          Remover banner
+                        </button>
+                      ) : null}
+                    </div>
+                    <input value={eventForm.bannerUrl} onChange={(event) => setEventForm((prev) => ({ ...prev, bannerUrl: event.target.value }))} placeholder="URL opcional do banner" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-[#336886] focus:bg-white" />
+                    <input value={eventForm.bannerTitle} onChange={(event) => setEventForm((prev) => ({ ...prev, bannerTitle: event.target.value }))} placeholder="Título opcional do banner" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-[#336886] focus:bg-white" />
+                    <textarea value={eventForm.bannerDescription} onChange={(event) => setEventForm((prev) => ({ ...prev, bannerDescription: event.target.value }))} placeholder="Descrição opcional do banner" className="min-h-[88px] w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-[#336886] focus:bg-white" />
+                  </div>
+                </div>
                 <textarea value={eventForm.notes} onChange={(event) => setEventForm((prev) => ({ ...prev, notes: event.target.value }))} placeholder="Observações para operação" className="min-h-[92px] w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none focus:border-[#336886] focus:bg-white" />
                 <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
                   <button onClick={saveEvent} disabled={saving || !eventForm.startsAt || !eventForm.endsAt} className="w-full rounded-2xl bg-[#153A4C] px-4 py-3.5 text-sm font-black text-white disabled:opacity-50">

@@ -419,6 +419,9 @@ type CondominiumEventSummary = {
   startsAt?: string;
   endsAt?: string;
   pickupLocation?: string | null;
+  bannerUrl?: string | null;
+  bannerTitle?: string | null;
+  bannerDescription?: string | null;
   notes?: string | null;
   canOrderInCondominium?: boolean;
 };
@@ -432,6 +435,10 @@ type CondominiumPromoModalState = {
   slug: string;
   name: string;
   timeLabel: string;
+  eventTitle?: string;
+  bannerTitle?: string | null;
+  bannerDescription?: string | null;
+  bannerUrl: string;
 };
 
 const normalizeSegment = (segment?: string | null) =>
@@ -3881,6 +3888,13 @@ export function MarketplacePage() {
                     });
                     return;
                   }
+                  const agendaBannerUrl = resolveAssetUrl(event?.bannerUrl || '') || '';
+                  if (!agendaBannerUrl) {
+                    setCondominiumPickerOpen(false);
+                    setCondominiumSearch('');
+                    setSelectedCondominiumSlug(slug);
+                    return;
+                  }
                   setCondominiumPromoModal({
                     slug,
                     name: name || 'Condomínio',
@@ -3888,6 +3902,10 @@ export function MarketplacePage() {
                       formatCondominiumPickerEventTime(event) ||
                       formatCondominiumEventTime(event) ||
                       'Feira aberta agora',
+                    eventTitle: event?.title || 'Feira do condomínio',
+                    bannerTitle: event?.bannerTitle || null,
+                    bannerDescription: event?.bannerDescription || null,
+                    bannerUrl: agendaBannerUrl,
                   });
                 };
 
@@ -4210,7 +4228,12 @@ export function MarketplacePage() {
       {condominiumPromoModal && (() => {
         const condo = condominiums.find((item) => String(item?.slug || '').trim() === condominiumPromoModal.slug) || null;
         const logoUrl = condo ? resolveCondominiumAssetUrl(condo, 'logo') : '';
-        const bannerUrl = condo ? resolveCondominiumAssetUrl(condo, 'banner') : '';
+        const condominiumBannerUrl = condo ? resolveCondominiumAssetUrl(condo, 'banner') : '';
+        const promoImageUrl = condominiumPromoModal.bannerUrl || condominiumBannerUrl || logoUrl;
+        const promoTitle = condominiumPromoModal.bannerTitle || condominiumPromoModal.eventTitle || 'Feira do condomínio';
+        const promoDescription =
+          condominiumPromoModal.bannerDescription ||
+          'Entre para ver as lojas participantes, horários da agenda e as opções de retirada na barraca ou entrega no apartamento quando disponíveis.';
         return (
           <div
             className="fixed inset-0 z-[255] flex items-center justify-center bg-slate-950/58 px-4 py-[max(1rem,env(safe-area-inset-top))] backdrop-blur-md animate-in fade-in duration-200"
@@ -4231,17 +4254,17 @@ export function MarketplacePage() {
 
               <div className="relative aspect-[16/10] overflow-hidden bg-slate-950">
                 <img
-                  src="/marketing/marketing_condominum.png"
-                  alt="Banner promocional da feira do condomínio"
+                  src={promoImageUrl}
+                  alt={`Banner da agenda do condomínio ${condominiumPromoModal.name}`}
                   loading="eager"
                   fetchPriority="high"
                   decoding="async"
                   className="absolute inset-0 h-full w-full object-cover"
                 />
                 <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-slate-950/55 via-slate-950/10 to-transparent" />
-                {bannerUrl ? (
+                {condominiumBannerUrl ? (
                   <img
-                    src={bannerUrl}
+                    src={condominiumBannerUrl}
                     alt=""
                     aria-hidden
                     className="absolute right-4 top-4 h-16 w-24 rounded-[1.2rem] border border-white/70 object-cover shadow-[0_18px_30px_-20px_rgba(15,23,42,0.52)]"
@@ -4261,17 +4284,15 @@ export function MarketplacePage() {
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Feira liberada</p>
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Agenda do condomínio</p>
                     <h3 className="mt-1 text-lg font-black leading-tight text-slate-950">{condominiumPromoModal.name}</h3>
                     <p className="mt-1 text-sm font-medium text-slate-500">{condominiumPromoModal.timeLabel}</p>
                   </div>
                 </div>
 
                 <div className="mt-4 rounded-[1.35rem] border border-[#d8e4ec] bg-[linear-gradient(135deg,#f8fbfd,#ffffff)] px-4 py-3 shadow-[0_18px_30px_-24px_rgba(51,104,134,0.16)]">
-                  <p className="text-sm font-black text-slate-900">Sua feira está pronta para receber pedidos.</p>
-                  <p className="mt-1 text-xs font-medium leading-5 text-slate-600">
-                    Entre para ver as lojas participantes, horários da agenda e as opções de retirada na barraca ou entrega no apartamento quando disponíveis.
-                  </p>
+                  <p className="text-sm font-black text-slate-900">{promoTitle}</p>
+                  <p className="mt-1 text-xs font-medium leading-5 text-slate-600">{promoDescription}</p>
                 </div>
 
                 <div className="mt-4 flex items-center gap-2">
