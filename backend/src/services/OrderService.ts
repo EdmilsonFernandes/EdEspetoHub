@@ -606,7 +606,7 @@ export class OrderService
       title: 'TEM ENTREGA DISPONÍVEL 🚚',
       body: `Existe um pedido aguardando retirada na loja ${storeName}. ${shortOrderId}${totalLabel}`,
       data: {
-        url: 'https://janocaminho.com.br/motoboy',
+        url: 'https://janocaminho.com.br/motoboy/available',
         screen: 'motoboy_available_orders',
         notificationType: 'motoboy_available_order',
         orderId: String(order.id),

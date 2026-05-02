@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, House, ListChecks, Truck, UserCircle, Wallet } from '@phosphor-icons/react';
 
+const MOTOBOY_QUEUE_BADGE_EVENT = 'jnc:motoboy-queue-badge';
+
 type Tab = {
   to: string;
   label: string;
@@ -66,8 +68,13 @@ export function MotoboyLayout() {
     const onStorage = (e: StorageEvent) => {
       if (e.key === 'motoboy:queue_badge') readBadge();
     };
+    const onQueueBadge = () => readBadge();
     window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    window.addEventListener(MOTOBOY_QUEUE_BADGE_EVENT, onQueueBadge as EventListener);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener(MOTOBOY_QUEUE_BADGE_EVENT, onQueueBadge as EventListener);
+    };
   }, []);
 
   useEffect(() => {

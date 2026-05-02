@@ -245,7 +245,7 @@ async recordDelivery(order: Order) {
       await chargeRepo.save(charge);
 
       cycle.deliveryCount = Number(cycle.deliveryCount || 0) + 1;
-      cycle.subtotal = Number((Number(cycle.subtotal || 0) + charge.chargeAmount).toFixed(2));
+      cycle.subtotal = Number((Number(cycle.subtotal || 0) + Number(charge.chargeAmount || 0)).toFixed(2));
       cycle.totalDue = Number((Number(cycle.subtotal) + Number(cycle.penaltyAmount || 0)).toFixed(2));
       await cycleRepo.save(cycle);
     });

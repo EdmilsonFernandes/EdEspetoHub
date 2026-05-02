@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { CheckCircle, Clock, Storefront } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { motoboyService } from '../services/motoboyService';
@@ -6,6 +6,8 @@ import { OrderCard } from '../components/Motoboy/OrderCard';
 import { useToast } from '../contexts/ToastContext';
 import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
 import { formatMotoboyAccountStatus } from '../utils/motoboyStatus';
+
+const MOTOBOY_AVAILABLE_ORDER_EVENT = 'jnc:motoboy-available-order';
 
 export function MotoboyAvailable() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -62,7 +64,7 @@ export function MotoboyAvailable() {
     } catch {}
   };
 
-  const loadOrders = async () => {
+  const loadOrders = useCallback(async () => {
     setLoading(true);
     try {
       const data = await motoboyService.listAvailableOrders();
@@ -100,12 +102,12 @@ export function MotoboyAvailable() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
 
   useEffect(() => {
-    loadOrders();
+    void loadOrders();
     firstLoadRef.current = false;
-  }, []);
+  }, [loadOrders]);
 
   useEffect(() => {
     // Poll queue every 5s (pause when tab is hidden).
@@ -120,7 +122,17 @@ export function MotoboyAvailable() {
     return () => {
       if (timer) window.clearInterval(timer);
     };
-  }, []);
+  }, [loadOrders]);
+
+  useEffect(() => {
+    const onForegroundPush = () => {
+      setNewBanner({ count: 1, at: Date.now() });
+      showToast('TEM ENTREGA DISPONÍVEL 🚚', 'info');
+      void loadOrders();
+    };
+    window.addEventListener(MOTOBOY_AVAILABLE_ORDER_EVENT, onForegroundPush as EventListener);
+    return () => window.removeEventListener(MOTOBOY_AVAILABLE_ORDER_EVENT, onForegroundPush as EventListener);
+  }, [loadOrders, showToast]);
 
   useEffect(() => {
     const loadRequests = async () => {

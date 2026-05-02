@@ -20,6 +20,9 @@ const PUSH_GUEST_ID_KEY = 'jnk_mobile_push_guest_id';
 const STORE_NEW_ORDER_PUSH_TYPE = 'store_new_online_order';
 const STORE_NEW_ORDER_CHANNEL_ID = 'store_new_orders_v1';
 const STORE_NEW_ORDER_CHANNEL_SOUND = 'jnc_store_new_order.wav';
+const MOTOBOY_AVAILABLE_ORDER_PUSH_TYPE = 'motoboy_available_order';
+const MOTOBOY_AVAILABLE_ORDER_EVENT = 'jnc:motoboy-available-order';
+const MOTOBOY_QUEUE_BADGE_EVENT = 'jnc:motoboy-queue-badge';
 
 let lastStoreForegroundAlertAt = 0;
 let foregroundAudioContext: AudioContext | null = null;
@@ -65,6 +68,11 @@ const navigateFromPayload = (payload?: unknown) => {
 const isStoreNewOrderPush = (payload?: unknown) => {
   const data = (payload && typeof payload === 'object' ? payload : {}) as Record<string, unknown>;
   return String(data.notificationType || data.pushType || '').trim() === STORE_NEW_ORDER_PUSH_TYPE;
+};
+
+const isMotoboyAvailableOrderPush = (payload?: unknown) => {
+  const data = (payload && typeof payload === 'object' ? payload : {}) as Record<string, unknown>;
+  return String(data.notificationType || data.pushType || '').trim() === MOTOBOY_AVAILABLE_ORDER_PUSH_TYPE;
 };
 
 const ensureStoreOrderPushChannel = async () => {
@@ -135,6 +143,17 @@ const playStoreOrderForegroundAlert = async () => {
   } catch {
     // no-op
   }
+};
+
+const triggerMotoboyForegroundOrderAlert = async (payload?: unknown) => {
+  try {
+    localStorage.setItem('motoboy:queue_badge', '1');
+  } catch {
+    // no-op
+  }
+  window.dispatchEvent(new CustomEvent(MOTOBOY_QUEUE_BADGE_EVENT, { detail: { active: true } }));
+  window.dispatchEvent(new CustomEvent(MOTOBOY_AVAILABLE_ORDER_EVENT, { detail: payload || {} }));
+  await playStoreOrderForegroundAlert();
 };
 
 const getCustomerSessionToken = () => {
@@ -294,6 +313,10 @@ const bootstrapPushNotifications = async () => {
     await PushNotifications.addListener('pushNotificationReceived', (notification) => {
       if (isStoreNewOrderPush(notification?.data)) {
         void playStoreOrderForegroundAlert();
+        return;
+      }
+      if (isMotoboyAvailableOrderPush(notification?.data)) {
+        void triggerMotoboyForegroundOrderAlert(notification?.data);
       }
     });
 

@@ -543,10 +543,10 @@ export function OrderTracking() {
     if (isPostalDelivery && (normalizedStatus === 'delivered' || normalizedStatus === 'finished')) return 'Entregue';
     if (isPostalDelivery && (normalizedStatus === 'dispatched' || normalizedStatus === 'waiting_for_motoboy' || normalizedStatus === 'in_delivery')) return 'Despachado';
     if (isPostalDelivery && (normalizedStatus === 'ready' || normalizedStatus === 'ready_for_delivery')) return 'Pronto para postagem';
-    if (isDelivery && (deliveryStatus === 'DELIVERED' || normalizedStatus === 'delivered' || normalizedStatus === 'finished')) return 'Entregue';
-    if (isDelivery && (deliveryStatus === 'IN_TRANSIT' || normalizedStatus === 'in_delivery')) return 'Em rota';
     if (isDelivery && deliveryStatus === 'ACCEPTED') return 'Entregador a caminho';
     if (isDelivery && deliveryStatus === 'PICKED_UP') return 'Pedido retirado';
+    if (isDelivery && (deliveryStatus === 'DELIVERED' || normalizedStatus === 'delivered' || normalizedStatus === 'finished')) return 'Entregue';
+    if (isDelivery && (deliveryStatus === 'IN_TRANSIT' || normalizedStatus === 'in_delivery')) return 'Em rota';
     if (isDelivery && normalizedStatus === 'dispatched') return 'Despachado';
     if (isDelivery && normalizedStatus === 'waiting_for_motoboy') return 'Aguardando entregador';
     if (isDelivery && normalizedStatus === 'ready_for_delivery') return 'Pronto para entrega';
@@ -627,7 +627,9 @@ export function OrderTracking() {
     !isAdminForStore &&
     isDelivery &&
     !isPostalDelivery &&
-    normalizedStatus === 'delivered';
+    [ 'delivered', 'finished', 'done' ].includes(normalizedStatus) &&
+    !order?.customerReceivedAt &&
+    !(order as any)?.customer_received_at;
 
   const handleConfirmReceipt = async () => {
     if (!orderId || confirmReceiptLoading || !canConfirmReceipt) return;
@@ -1011,7 +1013,18 @@ export function OrderTracking() {
       return nextStatus || tipUiStatus;
     },
   });
-  const tipProgressPct = Math.max(0, Math.min(100, (tipPolling.remainingMs / (5 * 60 * 1000)) * 100));
+  const tipCountdownMs =
+    tipExpiresAtMs && Number.isFinite(tipExpiresAtMs)
+      ? Math.max(0, tipExpiresAtMs - Date.now())
+      : tipPolling.remainingMs;
+  const tipCountdownTotalMs = tipExpiresAtMs && Number.isFinite(tipExpiresAtMs) ? 5 * 60 * 1000 : 5 * 60 * 1000;
+  const tipCountdownLabel = (() => {
+    const remainingSec = Math.max(0, Math.ceil(tipCountdownMs / 1000));
+    const remainingMin = Math.floor(remainingSec / 60);
+    const remainingSecPart = remainingSec % 60;
+    return `${String(remainingMin).padStart(2, '0')}:${String(remainingSecPart).padStart(2, '0')}`;
+  })();
+  const tipProgressPct = Math.max(0, Math.min(100, (tipCountdownMs / tipCountdownTotalMs) * 100));
   const showTipPendingUi = tipUiStatus !== 'PAID';
 
   const toggleTag = (type: 'storeTags' | 'deliveryTags', value: string) => {
@@ -2240,17 +2253,6 @@ export function OrderTracking() {
                                       {tipStatusLabel}
                                     </span>
                                   </div>
-                                  {showTipPendingUi && reviewTip?.tipQrCodeBase64 ? (
-                                    <div className="rounded-2xl border border-amber-200 bg-[linear-gradient(135deg,#fff7ed,#ffedd5)] px-3 py-2.5 shadow-[0_12px_26px_-22px_rgba(234,88,12,0.9)]">
-                                      <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-700">Tempo limite para pagar a gorjeta</p>
-                                      <div className="mt-1.5 flex items-center justify-between gap-2">
-                                        <p className="text-[11px] font-semibold text-amber-900">Você tem até o fim do contador</p>
-                                        <span className="rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-1 text-xs font-black text-white animate-pulse">
-                                          {tipPolling.remainingLabel}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  ) : null}
                                   {reviewTip?.tipQrCodeBase64 ? (
                                     <div className="flex items-center justify-center">
                                       <img
@@ -2296,7 +2298,7 @@ export function OrderTracking() {
                                       <div className="flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-white/80 px-2.5 py-2">
                                         <span className="text-[11px] font-semibold text-amber-900 uppercase tracking-[0.2em]">Tempo restante</span>
                                         <span className="rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-1 text-xs font-black text-white animate-pulse">
-                                          {tipPolling.remainingLabel}
+                                          {tipCountdownLabel}
                                         </span>
                                       </div>
                                       <div className="h-1.5 rounded-full bg-amber-100 overflow-hidden">

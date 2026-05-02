@@ -279,6 +279,11 @@ async acceptDelivery(orderId: string, motoboy: Motoboy) {
         toStatus: 'ACCEPTED',
       });
 
+      // As soon as a courier accepts, the store should see the order in the
+      // "em rota" operational lane, even before pickup.
+      order.status = 'in_delivery';
+      await orderRepo.save(order);
+
       const updated = await deliveryRepo.findOne({ where: { orderId } });
       return { order, delivery: updated };
     });

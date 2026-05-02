@@ -1110,12 +1110,21 @@ async setDefaultAddress(userId: string, addressId: string) {
    */
   async confirmOrderReceived(userId: string, orderId: string) {
     const result = await AppDataSource.transaction(async (manager) => {
-      const repo = manager.getRepository(Order);
-      const order = await repo.findOne({
-        where: { id: orderId, customerUserId: userId },
-        relations: [ 'store', 'store.owner', 'store.settings' ],
-        lock: { mode: 'pessimistic_write' },
-      });
+      const rows = await manager.query(
+        `
+          SELECT id,
+                 type,
+                 status,
+                 customer_received_at,
+                 store_id
+            FROM orders
+           WHERE id = $1
+             AND customer_user_id = $2
+           FOR UPDATE
+        `,
+        [orderId, userId]
+      );
+      const order = rows?.[0] || null;
       if (!order) {
         throw new AppError('ORDER-001', 404, { message: 'Pedido não encontrado.' });
       }
@@ -1124,39 +1133,64 @@ async setDefaultAddress(userId: string, addressId: string) {
       }
 
       const normalizedStatus = String(order.status || '').trim().toLowerCase();
-      if (normalizedStatus === 'finished' && order.customerReceivedAt) {
+      const customerReceivedAt = order.customer_received_at ? new Date(order.customer_received_at) : null;
+      if (normalizedStatus === 'finished' && customerReceivedAt) {
         return order;
       }
-      if (normalizedStatus !== 'delivered') {
+      if (![ 'delivered', 'finished', 'done' ].includes(normalizedStatus)) {
         throw new AppError('ORDER-004', 400, { message: 'Este pedido ainda não está pronto para confirmação de recebimento.' });
       }
 
-      order.customerReceivedAt = new Date();
-      order.customerReceivedConfirmedByUserId = userId;
-      order.status = 'finished';
-      return repo.save(order);
+      const [saved] = await manager.query(
+        `
+          UPDATE orders
+             SET customer_received_at = COALESCE(customer_received_at, NOW()),
+                 customer_received_confirmed_by_user_id = COALESCE(customer_received_confirmed_by_user_id, $2),
+                 status = 'finished',
+                 updated_at = NOW()
+           WHERE id = $1
+           RETURNING id,
+                     status,
+                     customer_received_at,
+                     customer_received_confirmed_by_user_id,
+                     store_id
+        `,
+        [orderId, userId]
+      );
+      return saved || order;
     });
 
-    const storeId = String((result as any)?.store?.id || '').trim();
+    const storeId = String((result as any)?.store_id || '').trim();
     if (storeId) {
       const orderDisplayId = `#${String(result.id || '').slice(0, 8)}`;
-      void this.pushService.notifyStoreUsersOrderDelivered(storeId, {
-        title: 'PEDIDO ENTREGUE',
-        body: `O cliente confirmou o recebimento do pedido ${orderDisplayId}.`,
-        data: {
-          url: 'https://janocaminho.com.br/admin/queue',
-          orderId: String(result.id),
-          status: String(result.status || ''),
-          notificationType: 'customer_order_received',
-        },
-      });
+      void this.pushService
+        .notifyStoreUsersOrderDelivered(storeId, {
+          title: 'PEDIDO ENTREGUE',
+          body: `O cliente confirmou o recebimento do pedido ${orderDisplayId}.`,
+          data: {
+            url: 'https://janocaminho.com.br/admin/queue',
+            orderId: String(result.id),
+            status: String(result.status || ''),
+            notificationType: 'customer_order_received',
+          },
+        })
+        .catch((error) => {
+          this.log.warn('Store delivered push failed after customer confirmation', {
+            orderId: String(result.id || orderId),
+            storeId,
+            error,
+          });
+        });
     }
 
     return {
       ok: true,
       orderId: result.id,
       status: result.status,
-      customerReceivedAt: (result as any).customerReceivedAt || null,
+      customerReceivedAt:
+        (result as any).customer_received_at ||
+        (result as any).customerReceivedAt ||
+        null,
     };
   }
 
