@@ -98,7 +98,7 @@ export const forceLogoutAndRedirect = (scope: SessionScope) => {
   } else if (scope === 'admin') {
     localStorage.removeItem('adminSession');
   } else if (scope === 'motoboy') {
-    localStorage.removeItem('motoboySession');
+    nativeBiometricService.syncMotoboySession(null);
   } else {
     localStorage.removeItem('superAdminToken');
     localStorage.removeItem('superAdminUser');

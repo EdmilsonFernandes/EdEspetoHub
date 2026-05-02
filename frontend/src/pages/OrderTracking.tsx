@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowClockwise, Bicycle, CheckCircle, Clock, CircleNotch, CopySimple, MapPin, Package, Phone, SealCheck, Star, User, WhatsappLogo } from '@phosphor-icons/react';
 import { Capacitor } from '@capacitor/core';
+import { customerAccountService } from '../services/customerAccountService';
 import { orderService } from '../services/orderService';
 import { mapsService } from '../services/mapsService';
 import { formatAddress, formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId } from '../utils/format';
@@ -353,6 +354,8 @@ export function OrderTracking() {
   const [orderAccessToken, setOrderAccessToken] = useState('');
   const [tipPixCopied, setTipPixCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [confirmReceiptLoading, setConfirmReceiptLoading] = useState(false);
+  const [confirmReceiptError, setConfirmReceiptError] = useState('');
   const [reviewForm, setReviewForm] = useState({
     storeRating: 0,
     deliveryRating: 0,
@@ -525,6 +528,16 @@ export function OrderTracking() {
   const storeLogo =
     resolveAssetUrl(order?.store?.settings?.logoUrl) || '/janocaminho.jpg';
   const isPostalDelivery = isDelivery && String((order as any)?.fulfillmentMode || '').toLowerCase() === 'postal';
+  const hasCustomerSession = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      const raw = localStorage.getItem('customerSession');
+      const parsed = raw ? JSON.parse(raw) : null;
+      return Boolean(parsed?.token);
+    } catch {
+      return false;
+    }
+  }, []);
   const statusLabel = useMemo(() => {
     if (normalizedStatus === 'cancelled') return 'Cancelado';
     if (isPostalDelivery && (normalizedStatus === 'delivered' || normalizedStatus === 'finished')) return 'Entregue';
@@ -609,6 +622,45 @@ export function OrderTracking() {
   const pixQrUrl = pixPayload
     ? `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(pixPayload)}`
     : '';
+  const canConfirmReceipt =
+    hasCustomerSession &&
+    !isAdminForStore &&
+    isDelivery &&
+    !isPostalDelivery &&
+    normalizedStatus === 'delivered';
+
+  const handleConfirmReceipt = async () => {
+    if (!orderId || confirmReceiptLoading || !canConfirmReceipt) return;
+    setConfirmReceiptError('');
+    setConfirmReceiptLoading(true);
+    try {
+      const result = await customerAccountService.confirmOrderReceived(orderId);
+      const customerReceivedAt = result?.customerReceivedAt || new Date().toISOString();
+      setOrder((prev: any) => (
+        prev
+          ? {
+              ...prev,
+              status: 'finished',
+              customerReceivedAt,
+            }
+          : prev
+      ));
+      setTrackingV2((prev: any) => (
+        prev
+          ? {
+              ...prev,
+              status: 'finished',
+              customerReceivedAt,
+            }
+          : prev
+      ));
+      setPolling(false);
+    } catch (err: any) {
+      setConfirmReceiptError(err?.message || 'Não foi possível confirmar o recebimento agora.');
+    } finally {
+      setConfirmReceiptLoading(false);
+    }
+  };
   const etaDetails = trackingV2?.eta || order?.eta || null;
   const hasAnyEtaTotal = Boolean(Number((etaDetails as any)?.totalMinutes) > 0);
   const etaTotalMinutes = etaDetails?.totalMinutes
@@ -1421,6 +1473,30 @@ export function OrderTracking() {
                                 : 'Ele está se preparando para sair da loja.'}
                             </div>
                           </div>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {canConfirmReceipt ? (
+                      <div className="mt-3 rounded-2xl border border-emerald-200 bg-[linear-gradient(135deg,#f6fdf8,#ffffff)] px-4 py-3 shadow-[0_18px_32px_-28px_rgba(16,185,129,0.22)]">
+                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-700">Recebimento</p>
+                        <p className="mt-1 text-sm font-semibold text-slate-900">Seu pedido chegou certinho?</p>
+                        <p className="mt-1 text-xs text-slate-600">
+                          Confirme o recebimento para finalizar o pedido e avisar a loja que a entrega foi concluída.
+                        </p>
+                        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+                          <button
+                            type="button"
+                            onClick={handleConfirmReceipt}
+                            disabled={confirmReceiptLoading}
+                            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_18px_32px_-24px_rgba(5,150,105,0.5)] transition-all hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-70"
+                          >
+                            {confirmReceiptLoading ? <CircleNotch size={16} className="animate-spin" /> : <SealCheck size={16} weight="fill" />}
+                            Confirmar recebimento
+                          </button>
+                          {confirmReceiptError ? (
+                            <p className="text-xs font-medium text-rose-600">{confirmReceiptError}</p>
+                          ) : null}
                         </div>
                       </div>
                     ) : null}

@@ -71,6 +71,7 @@ routes.patch('/customer/me/deactivate', requireAuth, requireRole('CUSTOMER'), Cu
 routes.post('/customer/me/change-password', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.changePassword);
 routes.get('/customer/orders', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.listOrders);
 routes.post('/customer/orders/:orderId/cancel', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.cancelOrder);
+routes.post('/customer/orders/:orderId/confirm-received', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.confirmOrderReceived);
 routes.post('/customer/push/register', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.registerPushToken);
 routes.post('/customer/push/unregister', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.unregisterPushToken);
 routes.post('/public/push/register', CustomerAccountController.registerGuestPushToken);

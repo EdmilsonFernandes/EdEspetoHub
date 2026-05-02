@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowSquareOut, Check, Eye, EyeSlash, LockKey, Scooter, ShieldCheck, SignOut, UserCircle, WarningCircle, WhatsappLogo } from '@phosphor-icons/react';
 import { authService } from '../services/authService';
+import { motoboyService } from '../services/motoboyService';
 import { useAuth } from '../contexts/AuthContext';
 import { runClientFreshStart } from '../utils/clientFreshStart';
 import { APP_BUILD_INFO } from '../generated/buildInfo';
@@ -230,8 +231,12 @@ export function MotoboyLogin() {
 
   const handleLogout = () => {
     markManualLogoutRedirect('motoboy', '/hub');
+    const token = String(persistedSession?.token || '').trim();
+    if (token) {
+      void motoboyService.unregisterPushToken({ token }).catch(() => undefined);
+    }
     try {
-      localStorage.removeItem('motoboySession');
+      nativeBiometricService.syncMotoboySession(null);
     } catch {
       // ignore
     }

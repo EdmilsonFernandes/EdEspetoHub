@@ -1,6 +1,12 @@
 import { apiClient } from '../config/apiClient';
 
 export const motoboyService = {
+  async registerPushToken(payload: { token: string; platform?: string; appVersion?: string; deviceModel?: string }) {
+    return apiClient.post('/motoboy/push/register', payload);
+  },
+  async unregisterPushToken(payload?: { token?: string | null }) {
+    return apiClient.post('/motoboy/push/unregister', payload || {});
+  },
   async listAvailableOrders() {
     return apiClient.get('/motoboy/orders/available');
   },

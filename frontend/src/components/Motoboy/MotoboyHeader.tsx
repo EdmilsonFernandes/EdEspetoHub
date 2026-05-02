@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
 import { motoboyService } from '../../services/motoboyService';
 import { markManualLogoutRedirect } from '../../utils/sessionRedirect';
+import { nativeBiometricService } from '../../services/nativeBiometricService';
 
 type MotoboyHeaderProps = {
   title: string;
@@ -74,10 +75,14 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
     };
   }, [showSession, user?.profileImageUrl]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     markManualLogoutRedirect('motoboy', '/hub');
+    const token = String(motoboySession?.token || '').trim();
+    if (token) {
+      void motoboyService.unregisterPushToken({ token }).catch(() => undefined);
+    }
     try {
-      localStorage.removeItem('motoboySession');
+      nativeBiometricService.syncMotoboySession(null);
     } catch {
       // ignore
     }

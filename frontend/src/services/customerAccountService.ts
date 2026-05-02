@@ -48,6 +48,10 @@ export const customerAccountService = {
     return apiClient.post(`/customer/orders/${orderId}/cancel`, payload);
   },
 
+  confirmOrderReceived(orderId: string) {
+    return apiClient.post(`/customer/orders/${orderId}/confirm-received`, {});
+  },
+
   listAddresses() {
     return apiClient.get('/customer/addresses');
   },

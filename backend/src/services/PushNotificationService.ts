@@ -714,6 +714,28 @@ export class PushNotificationService {
    * @author Edmilson Lopes
    */
   async notifyStoreUsersNewOnlineOrder(storeId: string, payload: CustomerPushPayload) {
+    return this.dispatchStoreUsersPayload(storeId, payload, 'new_online_order');
+  }
+
+  /**
+   * Dispatches "order delivered/finished" push to store owner and active store users.
+   *
+   * @author Edmilson Lopes
+   */
+  async notifyStoreUsersOrderDelivered(storeId: string, payload: CustomerPushPayload) {
+    return this.dispatchStoreUsersPayload(storeId, payload, 'order_delivered');
+  }
+
+  /**
+   * Sends one payload to all active store-user tokens for a store.
+   *
+   * @author Edmilson Lopes
+   */
+  private async dispatchStoreUsersPayload(
+    storeId: string,
+    payload: CustomerPushPayload,
+    topic: 'new_online_order' | 'order_delivered'
+  ) {
     const normalizedStoreId = String(storeId || '').trim();
     if (!normalizedStoreId) return { ok: false, sent: 0, skipped: true };
 
@@ -721,7 +743,7 @@ export class PushNotificationService {
       const hasV1 = Boolean(this.resolveFcmV1Config());
       const hasLegacy = Boolean(String(env.push?.fcmServerKey || '').trim());
       if (!hasV1 && !hasLegacy) {
-        log.info('Store user push skipped (missing FCM config)', { storeId: normalizedStoreId });
+        log.info('Store user push skipped (missing FCM config)', { storeId: normalizedStoreId, topic });
         return { ok: false, sent: 0, skipped: true };
       }
 
@@ -755,7 +777,7 @@ export class PushNotificationService {
       );
 
       if (!rows.length) {
-        log.info('Store user push skipped (no active tokens for store)', { storeId: normalizedStoreId });
+        log.info('Store user push skipped (no active tokens for store)', { storeId: normalizedStoreId, topic });
         return { ok: true, sent: 0, skipped: true };
       }
 
@@ -773,6 +795,7 @@ export class PushNotificationService {
 
         log.warn('Store user push send failed', {
           storeId: normalizedStoreId,
+          topic,
           userId,
           tokenSuffix: token.slice(-8),
           status: result.status,
@@ -787,6 +810,7 @@ export class PushNotificationService {
 
       log.info('Store user push dispatch finished', {
         storeId: normalizedStoreId,
+        topic,
         sent,
         attempted: rows.length,
       });
@@ -794,6 +818,7 @@ export class PushNotificationService {
     } catch (error) {
       log.warn('Store user push dispatch crashed', {
         storeId: normalizedStoreId,
+        topic,
         error,
       });
       return { ok: false, sent: 0, skipped: false };

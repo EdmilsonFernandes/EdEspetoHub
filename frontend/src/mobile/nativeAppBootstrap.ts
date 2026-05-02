@@ -2,7 +2,8 @@ import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { customerAccountService } from '../services/customerAccountService';
-import { ADMIN_SESSION_EVENT, CUSTOMER_SESSION_EVENT } from '../services/nativeBiometricService';
+import { ADMIN_SESSION_EVENT, CUSTOMER_SESSION_EVENT, MOTOBOY_SESSION_EVENT } from '../services/nativeBiometricService';
+import { motoboyService } from '../services/motoboyService';
 import { storePushService } from '../services/storePushService';
 
 const MOBILE_PUSH_ENABLED =
@@ -14,6 +15,7 @@ const PUSH_PROMPTED_KEY = 'jnk_mobile_push_prompted';
 const PUSH_TOKEN_KEY = 'jnk_mobile_push_token';
 const PUSH_LAST_SYNC_TOKEN_KEY = 'jnk_mobile_push_last_sync_token';
 const PUSH_LAST_SYNC_STORE_TOKEN_KEY = 'jnk_mobile_push_last_sync_store_token';
+const PUSH_LAST_SYNC_MOTOBOY_TOKEN_KEY = 'jnk_mobile_push_last_sync_motoboy_token';
 const PUSH_GUEST_ID_KEY = 'jnk_mobile_push_guest_id';
 const STORE_NEW_ORDER_PUSH_TYPE = 'store_new_online_order';
 const STORE_NEW_ORDER_CHANNEL_ID = 'store_new_orders_v1';
@@ -161,6 +163,20 @@ const getAdminSessionContext = () => {
   }
 };
 
+const getMotoboySessionContext = () => {
+  try {
+    const raw = localStorage.getItem('motoboySession');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const token = String(parsed?.token || '').trim();
+    const userId = String(parsed?.user?.id || '').trim();
+    if (!token || !userId) return null;
+    return { token, userId };
+  } catch {
+    return null;
+  }
+};
+
 const getOrCreateGuestPushId = () => {
   try {
     const existing = String(localStorage.getItem(PUSH_GUEST_ID_KEY) || '').trim();
@@ -224,6 +240,23 @@ const syncPushTokenWithBackend = async (tokenRaw?: string | null) => {
     }
   } else {
     localStorage.removeItem(PUSH_LAST_SYNC_STORE_TOKEN_KEY);
+  }
+
+  const motoboySession = getMotoboySessionContext();
+  if (motoboySession) {
+    const motoboySyncKey = `motoboy:${motoboySession.userId}:${token}`;
+    const lastMotoboySync = String(localStorage.getItem(PUSH_LAST_SYNC_MOTOBOY_TOKEN_KEY) || '').trim();
+    if (lastMotoboySync !== motoboySyncKey) {
+      syncTasks.push((async () => {
+        await motoboyService.registerPushToken({
+          token,
+          platform: Capacitor.getPlatform(),
+        });
+        localStorage.setItem(PUSH_LAST_SYNC_MOTOBOY_TOKEN_KEY, motoboySyncKey);
+      })());
+    }
+  } else {
+    localStorage.removeItem(PUSH_LAST_SYNC_MOTOBOY_TOKEN_KEY);
   }
 
   if (!syncTasks.length) return;
@@ -326,12 +359,13 @@ export const bootstrapNativeApp = async () => {
       }
     });
     window.addEventListener('storage', (event) => {
-      if (event.key === 'customerSession' || event.key === 'adminSession') {
+      if (event.key === 'customerSession' || event.key === 'adminSession' || event.key === 'motoboySession') {
         // Mantém o token sincronizado quando a sessão muda em outra aba/contexto.
         syncPushTokenNow();
       }
     });
     window.addEventListener(CUSTOMER_SESSION_EVENT, syncPushTokenNow as EventListener);
     window.addEventListener(ADMIN_SESSION_EVENT, syncPushTokenNow as EventListener);
+    window.addEventListener(MOTOBOY_SESSION_EVENT, syncPushTokenNow as EventListener);
   }
 };

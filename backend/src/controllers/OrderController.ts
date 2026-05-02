@@ -400,6 +400,8 @@ static async markItemsAsPrinted(req: Request, res: Response) {
       const responsePayload: any = {
         id: order.id,
         status: order.status,
+        customerReceivedAt: (order as any).customerReceivedAt || null,
+        customerReceivedConfirmedByUserId: (order as any).customerReceivedConfirmedByUserId || null,
         type: order.type,
         fulfillmentMode: (order as any).fulfillmentMode || 'distance',
         condominiumId: (order as any).condominiumId || null,
@@ -557,6 +559,8 @@ static async markItemsAsPrinted(req: Request, res: Response) {
       return res.json({
         id: order.id,
         status: order.status,
+        customerReceivedAt: (order as any).customerReceivedAt || null,
+        customerReceivedConfirmedByUserId: (order as any).customerReceivedConfirmedByUserId || null,
         type: order.type,
         fulfillmentMode: (order as any).fulfillmentMode || 'distance',
         condominiumId: (order as any).condominiumId || null,

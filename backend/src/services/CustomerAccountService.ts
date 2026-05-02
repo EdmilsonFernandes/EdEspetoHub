@@ -981,6 +981,8 @@ async setDefaultAddress(userId: string, addressId: string) {
       status: order.status,
       canceledAt: order.canceledAt || null,
       canceledReason: order.canceledReason || null,
+      customerReceivedAt: (order as any).customerReceivedAt || null,
+      customerReceivedConfirmedByUserId: (order as any).customerReceivedConfirmedByUserId || null,
       type: order.type,
       fulfillmentMode: order.fulfillmentMode,
       condominiumId: (order as any).condominiumId || null,
@@ -1098,6 +1100,63 @@ async setDefaultAddress(userId: string, addressId: string) {
       status: saved.status,
       canceledAt: saved.canceledAt || null,
       canceledReason: saved.canceledReason || null,
+    };
+  }
+
+  /**
+   * Confirms that the authenticated customer received the delivered order.
+   *
+   * @author Edmilson Lopes
+   */
+  async confirmOrderReceived(userId: string, orderId: string) {
+    const result = await AppDataSource.transaction(async (manager) => {
+      const repo = manager.getRepository(Order);
+      const order = await repo.findOne({
+        where: { id: orderId, customerUserId: userId },
+        relations: [ 'store', 'store.owner', 'store.settings' ],
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!order) {
+        throw new AppError('ORDER-001', 404, { message: 'Pedido não encontrado.' });
+      }
+      if (String(order.type || '').toLowerCase() !== 'delivery') {
+        throw new AppError('ORDER-004', 400, { message: 'A confirmação de recebimento só está disponível para pedidos com entrega.' });
+      }
+
+      const normalizedStatus = String(order.status || '').trim().toLowerCase();
+      if (normalizedStatus === 'finished' && order.customerReceivedAt) {
+        return order;
+      }
+      if (normalizedStatus !== 'delivered') {
+        throw new AppError('ORDER-004', 400, { message: 'Este pedido ainda não está pronto para confirmação de recebimento.' });
+      }
+
+      order.customerReceivedAt = new Date();
+      order.customerReceivedConfirmedByUserId = userId;
+      order.status = 'finished';
+      return repo.save(order);
+    });
+
+    const storeId = String((result as any)?.store?.id || '').trim();
+    if (storeId) {
+      const orderDisplayId = `#${String(result.id || '').slice(0, 8)}`;
+      void this.pushService.notifyStoreUsersOrderDelivered(storeId, {
+        title: 'PEDIDO ENTREGUE',
+        body: `O cliente confirmou o recebimento do pedido ${orderDisplayId}.`,
+        data: {
+          url: 'https://janocaminho.com.br/admin/queue',
+          orderId: String(result.id),
+          status: String(result.status || ''),
+          notificationType: 'customer_order_received',
+        },
+      });
+    }
+
+    return {
+      ok: true,
+      orderId: result.id,
+      status: result.status,
+      customerReceivedAt: (result as any).customerReceivedAt || null,
     };
   }
 

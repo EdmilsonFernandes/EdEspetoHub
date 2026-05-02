@@ -4,6 +4,7 @@ import { clearAllCustomerSessions } from '../utils/customerSessionStorage';
 const BIOMETRIC_RESULT_EVENT = 'jnc:android-biometric-result';
 export const CUSTOMER_SESSION_EVENT = 'jnc:customer-session-updated';
 export const ADMIN_SESSION_EVENT = 'jnc:admin-session-updated';
+export const MOTOBOY_SESSION_EVENT = 'jnc:motoboy-session-updated';
 
 type CustomerSession = {
   token: string;
@@ -154,9 +155,11 @@ const syncMotoboySession = (session: MotoboySession | null) => {
   if (typeof window === 'undefined') return;
   if (session?.token) {
     localStorage.setItem('motoboySession', JSON.stringify(session));
+    window.dispatchEvent(new CustomEvent(MOTOBOY_SESSION_EVENT, { detail: session }));
     return;
   }
   localStorage.removeItem('motoboySession');
+  window.dispatchEvent(new CustomEvent(MOTOBOY_SESSION_EVENT));
 };
 
 const normalizeCustomerProfile = (session: CustomerSession): StoredBiometricProfile | null => {

@@ -603,11 +603,12 @@ export class OrderService
     const totalLabel = Number.isFinite(total) && total > 0 ? ` • R$ ${total.toFixed(2).replace('.', ',')}` : '';
 
     void this.pushService.notifyStoreMotoboysAvailableOrder(storeId, {
-      title: 'Novo pedido disponível para entrega',
-      body: `${storeName} • ${shortOrderId}${totalLabel}`,
+      title: 'TEM ENTREGA DISPONÍVEL 🚚',
+      body: `Existe um pedido aguardando retirada na loja ${storeName}. ${shortOrderId}${totalLabel}`,
       data: {
         url: 'https://janocaminho.com.br/motoboy',
         screen: 'motoboy_available_orders',
+        notificationType: 'motoboy_available_order',
         orderId: String(order.id),
         storeId,
         status: normalizedStatus,

@@ -94,6 +94,12 @@ export class Order {
   @Column({ name: 'canceled_reason', type: 'text', nullable: true })
   canceledReason?: string | null;
 
+  @Column({ name: 'customer_received_at', type: 'timestamptz', nullable: true })
+  customerReceivedAt?: Date | null;
+
+  @Column({ name: 'customer_received_confirmed_by_user_id', type: 'uuid', nullable: true })
+  customerReceivedConfirmedByUserId?: string | null;
+
   @Column({ name: 'payment_method', nullable: true })
   paymentMethod?: string;
 
