@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from '@phosphor-icons/react';
 import {
@@ -37,6 +37,29 @@ const formatDateTimeLocal = (value?: string) => {
     minute: '2-digit',
     timeZone: 'America/Sao_Paulo',
   }).format(date).replace('.', '');
+};
+
+const formatCurrency = (value?: number | string | null) => {
+  if (value === null || value === undefined || value === '') return 'Sem taxa';
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return 'Sem taxa';
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(numeric);
+};
+
+const describeFulfillmentMode = (link: any) => {
+  const pickup = link?.allowPickupAtStall !== false;
+  const apartmentDelivery = link?.allowApartmentDelivery === true;
+  if (pickup && apartmentDelivery) {
+    return `Retirada e entrega no apartamento${link?.apartmentDeliveryFee != null ? ` • ${formatCurrency(link.apartmentDeliveryFee)}` : ''}`;
+  }
+  if (apartmentDelivery) {
+    return `Entrega no apartamento${link?.apartmentDeliveryFee != null ? ` • ${formatCurrency(link.apartmentDeliveryFee)}` : ''}`;
+  }
+  if (pickup) return 'Retirada na barraca';
+  return 'Definir modalidade';
 };
 
 const addHoursToLocalDateTime = (value: string, hours: number) => {
@@ -103,6 +126,8 @@ export function CondominiumDashboard() {
   });
   const [editingEventId, setEditingEventId] = useState('');
   const [selectedStoreByEvent, setSelectedStoreByEvent] = useState<Record<string, string>>({});
+  const [selectedAgendaEventId, setSelectedAgendaEventId] = useState('');
+  const [storeRuleDrafts, setStoreRuleDrafts] = useState<Record<string, { allowPickupAtStall: boolean; allowApartmentDelivery: boolean; apartmentDeliveryFee: string }>>({});
   const [confirmModal, setConfirmModal] = useState<null | {
     title: string;
     description: string;
@@ -151,6 +176,10 @@ export function CondominiumDashboard() {
   const stores = Array.isArray(data.stores) ? data.stores : [];
   const requests = Array.isArray(data.requests) ? data.requests : [];
   const approvedStores = Array.isArray(data.approvedStores) ? data.approvedStores : [];
+  const approvedStoreLinksById = useMemo(
+    () => new Map(approvedStores.map((link: any) => [link.storeId || link.store?.id, link])),
+    [approvedStores]
+  );
   const pendingRequests = requests.filter((request: any) => String(request?.status || 'pending') === 'pending');
   const nextEvent = events.find((event: any) => event.state === 'live') || events.find((event: any) => event.state === 'upcoming') || events[0];
   const fairStoresCount = events.reduce((acc: number, event: any) => acc + (Array.isArray(event?.stores) ? event.stores.length : 0), 0);
@@ -163,6 +192,28 @@ export function CondominiumDashboard() {
     { label: 'Lojas em feiras', value: fairStoresCount, tone: 'bg-sky-600 text-white' },
     { label: 'Solicitações pendentes', value: pendingRequests.length, tone: 'bg-amber-500 text-white' },
   ];
+
+  useEffect(() => {
+    if (!events.length) {
+      setSelectedAgendaEventId('');
+      return;
+    }
+    setSelectedAgendaEventId((current) => {
+      if (current && events.some((event: any) => event.id === current)) return current;
+      return nextEvent?.id || events[0]?.id || '';
+    });
+  }, [events, nextEvent?.id]);
+
+  const selectedAgendaEvent = useMemo(
+    () => events.find((event: any) => event.id === selectedAgendaEventId) || nextEvent || null,
+    [events, nextEvent, selectedAgendaEventId]
+  );
+
+  const selectedAgendaEventStoreIds = new Set([
+    ...((selectedAgendaEvent?.stores || []).map((store: any) => store.id)),
+    ...((selectedAgendaEvent?.storeInvitations || []).map((invite: any) => invite.storeId)),
+  ]);
+  const selectableApprovedStores = approvedStores.filter((link: any) => !selectedAgendaEventStoreIds.has(link.storeId || link.store?.id));
 
   const logout = () => {
     localStorage.removeItem('condominiumSession');
@@ -275,6 +326,7 @@ export function CondominiumDashboard() {
 
   const editEvent = (event: any) => {
     setEditingEventId(event.id);
+    setSelectedAgendaEventId(event.id);
     setEventForm({
       title: event.title || '',
       startsAt: toDateTimeLocalInput(event.startsAt),
@@ -320,10 +372,57 @@ export function CondominiumDashboard() {
     setError('');
     try {
       await condominiumService.organizerConfirmStore(eventId, { storeId });
+      setSelectedAgendaEventId(eventId);
       await load();
       showToast('Loja adicionada à feira.', 'success');
     } catch (err: any) {
       setError(err?.message || 'Falha ao confirmar loja na feira.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const getStoreRuleDraft = (storeLink: any) => {
+    const key = storeLink.storeId || storeLink.store?.id;
+    return storeRuleDrafts[key] || {
+      allowPickupAtStall: storeLink.allowPickupAtStall !== false,
+      allowApartmentDelivery: storeLink.allowApartmentDelivery === true,
+      apartmentDeliveryFee: storeLink.apartmentDeliveryFee != null ? String(storeLink.apartmentDeliveryFee) : '',
+    };
+  };
+
+  const updateStoreRuleDraft = (
+    storeLink: any,
+    patch: Partial<{ allowPickupAtStall: boolean; allowApartmentDelivery: boolean; apartmentDeliveryFee: string }>
+  ) => {
+    const key = storeLink.storeId || storeLink.store?.id;
+    setStoreRuleDrafts((prev) => {
+      const current = prev[key] || getStoreRuleDraft(storeLink);
+      return {
+        ...prev,
+        [key]: {
+          ...current,
+          ...patch,
+        },
+      };
+    });
+  };
+
+  const saveStoreRule = async (storeLink: any) => {
+    const key = storeLink.storeId || storeLink.store?.id;
+    const draft = getStoreRuleDraft(storeLink);
+    setSaving(true);
+    setError('');
+    try {
+      await condominiumService.organizerUpdateStoreSettings(key, {
+        allowPickupAtStall: draft.allowPickupAtStall,
+        allowApartmentDelivery: draft.allowApartmentDelivery,
+        apartmentDeliveryFee: draft.allowApartmentDelivery ? (draft.apartmentDeliveryFee || null) : null,
+      });
+      await load();
+      showToast('Regras de atendimento da loja atualizadas.', 'success');
+    } catch (err: any) {
+      setError(err?.message || 'Falha ao salvar regras da loja.');
     } finally {
       setSaving(false);
     }
@@ -501,6 +600,13 @@ export function CondominiumDashboard() {
                 </div>
               </div>
               <div className="mt-5 space-y-3">
+                <div className="rounded-[1.5rem] border border-emerald-100 bg-[linear-gradient(135deg,#ecfdf5_0%,#ffffff_56%,#eff6ff_100%)] p-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-700">Contexto da agenda</p>
+                  <p className="mt-2 text-sm font-black text-slate-950">A feira já nasce vinculada ao {condominium.name || 'condomínio'}.</p>
+                  <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
+                    Depois de salvar a data e o horário, você escolhe entre as lojas já aprovadas quem participa dessa edição e quais modalidades de atendimento aquela loja pode usar dentro do condomínio.
+                  </p>
+                </div>
                 <input value={eventForm.title} onChange={(event) => setEventForm((prev) => ({ ...prev, title: event.target.value }))} placeholder="Título da feira" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none focus:border-[#336886] focus:bg-white" />
                 <div className="grid gap-3 sm:grid-cols-2">
                   <input type="datetime-local" value={eventForm.startsAt} onChange={(event) => handleStartsAt(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none focus:border-[#336886] focus:bg-white" />
@@ -522,6 +628,30 @@ export function CondominiumDashboard() {
             </section>
 
             <section className="space-y-3">
+              {selectedAgendaEvent ? (
+                <div className="rounded-[1.7rem] border border-slate-200 bg-white p-4 shadow-[0_18px_60px_-44px_rgba(15,23,42,0.45)]">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Feira em foco</p>
+                      <h3 className="mt-1 text-lg font-black text-slate-950">{selectedAgendaEvent.title}</h3>
+                      <p className="mt-1 text-xs font-semibold text-slate-500">
+                        {formatDateTimeLocal(selectedAgendaEvent.startsAt)} até {formatDateTimeLocal(selectedAgendaEvent.endsAt)}
+                      </p>
+                      <p className="mt-1 text-xs font-semibold text-slate-500">{selectedAgendaEvent.pickupLocation || 'Local de retirada não informado'}</p>
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Lojas confirmadas</p>
+                        <p className="mt-1 text-2xl font-black text-slate-950">{(selectedAgendaEvent.stores || []).length}</p>
+                      </div>
+                      <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Ainda disponíveis</p>
+                        <p className="mt-1 text-2xl font-black text-slate-950">{selectableApprovedStores.length}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
               {events.length ? events.map((event: any) => (
                 <article key={event.id} className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_22px_70px_-50px_rgba(15,23,42,0.45)]">
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -537,6 +667,17 @@ export function CondominiumDashboard() {
                       {event.pickupLocation ? <p className="mt-2 text-sm font-bold text-[#336886]">{event.pickupLocation}</p> : null}
                     </div>
                     <div className="min-w-[260px] space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedAgendaEventId(event.id)}
+                        className={`w-full rounded-2xl border px-3 py-2.5 text-xs font-black transition ${
+                          selectedAgendaEventId === event.id
+                            ? 'border-slate-950 bg-slate-950 text-white shadow-[0_16px_30px_-24px_rgba(15,23,42,0.8)]'
+                            : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        Usar esta feira no seletor
+                      </button>
                       <div className="grid grid-cols-2 gap-2">
                         <button type="button" onClick={() => editEvent(event)} className="inline-flex items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-black text-slate-700 transition hover:bg-slate-50">
                           <PencilSimple size={15} weight="bold" /> Editar
@@ -559,7 +700,16 @@ export function CondominiumDashboard() {
                       </div>
                       <select value={selectedStoreByEvent[event.id] || ''} onChange={(e) => setSelectedStoreByEvent((prev) => ({ ...prev, [event.id]: e.target.value }))} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold">
                         <option value="">Escolher loja aprovada</option>
-                        {approvedStores.map((link: any) => {
+                        {approvedStores
+                          .filter((link: any) => {
+                            const linkStoreId = link.storeId || link.store?.id;
+                            const alreadyInEvent = new Set([
+                              ...((event.stores || []).map((store: any) => store.id)),
+                              ...((event.storeInvitations || []).map((invite: any) => invite.storeId)),
+                            ]);
+                            return !alreadyInEvent.has(linkStoreId);
+                          })
+                          .map((link: any) => {
                           const store = link.store || {};
                           return <option key={store.id || link.storeId} value={store.id || link.storeId}>{store.name || 'Loja aprovada'}</option>;
                         })}
@@ -580,7 +730,10 @@ export function CondominiumDashboard() {
                         {Array.isArray(event.stores) && event.stores.length ? event.stores.map((store: any) => (
                           <div key={store.id} className="flex items-center gap-2 rounded-xl bg-white px-3 py-2">
                             <img src={resolveAssetUrl(store.logoUrl || '') || getStoreAvatarUrl(store.slug, store.name)} alt={store.name} className="h-8 w-8 rounded-lg object-cover" />
-                            <span className="min-w-0 flex-1 truncate text-sm font-bold text-slate-800">{store.name}</span>
+                            <div className="min-w-0 flex-1">
+                              <span className="block truncate text-sm font-bold text-slate-800">{store.name}</span>
+                              <span className="block truncate text-[11px] font-semibold text-slate-500">{describeFulfillmentMode(approvedStoreLinksById.get(store.id))}</span>
+                            </div>
                             <CheckCircle size={17} weight="fill" className="text-emerald-500" />
                           </div>
                         )) : <p className="text-sm font-semibold text-slate-400">Nenhuma loja confirmada.</p>}
@@ -599,43 +752,117 @@ export function CondominiumDashboard() {
         ) : null}
 
         {activeTab === 'lojas' ? (
-          <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {stores.map((store: any) => (
-              <article key={store.id} className="rounded-[1.6rem] border border-slate-200 bg-white p-4 shadow-[0_18px_50px_-40px_rgba(15,23,42,0.45)]">
-                <div className="flex items-center gap-3">
-                  <img src={resolveAssetUrl(store.logoUrl || '') || getStoreAvatarUrl(store.slug, store.name)} alt={store.name} className="h-12 w-12 rounded-2xl object-cover" />
-                  <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-sm font-black text-slate-950">{store.name}</h3>
-                    <p className="text-xs font-semibold text-slate-500">{store.city || 'Cidade'} {store.state ? `• ${store.state}` : ''}</p>
-                  </div>
-                  <span className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${
-                    store.condominiumStatus === 'approved' ? 'bg-emerald-100 text-emerald-700' :
-                    store.condominiumStatus === 'invited' ? 'bg-sky-100 text-sky-700' :
-                    'bg-slate-100 text-slate-500'
-                  }`}>
-                    {store.condominiumStatus === 'approved' ? 'Aprovada' : store.condominiumStatus === 'invited' ? 'Pendente' : 'Disponível'}
-                  </span>
+          <div className="space-y-4">
+            <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_22px_70px_-50px_rgba(15,23,42,0.45)]">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-black text-slate-950">Regras de atendimento por loja</h2>
+                  <p className="text-sm font-semibold text-slate-500">Defina com clareza se a loja pode retirar na barraca, entregar no apartamento e qual taxa vale neste condomínio.</p>
                 </div>
-                {store.condominiumStatus === 'approved' ? (
-                  <button
-                    type="button"
-                    onClick={() => setConfirmModal({
-                      title: 'Remover loja do condomínio?',
-                      description: `${store.name || 'Esta loja'} perderá a associação atual e não poderá mais ser escalada nas próximas feiras até nova aprovação.`,
-                      confirmLabel: 'Remover loja',
-                      variant: 'danger',
-                      icon: <WarningCircle size={32} weight="duotone" />,
-                      onConfirm: () => removeApprovedStore(store.id, store.name),
-                    })}
-                    disabled={saving}
-                    className="mt-4 w-full rounded-2xl border border-rose-100 bg-rose-50 px-4 py-2.5 text-xs font-black text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
-                  >
-                    Remover do condomínio
-                  </button>
-                ) : null}
-              </article>
-            ))}
-          </section>
+                <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">
+                  {approvedStores.length} aprovadas
+                </span>
+              </div>
+              <div className="mt-4 grid gap-3 xl:grid-cols-2">
+                {approvedStores.length ? approvedStores.map((storeLink: any) => {
+                  const draft = getStoreRuleDraft(storeLink);
+                  const store = storeLink.store || {};
+                  const logo = resolveAssetUrl(store.logoUrl || store.bannerUrl || '') || getStoreAvatarUrl(store.slug || storeLink.storeId, store.name || 'Loja');
+                  return (
+                    <article key={storeLink.storeId} className="rounded-[1.6rem] border border-slate-200 bg-slate-50/70 p-4">
+                      <div className="flex items-center gap-3">
+                        <img src={logo} alt={store.name || 'Loja'} className="h-12 w-12 rounded-2xl object-cover" />
+                        <div className="min-w-0 flex-1">
+                          <h3 className="truncate text-sm font-black text-slate-950">{store.name || 'Loja aprovada'}</h3>
+                          <p className="truncate text-xs font-semibold text-slate-500">{describeFulfillmentMode(storeLink)}</p>
+                        </div>
+                        <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700">Aprovada</span>
+                      </div>
+                      <div className="mt-3 grid gap-3 md:grid-cols-2">
+                        <label className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-black text-slate-700">
+                          Retirada na barraca
+                          <input
+                            type="checkbox"
+                            checked={draft.allowPickupAtStall}
+                            onChange={(event) => updateStoreRuleDraft(storeLink, { allowPickupAtStall: event.target.checked })}
+                            className="h-4 w-4"
+                          />
+                        </label>
+                        <label className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-black text-slate-700">
+                          Entrega em apartamento
+                          <input
+                            type="checkbox"
+                            checked={draft.allowApartmentDelivery}
+                            onChange={(event) => updateStoreRuleDraft(storeLink, { allowApartmentDelivery: event.target.checked })}
+                            className="h-4 w-4"
+                          />
+                        </label>
+                      </div>
+                      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                        <input
+                          value={draft.apartmentDeliveryFee}
+                          onChange={(event) => updateStoreRuleDraft(storeLink, { apartmentDeliveryFee: event.target.value })}
+                          placeholder="Taxa apartamento ex: 5.00"
+                          disabled={!draft.allowApartmentDelivery}
+                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white disabled:opacity-50"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => saveStoreRule(storeLink)}
+                          disabled={saving}
+                          className="w-full rounded-2xl bg-[#153A4C] px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 sm:max-w-[168px]"
+                        >
+                          Salvar regras
+                        </button>
+                      </div>
+                    </article>
+                  );
+                }) : (
+                  <div className="rounded-[1.6rem] border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm font-semibold text-slate-500 xl:col-span-2">
+                    Nenhuma loja aprovada neste condomínio ainda.
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {stores.map((store: any) => (
+                <article key={store.id} className="rounded-[1.6rem] border border-slate-200 bg-white p-4 shadow-[0_18px_50px_-40px_rgba(15,23,42,0.45)]">
+                  <div className="flex items-center gap-3">
+                    <img src={resolveAssetUrl(store.logoUrl || '') || getStoreAvatarUrl(store.slug, store.name)} alt={store.name} className="h-12 w-12 rounded-2xl object-cover" />
+                    <div className="min-w-0 flex-1">
+                      <h3 className="truncate text-sm font-black text-slate-950">{store.name}</h3>
+                      <p className="text-xs font-semibold text-slate-500">{store.city || 'Cidade'} {store.state ? `• ${store.state}` : ''}</p>
+                    </div>
+                    <span className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${
+                      store.condominiumStatus === 'approved' ? 'bg-emerald-100 text-emerald-700' :
+                      store.condominiumStatus === 'invited' ? 'bg-sky-100 text-sky-700' :
+                      'bg-slate-100 text-slate-500'
+                    }`}>
+                      {store.condominiumStatus === 'approved' ? 'Aprovada' : store.condominiumStatus === 'invited' ? 'Pendente' : 'Disponível'}
+                    </span>
+                  </div>
+                  {store.condominiumStatus === 'approved' ? (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmModal({
+                        title: 'Remover loja do condomínio?',
+                        description: `${store.name || 'Esta loja'} perderá a associação atual e não poderá mais ser escalada nas próximas feiras até nova aprovação.`,
+                        confirmLabel: 'Remover loja',
+                        variant: 'danger',
+                        icon: <WarningCircle size={32} weight="duotone" />,
+                        onConfirm: () => removeApprovedStore(store.id, store.name),
+                      })}
+                      disabled={saving}
+                      className="mt-4 w-full rounded-2xl border border-rose-100 bg-rose-50 px-4 py-2.5 text-xs font-black text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
+                    >
+                      Remover do condomínio
+                    </button>
+                  ) : null}
+                </article>
+              ))}
+            </section>
+          </div>
         ) : null}
 
         {activeTab === 'solicitacoes' ? (
