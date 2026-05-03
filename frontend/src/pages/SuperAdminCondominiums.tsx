@@ -102,7 +102,7 @@ export function SuperAdminCondominiums() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [activeWorkspace, setActiveWorkspace] = useState<'overview' | 'setup' | 'access' | 'operations' | 'agenda'>('overview');
+  const [activeWorkspace, setActiveWorkspace] = useState<'dashboard' | 'requests' | 'condos' | 'agenda'>('dashboard');
   const [editingCondominiumId, setEditingCondominiumId] = useState('');
   const [editingEventId, setEditingEventId] = useState('');
   const [condominiumForm, setCondominiumForm] = useState({
@@ -559,15 +559,14 @@ export function SuperAdminCondominiums() {
   const bannerPreview = condominiumForm.bannerFile || resolveAssetUrl(condominiumForm.bannerUrl) || '';
   const eventBannerPreview = eventForm.bannerFile || resolveAssetUrl(eventForm.bannerUrl) || '';
   const workspaceTabs = [
-    { id: 'overview', label: 'Visão geral', helper: 'Resumo e atalhos' },
-    { id: 'setup', label: 'Cadastros', helper: 'Condomínio, feira e acessos' },
-    { id: 'access', label: 'Solicitações', helper: 'Novos condomínios' },
-    { id: 'operations', label: 'Operação', helper: 'Lojas e solicitações' },
-    { id: 'agenda', label: 'Agenda', helper: 'Eventos cadastrados' },
+    { id: 'dashboard', label: 'Início', helper: 'Resumo e atalhos' },
+    { id: 'requests', label: 'Solicitações', helper: 'Condomínios e lojas' },
+    { id: 'condos', label: 'Gestão', helper: 'Dados, regras e acesso' },
+    { id: 'agenda', label: 'Agenda', helper: 'Datas e participantes' },
   ] as const;
 
   const focusCondominiumAccess = () => {
-    setActiveWorkspace('setup');
+    setActiveWorkspace('condos');
     window.setTimeout(() => {
       document.getElementById('condominium-access-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 80);
@@ -727,8 +726,73 @@ export function SuperAdminCondominiums() {
           {error ? <p className="relative mt-5 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
         </section>
 
-        {(activeWorkspace === 'overview' || activeWorkspace === 'setup') ? (
-        <div className="grid gap-4 xl:grid-cols-[1.25fr_0.95fr_0.95fr]">
+        {activeWorkspace === 'dashboard' && (
+          <div className="space-y-6">
+            <section className="relative overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-[0_20px_50px_-30px_rgba(15,23,42,0.2)] sm:p-8">
+              <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-emerald-50/50 blur-3xl" />
+              <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                <div className="max-w-xl">
+                  <h2 className="text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">Painel de Operações</h2>
+                  <p className="mt-3 text-sm font-medium leading-relaxed text-slate-600 sm:text-base">
+                    Bem-vindo ao hub central. Utilize os atalhos abaixo para gerenciar solicitações pendentes ou navegar pelas abas de gestão e agenda.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <button onClick={() => setActiveWorkspace('requests')} className="flex items-center gap-3 rounded-2xl bg-amber-50 px-5 py-4 ring-1 ring-amber-100 transition hover:bg-amber-100/50">
+                    <div className="text-2xl font-black text-amber-700">{metrics.pendingAccessRequests || 0}</div>
+                    <div className="text-left">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-amber-600/70">Acessos</p>
+                      <p className="text-xs font-bold text-amber-900">Pendentes</p>
+                    </div>
+                  </button>
+                  <button onClick={() => setActiveWorkspace('requests')} className="flex items-center gap-3 rounded-2xl bg-sky-50 px-5 py-4 ring-1 ring-sky-100 transition hover:bg-sky-100/50">
+                    <div className="text-2xl font-black text-sky-700">{metrics.pendingRequests || 0}</div>
+                    <div className="text-left">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-sky-600/70">Lojas</p>
+                      <p className="text-xs font-bold text-sky-900">Solicitações</p>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <button onClick={() => setActiveWorkspace('condos')} className="group relative flex items-start gap-4 rounded-3xl border border-slate-100 bg-slate-50/50 p-5 transition hover:bg-white hover:shadow-xl hover:ring-1 hover:ring-slate-200">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-[#336886] shadow-sm ring-1 ring-slate-100 group-hover:scale-110 transition-transform">
+                    <Buildings size={24} weight="duotone" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="font-black text-slate-900">Gerenciar Condomínios</h3>
+                    <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">Cadastre novos prédios, configure regras e usuários.</p>
+                  </div>
+                </button>
+                <button onClick={() => setActiveWorkspace('agenda')} className="group relative flex items-start gap-4 rounded-3xl border border-slate-100 bg-slate-50/50 p-5 transition hover:bg-white hover:shadow-xl hover:ring-1 hover:ring-slate-200">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-emerald-600 shadow-sm ring-1 ring-slate-100 group-hover:scale-110 transition-transform">
+                    <CalendarBlank size={24} weight="duotone" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="font-black text-slate-900">Organizar Agenda</h3>
+                    <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">Crie novas feiras e gerencie a participação das lojas.</p>
+                  </div>
+                </button>
+                <button onClick={() => {
+                  setActiveWorkspace('agenda');
+                  window.setTimeout(() => document.getElementById('fairs-list-section')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                }} className="group relative flex items-start gap-4 rounded-3xl border border-slate-100 bg-slate-50/50 p-5 transition hover:bg-white hover:shadow-xl hover:ring-1 hover:ring-slate-200">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-slate-900 shadow-sm ring-1 ring-slate-100 group-hover:scale-110 transition-transform">
+                    <Clock size={24} weight="duotone" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="font-black text-slate-900">Ver Próximas Feiras</h3>
+                    <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">Confira o calendário completo de eventos confirmados.</p>
+                  </div>
+                </button>
+              </div>
+            </section>
+          </div>
+        )}
+
+        {activeWorkspace === 'condos' && (
+        <div className="grid gap-4 lg:grid-cols-2">
           <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#336886]/10 text-[#336886]">
@@ -801,110 +865,6 @@ export function SuperAdminCondominiums() {
                 </button>
                 {editingCondominiumId ? (
                   <button onClick={cancelCondominiumEdit} type="button" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-black text-slate-700">
-                    Cancelar edição
-                  </button>
-                ) : null}
-              </div>
-            </div>
-          </section>
-
-          <div className="space-y-4">
-          <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
-                <CalendarBlank size={22} weight="duotone" />
-              </div>
-              <div>
-                <h2 className="text-lg font-black tracking-tight text-slate-950">{editingEventId ? 'Editar feira' : 'Nova feira'}</h2>
-                <p className="text-sm font-medium text-slate-500">Defina a agenda. A feira entra ao vivo automaticamente no horário.</p>
-              </div>
-            </div>
-            <div className="mt-5 space-y-3">
-              <label className="block">
-                <span className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Condomínio da agenda</span>
-                <select value={eventForm.condominiumId || selectedAgendaCondominiumId} onChange={(event) => handleEventCondominiumChange(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold">
-                  <option value="">Escolha o condomínio</option>
-                  {condominiums.map((item: any) => <option key={item.id} value={item.id}>{item.name}</option>)}
-                </select>
-              </label>
-              {selectedAgendaCondominium ? (
-                <div className="rounded-[1.6rem] border border-emerald-100 bg-[linear-gradient(135deg,#ecfdf5_0%,#ffffff_54%,#eff6ff_100%)] p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white text-emerald-700 shadow-sm ring-1 ring-emerald-100">
-                      <Buildings size={22} weight="duotone" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-base font-black text-slate-950">{selectedAgendaCondominium.name}</p>
-                      <p className="mt-1 text-xs font-semibold text-slate-500">
-                        {selectedAgendaCondominium.city || 'Cidade não informada'}
-                        {selectedAgendaCondominium.state ? ` • ${selectedAgendaCondominium.state}` : ''}
-                      </p>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        <span className="rounded-full bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 ring-1 ring-slate-200">
-                          {agendaEvents.length} feira{agendaEvents.length === 1 ? '' : 's'} na agenda
-                        </span>
-                        <span className="rounded-full bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 ring-1 ring-slate-200">
-                          {approvedStoresForAgenda.length} loja{approvedStoresForAgenda.length === 1 ? '' : 's'} aprovadas
-                        </span>
-                      </div>
-                      <p className="mt-3 text-xs font-semibold leading-5 text-slate-600">
-                        A feira já nasce vinculada a este condomínio. Depois você escolhe, entre as lojas aprovadas, quem participa dessa data e com qual modalidade de retirada ou entrega.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ) : null}
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
-                <input value={eventForm.title} onChange={(event) => setEventForm((prev) => ({ ...prev, title: event.target.value }))} placeholder="Título da feira" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white sm:col-span-2 xl:col-span-1 2xl:col-span-2" />
-                <input type="datetime-local" value={eventForm.startsAt} onChange={(event) => handleEventStartsAtChange(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
-                <input type="datetime-local" value={eventForm.endsAt} onChange={(event) => handleEventEndsAtChange(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
-              </div>
-              <input value={eventForm.pickupLocation} onChange={(event) => handleEventPickupLocationChange(event.target.value)} placeholder="Ex: praça central, entrada social, lounge gourmet" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
-              <div className="overflow-hidden rounded-[1.6rem] border border-slate-200 bg-slate-50">
-                <div className="relative h-36 bg-[linear-gradient(135deg,#eff6ff_0%,#ffffff_55%,#f8fafc_100%)]">
-                  {eventBannerPreview ? (
-                    <img src={eventBannerPreview} alt="Banner da agenda" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-slate-300">
-                      <ImageSquare size={34} weight="duotone" />
-                    </div>
-                  )}
-                  <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/18 to-transparent" />
-                  <div className="absolute left-4 top-4 rounded-full bg-white/94 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#336886] shadow-sm ring-1 ring-white/70">
-                    Banner promocional
-                  </div>
-                </div>
-                <div className="space-y-3 p-4">
-                  <div className="flex flex-wrap gap-2">
-                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 shadow-sm">
-                      <UploadSimple size={14} weight="bold" />
-                      Upload banner da agenda
-                      <input type="file" accept="image/*" className="hidden" onChange={(event) => handleEventBannerUpload(event.target.files?.[0])} />
-                    </label>
-                    {eventBannerPreview ? (
-                      <button
-                        type="button"
-                        onClick={() => setEventForm((prev) => ({ ...prev, bannerUrl: '', bannerFile: '' }))}
-                        className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-600 shadow-sm"
-                      >
-                        <Trash size={14} weight="bold" />
-                        Remover banner
-                      </button>
-                    ) : null}
-                  </div>
-                  <input value={eventForm.bannerUrl} onChange={(event) => setEventForm((prev) => ({ ...prev, bannerUrl: event.target.value }))} placeholder="URL opcional do banner da agenda" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
-                  <input value={eventForm.bannerTitle} onChange={(event) => setEventForm((prev) => ({ ...prev, bannerTitle: event.target.value }))} placeholder="Título opcional do banner" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
-                  <textarea value={eventForm.bannerDescription} onChange={(event) => setEventForm((prev) => ({ ...prev, bannerDescription: event.target.value }))} placeholder="Descrição opcional do banner" className="min-h-[88px] w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
-                </div>
-              </div>
-              <textarea value={eventForm.notes} onChange={(event) => setEventForm((prev) => ({ ...prev, notes: event.target.value }))} placeholder="Observações da agenda" className="min-h-[96px] w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
-              {eventFormError ? <p className="rounded-2xl border border-rose-100 bg-rose-50 px-3 py-2.5 text-xs font-bold text-rose-700">{eventFormError}</p> : null}
-              <div className="flex flex-col gap-2">
-                <button onClick={saveEvent} disabled={saving || !eventForm.condominiumId || !eventForm.startsAt || !eventForm.endsAt} className="w-full rounded-2xl bg-emerald-600 px-4 py-3.5 text-sm font-black text-white shadow-[0_18px_34px_-22px_rgba(5,150,105,0.75)] disabled:opacity-50">
-                  {editingEventId ? 'Salvar feira' : 'Criar feira'}
-                </button>
-                {editingEventId ? (
-                  <button onClick={cancelEventEdit} type="button" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-black text-slate-700">
                     Cancelar edição
                   </button>
                 ) : null}
@@ -1012,7 +972,218 @@ export function SuperAdminCondominiums() {
                     </div>
                   ))}
                 </div>
+                ) : null}
+                </div>
+                </section>
+
+                <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                <h2 className="text-lg font-black tracking-tight text-slate-950">Condomínios cadastrados</h2>
+                <p className="text-sm font-medium text-slate-500">Edite dados principais e configure as regras operacionais por loja.</p>
+                </div>
+                </div>
+                <div className="mt-4 grid gap-3 lg:grid-cols-2 2xl:grid-cols-3">
+                {(data.condominiums || []).map((condominium: any) => {
+                const preview = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || '') || '';
+                return (
+                  <div key={condominium.id} className="rounded-[1.6rem] border border-slate-200 bg-white p-4 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.45)]">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[1.2rem] bg-slate-50 ring-1 ring-slate-100">
+                        {preview ? <img src={preview} alt={condominium.name} className="h-full w-full object-contain p-1.5" /> : <Buildings size={24} weight="duotone" className="text-[#336886]" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-base font-black text-slate-950">{condominium.name}</p>
+                        <p className="truncate text-xs font-semibold text-slate-500">{condominium.slug}</p>
+                        <p className="mt-2 text-xs font-semibold text-slate-500">{condominium.city || 'Cidade não informada'}{condominium.state ? `, ${condominium.state}` : ''}</p>
+                      </div>
+                    </div>
+                    <div className="mt-4 flex gap-2">
+                      <button onClick={() => editCondominium(condominium)} className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700">
+                        <PencilSimple size={14} weight="bold" />
+                        Editar
+                      </button>
+                      <button onClick={() => deactivateCondominium(condominium.id)} disabled={saving} className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-rose-50 px-3 py-2 text-xs font-black text-rose-700 ring-1 ring-rose-100 disabled:opacity-50">
+                        <Trash size={14} weight="bold" />
+                        Desativar
+                      </button>
+                    </div>
+                    <div className="mt-4 rounded-[1.3rem] border border-slate-100 bg-slate-50/80 p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Regras por loja</p>
+                          <p className="mt-1 text-xs font-semibold text-slate-500">Defina se a loja aceita retirada e entrega em apartamento nesse condomínio.</p>
+                        </div>
+                        <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500 ring-1 ring-slate-200">
+                          {(condominium.approvedStores || []).length} loja{(condominium.approvedStores || []).length === 1 ? '' : 's'}
+                        </span>
+                      </div>
+                      <div className="mt-3 space-y-3">
+                        {(condominium.approvedStores || []).length === 0 ? (
+                          <p className="rounded-2xl bg-white px-3 py-3 text-xs font-semibold text-slate-500 ring-1 ring-slate-100">Nenhuma loja aprovada nesse condomínio ainda.</p>
+                        ) : (condominium.approvedStores || []).map((storeLink: any) => {
+                          const draft = getStoreRuleDraft(condominium.id, storeLink);
+                          const storeLogo = resolveAssetUrl(storeLink.store?.logoUrl || storeLink.store?.bannerUrl || '') || getStoreAvatarUrl(storeLink.store?.slug || storeLink.storeId, storeLink.store?.name || 'Loja');
+                          return (
+                            <div key={storeLink.storeId} className="rounded-[1.15rem] border border-slate-200 bg-white p-3 shadow-sm">
+                              <div className="flex items-start gap-3">
+                                <img src={storeLogo} alt={storeLink.store?.name || 'Loja'} className="h-12 w-12 rounded-2xl border border-slate-100 object-cover" />
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate text-sm font-black text-slate-950">{storeLink.store?.name || 'Loja'}</p>
+                                  <p className="truncate text-[11px] font-semibold text-slate-500">{storeLink.store?.slug || storeLink.storeId}</p>
+                                </div>
+                              </div>
+                              <div className="mt-3 grid gap-3 md:grid-cols-2">
+                                <label className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-black text-slate-700">
+                                  Retirada na barraca
+                                  <input
+                                    type="checkbox"
+                                    checked={draft.allowPickupAtStall}
+                                    onChange={(event) => updateStoreRuleDraft(condominium.id, storeLink.storeId, { allowPickupAtStall: event.target.checked }, storeLink)}
+                                    className="h-4 w-4"
+                                  />
+                                </label>
+                                <label className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-black text-slate-700">
+                                  Entrega em apartamento
+                                  <input
+                                    type="checkbox"
+                                    checked={draft.allowApartmentDelivery}
+                                    onChange={(event) => updateStoreRuleDraft(condominium.id, storeLink.storeId, { allowApartmentDelivery: event.target.checked }, storeLink)}
+                                    className="h-4 w-4"
+                                  />
+                                </label>
+                              </div>
+                              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                                <input
+                                  value={draft.apartmentDeliveryFee}
+                                  onChange={(event) => updateStoreRuleDraft(condominium.id, storeLink.storeId, { apartmentDeliveryFee: event.target.value }, storeLink)}
+                                  placeholder="Taxa apartamento ex: 5.00"
+                                  disabled={!draft.allowApartmentDelivery}
+                                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white disabled:opacity-50"
+                                />
+                                <button
+                                  onClick={() => saveStoreRule(condominium.id, storeLink)}
+                                  disabled={saving}
+                                  className="w-full rounded-2xl bg-slate-950 px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 sm:max-w-[160px]"
+                                >
+                                  Salvar regras
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                );
+                })}
+                </div>
+                </section>
+                </div>
+                )}
+
+        {activeWorkspace === 'agenda' && (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
+                <CalendarBlank size={22} weight="duotone" />
+              </div>
+              <div>
+                <h2 className="text-lg font-black tracking-tight text-slate-950">{editingEventId ? 'Editar feira' : 'Nova feira'}</h2>
+                <p className="text-sm font-medium text-slate-500">Defina a agenda. A feira entra ao vivo automaticamente no horário.</p>
+              </div>
+            </div>
+            <div className="mt-5 space-y-3">
+              <label className="block">
+                <span className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Condomínio da agenda</span>
+                <select value={eventForm.condominiumId || selectedAgendaCondominiumId} onChange={(event) => handleEventCondominiumChange(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold">
+                  <option value="">Escolha o condomínio</option>
+                  {condominiums.map((item: any) => <option key={item.id} value={item.id}>{item.name}</option>)}
+                </select>
+              </label>
+              {selectedAgendaCondominium ? (
+                <div className="rounded-[1.6rem] border border-emerald-100 bg-[linear-gradient(135deg,#ecfdf5_0%,#ffffff_54%,#eff6ff_100%)] p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white text-emerald-700 shadow-sm ring-1 ring-emerald-100">
+                      <Buildings size={22} weight="duotone" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-base font-black text-slate-950">{selectedAgendaCondominium.name}</p>
+                      <p className="mt-1 text-xs font-semibold text-slate-500">
+                        {selectedAgendaCondominium.city || 'Cidade não informada'}
+                        {selectedAgendaCondominium.state ? ` • ${selectedAgendaCondominium.state}` : ''}
+                      </p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <span className="rounded-full bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 ring-1 ring-slate-200">
+                          {agendaEvents.length} feira{agendaEvents.length === 1 ? '' : 's'} na agenda
+                        </span>
+                        <span className="rounded-full bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 ring-1 ring-slate-200">
+                          {approvedStoresForAgenda.length} loja{approvedStoresForAgenda.length === 1 ? '' : 's'} aprovadas
+                        </span>
+                      </div>
+                      <p className="mt-3 text-xs font-semibold leading-5 text-slate-600">
+                        A feira já nasce vinculada a este condomínio. Depois você escolhe, entre as lojas aprovadas, quem participa dessa data e com qual modalidade de retirada ou entrega.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               ) : null}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <input value={eventForm.title} onChange={(event) => setEventForm((prev) => ({ ...prev, title: event.target.value }))} placeholder="Título da feira" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white sm:col-span-2" />
+                <input type="datetime-local" value={eventForm.startsAt} onChange={(event) => handleEventStartsAtChange(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
+                <input type="datetime-local" value={eventForm.endsAt} onChange={(event) => handleEventEndsAtChange(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
+              </div>
+              <input value={eventForm.pickupLocation} onChange={(event) => handleEventPickupLocationChange(event.target.value)} placeholder="Ex: praça central, entrada social, lounge gourmet" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
+              <div className="overflow-hidden rounded-[1.6rem] border border-slate-200 bg-slate-50">
+                <div className="relative h-36 bg-[linear-gradient(135deg,#eff6ff_0%,#ffffff_55%,#f8fafc_100%)]">
+                  {eventBannerPreview ? (
+                    <img src={eventBannerPreview} alt="Banner da agenda" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-slate-300">
+                      <ImageSquare size={34} weight="duotone" />
+                    </div>
+                  )}
+                  <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/18 to-transparent" />
+                  <div className="absolute left-4 top-4 rounded-full bg-white/94 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#336886] shadow-sm ring-1 ring-white/70">
+                    Banner promocional
+                  </div>
+                </div>
+                <div className="space-y-3 p-4">
+                  <div className="flex flex-wrap gap-2">
+                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 shadow-sm">
+                      <UploadSimple size={14} weight="bold" />
+                      Upload banner da agenda
+                      <input type="file" accept="image/*" className="hidden" onChange={(event) => handleEventBannerUpload(event.target.files?.[0])} />
+                    </label>
+                    {eventBannerPreview ? (
+                      <button
+                        type="button"
+                        onClick={() => setEventForm((prev) => ({ ...prev, bannerUrl: '', bannerFile: '' }))}
+                        className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-600 shadow-sm"
+                      >
+                        <Trash size={14} weight="bold" />
+                        Remover banner
+                      </button>
+                    ) : null}
+                  </div>
+                  <input value={eventForm.bannerUrl} onChange={(event) => setEventForm((prev) => ({ ...prev, bannerUrl: event.target.value }))} placeholder="URL opcional do banner da agenda" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
+                  <input value={eventForm.bannerTitle} onChange={(event) => setEventForm((prev) => ({ ...prev, bannerTitle: event.target.value }))} placeholder="Título opcional do banner" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
+                  <textarea value={eventForm.bannerDescription} onChange={(event) => setEventForm((prev) => ({ ...prev, bannerDescription: event.target.value }))} placeholder="Descrição opcional do banner" className="min-h-[88px] w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
+                </div>
+              </div>
+              <textarea value={eventForm.notes} onChange={(event) => setEventForm((prev) => ({ ...prev, notes: event.target.value }))} placeholder="Observações da agenda" className="min-h-[96px] w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white" />
+              {eventFormError ? <p className="rounded-2xl border border-rose-100 bg-rose-50 px-3 py-2.5 text-xs font-bold text-rose-700">{eventFormError}</p> : null}
+              <div className="flex flex-col gap-2">
+                <button onClick={saveEvent} disabled={saving || !eventForm.condominiumId || !eventForm.startsAt || !eventForm.endsAt} className="w-full rounded-2xl bg-emerald-600 px-4 py-3.5 text-sm font-black text-white shadow-[0_18px_34px_-22px_rgba(5,150,105,0.75)] disabled:opacity-50">
+                  {editingEventId ? 'Salvar feira' : 'Criar feira'}
+                </button>
+                {editingEventId ? (
+                  <button onClick={cancelEventEdit} type="button" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-black text-slate-700">
+                    Cancelar edição
+                  </button>
+                ) : null}
+              </div>
             </div>
           </section>
 
@@ -1029,7 +1200,7 @@ export function SuperAdminCondominiums() {
             <div className="mt-5 space-y-3">
               {!selectedAgendaCondominium ? (
                 <p className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-500">
-                  Escolha um condomínio acima para ver as feiras e as lojas que podem participar.
+                  Escolha um condomínio no filtro lateral (ou na lista de feiras) para ver quem pode participar.
                 </p>
               ) : (
                 <>
@@ -1129,226 +1300,119 @@ export function SuperAdminCondominiums() {
               )}
             </div>
           </section>
-          </div>
         </div>
-        ) : null}
+        )}
 
-        {(activeWorkspace === 'overview' || activeWorkspace === 'access') ? (
-        <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-lg font-black tracking-tight text-slate-950">Solicitações de condomínios</h2>
-              <p className="text-sm font-medium text-slate-500">Analise novos condomínios, aprove o cadastro e depois crie o usuário responsável.</p>
+        {activeWorkspace === 'requests' && (
+        <div className="space-y-6">
+          <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-lg font-black tracking-tight text-slate-950">Solicitações de condomínios</h2>
+                <p className="text-sm font-medium text-slate-500">Analise novos condomínios, aprove o cadastro e depois crie o usuário responsável.</p>
+              </div>
+              <div className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-amber-700 ring-1 ring-amber-100">
+                {metrics.pendingAccessRequests || 0} novas
+              </div>
             </div>
-            <div className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-amber-700 ring-1 ring-amber-100">
-              {metrics.pendingAccessRequests || 0} novas
+            <div className="mt-4 grid gap-3">
+              {(data.accessRequests || []).length === 0 ? (
+                <p className="rounded-[1.5rem] border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm font-semibold text-slate-500">Nenhuma solicitação de condomínio por enquanto.</p>
+              ) : (data.accessRequests || []).map((request: any) => {
+                const preview = resolveAssetUrl(request.logoUrl || request.bannerUrl || '') || '';
+                const status = statusCopy[String(request.status || 'pending')] || statusCopy.pending;
+                const canPrepareUser = String(request.status || '') === 'approved' && (request.createdCondominiumId || request.createdCondominium?.id);
+                return (
+                  <article key={request.id} className={`rounded-[1.6rem] border border-l-4 ${requestBorderAccent(request.status)} bg-[linear-gradient(135deg,_#ffffff_0%,_#f8fafc_45%,_#ffffff_100%)] p-4 shadow-[0_22px_45px_-34px_rgba(15,23,42,0.45)]`}>
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="flex min-w-0 gap-3">
+                        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[1.25rem] bg-slate-50 ring-1 ring-slate-100">
+                          {preview ? <img src={preview} alt={request.condominiumName} className="h-full w-full object-contain p-1.5" /> : <Buildings size={24} weight="duotone" className="text-[#336886]" />}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="truncate text-base font-black text-slate-950">{request.condominiumName}</h3>
+                            <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ring-1 ${status.tone}`}>{status.label}</span>
+                          </div>
+                          <p className="mt-1 text-xs font-semibold text-slate-500">{[request.city, request.state].filter(Boolean).join(' - ') || 'Local não informado'}</p>
+                          <p className="mt-2 text-sm font-bold text-slate-800">{request.responsibleName} <span className="font-semibold text-slate-400">• {request.responsibleRole || 'Responsável'}</span></p>
+                          <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{request.responsibleEmail} • {request.responsiblePhone || 'sem WhatsApp'}</p>
+                          {request.message ? <p className="mt-2 rounded-2xl bg-slate-50 px-3 py-2 text-xs font-semibold leading-5 text-slate-600 ring-1 ring-slate-100">{request.message}</p> : null}
+                          {request.createdCondominium ? (
+                            <p className="mt-2 text-xs font-black text-emerald-700">Cadastro criado: {request.createdCondominium.name}</p>
+                          ) : null}
+                        </div>
+                      </div>
+                      <div className="flex w-full flex-wrap gap-2 lg:max-w-[360px] lg:justify-end">
+                        <button onClick={() => reviewAccessRequest(request.id, 'approved')} disabled={saving || request.status === 'approved'} className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white shadow-[0_16px_30px_-22px_rgba(5,150,105,0.85)] disabled:opacity-50">
+                          Aprovar e criar cadastro
+                        </button>
+                        {canPrepareUser ? (
+                          <button onClick={() => prepareAccessUser(request)} disabled={saving} className="rounded-xl bg-[#153A4C] px-3 py-2 text-xs font-black text-white disabled:opacity-50">
+                            Criar usuário
+                          </button>
+                        ) : null}
+                        <button onClick={() => reviewAccessRequest(request.id, 'rejected')} disabled={saving || request.status === 'rejected'} className="rounded-xl bg-white px-3 py-2 text-xs font-black text-rose-700 ring-1 ring-rose-100 disabled:opacity-50">Recusar</button>
+                        <button onClick={() => reviewAccessRequest(request.id, 'pending')} disabled={saving || request.status === 'pending'} className="rounded-xl bg-amber-50 px-3 py-2 text-xs font-black text-amber-700 ring-1 ring-amber-100 disabled:opacity-50">Voltar p/ análise</button>
+                        <button onClick={() => reviewAccessRequest(request.id, 'cancelled')} disabled={saving || request.status === 'cancelled'} className="rounded-xl bg-slate-50 px-3 py-2 text-xs font-black text-slate-600 ring-1 ring-slate-200 disabled:opacity-50">Arquivar</button>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
-          </div>
-          <div className="mt-4 grid gap-3">
-            {(data.accessRequests || []).length === 0 ? (
-              <p className="rounded-[1.5rem] border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm font-semibold text-slate-500">Nenhuma solicitação de condomínio por enquanto.</p>
-            ) : (data.accessRequests || []).map((request: any) => {
-              const preview = resolveAssetUrl(request.logoUrl || request.bannerUrl || '') || '';
-              const status = statusCopy[String(request.status || 'pending')] || statusCopy.pending;
-              const canPrepareUser = String(request.status || '') === 'approved' && (request.createdCondominiumId || request.createdCondominium?.id);
-              return (
-                <article key={request.id} className={`rounded-[1.6rem] border border-l-4 ${requestBorderAccent(request.status)} bg-[linear-gradient(135deg,_#ffffff_0%,_#f8fafc_45%,_#ffffff_100%)] p-4 shadow-[0_22px_45px_-34px_rgba(15,23,42,0.45)]`}>
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                    <div className="flex min-w-0 gap-3">
-                      <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[1.25rem] bg-slate-50 ring-1 ring-slate-100">
-                        {preview ? <img src={preview} alt={request.condominiumName} className="h-full w-full object-contain p-1.5" /> : <Buildings size={24} weight="duotone" className="text-[#336886]" />}
+          </section>
+
+          <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-lg font-black tracking-tight text-slate-950">Solicitações das lojas</h2>
+                <p className="text-sm font-medium text-slate-500">Aprove, recuse e acompanhe a entrada de novas operações no hub.</p>
+              </div>
+              <div className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">
+                {metrics.pendingRequests} pendentes
+              </div>
+            </div>
+            <div className="mt-4 grid gap-3">
+              {(data.requests || []).length === 0 ? (
+                <p className="rounded-[1.5rem] border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm font-semibold text-slate-500">Nenhuma solicitação por enquanto.</p>
+              ) : (data.requests || []).map((request: any) => {
+                const storeLogo = resolveAssetUrl(request.store?.logoUrl || request.store?.bannerUrl || '') || getStoreAvatarUrl(request.store?.slug || request.storeId, request.store?.name || 'Loja');
+                const condominiumLogo = resolveAssetUrl(request.condominium?.logoUrl || request.condominium?.bannerUrl || '') || '';
+                const status = statusCopy[String(request.status || 'pending')] || statusCopy.pending;
+                return (
+                <div key={request.id} className={`rounded-[1.6rem] border border-l-4 ${requestBorderAccent(request.status)} bg-[linear-gradient(135deg,_#ffffff_0%,_#f8fafc_45%,_#ffffff_100%)] p-4 shadow-[0_22px_45px_-34px_rgba(15,23,42,0.45)]`}>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex -space-x-3">
+                        <img src={storeLogo} alt={request.store?.name || 'Loja'} className="h-14 w-14 rounded-[1.2rem] border-2 border-white bg-white object-cover shadow-sm" />
+                        <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-[1.2rem] border-2 border-white bg-white shadow-sm">
+                          {condominiumLogo ? <img src={condominiumLogo} alt={request.condominium?.name || 'Condomínio'} className="h-full w-full object-contain p-1" /> : <Buildings size={22} weight="duotone" className="text-[#336886]" />}
+                        </div>
                       </div>
                       <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="truncate text-base font-black text-slate-950">{request.condominiumName}</h3>
-                          <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ring-1 ${status.tone}`}>{status.label}</span>
-                        </div>
-                        <p className="mt-1 text-xs font-semibold text-slate-500">{[request.city, request.state].filter(Boolean).join(' - ') || 'Local não informado'}</p>
-                        <p className="mt-2 text-sm font-bold text-slate-800">{request.responsibleName} <span className="font-semibold text-slate-400">• {request.responsibleRole || 'Responsável'}</span></p>
-                        <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{request.responsibleEmail} • {request.responsiblePhone || 'sem WhatsApp'}</p>
-                        {request.message ? <p className="mt-2 rounded-2xl bg-slate-50 px-3 py-2 text-xs font-semibold leading-5 text-slate-600 ring-1 ring-slate-100">{request.message}</p> : null}
-                        {request.createdCondominium ? (
-                          <p className="mt-2 text-xs font-black text-emerald-700">Cadastro criado: {request.createdCondominium.name}</p>
-                        ) : null}
+                      <p className="truncate text-sm font-black text-slate-950">{request.store?.name || 'Loja'} <CaretRight size={12} className="inline" /> {request.condominium?.name || 'Condomínio'}</p>
+                      <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{request.message || 'Sem mensagem da loja.'}</p>
+                      <span className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ring-1 ${status.tone}`}>{status.label}</span>
                       </div>
                     </div>
-                    <div className="flex w-full flex-wrap gap-2 lg:max-w-[360px] lg:justify-end">
-                      <button onClick={() => reviewAccessRequest(request.id, 'approved')} disabled={saving || request.status === 'approved'} className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white shadow-[0_16px_30px_-22px_rgba(5,150,105,0.85)] disabled:opacity-50">
-                        Aprovar e criar cadastro
-                      </button>
-                      {canPrepareUser ? (
-                        <button onClick={() => prepareAccessUser(request)} disabled={saving} className="rounded-xl bg-[#153A4C] px-3 py-2 text-xs font-black text-white disabled:opacity-50">
-                          Criar usuário
-                        </button>
-                      ) : null}
-                      <button onClick={() => reviewAccessRequest(request.id, 'rejected')} disabled={saving || request.status === 'rejected'} className="rounded-xl bg-white px-3 py-2 text-xs font-black text-rose-700 ring-1 ring-rose-100 disabled:opacity-50">Recusar</button>
-                      <button onClick={() => reviewAccessRequest(request.id, 'pending')} disabled={saving || request.status === 'pending'} className="rounded-xl bg-amber-50 px-3 py-2 text-xs font-black text-amber-700 ring-1 ring-amber-100 disabled:opacity-50">Voltar p/ análise</button>
-                      <button onClick={() => reviewAccessRequest(request.id, 'cancelled')} disabled={saving || request.status === 'cancelled'} className="rounded-xl bg-slate-50 px-3 py-2 text-xs font-black text-slate-600 ring-1 ring-slate-200 disabled:opacity-50">Arquivar</button>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-        ) : null}
-
-        {(activeWorkspace === 'overview' || activeWorkspace === 'operations') ? (
-        <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-lg font-black tracking-tight text-slate-950">Condomínios cadastrados</h2>
-              <p className="text-sm font-medium text-slate-500">Edite dados principais e configure as regras operacionais por loja.</p>
-            </div>
-          </div>
-          <div className="mt-4 grid gap-3 lg:grid-cols-2 2xl:grid-cols-3">
-            {(data.condominiums || []).map((condominium: any) => {
-              const preview = resolveAssetUrl(condominium.logoUrl || condominium.bannerUrl || '') || '';
-              return (
-                <div key={condominium.id} className="rounded-[1.6rem] border border-slate-200 bg-white p-4 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.45)]">
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[1.2rem] bg-slate-50 ring-1 ring-slate-100">
-                      {preview ? <img src={preview} alt={condominium.name} className="h-full w-full object-contain p-1.5" /> : <Buildings size={24} weight="duotone" className="text-[#336886]" />}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-base font-black text-slate-950">{condominium.name}</p>
-                      <p className="truncate text-xs font-semibold text-slate-500">{condominium.slug}</p>
-                      <p className="mt-2 text-xs font-semibold text-slate-500">{condominium.city || 'Cidade não informada'}{condominium.state ? `, ${condominium.state}` : ''}</p>
-                    </div>
-                  </div>
-                  <div className="mt-4 flex gap-2">
-                    <button onClick={() => editCondominium(condominium)} className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700">
-                      <PencilSimple size={14} weight="bold" />
-                      Editar
-                    </button>
-                    <button onClick={() => deactivateCondominium(condominium.id)} disabled={saving} className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-rose-50 px-3 py-2 text-xs font-black text-rose-700 ring-1 ring-rose-100 disabled:opacity-50">
-                      <Trash size={14} weight="bold" />
-                      Desativar
-                    </button>
-                  </div>
-                  <div className="mt-4 rounded-[1.3rem] border border-slate-100 bg-slate-50/80 p-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Regras por loja</p>
-                        <p className="mt-1 text-xs font-semibold text-slate-500">Defina se a loja aceita retirada e entrega em apartamento nesse condomínio.</p>
-                      </div>
-                      <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500 ring-1 ring-slate-200">
-                        {(condominium.approvedStores || []).length} loja{(condominium.approvedStores || []).length === 1 ? '' : 's'}
-                      </span>
-                    </div>
-                    <div className="mt-3 space-y-3">
-                      {(condominium.approvedStores || []).length === 0 ? (
-                        <p className="rounded-2xl bg-white px-3 py-3 text-xs font-semibold text-slate-500 ring-1 ring-slate-100">Nenhuma loja aprovada nesse condomínio ainda.</p>
-                      ) : (condominium.approvedStores || []).map((storeLink: any) => {
-                        const draft = getStoreRuleDraft(condominium.id, storeLink);
-                        const storeLogo = resolveAssetUrl(storeLink.store?.logoUrl || storeLink.store?.bannerUrl || '') || getStoreAvatarUrl(storeLink.store?.slug || storeLink.storeId, storeLink.store?.name || 'Loja');
-                        return (
-                          <div key={storeLink.storeId} className="rounded-[1.15rem] border border-slate-200 bg-white p-3 shadow-sm">
-                            <div className="flex items-start gap-3">
-                              <img src={storeLogo} alt={storeLink.store?.name || 'Loja'} className="h-12 w-12 rounded-2xl border border-slate-100 object-cover" />
-                              <div className="min-w-0 flex-1">
-                                <p className="truncate text-sm font-black text-slate-950">{storeLink.store?.name || 'Loja'}</p>
-                                <p className="truncate text-[11px] font-semibold text-slate-500">{storeLink.store?.slug || storeLink.storeId}</p>
-                              </div>
-                            </div>
-                            <div className="mt-3 grid gap-3 md:grid-cols-2">
-                              <label className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-black text-slate-700">
-                                Retirada na barraca
-                                <input
-                                  type="checkbox"
-                                  checked={draft.allowPickupAtStall}
-                                  onChange={(event) => updateStoreRuleDraft(condominium.id, storeLink.storeId, { allowPickupAtStall: event.target.checked }, storeLink)}
-                                  className="h-4 w-4"
-                                />
-                              </label>
-                              <label className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-black text-slate-700">
-                                Entrega em apartamento
-                                <input
-                                  type="checkbox"
-                                  checked={draft.allowApartmentDelivery}
-                                  onChange={(event) => updateStoreRuleDraft(condominium.id, storeLink.storeId, { allowApartmentDelivery: event.target.checked }, storeLink)}
-                                  className="h-4 w-4"
-                                />
-                              </label>
-                            </div>
-                            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                              <input
-                                value={draft.apartmentDeliveryFee}
-                                onChange={(event) => updateStoreRuleDraft(condominium.id, storeLink.storeId, { apartmentDeliveryFee: event.target.value }, storeLink)}
-                                placeholder="Taxa apartamento ex: 5.00"
-                                disabled={!draft.allowApartmentDelivery}
-                                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white disabled:opacity-50"
-                              />
-                              <button
-                                onClick={() => saveStoreRule(condominium.id, storeLink)}
-                                disabled={saving}
-                                className="w-full rounded-2xl bg-slate-950 px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 sm:max-w-[160px]"
-                              >
-                                Salvar regras
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
+                    <div className="flex flex-wrap gap-2">
+                      <button onClick={() => reviewRequest(request.id, 'approved')} disabled={saving || request.status === 'approved'} className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white shadow-[0_16px_30px_-22px_rgba(5,150,105,0.85)] disabled:opacity-50">Aprovar</button>
+                      <button onClick={() => reviewRequest(request.id, 'rejected')} disabled={saving || request.status === 'rejected'} className="rounded-xl bg-white px-3 py-2 text-xs font-black text-rose-700 ring-1 ring-rose-100 disabled:opacity-50">Recusar</button>
+                      <button onClick={() => reviewRequest(request.id, 'blocked')} disabled={saving || request.status === 'blocked'} className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-black text-white disabled:opacity-50">Bloquear</button>
+                      <button onClick={() => reviewRequest(request.id, 'pending')} disabled={saving || request.status === 'pending'} className="rounded-xl bg-amber-50 px-3 py-2 text-xs font-black text-amber-700 ring-1 ring-amber-100 disabled:opacity-50">Voltar p/ análise</button>
+                      <button onClick={() => reviewRequest(request.id, 'cancelled')} disabled={saving || request.status === 'cancelled'} className="rounded-xl bg-slate-50 px-3 py-2 text-xs font-black text-slate-600 ring-1 ring-slate-200 disabled:opacity-50">Revogar</button>
                     </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </section>
-        ) : null}
-
-        {(activeWorkspace === 'overview' || activeWorkspace === 'operations') ? (
-        <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-lg font-black tracking-tight text-slate-950">Solicitações das lojas</h2>
-              <p className="text-sm font-medium text-slate-500">Aprove, recuse e acompanhe a entrada de novas operações no hub.</p>
+              );})}
             </div>
-            <div className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">
-              {metrics.pendingRequests} pendentes
-            </div>
-          </div>
-          <div className="mt-4 grid gap-3">
-            {(data.requests || []).length === 0 ? (
-              <p className="rounded-[1.5rem] border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm font-semibold text-slate-500">Nenhuma solicitação por enquanto.</p>
-            ) : (data.requests || []).map((request: any) => {
-              const storeLogo = resolveAssetUrl(request.store?.logoUrl || request.store?.bannerUrl || '') || getStoreAvatarUrl(request.store?.slug || request.storeId, request.store?.name || 'Loja');
-              const condominiumLogo = resolveAssetUrl(request.condominium?.logoUrl || request.condominium?.bannerUrl || '') || '';
-              const status = statusCopy[String(request.status || 'pending')] || statusCopy.pending;
-              return (
-              <div key={request.id} className={`rounded-[1.6rem] border border-l-4 ${requestBorderAccent(request.status)} bg-[linear-gradient(135deg,_#ffffff_0%,_#f8fafc_45%,_#ffffff_100%)] p-4 shadow-[0_22px_45px_-34px_rgba(15,23,42,0.45)]`}>
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <div className="flex -space-x-3">
-                      <img src={storeLogo} alt={request.store?.name || 'Loja'} className="h-14 w-14 rounded-[1.2rem] border-2 border-white bg-white object-cover shadow-sm" />
-                      <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-[1.2rem] border-2 border-white bg-white shadow-sm">
-                        {condominiumLogo ? <img src={condominiumLogo} alt={request.condominium?.name || 'Condomínio'} className="h-full w-full object-contain p-1" /> : <Buildings size={22} weight="duotone" className="text-[#336886]" />}
-                      </div>
-                    </div>
-                    <div className="min-w-0">
-                    <p className="truncate text-sm font-black text-slate-950">{request.store?.name || 'Loja'} <CaretRight size={12} className="inline" /> {request.condominium?.name || 'Condomínio'}</p>
-                    <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{request.message || 'Sem mensagem da loja.'}</p>
-                    <span className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ring-1 ${status.tone}`}>{status.label}</span>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <button onClick={() => reviewRequest(request.id, 'approved')} disabled={saving || request.status === 'approved'} className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white shadow-[0_16px_30px_-22px_rgba(5,150,105,0.85)] disabled:opacity-50">Aprovar</button>
-                    <button onClick={() => reviewRequest(request.id, 'rejected')} disabled={saving || request.status === 'rejected'} className="rounded-xl bg-white px-3 py-2 text-xs font-black text-rose-700 ring-1 ring-rose-100 disabled:opacity-50">Recusar</button>
-                    <button onClick={() => reviewRequest(request.id, 'blocked')} disabled={saving || request.status === 'blocked'} className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-black text-white disabled:opacity-50">Bloquear</button>
-                    <button onClick={() => reviewRequest(request.id, 'pending')} disabled={saving || request.status === 'pending'} className="rounded-xl bg-amber-50 px-3 py-2 text-xs font-black text-amber-700 ring-1 ring-amber-100 disabled:opacity-50">Voltar p/ análise</button>
-                    <button onClick={() => reviewRequest(request.id, 'cancelled')} disabled={saving || request.status === 'cancelled'} className="rounded-xl bg-slate-50 px-3 py-2 text-xs font-black text-slate-600 ring-1 ring-slate-200 disabled:opacity-50">Revogar</button>
-                  </div>
-                </div>
-              </div>
-            );})}
-          </div>
-        </section>
-        ) : null}
+          </section>
+        </div>
+        )}
 
-        {(activeWorkspace === 'overview' || activeWorkspace === 'agenda') ? (
-        <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
+        {activeWorkspace === 'agenda' ? (
+        <section id="fairs-list-section" className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-black tracking-tight text-slate-950">Agenda cadastrada</h2>
