@@ -61,6 +61,17 @@ export class OrderReviewService {
     return `data:image/png;base64,${qrCode}`;
   }
 
+  private async expirePendingTipIfNeeded(review: any) {
+    if (!review) return review;
+    const tipStatus = String(review.tipStatus || '').toUpperCase();
+    if (tipStatus !== 'PENDING' || !review.tipExpiresAt) return review;
+    const expiresAtMs = new Date(review.tipExpiresAt).getTime();
+    if (!Number.isFinite(expiresAtMs) || expiresAtMs > Date.now()) return review;
+
+    review.tipStatus = 'FAILED';
+    return this.orderReviewRepository.saveReview(review);
+  }
+
     /**
    * Executes resolve store review features business logic.
    *
@@ -159,7 +170,7 @@ private async ensureTipPayment(order: any, review: any) {
     let qrCodeText: string | null = null;
     let provider = 'MOCK';
     let providerId: string | null = null;
-    let expiresAt: Date | null = new Date(Date.now() + 30 * 60 * 1000);
+    let expiresAt: Date | null = new Date(Date.now() + 5 * 60 * 1000);
 
     if (connectedAccessToken || env.mercadoPago.accessToken) {
       try {
@@ -299,7 +310,8 @@ async getByOrderId(orderId: string, accessToken?: string | null) {
     const order = await this.orderRepository.findById(orderId);
     if (!order) throw new AppError('ORDER-001', 404);
     this.ensureOrderAccess(order.id, accessToken);
-    const review = await this.orderReviewRepository.findByOrderId(order.id);
+    let review = await this.orderReviewRepository.findByOrderId(order.id);
+    review = await this.expirePendingTipIfNeeded(review);
     const normalizedOrderType = String(order.type || '').trim().toLowerCase();
     const delivery = await this.orderDeliveryRepository.findByOrderId(order.id);
     const storeFeatures = await this.resolveStoreReviewFeatures(order.store.id);

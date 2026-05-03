@@ -50,6 +50,29 @@ const ONLINE_PAYMENT_METHODS = new Set([
 const normalizePaymentProvider = (value?: string | null) =>
   String(value || '').trim().toLowerCase();
 
+const getCustomerReceiptConfirmedAt = (order: any) =>
+  order?.customerReceivedAt || order?.customer_received_at || null;
+
+const shouldStopOrderPolling = (order: any) => {
+  const orderStatus = String(order?.status || '').toLowerCase();
+  const deliveryStatus = String(order?.delivery?.status || '').toUpperCase();
+  const isDeliveryOrder = String(order?.type || '').toLowerCase() === 'delivery' || Boolean(order?.delivery);
+  const isPostalOrder = isDeliveryOrder && String(order?.fulfillmentMode || '').toLowerCase() === 'postal';
+  const requiresCustomerReceipt = isDeliveryOrder && !isPostalOrder;
+  const customerReceiptConfirmedAt = getCustomerReceiptConfirmedAt(order);
+  const deliveredByCourier =
+    deliveryStatus === 'DELIVERED' ||
+    orderStatus === 'delivered' ||
+    orderStatus === 'finished';
+
+  return (
+    orderStatus === 'done' ||
+    orderStatus === 'cancelled' ||
+    orderStatus === 'finished' ||
+    (deliveredByCourier && (!requiresCustomerReceipt || Boolean(customerReceiptConfirmedAt)))
+  );
+};
+
 
 const buildDemoStatus = (createdAt: number) => {
   const diff = Date.now() - createdAt;
@@ -342,7 +365,6 @@ export function OrderTracking() {
   const [storeCoords, setStoreCoords] = useState(null);
   const [deliveryCoords, setDeliveryCoords] = useState(null);
   const [deliveryRoute, setDeliveryRoute] = useState(null);
-  const [trackingV2, setTrackingV2] = useState(null);
   const [trackingLoading, setTrackingLoading] = useState(false);
   const [routeLoading, setRouteLoading] = useState(false);
   const [ctaPulse, setCtaPulse] = useState(false);
@@ -384,11 +406,15 @@ export function OrderTracking() {
   useEffect(() => {
     if (!orderId) return;
     let interval: number | undefined;
+    let active = true;
 
     const loadOrder = async (silent = false) => {
+      if (!active) return;
       if (!silent) {
         setLoading(true);
         setError('');
+      } else {
+        setTrackingLoading(true);
       }
 
       if (orderId.startsWith('demo-')) {
@@ -410,22 +436,21 @@ export function OrderTracking() {
 
       try {
         const data = await orderService.getPublicById(orderId);
+        if (!active) return;
         setOrder(data);
-        const orderStatus = String(data?.status || '').toLowerCase();
-        const deliveryStatus = String((data as any)?.delivery?.status || '').toUpperCase();
-        const isTerminal =
-          orderStatus === 'done' ||
-          orderStatus === 'delivered' ||
-          orderStatus === 'finished' ||
-          orderStatus === 'cancelled' ||
-          deliveryStatus === 'DELIVERED';
-        if (isTerminal) {
+        if (shouldStopOrderPolling(data)) {
           setPolling(false);
         }
       } catch (err: any) {
+        if (!active) return;
         setError(err.message || 'Não foi possível carregar o pedido agora.');
       } finally {
-        if (!silent) setLoading(false);
+        if (!active) return;
+        if (!silent) {
+          setLoading(false);
+        } else {
+          setTrackingLoading(false);
+        }
       }
     };
 
@@ -435,42 +460,10 @@ export function OrderTracking() {
     }
 
     return () => {
+      active = false;
       if (interval) window.clearInterval(interval);
     };
   }, [orderId, polling]);
-
-  useEffect(() => {
-    if (!orderId) return;
-    let active = true;
-    let timer: number | undefined;
-    const loadTracking = async (silent = false) => {
-      if (!silent) setTrackingLoading(true);
-      try {
-        const data = await orderService.getTrackingV2(orderId);
-        if (active) setTrackingV2(data);
-      } catch {
-        // Silencioso para não quebrar UX do acompanhamento.
-      } finally {
-        if (!silent && active) setTrackingLoading(false);
-      }
-    };
-    loadTracking(false);
-    const orderStatus = String(order?.status || '').toLowerCase();
-    const dStatus = String((order as any)?.delivery?.status || '').toUpperCase();
-    const terminal =
-      orderStatus === 'done' ||
-      orderStatus === 'delivered' ||
-      orderStatus === 'finished' ||
-      orderStatus === 'cancelled' ||
-      dStatus === 'DELIVERED';
-    if (polling && !terminal) {
-      timer = window.setInterval(() => loadTracking(true), 15000);
-    }
-    return () => {
-      active = false;
-      if (timer) window.clearInterval(timer);
-    };
-  }, [orderId, polling, order?.status, (order as any)?.delivery?.status]);
 
   const status = order?.status || 'pending';
   const normalizedStatus = String(status || '').toLowerCase().trim();
@@ -490,6 +483,17 @@ export function OrderTracking() {
   const isDelivery = normalizedOrderType === 'delivery' || Boolean((order as any)?.delivery);
   const typeLabel = typeLabels[normalizedOrderType] || (isDelivery ? 'Entrega' : 'Pedido');
   const deliveryStatus = String((order as any)?.delivery?.status || '').toUpperCase();
+  const customerReceivedAtValue = getCustomerReceiptConfirmedAt(order);
+  const hasCustomerReceiptConfirmation = Boolean(customerReceivedAtValue);
+  const deliveredAtValue =
+    (order as any)?.delivery?.deliveredAt ||
+    (order as any)?.deliveredAt ||
+    null;
+  const hasCourierDeliveryConfirmation =
+    Boolean(deliveredAtValue) ||
+    deliveryStatus === 'DELIVERED' ||
+    normalizedStatus === 'delivered' ||
+    normalizedStatus === 'finished';
   const motoboyName = String((order as any)?.delivery?.motoboy?.name || '');
   const motoboyFirst = firstName(motoboyName);
   const motoboyProfileImageUrl = resolveAssetUrl(
@@ -540,13 +544,14 @@ export function OrderTracking() {
   }, []);
   const statusLabel = useMemo(() => {
     if (normalizedStatus === 'cancelled') return 'Cancelado';
+    if (isDelivery && !isPostalDelivery && hasCustomerReceiptConfirmation) return 'Recebido pelo cliente';
     if (isPostalDelivery && (normalizedStatus === 'delivered' || normalizedStatus === 'finished')) return 'Entregue';
+    if (isDelivery && !isPostalDelivery && hasCourierDeliveryConfirmation) return 'Entregue';
     if (isPostalDelivery && (normalizedStatus === 'dispatched' || normalizedStatus === 'waiting_for_motoboy' || normalizedStatus === 'in_delivery')) return 'Despachado';
     if (isPostalDelivery && (normalizedStatus === 'ready' || normalizedStatus === 'ready_for_delivery')) return 'Pronto para postagem';
-    if (isDelivery && deliveryStatus === 'ACCEPTED') return 'Entregador a caminho';
-    if (isDelivery && deliveryStatus === 'PICKED_UP') return 'Pedido retirado';
-    if (isDelivery && (deliveryStatus === 'DELIVERED' || normalizedStatus === 'delivered' || normalizedStatus === 'finished')) return 'Entregue';
     if (isDelivery && (deliveryStatus === 'IN_TRANSIT' || normalizedStatus === 'in_delivery')) return 'Em rota';
+    if (isDelivery && deliveryStatus === 'PICKED_UP') return 'Pedido retirado';
+    if (isDelivery && deliveryStatus === 'ACCEPTED') return 'Entregador a caminho';
     if (isDelivery && normalizedStatus === 'dispatched') return 'Despachado';
     if (isDelivery && normalizedStatus === 'waiting_for_motoboy') return 'Aguardando entregador';
     if (isDelivery && normalizedStatus === 'ready_for_delivery') return 'Pronto para entrega';
@@ -556,7 +561,7 @@ export function OrderTracking() {
     if (order?.type === 'table' && normalizedStatus === 'done') return 'Pedido Pronto';
     if (order?.type === 'pickup' && (normalizedStatus === 'ready' || normalizedStatus === 'ready_for_pickup')) return 'Pronto para retirada';
     return statusLabels[normalizedStatus] || statusLabels[status] || status;
-  }, [isDelivery, isPostalDelivery, order?.type, status, normalizedStatus, (order as any)?.delivery?.status]);
+  }, [isDelivery, isPostalDelivery, order?.type, status, normalizedStatus, deliveryStatus, hasCustomerReceiptConfirmation, hasCourierDeliveryConfirmation]);
   const isCancelled = normalizedStatus === 'cancelled';
   const isReady =
     status === 'done' ||
@@ -601,7 +606,7 @@ export function OrderTracking() {
     );
   const hasDeliveryFee =
     order?.deliveryFee !== null && order?.deliveryFee !== undefined && isDelivery;
-  const shipment = (order as any)?.shipment || (trackingV2 as any)?.shipment || null;
+  const shipment = (order as any)?.shipment || null;
   const shipmentServiceCode = String(shipment?.serviceCode || '').trim().toUpperCase();
   const shipmentServiceName = String(shipment?.serviceName || '').trim();
   const shipmentTrackingCode = String(shipment?.trackingCode || '').trim();
@@ -628,8 +633,7 @@ export function OrderTracking() {
     isDelivery &&
     !isPostalDelivery &&
     [ 'delivered', 'finished', 'done' ].includes(normalizedStatus) &&
-    !order?.customerReceivedAt &&
-    !(order as any)?.customer_received_at;
+    !hasCustomerReceiptConfirmation;
 
   const handleConfirmReceipt = async () => {
     if (!orderId || confirmReceiptLoading || !canConfirmReceipt) return;
@@ -647,15 +651,6 @@ export function OrderTracking() {
             }
           : prev
       ));
-      setTrackingV2((prev: any) => (
-        prev
-          ? {
-              ...prev,
-              status: 'finished',
-              customerReceivedAt,
-            }
-          : prev
-      ));
       setPolling(false);
     } catch (err: any) {
       setConfirmReceiptError(err?.message || 'Não foi possível confirmar o recebimento agora.');
@@ -663,7 +658,7 @@ export function OrderTracking() {
       setConfirmReceiptLoading(false);
     }
   };
-  const etaDetails = trackingV2?.eta || order?.eta || null;
+  const etaDetails = order?.eta || null;
   const hasAnyEtaTotal = Boolean(Number((etaDetails as any)?.totalMinutes) > 0);
   const etaTotalMinutes = etaDetails?.totalMinutes
     ? Number(etaDetails.totalMinutes)
@@ -673,7 +668,6 @@ export function OrderTracking() {
   const postalEstimatedDays = useMemo(() => {
     if (!isPostalDelivery) return null;
     const explicitCandidates = [
-      Number((trackingV2 as any)?.shipment?.estimatedDays || 0),
       Number((shipment as any)?.estimatedDays || 0),
       Number((shipment as any)?.quotePayload?.estimatedDays || 0),
     ].filter((value) => Number.isFinite(value) && value > 0);
@@ -686,7 +680,7 @@ export function OrderTracking() {
       return 8;
     }
     return null;
-  }, [isPostalDelivery, trackingV2, shipment, shipmentServiceCode, shipmentServiceName]);
+  }, [isPostalDelivery, shipment, shipmentServiceCode, shipmentServiceName]);
   const postalPostedAtMs = shipment?.postedAt ? new Date(shipment.postedAt).getTime() : null;
   const postalBaseMs = postalPostedAtMs && Number.isFinite(postalPostedAtMs)
     ? postalPostedAtMs
@@ -840,7 +834,7 @@ export function OrderTracking() {
     if (isReady) return null;
     if (routeEtaRemainingMinutes !== null) return routeEtaRemainingMinutes;
     if (!estimateMinutes) return null;
-    // ETA já vem calculada pelo backend (trackingV2 ou order.eta); não descontar elapsed no frontend.
+    // ETA já vem calculada pelo backend no pedido público; não descontar elapsed no frontend.
     if (hasAnyEtaTotal) return Math.max(0, Math.round(estimateMinutes));
     const elapsedMin = Math.max(0, elapsedMs / 60000);
     return Math.max(0, Math.round(estimateMinutes - elapsedMin));
@@ -954,6 +948,11 @@ export function OrderTracking() {
   const reviewTip = reviewState?.review || null;
   const tipStatus = String(reviewTip?.tipStatus || 'NONE').toUpperCase();
   const tipExpiresAtMs = reviewTip?.tipExpiresAt ? new Date(reviewTip.tipExpiresAt).getTime() : null;
+  const tipStartedAtMs = reviewTip?.updatedAt
+    ? new Date(reviewTip.updatedAt).getTime()
+    : reviewTip?.createdAt
+    ? new Date(reviewTip.createdAt).getTime()
+    : null;
   const isTipExpired = Boolean(
     tipExpiresAtMs &&
       Number.isFinite(tipExpiresAtMs) &&
@@ -961,14 +960,12 @@ export function OrderTracking() {
       tipStatus !== 'PAID' &&
       tipStatus !== 'NONE'
   );
-  const tipUiStatus = isTipExpired && tipStatus === 'PENDING' ? 'EXPIRED' : tipStatus;
+  const tipUiStatus = isTipExpired ? 'EXPIRED' : tipStatus;
   const tipAmount = Number(reviewTip?.tipAmount || 0);
   const hasTip = canUseTipFlow && tipAmount > 0;
   const canShowTipPayment = hasTip && (reviewTip?.tipQrCodeBase64 || reviewTip?.tipQrCodeText || reviewTip?.tipPaymentLink);
-  const tipPollingStatus =
-    canShowTipPayment && tipUiStatus !== 'PAID' && tipUiStatus !== 'NONE'
-      ? 'PENDING'
-      : tipUiStatus;
+  const shouldPollTipStatus = canShowTipPayment && tipUiStatus === 'PENDING';
+  const tipPollingStatus = shouldPollTipStatus ? 'PENDING' : tipUiStatus;
   const tipStatusLabel =
     tipUiStatus === 'PAID'
       ? 'Pago'
@@ -1004,10 +1001,13 @@ export function OrderTracking() {
 
   const tipPolling = usePollingPaymentStatus({
     id: reviewTip?.id || order?.id,
-    enabled: Boolean(order?.id && isReady && canShowTipPayment),
+    enabled: Boolean(order?.id && isReady && shouldPollTipStatus),
     status: tipPollingStatus,
     intervalMs: 5000,
-    timeoutMs: 5 * 60 * 1000,
+    timeoutMs:
+      tipExpiresAtMs && Number.isFinite(tipExpiresAtMs)
+        ? Math.max(5000, tipExpiresAtMs - Date.now())
+        : 5 * 60 * 1000,
     checkStatus: async () => {
       const nextStatus = await refreshReviewStatus({ silent: true });
       return nextStatus || tipUiStatus;
@@ -1017,7 +1017,14 @@ export function OrderTracking() {
     tipExpiresAtMs && Number.isFinite(tipExpiresAtMs)
       ? Math.max(0, tipExpiresAtMs - Date.now())
       : tipPolling.remainingMs;
-  const tipCountdownTotalMs = tipExpiresAtMs && Number.isFinite(tipExpiresAtMs) ? 5 * 60 * 1000 : 5 * 60 * 1000;
+  const tipCountdownTotalMs =
+    tipExpiresAtMs &&
+    Number.isFinite(tipExpiresAtMs) &&
+    tipStartedAtMs &&
+    Number.isFinite(tipStartedAtMs) &&
+    tipExpiresAtMs > tipStartedAtMs
+      ? Math.max(60 * 1000, tipExpiresAtMs - tipStartedAtMs)
+      : 5 * 60 * 1000;
   const tipCountdownLabel = (() => {
     const remainingSec = Math.max(0, Math.ceil(tipCountdownMs / 1000));
     const remainingMin = Math.floor(remainingSec / 60);
@@ -1158,7 +1165,11 @@ export function OrderTracking() {
 
   useEffect(() => {
     const isDeliveryOrder = isDelivery;
-    if (!isDeliveryOrder) {
+    const shouldShowLiveRoute =
+      isDeliveryOrder &&
+      !isPostalDelivery &&
+      (deliveryStatus === 'IN_TRANSIT' || normalizedStatus === 'in_delivery');
+    if (!shouldShowLiveRoute) {
       setStoreCoords(null);
       setDeliveryCoords(null);
       setDeliveryRoute(null);
@@ -1220,7 +1231,7 @@ export function OrderTracking() {
     return () => {
       active = false;
     };
-  }, [isDelivery, order?.address, order?.id, order?.store?.settings?.address, order?.store?.owner?.address]);
+  }, [isDelivery, isPostalDelivery, deliveryStatus, normalizedStatus, order?.address, order?.id, order?.store?.settings?.address, order?.store?.owner?.address]);
 
   const steps = useMemo(() => {
     if (normalizedStatus === 'cancelled') {
@@ -1248,6 +1259,7 @@ export function OrderTracking() {
         { id: 'ready', label: 'Aguardando entregador' },
         { id: 'in_delivery', label: 'Em rota' },
         { id: 'delivered', label: 'Entregue' },
+        { id: 'finished', label: 'Recebido pelo cliente' },
       ];
     }
     if (order?.type === 'pickup') {
@@ -1294,13 +1306,13 @@ export function OrderTracking() {
       if (normalizedStatus === 'preparing') return 'preparing';
       return 'pending';
     }
-    if (deliveryStatus === 'DELIVERED') return 'delivered';
+    if (hasCustomerReceiptConfirmation || normalizedStatus === 'finished') return 'finished';
+    if (deliveryStatus === 'DELIVERED' || normalizedStatus === 'delivered') return 'delivered';
     if (deliveryStatus === 'IN_TRANSIT') return 'in_delivery';
     if (deliveryStatus === 'ACCEPTED' || deliveryStatus === 'PICKED_UP') return 'ready';
     if (normalizedStatus === 'awaiting_payment' && hasOnlinePayment && isPaymentApproved) return 'pending';
     if (normalizedStatus === 'ready_for_delivery' || normalizedStatus === 'waiting_for_motoboy' || normalizedStatus === 'ready') return 'ready';
     if (normalizedStatus === 'in_delivery') return 'in_delivery';
-    if (normalizedStatus === 'delivered' || normalizedStatus === 'finished') return 'delivered';
     return normalizedStatus || status;
   })();
   const currentIndex = Math.max(0, steps.findIndex((item) => item.id === currentStep));
@@ -1457,7 +1469,7 @@ export function OrderTracking() {
                       </div>
                     ) : null}
 
-                    {isDelivery && !isPostalDelivery && motoboyFirst && ['ACCEPTED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED'].includes(deliveryStatus) ? (
+                    {isDelivery && !isPostalDelivery && motoboyFirst && (['ACCEPTED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED'].includes(deliveryStatus) || hasCustomerReceiptConfirmation) ? (
                       <div className="mt-3 rounded-2xl border border-[#d5e3ec] bg-[linear-gradient(135deg,#f9fcfe,#eef5fa)] px-4 py-3 text-sm text-stone-800 shadow-[0_18px_32px_-28px_rgba(51,104,134,0.16)]">
                         <div className="flex items-start gap-3">
                           {motoboyProfileImageUrl ? (
@@ -1476,16 +1488,56 @@ export function OrderTracking() {
                               Entregador
                             </div>
                             <div className="font-extrabold leading-tight truncate">
-                              {motoboyFirst} {deliveryStatus === 'IN_TRANSIT' ? 'está a caminho' : deliveryStatus === 'PICKED_UP' ? 'retirou seu pedido' : 'aceitou sua entrega'}
+                              {motoboyFirst}{' '}
+                              {hasCustomerReceiptConfirmation
+                                ? 'concluiu sua entrega'
+                                : hasCourierDeliveryConfirmation
+                                ? 'entregou seu pedido'
+                                : deliveryStatus === 'IN_TRANSIT'
+                                ? 'está a caminho'
+                                : deliveryStatus === 'PICKED_UP'
+                                ? 'retirou seu pedido'
+                                : 'aceitou sua entrega'}
                             </div>
                             <div className="mt-0.5 text-xs text-stone-600">
-                              {deliveryStatus === 'IN_TRANSIT'
+                              {hasCustomerReceiptConfirmation
+                                ? 'Recebimento confirmado pelo cliente. Pedido concluído.'
+                                : hasCourierDeliveryConfirmation
+                                ? 'A entrega foi concluída e o sistema aguarda a confirmação final do cliente.'
+                                : deliveryStatus === 'IN_TRANSIT'
                                 ? 'Ele está indo até você agora.'
                                 : deliveryStatus === 'PICKED_UP'
                                 ? 'Agora é só acompanhar o trajeto.'
                                 : 'Ele está se preparando para sair da loja.'}
                             </div>
                           </div>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {isDelivery && !isPostalDelivery && (hasCourierDeliveryConfirmation || hasCustomerReceiptConfirmation) ? (
+                      <div className={`mt-3 rounded-2xl border px-4 py-3 shadow-[0_18px_32px_-28px_rgba(16,185,129,0.22)] ${
+                        hasCustomerReceiptConfirmation
+                          ? 'border-emerald-200 bg-[linear-gradient(135deg,#f4fbf6,#ffffff)]'
+                          : 'border-[#d5e3ec] bg-[linear-gradient(135deg,#f9fcfe,#ffffff)]'
+                      }`}>
+                        <p className={`text-[11px] font-black uppercase tracking-[0.18em] ${
+                          hasCustomerReceiptConfirmation ? 'text-emerald-700' : 'text-[#336886]'
+                        }`}>
+                          {hasCustomerReceiptConfirmation ? 'Recebimento confirmado' : 'Entrega concluída'}
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-slate-900">
+                          {hasCustomerReceiptConfirmation ? 'Recebido pelo cliente' : 'Entregue pelo entregador'}
+                        </p>
+                        <div className="mt-1 space-y-1 text-xs text-slate-600">
+                          {deliveredAtValue ? (
+                            <p>Entregador marcou a entrega em {formatDateTime(deliveredAtValue)}.</p>
+                          ) : null}
+                          {hasCustomerReceiptConfirmation ? (
+                            <p>Cliente confirmou o recebimento em {formatDateTime(customerReceivedAtValue)}.</p>
+                          ) : (
+                            <p>Agora falta apenas a confirmação final do cliente para encerrar o pedido.</p>
+                          )}
                         </div>
                       </div>
                     ) : null}
@@ -2015,7 +2067,7 @@ export function OrderTracking() {
                               </div>
                             ) : null}
                             {trackingLoading ? (
-                              <div className="text-[11px] text-stone-400">Atualizando ETA...</div>
+                              <div className="text-[11px] text-stone-400">Atualizando acompanhamento...</div>
                             ) : null}
                           </div>
                         ) : null}

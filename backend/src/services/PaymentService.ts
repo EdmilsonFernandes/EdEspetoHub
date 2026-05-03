@@ -398,10 +398,18 @@ private resolvePlanChargeAmount(plan: Plan) {
       if (paymentId.startsWith('review_tip:')) {
         const reviewId = paymentId.replace('review_tip:', '');
         await auditByReference(PAYMENT_AUDIT_FLOW.TIP, PAYMENT_AUDIT_ENTITY.ORDER_REVIEW, reviewId);
-        if (mpPayment.status === 'approved') {
+        const tipStatus = String(mpPayment?.status || '').toLowerCase();
+        const failedTipStatuses = new Set(['rejected', 'cancelled', 'charged_back', 'refunded', 'failed']);
+        if (tipStatus === 'approved') {
           await this.orderReviewService.markTipPaidFromWebhook(reviewId, mpPayment);
-        } else {
+        } else if (failedTipStatuses.has(tipStatus)) {
           await this.orderReviewService.markTipFailedFromWebhook(reviewId, mpPayment);
+        } else {
+          this.log.debug('Ignoring non-terminal Mercado Pago tip status', {
+            reviewId,
+            providerStatus: tipStatus,
+            externalReference: paymentId,
+          });
         }
         return { status: mpPayment.status };
       }
