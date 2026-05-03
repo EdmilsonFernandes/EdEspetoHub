@@ -245,13 +245,14 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
   }, [openPlanMenu, openUserMenu]);
 
   useEffect(() => {
-    const onOpenAccountMenu = () => {
+    const onOpenChangePassword = () => {
       setOpenPlanMenu(false);
-      setOpenUserMenu(true);
+      setOpenUserMenu(false);
+      setChangePasswordOpen(true);
     };
-    window.addEventListener('admin:open-account-menu', onOpenAccountMenu as EventListener);
+    window.addEventListener('admin:open-change-password', onOpenChangePassword as EventListener);
     return () => {
-      window.removeEventListener('admin:open-account-menu', onOpenAccountMenu as EventListener);
+      window.removeEventListener('admin:open-change-password', onOpenChangePassword as EventListener);
     };
   }, []);
 
@@ -471,7 +472,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
         <div className="relative" ref={userMenuRef}>
           <button
             type="button"
-            onClick={() => setOpenUserMenu((prev) => !prev)}
+            onClick={() => window.dispatchEvent(new CustomEvent('admin:open-account-drawer'))}
             className="inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white text-slate-700 shadow-[0_2px_8px_-6px_rgba(15,23,42,0.8)] transition-colors hover:bg-slate-100"
             aria-label="Conta da operação"
             title="Conta da operação"
@@ -482,52 +483,6 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
               <span className="text-[11px] font-black">{userInitials}</span>
             )}
           </button>
-          {openUserMenu && (
-            <div className="absolute right-0 top-[calc(100%+8px)] w-52 rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_24px_48px_-26px_rgba(15,23,42,0.48)]">
-              <div className="px-2.5 py-2">
-                <p className="truncate text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Conta da operação</p>
-                <p className="mt-1 truncate text-sm font-black text-slate-900">{fullUserName}</p>
-                <p className="truncate text-[11px] font-semibold text-slate-500">{auth?.user?.email || ''}</p>
-              </div>
-              {storeSlug ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOpenUserMenu(false);
-                    navigate(`/${storeSlug}`);
-                  }}
-                  className="w-full inline-flex items-center gap-2 rounded-xl px-2.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
-                >
-                  <StoreIcon size={14} />
-                  Minha vitrine
-                </button>
-              ) : null}
-              <button
-                type="button"
-                onClick={() => {
-                  setOpenUserMenu(false);
-                  setChangePasswordOpen(true);
-                }}
-                className="w-full inline-flex items-center gap-2 rounded-xl px-2.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
-              >
-                <KeyRound size={14} />
-                Trocar senha
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setOpenUserMenu(false);
-                  markManualLogoutRedirect('admin', '/hub');
-                  logout();
-                  navigate('/hub', { replace: true });
-                }}
-                className="w-full inline-flex items-center gap-2 rounded-xl px-2.5 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors"
-              >
-                <LogOut size={14} />
-                Sair da operação
-              </button>
-            </div>
-          )}
         </div>
       </div>
 

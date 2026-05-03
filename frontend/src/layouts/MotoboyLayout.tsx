@@ -1,47 +1,73 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, House, ListChecks, Truck, UserCircle, Wallet } from '@phosphor-icons/react';
+import { ArrowLeft, House, IdentificationCard, ListChecks, Motorcycle, SignOut, Truck, UserCircle, Wallet } from '@phosphor-icons/react';
+import { useAuth } from '../contexts/AuthContext';
+import { motoboyService } from '../services/motoboyService';
+import { nativeBiometricService } from '../services/nativeBiometricService';
+import { markManualLogoutRedirect } from '../utils/sessionRedirect';
+import { ContextSideDrawer } from '../components/common/ContextSideDrawer';
 
 const MOTOBOY_QUEUE_BADGE_EVENT = 'jnc:motoboy-queue-badge';
 
 type Tab = {
-  to: string;
+  id: string;
+  to?: string;
   label: string;
   icon: React.ReactNode;
   match: (pathname: string) => boolean;
+  onClick?: () => void;
 };
 
 export function MotoboyLayout() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { setAuth } = useAuth();
   const [installPrompt, setInstallPrompt] = useState<any | null>(null);
   const [showInstall, setShowInstall] = useState(false);
   const [queueBadge, setQueueBadge] = useState(false);
+  const [accountDrawerOpen, setAccountDrawerOpen] = useState(false);
+
+  const motoboySession = useMemo(() => {
+    try {
+      const raw = localStorage.getItem('motoboySession');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }, [pathname, accountDrawerOpen]);
+
+  const motoboyUser = motoboySession?.user || null;
+  const motoboyName = String(motoboyUser?.fullName || motoboyUser?.name || 'Entregador').trim();
+  const motoboyEmail = String(motoboyUser?.email || '').trim();
 
   const tabs: Tab[] = [
     {
+      id: 'home',
       to: '/motoboy/home',
       label: 'Home',
       icon: <House size={20} weight="duotone" />,
       match: (p) => p === '/motoboy' || p.startsWith('/motoboy/home'),
     },
     {
+      id: 'queue',
       to: '/motoboy/available',
       label: 'Fila',
       icon: <ListChecks size={20} weight="duotone" />,
       match: (p) => p.startsWith('/motoboy/available'),
     },
     {
+      id: 'earnings',
       to: '/motoboy/earnings',
       label: 'Ganhos',
       icon: <Wallet size={20} weight="duotone" />,
       match: (p) => p.startsWith('/motoboy/earnings') || p.startsWith('/motoboy/history'),
     },
     {
-      to: '/motoboy/profile',
-      label: 'Perfil',
+      id: 'account',
+      label: 'Conta',
       icon: <UserCircle size={20} weight="duotone" />,
       match: (p) => p.startsWith('/motoboy/profile'),
+      onClick: () => setAccountDrawerOpen(true),
     },
   ];
 
@@ -86,6 +112,68 @@ export function MotoboyLayout() {
       setQueueBadge(false);
     }
   }, [pathname]);
+
+  useEffect(() => {
+    const openAccountDrawer = () => setAccountDrawerOpen(true);
+    window.addEventListener('motoboy:open-account-drawer', openAccountDrawer as EventListener);
+    return () => window.removeEventListener('motoboy:open-account-drawer', openAccountDrawer as EventListener);
+  }, []);
+
+  useEffect(() => {
+    setAccountDrawerOpen(false);
+  }, [pathname]);
+
+  const handleMotoboyLogout = async () => {
+    markManualLogoutRedirect('motoboy', '/hub');
+    const token = String(motoboySession?.token || '').trim();
+    if (token) {
+      void motoboyService.unregisterPushToken({ token }).catch(() => undefined);
+    }
+    try {
+      nativeBiometricService.syncMotoboySession(null);
+    } catch {
+      // ignore
+    }
+    try {
+      setAuth(null);
+    } catch {
+      // ignore
+    }
+    setAccountDrawerOpen(false);
+    navigate('/hub', { replace: true });
+  };
+
+  const accountActions = [
+    {
+      id: 'profile',
+      label: 'Dados da conta',
+      description: 'Cadastro, documentos, vínculos e repasses.',
+      icon: <IdentificationCard size={22} weight="duotone" />,
+      onClick: () => navigate('/motoboy/profile'),
+    },
+    {
+      id: 'queue',
+      label: 'Fila de entregas',
+      description: 'Veja os pedidos disponíveis e novas coletas.',
+      icon: <ListChecks size={22} weight="duotone" />,
+      onClick: () => navigate('/motoboy/available'),
+    },
+    {
+      id: 'earnings',
+      label: 'Ganhos',
+      description: 'Resumo do dia e histórico financeiro.',
+      icon: <Wallet size={22} weight="duotone" />,
+      onClick: () => navigate('/motoboy/earnings'),
+    },
+    {
+      id: 'logout',
+      label: 'Sair das entregas',
+      description: 'Encerra somente este acesso neste aparelho.',
+      icon: <SignOut size={22} weight="duotone" />,
+      onClick: handleMotoboyLogout,
+      tone: 'danger' as const,
+    },
+  ];
 
   return (
     <div className="min-h-screen motoboy-bg pb-28">
@@ -163,29 +251,59 @@ export function MotoboyLayout() {
         <div className="motoboy-screen !max-w-[72rem] !pt-0 !pb-0">
           <div className="motoboy-pill grid grid-cols-4 gap-1 p-1">
             {tabs.map((tab) => {
-              const active = tab.match(pathname);
+              const active = tab.id === 'account' ? accountDrawerOpen || tab.match(pathname) : tab.match(pathname);
               const showDot = tab.label === 'Fila' && queueBadge && !pathname.startsWith('/motoboy/available');
+              const sharedClassName = [
+                'motoboy-tab relative flex flex-col items-center justify-center gap-1 rounded-[999px] px-2 py-2 text-[11px] font-semibold',
+                active
+                  ? 'bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_65%,#f59e0b))] text-white shadow-[0_18px_34px_-26px_rgba(239,68,68,0.8)]'
+                  : 'text-slate-700 hover:bg-slate-100/80',
+              ].join(' ');
+
+              if (tab.to) {
+                return (
+                  <Link
+                    key={tab.id}
+                    to={tab.to}
+                    className={sharedClassName}
+                    aria-current={active ? 'page' : undefined}
+                  >
+                    {showDot && <span className="motoboy-dot" aria-hidden="true" />}
+                    <span className={active ? 'text-white' : 'text-slate-700'}>{tab.icon}</span>
+                    <span>{tab.label}</span>
+                  </Link>
+                );
+              }
+
               return (
-                <Link
-                  key={tab.to}
-                  to={tab.to}
-                  className={[
-                    'motoboy-tab relative flex flex-col items-center justify-center gap-1 rounded-[999px] px-2 py-2 text-[11px] font-semibold',
-                    active
-                      ? 'bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_65%,#f59e0b))] text-white shadow-[0_18px_34px_-26px_rgba(239,68,68,0.8)]'
-                      : 'text-slate-700 hover:bg-slate-100/80',
-                  ].join(' ')}
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={tab.onClick}
+                  className={sharedClassName}
                   aria-current={active ? 'page' : undefined}
                 >
                   {showDot && <span className="motoboy-dot" aria-hidden="true" />}
                   <span className={active ? 'text-white' : 'text-slate-700'}>{tab.icon}</span>
                   <span>{tab.label}</span>
-                </Link>
+                </button>
               );
             })}
           </div>
         </div>
       </nav>
+      <ContextSideDrawer
+        isOpen={accountDrawerOpen}
+        onClose={() => setAccountDrawerOpen(false)}
+        side="right"
+        eyebrow="Conta do entregador"
+        title={motoboyName || 'Entregador'}
+        subtitle={motoboyEmail || 'Acesso ativo neste aparelho'}
+        leading={<Motorcycle size={26} weight="duotone" className="text-[#f59e0b]" />}
+        actions={accountActions}
+        footerTitle="Já no Caminho"
+        footerSubtitle="Conta e entregas"
+      />
     </div>
   );
 }

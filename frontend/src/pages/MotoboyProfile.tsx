@@ -1027,7 +1027,7 @@ export function MotoboyProfile() {
 
   const profileAccountStatus = formatMotoboyAccountStatus(profile?.status);
   const tabItems = [
-    { id: 'profile', label: 'Perfil', icon: <ShieldCheck size={16} weight="duotone" /> },
+    { id: 'profile', label: 'Dados', icon: <ShieldCheck size={16} weight="duotone" /> },
     {
       id: 'documents',
       label: 'Documentos',
@@ -1066,7 +1066,7 @@ export function MotoboyProfile() {
 
   return (
     <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden no-x-scroll">
-      <MotoboyHeader title="Perfil" subtitle="Documentos, vínculo e dados do entregador." />
+      <MotoboyHeader title="Dados da conta" subtitle="Cadastro, documentos, vínculos e repasses do entregador." />
 
       <DocPreviewModal
         open={Boolean(preview)}

@@ -1,11 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { SignOut, UserCircle } from '@phosphor-icons/react';
-import { useAuth } from '../../contexts/AuthContext';
+import { UserCircle } from '@phosphor-icons/react';
 import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
 import { motoboyService } from '../../services/motoboyService';
-import { markManualLogoutRedirect } from '../../utils/sessionRedirect';
-import { nativeBiometricService } from '../../services/nativeBiometricService';
 
 type MotoboyHeaderProps = {
   title: string;
@@ -14,10 +10,6 @@ type MotoboyHeaderProps = {
 };
 
 export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderProps) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { setAuth } = useAuth();
-
   const motoboySession = useMemo(() => {
     try {
       const raw = localStorage.getItem('motoboySession');
@@ -36,7 +28,6 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
   const userImage = resolvedUserImage;
   const userInitial = String((userName || 'E').trim().charAt(0) || 'E').toUpperCase();
   const showSession = Boolean(motoboySession?.token && userEmail);
-  const isProfilePage = location.pathname.startsWith('/motoboy/profile');
 
   useEffect(() => {
     let active = true;
@@ -77,25 +68,6 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
     };
   }, [showSession, user?.profileImageUrl]);
 
-  const handleLogout = async () => {
-    markManualLogoutRedirect('motoboy', '/hub');
-    const token = String(motoboySession?.token || '').trim();
-    if (token) {
-      void motoboyService.unregisterPushToken({ token }).catch(() => undefined);
-    }
-    try {
-      nativeBiometricService.syncMotoboySession(null);
-    } catch {
-      // ignore
-    }
-    try {
-      setAuth(null);
-    } catch {
-      // ignore
-    }
-    navigate('/hub', { replace: true });
-  };
-
   return (
     <div className="premium-card-glass bg-white/85 backdrop-blur-md border border-slate-100 p-4 sm:p-5 overflow-hidden no-x-scroll">
       <div className="motoboy-header-grid">
@@ -118,13 +90,10 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
               <button
                 type="button"
                 onClick={() => {
-                  if (isProfilePage) return;
-                  navigate('/motoboy/profile');
+                  window.dispatchEvent(new CustomEvent('motoboy:open-account-drawer'));
                 }}
-                className={`hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-white/70 text-slate-800 min-w-0 max-w-full sm:max-w-[320px] transition-all ${
-                  isProfilePage ? 'cursor-default' : 'hover:bg-white active:scale-[0.98]'
-                }`}
-                title={isProfilePage ? 'Perfil do entregador' : 'Abrir perfil do entregador'}
+                className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-white/70 text-slate-800 min-w-0 max-w-full sm:max-w-[320px] transition-all hover:bg-white active:scale-[0.98]"
+                title="Abrir conta do entregador"
               >
                 {userImage ? (
                   <img
@@ -139,19 +108,16 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
                 )}
                 <div className="leading-tight text-left min-w-0">
                   <div className="text-[11px] font-extrabold truncate">{userName || 'Entregador'}</div>
-                  <div className="text-[10px] text-slate-500 truncate">{isProfilePage ? userEmail : 'Abrir perfil do entregador'}</div>
+                  <div className="text-[10px] text-slate-500 truncate">{userEmail || 'Conta do entregador'}</div>
                 </div>
               </button>
               <button
                 type="button"
                 onClick={() => {
-                  if (isProfilePage) return;
-                  navigate('/motoboy/profile');
+                  window.dispatchEvent(new CustomEvent('motoboy:open-account-drawer'));
                 }}
-                className={`sm:hidden flex items-center gap-2 px-2.5 py-2 rounded-xl border border-slate-200 bg-white/70 text-slate-800 min-w-0 transition-all ${
-                  isProfilePage ? 'cursor-default' : 'hover:bg-white active:scale-[0.98]'
-                }`}
-                title={isProfilePage ? 'Perfil do entregador' : 'Abrir perfil do entregador'}
+                className="sm:hidden flex items-center gap-2 px-2.5 py-2 rounded-xl border border-slate-200 bg-white/70 text-slate-800 min-w-0 transition-all hover:bg-white active:scale-[0.98]"
+                title="Abrir conta do entregador"
               >
                 {userImage ? (
                   <img
@@ -164,17 +130,8 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
                 )}
                 <div className="leading-tight text-left min-w-0 max-w-[140px]">
                   <div className="text-[11px] font-extrabold truncate">{userName || 'Entregador'}</div>
-                  <div className="text-[10px] text-slate-500 truncate">{isProfilePage ? userEmail : 'Abrir perfil'}</div>
+                  <div className="text-[10px] text-slate-500 truncate">Abrir conta</div>
                 </div>
-              </button>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="btn-secondary btn-press ml-auto sm:ml-0 px-3 py-2 text-xs font-extrabold flex items-center gap-2 transition-transform duration-200 active:scale-[0.98]"
-                title="Sair"
-              >
-                <SignOut size={16} weight="bold" />
-                <span>Sair</span>
               </button>
             </div>
           ) : null}

@@ -5,9 +5,10 @@ import { AdminHeader } from '../components/Admin/AdminHeader';
 import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Buildings, CaretDown, ChartBar, CheckSquare, ClipboardText, CreditCard, Gear, Package, ShoppingCart, SignOut, Scooter, Star, X, UsersThree } from '@phosphor-icons/react';
+import { Buildings, CaretDown, ChartBar, CheckSquare, ClipboardText, CreditCard, Gear, LockKey, Package, ShoppingCart, SignOut, Scooter, Star, UserCircle, X, UsersThree } from '@phosphor-icons/react';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
+import { ContextSideDrawer } from '../components/common/ContextSideDrawer';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -26,6 +27,7 @@ export function AdminLayout({
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [accountDrawerOpen, setAccountDrawerOpen] = useState(false);
   const [mobileOpenGroup, setMobileOpenGroup] = useState<string | null>(null);
   const userRole = String(auth?.user?.role || '').toUpperCase();
   const isOperatorUser = userRole === 'OPERATOR' || userRole === 'LOJISTA';
@@ -139,6 +141,15 @@ export function AdminLayout({
   }, []);
 
   useEffect(() => {
+    const openAccountDrawer = () => {
+      setMobileNavOpen(false);
+      setAccountDrawerOpen(true);
+    };
+    window.addEventListener('admin:open-account-drawer', openAccountDrawer as EventListener);
+    return () => window.removeEventListener('admin:open-account-drawer', openAccountDrawer as EventListener);
+  }, []);
+
+  useEffect(() => {
     document.body.classList.toggle('admin-mobile-menu-open', mobileNavOpen);
     window.dispatchEvent(new CustomEvent('admin:mobile-menu', { detail: { open: mobileNavOpen } }));
     return () => {
@@ -184,6 +195,44 @@ export function AdminLayout({
     navigate('/admin/dashboard', { state: { activeTab: id } });
     setMobileNavOpen(false);
   };
+
+  const accountActions = [
+    ...(storeSlug
+      ? [{
+          id: 'storefront',
+          label: 'Minha vitrine',
+          description: 'Abra a loja pública sem sair da operação.',
+          icon: <ShoppingCart size={22} weight="duotone" />,
+          onClick: () => navigate(`/${storeSlug}`),
+        }]
+      : []),
+    {
+      id: 'settings',
+      label: 'Configurações da loja',
+      description: 'Marca, atendimento e ajustes principais da operação.',
+      icon: <Gear size={22} weight="duotone" />,
+      onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'config' } }),
+    },
+    {
+      id: 'password',
+      label: 'Trocar senha',
+      description: 'Atualize a senha deste acesso sem sair da operação.',
+      icon: <LockKey size={22} weight="duotone" />,
+      onClick: () => window.dispatchEvent(new CustomEvent('admin:open-change-password')),
+    },
+    {
+      id: 'logout',
+      label: 'Sair da operação',
+      description: 'Encerra somente este acesso neste aparelho.',
+      icon: <SignOut size={22} weight="duotone" />,
+      onClick: () => {
+        markManualLogoutRedirect('admin', '/hub');
+        logout();
+        navigate('/hub', { replace: true });
+      },
+      tone: 'danger' as const,
+    },
+  ];
 
   return (
     <div className="ds-admin-bg overflow-x-clip pb-[calc(7.5rem+env(safe-area-inset-bottom))] lg:pb-0">
@@ -333,6 +382,18 @@ export function AdminLayout({
           </aside>
         </div>
       )}
+      <ContextSideDrawer
+        isOpen={accountDrawerOpen}
+        onClose={() => setAccountDrawerOpen(false)}
+        side="right"
+        eyebrow="Conta da operação"
+        title={String(auth?.store?.name || 'Minha loja')}
+        subtitle={String(auth?.user?.email || auth?.user?.fullName || auth?.user?.name || '').trim() || 'Acesso do lojista'}
+        leading={<UserCircle size={26} weight="duotone" className="text-[#336886]" />}
+        actions={accountActions}
+        footerTitle="Já no Caminho"
+        footerSubtitle="Conta e acessos da operação"
+      />
     </div>
   );
 }

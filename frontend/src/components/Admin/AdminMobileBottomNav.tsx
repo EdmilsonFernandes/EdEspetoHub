@@ -239,7 +239,7 @@ export function AdminMobileBottomNav() {
       active: false,
       onClick: () => {
         if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('admin:open-account-menu'));
+          window.dispatchEvent(new CustomEvent('admin:open-account-drawer'));
         }
       },
     },
