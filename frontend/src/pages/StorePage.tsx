@@ -43,6 +43,7 @@ import { getCartPricing } from '../utils/orderPricing';
 import { printReceiptAsImage } from '../utils/printReceiptImage';
 import { clearAllCustomerSessions } from '../utils/customerSessionStorage';
 import { nativeBiometricService } from '../services/nativeBiometricService';
+import { navigateBackOrFallback } from '../utils/navigation';
 
 const WEEKDAY_LABELS = [ 'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado' ];
 const PUBLIC_ORDER_ALERT_TTL_MS = 3 * 60 * 60 * 1000;
@@ -3103,11 +3104,16 @@ export function StorePage() {
             <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:py-7">
               <button
                 type="button"
-                onClick={() => navigate('/hub')}
-                className="mb-4 inline-flex items-center gap-2 rounded-[1.1rem] border border-white/85 bg-white/90 px-4 py-2.5 text-xs font-black uppercase tracking-[0.14em] text-slate-700 shadow-[0_16px_34px_-26px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/65 backdrop-blur-xl transition-all hover:bg-white"
+                onClick={() => navigateBackOrFallback(navigate, '/hub')}
+                className="mb-4 inline-flex items-center gap-2 text-left text-slate-700 transition-colors hover:text-[#336886]"
               >
-                <ArrowLeft size={16} weight="bold" />
-                Voltar ao hub
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-[#c9dbe7]/80 bg-white/90 text-slate-700 shadow-[0_12px_24px_-22px_rgba(51,104,134,0.25)] transition-all active:scale-95">
+                  <ArrowLeft size={16} weight="bold" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Navegação</span>
+                  <span className="block text-sm font-black leading-tight text-slate-800">Voltar ao hub</span>
+                </span>
               </button>
 
               <div className="grid gap-4 md:grid-cols-[minmax(0,1.2fr)_minmax(300px,0.8fr)] md:items-start">
@@ -3968,4 +3974,3 @@ export function StorePage() {
     const planName = String(subscription?.plan?.name || '').toLowerCase();
     return planName.includes('pro') || planName.includes('vip');
   };
-

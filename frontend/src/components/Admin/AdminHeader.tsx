@@ -245,6 +245,17 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
   }, [openPlanMenu, openUserMenu]);
 
   useEffect(() => {
+    const onOpenAccountMenu = () => {
+      setOpenPlanMenu(false);
+      setOpenUserMenu(true);
+    };
+    window.addEventListener('admin:open-account-menu', onOpenAccountMenu as EventListener);
+    return () => {
+      window.removeEventListener('admin:open-account-menu', onOpenAccountMenu as EventListener);
+    };
+  }, []);
+
+  useEffect(() => {
     let frame = 0;
     let ticking = false;
     let unlockTimer: ReturnType<typeof setTimeout> | null = null;

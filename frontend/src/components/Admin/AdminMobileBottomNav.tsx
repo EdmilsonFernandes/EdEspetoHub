@@ -1,15 +1,14 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Buildings, ChartBar, ChefHat, CurrencyDollar, Package, SignOut } from '@phosphor-icons/react';
+import { Buildings, ChartBar, ChefHat, CurrencyDollar, Package, UserCircle } from '@phosphor-icons/react';
 import { orderService } from '../../services/orderService';
 import { useAuth } from '../../contexts/AuthContext';
-import { markManualLogoutRedirect } from '../../utils/sessionRedirect';
 
 export function AdminMobileBottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { auth, logout } = useAuth();
+  const { auth } = useAuth();
   const role = String(auth?.user?.role || '').toUpperCase();
   const isOperator = role === 'OPERATOR' || role === 'LOJISTA';
   const isSuperAdmin = role === 'SUPER_ADMIN';
@@ -234,15 +233,14 @@ export function AdminMobileBottomNav() {
   const navItems = [
     ...items,
     {
-      id: 'logout',
-      label: 'Sair',
-      icon: SignOut,
+      id: 'account',
+      label: 'Conta',
+      icon: UserCircle,
       active: false,
       onClick: () => {
-        markManualLogoutRedirect('admin', '/hub');
-        logout();
-        if (typeof window !== 'undefined') sessionStorage.removeItem('admin:activeTab');
-        navigate('/hub', { replace: true });
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('admin:open-account-menu'));
+        }
       },
     },
   ];
@@ -338,20 +336,19 @@ export function AdminMobileBottomNav() {
       <ul className={`pointer-events-auto mx-auto grid ${navItems.length <= 2 ? 'grid-cols-2' : navItems.length === 3 ? 'grid-cols-3' : navItems.length === 4 ? 'grid-cols-4' : 'grid-cols-5'} gap-0.5 w-full max-w-lg sm:max-w-xl md:max-w-2xl border-t border-slate-200/60 bg-white/95 px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)] shadow-[0_-8px_32px_-16px_rgba(15,23,42,0.18)] backdrop-blur-xl`}>
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isLogout = item.id === 'logout';
           return (
             <li key={item.id}>
               <button
                 type="button"
                 onClick={item.onClick}
                 className={`w-full flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-[9px] font-bold uppercase tracking-[0.08em] transition-all active:scale-95 ${
-                  item.active ? '' : isLogout ? 'text-rose-400' : 'text-slate-400'
+                  item.active ? '' : 'text-slate-400'
                 }`}
                 style={item.active ? { color: activeTextColor } : undefined}
               >
                 <span
                   className={`relative inline-flex h-8 w-8 items-center justify-center rounded-2xl transition-all ${
-                    item.active ? '' : isLogout ? 'text-rose-400' : 'text-slate-400'
+                    item.active ? '' : 'text-slate-400'
                   }`}
                   style={item.active ? { backgroundColor: activePillColor, color: activeIconBg } : undefined}
                 >
