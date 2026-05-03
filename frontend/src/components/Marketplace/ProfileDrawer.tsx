@@ -188,13 +188,13 @@ export function ProfileDrawer({
   }, [isOpen]);
 
   const getAccessStateLabel = (profile: { biometric: boolean; hasSession: boolean }) => {
-    if (profile.biometric) return 'Biometria ativa';
-    if (profile.hasSession) return 'Sessão salva';
+    if (profile.biometric) return 'Entrar rápido';
+    if (profile.hasSession) return 'Disponível neste aparelho';
     return 'Entrar';
   };
   const getCompactAccessStateLabel = (profile: { biometric: boolean; hasSession: boolean }) => {
-    if (profile.biometric) return 'Biometria';
-    if (profile.hasSession) return 'Sessão salva';
+    if (profile.biometric) return 'Rápido';
+    if (profile.hasSession) return 'Disponível';
     return 'Entrar';
   };
 
@@ -203,7 +203,7 @@ export function ProfileDrawer({
       id: 'client',
       title: 'Cliente',
       subtitle: savedAccessProfiles.customer.biometric
-        ? 'Entrar com biometria neste aparelho'
+        ? 'Entrar rápido neste aparelho'
         : savedAccessProfiles.customer.hasSession
           ? savedAccessProfiles.customer.email || savedAccessProfiles.customer.name
           : 'Entrar para pedir e acompanhar',
@@ -216,7 +216,7 @@ export function ProfileDrawer({
       id: 'store',
       title: 'Lojista',
       subtitle: savedAccessProfiles.admin.biometric
-        ? 'Entrar com biometria neste aparelho'
+        ? 'Entrar rápido neste aparelho'
         : savedAccessProfiles.admin.hasSession
           ? savedAccessProfiles.admin.email || savedAccessProfiles.admin.name
           : 'Entrar na operação da loja',
@@ -228,7 +228,7 @@ export function ProfileDrawer({
       id: 'motoboy',
       title: 'Entregador',
       subtitle: savedAccessProfiles.motoboy.biometric
-        ? 'Entrar com biometria neste aparelho'
+        ? 'Entrar rápido neste aparelho'
         : savedAccessProfiles.motoboy.hasSession
           ? savedAccessProfiles.motoboy.email || savedAccessProfiles.motoboy.name
           : 'Entrar no painel de entregas',

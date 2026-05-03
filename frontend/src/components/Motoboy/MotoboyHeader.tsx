@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { SignOut, UserCircle } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
@@ -15,6 +15,7 @@ type MotoboyHeaderProps = {
 
 export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { setAuth } = useAuth();
 
   const motoboySession = useMemo(() => {
@@ -35,6 +36,7 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
   const userImage = resolvedUserImage;
   const userInitial = String((userName || 'E').trim().charAt(0) || 'E').toUpperCase();
   const showSession = Boolean(motoboySession?.token && userEmail);
+  const isProfilePage = location.pathname.startsWith('/motoboy/profile');
 
   useEffect(() => {
     let active = true;
@@ -113,7 +115,17 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
           <div className="flex items-center gap-2 flex-wrap min-w-0 sm:mr-1">{rightAction}</div>
           {showSession ? (
             <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:ml-auto w-full sm:w-auto">
-              <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-white/70 text-slate-800 min-w-0 max-w-full sm:max-w-[320px]">
+              <button
+                type="button"
+                onClick={() => {
+                  if (isProfilePage) return;
+                  navigate('/motoboy/profile');
+                }}
+                className={`hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-white/70 text-slate-800 min-w-0 max-w-full sm:max-w-[320px] transition-all ${
+                  isProfilePage ? 'cursor-default' : 'hover:bg-white active:scale-[0.98]'
+                }`}
+                title={isProfilePage ? 'Perfil do entregador' : 'Abrir perfil do entregador'}
+              >
                 {userImage ? (
                   <img
                     src={userImage}
@@ -127,10 +139,20 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
                 )}
                 <div className="leading-tight text-left min-w-0">
                   <div className="text-[11px] font-extrabold truncate">{userName || 'Entregador'}</div>
-                  <div className="text-[10px] text-slate-500 truncate">{userEmail}</div>
+                  <div className="text-[10px] text-slate-500 truncate">{isProfilePage ? userEmail : 'Abrir perfil do entregador'}</div>
                 </div>
-              </div>
-              <div className="sm:hidden flex items-center gap-2 px-2.5 py-2 rounded-xl border border-slate-200 bg-white/70 text-slate-800 min-w-0">
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (isProfilePage) return;
+                  navigate('/motoboy/profile');
+                }}
+                className={`sm:hidden flex items-center gap-2 px-2.5 py-2 rounded-xl border border-slate-200 bg-white/70 text-slate-800 min-w-0 transition-all ${
+                  isProfilePage ? 'cursor-default' : 'hover:bg-white active:scale-[0.98]'
+                }`}
+                title={isProfilePage ? 'Perfil do entregador' : 'Abrir perfil do entregador'}
+              >
                 {userImage ? (
                   <img
                     src={userImage}
@@ -142,9 +164,9 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
                 )}
                 <div className="leading-tight text-left min-w-0 max-w-[140px]">
                   <div className="text-[11px] font-extrabold truncate">{userName || 'Entregador'}</div>
-                  <div className="text-[10px] text-slate-500 truncate">{userEmail}</div>
+                  <div className="text-[10px] text-slate-500 truncate">{isProfilePage ? userEmail : 'Abrir perfil'}</div>
                 </div>
-              </div>
+              </button>
               <button
                 type="button"
                 onClick={handleLogout}
