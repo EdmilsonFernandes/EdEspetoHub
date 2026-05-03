@@ -29,6 +29,24 @@ const orderService = new OrderService();
 const orderEtaServiceV2 = new OrderEtaServiceV2();
 const orderPaymentService = new OrderPaymentService();
 const log = logger.child({ scope: 'OrderController' });
+const publicEtaStatuses = new Set([
+  'pending',
+  'preparing',
+  'ready',
+  'ready_for_delivery',
+  'waiting_for_motoboy',
+  'in_delivery',
+  'dispatched',
+]);
+
+function shouldAttachPublicEta(order: any) {
+  const normalizedStatus = String(order?.status || '').toLowerCase().trim();
+  if (!publicEtaStatuses.has(normalizedStatus)) {
+    return false;
+  }
+
+  return Boolean(order?.store);
+}
 /**
  * Provides OrderController functionality.
  *
@@ -379,13 +397,25 @@ static async markItemsAsPrinted(req: Request, res: Response) {
       const result = await orderService.getPublicById(orderId);
       if (!result) return respondWithError(req, res, new AppError('ORDER-001', 404), 404);
       const { order, queuePosition, queueSize } = result;
-      const deliveryRow =
+      const correlationId = typeof req.headers[ 'x-correlation-id' ] === 'string'
+        ? req.headers[ 'x-correlation-id' ]
+        : undefined;
+      const deliveryRowPromise =
         order?.type === 'delivery'
-          ? await AppDataSource.getRepository(OrderDelivery).findOne({ where: { orderId: order.id } as any })
-          : null;
-      const orderPayment = await AppDataSource.getRepository(OrderPayment).findOne({
+          ? AppDataSource.getRepository(OrderDelivery).findOne({ where: { orderId: order.id } as any })
+          : Promise.resolve(null);
+      const orderPaymentPromise = AppDataSource.getRepository(OrderPayment).findOne({
         where: { orderId: order.id } as any,
       });
+      const etaPromise =
+        env.etaV2.enabled && shouldAttachPublicEta(order)
+          ? orderEtaServiceV2.calculateForOrder(order, queuePosition, correlationId)
+          : Promise.resolve(null);
+      const [ deliveryRow, orderPayment, eta ] = await Promise.all([
+        deliveryRowPromise,
+        orderPaymentPromise,
+        etaPromise,
+      ]);
       const motoboy =
         deliveryRow?.motoboyId
           ? await AppDataSource.getRepository(Motoboy).findOne({
@@ -393,9 +423,6 @@ static async markItemsAsPrinted(req: Request, res: Response) {
               relations: [ 'user' ],
             })
           : null;
-      const correlationId = typeof req.headers[ 'x-correlation-id' ] === 'string'
-        ? req.headers[ 'x-correlation-id' ]
-        : undefined;
 
       const responsePayload: any = {
         id: order.id,
@@ -507,8 +534,7 @@ static async markItemsAsPrinted(req: Request, res: Response) {
           : null,
       };
 
-      if (env.etaV2.enabled) {
-        const eta = await orderEtaServiceV2.calculateForOrder(order, queuePosition, correlationId);
+      if (eta) {
         responsePayload.eta = {
           totalMinutes: eta.totalMinutes,
           windowMin: eta.windowMin,
@@ -554,7 +580,10 @@ static async markItemsAsPrinted(req: Request, res: Response) {
       const correlationId = typeof req.headers[ 'x-correlation-id' ] === 'string'
         ? req.headers[ 'x-correlation-id' ]
         : undefined;
-      const eta = await orderEtaServiceV2.calculateForOrder(order, queuePosition, correlationId);
+      const eta =
+        shouldAttachPublicEta(order)
+          ? await orderEtaServiceV2.calculateForOrder(order, queuePosition, correlationId)
+          : null;
 
       return res.json({
         id: order.id,
@@ -604,21 +633,25 @@ static async markItemsAsPrinted(req: Request, res: Response) {
               trackingLastAt: (order as any).shipment.trackingLastAt || null,
             }
           : null,
-        eta: {
-          totalMinutes: eta.totalMinutes,
-          windowMin: eta.windowMin,
-          windowMax: eta.windowMax,
-          prepMinutes: eta.prepMinutes,
-          queueMinutes: eta.queueMinutes,
-          travelMinutes: eta.travelMinutes,
-          bufferMinutes: eta.bufferMinutes,
-          confidence: eta.confidence,
-          algoVersion: eta.algoVersion,
-        },
-        travel: {
-          distanceKm: eta.distanceKm,
-          travelMinutes: eta.travelMinutes,
-        },
+        eta: eta
+          ? {
+              totalMinutes: eta.totalMinutes,
+              windowMin: eta.windowMin,
+              windowMax: eta.windowMax,
+              prepMinutes: eta.prepMinutes,
+              queueMinutes: eta.queueMinutes,
+              travelMinutes: eta.travelMinutes,
+              bufferMinutes: eta.bufferMinutes,
+              confidence: eta.confidence,
+              algoVersion: eta.algoVersion,
+            }
+          : null,
+        travel: eta
+          ? {
+              distanceKm: eta.distanceKm,
+              travelMinutes: eta.travelMinutes,
+            }
+          : null,
       });
     } catch (error: any) {
       log.warn('Order tracking v2 failed', { orderId, error });

@@ -1911,18 +1911,18 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
     const order = await this.orderRepository.findById(orderId);
     if (!order) return null;
     const queueStatuses = [ 'pending', 'preparing', 'ready' ];
-    let queuePosition: number | null = null;
-    let queueSize: number | null = null;
-
-    if (order.store?.id) {
-      queueSize = await this.orderRepository.countByStoreAndStatuses(order.store.id, queueStatuses);
-      if (queueStatuses.includes(order.status)) {
-        queuePosition = await this.orderRepository.countQueueAhead(order.store.id, queueStatuses, order.createdAt);
-        if (typeof queuePosition === 'number') {
-          queuePosition += 1;
-        }
-      }
-    }
+    const shouldIncludeQueuePosition = Boolean(order.store?.id && queueStatuses.includes(order.status));
+    const queueSizePromise = order.store?.id
+      ? this.orderRepository.countByStoreAndStatuses(order.store.id, queueStatuses)
+      : Promise.resolve<number | null>(null);
+    const queueAheadPromise = shouldIncludeQueuePosition
+      ? this.orderRepository.countQueueAhead(order.store!.id, queueStatuses, order.createdAt)
+      : Promise.resolve<number | null>(null);
+    const [ queueSize, queueAhead ] = await Promise.all([ queueSizePromise, queueAheadPromise ]);
+    const queuePosition =
+      typeof queueAhead === 'number'
+        ? queueAhead + 1
+        : null;
 
     return { order, queuePosition, queueSize };
   }

@@ -524,7 +524,7 @@ export function OrderTracking() {
     // Se veio do histórico do cliente, volta para lá
     const customerSession = typeof window !== 'undefined' ? localStorage.getItem('customerSession') : null;
     if (customerSession) {
-      navigate('/cliente/pedidos');
+      navigate('/cliente/pedidos', { replace: true });
       return;
     }
     navigate(storeHomePath);

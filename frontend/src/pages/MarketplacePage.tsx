@@ -2725,7 +2725,7 @@ export function MarketplacePage() {
           </div>
         </header>
 
-        <main className={`mx-auto max-w-[1200px] space-y-6 px-4 ${isNativePlatform ? 'pt-5' : 'pt-6'}`}>
+        <main className={`mx-auto max-w-[1200px] space-y-6 px-4 ${isNativePlatform ? 'pt-2' : 'pt-3'}`}>
           {/* Acompanhamento anonimo salvo neste navegador */}
           {!isCustomerLogged && visibleActiveAnonymousOrders.length > 0 && (
             <div className="animate-in fade-in slide-in-from-top-4 duration-500">
