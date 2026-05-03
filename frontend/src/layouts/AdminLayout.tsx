@@ -9,6 +9,7 @@ import { Buildings, CaretDown, ChartBar, CheckSquare, ClipboardText, CreditCard,
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 import { ContextSideDrawer } from '../components/common/ContextSideDrawer';
+import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -31,7 +32,20 @@ export function AdminLayout({
   const [mobileOpenGroup, setMobileOpenGroup] = useState<string | null>(null);
   const userRole = String(auth?.user?.role || '').toUpperCase();
   const isOperatorUser = userRole === 'OPERATOR' || userRole === 'LOJISTA';
+  const operatorRoleLabel =
+    userRole === 'ADMIN'
+      ? 'Administrador da loja'
+      : userRole === 'OPERATOR' || userRole === 'LOJISTA'
+        ? 'Operador da loja'
+        : 'Conta da operação';
   const storeSlug = String(auth?.store?.slug || '').trim();
+  const storeName = String(auth?.store?.name || 'Minha loja').trim() || 'Minha loja';
+  const operatorName = String(auth?.user?.fullName || auth?.user?.name || '').trim();
+  const storeEmail = String(auth?.user?.email || '').trim();
+  const storeCity = String(auth?.store?.settings?.city || '').trim();
+  const storeState = String(auth?.store?.settings?.state || '').trim().toUpperCase();
+  const storeLocation = [storeCity, storeState].filter(Boolean).join(' · ');
+  const storeLogo = resolveAssetUrl(String(auth?.store?.settings?.logoUrl || '')) || '';
   const isVip = Boolean(auth?.store?.settings?.planExempt || auth?.subscription?.planExempt);
   const planName = String(auth?.subscription?.plan?.name || '').toLowerCase();
   const subscriptionStatus = String(auth?.subscription?.status || '').toUpperCase();
@@ -197,6 +211,20 @@ export function AdminLayout({
   };
 
   const accountActions = [
+    {
+      id: 'queue',
+      label: 'Pedidos em operação',
+      description: 'Acompanhe fila, produção e pedidos aguardando ação.',
+      icon: <CheckSquare size={22} weight="duotone" />,
+      onClick: () => navigate('/admin/queue'),
+    },
+    {
+      id: 'sales',
+      label: 'Vendas concluídas',
+      description: 'Histórico recente com pedidos já finalizados.',
+      icon: <ClipboardText size={22} weight="duotone" />,
+      onClick: () => navigate('/admin/queue', { state: { activeTab: 'completed' } }),
+    },
     ...(storeSlug
       ? [{
           id: 'storefront',
@@ -204,6 +232,22 @@ export function AdminLayout({
           description: 'Abra a loja pública sem sair da operação.',
           icon: <ShoppingCart size={22} weight="duotone" />,
           onClick: () => navigate(`/${storeSlug}`),
+        }]
+      : []),
+    {
+      id: 'summary',
+      label: 'Resumo da operação',
+      description: 'Visão geral da loja, vendas e atalhos do painel.',
+      icon: <ChartBar size={22} weight="duotone" />,
+      onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'resumo' } }),
+    },
+    ...(canUseMotoboys && userRole === 'ADMIN'
+      ? [{
+          id: 'motoboys',
+          label: 'Entregadores',
+          description: 'Gestão de equipe, repasses e vínculo das entregas.',
+          icon: <Scooter size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/motoboys'),
         }]
       : []),
     {
@@ -385,14 +429,27 @@ export function AdminLayout({
       <ContextSideDrawer
         isOpen={accountDrawerOpen}
         onClose={() => setAccountDrawerOpen(false)}
-        side="right"
+        side="left"
         eyebrow="Conta da operação"
-        title={String(auth?.store?.name || 'Minha loja')}
-        subtitle={String(auth?.user?.email || auth?.user?.fullName || auth?.user?.name || '').trim() || 'Acesso do lojista'}
-        leading={<UserCircle size={26} weight="duotone" className="text-[#336886]" />}
+        title={storeName}
+        subtitle={[operatorRoleLabel, operatorName || null, storeEmail || null].filter(Boolean).join(' · ') || 'Acesso da operação neste aparelho'}
+        leading={
+          storeLogo ? (
+            <img
+              src={storeLogo}
+              alt={storeName}
+              className="h-10 w-10 rounded-[0.95rem] bg-white object-contain p-1"
+            />
+          ) : (
+            <UserCircle size={26} weight="duotone" className="text-[#336886]" />
+          )
+        }
+        badges={[
+          { label: userRole === 'ADMIN' ? 'Admin' : 'Operador', tone: 'brand' },
+          { label: storeLocation || 'Operação ativa', tone: 'neutral' },
+        ]}
         actions={accountActions}
-        footerTitle="Já no Caminho"
-        footerSubtitle="Conta e acessos da operação"
+        footer={<PlatformTrustFooter compact mode="default" align="left" />}
       />
     </div>
   );

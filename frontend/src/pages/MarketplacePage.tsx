@@ -2751,14 +2751,6 @@ export function MarketplacePage() {
               <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#EEF2F7]/90 to-transparent" />
             </div>
 
-            {debouncedQuery.length < 2 && condominiums.length > 0 ? (
-              <div className="px-1 pt-1">
-                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Condomínios</p>
-                <h1 className="mt-1 text-[1.15rem] font-black leading-tight tracking-[-0.03em] text-slate-950 sm:text-[1.28rem]">
-                  Escolha a feira do seu condomínio
-                </h1>
-              </div>
-            ) : null}
           </div>
           </div>
         </header>
@@ -2992,9 +2984,8 @@ export function MarketplacePage() {
 
                         {/* Texto */}
                         <div className="min-w-0 flex-1">
-                          <div className="mb-1 flex items-center gap-2">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#336886]">Feiras no condomínio</p>
-                            {liveCount > 0 && (
+                          {liveCount > 0 ? (
+                            <div className="mb-1 flex items-center gap-2">
                               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[8px] font-black uppercase tracking-wide text-white">
                                 <span className="relative flex h-1.5 w-1.5">
                                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
@@ -3002,9 +2993,9 @@ export function MarketplacePage() {
                                 </span>
                                 {liveCount} ao vivo
                               </span>
-                            )}
-                          </div>
-                          <p className="truncate text-[15px] font-black text-slate-900 leading-snug">Encontre lojas perto de você</p>
+                            </div>
+                          ) : null}
+                          <p className="truncate text-[15px] font-black text-slate-900 leading-snug">Veja lojas no condomínio</p>
                           <p className="mt-0.5 truncate text-[11px] font-medium text-slate-400">
                             {condominiums.length} condomínio{condominiums.length === 1 ? '' : 's'} disponível{condominiums.length === 1 ? '' : 'is'}
                           </p>
@@ -3793,18 +3784,32 @@ export function MarketplacePage() {
 
       {condominiumPickerOpen && (
         <div className="fixed inset-0 z-[220] overflow-x-hidden overflow-y-auto overscroll-x-none bg-[radial-gradient(circle_at_top,rgba(51,104,134,0.10),transparent_26%),linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)] text-slate-950">
-          <div className="mx-auto min-h-screen w-full max-w-[640px] overflow-x-hidden pb-28">
+            <div className="mx-auto min-h-screen w-full max-w-[640px] overflow-x-hidden pb-28">
             <div className="relative overflow-x-hidden px-4 pb-4 pt-[max(env(safe-area-inset-top),0.6rem)]">
               <div className="pointer-events-none absolute -right-12 -top-10 h-56 w-56 rounded-full bg-[#336886]/12 blur-3xl" />
 
-              <button
-                type="button"
-                onClick={() => { setCondominiumPickerOpen(false); setCondominiumSearch(''); setCondoPickerFilter('all'); }}
-                className="relative mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/80 text-slate-700 shadow-[0_18px_36px_-22px_rgba(15,23,42,0.35)] backdrop-blur-xl transition-colors hover:bg-white active:scale-95"
-                aria-label="Voltar"
-              >
-                <CaretRight size={16} weight="bold" className="rotate-180" />
-              </button>
+              <div className="relative mb-4 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => { setCondominiumPickerOpen(false); setCondominiumSearch(''); setCondoPickerFilter('all'); }}
+                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/70 bg-white/80 text-slate-700 shadow-[0_18px_36px_-22px_rgba(15,23,42,0.35)] backdrop-blur-xl transition-colors hover:bg-white active:scale-95"
+                  aria-label="Voltar"
+                >
+                  <CaretRight size={16} weight="bold" className="rotate-180" />
+                </button>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Condomínios</p>
+                  <h1 className="mt-1 truncate text-[1.08rem] font-black leading-tight tracking-[-0.03em] text-slate-950 sm:text-[1.18rem]">
+                    Escolha a feira do seu condomínio
+                  </h1>
+                </div>
+                <div className="shrink-0 min-w-[5.25rem] rounded-[1.25rem] border border-[#bfd6e4]/80 bg-white/82 px-3 py-2 text-center shadow-[0_16px_30px_-22px_rgba(51,104,134,0.28)] backdrop-blur-md">
+                  <p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#336886]">Ao vivo</p>
+                  <p className="mt-1 text-lg font-black leading-none text-slate-950">
+                    {condominiumPickerCounts.live}
+                  </p>
+                </div>
+              </div>
 
               <div className="relative rounded-[2rem] border border-slate-200/80 bg-white px-4 py-5 shadow-[0_24px_52px_-36px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/55">
                 <div className="relative mb-4 flex items-start justify-between gap-3">
@@ -3819,19 +3824,9 @@ export function MarketplacePage() {
                       </span>
                       <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]">Já no Caminho</p>
                     </div>
-                    <h2 className="max-w-[16rem] text-[1.9rem] font-black leading-[0.98] tracking-[-0.045em] text-slate-950">
-                      Escolha a feira do seu condomínio
-                    </h2>
-                    <p className="mt-2 max-w-[19rem] text-[13px] font-medium leading-snug text-slate-600">
+                    <p className="max-w-[19rem] text-[13px] font-medium leading-snug text-slate-600">
                       Veja o que está ao vivo, o que vem em seguida e entre com um toque no condomínio certo.
                     </p>
-                  </div>
-                  <div className="shrink-0 min-w-[5.75rem] rounded-[1.35rem] border border-[#bfd6e4]/80 bg-white/82 px-3 py-2 text-center shadow-[0_16px_30px_-22px_rgba(51,104,134,0.28)] backdrop-blur-md">
-                    <p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#336886]">Ao vivo</p>
-                    <p className="mt-1 text-lg font-black leading-none text-slate-950">
-                      {condominiumPickerCounts.live}
-                    </p>
-                    <p className="mt-1 text-[10px] font-semibold text-slate-500">feira{condominiumPickerCounts.live === 1 ? '' : 's'} ao vivo</p>
                   </div>
                 </div>
 

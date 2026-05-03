@@ -1,6 +1,11 @@
 import { useEffect, type ReactNode } from 'react';
 import { X } from '@phosphor-icons/react';
 
+type ContextSideDrawerBadge = {
+  label: string;
+  tone?: 'brand' | 'success' | 'neutral' | 'dark';
+};
+
 type ContextSideDrawerAction = {
   id: string;
   label: string;
@@ -17,9 +22,11 @@ type ContextSideDrawerProps = {
   title: string;
   subtitle?: string;
   leading: ReactNode;
+  badges?: ContextSideDrawerBadge[];
   actions: ContextSideDrawerAction[];
   footerTitle?: string;
   footerSubtitle?: string;
+  footer?: ReactNode;
   side?: 'left' | 'right';
 };
 
@@ -30,9 +37,11 @@ export function ContextSideDrawer({
   title,
   subtitle,
   leading,
+  badges = [],
   actions,
   footerTitle,
   footerSubtitle,
+  footer,
   side = 'right',
 }: ContextSideDrawerProps) {
   useEffect(() => {
@@ -77,6 +86,26 @@ export function ContextSideDrawer({
                 <p className="truncate text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{eyebrow}</p>
                 <h2 className="mt-1 truncate text-[1.1rem] font-black tracking-[-0.03em] text-slate-950">{title}</h2>
                 {subtitle ? <p className="mt-1 text-[12px] font-semibold leading-relaxed text-slate-500">{subtitle}</p> : null}
+                {badges.length > 0 ? (
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    {badges.map((badge) => (
+                      <span
+                        key={badge.label}
+                        className={`inline-flex items-center rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] ${
+                          badge.tone === 'success'
+                            ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
+                            : badge.tone === 'brand'
+                              ? 'border border-[#d8e5ee] bg-[#edf5fa] text-[#336886]'
+                              : badge.tone === 'dark'
+                                ? 'border border-slate-200 bg-slate-900 text-white'
+                                : 'border border-slate-200 bg-white/90 text-slate-500'
+                        }`}
+                      >
+                        {badge.label}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </div>
             <button
@@ -128,7 +157,11 @@ export function ContextSideDrawer({
           </div>
         </div>
 
-        {(footerTitle || footerSubtitle) ? (
+        {footer ? (
+          <div className="border-t border-slate-200/80 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            {footer}
+          </div>
+        ) : (footerTitle || footerSubtitle) ? (
           <div className="border-t border-slate-200/80 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
             {footerTitle ? <p className="text-[11px] font-black text-slate-900">{footerTitle}</p> : null}
             {footerSubtitle ? <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">{footerSubtitle}</p> : null}

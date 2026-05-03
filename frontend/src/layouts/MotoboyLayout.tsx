@@ -6,6 +6,8 @@ import { motoboyService } from '../services/motoboyService';
 import { nativeBiometricService } from '../services/nativeBiometricService';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 import { ContextSideDrawer } from '../components/common/ContextSideDrawer';
+import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 
 const MOTOBOY_QUEUE_BADGE_EVENT = 'jnc:motoboy-queue-badge';
 
@@ -39,6 +41,7 @@ export function MotoboyLayout() {
   const motoboyUser = motoboySession?.user || null;
   const motoboyName = String(motoboyUser?.fullName || motoboyUser?.name || 'Entregador').trim();
   const motoboyEmail = String(motoboyUser?.email || '').trim();
+  const motoboyImage = resolveAssetUrl(String(motoboyUser?.profileImageUrl || '')) || '';
 
   const tabs: Tab[] = [
     {
@@ -144,6 +147,20 @@ export function MotoboyLayout() {
   };
 
   const accountActions = [
+    {
+      id: 'home',
+      label: 'Painel do entregador',
+      description: 'Resumo rápido da conta, corrida atual e próximos passos.',
+      icon: <Truck size={22} weight="duotone" />,
+      onClick: () => navigate('/motoboy/home'),
+    },
+    {
+      id: 'delivery',
+      label: 'Entrega atual',
+      description: 'Abra a rota em andamento e confirme retirada ou entrega.',
+      icon: <Motorcycle size={22} weight="duotone" />,
+      onClick: () => navigate('/motoboy/delivery'),
+    },
     {
       id: 'profile',
       label: 'Dados da conta',
@@ -295,14 +312,27 @@ export function MotoboyLayout() {
       <ContextSideDrawer
         isOpen={accountDrawerOpen}
         onClose={() => setAccountDrawerOpen(false)}
-        side="right"
+        side="left"
         eyebrow="Conta do entregador"
         title={motoboyName || 'Entregador'}
         subtitle={motoboyEmail || 'Acesso ativo neste aparelho'}
-        leading={<Motorcycle size={26} weight="duotone" className="text-[#f59e0b]" />}
+        leading={
+          motoboyImage ? (
+            <img
+              src={motoboyImage}
+              alt={motoboyName || 'Entregador'}
+              className="h-10 w-10 rounded-[0.95rem] object-cover"
+            />
+          ) : (
+            <Motorcycle size={26} weight="duotone" className="text-[#f59e0b]" />
+          )
+        }
+        badges={[
+          { label: 'Entregador', tone: 'dark' },
+          { label: 'Conta ativa', tone: 'neutral' },
+        ]}
         actions={accountActions}
-        footerTitle="Já no Caminho"
-        footerSubtitle="Conta e entregas"
+        footer={<PlatformTrustFooter compact mode="default" align="left" />}
       />
     </div>
   );

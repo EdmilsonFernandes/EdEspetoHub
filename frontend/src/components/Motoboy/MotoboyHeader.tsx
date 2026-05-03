@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { UserCircle } from '@phosphor-icons/react';
+import { Motorcycle } from '@phosphor-icons/react';
 import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
 import { motoboyService } from '../../services/motoboyService';
 
@@ -26,7 +26,6 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
     resolveAssetUrl(String(user?.profileImageUrl || '')) || ''
   );
   const userImage = resolvedUserImage;
-  const userInitial = String((userName || 'E').trim().charAt(0) || 'E').toUpperCase();
   const showSession = Boolean(motoboySession?.token && userEmail);
 
   useEffect(() => {
@@ -102,8 +101,8 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
                     className="h-9 w-9 rounded-xl object-cover border border-slate-200 bg-white shrink-0"
                   />
                 ) : (
-                  <div className="h-9 w-9 rounded-xl border border-slate-200 bg-slate-100 text-slate-700 grid place-items-center text-xs font-extrabold shrink-0">
-                    {userInitial}
+                  <div className="grid h-9 w-9 place-items-center rounded-xl border border-slate-200 bg-slate-100 text-amber-600 shrink-0">
+                    <Motorcycle size={18} weight="duotone" />
                   </div>
                 )}
                 <div className="leading-tight text-left min-w-0">
@@ -126,7 +125,7 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
                     className="h-8 w-8 rounded-lg object-cover border border-slate-200 bg-white shrink-0"
                   />
                 ) : (
-                  <UserCircle size={18} weight="duotone" className="text-slate-600 shrink-0" />
+                  <Motorcycle size={18} weight="duotone" className="text-amber-600 shrink-0" />
                 )}
                 <div className="leading-tight text-left min-w-0 max-w-[140px]">
                   <div className="text-[11px] font-extrabold truncate">{userName || 'Entregador'}</div>
