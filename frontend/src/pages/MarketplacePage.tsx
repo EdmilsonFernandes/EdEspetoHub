@@ -2836,6 +2836,16 @@ export function MarketplacePage() {
           )}
 
           {debouncedQuery.length < 2 && condominiums.length > 0 && (
+            <>
+            <div
+              className="px-1 pt-0.5"
+              style={{ transition: 'all .45s ease', transitionDelay: '70ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
+            >
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Condomínios</p>
+              <h1 className="mt-1 text-[1.15rem] font-black leading-tight tracking-[-0.03em] text-slate-950 sm:text-[1.28rem]">
+                Escolha a feira do seu condomínio
+              </h1>
+            </div>
             <section
               className={selectedCondominium ? 'sticky top-[max(env(safe-area-inset-top),0.65rem)] z-30 mb-4' : 'mb-6'}
               style={{ transition: 'all .45s ease', transitionDelay: '95ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
@@ -2981,6 +2991,7 @@ export function MarketplacePage() {
                 </>
               )}
             </section>
+            </>
           )}
 
           {/* Seção Categorias Premium Squircle */}
