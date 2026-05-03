@@ -19,6 +19,7 @@ import { SuccessView } from '../components/Client/SuccessView';
 import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
 import { ContextSideDrawer } from '../components/common/ContextSideDrawer';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
+import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { formatCurrency, formatOrderDisplayId, formatOrderStatus, formatOrderType, formatPaymentMethod } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
@@ -43,7 +44,7 @@ import {
 import { getCartPricing } from '../utils/orderPricing';
 import { printReceiptAsImage } from '../utils/printReceiptImage';
 import { clearAllCustomerSessions } from '../utils/customerSessionStorage';
-import { nativeBiometricService } from '../services/nativeBiometricService';
+import { ADMIN_SESSION_EVENT, nativeBiometricService } from '../services/nativeBiometricService';
 import { navigateBackOrFallback } from '../utils/navigation';
 
 const WEEKDAY_LABELS = [ 'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado' ];
@@ -232,6 +233,7 @@ export function StorePage() {
   const { storeSlug } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { auth } = useAuth();
   const { showToast } = useToast();
   const [user, setUser] = useState(null);
   const [adminAccountDrawerOpen, setAdminAccountDrawerOpen] = useState(false);
@@ -282,6 +284,28 @@ export function StorePage() {
     lng: null,
   });
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+  const syncAdminSession = useCallback((candidate?: any | null) => {
+    const session = candidate && typeof candidate === 'object' ? candidate : null;
+    if (session?.token && session?.user) {
+      setUser(session);
+      return;
+    }
+    try {
+      const savedSession = localStorage.getItem('adminSession');
+      if (!savedSession) {
+        setUser(null);
+        return;
+      }
+      const parsedSession = JSON.parse(savedSession);
+      if (parsedSession?.token && parsedSession?.user) {
+        setUser(parsedSession);
+        return;
+      }
+    } catch {
+      // ignore malformed admin session in local storage
+    }
+    setUser(null);
+  }, []);
 
   useEffect(() => {
     const warning = location.state && (location.state as any).hubCoverageWarning;
@@ -529,7 +553,7 @@ export function StorePage() {
   const isNativeRuntime = Capacitor.isNativePlatform();
   const showAdminWebReturnBar = isStoreAdmin && !isNativeRuntime && view !== 'menu';
   const showClientWebBottomNav = !isNativeRuntime && !isStoreAdmin && view === 'menu';
-  const normalizedRole = String(user?.role || '').toLowerCase();
+  const normalizedRole = String(user?.user?.role || user?.role || '').toLowerCase();
   const isProfessionalCheckoutUser = [
     'admin',
     'operator',
@@ -1006,11 +1030,29 @@ export function StorePage() {
   }, [storeOrderingEnabled, user?.token, view]);
 
   useEffect(() => {
-    const savedSession = localStorage.getItem('adminSession');
-    if (savedSession) {
-      const parsedSession = JSON.parse(savedSession);
-      setUser(parsedSession);
-    }
+    syncAdminSession(auth);
+  }, [auth, syncAdminSession]);
+
+  useEffect(() => {
+    syncAdminSession();
+    const handleAdminSessionUpdated = (event: Event) => {
+      const customEvent = event as CustomEvent<any>;
+      syncAdminSession(customEvent?.detail ?? null);
+    };
+    const handleStorage = (event: StorageEvent) => {
+      if (!event.key || event.key === 'adminSession') {
+        syncAdminSession();
+      }
+    };
+    window.addEventListener(ADMIN_SESSION_EVENT, handleAdminSessionUpdated as EventListener);
+    window.addEventListener('storage', handleStorage);
+    return () => {
+      window.removeEventListener(ADMIN_SESSION_EVENT, handleAdminSessionUpdated as EventListener);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, [syncAdminSession]);
+
+  useEffect(() => {
     const savedCustomerSession =
       localStorage.getItem('customerSession') || localStorage.getItem(customerSessionStorageKey);
     if (savedCustomerSession) {

@@ -1407,7 +1407,8 @@ export function MarketplacePage() {
   useEffect(() => {
     const restoreHubHeader = () => {
       setHasEntered(true);
-      setIsHeaderElevated((window.scrollY || 0) > 6);
+      setIsHeaderElevated(!isNativePlatform || (window.scrollY || 0) > 6);
+      setIsBottomNavVisible(true);
       setIsSearchEditing(false);
       if (searchInputRef.current) {
         searchInputRef.current.blur();
@@ -1428,9 +1429,14 @@ export function MarketplacePage() {
       window.removeEventListener('pageshow', restoreHubHeader);
       document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, []);
+  }, [isNativePlatform]);
 
   useEffect(() => {
+    if (!isNativePlatform) {
+      setIsHeaderElevated(true);
+      setIsBottomNavVisible(true);
+      return;
+    }
     let lastY = window.scrollY || 0;
     let ticking = false;
     const onScroll = () => {
@@ -1448,7 +1454,7 @@ export function MarketplacePage() {
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  }, [isNativePlatform]);
 
   useEffect(() => {
     const onTouchStart = (event: TouchEvent) => {
