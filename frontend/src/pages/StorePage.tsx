@@ -17,6 +17,7 @@ import { CartView } from '../components/Client/CartView';
 import { CartViewCondominium } from '../components/Client/CartViewCondominium';
 import { SuccessView } from '../components/Client/SuccessView';
 import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
+import { ContextSideDrawer } from '../components/common/ContextSideDrawer';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { useToast } from '../contexts/ToastContext';
 import { formatCurrency, formatOrderDisplayId, formatOrderStatus, formatOrderType, formatPaymentMethod } from '../utils/format';
@@ -233,6 +234,7 @@ export function StorePage() {
   const location = useLocation();
   const { showToast } = useToast();
   const [user, setUser] = useState(null);
+  const [adminAccountDrawerOpen, setAdminAccountDrawerOpen] = useState(false);
   const [customerSession, setCustomerSession] = useState<any | null>(null);
   const [customerAddresses, setCustomerAddresses] = useState<any[]>([]);
   const [customerOrders, setCustomerOrders] = useState<any[]>([]);
@@ -289,6 +291,16 @@ export function StorePage() {
     }
     setHubCoverageNotice({ message: String(warning.message) });
   }, [location.state]);
+
+  useEffect(() => {
+    if (!isStoreAdmin) {
+      setAdminAccountDrawerOpen(false);
+      return;
+    }
+    const openAccountDrawer = () => setAdminAccountDrawerOpen(true);
+    window.addEventListener('admin:open-account-drawer', openAccountDrawer as EventListener);
+    return () => window.removeEventListener('admin:open-account-drawer', openAccountDrawer as EventListener);
+  }, [isStoreAdmin]);
 
   useEffect(() => {
     try {
@@ -513,6 +525,7 @@ export function StorePage() {
     Boolean(user?.store?.slug) &&
     Boolean(storeSlug) &&
     user.store.slug === storeSlug;
+  const adminRoleLabel = String(user?.user?.role || '').toUpperCase() === 'ADMIN' ? 'Administrador da loja' : 'Operador da loja';
   const isNativeRuntime = Capacitor.isNativePlatform();
   const showAdminWebReturnBar = isStoreAdmin && !isNativeRuntime && view !== 'menu';
   const showClientWebBottomNav = !isNativeRuntime && !isStoreAdmin && view === 'menu';
@@ -528,6 +541,10 @@ export function StorePage() {
   ].includes(normalizedRole);
   const hasAdminPrintAccess = normalizedRole === 'admin';
   const canUseAdminPrintFlow = hasAdminPrintAccess || isStoreAdmin;
+  const adminStoreName = String(user?.store?.name || storeName || branding?.brandName || 'Minha loja').trim() || 'Minha loja';
+  const adminStoreLogo = resolveAssetUrl(String(user?.store?.settings?.logoUrl || branding?.logoUrl || '')) || '';
+  const adminOperatorName = String(user?.user?.fullName || user?.user?.name || '').trim();
+  const adminOperatorEmail = String(user?.user?.email || '').trim();
   const [showPrintPrompt, setShowPrintPrompt] = useState(false);
   const [isGeneratingPrint, setIsGeneratingPrint] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
@@ -2497,9 +2514,49 @@ export function StorePage() {
     try {
       localStorage.removeItem('adminSession');
     } catch {}
+    setAdminAccountDrawerOpen(false);
     setUser(null);
     navigate('/', { replace: true });
   };
+
+  const adminAccountActions = [
+    {
+      id: 'queue',
+      label: 'Pedidos em operação',
+      description: 'Acompanhe fila, preparo e pedidos aguardando ação.',
+      icon: <ClipboardText size={22} weight="duotone" />,
+      onClick: () => navigate('/admin/queue'),
+    },
+    {
+      id: 'summary',
+      label: 'Resumo da operação',
+      description: 'Volte ao painel com visão geral da loja.',
+      icon: <House size={22} weight="duotone" />,
+      onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'resumo' } }),
+    },
+    {
+      id: 'products',
+      label: 'Produtos',
+      description: 'Abra o catálogo e ajustes da vitrine.',
+      icon: <ShoppingCart size={22} weight="duotone" />,
+      onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'produtos' } }),
+    },
+    {
+      id: 'settings',
+      label: 'Configurações da loja',
+      description: 'Marca, atendimento e ajustes da operação.',
+      icon: <Buildings size={22} weight="duotone" />,
+      onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'config' } }),
+    },
+    {
+      id: 'logout',
+      label: 'Sair da operação',
+      description: 'Encerra somente este acesso neste aparelho.',
+      icon: <X size={22} weight="duotone" />,
+      onClick: handleStoreSessionLogout,
+      tone: 'danger' as const,
+    },
+  ];
 
   const handleCustomerLogout = () => {
     persistCustomerSession(null);
@@ -3490,6 +3547,33 @@ export function StorePage() {
       </main>
 
       {isStoreAdmin && view === 'menu' && <AdminMobileBottomNav />}
+      {isStoreAdmin && view === 'menu' && (
+        <ContextSideDrawer
+          isOpen={adminAccountDrawerOpen}
+          onClose={() => setAdminAccountDrawerOpen(false)}
+          side="left"
+          eyebrow="Conta da operação"
+          title={adminStoreName}
+          subtitle={[adminRoleLabel, adminOperatorName || null, adminOperatorEmail || null].filter(Boolean).join(' · ') || 'Acesso da operação neste aparelho'}
+          leading={
+            adminStoreLogo ? (
+              <img
+                src={adminStoreLogo}
+                alt={adminStoreName}
+                className="h-10 w-10 rounded-[0.95rem] bg-white object-contain p-1"
+              />
+            ) : (
+              <UserCircle size={26} weight="duotone" className="text-[#336886]" />
+            )
+          }
+          badges={[
+            { label: String(user?.user?.role || '').toUpperCase() === 'ADMIN' ? 'Admin' : 'Operador', tone: 'brand' },
+            { label: 'Loja online', tone: 'neutral' },
+          ]}
+          actions={adminAccountActions}
+          footer={<PlatformTrustFooter compact mode="default" align="left" />}
+        />
+      )}
 
       {showCustomerAccount && !isStoreAdmin && (
         <div className="fixed inset-0 z-[9998] bg-slate-950/65 backdrop-blur-sm flex items-center justify-center px-3 py-5">
