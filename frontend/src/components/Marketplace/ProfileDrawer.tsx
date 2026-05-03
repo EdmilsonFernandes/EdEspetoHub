@@ -13,7 +13,6 @@ import {
   ShieldCheckered,
   UserCircle,
   UserRectangle,
-  House,
   CaretRight,
   Fingerprint,
   X
@@ -47,6 +46,8 @@ type ProfileDrawerProps = {
   onOpenPrivacy: () => void;
   onOpenHelp: () => void;
   onLogout: () => void;
+  onLogoutAdmin?: () => void;
+  onLogoutMotoboy?: () => void;
   onRegisterClient: () => void;
   onRegisterStore: () => void;
   onRegisterMotoboy: () => void;
@@ -62,6 +63,8 @@ type AccessProfile = {
   current?: boolean;
   ready?: boolean;
 };
+
+type DrawerContext = 'guest' | 'client' | 'store' | 'motoboy';
 
 export function ProfileDrawer({
   isOpen,
@@ -80,12 +83,15 @@ export function ProfileDrawer({
   onOpenPrivacy: _onOpenPrivacy,
   onOpenHelp,
   onLogout,
+  onLogoutAdmin,
+  onLogoutMotoboy,
   onRegisterClient,
   onRegisterStore,
   onRegisterMotoboy,
   versionLabel,
 }: ProfileDrawerProps) {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isMotoboy, setIsMotoboy] = useState(false);
   const [storeSlug, setStoreSlug] = useState<string | null>(null);
   const [accessPickerOpen, setAccessPickerOpen] = useState(false);
   const [highlightFirstAccess, setHighlightFirstAccess] = useState(false);
@@ -104,6 +110,7 @@ export function ProfileDrawer({
     if (!isOpen) return;
     try {
       const adminRaw = localStorage.getItem('adminSession');
+      const motoboyRaw = localStorage.getItem('motoboySession');
       if (adminRaw) {
         const parsed = JSON.parse(adminRaw);
         if (parsed?.token && parsed?.user) {
@@ -114,9 +121,19 @@ export function ProfileDrawer({
         }
       } else {
         setIsAdmin(false);
+        setStoreSlug(null);
+      }
+
+      if (motoboyRaw) {
+        const parsed = JSON.parse(motoboyRaw);
+        setIsMotoboy(Boolean(parsed?.token && parsed?.user));
+      } else {
+        setIsMotoboy(false);
       }
     } catch {
       setIsAdmin(false);
+      setIsMotoboy(false);
+      setStoreSlug(null);
     }
 
     try {
@@ -181,20 +198,6 @@ export function ProfileDrawer({
     return 'Entrar';
   };
 
-  const actions: DrawerAction[] = isLogged
-    ? [
-        { id: 'account', label: 'Minha Conta', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-[#336886]', bgColor: 'bg-[#336886]/10' },
-        { id: 'orders', label: 'Meus pedidos', icon: <Receipt size={22} weight="duotone" />, onClick: onOpenOrders || onOpenAccount, iconColor: 'text-[#336886]', bgColor: 'bg-[#336886]/10' },
-        { id: 'settings', label: 'Configurações', icon: <GearSix size={22} weight="duotone" />, onClick: onOpenSettings, iconColor: 'text-violet-600', bgColor: 'bg-violet-50' },
-        { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
-        { id: 'help', label: 'Ajuda e Atendimento', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
-        { id: 'logout', label: 'Sair da conta', icon: <SignOut size={22} weight="duotone" />, onClick: onLogout, tone: 'danger' },
-      ]
-    : [
-        { id: 'help', label: 'Ajuda e Atendimento', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
-        { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
-      ];
-
   const accessProfiles: AccessProfile[] = [
     {
       id: 'client',
@@ -234,47 +237,151 @@ export function ProfileDrawer({
       ready: savedAccessProfiles.motoboy.biometric || savedAccessProfiles.motoboy.hasSession,
     },
   ];
-  const visibleAccessProfiles = isLogged ? accessProfiles.filter((item) => item.id !== 'client') : accessProfiles;
-  const quickSwitchAccess = [
-    {
-      id: 'store',
-      label: 'Loja',
-      description: 'Painel do lojista',
-      state: getCompactAccessStateLabel(savedAccessProfiles.admin),
-      stateIcon: savedAccessProfiles.admin.biometric
-        ? <Fingerprint size={13} weight="duotone" />
-        : savedAccessProfiles.admin.hasSession
-          ? <CheckCircle size={13} weight="fill" />
-          : <CaretRight size={13} weight="bold" />,
-      icon: <Storefront size={23} weight="duotone" />,
-      shell: 'border-[#d8e5ee] bg-[linear-gradient(135deg,#ffffff_0%,#f1f7fb_100%)] text-slate-950 shadow-[0_14px_28px_-24px_rgba(51,104,134,0.28)]',
-      iconClass: 'bg-white/88 text-[#336886] ring-1 ring-[#d8e5ee]',
-      stateClass: savedAccessProfiles.admin.biometric || savedAccessProfiles.admin.hasSession ? 'text-[#336886]' : 'text-slate-500',
-      onClick: () => {
-        onOpenAdminLogin();
-        onClose();
-      },
-    },
-    {
-      id: 'motoboy',
-      label: 'Entrega',
-      description: 'Rotas e coletas',
-      state: getCompactAccessStateLabel(savedAccessProfiles.motoboy),
-      stateIcon: savedAccessProfiles.motoboy.biometric
-        ? <Fingerprint size={13} weight="duotone" />
-        : savedAccessProfiles.motoboy.hasSession
-          ? <CheckCircle size={13} weight="fill" />
-          : <CaretRight size={13} weight="bold" />,
-      icon: <Motorcycle size={23} weight="duotone" />,
-      shell: 'border-slate-200 bg-[linear-gradient(135deg,#ffffff_0%,#f6f9fb_100%)] text-slate-950 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.22)]',
-      iconClass: 'bg-white/88 text-slate-700 ring-1 ring-slate-200',
-      stateClass: savedAccessProfiles.motoboy.biometric || savedAccessProfiles.motoboy.hasSession ? 'text-slate-700' : 'text-slate-500',
-      onClick: () => {
-        onOpenMotoboyLogin();
-        onClose();
-      },
-    },
+  const activeContext: DrawerContext = isLogged ? 'client' : isAdmin ? 'store' : isMotoboy ? 'motoboy' : 'guest';
+  const hasActiveContext = activeContext !== 'guest';
+  const visibleAccessProfiles = hasActiveContext
+    ? accessProfiles.filter((item) => item.id !== activeContext)
+    : accessProfiles;
+
+  const currentIdentity =
+    activeContext === 'client'
+      ? {
+          eyebrow: 'Conta conectada',
+          title: String(userName || savedAccessProfiles.customer.name || 'Cliente').trim() || 'Cliente',
+          email: String(userEmail || savedAccessProfiles.customer.email || '').trim(),
+          imageUrl: profileImageUrl || null,
+          icon: <UserCircle size={36} weight="duotone" />,
+          iconShell: 'rounded-2xl bg-gradient-to-br from-white to-slate-100 text-slate-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_18px_32px_-24px_rgba(15,23,42,0.35)] ring-1 ring-slate-100',
+          badges: [
+            { label: 'Cliente no hub', tone: 'success' as const },
+            { label: 'Conta e pedidos', tone: 'neutral' as const },
+          ],
+          switchTitle: 'Abrir outra área',
+          switchHint: 'Sua conta de cliente segue ativa no hub enquanto você entra na operação.',
+        }
+      : activeContext === 'store'
+        ? {
+            eyebrow: 'Operação conectada',
+            title: String(savedAccessProfiles.admin.name || 'Lojista').trim() || 'Lojista',
+            email: String(savedAccessProfiles.admin.email || '').trim(),
+            imageUrl: null,
+            icon: <Storefront size={32} weight="duotone" />,
+            iconShell: 'rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] text-white shadow-[0_18px_30px_-18px_rgba(51,104,134,0.45)] ring-2 ring-[#336886]/12',
+            badges: [
+              { label: 'Lojista', tone: 'brand' as const },
+              { label: 'Operação da loja', tone: 'neutral' as const },
+            ],
+            switchTitle: 'Trocar acesso',
+            switchHint: 'Cliente e entrega ficam disponíveis como atalhos, sem misturar com o menu da loja.',
+          }
+        : activeContext === 'motoboy'
+          ? {
+              eyebrow: 'Entrega conectada',
+              title: String(savedAccessProfiles.motoboy.name || 'Entregador').trim() || 'Entregador',
+              email: String(savedAccessProfiles.motoboy.email || '').trim(),
+              imageUrl: null,
+              icon: <Motorcycle size={32} weight="duotone" />,
+              iconShell: 'rounded-2xl bg-[linear-gradient(135deg,#0f172a,#334155)] text-white shadow-[0_18px_30px_-18px_rgba(15,23,42,0.45)] ring-2 ring-slate-300/12',
+              badges: [
+                { label: 'Entregador', tone: 'dark' as const },
+                { label: 'Painel de entregas', tone: 'neutral' as const },
+              ],
+              switchTitle: 'Trocar acesso',
+              switchHint: 'Abra cliente ou loja quando precisar, mantendo o foco na área de entregas.',
+            }
+          : null;
+
+  const clientActions: DrawerAction[] = [
+    { id: 'account', label: 'Minha Conta', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-[#336886]', bgColor: 'bg-[#336886]/10' },
+    { id: 'orders', label: 'Meus pedidos', icon: <Receipt size={22} weight="duotone" />, onClick: onOpenOrders || onOpenAccount, iconColor: 'text-[#336886]', bgColor: 'bg-[#336886]/10' },
+    { id: 'settings', label: 'Configurações', icon: <GearSix size={22} weight="duotone" />, onClick: onOpenSettings, iconColor: 'text-violet-600', bgColor: 'bg-violet-50' },
+    { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
+    { id: 'help', label: 'Ajuda e Atendimento', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
+    { id: 'logout', label: 'Sair da conta', icon: <SignOut size={22} weight="duotone" />, onClick: onLogout, tone: 'danger' },
   ];
+  const storeActions: DrawerAction[] = [
+    { id: 'store-panel', label: 'Operação da loja', icon: <CookingPot size={22} weight="duotone" />, onClick: onOpenAdminLogin, iconColor: 'text-[#336886]', bgColor: 'bg-[#336886]/10' },
+    { id: 'help-store', label: 'Ajuda operacional', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
+    { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
+    { id: 'logout-store', label: 'Sair da operação', icon: <SignOut size={22} weight="duotone" />, onClick: onLogoutAdmin || (() => undefined), tone: 'danger' },
+  ];
+  if (storeSlug) {
+    storeActions.splice(1, 0, {
+      id: 'storefront',
+      label: 'Minha vitrine',
+      icon: <Storefront size={22} weight="duotone" />,
+      onClick: () => {
+        window.location.href = `/${storeSlug}`;
+      },
+      iconColor: 'text-slate-700',
+      bgColor: 'bg-slate-100',
+    });
+  }
+  const motoboyActions: DrawerAction[] = [
+    { id: 'motoboy-panel', label: 'Painel de entregas', icon: <Motorcycle size={22} weight="duotone" />, onClick: onOpenMotoboyLogin, iconColor: 'text-slate-700', bgColor: 'bg-slate-100' },
+    { id: 'help-motoboy', label: 'Ajuda do entregador', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
+    { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
+    { id: 'logout-motoboy', label: 'Sair das entregas', icon: <SignOut size={22} weight="duotone" />, onClick: onLogoutMotoboy || (() => undefined), tone: 'danger' },
+  ];
+  const guestActions: DrawerAction[] = [
+    { id: 'help', label: 'Ajuda e Atendimento', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
+    { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
+  ];
+  const actions: DrawerAction[] =
+    activeContext === 'client'
+      ? clientActions
+      : activeContext === 'store'
+        ? storeActions
+        : activeContext === 'motoboy'
+          ? motoboyActions
+          : guestActions;
+
+  const quickSwitchAccess = accessProfiles
+    .filter((item) => hasActiveContext && item.id !== activeContext)
+    .map((item) => {
+      const profile =
+        item.id === 'client'
+          ? savedAccessProfiles.customer
+          : item.id === 'store'
+            ? savedAccessProfiles.admin
+            : savedAccessProfiles.motoboy;
+
+      return {
+        id: item.id,
+        label: item.id === 'client' ? 'Cliente' : item.id === 'store' ? 'Loja' : 'Entrega',
+        description:
+          item.id === 'client'
+            ? 'Conta e pedidos'
+            : item.id === 'store'
+              ? 'Painel do lojista'
+              : 'Rotas e coletas',
+        state: getCompactAccessStateLabel(profile),
+        stateIcon: profile.biometric
+          ? <Fingerprint size={13} weight="duotone" />
+          : profile.hasSession
+            ? <CheckCircle size={13} weight="fill" />
+            : <CaretRight size={13} weight="bold" />,
+        icon: item.id === 'client' ? <UserCircle size={23} weight="duotone" /> : item.id === 'store' ? <Storefront size={23} weight="duotone" /> : <Motorcycle size={23} weight="duotone" />,
+        shell:
+          item.id === 'store'
+            ? 'border-[#d8e5ee] bg-[linear-gradient(135deg,#ffffff_0%,#f1f7fb_100%)] text-slate-950 shadow-[0_14px_28px_-24px_rgba(51,104,134,0.28)]'
+            : 'border-slate-200 bg-[linear-gradient(135deg,#ffffff_0%,#f6f9fb_100%)] text-slate-950 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.22)]',
+        iconClass:
+          item.id === 'store'
+            ? 'bg-white/88 text-[#336886] ring-1 ring-[#d8e5ee]'
+            : 'bg-white/88 text-slate-700 ring-1 ring-slate-200',
+        stateClass:
+          profile.biometric || profile.hasSession
+            ? item.id === 'store'
+              ? 'text-[#336886]'
+              : 'text-slate-700'
+            : 'text-slate-500',
+        onClick: () => {
+          item.action();
+          onClose();
+        },
+      };
+    });
 
   const getAccessCardClasses = (item: AccessProfile) => {
     if (item.current) {
@@ -314,12 +421,26 @@ export function ProfileDrawer({
         return 'Histórico e acompanhamento dos pedidos';
       case 'settings':
         return 'Permissões, biometria e segurança';
+      case 'store-panel':
+        return 'Pedidos, operação e rotina da loja';
+      case 'storefront':
+        return 'Abrir a vitrine pública da sua loja';
+      case 'motoboy-panel':
+        return 'Acesse suas corridas e entregas';
       case 'legal':
         return 'Termos, dados e proteção da conta';
       case 'help':
         return 'Suporte e dúvidas sobre seus pedidos';
+      case 'help-store':
+        return 'Suporte sobre operação e vendas';
+      case 'help-motoboy':
+        return 'Suporte para corridas e coletas';
       case 'logout':
         return 'Encerra somente a sessão neste aparelho';
+      case 'logout-store':
+        return 'Encerra somente a sessão da loja neste aparelho';
+      case 'logout-motoboy':
+        return 'Encerra somente a sessão de entregador neste aparelho';
       default:
         return '';
     }
@@ -343,14 +464,14 @@ export function ProfileDrawer({
           <div className="absolute right-0 top-24 h-36 w-36 rounded-full bg-sky-100/60 blur-3xl" />
         </div>
         <div className="border-b border-slate-100/80 bg-white/50 p-6 pb-4">
-          {isLogged ? (
+          {hasActiveContext && currentIdentity ? (
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                {profileImageUrl ? (
+                {currentIdentity.imageUrl ? (
                   <div className="relative">
                     <img
-                      src={profileImageUrl}
-                      alt={userName}
+                      src={currentIdentity.imageUrl}
+                      alt={currentIdentity.title}
                       loading="eager"
                       fetchPriority="high"
                       decoding="async"
@@ -359,57 +480,69 @@ export function ProfileDrawer({
                     <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-500 shadow-sm" />
                   </div>
                 ) : (
-                  <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-white to-slate-100 text-slate-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_18px_32px_-24px_rgba(15,23,42,0.35)] ring-1 ring-slate-100">
-                    <UserCircle size={36} weight="duotone" />
+                  <div className={`grid h-16 w-16 place-items-center ${currentIdentity.iconShell}`}>
+                    {currentIdentity.icon}
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]/80">Conta conectada</p>
-                  <p className="mt-1 truncate text-base font-black leading-tight text-slate-950">{userName}</p>
-                  <p className="mt-0.5 truncate text-xs font-bold text-slate-500">{userEmail}</p>
+                  <p className="truncate text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]/80">{currentIdentity.eyebrow}</p>
+                  <p className="mt-1 truncate text-base font-black leading-tight text-slate-950">{currentIdentity.title}</p>
+                  <p className="mt-0.5 truncate text-xs font-bold text-slate-500">{currentIdentity.email || 'Acesso salvo neste aparelho'}</p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-emerald-700">
-                      <CheckCircle size={10} weight="fill" />
-                      Cliente no hub
-                    </span>
-                    <span className="inline-flex items-center rounded-full border border-slate-200 bg-white/90 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-slate-500">
-                      Conta e pedidos
-                    </span>
+                    {currentIdentity.badges.map((badge) => (
+                      <span
+                        key={badge.label}
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] ${
+                          badge.tone === 'success'
+                            ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
+                            : badge.tone === 'brand'
+                              ? 'border border-[#d8e5ee] bg-[#edf5fa] text-[#336886]'
+                              : badge.tone === 'dark'
+                                ? 'border border-slate-200 bg-slate-900 text-white'
+                                : 'border border-slate-200 bg-white/90 text-slate-500'
+                        }`}
+                      >
+                        {badge.tone !== 'neutral' ? <CheckCircle size={10} weight="fill" /> : null}
+                        {badge.label}
+                      </span>
+                    ))}
                   </div>
                 </div>
               </div>
-              <section className="relative overflow-hidden rounded-[1.55rem] border border-[#336886]/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(243,248,251,0.96)_100%)] p-3.5 shadow-[0_18px_34px_-26px_rgba(51,104,134,0.24)]">
-                <div className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-[#336886]/10 blur-3xl" />
-                <div className="relative mb-3">
-                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Alternar acesso</p>
-                  <p className="mt-0.5 text-sm font-black leading-tight text-slate-950">Abrir outra área</p>
-                  <p className="mt-1 text-[11px] font-semibold leading-snug text-slate-500">Sua conta de cliente segue ativa no hub enquanto você entra na operação.</p>
-                </div>
+              {quickSwitchAccess.length > 0 ? (
+                <section className="relative overflow-hidden rounded-[1.55rem] border border-[#336886]/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(243,248,251,0.96)_100%)] p-3.5 shadow-[0_18px_34px_-26px_rgba(51,104,134,0.24)]">
+                  <div className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-[#336886]/10 blur-3xl" />
+                  <div className="relative mb-3">
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Alternar acesso</p>
+                    <p className="mt-0.5 text-sm font-black leading-tight text-slate-950">{currentIdentity.switchTitle}</p>
+                    <p className="mt-1 text-[11px] font-semibold leading-snug text-slate-500">{currentIdentity.switchHint}</p>
+                  </div>
 
-                <div className="relative grid gap-2">
-                  {quickSwitchAccess.map((item) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={item.onClick}
-                      className={`group relative flex min-h-[5rem] w-full items-start gap-3 rounded-[1.2rem] border px-3 py-3 pr-9 text-left transition-all active:scale-[0.98] ${item.shell}`}
-                    >
-                      <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-[1rem] shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] transition-transform group-active:scale-95 ${item.iconClass}`}>
-                        {item.icon}
-                      </span>
-                      <span className="min-w-0 flex-1 pt-0.5">
-                        <span className="block truncate text-[14px] font-black leading-tight">{item.label}</span>
-                        <span className="mt-0.5 block truncate text-[11px] font-semibold text-slate-600">{item.description}</span>
-                        <span className={`mt-2 inline-flex max-w-full items-center gap-1.5 rounded-full border border-white/80 bg-white/72 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] shadow-sm ${item.stateClass}`}>
-                          <span className="shrink-0">{item.stateIcon}</span>
-                          <span className="truncate">{item.state}</span>
+                  <div className="relative grid gap-2">
+                    {quickSwitchAccess.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={item.onClick}
+                        className={`group relative flex min-h-[5rem] w-full items-start gap-3 rounded-[1.2rem] border px-3 py-3 pr-9 text-left transition-all active:scale-[0.98] ${item.shell}`}
+                      >
+                        <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-[1rem] shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] transition-transform group-active:scale-95 ${item.iconClass}`}>
+                          {item.icon}
                         </span>
-                      </span>
-                      <CaretRight size={14} weight="bold" className="absolute right-3 top-3 text-slate-400/80 transition-transform group-active:translate-x-0.5" />
-                    </button>
-                  ))}
-                </div>
-              </section>
+                        <span className="min-w-0 flex-1 pt-0.5">
+                          <span className="block truncate text-[14px] font-black leading-tight">{item.label}</span>
+                          <span className="mt-0.5 block truncate text-[11px] font-semibold text-slate-600">{item.description}</span>
+                          <span className={`mt-2 inline-flex max-w-full items-center gap-1.5 rounded-full border border-white/80 bg-white/72 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] shadow-sm ${item.stateClass}`}>
+                            <span className="shrink-0">{item.stateIcon}</span>
+                            <span className="truncate">{item.state}</span>
+                          </span>
+                        </span>
+                        <CaretRight size={14} weight="bold" className="absolute right-3 top-3 text-slate-400/80 transition-transform group-active:translate-x-0.5" />
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              ) : null}
             </div>
           ) : (
             <div className="space-y-3.5">
@@ -454,41 +587,15 @@ export function ProfileDrawer({
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
-          {isAdmin && (
-            <section className="space-y-3">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 px-1">Minha Operação</p>
-              <div className="grid gap-2">
-                <button
-                  onClick={() => {
-                    if (storeSlug) window.location.href = `/${storeSlug}`;
-                    onClose();
-                  }}
-                  className="flex w-full items-center gap-3 rounded-[1.5rem] border border-[#336886]/15 bg-white/80 p-3.5 text-[#336886] shadow-[0_14px_28px_-24px_rgba(51,104,134,0.5)] transition-all active:scale-95"
-                >
-                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#336886]/10 shadow-sm text-[#336886]">
-                    <CookingPot size={22} weight="duotone" />
-                  </div>
-                  <span className="text-[14px] font-black">Gerenciar Loja</span>
-                </button>
-                <button
-                  onClick={() => {
-                    window.location.href = '/hub';
-                    onClose();
-                  }}
-                  className="flex w-full items-center gap-3 rounded-[1.5rem] border border-emerald-100 bg-white/80 p-3.5 text-emerald-900 shadow-[0_14px_28px_-24px_rgba(16,185,129,0.45)] transition-all active:scale-95"
-                >
-                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-50 shadow-sm text-emerald-600">
-                    <House size={22} weight="duotone" />
-                  </div>
-                  <span className="text-[14px] font-black">Página Inicial (Hub)</span>
-                </button>
-              </div>
-            </section>
-          )}
-
           <nav className="space-y-2">
             <p className="mb-3 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 px-1">
-              {isLogged ? 'Área do Cliente' : 'Suporte'}
+              {activeContext === 'client'
+                ? 'Área do Cliente'
+                : activeContext === 'store'
+                  ? 'Área da Loja'
+                  : activeContext === 'motoboy'
+                    ? 'Área do Entregador'
+                    : 'Suporte'}
             </p>
             {actions.map((action) => (
               <button
@@ -552,11 +659,11 @@ export function ProfileDrawer({
               <div className="min-w-0 pr-2">
                 <p className="text-[9px] font-black uppercase tracking-[0.28em] text-slate-500">Escolha seu acesso</p>
                 <h3 className="mt-1 text-[1.18rem] font-black tracking-[-0.035em] text-slate-950">
-                  {isLogged ? 'Abrir outro acesso' : accessPickerMode === 'register' ? 'Primeiro acesso' : 'Entrar'}
+                  {hasActiveContext ? 'Abrir outro acesso' : accessPickerMode === 'register' ? 'Primeiro acesso' : 'Entrar'}
                 </h3>
                 <p className="mt-1.5 text-[12px] font-semibold leading-relaxed text-slate-500">
-                  {isLogged
-                    ? 'Sua sessão de cliente fica ativa. Escolha apenas a área operacional que deseja abrir.'
+                  {hasActiveContext
+                    ? 'Seu acesso atual continua salvo. Escolha apenas a outra área que deseja abrir.'
                     : accessPickerMode === 'register'
                       ? 'Escolha qual conta deseja criar e siga o fluxo certo para começar.'
                       : 'Entre com sua conta e acesse a área certa do app.'}
@@ -572,7 +679,7 @@ export function ProfileDrawer({
               </button>
             </div>
 
-            {(isLogged || accessPickerMode === 'login') ? (
+            {(hasActiveContext || accessPickerMode === 'login') ? (
               <div className="relative grid gap-3">
                 {visibleAccessProfiles.map((item) => {
                   const classes = getAccessCardClasses(item);
@@ -615,7 +722,7 @@ export function ProfileDrawer({
                 })}
               </div>
             ) : null}
-            {!isLogged && accessPickerMode === 'register' ? (
+            {!hasActiveContext && accessPickerMode === 'register' ? (
               <div className={`relative rounded-[1.65rem] border p-4 shadow-[0_16px_34px_-28px_rgba(15,23,42,0.28)] transition-all duration-200 ${
                 highlightFirstAccess
                   ? 'border-[#336886]/25 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(236,253,245,0.86))] ring-2 ring-[#336886]/12'

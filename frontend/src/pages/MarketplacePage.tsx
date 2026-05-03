@@ -2273,6 +2273,33 @@ export function MarketplacePage() {
     navigate('/hub');
   }, [navigate]);
 
+  const handleAdminLogout = useCallback(() => {
+    try {
+      nativeBiometricService.syncAdminSession(null);
+    } catch {
+      // ignore
+    }
+    setAuth(null);
+    setBranding({
+      primaryColor: '#b91c1c',
+      secondaryColor: '#111827',
+      logoUrl: '',
+      bannerUrl: '',
+      brandName: '',
+    });
+    navigate('/hub', { replace: true });
+  }, [navigate, setAuth, setBranding]);
+
+  const handleMotoboyLogout = useCallback(() => {
+    try {
+      nativeBiometricService.syncMotoboySession(null);
+    } catch {
+      // ignore
+    }
+    setAuth(null);
+    navigate('/hub', { replace: true });
+  }, [navigate, setAuth]);
+
   const handleDeactivateAccount = useCallback(async () => {
     setDeactivating(true);
     try {
@@ -2536,6 +2563,8 @@ export function MarketplacePage() {
         onOpenPrivacy={openPrivacy}
         onOpenHelp={openHelp}
         onLogout={handleCustomerLogout}
+        onLogoutAdmin={handleAdminLogout}
+        onLogoutMotoboy={handleMotoboyLogout}
         onRegisterClient={() => navigate('/cliente?mode=register&hub=1&next=/hub')}
         onRegisterStore={() => navigate('/create?plan=trial')}
         onRegisterMotoboy={() => navigate('/motoboy/register')}
