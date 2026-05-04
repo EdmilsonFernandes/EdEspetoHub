@@ -10,7 +10,7 @@ describe('Auth — Registro e Login', () => {
       expect(res.body).toHaveProperty('user');
       expect(res.body).toHaveProperty('store');
       expect(res.body).toHaveProperty('token');
-      expect(res.body.user.email).toBeTruthy();
+      expect(res.body.user.id).toBeTruthy();
       expect(res.body.store.id).toBeTruthy();
     });
 
@@ -26,7 +26,7 @@ describe('Auth — Registro e Login', () => {
     });
 
     it('rejeita sem aceite de termos', async () => {
-      const { res } = await registerStore({ acceptTerms: false });
+      const { res } = await registerStore({ termsAccepted: false });
       expect(res.status).toBeGreaterThanOrEqual(400);
     });
   });

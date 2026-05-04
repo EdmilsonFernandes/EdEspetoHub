@@ -8,6 +8,25 @@ export const api = supertest(app);
 let counter = 0;
 const uid = () => `t${Date.now()}${++counter}`;
 
+/** Generate a valid CPF with check digits */
+function generateCpf(): string {
+  const digits: number[] = [];
+  for (let i = 0; i < 9; i++) digits.push(Math.floor(Math.random() * 9) + 1);
+  // first check digit
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += digits[i] * (10 - i);
+  let mod = (sum * 10) % 11;
+  if (mod === 10) mod = 0;
+  digits.push(mod);
+  // second check digit
+  sum = 0;
+  for (let i = 0; i < 10; i++) sum += digits[i] * (11 - i);
+  mod = (sum * 10) % 11;
+  if (mod === 10) mod = 0;
+  digits.push(mod);
+  return digits.join('');
+}
+
 /** Generate unique test email */
 export const testEmail = (prefix = 'user') => `${prefix}-${uid()}@test.local`;
 
@@ -16,15 +35,16 @@ export async function registerStore(overrides: Record<string, unknown> = {}) {
   const email = testEmail('lojista');
   const password = 'Test@123456';
   const res = await api.post('/api/auth/register').send({
-    name: 'Loja Teste',
+    fullName: 'Loja Teste',
     email,
     password,
     phone: `119${uid().slice(-8)}`,
-    document: uid().slice(-11).padStart(11, '0'),
+    document: generateCpf(),
     documentType: 'CPF',
     storeName: `Loja ${uid()}`,
-    acceptTerms: true,
-    acceptLgpd: true,
+    termsAccepted: true,
+    lgpdAccepted: true,
+    planId: 'test-plan-7days',
     address: { street: 'Rua Teste', number: '100', neighborhood: 'Centro', city: 'São Paulo', state: 'SP', zipCode: '01001000' },
     ...overrides,
   });
@@ -42,15 +62,15 @@ export async function registerMotoboy(overrides: Record<string, unknown> = {}) {
   const email = testEmail('motoboy');
   const password = 'Test@123456';
   const res = await api.post('/api/auth/register').send({
-    name: 'Motoboy Teste',
+    fullName: 'Motoboy Teste',
     email,
     password,
     phone: `119${uid().slice(-8)}`,
-    document: uid().slice(-11).padStart(11, '0'),
+    document: generateCpf(),
     documentType: 'CPF',
-    role: 'MOTOBOY',
-    acceptTerms: true,
-    acceptLgpd: true,
+    accountType: 'MOTOBOY',
+    termsAccepted: true,
+    lgpdAccepted: true,
     ...overrides,
   });
   return { res, email, password, body: res.body };
@@ -81,7 +101,7 @@ export async function activateSubscription(storeId: string) {
   await qr.connect();
   try {
     await qr.query(`
-      UPDATE subscriptions SET status = 'ACTIVE', starts_at = NOW(), expires_at = NOW() + INTERVAL '30 days'
+      UPDATE subscriptions SET status = 'ACTIVE', start_date = NOW(), end_date = NOW() + INTERVAL '30 days'
       WHERE store_id = $1
     `, [storeId]);
     await qr.query(`UPDATE stores SET open = true WHERE id = $1`, [storeId]);
@@ -96,7 +116,7 @@ export async function expireSubscription(storeId: string) {
   await qr.connect();
   try {
     await qr.query(`
-      UPDATE subscriptions SET status = 'EXPIRED', expires_at = NOW() - INTERVAL '1 day'
+      UPDATE subscriptions SET status = 'EXPIRED', end_date = NOW() - INTERVAL '1 day'
       WHERE store_id = $1
     `, [storeId]);
     await qr.query(`UPDATE stores SET open = false WHERE id = $1`, [storeId]);
