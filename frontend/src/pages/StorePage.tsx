@@ -553,6 +553,27 @@ export function StorePage() {
     Boolean(user?.store?.slug) &&
     Boolean(storeSlug) &&
     user.store.slug === storeSlug;
+  const storefrontContextKey = useMemo(() => {
+    if (isStoreAdmin) {
+      const storeKey = String(user?.store?.slug || storeSlug || '').trim() || 'store';
+      const userKey = String(user?.user?.id || user?.user?.email || '').trim() || 'operator';
+      return `store-admin:${storeKey}:${userKey}`;
+    }
+    if (customerSession?.token) {
+      const customerKey = String(customerSession?.user?.id || customerSession?.user?.email || '').trim() || 'customer';
+      return `store-customer:${customerKey}`;
+    }
+    return `store-guest:${String(storeSlug || '').trim() || 'guest'}`;
+  }, [
+    customerSession?.token,
+    customerSession?.user?.email,
+    customerSession?.user?.id,
+    isStoreAdmin,
+    storeSlug,
+    user?.store?.slug,
+    user?.user?.email,
+    user?.user?.id,
+  ]);
   const adminRoleLabel = String(user?.user?.role || '').toUpperCase() === 'ADMIN' ? 'Administrador da loja' : 'Operador da loja';
   const isNativeRuntime = Capacitor.isNativePlatform();
   const showAdminWebReturnBar = isStoreAdmin && !isNativeRuntime && view !== 'menu';
@@ -1061,6 +1082,15 @@ export function StorePage() {
       setCustomerSession(null);
       setCustomerAddresses([]);
       setCustomerOrders([]);
+      setShowCustomerAccount(false);
+      setCustomerAuthCheckoutPrompt(false);
+      setCustomerCheckoutResume(null);
+      setCustomerVerifyPrompt(null);
+      setCustomerVerifyCode('');
+      setCustomerAccountError('');
+      setCustomerAccountNotice('');
+      setRecentPublicOrders([]);
+      setLastPublicOrderId('');
       return;
     }
     const savedCustomerSession =
@@ -1220,7 +1250,7 @@ export function StorePage() {
         .catch(() => setTopProducts([]));
     }
     let recentOrdersInterval: number | null = null;
-    if (storeSlug) {
+    if (storeSlug && !isStoreAdmin) {
       const hydrateRecentPublicOrders = async () => {
         let lastEntry: any = null;
         let listEntries: any[] = [];
@@ -3414,6 +3444,7 @@ export function StorePage() {
               </div>
             )}
             <MenuView
+              key={storefrontContextKey}
               products={products}
               topProducts={topProducts}
               cart={cart}
@@ -3599,7 +3630,7 @@ export function StorePage() {
       </main>
 
       {isStoreAdmin && view === 'menu' && <AdminMobileBottomNav />}
-      {isStoreAdmin && view === 'menu' && (
+      {isStoreAdmin && view === 'menu' && adminAccountDrawerOpen && (
         <ContextSideDrawer
           isOpen={adminAccountDrawerOpen}
           onClose={() => setAdminAccountDrawerOpen(false)}

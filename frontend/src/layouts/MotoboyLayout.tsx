@@ -302,31 +302,33 @@ export function MotoboyLayout() {
           </div>
         </div>
       </nav>
-      <ContextSideDrawer
-        isOpen={accountDrawerOpen}
-        onClose={() => setAccountDrawerOpen(false)}
-        side="left"
-        eyebrow="Conta do entregador"
-        title={motoboyName || 'Entregador'}
-        subtitle={motoboyEmail || 'Acesso ativo neste aparelho'}
-        leading={
-          motoboyImage ? (
-            <img
-              src={motoboyImage}
-              alt={motoboyName || 'Entregador'}
-              className="h-10 w-10 rounded-[0.95rem] object-cover"
-            />
-          ) : (
-            <Motorcycle size={26} weight="duotone" className="text-[#f59e0b]" />
-          )
-        }
-        badges={[
-          { label: 'Entregador', tone: 'dark' },
-          { label: 'Conta ativa', tone: 'neutral' },
-        ]}
-        actions={accountActions}
-        footer={<PlatformTrustFooter compact mode="default" align="left" />}
-      />
+      {accountDrawerOpen && (
+        <ContextSideDrawer
+          isOpen={accountDrawerOpen}
+          onClose={() => setAccountDrawerOpen(false)}
+          side="left"
+          eyebrow="Conta do entregador"
+          title={motoboyName || 'Entregador'}
+          subtitle={motoboyEmail || 'Acesso ativo neste aparelho'}
+          leading={
+            motoboyImage ? (
+              <img
+                src={motoboyImage}
+                alt={motoboyName || 'Entregador'}
+                className="h-10 w-10 rounded-[0.95rem] object-cover"
+              />
+            ) : (
+              <Motorcycle size={26} weight="duotone" className="text-[#f59e0b]" />
+            )
+          }
+          badges={[
+            { label: 'Entregador', tone: 'dark' },
+            { label: 'Conta ativa', tone: 'neutral' },
+          ]}
+          actions={accountActions}
+          footer={<PlatformTrustFooter compact mode="default" align="left" />}
+        />
+      )}
     </div>
   );
 }

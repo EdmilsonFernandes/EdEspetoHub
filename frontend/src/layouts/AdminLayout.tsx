@@ -426,31 +426,33 @@ export function AdminLayout({
           </aside>
         </div>
       )}
-      <ContextSideDrawer
-        isOpen={accountDrawerOpen}
-        onClose={() => setAccountDrawerOpen(false)}
-        side="left"
-        eyebrow="Conta da operação"
-        title={storeName}
-        subtitle={[operatorRoleLabel, operatorName || null, storeEmail || null].filter(Boolean).join(' · ') || 'Acesso da operação neste aparelho'}
-        leading={
-          storeLogo ? (
-            <img
-              src={storeLogo}
-              alt={storeName}
-              className="h-10 w-10 rounded-[0.95rem] bg-white object-contain p-1"
-            />
-          ) : (
-            <UserCircle size={26} weight="duotone" className="text-[#336886]" />
-          )
-        }
-        badges={[
-          { label: userRole === 'ADMIN' ? 'Admin' : 'Operador', tone: 'brand' },
-          { label: storeLocation || 'Operação ativa', tone: 'neutral' },
-        ]}
-        actions={accountActions}
-        footer={<PlatformTrustFooter compact mode="default" align="left" />}
-      />
+      {accountDrawerOpen && (
+        <ContextSideDrawer
+          isOpen={accountDrawerOpen}
+          onClose={() => setAccountDrawerOpen(false)}
+          side="left"
+          eyebrow="Conta da operação"
+          title={storeName}
+          subtitle={[operatorRoleLabel, operatorName || null, storeEmail || null].filter(Boolean).join(' · ') || 'Acesso da operação neste aparelho'}
+          leading={
+            storeLogo ? (
+              <img
+                src={storeLogo}
+                alt={storeName}
+                className="h-10 w-10 rounded-[0.95rem] bg-white object-contain p-1"
+              />
+            ) : (
+              <UserCircle size={26} weight="duotone" className="text-[#336886]" />
+            )
+          }
+          badges={[
+            { label: userRole === 'ADMIN' ? 'Admin' : 'Operador', tone: 'brand' },
+            { label: storeLocation || 'Operação ativa', tone: 'neutral' },
+          ]}
+          actions={accountActions}
+          footer={<PlatformTrustFooter compact mode="default" align="left" />}
+        />
+      )}
     </div>
   );
 }
