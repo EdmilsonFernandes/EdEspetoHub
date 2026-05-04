@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Buildings, ChartBar, ChefHat, CurrencyDollar, Package, UserCircle } from '@phosphor-icons/react';
+import { Buildings, ChartBar, ChefHat, CurrencyDollar, Package, SignOut, UserCircle } from '@phosphor-icons/react';
 import { orderService } from '../../services/orderService';
 import { useAuth } from '../../contexts/AuthContext';
 
