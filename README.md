@@ -638,7 +638,7 @@ O script `deploy-api.sh` constroi o codigo local que esta no EC2 depois do `git 
 Conferir se as variaveis chegaram dentro do container:
 
 ```bash
-docker exec chamanoespeto-api sh -lc 'node -e "console.log({
+docker exec janocaminho-backend sh -lc 'node -e "console.log({
   DB_POOL_MAX: process.env.DB_POOL_MAX,
   DB_POOL_IDLE_TIMEOUT_MS: process.env.DB_POOL_IDLE_TIMEOUT_MS,
   DB_POOL_CONNECTION_TIMEOUT_MS: process.env.DB_POOL_CONNECTION_TIMEOUT_MS,
@@ -650,8 +650,8 @@ docker exec chamanoespeto-api sh -lc 'node -e "console.log({
 Conferir conexoes no Postgres:
 
 ```bash
-docker exec chamanoespeto-postgres psql -U postgres -d espetinho -c "show max_connections;"
-docker exec chamanoespeto-postgres psql -U postgres -d espetinho -c "select state, count(*) from pg_stat_activity group by state order by state;"
+docker exec janocaminho-postgres psql -U postgres -d espetinho -c "show max_connections;"
+docker exec janocaminho-postgres psql -U postgres -d espetinho -c "select state, count(*) from pg_stat_activity group by state order by state;"
 ```
 
 Limpeza segura de disco (quando der ENOSPC):
@@ -696,7 +696,7 @@ ls -lah /var/backups/janocaminho
 
 ```bash
 docker ps
-docker exec -it janocaminho-api env | grep -E '^(MP_|SMTP_|EMAIL_FROM|APP_BASE_URL)'
+docker exec -it janocaminho-backend env | grep -E '^(MP_|SMTP_|EMAIL_FROM|APP_BASE_URL)'
 curl -s https://www.janocaminho.com.br/api/docs.json | head -n 1
 ```
 
@@ -711,7 +711,7 @@ curl -X POST https://www.janocaminho.com.br/api/auth/forgot-password \
 6) Webhook MP (checagem rapida):
 
 ```bash
-docker logs janocaminho-api --tail 200 | grep -i "mercadopago\\|webhook"
+docker logs janocaminho-backend --tail 200 | grep -i "mercadopago\\|webhook"
 ```
 
 ## Versionamento e Release
@@ -841,7 +841,7 @@ Ponto importante de inicializacao da API:
 Verificacao rapida dentro do container:
 
 ```bash
-docker exec chamanoespeto-api node - <<'NODE'
+docker exec janocaminho-backend node - <<'NODE'
 (async () => {
   const { loadSsmEnv } = require('./dist/config/ssm');
   await loadSsmEnv();
@@ -898,7 +898,7 @@ Teste de pedido online:
 4. Confira no banco:
 
 ```bash
-docker exec -it chamanoespeto-postgres psql -U postgres -d espetinho -c \
+docker exec -it janocaminho-postgres psql -U postgres -d espetinho -c \
 "select id, store_id, payment_status, provider, provider_id, created_at from order_payments order by created_at desc limit 5;"
 ```
 
@@ -925,7 +925,7 @@ Deploy apos mudar SSM ou imagem:
 cd ~/EdEspetoHub
 docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod pull api frontend
 docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod up -d --no-deps --force-recreate api frontend
-docker logs --tail 60 chamanoespeto-api
+docker logs --tail 60 janocaminho-backend
 ```
 
 6) SMTP (exemplo Zoho):

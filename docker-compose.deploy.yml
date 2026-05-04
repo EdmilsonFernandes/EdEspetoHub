@@ -2,7 +2,7 @@ services:
   frontend:
     pull_policy: always
 
-  api:
+  backend:
     pull_policy: always
 
   face-worker:

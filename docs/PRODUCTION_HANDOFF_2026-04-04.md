@@ -116,7 +116,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.
 5. Verify env/key inside container:
 
 ```bash
-docker exec chamanoespeto-api sh -lc 'echo SSM_OVERRIDE=$SSM_OVERRIDE FCM_PROJECT_ID=$FCM_PROJECT_ID FCM_SERVICE_ACCOUNT_PATH=$FCM_SERVICE_ACCOUNT_PATH && ls -lah /app/keys/firebase-adminsdk.json'
+docker exec janocaminho-backend sh -lc 'echo SSM_OVERRIDE=$SSM_OVERRIDE FCM_PROJECT_ID=$FCM_PROJECT_ID FCM_SERVICE_ACCOUNT_PATH=$FCM_SERVICE_ACCOUNT_PATH && ls -lah /app/keys/firebase-adminsdk.json'
 ```
 
 ## 6) Important Notes

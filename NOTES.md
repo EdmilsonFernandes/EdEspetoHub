@@ -169,7 +169,7 @@
 - Arquivo de exemplo do Nginx: `docs/nginx/chamanoespeto.conf`.
 
 ## Workaround Postgres (pg_hba.conf corrompido)
-Sintoma: container `chamanoespeto-postgres` reiniciando com "invalid connection type \"EOF\"".
+Sintoma: container `janocaminho-postgres` reiniciando com "invalid connection type \"EOF\"".
 
 1) Descobrir o volume:
 ```bash
@@ -178,18 +178,18 @@ docker volume ls | grep postgres
 
 2) Reescrever `pg_hba.conf` em modo trust:
 ```bash
-docker stop chamanoespeto-postgres
+docker stop janocaminho-postgres
 docker run --rm -v edespetohub_postgres-data:/var/lib/postgresql/data alpine \
   sh -c "printf 'local all all trust\nhost all all all trust\n' > /var/lib/postgresql/data/pg_hba.conf"
-docker start chamanoespeto-postgres
+docker start janocaminho-postgres
 ```
 
 3) Resetar senha e voltar para scram:
 ```bash
-docker exec -it chamanoespeto-postgres psql -U postgres -d postgres -c "ALTER USER postgres WITH PASSWORD 'postgres';"
+docker exec -it janocaminho-postgres psql -U postgres -d postgres -c "ALTER USER postgres WITH PASSWORD 'postgres';"
 docker run --rm -v edespetohub_postgres-data:/var/lib/postgresql/data alpine \
   sh -c "printf 'local all all scram-sha-256\nhost all all all scram-sha-256\n' > /var/lib/postgresql/data/pg_hba.conf"
-docker restart chamanoespeto-postgres
+docker restart janocaminho-postgres
 docker restart chamanoespeto-api
 ```
 

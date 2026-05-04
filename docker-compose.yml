@@ -1,6 +1,6 @@
 services:
   frontend:
-    container_name: chamanoespeto-frontend
+    container_name: janocaminho-frontend
     image: "${IMAGE_REGISTRY:-ghcr.io}/${IMAGE_NAMESPACE:-edmilsonfernandes}/edespetohub-frontend:${IMAGE_TAG:-main}"
     build:
       context: ./frontend
@@ -19,8 +19,8 @@ services:
       - apis
     restart: always
 
-  api:
-    container_name: chamanoespeto-api
+  backend:
+    container_name: janocaminho-backend
     image: "${IMAGE_REGISTRY:-ghcr.io}/${IMAGE_NAMESPACE:-edmilsonfernandes}/edespetohub-api:${IMAGE_TAG:-main}"
     build:
       context: ./backend
@@ -38,7 +38,7 @@ services:
     restart: always
 
   face-worker:
-    container_name: chamanoespeto-face-worker
+    container_name: janocaminho-face-worker
     image: "${IMAGE_REGISTRY:-ghcr.io}/${IMAGE_NAMESPACE:-edmilsonfernandes}/edespetohub-face-worker:${IMAGE_TAG:-main}"
     build:
       context: ./face-worker
@@ -48,7 +48,7 @@ services:
     restart: always
 
   postgres:
-    container_name: chamanoespeto-postgres
+    container_name: janocaminho-postgres
     image: postgres:16
     environment:
       # Keep DB creds configurable so API+DB don't drift (common source of auth failures).
@@ -63,7 +63,7 @@ services:
     restart: always
 
   pgadmin:
-    container_name: chamanoespeto-pgadmin
+    container_name: janocaminho-pgadmin
     image: dpage/pgadmin4:8.13
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@janocaminho.com.br
@@ -74,7 +74,6 @@ services:
     depends_on:
       - postgres
     restart: always
-
 
   apis:
     container_name: janocaminho-apis
@@ -87,13 +86,11 @@ services:
     ports:
       - "5000:5000"
     depends_on:
-      - api
+      - backend
     restart: always
 
 volumes:
   postgres-data:
-    # Pin volume name to avoid accidental "new empty DB" when compose project name/path changes.
-    # Default matches the common compose-derived name for this repo.
     name: "${POSTGRES_VOLUME_NAME:-edespetohub_postgres-data}"
   edespetohub_uploads:
     name: "${UPLOADS_VOLUME_NAME:-edespetohub_uploads_data}"

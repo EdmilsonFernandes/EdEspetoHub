@@ -225,8 +225,8 @@ scripts/./deploy-release-frontend.sh
 
 ```bash
 docker ps
-docker logs chamanoespeto-api --tail 50
-docker logs chamanoespeto-frontend --tail 50
+docker logs janocaminho-backend --tail 50
+docker logs janocaminho-frontend --tail 50
 ```
 
 Fallback:
@@ -245,24 +245,24 @@ Se precisar testar rápido sem SSM, `.env.prod.secrets` continua aceito como fal
 
 | Container | Imagem | Porta | Função |
 |---|---|---|---|
-| `chamanoespeto-frontend` | `edespetohub-frontend:main` | 8080→80 | React + nginx |
-| `chamanoespeto-api` | `edespetohub-api:main` | 4000 | Backend Node.js |
-| `chamanoespeto-postgres` | `postgres:16` | 5432 | Banco de dados |
-| `chamanoespeto-pgadmin` | `pgadmin4:8.13` | 5050 | Admin do banco |
-| `chamanoespeto-face-worker` | `edespetohub-face-worker:main` | — | Verificação facial |
+| `janocaminho-frontend` | `edespetohub-frontend:main` | 8080→80 | React + nginx |
+| `janocaminho-backend` | `edespetohub-api:main` | 4000 | Backend Node.js |
+| `janocaminho-postgres` | `postgres:16` | 5432 | Banco de dados |
+| `janocaminho-pgadmin` | `pgadmin4:8.13` | 5050 | Admin do banco |
+| `janocaminho-face-worker` | `edespetohub-face-worker:main` | — | Verificação facial |
 
 ```bash
 # Ver containers rodando
 docker ps
 
 # Ver logs da API (últimas 50 linhas)
-docker logs chamanoespeto-api --tail 50
+docker logs janocaminho-backend --tail 50
 
 # Ver logs do frontend
-docker logs chamanoespeto-frontend --tail 50
+docker logs janocaminho-frontend --tail 50
 
 # Reiniciar um container
-docker restart chamanoespeto-api
+docker restart janocaminho-backend
 
 # Reiniciar tudo
 cd ~/EdEspetoHub && docker compose up -d
@@ -296,16 +296,16 @@ Tags publicadas:
 
 ```bash
 # Acessar o banco via psql
-docker exec -it chamanoespeto-postgres psql -U postgres -d espetinho
+docker exec -it janocaminho-postgres psql -U postgres -d espetinho
 
 # Executar SQL direto
-docker exec chamanoespeto-postgres psql -U postgres -d espetinho -c "SELECT COUNT(*) FROM orders;"
+docker exec janocaminho-postgres psql -U postgres -d espetinho -c "SELECT COUNT(*) FROM orders;"
 
 # Backup do banco
-docker exec chamanoespeto-postgres pg_dump -U postgres espetinho > backup_$(date +%Y%m%d).sql
+docker exec janocaminho-postgres pg_dump -U postgres espetinho > backup_$(date +%Y%m%d).sql
 
 # Restaurar backup
-docker exec -i chamanoespeto-postgres psql -U postgres espetinho < backup_YYYYMMDD.sql
+docker exec -i janocaminho-postgres psql -U postgres espetinho < backup_YYYYMMDD.sql
 ```
 
 **PgAdmin:** `http://SEU_IP:5050`  
@@ -527,7 +527,7 @@ mkdir -p backend/keys
 docker compose up -d postgres
 
 # Restaurar backup
-docker exec -i chamanoespeto-postgres psql -U postgres espetinho < backup.sql
+docker exec -i janocaminho-postgres psql -U postgres espetinho < backup.sql
 ```
 
 ### 6. Subir tudo
@@ -557,7 +557,7 @@ docker ps
 docker stats --no-stream
 
 # Ver logs de erro da API
-docker logs chamanoespeto-api --tail 100 2>&1 | grep '"level":"warn"\|"level":"error"'
+docker logs janocaminho-backend --tail 100 2>&1 | grep '"level":"warn"\|"level":"error"'
 
 # Testar se a API está respondendo
 curl -s https://janocaminho.com.br/api/health | head -c 100

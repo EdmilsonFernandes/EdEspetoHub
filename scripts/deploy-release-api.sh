@@ -9,7 +9,7 @@ if [ $# -gt 1 ]; then
 fi
 
 if [ $# -eq 0 ]; then
-  sh "$ROOT_DIR/scripts/deploy-release.sh" api apis face-worker
+  sh "$ROOT_DIR/scripts/deploy-release.sh" backend apis face-worker
 else
-  sh "$ROOT_DIR/scripts/deploy-release.sh" "$1" api apis face-worker
+  sh "$ROOT_DIR/scripts/deploy-release.sh" "$1" backend apis face-worker
 fi

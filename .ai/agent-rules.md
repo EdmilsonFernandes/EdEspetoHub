@@ -38,7 +38,7 @@ Nome no GitHub Actions: `Publish Docker Images (GHCR)`
 ## DECISÃO DE DEPLOY (informar ao usuário)
 
 - frontend alterado → preferir `scripts/./deploy-release-frontend.sh`
-- api alterada → preferir `scripts/./deploy-release-api.sh`
+- backend alterado → preferir `scripts/./deploy-release-api.sh`
 - ambos alterados → `scripts/./deploy-release-api.sh` e depois `scripts/./deploy-release-frontend.sh`
 - se o workflow `Deploy to EC2 (Approval)` estiver configurado e pronto → preferir mandar o usuário aprovar esse workflow
 - ao recomendar o workflow aprovado, considerar o escopo real da mudança (`frontend`, `api`, `face-worker` ou combinação), evitando subir serviço sem imagem nova
@@ -93,11 +93,11 @@ Backend API (chamanoespeto-api :4000)
 
 | Container | Imagem | Porta | Função |
 |-----------|--------|-------|--------|
-| chamanoespeto-frontend | edespetohub-frontend | 8080→80 | SPA React + nginx (proxy /api→apis) |
+| janocaminho-frontend | edespetohub-frontend | 8080→80 | SPA React + nginx (proxy /api→apis) |
 | janocaminho-apis | edespetohub-apis | 5000 | BFF Express (rotas + proxy pro backend) |
-| chamanoespeto-api | edespetohub-api | 4000 | Backend real (TypeORM, jobs, banco) |
-| chamanoespeto-face-worker | edespetohub-face-worker | 8000 | Verificação facial (Python) |
-| chamanoespeto-postgres | postgres:16 | 5432 | Banco de dados |
+| janocaminho-backend | edespetohub-api | 4000 | Backend real (TypeORM, jobs, banco) |
+| janocaminho-face-worker | edespetohub-face-worker | 8000 | Verificação facial (Python) |
+| janocaminho-postgres | postgres:16 | 5432 | Banco de dados |
 
 ### Regras de implementação por camada
 
@@ -117,7 +117,7 @@ Backend API (chamanoespeto-api :4000)
 Arquivo `apis/.env.docker` no EC2 (não vai pro git):
 ```
 PORT=5000
-BACKEND_URL=http://api:4000/api
+BACKEND_URL=http://backend:4000/api
 JWT_SECRET=<mesmo do backend>
 NODE_ENV=production
 ```
@@ -136,7 +136,7 @@ NODE_ENV=production
 - Resumir objetivo em 1 frase
 
 ### 2. ESCOPO
-- frontend / api / ambos
+- frontend / backend / apis / ambos
 
 ### 3. ALTERAR
 - Alterar apenas o necessário
@@ -155,7 +155,7 @@ git push
 ### 6. INFORMAR O USUÁRIO
 Após o push, reportar:
 - Commit hash (ex: `a1b2c3d`)
-- Escopo: frontend / api / ambos
+- Escopo: frontend / backend / apis / ambos
 - Script(s) a rodar no servidor
 - Se o usuário pedir acompanhamento de deploy, informar o status do workflow/imagens/aprovação
 - Se houver mudança de infra/scripts, avisar se será necessário `git pull` no servidor
@@ -168,7 +168,7 @@ SSH é permitido APENAS para investigação de erros:
 - Ver logs de container: `docker logs <container> --tail 50`
 - Verificar commit no servidor: `git log -1`
 - Checar containers rodando: `docker ps`
-- Executar SQL no banco: `docker exec chamanoespeto-postgres psql -U postgres -d espetinho -c '<SQL>'`
+- Executar SQL no banco: `docker exec janocaminho-postgres psql -U postgres -d espetinho -c '<SQL>'`
 ## INTEGRAÇÃO MCP (Obrigatório se disponível)
 - Use o MCP de SQL para validar o schema antes de gerar migrations.
 - Use o MCP de FileSystem para garantir que o 'git add' inclua todos os arquivos afetados por uma mudança de tipo/interface.

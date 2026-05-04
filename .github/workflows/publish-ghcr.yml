@@ -13,11 +13,11 @@ on:
         options:
           - auto
           - frontend
-          - api
+          - backend
           - apis
           - face-worker
-          - api+frontend
-          - api+apis
+          - backend+frontend
+          - backend+apis
           - all
 
 concurrency:
@@ -75,7 +75,7 @@ jobs:
               frontend)
                 frontend_changed=true
                 ;;
-              api)
+              backend)
                 api_changed=true
                 ;;
               apis)
@@ -84,11 +84,11 @@ jobs:
               face-worker)
                 face_worker_changed=true
                 ;;
-              api+frontend)
+              backend+frontend)
                 api_changed=true
                 frontend_changed=true
                 ;;
-              api+apis)
+              backend+apis)
                 api_changed=true
                 apis_changed=true
                 ;;
@@ -134,17 +134,17 @@ jobs:
 
           changed = {
               "frontend": os.environ.get("FRONTEND_CHANGED") == "true",
-              "api": os.environ.get("API_CHANGED") == "true",
+              "backend": os.environ.get("API_CHANGED") == "true",
               "apis": os.environ.get("APIS_CHANGED") == "true",
               "face-worker": os.environ.get("FACE_WORKER_CHANGED") == "true",
           }
 
-          service_order = ["api", "apis", "frontend", "face-worker"]
+          service_order = ["backend", "apis", "frontend", "face-worker"]
           services = [name for name in service_order if changed[name]]
 
           config = {
-              "api": {
-                  "name": "api",
+              "backend": {
+                  "name": "backend",
                   "context": "./backend",
                   "dockerfile": "./backend/Dockerfile",
                   "image": "edespetohub-api",

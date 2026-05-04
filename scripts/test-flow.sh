@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -e
 
-API_BASE="${API_BASE:-https://www.chamanoespeto.com.br/api}"
+API_BASE="${API_BASE:-https://www.janocaminho.com.br/api}"
 EMAIL="${TEST_EMAIL:-test-flow@example.com}"
 PASSWORD="${TEST_PASSWORD:-Test@123456}"
 STORE_NAME="${TEST_STORE_NAME:-Loja Fluxo Teste}"

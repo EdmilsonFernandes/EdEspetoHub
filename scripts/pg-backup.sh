@@ -4,7 +4,7 @@ set -e
 # Minimal, safe backup. Does not require stopping containers.
 # Produces a compressed SQL dump you can copy off the server (S3, etc).
 
-CONTAINER_NAME="${POSTGRES_CONTAINER_NAME:-chamanoespeto-postgres}"
+CONTAINER_NAME="${POSTGRES_CONTAINER_NAME:-janocaminho-postgres}"
 DB_NAME="${PGDATABASE:-espetinho}"
 USER_NAME="${PGUSER:-postgres}"
 OUT_DIR="${BACKUP_DIR:-./backups}"

@@ -2,7 +2,7 @@
 set -eu
 
 ROOT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
-BACKUP_DIR="${BACKUP_DIR:-/var/backups/chamanoespeto/config}"
+BACKUP_DIR="${BACKUP_DIR:-/var/backups/janocaminho/config}"
 KEEP_DAYS="${KEEP_DAYS:-30}"
 
 TS="$(date -u +%Y%m%dT%H%M%SZ)"

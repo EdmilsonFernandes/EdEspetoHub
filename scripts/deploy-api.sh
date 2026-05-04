@@ -49,7 +49,7 @@ $COMPOSE_CMD \
   -f "$ROOT_DIR/docker-compose.yml" \
   -f "$ROOT_DIR/docker-compose.prod.yml" \
   --env-file "$ENV_FILE" \
-  up -d --build --no-deps --force-recreate api
+  up -d --build --no-deps --force-recreate backend
 
 sh "$ROOT_DIR/scripts/docker-clean-build-cache.sh" || true
 

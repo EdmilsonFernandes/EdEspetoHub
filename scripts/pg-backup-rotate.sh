@@ -9,10 +9,10 @@ set -euo pipefail
 # Intended usage (cron):
 # - Run daily; script will skip if not due.
 
-CONTAINER_NAME="${POSTGRES_CONTAINER_NAME:-chamanoespeto-postgres}"
+CONTAINER_NAME="${POSTGRES_CONTAINER_NAME:-janocaminho-postgres}"
 DB_NAME="${PGDATABASE:-espetinho}"
 USER_NAME="${PGUSER:-postgres}"
-OUT_DIR="${BACKUP_DIR:-/var/backups/chamanoespeto}"
+OUT_DIR="${BACKUP_DIR:-/var/backups/janocaminho}"
 
 MIN_INTERVAL_HOURS="${MIN_INTERVAL_HOURS:-48}"
 KEEP_LATEST="${KEEP_LATEST:-1}"
