@@ -248,7 +248,7 @@ export const productService = {
   {
     const cached = readPublicProductCache(slug);
     if (cached) return cached;
-    const data = await apiClient.get(`/public/stores/slug/${slug}/products`);
+    const data = await apiClient.get(`/public/stores/slug/${slug}/products`, { authMode: 'none' });
     const normalized = data.map(normalizeProduct);
     return writePublicProductCache(slug, normalized);
   },
@@ -263,7 +263,7 @@ export const productService = {
   },
 
   async listPublicCategoriesBySlug(slug: string) {
-    return apiClient.get(`/public/stores/slug/${slug}/categories`);
+    return apiClient.get(`/public/stores/slug/${slug}/categories`, { authMode: 'none' });
   },
 
   async setCategoryPriority(name: string, priority: number, storeId?: string) {

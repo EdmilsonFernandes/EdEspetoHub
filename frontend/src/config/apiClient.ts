@@ -287,8 +287,8 @@ export const apiClient = {
   delete: (path: string, options: any = {}) => request(path, { method: 'DELETE', ...options }),
 
   rawGet: (path: string, options: any = {}) => rawRequest(path, { method: 'GET', ...options }),
-  rawPost: (path: string, body: any) => rawRequest(path, { method: 'POST', body }),
-  rawPut: (path: string, body: any) => rawRequest(path, { method: 'PUT', body }),
-  rawPatch: (path: string, body: any) => rawRequest(path, { method: 'PATCH', body }),
-  rawDelete: (path: string) => rawRequest(path, { method: 'DELETE' }),
+  rawPost: (path: string, body: any, options: any = {}) => rawRequest(path, { method: 'POST', body, ...options }),
+  rawPut: (path: string, body: any, options: any = {}) => rawRequest(path, { method: 'PUT', body, ...options }),
+  rawPatch: (path: string, body: any, options: any = {}) => rawRequest(path, { method: 'PATCH', body, ...options }),
+  rawDelete: (path: string, options: any = {}) => rawRequest(path, { method: 'DELETE', ...options }),
 };

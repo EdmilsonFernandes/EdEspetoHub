@@ -107,7 +107,7 @@ export const storeService = {
     if (!slug) return null;
     const cached = readPublicStoreCache(slug);
     if (cached) return cached;
-    const response = await apiClient.rawGet(`/stores/slug/${slug}`);
+    const response = await apiClient.rawGet(`/stores/slug/${slug}`, { authMode: 'none' });
     if (response.status === 404) return null;
     const data = await toJson(response);
     return writePublicStoreCache(slug, data);
@@ -123,7 +123,7 @@ export const storeService = {
     const cacheKey = `public:portfolio:list:${suffix || 'default'}`;
     const cached = readCollectionCache(cacheKey, 45 * 1000);
     if (cached) return cached;
-    const response = await apiClient.rawGet(`/public/stores${suffix}`);
+    const response = await apiClient.rawGet(`/public/stores${suffix}`, { authMode: 'none' });
     const data = await toJson(response);
     return writeCollectionCache(cacheKey, data);
   },
@@ -138,13 +138,13 @@ export const storeService = {
     const cacheKey = `public:portfolio:discovery:${suffix || 'default'}`;
     const cached = readCollectionCache(cacheKey, 30 * 1000);
     if (cached) return cached;
-    const response = await apiClient.rawGet(`/public/stores/discovery${suffix}`);
+    const response = await apiClient.rawGet(`/public/stores/discovery${suffix}`, { authMode: 'none' });
     const data = await toJson(response);
     return writeCollectionCache(cacheKey, data);
   },
 
   async trackPublicVisit(slug: string, payload: any) {
-    const response = await apiClient.rawPost(`/public/stores/slug/${slug}/track`, payload);
+    const response = await apiClient.rawPost(`/public/stores/slug/${slug}/track`, payload, { authMode: 'none' });
     return toJson(response);
   },
 
@@ -209,7 +209,7 @@ export const storeService = {
     slug: string,
     payload: { destinationZip: string; items: Array<{ productId?: string; quantity?: number; weightG?: number; lengthCm?: number; widthCm?: number; heightCm?: number; name?: string }> }
   ) {
-    const response = await apiClient.rawPost(`/stores/slug/${slug}/postal/quote`, payload);
+    const response = await apiClient.rawPost(`/stores/slug/${slug}/postal/quote`, payload, { authMode: 'none' });
     return toJson(response);
   },
 

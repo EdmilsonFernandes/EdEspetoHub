@@ -1093,6 +1093,7 @@ export function StorePage() {
       setLastPublicOrderId('');
       return;
     }
+
     const savedCustomerSession =
       localStorage.getItem('customerSession') || localStorage.getItem(customerSessionStorageKey);
     if (savedCustomerSession) {
@@ -1115,6 +1116,7 @@ export function StorePage() {
         console.error('Falha ao carregar clientes salvos', error);
       }
     }
+
     const savedCheckoutCustomer = localStorage.getItem(checkoutCustomerStorageKey);
     if (savedCheckoutCustomer && !customerSession?.token) {
       try {
@@ -1132,7 +1134,9 @@ export function StorePage() {
         console.error('Falha ao carregar dados salvos do checkout', error);
       }
     }
+  }, [isStoreAdmin, customersStorageKey, checkoutCustomerStorageKey, customerSessionStorageKey, customerSession?.token]);
 
+  useEffect(() => {
     if (!storeSlug) {
       console.warn('No store slug provided');
       setIsLoading(false);
@@ -1203,7 +1207,13 @@ export function StorePage() {
           applyStoreMeta(data);
         }
       } catch (error) {
-        console.error('Erro ao carregar loja', error);
+        console.error('Erro ao carregar loja', {
+          error,
+          storeSlug,
+          isStoreAdmin,
+          hasAdminSession: Boolean(user?.token),
+          hasCustomerSession: Boolean(customerSession?.token),
+        });
         if (!silent) {
           setBranding((prev) => ({
             ...prev,
@@ -1238,7 +1248,16 @@ export function StorePage() {
         const list = (await productService.listPublicBySlug(storeSlug)) || [];
         setProducts(list);
         try { localStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify({ data: list, ts: Date.now() })); } catch { /* storage cheio */ }
-      } catch { /* offline — mantém o que foi setado do cache acima */ }
+      } catch (error) {
+        console.error('Erro ao carregar produtos públicos da loja', {
+          error,
+          storeSlug,
+          isStoreAdmin,
+          hasAdminSession: Boolean(user?.token),
+          hasCustomerSession: Boolean(customerSession?.token),
+        });
+        /* offline — mantém o que foi setado do cache acima */
+      }
     };
 
     loadStore(false);
@@ -1353,7 +1372,7 @@ export function StorePage() {
       }
       document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, [isStoreAdmin, storeSlug, customersStorageKey, checkoutCustomerStorageKey, customerSessionStorageKey, customerSession?.token]);
+  }, [isStoreAdmin, publicOrderTtlMs, reorderTtlMs, storeSlug]);
 
   useEffect(() => {
     let active = true;

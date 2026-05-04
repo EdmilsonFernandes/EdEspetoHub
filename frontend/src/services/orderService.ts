@@ -175,7 +175,7 @@ export const orderService = {
     {
       return Promise.reject(new Error("Loja inválida"));
     }
-    return apiClient.get(`/public/stores/slug/${storeSlug}/highlights`);
+    return apiClient.get(`/public/stores/slug/${storeSlug}/highlights`, { authMode: 'none' });
   },
   async fetchTableStatusBySlug(storeSlug: string)
   {
@@ -183,7 +183,7 @@ export const orderService = {
     {
       return Promise.reject(new Error("Loja inválida"));
     }
-    return apiClient.get(`/public/stores/slug/${storeSlug}/tables/status`);
+    return apiClient.get(`/public/stores/slug/${storeSlug}/tables/status`, { authMode: 'none' });
   },
   async save(orderData: any, storeId?: string)
   {
