@@ -2655,13 +2655,15 @@ export function StorePage() {
       icon: <ShoppingCart size={22} weight="duotone" />,
       onClick: () => navigate(`/${storeSlug}`),
     },
-    {
-      id: 'condominiums',
-      label: 'Condomínios',
-      description: 'Gerencie feiras, vínculos e aprovações da operação.',
-      icon: <Buildings size={22} weight="duotone" />,
-      onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'condominios' } }),
-    },
+    ...(!isOperatorStoreUser
+      ? [{
+          id: 'condominiums',
+          label: 'Condomínios',
+          description: 'Gerencie feiras, vínculos e aprovações da operação.',
+          icon: <Buildings size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'condominios' } }),
+        }]
+      : []),
     ...(!isOperatorStoreUser
       ? [
           {
@@ -2687,7 +2689,7 @@ export function StorePage() {
           },
         ]
       : []),
-    ...(canUseStoreMotoboys && adminUserRole === 'ADMIN'
+    ...(canUseStoreMotoboys && ['ADMIN', 'LOJISTA'].includes(adminUserRole)
       ? [{
           id: 'motoboys',
           label: 'Entregadores',
@@ -3527,9 +3529,9 @@ export function StorePage() {
               onUpdateCart={updateCart}
               onClearCart={clearCart}
               onProceed={() => setView('cart')}
-              onOpenQueue={isStoreAdmin ? requireAdminSession : undefined}
-              onOpenAdmin={isStoreAdmin && [ 'admin', 'lojista', 'operator' ].includes(normalizedRole) ? () => navigate('/admin/dashboard') : undefined}
-              onLogout={isStoreAdmin ? handleStoreSessionLogout : undefined}
+              onOpenQueue={undefined}
+              onOpenAdmin={undefined}
+              onLogout={undefined}
               onOpenCustomerAccount={!isStoreAdmin ? () => {
                 setCustomerAuthCheckoutPrompt(false);
                 setCustomerVerifyPrompt(null);

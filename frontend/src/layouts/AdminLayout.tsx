@@ -74,7 +74,6 @@ export function AdminLayout({
             { id: 'fila', label: 'Fila ao Vivo', icon: CheckSquare },
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'cardapio', label: 'Loja Online', icon: Package },
-            { id: 'condominios', label: 'Condomínios', icon: Buildings },
           ]
         : [
             { id: 'resumo', label: 'Visão Geral', icon: ChartBar },
@@ -101,7 +100,6 @@ export function AdminLayout({
         { type: 'item', item: mobileNavItems.find((i) => i.id === 'fila') },
         { type: 'item', item: mobileNavItems.find((i) => i.id === 'produtos') },
         { type: 'item', item: mobileNavItems.find((i) => i.id === 'cardapio') },
-        { type: 'item', item: mobileNavItems.find((i) => i.id === 'condominios') },
       ].filter((entry) => Boolean(entry?.item));
     }
     const byId = new Map((mobileNavItems || []).map((item) => [item.id, item]));
@@ -243,13 +241,15 @@ export function AdminLayout({
       icon: <Package size={22} weight="duotone" />,
       onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'produtos' } }),
     },
-    {
-      id: 'condominiums',
-      label: 'Condomínios',
-      description: 'Gerencie feiras, vínculos e aprovações da operação.',
-      icon: <Buildings size={22} weight="duotone" />,
-      onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'condominios' } }),
-    },
+    ...(!isOperatorUser
+      ? [{
+          id: 'condominiums',
+          label: 'Condomínios',
+          description: 'Gerencie feiras, vínculos e aprovações da operação.',
+          icon: <Buildings size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'condominios' } }),
+        }]
+      : []),
     ...(!isOperatorUser
       ? [{
           id: 'summary',
@@ -259,7 +259,7 @@ export function AdminLayout({
           onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'resumo' } }),
         }]
       : []),
-    ...(canUseMotoboys && userRole === 'ADMIN'
+    ...(canUseMotoboys && ['ADMIN', 'LOJISTA'].includes(userRole)
       ? [{
           id: 'motoboys',
           label: 'Entregadores',

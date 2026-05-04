@@ -1796,7 +1796,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'cardapio', label: 'Loja Online', icon: Package },
             { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
-            { id: 'condominios', label: 'Condomínios', icon: Buildings },
           ]
         : [
             { id: 'resumo', label: 'Resumo', icon: ChartBar },
@@ -1939,7 +1938,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
   useEffect(() => {
     if (!isOperatorUser) return;
-    const disallowed = new Set(['resumo', 'pedidos', 'pagamentos', 'gateway', 'avaliacoes', 'config', 'motoboys', 'usuarios', 'estoque']);
+    const disallowed = new Set(['resumo', 'pedidos', 'pagamentos', 'gateway', 'avaliacoes', 'config', 'motoboys', 'usuarios', 'estoque', 'condominios']);
     if (disallowed.has(activeTab)) {
       setActiveTab('fila');
     }
@@ -2066,7 +2065,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       openQueueMonitor({ replace: true });
       return;
     }
-    const allowedTabs = new Set(['resumo', 'avaliacoes', 'produtos', 'estoque', 'config', 'pagamentos', 'gateway', 'motoboys', 'condominios', 'usuarios']);
+    const allowedTabs = new Set(
+      isOperatorUser
+        ? ['produtos', 'cardapio']
+        : ['resumo', 'avaliacoes', 'produtos', 'estoque', 'config', 'pagamentos', 'gateway', 'motoboys', 'condominios', 'usuarios']
+    );
     if (!allowedTabs.has(nextTab)) {
       navigate('/admin/dashboard', { replace: true, state: {} });
       return;
@@ -2078,7 +2081,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     setActiveTab(nextTab as typeof activeTab);
     // Consome o estado de navegação para evitar "reaplicar" aba e causar pisca ao trocar de menu.
     navigate('/admin/dashboard', { replace: true, state: {} });
-  }, [location.state, location.search, openQueueMonitor, navigate]);
+  }, [location.state, location.search, openQueueMonitor, navigate, isOperatorUser]);
   const [savingBranding, setSavingBranding] = useState(false);
   const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
   const pendingNavigationActionRef = useRef<null | (() => void)>(null);

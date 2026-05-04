@@ -135,6 +135,9 @@ const Header = ({
   const isOperatorUser = normalizedRole === "operator";
   const canAccessOperations = isAdminUser || isOperatorUser;
   const isLogged = Boolean(isAuthenticated || canAccessOperations);
+  const hasOperationHeaderActions = Boolean(
+    canAccessOperations && (onOpenAdmin || onOpenQueue || onLogout)
+  );
   const [mobileCollapsedStable, setMobileCollapsedStable] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const collapseLockUntilRef = React.useRef(0);
@@ -456,7 +459,7 @@ const Header = ({
               )}
             </div>
 
-            {isLogged && (
+            {isLogged && hasOperationHeaderActions && (
               <div className="mt-3 sm:mt-0 sm:absolute sm:right-6 sm:bottom-4 flex flex-row items-center justify-center sm:justify-end gap-2">
               {canAccessOperations && onOpenAdmin && (
                 <button
@@ -489,7 +492,7 @@ const Header = ({
             </div>
             )}
           </div>
-          {compact && !mobileCollapsedStable && isLogged && (
+          {compact && !mobileCollapsedStable && isLogged && hasOperationHeaderActions && (
             <div className="sm:hidden relative px-3 pb-2">
               <div className="flex flex-row items-center justify-end gap-2">
                 {canAccessOperations && onOpenAdmin && (
