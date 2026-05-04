@@ -30,6 +30,7 @@ describe('OrderEtaServiceV2', () => {
   beforeAll(() => {
     service = new OrderEtaServiceV2();
     (service as any).persistEstimate = async () => {};
+    (service as any).findDeliveryByOrderId = async () => null;
   });
 
   it('fallback when maps fail — travelMinutes null, confidence low', async () => {

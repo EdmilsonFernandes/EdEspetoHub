@@ -12,10 +12,10 @@ describe('Pedido — Jornada E2E (cliente)', () => {
     const store = await registerStore();
     await verifyEmailDirectly(store.email);
     storeId = store.body.store?.id;
-    storeSlug = store.body.store?.slug;
     if (storeId) await activateSubscription(storeId);
     const login = await loginAdmin(store.email, store.password);
     adminToken = login.token;
+    storeSlug = login.store?.slug;
 
     // Criar produto
     const prod = await api

@@ -10,13 +10,14 @@
     "backfill:customer-addresses": "ts-node src/scripts/backfillCustomerAddressCoordinates.ts",
     "seed:condominium:azuli": "ts-node src/scripts/seedCondominiumAzuli.ts",
     "seed:condominium-users": "ts-node src/scripts/seedCondominiumUsers.ts",
-    "test": "node node_modules/vitest/vitest.mjs run --config vitest.config.unit.ts",
+    "test": "node node_modules/vitest/vitest.mjs run --config vitest.config.unit.ts && node node_modules/vitest/vitest.mjs run --config vitest.config.ts",
     "test:watch": "node node_modules/vitest/vitest.mjs --config vitest.config.unit.ts",
     "test:e2e": "node node_modules/vitest/vitest.mjs run",
     "test:e2e:watch": "node node_modules/vitest/vitest.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.967.0",
+    "@rolldown/binding-linux-x64-gnu": "^1.0.0-rc.18",
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",

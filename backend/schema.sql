@@ -144,6 +144,20 @@ CREATE TABLE IF NOT EXISTS orders (
   cash_tendered NUMERIC(10,2),
   delivery_fee NUMERIC(10,2),
   total NUMERIC(10,2) NOT NULL,
+  customer_user_id UUID,
+  guest_push_id TEXT,
+  fulfillment_mode TEXT,
+  condominium_id UUID,
+  condominium_event_id UUID,
+  condominium_name TEXT,
+  condominium_event_title TEXT,
+  condominium_fulfillment_mode TEXT,
+  condominium_unit TEXT,
+  canceled_at TIMESTAMPTZ,
+  canceled_reason TEXT,
+  customer_received_at TIMESTAMPTZ,
+  customer_received_confirmed_by_user_id UUID,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -487,6 +501,9 @@ CREATE TABLE IF NOT EXISTS password_resets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   token_hash TEXT NOT NULL,
+  resend_count INTEGER NOT NULL DEFAULT 0,
+  request_ip TEXT,
+  last_sent_at TIMESTAMPTZ,
   expires_at TIMESTAMPTZ NOT NULL,
   used_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -499,6 +516,9 @@ CREATE TABLE IF NOT EXISTS email_verifications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   token_hash TEXT NOT NULL,
+  resend_count INTEGER NOT NULL DEFAULT 0,
+  request_ip TEXT,
+  last_sent_at TIMESTAMPTZ,
   expires_at TIMESTAMPTZ NOT NULL,
   used_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

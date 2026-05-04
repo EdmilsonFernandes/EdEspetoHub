@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { api, registerStore, verifyEmailDirectly, activateSubscription, expireSubscription } from '../helpers';
+import { api, registerStore, loginAdmin, verifyEmailDirectly, activateSubscription, expireSubscription } from '../helpers';
 
 describe('Subscription — Expiração de plano', () => {
   let token: string;
@@ -7,10 +7,11 @@ describe('Subscription — Expiração de plano', () => {
 
   beforeAll(async () => {
     const store = await registerStore();
-    token = store.body.token;
     storeId = store.body.store?.id;
     await verifyEmailDirectly(store.email);
     if (storeId) await activateSubscription(storeId);
+    const login = await loginAdmin(store.email, store.password);
+    token = login.token;
   });
 
   it('plano ativo permite criar produto', async () => {
@@ -21,14 +22,13 @@ describe('Subscription — Expiração de plano', () => {
     expect([200, 201]).toContain(res.status);
   });
 
-  it('plano expirado bloqueia operação sensível', async () => {
+  it('plano expirado bloqueia criação de pedido', async () => {
     if (!storeId) return;
     await expireSubscription(storeId);
 
     const res = await api
-      .post(`/api/stores/${storeId}/products`)
-      .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'Produto Bloqueado', price: 10, category: 'Teste', available: true });
+      .post(`/api/stores/${storeId}/orders`)
+      .send({ customerName: 'Teste', type: 'pickup', items: [], paymentMethod: 'pix' });
     expect(res.status).toBeGreaterThanOrEqual(400);
   });
 

@@ -9,6 +9,7 @@ export default defineConfig({
     hookTimeout: 60_000,
     pool: 'forks',
     poolOptions: { forks: { singleFork: true } },
+    globalSetup: ['src/test/globalSetup.ts'],
     setupFiles: ['src/test/setup.ts'],
   },
 });
