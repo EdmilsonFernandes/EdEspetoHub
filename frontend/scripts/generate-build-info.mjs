@@ -6,6 +6,7 @@ import { Buffer } from 'node:buffer';
 const projectRoot = resolve(process.cwd());
 const packageJsonPath = resolve(projectRoot, 'package.json');
 const outputPath = resolve(projectRoot, 'src/generated/buildInfo.ts');
+const publicOutputPath = resolve(projectRoot, 'public/build-info.json');
 
 const resolveGithubRepoUrl = () => {
   const raw =
@@ -167,5 +168,7 @@ const content =
 
 mkdirSync(dirname(outputPath), { recursive: true });
 writeFileSync(outputPath, content, 'utf8');
+mkdirSync(dirname(publicOutputPath), { recursive: true });
+writeFileSync(publicOutputPath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
 
 console.log(`[build-info] ${payload.versionLabel} ${payload.buildId}`);

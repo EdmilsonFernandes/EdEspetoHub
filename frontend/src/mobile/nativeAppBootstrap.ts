@@ -1,6 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { PushNotifications } from '@capacitor/push-notifications';
+import { APP_BUILD_INFO } from '../generated/buildInfo';
 import { customerAccountService } from '../services/customerAccountService';
 import { ADMIN_SESSION_EVENT, CUSTOMER_SESSION_EVENT, MOTOBOY_SESSION_EVENT } from '../services/nativeBiometricService';
 import { motoboyService } from '../services/motoboyService';
@@ -23,9 +24,13 @@ const STORE_NEW_ORDER_CHANNEL_SOUND = 'jnc_store_new_order.wav';
 const MOTOBOY_AVAILABLE_ORDER_PUSH_TYPE = 'motoboy_available_order';
 const MOTOBOY_AVAILABLE_ORDER_EVENT = 'jnc:motoboy-available-order';
 const MOTOBOY_QUEUE_BADGE_EVENT = 'jnc:motoboy-queue-badge';
+const BUILD_INFO_PUBLIC_PATH = '/build-info.json';
+const NATIVE_BUILD_CHECK_INTERVAL_MS = 90 * 1000;
+const LAST_RELOADED_BUILD_KEY = 'jnk_native_last_reloaded_build_id';
 
 let lastStoreForegroundAlertAt = 0;
 let foregroundAudioContext: AudioContext | null = null;
+let buildCheckInFlight = false;
 
 const normalizeInternalUrl = (rawUrl: string): string | null => {
   try {
@@ -353,6 +358,55 @@ const bootstrapPushNotifications = async () => {
   }
 };
 
+const reloadNativeAppForBuild = (nextBuildId: string) => {
+  if (typeof window === 'undefined') return;
+  const currentUrl = new URL(window.location.href);
+  currentUrl.searchParams.set('_appv', nextBuildId);
+  try {
+    sessionStorage.setItem(LAST_RELOADED_BUILD_KEY, nextBuildId);
+  } catch {
+    // no-op
+  }
+  window.location.replace(currentUrl.toString());
+};
+
+const checkForNativeBuildUpdate = async () => {
+  if (!Capacitor.isNativePlatform() || typeof window === 'undefined') return;
+  if (buildCheckInFlight) return;
+
+  buildCheckInFlight = true;
+  try {
+    const response = await fetch(`${BUILD_INFO_PUBLIC_PATH}?ts=${Date.now()}`, {
+      method: 'GET',
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+      },
+    });
+    if (!response.ok) return;
+    const payload = await response.json().catch(() => null);
+    const nextBuildId = String(payload?.buildId || '').trim();
+    const currentBuildId = String(APP_BUILD_INFO.buildId || '').trim();
+    if (!nextBuildId || !currentBuildId || nextBuildId === currentBuildId) return;
+
+    const lastReloadedBuildId = (() => {
+      try {
+        return String(sessionStorage.getItem(LAST_RELOADED_BUILD_KEY) || '').trim();
+      } catch {
+        return '';
+      }
+    })();
+    if (lastReloadedBuildId === nextBuildId) return;
+
+    reloadNativeAppForBuild(nextBuildId);
+  } catch {
+    // no-op
+  } finally {
+    buildCheckInFlight = false;
+  }
+};
+
 export const bootstrapNativeApp = async () => {
   if (!Capacitor.isNativePlatform()) return;
 
@@ -363,6 +417,7 @@ export const bootstrapNativeApp = async () => {
     await App.addListener('appStateChange', ({ isActive }) => {
       if (isActive) {
         if (MOBILE_PUSH_ENABLED) syncPushTokenNow();
+        void checkForNativeBuildUpdate();
         // O app usa esse evento para reidratar telas nativas sem forçar reload da WebView.
         window.dispatchEvent(new CustomEvent('jnc:app-foreground'));
       }
@@ -372,6 +427,7 @@ export const bootstrapNativeApp = async () => {
   }
 
   await bootstrapPushNotifications();
+  void checkForNativeBuildUpdate();
   if (MOBILE_PUSH_ENABLED) {
     syncPushTokenNow();
     window.addEventListener('focus', syncPushTokenNow);
@@ -391,4 +447,8 @@ export const bootstrapNativeApp = async () => {
     window.addEventListener(ADMIN_SESSION_EVENT, syncPushTokenNow as EventListener);
     window.addEventListener(MOTOBOY_SESSION_EVENT, syncPushTokenNow as EventListener);
   }
+
+  window.setInterval(() => {
+    void checkForNativeBuildUpdate();
+  }, NATIVE_BUILD_CHECK_INTERVAL_MS);
 };
