@@ -259,6 +259,11 @@ export function StorePage() {
     return null;
   }, []);
   const [user, setUser] = useState(() => readAdminSessionSnapshot(auth));
+  const isStoreAdmin =
+    Boolean(user?.token) &&
+    Boolean(user?.store?.slug) &&
+    Boolean(storeSlug) &&
+    user.store.slug === storeSlug;
   const [adminAccountDrawerOpen, setAdminAccountDrawerOpen] = useState(false);
   const [customerSession, setCustomerSession] = useState<any | null>(null);
   const [customerAddresses, setCustomerAddresses] = useState<any[]>([]);
@@ -548,11 +553,6 @@ export function StorePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const isDemo = storeSlug === 'demo' || storeSlug === 'test-store';
-  const isStoreAdmin =
-    Boolean(user?.token) &&
-    Boolean(user?.store?.slug) &&
-    Boolean(storeSlug) &&
-    user.store.slug === storeSlug;
   const storefrontContextKey = useMemo(() => {
     if (isStoreAdmin) {
       const storeKey = String(user?.store?.slug || storeSlug || '').trim() || 'store';
