@@ -105,6 +105,7 @@ PY
 resolve_service_image_name() {
   case "$1" in
     api) printf '%s' 'edespetohub-api' ;;
+    apis) printf '%s' 'edespetohub-apis' ;;
     frontend) printf '%s' 'edespetohub-frontend' ;;
     face-worker) printf '%s' 'edespetohub-face-worker' ;;
     *) return 1 ;;
@@ -114,6 +115,7 @@ resolve_service_image_name() {
 resolve_service_container_name() {
   case "$1" in
     api) printf '%s' 'chamanoespeto-api' ;;
+    apis) printf '%s' 'janocaminho-apis' ;;
     frontend) printf '%s' 'chamanoespeto-frontend' ;;
     face-worker) printf '%s' 'chamanoespeto-face-worker' ;;
     *) return 1 ;;
@@ -215,7 +217,7 @@ IMAGE_TAG_ARG="main"
 case "${1:-}" in
   "" )
     ;;
-  api|frontend|face-worker)
+  api|apis|frontend|face-worker)
     ;;
   -*)
     usage
@@ -265,7 +267,7 @@ load_value_if_missing GHCR_USERNAME_SSM_PARAMETER
 load_value_if_missing GHCR_TOKEN_SSM_PARAMETER
 
 if [ $# -eq 0 ]; then
-  set -- api frontend face-worker
+  set -- api apis frontend face-worker
 fi
 
 case "${IMAGE_REGISTRY:-ghcr.io}" in

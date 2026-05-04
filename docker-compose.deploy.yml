@@ -7,3 +7,6 @@ services:
 
   face-worker:
     pull_policy: always
+
+  apis:
+    pull_policy: always

@@ -1,0 +1,24 @@
+{
+  "name": "janocaminho.apis",
+  "version": "1.0.0",
+  "description": "API Gateway / BFF for Ja no Caminho platform",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "axios": "1.7.9",
+    "dotenv": "16.4.7",
+    "express": "4.21.2",
+    "jsonwebtoken": "9.0.2"
+  },
+  "devDependencies": {
+    "@types/express": "4.17.21",
+    "@types/jsonwebtoken": "9.0.7",
+    "@types/node": "20.17.10",
+    "ts-node-dev": "2.0.0",
+    "typescript": "5.7.3"
+  }
+}

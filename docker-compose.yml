@@ -16,7 +16,7 @@ services:
     ports:
       - "${FRONTEND_PORT:-8080}:80"
     depends_on:
-      - api
+      - apis
     restart: always
 
   api:
@@ -73,6 +73,21 @@ services:
       - "5050:80"
     depends_on:
       - postgres
+    restart: always
+
+
+  apis:
+    container_name: janocaminho-apis
+    image: "${IMAGE_REGISTRY:-ghcr.io}/${IMAGE_NAMESPACE:-edmilsonfernandes}/edespetohub-apis:${IMAGE_TAG:-main}"
+    build:
+      context: ./apis
+      dockerfile: Dockerfile
+    env_file:
+      - ./apis/.env.docker
+    ports:
+      - "5000:5000"
+    depends_on:
+      - api
     restart: always
 
 volumes:

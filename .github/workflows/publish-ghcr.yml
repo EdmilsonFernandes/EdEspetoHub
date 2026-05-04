@@ -14,8 +14,10 @@ on:
           - auto
           - frontend
           - api
+          - apis
           - face-worker
           - api+frontend
+          - api+apis
           - all
 
 concurrency:
@@ -59,6 +61,7 @@ jobs:
 
           frontend_changed=false
           api_changed=false
+          apis_changed=false
           face_worker_changed=false
 
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
@@ -66,6 +69,7 @@ jobs:
               ""|auto|all)
                 frontend_changed=true
                 api_changed=true
+                apis_changed=true
                 face_worker_changed=true
                 ;;
               frontend)
@@ -74,12 +78,19 @@ jobs:
               api)
                 api_changed=true
                 ;;
+              apis)
+                apis_changed=true
+                ;;
               face-worker)
                 face_worker_changed=true
                 ;;
               api+frontend)
                 api_changed=true
                 frontend_changed=true
+                ;;
+              api+apis)
+                api_changed=true
+                apis_changed=true
                 ;;
               *)
                 echo "Unsupported build_scope: $BUILD_SCOPE" >&2
@@ -90,6 +101,7 @@ jobs:
             if [ -z "$BEFORE_SHA" ] || [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
               frontend_changed=true
               api_changed=true
+              apis_changed=true
               face_worker_changed=true
             else
               changed_files="$(git diff --name-only "$BEFORE_SHA" "$CURRENT_SHA")"
@@ -102,6 +114,10 @@ jobs:
                 api_changed=true
               fi
 
+              if printf '%s\n' "$changed_files" | grep -Eq '^apis/'; then
+                apis_changed=true
+              fi
+
               if printf '%s\n' "$changed_files" | grep -Eq '^face-worker/'; then
                 face_worker_changed=true
               fi
@@ -110,6 +126,7 @@ jobs:
 
           FRONTEND_CHANGED="$frontend_changed" \
           API_CHANGED="$api_changed" \
+          APIS_CHANGED="$apis_changed" \
           FACE_WORKER_CHANGED="$face_worker_changed" \
           python3 - <<'PY' >> "$GITHUB_OUTPUT"
           import json
@@ -118,10 +135,11 @@ jobs:
           changed = {
               "frontend": os.environ.get("FRONTEND_CHANGED") == "true",
               "api": os.environ.get("API_CHANGED") == "true",
+              "apis": os.environ.get("APIS_CHANGED") == "true",
               "face-worker": os.environ.get("FACE_WORKER_CHANGED") == "true",
           }
 
-          service_order = ["api", "frontend", "face-worker"]
+          service_order = ["api", "apis", "frontend", "face-worker"]
           services = [name for name in service_order if changed[name]]
 
           config = {
@@ -130,6 +148,12 @@ jobs:
                   "context": "./backend",
                   "dockerfile": "./backend/Dockerfile",
                   "image": "edespetohub-api",
+              },
+              "apis": {
+                  "name": "apis",
+                  "context": "./apis",
+                  "dockerfile": "./apis/Dockerfile",
+                  "image": "edespetohub-apis",
               },
               "frontend": {
                   "name": "frontend",

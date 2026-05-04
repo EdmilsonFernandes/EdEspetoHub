@@ -19,8 +19,10 @@ on:
           - auto
           - frontend
           - api
+          - apis
           - face-worker
           - api+frontend
+          - api+apis
           - all
 
 concurrency:
@@ -111,14 +113,20 @@ jobs:
             api)
               services="api"
               ;;
+            apis)
+              services="apis"
+              ;;
             face-worker)
               services="face-worker"
               ;;
             api+frontend)
               services="api frontend"
               ;;
+            api+apis)
+              services="api apis"
+              ;;
             all)
-              services="api frontend face-worker"
+              services="api apis frontend face-worker"
               ;;
             auto)
               if [ "$EVENT_NAME" = "workflow_run" ] && [ -n "${SOURCE_RUN_ID:-}" ]; then
@@ -143,9 +151,10 @@ jobs:
                 services=""
                 for attempt in 1 2 3 4 5 6; do
                   services=""
-                  for service in api frontend face-worker; do
+                  for service in api apis frontend face-worker; do
                     case "$service" in
                       api) image="edespetohub-api" ;;
+                      apis) image="edespetohub-apis" ;;
                       frontend) image="edespetohub-frontend" ;;
                       face-worker) image="edespetohub-face-worker" ;;
                     esac
