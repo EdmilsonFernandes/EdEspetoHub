@@ -63,6 +63,73 @@ Nome no GitHub Actions: `Publish Docker Images (GHCR)`
 
 ---
 
+## ARQUITETURA DE SERVIÇOS (como o sistema funciona)
+
+```
+Cliente (browser/app)
+    │  fetch('/api/...')
+    ▼
+Nginx EC2 (:443) → Frontend container (:80)
+    │
+    ├── /*           → arquivos estáticos React (SPA)
+    ├── /api/*       → proxy_pass apis:5000 (BFF)
+    ├── /api/maps/*  → proxy_pass apis:5000 (BFF)
+    └── /uploads/*   → proxy_pass api:4000  (backend direto, só arquivos)
+    │
+    ▼  (/api/*)
+APIs BFF (janocaminho-apis :5000)
+    ├── Rotas com lógica própria (bus in-memory):
+    │     auth, customer, orders (processors)
+    ├── Proxy catch-all (proxy.routes.ts):
+    │     ~150+ rotas → forward() → http://api:4000/api/*
+    └── Middleware: authRequired/authOptional + error
+    │
+    ▼
+Backend API (chamanoespeto-api :4000)
+    └── Express + TypeORM + PostgreSQL (motor real)
+```
+
+### Containers em produção
+
+| Container | Imagem | Porta | Função |
+|-----------|--------|-------|--------|
+| chamanoespeto-frontend | edespetohub-frontend | 8080→80 | SPA React + nginx (proxy /api→apis) |
+| janocaminho-apis | edespetohub-apis | 5000 | BFF Express (rotas + proxy pro backend) |
+| chamanoespeto-api | edespetohub-api | 4000 | Backend real (TypeORM, jobs, banco) |
+| chamanoespeto-face-worker | edespetohub-face-worker | 8000 | Verificação facial (Python) |
+| chamanoespeto-postgres | postgres:16 | 5432 | Banco de dados |
+
+### Regras de implementação por camada
+
+- **Frontend (`frontend/`)**: SPA puro. Não tem lógica de API. Usa `apiClient.ts` que faz fetch relativo (`/api/...`). Nunca fala direto com o backend.
+- **APIs BFF (`apis/`)**: camada intermediária. Recebe todas as chamadas do frontend. Pode ter lógica própria (processors via bus) ou fazer proxy transparente pro backend. Toda rota nova que o frontend precisar deve ser registrada aqui.
+- **Backend (`backend/`)**: motor de dados. TypeORM, migrations, jobs, webhooks, uploads. O BFF consome ele via HTTP interno (`http://api:4000/api`).
+
+### Onde implementar algo novo
+
+- **Nova rota que o frontend consome**: registrar no BFF (`apis/src/domains/proxy/proxy.routes.ts` se for proxy, ou criar controller+processor se tiver lógica própria).
+- **Nova lógica de negócio/banco**: implementar no backend (`backend/`). O BFF faz proxy.
+- **Novo componente visual**: frontend (`frontend/src/`).
+- **Alterar roteamento nginx**: `frontend/nginx.conf`.
+
+### Env do BFF em produção
+
+Arquivo `apis/.env.docker` no EC2 (não vai pro git):
+```
+PORT=5000
+BACKEND_URL=http://api:4000/api
+JWT_SECRET=<mesmo do backend>
+NODE_ENV=production
+```
+
+### Deploy do BFF
+
+- Imagem: `ghcr.io/edmilsonfernandes/edespetohub-apis:<tag>`
+- Script: `scripts/deploy-release-apis.sh`
+- Workflow: incluído no `publish-ghcr.yml` e `deploy-production.yml`
+
+---
+
 ## FLUXO OBRIGATÓRIO
 
 ### 1. ENTENDER
