@@ -218,13 +218,15 @@ export function AdminLayout({
       icon: <CheckSquare size={22} weight="duotone" />,
       onClick: () => navigate('/admin/queue'),
     },
-    {
-      id: 'sales',
-      label: 'Vendas concluídas',
-      description: 'Histórico recente com pedidos já finalizados.',
-      icon: <ClipboardText size={22} weight="duotone" />,
-      onClick: () => navigate('/admin/queue', { state: { activeTab: 'completed' } }),
-    },
+    ...(!isOperatorUser
+      ? [{
+          id: 'sales',
+          label: 'Vendas concluídas',
+          description: 'Histórico recente com pedidos já finalizados.',
+          icon: <ClipboardText size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/queue', { state: { activeTab: 'completed' } }),
+        }]
+      : []),
     ...(storeSlug
       ? [{
           id: 'storefront',
@@ -235,12 +237,28 @@ export function AdminLayout({
         }]
       : []),
     {
-      id: 'summary',
-      label: 'Resumo da operação',
-      description: 'Visão geral da loja, vendas e atalhos do painel.',
-      icon: <ChartBar size={22} weight="duotone" />,
-      onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'resumo' } }),
+      id: 'products',
+      label: 'Produtos',
+      description: 'Abra o catálogo e ajustes da vitrine.',
+      icon: <Package size={22} weight="duotone" />,
+      onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'produtos' } }),
     },
+    {
+      id: 'condominiums',
+      label: 'Condomínios',
+      description: 'Gerencie feiras, vínculos e aprovações da operação.',
+      icon: <Buildings size={22} weight="duotone" />,
+      onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'condominios' } }),
+    },
+    ...(!isOperatorUser
+      ? [{
+          id: 'summary',
+          label: 'Resumo da operação',
+          description: 'Visão geral da loja, vendas e atalhos do painel.',
+          icon: <ChartBar size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'resumo' } }),
+        }]
+      : []),
     ...(canUseMotoboys && userRole === 'ADMIN'
       ? [{
           id: 'motoboys',
@@ -250,13 +268,15 @@ export function AdminLayout({
           onClick: () => navigate('/admin/motoboys'),
         }]
       : []),
-    {
-      id: 'settings',
-      label: 'Configurações da loja',
-      description: 'Marca, atendimento e ajustes principais da operação.',
-      icon: <Gear size={22} weight="duotone" />,
-      onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'config' } }),
-    },
+    ...(!isOperatorUser
+      ? [{
+          id: 'settings',
+          label: 'Configurações da loja',
+          description: 'Marca, atendimento e ajustes principais da operação.',
+          icon: <Gear size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'config' } }),
+        }]
+      : []),
     {
       id: 'password',
       label: 'Trocar senha',

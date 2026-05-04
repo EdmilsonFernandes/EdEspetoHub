@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft, Eye, EyeSlash, ClipboardText, House, Receipt, Buildings, UserCircle, WarningCircle, X } from '@phosphor-icons/react';
+import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft, Eye, EyeSlash, ClipboardText, House, Receipt, Buildings, UserCircle, WarningCircle, X, Gear, Package, LockKey, Scooter, SignOut } from '@phosphor-icons/react';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import { customerService } from '../services/customerService';
@@ -575,6 +575,8 @@ export function StorePage() {
     user?.user?.id,
   ]);
   const adminRoleLabel = String(user?.user?.role || '').toUpperCase() === 'ADMIN' ? 'Administrador da loja' : 'Operador da loja';
+  const adminUserRole = String(user?.user?.role || '').toUpperCase();
+  const isOperatorStoreUser = adminUserRole === 'OPERATOR' || adminUserRole === 'LOJISTA';
   const isNativeRuntime = Capacitor.isNativePlatform();
   const showAdminWebReturnBar = isStoreAdmin && !isNativeRuntime && view !== 'menu';
   const showClientWebBottomNav = !isNativeRuntime && !isStoreAdmin && view === 'menu';
@@ -594,6 +596,16 @@ export function StorePage() {
   const adminStoreLogo = resolveAssetUrl(String(user?.store?.settings?.logoUrl || branding?.logoUrl || '')) || '';
   const adminOperatorName = String(user?.user?.fullName || user?.user?.name || '').trim();
   const adminOperatorEmail = String(user?.user?.email || '').trim();
+  const adminSubscriptionStatus = String(user?.subscription?.status || '').toUpperCase();
+  const adminPlanName = String(user?.subscription?.plan?.name || '').toLowerCase();
+  const adminIsVip = Boolean(user?.store?.settings?.planExempt || user?.subscription?.planExempt);
+  const canUseStoreMotoboys = Boolean(
+    adminIsVip ||
+      user?.features?.motoboyManagement ||
+      adminSubscriptionStatus === 'TRIAL' ||
+      adminPlanName.includes('pro') ||
+      adminPlanName.includes('vip')
+  );
   const [showPrintPrompt, setShowPrintPrompt] = useState(false);
   const [isGeneratingPrint, setIsGeneratingPrint] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
@@ -2627,31 +2639,72 @@ export function StorePage() {
       onClick: () => navigate('/admin/queue'),
     },
     {
-      id: 'summary',
-      label: 'Resumo da operação',
-      description: 'Volte ao painel com visão geral da loja.',
-      icon: <House size={22} weight="duotone" />,
-      onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'resumo' } }),
-    },
-    {
       id: 'products',
       label: 'Produtos',
       description: 'Abra o catálogo e ajustes da vitrine.',
-      icon: <ShoppingCart size={22} weight="duotone" />,
+      icon: <Package size={22} weight="duotone" />,
       onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'produtos' } }),
     },
     {
-      id: 'settings',
-      label: 'Configurações da loja',
-      description: 'Marca, atendimento e ajustes da operação.',
+      id: 'storefront',
+      label: 'Minha vitrine',
+      description: 'Abra a loja pública sem sair da operação.',
+      icon: <ShoppingCart size={22} weight="duotone" />,
+      onClick: () => navigate(`/${storeSlug}`),
+    },
+    {
+      id: 'condominiums',
+      label: 'Condomínios',
+      description: 'Gerencie feiras, vínculos e aprovações da operação.',
       icon: <Buildings size={22} weight="duotone" />,
-      onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'config' } }),
+      onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'condominios' } }),
+    },
+    ...(!isOperatorStoreUser
+      ? [
+          {
+            id: 'sales',
+            label: 'Vendas concluídas',
+            description: 'Histórico recente com pedidos já finalizados.',
+            icon: <Receipt size={22} weight="duotone" />,
+            onClick: () => navigate('/admin/queue', { state: { activeTab: 'completed' } }),
+          },
+          {
+            id: 'summary',
+            label: 'Resumo da operação',
+            description: 'Volte ao painel com visão geral da loja.',
+            icon: <House size={22} weight="duotone" />,
+            onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'resumo' } }),
+          },
+          {
+            id: 'settings',
+            label: 'Configurações da loja',
+            description: 'Marca, atendimento e ajustes da operação.',
+            icon: <Gear size={22} weight="duotone" />,
+            onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'config' } }),
+          },
+        ]
+      : []),
+    ...(canUseStoreMotoboys && adminUserRole === 'ADMIN'
+      ? [{
+          id: 'motoboys',
+          label: 'Entregadores',
+          description: 'Gestão de equipe, repasses e vínculo das entregas.',
+          icon: <Scooter size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/motoboys'),
+        }]
+      : []),
+    {
+      id: 'password',
+      label: 'Trocar senha',
+      description: 'Atualize a senha deste acesso sem sair da operação.',
+      icon: <LockKey size={22} weight="duotone" />,
+      onClick: () => window.dispatchEvent(new CustomEvent('admin:open-change-password')),
     },
     {
       id: 'logout',
       label: 'Sair da operação',
       description: 'Encerra somente este acesso neste aparelho.',
-      icon: <X size={22} weight="duotone" />,
+      icon: <SignOut size={22} weight="duotone" />,
       onClick: handleStoreSessionLogout,
       tone: 'danger' as const,
     },
