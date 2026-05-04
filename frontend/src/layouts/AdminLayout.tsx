@@ -31,11 +31,11 @@ export function AdminLayout({
   const [accountDrawerOpen, setAccountDrawerOpen] = useState(false);
   const [mobileOpenGroup, setMobileOpenGroup] = useState<string | null>(null);
   const userRole = String(auth?.user?.role || '').toUpperCase();
-  const isOperatorUser = userRole === 'OPERATOR' || userRole === 'LOJISTA';
+  const isOperatorUser = userRole === 'OPERATOR';
   const operatorRoleLabel =
-    userRole === 'ADMIN'
+    userRole === 'ADMIN' || userRole === 'LOJISTA'
       ? 'Administrador da loja'
-      : userRole === 'OPERATOR' || userRole === 'LOJISTA'
+      : userRole === 'OPERATOR'
         ? 'Operador da loja'
         : 'Conta da operação';
   const storeSlug = String(auth?.store?.slug || '').trim();

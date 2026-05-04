@@ -10,7 +10,7 @@ export function AdminMobileBottomNav() {
   const location = useLocation();
   const { auth } = useAuth();
   const role = String(auth?.user?.role || '').toUpperCase();
-  const isOperator = role === 'OPERATOR' || role === 'LOJISTA';
+  const isOperator = role === 'OPERATOR';
   const isSuperAdmin = role === 'SUPER_ADMIN';
   const primaryColor = String(
     auth?.store?.settings?.primaryColor ||

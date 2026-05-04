@@ -49,9 +49,9 @@ const resolveMovementOrigin = (movement: any) => {
   const actorRole = String(movement?.actorRole || '').trim().toUpperCase();
   if (actorName) {
     const roleLabel =
-      actorRole === 'ADMIN' || actorRole === 'STORE_OWNER'
+      actorRole === 'ADMIN' || actorRole === 'STORE_OWNER' || actorRole === 'LOJISTA'
         ? 'Admin'
-        : actorRole === 'OPERATOR' || actorRole === 'LOJISTA'
+        : actorRole === 'OPERATOR'
         ? 'Operador'
         : 'Usuário';
     return `${roleLabel}: ${actorName}`;

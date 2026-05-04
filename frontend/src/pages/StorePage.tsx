@@ -574,9 +574,12 @@ export function StorePage() {
     user?.user?.email,
     user?.user?.id,
   ]);
-  const adminRoleLabel = String(user?.user?.role || '').toUpperCase() === 'ADMIN' ? 'Administrador da loja' : 'Operador da loja';
+  const adminRoleLabel =
+    [ 'ADMIN', 'LOJISTA' ].includes(String(user?.user?.role || '').toUpperCase())
+      ? 'Administrador da loja'
+      : 'Operador da loja';
   const adminUserRole = String(user?.user?.role || '').toUpperCase();
-  const isOperatorStoreUser = adminUserRole === 'OPERATOR' || adminUserRole === 'LOJISTA';
+  const isOperatorStoreUser = adminUserRole === 'OPERATOR';
   const isNativeRuntime = Capacitor.isNativePlatform();
   const showAdminWebReturnBar = isStoreAdmin && !isNativeRuntime && view !== 'menu';
   const showClientWebBottomNav = !isNativeRuntime && !isStoreAdmin && view === 'menu';
@@ -3525,7 +3528,7 @@ export function StorePage() {
               onClearCart={clearCart}
               onProceed={() => setView('cart')}
               onOpenQueue={isStoreAdmin ? requireAdminSession : undefined}
-              onOpenAdmin={isStoreAdmin && normalizedRole === 'admin' ? () => navigate('/admin/dashboard') : undefined}
+              onOpenAdmin={isStoreAdmin && [ 'admin', 'lojista', 'operator' ].includes(normalizedRole) ? () => navigate('/admin/dashboard') : undefined}
               onLogout={isStoreAdmin ? handleStoreSessionLogout : undefined}
               onOpenCustomerAccount={!isStoreAdmin ? () => {
                 setCustomerAuthCheckoutPrompt(false);
@@ -3719,10 +3722,10 @@ export function StorePage() {
               <UserCircle size={26} weight="duotone" className="text-[#336886]" />
             )
           }
-          badges={[
-            { label: String(user?.user?.role || '').toUpperCase() === 'ADMIN' ? 'Admin' : 'Operador', tone: 'brand' },
-            { label: 'Loja online', tone: 'neutral' },
-          ]}
+            badges={[
+              { label: [ 'ADMIN', 'LOJISTA' ].includes(String(user?.user?.role || '').toUpperCase()) ? 'Admin' : 'Operador', tone: 'brand' },
+              { label: 'Loja online', tone: 'neutral' },
+            ]}
           actions={adminAccountActions}
           footer={<PlatformTrustFooter compact mode="default" align="left" />}
         />

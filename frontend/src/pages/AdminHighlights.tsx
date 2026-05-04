@@ -76,7 +76,7 @@ export function AdminHighlights() {
   const storeId = String(auth?.store?.id || '').trim();
   const storeSlug = String(auth?.store?.slug || '').trim();
   const userRole = String(auth?.user?.role || '').toUpperCase();
-  const isOperatorUser = userRole === 'OPERATOR' || userRole === 'LOJISTA';
+  const isOperatorUser = userRole === 'OPERATOR';
   const canViewTechnical = userRole === 'ADMIN';
   const isVip = Boolean(auth?.store?.settings?.planExempt || auth?.subscription?.planExempt);
   const planName = String(auth?.subscription?.plan?.name || '').toLowerCase();

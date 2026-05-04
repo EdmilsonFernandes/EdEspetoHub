@@ -1779,7 +1779,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const storeSlug = session?.store?.slug;
   const storeUrl = storeSlug ? `https://www.janocaminho.com.br/${storeSlug}` : '';
   const storeName = session?.store?.name || 'Já no Caminho';
-  const isOperatorUser = [ 'OPERATOR', 'LOJISTA' ].includes(String(session?.user?.role || '').toUpperCase());
+  const isOperatorUser = String(session?.user?.role || '').toUpperCase() === 'OPERATOR';
   const socialLinks = session?.store?.settings?.socialLinks || [];
   const whatsappNumber = session?.store?.owner?.phone || '';
   const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;

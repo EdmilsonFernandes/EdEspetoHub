@@ -131,9 +131,10 @@ const Header = ({
   orderTypes
 }) => {
   const normalizedRole = String(userRole || "").toLowerCase();
-  const isAdminUser = normalizedRole === "admin";
-  const isOperatorUser = normalizedRole === "operator" || normalizedRole === "lojista";
-  const isLogged = Boolean(isAuthenticated || isAdminUser || isOperatorUser);
+  const isAdminUser = normalizedRole === "admin" || normalizedRole === "lojista";
+  const isOperatorUser = normalizedRole === "operator";
+  const canAccessOperations = isAdminUser || isOperatorUser;
+  const isLogged = Boolean(isAuthenticated || canAccessOperations);
   const [mobileCollapsedStable, setMobileCollapsedStable] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const collapseLockUntilRef = React.useRef(0);
@@ -457,7 +458,7 @@ const Header = ({
 
             {isLogged && (
               <div className="mt-3 sm:mt-0 sm:absolute sm:right-6 sm:bottom-4 flex flex-row items-center justify-center sm:justify-end gap-2">
-              {(isAdminUser || isOperatorUser) && onOpenAdmin && (
+              {canAccessOperations && onOpenAdmin && (
                 <button
                   onClick={onOpenAdmin}
                   className="px-3 py-2 rounded-full text-xs font-black border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 whitespace-nowrap shadow-sm active:scale-95"
@@ -466,7 +467,7 @@ const Header = ({
                   <span>Painel Admin</span>
                 </button>
               )}
-              {isOperatorUser && onOpenQueue && (
+              {canAccessOperations && onOpenQueue && (
                 <button
                   onClick={onOpenQueue}
                   className="px-3 py-2 rounded-full text-xs font-black border border-[#336886] bg-[#336886] text-white hover:bg-[#2a5670] transition flex items-center gap-1.5 whitespace-nowrap shadow-sm active:scale-95"
@@ -475,7 +476,7 @@ const Header = ({
                   <span>Fila de Pedidos</span>
                 </button>
               )}
-              {isOperatorUser && onLogout && (
+              {canAccessOperations && onLogout && (
                 <button
                   type="button"
                   onClick={onLogout}
@@ -491,7 +492,7 @@ const Header = ({
           {compact && !mobileCollapsedStable && isLogged && (
             <div className="sm:hidden relative px-3 pb-2">
               <div className="flex flex-row items-center justify-end gap-2">
-                {isAdminUser && onOpenAdmin && (
+                {canAccessOperations && onOpenAdmin && (
                   <button
                     onClick={onOpenAdmin}
                     className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition flex items-center gap-1 whitespace-nowrap"
@@ -500,7 +501,7 @@ const Header = ({
                     Painel
                   </button>
                 )}
-                {isOperatorUser && onLogout && (
+                {canAccessOperations && onLogout && (
                   <button
                     type="button"
                     onClick={onLogout}

@@ -714,9 +714,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   };
   const { auth } = useAuth();
   const userRole = String(auth?.user?.role || '').toLowerCase();
-  const hasPrintAccess = userRole === 'admin' || userRole === 'operator';
-  const isAdminUser = String(auth?.user?.role || '').toUpperCase() === 'ADMIN';
-  const isOperatorUser = String(auth?.user?.role || '').toUpperCase() === 'OPERATOR' || String(auth?.user?.role || '').toUpperCase() === 'LOJISTA';
+  const hasPrintAccess = userRole === 'admin' || userRole === 'lojista' || userRole === 'operator';
+  const isAdminUser = [ 'ADMIN', 'LOJISTA' ].includes(String(auth?.user?.role || '').toUpperCase());
+  const isOperatorUser = String(auth?.user?.role || '').toUpperCase() === 'OPERATOR';
   const canLoadMotoboyManagement = Boolean(
     isAdminUser &&
       (

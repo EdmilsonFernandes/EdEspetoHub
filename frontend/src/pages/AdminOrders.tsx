@@ -51,7 +51,7 @@ export function AdminOrders() {
     return savedPreference === 'true';
   });
   const userRole = String(auth?.user?.role || '').toUpperCase();
-  const isOperatorUser = userRole === 'OPERATOR' || userRole === 'LOJISTA';
+  const isOperatorUser = userRole === 'OPERATOR';
   const isVip = Boolean(auth?.store?.settings?.planExempt || auth?.subscription?.planExempt);
   const planName = String(auth?.subscription?.plan?.name || '').toLowerCase();
   const subscriptionStatus = String(auth?.subscription?.status || '').toUpperCase();
@@ -961,5 +961,4 @@ export function AdminOrders() {
     </AdminLayout>
   );
 }
-
 

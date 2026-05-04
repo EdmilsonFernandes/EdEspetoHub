@@ -25,7 +25,7 @@ export function AdminQueue() {
     return savedPreference === 'true';
   });
   const userRole = String(auth?.user?.role || '').toUpperCase();
-  const isOperatorUser = userRole === 'OPERATOR' || userRole === 'LOJISTA';
+  const isOperatorUser = userRole === 'OPERATOR';
   const storeSlug = String(auth?.store?.slug || '').trim();
   const isVip = Boolean(auth?.store?.settings?.planExempt || auth?.subscription?.planExempt);
   const planName = String(auth?.subscription?.plan?.name || '').toLowerCase();
@@ -151,4 +151,3 @@ export function AdminQueue() {
     </AdminLayout>
   );
 }
-
