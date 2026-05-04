@@ -153,10 +153,10 @@ jobs:
                   services=""
                   for service in backend apis frontend face-worker; do
                     case "$service" in
-                      backend) image="edespetohub-api" ;;
-                      apis) image="edespetohub-apis" ;;
-                      frontend) image="edespetohub-frontend" ;;
-                      face-worker) image="edespetohub-face-worker" ;;
+                      backend) image="janocaminho-backend" ;;
+                      apis) image="janocaminho-apis" ;;
+                      frontend) image="janocaminho-frontend" ;;
+                      face-worker) image="janocaminho-face-worker" ;;
                     esac
 
                     image_ref="ghcr.io/${GH_REPOSITORY_OWNER}/${image}:${IMAGE_TAG}"

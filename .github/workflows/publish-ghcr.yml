@@ -147,25 +147,25 @@ jobs:
                   "name": "backend",
                   "context": "./backend",
                   "dockerfile": "./backend/Dockerfile",
-                  "image": "edespetohub-api",
+                  "image": "janocaminho-backend",
               },
               "apis": {
                   "name": "apis",
                   "context": "./apis",
                   "dockerfile": "./apis/Dockerfile",
-                  "image": "edespetohub-apis",
+                  "image": "janocaminho-apis",
               },
               "frontend": {
                   "name": "frontend",
                   "context": "./frontend",
                   "dockerfile": "./frontend/Dockerfile",
-                  "image": "edespetohub-frontend",
+                  "image": "janocaminho-frontend",
               },
               "face-worker": {
                   "name": "face-worker",
                   "context": "./face-worker",
                   "dockerfile": "./face-worker/Dockerfile",
-                  "image": "edespetohub-face-worker",
+                  "image": "janocaminho-face-worker",
               },
           }
 

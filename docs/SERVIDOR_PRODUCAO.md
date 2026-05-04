@@ -208,9 +208,9 @@ EOF
 
 ```bash
 aws ssm get-parameter --name /chamanoespeto/prod --with-decryption --region us-east-2 --query 'Parameter.Value' --output text
-docker pull ghcr.io/edmilsonfernandes/edespetohub-api:main
-docker pull ghcr.io/edmilsonfernandes/edespetohub-frontend:main
-docker pull ghcr.io/edmilsonfernandes/edespetohub-face-worker:main
+docker pull ghcr.io/edmilsonfernandes/janocaminho-backend:main
+docker pull ghcr.io/edmilsonfernandes/janocaminho-frontend:main
+docker pull ghcr.io/edmilsonfernandes/janocaminho-face-worker:main
 ```
 
 6. Rodar o deploy novo:
@@ -245,11 +245,11 @@ Se precisar testar rápido sem SSM, `.env.prod.secrets` continua aceito como fal
 
 | Container | Imagem | Porta | Função |
 |---|---|---|---|
-| `janocaminho-frontend` | `edespetohub-frontend:main` | 8080→80 | React + nginx |
-| `janocaminho-backend` | `edespetohub-api:main` | 4000 | Backend Node.js |
+| `janocaminho-frontend` | `janocaminho-frontend:main` | 8080→80 | React + nginx |
+| `janocaminho-backend` | `janocaminho-backend:main` | 4000 | Backend Node.js |
 | `janocaminho-postgres` | `postgres:16` | 5432 | Banco de dados |
 | `janocaminho-pgadmin` | `pgadmin4:8.13` | 5050 | Admin do banco |
-| `janocaminho-face-worker` | `edespetohub-face-worker:main` | — | Verificação facial |
+| `janocaminho-face-worker` | `janocaminho-face-worker:main` | — | Verificação facial |
 
 ```bash
 # Ver containers rodando
@@ -276,9 +276,9 @@ Workflow responsável:
 - `.github/workflows/publish-ghcr.yml`
 
 Imagens publicadas:
-- `ghcr.io/edmilsonfernandes/edespetohub-api:<tag>`
-- `ghcr.io/edmilsonfernandes/edespetohub-frontend:<tag>`
-- `ghcr.io/edmilsonfernandes/edespetohub-face-worker:<tag>`
+- `ghcr.io/edmilsonfernandes/janocaminho-backend:<tag>`
+- `ghcr.io/edmilsonfernandes/janocaminho-frontend:<tag>`
+- `ghcr.io/edmilsonfernandes/janocaminho-face-worker:<tag>`
 
 Tags publicadas:
 - `main`

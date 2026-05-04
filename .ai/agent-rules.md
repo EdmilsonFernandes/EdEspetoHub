@@ -93,10 +93,10 @@ Backend API (chamanoespeto-api :4000)
 
 | Container | Imagem | Porta | Função |
 |-----------|--------|-------|--------|
-| janocaminho-frontend | edespetohub-frontend | 8080→80 | SPA React + nginx (proxy /api→apis) |
-| janocaminho-apis | edespetohub-apis | 5000 | BFF Express (rotas + proxy pro backend) |
-| janocaminho-backend | edespetohub-api | 4000 | Backend real (TypeORM, jobs, banco) |
-| janocaminho-face-worker | edespetohub-face-worker | 8000 | Verificação facial (Python) |
+| janocaminho-frontend | janocaminho-frontend | 8080→80 | SPA React + nginx (proxy /api→apis) |
+| janocaminho-apis | janocaminho-apis | 5000 | BFF Express (rotas + proxy pro backend) |
+| janocaminho-backend | janocaminho-backend | 4000 | Backend real (TypeORM, jobs, banco) |
+| janocaminho-face-worker | janocaminho-face-worker | 8000 | Verificação facial (Python) |
 | janocaminho-postgres | postgres:16 | 5432 | Banco de dados |
 
 ### Regras de implementação por camada
@@ -124,7 +124,7 @@ NODE_ENV=production
 
 ### Deploy do BFF
 
-- Imagem: `ghcr.io/edmilsonfernandes/edespetohub-apis:<tag>`
+- Imagem: `ghcr.io/edmilsonfernandes/janocaminho-apis:<tag>`
 - Script: `scripts/deploy-release-apis.sh`
 - Workflow: incluído no `publish-ghcr.yml` e `deploy-production.yml`
 

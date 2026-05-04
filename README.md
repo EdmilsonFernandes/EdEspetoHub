@@ -1356,9 +1356,9 @@ Testar acesso e deploy:
 
 ```bash
 aws ssm get-parameter --name /chamanoespeto/prod --with-decryption --region us-east-2 --query 'Parameter.Value' --output text
-docker pull ghcr.io/edmilsonfernandes/edespetohub-api:main
-docker pull ghcr.io/edmilsonfernandes/edespetohub-frontend:main
-docker pull ghcr.io/edmilsonfernandes/edespetohub-face-worker:main
+docker pull ghcr.io/edmilsonfernandes/janocaminho-backend:main
+docker pull ghcr.io/edmilsonfernandes/janocaminho-frontend:main
+docker pull ghcr.io/edmilsonfernandes/janocaminho-face-worker:main
 sh scripts/deploy-release-api.sh
 sh scripts/deploy-release-frontend.sh
 docker ps

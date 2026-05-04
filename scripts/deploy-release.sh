@@ -104,10 +104,10 @@ PY
 
 resolve_service_image_name() {
   case "$1" in
-    backend) printf '%s' 'edespetohub-api' ;;
-    apis) printf '%s' 'edespetohub-apis' ;;
-    frontend) printf '%s' 'edespetohub-frontend' ;;
-    face-worker) printf '%s' 'edespetohub-face-worker' ;;
+    backend) printf '%s' 'janocaminho-backend' ;;
+    apis) printf '%s' 'janocaminho-apis' ;;
+    frontend) printf '%s' 'janocaminho-frontend' ;;
+    face-worker) printf '%s' 'janocaminho-face-worker' ;;
     *) return 1 ;;
   esac
 }
