@@ -1,32 +1,22 @@
+import { describe, it, expect } from 'vitest';
 import { deliveryService } from './DeliveryService';
 
 const assertOk = (from: string, to: string) => {
-  // Access private helper (unit test only).
   (deliveryService as any).assertTransition(from, to);
 };
 
 const assertFail = (from: string, to: string) => {
-  try {
-    (deliveryService as any).assertTransition(from, to);
-  } catch (e: any) {
-    return;
-  }
-  throw new Error(`Expected transition to fail: ${from} -> ${to}`);
+  expect(() => (deliveryService as any).assertTransition(from, to)).toThrow();
 };
 
-(() => {
-  // Happy path
-  assertOk('AVAILABLE', 'ACCEPTED');
-  assertOk('ACCEPTED', 'PICKED_UP');
-  assertOk('PICKED_UP', 'IN_TRANSIT');
-  assertOk('IN_TRANSIT', 'DELIVERED');
+describe('DeliveryService transitions', () => {
+  it('AVAILABLE → ACCEPTED', () => assertOk('AVAILABLE', 'ACCEPTED'));
+  it('ACCEPTED → PICKED_UP', () => assertOk('ACCEPTED', 'PICKED_UP'));
+  it('PICKED_UP → IN_TRANSIT', () => assertOk('PICKED_UP', 'IN_TRANSIT'));
+  it('IN_TRANSIT → DELIVERED', () => assertOk('IN_TRANSIT', 'DELIVERED'));
 
-  // Invalids
-  assertFail('AVAILABLE', 'DELIVERED');
-  assertFail('DELIVERED', 'IN_TRANSIT');
-  assertFail('ACCEPTED', 'DELIVERED');
-  assertFail('PICKED_UP', 'CANCELED');
-
-  console.log('DeliveryService transition tests passed');
-})();
-
+  it('AVAILABLE → DELIVERED should fail', () => assertFail('AVAILABLE', 'DELIVERED'));
+  it('DELIVERED → IN_TRANSIT should fail', () => assertFail('DELIVERED', 'IN_TRANSIT'));
+  it('ACCEPTED → DELIVERED should fail', () => assertFail('ACCEPTED', 'DELIVERED'));
+  it('PICKED_UP → CANCELED should fail', () => assertFail('PICKED_UP', 'CANCELED'));
+});

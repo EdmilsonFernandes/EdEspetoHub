@@ -11,39 +11,28 @@
  * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
-import assert from 'assert';
+import { describe, it, expect } from 'vitest';
 import { AvailabilityDays, isProductAvailableToday } from './productAvailability';
 
 const monday = new Date('2025-01-06T12:00:00Z');
 const sunday = new Date('2025-01-05T12:00:00Z');
 
-const run = () => {
-  assert.strictEqual(
-    isProductAvailableToday({ active: false }, monday),
-    false,
-    'inactive product should be unavailable'
-  );
+describe('productAvailability', () => {
+  it('inactive product should be unavailable', () => {
+    expect(isProductAvailableToday({ active: false }, monday)).toBe(false);
+  });
 
-  assert.strictEqual(
-    isProductAvailableToday({ active: true, availabilityDays: null }, monday),
-    true,
-    'active product with null availability should be available'
-  );
+  it('active product with null availability should be available', () => {
+    expect(isProductAvailableToday({ active: true, availabilityDays: null }, monday)).toBe(true);
+  });
 
-  const allowed: AvailabilityDays = { mon: true, tue: false };
-  assert.strictEqual(
-    isProductAvailableToday({ active: true, availabilityDays: allowed }, monday),
-    true,
-    'active product with allowed day should be available'
-  );
+  it('active product with allowed day should be available', () => {
+    const allowed: AvailabilityDays = { mon: true, tue: false };
+    expect(isProductAvailableToday({ active: true, availabilityDays: allowed }, monday)).toBe(true);
+  });
 
-  const blocked: AvailabilityDays = { sun: false, mon: false };
-  assert.strictEqual(
-    isProductAvailableToday({ active: true, availabilityDays: blocked }, sunday),
-    false,
-    'active product with blocked day should be unavailable'
-  );
-};
-
-run();
-console.log('productAvailability tests passed');
+  it('active product with blocked day should be unavailable', () => {
+    const blocked: AvailabilityDays = { sun: false, mon: false };
+    expect(isProductAvailableToday({ active: true, availabilityDays: blocked }, sunday)).toBe(false);
+  });
+});

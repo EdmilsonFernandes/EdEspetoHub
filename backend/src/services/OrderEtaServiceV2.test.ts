@@ -11,7 +11,7 @@
  * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
-import assert from 'assert';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { OrderEtaServiceV2 } from './OrderEtaServiceV2';
 
 const createOrder = (overrides: any = {}) => ({
@@ -19,49 +19,44 @@ const createOrder = (overrides: any = {}) => ({
   type: 'delivery',
   address: 'Rua X, 123',
   createdAt: new Date(),
-  items: [
-    { quantity: 2 },
-    { quantity: 1 },
-  ],
-  store: {
-    id: 'store-1',
-    settings: {
-      address: 'Rua Loja, 10',
-    },
-  },
+  items: [{ quantity: 2 }, { quantity: 1 }],
+  store: { id: 'store-1', settings: { address: 'Rua Loja, 10' } },
   ...overrides,
 });
 
-async function run() {
-  const service = new OrderEtaServiceV2();
-  (service as any).persistEstimate = async () => {};
+describe('OrderEtaServiceV2', () => {
+  let service: OrderEtaServiceV2;
 
-  // 1) fallback when maps fail
-  (service as any).getTravelData = async () => null;
-  const etaFallback = await service.calculateForOrder(createOrder(), 1, 'test-1');
-  assert.strictEqual(etaFallback.travelMinutes, null);
-  assert.strictEqual(etaFallback.confidence, 'low');
+  beforeAll(() => {
+    service = new OrderEtaServiceV2();
+    (service as any).persistEstimate = async () => {};
+  });
 
-  // 2) default prep minutes
-  const etaDefaultPrep = await service.calculateForOrder(createOrder(), 1, 'test-2');
-  assert.ok(etaDefaultPrep.prepMinutes >= 15, 'prep should use default base');
+  it('fallback when maps fail — travelMinutes null, confidence low', async () => {
+    (service as any).getTravelData = async () => null;
+    const eta = await service.calculateForOrder(createOrder(), 1, 'test-1');
+    expect(eta.travelMinutes).toBeNull();
+    expect(eta.confidence).toBe('low');
+  });
 
-  // 3) window calculation
-  const etaWindow = await service.calculateForOrder(createOrder(), 1, 'test-3');
-  assert.ok(etaWindow.windowMin <= etaWindow.totalMinutes);
-  assert.ok(etaWindow.windowMax >= etaWindow.totalMinutes);
+  it('default prep minutes >= 15', async () => {
+    (service as any).getTravelData = async () => null;
+    const eta = await service.calculateForOrder(createOrder(), 1, 'test-2');
+    expect(eta.prepMinutes).toBeGreaterThanOrEqual(15);
+  });
 
-  // 4) active + allowed travel
-  (service as any).getTravelData = async () => ({ distanceKm: 1.5, durationMin: 8 });
-  const etaTravel = await service.calculateForOrder(createOrder(), 2, 'test-4');
-  assert.strictEqual(etaTravel.travelMinutes, 8);
-  assert.strictEqual(etaTravel.distanceKm, 1.5);
-  assert.ok(etaTravel.totalMinutes >= etaTravel.prepMinutes);
+  it('window calculation is consistent', async () => {
+    (service as any).getTravelData = async () => null;
+    const eta = await service.calculateForOrder(createOrder(), 1, 'test-3');
+    expect(eta.windowMin).toBeLessThanOrEqual(eta.totalMinutes);
+    expect(eta.windowMax).toBeGreaterThanOrEqual(eta.totalMinutes);
+  });
 
-  console.log('OrderEtaServiceV2 tests passed.');
-}
-
-run().catch((error) => {
-  console.error('OrderEtaServiceV2 tests failed', error);
-  process.exit(1);
+  it('uses travel data when available', async () => {
+    (service as any).getTravelData = async () => ({ distanceKm: 1.5, durationMin: 8 });
+    const eta = await service.calculateForOrder(createOrder(), 2, 'test-4');
+    expect(eta.travelMinutes).toBe(8);
+    expect(eta.distanceKm).toBe(1.5);
+    expect(eta.totalMinutes).toBeGreaterThanOrEqual(eta.prepMinutes);
+  });
 });

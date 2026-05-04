@@ -1,50 +1,34 @@
-import crypto from 'crypto';
+import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { CustomerAccountService } from './CustomerAccountService';
 import { AppDataSource } from '../config/database';
 import { AppError } from '../errors/AppError';
 
-const assert = (condition: any, message: string) => {
-  if (!condition) throw new Error(message);
-};
+const originalQuery = AppDataSource.query.bind(AppDataSource);
+const originalGetRepository = AppDataSource.getRepository.bind(AppDataSource);
+const originalTransaction = AppDataSource.transaction.bind(AppDataSource);
 
-const expectAppError = async (fn: () => Promise<any>, code: string) => {
-  try {
-    await fn();
-  } catch (error: any) {
-    assert(error instanceof AppError, `Expected AppError for ${code}`);
-    assert(error.code === code, `Expected code ${code}, got ${error.code}`);
-    return error;
-  }
-  throw new Error(`Expected error ${code}`);
-};
+afterAll(() => {
+  (AppDataSource as any).query = originalQuery;
+  (AppDataSource as any).getRepository = originalGetRepository;
+  (AppDataSource as any).transaction = originalTransaction;
+});
 
-(() => {
-  const originalQuery = AppDataSource.query.bind(AppDataSource);
-  const originalGetRepository = AppDataSource.getRepository.bind(AppDataSource);
-  const originalTransaction = AppDataSource.transaction.bind(AppDataSource);
+describe('CustomerAccountService — email OTP', () => {
+  let service: any;
+  let sentCode: string;
+  let welcomeSent: number;
+  let userExists: boolean;
+  let savedUser: any;
+  let otpRecords: any[];
 
-  const restore = () => {
-    (AppDataSource as any).query = originalQuery;
-    (AppDataSource as any).getRepository = originalGetRepository;
-    (AppDataSource as any).transaction = originalTransaction;
-  };
+  beforeEach(() => {
+    service = new CustomerAccountService();
+    sentCode = '';
+    welcomeSent = 0;
+    userExists = false;
+    otpRecords = [];
 
-  const run = async () => {
-    const service = new CustomerAccountService() as any;
-    let sentCode = '';
-    let welcomeSent = 0;
-
-    service.emailService = {
-      sendCustomerVerificationCode: async (_email: string, _name: string, code: string) => {
-        sentCode = code;
-      },
-      sendCustomerWelcome: async () => {
-        welcomeSent += 1;
-      },
-    };
-
-    let userExists = false;
-    const savedUser: any = {
+    savedUser = {
       id: 'customer-1',
       fullName: 'Cliente OTP',
       email: 'cliente@example.com',
@@ -54,7 +38,10 @@ const expectAppError = async (fn: () => Promise<any>, code: string) => {
       createdAt: new Date(),
     };
 
-    const otpRecords: any[] = [];
+    service.emailService = {
+      sendCustomerVerificationCode: async (_email: string, _name: string, code: string) => { sentCode = code; },
+      sendCustomerWelcome: async () => { welcomeSent += 1; },
+    };
 
     (AppDataSource as any).query = async (sql: string) => {
       if (sql.includes('MAX(resend_count)')) return [{ max_count: otpRecords.length ? otpRecords.length : 0 }];
@@ -70,11 +57,7 @@ const expectAppError = async (fn: () => Promise<any>, code: string) => {
         return null;
       },
       create: (payload: any) => ({ ...payload }),
-      save: async (payload: any) => {
-        Object.assign(savedUser, payload);
-        userExists = true;
-        return savedUser;
-      },
+      save: async (payload: any) => { Object.assign(savedUser, payload); userExists = true; return savedUser; },
     };
 
     const otpRepo = {
@@ -86,24 +69,16 @@ const expectAppError = async (fn: () => Promise<any>, code: string) => {
           return created;
         }
         const index = otpRecords.findIndex((row) => row.id === payload.id);
-        if (index >= 0) {
-          otpRecords[index] = payload;
-        } else {
-          otpRecords.unshift(payload);
-        }
+        if (index >= 0) otpRecords[index] = payload;
+        else otpRecords.unshift(payload);
         return payload;
       },
       findOne: async () => otpRecords[0] || null,
       createQueryBuilder: () => {
         const builder: any = {
-          update: () => builder,
-          set: () => builder,
-          where: () => builder,
-          andWhere: () => builder,
-          leftJoinAndSelect: () => builder,
-          orderBy: () => builder,
-          getOne: async () => otpRecords[0] || null,
-          execute: async () => undefined,
+          update: () => builder, set: () => builder, where: () => builder,
+          andWhere: () => builder, leftJoinAndSelect: () => builder, orderBy: () => builder,
+          getOne: async () => otpRecords[0] || null, execute: async () => undefined,
         };
         return builder;
       },
@@ -114,38 +89,37 @@ const expectAppError = async (fn: () => Promise<any>, code: string) => {
       return otpRepo;
     };
     (AppDataSource as any).transaction = async (callback: any) => callback({ save: async () => undefined });
+  });
 
-    const registerResult = await service.register({
-      fullName: 'Cliente OTP',
-      email: 'cliente@example.com',
-      password: '123456',
-      termsAccepted: true,
-      lgpdAccepted: true,
+  it('register requests OTP verification and sends 4-digit code', async () => {
+    const result = await service.register({
+      fullName: 'Cliente OTP', email: 'cliente@example.com', password: '123456',
+      termsAccepted: true, lgpdAccepted: true,
     }, { ipAddress: '127.0.0.1' });
 
-    assert(registerResult.next === 'VERIFY_EMAIL_CODE', 'register should request otp verification');
-    assert(sentCode.length === 4, 'register should send a 4-digit code');
+    expect(result.next).toBe('VERIFY_EMAIL_CODE');
+    expect(sentCode).toHaveLength(4);
+  });
 
-    await expectAppError(
-      () => service.verifyEmailCode({ email: 'cliente@example.com', code: '0000' }),
-      'GEN-002'
-    );
-    assert(Number(otpRecords[0]?.attemptsCount || 0) === 1, 'invalid code should increment attempts');
+  it('invalid code increments attempts and throws', async () => {
+    await service.register({
+      fullName: 'Cliente OTP', email: 'cliente@example.com', password: '123456',
+      termsAccepted: true, lgpdAccepted: true,
+    }, { ipAddress: '127.0.0.1' });
 
-    const verifyResult = await service.verifyEmailCode({ email: 'cliente@example.com', code: sentCode });
-    assert(verifyResult?.token, 'verify should authenticate customer after otp');
-    assert(savedUser.emailVerified === true, 'verify should activate customer email');
-    assert(welcomeSent === 1, 'verify should send welcome email');
+    await expect(service.verifyEmailCode({ email: 'cliente@example.com', code: '0000' })).rejects.toThrow(AppError);
+    expect(Number(otpRecords[0]?.attemptsCount || 0)).toBe(1);
+  });
 
-    console.log('CustomerAccountService email otp tests passed');
-  };
+  it('valid code authenticates customer and sends welcome', async () => {
+    await service.register({
+      fullName: 'Cliente OTP', email: 'cliente@example.com', password: '123456',
+      termsAccepted: true, lgpdAccepted: true,
+    }, { ipAddress: '127.0.0.1' });
 
-  run()
-    .catch((error) => {
-      console.error(error);
-      process.exitCode = 1;
-    })
-    .finally(() => {
-      restore();
-    });
-})();
+    const result = await service.verifyEmailCode({ email: 'cliente@example.com', code: sentCode });
+    expect(result.token).toBeTruthy();
+    expect(savedUser.emailVerified).toBe(true);
+    expect(welcomeSent).toBe(1);
+  });
+});

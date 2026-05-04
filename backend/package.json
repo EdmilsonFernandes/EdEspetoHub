@@ -10,7 +10,10 @@
     "backfill:customer-addresses": "ts-node src/scripts/backfillCustomerAddressCoordinates.ts",
     "seed:condominium:azuli": "ts-node src/scripts/seedCondominiumAzuli.ts",
     "seed:condominium-users": "ts-node src/scripts/seedCondominiumUsers.ts",
-    "test": "ts-node src/utils/productAvailability.test.ts && ts-node src/services/OrderEtaServiceV2.test.ts && ts-node src/services/DeliveryService.transitions.test.ts && ts-node src/services/AuthService.emailVerification.test.ts && ts-node src/services/CustomerAccountService.emailOtp.test.ts && ts-node src/services/DeliveryService.integration.test.ts"
+    "test": "node node_modules/vitest/vitest.mjs run --config vitest.config.unit.ts",
+    "test:watch": "node node_modules/vitest/vitest.mjs --config vitest.config.unit.ts",
+    "test:e2e": "node node_modules/vitest/vitest.mjs run",
+    "test:e2e:watch": "node node_modules/vitest/vitest.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.967.0",
@@ -38,9 +41,12 @@
     "@types/nodemailer": "^6.4.14",
     "@types/pg": "^8.16.0",
     "@types/qrcode": "^1.5.6",
+    "@types/supertest": "^7.2.0",
     "@types/swagger-ui-express": "^4.1.6",
+    "supertest": "^7.2.2",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vitest": "^4.1.5"
   }
 }
