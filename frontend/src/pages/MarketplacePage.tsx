@@ -636,7 +636,11 @@ const readAdminSession = () => {
     const raw = localStorage.getItem('adminSession');
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    if (!parsed?.token || !parsed?.user) return null;
+    const role = String(parsed?.user?.role || '').toUpperCase();
+    const isOperationalRole = role === 'ADMIN' || role === 'OPERATOR' || role === 'LOJISTA';
+    if (!parsed?.token || !parsed?.user || !isOperationalRole || !(parsed?.store?.id || parsed?.store?.slug)) {
+      return null;
+    }
     return parsed;
   } catch {
     return null;
@@ -2190,7 +2194,7 @@ export function MarketplacePage() {
         brandName: savedSession?.store?.name,
       });
       const savedRole = String(savedSession?.user?.role || '').toUpperCase();
-      if ((savedRole === 'ADMIN' || savedRole === 'OPERATOR') && window.matchMedia('(max-width: 767px)').matches && savedSession?.store?.slug) {
+      if ((savedRole === 'ADMIN' || savedRole === 'OPERATOR' || savedRole === 'LOJISTA') && window.matchMedia('(max-width: 767px)').matches && savedSession?.store?.slug) {
         navigate(`/${savedSession.store.slug}`, { replace: true });
         return;
       }
@@ -2209,7 +2213,7 @@ export function MarketplacePage() {
           brandName: session?.store?.name,
         });
         const role = String(session?.user?.role || '').toUpperCase();
-        if ((role === 'ADMIN' || role === 'OPERATOR') && window.matchMedia('(max-width: 767px)').matches && session?.store?.slug) {
+        if ((role === 'ADMIN' || role === 'OPERATOR' || role === 'LOJISTA') && window.matchMedia('(max-width: 767px)').matches && session?.store?.slug) {
           navigate(`/${session.store.slug}`, { replace: true });
           return;
         }
@@ -2225,16 +2229,13 @@ export function MarketplacePage() {
   const openMotoboyLogin = useCallback(async () => {
     const savedSession = readMotoboySession();
     if (savedSession?.token) {
-      setAuth(savedSession as any);
-      localStorage.setItem('motoboySession', JSON.stringify(savedSession));
+      nativeBiometricService.syncMotoboySession(savedSession as any);
       navigate('/motoboy/home', { replace: true });
       return;
     }
     if (nativeBiometricService.hasValidStoredMotoboyEnrollment()) {
       try {
-        const session = await nativeBiometricService.loginMotoboyWithBiometrics('Confirme sua identidade para acessar suas entregas');
-        setAuth(session as any);
-        localStorage.setItem('motoboySession', JSON.stringify(session));
+        await nativeBiometricService.loginMotoboyWithBiometrics('Confirme sua identidade para acessar suas entregas');
         navigate('/motoboy/home', { replace: true });
         return;
       } catch {
@@ -2242,7 +2243,7 @@ export function MarketplacePage() {
       }
     }
     navigate('/motoboy/login?bio=1&hub=1&next=/hub');
-  }, [navigate, setAuth]);
+  }, [navigate]);
 
   const openTerms = useCallback(() => {
     navigate('/terms?from=hub');
@@ -2302,9 +2303,8 @@ export function MarketplacePage() {
     } catch {
       // ignore
     }
-    setAuth(null);
     navigate('/hub', { replace: true });
-  }, [navigate, setAuth]);
+  }, [navigate]);
 
   const handleDeactivateAccount = useCallback(async () => {
     setDeactivating(true);

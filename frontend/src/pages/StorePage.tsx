@@ -235,7 +235,30 @@ export function StorePage() {
   const location = useLocation();
   const { auth } = useAuth();
   const { showToast } = useToast();
-  const [user, setUser] = useState(null);
+  const readAdminSessionSnapshot = useCallback((candidate?: any | null) => {
+    const session = candidate && typeof candidate === 'object' ? candidate : null;
+    const candidateRole = String(session?.user?.role || '').toUpperCase();
+    const candidateIsOperational = candidateRole === 'ADMIN' || candidateRole === 'OPERATOR' || candidateRole === 'LOJISTA';
+    if (session?.token && session?.user && candidateIsOperational && (session?.store?.id || session?.store?.slug)) {
+      return session;
+    }
+    try {
+      const savedSession = localStorage.getItem('adminSession');
+      if (!savedSession) {
+        return null;
+      }
+      const parsedSession = JSON.parse(savedSession);
+      const parsedRole = String(parsedSession?.user?.role || '').toUpperCase();
+      const parsedIsOperational = parsedRole === 'ADMIN' || parsedRole === 'OPERATOR' || parsedRole === 'LOJISTA';
+      if (parsedSession?.token && parsedSession?.user && parsedIsOperational && (parsedSession?.store?.id || parsedSession?.store?.slug)) {
+        return parsedSession;
+      }
+    } catch {
+      // ignore malformed admin session in local storage
+    }
+    return null;
+  }, []);
+  const [user, setUser] = useState(() => readAdminSessionSnapshot(auth));
   const [adminAccountDrawerOpen, setAdminAccountDrawerOpen] = useState(false);
   const [customerSession, setCustomerSession] = useState<any | null>(null);
   const [customerAddresses, setCustomerAddresses] = useState<any[]>([]);
@@ -285,27 +308,8 @@ export function StorePage() {
   });
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
   const syncAdminSession = useCallback((candidate?: any | null) => {
-    const session = candidate && typeof candidate === 'object' ? candidate : null;
-    if (session?.token && session?.user) {
-      setUser(session);
-      return;
-    }
-    try {
-      const savedSession = localStorage.getItem('adminSession');
-      if (!savedSession) {
-        setUser(null);
-        return;
-      }
-      const parsedSession = JSON.parse(savedSession);
-      if (parsedSession?.token && parsedSession?.user) {
-        setUser(parsedSession);
-        return;
-      }
-    } catch {
-      // ignore malformed admin session in local storage
-    }
-    setUser(null);
-  }, []);
+    setUser(readAdminSessionSnapshot(candidate));
+  }, [readAdminSessionSnapshot]);
 
   useEffect(() => {
     const warning = location.state && (location.state as any).hubCoverageWarning;
@@ -1053,6 +1057,12 @@ export function StorePage() {
   }, [syncAdminSession]);
 
   useEffect(() => {
+    if (isStoreAdmin) {
+      setCustomerSession(null);
+      setCustomerAddresses([]);
+      setCustomerOrders([]);
+      return;
+    }
     const savedCustomerSession =
       localStorage.getItem('customerSession') || localStorage.getItem(customerSessionStorageKey);
     if (savedCustomerSession) {
@@ -1313,7 +1323,7 @@ export function StorePage() {
       }
       document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, [storeSlug, customersStorageKey, checkoutCustomerStorageKey, customerSessionStorageKey, customerSession?.token]);
+  }, [isStoreAdmin, storeSlug, customersStorageKey, checkoutCustomerStorageKey, customerSessionStorageKey, customerSession?.token]);
 
   useEffect(() => {
     let active = true;

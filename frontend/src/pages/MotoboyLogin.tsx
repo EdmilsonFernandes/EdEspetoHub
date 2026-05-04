@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowSquareOut, Check, Eye, EyeSlash, LockKey, Scooter, ShieldCheck, SignOut, UserCircle, WarningCircle, WhatsappLogo } from '@phosphor-icons/react';
 import { authService } from '../services/authService';
 import { motoboyService } from '../services/motoboyService';
-import { useAuth } from '../contexts/AuthContext';
 import { runClientFreshStart } from '../utils/clientFreshStart';
 import { APP_BUILD_INFO } from '../generated/buildInfo';
 import { AuthLayout } from '../layouts/AuthLayout';
@@ -33,7 +32,6 @@ export function MotoboyLogin() {
     if (typeof window === 'undefined') return false;
     return localStorage.getItem('auth:superadmin-unlocked') === 'true';
   });
-  const { setAuth } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [persistedSession, setPersistedSession] = useState(() => {
@@ -100,7 +98,6 @@ export function MotoboyLogin() {
   const finishMotoboyLogin = (sessionData: any) => {
     nativeBiometricService.syncMotoboySession(sessionData);
     localStorage.setItem('motoboySession', JSON.stringify(sessionData));
-    setAuth(sessionData);
     setPersistedSession(sessionData);
     navigate('/motoboy/home');
   };
@@ -237,11 +234,6 @@ export function MotoboyLogin() {
     }
     try {
       nativeBiometricService.syncMotoboySession(null);
-    } catch {
-      // ignore
-    }
-    try {
-      setAuth(null);
     } catch {
       // ignore
     }

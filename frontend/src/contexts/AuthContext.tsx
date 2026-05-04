@@ -20,6 +20,13 @@ type AuthContextType = {
 };
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
+const isOperationalAuthSession = (session: any): session is AuthSession => {
+  const role = String(session?.user?.role || '').toUpperCase();
+  const allowedRole = role === 'ADMIN' || role === 'OPERATOR' || role === 'LOJISTA';
+  const hasStoreContext = Boolean(session?.store?.id || session?.store?.slug);
+  return Boolean(session?.token && session?.user && allowedRole && hasStoreContext);
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [auth, setAuthState] = useState<AuthSession | null>(null);
   const [hydrated, setHydrated] = useState(false);
@@ -91,7 +98,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       {
         const parsed = JSON.parse(raw);
 
-        if (parsed?.token && parsed?.user)
+        if (isOperationalAuthSession(parsed))
         {
           setAuthState(parsed);
           previousStoreRef.current = {
@@ -113,12 +120,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const setAuth = (session: AuthSession | null) => {
+    const normalizedSession = isOperationalAuthSession(session) ? session : null;
     const previousUserId = String(auth?.user?.id || '').trim();
     const previousStoreId = previousStoreRef.current?.id;
     const previousStoreSlug = previousStoreRef.current?.slug;
-    const nextUserId = session?.user?.id ? String(session.user.id) : '';
-    const nextStoreId = session?.store?.id ? String(session.store.id) : '';
-    const nextStoreSlug = session?.store?.slug ? String(session.store.slug) : '';
+    const nextUserId = normalizedSession?.user?.id ? String(normalizedSession.user.id) : '';
+    const nextStoreId = normalizedSession?.store?.id ? String(normalizedSession.store.id) : '';
+    const nextStoreSlug = normalizedSession?.store?.slug ? String(normalizedSession.store.slug) : '';
 
     const changedStore =
       Boolean(previousStoreId || previousStoreSlug) &&
@@ -126,7 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const changedAdminIdentity =
       Boolean(auth?.token) &&
       (
-        !session?.token ||
+        !normalizedSession?.token ||
         previousStoreId !== nextStoreId ||
         previousUserId !== nextUserId
       );
@@ -138,20 +146,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       unregisterAdminPushToken(auth);
     }
 
-    if (session) {
-      localStorage.setItem('adminSession', JSON.stringify(session));
-      window.dispatchEvent(new CustomEvent(ADMIN_SESSION_EVENT, { detail: session }));
+    if (normalizedSession) {
+      localStorage.setItem('adminSession', JSON.stringify(normalizedSession));
+      window.dispatchEvent(new CustomEvent(ADMIN_SESSION_EVENT, { detail: normalizedSession }));
     } else {
       localStorage.removeItem('adminSession');
       window.dispatchEvent(new CustomEvent(ADMIN_SESSION_EVENT));
     }
 
-    previousStoreRef.current = session
+    previousStoreRef.current = normalizedSession
       ? { id: nextStoreId, slug: nextStoreSlug }
       : null;
 
-    applyDocumentBranding(session);
-    setAuthState(session);
+    applyDocumentBranding(normalizedSession);
+    setAuthState(normalizedSession);
   };
 
   const logout = () => {

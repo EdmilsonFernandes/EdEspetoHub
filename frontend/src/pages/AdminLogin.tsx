@@ -99,7 +99,7 @@ export function AdminLogin() {
     sessionStorage.removeItem('admin:redirectTab');
     sessionStorage.removeItem('admin:redirectSlug');
     const loginRole = String(sessionData?.user?.role || '').toUpperCase();
-    if (loginRole === 'ADMIN' || loginRole === 'OPERATOR') {
+    if (loginRole === 'ADMIN' || loginRole === 'OPERATOR' || loginRole === 'LOJISTA') {
       const isMobile = window.matchMedia('(max-width: 767px)').matches;
       if (isMobile && sessionData.store?.slug) {
         navigate(`/${sessionData.store.slug}`);

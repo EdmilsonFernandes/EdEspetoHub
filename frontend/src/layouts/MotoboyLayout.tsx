@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, House, IdentificationCard, ListChecks, Motorcycle, SignOut, Truck, UserCircle, Wallet } from '@phosphor-icons/react';
-import { useAuth } from '../contexts/AuthContext';
 import { motoboyService } from '../services/motoboyService';
 import { nativeBiometricService } from '../services/nativeBiometricService';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
@@ -23,7 +22,6 @@ type Tab = {
 export function MotoboyLayout() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { setAuth } = useAuth();
   const [installPrompt, setInstallPrompt] = useState<any | null>(null);
   const [showInstall, setShowInstall] = useState(false);
   const [queueBadge, setQueueBadge] = useState(false);
@@ -134,11 +132,6 @@ export function MotoboyLayout() {
     }
     try {
       nativeBiometricService.syncMotoboySession(null);
-    } catch {
-      // ignore
-    }
-    try {
-      setAuth(null);
     } catch {
       // ignore
     }
