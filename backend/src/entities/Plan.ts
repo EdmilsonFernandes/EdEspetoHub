@@ -33,7 +33,7 @@ export class Plan {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ unique: true })
+  @Column({ type: 'varchar', unique: true })
   name!: PlanName;
 
   @Column({ name: 'display_name', nullable: true })
