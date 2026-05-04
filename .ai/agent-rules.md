@@ -201,6 +201,39 @@ NÃO usar SSH para rodar deploy ou git pull proativamente.
 
 ---
 
+## TESTES (OBRIGATÓRIO)
+
+Antes de commitar qualquer alteração em `backend/`, rodar:
+
+```bash
+cd backend && yarn test
+```
+
+Resultado esperado: **todos os testes passando (0 falhas)**.
+
+Se algum teste falhar:
+1. Investigar a causa
+2. Corrigir o código ou o teste (se o teste ficou desatualizado pela mudança)
+3. Rodar novamente até passar
+4. Só então commitar
+
+### Quando criar novos testes
+- Toda lógica de negócio pura (cálculos, validações, resolvers) deve ter teste unitário
+- Toda mudança em fluxo crítico (pedido, pagamento, assinatura, delivery) deve validar que os testes existentes continuam passando
+- Se a mudança altera comportamento coberto por teste, atualizar o teste junto
+
+### Estrutura de testes
+- Unitários (sem banco): `src/utils/**/*.test.ts`, `src/services/**/*.test.ts`, `src/config/**/*.test.ts`
+- Integração (com banco): `src/services/DeliveryService.integration.test.ts` (usa `.env.test`)
+- E2E (API completa): `src/test/e2e/*.test.ts` (roda com `yarn test:e2e`, precisa de Postgres)
+
+### Comandos
+- `yarn test` — unitários + integração (~7s)
+- `yarn test:watch` — watch mode
+- `yarn test:e2e` — e2e completo (precisa banco `espetinho_test`)
+
+---
+
 ## FORMATO DE RESPOSTA
 
 - Objetivo:

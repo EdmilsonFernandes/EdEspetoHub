@@ -7,6 +7,7 @@ export default defineConfig({
     include: [
       'src/utils/**/*.test.ts',
       'src/services/**/*.test.ts',
+      'src/config/**/*.test.ts',
     ],
     exclude: ['src/test/**'],
     testTimeout: 30_000,
