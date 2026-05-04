@@ -233,7 +233,7 @@ export function StorePage() {
   const { storeSlug } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { auth } = useAuth();
+  const { auth, logout: logoutAdminContext } = useAuth();
   const { showToast } = useToast();
   const readAdminSessionSnapshot = useCallback((candidate?: any | null) => {
     const session = candidate && typeof candidate === 'object' ? candidate : null;
@@ -2612,12 +2612,10 @@ export function StorePage() {
     navigate('/admin/queue');
   };
   const handleStoreSessionLogout = () => {
-    try {
-      localStorage.removeItem('adminSession');
-    } catch {}
+    logoutAdminContext();
     setAdminAccountDrawerOpen(false);
     setUser(null);
-    navigate('/', { replace: true });
+    navigate('/hub', { replace: true });
   };
 
   const adminAccountActions = [
