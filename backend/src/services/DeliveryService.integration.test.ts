@@ -1,73 +1,67 @@
 /**
  * Integration tests for delivery rules (requires a real Postgres).
- *
- * To run:
- *   TEST_DATABASE_URL=postgres://... vitest run --config vitest.config.unit.ts DeliveryService.integration
+ * Loads .env.test automatically so AppDataSource points to espetinho_test.
  */
 // @ts-nocheck
 
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.test', override: true });
+
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import 'reflect-metadata';
-import { DataSource } from 'typeorm';
-import { DeliveryEvent } from '../entities/DeliveryEvent';
-import { Motoboy } from '../entities/Motoboy';
-import { Order } from '../entities/Order';
-import { OrderDelivery } from '../entities/OrderDelivery';
+import { AppDataSource } from '../config/database';
+import { User } from '../entities/User';
 import { Store } from '../entities/Store';
 import { StoreSettings } from '../entities/StoreSettings';
-import { User } from '../entities/User';
+import { Motoboy } from '../entities/Motoboy';
+import { MotoboyStore } from '../entities/MotoboyStore';
+import { Order } from '../entities/Order';
 import { DeliveryService } from './DeliveryService';
 
 const url = process.env.TEST_DATABASE_URL;
 
 describe.skipIf(!url)('DeliveryService integration (real DB)', () => {
-  let ds: DataSource;
   let svc: DeliveryService;
   let store: any;
   let motoboy: any;
   let order1: any;
 
   beforeAll(async () => {
-    ds = new DataSource({
-      type: 'postgres',
-      url,
-      synchronize: true,
-      logging: false,
-      entities: [User, Store, StoreSettings, Order, OrderDelivery, Motoboy, DeliveryEvent],
-    });
-    await ds.initialize();
+    if (!AppDataSource.isInitialized) {
+      await AppDataSource.initialize();
+    }
+    await AppDataSource.synchronize(true);
     svc = new DeliveryService();
 
-    await ds.query(`
-      CREATE TABLE IF NOT EXISTS motoboy_stores (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        motoboy_id UUID NOT NULL,
-        store_id UUID NOT NULL,
-        active BOOLEAN NOT NULL DEFAULT TRUE
-      );
-    `);
+    const owner = await AppDataSource.getRepository(User).save(
+      AppDataSource.getRepository(User).create({ fullName: 'Owner', email: 'o@test.com', password: 'x', userRole: 'ADMIN' } as any),
+    );
+    store = await AppDataSource.getRepository(Store).save(
+      AppDataSource.getRepository(Store).create({ name: 'Store', slug: 'store', owner } as any),
+    );
+    await AppDataSource.getRepository(StoreSettings).save(
+      AppDataSource.getRepository(StoreSettings).create({ store, deliveryFee: 10 } as any),
+    );
 
-    const userRepo = ds.getRepository(User);
-    const storeRepo = ds.getRepository(Store);
-    const settingsRepo = ds.getRepository(StoreSettings);
-    const motoboyRepo = ds.getRepository(Motoboy);
-    const orderRepo = ds.getRepository(Order);
+    const motUser = await AppDataSource.getRepository(User).save(
+      AppDataSource.getRepository(User).create({ fullName: 'Motoboy', email: 'm@test.com', password: 'x', userRole: 'STORE_OWNER' } as any),
+    );
+    motoboy = await AppDataSource.getRepository(Motoboy).save(
+      AppDataSource.getRepository(Motoboy).create({ userId: motUser.id, status: 'ACTIVE' } as any),
+    );
 
-    const owner = await userRepo.save(userRepo.create({ fullName: 'Owner', email: 'o@test.com', password: 'x', userRole: 'ADMIN' } as any));
-    store = await storeRepo.save(storeRepo.create({ name: 'Store', slug: 'store', owner } as any));
-    await settingsRepo.save(settingsRepo.create({ store, deliveryFee: 10 } as any));
+    await AppDataSource.getRepository(MotoboyStore).save(
+      AppDataSource.getRepository(MotoboyStore).create({ motoboyId: motoboy.id, storeId: store.id, active: true } as any),
+    );
 
-    const motUser = await userRepo.save(userRepo.create({ fullName: 'Motoboy', email: 'm@test.com', password: 'x', userRole: 'STORE_OWNER' } as any));
-    motoboy = await motoboyRepo.save(motoboyRepo.create({ userId: motUser.id, status: 'ACTIVE' } as any));
-
-    await ds.query(`INSERT INTO motoboy_stores (motoboy_id, store_id, active) VALUES ($1,$2,true)`, [motoboy.id, store.id]);
-
-    order1 = await orderRepo.save(orderRepo.create({ customerName: 'C', type: 'delivery', status: 'waiting_for_motoboy', total: 10, store, deliveryFee: 10 } as any));
-    await svc.ensureQueueDelivery(order1 as any, ds.manager);
+    order1 = await AppDataSource.getRepository(Order).save(
+      AppDataSource.getRepository(Order).create({ customerName: 'C', type: 'delivery', status: 'waiting_for_motoboy', total: 10, store, deliveryFee: 10 } as any),
+    );
+    await svc.ensureQueueDelivery(order1 as any, AppDataSource.manager);
   });
 
   afterAll(async () => {
-    if (ds?.isInitialized) await ds.destroy();
+    if (AppDataSource.isInitialized) await AppDataSource.destroy();
   });
 
   it('first accept succeeds', async () => {

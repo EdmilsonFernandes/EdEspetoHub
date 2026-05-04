@@ -9,6 +9,6 @@ export default defineConfig({
       'src/services/**/*.test.ts',
     ],
     exclude: ['src/test/**'],
-    testTimeout: 15_000,
+    testTimeout: 30_000,
   },
 });
