@@ -209,7 +209,18 @@ export function AdminLayout({
   };
 
   const accountActions = [
+    ...(!isOperatorUser
+      ? [{
+          section: 'Painel',
+          id: 'summary',
+          label: 'Resumo da operação',
+          description: 'Visão geral da loja, vendas e atalhos do painel.',
+          icon: <ChartBar size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'resumo' } }),
+        }]
+      : []),
     {
+      section: 'Pedidos',
       id: 'queue',
       label: 'Pedidos em operação',
       description: 'Acompanhe fila, produção e pedidos aguardando ação.',
@@ -218,15 +229,37 @@ export function AdminLayout({
     },
     ...(!isOperatorUser
       ? [{
+          section: 'Pedidos',
+          id: 'orders',
+          label: 'Histórico de pedidos',
+          description: 'Pedidos finalizados, filtros e buscas da operação.',
+          icon: <ClipboardText size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/orders'),
+        }]
+      : []),
+    ...(!isOperatorUser
+      ? [{
+          section: 'Pedidos',
           id: 'sales',
           label: 'Vendas concluídas',
-          description: 'Histórico recente com pedidos já finalizados.',
+          description: 'Atalho para a fila com pedidos já finalizados.',
           icon: <ClipboardText size={22} weight="duotone" />,
           onClick: () => navigate('/admin/queue', { state: { activeTab: 'completed' } }),
         }]
       : []),
+    ...(!isOperatorUser
+      ? [{
+          section: 'Pedidos',
+          id: 'reviews',
+          label: 'Avaliações',
+          description: 'Notas e comentários dos clientes por pedido.',
+          icon: <Star size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'avaliacoes' } }),
+        }]
+      : []),
     ...(storeSlug
       ? [{
+          section: 'Loja',
           id: 'storefront',
           label: 'Minha vitrine',
           description: 'Abra a loja pública sem sair da operação.',
@@ -235,6 +268,7 @@ export function AdminLayout({
         }]
       : []),
     {
+      section: 'Loja',
       id: 'products',
       label: 'Produtos',
       description: 'Abra o catálogo e ajustes da vitrine.',
@@ -243,6 +277,47 @@ export function AdminLayout({
     },
     ...(!isOperatorUser
       ? [{
+          section: 'Loja',
+          id: 'stock',
+          label: 'Estoque',
+          description: 'Monitore níveis, alertas e movimentações dos produtos.',
+          icon: <Package size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'estoque' } }),
+        }]
+      : []),
+    ...(!isOperatorUser
+      ? [{
+          section: 'Loja',
+          id: 'highlights',
+          label: 'Destaques',
+          description: 'Solicite e acompanhe campanhas de visibilidade da loja.',
+          icon: <Star size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/highlights'),
+        }]
+      : []),
+    ...(!isOperatorUser
+      ? [{
+          section: 'Financeiro',
+          id: 'subscription',
+          label: 'Minha assinatura',
+          description: 'Controle assinatura, ciclo e renovação da loja.',
+          icon: <CreditCard size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'pagamentos' } }),
+        }]
+      : []),
+    ...(!isOperatorUser
+      ? [{
+          section: 'Financeiro',
+          id: 'gateway',
+          label: 'Pagamentos online',
+          description: 'Conecte e acompanhe Pix, crédito e débito online.',
+          icon: <CreditCard size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'gateway' } }),
+        }]
+      : []),
+    ...(!isOperatorUser
+      ? [{
+          section: 'Operação',
           id: 'condominiums',
           label: 'Condomínios',
           description: 'Gerencie feiras, vínculos e aprovações da operação.',
@@ -250,17 +325,9 @@ export function AdminLayout({
           onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'condominios' } }),
         }]
       : []),
-    ...(!isOperatorUser
-      ? [{
-          id: 'summary',
-          label: 'Resumo da operação',
-          description: 'Visão geral da loja, vendas e atalhos do painel.',
-          icon: <ChartBar size={22} weight="duotone" />,
-          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'resumo' } }),
-        }]
-      : []),
     ...(canUseMotoboys && ['ADMIN', 'LOJISTA'].includes(userRole)
       ? [{
+          section: 'Operação',
           id: 'motoboys',
           label: 'Entregadores',
           description: 'Gestão de equipe, repasses e vínculo das entregas.',
@@ -270,6 +337,17 @@ export function AdminLayout({
       : []),
     ...(!isOperatorUser
       ? [{
+          section: 'Operação',
+          id: 'users',
+          label: 'Usuários',
+          description: 'Cadastre e gerencie acessos de admin e operador da loja.',
+          icon: <UsersThree size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'usuarios' } }),
+        }]
+      : []),
+    ...(!isOperatorUser
+      ? [{
+          section: 'Operação',
           id: 'settings',
           label: 'Configurações da loja',
           description: 'Marca, atendimento e ajustes principais da operação.',
@@ -278,6 +356,7 @@ export function AdminLayout({
         }]
       : []),
     {
+      section: 'Conta',
       id: 'password',
       label: 'Trocar senha',
       description: 'Atualize a senha deste acesso sem sair da operação.',
@@ -285,6 +364,7 @@ export function AdminLayout({
       onClick: () => window.dispatchEvent(new CustomEvent('admin:open-change-password')),
     },
     {
+      section: 'Conta',
       id: 'logout',
       label: 'Sair da operação',
       description: 'Encerra somente este acesso neste aparelho.',
@@ -451,7 +531,7 @@ export function AdminLayout({
           isOpen={accountDrawerOpen}
           onClose={() => setAccountDrawerOpen(false)}
           side="left"
-          eyebrow="Conta da operação"
+          eyebrow="Menu da operação"
           title={storeName}
           subtitle={[operatorRoleLabel, operatorName || null, storeEmail || null].filter(Boolean).join(' · ') || 'Acesso da operação neste aparelho'}
           leading={
@@ -466,7 +546,7 @@ export function AdminLayout({
             )
           }
           badges={[
-            { label: userRole === 'ADMIN' ? 'Admin' : 'Operador', tone: 'brand' },
+            { label: ['ADMIN', 'LOJISTA'].includes(userRole) ? 'Admin' : 'Operador', tone: 'brand' },
             { label: storeLocation || 'Operação ativa', tone: 'neutral' },
           ]}
           actions={accountActions}

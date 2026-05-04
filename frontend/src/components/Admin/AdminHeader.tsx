@@ -6,7 +6,6 @@ import {
   ChevronDown,
   KeyRound,
   LogOut,
-  Menu,
   MapPin,
   Store as StoreIcon,
   Target,
@@ -451,15 +450,6 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
       </div>
 
       <div className="mt-2 md:hidden rounded-2xl border border-slate-200 bg-white px-3 sm:px-4 py-2.5 flex items-center justify-end gap-2 sm:gap-3">
-        <button
-          type="button"
-          onClick={() => window.dispatchEvent(new CustomEvent('admin:open-global-nav'))}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors shadow-[0_2px_8px_-6px_rgba(15,23,42,0.8)]"
-          title="Abrir menu"
-          aria-label="Abrir menu"
-        >
-          <Menu size={19} strokeWidth={2.4} />
-        </button>
         <button
           type="button"
           onClick={() => navigate('/admin/dashboard', { state: { openNotifications: true } })}

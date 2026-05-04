@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft, Eye, EyeSlash, ClipboardText, House, Receipt, Buildings, UserCircle, WarningCircle, X, Gear, Package, LockKey, Scooter, SignOut } from '@phosphor-icons/react';
+import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft, Eye, EyeSlash, ClipboardText, House, Receipt, Buildings, UserCircle, WarningCircle, X, Gear, Package, LockKey, Scooter, SignOut, Star, CreditCard, UsersThree } from '@phosphor-icons/react';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import { customerService } from '../services/customerService';
@@ -2634,14 +2634,56 @@ export function StorePage() {
   };
 
   const adminAccountActions = [
+    ...(!isOperatorStoreUser
+      ? [{
+          section: 'Painel',
+          id: 'summary',
+          label: 'Resumo da operação',
+          description: 'Volte ao painel com visão geral da loja.',
+          icon: <House size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'resumo' } }),
+        }]
+      : []),
     {
+      section: 'Pedidos',
       id: 'queue',
       label: 'Pedidos em operação',
       description: 'Acompanhe fila, preparo e pedidos aguardando ação.',
       icon: <ClipboardText size={22} weight="duotone" />,
       onClick: () => navigate('/admin/queue'),
     },
+    ...(!isOperatorStoreUser
+      ? [{
+          section: 'Pedidos',
+          id: 'orders',
+          label: 'Histórico de pedidos',
+          description: 'Pedidos finalizados, filtros e buscas da operação.',
+          icon: <Receipt size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/orders'),
+        }]
+      : []),
+    ...(!isOperatorStoreUser
+      ? [{
+          section: 'Pedidos',
+          id: 'sales',
+          label: 'Vendas concluídas',
+          description: 'Atalho para a fila com pedidos já finalizados.',
+          icon: <Receipt size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/queue', { state: { activeTab: 'completed' } }),
+        }]
+      : []),
+    ...(!isOperatorStoreUser
+      ? [{
+          section: 'Pedidos',
+          id: 'reviews',
+          label: 'Avaliações',
+          description: 'Acompanhe notas e comentários dos clientes.',
+          icon: <Star size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'avaliacoes' } }),
+        }]
+      : []),
     {
+      section: 'Loja',
       id: 'products',
       label: 'Produtos',
       description: 'Abra o catálogo e ajustes da vitrine.',
@@ -2649,6 +2691,7 @@ export function StorePage() {
       onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'produtos' } }),
     },
     {
+      section: 'Loja',
       id: 'storefront',
       label: 'Minha vitrine',
       description: 'Abra a loja pública sem sair da operação.',
@@ -2657,6 +2700,47 @@ export function StorePage() {
     },
     ...(!isOperatorStoreUser
       ? [{
+          section: 'Loja',
+          id: 'stock',
+          label: 'Estoque',
+          description: 'Controle níveis, alertas e movimentações dos produtos.',
+          icon: <Package size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'estoque' } }),
+        }]
+      : []),
+    ...(!isOperatorStoreUser
+      ? [{
+          section: 'Loja',
+          id: 'highlights',
+          label: 'Destaques',
+          description: 'Solicite e acompanhe visibilidade da loja no hub.',
+          icon: <Star size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/highlights'),
+        }]
+      : []),
+    ...(!isOperatorStoreUser
+      ? [{
+          section: 'Financeiro',
+          id: 'subscription',
+          label: 'Minha assinatura',
+          description: 'Consulte ciclo, renovação e plano atual da loja.',
+          icon: <CreditCard size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'pagamentos' } }),
+        }]
+      : []),
+    ...(!isOperatorStoreUser
+      ? [{
+          section: 'Financeiro',
+          id: 'gateway',
+          label: 'Pagamentos online',
+          description: 'Conecte e acompanhe os pagamentos digitais da operação.',
+          icon: <CreditCard size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'gateway' } }),
+        }]
+      : []),
+    ...(!isOperatorStoreUser
+      ? [{
+          section: 'Operação',
           id: 'condominiums',
           label: 'Condomínios',
           description: 'Gerencie feiras, vínculos e aprovações da operação.',
@@ -2664,33 +2748,9 @@ export function StorePage() {
           onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'condominios' } }),
         }]
       : []),
-    ...(!isOperatorStoreUser
-      ? [
-          {
-            id: 'sales',
-            label: 'Vendas concluídas',
-            description: 'Histórico recente com pedidos já finalizados.',
-            icon: <Receipt size={22} weight="duotone" />,
-            onClick: () => navigate('/admin/queue', { state: { activeTab: 'completed' } }),
-          },
-          {
-            id: 'summary',
-            label: 'Resumo da operação',
-            description: 'Volte ao painel com visão geral da loja.',
-            icon: <House size={22} weight="duotone" />,
-            onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'resumo' } }),
-          },
-          {
-            id: 'settings',
-            label: 'Configurações da loja',
-            description: 'Marca, atendimento e ajustes da operação.',
-            icon: <Gear size={22} weight="duotone" />,
-            onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'config' } }),
-          },
-        ]
-      : []),
     ...(canUseStoreMotoboys && ['ADMIN', 'LOJISTA'].includes(adminUserRole)
       ? [{
+          section: 'Operação',
           id: 'motoboys',
           label: 'Entregadores',
           description: 'Gestão de equipe, repasses e vínculo das entregas.',
@@ -2698,7 +2758,28 @@ export function StorePage() {
           onClick: () => navigate('/admin/motoboys'),
         }]
       : []),
+    ...(!isOperatorStoreUser
+      ? [{
+          section: 'Operação',
+          id: 'users',
+          label: 'Usuários',
+          description: 'Gerencie administradores e operadores da loja.',
+          icon: <UsersThree size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'usuarios' } }),
+        }]
+      : []),
+    ...(!isOperatorStoreUser
+      ? [{
+          section: 'Operação',
+          id: 'settings',
+          label: 'Configurações da loja',
+          description: 'Marca, atendimento e ajustes da operação.',
+          icon: <Gear size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'config' } }),
+        }]
+      : []),
     {
+      section: 'Conta',
       id: 'password',
       label: 'Trocar senha',
       description: 'Atualize a senha deste acesso sem sair da operação.',
@@ -2706,6 +2787,7 @@ export function StorePage() {
       onClick: () => window.dispatchEvent(new CustomEvent('admin:open-change-password')),
     },
     {
+      section: 'Conta',
       id: 'logout',
       label: 'Sair da operação',
       description: 'Encerra somente este acesso neste aparelho.',
@@ -3710,7 +3792,7 @@ export function StorePage() {
           isOpen={adminAccountDrawerOpen}
           onClose={() => setAdminAccountDrawerOpen(false)}
           side="left"
-          eyebrow="Conta da operação"
+          eyebrow="Menu da operação"
           title={adminStoreName}
           subtitle={[adminRoleLabel, adminOperatorName || null, adminOperatorEmail || null].filter(Boolean).join(' · ') || 'Acesso da operação neste aparelho'}
           leading={

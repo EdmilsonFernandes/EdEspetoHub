@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useMemo, type ReactNode } from 'react';
 import { X } from '@phosphor-icons/react';
 
 type ContextSideDrawerBadge = {
@@ -8,6 +8,7 @@ type ContextSideDrawerBadge = {
 
 type ContextSideDrawerAction = {
   id: string;
+  section?: string;
   label: string;
   description?: string;
   icon: ReactNode;
@@ -60,6 +61,25 @@ export function ContextSideDrawer({
       window.removeEventListener('keydown', onKeyDown);
     };
   }, [isOpen, onClose]);
+
+  const groupedActions = useMemo(() => {
+    const groups: Array<{ key: string; label: string; actions: ContextSideDrawerAction[] }> = [];
+    const lookup = new Map<string, { key: string; label: string; actions: ContextSideDrawerAction[] }>();
+
+    actions.forEach((action) => {
+      const label = String(action.section || '').trim();
+      const key = label || '__default__';
+      let group = lookup.get(key);
+      if (!group) {
+        group = { key, label, actions: [] };
+        lookup.set(key, group);
+        groups.push(group);
+      }
+      group.actions.push(action);
+    });
+
+    return groups;
+  }, [actions]);
 
   return (
     <div
@@ -120,39 +140,48 @@ export function ContextSideDrawer({
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-4">
-          <div className="space-y-2">
-            {actions.map((action) => (
-              <button
-                key={action.id}
-                type="button"
-                onClick={() => {
-                  action.onClick();
-                  onClose();
-                }}
-                className={`flex w-full items-center gap-3 rounded-[1.25rem] border px-3.5 py-3 text-left transition-all active:scale-[0.98] ${
-                  action.tone === 'danger'
-                    ? 'border-rose-100 bg-rose-50/75 text-rose-700 hover:bg-rose-50'
-                    : 'border-slate-200 bg-white text-slate-800 hover:border-[#d8e5ee] hover:bg-[#f7fafc]'
-                }`}
-              >
-                <div
-                  className={`grid h-11 w-11 shrink-0 place-items-center rounded-[1rem] border ${
-                    action.tone === 'danger'
-                      ? 'border-rose-100 bg-rose-100/80 text-rose-500'
-                      : 'border-slate-200 bg-slate-50 text-slate-700'
-                  }`}
-                >
-                  {action.icon}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className={`text-[14px] leading-tight ${action.tone === 'danger' ? 'font-black' : 'font-semibold'}`}>{action.label}</p>
-                  {action.description ? (
-                    <p className={`mt-0.5 text-[11px] font-semibold ${action.tone === 'danger' ? 'text-rose-700/70' : 'text-slate-500'}`}>
-                      {action.description}
-                    </p>
-                  ) : null}
-                </div>
-              </button>
+          <div className="space-y-4">
+            {groupedActions.map((group) => (
+              <div key={group.key} className="space-y-2">
+                {group.label ? (
+                  <p className="px-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                    {group.label}
+                  </p>
+                ) : null}
+                {group.actions.map((action) => (
+                  <button
+                    key={action.id}
+                    type="button"
+                    onClick={() => {
+                      action.onClick();
+                      onClose();
+                    }}
+                    className={`flex w-full items-center gap-3 rounded-[1.25rem] border px-3.5 py-3 text-left transition-all active:scale-[0.98] ${
+                      action.tone === 'danger'
+                        ? 'border-rose-100 bg-rose-50/75 text-rose-700 hover:bg-rose-50'
+                        : 'border-slate-200 bg-white text-slate-800 hover:border-[#d8e5ee] hover:bg-[#f7fafc]'
+                    }`}
+                  >
+                    <div
+                      className={`grid h-11 w-11 shrink-0 place-items-center rounded-[1rem] border ${
+                        action.tone === 'danger'
+                          ? 'border-rose-100 bg-rose-100/80 text-rose-500'
+                          : 'border-slate-200 bg-slate-50 text-slate-700'
+                      }`}
+                    >
+                      {action.icon}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className={`text-[14px] leading-tight ${action.tone === 'danger' ? 'font-black' : 'font-semibold'}`}>{action.label}</p>
+                      {action.description ? (
+                        <p className={`mt-0.5 text-[11px] font-semibold ${action.tone === 'danger' ? 'text-rose-700/70' : 'text-slate-500'}`}>
+                          {action.description}
+                        </p>
+                      ) : null}
+                    </div>
+                  </button>
+                ))}
+              </div>
             ))}
           </div>
         </div>
