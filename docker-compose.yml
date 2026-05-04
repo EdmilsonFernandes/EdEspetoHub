@@ -1,3 +1,5 @@
+name: janocaminho
+
 services:
   frontend:
     container_name: janocaminho-frontend
