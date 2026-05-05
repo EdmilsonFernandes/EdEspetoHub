@@ -143,14 +143,16 @@ export function RouteMapView({ origin, destination, zoom = 13, compact = false }
             </div>
           </div>
 
-          <a
-            href={directionsUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="rounded-2xl border border-amber-300/80 bg-[linear-gradient(135deg,#fff7e7,#f7d58d)] px-3 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-amber-900 shadow-[0_18px_30px_-24px_rgba(180,83,9,0.62)] transition-transform hover:-translate-y-0.5"
+          <button
+            type="button"
+            onClick={() => {
+              const geoUrl = `https://www.google.com/maps/dir/?api=1&origin=${Number(origin.lat).toFixed(6)},${Number(origin.lng).toFixed(6)}&destination=${Number(destination.lat).toFixed(6)},${Number(destination.lng).toFixed(6)}&travelmode=driving`;
+              window.open(geoUrl, '_system') || window.open(geoUrl, '_blank');
+            }}
+            className="rounded-2xl border border-amber-300/80 bg-[linear-gradient(135deg,#fff7e7,#f7d58d)] px-3 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-amber-900 shadow-[0_18px_30px_-24px_rgba(180,83,9,0.62)] transition-transform hover:-translate-y-0.5 active:scale-[0.96]"
           >
             Abrir no mapa
-          </a>
+          </button>
 
           <div className="flex min-w-0 items-center gap-2 rounded-2xl border border-white/70 bg-white/90 px-3 py-2 shadow-[0_18px_30px_-24px_rgba(28,25,23,0.55)] backdrop-blur">
             <span className="h-2.5 w-2.5 rounded-full bg-orange-600" />
