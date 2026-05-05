@@ -2884,6 +2884,8 @@ export function MarketplacePage() {
                       <img
                         src={selectedCondominiumBannerUrl}
                         alt={String(selectedCondominium.name || 'Condomínio')}
+                        loading="lazy"
+                        decoding="async"
                         className="h-full w-full object-cover opacity-[0.12] saturate-[0.92]"
                       />
                     ) : null}
@@ -4012,7 +4014,7 @@ export function MarketplacePage() {
                               >
                                 <div className="relative flex items-center gap-3">
                                   <div className="relative h-[5.25rem] w-[6.8rem] shrink-0 overflow-hidden rounded-[1.3rem] border border-slate-200/80 bg-slate-100 shadow-[0_16px_28px_-24px_rgba(15,23,42,0.34)]">
-                                    <img src={bannerUrl} alt="" aria-hidden className="h-full w-full object-cover" />
+                                    <img src={bannerUrl} alt="" aria-hidden loading="lazy" decoding="async" className="h-full w-full object-cover" />
                                     <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(15,23,42,0.18)_0%,rgba(15,23,42,0.06)_45%,rgba(15,23,42,0.24)_100%)]" />
                                     <div className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/92 px-2 py-1 text-[8px] font-black uppercase tracking-[0.09em] text-[#336886] shadow-[0_10px_24px_-18px_rgba(15,23,42,0.32)]">
                                       <span className="relative flex h-2 w-2">
@@ -4100,7 +4102,7 @@ export function MarketplacePage() {
                                 <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-[radial-gradient(circle_at_center,rgba(51,104,134,0.09),transparent_72%)]" />
                                 <div className="relative flex items-center gap-3">
                                   <div className="relative h-[4.95rem] w-[6.2rem] shrink-0 overflow-hidden rounded-[1.2rem] border border-slate-200/80 bg-slate-100 shadow-[0_16px_28px_-24px_rgba(15,23,42,0.42)]">
-                                    <img src={bannerUrl} alt="" aria-hidden className="h-full w-full object-cover" />
+                                    <img src={bannerUrl} alt="" aria-hidden loading="lazy" decoding="async" className="h-full w-full object-cover" />
                                     <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(15,23,42,0.18)_0%,rgba(15,23,42,0.06)_45%,rgba(15,23,42,0.26)_100%)]" />
                                     <div className="absolute bottom-2 left-2 h-9 w-9 overflow-hidden rounded-[0.9rem] border border-white/90 bg-white/95 p-1.5 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.52)]">
                                       <img src={logoUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
@@ -4168,7 +4170,7 @@ export function MarketplacePage() {
                               >
                                 <div className="relative flex items-center gap-3">
                                   <div className="relative h-[4.65rem] w-[5.5rem] shrink-0 overflow-hidden rounded-[1.1rem] border border-slate-200/80 bg-slate-100">
-                                    <img src={bannerUrl} alt="" aria-hidden className="h-full w-full object-cover opacity-90" />
+                                    <img src={bannerUrl} alt="" aria-hidden loading="lazy" decoding="async" className="h-full w-full object-cover opacity-90" />
                                     <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(15,23,42,0.12)_0%,rgba(255,255,255,0.02)_45%,rgba(15,23,42,0.18)_100%)]" />
                                     <div className="absolute bottom-2 left-2 h-8 w-8 overflow-hidden rounded-[0.8rem] border border-white/90 bg-white/95 p-1 shadow-[0_10px_20px_-16px_rgba(15,23,42,0.55)]">
                                       <img src={logoUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
@@ -4309,8 +4311,12 @@ export function MarketplacePage() {
                   loading="eager"
                   fetchPriority="high"
                   decoding="async"
-                  className="block max-h-[46vh] w-full object-contain"
+                  className="block max-h-[46vh] w-full object-contain animate-in fade-in duration-300"
+                  style={{ contentVisibility: 'auto' }}
                 />
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-slate-900 -z-10">
+                  <span className="h-6 w-6 rounded-full border-2 border-white/20 border-t-white/80 animate-spin" />
+                </div>
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-slate-950/55 via-slate-950/10 to-transparent" />
                 {condominiumBannerUrl ? (
                   <img
