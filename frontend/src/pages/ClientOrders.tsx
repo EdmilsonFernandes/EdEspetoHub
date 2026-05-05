@@ -740,7 +740,7 @@ function OrderCard({
               <span className="font-semibold">Motivo: </span>{order.canceledReason}
             </div>
           )}
-          {isCancelled && order.paymentLink && !order.refundStatus && (
+          {isCancelled && ['pix','credito','debito','credit_card','debit_card'].includes(String(order.paymentMethod || order.payment || '').toLowerCase()) && String(order.paymentStatus || '').toUpperCase() === 'PAID' && !order.refundStatus && (
             <div className="border-t border-sky-100 bg-sky-50 px-3 py-2 text-[11px] text-sky-700">
               <span className="font-semibold">Reembolso em análise</span> {'\u2014'} o estabelecimento está processando a devolução do valor pago.
             </div>

@@ -180,7 +180,7 @@ export function AdminOrders() {
     const normalized = query.trim().toLowerCase();
     return sortedOrders.filter((order) => {
       if (statusFilter === 'refunds') {
-        if (canonicalStatus(order.status) !== 'cancelled' || !order.paymentLink) return false;
+        if (canonicalStatus(order.status) !== 'cancelled' || !['pix','credito','debito','credit_card','debit_card'].includes(String(order.paymentMethod || '').toLowerCase()) || String(order.paymentStatus || '').toUpperCase() !== 'PAID') return false;
       } else if (statusFilter !== 'all') {
         const st = canonicalStatus(order.status);
         if (st !== String(statusFilter).toLowerCase()) return false;
@@ -214,8 +214,8 @@ export function AdminOrders() {
         const key = canonicalStatus(order.status);
         acc[key] = (acc[key] || 0) + 1;
         acc.all += 1;
-        if (key === 'cancelled' && order.paymentLink && !order.refundStatus) acc.refund_pending += 1;
-        if (key === 'cancelled' && order.paymentLink) acc.refunds += 1;
+        const isOnlinePaid = key === 'cancelled' && ['pix','credito','debito','credit_card','debit_card'].includes(String(order.paymentMethod || '').toLowerCase()) && String(order.paymentStatus || '').toUpperCase() === 'PAID'; if (isOnlinePaid && !order.refundStatus) acc.refund_pending += 1;
+        if (isOnlinePaid) acc.refunds += 1;
         return acc;
       },
       { all: 0, pending: 0, preparing: 0, ready: 0, done: 0, cancelled: 0, refunds: 0, refund_pending: 0 }
