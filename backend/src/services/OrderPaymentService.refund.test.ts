@@ -99,3 +99,48 @@ describe('OrderPaymentService — refund validation', () => {
     expect(result.refundAmount).toBe(0.01);
   });
 });
+
+
+type DenyPaymentLike = {
+  paymentStatus: string;
+  storeId: string;
+  refundStatus?: string | null;
+};
+
+function validateDeny(payment: DenyPaymentLike | null, storeId: string) {
+  if (!payment) return { error: 'Pagamento não encontrado para este pedido.' };
+  if (payment.storeId !== storeId) return { error: 'Acesso negado.' };
+  if (payment.refundStatus === 'REFUNDED' || payment.refundStatus === 'PARTIALLY_REFUNDED') {
+    return { error: 'Este pagamento já foi reembolsado.' };
+  }
+  if (payment.refundStatus === 'DENIED') {
+    return { error: 'Reembolso já foi recusado anteriormente.' };
+  }
+  return { ok: true, refundStatus: 'DENIED' };
+}
+
+describe('OrderPaymentService — denyRefund validation', () => {
+  const paid = { storeId: 'store-1', paymentStatus: 'PAID', refundStatus: null };
+
+  it('rejects null payment', () => {
+    expect(validateDeny(null, 'store-1').error).toContain('não encontrado');
+  });
+
+  it('rejects wrong store', () => {
+    expect(validateDeny(paid, 'other-store').error).toContain('Acesso');
+  });
+
+  it('rejects if already refunded', () => {
+    expect(validateDeny({ ...paid, refundStatus: 'REFUNDED' }, 'store-1').error).toContain('reembolsado');
+  });
+
+  it('rejects if already denied', () => {
+    expect(validateDeny({ ...paid, refundStatus: 'DENIED' }, 'store-1').error).toContain('recusado');
+  });
+
+  it('allows deny for pending payment', () => {
+    const result = validateDeny(paid, 'store-1');
+    expect(result.ok).toBe(true);
+    expect(result.refundStatus).toBe('DENIED');
+  });
+});
