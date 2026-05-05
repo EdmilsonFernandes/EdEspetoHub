@@ -209,13 +209,21 @@ Antes de commitar qualquer alteração em `backend/`, rodar:
 cd backend && yarn test
 ```
 
-Resultado esperado: **todos os testes passando (0 falhas)**.
+Resultado esperado: **todos os 141 testes passando (0 falhas)**.
+
+`yarn test` roda unitários (91) + e2e (50) sequencialmente. Precisa de Postgres rodando.
 
 Se algum teste falhar:
 1. Investigar a causa
 2. Corrigir o código ou o teste (se o teste ficou desatualizado pela mudança)
 3. Rodar novamente até passar
 4. Só então commitar
+
+### Regra de não-regressão
+- **Toda alteração no backend DEVE terminar com `yarn test` passando 100%.**
+- Se a mudança quebrar um teste existente, corrigir antes de commitar.
+- Se criar funcionalidade nova em fluxo crítico, criar teste correspondente.
+- Nunca commitar com testes falhando — mesmo que a falha "não seja relacionada".
 
 ### Quando criar novos testes
 - Toda lógica de negócio pura (cálculos, validações, resolvers) deve ter teste unitário
@@ -225,12 +233,19 @@ Se algum teste falhar:
 ### Estrutura de testes
 - Unitários (sem banco): `src/utils/**/*.test.ts`, `src/services/**/*.test.ts`, `src/config/**/*.test.ts`
 - Integração (com banco): `src/services/DeliveryService.integration.test.ts` (usa `.env.test`)
-- E2E (API completa): `src/test/e2e/*.test.ts` (roda com `yarn test:e2e`, precisa de Postgres)
+- E2E (API completa): `src/test/e2e/*.test.ts`
+- Setup global: `src/test/globalSetup.ts` (dropa e recria banco de teste)
+- Setup por arquivo: `src/test/setup.ts` (inicializa TypeORM + migrations)
 
 ### Comandos
-- `yarn test` — unitários + integração (~7s)
+- `yarn test` — **TUDO** (unitários + e2e, ~15s, precisa Postgres)
+- `yarn test:e2e` — só e2e
 - `yarn test:watch` — watch mode
-- `yarn test:e2e` — e2e completo (precisa banco `espetinho_test`)
+
+### Build Docker
+- A pasta `src/test/` é excluída do `tsc` build (`tsconfig.json` → `exclude`)
+- DevDependencies (vitest, supertest) não vão pro container de produção
+- Não instalar pacotes platform-specific (ex: `@rolldown/binding-linux-x64-gnu`) como dependency
 
 ---
 
