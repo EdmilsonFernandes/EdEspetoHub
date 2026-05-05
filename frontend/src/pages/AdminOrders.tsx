@@ -670,7 +670,7 @@ export function AdminOrders() {
                       </div>
 
                       {/* Pagamento + telefone */}
-                      <div className="flex flex-wrap items-center gap-1.5 border-t border-slate-100 px-4 py-2 text-[11px] text-slate-500">
+                      <div className="flex flex-wrap items-center gap-1.5 border-t border-slate-100 px-4 py-3 text-[11px] text-slate-500">
                         {paymentMeta.icon && <img src={paymentMeta.icon} alt={paymentMeta.label} className="h-3.5 w-3.5 object-contain" />}
                         <span className="font-semibold text-slate-700">{paymentMeta.label}</span>
                         <span className="text-slate-300">·</span>
@@ -699,6 +699,7 @@ export function AdminOrders() {
                         {order?.refundStatus === 'DENIED' && (
                           <span className="rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-600">Recusado</span>
                         )}
+                      </div>
                       </div>
 
                       {/* Entrega postal */}
