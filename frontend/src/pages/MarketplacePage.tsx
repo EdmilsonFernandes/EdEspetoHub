@@ -3024,8 +3024,8 @@ export function MarketplacePage() {
 
           {/* Seção Categorias Premium Squircle */}
           <section className="relative mb-6" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
-            <div className="-mx-4 mb-6 flex snap-x snap-mandatory gap-3 overflow-x-auto no-scrollbar px-4 py-1.5">
             <p className="mb-2 px-1 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Categorias</p>
+            <div className="-mx-4 mb-6 flex snap-x snap-mandatory gap-3 overflow-x-auto no-scrollbar px-4 py-1.5">
               <button
                 type="button"
                 className="group flex min-w-[58px] shrink-0 snap-start cursor-pointer flex-col items-center gap-1.5 active:scale-[0.97] transition-transform duration-150 ease-out"
