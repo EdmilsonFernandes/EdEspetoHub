@@ -1,5 +1,4 @@
-import {
-  BellRinging, useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import {
   BellRinging,
   ArrowRight,
@@ -19,8 +18,7 @@ import {
   Fingerprint,
   X
 } from '@phosphor-icons/react';
-import {
-  BellRinging, nativeBiometricService } from '../../services/nativeBiometricService';
+import { nativeBiometricService } from '../../services/nativeBiometricService';
 
 type DrawerAction = {
   id: string;

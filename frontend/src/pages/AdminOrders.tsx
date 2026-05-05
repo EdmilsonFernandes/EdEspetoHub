@@ -700,7 +700,6 @@ export function AdminOrders() {
                           <span className="rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-600">Recusado</span>
                         )}
                       </div>
-                      </div>
 
                       {/* Entrega postal */}
                       {String(order?.type || '').toLowerCase() === 'delivery' && (
@@ -1166,4 +1165,3 @@ export function AdminOrders() {
     </AdminLayout>
   );
 }
-

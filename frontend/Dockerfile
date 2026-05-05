@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
 # Build do React (Vite)
-FROM node:18-alpine AS build
+FROM node:20-alpine AS build
 
 WORKDIR /app
 ARG BUILD_VERSION=
