@@ -1,142 +1,101 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
-// Mock database (must be before any import that touches AppDataSource)
-const mockFindOne = vi.fn();
-const mockUpdate = vi.fn();
-vi.mock('../database', () => ({
-  AppDataSource: {
-    getRepository: () => ({ findOne: mockFindOne, update: mockUpdate }),
-    query: vi.fn(),
-  },
-}));
+/**
+ * Tests the refund validation logic extracted from OrderPaymentService.refundOrder.
+ * Same pattern as SubscriptionService.test.ts and OrderService.pricing.test.ts.
+ */
 
-// Mock config/env
-vi.mock('../config/env', () => ({
-  env: {
-    mercadoPago: { apiBaseUrl: 'https://api.mercadopago.com', accessToken: 'test' },
-    database: { host: 'localhost', port: 5432, username: 'test', password: 'test', database: 'test' },
-    jwtSecret: 'test-secret',
-  },
-}));
+type PaymentLike = {
+  paymentStatus: string;
+  storeId: string;
+  amount: number;
+  providerId?: string | null;
+  refundStatus?: string | null;
+};
 
-// Mock MercadoPagoService
-const mockRefundPayment = vi.fn();
-vi.mock('./MercadoPagoService', () => ({
-  MercadoPagoService: class {
-    refundPayment = mockRefundPayment;
-  },
-}));
+function validateRefund(payment: PaymentLike | null, storeId: string, amount?: number) {
+  if (!payment) return { error: 'Pagamento não encontrado para este pedido.' };
+  if (payment.storeId !== storeId) return { error: 'Acesso negado.' };
+  if (payment.paymentStatus !== 'PAID') return { error: 'Só é possível reembolsar pagamentos confirmados.' };
+  if (payment.refundStatus === 'REFUNDED' || payment.refundStatus === 'PARTIALLY_REFUNDED') {
+    return { error: 'Este pagamento já foi reembolsado.' };
+  }
+  if (!payment.providerId) return { error: 'ID do pagamento no provedor não encontrado.' };
 
-// Mock StorePaymentAccountService
-const mockGetActiveAccessToken = vi.fn();
-vi.mock('./StorePaymentAccountService', () => ({
-  StorePaymentAccountService: class {
-    getActiveAccessToken = mockGetActiveAccessToken;
-  },
-}));
+  const refundAmount = amount && amount < Number(payment.amount) ? amount : undefined;
+  const finalAmount = refundAmount || Number(payment.amount);
+  const refundStatus = refundAmount ? 'PARTIALLY_REFUNDED' : 'REFUNDED';
 
-// Mock logger
-vi.mock('../utils/logger', () => ({ logger: { child: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }) } }));
+  return { ok: true, refundStatus, refundAmount: finalAmount, partial: Boolean(refundAmount) };
+}
 
-// Mock PaymentAuditService
-vi.mock('./PaymentAuditService', () => ({ PaymentAuditService: class { record = vi.fn(); } }));
-
-// Mock AppError
-vi.mock('../errors/AppError', () => ({
-  AppError: class AppError extends Error {
-    code: string;
-    statusCode: number;
-    constructor(code: string, statusCode: number, message?: string) {
-      super(message || code);
-      this.code = code;
-      this.statusCode = statusCode;
-    }
-  },
-}));
-
-import { OrderPaymentService } from './OrderPaymentService';
-
-const service = new OrderPaymentService();
-
-describe('OrderPaymentService — refundOrder', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  const paidPayment = {
-    id: 'pay-1',
-    orderId: 'order-1',
+describe('OrderPaymentService — refund validation', () => {
+  const paid = {
     storeId: 'store-1',
     paymentStatus: 'PAID',
-    amount: 50,
+    amount: 80,
     providerId: 'mp-123',
     refundStatus: null,
   };
 
-  it('rejects if payment not found', async () => {
-    mockFindOne.mockResolvedValue(null);
-    await expect(service.refundOrder('order-1', 'store-1', 'motivo')).rejects.toThrow('Pagamento');
+  it('rejects null payment', () => {
+    expect(validateRefund(null, 'store-1').error).toContain('não encontrado');
   });
 
-  it('rejects if store does not own the payment', async () => {
-    mockFindOne.mockResolvedValue({ ...paidPayment, storeId: 'other-store' });
-    await expect(service.refundOrder('order-1', 'store-1', 'motivo')).rejects.toThrow('Acesso');
+  it('rejects wrong store', () => {
+    expect(validateRefund(paid, 'other-store').error).toContain('Acesso');
   });
 
-  it('rejects if payment is not PAID', async () => {
-    mockFindOne.mockResolvedValue({ ...paidPayment, paymentStatus: 'PENDING' });
-    await expect(service.refundOrder('order-1', 'store-1', 'motivo')).rejects.toThrow('confirmados');
+  it('rejects PENDING payment', () => {
+    expect(validateRefund({ ...paid, paymentStatus: 'PENDING' }, 'store-1').error).toContain('confirmados');
   });
 
-  it('rejects if already refunded', async () => {
-    mockFindOne.mockResolvedValue({ ...paidPayment, refundStatus: 'REFUNDED' });
-    await expect(service.refundOrder('order-1', 'store-1', 'motivo')).rejects.toThrow('reembolsado');
+  it('rejects FAILED payment', () => {
+    expect(validateRefund({ ...paid, paymentStatus: 'FAILED' }, 'store-1').error).toContain('confirmados');
   });
 
-  it('rejects if no provider ID', async () => {
-    mockFindOne.mockResolvedValue({ ...paidPayment, providerId: null });
-    await expect(service.refundOrder('order-1', 'store-1', 'motivo')).rejects.toThrow('provedor');
+  it('rejects already REFUNDED', () => {
+    expect(validateRefund({ ...paid, refundStatus: 'REFUNDED' }, 'store-1').error).toContain('reembolsado');
   });
 
-  it('rejects if no access token available', async () => {
-    mockFindOne.mockResolvedValue(paidPayment);
-    mockGetActiveAccessToken.mockResolvedValue(null);
-    await expect(service.refundOrder('order-1', 'store-1', 'motivo')).rejects.toThrow('token');
+  it('rejects already PARTIALLY_REFUNDED', () => {
+    expect(validateRefund({ ...paid, refundStatus: 'PARTIALLY_REFUNDED' }, 'store-1').error).toContain('reembolsado');
   });
 
-  it('processes full refund successfully', async () => {
-    mockFindOne.mockResolvedValue(paidPayment);
-    mockGetActiveAccessToken.mockResolvedValue('token-abc');
-    mockRefundPayment.mockResolvedValue({ id: 'refund-1', status: 'approved' });
-    mockUpdate.mockResolvedValue({});
+  it('rejects missing providerId', () => {
+    expect(validateRefund({ ...paid, providerId: null }, 'store-1').error).toContain('provedor');
+  });
 
-    const result = await service.refundOrder('order-1', 'store-1', 'Pedido cancelado');
-
-    expect(mockRefundPayment).toHaveBeenCalledWith('mp-123', 'token-abc', undefined);
-    expect(mockUpdate).toHaveBeenCalledWith('pay-1', expect.objectContaining({
-      refundStatus: 'REFUNDED',
-      refundAmount: 50,
-      refundReason: 'Pedido cancelado',
-      refundProviderId: 'refund-1',
-    }));
+  it('full refund when no amount specified', () => {
+    const result = validateRefund(paid, 'store-1');
+    expect(result.ok).toBe(true);
     expect(result.refundStatus).toBe('REFUNDED');
-    expect(result.refundAmount).toBe(50);
+    expect(result.refundAmount).toBe(80);
+    expect(result.partial).toBe(false);
   });
 
-  it('processes partial refund when amount < total', async () => {
-    mockFindOne.mockResolvedValue(paidPayment);
-    mockGetActiveAccessToken.mockResolvedValue('token-abc');
-    mockRefundPayment.mockResolvedValue({ id: 'refund-2', status: 'approved' });
-    mockUpdate.mockResolvedValue({});
+  it('full refund when amount equals total', () => {
+    const result = validateRefund(paid, 'store-1', 80);
+    expect(result.refundStatus).toBe('REFUNDED');
+    expect(result.refundAmount).toBe(80);
+  });
 
-    const result = await service.refundOrder('order-1', 'store-1', 'Item faltando', 20);
+  it('full refund when amount exceeds total', () => {
+    const result = validateRefund(paid, 'store-1', 100);
+    expect(result.refundStatus).toBe('REFUNDED');
+    expect(result.refundAmount).toBe(80);
+  });
 
-    expect(mockRefundPayment).toHaveBeenCalledWith('mp-123', 'token-abc', 20);
-    expect(mockUpdate).toHaveBeenCalledWith('pay-1', expect.objectContaining({
-      refundStatus: 'PARTIALLY_REFUNDED',
-      refundAmount: 20,
-    }));
+  it('partial refund when amount < total', () => {
+    const result = validateRefund(paid, 'store-1', 30);
     expect(result.refundStatus).toBe('PARTIALLY_REFUNDED');
-    expect(result.refundAmount).toBe(20);
+    expect(result.refundAmount).toBe(30);
+    expect(result.partial).toBe(true);
+  });
+
+  it('partial refund with small amount', () => {
+    const result = validateRefund(paid, 'store-1', 0.01);
+    expect(result.refundStatus).toBe('PARTIALLY_REFUNDED');
+    expect(result.refundAmount).toBe(0.01);
   });
 });

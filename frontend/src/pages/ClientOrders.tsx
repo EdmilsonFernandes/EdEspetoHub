@@ -740,6 +740,16 @@ function OrderCard({
               <span className="font-semibold">Motivo: </span>{order.canceledReason}
             </div>
           )}
+          {isCancelled && order.refundStatus === 'REFUNDED' && (
+            <div className="border-t border-emerald-100 bg-emerald-50 px-3 py-2 text-[11px] text-emerald-700 font-semibold">
+              ✓ Reembolso processado{order.refundAmount ? ` — ${formatCurrency(order.refundAmount)}` : ''}
+            </div>
+          )}
+          {isCancelled && order.refundStatus === 'PARTIALLY_REFUNDED' && (
+            <div className="border-t border-amber-100 bg-amber-50 px-3 py-2 text-[11px] text-amber-700 font-semibold">
+              ✓ Reembolso parcial processado{order.refundAmount ? ` — ${formatCurrency(order.refundAmount)}` : ''}
+            </div>
+          )}
           {['DELIVERING', 'IN_DELIVERY', 'DISPATCHED'].includes(normalizeStatus(order.status)) && details?.delivery?.motoboy?.name && (
             <div className="flex items-center gap-2 border-t border-indigo-100 bg-indigo-50 px-3 py-2">
               <div className="h-6 w-6 shrink-0 overflow-hidden rounded-full border border-white shadow-sm">

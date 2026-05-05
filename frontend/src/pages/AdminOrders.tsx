@@ -40,6 +40,14 @@ export function AdminOrders() {
   const [orderPaymentAuditLoading, setOrderPaymentAuditLoading] = useState(false);
   const [orderPaymentTechnicalOpen, setOrderPaymentTechnicalOpen] = useState(false);
 
+  // Refund states
+  const [refundModalOpen, setRefundModalOpen] = useState(false);
+  const [refundOrder, setRefundOrder] = useState<any | null>(null);
+  const [refundReason, setRefundReason] = useState('');
+  const [refundAmount, setRefundAmount] = useState('');
+  const [refundType, setRefundType] = useState<'full' | 'partial'>('full');
+  const [refundLoading, setRefundLoading] = useState(false);
+  const [refundSuccess, setRefundSuccess] = useState('');
   const storeId = auth?.store?.id;
   const storeSlug = auth?.store?.slug;
   const [sidebarCompact, setSidebarCompact] = useState(() => {
@@ -400,6 +408,49 @@ export function AdminOrders() {
     }
   };
 
+
+  const REFUND_REASONS = [
+    'Pedido cancelado antes do preparo',
+    'Item indisponível / fora de estoque',
+    'Erro no pedido',
+    'Problema na entrega',
+    'Solicitação do cliente',
+  ];
+
+  const openRefundModal = (order: any) => {
+    setRefundOrder(order);
+    setRefundReason('');
+    setRefundAmount('');
+    setRefundType('full');
+    setRefundSuccess('');
+    setRefundModalOpen(true);
+  };
+
+  const handleRefund = async () => {
+    if (!refundOrder || !storeId || !refundReason.trim()) return;
+    setRefundLoading(true);
+    try {
+      const body: any = { reason: refundReason.trim() };
+      if (refundType === 'partial' && refundAmount) body.amount = Number(refundAmount);
+      const res = await fetch(`/api/stores/${storeId}/orders/${refundOrder.id}/refund`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth?.token}` },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error || err?.message || 'Falha ao processar reembolso.');
+      }
+      const data = await res.json();
+      setRefundSuccess(data.refundStatus === 'PARTIALLY_REFUNDED' ? 'Reembolso parcial processado.' : 'Reembolso total processado.');
+      setOrders((prev) => prev.map((o) => o.id === refundOrder.id ? { ...o, refundStatus: data.refundStatus, refundAmount: data.refundAmount } : o));
+    } catch (error: any) {
+      alert(error?.message || 'Não foi possível processar o reembolso.');
+    } finally {
+      setRefundLoading(false);
+    }
+  };
+
   useEffect(() => {
     try {
       localStorage.setItem('adminOrdersView', viewMode);
@@ -594,6 +645,17 @@ export function AdminOrders() {
                           <button type="button" onClick={() => openOrderPayment(order)} className="ml-auto rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-600">
                             Ver pagamento
                           </button>
+                        )}
+                        {String(order?.status || '').toLowerCase() === 'cancelled' && String(order?.paymentStatus || '').toUpperCase() === 'PAID' && !order?.refundStatus && (
+                          <button type="button" onClick={() => openRefundModal(order)} className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700">
+                            Reembolsar
+                          </button>
+                        )}
+                        {order?.refundStatus === 'REFUNDED' && (
+                          <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">Reembolsado</span>
+                        )}
+                        {order?.refundStatus === 'PARTIALLY_REFUNDED' && (
+                          <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700">Reembolso parcial</span>
                         )}
                       </div>
 
@@ -958,6 +1020,71 @@ export function AdminOrders() {
         audit={selectedOrderPaymentAudit}
         onClose={() => setOrderPaymentTechnicalOpen(false)}
       />
+
+      {/* Modal de Reembolso */}
+      {refundModalOpen && refundOrder && (
+        <div className="fixed inset-0 z-[330] bg-slate-950/55 backdrop-blur-[1px] flex items-end sm:items-center justify-center p-3">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl">
+            {refundSuccess ? (
+              <div className="text-center py-4">
+                <div className="mx-auto mb-3 h-12 w-12 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <CheckSquare size={24} weight="fill" className="text-emerald-600" />
+                </div>
+                <p className="text-sm font-bold text-emerald-700">{refundSuccess}</p>
+                <button type="button" onClick={() => setRefundModalOpen(false)} className="mt-4 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white">
+                  Fechar
+                </button>
+              </div>
+            ) : (
+              <>
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-600">Reembolso</p>
+                <h3 className="mt-1 text-lg font-black text-slate-900">Devolver pagamento ao cliente</h3>
+                <p className="mt-1 text-xs text-slate-500">
+                  Pedido #{formatOrderDisplayId(refundOrder.id, storeSlug)} • {formatCurrency(refundOrder.total || refundOrder.amount || 0)}
+                </p>
+
+                <div className="mt-4 flex gap-2">
+                  <button type="button" onClick={() => setRefundType('full')} className={`flex-1 rounded-xl border px-3 py-2.5 text-xs font-bold transition ${refundType === 'full' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-700'}`}>
+                    Reembolso total
+                  </button>
+                  <button type="button" onClick={() => setRefundType('partial')} className={`flex-1 rounded-xl border px-3 py-2.5 text-xs font-bold transition ${refundType === 'partial' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-700'}`}>
+                    Reembolso parcial
+                  </button>
+                </div>
+
+                {refundType === 'partial' && (
+                  <div className="mt-3">
+                    <label className="text-xs font-semibold text-slate-600">Valor a devolver (R$)</label>
+                    <input type="number" step="0.01" min="0.01" max={refundOrder.total || refundOrder.amount || 999} value={refundAmount} onChange={(e) => setRefundAmount(e.target.value)} placeholder="0,00" className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                  </div>
+                )}
+
+                <div className="mt-3">
+                  <label className="text-xs font-semibold text-slate-600">Motivo</label>
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {REFUND_REASONS.map((r) => (
+                      <button key={r} type="button" onClick={() => setRefundReason(r)} className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${refundReason === r ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-600'}`}>
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                  <input type="text" value={refundReason} onChange={(e) => setRefundReason(e.target.value)} placeholder="Ou digite o motivo..." className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                </div>
+
+                <div className="mt-5 flex gap-2">
+                  <button type="button" onClick={() => setRefundModalOpen(false)} className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700">
+                    Cancelar
+                  </button>
+                  <button type="button" onClick={handleRefund} disabled={refundLoading || !refundReason.trim() || (refundType === 'partial' && !refundAmount)} className="flex-1 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50">
+                    {refundLoading ? 'Processando...' : 'Confirmar reembolso'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
     </AdminLayout>
   );
 }
