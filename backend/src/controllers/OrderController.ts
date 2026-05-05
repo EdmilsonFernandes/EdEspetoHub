@@ -239,6 +239,26 @@ export class OrderController {
     }
   }
 
+  /**
+   * Denies a refund for a cancelled order.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+   * @date 2026-05-05
+   */
+  static async denyRefund(req: Request, res: Response) {
+    try {
+      const { storeId, orderId } = req.params;
+      const { reason } = req.body || {};
+      if (!reason || !String(reason).trim()) {
+        return res.status(400).json({ error: 'Motivo da recusa é obrigatório.' });
+      }
+      const result = await orderPaymentService.denyRefund(orderId, storeId, String(reason).trim());
+      return res.status(200).json(result);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
 
 
 

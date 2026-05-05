@@ -1837,6 +1837,9 @@ export function OrderTracking() {
                       {isCancelled && order?.refundStatus === 'PARTIALLY_REFUNDED' && (
                         <TrackingMetaCard label="Reembolso" value="Parcial" detail={order?.refundAmount ? `${formatCurrency(order.refundAmount)} devolvido` : 'Valor parcial devolvido'} accent="warning" />
                       )}
+                      {isCancelled && order?.refundStatus === 'DENIED' && (
+                        <TrackingMetaCard label="Reembolso" value="Não aprovado" detail={order?.refundReason || 'Entre em contato com o estabelecimento'} accent="warning" />
+                      )}
                       <TrackingMetaCard
                         label="Total"
                         value={formatCurrency(order.total || 0)}

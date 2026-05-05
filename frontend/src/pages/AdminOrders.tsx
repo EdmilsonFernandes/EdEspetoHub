@@ -49,6 +49,9 @@ export function AdminOrders() {
   const [refundLoading, setRefundLoading] = useState(false);
   const [refundSuccess, setRefundSuccess] = useState('');
   const storeId = auth?.store?.id;
+  const [denyModalOpen, setDenyModalOpen] = useState(false);
+  const [denyLoading, setDenyLoading] = useState(false);
+  const [denyReason, setDenyReason] = useState('');
   const storeSlug = auth?.store?.slug;
   const [sidebarCompact, setSidebarCompact] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -176,7 +179,9 @@ export function AdminOrders() {
   const filteredOrders = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     return sortedOrders.filter((order) => {
-      if (statusFilter !== 'all') {
+      if (statusFilter === 'refunds') {
+        if (canonicalStatus(order.status) !== 'cancelled' || !order.paymentLink) return false;
+      } else if (statusFilter !== 'all') {
         const st = canonicalStatus(order.status);
         if (st !== String(statusFilter).toLowerCase()) return false;
       }
@@ -204,15 +209,18 @@ export function AdminOrders() {
   }, [sortedOrders, statusFilter, query, dateFilter]);
 
   const statusCounts = useMemo(() => {
-    return (orders || []).reduce(
+    const counts = (orders || []).reduce(
       (acc, order) => {
         const key = canonicalStatus(order.status);
         acc[key] = (acc[key] || 0) + 1;
         acc.all += 1;
+        if (key === 'cancelled' && order.paymentLink && !order.refundStatus) acc.refund_pending += 1;
+        if (key === 'cancelled' && order.paymentLink) acc.refunds += 1;
         return acc;
       },
-      { all: 0, pending: 0, preparing: 0, ready: 0, done: 0, cancelled: 0 }
+      { all: 0, pending: 0, preparing: 0, ready: 0, done: 0, cancelled: 0, refunds: 0, refund_pending: 0 }
     );
+    return counts;
   }, [orders]);
 
   const statusStyles = (status) => {
@@ -451,6 +459,29 @@ export function AdminOrders() {
     }
   };
 
+  const handleDenyRefund = async () => {
+    if (!refundOrder || !storeId || !denyReason.trim()) return;
+    setDenyLoading(true);
+    try {
+      const res = await fetch(`/api/stores/${storeId}/orders/${refundOrder.id}/refund-deny`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth?.token}` },
+        body: JSON.stringify({ reason: denyReason.trim() }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error || err?.message || 'Falha ao recusar reembolso.');
+      }
+      setOrders((prev) => prev.map((o) => o.id === refundOrder.id ? { ...o, refundStatus: 'DENIED' } : o));
+      setDenyModalOpen(false);
+    } catch (error: any) {
+      alert(error?.message || 'Não foi possível recusar o reembolso.');
+    } finally {
+      setDenyLoading(false);
+    }
+  };
+
+
   useEffect(() => {
     try {
       localStorage.setItem('adminOrdersView', viewMode);
@@ -516,6 +547,7 @@ export function AdminOrders() {
 	                { id: 'ready', label: 'Prontos', count: statusCounts.ready },
 	                { id: 'done', label: 'Finalizados', count: statusCounts.done },
 	                { id: 'cancelled', label: 'Cancelados', count: statusCounts.cancelled },
+	                { id: 'refunds', label: 'Reembolsos', count: statusCounts.refunds },
 	              ].map((filter) => (
                 <button
                   key={filter.id}
@@ -647,15 +679,23 @@ export function AdminOrders() {
                           </button>
                         )}
                         {String(order?.status || '').toLowerCase() === 'cancelled' && String(order?.paymentStatus || '').toUpperCase() === 'PAID' && !order?.refundStatus && (
+                          <>
                           <button type="button" onClick={() => openRefundModal(order)} className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700">
                             Reembolsar
                           </button>
+                          <button type="button" onClick={() => { setRefundOrder(order); setRefundReason(''); setRefundSuccess(''); setDenyModalOpen(true); }} className="rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-600">
+                            Recusar
+                          </button>
+                          </>
                         )}
                         {order?.refundStatus === 'REFUNDED' && (
                           <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">Reembolsado</span>
                         )}
                         {order?.refundStatus === 'PARTIALLY_REFUNDED' && (
                           <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700">Reembolso parcial</span>
+                        )}
+                        {order?.refundStatus === 'DENIED' && (
+                          <span className="rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-600">Recusado</span>
                         )}
                       </div>
 
@@ -1081,6 +1121,41 @@ export function AdminOrders() {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+
+      {/* Modal Recusar Reembolso */}
+      {denyModalOpen && refundOrder && (
+        <div className="fixed inset-0 z-[330] bg-slate-950/55 backdrop-blur-[1px] flex items-end sm:items-center justify-center p-3">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl">
+            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-rose-600">Recusar reembolso</p>
+            <h3 className="mt-1 text-lg font-black text-slate-900">Não devolver o valor ao cliente</h3>
+            <p className="mt-1 text-xs text-slate-500">
+              Pedido #{formatOrderDisplayId(refundOrder.id, storeSlug)} • {formatCurrency(refundOrder.total || refundOrder.amount || 0)}
+            </p>
+            <p className="mt-3 text-xs text-slate-600 leading-relaxed">
+              O cliente será informado que o reembolso não foi aprovado. Informe o motivo para registro.
+            </p>
+            <div className="mt-3">
+              <label className="text-xs font-semibold text-slate-600">Motivo da recusa</label>
+              <textarea
+                value={denyReason}
+                onChange={(e) => setDenyReason(e.target.value)}
+                placeholder="Ex: Pedido já foi preparado e retirado..."
+                rows={3}
+                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm resize-none"
+              />
+            </div>
+            <div className="mt-4 flex gap-2">
+              <button type="button" onClick={() => setDenyModalOpen(false)} className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700">
+                Cancelar
+              </button>
+              <button type="button" onClick={handleDenyRefund} disabled={denyLoading || !denyReason.trim()} className="flex-1 rounded-xl bg-rose-500 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50">
+                {denyLoading ? 'Processando...' : 'Confirmar recusa'}
+              </button>
+            </div>
           </div>
         </div>
       )}

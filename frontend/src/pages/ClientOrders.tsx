@@ -755,6 +755,11 @@ function OrderCard({
               ✓ Reembolso parcial processado{order.refundAmount ? ` — ${formatCurrency(order.refundAmount)}` : ''}
             </div>
           )}
+          {isCancelled && order.refundStatus === 'DENIED' && (
+            <div className="border-t border-rose-100 bg-rose-50 px-3 py-2 text-[11px] text-rose-700">
+              <span className="font-semibold">Reembolso não aprovado</span>{order.refundReason ? ` — ${order.refundReason}` : ''}. Em caso de dúvidas, entre em contato com o estabelecimento.
+            </div>
+          )}
           {['DELIVERING', 'IN_DELIVERY', 'DISPATCHED'].includes(normalizeStatus(order.status)) && details?.delivery?.motoboy?.name && (
             <div className="flex items-center gap-2 border-t border-indigo-100 bg-indigo-50 px-3 py-2">
               <div className="h-6 w-6 shrink-0 overflow-hidden rounded-full border border-white shadow-sm">
