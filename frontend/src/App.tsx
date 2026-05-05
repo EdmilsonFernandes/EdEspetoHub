@@ -52,7 +52,7 @@ const ArchitecturePage = lazyPage(() => import('./pages/ArchitecturePage'), 'Arc
 const InstallAppPage = lazyPage(() => import('./pages/InstallAppPage'), 'InstallAppPage');
 const ClientAccount = lazyPage(() => import('./pages/ClientAccount'), 'ClientAccount');
 const ClientOrders = lazyPage(() => import('./pages/ClientOrders'), 'ClientOrders');
-const NotificationsPage = lazyPage(() => import('./pages/NotificationsPage'), 'NotificationsPage');
+import { NotificationsPage } from './pages/NotificationsPage';
 const MarketplacePage = lazyPage(() => import('./pages/MarketplacePage'), 'MarketplacePage');
 const CondominiumAccessRequest = lazyPage(() => import('./pages/CondominiumAccessRequest'), 'CondominiumAccessRequest');
 const CondominiumDashboard = lazyPage(() => import('./pages/CondominiumDashboard'), 'CondominiumDashboard');
