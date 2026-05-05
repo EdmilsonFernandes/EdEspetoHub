@@ -4098,37 +4098,50 @@ export function StorePage() {
                     <p className="text-sm text-slate-500">Nenhum endereço salvo ainda.</p>
                   ) : (
                     <div className="space-y-2">
-                      {customerAddresses.map((address: any) => (
-                        <div key={address.id} className="rounded-xl border border-slate-200 bg-slate-50/70 p-2.5">
-                          <p className="text-sm font-semibold text-slate-700">
-                            {address.label || 'Endereço'} {address.isDefault ? '• Principal' : ''}
-                          </p>
-                          <p className="text-xs text-slate-500">
-                            {address.street}, {address.number || 's/n'} - {address.neighborhood} - {address.city}/{address.state}
-                          </p>
-                          <div className="mt-2 flex gap-2">
-                            <button
-                              type="button"
-                              onClick={() => handleUseAddressForCheckout(address)}
-                              className="rounded-lg bg-[linear-gradient(120deg,#0f172a,#1e293b)] px-2.5 py-1 text-[11px] font-bold text-white"
-                            >
-                              Usar no checkout
-                            </button>
-                            {!address.isDefault && (
-                              <button
-                                type="button"
-                                onClick={async () => {
-                                  await customerAccountService.setDefaultAddress(address.id);
-                                  await refreshCustomerData();
-                                }}
-                                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700"
-                              >
-                                Tornar principal
-                              </button>
-                            )}
+                      {customerAddresses.map((address: any) => {
+                        const isActive = address.isDefault;
+                        return (
+                        <div key={address.id} className={`rounded-2xl border p-3 transition ${isActive ? 'border-emerald-200 bg-emerald-50/50' : 'border-slate-200 bg-slate-50/50'}`}>
+                          <div className="flex items-start gap-2.5">
+                            <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${isActive ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
+                              <MapPinLine size={15} weight="duotone" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-bold text-slate-800 truncate">{address.label || 'Endereço'}</p>
+                                {isActive && (
+                                  <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-700">Principal</span>
+                                )}
+                              </div>
+                              <p className="mt-0.5 text-[12px] text-slate-500 leading-relaxed">
+                                {address.street}, {address.number || 's/n'} — {address.neighborhood} · {address.city}/{address.state}
+                              </p>
+                              <div className="mt-2.5 flex flex-wrap gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleUseAddressForCheckout(address)}
+                                  className="inline-flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1.5 text-[10px] font-bold text-white shadow-sm hover:bg-slate-800 transition active:scale-[0.97]"
+                                >
+                                  Usar este
+                                </button>
+                                {!isActive && (
+                                  <button
+                                    type="button"
+                                    onClick={async () => {
+                                      await customerAccountService.setDefaultAddress(address.id);
+                                      await refreshCustomerData();
+                                    }}
+                                    className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-bold text-slate-600 hover:bg-slate-50 transition active:scale-[0.97]"
+                                  >
+                                    Definir como principal
+                                  </button>
+                                )}
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
 
