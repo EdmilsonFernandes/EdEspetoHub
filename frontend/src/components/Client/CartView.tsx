@@ -768,7 +768,7 @@ export const CartView = ({
   const showDeliveryStatus = isPostalDelivery
     ? Boolean(deliveryStatus)
     : deliveryStatus && deliveryCheck?.status !== "ok" && deliveryCheck?.status !== "out";
-  const showDeliveryDebug = !isPostalDelivery && deliveryDebug && deliveryCheck?.status !== "ok";
+  const showDeliveryDebug = false; // Hidden from end users; validation feedback shown via status banner
   const hideOutOfRangeInlineReason = !isPostalDelivery && isDelivery && deliveryCheck?.status === "out";
 
   useEffect(() => {

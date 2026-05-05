@@ -1895,6 +1895,26 @@ export function StorePage() {
     }
   }, [deliveryAddress, manualDeliveryCoords]);
 
+  // Auto-validate delivery address when address is complete and status is idle
+  useEffect(() => {
+    if (customer.type !== 'delivery' || isPostalDelivery) return;
+    if (deliveryCheck?.status !== 'idle') return;
+    if (!deliveryValidationSignature) return;
+    if (validatedDeliverySignatureRef.current === deliveryValidationSignature) return;
+    const hasStructuredAddress = Boolean(
+      String(customer.street || '').trim() &&
+      String(customer.city || '').trim() &&
+      String(customer.state || '').trim()
+    );
+    const hasCoords = Boolean(
+      manualDeliveryCoords?.lat ||
+      (getNumeric(customer?.lat) !== null && getNumeric(customer?.lng) !== null)
+    );
+    if (!hasStructuredAddress && !hasCoords) return;
+    const timer = setTimeout(() => { validateDeliveryAddress(); }, 400);
+    return () => clearTimeout(timer);
+  }, [customer.type, customer.street, customer.city, customer.state, customer.lat, customer.lng, deliveryCheck?.status, deliveryValidationSignature, isPostalDelivery, manualDeliveryCoords, validateDeliveryAddress]);
+
   useEffect(() => {
     if (customer.type !== 'delivery') {
       setDeliveryMode('distance');
