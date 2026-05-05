@@ -4,9 +4,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { env } from '../config/env';
 import { publicUploadsMiddleware } from './publicUploads';
 
-const { getPublicObjectFromS3Mock, shouldReadPublicUploadFromS3Mock, loggerWarnMock } = vi.hoisted(() => ({
+const { getPublicObjectFromS3Mock, shouldReadPublicUploadFromS3Mock, loggerInfoMock, loggerWarnMock } = vi.hoisted(() => ({
   getPublicObjectFromS3Mock: vi.fn(),
   shouldReadPublicUploadFromS3Mock: vi.fn(),
+  loggerInfoMock: vi.fn(),
   loggerWarnMock: vi.fn(),
 }));
 
@@ -21,6 +22,11 @@ vi.mock('../utils/objectStorage', async () => {
 
 vi.mock('../utils/logger', () => ({
   logger: {
+    child: () => ({
+      info: loggerInfoMock,
+      warn: loggerWarnMock,
+    }),
+    info: loggerInfoMock,
     warn: loggerWarnMock,
   },
 }));
@@ -36,16 +42,20 @@ const createTestApp = () => {
 
 describe('publicUploadsMiddleware', () => {
   const originalMode = env.storage.publicUploadsMode;
+  const originalDebugLog = env.storage.publicUploadsDebugLog;
 
   beforeEach(() => {
     env.storage.publicUploadsMode = originalMode;
+    env.storage.publicUploadsDebugLog = originalDebugLog;
     getPublicObjectFromS3Mock.mockReset();
     shouldReadPublicUploadFromS3Mock.mockReset();
+    loggerInfoMock.mockReset();
     loggerWarnMock.mockReset();
   });
 
   it('serves public uploads from S3 when available', async () => {
     env.storage.publicUploadsMode = 'hybrid';
+    env.storage.publicUploadsDebugLog = true;
     shouldReadPublicUploadFromS3Mock.mockReturnValue(true);
     getPublicObjectFromS3Mock.mockResolvedValue({
       body: Buffer.from('from-s3'),
@@ -64,10 +74,20 @@ describe('publicUploadsMiddleware', () => {
     expect(response.headers['cache-control']).toBe('public, max-age=60');
     expect(response.headers.etag).toBe('"etag-1"');
     expect(getPublicObjectFromS3Mock).toHaveBeenCalledWith('/uploads/products/item.jpg');
+    expect(loggerInfoMock).toHaveBeenCalledWith(
+      'Served public upload from S3',
+      expect.objectContaining({
+        method: 'GET',
+        mode: 'hybrid',
+        relativePath: '/uploads/products/item.jpg',
+        contentType: 'image/jpeg',
+      })
+    );
   });
 
   it('falls back to local storage in hybrid mode when the object is missing in S3', async () => {
     env.storage.publicUploadsMode = 'hybrid';
+    env.storage.publicUploadsDebugLog = true;
     shouldReadPublicUploadFromS3Mock.mockReturnValue(true);
     getPublicObjectFromS3Mock.mockResolvedValue(null);
 
@@ -75,6 +95,14 @@ describe('publicUploadsMiddleware', () => {
 
     expect(response.status).toBe(200);
     expect(response.text).toBe('local:/products/item.jpg');
+    expect(loggerInfoMock).toHaveBeenCalledWith(
+      'Public upload missing in S3, falling back to local storage',
+      expect.objectContaining({
+        method: 'GET',
+        mode: 'hybrid',
+        relativePath: '/uploads/products/item.jpg',
+      })
+    );
   });
 
   it('falls back to local storage in hybrid mode when S3 read fails', async () => {

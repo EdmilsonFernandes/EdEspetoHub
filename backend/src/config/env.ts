@@ -215,6 +215,7 @@ export const env = {
     publicUploadsS3Region: process.env.PUBLIC_UPLOADS_S3_REGION || process.env.AWS_REGION || '',
     publicUploadsS3Prefix: trimTrailingSlash(process.env.PUBLIC_UPLOADS_S3_PREFIX || 'uploads').replace(/^\/+/, ''),
     publicUploadsBaseUrl: trimTrailingSlash(process.env.PUBLIC_UPLOADS_BASE_URL || ''),
+    publicUploadsDebugLog: process.env.PUBLIC_UPLOADS_DEBUG_LOG === 'true',
     publicFolders: configuredPublicUploadFolders.length ? configuredPublicUploadFolders : defaultPublicUploadFolders,
   },
 };

@@ -3,9 +3,19 @@ import { env } from '../config/env';
 import { getPublicObjectFromS3, shouldReadPublicUploadFromS3 } from '../utils/objectStorage';
 import { logger } from '../utils/logger';
 
+const uploadsLog = logger.child({ scope: 'PublicUploads' });
+
 const buildRelativeUploadPath = (requestPath: string) => {
   const normalized = String(requestPath || '').startsWith('/') ? String(requestPath || '') : `/${String(requestPath || '')}`;
   return `/uploads${normalized}`;
+};
+
+const logReadDecision = (message: string, meta?: Record<string, any>) => {
+  if (!env.storage.publicUploadsDebugLog) {
+    return;
+  }
+
+  uploadsLog.info(message, meta);
 };
 
 const applyObjectHeaders = (
@@ -50,12 +60,31 @@ export const publicUploadsMiddleware = async (
 
     if (!object) {
       if (env.storage.publicUploadsMode === 'hybrid') {
+        logReadDecision('Public upload missing in S3, falling back to local storage', {
+          method: request.method,
+          mode: env.storage.publicUploadsMode,
+          relativePath,
+        });
         return next();
       }
+
+      logReadDecision('Public upload missing in S3 while running in strict S3 mode', {
+        method: request.method,
+        mode: env.storage.publicUploadsMode,
+        relativePath,
+      });
       return response.status(404).end();
     }
 
     applyObjectHeaders(response, object);
+
+    logReadDecision('Served public upload from S3', {
+      method: request.method,
+      mode: env.storage.publicUploadsMode,
+      relativePath,
+      contentLength: object.contentLength ?? object.body.length,
+      contentType: object.contentType || null,
+    });
 
     if (request.method === 'HEAD') {
       return response.status(200).end();
