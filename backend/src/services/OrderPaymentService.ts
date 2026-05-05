@@ -8,6 +8,7 @@ import { MercadoPagoService } from './MercadoPagoService';
 import { StorePaymentAccountService } from './StorePaymentAccountService';
 import { logger } from '../utils/logger';
 import { PaymentAuditService } from './PaymentAuditService';
+import { PushNotificationService } from './PushNotificationService';
 import { PAYMENT_AUDIT_ENTITY, PAYMENT_AUDIT_FLOW, PAYMENT_AUDIT_STAGE, resolveMercadoPagoStatusDetailLabel, resolveMercadoPagoStatusLabel } from '../utils/paymentAudit';
 
 const ONLINE_METHOD_MAP: Record<string, 'PIX' | 'CREDIT_CARD'> = {
@@ -380,6 +381,28 @@ export class OrderPaymentService {
       refundedAt: new Date(),
       refundProviderId: result.id,
     });
+
+    // Push notification to customer
+    try {
+      const order = await AppDataSource.getRepository(Order).findOne({ where: { id: orderId }, relations: ['store'] });
+      const userId = order?.customerUserId;
+      const guestId = order?.guestPushId;
+      if (userId || guestId) {
+        const pushService = new PushNotificationService();
+        const storeName = String(order?.store?.name || '').trim();
+        const amountLabel = `R$ ${finalAmount.toFixed(2).replace('.', ',')}`;
+        const body = storeName
+          ? `${storeName}: reembolso de ${amountLabel} processado. O valor será devolvido à sua conta.`
+          : `Reembolso de ${amountLabel} processado. O valor será devolvido à sua conta.`;
+        const payload = {
+          title: 'Reembolso confirmado',
+          body,
+          data: { url: `https://janocaminho.com.br/pedido/${orderId}`, orderId, status: 'refunded' },
+        };
+        if (userId) void pushService.notifyCustomerOrderUpdate(userId, payload);
+        if (guestId) void pushService.notifyGuestOrderUpdate(guestId, payload);
+      }
+    } catch { /* push failure should not block refund response */ }
 
     return { refundStatus, refundAmount: finalAmount, refundProviderId: result.id };
   }
