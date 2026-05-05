@@ -254,6 +254,10 @@ Se algum teste falhar:
 - Toda alteração que crie, remova ou altere **tabela, coluna, índice, constraint, relação ou DDL manual** no `backend/` deve atualizar a documentação HTML do banco.
 - Arquivo versionado: `backend/docs/database-schema.html`
 - Comando para regenerar: `cd backend && npm run docs:schema`
+- Após regenerar, revisar obrigatoriamente o diff do HTML antes do commit.
+- O `git add` de qualquer mudança estrutural no banco deve incluir também `backend/docs/database-schema.html`.
+- Se houve mudança de schema e o HTML não mudou, investigar a causa e corrigir o gerador ou a fonte de schema antes de concluir.
+- No fechamento, informar explicitamente que a documentação de schema foi regenerada e validada.
 - A documentação deve refletir:
   - schema detectado no banco local
   - schema de testes/migrations
