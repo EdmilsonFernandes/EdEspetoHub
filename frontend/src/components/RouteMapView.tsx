@@ -12,14 +12,6 @@ type RouteMapViewProps = {
   compact?: boolean;
 };
 
-const buildDirectionsUrl = (origin: RouteCoords, destination: RouteCoords) => {
-  const originLat = Number(origin?.lat).toFixed(6);
-  const originLng = Number(origin?.lng).toFixed(6);
-  const destinationLat = Number(destination?.lat).toFixed(6);
-  const destinationLng = Number(destination?.lng).toFixed(6);
-  return `https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${originLat}%2C${originLng}%3B${destinationLat}%2C${destinationLng}`;
-};
-
 const isValidPoint = (point?: Partial<RouteCoords> | null) =>
   Number.isFinite(Number(point?.lat)) && Number.isFinite(Number(point?.lng));
 
@@ -73,10 +65,6 @@ export function RouteMapView({ origin, destination, zoom = 13, compact = false }
   const isValid = isValidPoint(origin) && isValidPoint(destination);
   const mapLayout = useMemo(
     () => (isValid ? buildMapLayout(origin, destination) : null),
-    [destination, isValid, origin]
-  );
-  const directionsUrl = useMemo(
-    () => (isValid ? buildDirectionsUrl(origin, destination) : ''),
     [destination, isValid, origin]
   );
 
