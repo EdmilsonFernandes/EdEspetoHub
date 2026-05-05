@@ -1065,7 +1065,9 @@ export function OrderTracking() {
         deliveryTags: canRateDelivery ? (reviewForm.deliveryTags || []) : [],
         tipAmount: canUseTipFlow ? Number(reviewForm.tipAmount || 0) : 0,
       }, orderAccessToken);
+      // Optimistic update then refresh full state from server
       setReviewState({ ...(reviewState || {}), review: payload });
+      await refreshReviewStatus({ silent: true });
     } catch (error: any) {
       if (Number(error?.status || 0) === 403) {
         setReviewAccessDenied(true);
