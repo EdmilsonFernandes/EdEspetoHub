@@ -1,5 +1,4 @@
 import {
-  BellRinging,
   Buildings,
   ChartLineUp,
   CreditCard,
