@@ -1503,45 +1503,61 @@ export const CartView = ({
                     </>
                   )}
                 </div>
-                <div className="rounded-[1.6rem] border border-slate-200/80 bg-white/88 p-4 shadow-[0_20px_38px_-30px_rgba(15,23,42,0.28)] space-y-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
-                          {isPostalDelivery ? "Resumo do envio" : "Resumo da entrega"}
-                        </p>
-                        <p className="mt-1 text-sm font-black leading-tight text-slate-900">
-                          {isPostalDelivery ? "Prazo e valor no mesmo lugar" : "Destino e frete com leitura rápida"}
-                        </p>
+                <div className="rounded-[1.6rem] border border-slate-100 bg-gradient-to-br from-white to-slate-50/60 p-4 shadow-[0_8px_32px_-12px_rgba(15,23,42,0.08)] space-y-3">
+                    {/* Header with fee badge */}
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${deliveryFeeValue > 0 ? 'bg-sky-50 text-sky-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                          <Truck size={18} weight="duotone" />
+                        </div>
+                        <div>
+                          <p className="text-[13px] font-bold text-slate-900">
+                            {isPostalDelivery ? "Envio postal" : "Entrega"}
+                          </p>
+                          <p className="text-[11px] text-slate-500">
+                            {deliveryFeeValue > 0 ? `Taxa: ${formatCurrency(deliveryFeeValue)}` : 'Frete grátis'}
+                          </p>
+                        </div>
                       </div>
-                      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold border ${deliveryFeeValue > 0 ? 'bg-sky-50 text-sky-700 border-sky-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}>
-                        <MapPinLine size={11} weight="duotone" />
-                        {deliveryFeeValue > 0 ? formatCurrency(deliveryFeeValue) : 'Grátis'}
+                      <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[12px] font-bold ${deliveryFeeValue > 0 ? 'bg-sky-50 text-sky-700 border border-sky-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'}`}>
+                        {deliveryFeeValue > 0 ? formatCurrency(deliveryFeeValue) : '🎉 Grátis'}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">
-                        {isPostalDelivery ? "Envio postal" : "Frete de entrega"}
-                      </p>
-                      <span className="text-[11px] font-semibold text-slate-500">
-                        {isPostalDelivery ? "Selecione o serviço ideal" : "Confira antes de seguir"}
-                      </span>
-                    </div>
+
+                    {/* Destination address */}
                     {customer.address && !isLoggedDeliveryFlow && (
-                      <div className="rounded-[1.2rem] border border-slate-200 bg-slate-50/80 px-3 py-3">
-                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Destino</p>
-                        <p className="mt-1 text-sm font-semibold leading-snug text-slate-800">{customer.address}</p>
+                      <div className="flex items-start gap-2.5 rounded-2xl border border-slate-100 bg-white px-3 py-3">
+                        <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-rose-500">
+                          <MapPinLine size={14} weight="fill" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Destino</p>
+                          <p className="mt-0.5 text-[13px] font-semibold leading-snug text-slate-900">{customer.address}</p>
+                        </div>
                       </div>
                     )}
+
+                    {/* Distance and time metrics */}
                     {!isPostalDelivery && deliveryCheck?.distanceKm ? (
                       <div className="grid grid-cols-2 gap-2">
-                        <div className="rounded-[1.1rem] border border-slate-200 bg-slate-50/80 px-3 py-2.5">
-                          <span className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Distância</span>
-                          <p className="text-sm font-bold text-slate-800 mt-0.5">{deliveryCheck.distanceKm.toFixed(1)} km</p>
+                        <div className="flex items-center gap-2.5 rounded-2xl border border-slate-100 bg-white px-3 py-2.5">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-500">
+                            <Bicycle size={15} weight="duotone" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">Distância</p>
+                            <p className="text-[15px] font-black text-slate-900">{deliveryCheck.distanceKm.toFixed(1)} km</p>
+                          </div>
                         </div>
                         {deliveryCheck?.durationMin ? (
-                          <div className="rounded-[1.1rem] border border-slate-200 bg-slate-50/80 px-3 py-2.5">
-                            <span className="text-[10px] uppercase tracking-[0.18em] text-slate-400 flex items-center gap-1"><Clock size={10} weight="duotone" />Estimativa</span>
-                            <p className="text-sm font-bold text-slate-800 mt-0.5">{deliveryCheck.durationMin} min</p>
+                          <div className="flex items-center gap-2.5 rounded-2xl border border-slate-100 bg-white px-3 py-2.5">
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-500">
+                              <Clock size={15} weight="duotone" />
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">Tempo</p>
+                              <p className="text-[15px] font-black text-slate-900">{deliveryCheck.durationMin} min</p>
+                            </div>
                           </div>
                         ) : null}
                       </div>
