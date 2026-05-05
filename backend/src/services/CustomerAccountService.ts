@@ -974,6 +974,20 @@ async setDefaultAddress(userId: string, addressId: string) {
       }
     }
 
+
+    // Fetch refund status for cancelled orders paid online
+    const cancelledIds = rows.filter((o) => o.status === 'cancelled').map((o) => o.id);
+    const refundMap: Record<string, { status: string; amount: number | null; reason: string | null }> = {};
+    if (cancelledIds.length > 0) {
+      const refundRows: { order_id: string; refund_status: string; refund_amount: string | null; refund_reason: string | null }[] = await AppDataSource.query(
+        `SELECT order_id, refund_status, refund_amount, refund_reason FROM order_payments WHERE order_id = ANY($1) AND refund_status IS NOT NULL`,
+        [cancelledIds]
+      );
+      for (const row of refundRows) {
+        refundMap[row.order_id] = { status: row.refund_status, amount: row.refund_amount ? Number(row.refund_amount) : null, reason: row.refund_reason };
+      }
+    }
+
     const data = rows.map((order) => ({
       id: order.id,
       createdAt: order.createdAt,
@@ -1005,6 +1019,9 @@ async setDefaultAddress(userId: string, addressId: string) {
       paymentStatus: order.paymentStatus || null,
       paymentLink: paymentLinkMap[order.id] || null,
       total: Number(order.total || 0),
+      refundStatus: refundMap[order.id]?.status || null,
+      refundAmount: refundMap[order.id]?.amount || null,
+      refundReason: refundMap[order.id]?.reason || null,
       deliveryFee: order.deliveryFee != null ? Number(order.deliveryFee) : null,
       customerName: order.customerName,
       phone: order.phone || null,
