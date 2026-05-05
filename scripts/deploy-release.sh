@@ -360,6 +360,6 @@ $COMPOSE_CMD \
   -f "$ROOT_DIR/docker-compose.prod.yml" \
   -f "$ROOT_DIR/docker-compose.deploy.yml" \
   --env-file "$ENV_FILE" \
-  up -d --no-build --no-deps "$@"
+  up -d --no-build --no-deps --force-recreate "$@"
 
 echo "Release deploy done."
