@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import express from 'express';
 import path from 'path';
 import cors from 'cors';
+import { publicUploadsMiddleware } from '../middleware/publicUploads';
 import routes from '../routes';
 
 /**
@@ -14,7 +15,7 @@ export function createApp(): express.Express {
   app.set('etag', false);
   app.use(cors({ origin: true }));
   app.use(express.json({ limit: '10mb' }));
-  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+  app.use('/uploads', publicUploadsMiddleware, express.static(path.join(process.cwd(), 'uploads')));
   app.get('/', (_, res) => res.json({ status: 'ok' }));
   app.use('/api', routes);
   return app;

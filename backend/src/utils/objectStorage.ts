@@ -1,9 +1,17 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { HeadObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { env } from '../config/env';
 
 export type PublicUploadsStorageMode = 'local' | 'hybrid' | 's3';
+export type PublicObjectReadResult = {
+  body: Buffer;
+  cacheControl?: string;
+  contentLength?: number;
+  contentType?: string;
+  etag?: string;
+  lastModified?: Date;
+};
 
 export const DEFAULT_PUBLIC_UPLOAD_FOLDERS = ['products', 'logos', 'condominiums', 'payment'] as const;
 
@@ -89,6 +97,11 @@ export const shouldWriteUploadToLocal = (
   mode: PublicUploadsStorageMode = env.storage.publicUploadsMode
 ) => !isPublicUploadFolder(folder, env.storage.publicFolders) || mode !== 's3';
 
+export const shouldReadPublicUploadFromS3 = (
+  relativePath: string,
+  mode: PublicUploadsStorageMode = env.storage.publicUploadsMode
+) => isPublicUploadPath(relativePath, env.storage.publicFolders) && mode !== 'local';
+
 let s3Client: S3Client | null = null;
 
 const ensureS3Configured = () => {
@@ -134,6 +147,40 @@ export const publicObjectExistsInS3 = async (relativePath: string) => {
   } catch (error: any) {
     if (error?.$metadata?.httpStatusCode === 404 || error?.name === 'NotFound') {
       return false;
+    }
+    throw error;
+  }
+};
+
+export const getPublicObjectFromS3 = async (
+  relativePath: string
+): Promise<PublicObjectReadResult | null> => {
+  ensureS3Configured();
+  try {
+    const response = await getS3Client().send(
+      new GetObjectCommand({
+        Bucket: env.storage.publicUploadsS3Bucket,
+        Key: resolveUploadObjectKey(relativePath, env.storage.publicUploadsS3Prefix),
+      })
+    );
+
+    const body = response.Body ? Buffer.from(await response.Body.transformToByteArray()) : Buffer.alloc(0);
+
+    return {
+      body,
+      cacheControl: response.CacheControl,
+      contentLength: response.ContentLength ? Number(response.ContentLength) : body.length,
+      contentType: response.ContentType || inferContentTypeFromFilename(relativePath),
+      etag: response.ETag,
+      lastModified: response.LastModified,
+    };
+  } catch (error: any) {
+    if (
+      error?.$metadata?.httpStatusCode === 404 ||
+      error?.name === 'NoSuchKey' ||
+      error?.name === 'NotFound'
+    ) {
+      return null;
     }
     throw error;
   }

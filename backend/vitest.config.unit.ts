@@ -6,6 +6,7 @@ export default defineConfig({
     root: '.',
     include: [
       'src/utils/**/*.test.ts',
+      'src/middleware/**/*.test.ts',
       'src/services/**/*.test.ts',
       'src/config/**/*.test.ts',
     ],

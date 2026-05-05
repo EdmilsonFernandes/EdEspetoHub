@@ -36,6 +36,16 @@ export const validateCriticalRuntimeConfig = () => {
     }
   }
 
+  if (env.storage.publicUploadsMode !== 'local') {
+    if (!env.storage.publicUploadsS3Bucket) {
+      issues.push('PUBLIC_UPLOADS_S3_BUCKET ausente para modo de storage publico em S3');
+    }
+
+    if (!env.storage.publicUploadsS3Region) {
+      issues.push('PUBLIC_UPLOADS_S3_REGION ausente para modo de storage publico em S3');
+    }
+  }
+
   if (issues.length > 0) {
     throw new Error(`Invalid runtime configuration: ${issues.join('; ')}`);
   }

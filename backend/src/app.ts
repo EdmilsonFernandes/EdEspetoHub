@@ -39,6 +39,7 @@ async function bootstrap()
 	  const { scheduleAwaitingPaymentExpirationJob } = await import('./jobs/awaiting-payment-expiration.job');
 	  const { scheduleStoreDashboardSnapshotJob } = await import('./jobs/store-dashboard-snapshot.job');
 	  const { runMigrations } = await import('./utils/runMigrations');
+  const { publicUploadsMiddleware } = await import('./middleware/publicUploads');
   const { applyApiSecurityHeaders } = await import('./middleware/apiSecurity');
   const { requestLogger } = await import('./middleware/requestLogger');
   const { accessLogger } = await import('./middleware/accessLogger');
@@ -129,7 +130,7 @@ async function bootstrap()
   });
 
   const uploadsDir = path.join(process.cwd(), 'uploads');
-  app.use('/uploads', express.static(uploadsDir));
+  app.use('/uploads', publicUploadsMiddleware, express.static(uploadsDir));
 
   app.get('/', (_, res) => res.json({ status: 'ok', name: 'Churras Sites API' }));
   app.use('/api/docs', swaggerUi.serve as any, swaggerUi.setup(swaggerSpec) as any);

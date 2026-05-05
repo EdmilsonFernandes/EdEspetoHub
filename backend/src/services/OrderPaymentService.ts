@@ -393,13 +393,13 @@ export class OrderPaymentService {
   async denyRefund(orderId: string, storeId: string, reason: string): Promise<{ refundStatus: string }> {
     const repo = AppDataSource.getRepository(OrderPayment);
     const orderPayment = await repo.findOne({ where: { orderId } });
-    if (!orderPayment) throw new AppError('REFUND-020', 404, 'Pagamento não encontrado para este pedido.');
-    if (orderPayment.storeId !== storeId) throw new AppError('REFUND-021', 403, 'Acesso negado.');
+    if (!orderPayment) throw new AppError('REFUND-020', 404, { message: 'Pagamento não encontrado para este pedido.' });
+    if (orderPayment.storeId !== storeId) throw new AppError('REFUND-021', 403, { message: 'Acesso negado.' });
     if (orderPayment.refundStatus === 'REFUNDED' || orderPayment.refundStatus === 'PARTIALLY_REFUNDED') {
-      throw new AppError('REFUND-022', 400, 'Este pagamento já foi reembolsado.');
+      throw new AppError('REFUND-022', 400, { message: 'Este pagamento já foi reembolsado.' });
     }
     if (orderPayment.refundStatus === 'DENIED') {
-      throw new AppError('REFUND-023', 400, 'Reembolso já foi recusado anteriormente.');
+      throw new AppError('REFUND-023', 400, { message: 'Reembolso já foi recusado anteriormente.' });
     }
     await repo.update(orderPayment.id, {
       refundStatus: 'DENIED',
