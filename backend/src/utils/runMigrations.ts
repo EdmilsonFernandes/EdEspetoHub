@@ -1547,6 +1547,36 @@ export async function runMigrations() {
     ON condominiums(active);
   `);
   await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS condominium_access_requests (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      condominium_name VARCHAR NOT NULL,
+      slug TEXT,
+      description TEXT,
+      address TEXT,
+      city TEXT,
+      state TEXT,
+      zip_code TEXT,
+      logo_url TEXT,
+      banner_url TEXT,
+      responsible_name VARCHAR NOT NULL,
+      responsible_role TEXT,
+      responsible_email VARCHAR NOT NULL,
+      responsible_phone TEXT,
+      message TEXT,
+      status TEXT NOT NULL DEFAULT 'pending',
+      review_note TEXT,
+      reviewed_by UUID,
+      reviewed_at TIMESTAMPTZ,
+      created_condominium_id UUID REFERENCES condominiums(id) ON DELETE SET NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_condominium_access_requests_status_created
+    ON condominium_access_requests(status, created_at DESC);
+  `);
+  await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS condominium_users (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       condominium_id UUID NOT NULL REFERENCES condominiums(id) ON DELETE CASCADE,

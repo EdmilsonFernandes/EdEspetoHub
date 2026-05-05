@@ -53,40 +53,6 @@ export class CondominiumRepository {
     this.condominiumAccessRequestRepository = AppDataSource.getRepository(CondominiumAccessRequest);
   }
 
-  async ensureAccessRequestTable() {
-    await AppDataSource.query('CREATE EXTENSION IF NOT EXISTS pgcrypto;');
-    await AppDataSource.query(`
-      CREATE TABLE IF NOT EXISTS condominium_access_requests (
-        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-        condominium_name varchar NOT NULL,
-        slug text NULL,
-        description text NULL,
-        address text NULL,
-        city text NULL,
-        state text NULL,
-        zip_code text NULL,
-        logo_url text NULL,
-        banner_url text NULL,
-        responsible_name varchar NOT NULL,
-        responsible_role text NULL,
-        responsible_email varchar NOT NULL,
-        responsible_phone text NULL,
-        message text NULL,
-        status text NOT NULL DEFAULT 'pending',
-        review_note text NULL,
-        reviewed_by uuid NULL,
-        reviewed_at timestamptz NULL,
-        created_condominium_id uuid NULL REFERENCES condominiums(id) ON DELETE SET NULL,
-        created_at timestamptz NOT NULL DEFAULT now(),
-        updated_at timestamptz NOT NULL DEFAULT now()
-      );
-    `);
-    await AppDataSource.query(`
-      CREATE INDEX IF NOT EXISTS idx_condominium_access_requests_status_created
-      ON condominium_access_requests (status, created_at DESC);
-    `);
-  }
-
   /**
    * Lists active condominiums.
    *
@@ -134,7 +100,6 @@ export class CondominiumRepository {
   }
 
   async listAccessRequests(status?: string) {
-    await this.ensureAccessRequestTable();
     const qb = this.condominiumAccessRequestRepository
       .createQueryBuilder('request')
       .leftJoinAndSelect('request.createdCondominium', 'createdCondominium')
@@ -144,7 +109,6 @@ export class CondominiumRepository {
   }
 
   async findAccessRequestById(id: string) {
-    await this.ensureAccessRequestTable();
     return this.condominiumAccessRequestRepository.findOne({
       where: { id },
       relations: [ 'createdCondominium' ],
@@ -152,7 +116,6 @@ export class CondominiumRepository {
   }
 
   async findPendingAccessRequestByEmailOrName(email: string, condominiumName: string) {
-    await this.ensureAccessRequestTable();
     const normalizedEmail = String(email || '').trim().toLowerCase();
     const normalizedName = String(condominiumName || '').trim();
     return this.condominiumAccessRequestRepository
@@ -167,7 +130,6 @@ export class CondominiumRepository {
   }
 
   async saveAccessRequest(payload: Partial<CondominiumAccessRequest>) {
-    await this.ensureAccessRequestTable();
     return this.condominiumAccessRequestRepository.save(this.condominiumAccessRequestRepository.create(payload));
   }
 
