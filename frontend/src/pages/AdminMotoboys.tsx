@@ -55,6 +55,9 @@ export function AdminMotoboys() {
     submitting: boolean;
   }>({ open: false, row: null, notes: '', proofFile: null, submitting: false });
   const storeId = auth?.store?.id || '';
+  const [approveConfirmOpen, setApproveConfirmOpen] = useState(false);
+  const [approveConfirmRequestId, setApproveConfirmRequestId] = useState<string | null>(null);
+  const [approveConfirmChecked, setApproveConfirmChecked] = useState(false);
   const pendingRequests = requests.filter((request) => request.status === 'PENDING');
   const requestsSectionRef = useRef<HTMLDivElement | null>(null);
   const linkedSectionRef = useRef<HTMLDivElement | null>(null);
@@ -467,11 +470,29 @@ export function AdminMotoboys() {
     }
   };
 
+  const confirmApproveRequest = async () => {
+    if (!storeId || !approveConfirmRequestId) return;
+    try {
+      await motoboyAdminService.approveRequest(storeId, approveConfirmRequestId);
+      showToast('Solicitação atualizada.', 'success');
+      setApproveConfirmOpen(false);
+      setApproveConfirmRequestId(null);
+      setApproveConfirmChecked(false);
+      loadRequests();
+      loadMotoboys();
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível atualizar solicitação.', 'error');
+    }
+  };
+
   const reviewRequest = async (requestId: string, status: 'approve' | 'reject') => {
     if (!storeId) return;
     try {
       if (status === 'approve') {
-        await motoboyAdminService.approveRequest(storeId, requestId);
+        setApproveConfirmRequestId(requestId);
+        setApproveConfirmChecked(false);
+        setApproveConfirmOpen(true);
+        return;
       } else {
         const target = pendingRequests.find((r) => r.id === requestId) || requests.find((r) => r.id === requestId) || null;
         setRejectRequestTarget(target);
@@ -1134,7 +1155,7 @@ export function AdminMotoboys() {
                 <div className="text-xs text-slate-600">
                 {docsLoadingId === docsModalMotoboyId
                   ? 'Carregando documentos...'
-                  : 'KYC aprovado pela plataforma. Se alguma foto estiver ruim, peça reenvio (com motivo).'}
+                  : 'Validação inicial concluída. Analise as informações e decida pela aprovação. A responsabilidade pela associação é do estabelecimento.'}
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -1171,6 +1192,53 @@ export function AdminMotoboys() {
                 className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700"
               >
                 Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+      {/* Modal de confirmação de aprovação com checkbox de responsabilidade */}
+      {approveConfirmOpen && (
+        <div className="ds-sheet-backdrop z-[90]" role="dialog" onClick={() => setApproveConfirmOpen(false)}>
+          <div className="ds-sheet-panel max-w-md" onClick={(e) => e.stopPropagation()}>
+            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-600">Confirmação</p>
+            <h3 className="mt-2 text-lg font-bold text-slate-900">Aprovar vínculo do entregador</h3>
+            <p className="mt-3 text-sm text-slate-600 leading-relaxed">
+              Este entregador passou por validação inicial da plataforma (quando aplicável). Essa validação tem caráter preliminar e de apoio à análise.
+            </p>
+            <label className="mt-4 flex items-start gap-3 cursor-pointer rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <input
+                type="checkbox"
+                checked={approveConfirmChecked}
+                onChange={(e) => setApproveConfirmChecked(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 shrink-0"
+              />
+              <span className="text-xs text-slate-700 leading-relaxed">
+                Declaro que visualizei as informações cadastrais e o status de validação inicial do entregador e que a decisão de aprovar sua associação à minha loja é de responsabilidade do meu estabelecimento. Assumo a responsabilidade pela orientação, gestão operacional e acompanhamento deste entregador na operação de entrega da minha loja.
+              </span>
+            </label>
+            <div className="mt-5 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setApproveConfirmOpen(false)}
+                className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={confirmApproveRequest}
+                disabled={!approveConfirmChecked}
+                className={[
+                  'flex-1 rounded-xl px-4 py-2.5 text-xs font-bold text-white',
+                  approveConfirmChecked
+                    ? 'bg-emerald-600 shadow-[0_12px_30px_-10px_rgba(16,185,129,0.5)]'
+                    : 'bg-slate-300 cursor-not-allowed',
+                ].join(' ')}
+              >
+                Confirmar aprovação
               </button>
             </div>
           </div>
@@ -1515,7 +1583,7 @@ export function AdminMotoboys() {
                     type="button"
                     onClick={() => reviewRequest(request.id, 'approve')}
                     disabled={!canApprove}
-                    title={!canApprove ? 'Aguarde o KYC ser aprovado pela plataforma para concluir o vínculo.' : 'Aprovar vínculo'}
+                    title={!canApprove ? 'Aguarde a validação inicial da plataforma para liberar a aprovação pelo seu estabelecimento.' : 'Aprovar vínculo'}
                     className={[
                       'btn-press px-3 py-2 rounded-xl text-xs font-extrabold',
                       canApprove
@@ -1544,7 +1612,7 @@ export function AdminMotoboys() {
                 </div>
                 {!canApprove ? (
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
-                    Aguardando aprovação do KYC pela plataforma (SUPER_ADMIN).
+                    Validação inicial em análise pela plataforma. Aprovação do vínculo será liberada após conclusão.
                   </div>
                 ) : null}
 
@@ -1887,7 +1955,7 @@ export function AdminMotoboys() {
                   >
                     Pedir reenvio
                   </button>
-                  <span className="text-xs text-slate-500 font-semibold">Validação feita pela plataforma.</span>
+                  <span className="text-xs text-slate-500 font-semibold">Validação inicial de apoio realizada pela plataforma.</span>
                 </div>
               ) : null}
             </div>

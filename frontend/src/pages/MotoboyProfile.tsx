@@ -55,6 +55,8 @@ export function MotoboyProfile() {
   const [selectedStores, setSelectedStores] = useState<string[]>([]);
   const [requesting, setRequesting] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
+  const [requestConsentChecked, setRequestConsentChecked] = useState(false);
+  const [requestLgpdChecked, setRequestLgpdChecked] = useState(false);
   const [cameraDocType, setCameraDocType] = useState<string | null>(null);
   const [preview, setPreview] = useState<{ title: string; src: string | null } | null>(null);
   const [showRequestBlockedModal, setShowRequestBlockedModal] = useState(false);
@@ -361,7 +363,7 @@ export function MotoboyProfile() {
         tone: 'emerald' as const,
         icon: <ShieldCheck size={18} weight="duotone" />,
         title: 'Verificação concluída',
-        subtitle: 'Sua selfie foi aprovada pela plataforma.',
+        subtitle: 'Validação inicial da selfie concluída pela plataforma.',
       };
     }
 
@@ -818,6 +820,8 @@ export function MotoboyProfile() {
       showToast('Solicitação enviada. Aguarde aprovação.', 'success');
       setSelectedStores([]);
       await loadRequests();
+      setRequestConsentChecked(false);
+      setRequestLgpdChecked(false);
     } catch (error: any) {
       showToast(error?.message || 'Não foi possível enviar solicitação.', 'error');
     } finally {
@@ -837,7 +841,7 @@ export function MotoboyProfile() {
     const reasons: string[] = [];
     if (!hasCompleteProfile) reasons.push('Complete os dados do perfil e veículo.');
     if (requiredDocStatus.missing.length > 0) reasons.push(`Envie os documentos faltantes: ${requiredDocStatus.missing.join(', ')}.`);
-    if (requiredDocStatus.pending.length > 0) reasons.push(`Aguarde aprovação da plataforma: ${requiredDocStatus.pending.join(', ')}.`);
+    if (requiredDocStatus.pending.length > 0) reasons.push(`Aguarde validação inicial da plataforma: ${requiredDocStatus.pending.join(', ')}.`);
     if (requiredDocStatus.rejected.length > 0) reasons.push(`Reenvie os documentos recusados: ${requiredDocStatus.rejected.join(', ')}.`);
     return reasons;
   }, [hasCompleteProfile, requiredDocStatus]);
@@ -1323,7 +1327,7 @@ export function MotoboyProfile() {
                   isApproved ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-amber-200 bg-amber-50 text-amber-900'
                 }`}
               >
-                {isApproved ? 'Aprovado pela plataforma. Documento pronto para solicitação de lojas.' : 'Enviado para análise da plataforma.'}
+                {isApproved ? 'Validação inicial concluída. Você pode solicitar vínculo com lojas. A aprovação final depende de cada estabelecimento.' : 'Enviado para análise da plataforma.'}
               </div>
             ) : null;
 
@@ -2124,14 +2128,24 @@ export function MotoboyProfile() {
             Atualizar status
           </button>
           {requestableStores.length > 0 && selectedStores.length > 0 ? (
+            <>
+            <label className="flex items-start gap-2.5 cursor-pointer rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <input type="checkbox" checked={requestConsentChecked} onChange={(e) => setRequestConsentChecked(e.target.checked)} className="mt-0.5 h-3.5 w-3.5 rounded border-slate-300 text-brand-primary focus:ring-brand-primary shrink-0" />
+              <span className="text-[11px] text-slate-600 leading-relaxed">Declaro estar ciente de que minha atuação como entregador será vinculada à operação do estabelecimento selecionado, sob responsabilidade do próprio estabelecimento. Não há vínculo empregatício ou de subordinação com a plataforma Já no Caminho.</span>
+            </label>
+            <label className="flex items-start gap-2.5 cursor-pointer rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <input type="checkbox" checked={requestLgpdChecked} onChange={(e) => setRequestLgpdChecked(e.target.checked)} className="mt-0.5 h-3.5 w-3.5 rounded border-slate-300 text-brand-primary focus:ring-brand-primary shrink-0" />
+              <span className="text-[11px] text-slate-600 leading-relaxed">Autorizo que meus dados cadastrais, documentos e status de validação inicial sejam disponibilizados ao estabelecimento exclusivamente para análise desta solicitação de vínculo.</span>
+            </label>
             <button
               type="button"
               onClick={handleRequestStores}
-              disabled={requesting || !canRequestAnyStore}
+              disabled={requesting || !canRequestAnyStore || !requestConsentChecked || !requestLgpdChecked}
               className="btn-press w-full rounded-xl bg-brand-primary px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50 shadow-[0_22px_48px_-34px_rgba(234,88,12,0.55)]"
             >
               {requesting ? 'Enviando...' : 'Enviar solicitação'}
             </button>
+            </>
           ) : null}
         </div>
       </FormSection>

@@ -2436,6 +2436,9 @@ export const CartView = ({
           </>
         ) : (
           <>
+            <p className="text-[11px] text-slate-400 text-center leading-relaxed mb-2">
+              Pedido processado pelo estabelecimento, responsável por produtos, preparo, preços e entrega.
+            </p>
             <button
               onClick={async () => {
                 setHasTriedCheckout(true);

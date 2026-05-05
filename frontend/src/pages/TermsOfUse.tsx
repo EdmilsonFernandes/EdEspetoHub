@@ -98,27 +98,42 @@ export function TermsOfUse() {
             As Lojas parceiras são <strong>pessoas jurídicas ou físicas independentes</strong> e são as únicas responsáveis pelos produtos que oferecem, pela qualidade do atendimento, pelo cumprimento das normas sanitárias, fiscais e legais aplicáveis ao seu ramo de atividade. A relação entre a Plataforma e as Lojas é de prestação de serviço tecnológico, sem qualquer vínculo trabalhista ou societário.
           </Para>
 
-          <Section title="5. Pagamentos e Transações" />
+
+          <Section title="5. Entregadores e Operação de Entrega" />
+          <Para>
+            Os entregadores cadastrados na plataforma são <strong>profissionais independentes</strong> que atuam vinculados a estabelecimentos específicos, mediante aprovação do próprio estabelecimento. A plataforma disponibiliza ferramentas tecnológicas para cadastro, validação inicial de apoio, registro de eventos e comunicação entre as partes.
+          </Para>
+          <Para>
+            A plataforma <strong>não</strong> contrata, emprega ou subordina entregadores; não garante a conduta, pontualidade ou qualidade do serviço de entrega; não substitui a análise e aprovação do estabelecimento; não certifica definitivamente a identidade ou aptidão do entregador; e não é responsável por danos causados durante a operação de entrega.
+          </Para>
+          <Para>
+            A validação inicial (KYC) realizada pela plataforma tem caráter preliminar e de apoio à segurança do cadastro. Não constitui certificação, garantia ou aprovação para atuação em qualquer estabelecimento. Cada loja é responsável por analisar, aprovar e gerir operacionalmente os entregadores vinculados à sua operação.
+          </Para>
+          <Para>
+            Não existe qualquer vínculo empregatício, societário, de representação ou de subordinação entre a plataforma e os entregadores cadastrados, nem entre a plataforma e os estabelecimentos parceiros. A relação entre entregador e estabelecimento é de natureza autônoma, cabendo às partes definir condições de atuação.
+          </Para>
+
+          <Section title="6. Pagamentos e Transações" />
           <Para>
             A Plataforma utiliza gateways de pagamento de terceiros (ex: Mercado Pago). Não armazenamos dados completos de cartão de crédito. A Plataforma não se responsabiliza por falhas de processamento, recusas de crédito, chargebacks ou fraudes de terceiros. O usuário é o único responsável por fornecer informações de pagamento precisas e válidas.
           </Para>
 
-          <Section title="6. Obrigações do Usuário" />
+          <Section title="7. Obrigações do Usuário" />
           <Para>
             O usuário compromete-se a fornecer dados cadastrais verdadeiros, não utilizar a Plataforma para fins ilícitos, lesivos ou fraudulentos, e manter a confidencialidade de suas credenciais. O uso indevido ou fraudulento resultará no banimento imediato da conta, sem prejuízo das medidas legais cabíveis.
           </Para>
 
-          <Section title="7. Disponibilidade da Plataforma" />
+          <Section title="8. Disponibilidade da Plataforma" />
           <Para>
             Não garantimos que a Plataforma funcionará de forma ininterrupta ou livre de erros. Reservamo-nos o direito de suspender, alterar ou encerrar os serviços a qualquer momento, por razões de manutenção técnica ou atualizações, sem prévio aviso e sem gerar direito a indenização.
           </Para>
 
-          <Section title="8. Foro e Legislação Aplicável" />
+          <Section title="9. Foro e Legislação Aplicável" />
           <Para>
             Estes Termos são regidos pelas leis da República Federativa do Brasil. Fica eleito o foro da comarca de domicílio do usuário para dirimir quaisquer controvérsias decorrentes deste instrumento, com renúncia expressa a qualquer outro, por mais privilegiado que seja.
           </Para>
 
-          <Section title="9. Modificações dos Termos" />
+          <Section title="10. Modificações dos Termos" />
           <Para>
             Estes Termos podem ser alterados a qualquer momento, a exclusivo critério da Plataforma. O uso contínuo dos serviços após as alterações constitui plena aceitação dos novos Termos.
           </Para>
@@ -136,6 +151,9 @@ export function TermsOfUse() {
           <Para>
             Coletamos os dados estritamente necessários para a execução dos serviços: nome, e-mail (identificador de login), telefone, endereço de entrega, histórico de pedidos e informações de dispositivo (para notificações push).
           </Para>
+          <Para>
+            Para entregadores, coletamos adicionalmente: foto de documento de habilitação (CNH), selfie com documento, documento do veículo (CRLV), dados do veículo (placa, modelo, cor), endereço operacional e chave Pix para repasse. Esses dados são coletados com base no consentimento do titular e na execução do serviço de validação inicial.
+          </Para>
 
           <Section title="2. Finalidade do Tratamento" />
           <Para>
@@ -145,6 +163,9 @@ export function TermsOfUse() {
           <Section title="3. Compartilhamento de Dados" />
           <Para>
             Dados de pedido (nome, endereço, telefone) são compartilhados com a Loja parceira e/ou entregador exclusivamente para viabilizar a entrega. Dados de pagamento são processados diretamente pelo gateway (Mercado Pago) e não ficam armazenados em nossos servidores.
+          </Para>
+          <Para>
+            Dados cadastrais, documentos e status de validação inicial do entregador são compartilhados com o estabelecimento ao qual o entregador solicitar vínculo, exclusivamente para fins de análise da associação. O compartilhamento ocorre mediante consentimento do entregador no momento da solicitação. O estabelecimento compromete-se a utilizar esses dados exclusivamente para análise da associação, sendo vedado o uso para outras finalidades.
           </Para>
 
           <Section title="4. Exclusão de Conta e Dados" />
