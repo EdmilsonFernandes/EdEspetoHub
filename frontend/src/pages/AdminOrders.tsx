@@ -809,6 +809,15 @@ export function AdminOrders() {
                             </div>
                           );
                         })()}
+                      {String(order?.status || '').toLowerCase() === 'cancelled' && String(order?.paymentStatus || '').toUpperCase() === 'PAID' && !order?.refundStatus && (
+                        <div className="flex gap-2 mt-2">
+                          <button type="button" onClick={() => openRefundModal(order)} className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700 active:scale-95">Reembolsar</button>
+                          <button type="button" onClick={() => { setRefundOrder(order); setRefundReason(''); setRefundSuccess(''); setDenyModalOpen(true); }} className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-600 active:scale-95">Recusar</button>
+                        </div>
+                      )}
+                      {order?.refundStatus === 'REFUNDED' && (<span className="inline-block mt-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">Reembolsado</span>)}
+                      {order?.refundStatus === 'PARTIALLY_REFUNDED' && (<span className="inline-block mt-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">Reembolso parcial</span>)}
+                      {order?.refundStatus === 'DENIED' && (<span className="inline-block mt-2 rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-bold text-rose-600">Recusado</span>)}
                       </div>
                       <div>
                         <p className="text-xs uppercase text-slate-400">Endereço</p>
