@@ -1,0 +1,26 @@
+{
+  "Rules": [
+    {
+      "ID": "postgres-espetinho-retention",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "postgres/espetinho/"
+      },
+      "Transitions": [
+        {
+          "Days": 30,
+          "StorageClass": "GLACIER"
+        }
+      ],
+      "Expiration": {
+        "Days": 180
+      },
+      "NoncurrentVersionExpiration": {
+        "NoncurrentDays": 30
+      },
+      "AbortIncompleteMultipartUpload": {
+        "DaysAfterInitiation": 7
+      }
+    }
+  ]
+}
