@@ -355,6 +355,16 @@ for service_name in "$@"; do
   show_release_comparison "$service_name"
 done
 
+# Remove potentially orphaned containers from previous compose projects
+for svc in "$@"; do
+  case "$svc" in
+    backend) docker rm -f janocaminho-backend 2>/dev/null || true ;;
+    apis) docker rm -f janocaminho-apis 2>/dev/null || true ;;
+    frontend) docker rm -f janocaminho-frontend 2>/dev/null || true ;;
+    face-worker) docker rm -f janocaminho-face-worker 2>/dev/null || true ;;
+  esac
+done
+
 $COMPOSE_CMD \
   -f "$ROOT_DIR/docker-compose.yml" \
   -f "$ROOT_DIR/docker-compose.prod.yml" \
