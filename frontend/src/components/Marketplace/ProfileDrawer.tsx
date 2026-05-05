@@ -477,7 +477,7 @@ export function ProfileDrawer({
                       decoding="async"
                       className="h-16 w-16 rounded-2xl border-2 border-white object-cover shadow-[0_18px_30px_-18px_rgba(51,104,134,0.45)] ring-2 ring-[#336886]/15"
                     />
-                    <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-500 shadow-sm" />
+                    <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
                   </div>
                 ) : (
                   <div className={`grid h-16 w-16 place-items-center ${currentIdentity.iconShell}`}>
@@ -597,9 +597,12 @@ export function ProfileDrawer({
                     ? 'Área do Entregador'
                     : 'Suporte'}
             </p>
-            {actions.map((action) => (
+            {actions.map((action, idx) => (
+              <div key={action.id}>
+              {(action.id === 'settings' || action.id === 'legal' || action.id === 'help' || action.id === 'logout' || action.id === 'logout-store' || action.id === 'logout-motoboy') && idx > 0 && actions[idx - 1]?.id !== 'settings' && actions[idx - 1]?.id !== 'legal' && actions[idx - 1]?.id !== 'help' && (
+                <div className="my-2 mx-3 h-px bg-slate-100" />
+              )}
               <button
-                key={action.id}
                 onClick={() => {
                   action.onClick();
                   onClose();
@@ -626,6 +629,7 @@ export function ProfileDrawer({
                   ) : null}
                 </div>
               </button>
+              </div>
             ))}
           </nav>
         </div>
@@ -633,12 +637,16 @@ export function ProfileDrawer({
         <div className="border-t border-slate-100/90 bg-white/70 p-6 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] backdrop-blur-xl">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-[11px] font-black text-slate-900 tracking-tight">Ja no Caminho</p>
+              <p className="text-[11px] font-black text-slate-900 tracking-tight">Já no Caminho</p>
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
                 Versão {versionLabel || 'v0.0.0'}
               </p>
+              <p className="flex items-center gap-1 text-[9px] font-semibold text-emerald-600">
+                <ShieldCheckered size={10} weight="fill" />
+                Ambiente seguro
+              </p>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-white bg-white p-0.5 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.55)]">
+            <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-white bg-white p-0.5 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.55)] ring-1 ring-slate-100">
               <img src="/janocaminho.jpg" alt="Logo" loading="eager" fetchPriority="high" decoding="async" className="h-full w-full rounded-full object-cover opacity-95" />
             </div>
           </div>
