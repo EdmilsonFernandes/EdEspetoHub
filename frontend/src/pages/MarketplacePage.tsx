@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { notificationStorage } from '../services/notificationStorage';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import {
@@ -2401,24 +2402,11 @@ export function MarketplacePage() {
     [activeAnonymousOrders, dismissedAnonymousOrderIds]
   );
 
-  const hubNotificationCount = visibleActiveOrders.length + (isCustomerLogged ? 0 : visibleActiveAnonymousOrders.length);
+  const hubNotificationCount = visibleActiveOrders.length + (isCustomerLogged ? 0 : visibleActiveAnonymousOrders.length) + notificationStorage.unreadCount();
 
   const handleHubNotificationClick = useCallback(() => {
-    if (visibleActiveOrders.length > 0) {
-      openCustomerOrders();
-      return;
-    }
-    if (!isCustomerLogged) {
-      const anonymousOrderId = String(visibleActiveAnonymousOrders[0]?.id || '').trim();
-      if (anonymousOrderId) {
-        navigate(`/pedido/${anonymousOrderId}`);
-        return;
-      }
-      openCustomerLogin();
-      return;
-    }
-    openCustomerOrders();
-  }, [isCustomerLogged, navigate, openCustomerLogin, openCustomerOrders, visibleActiveAnonymousOrders, visibleActiveOrders]);
+    navigate('/notificacoes');
+  }, [navigate]);
 
   useEffect(() => {
     if (isCustomerLogged) setActiveAnonymousOrders([]);

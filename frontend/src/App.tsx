@@ -52,6 +52,7 @@ const ArchitecturePage = lazyPage(() => import('./pages/ArchitecturePage'), 'Arc
 const InstallAppPage = lazyPage(() => import('./pages/InstallAppPage'), 'InstallAppPage');
 const ClientAccount = lazyPage(() => import('./pages/ClientAccount'), 'ClientAccount');
 const ClientOrders = lazyPage(() => import('./pages/ClientOrders'), 'ClientOrders');
+const NotificationsPage = lazyPage(() => import('./pages/NotificationsPage'), 'NotificationsPage');
 const MarketplacePage = lazyPage(() => import('./pages/MarketplacePage'), 'MarketplacePage');
 const CondominiumAccessRequest = lazyPage(() => import('./pages/CondominiumAccessRequest'), 'CondominiumAccessRequest');
 const CondominiumDashboard = lazyPage(() => import('./pages/CondominiumDashboard'), 'CondominiumDashboard');
@@ -106,6 +107,7 @@ function App() {
               <Route path="/cliente/cadastro" element={<Navigate to="/cliente?mode=register" replace />} />
               <Route path="/cliente/conta" element={<ClientAccount />} />
               <Route path="/cliente/pedidos" element={<ClientOrders />} />
+              <Route path="/notificacoes" element={<NotificationsPage />} />
               <Route path="/cliente/enderecos" element={<AddressDistance />} />
               <Route path="/condominio/login" element={<CondominiumLogin />} />
               <Route path="/condominio/solicitar" element={<CondominiumAccessRequest />} />
