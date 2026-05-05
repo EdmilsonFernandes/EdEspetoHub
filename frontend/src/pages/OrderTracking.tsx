@@ -1828,10 +1828,10 @@ export function OrderTracking() {
                         value={paymentMeta?.label || 'Sem informacao'}
                         detail={paymentSummaryDetail}
                       />
-                      {isCancelled && order?.refundStatus === 'REFUNDED' && (
                       {isCancelled && hasOnlinePayment && isPaymentApproved && !order?.refundStatus && (
                         <TrackingMetaCard label="Reembolso" value="Em análise" detail="O estabelecimento está processando a devolução" accent="default" />
                       )}
+                      {isCancelled && order?.refundStatus === 'REFUNDED' && (
                         <TrackingMetaCard label="Reembolso" value="Processado" detail={order?.refundAmount ? `${formatCurrency(order.refundAmount)} devolvido` : 'Valor total devolvido'} accent="success" />
                       )}
                       {isCancelled && order?.refundStatus === 'PARTIALLY_REFUNDED' && (

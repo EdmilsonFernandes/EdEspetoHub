@@ -740,12 +740,12 @@ function OrderCard({
               <span className="font-semibold">Motivo: </span>{order.canceledReason}
             </div>
           )}
-          {isCancelled && order.refundStatus === 'REFUNDED' && (
           {isCancelled && order.paymentLink && !order.refundStatus && (
             <div className="border-t border-sky-100 bg-sky-50 px-3 py-2 text-[11px] text-sky-700">
-              <span className="font-semibold">Reembolso em análise</span> — o estabelecimento está processando a devolução do valor pago.
+              <span className="font-semibold">Reembolso em análise</span> {'\u2014'} o estabelecimento está processando a devolução do valor pago.
             </div>
           )}
+          {isCancelled && order.refundStatus === 'REFUNDED' && (
             <div className="border-t border-emerald-100 bg-emerald-50 px-3 py-2 text-[11px] text-emerald-700 font-semibold">
               ✓ Reembolso processado{order.refundAmount ? ` — ${formatCurrency(order.refundAmount)}` : ''}
             </div>
