@@ -372,4 +372,13 @@ $COMPOSE_CMD \
   --env-file "$ENV_FILE" \
   up -d --no-build --no-deps --force-recreate "$@"
 
+# Ensure deployed containers share the same network as postgres
+PG_NETWORK="$(docker inspect janocaminho-postgres --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{end}}' 2>/dev/null || true)"
+if [ -n "$PG_NETWORK" ]; then
+  for svc in "$@"; do
+    cname="janocaminho-${svc}"
+    docker network connect "$PG_NETWORK" "$cname" 2>/dev/null || true
+  done
+fi
+
 echo "Release deploy done."
