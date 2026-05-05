@@ -1674,9 +1674,8 @@ export function StorePage() {
     }
   }, [user?.token]);
 
-  useEffect(() => {
-    setStoreCoords(null);
-  }, [storeAddress]);
+  // storeCoords is set directly from store data load (line ~1210).
+  // No need to reset on storeAddress change — coords come from the same API response.
 
   useEffect(() => {
     if (!storeSlug) return;
