@@ -515,6 +515,9 @@ static async markItemsAsPrinted(req: Request, res: Response) {
               qrCodeBase64: orderPayment.qrCodeBase64 || null,
               qrCodeText: orderPayment.qrCodeText || null,
               expiresAt: orderPayment.expiresAt || null,
+              refundStatus: orderPayment.refundStatus || null,
+              refundAmount: orderPayment.refundAmount || null,
+              refundReason: orderPayment.refundReason || null,
             }
           : null,
         cashTendered: order.cashTendered ?? null,

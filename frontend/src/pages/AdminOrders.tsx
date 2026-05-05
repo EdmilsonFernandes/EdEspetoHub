@@ -142,7 +142,9 @@ export function AdminOrders() {
     if (!storeId && !storeSlug) return;
 
     const storeIdentifier = storeId || storeSlug;
-    const unsubscribeOrders = orderService.subscribeAll(storeIdentifier, setOrders);
+    const unsubscribeOrders = orderService.subscribeAll(storeIdentifier, (list: any[]) => {
+      setOrders((list || []).map((o: any) => ({ ...o, refundStatus: o.refundStatus || o.payment?.refundStatus || null, refundAmount: o.refundAmount || o.payment?.refundAmount || null, refundReason: o.refundReason || o.payment?.refundReason || null })));
+    });
 
     return () => {
       unsubscribeOrders?.();
@@ -340,7 +342,7 @@ export function AdminOrders() {
     if (!storeIdentifier) return;
     try {
       const list = await orderService.fetchAll(storeIdentifier);
-      setOrders(list || []);
+      setOrders((list || []).map((o: any) => ({ ...o, refundStatus: o.refundStatus || o.payment?.refundStatus || null, refundAmount: o.refundAmount || o.payment?.refundAmount || null, refundReason: o.refundReason || o.payment?.refundReason || null })));
     } catch (error) {
       console.error('Erro ao atualizar pedidos', error);
     }
