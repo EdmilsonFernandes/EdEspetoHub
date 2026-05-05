@@ -1184,10 +1184,10 @@ export function CreateStore() {
   ];
   const progressPercent = Math.max(0, Math.min(100, (currentStep / steps.length) * 100));
   const stepMeta: Record<number, { icon: any; hint: string }> = {
-    1: { icon: UserCircle, hint: 'Responsável e acesso' },
-    2: { icon: MapPinLine, hint: 'Local de operação' },
-    3: { icon: Storefront, hint: 'Identidade da loja' },
-    4: { icon: CreditCard, hint: 'Plano e termos' },
+    1: { icon: UserCircle, hint: 'Seus dados' },
+    2: { icon: MapPinLine, hint: 'Onde você está' },
+    3: { icon: Storefront, hint: 'Sua marca' },
+    4: { icon: CreditCard, hint: 'Ativar grátis' },
   };
   const finalReviewBlockingItems = [
     missingFields.plan ? 'Escolha um plano disponível para liberar a criação da loja.' : '',
@@ -1384,15 +1384,15 @@ export function CreateStore() {
       <div className="space-y-2 text-xs text-slate-600">
         <p className="inline-flex items-start gap-2">
           <RocketLaunch className="mt-0.5" size={13} weight="duotone" />
-          Publique sua loja em minutos com link pronto para divulgar.
+          Sem comissão por pedido — só mensalidade acessível.
         </p>
         <p className="inline-flex items-start gap-2">
           <Buildings className="mt-0.5" size={13} weight="duotone" />
-          Painel com vitrine, pedidos e operação no mesmo fluxo.
+          Receba pagamentos direto na sua conta Mercado Pago.
         </p>
         <p className="inline-flex items-start gap-2">
           <GlobeHemisphereWest className="mt-0.5" size={13} weight="duotone" />
-          Experiência mobile-first para loja e cliente final.
+          App na Play Store + link exclusivo para divulgar.
         </p>
       </div>
       <div className="rounded-xl border border-slate-200 bg-white p-3">
@@ -1488,14 +1488,14 @@ export function CreateStore() {
         <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-6 items-start">
         <div className="min-w-0 rounded-2xl border border-slate-100 bg-white p-6 md:p-10 shadow-sm">
           <div className="mb-5 flex flex-col items-center text-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 leading-tight">Criar minha loja</h1>
-            <p className="text-sm sm:text-base text-slate-600">4 etapas rápidas para publicar sua loja com checkout pronto.</p>
+            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 leading-tight">Abra sua loja em minutos</h1>
+            <p className="text-sm sm:text-base text-slate-600">Sem comissão por pedido · 7 dias grátis · Pronto para vender em minutos</p>
           </div>
 
           <div className="sticky top-[72px] sm:top-[84px] z-20 mb-6 rounded-2xl border border-slate-200 bg-white/95 p-3 sm:p-4 backdrop-blur">
           <div className="mb-2 flex items-center justify-between gap-2">
-            <p className="text-xs uppercase tracking-[0.22em] font-semibold text-slate-500">Etapas da loja</p>
-            <span className="text-[11px] text-slate-500 font-semibold">Etapa {currentStep} de 4</span>
+            <p className="text-xs uppercase tracking-[0.22em] font-semibold text-slate-500">Progresso</p>
+            <span className="text-[11px] text-slate-500 font-semibold">{currentStep} de 4 — falta pouco!</span>
           </div>
           <div className="mb-3 h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
             <div
@@ -1561,7 +1561,7 @@ export function CreateStore() {
             <div ref={personalSectionRef} className={`scroll-mt-36 ${currentStep === 1 || currentStep === 2 ? '' : 'hidden'}`} onFocusCapture={() => setCurrentStep(currentStep <= 2 ? currentStep : 1)}>
             <FormSection
               title={currentStep === 2 ? 'Endereço da operação' : 'Informações pessoais'}
-              subtitle={currentStep === 2 ? 'Onde sua loja opera e recebe pedidos.' : 'Dados do responsável pela operação da loja.'}
+              subtitle={currentStep === 2 ? 'Preencha o CEP e o resto é automático.' : 'Rápido e seguro. Só precisamos do básico para começar.'}
               variant="primary"
               className="create-store-section"
               contentClassName="space-y-4"
@@ -1905,7 +1905,7 @@ export function CreateStore() {
             <div ref={storeSectionRef} className={`pt-6 border-t border-gray-100 scroll-mt-36 ${currentStep === 3 ? 'motion-safe:animate-[createStoreStepIn_.26s_ease-out]' : 'hidden'}`} onFocusCapture={() => setCurrentStep(3)}>
               <FormSection
                 title="Configurações da loja"
-                subtitle="Defina identidade, segmento e canais de contato."
+                subtitle="Dê personalidade à sua loja. O cliente vai adorar."
                 variant="warning"
                 className="create-store-section"
                 contentClassName="space-y-4"
@@ -2175,7 +2175,7 @@ export function CreateStore() {
             <div ref={planSectionRef} className={`pt-6 border-t border-gray-100 ${currentStep === 4 ? 'motion-safe:animate-[createStoreStepIn_.26s_ease-out]' : 'hidden'}`} onFocusCapture={() => setCurrentStep(4)}>
               <FormSection
                 title="Selecione um plano"
-                subtitle="Comece pelo teste gratuito e escolha o plano ideal depois."
+                subtitle="Comece vendendo hoje. Sem cartão, sem compromisso."
                 variant="success"
                 className="create-store-section"
                 contentClassName="space-y-6"
@@ -2458,7 +2458,7 @@ export function CreateStore() {
             <div className="fixed bottom-0 left-0 z-50 w-full rounded-t-[1.6rem] border border-b-0 border-white/70 bg-white/92 p-2.5 pb-[max(env(safe-area-inset-bottom),0.25rem)] shadow-[0_-24px_70px_-34px_rgba(15,23,42,0.6)] backdrop-blur-xl md:static md:rounded-2xl md:border md:border-slate-200/90 md:p-3 md:shadow-[0_24px_46px_-30px_rgba(15,23,42,0.55)]">
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
                 <div className="hidden sm:block text-[11px] text-slate-500">
-                  Etapa atual <span className="font-semibold text-slate-700">{currentStep} de 4</span>
+                  Passo <span className="font-semibold text-slate-700">{currentStep}/4</span> — quase lá!
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -2476,7 +2476,7 @@ export function CreateStore() {
                       disabled={isPreflightingOwner}
                       className="flex-[1.4] rounded-2xl bg-[linear-gradient(135deg,#0f3b53,#0d4f66,#2c8c9f)] px-4 py-3 text-sm font-black text-white shadow-[0_22px_42px_-24px_rgba(15,59,83,0.65)] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-55 disabled:cursor-not-allowed sm:flex-none"
                     >
-                      {isPreflightingOwner ? 'Validando...' : 'Próximo'}
+                      {isPreflightingOwner ? 'Validando...' : 'Continuar →'}
                     </button>
                   ) : (
                     <button
@@ -2490,7 +2490,7 @@ export function CreateStore() {
                           Criando loja...
                         </span>
                       ) : (
-                        'Criar minha loja'
+                        'Ativar minha loja grátis'
                       )}
                     </button>
                   )}
