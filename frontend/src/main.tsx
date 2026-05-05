@@ -1,3 +1,4 @@
+// Deploy validation trigger - 2026-05-04
 // @ts-nocheck
 import React from 'react';
 import ReactDOM from 'react-dom/client';

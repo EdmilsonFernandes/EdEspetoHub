@@ -1,3 +1,4 @@
+// Deploy validation trigger - 2026-05-04
 import express from 'express';
 import { InMemoryTransporter } from './bus/transporters/in-memory.transporter';
 import { CommandProducer } from './bus/command-producer';

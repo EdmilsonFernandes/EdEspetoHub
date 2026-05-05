@@ -1,3 +1,4 @@
+// Deploy validation trigger - 2026-05-04
 /*
  * Já no Caminho CONFIDENTIAL
  * ------------------
