@@ -131,6 +131,9 @@ export class OrderService
           paidAt: payment.paidAt || null,
           failedAt: payment.failedAt || null,
           updatedAt: payment.updatedAt || null,
+          refundStatus: payment.refundStatus || null,
+          refundAmount: payment.refundAmount ? Number(payment.refundAmount) : null,
+          refundReason: payment.refundReason || null,
         },
       };
     });

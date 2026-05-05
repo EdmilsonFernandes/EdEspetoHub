@@ -143,7 +143,7 @@ export function AdminOrders() {
 
     const storeIdentifier = storeId || storeSlug;
     const unsubscribeOrders = orderService.subscribeAll(storeIdentifier, (list: any[]) => {
-      setOrders((list || []).map((o: any) => ({ ...o, refundStatus: o.refundStatus || o.payment?.refundStatus || null, refundAmount: o.refundAmount || o.payment?.refundAmount || null, refundReason: o.refundReason || o.payment?.refundReason || null })));
+      setOrders((list || []).map((o: any) => ({ ...o, refundStatus: o.refundStatus || o.onlinePayment?.refundStatus || o.payment?.refundStatus || null, refundAmount: o.refundAmount || o.onlinePayment?.refundAmount || o.payment?.refundAmount || null, refundReason: o.refundReason || o.onlinePayment?.refundReason || o.payment?.refundReason || null })));
     });
 
     return () => {
@@ -342,7 +342,7 @@ export function AdminOrders() {
     if (!storeIdentifier) return;
     try {
       const list = await orderService.fetchAll(storeIdentifier);
-      setOrders((list || []).map((o: any) => ({ ...o, refundStatus: o.refundStatus || o.payment?.refundStatus || null, refundAmount: o.refundAmount || o.payment?.refundAmount || null, refundReason: o.refundReason || o.payment?.refundReason || null })));
+      setOrders((list || []).map((o: any) => ({ ...o, refundStatus: o.refundStatus || o.onlinePayment?.refundStatus || o.payment?.refundStatus || null, refundAmount: o.refundAmount || o.onlinePayment?.refundAmount || o.payment?.refundAmount || null, refundReason: o.refundReason || o.onlinePayment?.refundReason || o.payment?.refundReason || null })));
     } catch (error) {
       console.error('Erro ao atualizar pedidos', error);
     }
