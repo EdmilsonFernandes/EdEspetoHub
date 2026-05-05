@@ -2702,7 +2702,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           type="button"
           onClick={() => openCancelOrderModal(order)}
           disabled={updating === order.id}
-          className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition-all hover:bg-rose-100 disabled:opacity-50"
+          className="rounded-2xl border border-rose-200/80 bg-white px-4 py-2.5 text-xs font-bold text-rose-600 shadow-[0_8px_20px_-12px_rgba(225,29,72,0.15)] transition-all hover:bg-rose-50 hover:border-rose-300 active:scale-[0.97] disabled:opacity-50"
         >
           Cancelar pedido
         </button>

@@ -1448,9 +1448,14 @@ export function OrderTracking() {
                       ) : null}
                     </div>
                     {isCancelled && order?.canceledReason ? (
-                      <div className="mt-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3">
-                        <p className="text-xs font-bold uppercase tracking-[0.16em] text-rose-700">Motivo do cancelamento</p>
-                        <p className="mt-1 text-sm text-rose-900">{order.canceledReason}</p>
+                      <div className="mt-3 rounded-2xl border border-rose-200/70 bg-rose-50/80 px-4 py-3">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-rose-600">Cancelado pelo estabelecimento</p>
+                        <p className="mt-1.5 text-sm font-medium text-rose-900 leading-relaxed">{order.canceledReason}</p>
+                      </div>
+                    ) : isCancelled ? (
+                      <div className="mt-3 rounded-2xl border border-rose-200/70 bg-rose-50/80 px-4 py-3">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-rose-600">Pedido cancelado</p>
+                        <p className="mt-1.5 text-sm font-medium text-rose-900 leading-relaxed">Este pedido foi cancelado e não será processado.</p>
                       </div>
                     ) : null}
 

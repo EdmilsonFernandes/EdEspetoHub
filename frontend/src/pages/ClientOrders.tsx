@@ -736,8 +736,13 @@ function OrderCard({
             </div>
           ) : null}
           {isCancelled && String(order.canceledReason || '').trim() && (
-            <div className="border-t border-rose-100 bg-rose-50 px-3 py-2 text-[11px] text-rose-600">
-              <span className="font-semibold">Motivo: </span>{order.canceledReason}
+            <div className="border-t border-rose-100 bg-rose-50/80 px-3 py-2.5 text-[11px] text-rose-700">
+              <span className="font-bold">Cancelado pelo estabelecimento:</span> {order.canceledReason}
+            </div>
+          )}
+          {isCancelled && !String(order.canceledReason || '').trim() && (
+            <div className="border-t border-rose-100 bg-rose-50/80 px-3 py-2.5 text-[11px] text-rose-600">
+              Pedido cancelado
             </div>
           )}
           {isCancelled && ['pix','credito','debito','credit_card','debit_card'].includes(String(order.paymentMethod || order.payment || '').toLowerCase()) && String(order.paymentStatus || '').toUpperCase() === 'PAID' && !order.refundStatus && (
