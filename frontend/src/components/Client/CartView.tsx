@@ -1311,40 +1311,49 @@ export const CartView = ({
               <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1.08fr_0.92fr]">
                 <div className="space-y-4">
                   {isLoggedDeliveryFlow ? (
-                    <div className="rounded-[1.45rem] border border-slate-200/80 bg-white/85 px-4 py-4 text-sm text-slate-600 shadow-[0_16px_30px_-24px_rgba(15,23,42,0.22)]">
+                    <div className="rounded-[1.45rem] border border-slate-100 bg-gradient-to-br from-white to-slate-50/80 px-4 py-4 text-sm text-slate-600 shadow-[0_8px_32px_-12px_rgba(15,23,42,0.10)]">
                       {hasSavedAddress ? (
                         <>
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 mb-1">Entregar em</p>
-                              <p className="font-semibold text-slate-800">{activeSavedAddress?.label || 'Endereço principal'}</p>
+                          <div className="flex items-start gap-3">
+                            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                              <MapPinLine size={18} weight="duotone" />
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => onOpenAddressManager?.()}
-                              className="shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-700 shadow-sm"
-                            >
-                              Trocar
-                            </button>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-slate-400">Entregar em</p>
+                                <button
+                                  type="button"
+                                  onClick={() => onOpenAddressManager?.()}
+                                  className="rounded-full border border-slate-200/80 bg-white px-2.5 py-1 text-[10px] font-bold text-slate-600 shadow-sm hover:bg-slate-50 transition active:scale-[0.97]"
+                                >
+                                  Alterar
+                                </button>
+                              </div>
+                              <p className="mt-1 text-[15px] font-bold text-slate-900 leading-snug">{activeSavedAddress?.label || 'Endereço principal'}</p>
+                              {loggedDeliveryAddressSummary ? (
+                                <p className="mt-1.5 text-[12px] leading-relaxed text-slate-500">{loggedDeliveryAddressSummary}</p>
+                              ) : null}
+                            </div>
                           </div>
-                          {loggedDeliveryAddressSummary ? (
-                            <p className="mt-2 text-xs leading-relaxed text-slate-500">{loggedDeliveryAddressSummary}</p>
-                          ) : null}
                         </>
                       ) : (
                         <>
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-700 mb-1">Endereço obrigatório</p>
-                              <p className="font-semibold text-slate-800">Cadastre um endereço para continuar com entrega.</p>
+                          <div className="flex items-start gap-3">
+                            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                              <MapPinLine size={18} weight="duotone" />
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => onOpenAddressManager?.()}
-                              className="shrink-0 rounded-full border border-amber-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-amber-700 shadow-sm"
-                            >
-                              Cadastrar
-                            </button>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-amber-600">Endereço necessário</p>
+                              <p className="mt-1 text-sm font-semibold text-slate-800 leading-snug">Cadastre um endereço para receber seu pedido.</p>
+                              <button
+                                type="button"
+                                onClick={() => onOpenAddressManager?.()}
+                                className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3.5 py-1.5 text-[11px] font-bold text-amber-700 shadow-sm hover:bg-amber-100 transition active:scale-[0.97]"
+                              >
+                                <MapPinLine size={13} weight="bold" />
+                                Cadastrar endereço
+                              </button>
+                            </div>
                           </div>
                         </>
                       )}
