@@ -249,6 +249,19 @@ Se algum teste falhar:
 
 ---
 
+## DOCUMENTAÇÃO DE SCHEMA (OBRIGATÓRIO)
+
+- Toda alteração que crie, remova ou altere **tabela, coluna, índice, constraint, relação ou DDL manual** no `backend/` deve atualizar a documentação HTML do banco.
+- Arquivo versionado: `backend/docs/database-schema.html`
+- Comando para regenerar: `cd backend && npm run docs:schema`
+- A documentação deve refletir:
+  - schema detectado no banco local
+  - schema de testes/migrations
+  - tabelas criadas fora de `runMigrations.ts` também
+- Se houver drift entre entity, `runMigrations.ts` e banco local, isso deve aparecer na documentação ou ser corrigido no mesmo trabalho.
+
+---
+
 ## FORMATO DE RESPOSTA
 
 - Objetivo:
