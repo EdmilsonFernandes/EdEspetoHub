@@ -2348,6 +2348,11 @@ export const CartView = ({
       <div className={`fixed left-0 right-0 w-full box-border p-4 border-t border-slate-100 bg-white/90 backdrop-blur-md max-w-lg mx-auto z-50 shadow-[0_-14px_28px_-22px_rgba(15,23,42,0.28)] ${isNativePlatform ? "ds-native-nav-dock" : "bottom-0"}`}>
         {useMultiStepFlow ? (
           <>
+            {checkoutStep >= 3 && (
+              <p className="text-[11px] text-slate-400 text-center leading-relaxed mb-2">
+                Pedido processado pelo estabelecimento, responsável por produtos, preparo, preços e entrega.
+              </p>
+            )}
             <button
               onClick={async () => {
                 setCtaPulse(true);
