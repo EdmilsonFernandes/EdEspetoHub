@@ -463,9 +463,15 @@ export class MercadoPagoService {
     if (!response.ok) {
       const errorBody = await response.text().catch(() => '');
       this.log.error('POST refund failed', { status: response.status, body: errorBody });
-      throw new AppError('REFUND-001', 400, {
-        message: `Falha ao processar reembolso no Mercado Pago (${response.status})`,
-      });
+      let message = `Falha ao processar reembolso no Mercado Pago (${response.status})`;
+      if (errorBody.includes('enough available money')) {
+        message = 'Saldo insuficiente na conta Mercado Pago da loja para processar o reembolso. Deposite o valor antes de tentar novamente.';
+      } else if (errorBody.includes('already refunded') || errorBody.includes('refund already')) {
+        message = 'Este pagamento já foi reembolsado anteriormente no Mercado Pago.';
+      } else if (errorBody.includes('not found')) {
+        message = 'Pagamento não encontrado no Mercado Pago. Pode ter expirado ou sido removido.';
+      }
+      throw new AppError('REFUND-001', 400, { message });
     }
     const data = await response.json();
     this.debugLog('POST refund ok', { id: data?.id, status: data?.status });

@@ -449,7 +449,7 @@ export function AdminOrders() {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err?.error || err?.message || 'Falha ao processar reembolso.');
+        throw new Error(err?.details?.message || err?.error || err?.message || 'Falha ao processar reembolso.');
       }
       const data = await res.json();
       setRefundSuccess(data.refundStatus === 'PARTIALLY_REFUNDED' ? 'Reembolso parcial processado.' : 'Reembolso total processado.');
