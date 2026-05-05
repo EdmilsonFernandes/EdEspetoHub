@@ -440,4 +440,35 @@ export class MercadoPagoService {
       expiresAt: pixExpiresAt,
     };
   }
+
+  /**
+   * Refunds a payment (total or partial) via Mercado Pago API.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+   * @date 2026-05-05
+   */
+  async refundPayment(
+    paymentId: string,
+    accessToken: string,
+    amount?: number,
+  ): Promise<{ id: string; status: string }> {
+    const url = `${env.mercadoPago.apiBaseUrl}/v1/payments/${paymentId}/refunds`;
+    const body = amount ? JSON.stringify({ amount }) : undefined;
+    this.debugLog('POST refund', { url, paymentId, amount });
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: buildHeaders(accessToken),
+      ...(body ? { body } : {}),
+    });
+    if (!response.ok) {
+      const errorBody = await response.text().catch(() => '');
+      this.log.error('POST refund failed', { status: response.status, body: errorBody });
+      throw new AppError('REFUND-001', 400, {
+        message: `Falha ao processar reembolso no Mercado Pago (${response.status})`,
+      });
+    }
+    const data = await response.json();
+    this.debugLog('POST refund ok', { id: data?.id, status: data?.status });
+    return { id: String(data?.id || ''), status: String(data?.status || '') };
+  }
 }

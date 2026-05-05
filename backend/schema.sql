@@ -618,6 +618,11 @@ CREATE TABLE IF NOT EXISTS order_payments (
   paid_at TIMESTAMPTZ,
   failed_at TIMESTAMPTZ,
   provider_payload JSONB,
+  refund_status TEXT,
+  refund_amount NUMERIC(10,2),
+  refund_reason TEXT,
+  refunded_at TIMESTAMPTZ,
+  refund_provider_id TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   CONSTRAINT uq_order_payments_order UNIQUE (order_id)

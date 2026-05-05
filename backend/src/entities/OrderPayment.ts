@@ -57,6 +57,21 @@ export class OrderPayment {
   @Column({ name: 'provider_payload', type: 'jsonb', nullable: true })
   providerPayload?: Record<string, any> | null;
 
+  @Column({ name: 'refund_status', type: 'varchar', nullable: true })
+  refundStatus?: string | null;
+
+  @Column({ name: 'refund_amount', type: 'numeric', precision: 10, scale: 2, nullable: true })
+  refundAmount?: number | null;
+
+  @Column({ name: 'refund_reason', type: 'text', nullable: true })
+  refundReason?: string | null;
+
+  @Column({ name: 'refunded_at', type: 'timestamptz', nullable: true })
+  refundedAt?: Date | null;
+
+  @Column({ name: 'refund_provider_id', type: 'varchar', nullable: true })
+  refundProviderId?: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 

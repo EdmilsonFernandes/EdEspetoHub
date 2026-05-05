@@ -1,6 +1,16 @@
 const isAbsoluteUrl = (value: string) =>
   /^https?:\/\//i.test(value) || /^data:|^blob:/i.test(value);
 
+const publicUploadsBaseUrl = (import.meta.env.VITE_PUBLIC_UPLOADS_BASE_URL || '').trim().replace(/\/+$/, '');
+const publicUploadPrefixes = [
+  '/uploads/products/',
+  '/uploads/logos/',
+  '/uploads/condominiums/',
+  '/uploads/payment/',
+];
+
+const isPublicUploadPath = (value: string) => publicUploadPrefixes.some((prefix) => value.startsWith(prefix));
+
 /**
  * Resolve a URL de um asset (imagem, upload, etc) para garantir que funcione
  * tanto na Web quanto no APK (Android/iOS).
@@ -20,6 +30,15 @@ export const resolveAssetUrl = (value?: string) => {
 
   // 1. Se for uma URL absoluta
   if (isAbsoluteUrl(value)) {
+    try {
+      const parsed = new URL(value);
+      if (publicUploadsBaseUrl && isPublicUploadPath(parsed.pathname)) {
+        return `${publicUploadsBaseUrl}${parsed.pathname}${parsed.search}`;
+      }
+    } catch {
+      // Fallback to the existing normalization logic below.
+    }
+
     // Se for um dos nossos domínios, garante HTTPS, domínio novo e REMOVE 'www.'
     if (value.includes('janocaminho.com.br') || value.includes('janocaminho.com.br')) {
       let normalized = value.replace(/^http:\/\//i, 'https://');
@@ -32,6 +51,10 @@ export const resolveAssetUrl = (value?: string) => {
 
   // 2. Se chegamos aqui, a URL é relativa (ex: /uploads/... ou /imagem.jpg)
   const path = value.startsWith('/') ? value : `/${value}`;
+
+  if (publicUploadsBaseUrl && isPublicUploadPath(path)) {
+    return `${publicUploadsBaseUrl}${path}`;
+  }
   
   // Lista de arquivos que sabemos que são LOCAIS do App (estão na pasta public)
   const isLocalAsset = path.startsWith('/icons/') || 

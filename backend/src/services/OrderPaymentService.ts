@@ -335,4 +335,52 @@ export class OrderPaymentService {
     }
     return payload;
   }
+
+  /**
+   * Processes a refund for a cancelled order's online payment.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+   * @date 2026-05-05
+   */
+  async refundOrder(
+    orderId: string,
+    storeId: string,
+    reason: string,
+    amount?: number,
+  ): Promise<{ refundStatus: string; refundAmount: number; refundProviderId: string }> {
+    const repo = AppDataSource.getRepository(OrderPayment);
+    const orderPayment = await repo.findOne({ where: { orderId } });
+    if (!orderPayment) throw new AppError('REFUND-010', 404, { message: 'Pagamento não encontrado para este pedido.' });
+    if (orderPayment.storeId !== storeId) throw new AppError('REFUND-011', 403, { message: 'Acesso negado.' });
+    if (orderPayment.paymentStatus !== 'PAID') {
+      throw new AppError('REFUND-012', 400, { message: 'Só é possível reembolsar pagamentos confirmados.' });
+    }
+    if (orderPayment.refundStatus === 'REFUNDED' || orderPayment.refundStatus === 'PARTIALLY_REFUNDED') {
+      throw new AppError('REFUND-013', 400, { message: 'Este pagamento já foi reembolsado.' });
+    }
+    if (!orderPayment.providerId) {
+      throw new AppError('REFUND-014', 400, { message: 'ID do pagamento no provedor não encontrado.' });
+    }
+
+    const accessToken = await this.accountService.getActiveAccessToken(storeId);
+    if (!accessToken) {
+      throw new AppError('REFUND-015', 400, { message: 'Conta Mercado Pago não conectada ou token indisponível.' });
+    }
+
+    const refundAmount = amount && amount < Number(orderPayment.amount) ? amount : undefined;
+    const result = await this.mercadoPago.refundPayment(orderPayment.providerId, accessToken, refundAmount);
+
+    const finalAmount = refundAmount || Number(orderPayment.amount);
+    const refundStatus = refundAmount ? 'PARTIALLY_REFUNDED' : 'REFUNDED';
+
+    await repo.update(orderPayment.id, {
+      refundStatus,
+      refundAmount: finalAmount,
+      refundReason: reason,
+      refundedAt: new Date(),
+      refundProviderId: result.id,
+    });
+
+    return { refundStatus, refundAmount: finalAmount, refundProviderId: result.id };
+  }
 }

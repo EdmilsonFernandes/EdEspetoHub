@@ -76,6 +76,7 @@ export function createProxyRoutes(): Router {
     r.get('/stores/:storeId/orders/queue', authRequired, forward);
     r.get('/stores/:storeId/orders/:orderId/payment-audit', authRequired, forward);
     r.post('/stores/slug/:slug/orders', authOptional, forward);
+    r.post('/stores/:storeId/orders/:orderId/refund', authRequired, forward);
     r.get('/stores/slug/:slug/orders', authRequired, forward);
     r.get('/stores/slug/:slug/orders/queue', authRequired, forward);
     // Order status/items (not store-scoped)

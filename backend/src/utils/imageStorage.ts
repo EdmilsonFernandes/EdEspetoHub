@@ -12,25 +12,15 @@
  */
 
 import fs from 'fs/promises';
-import path from 'path';
-
-const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
-/**
- * Handles resolve target dir.
- *
- * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
- * @date 2025-12-22
- */
-const resolveTargetDir = (folder: string) => path.join(UPLOADS_DIR, folder);
-/**
- * Ensures dir.
- *
- * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
- * @date 2025-12-22
- */
-const ensureDir = async (dir: string) => {
-  await fs.mkdir(dir, { recursive: true });
-};
+import {
+  ensureLocalUploadDir,
+  inferContentTypeFromFilename,
+  resolveLocalUploadPath,
+  resolveUploadRelativePath,
+  shouldWritePublicUploadToS3,
+  shouldWriteUploadToLocal,
+  uploadPublicObjectToS3,
+} from './objectStorage';
 
 export const saveBase64Image = async (
   data?: string | null,
@@ -43,14 +33,18 @@ export const saveBase64Image = async (
   const mimeMatch = data.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,/);
   const extension = mimeMatch?.[1]?.split('/')?.[1] || 'png';
 
-  const targetDir = resolveTargetDir(folder);
-  await ensureDir(targetDir);
-
   const filename = `${prefix}-${Date.now()}-${Math.round(Math.random() * 1e6)}.${extension}`;
-  const filePath = path.join(targetDir, filename);
-
   const buffer = Buffer.from(base64Content, 'base64');
-  await fs.writeFile(filePath, buffer);
+  const relativePath = resolveUploadRelativePath(folder, filename);
 
-  return `/uploads/${folder}/${filename}`;
+  if (shouldWriteUploadToLocal(folder)) {
+    await ensureLocalUploadDir(folder);
+    await fs.writeFile(resolveLocalUploadPath(relativePath), buffer);
+  }
+
+  if (shouldWritePublicUploadToS3(folder)) {
+    await uploadPublicObjectToS3(relativePath, buffer, inferContentTypeFromFilename(filename));
+  }
+
+  return relativePath;
 };

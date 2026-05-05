@@ -31,6 +31,13 @@ const listEnv = (name: string) => {
     .filter(Boolean);
 };
 
+const normalizeEnum = <T extends string>(value: string | undefined, allowed: readonly T[], fallback: T): T => {
+  const normalized = String(value || '').trim().toLowerCase();
+  return (allowed as readonly string[]).includes(normalized) ? (normalized as T) : fallback;
+};
+
+const trimTrailingSlash = (value: string) => value.replace(/\/+$/, '');
+
 const expandWebOrigins = (origin: string) => {
   const normalized = String(origin || '').trim();
   if (!normalized) return [] as string[];
@@ -70,6 +77,9 @@ const defaultCorsOrigins = [
   'capacitor://localhost',
   'ionic://localhost',
 ];
+
+const defaultPublicUploadFolders = ['products', 'logos', 'condominiums', 'payment'];
+const configuredPublicUploadFolders = listEnv('PUBLIC_UPLOADS_FOLDERS').map((value) => value.toLowerCase());
 
 export const env = {
   port: process.env.PORT ? Number(process.env.PORT) : 4000,
@@ -198,5 +208,13 @@ export const env = {
       process.env.REQUIRE_STRICT_RUNTIME_VALIDATION === 'true' ||
       Boolean(process.env.SSM_PARAMETER_NAME) ||
       /^https:\/\//i.test(appUrl),
+  },
+  storage: {
+    publicUploadsMode: normalizeEnum(process.env.PUBLIC_UPLOADS_STORAGE_MODE, ['local', 'hybrid', 's3'], 'local'),
+    publicUploadsS3Bucket: process.env.PUBLIC_UPLOADS_S3_BUCKET || '',
+    publicUploadsS3Region: process.env.PUBLIC_UPLOADS_S3_REGION || process.env.AWS_REGION || '',
+    publicUploadsS3Prefix: trimTrailingSlash(process.env.PUBLIC_UPLOADS_S3_PREFIX || 'uploads').replace(/^\/+/, ''),
+    publicUploadsBaseUrl: trimTrailingSlash(process.env.PUBLIC_UPLOADS_BASE_URL || ''),
+    publicFolders: configuredPublicUploadFolders.length ? configuredPublicUploadFolders : defaultPublicUploadFolders,
   },
 };

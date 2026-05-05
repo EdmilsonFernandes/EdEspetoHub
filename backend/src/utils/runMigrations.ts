@@ -304,15 +304,19 @@ export async function runMigrations() {
   await AppDataSource.query(`
     DO $$
     BEGIN
-      IF NOT EXISTS (
-        SELECT 1
-        FROM pg_constraint
-        WHERE conname = 'chk_store_settings_prep_base_minutes_min'
-      ) THEN
-        ALTER TABLE store_settings
-        ADD CONSTRAINT chk_store_settings_prep_base_minutes_min
-        CHECK (prep_base_minutes IS NULL OR prep_base_minutes >= 5);
-      END IF;
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1
+          FROM pg_constraint
+          WHERE conname = 'chk_store_settings_prep_base_minutes_min'
+        ) THEN
+          ALTER TABLE store_settings
+          ADD CONSTRAINT chk_store_settings_prep_base_minutes_min
+          CHECK (prep_base_minutes IS NULL OR prep_base_minutes >= 5);
+        END IF;
+      EXCEPTION
+        WHEN duplicate_object THEN NULL;
+      END;
     END $$;
   `);
   await AppDataSource.query(`
@@ -429,14 +433,18 @@ export async function runMigrations() {
   await AppDataSource.query(`
     DO $$
     BEGIN
-      IF NOT EXISTS (
-        SELECT 1 FROM pg_constraint
-        WHERE conname = 'chk_orders_fulfillment_mode'
-      ) THEN
-        ALTER TABLE orders
-        ADD CONSTRAINT chk_orders_fulfillment_mode
-        CHECK (fulfillment_mode IN ('distance', 'postal'));
-      END IF;
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint
+          WHERE conname = 'chk_orders_fulfillment_mode'
+        ) THEN
+          ALTER TABLE orders
+          ADD CONSTRAINT chk_orders_fulfillment_mode
+          CHECK (fulfillment_mode IN ('distance', 'postal'));
+        END IF;
+      EXCEPTION
+        WHEN duplicate_object THEN NULL;
+      END;
     END $$;
   `);
   await AppDataSource.query(`
@@ -1881,43 +1889,55 @@ export async function runMigrations() {
   await AppDataSource.query(`
     DO $$
     BEGIN
-      IF NOT EXISTS (
-        SELECT 1
-          FROM pg_constraint
-         WHERE conname = 'chk_customer_security_blocks_status'
-      ) THEN
-        ALTER TABLE customer_security_blocks
-          ADD CONSTRAINT chk_customer_security_blocks_status
-          CHECK (status IN ('active', 'expired', 'revoked'));
-      END IF;
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1
+            FROM pg_constraint
+           WHERE conname = 'chk_customer_security_blocks_status'
+        ) THEN
+          ALTER TABLE customer_security_blocks
+            ADD CONSTRAINT chk_customer_security_blocks_status
+            CHECK (status IN ('active', 'expired', 'revoked'));
+        END IF;
+      EXCEPTION
+        WHEN duplicate_object THEN NULL;
+      END;
     END $$;
   `);
   await AppDataSource.query(`
     DO $$
     BEGIN
-      IF NOT EXISTS (
-        SELECT 1
-          FROM pg_constraint
-         WHERE conname = 'chk_customer_security_blocks_type'
-      ) THEN
-        ALTER TABLE customer_security_blocks
-          ADD CONSTRAINT chk_customer_security_blocks_type
-          CHECK (block_type IN ('far_pickup_abuse', 'payment_abuse', 'identity_risk', 'manual_review', 'chargeback_risk'));
-      END IF;
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1
+            FROM pg_constraint
+           WHERE conname = 'chk_customer_security_blocks_type'
+        ) THEN
+          ALTER TABLE customer_security_blocks
+            ADD CONSTRAINT chk_customer_security_blocks_type
+            CHECK (block_type IN ('far_pickup_abuse', 'payment_abuse', 'identity_risk', 'manual_review', 'chargeback_risk'));
+        END IF;
+      EXCEPTION
+        WHEN duplicate_object THEN NULL;
+      END;
     END $$;
   `);
   await AppDataSource.query(`
     DO $$
     BEGIN
-      IF NOT EXISTS (
-        SELECT 1
-          FROM pg_constraint
-         WHERE conname = 'chk_customer_security_blocks_severity'
-      ) THEN
-        ALTER TABLE customer_security_blocks
-          ADD CONSTRAINT chk_customer_security_blocks_severity
-          CHECK (severity IN ('soft', 'hard'));
-      END IF;
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1
+            FROM pg_constraint
+           WHERE conname = 'chk_customer_security_blocks_severity'
+        ) THEN
+          ALTER TABLE customer_security_blocks
+            ADD CONSTRAINT chk_customer_security_blocks_severity
+            CHECK (severity IN ('soft', 'hard'));
+        END IF;
+      EXCEPTION
+        WHEN duplicate_object THEN NULL;
+      END;
     END $$;
   `);
   await AppDataSource.query(`
@@ -2016,5 +2036,15 @@ export async function runMigrations() {
     SET delivery_radius_km = 5
     WHERE delivery_radius_km IS NULL
       AND COALESCE(order_types, '[]'::jsonb) @> '["delivery"]'::jsonb;
+  `);
+
+  // --- Refund columns on order_payments ---
+  await AppDataSource.query(`
+    ALTER TABLE order_payments
+    ADD COLUMN IF NOT EXISTS refund_status TEXT DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS refund_amount NUMERIC(10,2) DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS refund_reason TEXT DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS refunded_at TIMESTAMPTZ DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS refund_provider_id TEXT DEFAULT NULL;
   `);
 }

@@ -206,7 +206,39 @@ export class OrderController {
       });
       return respondWithError(req, res, error, 400);
     }
+
   }
+  /**
+   * Processes a refund for a cancelled order.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+   * @date 2026-05-05
+   */
+  static async refund(req: Request, res: Response) {
+    try {
+      const { storeId, orderId } = req.params;
+      const { reason, amount } = req.body || {};
+      if (!reason || !String(reason).trim()) {
+        return res.status(400).json({ error: 'Motivo do reembolso é obrigatório.' });
+      }
+      const result = await orderPaymentService.refundOrder(
+        orderId,
+        storeId,
+        String(reason).trim(),
+        amount ? Number(amount) : undefined,
+      );
+      return res.status(200).json(result);
+    } catch (error: any) {
+      log.warn('Order refund failed', {
+        storeId: req.params.storeId,
+        orderId: req.params.orderId,
+        userId: req.auth?.sub,
+        error,
+      });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
 
 
 

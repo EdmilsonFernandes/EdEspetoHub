@@ -235,6 +235,7 @@ routes.get('/stores/:storeId/orders/queue', requireAuth, requireRole('ADMIN', 'O
 routes.get('/stores/slug/:slug/orders/queue', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.listQueueBySlug);
 routes.get('/stores/:storeId/orders/:orderId/payment-audit', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.getPaymentAudit);
 routes.get('/stores/:storeId/orders', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.list);
+routes.post('/stores/:storeId/orders/:orderId/refund', requireAuth, requireRole('ADMIN', 'LOJISTA'), OrderController.refund);
 routes.get('/stores/slug/:slug/orders', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.listBySlug);
 routes.patch('/orders/:orderId/status', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.updateStatus);
 routes.patch('/orders/:orderId/fulfillment-mode', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.updateFulfillmentMode);
