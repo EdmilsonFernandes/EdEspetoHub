@@ -6,6 +6,7 @@ import { customerAccountService } from '../services/customerAccountService';
 import { ADMIN_SESSION_EVENT, CUSTOMER_SESSION_EVENT, MOTOBOY_SESSION_EVENT } from '../services/nativeBiometricService';
 import { motoboyService } from '../services/motoboyService';
 import { storePushService } from '../services/storePushService';
+import { notificationStorage } from '../services/notificationStorage';
 
 const MOBILE_PUSH_ENABLED =
   String(
@@ -312,10 +313,25 @@ const bootstrapPushNotifications = async () => {
     });
 
     await PushNotifications.addListener('pushNotificationActionPerformed', (event) => {
+      // Save to storage when user taps a background notification
+      const title = String(event?.notification?.title || event?.notification?.data?.title || '').trim();
+      const body = String(event?.notification?.body || event?.notification?.data?.body || '').trim();
+      const url = String(event?.notification?.data?.url || '').trim();
+      if (title || body) {
+        notificationStorage.add({ title: title || 'Notificação', body, url: url || undefined });
+      }
       navigateFromPayload(event?.notification?.data);
     });
 
     await PushNotifications.addListener('pushNotificationReceived', (notification) => {
+      // Save to notification storage for the notifications page
+      const title = String(notification?.title || notification?.data?.title || '').trim();
+      const body = String(notification?.body || notification?.data?.body || '').trim();
+      const url = String(notification?.data?.url || '').trim();
+      if (title || body) {
+        notificationStorage.add({ title: title || 'Notificação', body, url: url || undefined });
+      }
+
       if (isStoreNewOrderPush(notification?.data)) {
         void playStoreOrderForegroundAlert();
         return;
