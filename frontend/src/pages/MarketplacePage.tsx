@@ -2602,7 +2602,7 @@ export function MarketplacePage() {
                     <p className="truncate text-[9.5px] font-black uppercase tracking-[0.2em] text-slate-400">
                       {isCustomerLogged
                         ? `${(() => { const h = new Date().getHours(); return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'; })()}, ${customerDisplayName.split(' ')[0]} 👋`
-                        : `${(() => { const h = new Date().getHours(); return h < 12 ? '☀️ Bom dia' : h < 18 ? '🌤️ Boa tarde' : '🌙 Boa noite'; })()} — explore as feiras`}
+                        : `${(() => { const h = new Date().getHours(); return h < 12 ? '☀️ Bom dia' : h < 18 ? '🌤️ Boa tarde' : '🌙 Boa noite'; })()} — o que vai pedir hoje?`}
                     </p>
                   </div>
                   <button
@@ -3025,6 +3025,7 @@ export function MarketplacePage() {
           {/* Seção Categorias Premium Squircle */}
           <section className="relative mb-6" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
             <div className="-mx-4 mb-6 flex snap-x snap-mandatory gap-3 overflow-x-auto no-scrollbar px-4 py-1.5">
+            <p className="mb-2 px-1 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Categorias</p>
               <button
                 type="button"
                 className="group flex min-w-[58px] shrink-0 snap-start cursor-pointer flex-col items-center gap-1.5 active:scale-[0.97] transition-transform duration-150 ease-out"
@@ -3747,6 +3748,7 @@ export function MarketplacePage() {
               <House size={18} weight={quickFilter === 'all' && !condominiumPickerOpen && !selectedCondominium ? 'fill' : 'duotone'} />
             </span>
             <span>Início</span>
+                  <span className="h-[3px] w-4 rounded-full bg-[#336886]" />
           </button>
           <button
             type="button"
@@ -4220,6 +4222,7 @@ export function MarketplacePage() {
                     <House size={18} weight="duotone" />
                   </span>
                   <span>Início</span>
+                  <span className="h-[3px] w-4 rounded-full bg-[#336886]" />
                 </button>
                 <button
                   type="button"
