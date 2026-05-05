@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   ArrowRight,
+  ArrowCounterClockwise,
   ArrowsClockwise,
   Bell,
   Buildings,
@@ -705,6 +706,15 @@ export function LandingPage() {
             </div>
             <p className="text-left text-xs font-semibold leading-5 text-slate-600">
               Autorização OAuth segura — o dinheiro cai direto na conta do lojista, sem repasse manual.
+            </p>
+          </div>
+
+          <div className="mx-auto mt-3 flex max-w-sm items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/60 px-4 py-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white">
+              <ArrowCounterClockwise size={16} weight="bold" />
+            </div>
+            <p className="text-left text-xs font-semibold leading-5 text-emerald-800">
+              Reembolso automático via Pix — cancele o pedido e devolva o valor ao cliente com um clique.
             </p>
           </div>
 
