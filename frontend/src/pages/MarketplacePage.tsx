@@ -2409,7 +2409,7 @@ export function MarketplacePage() {
     window.addEventListener('focus', onFocus);
     return () => { clearInterval(interval); window.removeEventListener('focus', onFocus); };
   }, []);
-  const hubNotificationCount = visibleActiveOrders.length + (isCustomerLogged ? 0 : visibleActiveAnonymousOrders.length) + storageUnread;
+  const hubNotificationCount = storageUnread;
 
   const handleHubNotificationClick = useCallback(() => {
     navigate('/notificacoes');
