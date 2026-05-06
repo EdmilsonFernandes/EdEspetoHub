@@ -1401,7 +1401,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         }
         const audio = notificationAudioRef.current;
         audio.currentTime = 0;
-        audio.play().catch(() => {
+        audio.play().then(() => {
+          setTimeout(() => { audio.pause(); audio.currentTime = 0; }, 1500);
+        }).catch(() => {
           const context = audioContextRef.current || new AudioContext();
           audioContextRef.current = context;
           if (context.state === 'suspended') return;
