@@ -514,7 +514,7 @@ export function ProfileDrawer({
                 <section className="relative overflow-hidden rounded-[1.55rem] border border-[#336886]/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(243,248,251,0.96)_100%)] p-3.5 shadow-[0_18px_34px_-26px_rgba(51,104,134,0.24)]">
                   <div className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-[#336886]/10 blur-3xl" />
                   <div className="relative mb-2.5">
-                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">{currentIdentity.switchTitle}</p>
+                    <p className="text-[11px] font-bold tracking-tight text-slate-400">{currentIdentity.switchTitle}</p>
                   </div>
 
                   <div className="relative grid gap-2">
@@ -583,7 +583,7 @@ export function ProfileDrawer({
 
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
           <nav className="space-y-2">
-            <p className="mb-3 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 px-1">
+            <p className="mb-3 text-[11px] font-bold tracking-tight text-slate-400 px-1">
               {activeContext === 'client'
                 ? 'Área do Cliente'
                 : activeContext === 'store'
