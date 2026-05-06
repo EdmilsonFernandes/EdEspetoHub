@@ -2366,7 +2366,7 @@ export function MarketplacePage() {
     navigate('/cliente?mode=login&next=/cliente/pedidos&hub=1&bio=1');
   }, [navigate, isCustomerLogged, setCustomerSession]);
 
-  const [activeOrders, setActiveOrders] = useState<any[]>([]);
+  const [activeOrders, setActiveOrders] = useState<any[]>([]); void activeOrders;
 
   const clearAnonymousOrderCache = useCallback((orderIds: string[]) => {
     const ids = orderIds.map((item) => String(item || '').trim()).filter(Boolean);
