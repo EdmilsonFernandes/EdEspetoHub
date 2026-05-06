@@ -29,6 +29,7 @@ type DrawerAction = {
   tone?: 'default' | 'danger';
   iconColor?: string;
   bgColor?: string;
+  badge?: number;
 };
 
 type ProfileDrawerProps = {
@@ -97,6 +98,7 @@ export function ProfileDrawer({
   const [isMotoboy, setIsMotoboy] = useState(false);
   const [storeSlug, setStoreSlug] = useState<string | null>(null);
   const [accessPickerOpen, setAccessPickerOpen] = useState(false);
+  const [notifBadge, setNotifBadge] = useState(0);
   const [highlightFirstAccess, setHighlightFirstAccess] = useState(false);
   const [accessPickerMode, setAccessPickerMode] = useState<'login' | 'register'>('login');
   const [savedAccessProfiles, setSavedAccessProfiles] = useState<{
@@ -111,6 +113,7 @@ export function ProfileDrawer({
 
   useEffect(() => {
     if (!isOpen) return;
+    fetch("/api/customer/notifications").then(r => r.ok ? r.json() : null).then(d => setNotifBadge(d?.unreadCount || 0)).catch(() => {});
     try {
       const adminRaw = localStorage.getItem('adminSession');
       const motoboyRaw = localStorage.getItem('motoboySession');
@@ -294,7 +297,7 @@ export function ProfileDrawer({
   const clientActions: DrawerAction[] = [
     { id: 'account', label: 'Minha Conta', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-[#336886]', bgColor: 'bg-[#336886]/10' },
     { id: 'orders', label: 'Meus pedidos', icon: <Receipt size={22} weight="duotone" />, onClick: onOpenOrders || onOpenAccount, iconColor: 'text-[#336886]', bgColor: 'bg-[#336886]/10' },
-    { id: 'notifications', label: 'Notificações', icon: <BellRinging size={22} weight="duotone" />, onClick: () => { drawerNavigate('/notificacoes'); }, iconColor: 'text-amber-600', bgColor: 'bg-amber-50' },
+    { id: 'notifications', label: 'Notificações', icon: <BellRinging size={22} weight="duotone" />, onClick: () => { drawerNavigate('/notificacoes'); }, iconColor: 'text-amber-600', bgColor: 'bg-amber-50', badge: notifBadge },
     { id: 'settings', label: 'Configurações', icon: <GearSix size={22} weight="duotone" />, onClick: onOpenSettings, iconColor: 'text-violet-600', bgColor: 'bg-violet-50' },
     { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
     { id: 'help', label: 'Ajuda e Atendimento', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
@@ -618,7 +621,7 @@ export function ProfileDrawer({
                   {action.icon}
                 </div>
                 <div className="min-w-0 flex-1 text-left">
-                  <span className={`block text-[15px] leading-tight ${action.tone === 'danger' ? 'font-black text-rose-700' : 'font-semibold'}`}>{action.label}</span>
+                  <span className={`block text-[15px] leading-tight ${action.tone === 'danger' ? 'font-black text-rose-700' : 'font-semibold'}`}>{action.label}{action.badge ? <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-bold text-white">{action.badge > 9 ? "9+" : action.badge}</span> : null}</span>
                   {getActionHelper(action.id) ? (
                     <span className={`mt-0.5 block text-[11px] font-semibold ${action.tone === 'danger' ? 'text-rose-700/46' : 'text-slate-500'}`}>
                       {getActionHelper(action.id)}

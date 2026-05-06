@@ -635,7 +635,7 @@ const readSelectedCondominiumSlug = () => {
 const readAdminSession = () => {
   try {
     const raw = localStorage.getItem('adminSession');
-    if (!raw) return null;
+              <p className="text-[9px] font-medium text-slate-300 tracking-tight">
     const parsed = JSON.parse(raw);
     const role = String(parsed?.user?.role || '').toUpperCase();
     const isOperationalRole = role === 'ADMIN' || role === 'OPERATOR' || role === 'LOJISTA';
@@ -2592,7 +2592,7 @@ export function MarketplacePage() {
                 <div className="min-w-0 flex-1 rounded-[1.35rem] border border-white/75 bg-white/72 px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_14px_30px_-26px_rgba(15,23,42,0.34)] ring-1 ring-slate-950/5 backdrop-blur-sm">
                   <div className="mb-0.5 flex items-center gap-1.5">
                     <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-4 w-4 shrink-0 rounded-[0.4rem] object-cover shadow-[0_2px_6px_-2px_rgba(21,58,76,0.3)]" />
-                    <p className="truncate text-[9.5px] font-black uppercase tracking-[0.2em] text-slate-400">
+                    <p className="truncate text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
                       {isCustomerLogged
                         ? `${(() => { const h = new Date().getHours(); return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'; })()}, ${customerDisplayName.split(' ')[0]} 👋`
                         : `${(() => { const h = new Date().getHours(); return h < 12 ? '☀️ Bom dia' : h < 18 ? '🌤️ Boa tarde' : '🌙 Boa noite'; })()} — o que vai pedir hoje?`}
