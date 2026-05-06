@@ -247,22 +247,21 @@ export function ProfileDrawer({
   const currentIdentity =
     activeContext === 'client'
       ? {
-          eyebrow: 'Conta conectada',
+          eyebrow: 'Minha conta',
           title: String(userName || savedAccessProfiles.customer.name || 'Cliente').trim() || 'Cliente',
           email: String(userEmail || savedAccessProfiles.customer.email || '').trim(),
           imageUrl: profileImageUrl || null,
           icon: <UserCircle size={36} weight="duotone" />,
           iconShell: 'rounded-2xl bg-gradient-to-br from-white to-slate-100 text-slate-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_18px_32px_-24px_rgba(15,23,42,0.35)] ring-1 ring-slate-100',
           badges: [
-            { label: 'Cliente no hub', tone: 'success' as const },
-            { label: 'Conta e pedidos', tone: 'neutral' as const },
+            { label: 'Conectado', tone: 'success' as const },
           ],
-          switchTitle: 'Abrir outra área',
-          switchHint: 'Sua conta de cliente segue ativa no hub enquanto você entra na operação.',
+          switchTitle: 'Trocar perfil',
+          switchHint: '',
         }
       : activeContext === 'store'
         ? {
-            eyebrow: 'Operação conectada',
+            eyebrow: 'Minha loja',
             title: String(savedAccessProfiles.admin.name || 'Lojista').trim() || 'Lojista',
             email: String(savedAccessProfiles.admin.email || '').trim(),
             imageUrl: null,
@@ -270,14 +269,13 @@ export function ProfileDrawer({
             iconShell: 'rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] text-white shadow-[0_18px_30px_-18px_rgba(51,104,134,0.45)] ring-2 ring-[#336886]/12',
             badges: [
               { label: 'Lojista', tone: 'brand' as const },
-              { label: 'Operação da loja', tone: 'neutral' as const },
             ],
-            switchTitle: 'Trocar acesso',
-            switchHint: 'Cliente e entrega ficam disponíveis como atalhos, sem misturar com o menu da loja.',
+            switchTitle: 'Trocar perfil',
+            switchHint: '',
           }
         : activeContext === 'motoboy'
           ? {
-              eyebrow: 'Entrega conectada',
+              eyebrow: 'Entregas',
               title: String(savedAccessProfiles.motoboy.name || 'Entregador').trim() || 'Entregador',
               email: String(savedAccessProfiles.motoboy.email || '').trim(),
               imageUrl: null,
@@ -285,10 +283,9 @@ export function ProfileDrawer({
               iconShell: 'rounded-2xl bg-[linear-gradient(135deg,#0f172a,#334155)] text-white shadow-[0_18px_30px_-18px_rgba(15,23,42,0.45)] ring-2 ring-slate-300/12',
               badges: [
                 { label: 'Entregador', tone: 'dark' as const },
-                { label: 'Painel de entregas', tone: 'neutral' as const },
               ],
-              switchTitle: 'Trocar acesso',
-              switchHint: 'Abra cliente ou loja quando precisar, mantendo o foco na área de entregas.',
+              switchTitle: 'Trocar perfil',
+              switchHint: '',
             }
           : null;
 
@@ -516,10 +513,8 @@ export function ProfileDrawer({
               {quickSwitchAccess.length > 0 ? (
                 <section className="relative overflow-hidden rounded-[1.55rem] border border-[#336886]/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(243,248,251,0.96)_100%)] p-3.5 shadow-[0_18px_34px_-26px_rgba(51,104,134,0.24)]">
                   <div className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-[#336886]/10 blur-3xl" />
-                  <div className="relative mb-3">
-                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Alternar acesso</p>
-                    <p className="mt-0.5 text-sm font-black leading-tight text-slate-950">{currentIdentity.switchTitle}</p>
-                    <p className="mt-1 text-[11px] font-semibold leading-snug text-slate-500">{currentIdentity.switchHint}</p>
+                  <div className="relative mb-2.5">
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">{currentIdentity.switchTitle}</p>
                   </div>
 
                   <div className="relative grid gap-2">
@@ -528,7 +523,7 @@ export function ProfileDrawer({
                         key={item.id}
                         type="button"
                         onClick={item.onClick}
-                        className={`group relative flex min-h-[5rem] w-full items-start gap-3 rounded-[1.2rem] border px-3 py-3 pr-9 text-left transition-all active:scale-[0.98] ${item.shell}`}
+                        className={`group relative flex w-full items-center gap-3 rounded-[1.2rem] border px-3 py-3 pr-9 text-left transition-all active:scale-[0.98] ${item.shell}`}
                       >
                         <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-[1rem] shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] transition-transform group-active:scale-95 ${item.iconClass}`}>
                           {item.icon}
@@ -536,10 +531,6 @@ export function ProfileDrawer({
                         <span className="min-w-0 flex-1 pt-0.5">
                           <span className="block truncate text-[14px] font-black leading-tight">{item.label}</span>
                           <span className="mt-0.5 block truncate text-[11px] font-semibold text-slate-600">{item.description}</span>
-                          <span className={`mt-2 inline-flex max-w-full items-center gap-1.5 rounded-full border border-white/80 bg-white/72 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] shadow-sm ${item.stateClass}`}>
-                            <span className="shrink-0">{item.stateIcon}</span>
-                            <span className="truncate">{item.state}</span>
-                          </span>
                         </span>
                         <CaretRight size={14} weight="bold" className="absolute right-3 top-3 text-slate-400/80 transition-transform group-active:translate-x-0.5" />
                       </button>
