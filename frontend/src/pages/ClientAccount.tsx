@@ -608,10 +608,6 @@ export function ClientAccount() {
               <section className="relative overflow-hidden rounded-[2.45rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(244,248,252,0.96)_56%,rgba(255,255,255,0.94)_100%)] p-5 shadow-[0_26px_60px_-42px_rgba(15,23,42,0.28)]">
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,rgba(51,104,134,0.16),transparent_72%)]" />
                 <div className="relative flex flex-col items-center text-center space-y-4">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-[#153A4C]/10 bg-white/78 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-[#153A4C] shadow-[0_14px_30px_-24px_rgba(21,58,76,0.42)]">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(34,197,94,0.14)]" />
-                    Área pessoal
-                  </div>
                   <div className="relative">
                     <div className="h-24 w-24 overflow-hidden rounded-[2rem] border-4 border-slate-50 shadow-md">
                       {cachedProfileImage ? (
@@ -652,14 +648,7 @@ export function ClientAccount() {
                   <div>
                     <h2 className="text-xl font-black text-slate-900">{me?.fullName || 'Usuário'}</h2>
                     <p className="text-sm font-bold text-slate-400">{me?.email}</p>
-                    <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">
-                      Centralize seu perfil, endereços e preferências do aplicativo no mesmo lugar.
-                    </p>
                     <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-emerald-700">
-                        <CheckCircle size={11} weight="fill" />
-                        Conta ativa
-                      </span>
                       {normalizedPhoneLabel ? (
                         <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/90 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600">
                           <Phone size={11} weight="duotone" />
@@ -816,15 +805,9 @@ export function ClientAccount() {
                         <CaretRight size={16} className="mt-1 text-slate-300 transition-colors group-hover:text-slate-500" />
                       </div>
 
-                      <div className="flex items-center justify-between rounded-[1.4rem] border border-slate-100 bg-slate-50/80 px-4 py-3">
-                        <div>
-                          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Gestão completa</p>
-                          <p className="mt-1 text-xs font-bold text-slate-600">
-                            {addresses.length} {addresses.length === 1 ? 'endereço salvo' : 'endereços salvos'} • editar, excluir e trocar principal
-                          </p>
-                        </div>
-                        <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-slate-700">
-                          Gerenciar
+                      <div className="flex items-center justify-end mt-2">
+                        <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600">
+                          Ver todos <CaretRight size={11} weight="bold" />
                         </span>
                       </div>
                     </div>
@@ -851,9 +834,6 @@ export function ClientAccount() {
                     <ShieldCheck size={16} weight="duotone" className="text-indigo-500" />
                     Segurança
                   </h3>
-                  <p className="text-xs font-semibold leading-5 text-slate-500">
-                    Ajuste sua senha da conta e mantenha seu acesso pessoal sob controle.
-                  </p>
                   <div className="space-y-2">
                     <input
                       type="password"
@@ -893,7 +873,7 @@ export function ClientAccount() {
                 </h3>
                 <p className="mt-2 text-base font-black text-slate-900">Permissões do aplicativo</p>
                 <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">
-                  Fotos da galeria agora usam o seletor do sistema. Aqui ficam apenas os acessos contínuos que o app realmente mantém.
+                  Gerencie permissões e acessos do app.
                 </p>
               </div>
             </div>

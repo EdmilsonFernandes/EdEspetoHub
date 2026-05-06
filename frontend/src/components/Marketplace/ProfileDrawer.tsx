@@ -503,7 +503,7 @@ export function ProfileDrawer({
                                 : 'border border-slate-200 bg-white/90 text-slate-500'
                         }`}
                       >
-                        {badge.tone !== 'neutral' ? <CheckCircle size={10} weight="fill" /> : null}
+                        <CheckCircle size={10} weight="fill" />
                         {badge.label}
                       </span>
                     ))}
