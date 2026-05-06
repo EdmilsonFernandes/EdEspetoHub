@@ -944,7 +944,6 @@ export function ClientAccount() {
               </button>
             </section>
           )}
-          )}
         </div>
       </div>
 
