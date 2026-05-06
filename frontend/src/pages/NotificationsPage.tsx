@@ -136,9 +136,8 @@ export function NotificationsPage() {
               <p className="mb-2 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">{group.label}</p>
               <div className="space-y-2.5">
                 {group.items.map((n) => (
-                  <div key={n.id} className={`group relative overflow-hidden rounded-2xl border bg-white transition-all active:scale-[0.98] ${n.read ? 'border-slate-100' : 'border-[#336886]/15 shadow-[0_8px_24px_-12px_rgba(51,104,134,0.15)]'}`}>
-                    <button onClick={() => handleRead(n)} className="absolute inset-0 z-0" aria-label="Abrir notificação" />
-                    <div className="relative z-10 flex items-start gap-3 p-4">
+                  <div key={n.id} onClick={() => handleRead(n)} className={`group relative overflow-hidden cursor-pointer rounded-2xl border bg-white transition-all active:scale-[0.98] ${n.read ? 'border-slate-100' : 'border-[#336886]/15 shadow-[0_8px_24px_-12px_rgba(51,104,134,0.15)]'}`}>
+                    <div className="relative flex items-start gap-3 p-4">
                       <div className="relative shrink-0">
                         <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-[linear-gradient(135deg,#0f3b53,#336886)] shadow-[0_8px_18px_-10px_rgba(51,104,134,0.4)]">
                           <img src={n.imageUrl || "/janocaminho.jpg"} alt="" className="h-full w-full object-cover opacity-90" />

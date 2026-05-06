@@ -903,6 +903,16 @@ export class PushNotificationService {
       }
     }
 
+    // Save notification for all users with active push tokens
+    try {
+      await AppDataSource.query(
+        `INSERT INTO notifications (user_id, title, body, url, image_url)
+         SELECT DISTINCT cpt.user_id, $1, $2, $3, $4
+         FROM customer_push_tokens cpt
+         WHERE cpt.is_active = TRUE AND cpt.user_id IS NOT NULL`,
+        [String(payload.title || "").trim(), String(payload.body || "").trim(), (payload.data as any)?.url || null, (payload.data as any)?.imageUrl || null]
+      );
+    } catch { /* non-blocking */ }
     log.info('Push broadcast finished', {
       topic: normalizedTopic,
       sent,
