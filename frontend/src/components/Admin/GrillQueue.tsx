@@ -1382,7 +1382,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     if (!soundEnabled) return;
     const rawSetting = String(configuredOrderNotificationSound || '').trim();
     const normalizedSetting = rawSetting.toLowerCase();
-    const customUrl = /^(https?:\/\/|\/)/i.test(rawSetting) ? rawSetting : '';
+    const customUrl = /^(https?:\/\/|\/|data:)/i.test(rawSetting) ? rawSetting : '';
     const preset =
       normalizedSetting === 'preset:chime'
         ? 'chime'
