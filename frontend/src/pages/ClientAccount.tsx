@@ -664,32 +664,6 @@ export function ClientAccount() {
                     </div>
                   </div>
                 </div>
-
-                <div className="relative mt-6 grid gap-3 sm:grid-cols-3">
-                  {accountOverviewCards.map((card) => {
-                    const Icon = card.icon;
-                    return (
-                      <button
-                        key={card.id}
-                        type="button"
-                        onClick={card.onClick}
-                        className="rounded-[1.55rem] border border-slate-200/80 bg-white/88 px-4 py-4 text-left shadow-[0_18px_34px_-28px_rgba(15,23,42,0.2)] transition-all hover:-translate-y-0.5 hover:border-slate-300 active:scale-[0.99]"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">{card.label}</p>
-                            <p className="mt-2 text-lg font-black tracking-tight text-slate-950">{card.value}</p>
-                            <p className="mt-1 text-[11px] font-semibold leading-5 text-slate-500">{card.helper}</p>
-                          </div>
-                          <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl ${card.iconTone}`}>
-                            <Icon size={18} weight="duotone" />
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-
                 <div className="relative mt-4 grid gap-2 sm:grid-cols-3">
                   {quickAccountActions.map((action) => {
                     const Icon = action.icon;
@@ -709,7 +683,7 @@ export function ClientAccount() {
 
                 <div className="relative mt-8 space-y-3">
                   <div className="grid gap-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Nome Completo</label>
+                    <label className="text-xs font-semibold text-slate-500 ml-1">Nome</label>
                     <div className="relative">
                       <UserCircle size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
@@ -721,7 +695,7 @@ export function ClientAccount() {
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="grid gap-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">E-mail da conta</label>
+                      <label className="text-xs font-semibold text-slate-500 ml-1">E-mail</label>
                       <div className="relative">
                         <EnvelopeSimple size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input
@@ -730,10 +704,9 @@ export function ClientAccount() {
                           className="w-full cursor-not-allowed rounded-2xl border border-slate-100 bg-slate-100/80 py-3 pl-11 pr-4 text-sm font-bold text-slate-500 outline-none"
                         />
                       </div>
-                      <p className="ml-2 text-[10px] font-semibold text-slate-400">Alteração de e-mail segue fluxo validado por segurança.</p>
                     </div>
                     <div className="grid gap-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Telefone para Contato</label>
+                      <label className="text-xs font-semibold text-slate-500 ml-1">Telefone</label>
                       <div className="relative">
                         <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input
