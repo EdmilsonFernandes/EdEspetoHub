@@ -635,8 +635,7 @@ const readSelectedCondominiumSlug = () => {
 const readAdminSession = () => {
   try {
     const raw = localStorage.getItem('adminSession');
-              <p className="text-[9px] font-medium text-slate-300 tracking-tight">
-    const parsed = JSON.parse(raw);
+    const parsed = JSON.parse(raw || "null");
     const role = String(parsed?.user?.role || '').toUpperCase();
     const isOperationalRole = role === 'ADMIN' || role === 'OPERATOR' || role === 'LOJISTA';
     if (!parsed?.token || !parsed?.user || !isOperationalRole || !(parsed?.store?.id || parsed?.store?.slug)) {
