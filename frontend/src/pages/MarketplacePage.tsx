@@ -2400,7 +2400,7 @@ export function MarketplacePage() {
 
   const [storageUnread, setStorageUnread] = useState(0);
   useEffect(() => {
-    const interval = setInterval(() => { apiClient.get("/customer/notifications").then((r: any) => setStorageUnread(r?.unreadCount || 0)).catch(() => {}); }, 10000);
+    const interval = setInterval(() => { apiClient.get("/customer/notifications").then((r: any) => setStorageUnread(r?.unreadCount || 0)).catch(() => {}); }, 5000);
     const onFocus = () => { apiClient.get("/customer/notifications").then((r: any) => setStorageUnread(r?.unreadCount || 0)).catch(() => {}); };
     window.addEventListener('focus', onFocus);
     return () => { clearInterval(interval); window.removeEventListener('focus', onFocus); };

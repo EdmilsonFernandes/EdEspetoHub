@@ -144,8 +144,8 @@ export function NotificationsPage() {
                         {!n.read && <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-white bg-[#336886] shadow-[0_0_6px_rgba(51,104,134,0.5)]" />}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className={`text-[13px] leading-tight ${n.read ? 'font-semibold text-slate-700' : 'font-black text-slate-900'}`}>{n.title}</p>
-                        <p className="mt-1 text-[12px] text-slate-500 leading-relaxed line-clamp-2">{n.body}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{n.title}</p>
+                        <p className={`mt-0.5 text-[13px] leading-snug ${n.read ? "font-semibold text-slate-600" : "font-black text-slate-900"}`}>{n.body || n.title}</p>
                         <p className="mt-2 text-[10px] font-semibold text-slate-400">{timeAgo(n.createdAt)}</p>
                       </div>
                       <button onClick={(e) => { e.stopPropagation(); handleRemove(n.id); }} className="relative z-20 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400 transition-all hover:bg-rose-50 hover:text-rose-500 active:scale-95" aria-label="Remover">
