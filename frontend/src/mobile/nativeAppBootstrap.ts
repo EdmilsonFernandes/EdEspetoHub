@@ -6,7 +6,7 @@ import { customerAccountService } from '../services/customerAccountService';
 import { ADMIN_SESSION_EVENT, CUSTOMER_SESSION_EVENT, MOTOBOY_SESSION_EVENT } from '../services/nativeBiometricService';
 import { motoboyService } from '../services/motoboyService';
 import { storePushService } from '../services/storePushService';
-import { notificationStorage } from '../services/notificationStorage';
+
 
 const MOBILE_PUSH_ENABLED =
   String(
@@ -318,7 +318,7 @@ const bootstrapPushNotifications = async () => {
       const body = String(event?.notification?.body || event?.notification?.data?.body || '').trim();
       const url = String(event?.notification?.data?.url || '').trim();
       if (title || body) {
-        notificationStorage.add({ title: title || 'Notificação', body, url: url || undefined });
+        fetch("/api/customer/notifications", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: title || "Notificação", body, url: url || undefined }) }).catch(() => {});
       }
       navigateFromPayload(event?.notification?.data);
     });
@@ -329,7 +329,7 @@ const bootstrapPushNotifications = async () => {
       const body = String(notification?.body || notification?.data?.body || '').trim();
       const url = String(notification?.data?.url || '').trim();
       if (title || body) {
-        notificationStorage.add({ title: title || 'Notificação', body, url: url || undefined });
+        fetch("/api/customer/notifications", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: title || "Notificação", body, url: url || undefined }) }).catch(() => {});
       }
 
       if (isStoreNewOrderPush(notification?.data)) {

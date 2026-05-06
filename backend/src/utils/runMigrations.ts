@@ -2029,6 +2029,23 @@ export async function runMigrations() {
   `);
   await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_store_dashboard_daily_products_name
+
+  // --- Notifications table ---
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS notifications (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      body TEXT NOT NULL DEFAULT '',
+      url TEXT,
+      read BOOLEAN NOT NULL DEFAULT false,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_notifications_user_created
+    ON notifications(user_id, created_at DESC);
+  `);
     ON store_dashboard_daily_products(product_name);
   `);
   await AppDataSource.query(`

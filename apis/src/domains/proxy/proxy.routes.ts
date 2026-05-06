@@ -215,5 +215,14 @@ export function createProxyRoutes(): Router {
     r.get('/admin/motoboys/:motoboyId/documents', authRequired, forward);
     r.post('/admin/motoboys/:motoboyId/documents/:documentId/approve', authRequired, forward);
     r.post('/admin/motoboys/:motoboyId/documents/:documentId/reject', authRequired, forward);
+
+    // Customer notifications
+    r.get('/customer/notifications', authRequired, forward);
+    r.post('/customer/notifications', authRequired, forward);
+    r.patch('/customer/notifications/:id/read', authRequired, forward);
+    r.post('/customer/notifications/read-all', authRequired, forward);
+    r.delete('/customer/notifications/:id', authRequired, forward);
+    r.delete('/customer/notifications', authRequired, forward);
+
     return r;
 }

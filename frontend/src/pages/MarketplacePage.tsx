@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { notificationStorage } from '../services/notificationStorage';
+import { apiClient } from '../config/apiClient';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import {
@@ -723,7 +723,6 @@ export function MarketplacePage() {
   const publicCondominiumLoadInFlightRef = useRef(false);
   const activeOrdersLoadInFlightRef = useRef(false);
   const anonymousOrdersHydrationInFlightRef = useRef(false);
-  const prevOrderStatusMapRef = useRef<Record<string, string>>(JSON.parse(localStorage.getItem("jnk_order_status_map") || "{}"));
 
   const stageFeaturedProductCheckout = (item: FeaturedProduct) => {
     const storeSlug = String(item?.storeSlug || '').trim();
@@ -2399,10 +2398,10 @@ export function MarketplacePage() {
     [activeAnonymousOrders, dismissedAnonymousOrderIds]
   );
 
-  const [storageUnread, setStorageUnread] = useState(() => notificationStorage.unreadCount());
+  const [storageUnread, setStorageUnread] = useState(0);
   useEffect(() => {
-    const interval = setInterval(() => setStorageUnread(notificationStorage.unreadCount()), 3000);
-    const onFocus = () => setStorageUnread(notificationStorage.unreadCount());
+    const interval = setInterval(() => { apiClient.get("/customer/notifications").then((r: any) => setStorageUnread(r?.unreadCount || 0)).catch(() => {}); }, 10000);
+    const onFocus = () => { apiClient.get("/customer/notifications").then((r: any) => setStorageUnread(r?.unreadCount || 0)).catch(() => {}); };
     window.addEventListener('focus', onFocus);
     return () => { clearInterval(interval); window.removeEventListener('focus', onFocus); };
   }, []);
@@ -2433,25 +2432,7 @@ export function MarketplacePage() {
         const isRecentEnough = Number.isFinite(createdAt) ? (Date.now() - createdAt) < ACTIVE_ORDER_ALERT_MAX_AGE_MS : true;
         return isRecentEnough && !['done', 'delivered', 'finished', 'cancelled', 'rejected'].includes(status);
       });
-      // Detect status changes and save notifications
-      const allOrders = (result?.data) || [];
-      const prevMap = prevOrderStatusMapRef.current;
-      for (const o of allOrders) {
-        const id = String(o.id || '');
-        const status = String(o.status || '').toLowerCase();
-        const prev = prevMap[id];
-        if (prev && prev !== status) {
-          const storeName = String(o.store?.name || '').trim();
-          const labels: Record<string, string> = { preparing: 'Em preparo', ready: 'Pronto para retirada', ready_for_delivery: 'Pronto para entrega', in_delivery: 'Saiu para entrega', delivered: 'Entregue', finished: 'Finalizado', cancelled: 'Cancelado' };
-          const label = labels[status];
-          if (label) {
-            notificationStorage.add({ title: label, body: storeName ? `${storeName} — pedido #${id.slice(0, 6).toUpperCase()}` : `Pedido #${id.slice(0, 6).toUpperCase()}`, url: `/pedido/${id}` });
-          }
-        }
-        prevMap[id] = status;
-      }
-      prevOrderStatusMapRef.current = prevMap;
-      try { localStorage.setItem("jnk_order_status_map", JSON.stringify(prevMap)); } catch {}
+      setActiveOrders(active.slice(0, 3));
       setActiveOrders(active.slice(0, 3));
     } catch {
       // ignore

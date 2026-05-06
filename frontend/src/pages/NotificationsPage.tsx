@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, BellRinging, Check, Trash } from '@phosphor-icons/react';
-import { notificationStorage, type AppNotification } from '../services/notificationStorage';
 import { navigateBackOrFallback } from '../utils/navigation';
+import { apiClient } from '../config/apiClient';
+
+type Notification = { id: string; title: string; body: string; url?: string | null; read: boolean; createdAt: string };
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -15,61 +17,65 @@ function timeAgo(dateStr: string) {
   return `há ${d}d`;
 }
 
-function groupByDate(items: AppNotification[]) {
+function groupByDate(items: Notification[]) {
   const today = new Date().toDateString();
   const yesterday = new Date(Date.now() - 86400000).toDateString();
-  const groups: { label: string; items: AppNotification[] }[] = [];
-  const map = new Map<string, AppNotification[]>();
+  const groups: { label: string; items: Notification[] }[] = [];
+  const map = new Map<string, Notification[]>();
   items.forEach((n) => {
     const d = new Date(n.createdAt).toDateString();
     const label = d === today ? 'Hoje' : d === yesterday ? 'Ontem' : new Date(n.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
     if (!map.has(label)) map.set(label, []);
     map.get(label)!.push(n);
   });
-  map.forEach((items, label) => groups.push({ label, items }));
+  map.forEach((v, k) => groups.push({ label: k, items: v }));
   return groups;
 }
 
 export function NotificationsPage() {
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unread, setUnread] = useState(0);
 
-  const reload = useCallback(() => setNotifications(notificationStorage.getAll()), []);
+  const load = useCallback(async () => {
+    try {
+      const res = await apiClient.get('/customer/notifications');
+      setNotifications(res?.items || []);
+      setUnread(res?.unreadCount || 0);
+    } catch { /* ignore if not logged */ }
+  }, []);
 
-  useEffect(() => {
-    reload();
-    // Re-read storage periodically to catch new pushes
-    const interval = setInterval(reload, 3000);
-    const onFocus = () => reload();
-    window.addEventListener('focus', onFocus);
-    return () => { clearInterval(interval); window.removeEventListener('focus', onFocus); };
-  }, [reload]);
+  useEffect(() => { load(); }, [load]);
 
-  const handleRead = (n: AppNotification) => {
-    notificationStorage.markRead(n.id);
-    reload();
+  const handleRead = async (n: Notification) => {
+    if (!n.read) {
+      await apiClient.patch(`/customer/notifications/${n.id}/read`, {}).catch(() => {});
+      setNotifications((prev) => prev.map((x) => x.id === n.id ? { ...x, read: true } : x));
+      setUnread((c) => Math.max(0, c - 1));
+    }
     if (n.url) {
       const path = n.url.replace(/^https?:\/\/[^/]+/, '');
       navigate(path);
     }
   };
 
-  const handleRemove = (id: string) => {
-    notificationStorage.remove(id);
-    reload();
+  const handleRemove = async (id: string) => {
+    await apiClient.delete(`/customer/notifications/${id}`).catch(() => {});
+    setNotifications((prev) => prev.filter((x) => x.id !== id));
   };
 
-  const handleMarkAllRead = () => {
-    notificationStorage.markAllRead();
-    reload();
+  const handleMarkAllRead = async () => {
+    await apiClient.post('/customer/notifications/read-all', {}).catch(() => {});
+    setNotifications((prev) => prev.map((x) => ({ ...x, read: true })));
+    setUnread(0);
   };
 
-  const handleClearAll = () => {
-    notificationStorage.clearAll();
-    reload();
+  const handleClearAll = async () => {
+    await apiClient.delete('/customer/notifications').catch(() => {});
+    setNotifications([]);
+    setUnread(0);
   };
 
-  const unread = notifications.filter((n) => !n.read).length;
   const groups = groupByDate(notifications);
 
   return (
@@ -80,10 +86,7 @@ export function NotificationsPage() {
       <div className="mx-auto max-w-2xl">
         <header className="sticky top-0 z-20 border-b border-slate-200/60 bg-white/90 backdrop-blur-xl">
           <div className="flex items-center justify-between px-4 py-3.5">
-            <button
-              onClick={() => navigateBackOrFallback(navigate, '/hub')}
-              className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-all active:scale-95"
-            >
+            <button onClick={() => navigateBackOrFallback(navigate, '/hub')} className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-all active:scale-95">
               <ArrowLeft size={18} weight="bold" />
             </button>
             <div className="flex flex-col items-center gap-0.5">
@@ -131,35 +134,21 @@ export function NotificationsPage() {
               <p className="mb-2 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">{group.label}</p>
               <div className="space-y-2.5">
                 {group.items.map((n) => (
-                  <div
-                    key={n.id}
-                    className={`group relative overflow-hidden rounded-2xl border bg-white transition-all active:scale-[0.98] ${
-                      n.read ? 'border-slate-100' : 'border-[#336886]/15 shadow-[0_8px_24px_-12px_rgba(51,104,134,0.15)]'
-                    }`}
-                  >
+                  <div key={n.id} className={`group relative overflow-hidden rounded-2xl border bg-white transition-all active:scale-[0.98] ${n.read ? 'border-slate-100' : 'border-[#336886]/15 shadow-[0_8px_24px_-12px_rgba(51,104,134,0.15)]'}`}>
                     <button onClick={() => handleRead(n)} className="absolute inset-0 z-0" aria-label="Abrir notificação" />
                     <div className="relative z-10 flex items-start gap-3 p-4">
-                      {/* Logo + dot */}
                       <div className="relative shrink-0">
                         <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-[linear-gradient(135deg,#0f3b53,#336886)] shadow-[0_8px_18px_-10px_rgba(51,104,134,0.4)]">
                           <img src="/janocaminho.jpg" alt="" className="h-full w-full object-cover opacity-90" />
                         </div>
-                        {!n.read && (
-                          <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-white bg-[#336886] shadow-[0_0_6px_rgba(51,104,134,0.5)]" />
-                        )}
+                        {!n.read && <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-white bg-[#336886] shadow-[0_0_6px_rgba(51,104,134,0.5)]" />}
                       </div>
-                      {/* Content */}
                       <div className="min-w-0 flex-1">
                         <p className={`text-[13px] leading-tight ${n.read ? 'font-semibold text-slate-700' : 'font-black text-slate-900'}`}>{n.title}</p>
                         <p className="mt-1 text-[12px] text-slate-500 leading-relaxed line-clamp-2">{n.body}</p>
                         <p className="mt-2 text-[10px] font-semibold text-slate-400">{timeAgo(n.createdAt)}</p>
                       </div>
-                      {/* Delete */}
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleRemove(n.id); }}
-                        className="relative z-20 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400 transition-all hover:bg-rose-50 hover:text-rose-500 active:scale-95"
-                        aria-label="Remover"
-                      >
+                      <button onClick={(e) => { e.stopPropagation(); handleRemove(n.id); }} className="relative z-20 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400 transition-all hover:bg-rose-50 hover:text-rose-500 active:scale-95" aria-label="Remover">
                         <Trash size={14} weight="bold" />
                       </button>
                     </div>

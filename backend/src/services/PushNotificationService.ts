@@ -611,6 +611,13 @@ export class PushNotificationService {
    * @author Edmilson Lopes
    */
   async notifyCustomerOrderUpdate(userId: string, payload: CustomerPushPayload) {
+    // Persist notification in database
+    try {
+      const { Notification: NotifEntity } = require("../entities/Notification");
+      const { AppDataSource: DS } = require("../config/database");
+      const repo = DS.getRepository(NotifEntity);
+      void repo.save(repo.create({ userId, title: String(payload.title || "").trim(), body: String(payload.body || "").trim(), url: (payload.data as any)?.url || null }));
+    } catch { /* non-blocking */ }
     return this.dispatchByOwner({
       ownerKey: 'userId',
       ownerValue: userId,

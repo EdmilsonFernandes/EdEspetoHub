@@ -83,6 +83,15 @@ routes.patch('/customer/addresses/:addressId', requireAuth, requireRole('CUSTOME
 routes.patch('/customer/addresses/:addressId/default', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.setDefaultAddress);
 routes.delete('/customer/addresses/:addressId', requireAuth, requireRole('CUSTOMER'), CustomerAccountController.deleteAddress);
 
+
+// Customer notifications
+import { NotificationController } from '../controllers/NotificationController';
+routes.get('/customer/notifications', requireAuth, NotificationController.list);
+routes.post('/customer/notifications', requireAuth, NotificationController.create);
+routes.patch('/customer/notifications/:id/read', requireAuth, NotificationController.markRead);
+routes.post('/customer/notifications/read-all', requireAuth, NotificationController.markAllRead);
+routes.delete('/customer/notifications/:id', requireAuth, NotificationController.remove);
+routes.delete('/customer/notifications', requireAuth, NotificationController.clearAll);
 // Plans / payments
 routes.get('/plans', PlanController.list);
 routes.post('/subscriptions', SubscriptionController.create);
