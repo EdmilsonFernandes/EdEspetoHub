@@ -419,9 +419,9 @@ export function ProfileDrawer({
       case 'account':
         return 'Perfil, endereços e preferências';
       case 'orders':
+        return 'Histórico e acompanhamento dos pedidos';
       case 'notifications':
         return 'Alertas de pedidos e atualizações';
-        return 'Histórico e acompanhamento dos pedidos';
       case 'settings':
         return 'Permissões, biometria e segurança';
       case 'store-panel':
@@ -635,8 +635,8 @@ export function ProfileDrawer({
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <p className="text-[11px] font-black text-slate-900 tracking-tight">Já no Caminho</p>
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
-                Versão {versionLabel || 'v0.0.0'}
+              <p className="text-[8px] font-medium text-slate-300">
+                {versionLabel || 'v0.0.0'}
               </p>
               <p className="flex items-center gap-1 text-[9px] font-semibold text-emerald-600">
                 <ShieldCheckered size={10} weight="fill" />

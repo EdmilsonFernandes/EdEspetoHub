@@ -1455,7 +1455,7 @@ export function OrderTracking() {
                     ) : isCancelled ? (
                       <div className="mt-3 rounded-2xl border border-rose-200/70 bg-rose-50/80 px-4 py-3">
                         <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-rose-600">Pedido cancelado</p>
-                        <p className="mt-1.5 text-sm font-medium text-rose-900 leading-relaxed">Este pedido foi cancelado e não será processado.</p>
+                        <p className="mt-1.5 text-sm font-medium text-rose-900 leading-relaxed">Sentimos muito! Este pedido foi cancelado.</p>
                       </div>
                     ) : null}
 
@@ -1512,7 +1512,7 @@ export function OrderTracking() {
                                 : hasCourierDeliveryConfirmation
                                 ? 'A entrega foi concluída e o sistema aguarda a confirmação final do cliente.'
                                 : deliveryStatus === 'IN_TRANSIT'
-                                ? 'Ele está indo até você agora.'
+                                ? 'A caminho do seu endereço.'
                                 : deliveryStatus === 'PICKED_UP'
                                 ? 'Agora é só acompanhar o trajeto.'
                                 : 'Ele está se preparando para sair da loja.'}
@@ -1607,7 +1607,7 @@ export function OrderTracking() {
                   </div>
                   <div className="mt-2 flex items-center justify-between gap-3 text-xs text-slate-500">
                     <span>Etapa atual do pedido</span>
-                    <span className="font-semibold text-[#336886]">{progress}% completo</span>
+                    <span className="font-semibold text-[#336886]">Acompanhando</span>
                   </div>
                 </div>
                 {(isReady && elapsedMs > 0) ||
@@ -1643,14 +1643,14 @@ export function OrderTracking() {
                     {isEstimateDelayed && (
                       <div className="inline-flex items-center gap-2 text-sm text-stone-500">
                         <Clock size={13} weight="duotone" className="text-amber-600" />
-                        <span className="font-medium">Pedido em atraso. Atualizando automaticamente.</span>
+                        <span className="font-medium">Seu pedido está demorando mais que o previsto.</span>
                       </div>
                     )}
                   </div>
                 ) : null}
 
                 <div className="rounded-2xl border border-[#d9e6ee] bg-white/92 px-4 py-4 shadow-[0_12px_28px_-24px_rgba(51,104,134,0.14)]">
-                  <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]">Linha do pedido</p>
+                  <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]">Acompanhamento</p>
                   <div className="relative pl-1">
                     {/* Trilho de fundo */}
                     <span className="pointer-events-none absolute left-[10px] top-3 bottom-3 w-[2px] rounded-full bg-[#dce9f1]/85" />
