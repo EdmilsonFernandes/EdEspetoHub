@@ -303,3 +303,32 @@ jobs:
              cd ~/EdEspetoHub; \
              git pull --ff-only; \
              scripts/./deploy-release.sh '$IMAGE_TAG' $SERVICES"
+
+      - name: Capture deployed versions
+        if: success()
+        shell: bash
+        env:
+          PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+          PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
+          PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
+        run: |
+          ssh_user="${PROD_SSH_USER:-ec2-user}"
+          ssh_port="${PROD_SSH_PORT:-22}"
+
+          versions=$(ssh \
+            -i ~/.ssh/id_ed25519 \
+            -p "$ssh_port" \
+            -o BatchMode=yes \
+            -o ConnectTimeout=10 \
+            -o StrictHostKeyChecking=yes \
+            "${ssh_user}@${PROD_SSH_HOST}" \
+            "docker exec janocaminho-frontend cat /usr/share/nginx/html/build-info.json 2>/dev/null | grep -E 'versionLabel|shortHash|builtAt' | head -3; echo '---'; docker exec janocaminho-backend node -e \"try{const p=require('./package.json');console.log('backend:',p.version)}catch{}\" 2>/dev/null" || echo "Could not fetch versions")
+
+          cat <<EOF >> "$GITHUB_STEP_SUMMARY"
+
+          ## Deployed versions
+
+          \`\`\`
+          $versions
+          \`\`\`
+          EOF
