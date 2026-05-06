@@ -2028,7 +2028,9 @@ export async function runMigrations() {
     ON store_dashboard_daily_products(store_id, snapshot_date DESC);
   `);
   await AppDataSource.query(`
-    CREATE INDEX IF NOT EXISTS idx_store_dashboard_daily_products_name
+    ON store_dashboard_daily_products(product_name);
+  `);
+
 
   // --- Notifications table ---
   await AppDataSource.query(`
@@ -2045,8 +2047,6 @@ export async function runMigrations() {
   await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_notifications_user_created
     ON notifications(user_id, created_at DESC);
-  `);
-    ON store_dashboard_daily_products(product_name);
   `);
   await AppDataSource.query(`
     UPDATE store_settings
