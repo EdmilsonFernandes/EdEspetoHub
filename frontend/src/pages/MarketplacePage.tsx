@@ -723,6 +723,7 @@ export function MarketplacePage() {
   const publicCondominiumLoadInFlightRef = useRef(false);
   const activeOrdersLoadInFlightRef = useRef(false);
   const anonymousOrdersHydrationInFlightRef = useRef(false);
+  const prevOrderStatusMapRef = useRef<Record<string, string>>({});
 
   const stageFeaturedProductCheckout = (item: FeaturedProduct) => {
     const storeSlug = String(item?.storeSlug || '').trim();
@@ -2432,6 +2433,24 @@ export function MarketplacePage() {
         const isRecentEnough = Number.isFinite(createdAt) ? (Date.now() - createdAt) < ACTIVE_ORDER_ALERT_MAX_AGE_MS : true;
         return isRecentEnough && !['done', 'delivered', 'finished', 'cancelled', 'rejected'].includes(status);
       });
+      // Detect status changes and save notifications
+      const allOrders = (result?.data) || [];
+      const prevMap = prevOrderStatusMapRef.current;
+      for (const o of allOrders) {
+        const id = String(o.id || '');
+        const status = String(o.status || '').toLowerCase();
+        const prev = prevMap[id];
+        if (prev && prev !== status) {
+          const storeName = String(o.store?.name || '').trim();
+          const labels: Record<string, string> = { preparing: 'Em preparo', ready: 'Pronto para retirada', ready_for_delivery: 'Pronto para entrega', in_delivery: 'Saiu para entrega', delivered: 'Entregue', finished: 'Finalizado', cancelled: 'Cancelado' };
+          const label = labels[status];
+          if (label) {
+            notificationStorage.add({ title: label, body: storeName ? `${storeName} — pedido #${id.slice(0, 6).toUpperCase()}` : `Pedido #${id.slice(0, 6).toUpperCase()}`, url: `/pedido/${id}` });
+          }
+        }
+        prevMap[id] = status;
+      }
+      prevOrderStatusMapRef.current = prevMap;
       setActiveOrders(active.slice(0, 3));
     } catch {
       // ignore
