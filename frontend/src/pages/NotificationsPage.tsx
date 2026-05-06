@@ -4,7 +4,7 @@ import { ArrowLeft, BellRinging, Check, Trash } from '@phosphor-icons/react';
 import { navigateBackOrFallback } from '../utils/navigation';
 import { apiClient } from '../config/apiClient';
 
-type Notification = { id: string; title: string; body: string; url?: string | null; read: boolean; createdAt: string };
+type Notification = { id: string; title: string; body: string; url?: string | null; imageUrl?: string | null; read: boolean; createdAt: string };
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -54,8 +54,10 @@ export function NotificationsPage() {
       setUnread((c) => Math.max(0, c - 1));
     }
     if (n.url) {
-      const path = n.url.replace(/^https?:\/\/[^/]+/, '');
-      navigate(path);
+      const isExternal = /^https?:\/\//i.test(n.url) && !n.url.includes("janocaminho.com.br");
+      if (isExternal) { window.open(n.url, "_blank"); return; }
+      const path = n.url.replace(/^https?:\/\/[^/]+/, "");
+      if (path) window.location.href = path;
     }
   };
 
@@ -139,7 +141,7 @@ export function NotificationsPage() {
                     <div className="relative z-10 flex items-start gap-3 p-4">
                       <div className="relative shrink-0">
                         <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-[linear-gradient(135deg,#0f3b53,#336886)] shadow-[0_8px_18px_-10px_rgba(51,104,134,0.4)]">
-                          <img src="/janocaminho.jpg" alt="" className="h-full w-full object-cover opacity-90" />
+                          <img src={n.imageUrl || "/janocaminho.jpg"} alt="" className="h-full w-full object-cover opacity-90" />
                         </div>
                         {!n.read && <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-white bg-[#336886] shadow-[0_0_6px_rgba(51,104,134,0.5)]" />}
                       </div>

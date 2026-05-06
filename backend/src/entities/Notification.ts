@@ -22,6 +22,9 @@ export class Notification {
   @Column({ type: 'text', nullable: true })
   url?: string | null;
 
+  @Column({ name: 'image_url', type: 'text', nullable: true })
+  imageUrl?: string | null;
+
   @Column({ type: 'boolean', default: false })
   read!: boolean;
 

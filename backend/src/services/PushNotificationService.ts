@@ -616,7 +616,7 @@ export class PushNotificationService {
       const { Notification: NotifEntity } = require("../entities/Notification");
       const { AppDataSource: DS } = require("../config/database");
       const repo = DS.getRepository(NotifEntity);
-      void repo.save(repo.create({ userId, title: String(payload.title || "").trim(), body: String(payload.body || "").trim(), url: (payload.data as any)?.url || null }));
+      void repo.save(repo.create({ userId, title: String(payload.title || "").trim(), body: String(payload.body || "").trim(), url: (payload.data as any)?.url || null, imageUrl: (payload.data as any)?.imageUrl || null }));
     } catch { /* non-blocking */ }
     return this.dispatchByOwner({
       ownerKey: 'userId',
