@@ -2027,9 +2027,6 @@ export async function runMigrations() {
     CREATE INDEX IF NOT EXISTS idx_store_dashboard_daily_products_store_date
     ON store_dashboard_daily_products(store_id, snapshot_date DESC);
   `);
-  await AppDataSource.query(`
-    ON store_dashboard_daily_products(product_name);
-  `);
 
 
   // --- Notifications table ---
