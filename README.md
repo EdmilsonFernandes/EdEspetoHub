@@ -1374,6 +1374,14 @@ Execução local (porta 8080):
 sh scripts/compose-dev.sh
 ```
 
+Rebuild local de um serviço específico:
+
+```bash
+sh scripts/compose-dev-backend.sh
+sh scripts/compose-dev-frontend.sh
+sh scripts/compose-dev-apis.sh
+```
+
 Execução produção (porta 80):
 
 ```bash
