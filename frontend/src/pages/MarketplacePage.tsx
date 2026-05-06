@@ -2392,7 +2392,7 @@ export function MarketplacePage() {
     }
   }, []);
 
-  const visibleActiveOrders = useMemo(
+  const _visibleActiveOrders = useMemo(
     () => activeOrders,
     [activeOrders]
   );
