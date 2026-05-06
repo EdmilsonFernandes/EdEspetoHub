@@ -874,7 +874,7 @@ export const BrandingSettings = ({
                     </div>
                   )}
                 </div>
-              ) : null}
+              )}
             </div>
           </div>
         </div>
