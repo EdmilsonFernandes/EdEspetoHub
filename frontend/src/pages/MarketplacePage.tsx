@@ -723,7 +723,7 @@ export function MarketplacePage() {
   const publicCondominiumLoadInFlightRef = useRef(false);
   const activeOrdersLoadInFlightRef = useRef(false);
   const anonymousOrdersHydrationInFlightRef = useRef(false);
-  const prevOrderStatusMapRef = useRef<Record<string, string>>(() => { try { return JSON.parse(localStorage.getItem("jnk_order_status_map") || "{}"); } catch { return {}; } })();
+  const prevOrderStatusMapRef = useRef<Record<string, string>>(JSON.parse(localStorage.getItem("jnk_order_status_map") || "{}"));
 
   const stageFeaturedProductCheckout = (item: FeaturedProduct) => {
     const storeSlug = String(item?.storeSlug || '').trim();
