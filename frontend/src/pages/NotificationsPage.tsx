@@ -57,7 +57,7 @@ export function NotificationsPage() {
       const isExternal = /^https?:\/\//i.test(n.url) && !n.url.includes("janocaminho.com.br");
       if (isExternal) { window.open(n.url, "_blank"); return; }
       const path = n.url.replace(/^https?:\/\/[^/]+/, "");
-      if (path) window.location.href = path;
+      if (path) navigate(path);
     }
   };
 
