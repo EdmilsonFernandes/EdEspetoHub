@@ -50,7 +50,8 @@ Nome no GitHub Actions: `Publish Docker Images (GHCR)`
 - se a mudança tocar código nativo mobile, Capacitor, plugins nativos, `MainActivity`, `AndroidManifest`, `build.gradle`, `capacitor.config`, `res/` Android ou qualquer fluxo que exija novo binário Android → gerar novo `AAB`
 - ao gerar novo `AAB`, subir sempre:
   - `versionCode` +1
-  - `versionName` compatível com a nova versão
+  - `versionName` compatível com a nova versão e evoluindo logicamente
+- se houve mudança nativa no escopo da tarefa, a entrega só termina com o `.aab` gerado e validado no mesmo ciclo; não esperar o usuário pedir isso
 - validar com:
   - `npm --prefix frontend run build`
   - `npm --prefix mobile run android:sync`
@@ -59,6 +60,7 @@ Nome no GitHub Actions: `Publish Docker Images (GHCR)`
   - caminho do `.aab`
   - `versionCode`
   - `versionName`
+  - descrição curta pronta para colar em “Novidades desta versão” no Google Play Console
 - não esperar o usuário pedir o `AAB` quando ele for claramente necessário
 
 ---
@@ -202,6 +204,26 @@ NÃO usar SSH para rodar deploy ou git pull proativamente.
 ---
 
 ## TESTES (OBRIGATÓRIO)
+
+## VALIDAÇÃO DOCKER LOCAL (OBRIGATÓRIO para mudanças de schema/migration)
+
+Antes de dar push em qualquer mudança que altere `runMigrations.ts`, `schema.sql`, ou crie/altere tabelas:
+
+1. Buildar o backend Docker localmente:
+```bash
+cd backend && docker build -t test-backend . 2>&1 | tail -5
+```
+
+2. Se o build falhar, corrigir ANTES do push.
+3. Se possível, subir o container e verificar que a migration roda sem erro:
+```bash
+docker run --rm --network host -e PGHOST=localhost test-backend
+```
+
+Isso evita que código com SQL quebrado vá para produção e derrube o backend.
+
+---
+
 
 Antes de commitar qualquer alteração em `backend/`, rodar:
 
