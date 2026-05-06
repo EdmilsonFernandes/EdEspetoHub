@@ -235,12 +235,16 @@ sh scripts/compose-dev-frontend.sh
 sh scripts/compose-dev-apis.sh
 ```
 
-6. Para subir a stack local inteira:
+6. Usar `sh scripts/compose-dev.sh` APENAS quando a mudança envolver a stack inteira, integração real entre múltiplos serviços, ou alterações em `frontend` + `apis` + `backend` no mesmo trabalho.
+
+7. Para subir a stack local inteira nesses casos:
 ```bash
 sh scripts/compose-dev.sh
 ```
 
-Isso evita que código com SQL quebrado vá para produção e derrube o backend, e garante que a IA use o mesmo fluxo local padronizado do repositório.
+8. Se a mudança for só de um serviço, preferir sempre o wrapper específico e não subir a stack completa sem necessidade.
+
+Isso evita que código com SQL quebrado vá para produção e derrube o backend, e garante que a IA use o mesmo fluxo local padronizado do repositório sem gastar tempo com rebuild desnecessário.
 
 ---
 
