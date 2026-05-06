@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, BellRinging, Check, Trash } from '@phosphor-icons/react';
 import { notificationStorage, type AppNotification } from '../services/notificationStorage';
@@ -34,13 +34,20 @@ export function NotificationsPage() {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
+  const reload = useCallback(() => setNotifications(notificationStorage.getAll()), []);
+
   useEffect(() => {
-    setNotifications(notificationStorage.getAll());
-  }, []);
+    reload();
+    // Re-read storage periodically to catch new pushes
+    const interval = setInterval(reload, 3000);
+    const onFocus = () => reload();
+    window.addEventListener('focus', onFocus);
+    return () => { clearInterval(interval); window.removeEventListener('focus', onFocus); };
+  }, [reload]);
 
   const handleRead = (n: AppNotification) => {
     notificationStorage.markRead(n.id);
-    setNotifications(notificationStorage.getAll());
+    reload();
     if (n.url) {
       const path = n.url.replace(/^https?:\/\/[^/]+/, '');
       navigate(path);
@@ -49,17 +56,17 @@ export function NotificationsPage() {
 
   const handleRemove = (id: string) => {
     notificationStorage.remove(id);
-    setNotifications(notificationStorage.getAll());
+    reload();
   };
 
   const handleMarkAllRead = () => {
     notificationStorage.markAllRead();
-    setNotifications(notificationStorage.getAll());
+    reload();
   };
 
   const handleClearAll = () => {
     notificationStorage.clearAll();
-    setNotifications([]);
+    reload();
   };
 
   const unread = notifications.filter((n) => !n.read).length;
@@ -91,7 +98,6 @@ export function NotificationsPage() {
         </header>
 
         <div className="px-4 pt-4">
-          {/* Actions bar */}
           {notifications.length > 0 && (
             <div className="mb-4 flex items-center justify-between">
               <p className="text-xs font-bold text-slate-500">
@@ -110,7 +116,6 @@ export function NotificationsPage() {
             </div>
           )}
 
-          {/* Empty state */}
           {notifications.length === 0 && (
             <div className="mt-16 flex flex-col items-center text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-100">
@@ -121,32 +126,41 @@ export function NotificationsPage() {
             </div>
           )}
 
-          {/* Notification groups */}
           {groups.map((group) => (
             <div key={group.label} className="mb-5">
               <p className="mb-2 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">{group.label}</p>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {group.items.map((n) => (
                   <div
                     key={n.id}
-                    className={`group relative overflow-hidden rounded-2xl border bg-white p-3.5 transition-all active:scale-[0.98] ${
-                      n.read ? 'border-slate-100' : 'border-[#336886]/15 shadow-[0_8px_20px_-12px_rgba(51,104,134,0.12)]'
+                    className={`group relative overflow-hidden rounded-2xl border bg-white transition-all active:scale-[0.98] ${
+                      n.read ? 'border-slate-100' : 'border-[#336886]/15 shadow-[0_8px_24px_-12px_rgba(51,104,134,0.15)]'
                     }`}
                   >
                     <button onClick={() => handleRead(n)} className="absolute inset-0 z-0" aria-label="Abrir notificação" />
-                    <div className="relative z-10 flex items-start gap-3">
-                      <div className={`mt-0.5 flex h-2 w-2 shrink-0 rounded-full ${n.read ? 'bg-transparent' : 'bg-[#336886]'}`} />
+                    <div className="relative z-10 flex items-start gap-3 p-4">
+                      {/* Logo + dot */}
+                      <div className="relative shrink-0">
+                        <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-[linear-gradient(135deg,#0f3b53,#336886)] shadow-[0_8px_18px_-10px_rgba(51,104,134,0.4)]">
+                          <img src="/janocaminho.jpg" alt="" className="h-full w-full object-cover opacity-90" />
+                        </div>
+                        {!n.read && (
+                          <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-white bg-[#336886] shadow-[0_0_6px_rgba(51,104,134,0.5)]" />
+                        )}
+                      </div>
+                      {/* Content */}
                       <div className="min-w-0 flex-1">
                         <p className={`text-[13px] leading-tight ${n.read ? 'font-semibold text-slate-700' : 'font-black text-slate-900'}`}>{n.title}</p>
-                        <p className="mt-0.5 text-[11px] text-slate-500 leading-relaxed line-clamp-2">{n.body}</p>
-                        <p className="mt-1.5 text-[10px] font-semibold text-slate-400">{timeAgo(n.createdAt)}</p>
+                        <p className="mt-1 text-[12px] text-slate-500 leading-relaxed line-clamp-2">{n.body}</p>
+                        <p className="mt-2 text-[10px] font-semibold text-slate-400">{timeAgo(n.createdAt)}</p>
                       </div>
+                      {/* Delete */}
                       <button
                         onClick={(e) => { e.stopPropagation(); handleRemove(n.id); }}
-                        className="relative z-20 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 opacity-0 transition-opacity group-hover:opacity-100 active:scale-95"
+                        className="relative z-20 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400 transition-all hover:bg-rose-50 hover:text-rose-500 active:scale-95"
                         aria-label="Remover"
                       >
-                        <Trash size={13} weight="bold" />
+                        <Trash size={14} weight="bold" />
                       </button>
                     </div>
                   </div>

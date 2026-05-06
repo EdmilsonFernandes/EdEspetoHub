@@ -2402,7 +2402,14 @@ export function MarketplacePage() {
     [activeAnonymousOrders, dismissedAnonymousOrderIds]
   );
 
-  const hubNotificationCount = visibleActiveOrders.length + (isCustomerLogged ? 0 : visibleActiveAnonymousOrders.length) + notificationStorage.unreadCount();
+  const [storageUnread, setStorageUnread] = useState(() => notificationStorage.unreadCount());
+  useEffect(() => {
+    const interval = setInterval(() => setStorageUnread(notificationStorage.unreadCount()), 3000);
+    const onFocus = () => setStorageUnread(notificationStorage.unreadCount());
+    window.addEventListener('focus', onFocus);
+    return () => { clearInterval(interval); window.removeEventListener('focus', onFocus); };
+  }, []);
+  const hubNotificationCount = visibleActiveOrders.length + (isCustomerLogged ? 0 : visibleActiveAnonymousOrders.length) + storageUnread;
 
   const handleHubNotificationClick = useCallback(() => {
     navigate('/notificacoes');
