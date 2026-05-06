@@ -679,6 +679,25 @@ Backup com rotacao (recomendado em producao com pouco disco):
 sh scripts/pg-backup-rotate.sh
 ```
 
+Backup de configuracao/runtime (envs, chaves e export opcional do SSM):
+```bash
+sh scripts/backup-config.sh
+```
+
+Backup de configuracao para bucket privado, incluindo export dos parametros SSM referenciados no deploy:
+```bash
+CONFIG_BACKUP_S3_BUCKET=jnc-config-backups-prod-222984221398 \
+CONFIG_BACKUP_S3_PREFIX=config/runtime \
+CONFIG_BACKUP_SSM_EXPORT_MODE=required \
+sh scripts/backup-config.sh
+```
+
+Opcional: incluir parametros extras do SSM que nao estejam apontados nos arquivos `.env*`:
+```bash
+CONFIG_BACKUP_EXTRA_SSM_PARAMETERS="/chamanoespeto/prod /chamanoespeto/extra" \
+sh scripts/backup-config.sh
+```
+
 Exemplo de cron (executa a cada 4h, faz dump quando vencida a janela e remove o anterior):
 ```bash
 sudo crontab -e
@@ -690,6 +709,17 @@ Verificar crontab e ultimos backups:
 ```bash
 sudo crontab -l
 ls -lah /var/backups/janocaminho
+```
+
+Exemplo de cron para backup privado de configuracao:
+```bash
+# 15 2 * * * BACKUP_DIR=/home/ec2-user/backups/chamanoespeto/config KEEP_DAYS=30 CONFIG_BACKUP_S3_BUCKET=jnc-config-backups-prod-222984221398 CONFIG_BACKUP_S3_PREFIX=config/runtime CONFIG_BACKUP_SSM_EXPORT_MODE=required sh /home/ec2-user/EdEspetoHub/scripts/backup-config.sh >> /home/ec2-user/config-backup.log 2>&1
+```
+
+Aplicar lifecycle no bucket privado de configuracao:
+```bash
+BACKUP_S3_LIFECYCLE_CONFIG=scripts/s3-config-backup-lifecycle.json \
+sh scripts/apply-s3-backup-lifecycle.sh jnc-config-backups-prod-222984221398
 ```
 
 4) Verificacao rapida:
