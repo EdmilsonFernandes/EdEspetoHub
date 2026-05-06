@@ -723,7 +723,7 @@ export function MarketplacePage() {
   const publicCondominiumLoadInFlightRef = useRef(false);
   const activeOrdersLoadInFlightRef = useRef(false);
   const anonymousOrdersHydrationInFlightRef = useRef(false);
-  const prevOrderStatusMapRef = useRef<Record<string, string>>({});
+  const prevOrderStatusMapRef = useRef<Record<string, string>>(() => { try { return JSON.parse(localStorage.getItem("jnk_order_status_map") || "{}"); } catch { return {}; } })();
 
   const stageFeaturedProductCheckout = (item: FeaturedProduct) => {
     const storeSlug = String(item?.storeSlug || '').trim();
@@ -2451,6 +2451,7 @@ export function MarketplacePage() {
         prevMap[id] = status;
       }
       prevOrderStatusMapRef.current = prevMap;
+      try { localStorage.setItem("jnk_order_status_map", JSON.stringify(prevMap)); } catch {}
       setActiveOrders(active.slice(0, 3));
     } catch {
       // ignore
