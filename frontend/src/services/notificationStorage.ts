@@ -25,22 +25,27 @@ function save(items: AppNotification[]) {
   } catch {}
 }
 
+// Queue to serialize add operations
+let addQueue: Promise<void> = Promise.resolve();
+
 export const notificationStorage = {
   getAll,
 
   add(notification: Omit<AppNotification, 'id' | 'read' | 'createdAt'>) {
-    const items = getAll();
-    const entry: AppNotification = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
-      title: notification.title,
-      body: notification.body,
-      url: notification.url,
-      read: false,
-      createdAt: new Date().toISOString(),
-    };
-    items.unshift(entry);
-    save(items);
-    return entry;
+    // Serialize adds to prevent race conditions
+    addQueue = addQueue.then(() => {
+      const items = getAll();
+      const entry: AppNotification = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+        title: notification.title,
+        body: notification.body,
+        url: notification.url,
+        read: false,
+        createdAt: new Date().toISOString(),
+      };
+      items.unshift(entry);
+      save(items);
+    });
   },
 
   markRead(id: string) {
