@@ -2469,7 +2469,7 @@ export function MarketplacePage() {
       void loadActiveOrders();
     };
     const timer = window.setTimeout(refreshIfVisible, 1200);
-    const interval = window.setInterval(refreshIfVisible, 30000);
+    const interval = window.setInterval(refreshIfVisible, 10000);
     window.addEventListener('focus', refreshIfVisible);
     document.addEventListener('visibilitychange', refreshIfVisible);
     window.addEventListener('jnc:app-foreground', refreshIfVisible as EventListener);
