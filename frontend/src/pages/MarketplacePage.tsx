@@ -2392,10 +2392,6 @@ export function MarketplacePage() {
     }
   }, []);
 
-  const _visibleActiveOrders = useMemo(
-    () => activeOrders,
-    [activeOrders]
-  );
 
   const visibleActiveAnonymousOrders = useMemo(
     () => activeAnonymousOrders.filter((order) => !dismissedAnonymousOrderIds.includes(String(order?.id || '').trim())),
