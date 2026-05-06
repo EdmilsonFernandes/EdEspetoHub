@@ -616,7 +616,12 @@ export class PushNotificationService {
       const { Notification: NotifEntity } = require("../entities/Notification");
       const { AppDataSource: DS } = require("../config/database");
       const repo = DS.getRepository(NotifEntity);
-      void repo.save(repo.create({ userId, title: String(payload.title || "").trim(), body: String(payload.body || "").trim(), url: (payload.data as any)?.url || null, imageUrl: (payload.data as any)?.imageUrl || null }));
+      let imageUrl = (payload.data as any)?.imageUrl || null;
+      if (!imageUrl && (payload.data as any)?.orderId) {
+        const rows = await DS.query("SELECT ss.logo_url FROM store_settings ss JOIN stores s ON s.id = ss.store_id JOIN orders o ON o.store_id = s.id WHERE o.id = $1 LIMIT 1", [(payload.data as any).orderId]);
+        imageUrl = rows?.[0]?.logo_url || null;
+      }
+      void repo.save(repo.create({ userId, title: String(payload.title || "").trim(), body: String(payload.body || "").trim(), url: (payload.data as any)?.url || null, imageUrl }));
     } catch { /* non-blocking */ }
     return this.dispatchByOwner({
       ownerKey: 'userId',

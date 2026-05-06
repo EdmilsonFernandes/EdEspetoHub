@@ -578,9 +578,9 @@ export class OrderService
       data: {
         url: `https://janocaminho.com.br/pedido/${order.id}`,
         orderId: String(order.id),
-        status: String(order.status || ''),
-      },
+        status: String(order.status || ""),
         imageUrl: (order?.store as any)?.settings?.logoUrl || null,
+      },
     };
     if (userId) {
       void this.pushService.notifyCustomerOrderUpdate(userId, payload);
