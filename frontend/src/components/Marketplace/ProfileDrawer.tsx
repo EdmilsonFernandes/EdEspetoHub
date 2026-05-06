@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   BellRinging,
   ArrowRight,
@@ -92,6 +93,7 @@ export function ProfileDrawer({
   versionLabel,
 }: ProfileDrawerProps) {
   const [isAdmin, setIsAdmin] = useState(false);
+  const drawerNavigate = useNavigate();
   const [isMotoboy, setIsMotoboy] = useState(false);
   const [storeSlug, setStoreSlug] = useState<string | null>(null);
   const [accessPickerOpen, setAccessPickerOpen] = useState(false);
@@ -292,7 +294,7 @@ export function ProfileDrawer({
   const clientActions: DrawerAction[] = [
     { id: 'account', label: 'Minha Conta', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-[#336886]', bgColor: 'bg-[#336886]/10' },
     { id: 'orders', label: 'Meus pedidos', icon: <Receipt size={22} weight="duotone" />, onClick: onOpenOrders || onOpenAccount, iconColor: 'text-[#336886]', bgColor: 'bg-[#336886]/10' },
-    { id: 'notifications', label: 'Notificações', icon: <BellRinging size={22} weight="duotone" />, onClick: () => { window.location.href = '/notificacoes'; }, iconColor: 'text-amber-600', bgColor: 'bg-amber-50' },
+    { id: 'notifications', label: 'Notificações', icon: <BellRinging size={22} weight="duotone" />, onClick: () => { drawerNavigate('/notificacoes'); }, iconColor: 'text-amber-600', bgColor: 'bg-amber-50' },
     { id: 'settings', label: 'Configurações', icon: <GearSix size={22} weight="duotone" />, onClick: onOpenSettings, iconColor: 'text-violet-600', bgColor: 'bg-violet-50' },
     { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
     { id: 'help', label: 'Ajuda e Atendimento', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
