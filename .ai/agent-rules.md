@@ -209,18 +209,38 @@ NÃO usar SSH para rodar deploy ou git pull proativamente.
 
 Antes de dar push em qualquer mudança que altere `runMigrations.ts`, `schema.sql`, ou crie/altere tabelas:
 
-1. Buildar o backend Docker localmente:
+1. Preferir SEMPRE os scripts versionados de validação local, nunca montar comando longo manual se já existir wrapper em `scripts/`.
+
+2. Para validar backend localmente, usar:
 ```bash
-cd backend && docker build -t test-backend . 2>&1 | tail -5
+sh scripts/compose-dev-backend.sh
 ```
 
-2. Se o build falhar, corrigir ANTES do push.
-3. Se possível, subir o container e verificar que a migration roda sem erro:
+Se já estiver dentro de `scripts/`, usar:
 ```bash
-docker run --rm --network host -e PGHOST=localhost test-backend
+sh ./compose-dev-backend.sh
 ```
 
-Isso evita que código com SQL quebrado vá para produção e derrube o backend.
+3. Depois do rebuild, confirmar que o container ficou saudável:
+```bash
+docker compose --env-file .env.dev ps backend
+docker logs janocaminho-backend --tail 80
+```
+
+4. Se o backend entrar em restart loop ou logar erro de migration/SQL, corrigir ANTES do push.
+
+5. Para validar serviço isolado em mudança local:
+```bash
+sh scripts/compose-dev-frontend.sh
+sh scripts/compose-dev-apis.sh
+```
+
+6. Para subir a stack local inteira:
+```bash
+sh scripts/compose-dev.sh
+```
+
+Isso evita que código com SQL quebrado vá para produção e derrube o backend, e garante que a IA use o mesmo fluxo local padronizado do repositório.
 
 ---
 
