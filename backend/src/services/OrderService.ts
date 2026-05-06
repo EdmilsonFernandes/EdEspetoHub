@@ -580,7 +580,7 @@ export class OrderService
         orderId: String(order.id),
         status: String(order.status || ''),
       },
-        imageUrl: order?.store?.settings?.logoUrl || null,
+        imageUrl: (order?.store as any)?.settings?.logoUrl || null,
     };
     if (userId) {
       void this.pushService.notifyCustomerOrderUpdate(userId, payload);

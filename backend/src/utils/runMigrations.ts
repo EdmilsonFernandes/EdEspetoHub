@@ -2046,9 +2046,9 @@ export async function runMigrations() {
     ON notifications(user_id, created_at DESC);
   `);
   await AppDataSource.query(`
-  await AppDataSource.query(`
     ALTER TABLE notifications ADD COLUMN IF NOT EXISTS image_url TEXT DEFAULT NULL;
   `);
+  await AppDataSource.query(`
     UPDATE store_settings
     SET delivery_radius_km = 5
     WHERE delivery_radius_km IS NULL
