@@ -935,28 +935,15 @@ export function ClientAccount() {
           ) : null}
 
           {!settingsOnly && (
-            <section className="pt-4">
+            <section className="pt-6 flex justify-center">
               <button
                 onClick={() => setShowDeactivateModal(true)}
-                className="group w-full overflow-hidden rounded-[1.6rem] border border-rose-200/80 bg-[linear-gradient(135deg,rgba(255,241,242,0.98)_0%,rgba(255,255,255,0.98)_100%)] px-4 py-4 text-left shadow-[0_18px_34px_-28px_rgba(225,29,72,0.35)] transition-all duration-200 hover:border-rose-300 hover:shadow-[0_22px_40px_-28px_rgba(225,29,72,0.42)] active:scale-[0.98]"
+                className="text-xs font-semibold text-slate-400 transition-colors hover:text-rose-500 active:scale-95"
               >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-rose-500">Zona crítica</p>
-                    <p className="mt-1 text-sm font-black text-rose-700">Excluir minha conta permanentemente</p>
-                    <p className="mt-1 text-[11px] font-semibold leading-4 text-rose-500/90">
-                      Remove seu acesso e desativa seus dados pessoais.
-                    </p>
-                  </div>
-                  <div className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-rose-200 bg-white text-rose-600 shadow-[0_12px_24px_-18px_rgba(225,29,72,0.45)] transition-transform duration-200 group-hover:scale-105">
-                    <Trash size={18} weight="bold" />
-                  </div>
-                </div>
+                Excluir minha conta
               </button>
-              <p className="mt-3 px-6 text-center text-[10px] font-bold text-slate-400">
-                Ao excluir sua conta, todos os seus dados pessoais serão desativados de nossa base, conforme a LGPD.
-              </p>
             </section>
+          )}
           )}
         </div>
       </div>

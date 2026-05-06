@@ -1402,7 +1402,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         const audio = notificationAudioRef.current;
         audio.currentTime = 0;
         audio.play().then(() => {
-          setTimeout(() => { audio.pause(); audio.currentTime = 0; }, 3000);
+          setTimeout(() => { audio.pause(); audio.currentTime = 0; }, 4000);
         }).catch(() => {
           const context = audioContextRef.current || new AudioContext();
           audioContextRef.current = context;
