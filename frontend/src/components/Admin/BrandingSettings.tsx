@@ -185,7 +185,7 @@ export const BrandingSettings = ({
   const logoPreview = resolveAssetUrl(branding.logoUrl) || branding.logoFile || "";
   const bannerPreview = resolveAssetUrl(branding.bannerUrl) || branding.bannerFile || "";
   const orderSoundValue = String(branding.orderNotificationSound || '').trim();
-  const orderSoundIsCustom = /^(https?:\/\/|\/)/i.test(orderSoundValue);
+  const orderSoundIsCustom = /^(https?:\/\/|\/|data:|custom:)/i.test(orderSoundValue);
   return (
 
     <div className="bg-white/95 rounded-2xl shadow-[0_16px_36px_-28px_rgba(15,23,42,0.35)] border border-slate-200 overflow-hidden">
@@ -835,7 +835,7 @@ export const BrandingSettings = ({
                     return;
                   }
                   if (next === 'custom') {
-                    if (!orderSoundIsCustom) handleChange('orderNotificationSound', '');
+                    handleChange('orderNotificationSound', 'custom:');
                     return;
                   }
                   handleChange('orderNotificationSound', next);
@@ -849,14 +849,32 @@ export const BrandingSettings = ({
                 <option value="custom">URL personalizada (MP3/OGG/WAV)</option>
               </select>
               {orderSoundIsCustom && (
-                <input
-                  type="url"
-                  value={orderSoundIsCustom ? orderSoundValue : ''}
-                  onChange={(event) => handleChange('orderNotificationSound', event.target.value)}
-                  className="w-full border border-gray-200 rounded-xl p-3 bg-white/90 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors text-sm"
-                  placeholder="https://exemplo.com/vinheta.mp3"
-                />
-              )}
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 cursor-pointer hover:border-brand-primary hover:bg-brand-primary/5 transition-colors">
+                    <span className="text-xs font-semibold text-slate-600">Enviar arquivo de áudio (MP3, WAV, OGG — máx 1MB)</span>
+                    <input
+                      type="file"
+                      accept="audio/mpeg,audio/wav,audio/ogg,audio/mp3,.mp3,.wav,.ogg"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        if (file.size > 1024 * 1024) { alert("Arquivo muito grande. Máximo 1MB."); return; }
+                        const reader = new FileReader();
+                        reader.onload = () => { handleChange("orderNotificationSound", String(reader.result || "")); };
+                        reader.readAsDataURL(file);
+                      }}
+                      className="hidden"
+                    />
+                  </label>
+                  {orderSoundValue.startsWith("data:") && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-semibold text-emerald-600 truncate flex-1">✓ Áudio carregado</span>
+                      <button type="button" onClick={() => { const a = new Audio(orderSoundValue); a.play().catch(() => {}); }} className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-700 active:scale-95">Testar</button>
+                      <button type="button" onClick={() => handleChange("orderNotificationSound", "")} className="rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 text-[11px] font-bold text-rose-600 active:scale-95">Remover</button>
+                    </div>
+                  )}
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
