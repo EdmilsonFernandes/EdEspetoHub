@@ -735,34 +735,25 @@ function OrderCard({
               </div>
             </div>
           ) : null}
-          {isCancelled && String(order.canceledReason || '').trim() && (
-            <div className="border-t border-rose-100 bg-rose-50/80 px-3 py-2.5 text-[11px] text-rose-700">
-              <span className="font-bold">Cancelado pelo estabelecimento:</span> {order.canceledReason}
-            </div>
-          )}
-          {isCancelled && !String(order.canceledReason || '').trim() && (
-            <div className="border-t border-rose-100 bg-rose-50/80 px-3 py-2.5 text-[11px] text-rose-600">
-              Pedido cancelado
-            </div>
-          )}
-          {isCancelled && ['pix','credito','debito','credit_card','debit_card'].includes(String(order.paymentMethod || order.payment || '').toLowerCase()) && String(order.paymentStatus || '').toUpperCase() === 'PAID' && !order.refundStatus && (
-            <div className="border-t border-sky-100 bg-sky-50 px-3 py-2 text-[11px] text-sky-700">
-              <span className="font-semibold">Reembolso em análise</span> {'\u2014'} o estabelecimento está processando a devolução do valor pago.
-            </div>
-          )}
-          {isCancelled && order.refundStatus === 'REFUNDED' && (
-            <div className="border-t border-emerald-100 bg-emerald-50 px-3 py-2 text-[11px] text-emerald-700 font-semibold">
-              ✓ Reembolso processado{order.refundAmount ? ` — ${formatCurrency(order.refundAmount)}` : ''}
-            </div>
-          )}
-          {isCancelled && order.refundStatus === 'PARTIALLY_REFUNDED' && (
-            <div className="border-t border-amber-100 bg-amber-50 px-3 py-2 text-[11px] text-amber-700 font-semibold">
-              ✓ Reembolso parcial processado{order.refundAmount ? ` — ${formatCurrency(order.refundAmount)}` : ''}
-            </div>
-          )}
-          {isCancelled && order.refundStatus === 'DENIED' && (
-            <div className="border-t border-rose-100 bg-rose-50 px-3 py-2 text-[11px] text-rose-700">
-              <span className="font-semibold">Reembolso não aprovado</span>{order.refundReason ? ` — ${order.refundReason}` : ''}. Em caso de dúvidas, entre em contato com o estabelecimento.
+          {isCancelled && (
+            <div className="border-t border-slate-100 px-3 py-2.5 flex flex-wrap items-center gap-2">
+              {String(order.canceledReason || "").trim() ? (
+                <span className="text-[11px] text-slate-500"><span className="font-semibold text-slate-600">Motivo:</span> {order.canceledReason}</span>
+              ) : (
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">Cancelado</span>
+              )}
+              {order.refundStatus === "REFUNDED" && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-700">✓ Reembolsado{order.refundAmount ? ` ${formatCurrency(order.refundAmount)}` : ""}</span>
+              )}
+              {order.refundStatus === "PARTIALLY_REFUNDED" && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2 py-0.5 text-[10px] font-bold text-amber-700">✓ Parcial{order.refundAmount ? ` ${formatCurrency(order.refundAmount)}` : ""}</span>
+              )}
+              {order.refundStatus === "DENIED" && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 border border-rose-200 px-2 py-0.5 text-[10px] font-bold text-rose-600">Não aprovado</span>
+              )}
+              {["pix","credito","debito","credit_card","debit_card"].includes(String(order.paymentMethod || order.payment || "").toLowerCase()) && String(order.paymentStatus || "").toUpperCase() === "PAID" && !order.refundStatus && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-sky-50 border border-sky-200 px-2 py-0.5 text-[10px] font-semibold text-sky-600">Reembolso em análise</span>
+              )}
             </div>
           )}
           {['DELIVERING', 'IN_DELIVERY', 'DISPATCHED'].includes(normalizeStatus(order.status)) && details?.delivery?.motoboy?.name && (
