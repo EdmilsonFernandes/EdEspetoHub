@@ -2592,9 +2592,11 @@ export function MarketplacePage() {
                   <div className="mb-0.5 flex items-center gap-1.5">
                     <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-4 w-4 shrink-0 rounded-[0.4rem] object-cover shadow-[0_2px_6px_-2px_rgba(21,58,76,0.3)]" />
                     <p className="truncate text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
-                      {isCustomerLogged
-                        ? `${(() => { const h = new Date().getHours(); return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'; })()}, ${customerDisplayName.split(' ')[0]} 👋`
-                        : `${(() => { const h = new Date().getHours(); return h < 12 ? '☀️ Bom dia' : h < 18 ? '🌤️ Boa tarde' : '🌙 Boa noite'; })()} — o que vai pedir hoje?`}
+                      {selectedCondominium
+                        ? `🏢 ${String(selectedCondominium.name || "Feira").slice(0, 20)}`
+                        : isCustomerLogged
+                        ? `${(() => { const h = new Date().getHours(); return h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite"; })()}, ${customerDisplayName.split(" ")[0]} 👋`
+                        : `${(() => { const h = new Date().getHours(); return h < 12 ? "☀️ Bom dia" : h < 18 ? "🌤️ Boa tarde" : "🌙 Boa noite"; })()} — o que vai pedir hoje?`}
                     </p>
                   </div>
                   <button
@@ -3004,9 +3006,9 @@ export function MarketplacePage() {
                               </span>
                             </div>
                           ) : null}
-                          <p className="truncate text-[15px] font-black text-slate-900 leading-snug">Veja lojas no condomínio</p>
+                          <p className="truncate text-[15px] font-black text-slate-900 leading-snug">Feiras e eventos perto de você</p>
                           <p className="mt-0.5 truncate text-[11px] font-medium text-slate-400">
-                            {condominiums.length} condomínio{condominiums.length === 1 ? '' : 's'} disponível{condominiums.length === 1 ? '' : 'is'}
+                            {condominiums.length} {condominiums.length === 1 ? 'local disponível' : 'locais disponíveis'}
                           </p>
                         </div>
 
