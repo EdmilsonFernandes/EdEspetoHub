@@ -1280,9 +1280,9 @@ export const MenuView = ({
           </div>
         )}
         {preOrderBlocked ? (
-          <div className="rounded-[1.75rem] border border-sky-100 bg-[linear-gradient(135deg,rgba(240,249,255,0.96)_0%,rgba(255,255,255,0.98)_100%)] px-4 py-3.5 text-sm text-slate-700 shadow-[0_18px_34px_-28px_rgba(51,104,134,0.24)]">
+          <div className="rounded-[1.75rem] border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900 shadow-[0_18px_34px_-28px_rgba(245,158,11,0.2)]">
             <div className="flex items-start gap-3">
-              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-100 text-[#336886]">
+              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
                 <CalendarBlank size={18} weight="duotone" />
               </span>
               <span className="min-w-0">
@@ -1294,8 +1294,16 @@ export const MenuView = ({
             </div>
           </div>
         ) : !canOrder ? (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-            Pedidos online desativados para esta loja. Consulte o cardápio e faça o pedido no balcão/mesa.
+          <div className="rounded-[1.75rem] border border-indigo-200 bg-indigo-50 px-4 py-4 shadow-[0_12px_24px_-18px_rgba(99,102,241,0.15)]">
+            <div className="flex items-start gap-3">
+              <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-600">
+                <Storefront size={18} weight="duotone" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-sm font-black text-indigo-900">Apenas cardápio</span>
+                <span className="mt-1 block text-xs font-medium leading-relaxed text-indigo-700/80">Esta loja não aceita pedidos online. Consulte os produtos e faça o pedido presencialmente.</span>
+              </span>
+            </div>
           </div>
         ) : null}
         {filteredGrouped.map((category, index) => {

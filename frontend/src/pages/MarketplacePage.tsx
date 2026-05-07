@@ -2528,7 +2528,7 @@ export function MarketplacePage() {
               className="group block overflow-hidden rounded-[1.85rem] border border-white/80 bg-white shadow-[0_28px_70px_-32px_rgba(15,23,42,0.72)] transition-all duration-200 ease-out active:scale-[0.985]"
               aria-label="Criar minha loja no Já no Caminho"
             >
-              <div className="relative aspect-[16/6] bg-slate-950">
+              <div className="relative aspect-[3/4] bg-slate-950">
                 <img
                   src="/marketing/mpv2.png"
                   alt="Banner de integração com Mercado Pago no Já no Caminho"
