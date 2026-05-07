@@ -23,7 +23,7 @@ registerAuthProcessors(transporter);
 registerCustomerProcessors(transporter);
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '5mb' }));
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
 // Mount on both /v1 (new) and /api (backward compat with frontend)
