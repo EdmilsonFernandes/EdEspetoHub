@@ -744,22 +744,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     if (!Number.isFinite(raw)) return fallback;
     return Math.min(prepSlaMinutes, Math.max(1, Math.round(raw)));
   }, [auth?.store?.settings?.prepAttentionMinutes, prepSlaMinutes]);
-  const configuredOrderNotificationSound = liveSoundSetting;
-  const [liveSoundSetting, setLiveSoundSetting] = useState(String(auth?.store?.settings?.orderNotificationSound || "").trim());
-  const [liveSoundDuration, setLiveSoundDuration] = useState(Number(auth?.store?.settings?.orderNotificationSoundDuration || 4));
-  useEffect(() => {
-    if (!storeIdentifier) return;
-    const fetchSound = () => {
-      fetch(`/api/stores/slug/${storeSlug || storeIdentifier}`).then(r => r.ok ? r.json() : null).then(d => {
-        if (d?.settings?.orderNotificationSound !== undefined) setLiveSoundSetting(String(d.settings.orderNotificationSound || "").trim());
-        if (d?.settings?.orderNotificationSoundDuration !== undefined) setLiveSoundDuration(Number(d.settings.orderNotificationSoundDuration || 4));
-      }).catch(() => {});
-    };
-    fetchSound();
-    const interval = setInterval(fetchSound, 60000);
-    return () => clearInterval(interval);
-  }, [storeIdentifier]);
-  const soundDurationMs = liveSoundDuration * 1000;
+  const configuredOrderNotificationSound = useMemo(
+    () => String(auth?.store?.settings?.orderNotificationSound || '').trim(),
+    [auth?.store?.settings?.orderNotificationSound]
+  );
+  const soundDurationMs = Number(auth?.store?.settings?.orderNotificationSoundDuration || 4) * 1000;
   const PREP_SLA_MS = prepSlaMinutes * 60 * 1000;
   const PREP_ATTENTION_MS = prepAttentionMinutes * 60 * 1000;
   const [queue, setQueue] = useState([]);
