@@ -1317,9 +1317,10 @@ export function CreateStore() {
   };
 
   const scrollToStep = (stepId: number) => {
-    if (stepId > currentStep && !canAdvanceFromStep(currentStep)) {
-      showStepValidation(currentStep);
-      return;
+    if (stepId > currentStep) {
+      for (let s = currentStep; s < stepId; s++) {
+        if (!canAdvanceFromStep(s)) { showStepValidation(s); return; }
+      }
     }
     const target =
       stepId === 1
