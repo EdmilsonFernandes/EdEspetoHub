@@ -2691,39 +2691,32 @@ export function CreateStore() {
             </div>
             <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto text-sm text-slate-600">
               <section className="space-y-2">
-                <h3 className="text-base font-semibold text-slate-900">1. Plataforma e finalidade</h3>
-                <p>
-                  A plataforma Já no Caminho fornece ferramentas para criar, publicar e gerir lojas digitais.
-                  O usuário é responsável pelo conteúdo, preços, ofertas e atendimento.
-                </p>
+                <h3 className="text-base font-semibold text-slate-900">1. Natureza do Serviço</h3>
+                <p>A Plataforma atua como intermediador tecnológico, disponibilizando ferramentas para que estabelecimentos ofereçam seus produtos e serviços. Não preparamos, vendemos, entregamos nem somos responsáveis pelos produtos comercializados pelas Lojas.</p>
               </section>
               <section className="space-y-2">
-                <h3 className="text-base font-semibold text-slate-900">2. Cadastro e veracidade</h3>
-                <p>
-                  Informações fornecidas devem ser verdadeiras e atualizadas. Dados incorretos podem impedir
-                  a ativação da loja e o recebimento de pagamentos.
-                </p>
+                <h3 className="text-base font-semibold text-slate-900">2. Responsabilidade do Estabelecimento</h3>
+                <p>As Lojas parceiras são independentes e únicas responsáveis pelos produtos, qualidade do atendimento, cumprimento de normas sanitárias, fiscais e legais. A relação com a Plataforma é de prestação de serviço tecnológico, sem vínculo trabalhista ou societário.</p>
               </section>
               <section className="space-y-2">
-                <h3 className="text-base font-semibold text-slate-900">3. Pagamentos e acesso</h3>
-                <p>
-                  A ativação completa depende da confirmação do pagamento do plano escolhido. Boletos podem
-                  levar até 3 dias úteis para compensar.
-                </p>
+                <h3 className="text-base font-semibold text-slate-900">3. Entregadores e Operação de Entrega</h3>
+                <p>Entregadores cadastrados são profissionais independentes vinculados a estabelecimentos mediante aprovação do próprio estabelecimento. A plataforma disponibiliza ferramentas de cadastro e validação inicial de apoio. Não existe vínculo empregatício entre a plataforma e os entregadores.</p>
               </section>
               <section className="space-y-2">
-                <h3 className="text-base font-semibold text-slate-900">4. LGPD e privacidade</h3>
-                <p>
-                  Os dados pessoais são tratados para cadastro, autenticação, cobrança e suporte, conforme a
-                  LGPD. O usuário pode solicitar atualização ou exclusão quando aplicável.
-                </p>
+                <h3 className="text-base font-semibold text-slate-900">4. Pagamentos e Reembolsos</h3>
+                <p>A Plataforma utiliza gateways de terceiros (Mercado Pago). O lojista conecta sua própria conta e recebe diretamente. A plataforma não cobra comissão por pedido — apenas mensalidade. Reembolsos são processados pelo estabelecimento quando aplicável.</p>
               </section>
               <section className="space-y-2">
-                <h3 className="text-base font-semibold text-slate-900">5. Uso adequado</h3>
-                <p>
-                  É proibido utilizar a plataforma para fins ilegais ou fraudulentos. Contas em desacordo
-                  podem ser suspensas.
-                </p>
+                <h3 className="text-base font-semibold text-slate-900">5. LGPD e Privacidade</h3>
+                <p>Dados pessoais são tratados para cadastro, autenticação, cobrança e suporte, conforme a LGPD. Para entregadores, coletamos adicionalmente documentos (CNH, selfie, CRLV) com base no consentimento do titular. O usuário pode solicitar exclusão de dados a qualquer momento.</p>
+              </section>
+              <section className="space-y-2">
+                <h3 className="text-base font-semibold text-slate-900">6. Cadastro e Uso Adequado</h3>
+                <p>Informações fornecidas devem ser verdadeiras e atualizadas. É proibido utilizar a plataforma para fins ilegais ou fraudulentos. Contas em desacordo podem ser suspensas sem aviso prévio.</p>
+              </section>
+              <section className="space-y-2">
+                <h3 className="text-base font-semibold text-slate-900">7. Termos Completos</h3>
+                <p>Estes são os pontos principais. Os termos completos, incluindo isenção de responsabilidade, foro e modificações, estão disponíveis em <a href="/terms" target="_blank" className="text-brand-primary underline font-semibold">janocaminho.com.br/terms</a>.</p>
               </section>
             </div>
             <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end">
