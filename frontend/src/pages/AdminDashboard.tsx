@@ -2852,6 +2852,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         deliveryRadiusKm: brandingDraft.deliveryRadiusKm,
         deliveryFee: brandingDraft.deliveryFee,
         orderNotificationSound: brandingDraft.orderNotificationSound?.trim() ?? '',
+        orderNotificationSoundDuration: brandingDraft.orderNotificationSoundDuration || 4,
         postalEnabled: brandingDraft.postalEnabled === true,
         postalOriginZip: brandingDraft.postalOriginZip,
         prepBaseMinutes: brandingDraft.prepBaseMinutes,
