@@ -684,6 +684,11 @@ Backup de configuracao/runtime (envs, chaves e export opcional do SSM):
 sh scripts/backup-config.sh
 ```
 
+Backup de configuracao a cada 15 dias:
+```bash
+MIN_INTERVAL_HOURS=360 sh scripts/backup-config.sh
+```
+
 Backup de configuracao para bucket privado, incluindo export dos parametros SSM referenciados no deploy:
 ```bash
 CONFIG_BACKUP_S3_BUCKET=jnc-config-backups-prod-222984221398 \
@@ -713,7 +718,7 @@ ls -lah /var/backups/janocaminho
 
 Exemplo de cron para backup privado de configuracao:
 ```bash
-# 15 2 * * * BACKUP_DIR=/home/ec2-user/backups/chamanoespeto/config KEEP_DAYS=30 CONFIG_BACKUP_S3_BUCKET=jnc-config-backups-prod-222984221398 CONFIG_BACKUP_S3_PREFIX=config/runtime CONFIG_BACKUP_SSM_EXPORT_MODE=required sh /home/ec2-user/EdEspetoHub/scripts/backup-config.sh >> /home/ec2-user/config-backup.log 2>&1
+# 15 2 * * * BACKUP_DIR=/home/ec2-user/backups/chamanoespeto/config KEEP_DAYS=30 MIN_INTERVAL_HOURS=360 CONFIG_BACKUP_S3_BUCKET=jnc-config-backups-prod-222984221398 CONFIG_BACKUP_S3_PREFIX=config/runtime CONFIG_BACKUP_SSM_EXPORT_MODE=required sh /home/ec2-user/EdEspetoHub/scripts/backup-config.sh >> /home/ec2-user/config-backup.log 2>&1
 ```
 
 Aplicar lifecycle no bucket privado de configuracao:

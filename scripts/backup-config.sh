@@ -4,6 +4,7 @@ set -eu
 ROOT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 BACKUP_DIR="${BACKUP_DIR:-/var/backups/janocaminho/config}"
 KEEP_DAYS="${KEEP_DAYS:-30}"
+MIN_INTERVAL_HOURS="${MIN_INTERVAL_HOURS:-0}"
 S3_BUCKET="${CONFIG_BACKUP_S3_BUCKET:-${BACKUP_S3_BUCKET:-}}"
 S3_PREFIX="${CONFIG_BACKUP_S3_PREFIX:-${BACKUP_S3_PREFIX:-config/runtime}}"
 S3_STORAGE_CLASS="${CONFIG_BACKUP_S3_STORAGE_CLASS:-${BACKUP_S3_STORAGE_CLASS:-STANDARD}}"
@@ -17,6 +18,21 @@ STAGE_DIR="$TMP_DIR/config-$TS"
 ARCHIVE="$BACKUP_DIR/config-backup-$TS.tar.gz"
 
 mkdir -p "$BACKUP_DIR" "$STAGE_DIR"
+
+if [ "$MIN_INTERVAL_HOURS" -gt 0 ]; then
+  latest_backup="$(ls -1t "$BACKUP_DIR"/config-backup-*.tar.gz 2>/dev/null | head -n 1 || true)"
+  if [ -n "$latest_backup" ]; then
+    now_epoch="$(date -u +%s)"
+    latest_epoch="$(stat -c %Y "$latest_backup" 2>/dev/null || echo 0)"
+    min_interval_seconds="$((MIN_INTERVAL_HOURS * 3600))"
+    age_seconds="$((now_epoch - latest_epoch))"
+    if [ "$age_seconds" -lt "$min_interval_seconds" ]; then
+      echo "Skip: latest config backup is ${age_seconds}s old (< ${min_interval_seconds}s)."
+      rm -rf "$TMP_DIR"
+      exit 0
+    fi
+  fi
+fi
 
 copy_if_exists() {
   src="$1"

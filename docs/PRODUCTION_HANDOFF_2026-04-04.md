@@ -62,6 +62,7 @@ What it does:
 - Can upload the archive to a private S3 bucket with server-side encryption.
 - Adds metadata and checksums.
 - Keeps backups with retention (`KEEP_DAYS`, default `30`).
+- Can skip runs until a minimum interval is reached (`MIN_INTERVAL_HOURS`).
 
 Run manually:
 
@@ -87,11 +88,23 @@ CONFIG_BACKUP_SSM_EXPORT_MODE=required \
 sh scripts/backup-config.sh
 ```
 
+Approx. every 15 days:
+
+```bash
+BACKUP_DIR=/var/backups/chamanoespeto/config \
+KEEP_DAYS=60 \
+MIN_INTERVAL_HOURS=360 \
+CONFIG_BACKUP_S3_BUCKET=jnc-config-backups-prod-222984221398 \
+CONFIG_BACKUP_S3_PREFIX=config/runtime \
+CONFIG_BACKUP_SSM_EXPORT_MODE=required \
+sh scripts/backup-config.sh
+```
+
 ## 4) Recommended Cron (Daily)
 
 ```bash
 ( crontab -l 2>/dev/null | grep -v 'backup-config.sh' ; \
-  echo '15 2 * * * BACKUP_DIR=/var/backups/chamanoespeto/config KEEP_DAYS=30 CONFIG_BACKUP_S3_BUCKET=jnc-config-backups-prod-222984221398 CONFIG_BACKUP_S3_PREFIX=config/runtime CONFIG_BACKUP_SSM_EXPORT_MODE=required sh /home/ec2-user/EdEspetoHub/scripts/backup-config.sh >> /var/log/config-backup.log 2>&1' \
+  echo '15 2 * * * BACKUP_DIR=/var/backups/chamanoespeto/config KEEP_DAYS=30 MIN_INTERVAL_HOURS=360 CONFIG_BACKUP_S3_BUCKET=jnc-config-backups-prod-222984221398 CONFIG_BACKUP_S3_PREFIX=config/runtime CONFIG_BACKUP_SSM_EXPORT_MODE=required sh /home/ec2-user/EdEspetoHub/scripts/backup-config.sh >> /var/log/config-backup.log 2>&1' \
 ) | crontab -
 ```
 
