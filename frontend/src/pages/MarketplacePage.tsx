@@ -3441,7 +3441,7 @@ export function MarketplacePage() {
                       >
                         {/* Banner + logo wrapper — sem overflow-hidden para o logo não ser cortado */}
                         <div className="relative">
-                          <div className="relative h-[78px] overflow-hidden rounded-t-[1.45rem] bg-slate-100">
+                          <div className="relative h-[56px] overflow-hidden rounded-t-[1.45rem] bg-slate-100">
                             <img
                               src={store.banner || store.logo}
                               alt={store.name}
@@ -3537,7 +3537,7 @@ export function MarketplacePage() {
                     >
                       {/* Banner + overlapping logo wrapper */}
                       <div className="relative">
-                        <div className="relative h-[72px] overflow-hidden rounded-t-[1.45rem] bg-slate-100">
+                        <div className="relative h-[56px] overflow-hidden rounded-t-[1.45rem] bg-slate-100">
                           <img
                             src={store.banner || store.logo}
                             alt=""
