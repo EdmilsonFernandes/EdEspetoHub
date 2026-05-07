@@ -744,11 +744,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     if (!Number.isFinite(raw)) return fallback;
     return Math.min(prepSlaMinutes, Math.max(1, Math.round(raw)));
   }, [auth?.store?.settings?.prepAttentionMinutes, prepSlaMinutes]);
-  const configuredOrderNotificationSound = useMemo(
-    () => String(auth?.store?.settings?.orderNotificationSound || '').trim(),
-    [auth?.store?.settings?.orderNotificationSound]
-  );
-  const soundDurationMs = Number(auth?.store?.settings?.orderNotificationSoundDuration || 4) * 1000;
+  const [liveSoundSetting, setLiveSoundSetting] = useState(String(auth?.store?.settings?.orderNotificationSound || "").trim());
+  const [liveSoundDuration, setLiveSoundDuration] = useState(Number(auth?.store?.settings?.orderNotificationSoundDuration || 4));
+  const configuredOrderNotificationSound = liveSoundSetting;
+  const soundDurationMs = liveSoundDuration * 1000;
   const PREP_SLA_MS = prepSlaMinutes * 60 * 1000;
   const PREP_ATTENTION_MS = prepAttentionMinutes * 60 * 1000;
   const [queue, setQueue] = useState([]);
@@ -769,6 +768,18 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       return '';
     }
   }, []);
+  useEffect(() => {
+    if (!storeSlug) return;
+    const fetchSound = () => {
+      fetch("/api/stores/slug/" + storeSlug).then(function(r) { return r.ok ? r.json() : null; }).then(function(d) {
+        if (d && d.settings && d.settings.orderNotificationSound !== undefined) setLiveSoundSetting(String(d.settings.orderNotificationSound || "").trim());
+        if (d && d.settings && d.settings.orderNotificationSoundDuration !== undefined) setLiveSoundDuration(Number(d.settings.orderNotificationSoundDuration || 4));
+      }).catch(function() {});
+    };
+    fetchSound();
+    var iv = setInterval(fetchSound, 60000);
+    return function() { clearInterval(iv); };
+  }, [storeSlug]);
   const [activeTab, setActiveTab] = useState<'queue' | 'inroute' | 'completed'>(
     forcedTab === 'inroute' || forcedTab === 'completed' ? forcedTab : 'queue'
   );
