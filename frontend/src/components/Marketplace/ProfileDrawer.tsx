@@ -638,7 +638,7 @@ export function ProfileDrawer({
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <p className="text-[11px] font-black text-slate-900 tracking-tight">Já no Caminho</p>
-              <p className="text-[8px] font-medium text-slate-300">
+              <p className="text-[8px] font-medium text-slate-400">
                 {versionLabel || 'v0.0.0'}
               </p>
               <p className="flex items-center gap-1 text-[9px] font-semibold text-emerald-600">

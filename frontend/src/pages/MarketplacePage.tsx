@@ -2927,6 +2927,15 @@ export function MarketplacePage() {
                         <Buildings size={13} weight="duotone" />
                         Trocar
                       </button>
+                      <button
+                        type="button"
+                        onClick={() => { clearCondominiumSelection(); }}
+                        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-rose-200/80 bg-white/88 text-rose-500 shadow-[0_12px_24px_-20px_rgba(225,29,72,0.18)] transition hover:bg-rose-50 hover:border-rose-300 active:scale-95"
+                        aria-label="Sair do condomínio"
+                        title="Voltar ao hub principal"
+                      >
+                        <X size={14} weight="bold" />
+                      </button>
                     </div>
                     <div className="mt-4 flex flex-wrap items-center gap-2">
                       <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold ${
