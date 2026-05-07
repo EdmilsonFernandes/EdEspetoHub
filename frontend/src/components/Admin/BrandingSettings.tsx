@@ -875,6 +875,18 @@ export const BrandingSettings = ({
                   )}
                 </div>
               )}
+            <div className="mt-3">
+              <label className="text-xs font-semibold text-slate-600">Duração da vinheta (segundos)</label>
+              <input
+                type="number"
+                min="1"
+                max="15"
+                step="1"
+                value={branding.orderNotificationSoundDuration || 4}
+                onChange={(e) => handleChange("orderNotificationSoundDuration", Number(e.target.value) || 4)}
+                className="mt-1 w-24 rounded-xl border border-gray-200 px-3 py-2 text-sm bg-white/90 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none"
+              />
+            </div>
             </div>
           </div>
         </div>

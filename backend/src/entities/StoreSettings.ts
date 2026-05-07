@@ -125,6 +125,8 @@ export class StoreSettings
 
   @Column({ name: 'order_notification_sound', type: 'text', nullable: true })
   orderNotificationSound?: string | null;
+  @Column({ name: "order_notification_sound_duration", type: "int", default: 4, nullable: true })
+  orderNotificationSoundDuration?: number | null;
 
   @Column({
     name: 'social_links',

@@ -2064,4 +2064,7 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS refunded_at TIMESTAMPTZ DEFAULT NULL,
     ADD COLUMN IF NOT EXISTS refund_provider_id TEXT DEFAULT NULL;
   `);
+  await AppDataSource.query(`
+    ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS order_notification_sound_duration INT DEFAULT 4;
+  `);
 }

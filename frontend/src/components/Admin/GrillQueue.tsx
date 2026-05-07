@@ -748,6 +748,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     () => String(auth?.store?.settings?.orderNotificationSound || '').trim(),
     [auth?.store?.settings?.orderNotificationSound]
   );
+  const soundDurationMs = Number(auth?.store?.settings?.orderNotificationSoundDuration || 4) * 1000;
   const PREP_SLA_MS = prepSlaMinutes * 60 * 1000;
   const PREP_ATTENTION_MS = prepAttentionMinutes * 60 * 1000;
   const [queue, setQueue] = useState([]);
@@ -1402,7 +1403,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         const audio = notificationAudioRef.current;
         audio.currentTime = 0;
         audio.play().then(() => {
-          setTimeout(() => { audio.pause(); audio.currentTime = 0; }, 4000);
+          setTimeout(() => { audio.pause(); audio.currentTime = 0; }, soundDurationMs);
         }).catch(() => {
           const context = audioContextRef.current || new AudioContext();
           audioContextRef.current = context;
