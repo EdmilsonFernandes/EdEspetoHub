@@ -516,11 +516,14 @@ static async markItemsAsPrinted(req: Request, res: Response) {
               qrCodeBase64: orderPayment.qrCodeBase64 || null,
               qrCodeText: orderPayment.qrCodeText || null,
               expiresAt: orderPayment.expiresAt || null,
+              paidAt: orderPayment.paidAt || null,
+              failedAt: orderPayment.failedAt || null,
               refundStatus: orderPayment.refundStatus || null,
               refundAmount: orderPayment.refundAmount || null,
               refundReason: orderPayment.refundReason || null,
             }
           : null,
+        canceledAt: order.canceledAt || null,
         cashTendered: order.cashTendered ?? null,
         total: order.total,
         deliveryFee: order.deliveryFee ?? null,
@@ -559,6 +562,7 @@ static async markItemsAsPrinted(req: Request, res: Response) {
             }
           : null,
         createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
         queuePosition,
         queueSize,
         items: (order.items || []).map((item) => ({

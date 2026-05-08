@@ -31,6 +31,7 @@ import { Subscription } from '../entities/Subscription';
 import { Store } from '../entities/Store';
 import { PushNotificationService } from '../services/PushNotificationService';
 import { CustomerSecurityService } from '../services/CustomerSecurityService';
+import { buildOrderTimelineJson } from '../utils/orderTimeline';
 
 const storeRepository = new StoreRepository();
 const subscriptionService = new SubscriptionService();
@@ -743,13 +744,14 @@ export class PlatformAdminController {
           const result = await manager.query(
             `
               UPDATE orders o
-                 SET status = 'delivered'
+                 SET status = 'delivered',
+                     status_timeline = COALESCE(o.status_timeline, '[]'::jsonb) || $${params.length + 1}::jsonb
                 FROM order_deliveries od, stores s
                WHERE o.id = od.order_id
                  AND s.id = o.store_id
                  AND ${baseWhere}
             `,
-            params
+            [ ...params, buildOrderTimelineJson('delivered') ]
           );
           return Number((result && (result.rowCount ?? result.affectedRows)) || 0);
         });

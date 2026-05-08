@@ -18,6 +18,7 @@ import { ZipCodeLookupService } from './ZipCodeLookupService';
 import { isAllowlistedEmail, isDisposableEmailDomain } from '../utils/emailRisk';
 import { CustomerSecurityService } from './CustomerSecurityService';
 import { GeoLocationService } from './GeoLocationService';
+import { buildOrderTimelineJson } from '../utils/orderTimeline';
 
 type AddressInput = {
   label?: string;
@@ -943,9 +944,10 @@ async setDefaultAddress(userId: string, addressId: string) {
         );
         await AppDataSource.query(
           `UPDATE orders SET payment_status = 'FAILED', status = 'cancelled',
-           canceled_reason = 'Pagamento não confirmado dentro do prazo.'
+           canceled_reason = 'Pagamento não confirmado dentro do prazo.',
+           status_timeline = COALESCE(status_timeline, '[]'::jsonb) || $2::jsonb
            WHERE id = $1 AND status = 'awaiting_payment'`,
-          [row.order_id]
+          [row.order_id, buildOrderTimelineJson('cancelled')]
         );
       }
     } catch { /* non-blocking — never break list */ }
@@ -1174,9 +1176,13 @@ async setDefaultAddress(userId: string, addressId: string) {
         `,
         [orderId, userId]
       );
+      try {
+        await manager.query(
+          "UPDATE orders SET status_timeline = COALESCE(status_timeline, '[]'::jsonb) || $1::jsonb WHERE id = $2",
+          [buildOrderTimelineJson('finished', saved?.customer_received_at || new Date()), orderId]
+        );
+      } catch {}
       return saved || order;
-      // Append to statusTimeline
-      try { await AppDataSource.query("UPDATE orders SET status_timeline = COALESCE(status_timeline, '[]'::jsonb) || $1::jsonb WHERE id = $2", [JSON.stringify([{status: "finished", at: new Date().toISOString()}]), orderId]); } catch {}
     });
 
     const storeId = String((result as any)?.store_id || '').trim();

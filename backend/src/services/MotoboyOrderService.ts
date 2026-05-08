@@ -22,6 +22,7 @@ import { MotoboyStoreRepository } from '../repositories/MotoboyStoreRepository';
 import { logger } from '../utils/logger';
 import { DeliveryBillingService } from './DeliveryBillingService';
 import { deliveryService } from './DeliveryService';
+import { appendOrderTimelineEntry } from '../utils/orderTimeline';
 /**
  * Provides MotoboyOrderService functionality.
  *
@@ -333,7 +334,7 @@ async startOrder(orderId: string, motoboy: Motoboy) {
     }
 
     order.status = 'finished';
-    order.statusTimeline = [...(Array.isArray(order.statusTimeline) ? order.statusTimeline : []), { status: "finished", at: new Date().toISOString() }];
+    order.statusTimeline = appendOrderTimelineEntry(order.statusTimeline, 'finished');
     const saved = await this.orderRepository.save(order);
     await this.deliveryBillingService.recordDelivery(saved);
     return saved;

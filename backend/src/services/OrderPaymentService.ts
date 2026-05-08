@@ -10,6 +10,7 @@ import { logger } from '../utils/logger';
 import { PaymentAuditService } from './PaymentAuditService';
 import { PushNotificationService } from './PushNotificationService';
 import { PAYMENT_AUDIT_ENTITY, PAYMENT_AUDIT_FLOW, PAYMENT_AUDIT_STAGE, resolveMercadoPagoStatusDetailLabel, resolveMercadoPagoStatusLabel } from '../utils/paymentAudit';
+import { buildOrderTimelineJson } from '../utils/orderTimeline';
 
 const ONLINE_METHOD_MAP: Record<string, 'PIX' | 'CREDIT_CARD'> = {
   pix: 'PIX',
@@ -170,8 +171,16 @@ export class OrderPaymentService {
         .set({ status: 'pending' })
         .where('id = :id AND status = :s', { id: row.orderId, s: 'awaiting_payment' })
         .execute();
-      // Append pending to timeline
-      try { await manager.query("UPDATE orders SET status_timeline = COALESCE(status_timeline, '[]'::jsonb) || $1::jsonb WHERE id = $2 AND status = 'pending'", [JSON.stringify([{status: "pending", at: new Date().toISOString()}]), row.orderId]); } catch {}
+      try {
+        await manager.query(
+          "UPDATE orders SET status_timeline = COALESCE(status_timeline, '[]'::jsonb) || $1::jsonb WHERE id = $2",
+          [buildOrderTimelineJson('payment', row.paidAt), row.orderId]
+        );
+        await manager.query(
+          "UPDATE orders SET status_timeline = COALESCE(status_timeline, '[]'::jsonb) || $1::jsonb WHERE id = $2 AND status = 'pending'",
+          [buildOrderTimelineJson('pending', row.paidAt), row.orderId]
+        );
+      } catch {}
     });
   }
 
@@ -210,6 +219,12 @@ export class OrderPaymentService {
       .set({ status: 'cancelled' })
       .where('id = :id AND status = :s', { id: row.orderId, s: 'awaiting_payment' })
       .execute();
+    try {
+      await AppDataSource.query(
+        "UPDATE orders SET status_timeline = COALESCE(status_timeline, '[]'::jsonb) || $1::jsonb WHERE id = $2 AND status = 'cancelled'",
+        [buildOrderTimelineJson('cancelled', row.failedAt), row.orderId]
+      );
+    } catch {}
   }
 
   async refreshFromProvider(orderPaymentId: string) {

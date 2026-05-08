@@ -10,6 +10,7 @@
 
 import { AppDataSource } from '../config/database';
 import { logger } from '../utils/logger';
+import { buildOrderTimelineJson } from '../utils/orderTimeline';
 
 const log = logger.child({ scope: 'AwaitingPaymentExpirationJob' });
 
@@ -40,6 +41,7 @@ export function scheduleAwaitingPaymentExpirationJob() {
           UPDATE orders
           SET status = 'cancelled',
               payment_status = 'FAILED',
+              status_timeline = COALESCE(status_timeline, '[]'::jsonb) || $2::jsonb,
               updated_at = NOW()
           WHERE status = 'awaiting_payment'
             AND created_at < NOW() - ($1 || ' minutes')::INTERVAL
@@ -50,7 +52,7 @@ export function scheduleAwaitingPaymentExpirationJob() {
             failed_at = NOW()
         WHERE order_id IN (SELECT id FROM cancelled)
           AND payment_status NOT IN ('PAID', 'FAILED')
-      `, [thresholdMinutes]);
+      `, [thresholdMinutes, buildOrderTimelineJson('cancelled')]);
 
       const count = result?.[1]?.rowCount ?? 0;
       if (count > 0) {

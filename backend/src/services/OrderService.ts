@@ -38,6 +38,7 @@ import { env } from '../config/env';
 import { CustomerSecurityService } from './CustomerSecurityService';
 import { resolveMercadoPagoStatusDetailLabel, resolveMercadoPagoStatusLabel } from '../utils/paymentAudit';
 import { logger } from '../utils/logger';
+import { appendOrderTimelineEntry, buildOrderTimelineJson } from '../utils/orderTimeline';
 /**
  * Provides OrderService functionality.
  *
@@ -78,6 +79,11 @@ export class OrderService
   private readonly anonymousOrderGuestLimit = 4;
   private readonly anonymousOrderIpWindowMinutes = 20;
   private readonly anonymousOrderIpLimit = 6;
+
+  private createTimelineJson(status: string, at?: Date | string | null) {
+    return buildOrderTimelineJson(status, at);
+  }
+
   private normalizePhone(value?: string | null) {
     return String(value || '').replace(/\D/g, '').slice(0, 11);
   }
@@ -651,7 +657,8 @@ private async reconcileDeliveredOrdersByStore(storeId: string) {
     await AppDataSource.query(
       `
         UPDATE orders o
-           SET status = 'delivered'
+           SET status = 'delivered',
+               status_timeline = COALESCE(o.status_timeline, '[]'::jsonb) || $2::jsonb
           FROM order_deliveries od
          WHERE o.id = od.order_id
            AND o.store_id = $1
@@ -659,7 +666,7 @@ private async reconcileDeliveredOrdersByStore(storeId: string) {
            AND o.status = 'in_delivery'
            AND od.status = 'DELIVERED'
       `,
-      [storeId]
+      [storeId, this.createTimelineJson('delivered')]
     );
 
     // Auto-close stale operational orders (no updates for 6h) to avoid stuck queue.
@@ -667,15 +674,16 @@ private async reconcileDeliveredOrdersByStore(storeId: string) {
       `
         UPDATE orders o
            SET status = 'done',
-               payment_status = CASE
-                 WHEN UPPER(COALESCE(o.payment_status, '')) = 'PAID' THEN 'PAID'
-                 ELSE 'PAID'
-               END
+               status_timeline = COALESCE(o.status_timeline, '[]'::jsonb) || $2::jsonb,
+                payment_status = CASE
+                  WHEN UPPER(COALESCE(o.payment_status, '')) = 'PAID' THEN 'PAID'
+                  ELSE 'PAID'
+                END
          WHERE o.store_id = $1
            AND o.status IN ('pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy')
            AND COALESCE(o.updated_at, o.created_at) <= (NOW() - INTERVAL '6 hours')
       `,
-      [storeId]
+      [storeId, this.createTimelineJson('done')]
     );
   }
 
@@ -714,7 +722,8 @@ private async reconcileDeliveredOrderById(orderId: string) {
     await AppDataSource.query(
       `
         UPDATE orders o
-           SET status = 'delivered'
+           SET status = 'delivered',
+               status_timeline = COALESCE(o.status_timeline, '[]'::jsonb) || $2::jsonb
           FROM order_deliveries od
          WHERE o.id = od.order_id
            AND o.id = $1
@@ -722,7 +731,7 @@ private async reconcileDeliveredOrderById(orderId: string) {
            AND o.status = 'in_delivery'
            AND od.status = 'DELIVERED'
       `,
-      [orderId]
+      [orderId, this.createTimelineJson('delivered')]
     );
   }
 
@@ -1246,6 +1255,11 @@ private async seedPostalShipmentFromCheckoutTx(
           saved.status = 'awaiting_payment';
         }
       }
+      if (saved.status !== 'awaiting_payment') {
+        const timeline = appendOrderTimelineEntry(saved.statusTimeline, 'pending', saved.createdAt);
+        await manager.getRepository(Order).update({ id: saved.id }, { statusTimeline: timeline as any });
+        saved.statusTimeline = timeline;
+      }
       return saved;
     });
     await this.registerAnonymousOrderAttempt(input, store.id);
@@ -1320,6 +1334,11 @@ private async seedPostalShipmentFromCheckoutTx(
           await manager.getRepository(Order).update({ id: saved.id }, { status: 'awaiting_payment' });
           saved.status = 'awaiting_payment';
         }
+      }
+      if (saved.status !== 'awaiting_payment') {
+        const timeline = appendOrderTimelineEntry(saved.statusTimeline, 'pending', saved.createdAt);
+        await manager.getRepository(Order).update({ id: saved.id }, { statusTimeline: timeline as any });
+        saved.statusTimeline = timeline;
       }
       return saved;
     });
@@ -1568,8 +1587,7 @@ private async seedPostalShipmentFromCheckoutTx(
       }
 
       lockedOrder.status = nextStatus;
-      const prevTimeline = Array.isArray(lockedOrder.statusTimeline) ? lockedOrder.statusTimeline : [];
-      lockedOrder.statusTimeline = [...prevTimeline, { status: nextStatus, at: new Date().toISOString() }];
+      lockedOrder.statusTimeline = appendOrderTimelineEntry(lockedOrder.statusTimeline, nextStatus);
       if (nextStatus === 'cancelled') {
         lockedOrder.canceledAt = new Date();
         lockedOrder.canceledReason = String(reason || '').trim() || null;
@@ -1755,7 +1773,7 @@ async reopenOrder(
 
     // Reopen finalized order back to the operational queue.
     order.status = 'pending';
-    order.statusTimeline = [{ status: "pending", at: new Date().toISOString() }];
+    order.statusTimeline = appendOrderTimelineEntry([], 'pending');
     return this.orderRepository.save(order);
   }
 

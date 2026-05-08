@@ -53,6 +53,60 @@ const normalizePaymentProvider = (value?: string | null) =>
 const getCustomerReceiptConfirmedAt = (order: any) =>
   order?.customerReceivedAt || order?.customer_received_at || null;
 
+const STEP_STATUS_ALIASES: Record<string, string[]> = {
+  payment: ['payment'],
+  pending: ['pending'],
+  preparing: ['preparing'],
+  ready: ['ready', 'ready_for_pickup', 'ready_for_delivery', 'waiting_for_motoboy'],
+  in_delivery: ['in_delivery', 'dispatched'],
+  delivered: ['delivered'],
+  finished: ['finished'],
+  done: ['done', 'paid'],
+  cancelled: ['cancelled'],
+};
+
+const getLastTimelineEntry = (order: any, stepId: string) => {
+  const aliases = STEP_STATUS_ALIASES[stepId] || [stepId];
+  const entries = Array.isArray(order?.statusTimeline) ? order.statusTimeline : [];
+  const matches = entries.filter((entry: any) => aliases.includes(String(entry?.status || '')));
+  return matches.length ? matches[matches.length - 1] : null;
+};
+
+const getStepTimestamp = (
+  order: any,
+  stepId: string,
+  options?: { hasOnlinePayment?: boolean; isPaymentApproved?: boolean }
+) => {
+  const timelineEntry = getLastTimelineEntry(order, stepId);
+  if (timelineEntry?.at) return timelineEntry.at;
+
+  if (stepId === 'payment') {
+    return order?.payment?.paidAt || order?.onlinePayment?.paidAt || null;
+  }
+  if (stepId === 'pending') {
+    if (options?.hasOnlinePayment && options?.isPaymentApproved) {
+      return order?.payment?.paidAt || order?.onlinePayment?.paidAt || order?.createdAt || null;
+    }
+    return order?.createdAt || null;
+  }
+  if (stepId === 'in_delivery') {
+    return order?.delivery?.inTransitAt || null;
+  }
+  if (stepId === 'delivered') {
+    return order?.delivery?.deliveredAt || order?.shipment?.deliveredAt || null;
+  }
+  if (stepId === 'finished') {
+    return getCustomerReceiptConfirmedAt(order) || null;
+  }
+  if (stepId === 'done') {
+    return order?.updatedAt || null;
+  }
+  if (stepId === 'cancelled') {
+    return order?.canceledAt || order?.cancelledAt || order?.updatedAt || null;
+  }
+  return null;
+};
+
 const shouldStopOrderPolling = (order: any) => {
   const orderStatus = String(order?.status || '').toLowerCase();
   const deliveryStatus = String(order?.delivery?.status || '').toUpperCase();
@@ -1725,10 +1779,14 @@ export function OrderTracking() {
                             }`}>
                               {step.label}
                             </span>
-                            {isCompleted && (() => {
-                              const aliases: Record<string,string[]> = { pending:["pending"], preparing:["preparing"], ready:["ready","ready_for_delivery","waiting_for_motoboy"], in_delivery:["in_delivery"], delivered:["delivered"], finished:["finished"], cancelled:["cancelled"], payment:["payment"] }; const entry = (order?.statusTimeline || []).find((e: any) => (aliases[step.id] || [step.id]).includes(e.status));
-                              if (!entry?.at) return null;
-                              const t = new Date(entry.at);
+                            {(isCompleted || isCurrent) && (() => {
+                              const timestampValue = getStepTimestamp(order, step.id, {
+                                hasOnlinePayment,
+                                isPaymentApproved,
+                              });
+                              if (!timestampValue) return null;
+                              const t = new Date(timestampValue);
+                              if (Number.isNaN(t.getTime())) return null;
                               return <p className="mt-1 flex w-fit items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500"><Clock size={9} weight="bold" />{formatTimeOfDay(t, { padHour: true })}</p>;
                             })()}
                           </div>

@@ -17,6 +17,7 @@ import { Order } from '../entities/Order';
 import { OrderDelivery } from '../entities/OrderDelivery';
 import { PushNotificationService } from './PushNotificationService';
 import { logger } from '../utils/logger';
+import { appendOrderTimelineEntry } from '../utils/orderTimeline';
 
 const ACTIVE_DELIVERY_STATUSES = [ 'ACCEPTED', 'PICKED_UP', 'IN_TRANSIT' ] as const;
 type ActiveDeliveryStatus = (typeof ACTIVE_DELIVERY_STATUSES)[number];
@@ -284,7 +285,7 @@ async acceptDelivery(orderId: string, motoboy: Motoboy) {
       const normalizedOrderStatus = String(order.status || '').trim().toLowerCase();
       if (normalizedOrderStatus !== 'waiting_for_motoboy') {
         order.status = 'waiting_for_motoboy';
-        order.statusTimeline = [...(Array.isArray(order.statusTimeline) ? order.statusTimeline : []), { status: "waiting_for_motoboy", at: new Date().toISOString() }];
+        order.statusTimeline = appendOrderTimelineEntry(order.statusTimeline, 'waiting_for_motoboy');
         await orderRepo.save(order);
       }
 
@@ -367,7 +368,7 @@ async pickupAndStart(orderId: string, motoboy: Motoboy) {
       const order = await orderRepo.findOne({ where: { id: orderId } as any, relations: [ 'store' ] as any });
       if (order) {
         order.status = 'in_delivery';
-        order.statusTimeline = [...(Array.isArray(order.statusTimeline) ? order.statusTimeline : []), { status: "in_delivery", at: new Date().toISOString() }];
+        order.statusTimeline = appendOrderTimelineEntry(order.statusTimeline, 'in_delivery');
         await orderRepo.save(order);
       }
 
@@ -431,7 +432,7 @@ private async advance(orderId: string, motoboy: Motoboy, to: DeliveryStatus) {
         order = await orderRepo.findOne({ where: { id: orderId } as any, relations: [ 'store' ] as any });
         if (order) {
           order.status = 'in_delivery';
-          order.statusTimeline = [...(Array.isArray(order.statusTimeline) ? order.statusTimeline : []), { status: "in_delivery", at: new Date().toISOString() }];
+          order.statusTimeline = appendOrderTimelineEntry(order.statusTimeline, 'in_delivery');
           await orderRepo.save(order);
         }
       }
@@ -480,7 +481,7 @@ async complete(orderId: string, motoboy: Motoboy) {
       const order = await orderRepo.findOne({ where: { id: orderId }, relations: [ 'store' ] as any });
       if (order) {
         order.status = 'delivered';
-        order.statusTimeline = [...(Array.isArray(order.statusTimeline) ? order.statusTimeline : []), { status: "delivered", at: new Date().toISOString() }];
+        order.statusTimeline = appendOrderTimelineEntry(order.statusTimeline, 'delivered');
         // Business: motoboy only marks as delivered after receiving payment.
         // So we normalize the payment status here to avoid leaving it as PENDING.
         if (String(order.paymentStatus || '').toUpperCase() !== 'PAID') {
