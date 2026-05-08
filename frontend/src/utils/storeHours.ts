@@ -1,6 +1,7 @@
 export type OpeningInterval = { start: string; end: string };
 export type OpeningDay = { day: number; enabled?: boolean; intervals?: OpeningInterval[] };
 const SAO_PAULO_TZ = 'America/Sao_Paulo';
+const WEEKDAY_LABELS = [ 'Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab' ];
 
 const parseDayValue = (value: unknown) => {
   const parsed = typeof value === 'number' ? value : Number(value);
@@ -81,10 +82,46 @@ const toMinutes = (value?: string) => {
   return h * 60 + m;
 };
 
+const formatCompactTime = (value?: string, padHour = false) => {
+  const totalMinutes = toMinutes(value);
+  if (totalMinutes == null) return '';
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  const hourLabel = padHour ? String(hours).padStart(2, '0') : String(hours);
+  return minutes === 0 ? `${hourLabel}h` : `${hourLabel}h${String(minutes).padStart(2, '0')}`;
+};
+
+const resolveDayPart = (value?: string) => {
+  const totalMinutes = toMinutes(value);
+  if (totalMinutes == null) return '';
+  if (totalMinutes < 360) return 'da madrugada';
+  if (totalMinutes < 720) return 'da manhã';
+  if (totalMinutes < 1080) return 'da tarde';
+  return 'da noite';
+};
+
+const formatCompactTimeWithContext = (value?: string) => {
+  const base = formatCompactTime(value);
+  if (!base) return '';
+  const dayPart = resolveDayPart(value);
+  return dayPart ? `${base} ${dayPart}` : base;
+};
+
 const isInsideInterval = (nowMinutes: number, start: number, end: number) => {
   if (start === end) return true;
   if (end < start) return nowMinutes >= start || nowMinutes < end;
   return nowMinutes >= start && nowMinutes < end;
+};
+
+const resolveDayValueLabel = (
+  enabled: boolean | undefined,
+  intervals: OpeningInterval[],
+  closedLabel: string,
+  openAllDayLabel: string
+) => {
+  if (enabled === false) return closedLabel;
+  if (!intervals.length) return openAllDayLabel;
+  return intervals.map((interval) => formatOpeningIntervalLabel(interval)).join(' • ');
 };
 
 const isOpenFromPreviousDayOvernight = (openingHours: OpeningDay[], currentDay: number, currentMinutes: number) => {
@@ -128,19 +165,86 @@ export const isStoreOpenNow = (openingHours?: OpeningDay[]) => {
   return isOpenFromPreviousDayOvernight(openingHours, day, minutes);
 };
 
+export const formatOpeningIntervalLabel = (interval?: OpeningInterval | null) => {
+  const rawStart = String(interval?.start || '').trim();
+  const rawEnd = String(interval?.end || '').trim();
+  const start = toMinutes(rawStart);
+  const end = toMinutes(rawEnd);
+  if (start == null || end == null) return [ rawStart, rawEnd ].filter(Boolean).join(' às ');
+  if (start === end) return '24 horas';
+
+  const startLabel = formatCompactTime(rawStart);
+  const endLabel = end < start ? formatCompactTimeWithContext(rawEnd) : formatCompactTime(rawEnd);
+  return `${startLabel} às ${endLabel}`;
+};
+
+export const formatOpeningIntervalsLabel = (intervals?: OpeningInterval[] | null) => {
+  const safeIntervals = Array.isArray(intervals) ? intervals : [];
+  if (!safeIntervals.length) return '24 horas';
+  return safeIntervals.map((interval) => formatOpeningIntervalLabel(interval)).join(' • ');
+};
+
+export const formatOpeningHoursForDay = (
+  openingHours: OpeningDay[] | undefined,
+  jsDay: number,
+  options?: { closedLabel?: string; openAllDayLabel?: string }
+) => {
+  const closedLabel = options?.closedLabel || 'Fechado';
+  const openAllDayLabel = options?.openAllDayLabel || '24 horas';
+  const normalizedDay = normalizeOpeningHours(openingHours);
+  const entry = normalizedDay.find((item) => item.day === ((jsDay % 7) + 7) % 7);
+  if (!entry) return closedLabel;
+  const intervals = Array.isArray(entry.intervals) ? entry.intervals : [];
+  return resolveDayValueLabel(entry.enabled, intervals, closedLabel, openAllDayLabel);
+};
+
+export const getCurrentClosingTimeLabel = (openingHours?: OpeningDay[]) => {
+  if (!Array.isArray(openingHours) || openingHours.length === 0) return '';
+
+  const { day, minutes } = getSaoPauloNowParts();
+  const todayEntries = resolveDayEntries(openingHours, day).filter((entry) => entry.enabled !== false);
+  for (const entry of todayEntries) {
+    const intervals = Array.isArray(entry?.intervals) ? entry.intervals : [];
+    if (!intervals.length) return '24 horas';
+    for (const interval of intervals) {
+      const start = toMinutes(interval?.start);
+      const end = toMinutes(interval?.end);
+      if (start == null || end == null) continue;
+      if (isInsideInterval(minutes, start, end)) {
+        return end < start ? formatCompactTimeWithContext(interval.end) : formatCompactTime(interval.end);
+      }
+    }
+  }
+
+  const previousDay = (day + 6) % 7;
+  const previousEntries = resolveDayEntries(openingHours, previousDay).filter((entry) => entry.enabled !== false);
+  for (const entry of previousEntries) {
+    const intervals = Array.isArray(entry?.intervals) ? entry.intervals : [];
+    for (const interval of intervals) {
+      const start = toMinutes(interval?.start);
+      const end = toMinutes(interval?.end);
+      if (start == null || end == null || end >= start) continue;
+      if (minutes < end) {
+        return formatCompactTimeWithContext(interval.end);
+      }
+    }
+  }
+
+  return '';
+};
+
+export const formatNextOpeningLabel = (label?: string | null) => {
+  const rawLabel = String(label || '').trim();
+  if (!rawLabel) return '';
+  return rawLabel.replace(/\b(\d{1,2}:\d{2})\b/g, (_, value: string) => formatCompactTime(value, true));
+};
+
 export const formatOpeningHoursSummary = (openingHours?: OpeningDay[]) => {
   if (!Array.isArray(openingHours) || openingHours.length === 0) return [];
-  const labels = [ 'Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab' ];
   return normalizeOpeningHours(openingHours).map((entry) => {
-    const dayLabel = labels[ entry.day ] || 'Dia';
-    if (entry.enabled === false) {
-      return `${dayLabel}: fechado`;
-    }
+    const dayLabel = WEEKDAY_LABELS[ entry.day ] || 'Dia';
     const intervals = Array.isArray(entry.intervals) ? entry.intervals : [];
-    if (!intervals.length) {
-      return `${dayLabel}: horario livre`;
-    }
-    const ranges = intervals.map((interval) => `${interval.start}–${interval.end}`).join(' • ');
-    return `${dayLabel}: ${ranges}`;
+    const value = resolveDayValueLabel(entry.enabled, intervals, 'fechado', '24 horas');
+    return `${dayLabel}: ${value}`;
   });
 };

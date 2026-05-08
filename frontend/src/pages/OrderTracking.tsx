@@ -6,7 +6,7 @@ import { Capacitor } from '@capacitor/core';
 import { customerAccountService } from '../services/customerAccountService';
 import { orderService } from '../services/orderService';
 import { mapsService } from '../services/mapsService';
-import { formatAddress, formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId, formatReadableDateTime, formatTimeOfDay } from '../utils/format';
+import { formatAddress, formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId, formatTimeOfDay } from '../utils/format';
 import { getPaymentMethodMeta, getPaymentProviderMeta, mercadoPagoHorizontal } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { applyBrandTheme } from '../utils/brandTheme';
@@ -71,6 +71,30 @@ const shouldStopOrderPolling = (order: any) => {
     orderStatus === 'finished' ||
     (deliveredByCourier && (!requiresCustomerReceipt || Boolean(customerReceiptConfirmedAt)))
   );
+};
+
+const formatEtaMoment = (value: Date | string | number | null | undefined) => {
+  if (!value) return '';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return '';
+
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfTarget = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+  const diffDays = Math.round((startOfTarget.getTime() - startOfToday.getTime()) / 86_400_000);
+  const timeLabel = formatTimeOfDay(parsed, { padHour: true });
+
+  if (diffDays === 0) return timeLabel;
+  if (diffDays === 1) return `amanhã às ${timeLabel}`;
+  if (diffDays === -1) return `ontem às ${timeLabel}`;
+
+  const dateLabel = parsed.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    ...(parsed.getFullYear() !== now.getFullYear() ? { year: 'numeric' } : {}),
+  });
+
+  return `${dateLabel} às ${timeLabel}`;
 };
 
 
@@ -1462,7 +1486,7 @@ export function OrderTracking() {
                           {etaForecastPrefix}{' '}
                           {isPostalDelivery
                             ? estimatedReadyAt.toLocaleDateString('pt-BR')
-                            : formatReadableDateTime(estimatedReadyAt)}
+                            : formatEtaMoment(estimatedReadyAt)}
                         </p>
                         {isPostalDelivery ? (
                           <p className="mt-1 text-xs text-stone-600">
@@ -2035,7 +2059,7 @@ export function OrderTracking() {
                         </div>
                         {deliveryEta ? (
                           <div className="mt-2 text-xs font-semibold text-emerald-700">
-                            {etaForecastLabel}: {formatReadableDateTime(deliveryEta)}
+                            {etaForecastLabel}: {formatEtaMoment(deliveryEta)}
                           </div>
                         ) : null}
                         {etaDetails ? (

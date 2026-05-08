@@ -39,7 +39,7 @@ import { customerAccountService } from '../services/customerAccountService';
 import { featuredService } from '../services/featuredService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
-import { isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
+import { formatNextOpeningLabel, isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
 import { useCachedCustomerProfileImage } from '../hooks/useCachedCustomerProfileImage';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { HeaderAvatarTrigger } from '../components/Marketplace/HeaderAvatarTrigger';
@@ -1586,7 +1586,7 @@ export function MarketplacePage() {
           geoAvailability: String((store as any)?.geoAvailability || '').trim(),
           isNearest: Boolean((store as any)?.isNearest),
           distanceSource: apiDistanceKm !== null ? 'server' : 'local',
-          nextOpeningLabel: String(store?.nextOpeningLabel || '').trim(),
+          nextOpeningLabel: formatNextOpeningLabel(String(store?.nextOpeningLabel || '').trim()),
           primaryColor: String(store?.settings?.primaryColor || '').trim(),
           secondaryColor: String(store?.settings?.secondaryColor || '').trim(),
           storeLat,

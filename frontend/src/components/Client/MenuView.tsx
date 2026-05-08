@@ -125,6 +125,7 @@ const Header = ({
   compact,
   isOpenNow,
   todayHoursLabel,
+  todayClosingLabel,
   onOpenStoreDetails,
   reviewSummary,
   deliveryFeeLabel,
@@ -178,12 +179,17 @@ const Header = ({
           type === "delivery" ? "Entrega" : type === "pickup" ? "Retirada" : type === "table" ? "Mesa" : type
         )
     : [];
-  const closingHour = todayHoursLabel
-    ? todayHoursLabel
-        .split("-")
-        .map((part) => part.trim())
-        .filter(Boolean)[1] || todayHoursLabel
-    : "";
+  const normalizedTodayHoursLabel = String(todayHoursLabel || "").trim();
+  const hasAllDayService = todayClosingLabel === "24 horas" || normalizedTodayHoursLabel === "24 horas";
+  const statusDetailLabel = isOpenNow
+    ? (hasAllDayService
+        ? "Atendimento 24 horas"
+        : todayClosingLabel
+          ? `Fecha às ${todayClosingLabel}`
+          : normalizedTodayHoursLabel)
+    : (normalizedTodayHoursLabel && !/^fechado/i.test(normalizedTodayHoursLabel)
+        ? `Hoje: ${normalizedTodayHoursLabel}`
+        : normalizedTodayHoursLabel);
   const handleShareStore = async () => {
     if (!storeUrl || typeof window === "undefined") return;
     try {
@@ -341,7 +347,7 @@ const Header = ({
                     <span className={`h-2 w-2 rounded-full ${isOpenNow ? "bg-emerald-400 animate-pulse" : "bg-amber-300"}`} />
                     <span>
                       {isOpenNow ? "Aberto agora" : "Fechado agora"}
-                      {closingHour ? ` · ${isOpenNow ? "Fecha" : "Hoje até"} ${closingHour}` : ""}
+                      {statusDetailLabel ? ` · ${statusDetailLabel}` : ""}
                     </span>
                   </div>
                 </button>
@@ -386,7 +392,7 @@ const Header = ({
                         <span className={`h-2 w-2 rounded-full ${isOpenNow ? "bg-emerald-500 animate-pulse" : "bg-orange-500"}`} />
                         <span>
                           {isOpenNow ? "Aberto agora" : "Fechado agora"}
-                          {closingHour ? `  ${isOpenNow ? "Fecha às" : "Hoje até"} ${closingHour}` : ""}
+                          {statusDetailLabel ? ` · ${statusDetailLabel}` : ""}
                         </span>
                       </div>
                     </div>
@@ -541,6 +547,7 @@ export const MenuView = ({
   storeCoords,
   isOpenNow,
   todayHoursLabel,
+  todayClosingLabel,
   showHeader = true,
   onOpenQueue,
   onOpenAdmin,
@@ -1067,6 +1074,7 @@ export const MenuView = ({
           compact={effectiveCompactHeader}
           isOpenNow={isOpenNow}
           todayHoursLabel={todayHoursLabel}
+          todayClosingLabel={todayClosingLabel}
           onOpenStoreDetails={() => setShowStoreDetails(true)}
           reviewSummary={reviewSummary}
           deliveryFeeLabel={deliveryFeeLabel}

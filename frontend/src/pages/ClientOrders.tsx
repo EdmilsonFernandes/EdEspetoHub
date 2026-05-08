@@ -30,7 +30,7 @@ import {
 import { customerAccountService } from '../services/customerAccountService';
 import { orderService } from '../services/orderService';
 import { useToast } from '../contexts/ToastContext';
-import { formatCurrency, formatOrderDisplayId } from '../utils/format';
+import { formatCurrency, formatOrderDisplayId, formatReadableDateTime, formatTimeOfDay } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getPaymentProviderMeta } from '../utils/paymentAssets';
 import { formatSelectedModifiers } from '../utils/productModifiers';
@@ -88,12 +88,7 @@ const formatRelativeGroupLabel = (value?: string) => {
 };
 
 const formatTime = (value?: string) => {
-  if (!value) return '';
-  const date = new Date(value);
-  return date.toLocaleTimeString('pt-BR', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  return formatTimeOfDay(value, { padHour: true });
 };
 
 const getStoreInitials = (name?: string) => {
@@ -426,18 +421,7 @@ const getOrderFulfillmentMeta = (order: any) => {
 };
 
 const formatOrderMoment = (value?: string) => {
-  if (!value) return '';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-
-  const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const startOfTarget = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const diffDays = Math.round((startOfToday.getTime() - startOfTarget.getTime()) / 86_400_000);
-
-  if (diffDays === 0) return `Hoje, ${formatTime(value)}`;
-  if (diffDays === 1) return `Ontem, ${formatTime(value)}`;
-  return formatSupportDateTime(value);
+  return formatReadableDateTime(value) || formatSupportDateTime(value);
 };
 
 const getStatusMeta = (status: string, orderType?: string) => {
@@ -637,7 +621,7 @@ function OrderCard({
               </span>
             )}
             <span className="text-slate-300">·</span>
-            <span className="text-[11px] text-slate-400">{orderDate || formatGroupDate(order.createdAt)}</span>
+            <span className="text-[11px] text-slate-400">{orderMoment || orderDate || formatGroupDate(order.createdAt)}</span>
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
             <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">

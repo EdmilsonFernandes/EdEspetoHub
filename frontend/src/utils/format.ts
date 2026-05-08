@@ -1,5 +1,16 @@
 export const APP_TIMEZONE = 'America/Sao_Paulo';
 
+const toDateValue = (
+  timestamp: Date | number | string | { seconds: number } | null | undefined
+) => {
+  if (!timestamp) return null;
+  const parsed =
+    typeof timestamp === 'object' && 'seconds' in timestamp
+      ? new Date(timestamp.seconds * 1000)
+      : new Date(timestamp);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
 export const formatCurrency = (value: number | string | null | undefined) => {
   const numeric = Number(value);
   const safeValue = Number.isFinite(numeric) ? numeric : 0;
@@ -7,23 +18,55 @@ export const formatCurrency = (value: number | string | null | undefined) => {
 };
 
 export const formatDateTime = (timestamp: Date | number | string | { seconds: number } | null | undefined) => {
-  if (!timestamp) return '';
-  const parsed =
-    typeof timestamp === 'object' && 'seconds' in timestamp
-      ? new Date(timestamp.seconds * 1000)
-      : new Date(timestamp);
-  if (Number.isNaN(parsed.getTime())) return '';
+  const parsed = toDateValue(timestamp);
+  if (!parsed) return '';
   return parsed.toLocaleString('pt-BR', { timeZone: APP_TIMEZONE });
 };
 
 export const formatDate = (timestamp: Date | number | string | { seconds: number } | null | undefined) => {
-  if (!timestamp) return '';
-  const parsed =
-    typeof timestamp === 'object' && 'seconds' in timestamp
-      ? new Date(timestamp.seconds * 1000)
-      : new Date(timestamp);
-  if (Number.isNaN(parsed.getTime())) return '';
+  const parsed = toDateValue(timestamp);
+  if (!parsed) return '';
   return parsed.toLocaleDateString('pt-BR', { timeZone: APP_TIMEZONE });
+};
+
+export const formatTimeOfDay = (
+  timestamp: Date | number | string | { seconds: number } | null | undefined,
+  options?: { padHour?: boolean; includeSeconds?: boolean }
+) => {
+  const parsed = toDateValue(timestamp);
+  if (!parsed) return '';
+  const hours = parsed.getHours();
+  const minutes = parsed.getMinutes();
+  const seconds = parsed.getSeconds();
+  const hourLabel = options?.padHour ? String(hours).padStart(2, '0') : String(hours);
+  const minuteLabel = `${hourLabel}h${String(minutes).padStart(2, '0')}`;
+  if (!options?.includeSeconds) return minuteLabel;
+  return `${minuteLabel}m${String(seconds).padStart(2, '0')}`;
+};
+
+export const formatReadableDateTime = (
+  timestamp: Date | number | string | { seconds: number } | null | undefined
+) => {
+  const parsed = toDateValue(timestamp);
+  if (!parsed) return '';
+
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfTarget = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+  const diffDays = Math.round((startOfTarget.getTime() - startOfToday.getTime()) / 86_400_000);
+  const timeLabel = formatTimeOfDay(parsed, { padHour: true });
+
+  if (diffDays === 0) return `Hoje, ${timeLabel}`;
+  if (diffDays === 1) return `Amanhã, ${timeLabel}`;
+  if (diffDays === -1) return `Ontem, ${timeLabel}`;
+
+  const dateLabel = parsed.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    ...(parsed.getFullYear() !== now.getFullYear() ? { year: 'numeric' } : {}),
+  });
+
+  return `${dateLabel}, ${timeLabel}`;
 };
 
 export const formatDuration = (milliseconds: number | null | undefined) => {

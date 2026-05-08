@@ -34,7 +34,7 @@ import {
   PICKUP_DISTANCE_WARNING_KM,
   PICKUP_DISTANCE_CONFIRMATION_KM,
 } from '../constants';
-import { isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
+import { formatOpeningHoursForDay, getCurrentClosingTimeLabel, isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
 import {
   formatSelectedModifiers,
   getModifiersSignature,
@@ -514,24 +514,21 @@ export function StorePage() {
 
   const todayHoursLabel = useMemo(() => {
     if (!openingHours?.length) return '';
-    const today = openingHours.find((entry) => entry.day === new Date().getDay());
-    if (!today || today.enabled === false) return 'Fechado hoje';
-    const intervals = Array.isArray(today.intervals) ? today.intervals : [];
-    if (!intervals.length) return '';
-    return intervals.map((interval) => `${interval.start}–${interval.end}`).join(' • ');
+    return formatOpeningHoursForDay(openingHours, new Date().getDay(), {
+      closedLabel: 'Fechado hoje',
+      openAllDayLabel: '24 horas',
+    });
   }, [openingHours]);
+  const todayClosingLabel = useMemo(() => getCurrentClosingTimeLabel(openingHours), [openingHours]);
   const weeklyHoursRows = useMemo(() => {
     const normalized = normalizeOpeningHours(openingHours);
     const today = new Date().getDay();
     return normalized.map((entry) => {
       const label = WEEKDAY_LABELS[entry.day] || `Dia ${entry.day}`;
-      const intervals = Array.isArray(entry.intervals) ? entry.intervals : [];
-      const value =
-        entry.enabled === false
-          ? 'Fechado'
-          : intervals.length
-            ? intervals.map((interval) => `${interval.start} - ${interval.end}`).join(' • ')
-            : 'Horário livre';
+      const value = formatOpeningHoursForDay([ entry ], entry.day, {
+        closedLabel: 'Fechado',
+        openAllDayLabel: '24 horas',
+      });
       return {
         day: entry.day,
         label,
@@ -3661,6 +3658,7 @@ export function StorePage() {
                   : ''
               }
               orderTypes={orderTypes}
+              todayClosingLabel={todayClosingLabel}
               compactHeader={isMobile}
               staffView={Boolean(canUseAdminPrintFlow)}
               isOrderingEnabled={storeOrderingEnabled || Boolean(user?.token)}
