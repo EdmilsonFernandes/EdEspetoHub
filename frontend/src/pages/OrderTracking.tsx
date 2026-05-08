@@ -1638,7 +1638,7 @@ export function OrderTracking() {
                           {hasCustomerReceiptConfirmation ? (
                             <p>Cliente confirmou o recebimento em {formatDateTime(customerReceivedAtValue)}.</p>
                           ) : (
-                            <p>Agora falta apenas a confirmação final do cliente para encerrar o pedido.</p>
+                            <p>{normalizedStatus === 'finished' ? 'Entrega confirmada com código. Pedido finalizado.' : 'Agora falta apenas a confirmação final do cliente para encerrar o pedido.'}</p>
                           )}
                         </div>
                       </div>
