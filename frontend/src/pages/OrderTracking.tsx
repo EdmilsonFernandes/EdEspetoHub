@@ -1721,7 +1721,7 @@ export function OrderTracking() {
                             const entry = (order?.statusTimeline || []).find((e: any) => e.status === step.id);
                             if (!entry?.at) return null;
                             const t = new Date(entry.at);
-                            return <span className="ml-2 text-[10px] font-medium text-slate-400">{formatTimeOfDay(t, { padHour: true })}</span>;
+                            return <span className="block text-[9px] font-medium text-slate-400 mt-0.5">{formatTimeOfDay(t, { padHour: true })}</span>;
                           })()}
                         </div>
                       );
