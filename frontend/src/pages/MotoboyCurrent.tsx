@@ -19,6 +19,9 @@ export function MotoboyCurrent() {
   const navigate = useNavigate();
   const [showDetails, setShowDetails] = useState(false);
   const [routeMs, setRouteMs] = useState<number>(0);
+  const [showCodeModal, setShowCodeModal] = useState(false);
+  const [deliveryCode, setDeliveryCode] = useState("");
+  const [codeError, setCodeError] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -162,20 +165,25 @@ export function MotoboyCurrent() {
         setShowPayment(true);
         return;
       }
-
-      await motoboyService.markDelivered(activeOrder.id);
-      showToast('Entrega finalizada.', 'success');
-      const donePayload = {
-        orderId: activeOrder.id,
-        customerName: activeOrder?.customerName,
-        total: Number(activeOrder?.total || 0),
-        deliveryFee: Number(activeOrder?.deliveryFee || 0),
-        storeName: activeOrder?.store?.name || null,
-      };
-      load();
-      navigate('/motoboy/done', { state: { done: donePayload } });
+      setDeliveryCode("");
+      setCodeError("");
+      setShowCodeModal(true);
+      return;
     } catch (error: any) {
-      showToast(error?.message || 'Não foi possível concluir a entrega.', 'error');
+      showToast(error?.message || "Não foi possível abrir a confirmação.", "error");
+    }
+  };
+
+  const confirmDeliveryWithCode = async () => {
+    if (!activeOrder) return;
+    try {
+      await motoboyService.markDelivered(activeOrder.id, deliveryCode.trim() || undefined);
+      setShowCodeModal(false);
+      showToast("Entrega finalizada.", "success");
+      load();
+      navigate("/motoboy/done", { state: { done: { orderId: activeOrder.id, customerName: activeOrder?.customerName, total: Number(activeOrder?.total || 0), deliveryFee: Number(activeOrder?.deliveryFee || 0), storeName: activeOrder?.store?.name || null } } });
+    } catch (error: any) {
+      setCodeError(error?.message || "Código incorreto. Tente novamente.");
     }
   };
 
@@ -408,6 +416,30 @@ export function MotoboyCurrent() {
         pixPayload={pixInfo.pixPayload}
         defaultCashTendered={selected?.cashTendered ?? null}
       />
+      {showCodeModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/60 backdrop-blur-sm px-4">
+          <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-600">Confirmação de entrega</p>
+            <h3 className="mt-1 text-lg font-black text-slate-900">Digite o código do cliente</h3>
+            <p className="mt-1 text-xs text-slate-500">Peça o código de 4 dígitos ao cliente para confirmar a entrega.</p>
+            <input
+              type="text"
+              inputMode="numeric"
+              maxLength={4}
+              value={deliveryCode}
+              onChange={(e) => { setDeliveryCode(e.target.value.replace(/\D/g, "").slice(0, 4)); setCodeError(""); }}
+              placeholder="0000"
+              className="mt-4 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-center text-2xl font-black tracking-[0.5em] text-slate-900 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              autoFocus
+            />
+            {codeError && <p className="mt-2 text-center text-xs font-semibold text-rose-600">{codeError}</p>}
+            <div className="mt-5 flex gap-2">
+              <button type="button" onClick={() => setShowCodeModal(false)} className="flex-1 rounded-2xl border border-slate-200 bg-white py-3 text-sm font-bold text-slate-700 active:scale-95">Cancelar</button>
+              <button type="button" onClick={confirmDeliveryWithCode} disabled={deliveryCode.length < 4} className="flex-1 rounded-2xl bg-indigo-600 py-3 text-sm font-bold text-white disabled:opacity-50 active:scale-95">Confirmar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

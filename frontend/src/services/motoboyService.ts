@@ -39,8 +39,8 @@ export const motoboyService = {
       cashTendered: cashTendered ?? null,
     });
   },
-  async markDelivered(orderId: string) {
-    return apiClient.post(`/motoboy/orders/${orderId}/delivered`, {});
+  async markDelivered(orderId: string, code?: string) {
+    return apiClient.post(`/motoboy/orders/${orderId}/delivered`, code ? { code } : {});
   },
   async finishOrder(orderId: string) {
     return apiClient.post(`/motoboy/orders/${orderId}/finish`, {});
