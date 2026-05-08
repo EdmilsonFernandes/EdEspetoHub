@@ -1175,6 +1175,8 @@ async setDefaultAddress(userId: string, addressId: string) {
         [orderId, userId]
       );
       return saved || order;
+      // Append to statusTimeline
+      try { await AppDataSource.query("UPDATE orders SET status_timeline = COALESCE(status_timeline, '[]'::jsonb) || $1::jsonb WHERE id = $2", [JSON.stringify([{status: "finished", at: new Date().toISOString()}]), orderId]); } catch {}
     });
 
     const storeId = String((result as any)?.store_id || '').trim();

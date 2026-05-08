@@ -328,6 +328,7 @@ async startOrder(orderId: string, motoboy: Motoboy) {
     }
 
     order.status = 'finished';
+    order.statusTimeline = [...(Array.isArray(order.statusTimeline) ? order.statusTimeline : []), { status: "finished", at: new Date().toISOString() }];
     const saved = await this.orderRepository.save(order);
     await this.deliveryBillingService.recordDelivery(saved);
     return saved;
