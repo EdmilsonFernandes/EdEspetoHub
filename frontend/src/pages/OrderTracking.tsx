@@ -1668,7 +1668,7 @@ export function OrderTracking() {
                 <div className="rounded-2xl border border-[#d9e6ee] bg-white/92 px-4 py-4 shadow-[0_12px_28px_-24px_rgba(51,104,134,0.14)]">
                   <div className="relative pl-1">
                     {/* Trilho de fundo */}
-                    <span className="pointer-events-none absolute left-[10px] top-3 bottom-3 w-[2px] rounded-full bg-[#dce9f1]/85" />
+                    <span className="pointer-events-none absolute left-[10px] top-3 bottom-6 w-[2px] rounded-full bg-[#dce9f1]/85" />
                     {/* Trilho preenchido (concluído) */}
                     {currentIndex > 0 && (
                       <span
