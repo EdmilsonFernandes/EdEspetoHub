@@ -1704,25 +1704,27 @@ export function OrderTracking() {
                               : <span className="text-[8px] font-black">{stepIndex + 1}</span>
                             }
                           </span>
-                          <span className={`text-[12.5px] leading-tight ${
-                            isCurrent
-                              ? isCancelled
-                                ? 'font-black text-rose-600'
-                                : 'font-black text-stone-950'
-                              : isCompleted
+                          <div className="min-w-0">
+                            <span className={`text-[12.5px] leading-tight ${
+                              isCurrent
                                 ? isCancelled
-                                  ? 'font-semibold text-rose-500'
-                                  : 'font-semibold text-stone-600'
-                                : 'text-stone-300'
-                          }`}>
-                            {step.label}
-                          </span>
-                          {isCompleted && (() => {
-                            const entry = (order?.statusTimeline || []).find((e: any) => e.status === step.id);
-                            if (!entry?.at) return null;
-                            const t = new Date(entry.at);
-                            return <span className="block text-[9px] font-medium text-slate-400 mt-0.5">{formatTimeOfDay(t, { padHour: true })}</span>;
-                          })()}
+                                  ? "font-black text-rose-600"
+                                  : "font-black text-stone-950"
+                                : isCompleted
+                                  ? isCancelled
+                                    ? "font-semibold text-rose-500"
+                                    : "font-semibold text-stone-600"
+                                  : "text-stone-300"
+                            }`}>
+                              {step.label}
+                            </span>
+                            {isCompleted && (() => {
+                              const entry = (order?.statusTimeline || []).find((e: any) => e.status === step.id);
+                              if (!entry?.at) return null;
+                              const t = new Date(entry.at);
+                              return <p className="text-[9px] font-medium text-slate-400 mt-0.5">{formatTimeOfDay(t, { padHour: true })}</p>;
+                            })()}
+                          </div>
                         </div>
                       );
                     })}
