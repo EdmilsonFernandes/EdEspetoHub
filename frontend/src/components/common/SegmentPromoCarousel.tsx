@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 
-type PromoSlide = {
+export type PromoSlide = {
   id: string;
   image: string;
   imageAlt: string;
+  actionUrl?: string;
   fit?: 'contain' | 'cover';
 };
 
@@ -37,27 +38,40 @@ const PROMO_SLIDES: PromoSlide[] = [
 type SegmentPromoCarouselProps = {
   mode?: 'landing' | 'hub';
   className?: string;
+  slides?: PromoSlide[];
+  defaultActionUrl?: string;
 };
 
 export function SegmentPromoCarousel({
   mode = 'landing',
   className = '',
+  slides,
+  defaultActionUrl = '/create?plan=trial',
 }: SegmentPromoCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const touchStartXRef = useRef<number | null>(null);
   const suppressClickRef = useRef(false);
   const compact = mode === 'hub';
   const interactive = mode !== 'hub';
+  const activeSlides = slides && slides.length ? slides : PROMO_SLIDES;
+  const currentSlide = activeSlides[activeIndex] || activeSlides[0];
+  const currentHref = currentSlide?.actionUrl || defaultActionUrl;
 
   useEffect(() => {
+    if (activeSlides.length <= 1) return undefined;
     const interval = window.setInterval(() => {
-      setActiveIndex((current) => (current + 1) % PROMO_SLIDES.length);
+      setActiveIndex((current) => (current + 1) % activeSlides.length);
     }, 8000);
     return () => window.clearInterval(interval);
-  }, []);
+  }, [activeSlides.length]);
+
+  useEffect(() => {
+    setActiveIndex((current) => Math.min(current, Math.max(activeSlides.length - 1, 0)));
+  }, [activeSlides.length]);
 
   const goToSlide = (index: number) => {
-    const total = PROMO_SLIDES.length;
+    const total = activeSlides.length;
+    if (!total) return;
     setActiveIndex(((index % total) + total) % total);
   };
 
@@ -84,10 +98,14 @@ export function SegmentPromoCarousel({
     }, 220);
   };
 
+  if (!activeSlides.length || !currentSlide) {
+    return null;
+  }
+
   const content = (
     <>
       <div className={`relative ${compact ? 'aspect-[16/7.8]' : 'aspect-[16/6.8] sm:aspect-[16/6.6]'}`}>
-        {PROMO_SLIDES.map((slide, index) => (
+        {activeSlides.map((slide, index) => (
           <div
             key={slide.id}
             className={`absolute inset-0 flex items-center justify-center bg-slate-950/5 transition-all duration-700 ${
@@ -118,7 +136,7 @@ export function SegmentPromoCarousel({
         ))}
       </div>
 
-      {PROMO_SLIDES[activeIndex]?.id !== 'mercado-pago' && (
+      {currentSlide.id !== 'mercado-pago' && (
         <div className="pointer-events-none absolute bottom-2 right-2 z-[3] inline-flex rounded-full border border-white/70 bg-white/92 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-slate-900 shadow-[0_10px_22px_-14px_rgba(15,23,42,0.5)] backdrop-blur-md sm:bottom-3 sm:right-3 sm:px-3 sm:py-1.5 sm:text-[10px]">
           Criar loja →
         </div>
@@ -126,7 +144,7 @@ export function SegmentPromoCarousel({
 
       <div className="absolute inset-x-0 bottom-0 flex justify-center pb-1.5 sm:pb-2">
         <div className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-slate-950/20 px-2 py-0.5 backdrop-blur-md">
-          {PROMO_SLIDES.map((slide, index) => (
+          {activeSlides.map((slide, index) => (
             <button
               type="button"
               key={slide.id}
@@ -148,8 +166,8 @@ export function SegmentPromoCarousel({
   if (!interactive) {
     return (
       <a
-        href="/create?plan=trial"
-        aria-label="Criar loja no Já no Caminho"
+        href={currentHref}
+        aria-label={currentSlide.imageAlt || 'Abrir banner do Já no Caminho'}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onClick={(event) => {
@@ -166,8 +184,8 @@ export function SegmentPromoCarousel({
 
   return (
     <a
-      href="/create?plan=trial"
-      aria-label="Criar loja no Ja no Caminho"
+      href={currentHref}
+      aria-label={currentSlide.imageAlt || 'Abrir banner do Já no Caminho'}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onClick={(event) => {

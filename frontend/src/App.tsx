@@ -38,6 +38,7 @@ const AdminDemo = lazyPage(() => import('./pages/AdminDemo'), 'AdminDemo');
 const PaymentPage = lazyPage(() => import('./pages/PaymentPage'), 'PaymentPage');
 const SuperAdmin = lazyPage(() => import('./pages/SuperAdmin'), 'SuperAdmin');
 const SuperAdminCondominiums = lazyPage(() => import('./pages/SuperAdminCondominiums'), 'SuperAdminCondominiums');
+const SuperAdminHomeConfig = lazyPage(() => import('./pages/SuperAdminHomeConfig'), 'SuperAdminHomeConfig');
 const TermsOfUse = lazyPage(() => import('./pages/TermsOfUse'), 'TermsOfUse');
 const OrderTracking = lazyPage(loadOrderTrackingPage, 'OrderTracking');
 const AddressDistance = lazyPage(() => import('./pages/AddressDistance'), 'AddressDistance');
@@ -213,6 +214,14 @@ function App() {
                 element={
                   <AppErrorBoundary>
                     <SuperAdminCondominiums />
+                  </AppErrorBoundary>
+                }
+              />
+              <Route
+                path="/superadmin/home-config"
+                element={
+                  <AppErrorBoundary>
+                    <SuperAdminHomeConfig />
                   </AppErrorBoundary>
                 }
               />

@@ -27,6 +27,7 @@ import { PaymentController } from '../controllers/PaymentController';
 import { MotoboyController } from '../controllers/MotoboyController';
 import { MotoboyKycController } from '../controllers/MotoboyKycController';
 import { DeliveryController } from '../controllers/DeliveryController';
+import { HomeConfigController } from '../controllers/HomeConfigController';
 import { LegalController } from '../controllers/LegalController';
 import { DeliveryBillingController } from '../controllers/DeliveryBillingController';
 import { StoreUserController } from '../controllers/StoreUserController';
@@ -299,6 +300,9 @@ routes.post('/motoboy/stores/:storeId/leave', requireAuth, MotoboyController.lea
 // Legal content (public)
 routes.get('/legal/terms', LegalController.getTerms);
 routes.get('/legal/lgpd', LegalController.getLgpd);
+routes.get('/public/home-config', HomeConfigController.getPublic);
+routes.get('/admin/home-config', requireAuth, requireRole('SUPER_ADMIN'), HomeConfigController.getAdmin);
+routes.put('/admin/home-config', requireAuth, requireRole('SUPER_ADMIN'), HomeConfigController.saveAdmin);
 routes.post('/admin/site-settings', requireAuth, requireRole('SUPER_ADMIN'), LegalController.setSetting);
 routes.get('/admin/featured-requests', requireAuth, requireRole('SUPER_ADMIN'), FeaturedProductController.listForAdmin);
 routes.patch('/admin/featured-requests/:requestId/review', requireAuth, requireRole('SUPER_ADMIN'), FeaturedProductController.reviewByAdmin);

@@ -53,6 +53,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { clearAllCustomerSessions } from '../utils/customerSessionStorage';
 import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
+import { DEFAULT_HOME_CONFIG, homeConfigService } from '../services/homeConfigService';
 
 type MarketplaceStore = {
   id?: string;
@@ -814,6 +815,8 @@ export function MarketplacePage() {
   }, [condominiumPickerOpen]);
 
   const [showStorePromoPopup, setShowStorePromoPopup] = useState(false);
+  const [homeConfig, setHomeConfig] = useState(() => DEFAULT_HOME_CONFIG);
+  const [homeConfigLoaded, setHomeConfigLoaded] = useState(false);
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
   const [featuredLoading, setFeaturedLoading] = useState(false);
   const [featuredOffset, setFeaturedOffset] = useState(0);
@@ -824,6 +827,23 @@ export function MarketplacePage() {
   const [preferredDiscoveryAddress, setPreferredDiscoveryAddress] = useState<PreferredDiscoveryAddress | null>(null);
   const [preferredAddressLoading, setPreferredAddressLoading] = useState(false);
   const [hubScopeOverride, setHubScopeOverride] = useState<'default' | 'all_stores'>('default');
+  const homePromoSlides = useMemo(
+    () =>
+      homeConfig.homeBanners
+        .filter((banner) => banner.active && String(banner.imageUrl || '').trim())
+        .sort((a, b) => a.order - b.order)
+        .slice(0, 4)
+        .map((banner) => ({
+          id: banner.id,
+          image: resolveAssetUrl(banner.imageUrl) || '',
+          imageAlt: banner.title || 'Banner da home',
+          actionUrl: banner.actionUrl || '/create?plan=trial',
+          fit: banner.fit || 'cover',
+        })),
+    [homeConfig.homeBanners]
+  );
+  const marketingPopupImageUrl = resolveAssetUrl(homeConfig.marketingPopup.imageUrl) || '';
+  const marketingPopupActionUrl = String(homeConfig.marketingPopup.actionUrl || '').trim() || '/create?plan=trial';
   const savedAddressLocation = useMemo(() => {
     if (preferredDiscoveryAddress?.lat == null || preferredDiscoveryAddress?.lng == null) return null;
     return {
@@ -2479,7 +2499,27 @@ export function MarketplacePage() {
   }, [isCustomerLogged, loadActiveOrders]);
 
   useEffect(() => {
+    let active = true;
+    void homeConfigService
+      .getPublicConfig()
+      .then((payload) => {
+        if (!active) return;
+        setHomeConfig(payload);
+      })
+      .finally(() => {
+        if (active) {
+          setHomeConfigLoaded(true);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
     if (loading) return;
+    if (!homeConfigLoaded) return;
+    if (!homeConfig.marketingPopup.active || !marketingPopupImageUrl) return;
     const timeout = window.setTimeout(() => {
       try {
         const dismissedUntil = Number(localStorage.getItem(STORE_PROMO_POPUP_DISMISSED_UNTIL_KEY) || 0);
@@ -2490,7 +2530,7 @@ export function MarketplacePage() {
       setShowStorePromoPopup(true);
     }, 5200);
     return () => window.clearTimeout(timeout);
-  }, [loading]);
+  }, [homeConfig.marketingPopup.active, homeConfigLoaded, loading, marketingPopupImageUrl]);
 
   const dismissStorePromoPopup = useCallback(() => {
     setShowStorePromoPopup(false);
@@ -2536,24 +2576,36 @@ export function MarketplacePage() {
             >
               <X size={19} weight="bold" />
             </button>
-            <Link
-              to="/create?plan=trial"
+            <a
+              href={marketingPopupActionUrl}
               onClick={dismissStorePromoPopup}
               className="group block overflow-hidden rounded-[1.85rem] border border-white/80 bg-white shadow-[0_28px_70px_-32px_rgba(15,23,42,0.72)] transition-all duration-200 ease-out active:scale-[0.985]"
-              aria-label="Criar minha loja no Já no Caminho"
+              aria-label={homeConfig.marketingPopup.title || 'Abrir popup de marketing do Já no Caminho'}
             >
               <div className="relative aspect-[3/4] bg-slate-950">
                 <img
-                  src="/marketing/mpv2.png"
-                  alt="Banner de integração com Mercado Pago no Já no Caminho"
+                  src={marketingPopupImageUrl}
+                  alt={homeConfig.marketingPopup.title || 'Banner de marketing do Já no Caminho'}
                   loading="eager"
                   fetchPriority="high"
                   decoding="async"
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className={`absolute inset-0 h-full w-full ${homeConfig.marketingPopup.fit === 'contain' ? 'object-contain bg-slate-900/5' : 'object-cover'}`}
                 />
                 <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/35 to-transparent opacity-80 transition-opacity duration-200 group-active:opacity-100" />
               </div>
-            </Link>
+              {(homeConfig.marketingPopup.title || homeConfig.marketingPopup.description) ? (
+                <div className="border-t border-slate-100 px-4 py-3">
+                  {homeConfig.marketingPopup.title ? (
+                    <p className="text-sm font-black text-slate-900">{homeConfig.marketingPopup.title}</p>
+                  ) : null}
+                  {homeConfig.marketingPopup.description ? (
+                    <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">
+                      {homeConfig.marketingPopup.description}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
+            </a>
           </div>
         </div>
       )}
@@ -2854,7 +2906,7 @@ export function MarketplacePage() {
           )}
 
           {/* Carrossel de Banners - Esconde na busca para focar no resultado */}
-          {debouncedQuery.length < 2 && !selectedCondominium && (
+          {debouncedQuery.length < 2 && !selectedCondominium && homePromoSlides.length > 0 && (
             <div className="animate-in fade-in slide-in-from-top-4 duration-500" style={{ animationDelay: '80ms' }}>
               <section className="relative overflow-hidden rounded-[2.15rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.92)_0%,rgba(248,250,252,0.86)_100%)] p-2.5 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.38)] ring-1 ring-slate-200/60 backdrop-blur-xl">
                 <div className="pointer-events-none absolute -left-10 -top-12 h-32 w-32 rounded-full bg-[#336886]/10 blur-3xl" />
@@ -2868,7 +2920,7 @@ export function MarketplacePage() {
                     Hub
                   </span>
                 </div>
-                <SegmentPromoCarousel mode="hub" className="mx-0 shadow-[0_18px_42px_-28px_rgba(15,23,42,0.45)]" />
+                <SegmentPromoCarousel mode="hub" slides={homePromoSlides} className="mx-0 shadow-[0_18px_42px_-28px_rgba(15,23,42,0.45)]" />
               </section>
             </div>
           )}

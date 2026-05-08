@@ -25,6 +25,7 @@ import {
   Car,
   ShieldCheck,
   Megaphone,
+  ImageSquare,
   CaretDown,
   Sparkle,
   GitCommit,
@@ -1225,6 +1226,14 @@ export function SuperAdmin() {
         <div className="relative flex items-center gap-2" ref={profileMenuRef}>
           <button
             type="button"
+            onClick={() => { window.location.href = '/superadmin/home-config'; }}
+            className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/88 px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm transition hover:border-[#336886]/25 hover:text-[#336886] sm:inline-flex"
+          >
+            <ImageSquare size={15} weight="duotone" />
+            Configuração da Home
+          </button>
+          <button
+            type="button"
             onClick={() => { window.location.href = '/superadmin/condominiums'; }}
             className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/88 px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm transition hover:border-[#336886]/25 hover:text-[#336886] sm:inline-flex"
           >
@@ -1271,9 +1280,20 @@ export function SuperAdmin() {
                 type="button"
                 onClick={() => {
                   setProfileMenuOpen(false);
-                  window.location.href = '/superadmin/condominiums';
+                  window.location.href = '/superadmin/home-config';
                 }}
                 className="mt-2 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+              >
+                <ImageSquare size={16} weight="duotone" />
+                Configuração da Home
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setProfileMenuOpen(false);
+                  window.location.href = '/superadmin/condominiums';
+                }}
+                className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
               >
                 <Buildings size={16} weight="duotone" />
                 Condomínios e acessos

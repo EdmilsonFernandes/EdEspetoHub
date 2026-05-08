@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Buildings, ChartBar, ChefHat, CurrencyDollar, Package, SignOut, UserCircle } from '@phosphor-icons/react';
+import { Buildings, ChartBar, ChefHat, CurrencyDollar, ImageSquare, Package, SignOut, UserCircle } from '@phosphor-icons/react';
 import { orderService } from '../../services/orderService';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -260,6 +260,13 @@ export function AdminMobileBottomNav() {
         icon: Buildings,
         active: path.startsWith('/superadmin/condominiums'),
         onClick: () => navigate('/superadmin/condominiums'),
+      },
+      {
+        id: 'super-home-config',
+        label: 'Banners',
+        icon: ImageSquare,
+        active: path.startsWith('/superadmin/home-config'),
+        onClick: () => navigate('/superadmin/home-config'),
       },
       {
         id: 'super-logout',

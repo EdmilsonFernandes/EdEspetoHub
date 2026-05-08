@@ -189,6 +189,8 @@ export function createProxyRoutes(): Router {
     r.patch('/admin/stores/:storeId/reactivate', authRequired, forward);
     r.patch('/admin/stores/:storeId/plan-exempt', authRequired, forward);
     r.post('/admin/payments/:paymentId/reprocess', authRequired, forward);
+    r.get('/admin/home-config', authRequired, forward);
+    r.put('/admin/home-config', authRequired, forward);
     r.post('/admin/site-settings', authRequired, forward);
     r.get('/admin/featured-requests', authRequired, forward);
     r.patch('/admin/featured-requests/:requestId/review', authRequired, forward);
@@ -217,6 +219,7 @@ export function createProxyRoutes(): Router {
     r.post('/admin/motoboys/:motoboyId/documents/:documentId/reject', authRequired, forward);
 
     // Customer notifications
+    r.get('/public/home-config', forward);
     r.get('/customer/notifications', authRequired, forward);
     r.post('/customer/notifications', authRequired, forward);
     r.patch('/customer/notifications/:id/read', authRequired, forward);
