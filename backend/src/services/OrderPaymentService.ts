@@ -170,6 +170,8 @@ export class OrderPaymentService {
         .set({ status: 'pending' })
         .where('id = :id AND status = :s', { id: row.orderId, s: 'awaiting_payment' })
         .execute();
+      // Append pending to timeline
+      try { await manager.query("UPDATE orders SET status_timeline = COALESCE(status_timeline, '[]'::jsonb) || $1::jsonb WHERE id = $2 AND status = 'pending'", [JSON.stringify([{status: "pending", at: new Date().toISOString()}]), row.orderId]); } catch {}
     });
   }
 
