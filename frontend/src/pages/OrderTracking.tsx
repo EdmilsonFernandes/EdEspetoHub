@@ -1406,6 +1406,9 @@ export function OrderTracking() {
                         Pedido #{orderDisplayId}
                     </p>
                     <div className="mt-3 flex items-center gap-3 flex-wrap">
+                      <div className={`mb-2 inline-flex h-12 w-12 items-center justify-center rounded-2xl ${isCancelled ? "bg-rose-100 text-rose-500" : isReady ? "bg-emerald-100 text-emerald-600" : "bg-sky-100 text-sky-600"} ${!isTerminal ? "animate-bounce" : ""}`} style={!isTerminal ? { animationDuration: "2s" } : undefined}>
+                        {isCancelled ? <CircleNotch size={24} weight="bold" /> : isReady ? <CheckCircle size={24} weight="fill" /> : <Clock size={24} weight="duotone" className="animate-spin" style={{ animationDuration: "3s" }} />}
+                      </div>
                       <h1 className="text-[1.45rem] font-black leading-none text-slate-950 sm:text-[2rem]">{statusLabel}</h1>
                       {isDelivery && (
                         String((order as any)?.delivery?.status || '').toUpperCase() === 'IN_TRANSIT' ||
@@ -1660,7 +1663,7 @@ export function OrderTracking() {
                       return (
                         <div key={`mobile-line-${step.id}`} className="relative z-[1] flex items-center gap-3">
                           <span
-                            className={`h-[22px] w-[22px] shrink-0 rounded-full border-2 grid place-items-center transition-all duration-300 ${
+                            className={`h-[22px] w-[22px] shrink-0 rounded-full border-2 grid place-items-center transition-all duration-300 ${isCurrent && !isTerminal ? 'animate-pulse' : ''} ${
                               isCurrent
                                 ? isCancelled
                                   ? 'border-rose-500 bg-rose-500 text-white shadow-[0_0_0_3px_rgba(244,63,94,0.15)]'
