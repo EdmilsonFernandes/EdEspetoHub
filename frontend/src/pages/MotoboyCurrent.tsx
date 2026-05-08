@@ -117,26 +117,11 @@ export function MotoboyCurrent() {
       setShowPayment(false);
 
       if (finalizeAfterPayment) {
-        try {
-          await motoboyService.markDelivered(selected.id);
-          showToast('Entrega finalizada.', 'success');
-          setFinalizeAfterPayment(false);
-          const donePayload = {
-            orderId: selected.id,
-            customerName: selected?.customerName,
-            total: Number(selected?.total || 0),
-            deliveryFee: Number(selected?.deliveryFee || 0),
-            storeName: selected?.store?.name || null,
-          };
-          load();
-          navigate('/motoboy/done', { state: { done: donePayload } });
-          return;
-        } catch (error: any) {
-          setFinalizeAfterPayment(false);
-          showToast(error?.message || 'Não foi possível concluir a entrega.', 'error');
-        }
+        setFinalizeAfterPayment(false);
+        setDeliveryCode("");
+        setCodeError("");
+        setShowCodeModal(true);
       }
-
       setFinalizeAfterPayment(false);
       load();
     } catch (error: any) {
@@ -183,7 +168,7 @@ export function MotoboyCurrent() {
       load();
       navigate("/motoboy/done", { state: { done: { orderId: activeOrder.id, customerName: activeOrder?.customerName, total: Number(activeOrder?.total || 0), deliveryFee: Number(activeOrder?.deliveryFee || 0), storeName: activeOrder?.store?.name || null } } });
     } catch (error: any) {
-      setCodeError(error?.message || "Código incorreto. Tente novamente.");
+      setCodeError(error?.details?.message || error?.message || "Código incorreto. Tente novamente.");
     }
   };
 
