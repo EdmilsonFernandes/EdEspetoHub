@@ -44,9 +44,7 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
   }, [items]);
   const compactAddress = useMemo(() => {
     const raw = String(address || '').trim();
-    if (!raw) return '-';
-    if (raw.length <= 64) return raw;
-    return `${raw.slice(0, 64)}...`;
+    return raw || '-';
   }, [address]);
   const shortId = order?.shortId || (order?.id ? String(order.id).slice(0, 8) : '-');
   const customerName = order?.customerName || order?.customer_name || 'Cliente';
@@ -80,7 +78,7 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
               <div className="h-9 w-9 rounded-xl bg-slate-100 border border-white shadow-sm" />
             )}
             <div className="min-w-0">
-              <p className="text-[11px] uppercase tracking-[0.25em] text-slate-400 truncate">{storeLabel}</p>
+              <p className="text-[11px] uppercase tracking-[0.25em] text-slate-400 break-words line-clamp-2">{storeLabel}</p>
               <p className="text-[11px] text-slate-400 truncate">Pedido</p>
             </div>
           </div>
@@ -106,10 +104,16 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
             )}
             {compact && (
               <div className="mt-2 space-y-1">
-                <p className="text-[11px] text-slate-600 truncate">
+                <p
+                  className="text-[11px] leading-relaxed text-slate-600 break-words line-clamp-2 sm:line-clamp-1"
+                  title={storeName || storeSlug || 'Loja'}
+                >
                   <span className="font-semibold text-slate-700">Loja:</span> {storeName || storeSlug || 'Loja'}
                 </p>
-                <p className="text-[11px] text-slate-600 truncate">
+                <p
+                  className="text-[11px] leading-relaxed text-slate-600 break-words line-clamp-3 sm:line-clamp-2"
+                  title={compactAddress}
+                >
                   <span className="font-semibold text-slate-700">Entrega:</span> {compactAddress}
                 </p>
               </div>
