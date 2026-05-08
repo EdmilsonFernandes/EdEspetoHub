@@ -1320,6 +1320,7 @@ export function OrderTracking() {
   const currentIndex = Math.max(0, steps.findIndex((item) => item.id === currentStep));
   const progress = steps.length > 1 ? Math.round((currentIndex / (steps.length - 1)) * 100) : 0;
   const itemsToRender = Array.isArray(order?.items) ? order.items : [];
+  const [itemsExpanded, setItemsExpanded] = useState(itemsToRender.length <= 3);
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f4f8fb_0%,#ebf2f7_100%)] pt-[env(safe-area-inset-top)]">
@@ -1399,7 +1400,6 @@ export function OrderTracking() {
                   ? 'border-emerald-100 bg-[linear-gradient(145deg,#f5fbf7,#ffffff)]'
                   : 'border-[#d5e3ec] bg-[linear-gradient(145deg,#f8fbfd,#eef5fa_52%,#ffffff_100%)]'
               }`}>
-                <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full blur-3xl opacity-40" style={{ background: isCancelled ? '#fecdd3' : isReady ? '#bbf7d0' : '#bfdbfe' }} />
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div>
                     <p className="inline-flex items-center gap-1.5 rounded-full border border-[#cfe0ea]/90 bg-white/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#336886] shadow-[0_12px_22px_-20px_rgba(51,104,134,0.18)]">
@@ -1431,21 +1431,12 @@ export function OrderTracking() {
                       >
                       {isCancelled ? 'Cancelado' : isReady ? 'Finalizado' : 'Em andamento'}
                     </span>
-                    </div>
-                    <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <span className="inline-flex rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-slate-600 ring-1 ring-[#d5e3ec]">
-                        {typeLabel}
+                    {!isTerminal && polling && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-600 ring-1 ring-emerald-100">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        Ao vivo
                       </span>
-                      {orderCreatedAtLabel ? (
-                        <span className="inline-flex rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-slate-500 ring-1 ring-slate-200">
-                          {orderCreatedAtLabel}
-                        </span>
-                      ) : null}
-                      {paymentMeta?.label ? (
-                        <span className="inline-flex rounded-full bg-[#edf5fa] px-2.5 py-1 text-[11px] font-semibold text-[#336886] ring-1 ring-[#d5e3ec]">
-                          {paymentMeta.label}
-                        </span>
-                      ) : null}
+                    )}
                     </div>
                     {isCancelled && (
                       <div className="mt-3 rounded-2xl border border-rose-200/70 bg-rose-50/80 px-4 py-3">
@@ -1453,6 +1444,12 @@ export function OrderTracking() {
                           {order?.canceledReason || "Sentimos muito! Este pedido foi cancelado."}
                         </p>
                       </div>
+                    )}
+                    {storePhone && (
+                      <a href={storeWhatsappNativeLink || storeWhatsappLink} target="_blank" rel="noopener" className="mt-3 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 active:scale-95 transition-transform">
+                        <WhatsappLogo size={15} weight="fill" />
+                        Falar com a loja
+                      </a>
                     )}
 
                     {estimatedReadyAt && !isTerminal ? (
@@ -1601,10 +1598,6 @@ export function OrderTracking() {
                       }}
                     />
                   </div>
-                  <div className="mt-2 flex items-center justify-between gap-3 text-xs text-slate-500">
-                    <span>Etapa atual do pedido</span>
-                    <span className="font-semibold text-[#336886]">Acompanhando</span>
-                  </div>
                 </div>
                 {(isReady && elapsedMs > 0) ||
                 (remainingEstimateMinutes !== null && !isTerminal) ||
@@ -1646,7 +1639,6 @@ export function OrderTracking() {
                 ) : null}
 
                 <div className="rounded-2xl border border-[#d9e6ee] bg-white/92 px-4 py-4 shadow-[0_12px_28px_-24px_rgba(51,104,134,0.14)]">
-                  <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]">Acompanhamento</p>
                   <div className="relative pl-1">
                     {/* Trilho de fundo */}
                     <span className="pointer-events-none absolute left-[10px] top-3 bottom-3 w-[2px] rounded-full bg-[#dce9f1]/85" />
@@ -1723,7 +1715,7 @@ export function OrderTracking() {
                     )}
                   </div>
                   <div className="space-y-2 text-sm text-slate-600">
-                    {itemsToRender.map((item) => (
+                    {(itemsExpanded ? itemsToRender : itemsToRender.slice(0, 2)).map((item) => (
                       <div key={item.id || item.productId} className="flex items-start gap-3 rounded-2xl border border-[#dce9f1] bg-white/92 px-3 py-3 shadow-[0_12px_24px_-24px_rgba(51,104,134,0.12)]">
                         {/* Imagem */}
                         {item.imageUrl || item.image || item.product?.imageUrl ? (
@@ -1790,6 +1782,11 @@ export function OrderTracking() {
                       </div>
                     ))}
                   </div>
+                    {!itemsExpanded && itemsToRender.length > 2 && (
+                      <button type="button" onClick={() => setItemsExpanded(true)} className="mt-2 w-full rounded-xl border border-slate-200 bg-white py-2 text-xs font-bold text-slate-600 active:scale-[0.98] transition-transform">
+                        Ver todos os {itemsToRender.length} itens
+                      </button>
+                    )}
                   {hasDeliveryFee ? (
                     <div className="mt-5 flex items-center justify-between border-t border-[#dce9f1] pt-4 text-xs font-semibold text-slate-600">
                       <span>Frete</span>
@@ -1812,14 +1809,8 @@ export function OrderTracking() {
                   <div className="space-y-4 px-4 py-4 sm:px-5">
                     <div className="grid gap-3 sm:grid-cols-2">
                       <TrackingMetaCard
-                        label="Status"
-                        value={statusLabel}
-                        detail={orderLifecycleLabel}
-                        accent={isCancelled ? 'warning' : isReady ? 'success' : 'primary'}
-                      />
-                      <TrackingMetaCard
                         label="Pagamento"
-                        value={paymentMeta?.label || 'Sem informacao'}
+                        value={paymentMeta?.label || 'A confirmar'}
                         detail={paymentSummaryDetail}
                       />
                       {isCancelled && hasOnlinePayment && isPaymentApproved && !order?.refundStatus && (
