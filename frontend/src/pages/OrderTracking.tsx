@@ -6,7 +6,7 @@ import { Capacitor } from '@capacitor/core';
 import { customerAccountService } from '../services/customerAccountService';
 import { orderService } from '../services/orderService';
 import { mapsService } from '../services/mapsService';
-import { formatAddress, formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId } from '../utils/format';
+import { formatAddress, formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId, formatReadableDateTime, formatTimeOfDay } from '../utils/format';
 import { getPaymentMethodMeta, getPaymentProviderMeta, mercadoPagoHorizontal } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { applyBrandTheme } from '../utils/brandTheme';
@@ -1462,7 +1462,7 @@ export function OrderTracking() {
                           {etaForecastPrefix}{' '}
                           {isPostalDelivery
                             ? estimatedReadyAt.toLocaleDateString('pt-BR')
-                            : estimatedReadyAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                            : formatReadableDateTime(estimatedReadyAt)}
                         </p>
                         {isPostalDelivery ? (
                           <p className="mt-1 text-xs text-stone-600">
@@ -1697,7 +1697,7 @@ export function OrderTracking() {
                             const entry = (order?.statusTimeline || []).find((e: any) => e.status === step.id);
                             if (!entry?.at) return null;
                             const t = new Date(entry.at);
-                            return <span className="ml-2 text-[10px] font-medium text-slate-400">{t.getHours().toString().padStart(2,"0")}:{t.getMinutes().toString().padStart(2,"0")}</span>;
+                            return <span className="ml-2 text-[10px] font-medium text-slate-400">{formatTimeOfDay(t, { padHour: true })}</span>;
                           })()}
                         </div>
                       );
@@ -2035,7 +2035,7 @@ export function OrderTracking() {
                         </div>
                         {deliveryEta ? (
                           <div className="mt-2 text-xs font-semibold text-emerald-700">
-                            {etaForecastLabel}: {deliveryEta.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                            {etaForecastLabel}: {formatReadableDateTime(deliveryEta)}
                           </div>
                         ) : null}
                         {etaDetails ? (
@@ -2147,16 +2147,6 @@ export function OrderTracking() {
                           >
                             <ArrowClockwise size={15} weight="bold" />
                             Pedir de novo
-                          </button>
-                        ) : null}
-                        {storeWhatsappLink ? (
-                          <button
-                            type="button"
-                            onClick={openWhatsApp}
-                            className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#16a34a,#166534)] px-4 py-3 text-[13px] font-bold text-white shadow-[0_18px_34px_-20px_rgba(22,163,74,0.48)] transition-transform active:scale-[0.98]"
-                          >
-                            <WhatsappLogo size={15} weight="fill" />
-                            Falar com a loja
                           </button>
                         ) : null}
                       </div>
