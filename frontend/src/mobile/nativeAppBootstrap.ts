@@ -66,9 +66,12 @@ const navigateFromPayload = (payload?: unknown) => {
   const target = candidates.find(Boolean);
   if (!target) return;
   const internal = normalizeInternalUrl(target);
-  if (!internal) return;
-  if (window.location.pathname + window.location.search + window.location.hash === internal) return;
-  window.location.assign(internal);
+  if (internal) {
+    if (window.location.pathname + window.location.search + window.location.hash === internal) return;
+    window.location.assign(internal);
+  } else if (/^https?:\/\//i.test(target)) {
+    import("@capacitor/browser").then(({ Browser }) => Browser.open({ url: target })).catch(() => window.open(target, "_blank", "noopener"));
+  }
 };
 
 const isStoreNewOrderPush = (payload?: unknown) => {

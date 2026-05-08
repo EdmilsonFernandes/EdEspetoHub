@@ -54,8 +54,15 @@ export function NotificationsPage() {
       setUnread((c) => Math.max(0, c - 1));
     }
     if (n.url) {
+    if (n.url) {
       const isExternal = /^https?:\/\//i.test(n.url) && !n.url.includes("janocaminho.com.br");
-      if (isExternal) { window.open(n.url, "_blank"); return; }
+      if (isExternal) {
+        try { const { Browser } = await import("@capacitor/browser"); await Browser.open({ url: n.url }); } catch { window.open(n.url, "_blank", "noopener"); }
+        return;
+      }
+      const path = n.url.replace(/^https?:\/\/[^/]+/, "");
+      if (path) navigate(path);
+    }
       const path = n.url.replace(/^https?:\/\/[^/]+/, "");
       if (path) navigate(path);
     }
