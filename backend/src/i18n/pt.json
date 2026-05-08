@@ -84,5 +84,6 @@
   "MOTO-033": "A chave PIX deve ser um CPF válido do entregador.",
   "MOTO-034": "A chave PIX precisa ser o mesmo CPF cadastrado no perfil do entregador.",
   "REVIEW-003": "Este pedido não possui gorjeta para repasse.",
-  "REVIEW-004": "A gorjeta ainda não foi paga pelo cliente."
+  "REVIEW-004": "A gorjeta ainda não foi paga pelo cliente.",
+  "REVIEW-005": "Esta gorjeta já foi recebida diretamente pelo entregador."
 }

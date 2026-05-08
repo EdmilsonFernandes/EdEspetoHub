@@ -84,5 +84,6 @@
   "MOTO-033": "PIX key must be a valid CPF from the courier.",
   "MOTO-034": "PIX key must match the courier CPF registered in the profile.",
   "REVIEW-003": "This order has no tip available for payout.",
-  "REVIEW-004": "The tip has not been paid by the customer yet."
+  "REVIEW-004": "The tip has not been paid by the customer yet.",
+  "REVIEW-005": "This tip was already received directly by the courier."
 }

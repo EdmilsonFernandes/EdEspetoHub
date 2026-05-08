@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { LinkSimpleHorizontal, Storefront, ClockClockwise, CheckCircle, ShieldCheck, ShieldWarning, Clock, Info, IdentificationCard, Camera, Car } from '@phosphor-icons/react';
 import { motoboyService } from '../services/motoboyService';
 import { storeService } from '../services/storeService';
@@ -28,6 +29,7 @@ const faceReasonLabel = (reason?: string | null) => {
 };
 
 export function MotoboyProfile() {
+  const location = useLocation();
   const [docFiles, setDocFiles] = useState<Record<string, File | null>>({});
   const [documents, setDocuments] = useState<any[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -75,6 +77,9 @@ export function MotoboyProfile() {
   });
   const [tipPayouts, setTipPayouts] = useState<any[]>([]);
   const [tipPayoutsLoading, setTipPayoutsLoading] = useState(false);
+  const [mpAccount, setMpAccount] = useState<any | null>(null);
+  const [mpLoading, setMpLoading] = useState(false);
+  const [mpActionLoading, setMpActionLoading] = useState(false);
   // Face verification is an internal signal; keep UI friendly (no raw status/reason for motoboys).
   const [notifyOrders, setNotifyOrders] = useState(() => {
     const raw = localStorage.getItem('motoboy:notify_orders');
@@ -82,6 +87,10 @@ export function MotoboyProfile() {
     return raw === '1';
   });
   const { showToast } = useToast();
+  const paymentAccountResult = useMemo(
+    () => String(new URLSearchParams(location.search || '').get('paymentAccount') || '').trim().toLowerCase(),
+    [location.search]
+  );
 
   const BRAZIL_UF: Array<{ uf: string; name: string }> = [
     { uf: 'AC', name: 'Acre' },
@@ -225,6 +234,37 @@ export function MotoboyProfile() {
     };
     loadProfile();
   }, []);
+
+  const loadMercadoPagoAccount = async () => {
+    setMpLoading(true);
+    try {
+      const data = await motoboyService.getMercadoPagoAccount();
+      setMpAccount(data || null);
+      return data;
+    } catch {
+      setMpAccount(null);
+      return null;
+    } finally {
+      setMpLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadMercadoPagoAccount();
+  }, []);
+
+  useEffect(() => {
+    if (!paymentAccountResult) return;
+    void loadMercadoPagoAccount();
+    if (paymentAccountResult === 'connected') {
+      showToast('Conta Mercado Pago conectada.', 'success');
+    } else if (paymentAccountResult === 'error') {
+      showToast('Não foi possível concluir a conexão do Mercado Pago.', 'error');
+    }
+    const url = new URL(window.location.href);
+    url.searchParams.delete('paymentAccount');
+    window.history.replaceState({}, '', url.toString());
+  }, [paymentAccountResult, showToast]);
 
   const documentsByType = useMemo(() => {
     const map = new Map<string, any>();
@@ -612,6 +652,16 @@ export function MotoboyProfile() {
     if (Number.isNaN(date.getTime())) return '-';
     return date.toLocaleString('pt-BR');
   };
+  const isDirectTipSettlement = (row: any) => String(row?.tipSettlementMode || '').toUpperCase() === 'DIRECT_MOTOBOY';
+  const mpConnected = Boolean(!mpLoading && mpAccount?.connected);
+  const mpPixReady = Boolean(mpConnected && mpAccount?.validation?.pix?.available);
+  const directTipPaidRows = useMemo(
+    () =>
+      Array.isArray(tipPayouts)
+        ? tipPayouts.filter((row: any) => isDirectTipSettlement(row) && String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID')
+        : [],
+    [tipPayouts]
+  );
 
   const payoutStats = useMemo(() => {
     const rows = Array.isArray(tipPayouts) ? tipPayouts : [];
@@ -625,8 +675,9 @@ export function MotoboyProfile() {
       pendingCount: pending.length,
       paidAmount,
       pendingAmount,
+      directPaidCount: directTipPaidRows.length,
     };
-  }, [tipPayouts]);
+  }, [directTipPaidRows, tipPayouts]);
 
   useEffect(() => {
     loadTipPayouts();
@@ -849,6 +900,32 @@ export function MotoboyProfile() {
   const explainBlockedRequest = () => {
     setShowRequestBlockedModal(true);
     if (requestBlockReasons[0]) showToast(requestBlockReasons[0], 'error');
+  };
+
+  const handleConnectMercadoPago = async () => {
+    setMpActionLoading(true);
+    try {
+      const canonicalOrigin = window.location.origin.replace('://www.', '://');
+      const data = await motoboyService.createMercadoPagoConnectUrl(`${canonicalOrigin}${window.location.pathname}`);
+      if (!data?.authUrl) throw new Error('Não foi possível iniciar a conexão.');
+      window.location.assign(String(data.authUrl));
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível conectar o Mercado Pago.', 'error');
+      setMpActionLoading(false);
+    }
+  };
+
+  const handleDisconnectMercadoPago = async () => {
+    setMpActionLoading(true);
+    try {
+      const data = await motoboyService.disconnectMercadoPago();
+      setMpAccount(data || null);
+      showToast('Conta Mercado Pago desconectada.', 'success');
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível desconectar o Mercado Pago.', 'error');
+    } finally {
+      setMpActionLoading(false);
+    }
   };
 
   const handleRequestSingle = async (storeId: string) => {
@@ -1490,9 +1567,12 @@ export function MotoboyProfile() {
               <p className="text-[11px] text-amber-800/80">{payoutStats.pendingCount} gorjeta(s) aguardando repasse</p>
             </div>
             <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">Repasses concluídos</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">Gorjetas recebidas</p>
               <p className="text-lg font-black text-emerald-800">{formatCurrency(payoutStats.paidAmount)}</p>
-              <p className="text-[11px] text-emerald-800/80">{payoutStats.paidCount} gorjeta(s) repassada(s)</p>
+              <p className="text-[11px] text-emerald-800/80">
+                {payoutStats.paidCount} gorjeta(s) confirmada(s)
+                {payoutStats.directPaidCount > 0 ? ` • ${payoutStats.directPaidCount} direta(s) via Mercado Pago` : ''}
+              </p>
             </div>
           </div>
           <button
@@ -1556,8 +1636,78 @@ export function MotoboyProfile() {
               <p className="text-sm font-semibold text-slate-900 break-words">{profileDraft?.address || '-'}</p>
             </div>
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 sm:col-span-2">
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">PIX para repasse</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">PIX manual de fallback</p>
               <p className="text-sm font-semibold text-slate-900 break-all">{profileDraft?.pixKey || '-'}</p>
+            </div>
+          </div>
+        </FormSection>
+        <FormSection title="Mercado Pago do entregador" variant="primary" contentClassName="space-y-3">
+          <div className={`rounded-2xl border px-4 py-4 ${
+            mpConnected
+              ? mpPixReady
+                ? 'border-emerald-200 bg-emerald-50'
+                : 'border-amber-200 bg-amber-50'
+              : 'border-slate-200 bg-white'
+          }`}>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="space-y-1">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Gorjeta direta</p>
+                <p className="text-base font-black text-slate-900">
+                  {mpLoading
+                    ? 'Verificando conta conectada...'
+                    : mpConnected
+                      ? mpPixReady
+                        ? 'Conta pronta para receber a gorjeta direto'
+                        : 'Conta conectada, mas o Pix ainda precisa de ajuste'
+                      : 'Nenhuma conta Mercado Pago conectada'}
+                </p>
+                <p className="text-xs text-slate-600">
+                  {mpConnected
+                    ? mpPixReady
+                      ? 'Quando o cliente pagar a gorjeta, o valor cai direto no seu Mercado Pago conectado.'
+                      : mpAccount?.validation?.pix?.detail || 'Conecte uma chave Pix ativa no Mercado Pago para usar o recebimento direto.'
+                    : 'Conecte sua conta Mercado Pago para a gorjeta ir direto para você. Sem conta conectada, o sistema usa o fluxo atual da loja e repasse manual.'}
+                </p>
+                {Array.isArray(mpAccount?.validation?.notes) && mpAccount.validation.notes.length > 0 ? (
+                  <div className="space-y-1 pt-1">
+                    {mpAccount.validation.notes.slice(0, 3).map((note: string, idx: number) => (
+                      <p key={`mp-note-${idx}`} className="text-[11px] text-slate-600">
+                        • {note}
+                      </p>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {mpConnected ? (
+                  <>
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${
+                      mpPixReady
+                        ? 'border-emerald-200 bg-white text-emerald-700'
+                        : 'border-amber-200 bg-white text-amber-700'
+                    }`}>
+                      {mpPixReady ? 'Pix pronto' : 'Revisar Pix'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleDisconnectMercadoPago}
+                      disabled={mpActionLoading}
+                      className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 disabled:opacity-60"
+                    >
+                      {mpActionLoading ? 'Processando...' : 'Desconectar'}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleConnectMercadoPago}
+                    disabled={mpActionLoading}
+                    className="btn-press rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-extrabold text-sky-800 disabled:opacity-60"
+                  >
+                    {mpActionLoading ? 'Redirecionando...' : 'Conectar Mercado Pago'}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </FormSection>
@@ -1720,12 +1870,12 @@ export function MotoboyProfile() {
           <input
             value={profileDraft.pixKey}
             onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, pixKey: event.target.value }))}
-            placeholder="Chave PIX CPF (somente números)"
+            placeholder="Chave PIX CPF para fallback manual (somente números)"
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm sm:col-span-2"
             inputMode="numeric"
           />
           <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] text-slate-600 sm:col-span-2">
-            Para repasse da gorjeta, use a chave PIX CPF do próprio entregador.
+            Essa chave continua como fallback para repasse manual quando a gorjeta não cair direto no Mercado Pago conectado.
           </div>
           <input
             value={profileDraft.address}
@@ -1788,9 +1938,9 @@ export function MotoboyProfile() {
             <p className="text-[11px] text-amber-800/80">{payoutStats.pendingCount} repasse(s)</p>
           </div>
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">Repassado</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">Recebido</p>
             <p className="text-lg font-black text-emerald-800">{formatCurrency(payoutStats.paidAmount)}</p>
-            <p className="text-[11px] text-emerald-800/80">{payoutStats.paidCount} repasse(s)</p>
+            <p className="text-[11px] text-emerald-800/80">{payoutStats.paidCount} gorjeta(s) confirmada(s)</p>
           </div>
           <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
             <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Total histórico</p>
@@ -1807,6 +1957,7 @@ export function MotoboyProfile() {
           <div className="grid gap-2">
             {tipPayouts.slice(0, 40).map((row: any, idx: number) => {
               const payoutStatus = String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID' ? 'PAID' : 'PENDING';
+              const directTipSettlement = isDirectTipSettlement(row);
               const logo = resolveAssetUrl(String(row?.storeLogoUrl || '')) || String(row?.storeLogoUrl || '');
               return (
                 <div key={String(row?.id || `tip-row-${idx}`)} className="rounded-2xl border border-slate-200 bg-white p-3">
@@ -1824,14 +1975,22 @@ export function MotoboyProfile() {
                               : 'border-amber-200 bg-amber-50 text-amber-800'
                           }`}
                         >
-                          {payoutStatus === 'PAID' ? 'Repassado' : 'Pendente'}
+                          {payoutStatus === 'PAID'
+                            ? directTipSettlement
+                              ? 'Recebida direto'
+                              : 'Repassado'
+                            : 'Pendente'}
                         </span>
                       </div>
                       <div className="text-[11px] text-slate-500">
                         Pedido #{String(row?.orderId || '').slice(0, 8)} · Gorjeta paga em {formatDateTime(row?.tipPaidAt)}
                       </div>
                       <div className="text-[11px] text-slate-500">
-                        {payoutStatus === 'PAID' ? `Repasse confirmado em ${formatDateTime(row?.tipPayoutAt)}` : 'Aguardando repasse do lojista'}
+                        {directTipSettlement
+                          ? `Recebida direto em ${formatDateTime(row?.tipPayoutAt || row?.tipPaidAt)}`
+                          : payoutStatus === 'PAID'
+                            ? `Repasse confirmado em ${formatDateTime(row?.tipPayoutAt)}`
+                            : 'Aguardando repasse do lojista'}
                       </div>
                       {row?.tipPayoutNotes ? (
                         <div className="text-[11px] text-slate-600 break-words">

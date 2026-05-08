@@ -355,6 +355,25 @@ export async function runMigrations() {
     ON store_payment_accounts(store_id);
   `);
   await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS motoboy_payment_accounts (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      motoboy_id UUID NOT NULL REFERENCES motoboys(id) ON DELETE CASCADE,
+      provider TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'CONNECTED',
+      provider_user_id TEXT,
+      access_token_encrypted TEXT NOT NULL,
+      refresh_token_encrypted TEXT,
+      expires_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      CONSTRAINT uq_motoboy_payment_accounts_motoboy_provider UNIQUE (motoboy_id, provider)
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_motoboy_payment_accounts_motoboy
+    ON motoboy_payment_accounts(motoboy_id);
+  `);
+  await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS order_payments (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
@@ -980,6 +999,10 @@ export async function runMigrations() {
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS order_reviews
     ADD COLUMN IF NOT EXISTS tip_paid_at TIMESTAMPTZ;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_reviews
+    ADD COLUMN IF NOT EXISTS tip_settlement_mode TEXT NOT NULL DEFAULT 'STORE_PAYOUT';
   `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS order_reviews

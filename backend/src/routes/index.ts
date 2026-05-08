@@ -35,6 +35,7 @@ import { CustomerAccountController } from '../controllers/CustomerAccountControl
 import { FeaturedProductController } from '../controllers/FeaturedProductController';
 import { CondominiumController } from '../controllers/CondominiumController';
 import { StorePaymentAccountController } from '../controllers/StorePaymentAccountController';
+import { MotoboyPaymentAccountController } from '../controllers/MotoboyPaymentAccountController';
 import { MapsController } from '../controllers/MapsController';
 
 import { hydrateAuthOptional, requireAuth, requireRole } from '../middleware/authGuard';
@@ -271,6 +272,9 @@ routes.get('/motoboy/orders/history', requireAuth, MotoboyController.listHistory
 routes.get('/motoboy/earnings/today', requireAuth, MotoboyController.getEarningsToday);
 routes.get('/motoboy/stats', requireAuth, MotoboyController.getStats);
 routes.get('/motoboy/reviews/tip-payouts', requireAuth, OrderReviewController.listTipPayoutsForMotoboy);
+routes.get('/motoboy/payment-accounts/mercadopago', requireAuth, MotoboyPaymentAccountController.getMercadoPagoStatus);
+routes.post('/motoboy/payment-accounts/mercadopago/connect', requireAuth, MotoboyPaymentAccountController.createMercadoPagoConnectUrl);
+routes.delete('/motoboy/payment-accounts/mercadopago', requireAuth, MotoboyPaymentAccountController.disconnectMercadoPago);
 routes.post('/motoboy/orders/:orderId/accept', requireAuth, MotoboyController.acceptOrder);
 routes.post('/motoboy/orders/:orderId/pickup', requireAuth, MotoboyController.pickupOrder);
 routes.post('/motoboy/orders/:orderId/start', requireAuth, MotoboyController.startDelivery);

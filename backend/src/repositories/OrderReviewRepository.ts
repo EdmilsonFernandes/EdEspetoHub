@@ -80,6 +80,7 @@ async listByStoreId(storeId: string, limit = 100) {
         'r.tip_amount as "tipAmount"',
         'r.tip_status as "tipStatus"',
         'r.tip_paid_at as "tipPaidAt"',
+        'r.tip_settlement_mode as "tipSettlementMode"',
         'r.tip_payout_status as "tipPayoutStatus"',
         'r.tip_payout_at as "tipPayoutAt"',
         'r.tip_payout_proof_url as "tipPayoutProofUrl"',
@@ -191,6 +192,7 @@ async listTipPayoutsByStoreId(storeId: string, limit = 300) {
         r.tip_amount AS "tipAmount",
         r.tip_status AS "tipStatus",
         r.tip_paid_at AS "tipPaidAt",
+        r.tip_settlement_mode AS "tipSettlementMode",
         r.tip_payout_status AS "tipPayoutStatus",
         r.tip_payout_at AS "tipPayoutAt",
         r.tip_payout_proof_url AS "tipPayoutProofUrl",
@@ -206,6 +208,7 @@ async listTipPayoutsByStoreId(storeId: string, limit = 300) {
       WHERE r.store_id = $1
         AND COALESCE(r.tip_amount, 0) > 0
         AND UPPER(COALESCE(r.tip_status, '')) = 'PAID'
+        AND UPPER(COALESCE(r.tip_settlement_mode, 'STORE_PAYOUT')) <> 'DIRECT_MOTOBOY'
       ORDER BY COALESCE(r.tip_payout_at, r.tip_paid_at, r.created_at) DESC
       LIMIT $2
       `,
@@ -230,6 +233,7 @@ async listTipPayoutsByMotoboyId(motoboyId: string, limit = 300) {
         r.tip_amount AS "tipAmount",
         r.tip_status AS "tipStatus",
         r.tip_paid_at AS "tipPaidAt",
+        r.tip_settlement_mode AS "tipSettlementMode",
         r.tip_payout_status AS "tipPayoutStatus",
         r.tip_payout_at AS "tipPayoutAt",
         r.tip_payout_proof_url AS "tipPayoutProofUrl",

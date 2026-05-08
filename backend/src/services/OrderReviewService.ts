@@ -24,9 +24,11 @@ import { saveBase64Image } from '../utils/imageStorage';
 import { resolvePlanFeatures } from '../config/planFeatures';
 import { verifyOrderAccessToken } from '../utils/orderAccessToken';
 import { StorePaymentAccountService } from './StorePaymentAccountService';
+import { MotoboyPaymentAccountService } from './MotoboyPaymentAccountService';
 import { logger } from '../utils/logger';
 import { PaymentAuditService } from './PaymentAuditService';
 import { PAYMENT_AUDIT_ENTITY, PAYMENT_AUDIT_FLOW, PAYMENT_AUDIT_STAGE } from '../utils/paymentAudit';
+import { PushNotificationService } from './PushNotificationService';
 
 type SubmitReviewInput = {
   storeRating: number;
@@ -47,12 +49,14 @@ type MarkTipPayoutInput = {
 export class OrderReviewService {
   private mercadoPagoService = new MercadoPagoService();
   private accountService = new StorePaymentAccountService();
+  private motoboyPaymentAccountService = new MotoboyPaymentAccountService();
   private orderRepository = new OrderRepository();
   private storeRepository = new StoreRepository();
   private subscriptionRepository = new SubscriptionRepository();
   private orderDeliveryRepository = new OrderDeliveryRepository();
   private orderReviewRepository = new OrderReviewRepository();
   private paymentAuditService = new PaymentAuditService();
+  private pushNotificationService = new PushNotificationService();
   private log = logger.child({ scope: 'OrderReviewService' });
 
   private normalizeQrCode(qrCode?: string | null) {
@@ -143,6 +147,12 @@ private async ensureTipPayment(order: any, review: any) {
       review.tipQrCodeText = null;
       review.tipExpiresAt = null;
       review.tipPaidAt = null;
+      review.tipSettlementMode = 'STORE_PAYOUT';
+      review.tipPayoutStatus = 'PENDING';
+      review.tipPayoutAt = null;
+      review.tipPayoutProofUrl = null;
+      review.tipPayoutNotes = null;
+      review.tipPayoutByUserId = null;
       return this.orderReviewRepository.saveReview(review);
     }
 
@@ -161,8 +171,11 @@ private async ensureTipPayment(order: any, review: any) {
       .trim()
       .toLowerCase();
     const payerName = String(order?.customerName || 'Cliente').trim() || 'Cliente';
-    const connectedAccessToken = order?.store?.id
+    const storeAccessToken = order?.store?.id
       ? await this.accountService.getActiveAccessToken(order.store.id)
+      : null;
+    const motoboyAccessToken = review?.motoboyId
+      ? await this.motoboyPaymentAccountService.getActiveAccessToken(review.motoboyId)
       : null;
 
     let paymentLink: string | null = null;
@@ -171,8 +184,22 @@ private async ensureTipPayment(order: any, review: any) {
     let provider = 'MOCK';
     let providerId: string | null = null;
     let expiresAt: Date | null = new Date(Date.now() + 5 * 60 * 1000);
+    let tipSettlementMode: 'STORE_PAYOUT' | 'DIRECT_MOTOBOY' = 'STORE_PAYOUT';
+    let chargeAccessToken: string | undefined;
+    let chargeScope: 'motoboy' | 'store' | 'platform' | 'mock' = 'mock';
 
-    if (connectedAccessToken || env.mercadoPago.accessToken) {
+    if (motoboyAccessToken) {
+      chargeAccessToken = motoboyAccessToken;
+      chargeScope = 'motoboy';
+      tipSettlementMode = 'DIRECT_MOTOBOY';
+    } else if (storeAccessToken) {
+      chargeAccessToken = storeAccessToken;
+      chargeScope = 'store';
+    } else if (env.mercadoPago.accessToken) {
+      chargeScope = 'platform';
+    }
+
+    if (chargeScope !== 'mock') {
       try {
         const mp = await this.mercadoPagoService.createPayment({
           amount: tipAmount,
@@ -183,7 +210,7 @@ private async ensureTipPayment(order: any, review: any) {
             email: payerEmail.includes('@') ? payerEmail : 'cliente@janocaminho.com.br',
             name: payerName,
           },
-          accessToken: connectedAccessToken || undefined,
+          accessToken: chargeAccessToken,
           auditContext: {
             flowType: PAYMENT_AUDIT_FLOW.TIP,
             entityType: PAYMENT_AUDIT_ENTITY.ORDER_REVIEW,
@@ -202,16 +229,58 @@ private async ensureTipPayment(order: any, review: any) {
           expiresAt = (mp as any)?.expiresAt ? new Date((mp as any).expiresAt) : expiresAt;
         }
       } catch (error) {
-        this.log.warn('Tip PIX generation failed', {
-          reviewId: review.id,
-          orderId: order.id,
-          storeId: order?.store?.id || null,
-          hasConnectedMercadoPago: Boolean(connectedAccessToken),
-          error,
-        });
-        throw new AppError('PAY-004', 400, {
-          message: 'Nao foi possivel gerar o Pix da gorjeta agora. Tente novamente em instantes.',
-        });
+        if (chargeScope === 'motoboy') {
+          this.log.warn('Tip PIX generation failed for motoboy account, falling back to store/manual flow', {
+            reviewId: review.id,
+            orderId: order.id,
+            storeId: order?.store?.id || null,
+            motoboyId: review?.motoboyId || null,
+            error,
+          });
+          tipSettlementMode = 'STORE_PAYOUT';
+          chargeAccessToken = storeAccessToken || undefined;
+          chargeScope = storeAccessToken ? 'store' : env.mercadoPago.accessToken ? 'platform' : 'mock';
+          if (chargeScope !== 'mock') {
+            const fallbackMp = await this.mercadoPagoService.createPayment({
+              amount: tipAmount,
+              method: 'PIX',
+              description,
+              externalReference,
+              payer: {
+                email: payerEmail.includes('@') ? payerEmail : 'cliente@janocaminho.com.br',
+                name: payerName,
+              },
+              accessToken: chargeAccessToken,
+              auditContext: {
+                flowType: PAYMENT_AUDIT_FLOW.TIP,
+                entityType: PAYMENT_AUDIT_ENTITY.ORDER_REVIEW,
+                entityId: review.id,
+                storeId: order?.store?.id || null,
+                externalReference,
+                eventStage: PAYMENT_AUDIT_STAGE.PROVIDER_REQUEST,
+              },
+            });
+            if (fallbackMp) {
+              provider = 'MERCADO_PAGO';
+              providerId = fallbackMp.providerId || null;
+              paymentLink = fallbackMp.paymentLink || null;
+              qrCodeBase64 = this.normalizeQrCode(fallbackMp.qrCodeBase64);
+              qrCodeText = fallbackMp.qrCodeText || null;
+              expiresAt = (fallbackMp as any)?.expiresAt ? new Date((fallbackMp as any).expiresAt) : expiresAt;
+            }
+          }
+        } else {
+          this.log.warn('Tip PIX generation failed', {
+            reviewId: review.id,
+            orderId: order.id,
+            storeId: order?.store?.id || null,
+            chargeScope,
+            error,
+          });
+          throw new AppError('PAY-004', 400, {
+            message: 'Nao foi possivel gerar o Pix da gorjeta agora. Tente novamente em instantes.',
+          });
+        }
       }
     }
 
@@ -220,10 +289,12 @@ private async ensureTipPayment(order: any, review: any) {
         reviewId: review.id,
         orderId: order.id,
         storeId: order?.store?.id || null,
+        tipSettlementMode,
       });
       const payload = `PIX GORJETA | Store: ${order.store?.name || 'Loja'} | Amount: ${tipAmount.toFixed(2)} | Review:${review.id}`;
       qrCodeText = payload;
       qrCodeBase64 = await QRCode.toDataURL(payload);
+      tipSettlementMode = 'STORE_PAYOUT';
     }
 
     review.tipStatus = 'PENDING';
@@ -234,6 +305,12 @@ private async ensureTipPayment(order: any, review: any) {
     review.tipQrCodeText = qrCodeText;
     review.tipExpiresAt = expiresAt;
     review.tipPaidAt = null;
+    review.tipSettlementMode = tipSettlementMode;
+    review.tipPayoutStatus = 'PENDING';
+    review.tipPayoutAt = null;
+    review.tipPayoutProofUrl = null;
+    review.tipPayoutNotes = null;
+    review.tipPayoutByUserId = null;
     return this.orderReviewRepository.saveReview(review);
   }
 
@@ -331,6 +408,7 @@ async getByOrderId(orderId: string, accessToken?: string | null) {
           tipQrCodeText: canUseTip ? review.tipQrCodeText : null,
           tipExpiresAt: canUseTip ? review.tipExpiresAt : null,
           tipPaidAt: canUseTip ? review.tipPaidAt : null,
+          tipSettlementMode: canUseTip ? review.tipSettlementMode : null,
           tipPayoutStatus: canUseTip ? review.tipPayoutStatus : null,
           tipPayoutAt: canUseTip ? review.tipPayoutAt : null,
         }
@@ -416,6 +494,9 @@ async markTipPayoutByStoreId(
     const tipAmount = Number(review.tipAmount || 0);
     if (!(tipAmount > 0)) throw new AppError('REVIEW-003', 400);
     if (String(review.tipStatus || '').toUpperCase() !== 'PAID') throw new AppError('REVIEW-004', 400);
+    if (String(review.tipSettlementMode || '').toUpperCase() === 'DIRECT_MOTOBOY') {
+      throw new AppError('REVIEW-005', 400);
+    }
 
     const nextStatus = String(input?.payoutStatus || 'PAID').toUpperCase() === 'PENDING' ? 'PENDING' : 'PAID';
     const proofUrl = String(input?.payoutProofUrl || '').trim() || null;
@@ -440,7 +521,22 @@ async markTipPayoutByStoreId(
       review.tipPayoutProofUrl = uploadedProofUrl || proofUrl || null;
     }
 
-    return this.orderReviewRepository.saveReview(review);
+    const saved = await this.orderReviewRepository.saveReview(review);
+    if (nextStatus === 'PAID' && saved.motoboyId) {
+      await this.pushNotificationService.notifyMotoboyById(saved.motoboyId, {
+        title: 'Repasse de gorjeta confirmado',
+        body: `O lojista confirmou o repasse da gorjeta do pedido #${String(saved.orderId || '').slice(0, 8)}.`,
+        data: {
+          url: '/motoboy/profile',
+          section: 'payouts',
+          reviewId: saved.id,
+        },
+        android: {
+          channelId: 'delivery-updates',
+        },
+      }).catch(() => null);
+    }
+    return saved;
   }
 
     /**
@@ -496,6 +592,13 @@ async markTipPaidFromWebhook(reviewId: string, mpPayment: any) {
         : `data:image/png;base64,${String(mpQrBase64)}`;
     }
     review.tipPaidAt = new Date();
+    if (String(review.tipSettlementMode || '').toUpperCase() === 'DIRECT_MOTOBOY') {
+      review.tipPayoutStatus = 'PAID';
+      review.tipPayoutAt = review.tipPaidAt;
+      review.tipPayoutProofUrl = null;
+      review.tipPayoutNotes = null;
+      review.tipPayoutByUserId = null;
+    }
     const saved = await this.orderReviewRepository.saveReview(review);
     await this.paymentAuditService.record({
       provider: 'MERCADO_PAGO',
@@ -510,6 +613,20 @@ async markTipPaidFromWebhook(reviewId: string, mpPayment: any) {
       responsePayload: { localTipStatus: 'PAID' },
       success: true,
     });
+    if (saved.motoboyId && String(saved.tipSettlementMode || '').toUpperCase() === 'DIRECT_MOTOBOY') {
+      await this.pushNotificationService.notifyMotoboyById(saved.motoboyId, {
+        title: 'Gorjeta recebida',
+        body: `Você recebeu ${Number(saved.tipAmount || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} direto no Mercado Pago pelo pedido #${String(saved.orderId || '').slice(0, 8)}.`,
+        data: {
+          url: '/motoboy/profile',
+          section: 'payouts',
+          reviewId: saved.id,
+        },
+        android: {
+          channelId: 'delivery-updates',
+        },
+      }).catch(() => null);
+    }
     return saved;
   }
 

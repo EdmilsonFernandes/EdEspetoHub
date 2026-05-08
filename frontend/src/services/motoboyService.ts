@@ -25,6 +25,15 @@ export const motoboyService = {
   async listTipPayouts(limit = 300) {
     return apiClient.get(`/motoboy/reviews/tip-payouts?limit=${limit}`);
   },
+  async getMercadoPagoAccount() {
+    return apiClient.get('/motoboy/payment-accounts/mercadopago');
+  },
+  async createMercadoPagoConnectUrl(returnTo?: string) {
+    return apiClient.post('/motoboy/payment-accounts/mercadopago/connect', { returnTo });
+  },
+  async disconnectMercadoPago() {
+    return apiClient.delete('/motoboy/payment-accounts/mercadopago');
+  },
   async acceptOrder(orderId: string) {
     return apiClient.post(`/motoboy/orders/${orderId}/accept`, {});
   },

@@ -30,6 +30,7 @@ import { OrderReviewService } from './OrderReviewService';
 import { FeaturedProductService } from './FeaturedProductService';
 import { OrderPaymentService } from './OrderPaymentService';
 import { StorePaymentAccountService } from './StorePaymentAccountService';
+import { MotoboyPaymentAccountService } from './MotoboyPaymentAccountService';
 import { PaymentAuditService } from './PaymentAuditService';
 import { PAYMENT_AUDIT_ENTITY, PAYMENT_AUDIT_FLOW, PAYMENT_AUDIT_STAGE } from '../utils/paymentAudit';
 /**
@@ -47,6 +48,7 @@ export class PaymentService {
   private featuredProductService = new FeaturedProductService();
   private orderPaymentService = new OrderPaymentService();
   private accountService = new StorePaymentAccountService();
+  private motoboyPaymentAccountService = new MotoboyPaymentAccountService();
   private paymentAuditService = new PaymentAuditService();
   private log = logger.child({ scope: 'PaymentService' });
   /**
@@ -62,13 +64,21 @@ export class PaymentService {
   }
 
   private async getMercadoPagoPaymentAnyAccessToken(mercadoPagoPaymentId: string) {
-    const accounts = await this.accountService.listActiveAccessTokens();
+    const [storeAccounts, motoboyAccounts] = await Promise.all([
+      this.accountService.listActiveAccessTokens(),
+      this.motoboyPaymentAccountService.listActiveAccessTokens(),
+    ]);
     const candidates = [
       ...(env.mercadoPago.accessToken ? [ { accessToken: undefined as string | undefined, scope: 'platform' } ] : []),
-      ...accounts.map((account) => ({
+      ...storeAccounts.map((account) => ({
         accessToken: account.accessToken,
         scope: 'store',
         storeId: account.storeId,
+      })),
+      ...motoboyAccounts.map((account) => ({
+        accessToken: account.accessToken,
+        scope: 'motoboy',
+        motoboyId: account.motoboyId,
       })),
     ];
 

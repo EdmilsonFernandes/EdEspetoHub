@@ -721,6 +721,66 @@ export class PushNotificationService {
   }
 
   /**
+   * Dispatches one push payload to active tokens for a specific motoboy.
+   *
+   * @author Edmilson Lopes
+   */
+  async notifyMotoboyById(motoboyId: string, payload: CustomerPushPayload) {
+    const normalizedMotoboyId = String(motoboyId || '').trim();
+    if (!normalizedMotoboyId) return { ok: false, sent: 0, skipped: true };
+
+    const hasV1 = Boolean(this.resolveFcmV1Config());
+    const hasLegacy = Boolean(String(env.push?.fcmServerKey || '').trim());
+    if (!hasV1 && !hasLegacy) {
+      log.info('Motoboy direct push skipped (missing FCM config)', { motoboyId: normalizedMotoboyId });
+      return { ok: false, sent: 0, skipped: true };
+    }
+
+    const rows: Array<{ token: string }> = await AppDataSource.query(
+      `
+        SELECT token
+        FROM motoboy_push_tokens
+        WHERE motoboy_id = $1
+          AND is_active = TRUE
+        ORDER BY updated_at DESC
+        LIMIT 20
+      `,
+      [normalizedMotoboyId]
+    );
+
+    if (!rows.length) {
+      log.info('Motoboy direct push skipped (no active tokens)', { motoboyId: normalizedMotoboyId });
+      return { ok: true, sent: 0, skipped: true };
+    }
+
+    let sent = 0;
+    for (const row of rows) {
+      const token = String(row?.token || '').trim();
+      if (!token) continue;
+
+      const result = await this.sendToToken(token, payload);
+      if (result.ok) {
+        sent += 1;
+        continue;
+      }
+
+      log.warn('Motoboy direct push send failed', {
+        motoboyId: normalizedMotoboyId,
+        tokenSuffix: token.slice(-8),
+        status: result.status,
+        errorCode: result.errorCode,
+        body: result.body,
+      });
+
+      if (result.deactivateToken) {
+        await this.unregisterMotoboyToken(normalizedMotoboyId, token);
+      }
+    }
+
+    return { ok: true, sent, attempted: rows.length };
+  }
+
+  /**
    * Dispatches "new online order" push to store owner and active store users.
    *
    * @author Edmilson Lopes

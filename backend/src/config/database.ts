@@ -57,6 +57,7 @@ import { CondominiumUser } from '../entities/CondominiumUser';
 import { CondominiumAccessRequest } from '../entities/CondominiumAccessRequest';
 import { CustomerEmailOtp } from '../entities/CustomerEmailOtp';
 import { StorePaymentAccount } from '../entities/StorePaymentAccount';
+import { MotoboyPaymentAccount } from '../entities/MotoboyPaymentAccount';
 import { OrderPayment } from '../entities/OrderPayment';
 import { ZipCodeCache } from '../entities/ZipCodeCache';
 import { CustomerSecurityBlock } from '../entities/CustomerSecurityBlock';
@@ -71,7 +72,7 @@ export const AppDataSource = new DataSource({
   password: env.database.password,
   database: env.database.database,
   synchronize: false,
-  entities: [ User, Store, StoreSettings, Product, Order, OrderShipment, OrderReview, OrderItem, OrderEtaEstimate, Motoboy, MotoboyStore, OrderDelivery, DeliveryEvent, MotoboyDocument, MotoboyStoreRequest, MotoboyAuditLog, DeliveryBillingCycle, DeliveryBillingCharge, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog, StoreLinkHit, StoreUser, InventoryMovement, CustomerAddress, FeaturedProductRequest, Condominium, StoreCondominium, CondominiumEvent, CondominiumEventStore, StoreCondominiumRequest, CondominiumUser, CondominiumAccessRequest, CustomerEmailOtp, StorePaymentAccount, OrderPayment, ZipCodeCache, CustomerSecurityBlock, CustomerRiskEvent, PaymentAuditLog, PromoPush, Notification ],
+  entities: [ User, Store, StoreSettings, Product, Order, OrderShipment, OrderReview, OrderItem, OrderEtaEstimate, Motoboy, MotoboyStore, OrderDelivery, DeliveryEvent, MotoboyDocument, MotoboyStoreRequest, MotoboyAuditLog, DeliveryBillingCycle, DeliveryBillingCharge, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog, StoreLinkHit, StoreUser, InventoryMovement, CustomerAddress, FeaturedProductRequest, Condominium, StoreCondominium, CondominiumEvent, CondominiumEventStore, StoreCondominiumRequest, CondominiumUser, CondominiumAccessRequest, CustomerEmailOtp, StorePaymentAccount, MotoboyPaymentAccount, OrderPayment, ZipCodeCache, CustomerSecurityBlock, CustomerRiskEvent, PaymentAuditLog, PromoPush, Notification ],
   migrations: [],
   logging: [ 'error' ],
   extra: {

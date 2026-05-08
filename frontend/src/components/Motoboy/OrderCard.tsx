@@ -12,9 +12,10 @@ type Props = {
   showCourierEarnings?: boolean;
   tipAmount?: number;
   tipPayoutStatus?: string;
+  tipSettlementMode?: string;
 };
 
-export function OrderCard({ order, compact, actions, showCourierEarnings = false, tipAmount = 0, tipPayoutStatus }: Props) {
+export function OrderCard({ order, compact, actions, showCourierEarnings = false, tipAmount = 0, tipPayoutStatus, tipSettlementMode }: Props) {
   const createdAt = order?.createdAt || order?.created_at;
   const address = formatAddress(order?.address || order?.deliveryAddress) || '-';
   const storeName = order?.store?.name || order?.storeName;
@@ -31,6 +32,7 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
   const safeTipAmount = Number(tipAmount || 0);
   const deliveryGain = Math.max(0, Number(deliveryFee || 0)) + safeTipAmount;
   const tipRepasseStatus = String(tipPayoutStatus || '').toUpperCase() === 'PAID' ? 'PAID' : 'PENDING';
+  const isDirectTipSettlement = String(tipSettlementMode || '').toUpperCase() === 'DIRECT_MOTOBOY';
 
   const items = useMemo(() => (Array.isArray(order?.items) ? order.items : []), [order?.items]);
   const compactItemsLabel = useMemo(() => {
@@ -132,7 +134,13 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
                 </p>
                 {safeTipAmount > 0 ? (
                   <p className="text-[10px] text-slate-500">
-                    Frete + gorjeta ({tipRepasseStatus === 'PAID' ? 'repassada' : 'repasse pendente'})
+                    Frete + gorjeta (
+                    {tipRepasseStatus === 'PAID'
+                      ? isDirectTipSettlement
+                        ? 'recebida direto'
+                        : 'repassada'
+                      : 'repasse pendente'}
+                    )
                   </p>
                 ) : (
                   <p className="text-[10px] text-slate-500">Somente frete</p>

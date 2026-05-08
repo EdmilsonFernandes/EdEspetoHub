@@ -302,6 +302,7 @@ CREATE TABLE IF NOT EXISTS order_reviews (
   tip_qr_code_text TEXT,
   tip_expires_at TIMESTAMPTZ,
   tip_paid_at TIMESTAMPTZ,
+  tip_settlement_mode TEXT NOT NULL DEFAULT 'STORE_PAYOUT',
   tip_payout_status TEXT NOT NULL DEFAULT 'PENDING',
   tip_payout_at TIMESTAMPTZ,
   tip_payout_proof_url TEXT,
@@ -601,6 +602,23 @@ CREATE TABLE IF NOT EXISTS store_payment_accounts (
 
 CREATE INDEX IF NOT EXISTS idx_store_payment_accounts_store
 ON store_payment_accounts(store_id);
+
+CREATE TABLE IF NOT EXISTS motoboy_payment_accounts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  motoboy_id UUID NOT NULL REFERENCES motoboys(id) ON DELETE CASCADE,
+  provider TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'CONNECTED',
+  provider_user_id TEXT,
+  access_token_encrypted TEXT NOT NULL,
+  refresh_token_encrypted TEXT,
+  expires_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT uq_motoboy_payment_accounts_motoboy_provider UNIQUE (motoboy_id, provider)
+);
+
+CREATE INDEX IF NOT EXISTS idx_motoboy_payment_accounts_motoboy
+ON motoboy_payment_accounts(motoboy_id);
 
 CREATE TABLE IF NOT EXISTS order_payments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

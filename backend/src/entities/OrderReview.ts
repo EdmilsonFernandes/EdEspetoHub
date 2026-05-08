@@ -98,6 +98,9 @@ export class OrderReview {
   @Column({ name: 'tip_paid_at', type: 'timestamptz', nullable: true })
   tipPaidAt?: Date | null;
 
+  @Column({ name: 'tip_settlement_mode', type: 'varchar', default: 'STORE_PAYOUT' })
+  tipSettlementMode!: 'STORE_PAYOUT' | 'DIRECT_MOTOBOY';
+
   @Column({ name: 'tip_payout_status', type: 'varchar', default: 'PENDING' })
   tipPayoutStatus!: 'PENDING' | 'PAID';
 

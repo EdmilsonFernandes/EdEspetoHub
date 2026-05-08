@@ -1025,6 +1025,8 @@ export function OrderTracking() {
   const deliveryTagOptions = ['Rápido', 'Educado', 'Pedido intacto', 'Boa comunicação'];
   const reviewTip = reviewState?.review || null;
   const tipStatus = String(reviewTip?.tipStatus || 'NONE').toUpperCase();
+  const tipSettlementMode = String(reviewTip?.tipSettlementMode || 'STORE_PAYOUT').toUpperCase();
+  const tipDirectToMotoboy = tipSettlementMode === 'DIRECT_MOTOBOY';
   const tipExpiresAtMs = reviewTip?.tipExpiresAt ? new Date(reviewTip.tipExpiresAt).getTime() : null;
   const tipStartedAtMs = reviewTip?.updatedAt
     ? new Date(reviewTip.updatedAt).getTime()
@@ -2395,6 +2397,15 @@ export function OrderTracking() {
                                       {tipStatusLabel}
                                     </span>
                                   </div>
+                                  <div className={`rounded-lg border px-3 py-2 text-[11px] ${
+                                    tipDirectToMotoboy
+                                      ? 'border-sky-200 bg-sky-50 text-sky-800'
+                                      : 'border-slate-200 bg-white text-slate-600'
+                                  }`}>
+                                    {tipDirectToMotoboy
+                                      ? 'Esse Pix cai direto no Mercado Pago do entregador conectado.'
+                                      : 'Depois do pagamento, a loja confirma o repasse manual para o entregador.'}
+                                  </div>
                                   {reviewTip?.tipQrCodeBase64 ? (
                                     <div className="flex items-center justify-center">
                                       <img
@@ -2433,7 +2444,16 @@ export function OrderTracking() {
                                   ) : null}
                                   {tipUiStatus === 'PAID' ? (
                                     <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
-                                      <p className="font-semibold">Pagamento confirmado. Obrigado!</p>
+                                      <p className="font-semibold">
+                                        {tipDirectToMotoboy
+                                          ? 'Pagamento confirmado. A gorjeta foi enviada direto ao entregador.'
+                                          : 'Pagamento confirmado. Obrigado!'}
+                                      </p>
+                                      {tipDirectToMotoboy ? (
+                                        <p className="mt-1 text-[11px] text-emerald-800/80">
+                                          O valor foi liquidado na conta Mercado Pago conectada do entregador.
+                                        </p>
+                                      ) : null}
                                     </div>
                                   ) : showTipPendingUi ? (
                                     <div className="rounded-lg border border-amber-200 bg-gradient-to-br from-amber-50 via-orange-50 to-white px-3 py-2 space-y-2 shadow-[0_10px_24px_-22px_rgba(234,88,12,0.85)]">
@@ -2457,7 +2477,9 @@ export function OrderTracking() {
                                         />
                                         <span className="font-semibold">
                                           {tipUiStatus === 'PENDING'
-                                            ? 'Aguardando confirmação do pagamento via Pix. Isso pode levar alguns segundos.'
+                                            ? tipDirectToMotoboy
+                                              ? 'Aguardando confirmação do Pix. Quando aprovar, a gorjeta cai direto no entregador.'
+                                              : 'Aguardando confirmação do pagamento via Pix. Isso pode levar alguns segundos.'
                                             : 'Não conseguimos confirmar ainda. Você pode tentar novamente.'}
                                         </span>
                                       </div>

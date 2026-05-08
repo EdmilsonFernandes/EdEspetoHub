@@ -81,8 +81,10 @@ export function MotoboyEarnings() {
     if (!dt) return false;
     return new Date(dt).getTime() >= tipsCutoffMs;
   });
+  const isDirectTipSettlement = (row: any) => String(row?.tipSettlementMode || '').toUpperCase() === 'DIRECT_MOTOBOY';
   const tipRowsPaid = tipRows30d.filter((row) => String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID');
   const tipRowsPending = tipRows30d.filter((row) => String(row?.tipPayoutStatus || '').toUpperCase() !== 'PAID');
+  const tipRowsDirectPaid = tipRowsPaid.filter((row) => isDirectTipSettlement(row));
   const totalTipsMonth = tipRows30d.reduce((acc, row) => acc + Number(row?.tipAmount || 0), 0);
   const totalTipsPending = tipRowsPending.reduce((acc, row) => acc + Number(row?.tipAmount || 0), 0);
   const totalTipsPaid = tipRowsPaid.reduce((acc, row) => acc + Number(row?.tipAmount || 0), 0);
@@ -94,16 +96,18 @@ export function MotoboyEarnings() {
 
   const recentTipPayouts = useMemo(() => tipPayouts.slice(0, 5), [tipPayouts]);
   const tipsByOrderId = useMemo(() => {
-    const map = new Map<string, { tipAmount: number; tipPayoutStatus: string }>();
+    const map = new Map<string, { tipAmount: number; tipPayoutStatus: string; tipSettlementMode: string }>();
     (tipPayouts || []).forEach((row: any) => {
       const orderId = String(row?.orderId || '').trim();
       if (!orderId) return;
       const prev = map.get(orderId);
       const currentAmount = Number(row?.tipAmount || 0);
+      const currentSettlementMode = String(row?.tipSettlementMode || 'STORE_PAYOUT');
       if (!prev) {
         map.set(orderId, {
           tipAmount: currentAmount,
           tipPayoutStatus: String(row?.tipPayoutStatus || 'PENDING'),
+          tipSettlementMode: currentSettlementMode,
         });
         return;
       }
@@ -114,6 +118,11 @@ export function MotoboyEarnings() {
           String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID'
             ? 'PAID'
             : 'PENDING',
+        tipSettlementMode:
+          String(prev.tipSettlementMode || '').toUpperCase() === 'DIRECT_MOTOBOY' ||
+          String(currentSettlementMode || '').toUpperCase() === 'DIRECT_MOTOBOY'
+            ? 'DIRECT_MOTOBOY'
+            : 'STORE_PAYOUT',
       });
     });
     return map;
@@ -285,7 +294,11 @@ export function MotoboyEarnings() {
               <div className="grid gap-4">
                 {paginatedOrders.map((order) => {
                   const isOpen = expanded.has(order.id);
-                  const tipInfo = tipsByOrderId.get(String(order?.id || '')) || { tipAmount: 0, tipPayoutStatus: 'PENDING' };
+                  const tipInfo = tipsByOrderId.get(String(order?.id || '')) || {
+                    tipAmount: 0,
+                    tipPayoutStatus: 'PENDING',
+                    tipSettlementMode: 'STORE_PAYOUT',
+                  };
                   return (
                     <OrderCard
                       key={order.id}
@@ -294,6 +307,7 @@ export function MotoboyEarnings() {
                       showCourierEarnings
                       tipAmount={tipInfo.tipAmount}
                       tipPayoutStatus={tipInfo.tipPayoutStatus}
+                      tipSettlementMode={tipInfo.tipSettlementMode}
                       actions={
                         <button
                           type="button"
@@ -348,13 +362,18 @@ export function MotoboyEarnings() {
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3 ds-interactive-card">
-          <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-bold">Histórico de repasses</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-bold">Histórico de gorjetas</p>
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-            Repassado: <span className="font-extrabold">{toCurrency(totalTipsPaid)}</span>
+            Recebido: <span className="font-extrabold">{toCurrency(totalTipsPaid)}</span>
           </div>
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
             Aguardando repasse: <span className="font-extrabold">{toCurrency(totalTipsPending)}</span>
           </div>
+          {tipRowsDirectPaid.length > 0 ? (
+            <div className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-800">
+              Direto no Mercado Pago: <span className="font-extrabold">{toCurrency(tipRowsDirectPaid.reduce((acc, row) => acc + Number(row?.tipAmount || 0), 0))}</span>
+            </div>
+          ) : null}
 
           {recentTipPayouts.length === 0 ? (
             <div className="ds-empty-state rounded-xl border border-slate-200 bg-slate-50 px-3 py-4 text-center">
@@ -365,6 +384,7 @@ export function MotoboyEarnings() {
             <div className="space-y-2">
               {recentTipPayouts.map((row: any) => {
                 const payoutStatus = String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID' ? 'PAID' : 'PENDING';
+                const directTipSettlement = isDirectTipSettlement(row);
                 return (
                   <div key={row?.id || `${row?.orderId}-${row?.tipPaidAt}`} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
                     <div className="flex items-center justify-between gap-2">
@@ -378,12 +398,23 @@ export function MotoboyEarnings() {
                             : 'border-amber-200 bg-amber-50 text-amber-700'
                         }`}
                       >
-                        {payoutStatus === 'PAID' ? 'Repassado' : 'Pendente'}
+                        {payoutStatus === 'PAID'
+                          ? directTipSettlement
+                            ? 'Recebida direto'
+                            : 'Repassado'
+                          : 'Pendente'}
                       </span>
                     </div>
                     <div className="mt-1 text-xs text-slate-600 flex items-center justify-between gap-2">
                       <span>{toCurrency(Number(row?.tipAmount || 0))}</span>
                       <span>{row?.tipPaidAt ? new Date(row.tipPaidAt).toLocaleDateString('pt-BR') : '-'}</span>
+                    </div>
+                    <div className="mt-1 text-[11px] text-slate-500">
+                      {directTipSettlement
+                        ? 'Pagamento caiu direto na sua conta Mercado Pago conectada.'
+                        : payoutStatus === 'PAID'
+                          ? 'O lojista confirmou o repasse manual.'
+                          : 'Aguardando repasse manual do lojista.'}
                     </div>
                   </div>
                 );
