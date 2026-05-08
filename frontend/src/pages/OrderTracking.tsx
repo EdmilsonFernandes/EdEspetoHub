@@ -1447,17 +1447,13 @@ export function OrderTracking() {
                         </span>
                       ) : null}
                     </div>
-                    {isCancelled && order?.canceledReason ? (
+                    {isCancelled && (
                       <div className="mt-3 rounded-2xl border border-rose-200/70 bg-rose-50/80 px-4 py-3">
-                        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-rose-600">Cancelado pelo estabelecimento</p>
-                        <p className="mt-1.5 text-sm font-medium text-rose-900 leading-relaxed">{order.canceledReason}</p>
+                        <p className="text-sm font-medium text-rose-900 leading-relaxed">
+                          {order?.canceledReason || "Sentimos muito! Este pedido foi cancelado."}
+                        </p>
                       </div>
-                    ) : isCancelled ? (
-                      <div className="mt-3 rounded-2xl border border-rose-200/70 bg-rose-50/80 px-4 py-3">
-                        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-rose-600">Pedido cancelado</p>
-                        <p className="mt-1.5 text-sm font-medium text-rose-900 leading-relaxed">Sentimos muito! Este pedido foi cancelado.</p>
-                      </div>
-                    ) : null}
+                    )}
 
                     {estimatedReadyAt && !isTerminal ? (
                       <div className="mt-3 rounded-2xl border border-[#d5e3ec] bg-white/80 px-4 py-3 shadow-[0_16px_30px_-26px_rgba(51,104,134,0.18)]">
@@ -1812,16 +1808,9 @@ export function OrderTracking() {
                 <div id="order-info-section" className="overflow-hidden rounded-3xl border border-[#d5e3ec] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(239,246,251,0.98))] shadow-[0_22px_42px_-34px_rgba(51,104,134,0.18)]">
                   <div className="border-b border-[#dce9f1] px-5 py-4">
                     <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#336886]">Informações do pedido</p>
-                    <p className="mt-1 text-sm font-medium text-stone-500">Resumo visual com os dados principais e ações deste pedido.</p>
                   </div>
                   <div className="space-y-4 px-4 py-4 sm:px-5">
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <TrackingMetaCard
-                        label="Pedido"
-                        value={`#${orderDisplayId}`}
-                        detail={orderCreatedAtLabel || typeLabel}
-                        accent="primary"
-                      />
                       <TrackingMetaCard
                         label="Status"
                         value={statusLabel}
@@ -1854,13 +1843,14 @@ export function OrderTracking() {
                     </div>
 
                     <div className="space-y-3">
-                      <TrackingInfoRow
-                        icon={<User size={16} weight="duotone" />}
-                        label="Cliente"
-                        value={order.customerName || 'Cliente'}
-                      />
-
-                      {order.phone ? (
+                      {isAdminForStore && (
+                        <TrackingInfoRow
+                          icon={<User size={16} weight="duotone" />}
+                          label="Cliente"
+                          value={order.customerName || "Cliente"}
+                        />
+                      )}
+                      {isAdminForStore && order.phone ? (
                         <TrackingInfoRow
                           icon={<Phone size={16} weight="duotone" />}
                           label="Telefone"
