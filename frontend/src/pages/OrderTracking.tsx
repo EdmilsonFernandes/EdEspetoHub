@@ -1605,7 +1605,7 @@ export function OrderTracking() {
                               {hasCustomerReceiptConfirmation
                                 ? 'Recebimento confirmado pelo cliente. Pedido concluído.'
                                 : hasCourierDeliveryConfirmation
-                                ? 'A entrega foi concluída e o sistema aguarda a confirmação final do cliente.'
+                                ? (normalizedStatus === 'finished' ? 'Entrega confirmada com sucesso.' : 'A entrega foi concluída e o sistema aguarda a confirmação final do cliente.')
                                 : deliveryStatus === 'IN_TRANSIT'
                                 ? 'A caminho do seu endereço.'
                                 : deliveryStatus === 'PICKED_UP'
