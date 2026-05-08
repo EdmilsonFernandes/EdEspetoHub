@@ -1719,7 +1719,7 @@ export function OrderTracking() {
                               {step.label}
                             </span>
                             {isCompleted && (() => {
-                              const entry = (order?.statusTimeline || []).find((e: any) => e.status === step.id);
+                              const aliases: Record<string,string[]> = { pending:["pending"], preparing:["preparing"], ready:["ready","ready_for_delivery","waiting_for_motoboy"], in_delivery:["in_delivery"], delivered:["delivered"], finished:["finished"], cancelled:["cancelled"], payment:["payment"] }; const entry = (order?.statusTimeline || []).find((e: any) => (aliases[step.id] || [step.id]).includes(e.status));
                               if (!entry?.at) return null;
                               const t = new Date(entry.at);
                               return <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500"><Clock size={9} weight="bold" />{formatTimeOfDay(t, { padHour: true })}</p>;
