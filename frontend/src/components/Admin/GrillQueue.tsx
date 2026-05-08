@@ -41,6 +41,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { buildPixPayload } from "../../utils/pixPayload";
 import { printReceiptAsImage } from "../../utils/printReceiptImage";
 import { exportToCsv } from "../../utils/export";
+import { normalizeOrderNotificationDurationSeconds, parseOrderNotificationSoundSetting, playOrderNotificationPreset } from "../../utils/orderNotificationSound";
 
 const normalizeSearchText = (value: any) =>
   String(value || "")
@@ -745,9 +746,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     return Math.min(prepSlaMinutes, Math.max(1, Math.round(raw)));
   }, [auth?.store?.settings?.prepAttentionMinutes, prepSlaMinutes]);
   const [liveSoundSetting, setLiveSoundSetting] = useState(String(auth?.store?.settings?.orderNotificationSound || "").trim());
-  const [liveSoundDuration, setLiveSoundDuration] = useState(Number(auth?.store?.settings?.orderNotificationSoundDuration || 4));
+  const [liveSoundDuration, setLiveSoundDuration] = useState(
+    normalizeOrderNotificationDurationSeconds(auth?.store?.settings?.orderNotificationSoundDuration)
+  );
   const configuredOrderNotificationSound = liveSoundSetting;
-  const soundDurationMs = liveSoundDuration * 1000;
+  const soundDurationMs = normalizeOrderNotificationDurationSeconds(liveSoundDuration) * 1000;
   const PREP_SLA_MS = prepSlaMinutes * 60 * 1000;
   const PREP_ATTENTION_MS = prepAttentionMinutes * 60 * 1000;
   const [queue, setQueue] = useState([]);
@@ -758,6 +761,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const [storePixKey, setStorePixKey] = useState('');
   const [cashConfirmValue, setCashConfirmValue] = useState('');
   const storeSlug = useMemo(() => {
+    const authSlug = String(auth?.store?.slug || '').trim();
+    if (authSlug) return authSlug;
     if (typeof window === 'undefined') return '';
     const raw = localStorage.getItem('adminSession');
     if (!raw) return '';
@@ -767,13 +772,24 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     } catch {
       return '';
     }
-  }, []);
+  }, [auth?.store?.slug]);
+  useEffect(() => {
+    setLiveSoundSetting(String(auth?.store?.settings?.orderNotificationSound || "").trim());
+    setLiveSoundDuration(
+      normalizeOrderNotificationDurationSeconds(auth?.store?.settings?.orderNotificationSoundDuration)
+    );
+  }, [
+    auth?.store?.settings?.orderNotificationSound,
+    auth?.store?.settings?.orderNotificationSoundDuration,
+  ]);
   useEffect(() => {
     if (!storeSlug) return;
     const fetchSound = () => {
       fetch("/api/stores/slug/" + storeSlug).then(function(r) { return r.ok ? r.json() : null; }).then(function(d) {
         if (d && d.settings && d.settings.orderNotificationSound !== undefined) setLiveSoundSetting(String(d.settings.orderNotificationSound || "").trim());
-        if (d && d.settings && d.settings.orderNotificationSoundDuration !== undefined) setLiveSoundDuration(Number(d.settings.orderNotificationSoundDuration || 4));
+        if (d && d.settings && d.settings.orderNotificationSoundDuration !== undefined) {
+          setLiveSoundDuration(normalizeOrderNotificationDurationSeconds(d.settings.orderNotificationSoundDuration));
+        }
       }).catch(function() {});
     };
     fetchSound();
@@ -1358,51 +1374,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     return context;
   };
 
-  const playPresetTone = (context: AudioContext, preset: 'default' | 'chime' | 'triple' | 'alert') => {
-    const schedule = (offset: number, frequency: number, duration: number, gainValue = 0.07) => {
-      const oscillator = context.createOscillator();
-      const gain = context.createGain();
-      oscillator.type = 'sine';
-      oscillator.frequency.value = frequency;
-      gain.gain.value = gainValue;
-      oscillator.connect(gain);
-      gain.connect(context.destination);
-      oscillator.start(context.currentTime + offset);
-      oscillator.stop(context.currentTime + offset + duration);
-    };
-    if (preset === 'chime') {
-      schedule(0, 720, 0.12, 0.06);
-      schedule(0.14, 980, 0.14, 0.065);
-      return;
-    }
-    if (preset === 'triple') {
-      schedule(0, 900, 0.1, 0.07);
-      schedule(0.16, 900, 0.1, 0.07);
-      schedule(0.32, 1020, 0.12, 0.075);
-      return;
-    }
-    if (preset === 'alert') {
-      schedule(0, 760, 0.14, 0.08);
-      schedule(0.18, 620, 0.14, 0.08);
-      schedule(0.36, 760, 0.14, 0.08);
-      return;
-    }
-    schedule(0, 880, 0.2, 0.07);
-  };
-
-  const playNewOrderSound = () => {
+  const playNewOrderSound = async () => {
     if (!soundEnabled) return;
-    const rawSetting = String(configuredOrderNotificationSound || '').trim();
-    const normalizedSetting = rawSetting.toLowerCase();
-    const customUrl = /^(https?:\/\/|\/|data:)/i.test(rawSetting) ? rawSetting : '';
-    const preset =
-      normalizedSetting === 'preset:chime'
-        ? 'chime'
-        : normalizedSetting === 'preset:triple'
-        ? 'triple'
-        : normalizedSetting === 'preset:alert'
-        ? 'alert'
-        : 'default';
+    const { customUrl, preset } = parseOrderNotificationSoundSetting(configuredOrderNotificationSound);
 
     if (customUrl) {
       try {
@@ -1415,11 +1389,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         audio.currentTime = 0;
         audio.play().then(() => {
           setTimeout(() => { audio.pause(); audio.currentTime = 0; }, soundDurationMs);
-        }).catch(() => {
-          const context = audioContextRef.current || new AudioContext();
-          audioContextRef.current = context;
-          if (context.state === 'suspended') return;
-          playPresetTone(context, preset);
+        }).catch(async () => {
+          const context = await ensureAudioContext();
+          playOrderNotificationPreset(context, preset, soundDurationMs);
         });
         return;
       } catch {
@@ -1428,12 +1400,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     }
 
     try {
-      const context = audioContextRef.current || new AudioContext();
-      audioContextRef.current = context;
-      if (context.state === 'suspended') {
-        return;
-      }
-      playPresetTone(context, preset);
+      const context = await ensureAudioContext();
+      playOrderNotificationPreset(context, preset, soundDurationMs);
     } catch (err) {
       console.error("Não foi possível tocar o som", err);
     }
@@ -1497,7 +1465,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       const incoming = nextIds.filter((id) => !previousIds.includes(id));
       const hasNew = incoming.length > 0;
       if (hasNew) {
-        playNewOrderSound();
+        void playNewOrderSound();
         setNewOrderIds(incoming);
         window.setTimeout(() => setNewOrderIds([]), 4000);
       }
@@ -4757,7 +4725,3 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     </>
   );
 };
-
-
-
-

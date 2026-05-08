@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { formatPhoneInput } from "../../utils/format";
 import { addressLookupService } from "../../services/addressLookupService";
+import { normalizeOrderNotificationDurationSeconds } from "../../utils/orderNotificationSound";
 
 const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
 const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e', '#065f46', '#4b5563' ];
@@ -869,7 +870,22 @@ export const BrandingSettings = ({
                   {orderSoundValue.startsWith("data:") && (
                     <div className="flex items-center gap-2">
                       <span className="text-[11px] font-semibold text-emerald-600 truncate flex-1">✓ Áudio carregado</span>
-                      <button type="button" onClick={() => { const a = new Audio(orderSoundValue); a.play().catch(() => {}); }} className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-700 active:scale-95">Testar</button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const a = new Audio(orderSoundValue);
+                          const durationMs = normalizeOrderNotificationDurationSeconds(branding.orderNotificationSoundDuration) * 1000;
+                          a.play().then(() => {
+                            window.setTimeout(() => {
+                              a.pause();
+                              a.currentTime = 0;
+                            }, durationMs);
+                          }).catch(() => {});
+                        }}
+                        className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-700 active:scale-95"
+                      >
+                        Testar
+                      </button>
                       <button type="button" onClick={() => handleChange("orderNotificationSound", "")} className="rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 text-[11px] font-bold text-rose-600 active:scale-95">Remover</button>
                     </div>
                   )}

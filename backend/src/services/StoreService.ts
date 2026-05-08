@@ -146,6 +146,12 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
     return numeric;
   }
 
+  private normalizeOrderNotificationSoundDuration(value?: unknown) {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) return 4;
+    return Math.min(15, Math.max(1, Math.round(parsed)));
+  }
+
   private normalizeAddressForGeocode(value?: string | null) {
     const raw = String(value || '').trim();
     if (!raw) return '';
@@ -347,6 +353,7 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
       const deliveryRadiusKm = this.normalizeDeliveryRadiusKm(input.deliveryRadiusKm, supportsDelivery);
       const deliveryFee = this.parseNumber(input.deliveryFee);
       const orderNotificationSound = input.orderNotificationSound?.toString().trim() || null;
+      const orderNotificationSoundDuration = this.normalizeOrderNotificationSoundDuration(input.orderNotificationSoundDuration);
       const trimmedAddress = input.address?.toString().trim();
       const trimmedCity = this.normalizeCity(input.city) || null;
       const trimmedState = this.normalizeState(input.state) || null;
@@ -401,6 +408,7 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
         deliveryRadiusKm: deliveryRadiusKm ?? null,
         deliveryFee: deliveryFee ?? null,
         orderNotificationSound,
+        orderNotificationSoundDuration,
         postalEnabled,
         postalOriginZip: postalOriginZip ?? null,
         socialLinks,
@@ -531,6 +539,11 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
       {
         const trimmedSound = data.orderNotificationSound?.toString().trim();
         store.settings.orderNotificationSound = trimmedSound || null;
+      }
+      if (data.orderNotificationSoundDuration !== undefined)
+      {
+        store.settings.orderNotificationSoundDuration =
+          this.normalizeOrderNotificationSoundDuration(data.orderNotificationSoundDuration);
       }
       if (data.postalOriginZip !== undefined)
       {

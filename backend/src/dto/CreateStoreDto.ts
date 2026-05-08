@@ -34,6 +34,7 @@ export interface CreateStoreDto {
   postalEnabled?: boolean;
   postalOriginZip?: string;
   orderNotificationSound?: string;
+  orderNotificationSoundDuration?: number;
   prepBaseMinutes?: number;
   prepAttentionMinutes?: number;
   address?: string;

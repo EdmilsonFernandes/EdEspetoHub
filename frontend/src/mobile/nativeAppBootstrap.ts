@@ -6,6 +6,7 @@ import { customerAccountService } from '../services/customerAccountService';
 import { ADMIN_SESSION_EVENT, CUSTOMER_SESSION_EVENT, MOTOBOY_SESSION_EVENT } from '../services/nativeBiometricService';
 import { motoboyService } from '../services/motoboyService';
 import { storePushService } from '../services/storePushService';
+import { normalizeOrderNotificationDurationSeconds, parseOrderNotificationSoundSetting, playOrderNotificationPreset } from '../utils/orderNotificationSound';
 
 
 const MOBILE_PUSH_ENABLED =
@@ -31,6 +32,8 @@ const LAST_RELOADED_BUILD_KEY = 'jnk_native_last_reloaded_build_id';
 
 let lastStoreForegroundAlertAt = 0;
 let foregroundAudioContext: AudioContext | null = null;
+let foregroundNotificationAudio: HTMLAudioElement | null = null;
+let lastForegroundNotificationAudioSrc = '';
 let buildCheckInFlight = false;
 
 const normalizeInternalUrl = (rawUrl: string): string | null => {
@@ -128,27 +131,27 @@ const playStoreOrderForegroundAlert = async () => {
       await foregroundAudioContext.resume();
     }
 
-    const sequence = [
-      { frequency: 784, duration: 0.11, gain: 0.04 },
-      { frequency: 988, duration: 0.11, gain: 0.045 },
-      { frequency: 1175, duration: 0.14, gain: 0.05 },
-      { frequency: 1568, duration: 0.24, gain: 0.06 },
-    ];
-    let cursor = foregroundAudioContext.currentTime + 0.01;
-    for (const step of sequence) {
-      const oscillator = foregroundAudioContext.createOscillator();
-      const gainNode = foregroundAudioContext.createGain();
-      oscillator.type = 'triangle';
-      oscillator.frequency.setValueAtTime(step.frequency, cursor);
-      gainNode.gain.setValueAtTime(0.0001, cursor);
-      gainNode.gain.exponentialRampToValueAtTime(step.gain, cursor + 0.015);
-      gainNode.gain.exponentialRampToValueAtTime(0.0001, cursor + step.duration);
-      oscillator.connect(gainNode);
-      gainNode.connect(foregroundAudioContext.destination);
-      oscillator.start(cursor);
-      oscillator.stop(cursor + step.duration + 0.04);
-      cursor += step.duration + 0.045;
+    const { sound, durationSeconds } = getAdminOrderNotificationSettings();
+    const durationMs = durationSeconds * 1000;
+    const { customUrl, preset } = parseOrderNotificationSoundSetting(sound);
+
+    if (customUrl) {
+      if (!foregroundNotificationAudio || lastForegroundNotificationAudioSrc !== customUrl) {
+        foregroundNotificationAudio = new Audio(customUrl);
+        foregroundNotificationAudio.preload = 'auto';
+        lastForegroundNotificationAudioSrc = customUrl;
+      }
+      const audio = foregroundNotificationAudio;
+      audio.currentTime = 0;
+      await audio.play();
+      window.setTimeout(() => {
+        audio.pause();
+        audio.currentTime = 0;
+      }, durationMs);
+      return;
     }
+
+    playOrderNotificationPreset(foregroundAudioContext, preset, durationMs);
   } catch {
     // no-op
   }
@@ -188,6 +191,22 @@ const getAdminSessionContext = () => {
     return { token, storeId, userId };
   } catch {
     return null;
+  }
+};
+
+const getAdminOrderNotificationSettings = () => {
+  try {
+    const raw = localStorage.getItem('adminSession');
+    if (!raw) {
+      return { sound: '', durationSeconds: 4 };
+    }
+    const parsed = JSON.parse(raw);
+    return {
+      sound: String(parsed?.store?.settings?.orderNotificationSound || '').trim(),
+      durationSeconds: normalizeOrderNotificationDurationSeconds(parsed?.store?.settings?.orderNotificationSoundDuration),
+    };
+  } catch {
+    return { sound: '', durationSeconds: 4 };
   }
 };
 

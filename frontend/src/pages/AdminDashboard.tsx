@@ -30,6 +30,7 @@ import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAs
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatSelectedModifiers } from '../utils/productModifiers';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
+import { nativeBiometricService } from '../services/nativeBiometricService';
 import { FormSection } from '../components/common/FormSection';
 import { PremiumSelect } from '../components/common/PremiumSelect';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
@@ -1967,6 +1968,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     deliveryRadiusKm: session?.store?.settings?.deliveryRadiusKm || '',
     deliveryFee: session?.store?.settings?.deliveryFee || '',
     orderNotificationSound: session?.store?.settings?.orderNotificationSound || '',
+    orderNotificationSoundDuration: Number(session?.store?.settings?.orderNotificationSoundDuration ?? 4),
     postalEnabled: session?.store?.settings?.postalEnabled === true,
     postalOriginZip: session?.store?.settings?.postalOriginZip || '',
     prepBaseMinutes: session?.store?.settings?.prepBaseMinutes || '20',
@@ -2088,7 +2090,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
   const updateAuthStore = (updates) => {
     if (!auth?.store) return;
-    setAuth({
+    const nextAuth = {
       ...auth,
       store: {
         ...auth.store,
@@ -2098,7 +2100,15 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           ...(updates.settings || {}),
         },
       },
-    });
+    };
+    setAuth(nextAuth);
+    try {
+      if (nativeBiometricService.hasValidStoredAdminEnrollment()) {
+        nativeBiometricService.enableAdmin(nextAuth);
+      }
+    } catch {
+      // no-op
+    }
   };
 
 
@@ -2127,6 +2137,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       deliveryRadiusKm: session?.store?.settings?.deliveryRadiusKm || '',
       deliveryFee: session?.store?.settings?.deliveryFee || '',
       orderNotificationSound: session?.store?.settings?.orderNotificationSound || '',
+      orderNotificationSoundDuration: Number(session?.store?.settings?.orderNotificationSoundDuration ?? 4),
       postalEnabled: session?.store?.settings?.postalEnabled === true,
       postalOriginZip: session?.store?.settings?.postalOriginZip || '',
       prepBaseMinutes: session?.store?.settings?.prepBaseMinutes || '20',
@@ -2154,6 +2165,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     session?.store?.settings?.deliveryRadiusKm,
     session?.store?.settings?.deliveryFee,
     session?.store?.settings?.orderNotificationSound,
+    session?.store?.settings?.orderNotificationSoundDuration,
     session?.store?.settings?.postalEnabled,
     session?.store?.settings?.postalOriginZip,
     session?.store?.settings?.prepBaseMinutes,
@@ -2184,6 +2196,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       deliveryRadiusKm: normalize(session?.store?.settings?.deliveryRadiusKm),
       deliveryFee: normalize(session?.store?.settings?.deliveryFee),
       orderNotificationSound: normalize(session?.store?.settings?.orderNotificationSound),
+      orderNotificationSoundDuration: normalize(Number(session?.store?.settings?.orderNotificationSoundDuration ?? 4)),
       postalEnabled: session?.store?.settings?.postalEnabled === true ? 'true' : 'false',
       postalOriginZip: normalize(session?.store?.settings?.postalOriginZip),
       prepBaseMinutes: normalize(session?.store?.settings?.prepBaseMinutes || '20'),
@@ -2211,6 +2224,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       deliveryRadiusKm: normalize(brandingDraft.deliveryRadiusKm),
       deliveryFee: normalize(brandingDraft.deliveryFee),
       orderNotificationSound: normalize(brandingDraft.orderNotificationSound),
+      orderNotificationSoundDuration: normalize(Number(brandingDraft.orderNotificationSoundDuration ?? 4)),
       postalEnabled: brandingDraft.postalEnabled === true ? 'true' : 'false',
       postalOriginZip: normalize(brandingDraft.postalOriginZip),
       prepBaseMinutes: normalize(brandingDraft.prepBaseMinutes || '20'),
@@ -2852,7 +2866,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         deliveryRadiusKm: brandingDraft.deliveryRadiusKm,
         deliveryFee: brandingDraft.deliveryFee,
         orderNotificationSound: brandingDraft.orderNotificationSound?.trim() ?? '',
-        orderNotificationSoundDuration: brandingDraft.orderNotificationSoundDuration || 4,
+        orderNotificationSoundDuration: Number(brandingDraft.orderNotificationSoundDuration ?? 4),
         postalEnabled: brandingDraft.postalEnabled === true,
         postalOriginZip: brandingDraft.postalOriginZip,
         prepBaseMinutes: brandingDraft.prepBaseMinutes,
