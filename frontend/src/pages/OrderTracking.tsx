@@ -1479,6 +1479,13 @@ export function OrderTracking() {
                       </a>
                     )}
 
+                    {normalizedStatus === "in_delivery" && (order as any)?.delivery?.confirmationCode && (
+                      <div className="mt-3 rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-4 text-center">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-600">Código de entrega</p>
+                        <p className="mt-2 text-3xl font-black tracking-[0.3em] text-indigo-900">{(order as any).delivery.confirmationCode}</p>
+                        <p className="mt-2 text-[11px] font-medium text-indigo-600/80">Informe este código ao entregador para confirmar o recebimento.</p>
+                      </div>
+                    )}
                     {estimatedReadyAt && !isTerminal ? (
                       <div className="mt-3 rounded-2xl border border-[#d5e3ec] bg-white/80 px-4 py-3 shadow-[0_16px_30px_-26px_rgba(51,104,134,0.18)]">
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#336886]">{etaForecastLabel}</p>

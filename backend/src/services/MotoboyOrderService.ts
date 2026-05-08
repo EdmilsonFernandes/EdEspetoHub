@@ -289,7 +289,12 @@ async startOrder(orderId: string, motoboy: Motoboy) {
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
-  async markDelivered(orderId: string, motoboy: Motoboy) {
+  async markDelivered(orderId: string, motoboy: Motoboy, code?: string) {
+    // Validate confirmation code if one was generated
+    const delivery = await AppDataSource.getRepository(OrderDelivery).findOne({ where: { orderId } as any });
+    if (delivery?.confirmationCode && String(delivery.confirmationCode) !== String(code || "").trim()) {
+      throw new AppError("DELIV-CODE", 400, { message: "Código de confirmação incorreto." });
+    }
     const result = await deliveryService.complete(orderId, motoboy);
     if (result?.order) {
       // Delivery completion must not fail if billing fails (it can be retried later).

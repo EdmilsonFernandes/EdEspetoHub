@@ -65,6 +65,8 @@ export class OrderDelivery {
 
   @Column({ name: 'delivered_at', type: 'timestamptz', nullable: true })
   deliveredAt?: Date | null;
+  @Column({ name: "confirmation_code", type: "varchar", length: 4, nullable: true })
+  confirmationCode?: string | null;
 
   @Column({ name: 'canceled_at', type: 'timestamptz', nullable: true })
   canceledAt?: Date | null;

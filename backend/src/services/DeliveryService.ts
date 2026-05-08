@@ -346,6 +346,7 @@ async pickupAndStart(orderId: string, motoboy: Motoboy) {
       delivery.status = 'IN_TRANSIT';
       delivery.pickedUpAt = delivery.pickedUpAt ?? now;
       delivery.inTransitAt = now;
+      delivery.confirmationCode = String(Math.floor(1000 + Math.random() * 9000));
       await repo.save(delivery);
 
       await this.insertEvent(manager, {
@@ -379,6 +380,15 @@ async pickupAndStart(orderId: string, motoboy: Motoboy) {
       deliveryStatus: String((result as any)?.delivery?.status || '').trim().toUpperCase(),
     });
     this.dispatchDeliveryProgressPush((result as any)?.order, 'IN_TRANSIT', motoboy);
+    // Send confirmation code push to customer
+    const code = (result as any)?.delivery?.confirmationCode;
+    if (code) {
+      const userId = String((result as any)?.order?.customerUserId || "").trim();
+      const guestId = String((result as any)?.order?.guestPushId || "").trim();
+      const codePayload = { title: "Código de entrega", body: `Informe o código ${code} ao entregador para confirmar o recebimento.`, data: { url: `https://janocaminho.com.br/pedido/${orderId}`, orderId, deliveryCode: code } };
+      if (userId) void this.pushService.notifyCustomerOrderUpdate(userId, codePayload);
+      if (guestId) void this.pushService.notifyGuestOrderUpdate(guestId, codePayload);
+    }
     return result.delivery;
   }
 

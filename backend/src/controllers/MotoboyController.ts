@@ -486,7 +486,7 @@ export class MotoboyController {
   static async markDelivered(req: Request, res: Response) {
     try {
       const motoboy = await motoboyService.getActiveMotoboyByUserId(req.auth?.sub || '');
-      const order = await motoboyOrderService.markDelivered(req.params.orderId, motoboy);
+      const order = await motoboyOrderService.markDelivered(req.params.orderId, motoboy, req.body?.code);
       return res.json(order);
     } catch (error: any) {
       log.warn('Motoboy delivered failed', { error });

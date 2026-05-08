@@ -555,6 +555,7 @@ static async markItemsAsPrinted(req: Request, res: Response) {
               pickedUpAt: deliveryRow.pickedUpAt ?? null,
               inTransitAt: deliveryRow.inTransitAt ?? null,
               deliveredAt: deliveryRow.deliveredAt ?? null,
+              confirmationCode: order.status === "in_delivery" ? deliveryRow.confirmationCode || null : null,
             }
           : null,
         createdAt: order.createdAt,

@@ -2070,4 +2070,7 @@ export async function runMigrations() {
   await AppDataSource.query(`
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS status_timeline JSONB DEFAULT '[]';
   `);
+  await AppDataSource.query(`
+    ALTER TABLE order_deliveries ADD COLUMN IF NOT EXISTS confirmation_code VARCHAR(4) DEFAULT NULL;
+  `);
 }
