@@ -503,6 +503,7 @@ static async markItemsAsPrinted(req: Request, res: Response) {
         customerName: order.customerName,
         phone: order.phone,
         address: order.address,
+        statusTimeline: order.statusTimeline || [],
         paymentMethod: order.paymentMethod,
         paymentStatus: order.paymentStatus,
         payment: orderPayment
