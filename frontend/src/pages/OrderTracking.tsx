@@ -1691,7 +1691,7 @@ export function OrderTracking() {
                               isCurrent
                                 ? isCancelled
                                   ? 'border-rose-500 bg-rose-500 text-white shadow-[0_0_0_3px_rgba(244,63,94,0.15)]'
-                                  : 'border-amber-500 bg-amber-500 text-white shadow-[0_0_0_3px_rgba(245,158,11,0.18)]'
+                                  : 'border-[#336886] bg-[#336886] text-white shadow-[0_0_0_3px_rgba(51,104,134,0.2)]'
                                 : isCompleted
                                   ? isCancelled
                                     ? 'border-rose-200 bg-rose-100 text-rose-600'
