@@ -1693,6 +1693,12 @@ export function OrderTracking() {
                           }`}>
                             {step.label}
                           </span>
+                          {isCompleted && (() => {
+                            const entry = (order?.statusTimeline || []).find((e: any) => e.status === step.id);
+                            if (!entry?.at) return null;
+                            const t = new Date(entry.at);
+                            return <span className="ml-2 text-[10px] font-medium text-slate-400">{t.getHours().toString().padStart(2,"0")}:{t.getMinutes().toString().padStart(2,"0")}</span>;
+                          })()}
                         </div>
                       );
                     })}

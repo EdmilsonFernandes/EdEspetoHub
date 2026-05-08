@@ -1568,6 +1568,8 @@ private async seedPostalShipmentFromCheckoutTx(
       }
 
       lockedOrder.status = nextStatus;
+      const prevTimeline = Array.isArray(lockedOrder.statusTimeline) ? lockedOrder.statusTimeline : [];
+      lockedOrder.statusTimeline = [...prevTimeline, { status: nextStatus, at: new Date().toISOString() }];
       if (nextStatus === 'cancelled') {
         lockedOrder.canceledAt = new Date();
         lockedOrder.canceledReason = String(reason || '').trim() || null;
@@ -1753,6 +1755,7 @@ async reopenOrder(
 
     // Reopen finalized order back to the operational queue.
     order.status = 'pending';
+    order.statusTimeline = [{ status: "pending", at: new Date().toISOString() }];
     return this.orderRepository.save(order);
   }
 

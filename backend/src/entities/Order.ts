@@ -90,6 +90,8 @@ export class Order {
 
   @Column({ name: 'canceled_at', type: 'timestamptz', nullable: true })
   canceledAt?: Date | null;
+  @Column({ name: "status_timeline", type: "jsonb", nullable: true, default: "[]" })
+  statusTimeline?: Array<{ status: string; at: string }> | null;
 
   @Column({ name: 'canceled_reason', type: 'text', nullable: true })
   canceledReason?: string | null;

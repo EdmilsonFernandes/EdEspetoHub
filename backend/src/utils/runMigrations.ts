@@ -2067,4 +2067,7 @@ export async function runMigrations() {
   await AppDataSource.query(`
     ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS order_notification_sound_duration INT DEFAULT 4;
   `);
+  await AppDataSource.query(`
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS status_timeline JSONB DEFAULT '[]';
+  `);
 }
