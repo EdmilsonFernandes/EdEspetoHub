@@ -208,6 +208,7 @@ export function LandingPage() {
     { icon: CurrencyDollar,title: 'Pagamento online',        desc: 'Pix, crédito e débito com Mercado Pago da própria loja.', accent: 'emerald' },
     { icon: ChartLine,     title: 'Dashboard analítico',     desc: 'Faturamento, ticket médio e comparativos por período.', accent: 'sky' },
     { icon: MapPin,        title: 'Rastreamento',            desc: 'Clientes acompanham o pedido do preparo até a porta.', accent: 'rose' },
+    { icon: ShieldCheck,   title: 'Código de confirmação',  desc: 'Entrega validada com código de 4 dígitos. O cliente confirma o recebimento — sem contestação.', accent: 'emerald' },
     { icon: Buildings,     title: 'Hub de condomínios',      desc: 'Vitrine própria em feiras e condomínios. Retirada ou entrega.', accent: 'indigo' },
     { icon: Desktop,       title: 'Multi-dispositivo',       desc: 'Admin no PC, app mobile para o time, PWA instalável.', accent: 'sky' },
     { icon: Bell,          title: 'Notificações push',       desc: 'Lojista, entregador e cliente recebem o alerta certo em cada etapa do pedido.', accent: 'amber' },
@@ -281,22 +282,19 @@ export function LandingPage() {
               <div className="animate-in fade-in slide-in-from-top-3 duration-700">
                 <span className="inline-flex items-center gap-2 rounded-full border border-sky-400/25 bg-sky-400/5 px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.22em] text-sky-300 backdrop-blur-md">
                   <Rocket size={12} weight="duotone" className="animate-pulse" />
-                  Loja online, operação e entrega em um só painel
+                  0% comissão por pedido · Mensalidade fixa · Dinheiro direto na sua conta
                 </span>
               </div>
 
               {/* Headline */}
               <div className="animate-in fade-in slide-in-from-top-5 duration-700 delay-100 space-y-5">
                 <h1 className="text-[2.6rem] font-black leading-[1.06] tracking-tight text-white sm:text-6xl xl:text-7xl">
-                  Sua loja vendendo<br />
-                  com cara de{' '}
-                  <span className="animate-text-gradient bg-gradient-to-r from-sky-400 via-emerald-400 to-sky-400 bg-clip-text text-transparent">
-                    aplicativo premium.
+                  Venda online sem pagar<br />
+                  <span className="animate-text-gradient bg-gradient-to-r from-emerald-400 via-sky-400 to-emerald-400 bg-clip-text text-transparent">
+                    comissão por pedido.
                   </span>
                 </h1>
-                <p className="mx-auto max-w-2xl text-base font-medium leading-relaxed text-slate-400 lg:mx-0 sm:text-xl">
-                  Crie uma vitrine profissional, receba pedidos em tempo real, organize a produção, conecte entregadores e cobre online com Mercado Pago quando quiser.
-                </p>
+                <p className="mx-auto max-w-2xl text-base font-medium leading-relaxed text-slate-400 lg:mx-0 sm:text-xl">Cardápio online, pedidos ao vivo, entrega com código de confirmação e pagamento direto na sua conta — por uma mensalidade fixa, sem surpresas.</p>
               </div>
 
               {/* CTAs */}
@@ -306,7 +304,7 @@ export function LandingPage() {
                   onClick={() => navigate('/create?plan=trial')}
                   className="group inline-flex items-center justify-center gap-2.5 rounded-2xl bg-white px-8 py-4 text-base font-black text-slate-950 shadow-[0_20px_50px_-15px_rgba(255,255,255,0.22)] transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  Começar teste grátis
+                  Criar minha loja grátis
                   <ArrowRight size={17} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
                 </button>
                 <a
@@ -337,10 +335,10 @@ export function LandingPage() {
               {/* Trust strip */}
               <div className="animate-in fade-in duration-700 delay-300 flex flex-wrap justify-center gap-x-6 gap-y-2 opacity-55 lg:justify-start">
                 {[
-                  { icon: ShieldCheck, text: '7 dias grátis', color: 'text-emerald-400' },
-                  { icon: CurrencyDollar, text: 'Mercado Pago opcional', color: 'text-sky-400' },
-                  { icon: ArrowsClockwise, text: 'Pedidos ao vivo', color: 'text-sky-400' },
-                  { icon: Desktop, text: 'Painel + celular', color: 'text-indigo-400' },
+                  { icon: ShieldCheck, text: '0% comissão', color: 'text-emerald-400' },
+                  { icon: CurrencyDollar, text: 'Dinheiro direto na sua conta', color: 'text-sky-400' },
+                  { icon: ArrowsClockwise, text: '7 dias grátis', color: 'text-sky-400' },
+                  { icon: Desktop, text: 'Sem cartão para começar', color: 'text-indigo-400' },
                 ].map(({ icon: Icon, text, color }) => (
                   <div key={text} className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-slate-300">
                     <Icon size={15} weight="duotone" className={color} />
@@ -673,7 +671,7 @@ export function LandingPage() {
         <div className="mx-auto max-w-4xl px-4 text-center">
           <p className="text-[11px] font-black uppercase tracking-[0.4em] text-sky-600">Pagamentos online</p>
           <h2 className="mt-3 text-3xl font-black leading-tight tracking-tight text-slate-950 sm:text-4xl">
-            Cobranças dentro do pedido,<br className="hidden sm:block" /> dinheiro direto na conta da loja.
+            Sem comissão. Sem repasse.<br className="hidden sm:block" /> Dinheiro direto na sua conta.
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-sm font-medium leading-7 text-slate-500 sm:text-base">
             O lojista conecta a própria conta Mercado Pago via OAuth e libera Pix, crédito e débito no fluxo do pedido. Quem preferir manter atendimento presencial continua operando normalmente.
