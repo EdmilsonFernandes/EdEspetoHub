@@ -46,6 +46,7 @@ import { printReceiptAsImage } from '../utils/printReceiptImage';
 import { clearAllCustomerSessions } from '../utils/customerSessionStorage';
 import { ADMIN_SESSION_EVENT, nativeBiometricService } from '../services/nativeBiometricService';
 import { navigateBackOrFallback } from '../utils/navigation';
+import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
 
 const WEEKDAY_LABELS = [ 'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado' ];
 const PUBLIC_ORDER_ALERT_TTL_MS = 3 * 60 * 60 * 1000;
@@ -438,6 +439,12 @@ export function StorePage() {
   const [deliveryCheck, setDeliveryCheck] = useState({ status: 'idle', distanceKm: null, durationMin: null });
   const [condominiumCheckoutContext, setCondominiumCheckoutContext] = useState<any | null>(null);
   const [condominiumCheckoutLoading, setCondominiumCheckoutLoading] = useState(false);
+  const openOrderTracking = useCallback((orderId?: string | null, accessToken?: string | null) => {
+    const normalizedOrderId = String(orderId || '').trim();
+    if (!normalizedOrderId) return;
+    primeOrderTrackingNavigation(normalizedOrderId, accessToken);
+    navigate(buildOrderTrackingPath(normalizedOrderId, accessToken));
+  }, [navigate]);
   const customersStorageKey = useMemo(
     () => `customers:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
@@ -446,6 +453,13 @@ export function StorePage() {
     () => `customerSession:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
   );
+
+  useEffect(() => {
+    const recentOrder = recentPublicOrders[0];
+    if (!user?.token && !customerSession?.token && recentOrder?.id) {
+      primeOrderTrackingNavigation(recentOrder.id, recentOrder.accessToken);
+    }
+  }, [customerSession?.token, recentPublicOrders, user?.token]);
   const checkoutCustomerStorageKey = useMemo(
     () => `checkoutCustomer:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
@@ -3568,13 +3582,10 @@ export function StorePage() {
               <div className="fixed bottom-20 left-4 right-4 z-[110] sm:relative sm:bottom-0 sm:left-0 sm:right-0 sm:mx-6 rounded-[1.75rem] border border-emerald-200/60 bg-white/92 backdrop-blur-xl px-4 py-3 shadow-[0_18px_42px_-22px_rgba(16,185,129,0.35)] flex items-center justify-between gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <button
                   type="button"
-                  onClick={() =>
-                    navigate(
-                      recentPublicOrders[0]?.accessToken
-                        ? `/pedido/${recentPublicOrders[0].id}?ot=${encodeURIComponent(recentPublicOrders[0].accessToken)}`
-                        : `/pedido/${recentPublicOrders[0].id}`
-                    )
-                  }
+                  onClick={() => openOrderTracking(recentPublicOrders[0]?.id, recentPublicOrders[0]?.accessToken)}
+                  onMouseEnter={() => primeOrderTrackingNavigation(recentPublicOrders[0]?.id, recentPublicOrders[0]?.accessToken)}
+                  onFocus={() => primeOrderTrackingNavigation(recentPublicOrders[0]?.id, recentPublicOrders[0]?.accessToken)}
+                  onTouchStart={() => primeOrderTrackingNavigation(recentPublicOrders[0]?.id, recentPublicOrders[0]?.accessToken)}
                   className="min-w-0 flex flex-1 items-center gap-3 text-left active:scale-[0.99]"
                 >
                   <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 shadow-sm">
@@ -3603,13 +3614,10 @@ export function StorePage() {
                   </div>
                 </button>
                 <button
-                  onClick={() =>
-                    navigate(
-                      recentPublicOrders[0]?.accessToken
-                        ? `/pedido/${recentPublicOrders[0].id}?ot=${encodeURIComponent(recentPublicOrders[0].accessToken)}`
-                        : `/pedido/${recentPublicOrders[0].id}`
-                    )
-                  }
+                  onClick={() => openOrderTracking(recentPublicOrders[0]?.id, recentPublicOrders[0]?.accessToken)}
+                  onMouseEnter={() => primeOrderTrackingNavigation(recentPublicOrders[0]?.id, recentPublicOrders[0]?.accessToken)}
+                  onFocus={() => primeOrderTrackingNavigation(recentPublicOrders[0]?.id, recentPublicOrders[0]?.accessToken)}
+                  onTouchStart={() => primeOrderTrackingNavigation(recentPublicOrders[0]?.id, recentPublicOrders[0]?.accessToken)}
                   className="btn-press shrink-0 rounded-2xl bg-emerald-600 px-4 py-2.5 text-[12px] font-black text-white shadow-[0_12px_24px_-12px_rgba(5,150,105,0.5)] transition-all hover:bg-emerald-700 active:scale-95"
                 >
                   Acompanhar
@@ -3789,7 +3797,7 @@ export function StorePage() {
                 ? undefined
                 : () => {
                     if (lastOrder?.id) {
-                      navigate(`/pedido/${lastOrder.id}`);
+                      openOrderTracking(lastOrder.id);
                     }
                   }
             }
@@ -4191,7 +4199,10 @@ export function StorePage() {
                       {customerOrders.slice(0, 8).map((order: any) => (
                         <button
                           key={order.id}
-                          onClick={() => navigate(`/pedido/${order.id}`)}
+                          onClick={() => openOrderTracking(order.id)}
+                          onMouseEnter={() => primeOrderTrackingNavigation(order.id)}
+                          onFocus={() => primeOrderTrackingNavigation(order.id)}
+                          onTouchStart={() => primeOrderTrackingNavigation(order.id)}
                           className="w-full text-left rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2 hover:bg-slate-100"
                         >
                           <p className="text-sm font-semibold text-slate-700">

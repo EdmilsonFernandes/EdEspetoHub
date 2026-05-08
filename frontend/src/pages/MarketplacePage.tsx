@@ -52,6 +52,7 @@ import { nativeBiometricService } from '../services/nativeBiometricService';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { clearAllCustomerSessions } from '../utils/customerSessionStorage';
+import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
 
 type MarketplaceStore = {
   id?: string;
@@ -722,6 +723,12 @@ export function MarketplacePage() {
   const publicCondominiumLoadInFlightRef = useRef(false);
   const activeOrdersLoadInFlightRef = useRef(false);
   const anonymousOrdersHydrationInFlightRef = useRef(false);
+  const openOrderTracking = useCallback((orderId?: string | null, accessToken?: string | null) => {
+    const normalizedOrderId = String(orderId || '').trim();
+    if (!normalizedOrderId) return;
+    primeOrderTrackingNavigation(normalizedOrderId, accessToken);
+    navigate(buildOrderTrackingPath(normalizedOrderId, accessToken));
+  }, [navigate]);
 
   const stageFeaturedProductCheckout = (item: FeaturedProduct) => {
     const storeSlug = String(item?.storeSlug || '').trim();
@@ -2397,6 +2404,13 @@ export function MarketplacePage() {
     [activeAnonymousOrders, dismissedAnonymousOrderIds]
   );
 
+  useEffect(() => {
+    const nextOrder = visibleActiveAnonymousOrders[0];
+    if (!isCustomerLogged && nextOrder?.id) {
+      primeOrderTrackingNavigation(nextOrder.id, nextOrder.accessToken);
+    }
+  }, [isCustomerLogged, visibleActiveAnonymousOrders]);
+
   const [storageUnread, setStorageUnread] = useState(0);
   useEffect(() => {
     apiClient.get("/customer/notifications").then((r: any) => setStorageUnread(r?.unreadCount || 0)).catch(() => {});
@@ -2797,13 +2811,10 @@ export function MarketplacePage() {
                       {visibleActiveAnonymousOrders.map((order) => (
                         <button
                           key={order.id}
-                          onClick={() =>
-                            navigate(
-                              order.accessToken
-                                ? `/pedido/${order.id}?ot=${encodeURIComponent(order.accessToken)}`
-                                : `/pedido/${order.id}`
-                            )
-                          }
+                          onClick={() => openOrderTracking(order.id, order.accessToken)}
+                          onMouseEnter={() => primeOrderTrackingNavigation(order.id, order.accessToken)}
+                          onFocus={() => primeOrderTrackingNavigation(order.id, order.accessToken)}
+                          onTouchStart={() => primeOrderTrackingNavigation(order.id, order.accessToken)}
                           className="min-w-[180px] rounded-[1.4rem] border border-white/70 bg-white/95 px-3.5 py-3 text-left shadow-[0_12px_26px_-18px_rgba(245,158,11,0.28)] transition-all active:scale-95"
                         >
                           <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
@@ -2824,13 +2835,10 @@ export function MarketplacePage() {
                   <div className="sm:text-right space-y-1">
                     <button
                       type="button"
-                      onClick={() =>
-                        navigate(
-                          visibleActiveAnonymousOrders[0]?.accessToken
-                            ? `/pedido/${visibleActiveAnonymousOrders[0].id}?ot=${encodeURIComponent(visibleActiveAnonymousOrders[0].accessToken)}`
-                            : `/pedido/${visibleActiveAnonymousOrders[0].id}`
-                        )
-                      }
+                      onClick={() => openOrderTracking(visibleActiveAnonymousOrders[0]?.id, visibleActiveAnonymousOrders[0]?.accessToken)}
+                      onMouseEnter={() => primeOrderTrackingNavigation(visibleActiveAnonymousOrders[0]?.id, visibleActiveAnonymousOrders[0]?.accessToken)}
+                      onFocus={() => primeOrderTrackingNavigation(visibleActiveAnonymousOrders[0]?.id, visibleActiveAnonymousOrders[0]?.accessToken)}
+                      onTouchStart={() => primeOrderTrackingNavigation(visibleActiveAnonymousOrders[0]?.id, visibleActiveAnonymousOrders[0]?.accessToken)}
                       className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-black text-white shadow-[0_14px_28px_-16px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 active:scale-95"
                     >
                       Acompanhar agora

@@ -35,6 +35,7 @@ import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getPaymentProviderMeta } from '../utils/paymentAssets';
 import { formatSelectedModifiers } from '../utils/productModifiers';
 import { navigateBackOrFallback } from '../utils/navigation';
+import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
 
 const TERMINAL_STATUSES = [ 'DELIVERED', 'CANCELLED', 'FINISHED', 'REJECTED', 'DONE' ];
 const ACTIVE_REFRESH_MS = 10_000;
@@ -582,6 +583,9 @@ function OrderCard({
       <button
         type="button"
         onClick={() => onOpenOrder(order.id)}
+        onMouseEnter={() => primeOrderTrackingNavigation(order.id)}
+        onFocus={() => primeOrderTrackingNavigation(order.id)}
+        onTouchStart={() => primeOrderTrackingNavigation(order.id)}
         className="flex w-full items-center gap-3 px-4 pt-4 pb-2.5 text-left"
       >
         {/* Logo da loja */}
@@ -670,7 +674,14 @@ function OrderCard({
       )}
 
       {/* Itens */}
-      <button type="button" onClick={() => onOpenOrder(order.id)} className="block w-full text-left">
+      <button
+        type="button"
+        onClick={() => onOpenOrder(order.id)}
+        onMouseEnter={() => primeOrderTrackingNavigation(order.id)}
+        onFocus={() => primeOrderTrackingNavigation(order.id)}
+        onTouchStart={() => primeOrderTrackingNavigation(order.id)}
+        className="block w-full text-left"
+      >
         <div className="mx-4 mb-3 overflow-hidden rounded-2xl bg-slate-50">
           {normalizeStatus(order.status) === 'AWAITING_PAYMENT' && (
             <div className="border-b border-slate-100 px-3 py-2">
@@ -773,7 +784,14 @@ function OrderCard({
             )}
           </>
         ) : isActive ? (
-          <button type="button" onClick={() => onOpenOrder(order.id)} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] py-2.5 text-[13px] font-bold text-white shadow-[0_8px_20px_-10px_rgba(21,58,76,0.5)] active:scale-[0.98] transition-transform">
+          <button
+            type="button"
+            onClick={() => onOpenOrder(order.id)}
+            onMouseEnter={() => primeOrderTrackingNavigation(order.id)}
+            onFocus={() => primeOrderTrackingNavigation(order.id)}
+            onTouchStart={() => primeOrderTrackingNavigation(order.id)}
+            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] py-2.5 text-[13px] font-bold text-white shadow-[0_8px_20px_-10px_rgba(21,58,76,0.5)] active:scale-[0.98] transition-transform"
+          >
             Acompanhar pedido
           </button>
         ) : (
@@ -786,7 +804,14 @@ function OrderCard({
             >
               <ChatCircleDots size={17} weight="duotone" />
             </button>
-            <button type="button" onClick={() => onOpenOrder(order.id)} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white py-2.5 text-[13px] font-semibold text-slate-700 active:scale-[0.98] transition-transform">
+            <button
+              type="button"
+              onClick={() => onOpenOrder(order.id)}
+              onMouseEnter={() => primeOrderTrackingNavigation(order.id)}
+              onFocus={() => primeOrderTrackingNavigation(order.id)}
+              onTouchStart={() => primeOrderTrackingNavigation(order.id)}
+              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white py-2.5 text-[13px] font-semibold text-slate-700 active:scale-[0.98] transition-transform"
+            >
               Ver detalhes
             </button>
             {canCancel && (
@@ -1102,6 +1127,10 @@ export function ClientOrders() {
   const offsetRef = useRef(0);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const PAGE_SIZE = 10;
+  const openOrderTracking = useCallback((orderId: string) => {
+    primeOrderTrackingNavigation(orderId);
+    navigate(buildOrderTrackingPath(orderId));
+  }, [navigate]);
 
   const refreshActiveOrderDetails = useCallback(async (targetOrders: any[]) => {
     const active = (Array.isArray(targetOrders) ? targetOrders : []).filter(
@@ -1512,7 +1541,7 @@ export function ClientOrders() {
                     onConfirmReceipt={handleConfirmReceiptFromList}
                     confirmReceiptLoading={confirmingReceiptOrderId === String(order.id)}
                     onOpenHelp={setHelpOrder}
-                    onOpenOrder={(orderId) => navigate(`/pedido/${orderId}`)}
+                    onOpenOrder={openOrderTracking}
                     onOpenStore={openStore}
                   />
                 ))}
@@ -1577,7 +1606,7 @@ export function ClientOrders() {
                           onConfirmReceipt={handleConfirmReceiptFromList}
                           confirmReceiptLoading={confirmingReceiptOrderId === String(order.id)}
                           onOpenHelp={setHelpOrder}
-                          onOpenOrder={(orderId) => navigate(`/pedido/${orderId}`)}
+                          onOpenOrder={openOrderTracking}
                           onOpenStore={openStore}
                         />
                       ))}

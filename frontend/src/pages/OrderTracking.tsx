@@ -487,10 +487,19 @@ export function OrderTracking() {
     let active = true;
 
     const loadOrder = async (silent = false) => {
+      const cachedSnapshot = orderService.peekPublicById(orderId);
       if (!active) return;
       if (!silent) {
-        setLoading(true);
         setError('');
+        if (cachedSnapshot) {
+          setOrder(cachedSnapshot);
+          setLoading(false);
+          if (shouldStopOrderPolling(cachedSnapshot)) {
+            setPolling(false);
+          }
+        } else {
+          setLoading(true);
+        }
       } else {
         setTrackingLoading(true);
       }
@@ -516,12 +525,15 @@ export function OrderTracking() {
         const data = await orderService.getPublicById(orderId);
         if (!active) return;
         setOrder(data);
+        setError('');
         if (shouldStopOrderPolling(data)) {
           setPolling(false);
         }
       } catch (err: any) {
         if (!active) return;
-        setError(err.message || 'Não foi possível carregar o pedido agora.');
+        if (!cachedSnapshot) {
+          setError(err.message || 'Não foi possível carregar o pedido agora.');
+        }
       } finally {
         if (!active) return;
         if (!silent) {

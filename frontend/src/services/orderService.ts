@@ -2,6 +2,9 @@ import { apiClient } from "../config/apiClient";
 import { normalizeProductModifiers } from "../utils/productModifiers";
 
 const ORDER_FEED_TIMEOUT_MS = 8000;
+const PUBLIC_ORDER_CACHE_TTL_MS = 60_000;
+const publicOrderCache = new Map<string, { data: any; expiresAt: number }>();
+const publicOrderInflight = new Map<string, Promise<any>>();
 
 const isUuid = (value: string) =>
   /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(value);
@@ -152,6 +155,35 @@ const getStoreIdentifierFromSession = (): string | null =>
 
 const resolveStoreIdentifier = (storeId?: string): string | null =>
   storeId || getStoreIdentifierFromSession();
+
+const normalizePublicOrderCacheKey = (orderId: string) => String(orderId || '').trim();
+
+const readPublicOrderCache = (orderId: string) => {
+  const cacheKey = normalizePublicOrderCacheKey(orderId);
+  if (!cacheKey) return null;
+  const entry = publicOrderCache.get(cacheKey);
+  if (!entry) return null;
+  if (entry.expiresAt <= Date.now()) {
+    publicOrderCache.delete(cacheKey);
+    return null;
+  }
+  return entry.data;
+};
+
+const writePublicOrderCache = (orderId: string, data: any) => {
+  const cacheKey = normalizePublicOrderCacheKey(orderId);
+  if (!cacheKey || !data) return data;
+  publicOrderCache.set(cacheKey, {
+    data,
+    expiresAt: Date.now() + PUBLIC_ORDER_CACHE_TTL_MS,
+  });
+  return data;
+};
+
+const fetchPublicOrderById = async (orderId: string) => {
+  const data = await apiClient.get(`/orders/${orderId}/public`);
+  return writePublicOrderCache(orderId, data);
+};
 
 export const orderService = {
   async createBySlug(
@@ -342,9 +374,51 @@ export const orderService = {
     return apiClient.patch(`/orders/${id}/mark-as-printed`, { itemIds: normalized });
   },
 
-  async getPublicById(orderId: string)
+  peekPublicById(orderId: string) {
+    return readPublicOrderCache(orderId);
+  },
+
+  async prefetchPublicById(orderId: string) {
+    const cacheKey = normalizePublicOrderCacheKey(orderId);
+    if (!cacheKey) return null;
+    const cached = readPublicOrderCache(cacheKey);
+    if (cached) return cached;
+    const inflight = publicOrderInflight.get(cacheKey);
+    if (inflight) return inflight;
+    const requestPromise = fetchPublicOrderById(cacheKey).finally(() => {
+      publicOrderInflight.delete(cacheKey);
+    });
+    publicOrderInflight.set(cacheKey, requestPromise);
+    return requestPromise;
+  },
+
+  clearPublicByIdCache(orderId?: string) {
+    const cacheKey = normalizePublicOrderCacheKey(String(orderId || ''));
+    if (!cacheKey) {
+      publicOrderCache.clear();
+      publicOrderInflight.clear();
+      return;
+    }
+    publicOrderCache.delete(cacheKey);
+    publicOrderInflight.delete(cacheKey);
+  },
+
+  async getPublicById(orderId: string, options?: { dedupe?: boolean })
   {
-    return apiClient.get(`/orders/${orderId}/public`);
+    const cacheKey = normalizePublicOrderCacheKey(orderId);
+    if (!cacheKey) {
+      return apiClient.get(`/orders/${orderId}/public`);
+    }
+    if (options?.dedupe !== false) {
+      const inflight = publicOrderInflight.get(cacheKey);
+      if (inflight) return inflight;
+      const requestPromise = fetchPublicOrderById(cacheKey).finally(() => {
+        publicOrderInflight.delete(cacheKey);
+      });
+      publicOrderInflight.set(cacheKey, requestPromise);
+      return requestPromise;
+    }
+    return fetchPublicOrderById(cacheKey);
   },
 
   async getPaymentAudit(orderId: string, storeId?: string) {

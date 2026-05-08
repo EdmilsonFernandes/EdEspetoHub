@@ -21,6 +21,7 @@ import { ResetPassword } from './pages/ResetPassword';
 import { VerifyEmail } from './pages/VerifyEmail';
 import './index.css';
 import { MotoboyLayout } from './layouts/MotoboyLayout';
+import { loadOrderTrackingPage } from './utils/orderTrackingPrefetch';
 
 const lazyPage = (loader: () => Promise<any>, exportName: string) =>
   React.lazy(() => loader().then((module) => ({ default: module[exportName] })));
@@ -38,7 +39,7 @@ const PaymentPage = lazyPage(() => import('./pages/PaymentPage'), 'PaymentPage')
 const SuperAdmin = lazyPage(() => import('./pages/SuperAdmin'), 'SuperAdmin');
 const SuperAdminCondominiums = lazyPage(() => import('./pages/SuperAdminCondominiums'), 'SuperAdminCondominiums');
 const TermsOfUse = lazyPage(() => import('./pages/TermsOfUse'), 'TermsOfUse');
-const OrderTracking = lazyPage(() => import('./pages/OrderTracking'), 'OrderTracking');
+const OrderTracking = lazyPage(loadOrderTrackingPage, 'OrderTracking');
 const AddressDistance = lazyPage(() => import('./pages/AddressDistance'), 'AddressDistance');
 const AdminMotoboys = lazyPage(() => import('./pages/AdminMotoboys'), 'AdminMotoboys');
 const MotoboyAvailable = lazyPage(() => import('./pages/MotoboyAvailable'), 'MotoboyAvailable');
