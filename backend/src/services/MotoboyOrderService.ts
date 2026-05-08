@@ -308,6 +308,14 @@ async startOrder(orderId: string, motoboy: Motoboy) {
           error,
         });
       }
+      // Auto-finish when delivery was confirmed with code (no need for separate customer confirmation)
+      if (delivery?.confirmationCode && code) {
+        try {
+          result.order.status = "finished";
+          result.order.statusTimeline = [...(Array.isArray(result.order.statusTimeline) ? result.order.statusTimeline : []), { status: "finished", at: new Date().toISOString() }];
+          await AppDataSource.getRepository(Order).save(result.order);
+        } catch { /* non-blocking */ }
+      }
       return result.order;
     }
     // fallback: keep old behavior if order not loaded
