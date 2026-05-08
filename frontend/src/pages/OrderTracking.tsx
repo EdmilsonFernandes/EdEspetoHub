@@ -711,7 +711,7 @@ export function OrderTracking() {
     isDelivery &&
     !isPostalDelivery &&
     [ 'delivered', 'finished', 'done' ].includes(normalizedStatus) &&
-    !hasCustomerReceiptConfirmation;
+    !hasCustomerReceiptConfirmation && normalizedStatus !== 'finished';
 
   const handleConfirmReceipt = async () => {
     if (!orderId || confirmReceiptLoading || !canConfirmReceipt) return;
