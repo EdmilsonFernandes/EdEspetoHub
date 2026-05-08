@@ -166,6 +166,13 @@ export function ConfirmPaymentModal({
               placeholder="0,00"
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-primary"
             />
+            {(() => {
+              const parsed = Number(cashValue.trim().replace(",", "."));
+              if (!cashValue.trim() || !Number.isFinite(parsed)) return null;
+              if (parsed < totalValue) return <p className="text-[11px] font-semibold text-rose-600 mt-1">⚠️ Valor menor que o total do pedido ({formatCurrency(totalValue)})</p>;
+              if (parsed > totalValue) return <p className="text-[11px] font-semibold text-emerald-700 mt-1">Troco: {formatCurrency(parsed - totalValue)}</p>;
+              return <p className="text-[11px] font-semibold text-emerald-700 mt-1">✓ Valor exato</p>;
+            })()}
             {informedCash !== null && Number.isFinite(informedCash) && (
               <p className="text-[11px] text-slate-500">
                 Dica: pode deixar vazio e só confirmar para usar o valor informado pelo cliente.
