@@ -31,6 +31,7 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
   const cashChangeDue = cashTendered !== null ? cashTendered - totalValue : null;
   const safeTipAmount = Number(tipAmount || 0);
   const deliveryGain = Math.max(0, Number(deliveryFee || 0)) + safeTipAmount;
+  const compactCourierGain = Math.max(0, Number(deliveryFee || 0));
   const tipRepasseStatus = String(tipPayoutStatus || '').toUpperCase() === 'PAID' ? 'PAID' : 'PENDING';
   const isDirectTipSettlement = String(tipSettlementMode || '').toUpperCase() === 'DIRECT_MOTOBOY';
 
@@ -121,15 +122,20 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
           </div>
           <div className="min-w-0 w-full sm:w-auto sm:max-w-[220px] text-left sm:text-right">
             <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500 mb-1">Valores</p>
+            {compact && isDelivery ? (
+              <p className="mb-1 text-xs font-extrabold text-emerald-700">
+                Voce recebe: {formatCurrency(showCourierEarnings ? deliveryGain : compactCourierGain)}
+              </p>
+            ) : null}
             <div className="flex flex-wrap justify-start sm:justify-end gap-1.5">
-              <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
-                Pedido: <strong className="ml-1 text-slate-900 tracking-tight">{formatCurrency(order?.total || 0)}</strong>
-              </span>
               {isDelivery && (
                 <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
                   Frete: <strong className="ml-1 tracking-tight text-slate-800">{formatCurrency(Number.isFinite(Number(deliveryFee)) ? Number(deliveryFee) : 0)}</strong>
                 </span>
               )}
+              <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+                Pedido: <strong className="ml-1 text-slate-900 tracking-tight">{formatCurrency(order?.total || 0)}</strong>
+              </span>
             </div>
             {showCourierEarnings && isDelivery && (
               <div className="mt-1.5 space-y-0.5">

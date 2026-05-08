@@ -37,7 +37,7 @@ export function PremiumTabs({
   return (
     <div
       className={[
-        'rounded-2xl border border-slate-200 bg-gradient-to-r from-white via-slate-50 to-white p-2 shadow-[0_20px_42px_-34px_rgba(15,23,42,0.35)]',
+        'rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_16px_34px_-28px_rgba(15,23,42,0.25)]',
         containerClassName,
       ].join(' ')}
     >
@@ -55,11 +55,11 @@ export function PremiumTabs({
               style={getButtonStyle ? getButtonStyle(item, isActive) : undefined}
               className={[
                 'rounded-xl border transition-all touch-manipulation',
-                item.icon ? 'px-3 py-2 text-[10px] sm:text-sm min-w-[108px] sm:min-w-[124px] min-h-[56px]' : 'px-3.5 py-2',
+                item.icon ? 'px-3 py-2 text-[11px] sm:text-sm min-w-[108px] sm:min-w-[124px] min-h-[56px]' : 'px-3.5 py-2',
                 item.icon ? 'flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center active:scale-95' : '',
                 isActive
-                  ? 'border-transparent bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 text-white shadow-[0_16px_30px_-22px_rgba(15,23,42,0.75)]'
-                  : 'border-slate-200 bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md',
+                  ? 'border-slate-900 bg-slate-900 text-white shadow-[0_14px_26px_-20px_rgba(15,23,42,0.45)]'
+                  : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-white',
                 item.disabled ? 'opacity-55 cursor-not-allowed hover:translate-y-0 hover:shadow-none' : '',
                 isActive ? activeClassName : inactiveClassName,
                 getButtonClassName ? getButtonClassName(item, isActive) : '',
@@ -67,7 +67,7 @@ export function PremiumTabs({
               ].join(' ')}
             >
               {item.icon ? (
-                <span className={`relative grid place-items-center h-9 w-11 rounded-2xl ${isActive ? 'bg-white/15 ring-1 ring-white/25' : 'bg-slate-100 ring-1 ring-slate-200'}`}>
+                <span className={`relative grid place-items-center h-9 w-11 rounded-2xl ${isActive ? 'bg-white/12 ring-1 ring-white/20' : 'bg-white ring-1 ring-slate-200'}`}>
                   {item.icon}
                   {item.badge ? item.badge : null}
                 </span>

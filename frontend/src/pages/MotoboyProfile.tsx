@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { LinkSimpleHorizontal, Storefront, ClockClockwise, CheckCircle, ShieldCheck, ShieldWarning, Clock, Info, IdentificationCard, Camera, Car } from '@phosphor-icons/react';
 import { motoboyService } from '../services/motoboyService';
@@ -62,7 +62,7 @@ export function MotoboyProfile() {
   const [cameraDocType, setCameraDocType] = useState<string | null>(null);
   const [preview, setPreview] = useState<{ title: string; src: string | null } | null>(null);
   const [showRequestBlockedModal, setShowRequestBlockedModal] = useState(false);
-  const [activeSection, setActiveSection] = useState<'profile' | 'documents' | 'stores' | 'notifications' | 'payouts'>('profile');
+  const [activeSection, setActiveSection] = useState<'profile' | 'documents' | 'stores' | 'payouts'>('profile');
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewStats, setReviewStats] = useState<{
     avgDeliveryRating: number;
@@ -80,6 +80,7 @@ export function MotoboyProfile() {
   const [mpAccount, setMpAccount] = useState<any | null>(null);
   const [mpLoading, setMpLoading] = useState(false);
   const [mpActionLoading, setMpActionLoading] = useState(false);
+  const initialSectionAppliedRef = useRef(false);
   // Face verification is an internal signal; keep UI friendly (no raw status/reason for motoboys).
   const [notifyOrders, setNotifyOrders] = useState(() => {
     const raw = localStorage.getItem('motoboy:notify_orders');
@@ -897,6 +898,89 @@ export function MotoboyProfile() {
     return reasons;
   }, [hasCompleteProfile, requiredDocStatus]);
 
+  const nextStep = useMemo(() => {
+    if (!hasCompleteProfile) {
+      return {
+        section: 'profile' as const,
+        tone: 'amber' as const,
+        eyebrow: 'Próximo passo',
+        title: 'Complete seu cadastro',
+        description: 'Preencha veículo, cidade e endereço para liberar o restante da conta.',
+        actionLabel: 'Completar cadastro',
+      };
+    }
+    if (requiredDocStatus.missing.length > 0 || requiredDocStatus.rejected.length > 0) {
+      return {
+        section: 'documents' as const,
+        tone: 'amber' as const,
+        eyebrow: 'Próximo passo',
+        title: 'Resolver documentos',
+        description:
+          requiredDocStatus.rejected.length > 0
+            ? `Reenvie: ${requiredDocStatus.rejected.join(', ')}.`
+            : `Faltam: ${requiredDocStatus.missing.join(', ')}.`,
+        actionLabel: 'Abrir documentos',
+      };
+    }
+    if (requiredDocStatus.pending.length > 0) {
+      return {
+        section: 'documents' as const,
+        tone: 'sky' as const,
+        eyebrow: 'Em análise',
+        title: 'Seus documentos estão sendo analisados',
+        description: 'Agora é só aguardar a validação inicial da plataforma.',
+        actionLabel: 'Ver andamento',
+      };
+    }
+    if (linkedStoreIds.length === 0) {
+      return {
+        section: 'stores' as const,
+        tone: canRequestAnyStore ? 'emerald' as const : 'amber' as const,
+        eyebrow: 'Próximo passo',
+        title: canRequestAnyStore ? 'Solicite uma loja' : 'Falta liberar sua operação',
+        description: canRequestAnyStore
+          ? 'Escolha uma loja para começar a receber pedidos.'
+          : 'Revise cadastro e documentos antes de solicitar uma loja.',
+        actionLabel: canRequestAnyStore ? 'Abrir lojas' : 'Ver pendências',
+      };
+    }
+    if (payoutStats.pendingCount > 0) {
+      return {
+        section: 'payouts' as const,
+        tone: 'amber' as const,
+        eyebrow: 'Recebimentos',
+        title: 'Você tem gorjeta para receber',
+        description: `${payoutStats.pendingCount} repasse(s) aguardando confirmação da loja.`,
+        actionLabel: 'Ver recebimentos',
+      };
+    }
+    if (!mpConnected) {
+      return {
+        section: 'payouts' as const,
+        tone: 'sky' as const,
+        eyebrow: 'Recebimento direto',
+        title: 'Conecte seu Mercado Pago',
+        description: 'Assim a gorjeta pode cair direto na sua conta conectada.',
+        actionLabel: 'Configurar recebimento',
+      };
+    }
+    return {
+      section: 'profile' as const,
+      tone: 'emerald' as const,
+      eyebrow: 'Conta pronta',
+      title: 'Tudo certo para operar',
+      description: 'Seu cadastro está pronto. Agora é só aceitar pedidos.',
+      actionLabel: 'Revisar conta',
+    };
+  }, [canRequestAnyStore, hasCompleteProfile, linkedStoreIds.length, mpConnected, payoutStats.pendingCount, requiredDocStatus]);
+
+  useEffect(() => {
+    if (initialSectionAppliedRef.current) return;
+    if (!profile && documents.length === 0 && requests.length === 0) return;
+    setActiveSection(nextStep.section);
+    initialSectionAppliedRef.current = true;
+  }, [documents.length, nextStep.section, profile, requests.length]);
+
   const explainBlockedRequest = () => {
     setShowRequestBlockedModal(true);
     if (requestBlockReasons[0]) showToast(requestBlockReasons[0], 'error');
@@ -1108,7 +1192,7 @@ export function MotoboyProfile() {
 
   const profileAccountStatus = formatMotoboyAccountStatus(profile?.status);
   const tabItems = [
-    { id: 'profile', label: 'Dados', icon: <ShieldCheck size={16} weight="duotone" /> },
+    { id: 'profile', label: 'Cadastro', icon: <ShieldCheck size={16} weight="duotone" /> },
     {
       id: 'documents',
       label: 'Documentos',
@@ -1133,7 +1217,7 @@ export function MotoboyProfile() {
     },
     {
       id: 'payouts',
-      label: 'Repasses',
+      label: 'Recebimentos',
       icon: <ClockClockwise size={16} weight="duotone" />,
       badge:
         payoutStats.pendingCount > 0 ? (
@@ -1142,12 +1226,11 @@ export function MotoboyProfile() {
           </span>
         ) : null,
     },
-    { id: 'notifications', label: 'Notificações', icon: <Info size={16} weight="duotone" /> },
   ];
 
   return (
     <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden no-x-scroll">
-      <MotoboyHeader title="Dados da conta" subtitle="Cadastro, documentos, vínculos e repasses do entregador." />
+      <MotoboyHeader title="Cadastro" subtitle="Veja o que falta para trabalhar, receber e manter sua conta em dia." />
 
       <DocPreviewModal
         open={Boolean(preview)}
@@ -1206,6 +1289,31 @@ export function MotoboyProfile() {
       />
 
       <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-[0_22px_48px_-40px_rgba(15,23,42,0.45)] motoboy-fade-up">
+        <div
+          className={[
+            'mb-3 rounded-2xl border px-4 py-4',
+            nextStep.tone === 'emerald'
+              ? 'border-emerald-200 bg-emerald-50'
+              : nextStep.tone === 'sky'
+                ? 'border-sky-200 bg-sky-50'
+                : 'border-amber-200 bg-amber-50',
+          ].join(' ')}
+        >
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-1">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">{nextStep.eyebrow}</p>
+              <p className="text-base font-black text-slate-900">{nextStep.title}</p>
+              <p className="text-xs text-slate-700">{nextStep.description}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveSection(nextStep.section)}
+              className="btn-press w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-extrabold text-slate-800"
+            >
+              {nextStep.actionLabel}
+            </button>
+          </div>
+        </div>
         <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Conta</p>
@@ -1236,55 +1344,10 @@ export function MotoboyProfile() {
         items={tabItems}
         activeId={activeSection}
         onChange={(id) => setActiveSection(id as any)}
-        listClassName="grid grid-cols-2 sm:grid-cols-5 gap-2"
+        listClassName="grid grid-cols-2 sm:grid-cols-4 gap-2"
         containerClassName="bg-white/90 backdrop-blur-sm shadow-[0_22px_48px_-40px_rgba(15,23,42,0.45)] border-slate-200 sticky top-[10px] z-20"
         buttonClassName="btn-press"
       />
-
-      {activeSection === 'notifications' && (
-      <div className="motoboy-fade-up" style={{ animationDelay: '40ms' }}>
-        <FormSection
-          title="Notificações"
-          subtitle="Quando entra pedido novo na fila (som e vibração)."
-          variant="neutral"
-          className="premium-card-glass"
-          contentClassName="space-y-3"
-        >
-        <button
-          type="button"
-          onClick={() => {
-            setNotifyOrders((prev) => {
-              const next = !prev;
-              localStorage.setItem('motoboy:notify_orders', next ? '1' : '0');
-              return next;
-            });
-          }}
-          className={[
-            'btn-press w-full rounded-xl px-4 py-3 text-sm font-extrabold flex items-center justify-between border',
-            notifyOrders
-              ? 'bg-emerald-50/70 text-emerald-900 border-emerald-200 shadow-[0_18px_40px_-32px_rgba(5,150,105,0.35)]'
-              : 'bg-white/70 text-slate-800 border-slate-200 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.35)]',
-          ].join(' ')}
-        >
-          <span>{notifyOrders ? 'Ativadas' : 'Desativadas'}</span>
-          <span
-            className={[
-              'relative inline-flex h-7 w-12 rounded-full transition',
-              notifyOrders ? 'bg-emerald-500' : 'bg-slate-300',
-            ].join(' ')}
-            aria-hidden="true"
-          >
-            <span
-              className={[
-                'absolute top-1 h-5 w-5 rounded-full bg-white shadow transition',
-                notifyOrders ? 'left-6' : 'left-1',
-              ].join(' ')}
-            />
-          </span>
-        </button>
-        </FormSection>
-      </div>
-      )}
 
       {blocked && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
@@ -1294,7 +1357,7 @@ export function MotoboyProfile() {
 
       {activeSection === 'documents' && (
       <FormSection
-        title="Documentos (KYC)"
+        title="Documentos"
         subtitle="Envie e acompanhe"
         variant="warning"
         contentClassName="space-y-3"
@@ -1526,65 +1589,70 @@ export function MotoboyProfile() {
 
       {activeSection === 'profile' && (
       <FormSection title="Perfil do entregador" subtitle="Dados do veículo e região." variant="primary" contentClassName="space-y-3">
-        <FormSection
-          title="Desempenho"
-          subtitle="Sua reputação e gorjetas nas lojas vinculadas."
-          variant="success"
-          actions={
-            <button
-              type="button"
-              onClick={loadReviewStats}
-              disabled={reviewsLoading}
-              className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 disabled:opacity-60"
+        <details className="rounded-2xl border border-slate-200 bg-white">
+          <summary className="cursor-pointer list-none px-4 py-3 text-sm font-extrabold text-slate-800">
+            Ver informações da conta, recebimentos e Mercado Pago
+          </summary>
+          <div className="space-y-3 border-t border-slate-100 px-3 py-3">
+            <FormSection
+              title="Desempenho"
+              subtitle="Sua reputação e gorjetas nas lojas vinculadas."
+              variant="success"
+              actions={
+                <button
+                  type="button"
+                  onClick={loadReviewStats}
+                  disabled={reviewsLoading}
+                  className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 disabled:opacity-60"
+                >
+                  {reviewsLoading ? 'Atualizando...' : 'Atualizar'}
+                </button>
+              }
             >
-              {reviewsLoading ? 'Atualizando...' : 'Atualizar'}
-            </button>
-          }
-        >
-          <div className="grid gap-2 sm:grid-cols-3">
-            <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Nota média (entrega)</p>
-              <p className="text-lg font-black text-slate-900">{Number(reviewStats.avgDeliveryRating || 0).toFixed(1)} ★</p>
-            </div>
-            <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Avaliações</p>
-              <p className="text-lg font-black text-slate-900">{Number(reviewStats.totalReviews || 0)}</p>
-            </div>
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">Gorjetas confirmadas (cliente)</p>
-              <p className="text-lg font-black text-emerald-800">
-                {Number(reviewStats.totalTips || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              <div className="grid gap-2 sm:grid-cols-3">
+                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Nota média (entrega)</p>
+                  <p className="text-lg font-black text-slate-900">{Number(reviewStats.avgDeliveryRating || 0).toFixed(1)} ★</p>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Avaliações</p>
+                  <p className="text-lg font-black text-slate-900">{Number(reviewStats.totalReviews || 0)}</p>
+                </div>
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">Gorjetas confirmadas (cliente)</p>
+                  <p className="text-lg font-black text-emerald-800">
+                    {Number(reviewStats.totalTips || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  </p>
+                </div>
+              </div>
+              <p className="text-[11px] text-slate-500">
+                Base: {reviewStats.storesMeasured} loja{reviewStats.storesMeasured === 1 ? '' : 's'} vinculada{reviewStats.storesMeasured === 1 ? '' : 's'} com avaliações e gorjetas confirmadas.
               </p>
-            </div>
-          </div>
-          <p className="text-[11px] text-slate-500">
-            Base: {reviewStats.storesMeasured} loja{reviewStats.storesMeasured === 1 ? '' : 's'} vinculada{reviewStats.storesMeasured === 1 ? '' : 's'} com avaliações e gorjetas confirmadas.
-          </p>
-          <div className="grid gap-2 sm:grid-cols-2">
-            <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-700">Repasses pendentes</p>
-              <p className="text-lg font-black text-amber-800">{formatCurrency(payoutStats.pendingAmount)}</p>
-              <p className="text-[11px] text-amber-800/80">{payoutStats.pendingCount} gorjeta(s) aguardando repasse</p>
-            </div>
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">Gorjetas recebidas</p>
-              <p className="text-lg font-black text-emerald-800">{formatCurrency(payoutStats.paidAmount)}</p>
-              <p className="text-[11px] text-emerald-800/80">
-                {payoutStats.paidCount} gorjeta(s) confirmada(s)
-                {payoutStats.directPaidCount > 0 ? ` • ${payoutStats.directPaidCount} direta(s) via Mercado Pago` : ''}
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setActiveSection('payouts')}
-            className="btn-press w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800"
-          >
-            Ver aba de repasses
-          </button>
-        </FormSection>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-700">Repasses pendentes</p>
+                  <p className="text-lg font-black text-amber-800">{formatCurrency(payoutStats.pendingAmount)}</p>
+                  <p className="text-[11px] text-amber-800/80">{payoutStats.pendingCount} gorjeta(s) aguardando repasse</p>
+                </div>
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">Gorjetas recebidas</p>
+                  <p className="text-lg font-black text-emerald-800">{formatCurrency(payoutStats.paidAmount)}</p>
+                  <p className="text-[11px] text-emerald-800/80">
+                    {payoutStats.paidCount} gorjeta(s) confirmada(s)
+                    {payoutStats.directPaidCount > 0 ? ` • ${payoutStats.directPaidCount} direta(s) via Mercado Pago` : ''}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveSection('payouts')}
+                className="btn-press w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800"
+              >
+                Ver recebimentos
+              </button>
+            </FormSection>
 
-        <FormSection title="Dados da conta" variant="neutral" contentClassName="space-y-2">
+            <FormSection title="Dados da conta" variant="neutral" contentClassName="space-y-2">
           <div className="grid gap-2 sm:grid-cols-2">
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
               <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Nome</p>
@@ -1610,8 +1678,8 @@ export function MotoboyProfile() {
               <p className="text-sm font-semibold text-slate-900 break-words">{profile?.user?.address || '-'}</p>
             </div>
           </div>
-        </FormSection>
-        <FormSection title="Dados do entregador" variant="neutral" contentClassName="space-y-2">
+            </FormSection>
+            <FormSection title="Dados do entregador" variant="neutral" contentClassName="space-y-2">
           <div className="grid gap-2 sm:grid-cols-2">
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
               <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Tipo de veículo</p>
@@ -1640,8 +1708,8 @@ export function MotoboyProfile() {
               <p className="text-sm font-semibold text-slate-900 break-all">{profileDraft?.pixKey || '-'}</p>
             </div>
           </div>
-        </FormSection>
-        <FormSection title="Mercado Pago do entregador" variant="primary" contentClassName="space-y-3">
+            </FormSection>
+            <FormSection title="Mercado Pago do entregador" variant="primary" contentClassName="space-y-3">
           <div className={`rounded-2xl border px-4 py-4 ${
             mpConnected
               ? mpPixReady
@@ -1710,7 +1778,9 @@ export function MotoboyProfile() {
               </div>
             </div>
           </div>
-        </FormSection>
+            </FormSection>
+          </div>
+        </details>
         <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100/80 px-3 py-3 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.35)]">
           <div className="flex items-center gap-3">
             <AdaptiveAvatar
@@ -1912,13 +1982,48 @@ export function MotoboyProfile() {
             })()}
           </div>
         )}
+        <div className="rounded-2xl border border-slate-200 bg-white p-3">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500 font-black">Notificações de pedido</p>
+          <button
+            type="button"
+            onClick={() => {
+              setNotifyOrders((prev) => {
+                const next = !prev;
+                localStorage.setItem('motoboy:notify_orders', next ? '1' : '0');
+                return next;
+              });
+            }}
+            className={[
+              'mt-3 btn-press w-full rounded-xl px-4 py-3 text-sm font-extrabold flex items-center justify-between border',
+              notifyOrders
+                ? 'bg-emerald-50/70 text-emerald-900 border-emerald-200 shadow-[0_18px_40px_-32px_rgba(5,150,105,0.35)]'
+                : 'bg-white/70 text-slate-800 border-slate-200 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.35)]',
+            ].join(' ')}
+          >
+            <span>{notifyOrders ? 'Ativadas' : 'Desativadas'}</span>
+            <span
+              className={[
+                'relative inline-flex h-7 w-12 rounded-full transition',
+                notifyOrders ? 'bg-emerald-500' : 'bg-slate-300',
+              ].join(' ')}
+              aria-hidden="true"
+            >
+              <span
+                className={[
+                  'absolute top-1 h-5 w-5 rounded-full bg-white shadow transition',
+                  notifyOrders ? 'left-6' : 'left-1',
+                ].join(' ')}
+              />
+            </span>
+          </button>
+        </div>
       </FormSection>
       )}
 
       {activeSection === 'payouts' && (
       <FormSection
-        title="Repasses de gorjeta"
-        subtitle="Acompanhe pendentes e pagos com comprovante."
+        title="Recebimentos de gorjeta"
+        subtitle="Veja o que voce ja recebeu e o que a loja ainda vai pagar."
         variant="warning"
         contentClassName="space-y-3"
         actions={

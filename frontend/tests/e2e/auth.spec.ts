@@ -5,10 +5,7 @@ test.describe('Suíte E2E: Auth e Acesso', () => {
     // A baseURL já gerencia o http://localhost:8080 configurado no playwright.config.ts
     await page.goto('/');
 
-    // O Playwright espera até que a logo ou o seletor da loja renderize sem precisar de Hard Sleeps
-    const mainTitle = page.locator('text=EdEspeto'); // Ou outro label persistente
-    
-    // Verificação Base: App não quebra na tela limpa (White Screen of Death)
-    await expect(page).toHaveTitle(/EdEspetoHub|Plataforma/i);
+    // Verificação base: a home pública carrega com o branding atual sem tela em branco.
+    await expect(page).toHaveTitle(/Já no Caminho|Plataforma/i);
   });
 });

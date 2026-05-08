@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { CheckCircle, Clock, Storefront } from '@phosphor-icons/react';
+import { CheckCircle, Clock, ListChecks, Storefront } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { motoboyService } from '../services/motoboyService';
 import { OrderCard } from '../components/Motoboy/OrderCard';
@@ -29,7 +29,7 @@ export function MotoboyAvailable() {
 
   const notificationsEnabled = () => {
     const raw = localStorage.getItem('motoboy:notify_orders');
-    if (raw === null) return true; // default ON
+    if (raw === null) return true;
     return raw === '1';
   };
 
@@ -38,7 +38,6 @@ export function MotoboyAvailable() {
     try {
       if ('vibrate' in navigator) navigator.vibrate?.(120);
     } catch {}
-    // Audio can be blocked until user interacts; fail silently.
     try {
       const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
       if (!AudioCtx) return;
@@ -97,7 +96,7 @@ export function MotoboyAvailable() {
         setBlocked(true);
         setOrders([]);
       } else {
-        showToast(error?.message || 'Não foi possível carregar pedidos.', 'error');
+        showToast(error?.message || 'Nao foi possivel carregar pedidos.', 'error');
       }
     } finally {
       setLoading(false);
@@ -110,7 +109,6 @@ export function MotoboyAvailable() {
   }, [loadOrders]);
 
   useEffect(() => {
-    // Poll queue every 5s (pause when tab is hidden).
     let timer: number | null = null;
     const tick = async () => {
       if (document.visibilityState !== 'visible') return;
@@ -127,7 +125,7 @@ export function MotoboyAvailable() {
   useEffect(() => {
     const onForegroundPush = () => {
       setNewBanner({ count: 1, at: Date.now() });
-      showToast('TEM ENTREGA DISPONÍVEL 🚚', 'info');
+      showToast('Tem entrega disponivel.', 'info');
       void loadOrders();
     };
     window.addEventListener(MOTOBOY_AVAILABLE_ORDER_EVENT, onForegroundPush as EventListener);
@@ -145,7 +143,7 @@ export function MotoboyAvailable() {
         setPendingCount(0);
       }
     };
-    loadRequests();
+    void loadRequests();
   }, []);
 
   useEffect(() => {
@@ -157,7 +155,7 @@ export function MotoboyAvailable() {
         setProfile(null);
       }
     };
-    loadProfile();
+    void loadProfile();
   }, []);
 
   useEffect(() => {
@@ -169,7 +167,7 @@ export function MotoboyAvailable() {
         setDocuments([]);
       }
     };
-    loadDocs();
+    void loadDocs();
   }, []);
 
   const documentsByType = new Map(
@@ -179,6 +177,7 @@ export function MotoboyAvailable() {
   const missingRequiredDocs = requiredDocs.filter((key) => !documentsByType.has(key)).length;
   const approvedStores = requests.filter((req) => req.status === 'APPROVED');
   const accountStatus = formatMotoboyAccountStatus(profile?.status);
+  const canOperate = !blocked && hasAllRequiredDocs && approvedStores.length > 0;
 
   const handleAccept = async (orderId: string) => {
     try {
@@ -196,30 +195,24 @@ export function MotoboyAvailable() {
       navigate('/motoboy/delivery');
     } catch (error: any) {
       if (error?.status === 409) {
-        showToast('Pedido já foi aceito por outro motoboy.', 'warning');
+        showToast('Pedido ja foi aceito por outro motoboy.', 'warning');
       } else {
-        showToast(error?.message || 'Não foi possível aceitar o pedido.', 'error');
+        showToast(error?.message || 'Nao foi possivel aceitar o pedido.', 'error');
       }
     }
   };
 
   return (
     <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden">
-      {newBanner && (
-        <div
-          className="premium-card-glass p-4 motoboy-fade-up"
-          style={{ animationDelay: '40ms' }}
-          role="status"
-        >
+      {newBanner && !hasActive ? (
+        <div className="premium-card-glass p-4 motoboy-fade-up" role="status">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="min-w-0">
               <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Novo pedido</p>
-              <p className="text-sm font-extrabold text-slate-900">
-                {newBanner.count} pedido{newBanner.count === 1 ? '' : 's'} acabou{newBanner.count === 1 ? '' : 'ram'} de entrar na fila
+              <p className="text-base font-extrabold text-slate-900">
+                Entrou {newBanner.count} pedido{newBanner.count === 1 ? '' : 's'} novo{newBanner.count === 1 ? '' : 's'} na fila
               </p>
-              <p className="text-[11px] text-slate-600">
-                Atualizado agora. Toque em ver para ir direto.
-              </p>
+              <p className="text-xs text-slate-600">Abra a fila e aceite so se puder sair agora.</p>
             </div>
             <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
               <button
@@ -231,170 +224,151 @@ export function MotoboyAvailable() {
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }}
+                onClick={() => listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
                 className="btn-press flex-1 sm:flex-none rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-3 py-2 text-xs font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)]"
               >
-                Ver
+                Ver fila
               </button>
             </div>
           </div>
-        </div>
-      )}
-
-      <MotoboyHeader
-        title="Pedidos disponíveis"
-        subtitle="Aceite e inicie sua rota."
-        rightAction={
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate('/motoboy/profile')}
-              className="btn-press px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-extrabold text-slate-700"
-            >
-              Perfil
-            </button>
-            <button
-              onClick={loadOrders}
-              className="btn-press px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-extrabold text-slate-700"
-            >
-              Atualizar
-            </button>
-          </div>
-        }
-      />
-      {blocked && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-          Seu cadastro está em análise. Envie os documentos obrigatórios e aguarde a aprovação.
-        </div>
-      )}
-      {pendingCount > 0 && (
-        <button
-          type="button"
-          onClick={() => navigate('/motoboy/profile')}
-          className="w-full rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-700"
-        >
-          {pendingCount} solicitação{pendingCount === 1 ? '' : 'es'} pendente{pendingCount === 1 ? '' : 's'} de vínculo
-        </button>
-      )}
-
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
-            <CheckCircle size={20} weight="duotone" />
-          </div>
-          <div>
-            <p className="text-xs text-slate-500">Conta</p>
-            <span className={`mt-0.5 inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border ${accountStatus.tone}`}>
-              {accountStatus.label}
-            </span>
-          </div>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center gap-3">
-          <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${hasAllRequiredDocs ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
-            <CheckCircle size={20} weight="duotone" />
-          </div>
-          <div>
-            <p className="text-xs text-slate-500">Documentos</p>
-            <p className={`text-sm font-semibold ${hasAllRequiredDocs ? 'text-emerald-700' : 'text-amber-700'}`}>
-              {hasAllRequiredDocs ? 'Tudo certo' : `${missingRequiredDocs} pendente(s)`}
-            </p>
-          </div>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
-            <Storefront size={20} weight="duotone" />
-          </div>
-          <div>
-            <p className="text-xs text-slate-500">Lojas vinculadas</p>
-            <p className="text-sm font-semibold text-slate-800">{approvedStores.length}</p>
-          </div>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
-            <Clock size={20} weight="duotone" />
-          </div>
-          <div>
-            <p className="text-xs text-slate-500">Pedidos agora</p>
-            <p className="text-sm font-semibold text-slate-800">{orders.length}</p>
-          </div>
-        </div>
-      </div>
-
-      {!hasAllRequiredDocs || approvedStores.length === 0 ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-2">
-          {!hasAllRequiredDocs ? (
-            <p className="text-[12px] text-amber-700 font-semibold">
-              Complete CNH e Selfie para liberar todos os pedidos da fila.
-            </p>
-          ) : null}
-          {approvedStores.length === 0 ? (
-            <p className="text-[12px] text-slate-600">
-              Você ainda não tem vínculo aprovado com loja. Acesse o perfil para solicitar.
-            </p>
-          ) : null}
         </div>
       ) : null}
 
-      {loading ? (
-        <div className="grid gap-3" ref={listRef}>
-          <div className="motoboy-skeleton h-[92px]" />
-          <div className="motoboy-skeleton h-[92px]" />
-          <div className="motoboy-skeleton h-[92px]" />
-        </div>
-      ) : orders.length === 0 ? (
-        <div className="space-y-3">
-          {hasActive && currentOrder ? (
-            <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
-              <p className="text-xs uppercase tracking-[0.2em] text-sky-600 font-extrabold">Entrega ativa</p>
-              <p className="mt-1 text-sm font-bold text-slate-900">
-                Pedido #{String(currentOrder?.id || '').slice(0, 8)}
-              </p>
-              <p className="text-xs text-slate-600 mt-1">
-                Você já está em rota. Abra a entrega atual para confirmar pagamento e finalizar.
-              </p>
-              <button
-                type="button"
-                onClick={() => navigate('/motoboy/delivery')}
-                className="mt-3 w-full sm:w-auto btn-press rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#0ea5e9))] px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(14,165,233,0.85)]"
-              >
-                Abrir entrega atual
-              </button>
+      <MotoboyHeader
+        title="Fila de entregas"
+        subtitle={hasActive ? 'Voce ja esta em rota. Termine a entrega atual primeiro.' : 'Veja o pedido e aceite rapido.'}
+        rightAction={
+          <button
+            onClick={loadOrders}
+            className="btn-press px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-extrabold text-slate-700"
+          >
+            Atualizar
+          </button>
+        }
+      />
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.35)]">
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+              <ListChecks size={20} weight="duotone" />
             </div>
-          ) : null}
-          <div className="text-center text-sm text-slate-500">
-            Nenhum pedido disponível. A loja precisa marcar o pedido como “Pronto para entrega” ou “Aguardando entregador”.
+            <div>
+              <p className="text-xs text-slate-500">Pedidos agora</p>
+              <p className="text-sm font-black text-slate-900">{orders.length}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${canOperate ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+              <CheckCircle size={20} weight="duotone" />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500">Conta</p>
+              <p className="text-sm font-black text-slate-900">{accountStatus.label}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
+              <Storefront size={20} weight="duotone" />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500">Lojas ativas</p>
+              <p className="text-sm font-black text-slate-900">{approvedStores.length}</p>
+            </div>
           </div>
         </div>
-      ) : (
-        <div className="grid gap-4" ref={listRef}>
-          {hasActive && (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              Você já tem uma entrega ativa. Finalize na aba “Entrega” antes de aceitar outra.
+      </section>
+
+      {blocked || !canOperate || pendingCount > 0 ? (
+        <section className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <p className="font-extrabold">Antes de aceitar mais pedidos</p>
+          <p className="mt-1 text-amber-800">
+            {blocked
+              ? 'Seu cadastro ainda esta em analise da plataforma.'
+              : !hasAllRequiredDocs
+                ? `Faltam documentos obrigatorios. Hoje faltam ${missingRequiredDocs}.`
+                : approvedStores.length === 0
+                  ? 'Voce ainda nao tem loja aprovada para operar.'
+                  : `${pendingCount} solicitacao${pendingCount === 1 ? '' : 'oes'} de loja aguardando resposta.`}
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate('/motoboy/profile')}
+            className="mt-3 btn-press w-full sm:w-auto rounded-xl border border-amber-300 bg-white px-4 py-2.5 text-sm font-extrabold text-amber-900"
+          >
+            Resolver no cadastro
+          </button>
+        </section>
+      ) : null}
+
+      {hasActive && currentOrder ? (
+        <section className="rounded-2xl border border-sky-200 bg-sky-50 p-4 space-y-3" ref={listRef}>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-sky-700 font-extrabold">Entrega ativa</p>
+              <p className="mt-1 text-lg font-black text-slate-900">
+                Pedido #{String(currentOrder?.id || '').slice(0, 8)}
+              </p>
+              <p className="text-sm text-sky-900 mt-1">
+                Finalize sua entrega atual antes de aceitar outro pedido.
+              </p>
+              <p className="text-xs text-sky-800 mt-1">
+                Ainda ha {orders.length} pedido{orders.length === 1 ? '' : 's'} esperando na fila.
+              </p>
             </div>
-          )}
-          {orders.map((order, idx) => (
-            <div
-              key={order.id}
-              className="motoboy-fade-up"
-              style={{ animationDelay: `${Math.min(idx * 70, 420)}ms` }}
-            >
-              <OrderCard
-                order={order}
-                compact
-                actions={
-                  <button
-                    onClick={() => handleAccept(order.id)}
-                    disabled={hasActive}
-                    className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)] disabled:opacity-50"
-                  >
-                    Aceitar entrega
-                  </button>
-                }
-              />
+            <div className="h-11 w-11 rounded-2xl border border-sky-200 bg-white text-sky-700 inline-flex items-center justify-center shrink-0">
+              <Clock size={20} weight="duotone" />
             </div>
-          ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/motoboy/delivery')}
+            className="btn-press w-full sm:w-auto rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#0ea5e9))] px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(14,165,233,0.85)]"
+          >
+            Abrir entrega atual
+          </button>
+        </section>
+      ) : loading ? (
+        <div className="grid gap-3" ref={listRef}>
+          <div className="motoboy-skeleton h-[112px]" />
+          <div className="motoboy-skeleton h-[112px]" />
+          <div className="motoboy-skeleton h-[112px]" />
         </div>
+      ) : orders.length === 0 ? (
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 text-center text-sm text-slate-600" ref={listRef}>
+          Nenhum pedido disponivel agora. A fila atualiza automaticamente.
+        </div>
+      ) : (
+        <section className="space-y-3" ref={listRef}>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Pedidos na fila</p>
+              <p className="text-sm text-slate-600">Veja o valor do frete, o pagamento e aceite so se puder sair agora.</p>
+            </div>
+          </div>
+          <div className="grid gap-4">
+            {orders.map((order, idx) => (
+              <div
+                key={order.id}
+                className="motoboy-fade-up"
+                style={{ animationDelay: `${Math.min(idx * 70, 420)}ms` }}
+              >
+                <OrderCard
+                  order={order}
+                  compact
+                  actions={
+                    <button
+                      onClick={() => handleAccept(order.id)}
+                      className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)]"
+                    >
+                      Aceitar entrega
+                    </button>
+                  }
+                />
+              </div>
+            ))}
+          </div>
+        </section>
       )}
     </div>
   );

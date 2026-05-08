@@ -73,7 +73,7 @@ export function ConfirmPaymentModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-md premium-card-glass p-5 space-y-4 shadow-xl motoboy-fade-up">
+      <div className="w-full max-w-md max-h-[92vh] overflow-y-auto premium-card-glass p-5 space-y-4 shadow-xl motoboy-fade-up">
         <div>
           <h3 className="text-lg font-bold text-slate-800">Confirmar pagamento</h3>
           <p className="text-sm text-slate-500">Total do pedido: {formatCurrency(amount || 0)}</p>
@@ -100,40 +100,49 @@ export function ConfirmPaymentModal({
                 </p>
               </div>
             )}
-            {pixKey && (
-              <div className="space-y-2">
-                <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500">Chave</p>
-                <div className="flex items-center gap-2">
-                  <code className="flex-1 rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-[11px] text-slate-800 overflow-hidden text-ellipsis whitespace-nowrap">
-                    {pixKey}
-                  </code>
-                  <button
-                    type="button"
-                    onClick={() => void copyText(pixKey)}
-                    className="btn-press rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-xs font-extrabold text-slate-800"
-                  >
-                    Copiar
-                  </button>
+            {(pixKey || pixPayload) ? (
+              <details className="rounded-2xl border border-slate-200 bg-white/70 p-3">
+                <summary className="cursor-pointer text-xs font-extrabold text-slate-800">
+                  Ver chave e copia e cola
+                </summary>
+                <div className="mt-3 space-y-3">
+                  {pixKey ? (
+                    <div className="space-y-2">
+                      <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500">Chave</p>
+                      <div className="flex items-center gap-2">
+                        <code className="flex-1 rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-[11px] text-slate-800 overflow-hidden text-ellipsis whitespace-nowrap">
+                          {pixKey}
+                        </code>
+                        <button
+                          type="button"
+                          onClick={() => void copyText(pixKey)}
+                          className="btn-press rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-xs font-extrabold text-slate-800"
+                        >
+                          Copiar
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+                  {pixPayload ? (
+                    <div className="space-y-2">
+                      <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500">Copia e cola</p>
+                      <div className="flex items-center gap-2">
+                        <code className="flex-1 rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-[11px] text-slate-800 overflow-hidden text-ellipsis whitespace-nowrap">
+                          {pixPayload}
+                        </code>
+                        <button
+                          type="button"
+                          onClick={() => void copyText(pixPayload)}
+                          className="btn-press rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-xs font-extrabold text-slate-800"
+                        >
+                          Copiar
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
-              </div>
-            )}
-            {pixPayload && (
-              <div className="space-y-2">
-                <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500">Copia e cola</p>
-                <div className="flex items-center gap-2">
-                  <code className="flex-1 rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-[11px] text-slate-800 overflow-hidden text-ellipsis whitespace-nowrap">
-                    {pixPayload}
-                  </code>
-                  <button
-                    type="button"
-                    onClick={() => void copyText(pixPayload)}
-                    className="btn-press rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-xs font-extrabold text-slate-800"
-                  >
-                    Copiar
-                  </button>
-                </div>
-              </div>
-            )}
+              </details>
+            ) : null}
           </div>
         )}
 
@@ -141,13 +150,13 @@ export function ConfirmPaymentModal({
           <div className="space-y-2">
             <label className="text-xs font-semibold text-slate-600">Valor recebido em dinheiro</label>
             {informedCash !== null && Number.isFinite(informedCash) && (
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">
                 <p className="font-extrabold">Cliente informou no pedido</p>
-                <p className="mt-1">
-                  Paga com: <span className="font-black">{formatCurrency(informedCash)}</span>
+                <p className="mt-2 text-lg font-black">
+                  Paga com: {formatCurrency(informedCash)}
                 </p>
-                <p className="mt-1">
-                  Troco: <span className="font-black">{formatCurrency(changeDue)}</span>
+                <p className="mt-1 text-base font-extrabold">
+                  Troco: {formatCurrency(changeDue)}
                 </p>
               </div>
             )}

@@ -11,8 +11,8 @@
 const STATUS_LABELS: Record<string, string> = {
   pending: 'Pedido Recebido',
   preparing: 'Em Preparação',
-  ready_for_delivery: 'Pronto para entrega',
-  waiting_for_motoboy: 'Aguardando',
+  ready_for_delivery: 'Pronto',
+  waiting_for_motoboy: 'Na fila',
   in_delivery: 'Em rota',
   delivered: 'Entregue',
   finished: 'Finalizado',

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, House, IdentificationCard, ListChecks, Motorcycle, SignOut, Truck, UserCircle, Wallet } from '@phosphor-icons/react';
+import { House, IdentificationCard, ListChecks, Motorcycle, SignOut, Truck, UserCircle, Wallet } from '@phosphor-icons/react';
 import { motoboyService } from '../services/motoboyService';
 import { nativeBiometricService } from '../services/nativeBiometricService';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
@@ -45,7 +45,7 @@ export function MotoboyLayout() {
     {
       id: 'home',
       to: '/motoboy/home',
-      label: 'Home',
+      label: 'Início',
       icon: <House size={20} weight="duotone" />,
       match: (p) => p === '/motoboy' || p.startsWith('/motoboy/home'),
     },
@@ -57,6 +57,13 @@ export function MotoboyLayout() {
       match: (p) => p.startsWith('/motoboy/available'),
     },
     {
+      id: 'delivery',
+      to: '/motoboy/delivery',
+      label: 'Entrega',
+      icon: <Motorcycle size={20} weight="duotone" />,
+      match: (p) => p.startsWith('/motoboy/delivery') || p.startsWith('/motoboy/current') || p.startsWith('/motoboy/done'),
+    },
+    {
       id: 'earnings',
       to: '/motoboy/earnings',
       label: 'Ganhos',
@@ -65,10 +72,10 @@ export function MotoboyLayout() {
     },
     {
       id: 'account',
+      to: '/motoboy/profile',
       label: 'Conta',
       icon: <UserCircle size={20} weight="duotone" />,
       match: (p) => p.startsWith('/motoboy/profile'),
-      onClick: () => setAccountDrawerOpen(true),
     },
   ];
 
@@ -187,26 +194,6 @@ export function MotoboyLayout() {
 
   return (
     <div className="min-h-screen motoboy-bg pb-28">
-      {/* ── Mode indicator pill (fixed, above bottom nav) ── */}
-      <div
-        className="fixed left-3 z-[75] animate-in fade-in slide-in-from-bottom-3 duration-500 motion-reduce:animate-none"
-        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 5rem)' }}
-      >
-        <div className="flex items-center gap-1.5 overflow-hidden rounded-full border border-white/[0.08] bg-slate-950/90 py-1.5 pl-2.5 pr-1 shadow-[0_8px_28px_-8px_rgba(0,0,0,0.6)] backdrop-blur-xl">
-          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400 shadow-[0_0_5px_rgba(251,191,36,0.9)]" />
-          <Truck size={11} weight="duotone" className="shrink-0 text-amber-400" />
-          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">Entregador</span>
-          <span className="mx-0.5 h-3 w-px bg-white/10" />
-          <button
-            type="button"
-            onClick={() => navigate('/hub')}
-            className="flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-1 text-[9px] font-black text-amber-400 transition hover:bg-amber-500/25 active:scale-95"
-          >
-            <ArrowLeft size={9} weight="bold" />
-            Hub
-          </button>
-        </div>
-      </div>
       <Outlet />
 
       {showInstall && installPrompt && (
@@ -259,7 +246,7 @@ export function MotoboyLayout() {
         aria-label="Navegação do entregador"
       >
         <div className="motoboy-screen !max-w-[72rem] !pt-0 !pb-0">
-          <div className="motoboy-pill grid grid-cols-4 gap-1 p-1">
+          <div className="motoboy-pill grid grid-cols-5 gap-1 p-1">
             {tabs.map((tab) => {
               const active = tab.id === 'account' ? accountDrawerOpen || tab.match(pathname) : tab.match(pathname);
               const showDot = tab.label === 'Fila' && queueBadge && !pathname.startsWith('/motoboy/available');

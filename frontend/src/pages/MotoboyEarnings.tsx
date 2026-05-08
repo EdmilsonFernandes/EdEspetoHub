@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ChartLineUp, Clock, CurrencyCircleDollar, Wallet } from '@phosphor-icons/react';
+import { Clock, CurrencyCircleDollar, Wallet } from '@phosphor-icons/react';
 import { motoboyService } from '../services/motoboyService';
 import { OrderCard } from '../components/Motoboy/OrderCard';
 import { useToast } from '../contexts/ToastContext';
@@ -45,7 +45,7 @@ export function MotoboyEarnings() {
         setTipPayouts([]);
         setEarningsToday({ total: 0, count: 0 });
       } else {
-        showToast(error?.message || 'Não foi possível carregar ganhos.', 'error');
+        showToast(error?.message || 'Nao foi possivel carregar ganhos.', 'error');
       }
     } finally {
       setLoading(false);
@@ -71,9 +71,7 @@ export function MotoboyEarnings() {
 
   const totalToday = Number(earningsToday?.total || 0);
   const deliveriesTodayCount = Number(earningsToday?.count || 0);
-  const totalMonth = orders.reduce((acc, order) => acc + Number(order.deliveryFee || 0), 0);
-  const deliveredOrdersValue30d = orders.reduce((acc, order) => acc + Number(order.total || 0), 0);
-  const avgDeliveryFee = orders.length > 0 ? totalMonth / orders.length : 0;
+  const totalDeliveryFees30d = orders.reduce((acc, order) => acc + Number(order.deliveryFee || 0), 0);
 
   const tipsCutoffMs = Date.now() - 30 * 24 * 60 * 60 * 1000;
   const tipRows30d = tipPayouts.filter((row) => {
@@ -84,14 +82,12 @@ export function MotoboyEarnings() {
   const isDirectTipSettlement = (row: any) => String(row?.tipSettlementMode || '').toUpperCase() === 'DIRECT_MOTOBOY';
   const tipRowsPaid = tipRows30d.filter((row) => String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID');
   const tipRowsPending = tipRows30d.filter((row) => String(row?.tipPayoutStatus || '').toUpperCase() !== 'PAID');
-  const tipRowsDirectPaid = tipRowsPaid.filter((row) => isDirectTipSettlement(row));
-  const totalTipsMonth = tipRows30d.reduce((acc, row) => acc + Number(row?.tipAmount || 0), 0);
-  const totalTipsPending = tipRowsPending.reduce((acc, row) => acc + Number(row?.tipAmount || 0), 0);
   const totalTipsPaid = tipRowsPaid.reduce((acc, row) => acc + Number(row?.tipAmount || 0), 0);
+  const totalTipsPending = tipRowsPending.reduce((acc, row) => acc + Number(row?.tipAmount || 0), 0);
+  const totalReceived30d = totalDeliveryFees30d + totalTipsPaid;
 
-  const totalGross30d = totalMonth + totalTipsMonth;
   const lastUpdatedLabel = lastUpdatedAt
-    ? new Date(lastUpdatedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    ? new Date(lastUpdatedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
     : '—';
 
   const recentTipPayouts = useMemo(() => tipPayouts.slice(0, 5), [tipPayouts]);
@@ -127,6 +123,7 @@ export function MotoboyEarnings() {
     });
     return map;
   }, [tipPayouts]);
+
   const ordersPerPage = 10;
   const totalOrdersPages = Math.max(1, Math.ceil(orders.length / ordersPerPage));
   const paginatedOrders = useMemo(() => {
@@ -142,7 +139,7 @@ export function MotoboyEarnings() {
     <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden">
       <MotoboyHeader
         title="Ganhos"
-        subtitle="Visão financeira da sua operação nos últimos 30 dias."
+        subtitle="Veja o que entrou para voce e o que ainda falta receber."
         rightAction={
           <button
             type="button"
@@ -154,131 +151,89 @@ export function MotoboyEarnings() {
         }
       />
 
-      {blocked && (
+      {blocked ? (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-          Seu cadastro está em análise. Aguarde aprovação para visualizar ganhos.
+          Seu cadastro esta em analise. Aguarde aprovacao para visualizar ganhos.
         </div>
-      )}
+      ) : null}
 
-      {pendingCount > 0 && (
+      {pendingCount > 0 ? (
         <button
           type="button"
           onClick={() => navigate('/motoboy/profile')}
           className="w-full rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-700"
         >
-          {pendingCount} solicitação{pendingCount === 1 ? '' : 'es'} pendente{pendingCount === 1 ? '' : 's'} de vínculo
+          {pendingCount} solicitacao{pendingCount === 1 ? '' : 'oes'} pendente{pendingCount === 1 ? '' : 's'} de loja
         </button>
-      )}
+      ) : null}
 
       <section className="premium-card-glass p-4 sm:p-5 motoboy-fade-up">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Resumo financeiro</p>
-            <p className="text-sm text-slate-700 mt-1">Atualizado às <span className="font-semibold">{lastUpdatedLabel}</span></p>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Resumo rapido</p>
+            <p className="text-sm text-slate-700 mt-1">Atualizado as <span className="font-semibold">{lastUpdatedLabel}</span></p>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => navigate('/motoboy/history')}
-              className="btn-press rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-xs font-extrabold text-slate-700"
-            >
-              Histórico completo
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/motoboy/profile')}
-              className="btn-press rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-xs font-extrabold text-slate-700"
-            >
-              Perfil
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/motoboy/profile')}
+            className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700"
+          >
+            Abrir conta
+          </button>
         </div>
       </section>
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
-        <article className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between ds-interactive-card">
+      <section className="grid gap-3 sm:grid-cols-3">
+        <article className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Seu ganho hoje</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Hoje voce ganhou</p>
             <p className="text-2xl font-black text-emerald-600 mt-2">{toCurrency(totalToday)}</p>
-            <p className="text-xs text-slate-500 mt-1">{deliveriesTodayCount} entrega(s) concluída(s) hoje</p>
+            <p className="text-xs text-slate-500 mt-1">{deliveriesTodayCount} entrega(s) hoje</p>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200">
             <Wallet size={22} weight="duotone" />
           </div>
         </article>
 
-        <article className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between ds-interactive-card">
+        <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Frete (30 dias)</p>
-            <p className="text-2xl font-black text-slate-800 mt-2">{toCurrency(totalMonth)}</p>
-            <p className="text-xs text-slate-500 mt-1">{orders.length} entrega(s) concluída(s) no período</p>
-          </div>
-          <div className="h-12 w-12 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center border border-slate-200">
-            <ChartLineUp size={22} weight="duotone" />
-          </div>
-        </article>
-
-        <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 flex items-center justify-between ds-interactive-card">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-emerald-700">Gorjetas pagas pelo cliente (30 dias)</p>
-            <p className="text-2xl font-black text-emerald-700 mt-2">{toCurrency(totalTipsMonth)}</p>
-            <p className="text-xs text-emerald-700/80 mt-1">{tipRows30d.length} gorjeta(s) registrada(s)</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-emerald-700">Ja caiu para voce</p>
+            <p className="text-2xl font-black text-emerald-700 mt-2">{toCurrency(totalReceived30d)}</p>
+            <p className="text-xs text-emerald-700/80 mt-1">Frete + gorjetas pagas dos ultimos 30 dias</p>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-white/80 text-emerald-700 flex items-center justify-center border border-emerald-200">
             <CurrencyCircleDollar size={22} weight="duotone" />
           </div>
         </article>
 
-        <article className="rounded-2xl border border-amber-200 bg-amber-50 p-4 flex items-center justify-between ds-interactive-card">
+        <article className="rounded-2xl border border-amber-200 bg-amber-50 p-4 flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-amber-700">Repasse pendente</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-amber-700">A loja ainda vai te pagar</p>
             <p className="text-2xl font-black text-amber-700 mt-2">{toCurrency(totalTipsPending)}</p>
-            <p className="text-xs text-amber-700/80 mt-1">{tipRowsPending.length} item(ns) aguardando repasse</p>
+            <p className="text-xs text-amber-700/80 mt-1">{tipRowsPending.length} gorjeta(s) aguardando repasse</p>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-white/80 text-amber-700 flex items-center justify-center border border-amber-200">
             <Clock size={22} weight="duotone" />
           </div>
         </article>
-
-        <article className="rounded-2xl border border-blue-200 bg-blue-50 p-4 flex items-center justify-between ds-interactive-card">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-blue-700">Seu ganho total (30 dias)</p>
-            <p className="text-2xl font-black text-blue-700 mt-2">{toCurrency(totalGross30d)}</p>
-            <p className="text-xs text-blue-700/80 mt-1">Frete ({toCurrency(totalMonth)}) + gorjetas ({toCurrency(totalTipsMonth)})</p>
-            <p className="text-[11px] text-blue-700/80 mt-1">Ticket médio de frete: {toCurrency(avgDeliveryFee)}</p>
-          </div>
-          <div className="h-12 w-12 rounded-2xl bg-white/85 text-blue-700 flex items-center justify-center border border-blue-200">
-            <Wallet size={22} weight="duotone" />
-          </div>
-        </article>
-
-        <article className="rounded-2xl border border-violet-200 bg-violet-50 p-4 flex items-center justify-between ds-interactive-card">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-violet-700">Valor dos pedidos (30 dias)</p>
-            <p className="text-2xl font-black text-violet-700 mt-2">{toCurrency(deliveredOrdersValue30d)}</p>
-            <p className="text-xs text-violet-700/80 mt-1">Informativo da loja • não é seu ganho</p>
-          </div>
-          <div className="h-12 w-12 rounded-2xl bg-white/85 text-violet-700 flex items-center justify-center border border-violet-200">
-            <ChartLineUp size={22} weight="duotone" />
-          </div>
-        </article>
       </section>
 
-      <section className="grid gap-3 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 ds-interactive-card">
+      <section className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
+        Nos ultimos 30 dias, voce recebeu <span className="font-extrabold text-slate-900">{toCurrency(totalDeliveryFees30d)}</span> de frete e{' '}
+        <span className="font-extrabold text-slate-900">{toCurrency(totalTipsPaid)}</span> de gorjetas pagas.
+      </section>
+
+      <section className="grid gap-3 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-bold">Últimas entregas (30 dias)</p>
-            <button
-              type="button"
-              onClick={() => navigate('/motoboy/history')}
-              className="text-xs font-extrabold text-slate-700 inline-flex items-center gap-1"
-            >
-              Ver tudo <ArrowRight size={14} weight="bold" />
-            </button>
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-bold">Ultimas entregas</p>
+              <p className="mt-1 text-[11px] text-slate-500">Seu ganho por entrega aparece logo no card.</p>
+            </div>
+            <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-slate-500">
+              Ultimos 30 dias
+            </span>
           </div>
-          <p className="mt-1 text-[11px] text-slate-500">
-            Mostra o total do pedido e o seu ganho real por entrega (frete + gorjeta).
-          </p>
           <div className="mt-3">
             {loading ? (
               <div className="grid gap-3">
@@ -288,7 +243,7 @@ export function MotoboyEarnings() {
             ) : orders.length === 0 ? (
               <div className="ds-empty-state text-center py-6">
                 <p className="text-base font-semibold text-slate-800">Nenhuma entrega finalizada ainda</p>
-                <p className="mt-1 text-xs text-slate-500">Quando concluir entregas, seus ganhos aparecerão aqui.</p>
+                <p className="mt-1 text-xs text-slate-500">Quando concluir entregas, seus ganhos aparecerao aqui.</p>
               </div>
             ) : (
               <div className="grid gap-4">
@@ -327,6 +282,7 @@ export function MotoboyEarnings() {
                     />
                   );
                 })}
+
                 {orders.length > ordersPerPage ? (
                   <div className="pt-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <p className="text-xs text-slate-500">
@@ -336,7 +292,7 @@ export function MotoboyEarnings() {
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => setOrdersPage((p) => Math.max(1, p - 1))}
+                        onClick={() => setOrdersPage((page) => Math.max(1, page - 1))}
                         disabled={ordersPage <= 1}
                         className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-extrabold text-slate-700 disabled:opacity-45"
                       >
@@ -347,11 +303,11 @@ export function MotoboyEarnings() {
                       </span>
                       <button
                         type="button"
-                        onClick={() => setOrdersPage((p) => Math.min(totalOrdersPages, p + 1))}
+                        onClick={() => setOrdersPage((page) => Math.min(totalOrdersPages, page + 1))}
                         disabled={ordersPage >= totalOrdersPages}
                         className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-extrabold text-slate-700 disabled:opacity-45"
                       >
-                        Próxima
+                        Proxima
                       </button>
                     </div>
                   </div>
@@ -361,24 +317,22 @@ export function MotoboyEarnings() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3 ds-interactive-card">
-          <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-bold">Histórico de gorjetas</p>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-bold">Gorjetas</p>
+            <p className="mt-1 text-[11px] text-slate-500">Aqui aparece o que ja foi pago e o que ainda esta pendente.</p>
+          </div>
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
             Recebido: <span className="font-extrabold">{toCurrency(totalTipsPaid)}</span>
           </div>
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-            Aguardando repasse: <span className="font-extrabold">{toCurrency(totalTipsPending)}</span>
+            Falta receber: <span className="font-extrabold">{toCurrency(totalTipsPending)}</span>
           </div>
-          {tipRowsDirectPaid.length > 0 ? (
-            <div className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-800">
-              Direto no Mercado Pago: <span className="font-extrabold">{toCurrency(tipRowsDirectPaid.reduce((acc, row) => acc + Number(row?.tipAmount || 0), 0))}</span>
-            </div>
-          ) : null}
 
           {recentTipPayouts.length === 0 ? (
             <div className="ds-empty-state rounded-xl border border-slate-200 bg-slate-50 px-3 py-4 text-center">
-              <p className="text-sm font-semibold text-slate-800">Ainda não há gorjetas registradas</p>
-              <p className="mt-1 text-xs text-slate-500">As gorjetas pagas pelos clientes aparecerão neste histórico.</p>
+              <p className="text-sm font-semibold text-slate-800">Ainda nao ha gorjetas registradas</p>
+              <p className="mt-1 text-xs text-slate-500">As gorjetas pagas pelos clientes aparecerao neste historico.</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -401,7 +355,7 @@ export function MotoboyEarnings() {
                         {payoutStatus === 'PAID'
                           ? directTipSettlement
                             ? 'Recebida direto'
-                            : 'Repassado'
+                            : 'Recebida'
                           : 'Pendente'}
                       </span>
                     </div>
@@ -411,10 +365,10 @@ export function MotoboyEarnings() {
                     </div>
                     <div className="mt-1 text-[11px] text-slate-500">
                       {directTipSettlement
-                        ? 'Pagamento caiu direto na sua conta Mercado Pago conectada.'
+                        ? 'A gorjeta caiu direto no seu Mercado Pago conectado.'
                         : payoutStatus === 'PAID'
-                          ? 'O lojista confirmou o repasse manual.'
-                          : 'Aguardando repasse manual do lojista.'}
+                          ? 'A loja confirmou o repasse.'
+                          : 'A loja ainda vai confirmar esse repasse.'}
                     </div>
                   </div>
                 );
