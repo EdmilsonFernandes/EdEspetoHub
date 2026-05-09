@@ -400,6 +400,7 @@ const OrderSummaryCard = ({
 }: any) => (
   (() => {
     const orderType = String(order?.type || '').toLowerCase();
+    const orderStatus = String(order?.status || '').toLowerCase();
     const locationIdentifier = resolveLocationIdentifier(order);
     const isCondo = isCondominiumOrder(order);
     const cardLocationIdentifier = isCondo ? resolveCondominiumCardIdentifier(order) : locationIdentifier;
@@ -424,11 +425,6 @@ const OrderSummaryCard = ({
       new Set(orderItems.map((item: any) => String(item?.name || '').trim()).filter(Boolean))
     );
     const itemsSummary = itemNames.slice(0, 2).join(' • ');
-    const statusToneClass = (() => {
-      const raw = String(order?.status || '').toLowerCase();
-      if (raw === 'ready' || raw === 'done' || raw === 'delivered' || raw === 'finished') return 'text-emerald-600';
-      return 'text-amber-600';
-    })();
     const timerToneClass = isLate
       ? 'text-red-600'
       : isTimerWarning
@@ -439,15 +435,19 @@ const OrderSummaryCard = ({
       : isTimerWarning
         ? 'text-amber-500'
         : 'text-slate-400';
+    const timerShellClass = isLate
+      ? 'border-red-200 bg-red-50/80'
+      : isTimerWarning
+        ? 'border-amber-200 bg-amber-50/80'
+        : 'border-slate-200 bg-white';
     const selectorToneClass = (() => {
-      const raw = String(order?.status || '').toLowerCase();
-      if (raw === 'pending') return 'border-amber-200 bg-amber-50/80 text-amber-700';
-      if (raw === 'preparing') return 'border-sky-200 bg-sky-50/80 text-sky-700';
-      if (raw === 'ready' || raw === 'ready_for_delivery' || raw === 'waiting_for_motoboy' || raw === 'dispatched' || raw === 'in_delivery') {
-        return 'border-violet-200 bg-violet-50/80 text-violet-700';
+      if (orderStatus === 'pending') return 'border-amber-200 bg-amber-50 text-amber-700';
+      if (orderStatus === 'preparing') return 'border-sky-200 bg-sky-50 text-sky-700';
+      if (orderStatus === 'ready' || orderStatus === 'ready_for_delivery' || orderStatus === 'waiting_for_motoboy' || orderStatus === 'dispatched' || orderStatus === 'in_delivery') {
+        return 'border-violet-200 bg-violet-50 text-violet-700';
       }
-      if (raw === 'done' || raw === 'delivered' || raw === 'finished') return 'border-emerald-200 bg-emerald-50/80 text-emerald-700';
-      return 'border-slate-200 bg-slate-50 text-slate-500';
+      if (orderStatus === 'done' || orderStatus === 'delivered' || orderStatus === 'finished') return 'border-emerald-200 bg-emerald-50 text-emerald-700';
+      return 'border-slate-200 bg-slate-100 text-slate-600';
     })();
     const selectorMeta = (() => {
       const fulfillment = String(order?.fulfillmentMode || '').toLowerCase();
@@ -457,23 +457,16 @@ const OrderSummaryCard = ({
       if (orderType === 'table') return { icon: Monitor };
       return { icon: Hash };
     })();
-    const cardBgTone = (() => {
-      if (archived) return 'bg-slate-50/80';
-      const raw = String(order?.status || '').toLowerCase();
-      if (raw === 'pending') return 'bg-gradient-to-br from-amber-50/40 via-white to-white';
-      if (raw === 'preparing') return 'bg-gradient-to-br from-sky-50/40 via-white to-white';
-      if (raw === 'ready' || raw === 'ready_for_delivery' || raw === 'waiting_for_motoboy' || raw === 'dispatched' || raw === 'in_delivery') return 'bg-gradient-to-br from-violet-50/40 via-white to-white';
-      if (raw === 'done' || raw === 'delivered' || raw === 'finished') return 'bg-gradient-to-br from-emerald-50/30 via-white to-white';
-      return 'bg-white';
-    })();
     const statusBadgeTone = (() => {
-      const raw = String(order?.status || '').toLowerCase();
-      if (raw === 'pending') return 'bg-amber-50 border-amber-100 text-amber-600';
-      if (raw === 'preparing') return 'bg-sky-50 border-sky-100 text-sky-600';
-      if (raw === 'ready' || raw === 'ready_for_delivery' || raw === 'waiting_for_motoboy' || raw === 'dispatched' || raw === 'in_delivery') return 'bg-violet-50 border-violet-100 text-violet-600';
-      if (raw === 'done' || raw === 'delivered' || raw === 'finished') return 'bg-emerald-50 border-emerald-100 text-emerald-600';
+      if (orderStatus === 'pending') return 'border-amber-200 bg-amber-50 text-amber-700';
+      if (orderStatus === 'preparing') return 'border-sky-200 bg-sky-50 text-sky-700';
+      if (orderStatus === 'ready' || orderStatus === 'ready_for_delivery' || orderStatus === 'waiting_for_motoboy' || orderStatus === 'dispatched' || orderStatus === 'in_delivery') return 'border-violet-200 bg-violet-50 text-violet-700';
+      if (orderStatus === 'done' || orderStatus === 'delivered' || orderStatus === 'finished') return 'border-emerald-200 bg-emerald-50 text-emerald-700';
       return 'bg-slate-50 border-transparent text-slate-500';
     })();
+    const orderDisplayLabel = String(orderDisplayId || '').trim() || String(order?.id || '').trim() || '-';
+    const typeLabel = String(typeMeta?.label || '').trim();
+    const renderMetaDivider = () => <span className="text-slate-300">•</span>;
     return (
   <div
     role="button"
@@ -485,44 +478,63 @@ const OrderSummaryCard = ({
         onClick();
       }
     }}
-    className={`relative w-full min-h-[140px] rounded-[1.8rem] border transition-all duration-300 cursor-pointer overflow-hidden ${
+    className={`relative w-full min-h-[140px] rounded-[1.7rem] border transition-all duration-300 cursor-pointer overflow-hidden ${
       archived
-        ? `${cardBgTone} border-slate-200/60 opacity-80`
-        : `${cardBgTone} border-slate-200 shadow-[0_8px_20px_-12px_rgba(15,23,42,0.12)] hover:border-[#336886]/30 hover:shadow-[0_20px_40px_-20px_rgba(15,23,42,0.18)] hover:-translate-y-0.5`
+        ? 'border-slate-200/80 bg-slate-50/90 opacity-80'
+        : `border-slate-200 bg-white shadow-[0_12px_32px_-24px_rgba(15,23,42,0.24)] hover:border-slate-300 hover:shadow-[0_20px_38px_-24px_rgba(15,23,42,0.28)] hover:-translate-y-0.5 ${
+            selected ? 'ring-2 ring-emerald-100' : ''
+          }`
     }`}
   >
     <div className="flex items-stretch h-full">
       {showSelector && (
-        <div className={`shrink-0 w-14 border-r transition-all duration-300 flex flex-col items-center justify-center gap-3 ${selectorToneClass} ${selected ? 'bg-opacity-100' : 'bg-opacity-40'}`}>
+        <div className="shrink-0 flex w-14 flex-col items-center justify-center gap-3 border-r border-slate-100 bg-slate-50/80 px-2">
           <PremiumCheckToggle
             selected={selected}
             disabled={!showQuickFinalize}
             onToggle={onToggleSelect}
             ariaLabel={selected ? "Desmarcar pedido" : "Selecionar pedido"}
           />
-          <div className={`p-2 rounded-xl bg-white/50 shadow-sm transition-transform duration-300 ${selected ? 'scale-110' : 'scale-100'}`}>
+          <div className={`inline-flex h-9 w-9 items-center justify-center rounded-2xl border shadow-sm transition-transform duration-300 ${selectorToneClass} ${selected ? 'scale-105 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)]' : ''}`}>
             <selectorMeta.icon size={18} weight="duotone" />
           </div>
         </div>
       )}
 
-      <div className="flex-1 p-4 flex flex-col justify-between min-w-0">
-        <div className="space-y-3">
+      <div className="flex min-w-0 flex-1 flex-col justify-between p-4">
+        <div className="space-y-3.5">
           {/* Header do Card */}
           <div className="flex items-start justify-between gap-3">
-            <div className="flex min-w-0 flex-nowrap items-center gap-2.5">
-              <div className={`flex items-center justify-center h-9 px-3 rounded-2xl font-black text-sm tracking-tight shadow-sm ${
-                archived ? 'bg-slate-200 text-slate-500' : 'bg-slate-900 text-white shadow-slate-900/20'
+            <div className="min-w-0 flex flex-1 items-start gap-3">
+              <div className={`inline-flex h-9 shrink-0 items-center justify-center rounded-2xl px-3 text-sm font-black tracking-tight shadow-sm ${
+                archived
+                  ? 'border border-slate-200 bg-white text-slate-400'
+                  : 'border border-slate-900/5 bg-slate-900 text-white shadow-[0_16px_28px_-20px_rgba(15,23,42,0.45)]'
               }`}>
                 #{String(queueRank).padStart(2, '0')}
               </div>
-              
+
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                  <span className="truncate">{orderDisplayLabel}</span>
+                  {typeLabel ? renderMetaDivider() : null}
+                  {typeLabel ? (
+                    <span className="inline-flex items-center gap-1 text-slate-500">
+                      {typeMeta?.icon}
+                      <span>{typeLabel}</span>
+                    </span>
+                  ) : null}
+                </div>
+                <p className="mt-1 text-[1.05rem] font-black leading-tight text-slate-900 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden [overflow-wrap:anywhere]">
+                  {order.customerName || order.name || 'Cliente'}
+                </p>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <div className={`flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50/50 px-2.5 py-1.5 transition-colors whitespace-nowrap ${timerToneClass}`}>
+            <div className="flex shrink-0 items-center gap-2">
+              <div className={`inline-flex shrink-0 items-center gap-1.5 rounded-xl border px-2.5 py-1.5 transition-colors whitespace-nowrap ${timerShellClass} ${timerToneClass}`}>
                 <Clock size={14} weight="fill" className={`shrink-0 ${timerIconToneClass}`} />
-                <span className="inline-block min-w-[3.1rem] text-center text-[11px] font-black tabular-nums tracking-tight whitespace-nowrap">
+                <span className="inline-block min-w-[3.1rem] text-center text-[11px] font-extrabold tabular-nums tracking-tight whitespace-nowrap">
                   {archived ? (closedAtLabel || '--:--') : elapsedLabel}
                 </span>
               </div>
@@ -535,7 +547,7 @@ const OrderSummaryCard = ({
                     onPrint();
                   }}
                   disabled={printBusy}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 text-amber-600 shadow-sm hover:bg-amber-100 transition-all active:scale-90 disabled:opacity-50 shrink-0"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-90 disabled:opacity-50 shrink-0"
                   title="Imprimir"
                 >
                   <Printer size={18} weight="duotone" />
@@ -548,18 +560,18 @@ const OrderSummaryCard = ({
           <div className="min-w-0">
             {hasLocationIdentifier && (
               <div
-                className={`mb-2 flex min-w-0 items-start gap-2 rounded-2xl border px-3 py-2 text-[11px] font-extrabold shadow-sm ${locationBadgeTone}`}
+                className={`mb-2.5 inline-flex max-w-full items-start gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold shadow-sm ${locationBadgeTone}`}
                 title={locationIdentifier || cardLocationIdentifier}
               >
                 {isMesaLocation ? (
                   <>
-                    <Monitor size={15} weight="duotone" className="mt-0.5 shrink-0" />
-                    <span className="shrink-0 text-[10px] font-black uppercase tracking-wider">Mesa</span>
+                    <Monitor size={14} weight="duotone" className="mt-0.5 shrink-0" />
+                    <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.14em]">Mesa</span>
                     <span className="text-sm font-black leading-none">{mesaMeta.number}</span>
                   </>
                 ) : (
                   <>
-                    {isCondo ? <Buildings size={15} weight="duotone" className="mt-0.5 shrink-0" /> : orderType === 'delivery' ? <Truck size={15} weight="duotone" className="mt-0.5 shrink-0" /> : <Storefront size={15} weight="duotone" className="mt-0.5 shrink-0" />}
+                    {isCondo ? <Buildings size={14} weight="duotone" className="mt-0.5 shrink-0" /> : orderType === 'delivery' ? <Truck size={14} weight="duotone" className="mt-0.5 shrink-0" /> : <Storefront size={14} weight="duotone" className="mt-0.5 shrink-0" />}
                     <span className="min-w-0 leading-snug [overflow-wrap:anywhere]">
                       {locationLine}
                     </span>
@@ -567,41 +579,43 @@ const OrderSummaryCard = ({
                 )}
               </div>
             )}
-            <h3 className="text-[1.15rem] font-black text-slate-900 leading-tight truncate">
-              {order.customerName || order.name || 'Cliente'}
-            </h3>
-            <p className="mt-1 text-[12px] font-bold text-slate-400 flex items-center gap-1.5">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-200" />
-              {itemsCount} {itemsCount === 1 ? 'item' : 'itens'}
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-slate-500">
+              <span className="font-semibold text-slate-700">{itemsCount} {itemsCount === 1 ? 'item' : 'itens'}</span>
+              {renderMetaDivider()}
+              <span className="truncate">{paymentLabel}</span>
               {itemsSummary && (
                 <>
-                  <span className="text-slate-200">|</span>
+                  {renderMetaDivider()}
                   <span className="truncate">{itemsSummary}</span>
                 </>
               )}
-            </p>
+            </div>
           </div>
         </div>
 
         {/* Footer do Card */}
-        <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-[auto_1fr_auto] items-center gap-3">
-          {/* Lado Esquerdo: Preço (Nunca encolhe) */}
-          <div className="flex flex-col shrink-0">
-            <span className="text-[9px] font-black uppercase tracking-[0.12em] text-slate-400 leading-none mb-1">Total</span>
-            <span className="text-[1.05rem] font-black text-slate-900 tracking-tight leading-none whitespace-nowrap">
-              {totalLabel}
-            </span>
+        <div className="mt-4 flex items-end justify-between gap-3 border-t border-slate-100 pt-3">
+          <div className="min-w-0 space-y-2">
+            <div className="flex flex-col shrink-0">
+              <span className="mb-1 text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400 leading-none">Total</span>
+              <span className="text-[1.05rem] font-black text-slate-900 tracking-tight leading-none whitespace-nowrap">
+                {totalLabel}
+              </span>
+            </div>
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <span className={`inline-flex max-w-full items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] ${statusBadgeTone}`}>
+                {archived ? 'Finalizado' : statusMeta.label}
+              </span>
+              {typeLabel ? (
+                <span className="inline-flex max-w-full items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-semibold text-slate-600">
+                  {typeMeta?.icon}
+                  <span className="truncate">{typeLabel}</span>
+                </span>
+              ) : null}
+            </div>
           </div>
 
-          {/* Centro: Status (Agora visível em todas as telas) */}
-          <div className="flex justify-center min-w-0">
-            <span className={`truncate text-[9px] font-black uppercase tracking-wider px-2 py-1 rounded-lg border ${statusBadgeTone}`}>
-              {archived ? 'Finalizado' : statusMeta.label}
-            </span>
-          </div>
-
-          {/* Lado Direito: Ações (Ícones Apenas para mais respiro) */}
-          <div className="flex items-center gap-2 justify-end shrink-0">
+          <div className="flex shrink-0 items-center gap-2 justify-end">
             {!archived && showQuickStart && (
               <button
                 type="button"
@@ -609,10 +623,11 @@ const OrderSummaryCard = ({
                   event.stopPropagation();
                   onQuickStart();
                 }}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-500 text-white shadow-[0_8px_20px_-8px_rgba(249,115,22,0.5)] hover:bg-orange-600 transition-all active:scale-90"
+                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-2xl bg-[#153A4C] px-3.5 text-[11px] font-black text-white shadow-[0_18px_32px_-24px_rgba(21,58,76,0.55)] transition-all hover:bg-[#102b38] active:scale-95"
                 title="Atender"
               >
-                <Play size={20} weight="fill" />
+                <Play size={16} weight="fill" />
+                <span>Atender</span>
               </button>
             )}
 
@@ -623,10 +638,11 @@ const OrderSummaryCard = ({
                   event.stopPropagation();
                   onQuickFinalize();
                 }}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-[0_8px_20px_-8px_rgba(5,150,105,0.5)] hover:bg-emerald-700 transition-all active:scale-90"
+                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-2xl bg-emerald-600 px-3.5 text-[11px] font-black text-white shadow-[0_18px_32px_-24px_rgba(5,150,105,0.55)] transition-all hover:bg-emerald-700 active:scale-95"
                 title="Pronto"
               >
-                <Check size={22} weight="bold" />
+                <Check size={16} weight="bold" />
+                <span>Pronto</span>
               </button>
             )}
 
@@ -637,7 +653,7 @@ const OrderSummaryCard = ({
                   event.stopPropagation();
                   onReopen();
                 }}
-                className="px-3 h-9 inline-flex items-center justify-center rounded-xl border border-amber-300 bg-amber-50 text-[10px] font-black uppercase tracking-wider text-amber-700 hover:bg-amber-100 transition-all active:scale-95 whitespace-nowrap"
+                className="inline-flex h-10 items-center justify-center rounded-2xl border border-amber-200 bg-amber-50 px-3 text-[10px] font-black uppercase tracking-[0.14em] text-amber-700 transition-all hover:bg-amber-100 active:scale-95 whitespace-nowrap"
               >
                 Reabrir
               </button>
