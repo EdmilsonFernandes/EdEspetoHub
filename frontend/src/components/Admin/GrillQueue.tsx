@@ -564,10 +564,13 @@ const OrderSummaryCard = ({
                 )}
               </div>
             )}
-            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400 truncate">
-              {orderDisplayLabel}
-            </p>
-            <h3 className="mt-1 text-[1.05rem] font-black leading-tight text-slate-900 truncate">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-black tracking-[0.08em] text-slate-600 shadow-sm">
+                <Hash size={11} weight="duotone" className="shrink-0 text-slate-400" />
+                <span className="truncate">{orderDisplayLabel}</span>
+              </span>
+            </div>
+            <h3 className="mt-2 text-[1.05rem] font-black leading-tight text-slate-900 truncate">
               {order.customerName || order.name || 'Cliente'}
             </h3>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-slate-500">
@@ -3212,141 +3215,172 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               order.status === "ready_for_delivery" || order.status === "waiting_for_motoboy"
                 ? "ready"
                 : order.status;
-            const statusAccent =
-              toneKey === "pending"
-                ? "border-l-amber-400 bg-gradient-to-br from-amber-50/70 via-white to-amber-50/30"
-                : toneKey === "preparing"
-                ? "border-l-sky-400 bg-gradient-to-br from-sky-50/70 via-white to-sky-50/30"
-                : toneKey === "ready"
-                ? "border-l-violet-400 bg-gradient-to-br from-violet-50/70 via-white to-violet-50/30"
-                : toneKey === "done"
-                ? "border-l-emerald-400 bg-gradient-to-br from-emerald-50/70 via-white to-emerald-50/30"
-                : "border-l-slate-300 bg-gradient-to-br from-slate-50 via-white to-slate-50";
             const drawerLocationIdentifier = resolveLocationIdentifier(order);
             const drawerIsCondo = isCondominiumOrder(order);
-            const drawerIsPickup = String(order?.type || '').toLowerCase() === 'pickup';
+            const drawerTypeMeta = orderTypeMeta(order);
+            const drawerStatusMeta = getStatusStyles(order.status, order.type, order);
+            const drawerDisplayLabel = formatOrderDisplayId(order.id, storeSlug);
+            const drawerPaymentMeta = getPaymentMethodMeta(order.payment);
+            const drawerItemsCount = (Array.isArray(order?.items) ? order.items : []).reduce(
+              (sum: number, item: any) => sum + Number(item?.qty || 0),
+              0
+            );
+            const drawerCardLocationIdentifier = drawerIsCondo ? resolveCondominiumCardIdentifier(order) : drawerLocationIdentifier;
+            const drawerHasLocationIdentifier = Boolean(drawerCardLocationIdentifier);
+            const drawerMesaMeta = parseMesaIdentifier(drawerCardLocationIdentifier);
+            const drawerIsMesaLocation = drawerMesaMeta.isMesa;
+            const drawerLocationLine = drawerIsCondo ? String(drawerLocationIdentifier || '').trim() : drawerCardLocationIdentifier;
+            const drawerLocationBadgeTone = drawerIsMesaLocation
+              ? 'bg-[#FFF3E0] text-[#E65100] border-[#E65100]'
+              : drawerIsCondo
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                : 'bg-slate-100 text-slate-900 border-slate-200';
+            const drawerShowTypeInMeta = !drawerHasLocationIdentifier && Boolean(drawerTypeMeta?.label);
+            const drawerPaymentStatus = String(order.paymentStatus || '').toUpperCase();
             return (
             <div
               key={order.id}
-              className={`relative w-full max-w-full p-3 sm:p-3.5 rounded-2xl border border-slate-200 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md overflow-visible ${
+              className={`relative w-full max-w-full overflow-hidden rounded-[1.7rem] border border-slate-200 bg-white shadow-[0_12px_32px_-24px_rgba(15,23,42,0.24)] transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_20px_38px_-24px_rgba(15,23,42,0.28)] ${
                 isNew ? 'ring-2 ring-emerald-300/80' : ''
-              } ${isLate ? 'border-rose-200 bg-rose-50/60' : 'bg-white'}`}
+              } ${isLate ? 'border-rose-200 bg-rose-50/60' : ''}`}
             >
-              {/* HEADER DO CARD */}
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2.5">
-                <div className="relative flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1 text-[10px] text-slate-500 uppercase font-bold">
-                    <Hash size={14} weight="duotone" className="text-slate-400" /> Prioridade
-                    <span className={`ml-1 px-3 py-1 rounded-lg text-sm font-black leading-none ${getPriorityTone(selectedOrderRank)}`}>
-                      #{String(selectedOrderRank).padStart(2, "0")}
-                    </span>
-                  </div>
-
-                <p className="text-[11px] text-gray-500">
-                  {formatDateTime(order.createdAt)}
-                </p>
-                <p className="text-[11px] font-semibold text-slate-500">
-                  Pedido #{formatOrderDisplayId(order.id, storeSlug)}
-                </p>
-
-                  <h3 className="text-base font-bold text-slate-800 truncate">
-                    Cliente: {order.customerName || order.name || "Cliente"}
-                  </h3>
-
-                  {!drawerLocationIdentifier && (
-                    <div className="mt-1 flex flex-wrap items-center gap-2">
-                      {(() => {
-                        const meta = orderTypeMeta(order);
-                        return (
-                          <span
-                            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] ${meta.pill}`}
-                            title={formatOrderType(order.type)}
-                          >
-                            {meta.icon}
-                            <span>{meta.label}</span>
-                          </span>
-                        );
-                      })()}
+              <div className={`h-1 w-full ${
+                toneKey === 'pending'
+                  ? 'bg-amber-400'
+                  : toneKey === 'preparing'
+                    ? 'bg-sky-400'
+                    : toneKey === 'ready'
+                      ? 'bg-violet-400'
+                      : toneKey === 'done'
+                        ? 'bg-emerald-400'
+                        : 'bg-slate-300'
+              }`} />
+              <div className="p-4">
+                <div className="space-y-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex flex-1 items-start gap-3">
+                      <div className={`inline-flex h-9 shrink-0 items-center justify-center rounded-2xl px-3 text-sm font-black tracking-tight shadow-sm ${getPriorityTone(selectedOrderRank)}`}>
+                        #{String(selectedOrderRank).padStart(2, "0")}
+                      </div>
                     </div>
-                  )}
-                  {order.phone && (
-                    <p className="mt-1 inline-flex max-w-full items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-600">
-                      <Phone size={12} weight="duotone" className="shrink-0 text-[#336886]" />
-                      <span className="min-w-0 truncate whitespace-nowrap">{order.phone}</span>
-                    </p>
-                  )}
-                  {isPostalOrder(order) ? (
-                    <p className="max-w-full text-[11px] text-gray-500">
-                      Rastreio:{' '}
-                      <span className="inline-block max-w-full align-bottom font-semibold text-slate-700 truncate whitespace-nowrap">
-                        {String(order?.shipment?.trackingCode || '').trim() || 'não informado'}
-                      </span>
-                    </p>
-                  ) : null}
 
-                  <p className="text-[11px] text-gray-500 uppercase mt-1 inline-flex flex-wrap items-center gap-2">
-                    Pagamento:
-                    {(() => {
-                      const paymentMeta = getPaymentMethodMeta(order.payment);
-                      return (
-                        <>
-                          {paymentMeta.icon && (
-                            <img
-                              src={paymentMeta.icon}
-                              alt={paymentMeta.label}
-                              className="h-4 w-4 object-contain"
-                            />
-                          )}
-                          <span>{paymentMeta.label}</span>
-                          {String(order.paymentStatus || '').toUpperCase() === 'PAID' && (
-                            <span className="inline-flex items-center rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
-                              Pago
-                            </span>
-                          )}
-                        </>
-                      );
-                    })()}
-                  </p>
-                  {order.payment?.toString().toLowerCase() === 'dinheiro' && order.cashTendered ? (
-                    <div className="text-[11px] space-y-0.5">
-                      <p className="text-emerald-700 font-semibold">
-                        Cliente paga com: {formatCurrency(Number(order.cashTendered))}
-                      </p>
-                      {Number(order.cashTendered) > Number(order.total || 0) ? (
-                        <p className="text-amber-700 font-semibold">
-                          Troco: {formatCurrency(Number(order.cashTendered) - Number(order.total || 0))}
-                        </p>
-                      ) : (
-                        <p className="text-slate-500 font-semibold">Sem troco</p>
+                    <div className="flex shrink-0 flex-col items-end gap-2">
+                      <div className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-slate-500 shadow-sm whitespace-nowrap">
+                        <Clock size={14} weight="fill" className="shrink-0 text-slate-400" />
+                        <span className="inline-block min-w-[3.1rem] text-center text-[11px] font-extrabold tabular-nums tracking-tight whitespace-nowrap">
+                          {elapsedTime[order.id] || "0s"}
+                        </span>
+                      </div>
+                      <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] whitespace-nowrap ${drawerStatusMeta.className}`}>
+                        {drawerStatusMeta.label}
+                      </span>
+                      {isLate && (
+                        <span className="inline-flex items-center rounded-full border border-rose-200 bg-rose-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-rose-700 animate-pulse whitespace-nowrap">
+                          Prazo estourado
+                        </span>
                       )}
                     </div>
-                  ) : null}
-                </div>
-
-                <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2">
-                  {drawerLocationIdentifier && !drawerIsCondo && (
-                    <div className={`px-3 py-1.5 rounded-lg text-white text-xs font-black tracking-[0.12em] shadow-sm ${drawerIsPickup ? 'bg-orange-500' : 'bg-slate-950'}`}>
-                      {drawerLocationIdentifier}
-                    </div>
-                  )}
-                  <span
-                    className={`px-2 py-0.5 text-[11px] font-bold rounded-full border ${getStatusStyles(order.status, order.type, order).className}`}
-                  >
-                    {getStatusStyles(order.status, order.type, order).label}
-                  </span>
-                  <div className="px-2.5 py-0.5 rounded-full bg-brand-primary text-white font-black flex items-center gap-1.5 shadow-sm text-[11px] ring-2 ring-white/40">
-                    <Clock size={11} weight="duotone" className="text-white" />
-                    <span className="tabular-nums text-[11px]">
-                      {elapsedTime[order.id] || "0s"}
-                    </span>
                   </div>
-                  {isLate && (
-                    <span className="px-2 py-0.5 text-[10px] font-bold rounded-full border bg-rose-100 text-rose-700 border-rose-200 animate-pulse">
-                      Prazo estourado
-                    </span>
-                  )}
+
+                  <div className="min-w-0">
+                    {drawerHasLocationIdentifier && (
+                      <div
+                        className={`mb-2.5 inline-flex max-w-full items-start gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold shadow-sm ${drawerLocationBadgeTone}`}
+                        title={drawerLocationIdentifier || drawerCardLocationIdentifier}
+                      >
+                        {drawerIsMesaLocation ? (
+                          <>
+                            <Monitor size={14} weight="duotone" className="mt-0.5 shrink-0" />
+                            <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.14em]">Mesa</span>
+                            <span className="text-sm font-black leading-none">{drawerMesaMeta.number}</span>
+                          </>
+                        ) : (
+                          <>
+                            {drawerIsCondo ? <Buildings size={14} weight="duotone" className="mt-0.5 shrink-0" /> : order.type === 'delivery' ? <Truck size={14} weight="duotone" className="mt-0.5 shrink-0" /> : <Storefront size={14} weight="duotone" className="mt-0.5 shrink-0" />}
+                            <span className="min-w-0 leading-snug [overflow-wrap:anywhere]">
+                              {drawerLocationLine}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-black tracking-[0.08em] text-slate-600 shadow-sm">
+                        <Hash size={11} weight="duotone" className="shrink-0 text-slate-400" />
+                        <span className="truncate">{drawerDisplayLabel}</span>
+                      </span>
+                      <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-semibold text-slate-500 shadow-sm whitespace-nowrap">
+                        {formatDateTime(order.createdAt)}
+                      </span>
+                    </div>
+
+                    <h3 className="mt-2 text-[1.08rem] font-black leading-tight text-slate-900 truncate">
+                      {order.customerName || order.name || "Cliente"}
+                    </h3>
+
+                    <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-slate-500">
+                      {drawerShowTypeInMeta ? (
+                        <>
+                          <span className="font-semibold text-slate-700">{drawerTypeMeta.label}</span>
+                          <span className="text-slate-300">•</span>
+                        </>
+                      ) : null}
+                      <span className="font-semibold text-slate-700">{drawerItemsCount} {drawerItemsCount === 1 ? 'item' : 'itens'}</span>
+                      <span className="text-slate-300">•</span>
+                      <span className="inline-flex items-center gap-1.5">
+                        {drawerPaymentMeta.icon && (
+                          <img
+                            src={drawerPaymentMeta.icon}
+                            alt={drawerPaymentMeta.label}
+                            className="h-4 w-4 object-contain"
+                          />
+                        )}
+                        <span className="truncate">{drawerPaymentMeta.label}</span>
+                      </span>
+                      {drawerPaymentStatus === 'PAID' ? (
+                        <>
+                          <span className="text-slate-300">•</span>
+                          <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                            Pago
+                          </span>
+                        </>
+                      ) : null}
+                    </div>
+
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      {order.phone && (
+                        <span className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-600 shadow-sm">
+                          <Phone size={12} weight="duotone" className="shrink-0 text-[#336886]" />
+                          <span className="min-w-0 truncate whitespace-nowrap">{order.phone}</span>
+                        </span>
+                      )}
+                      {isPostalOrder(order) ? (
+                        <span className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-600 shadow-sm">
+                          <Package size={12} weight="duotone" className="shrink-0 text-slate-500" />
+                          <span className="min-w-0 truncate">
+                            Rastreio: {String(order?.shipment?.trackingCode || '').trim() || 'não informado'}
+                          </span>
+                        </span>
+                      ) : null}
+                    </div>
+
+                    {order.payment?.toString().toLowerCase() === 'dinheiro' && order.cashTendered ? (
+                      <div className="mt-3 rounded-2xl border border-emerald-100 bg-emerald-50/60 px-3 py-2 text-[11px] shadow-sm">
+                        <p className="font-semibold text-emerald-700">
+                          Cliente paga com: {formatCurrency(Number(order.cashTendered))}
+                        </p>
+                        {Number(order.cashTendered) > Number(order.total || 0) ? (
+                          <p className="mt-0.5 font-semibold text-amber-700">
+                            Troco: {formatCurrency(Number(order.cashTendered) - Number(order.total || 0))}
+                          </p>
+                        ) : (
+                          <p className="mt-0.5 font-semibold text-slate-500">Sem troco</p>
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
-              </div>
 
               {/* LISTA DE ITENS */}
               <div className="mt-3 space-y-2">
@@ -3477,7 +3511,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               <div className="mt-3">
                 {renderMoneyBreakdown(order)}
               </div>
-                    </div>
+                </div>
+            </div>
                   );
                   })}
 
