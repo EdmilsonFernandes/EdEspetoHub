@@ -23,6 +23,7 @@ import { logger } from '../utils/logger';
 import { DeliveryBillingService } from './DeliveryBillingService';
 import { deliveryService } from './DeliveryService';
 import { appendOrderTimelineEntry } from '../utils/orderTimeline';
+import { User } from '../entities/User';
 /**
  * Provides MotoboyOrderService functionality.
  *
@@ -196,7 +197,16 @@ private isDeliveryOrder(order: Order) {
 
     if (!order) return null;
     const delivery = await AppDataSource.getRepository(OrderDelivery).findOne({ where: { orderId: order.id } });
-    return { ...order, delivery };
+    let customerProfileImageUrl: string | null = null;
+    if (order.customerUserId) {
+      const customerProfile = await AppDataSource.getRepository(User)
+        .createQueryBuilder('user')
+        .select([ 'user.id', 'user.profileImageUrl' ])
+        .where('user.id = :id', { id: order.customerUserId })
+        .getOne();
+      customerProfileImageUrl = customerProfile?.profileImageUrl || null;
+    }
+    return { ...order, delivery, customerProfileImageUrl };
   }
 
   /**

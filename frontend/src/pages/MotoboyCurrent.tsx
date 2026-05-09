@@ -1,5 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
+import { type SyntheticEvent, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  Buildings,
+  CheckCircle,
+  CreditCard,
+  Copy,
+  CurrencyCircleDollar,
+  NavigationArrow,
+  Package,
+  Storefront,
+  UserCircle,
+} from '@phosphor-icons/react';
 import { motoboyService } from '../services/motoboyService';
 import { OrderCard } from '../components/Motoboy/OrderCard';
 import { ConfirmPaymentModal } from '../components/Motoboy/ConfirmPaymentModal';
@@ -7,8 +18,27 @@ import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
 import { useToast } from '../contexts/ToastContext';
 import { formatAddress, formatCurrency } from '../utils/format';
 import { buildPixPayload } from '../utils/pixPayload';
+import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { getStoreAvatarUrl } from '../utils/storeAvatar';
 
-const STEP_LABELS = ['Retirar', 'Rota', 'Entregar'];
+const STEP_ITEMS = [
+  { label: 'Retirar', hint: 'Loja', icon: Storefront },
+  { label: 'Rota', hint: 'Deslocamento', icon: NavigationArrow },
+  { label: 'Entregar', hint: 'Cliente', icon: CheckCircle },
+];
+
+const normalizeAvatarSeed = (value?: string | null) =>
+  String(value || 'janocaminho')
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '-')
+    .toLowerCase();
+
+const getPersonAvatarUrl = (name?: string | null) =>
+  `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(
+    normalizeAvatarSeed(name || 'cliente')
+  )}&backgroundType=gradientLinear&radius=24`;
 
 export function MotoboyCurrent() {
   const [activeOrder, setActiveOrder] = useState<any | null>(null);
@@ -83,6 +113,40 @@ export function MotoboyCurrent() {
     () => formatAddress(activeOrder?.store?.settings?.address || activeOrder?.store?.address),
     [activeOrder?.store?.address, activeOrder?.store?.settings?.address]
   );
+  const storeAvatarUrl = useMemo(() => {
+    const storeLogo =
+      resolveAssetUrl(
+        activeOrder?.store?.settings?.logoUrl ||
+          activeOrder?.store?.settings?.logo_url ||
+          activeOrder?.store?.logoUrl ||
+          ''
+      ) || '';
+
+    return (
+      storeLogo ||
+      getStoreAvatarUrl(
+        activeOrder?.store?.id || activeOrder?.store?.slug || activeOrder?.id,
+        activeOrder?.store?.name
+      )
+    );
+  }, [
+    activeOrder?.id,
+    activeOrder?.store?.id,
+    activeOrder?.store?.logoUrl,
+    activeOrder?.store?.name,
+    activeOrder?.store?.settings?.logoUrl,
+    activeOrder?.store?.settings?.logo_url,
+    activeOrder?.store?.slug,
+  ]);
+  const customerAvatarUrl = useMemo(
+    () =>
+      resolveAssetUrl(
+        activeOrder?.customerProfileImageUrl ||
+          activeOrder?.customer?.profileImageUrl ||
+          ''
+      ) || getPersonAvatarUrl(activeOrder?.customerName),
+    [activeOrder?.customer?.profileImageUrl, activeOrder?.customerName, activeOrder?.customerProfileImageUrl]
+  );
 
   const pixInfo = useMemo(() => {
     const method = String(activeOrder?.paymentMethod || '').toLowerCase();
@@ -121,17 +185,33 @@ export function MotoboyCurrent() {
   const activeStop = useMemo(() => {
     if (deliveryStatus === 'ACCEPTED') {
       return {
+        eyebrow: 'Retirada na loja',
         title: activeOrder?.store?.name || 'Retirada na loja',
         address: pickupAddress || 'Endereco da loja indisponivel',
         actionLabel: 'Abrir rota para a loja',
+        avatarUrl: storeAvatarUrl,
+        avatarAlt: activeOrder?.store?.name || 'Loja',
+        avatarBadge: Buildings,
       };
     }
     return {
+      eyebrow: 'Destino da entrega',
       title: activeOrder?.customerName || 'Entrega ao cliente',
       address: deliveryAddress || 'Endereco do cliente indisponivel',
       actionLabel: 'Abrir rota para o cliente',
+      avatarUrl: customerAvatarUrl,
+      avatarAlt: activeOrder?.customerName || 'Cliente',
+      avatarBadge: UserCircle,
     };
-  }, [activeOrder?.customerName, activeOrder?.store?.name, deliveryAddress, deliveryStatus, pickupAddress]);
+  }, [
+    activeOrder?.customerName,
+    activeOrder?.store?.name,
+    customerAvatarUrl,
+    deliveryAddress,
+    deliveryStatus,
+    pickupAddress,
+    storeAvatarUrl,
+  ]);
 
   const openRoute = () => {
     const destination = activeStop.address;
@@ -241,6 +321,12 @@ export function MotoboyCurrent() {
     const sec = totalSec % 60;
     return `${min}m ${String(sec).padStart(2, '0')}s`;
   };
+  const handleAvatarError = (event: SyntheticEvent<HTMLImageElement>, fallbackUrl: string) => {
+    const target = event.currentTarget;
+    if (target.dataset.fallbackApplied === 'true') return;
+    target.dataset.fallbackApplied = 'true';
+    target.src = fallbackUrl;
+  };
 
   return (
     <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden">
@@ -284,11 +370,38 @@ export function MotoboyCurrent() {
           <div className="premium-card-glass p-4 motoboy-fade-up overflow-x-hidden" style={{ animationDelay: '40ms' }}>
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0">
-                  <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500">O que fazer agora</p>
-                  <p className="mt-1 text-lg font-extrabold text-slate-900">{activeStop.title}</p>
-                  <p className="text-sm text-slate-600 mt-1 break-words">{activeStop.address}</p>
-                  <p className="text-[11px] text-slate-500 mt-3">{stepMeta.label}</p>
+                <div className="min-w-0 flex items-start gap-3">
+                  <div className="relative shrink-0">
+                    <div className="h-16 w-16 overflow-hidden rounded-[22px] border border-white/80 bg-white shadow-[0_18px_30px_-22px_rgba(15,23,42,0.5)] ring-1 ring-slate-100">
+                      <img
+                        src={activeStop.avatarUrl}
+                        alt={activeStop.avatarAlt}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                        onError={(event) =>
+                          handleAvatarError(
+                            event,
+                            activeStop.avatarBadge === Buildings
+                              ? getStoreAvatarUrl(activeOrder?.store?.id || activeOrder?.id, activeOrder?.store?.name)
+                              : getPersonAvatarUrl(activeOrder?.customerName)
+                          )
+                        }
+                      />
+                    </div>
+                    <span className="absolute -bottom-1 -right-1 inline-flex h-7 w-7 items-center justify-center rounded-2xl border border-white bg-slate-900 text-white shadow-lg">
+                      <activeStop.avatarBadge size={14} weight="fill" />
+                    </span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500">O que fazer agora</p>
+                    <span className="mt-2 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-slate-600">
+                      <Package size={13} weight="duotone" />
+                      {activeStop.eyebrow}
+                    </span>
+                    <p className="mt-2 text-lg font-extrabold text-slate-900">{activeStop.title}</p>
+                    <p className="text-sm text-slate-600 mt-1 break-words">{activeStop.address}</p>
+                    <p className="text-[11px] text-slate-500 mt-3">{stepMeta.label}</p>
+                  </div>
                 </div>
                 <div className="w-full sm:w-auto flex flex-col gap-2 shrink-0">
                   <button
@@ -296,27 +409,33 @@ export function MotoboyCurrent() {
                     onClick={openRoute}
                     className="btn-press w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-extrabold text-slate-900"
                   >
-                    {activeStop.actionLabel}
+                    <span className="inline-flex items-center gap-2">
+                      <NavigationArrow size={16} weight="fill" />
+                      {activeStop.actionLabel}
+                    </span>
                   </button>
                   <button
                     type="button"
                     onClick={handleCopyAddress}
                     className="btn-press w-full sm:w-auto rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-extrabold text-slate-700"
                   >
-                    Copiar endereco
+                    <span className="inline-flex items-center gap-2">
+                      <Copy size={14} weight="bold" />
+                      Copiar endereco
+                    </span>
                   </button>
                 </div>
               </div>
 
               <div className="grid gap-2 sm:grid-cols-3">
-                {STEP_LABELS.map((label, index) => {
+                {STEP_ITEMS.map(({ label, hint, icon: Icon }, index) => {
                   const isCurrent = index === stepMeta.current;
                   const isDone = index < stepMeta.current;
                   return (
                     <div
                       key={label}
                       className={[
-                        'rounded-2xl border px-3 py-2 text-center text-sm font-extrabold',
+                        'rounded-2xl border px-3 py-3 text-left transition-all',
                         isCurrent
                           ? 'border-transparent bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] text-white shadow-[0_18px_34px_-26px_rgba(239,68,68,0.8)]'
                           : isDone
@@ -324,36 +443,105 @@ export function MotoboyCurrent() {
                             : 'border-slate-200 bg-white text-slate-500',
                       ].join(' ')}
                     >
-                      {label}
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={[
+                            'inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border',
+                            isCurrent
+                              ? 'border-white/25 bg-white/15 text-white'
+                              : isDone
+                                ? 'border-emerald-200 bg-white text-emerald-700'
+                                : 'border-slate-200 bg-slate-50 text-slate-500',
+                          ].join(' ')}
+                        >
+                          <Icon size={20} weight={isCurrent ? 'fill' : 'duotone'} />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block text-sm font-extrabold">{label}</span>
+                          <span
+                            className={[
+                              'mt-0.5 block text-[11px] font-semibold',
+                              isCurrent ? 'text-white/85' : isDone ? 'text-emerald-800/80' : 'text-slate-500',
+                            ].join(' ')}
+                          >
+                            {hint}
+                          </span>
+                        </span>
+                      </div>
                     </div>
                   );
                 })}
               </div>
 
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Loja</p>
-                  <p className="mt-1 text-sm font-black text-slate-900 break-words">{activeOrder?.store?.name || 'Loja'}</p>
-                  <p className="mt-1 text-[11px] text-slate-600 break-words">{pickupAddress || '-'}</p>
+                <div className="rounded-xl border border-slate-200 bg-white px-3 py-3">
+                  <div className="flex items-start gap-3">
+                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
+                      <img
+                        src={storeAvatarUrl}
+                        alt={activeOrder?.store?.name || 'Loja'}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                        onError={(event) =>
+                          handleAvatarError(
+                            event,
+                            getStoreAvatarUrl(activeOrder?.store?.id || activeOrder?.id, activeOrder?.store?.name)
+                          )
+                        }
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Loja</p>
+                      <p className="mt-1 text-sm font-black text-slate-900 break-words">{activeOrder?.store?.name || 'Loja'}</p>
+                      <p className="mt-1 text-[11px] text-slate-600 break-words">{pickupAddress || '-'}</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Cliente</p>
-                  <p className="mt-1 text-sm font-black text-slate-900 break-words">{activeOrder?.customerName || 'Cliente'}</p>
-                  <p className="mt-1 text-[11px] text-slate-600 break-words">{deliveryAddress || '-'}</p>
+                <div className="rounded-xl border border-slate-200 bg-white px-3 py-3">
+                  <div className="flex items-start gap-3">
+                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
+                      <img
+                        src={customerAvatarUrl}
+                        alt={activeOrder?.customerName || 'Cliente'}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                        onError={(event) => handleAvatarError(event, getPersonAvatarUrl(activeOrder?.customerName))}
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Cliente</p>
+                      <p className="mt-1 text-sm font-black text-slate-900 break-words">{activeOrder?.customerName || 'Cliente'}</p>
+                      <p className="mt-1 text-[11px] text-slate-600 break-words">{deliveryAddress || '-'}</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-emerald-700">Voce recebe</p>
-                  <p className="mt-1 text-lg font-black text-emerald-800">{formatCurrency(Number(activeOrder?.deliveryFee || 0))}</p>
-                  <p className="mt-1 text-[11px] text-emerald-800/80">Frete desta entrega</p>
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.14em] text-emerald-700">Voce recebe</p>
+                      <p className="mt-1 text-lg font-black text-emerald-800">{formatCurrency(Number(activeOrder?.deliveryFee || 0))}</p>
+                      <p className="mt-1 text-[11px] text-emerald-800/80">Frete desta entrega</p>
+                    </div>
+                    <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-emerald-200 bg-white/80 text-emerald-700">
+                      <CurrencyCircleDollar size={20} weight="duotone" />
+                    </span>
+                  </div>
                 </div>
-                <div className={`rounded-xl border px-3 py-2 ${paymentIsPaid ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50'}`}>
-                  <p className={`text-[10px] uppercase tracking-[0.14em] ${paymentIsPaid ? 'text-emerald-700' : 'text-amber-700'}`}>Pagamento</p>
-                  <p className={`mt-1 text-lg font-black ${paymentIsPaid ? 'text-emerald-800' : 'text-amber-800'}`}>
-                    {paymentIsPaid ? 'Pago' : 'A receber'}
-                  </p>
-                  {routeStartAt > 0 ? (
-                    <p className={`mt-1 text-[11px] ${paymentIsPaid ? 'text-emerald-800/80' : 'text-amber-800/80'}`}>Tempo em rota: {formatRouteTime(routeMs)}</p>
-                  ) : null}
+                <div className={`rounded-xl border px-3 py-3 ${paymentIsPaid ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50'}`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className={`text-[10px] uppercase tracking-[0.14em] ${paymentIsPaid ? 'text-emerald-700' : 'text-amber-700'}`}>Pagamento</p>
+                      <p className={`mt-1 text-lg font-black ${paymentIsPaid ? 'text-emerald-800' : 'text-amber-800'}`}>
+                        {paymentIsPaid ? 'Pago' : 'A receber'}
+                      </p>
+                      {routeStartAt > 0 ? (
+                        <p className={`mt-1 text-[11px] ${paymentIsPaid ? 'text-emerald-800/80' : 'text-amber-800/80'}`}>Tempo em rota: {formatRouteTime(routeMs)}</p>
+                      ) : null}
+                    </div>
+                    <span className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl border ${paymentIsPaid ? 'border-emerald-200 bg-white/80 text-emerald-700' : 'border-amber-200 bg-white/80 text-amber-700'}`}>
+                      <CreditCard size={20} weight="duotone" />
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

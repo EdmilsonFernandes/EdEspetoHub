@@ -24,6 +24,7 @@ import {
   UserCircle,
   Trash,
   CalendarBlank,
+  Storefront,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
@@ -1683,18 +1684,19 @@ export const MenuView = ({
                 </div>
 
                 <div className="relative px-4 pb-5 pt-0">
-                  <div className="-mt-10 flex items-end gap-3">
-                    <div className="h-20 w-20 overflow-hidden rounded-[24px] border-4 border-white bg-white shadow-lg">
-                      {branding?.logoUrl ? (
-                        <img src={branding.logoUrl} alt={branding?.brandName} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(branding?.espetoId, branding?.brandName); }} />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-xl font-black text-slate-700">
-                          {String(branding?.brandName || "JC").slice(0, 2).toUpperCase()}
-                        </div>
-                      )}
+                  <div className="flex items-start gap-4 pt-4">
+                    <div className="-mt-10 shrink-0 h-20 w-20 overflow-hidden rounded-[24px] border-4 border-white bg-white shadow-lg">
+                    {branding?.logoUrl ? (
+                      <img src={branding.logoUrl} alt={branding?.brandName} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(branding?.espetoId, branding?.brandName); }} />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-xl font-black text-slate-700">
+                        {String(branding?.brandName || "JC").slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
                     </div>
-                    <div className="min-w-0 flex-1 pb-1">
-                      <h3 className="truncate text-xl font-black text-slate-900">{branding?.brandName || "Sua Loja"}</h3>
+
+                    <div className="min-w-0 flex-1 pt-1 sm:pt-2">
+                      <h3 className="break-words text-xl font-black leading-tight text-slate-900">{branding?.brandName || "Sua Loja"}</h3>
                       <div className="mt-1 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
                         <span>{storeSegmentLabel}</span>
                         {avgRating > 0 && (
