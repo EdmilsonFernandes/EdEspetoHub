@@ -466,6 +466,7 @@ const OrderSummaryCard = ({
     })();
     const orderDisplayLabel = String(orderDisplayId || '').trim() || String(order?.id || '').trim() || '-';
     const typeLabel = String(typeMeta?.label || '').trim();
+    const showTypeInMeta = !hasLocationIdentifier && Boolean(typeLabel);
     const renderMetaDivider = () => <span className="text-slate-300">•</span>;
     return (
   <div
@@ -512,22 +513,6 @@ const OrderSummaryCard = ({
                   : 'border border-slate-900/5 bg-slate-900 text-white shadow-[0_16px_28px_-20px_rgba(15,23,42,0.45)]'
               }`}>
                 #{String(queueRank).padStart(2, '0')}
-              </div>
-
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                  <span className="truncate">{orderDisplayLabel}</span>
-                  {typeLabel ? renderMetaDivider() : null}
-                  {typeLabel ? (
-                    <span className="inline-flex items-center gap-1 text-slate-500">
-                      {typeMeta?.icon}
-                      <span>{typeLabel}</span>
-                    </span>
-                  ) : null}
-                </div>
-                <p className="mt-1 text-[1.05rem] font-black leading-tight text-slate-900 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden [overflow-wrap:anywhere]">
-                  {order.customerName || order.name || 'Cliente'}
-                </p>
               </div>
             </div>
 
@@ -579,7 +564,19 @@ const OrderSummaryCard = ({
                 )}
               </div>
             )}
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400 truncate">
+              {orderDisplayLabel}
+            </p>
+            <h3 className="mt-1 text-[1.05rem] font-black leading-tight text-slate-900 truncate">
+              {order.customerName || order.name || 'Cliente'}
+            </h3>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-slate-500">
+              {showTypeInMeta ? (
+                <>
+                  <span className="font-semibold text-slate-700">{typeLabel}</span>
+                  {renderMetaDivider()}
+                </>
+              ) : null}
               <span className="font-semibold text-slate-700">{itemsCount} {itemsCount === 1 ? 'item' : 'itens'}</span>
               {renderMetaDivider()}
               <span className="truncate">{paymentLabel}</span>
@@ -603,15 +600,9 @@ const OrderSummaryCard = ({
               </span>
             </div>
             <div className="flex min-w-0 flex-wrap items-center gap-2">
-              <span className={`inline-flex max-w-full items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] ${statusBadgeTone}`}>
+              <span className={`inline-flex max-w-full items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] whitespace-nowrap ${statusBadgeTone}`}>
                 {archived ? 'Finalizado' : statusMeta.label}
               </span>
-              {typeLabel ? (
-                <span className="inline-flex max-w-full items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-semibold text-slate-600">
-                  {typeMeta?.icon}
-                  <span className="truncate">{typeLabel}</span>
-                </span>
-              ) : null}
             </div>
           </div>
 
@@ -623,11 +614,11 @@ const OrderSummaryCard = ({
                   event.stopPropagation();
                   onQuickStart();
                 }}
-                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-2xl bg-[#153A4C] px-3.5 text-[11px] font-black text-white shadow-[0_18px_32px_-24px_rgba(21,58,76,0.55)] transition-all hover:bg-[#102b38] active:scale-95"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[#153A4C] text-white shadow-[0_18px_32px_-24px_rgba(21,58,76,0.55)] transition-all hover:bg-[#102b38] active:scale-95"
                 title="Atender"
+                aria-label="Atender pedido"
               >
                 <Play size={16} weight="fill" />
-                <span>Atender</span>
               </button>
             )}
 
@@ -638,11 +629,11 @@ const OrderSummaryCard = ({
                   event.stopPropagation();
                   onQuickFinalize();
                 }}
-                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-2xl bg-emerald-600 px-3.5 text-[11px] font-black text-white shadow-[0_18px_32px_-24px_rgba(5,150,105,0.55)] transition-all hover:bg-emerald-700 active:scale-95"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-[0_18px_32px_-24px_rgba(5,150,105,0.55)] transition-all hover:bg-emerald-700 active:scale-95"
                 title="Pronto"
+                aria-label="Marcar pedido como pronto"
               >
                 <Check size={16} weight="bold" />
-                <span>Pronto</span>
               </button>
             )}
 
