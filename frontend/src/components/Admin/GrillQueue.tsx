@@ -2687,18 +2687,13 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     cancelled: { dot: "bg-rose-500", text: "text-rose-700" },
   };
 
-  const renderOrderFooterActions = (order: any) => (
-    <div className="w-full flex flex-wrap gap-2 md:justify-end">
-      {[ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ].includes(String(order?.status || '').toLowerCase()) && (
-        <button
-          type="button"
-          onClick={() => openCancelOrderModal(order)}
-          disabled={updating === order.id}
-          className="rounded-2xl border border-rose-200/80 bg-white px-4 py-2.5 text-xs font-bold text-rose-600 shadow-[0_8px_20px_-12px_rgba(225,29,72,0.15)] transition-all hover:bg-rose-50 hover:border-rose-300 active:scale-[0.97] disabled:opacity-50"
-        >
-          Cancelar pedido
-        </button>
-      )}
+  const renderOrderFooterActions = (order: any) => {
+    const canCancelOrder = [ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ].includes(
+      String(order?.status || '').toLowerCase()
+    );
+
+    return (
+    <div className="w-full space-y-3">
       {updating === order.id && (
         <div className="w-full rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700 inline-flex items-center gap-2">
           <ArrowsClockwise size={14} weight="duotone" className="animate-spin" />
@@ -2923,8 +2918,30 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           </button>
         </div>
       )}
+      {canCancelOrder && (
+        <div className="w-full border-t border-slate-100 pt-3">
+          <div className="mb-2 rounded-2xl border border-rose-100 bg-rose-50/70 px-3 py-2">
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-rose-700">
+              Ação sensível
+            </p>
+            <p className="mt-1 text-[11px] font-semibold text-rose-600/90">
+              Use apenas se o pedido realmente não puder mais seguir no fluxo normal.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => openCancelOrderModal(order)}
+            disabled={updating === order.id}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700 shadow-[0_12px_24px_-18px_rgba(225,29,72,0.28)] transition-all hover:border-rose-300 hover:bg-rose-100 active:scale-[0.98] disabled:opacity-50"
+          >
+            <X size={15} weight="bold" />
+            Cancelar pedido
+          </button>
+        </div>
+      )}
     </div>
   );
+  };
 
   return (
     <>
