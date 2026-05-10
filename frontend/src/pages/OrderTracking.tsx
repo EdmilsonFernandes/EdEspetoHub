@@ -13,6 +13,7 @@ import { applyBrandTheme } from '../utils/brandTheme';
 import { buildPixPayload } from '../utils/pixPayload';
 import { RouteMapView } from '../components/RouteMapView';
 import { formatSelectedModifiers } from '../utils/productModifiers';
+import { getOrderItemLineTotal, getOrderItemOriginalLineTotal, getOrderItemQuantity } from '../utils/orderItems';
 import { usePollingPaymentStatus } from '../hooks/usePollingPaymentStatus';
 
 const statusLabels: Record<string, string> = {
@@ -265,7 +266,7 @@ const fitReceiptColumns = (left: unknown, right: unknown, width = RECEIPT_LINE_W
 };
 
 const buildOrderWhatsappHighlightItemLines = (item: any) => {
-  const quantity = Math.max(1, Number(item?.quantity ?? item?.qty ?? 1));
+  const quantity = getOrderItemQuantity(item);
   const name = String(item?.name || item?.product?.name || 'Item do pedido').trim();
   const detailParts = [];
 
@@ -275,7 +276,7 @@ const buildOrderWhatsappHighlightItemLines = (item: any) => {
   const modifiers = formatSelectedModifiers(item?.selectedModifiers || []);
   if (modifiers.length) detailParts.push(`+ ${modifiers.join(', ')}`);
 
-  const lineTotalValue = Number(item?.lineTotal ?? item?.price ?? 0);
+  const lineTotalValue = getOrderItemLineTotal(item);
   const lineTotalLabel =
     Number.isFinite(lineTotalValue) && lineTotalValue > 0
       ? formatCurrency(lineTotalValue)
@@ -1829,8 +1830,14 @@ export function OrderTracking() {
                     )}
                   </div>
                   <div className="space-y-2 text-sm text-slate-600">
-                    {(itemsExpanded ? itemsToRender : itemsToRender.slice(0, 2)).map((item) => (
-                      <div key={item.id || item.productId} className="flex items-start gap-3 rounded-2xl border border-[#dce9f1] bg-white/92 px-3 py-3 shadow-[0_12px_24px_-24px_rgba(51,104,134,0.12)]">
+                    {(itemsExpanded ? itemsToRender : itemsToRender.slice(0, 2)).map((item) => {
+                      const quantity = getOrderItemQuantity(item);
+                      const lineTotal = getOrderItemLineTotal(item);
+                      const originalLineTotal = getOrderItemOriginalLineTotal(item);
+                      const hasDiscount = originalLineTotal !== null && originalLineTotal > lineTotal;
+
+                      return (
+                        <div key={item.id || item.productId} className="flex items-start gap-3 rounded-2xl border border-[#dce9f1] bg-white/92 px-3 py-3 shadow-[0_12px_24px_-24px_rgba(51,104,134,0.12)]">
                         {/* Imagem */}
                         {item.imageUrl || item.image || item.product?.imageUrl ? (
                           <img
@@ -1848,7 +1855,7 @@ export function OrderTracking() {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-baseline gap-1.5">
                             <span className="shrink-0 rounded-md border border-[#dce9f1] bg-[#edf5fa] px-1.5 py-0.5 text-[11px] font-black text-[#336886]">
-                              {item.quantity}x
+                              {quantity}x
                             </span>
                             <span className="font-semibold leading-snug text-slate-900">{item.name}</span>
                           </div>
@@ -1878,23 +1885,23 @@ export function OrderTracking() {
 
                         {/* Preço */}
                         <div className="shrink-0 text-right">
-                          {item.originalPrice && Number(item.originalPrice) > Number(item.price) ? (
+                          {hasDiscount ? (
                             <>
                               <p className="text-[11px] leading-none line-through text-slate-400">
-                                {formatCurrency(Number(item.originalPrice) * (item.quantity || 1))}
+                                {formatCurrency(originalLineTotal)}
                               </p>
                               <p className="mt-0.5 text-sm font-black text-[#336886]">
-                                {formatCurrency(Number(item.price))}
+                                {formatCurrency(lineTotal)}
                               </p>
                             </>
                           ) : (
                             <p className="text-sm font-black text-slate-800">
-                              {formatCurrency(Number(item.price) * (item.quantity || 1))}
+                              {formatCurrency(lineTotal)}
                             </p>
                           )}
                         </div>
-                      </div>
-                    ))}
+                        </div>
+                    )})}
                   </div>
                     {!itemsExpanded && itemsToRender.length > 2 && (
                       <button type="button" onClick={() => setItemsExpanded(true)} className="mt-2 w-full rounded-xl border border-slate-200 bg-white py-2 text-xs font-bold text-slate-600 active:scale-[0.98] transition-transform">
