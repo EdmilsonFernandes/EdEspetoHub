@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ListChecks, NavigationArrow, ShieldCheck, Storefront, Wallet } from '@phosphor-icons/react';
+import { ArrowClockwise, ArrowRight, ListChecks, NavigationArrow, ShieldCheck, Storefront, Wallet } from '@phosphor-icons/react';
 import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
 import { motoboyService } from '../services/motoboyService';
 import { formatCurrency } from '../utils/format';
@@ -130,9 +130,9 @@ export function MotoboyHome() {
     return {
       eyebrow: 'Aguardando',
       title: 'Sem pedidos por agora',
-      description: 'Fique online que a fila atualiza automaticamente.',
-      actionLabel: 'Atualizar agora',
-      actionPath: '/motoboy/home',
+      description: 'Se aparecer algo novo, a fila atualiza sozinha.',
+      actionLabel: 'Abrir fila',
+      actionPath: '/motoboy/available',
     };
   }, [activeOrder?.customerName, activeOrder?.store?.name, deliveryStatus, hasActive, loading, nextOrderLabel, queueCount]);
 
@@ -140,16 +140,7 @@ export function MotoboyHome() {
     <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden">
       <MotoboyHeader
         title="Inicio"
-        subtitle={hasActive ? 'Continue sua entrega sem perder tempo.' : 'Veja rapido o que fazer agora.'}
-        rightAction={
-          <button
-            type="button"
-            onClick={() => void load({ silent: true })}
-            className="btn-press px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-extrabold text-slate-700"
-          >
-            {refreshing ? 'Atualizando...' : 'Atualizar'}
-          </button>
-        }
+        subtitle={hasActive ? 'Continue pela etapa atual.' : 'Entregas e fila em tempo real.'}
       />
 
       <section className="premium-card-glass p-4 sm:p-5 motoboy-fade-up">
@@ -158,19 +149,26 @@ export function MotoboyHome() {
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">{primaryState.eyebrow}</p>
             <p className="mt-2 text-2xl font-black text-slate-900">{primaryState.title}</p>
             <p className="mt-1 text-sm text-slate-600">{primaryState.description}</p>
-            <p className="mt-3 text-xs text-slate-500">
-              Ultima atualizacao: <span className="font-semibold text-slate-700">{lastUpdatedLabel}</span>
-            </p>
+            <div className="mt-3 inline-flex flex-wrap items-center gap-2 text-xs text-slate-500">
+              <span>
+                Ultima atualizacao: <span className="font-semibold text-slate-700">{lastUpdatedLabel}</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => void load({ silent: true })}
+                className="btn-press inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/80 px-2.5 py-1 font-semibold text-slate-600"
+                title="Atualizar agora"
+              >
+                <ArrowClockwise size={13} weight="bold" className={refreshing ? 'animate-spin' : ''} />
+                <span>{refreshing ? 'Atualizando' : 'Atualizar'}</span>
+              </button>
+            </div>
           </div>
 
           <div className="w-full lg:w-auto flex flex-col gap-2">
             <button
               type="button"
               onClick={() => {
-                if (primaryState.actionPath === '/motoboy/home') {
-                  void load();
-                  return;
-                }
                 navigate(primaryState.actionPath);
               }}
               disabled={loading}
@@ -237,7 +235,7 @@ export function MotoboyHome() {
 
         <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] sm:col-span-2 xl:col-span-1">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Conta e lojas</p>
+            <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Cadastro e lojas</p>
             <span className="h-10 w-10 rounded-xl bg-violet-50 text-violet-700 border border-violet-200 inline-flex items-center justify-center">
               {approvedStores > 0 ? <Storefront size={20} weight="duotone" /> : <ShieldCheck size={20} weight="duotone" />}
             </span>
@@ -253,7 +251,7 @@ export function MotoboyHome() {
             onClick={() => navigate('/motoboy/profile')}
             className="mt-3 btn-press w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-extrabold text-slate-800"
           >
-            Abrir conta
+            Abrir cadastro
           </button>
         </article>
       </section>

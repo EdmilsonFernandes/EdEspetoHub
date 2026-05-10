@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { House, IdentificationCard, ListChecks, Motorcycle, SignOut, Truck, UserCircle, Wallet } from '@phosphor-icons/react';
+import { House, IdentificationCard, ListChecks, Motorcycle, SignOut, Truck, Wallet } from '@phosphor-icons/react';
 import { motoboyService } from '../services/motoboyService';
 import { nativeBiometricService } from '../services/nativeBiometricService';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
@@ -71,11 +71,11 @@ export function MotoboyLayout() {
       match: (p) => p.startsWith('/motoboy/earnings') || p.startsWith('/motoboy/history'),
     },
     {
-      id: 'account',
-      to: '/motoboy/profile',
-      label: 'Conta',
-      icon: <UserCircle size={20} weight="duotone" />,
+      id: 'profile',
+      label: 'Menu',
+      icon: <IdentificationCard size={20} weight="duotone" />,
       match: (p) => p.startsWith('/motoboy/profile'),
+      onClick: () => setAccountDrawerOpen(true),
     },
   ];
 
@@ -123,8 +123,13 @@ export function MotoboyLayout() {
 
   useEffect(() => {
     const openAccountDrawer = () => setAccountDrawerOpen(true);
+    const openMenuDrawer = () => setAccountDrawerOpen(true);
     window.addEventListener('motoboy:open-account-drawer', openAccountDrawer as EventListener);
-    return () => window.removeEventListener('motoboy:open-account-drawer', openAccountDrawer as EventListener);
+    window.addEventListener('motoboy:open-menu-drawer', openMenuDrawer as EventListener);
+    return () => {
+      window.removeEventListener('motoboy:open-account-drawer', openAccountDrawer as EventListener);
+      window.removeEventListener('motoboy:open-menu-drawer', openMenuDrawer as EventListener);
+    };
   }, []);
 
   useEffect(() => {
@@ -149,27 +154,23 @@ export function MotoboyLayout() {
   const accountActions = [
     {
       id: 'home',
-      label: 'Painel do entregador',
-      description: 'Resumo rápido da conta, corrida atual e próximos passos.',
+      section: 'Operacao',
+      label: 'Inicio',
+      description: 'Resumo do dia, entrega atual e pedidos da fila.',
       icon: <Truck size={22} weight="duotone" />,
       onClick: () => navigate('/motoboy/home'),
     },
     {
       id: 'delivery',
+      section: 'Operacao',
       label: 'Entrega atual',
       description: 'Abra a rota em andamento e confirme retirada ou entrega.',
       icon: <Motorcycle size={22} weight="duotone" />,
       onClick: () => navigate('/motoboy/delivery'),
     },
     {
-      id: 'profile',
-      label: 'Dados da conta',
-      description: 'Cadastro, documentos, vínculos e repasses.',
-      icon: <IdentificationCard size={22} weight="duotone" />,
-      onClick: () => navigate('/motoboy/profile'),
-    },
-    {
       id: 'queue',
+      section: 'Operacao',
       label: 'Fila de entregas',
       description: 'Veja os pedidos disponíveis e novas coletas.',
       icon: <ListChecks size={22} weight="duotone" />,
@@ -177,13 +178,23 @@ export function MotoboyLayout() {
     },
     {
       id: 'earnings',
+      section: 'Operacao',
       label: 'Ganhos',
       description: 'Resumo do dia e histórico financeiro.',
       icon: <Wallet size={22} weight="duotone" />,
       onClick: () => navigate('/motoboy/earnings'),
     },
     {
+      id: 'profile',
+      section: 'Cadastro',
+      label: 'Perfil e documentos',
+      description: 'Cadastro, documentos, lojas aprovadas e repasses.',
+      icon: <IdentificationCard size={22} weight="duotone" />,
+      onClick: () => navigate('/motoboy/profile'),
+    },
+    {
       id: 'logout',
+      section: 'Sessao',
       label: 'Sair das entregas',
       description: 'Encerra somente este acesso neste aparelho.',
       icon: <SignOut size={22} weight="duotone" />,
@@ -248,7 +259,7 @@ export function MotoboyLayout() {
         <div className="motoboy-screen !max-w-[72rem] !pt-0 !pb-0">
           <div className="motoboy-pill grid grid-cols-5 gap-1 p-1">
             {tabs.map((tab) => {
-              const active = tab.id === 'account' ? accountDrawerOpen || tab.match(pathname) : tab.match(pathname);
+              const active = tab.id === 'profile' ? accountDrawerOpen || tab.match(pathname) : tab.match(pathname);
               const showDot = tab.label === 'Fila' && queueBadge && !pathname.startsWith('/motoboy/available');
               const sharedClassName = [
                 'motoboy-tab relative flex flex-col items-center justify-center gap-1 rounded-[999px] px-2 py-2 text-[11px] font-semibold',
@@ -294,7 +305,7 @@ export function MotoboyLayout() {
           isOpen={accountDrawerOpen}
           onClose={() => setAccountDrawerOpen(false)}
           side="left"
-          eyebrow="Conta do entregador"
+          eyebrow="Menu do entregador"
           title={motoboyName || 'Entregador'}
           subtitle={motoboyEmail || 'Acesso ativo neste aparelho'}
           leading={
@@ -309,7 +320,7 @@ export function MotoboyLayout() {
             )
           }
           badges={[
-            { label: 'Entregador', tone: 'dark' },
+            { label: 'Entregador', tone: 'brand' },
             { label: 'Conta ativa', tone: 'neutral' },
           ]}
           actions={accountActions}
