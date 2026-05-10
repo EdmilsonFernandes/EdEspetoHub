@@ -261,8 +261,8 @@ export function ProfileDrawer({
           badges: [
             { label: 'Conectado', tone: 'success' as const },
           ],
-          switchTitle: 'Trocar perfil',
-          switchHint: '',
+          switchTitle: 'Outros acessos',
+          switchHint: 'Lojista e entregador aparecem aqui.',
         }
       : activeContext === 'store'
         ? {
@@ -275,8 +275,8 @@ export function ProfileDrawer({
             badges: [
               { label: 'Lojista', tone: 'brand' as const },
             ],
-            switchTitle: 'Trocar perfil',
-            switchHint: '',
+            switchTitle: 'Outros acessos',
+            switchHint: 'Cliente e entregador aparecem aqui.',
           }
         : activeContext === 'motoboy'
           ? {
@@ -289,8 +289,8 @@ export function ProfileDrawer({
               badges: [
                 { label: 'Entregador', tone: 'dark' as const },
               ],
-              switchTitle: 'Trocar perfil',
-              switchHint: '',
+              switchTitle: 'Outros acessos',
+              switchHint: 'Cliente e lojista aparecem aqui.',
             }
           : null;
 
@@ -520,6 +520,9 @@ export function ProfileDrawer({
                   <div className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-[#336886]/10 blur-3xl" />
                   <div className="relative mb-2.5">
                     <p className="text-[11px] font-bold tracking-tight text-slate-400">{currentIdentity.switchTitle}</p>
+                    {currentIdentity.switchHint ? (
+                      <p className="mt-1 text-[10px] font-semibold leading-4 text-slate-500">{currentIdentity.switchHint}</p>
+                    ) : null}
                   </div>
 
                   <div className="relative grid gap-2">
@@ -549,8 +552,8 @@ export function ProfileDrawer({
               {/* Saudação */}
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]/70">Já no Caminho</p>
-                <h2 className="mt-0.5 text-[1.15rem] font-black tracking-tight text-slate-900 leading-snug">Olá, bem-vindo!</h2>
-                <p className="mt-0.5 text-[11.5px] font-medium text-slate-500">Entre ou crie sua conta para aproveitar tudo.</p>
+                <h2 className="mt-0.5 text-[1.15rem] font-black tracking-tight text-slate-900 leading-snug">Acesse sua conta</h2>
+                <p className="mt-0.5 text-[11.5px] font-medium text-slate-500">Entre para acompanhar pedidos, endereços e favoritos.</p>
               </div>
 
               {/* Dois CTAs lado a lado */}
@@ -590,12 +593,12 @@ export function ProfileDrawer({
           <nav className="space-y-2">
             <p className="mb-3 text-[11px] font-bold tracking-tight text-slate-400 px-1">
               {activeContext === 'client'
-                ? 'Área do Cliente'
+                ? 'Sua conta'
                 : activeContext === 'store'
                   ? 'Área da Loja'
                   : activeContext === 'motoboy'
                     ? 'Área do Entregador'
-                    : 'Suporte'}
+                    : 'Ajuda e políticas'}
             </p>
             {actions.map((action, idx) => (
               <div key={action.id}>
@@ -665,9 +668,11 @@ export function ProfileDrawer({
             </div>
             <div className="relative mb-4 flex items-start justify-between gap-3">
               <div className="min-w-0 pr-2">
-                <p className="text-[9px] font-black uppercase tracking-[0.28em] text-slate-500">Escolha seu acesso</p>
+                <p className="text-[9px] font-black uppercase tracking-[0.28em] text-slate-500">
+                  {hasActiveContext ? 'Outros acessos' : 'Escolha sua área'}
+                </p>
                 <h3 className="mt-1 text-[1.18rem] font-black tracking-[-0.035em] text-slate-950">
-                  {hasActiveContext ? 'Abrir outro acesso' : accessPickerMode === 'register' ? 'Primeiro acesso' : 'Entrar'}
+                  {hasActiveContext ? 'Abrir outra área' : accessPickerMode === 'register' ? 'Primeiro acesso' : 'Entrar'}
                 </h3>
                 <p className="mt-1.5 text-[12px] font-semibold leading-relaxed text-slate-500">
                   {hasActiveContext

@@ -623,6 +623,7 @@ const FAVORITES_STORAGE_KEY = 'hub:favorites:stores';
 const SELECTED_CONDOMINIUM_STORAGE_KEY = 'hub:selected-condominium';
 const DISMISSED_ANONYMOUS_ORDERS_KEY = 'hub:dismissed-anonymous-orders';
 const STORE_PROMO_POPUP_DISMISSED_UNTIL_KEY = 'hub:store-promo-popup-dismissed-until';
+const STORE_PROMO_POPUP_PRIMED_KEY = 'hub:store-promo-popup-primed';
 const ORDER_EXPIRATION_MS = 3 * 60 * 60 * 1000; // 3 horas
 const ACTIVE_ORDER_ALERT_MAX_AGE_MS = 6 * 60 * 60 * 1000; // 6 horas
 const STORE_PROMO_POPUP_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 horas
@@ -2189,6 +2190,21 @@ export function MarketplacePage() {
   );
   const displayLocationLabel =
     activeLocationLabel === 'Sua região' && fallbackRegionLabel ? fallbackRegionLabel : activeLocationLabel;
+  const currentDayGreeting = (() => {
+    const hour = new Date().getHours();
+    return hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
+  })();
+  const customerFirstName = customerDisplayName.split(/\s+/).filter(Boolean)[0] || 'Cliente';
+  const hubHeaderEyebrow = selectedCondominium
+    ? `Condomínio · ${String(selectedCondominium.name || 'Agenda local').trim() || 'Agenda local'}`
+    : isCustomerLogged
+      ? `${currentDayGreeting}, ${customerFirstName}`
+      : `${currentDayGreeting} — descubra o que pedir hoje`;
+  const canOpenMarketingPopup =
+    homeConfig.marketingPopup.active &&
+    Boolean(marketingPopupImageUrl) &&
+    !selectedCondominium &&
+    debouncedQuery.length < 2;
 
   const openCustomerAccount = useCallback(() => {
     navigate('/cliente/conta');
@@ -2532,18 +2548,23 @@ export function MarketplacePage() {
   useEffect(() => {
     if (loading) return;
     if (!homeConfigLoaded) return;
-    if (!homeConfig.marketingPopup.active || !marketingPopupImageUrl) return;
+    if (!canOpenMarketingPopup) return;
     const timeout = window.setTimeout(() => {
       try {
         const dismissedUntil = Number(localStorage.getItem(STORE_PROMO_POPUP_DISMISSED_UNTIL_KEY) || 0);
         if (Number.isFinite(dismissedUntil) && dismissedUntil > Date.now()) return;
+        const popupPrimed = localStorage.getItem(STORE_PROMO_POPUP_PRIMED_KEY) === '1';
+        if (!popupPrimed) {
+          localStorage.setItem(STORE_PROMO_POPUP_PRIMED_KEY, '1');
+          return;
+        }
       } catch {
         // ignore
       }
       setShowStorePromoPopup(true);
-    }, 5200);
+    }, 6200);
     return () => window.clearTimeout(timeout);
-  }, [homeConfig.marketingPopup.active, homeConfigLoaded, loading, marketingPopupImageUrl]);
+  }, [canOpenMarketingPopup, homeConfigLoaded, loading]);
 
   const dismissStorePromoPopup = useCallback(() => {
     setShowStorePromoPopup(false);
@@ -2577,14 +2598,14 @@ export function MarketplacePage() {
           className="fixed inset-0 z-[140] flex items-center justify-center bg-slate-950/48 px-4 py-[max(1rem,env(safe-area-inset-top))] backdrop-blur-md animate-in fade-in duration-200"
           role="dialog"
           aria-modal="true"
-          aria-label="Criar loja no Já no Caminho"
+          aria-label="Campanha em destaque do Já no Caminho"
         >
           <div className="relative w-full max-w-[430px] animate-in zoom-in-95 slide-in-from-bottom-3 duration-200">
             <button
               type="button"
               onClick={dismissStorePromoPopup}
               className="absolute -right-2 -top-2 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/80 bg-white text-slate-900 shadow-[0_14px_30px_-14px_rgba(15,23,42,0.45)] transition-all duration-150 ease-out hover:bg-slate-50 active:scale-95"
-              aria-label="Fechar propaganda"
+              aria-label="Fechar destaque"
               title="Fechar"
             >
               <X size={19} weight="bold" />
@@ -2684,11 +2705,7 @@ export function MarketplacePage() {
                   <div className="mb-0.5 flex items-center gap-1.5">
                     <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-4 w-4 shrink-0 rounded-[0.4rem] object-cover shadow-[0_2px_6px_-2px_rgba(21,58,76,0.3)]" />
                     <p className="truncate text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
-                      {selectedCondominium
-                        ? `🏢 ${String(selectedCondominium.name || "Feira").slice(0, 20)}`
-                        : isCustomerLogged
-                        ? `${(() => { const h = new Date().getHours(); return h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite"; })()}, ${customerDisplayName.split(" ")[0]} 👋`
-                        : `${(() => { const h = new Date().getHours(); return h < 12 ? "☀️ Bom dia" : h < 18 ? "🌤️ Boa tarde" : "🌙 Boa noite"; })()} — o que vai pedir hoje?`}
+                      {hubHeaderEyebrow}
                     </p>
                   </div>
                   <button
@@ -3865,7 +3882,7 @@ export function MarketplacePage() {
             }`}>
               <Buildings size={18} weight={selectedCondominium || condominiumPickerOpen ? 'fill' : 'duotone'} />
             </span>
-            <span>Condo</span>
+            <span>Agenda</span>
           </button>
           <button
             type="button"
@@ -4333,7 +4350,7 @@ export function MarketplacePage() {
                   <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]">
                     <Buildings size={18} weight="fill" />
                   </span>
-                  <span>Condo</span>
+                  <span>Agenda</span>
                 </button>
                 <button
                   type="button"
