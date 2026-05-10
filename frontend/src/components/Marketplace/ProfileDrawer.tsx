@@ -649,21 +649,8 @@ export function ProfileDrawer({
                 Ambiente seguro
               </p>
             </div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/90 bg-white/92 px-2.5 py-2 shadow-[0_14px_28px_-20px_rgba(15,23,42,0.24)] ring-1 ring-slate-100">
-              <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-[0.95rem] border border-slate-200 bg-white p-0.5 shadow-[0_8px_18px_-14px_rgba(15,23,42,0.24)]">
-                <img
-                  src="/janocaminho.jpg"
-                  alt="Já no Caminho"
-                  loading="eager"
-                  fetchPriority="high"
-                  decoding="async"
-                  className="h-full w-full rounded-[0.8rem] object-cover opacity-95"
-                />
-              </span>
-              <span className="hidden text-right sm:block">
-                <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Oficial</span>
-                <span className="block text-[9px] font-semibold text-slate-400">Marca do app</span>
-              </span>
+            <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-white bg-white p-0.5 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.55)] ring-1 ring-slate-100">
+              <img src="/janocaminho.jpg" alt="Logo" loading="eager" fetchPriority="high" decoding="async" className="h-full w-full rounded-full object-cover opacity-95" />
             </div>
           </div>
         </div>
