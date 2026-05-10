@@ -961,7 +961,7 @@ export function LandingPage() {
               <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_30px_70px_-44px_rgba(15,23,42,0.45)]">
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(95,211,90,0.08),transparent_32%),radial-gradient(circle_at_86%_20%,rgba(51,104,134,0.10),transparent_34%)]" />
                 <img
-                  src="/marketing/playstore.png"
+                  src="/marketing/certo_play.png"
                   alt="Já no Caminho na Google Play Store"
                   loading="lazy"
                   className="w-full rounded-[2rem] object-cover"
