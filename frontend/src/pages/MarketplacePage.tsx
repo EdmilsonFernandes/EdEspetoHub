@@ -54,7 +54,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { clearAllCustomerSessions } from '../utils/customerSessionStorage';
 import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
 import { DEFAULT_HOME_CONFIG, homeConfigService } from '../services/homeConfigService';
-import { openActionTarget, resolveActionTarget } from '../utils/actionLink';
+import { openActionTarget, resolveActionLabel, resolveActionTarget } from '../utils/actionLink';
 
 type MarketplaceStore = {
   id?: string;
@@ -839,14 +839,23 @@ export function MarketplacePage() {
           image: resolveAssetUrl(banner.imageUrl) || '',
           imageAlt: banner.title || 'Banner da home',
           actionUrl: banner.actionUrl || '/create?plan=trial',
+          actionLabel: banner.actionLabel || '',
           fit: banner.fit || 'cover',
         })),
     [homeConfig.homeBanners]
   );
   const marketingPopupImageUrl = resolveAssetUrl(homeConfig.marketingPopup.imageUrl) || '';
+  const marketingPopupHasAction = Boolean(String(homeConfig.marketingPopup.actionUrl || '').trim());
   const marketingPopupActionTarget = useMemo(
-    () => resolveActionTarget(homeConfig.marketingPopup.actionUrl, '/create?plan=trial'),
-    [homeConfig.marketingPopup.actionUrl]
+    () => (marketingPopupHasAction ? resolveActionTarget(homeConfig.marketingPopup.actionUrl) : null),
+    [homeConfig.marketingPopup.actionUrl, marketingPopupHasAction]
+  );
+  const marketingPopupActionLabel = useMemo(
+    () =>
+      marketingPopupHasAction
+        ? resolveActionLabel(homeConfig.marketingPopup.actionLabel, homeConfig.marketingPopup.actionUrl)
+        : '',
+    [homeConfig.marketingPopup.actionLabel, homeConfig.marketingPopup.actionUrl, marketingPopupHasAction]
   );
   const savedAddressLocation = useMemo(() => {
     if (preferredDiscoveryAddress?.lat == null || preferredDiscoveryAddress?.lng == null) return null;
@@ -2581,13 +2590,15 @@ export function MarketplacePage() {
               <X size={19} weight="bold" />
             </button>
             <a
-              href={marketingPopupActionTarget.href}
-              target={marketingPopupActionTarget.external ? '_blank' : undefined}
-              rel={marketingPopupActionTarget.external ? 'noopener noreferrer' : undefined}
+              href={marketingPopupActionTarget?.href || '#'}
+              target={marketingPopupActionTarget?.external ? '_blank' : undefined}
+              rel={marketingPopupActionTarget?.external ? 'noopener noreferrer' : undefined}
               onClick={(event) => {
                 event.preventDefault();
                 dismissStorePromoPopup();
-                void openActionTarget(marketingPopupActionTarget, navigate);
+                if (marketingPopupActionTarget) {
+                  void openActionTarget(marketingPopupActionTarget, navigate);
+                }
               }}
               className="group block overflow-hidden rounded-[1.85rem] border border-white/80 bg-white shadow-[0_28px_70px_-32px_rgba(15,23,42,0.72)] transition-all duration-200 ease-out active:scale-[0.985]"
               aria-label={homeConfig.marketingPopup.title || 'Abrir popup de marketing do Já no Caminho'}
@@ -2603,7 +2614,7 @@ export function MarketplacePage() {
                 />
                 <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/35 to-transparent opacity-80 transition-opacity duration-200 group-active:opacity-100" />
               </div>
-              {(homeConfig.marketingPopup.title || homeConfig.marketingPopup.description) ? (
+              {(homeConfig.marketingPopup.title || homeConfig.marketingPopup.description || homeConfig.marketingPopup.actionUrl) ? (
                 <div className="border-t border-slate-100 px-4 py-3">
                   {homeConfig.marketingPopup.title ? (
                     <p className="text-sm font-black text-slate-900">{homeConfig.marketingPopup.title}</p>
@@ -2612,6 +2623,11 @@ export function MarketplacePage() {
                     <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">
                       {homeConfig.marketingPopup.description}
                     </p>
+                  ) : null}
+                  {homeConfig.marketingPopup.actionUrl ? (
+                    <div className="mt-3 inline-flex max-w-full rounded-full bg-slate-900 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-[0_10px_24px_-16px_rgba(15,23,42,0.45)]">
+                      <span className="truncate">{marketingPopupActionLabel}</span>
+                    </div>
                   ) : null}
                 </div>
               ) : null}

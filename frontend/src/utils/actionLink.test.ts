@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { resolveActionTarget } from './actionLink';
+import { resolveActionLabel, resolveActionTarget } from './actionLink';
 
 describe('resolveActionTarget', () => {
   it('treats relative app routes as internal', () => {
@@ -21,5 +21,15 @@ describe('resolveActionTarget', () => {
       href: '/create?plan=trial',
       external: false,
     });
+  });
+
+  it('infers a smart label for external app links', () => {
+    expect(resolveActionLabel('', 'https://play.google.com/store/apps/details?id=com.example.app')).toBe(
+      'Baixar na Play Store'
+    );
+  });
+
+  it('preserves a custom label when provided', () => {
+    expect(resolveActionLabel('Ver promoção', 'https://example.com')).toBe('Ver promoção');
   });
 });

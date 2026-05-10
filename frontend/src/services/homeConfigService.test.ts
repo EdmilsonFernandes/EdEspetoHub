@@ -11,7 +11,7 @@ describe('homeConfigService', () => {
   it('sorts and limits banners for the public home preview', () => {
     const normalized = normalizeHomeConfigPayload({
       homeBanners: [
-        { id: 'banner-4', imageUrl: '/img-4.jpg', order: 4, active: true },
+        { id: 'banner-4', imageUrl: '/img-4.jpg', order: 4, active: true, actionLabel: 'Saiba mais' },
         { id: 'banner-2', imageUrl: '/img-2.jpg', order: 2, active: true },
         { id: 'banner-1', imageUrl: '/img-1.jpg', order: 1, active: true },
         { id: 'banner-3', imageUrl: '/img-3.jpg', order: 3, active: true },
@@ -27,5 +27,6 @@ describe('homeConfigService', () => {
       'banner-3',
       'banner-4',
     ]);
+    expect(normalized.homeBanners[3].actionLabel).toBe('Saiba mais');
   });
 });

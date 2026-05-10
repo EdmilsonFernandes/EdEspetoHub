@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { openActionTarget, resolveActionTarget } from '../../utils/actionLink';
+import { openActionTarget, resolveActionLabel, resolveActionTarget } from '../../utils/actionLink';
 
 export type PromoSlide = {
   id: string;
   image: string;
   imageAlt: string;
   actionUrl?: string;
+  actionLabel?: string;
   fit?: 'contain' | 'cover';
 };
 
@@ -58,9 +59,25 @@ export function SegmentPromoCarousel({
   const interactive = mode !== 'hub';
   const activeSlides = slides && slides.length ? slides : PROMO_SLIDES;
   const currentSlide = activeSlides[activeIndex] || activeSlides[0];
+  const useDefaultAction = !slides || !slides.length;
+  const hasConfiguredAction = useDefaultAction || Boolean(String(currentSlide?.actionUrl || '').trim());
   const currentTarget = useMemo(
-    () => resolveActionTarget(currentSlide?.actionUrl, defaultActionUrl),
-    [currentSlide?.actionUrl, defaultActionUrl]
+    () =>
+      hasConfiguredAction
+        ? resolveActionTarget(useDefaultAction ? currentSlide?.actionUrl || defaultActionUrl : currentSlide?.actionUrl)
+        : null,
+    [currentSlide?.actionUrl, defaultActionUrl, hasConfiguredAction, useDefaultAction]
+  );
+  const currentActionLabel = useMemo(
+    () =>
+      hasConfiguredAction
+        ? resolveActionLabel(
+            currentSlide?.actionLabel,
+            useDefaultAction ? currentSlide?.actionUrl || defaultActionUrl : currentSlide?.actionUrl,
+            defaultActionUrl
+          )
+        : '',
+    [currentSlide?.actionLabel, currentSlide?.actionUrl, defaultActionUrl, hasConfiguredAction, useDefaultAction]
   );
 
   useEffect(() => {
@@ -142,11 +159,11 @@ export function SegmentPromoCarousel({
         ))}
       </div>
 
-      {currentSlide.id !== 'mercado-pago' && (
-        <div className="pointer-events-none absolute bottom-2 right-2 z-[3] inline-flex rounded-full border border-white/70 bg-white/92 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-slate-900 shadow-[0_10px_22px_-14px_rgba(15,23,42,0.5)] backdrop-blur-md sm:bottom-3 sm:right-3 sm:px-3 sm:py-1.5 sm:text-[10px]">
-          Criar loja →
+      {hasConfiguredAction && currentActionLabel ? (
+        <div className="pointer-events-none absolute bottom-2 right-2 z-[3] inline-flex max-w-[72%] rounded-full border border-white/70 bg-white/92 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-slate-900 shadow-[0_10px_22px_-14px_rgba(15,23,42,0.5)] backdrop-blur-md sm:bottom-3 sm:right-3 sm:max-w-[58%] sm:px-3 sm:py-1.5 sm:text-[10px]">
+          <span className="truncate">{currentActionLabel} →</span>
         </div>
-      )}
+      ) : null}
 
       <div className="absolute inset-x-0 bottom-0 flex justify-center pb-1.5 sm:pb-2">
         <div className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-slate-950/20 px-2 py-0.5 backdrop-blur-md">
@@ -172,14 +189,18 @@ export function SegmentPromoCarousel({
   if (!interactive) {
     return (
       <a
-        href={currentTarget.href}
-        target={currentTarget.external ? '_blank' : undefined}
-        rel={currentTarget.external ? 'noopener noreferrer' : undefined}
+        href={currentTarget?.href || '#'}
+        target={currentTarget?.external ? '_blank' : undefined}
+        rel={currentTarget?.external ? 'noopener noreferrer' : undefined}
         aria-label={currentSlide.imageAlt || 'Abrir banner do Já no Caminho'}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onClick={(event) => {
           if (suppressClickRef.current) {
+            event.preventDefault();
+            return;
+          }
+          if (!currentTarget) {
             event.preventDefault();
             return;
           }
@@ -195,14 +216,18 @@ export function SegmentPromoCarousel({
 
   return (
     <a
-      href={currentTarget.href}
-      target={currentTarget.external ? '_blank' : undefined}
-      rel={currentTarget.external ? 'noopener noreferrer' : undefined}
+      href={currentTarget?.href || '#'}
+      target={currentTarget?.external ? '_blank' : undefined}
+      rel={currentTarget?.external ? 'noopener noreferrer' : undefined}
       aria-label={currentSlide.imageAlt || 'Abrir banner do Já no Caminho'}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onClick={(event) => {
         if (suppressClickRef.current) {
+          event.preventDefault();
+          return;
+        }
+        if (!currentTarget) {
           event.preventDefault();
           return;
         }

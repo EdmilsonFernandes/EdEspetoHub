@@ -14,6 +14,7 @@ export type HomeBannerDraft = {
   title: string;
   description: string;
   actionUrl: string;
+  actionLabel: string;
   order: number;
   active: boolean;
   fit: HomeBannerFit;
@@ -25,6 +26,7 @@ export type MarketingPopupDraft = {
   title: string;
   description: string;
   actionUrl: string;
+  actionLabel: string;
   active: boolean;
   fit: HomeBannerFit;
 };
@@ -43,6 +45,7 @@ export const DEFAULT_HOME_CONFIG: HomeConfigPayload = {
       title: 'Mercado Pago',
       description: 'Ative sua loja online com pagamento integrado.',
       actionUrl: '/create?plan=trial',
+      actionLabel: '',
       order: 1,
       active: true,
       fit: 'cover',
@@ -53,6 +56,7 @@ export const DEFAULT_HOME_CONFIG: HomeConfigPayload = {
       title: 'Operação completa',
       description: 'Pedidos, impressão e fluxo operacional em um só lugar.',
       actionUrl: '/create?plan=trial',
+      actionLabel: '',
       order: 2,
       active: true,
       fit: 'cover',
@@ -63,6 +67,7 @@ export const DEFAULT_HOME_CONFIG: HomeConfigPayload = {
       title: 'Adegas e conveniência',
       description: 'Vitrine pronta para segmentos com alto giro.',
       actionUrl: '/create?plan=trial',
+      actionLabel: '',
       order: 3,
       active: true,
       fit: 'contain',
@@ -73,6 +78,7 @@ export const DEFAULT_HOME_CONFIG: HomeConfigPayload = {
       title: 'Divulgação multissetorial',
       description: 'Destaque sua operação dentro do hub.',
       actionUrl: '/create?plan=trial',
+      actionLabel: '',
       order: 4,
       active: true,
       fit: 'contain',
@@ -83,6 +89,7 @@ export const DEFAULT_HOME_CONFIG: HomeConfigPayload = {
     title: 'Crie sua loja online',
     description: 'Integre pedidos, pagamentos e operação no Já no Caminho.',
     actionUrl: '/create?plan=trial',
+    actionLabel: '',
     active: true,
     fit: 'cover',
   },
@@ -121,6 +128,7 @@ const normalizeBanner = (banner: any, index: number): HomeBannerDraft => ({
   title: sanitizeText(banner?.title),
   description: sanitizeText(banner?.description),
   actionUrl: sanitizeText(banner?.actionUrl),
+  actionLabel: sanitizeText(banner?.actionLabel),
   order: sanitizeOrder(banner?.order, index + 1),
   active: Boolean(banner?.active),
   fit: sanitizeFit(banner?.fit),
@@ -132,6 +140,7 @@ const normalizePopup = (popup: any): MarketingPopupDraft => ({
   title: sanitizeText(popup?.title),
   description: sanitizeText(popup?.description),
   actionUrl: sanitizeText(popup?.actionUrl),
+  actionLabel: sanitizeText(popup?.actionLabel),
   active: Boolean(popup?.active),
   fit: sanitizeFit(popup?.fit),
 });

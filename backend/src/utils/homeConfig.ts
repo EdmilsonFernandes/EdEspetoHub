@@ -9,6 +9,7 @@ export type HomeBannerConfig = {
   title: string | null;
   description: string | null;
   actionUrl: string | null;
+  actionLabel: string | null;
   order: number;
   active: boolean;
   fit: HomeBannerFit;
@@ -19,6 +20,7 @@ export type MarketingPopupConfig = {
   title: string | null;
   description: string | null;
   actionUrl: string | null;
+  actionLabel: string | null;
   active: boolean;
   fit: HomeBannerFit;
 };
@@ -39,6 +41,7 @@ const DEFAULT_HOME_BANNERS: HomeBannerConfig[] = [
     title: 'Mercado Pago',
     description: 'Ative sua loja online com pagamento integrado.',
     actionUrl: '/create?plan=trial',
+    actionLabel: null,
     order: 1,
     active: true,
     fit: 'cover',
@@ -49,6 +52,7 @@ const DEFAULT_HOME_BANNERS: HomeBannerConfig[] = [
     title: 'Operação completa',
     description: 'Pedidos, impressão e fluxo operacional em um só lugar.',
     actionUrl: '/create?plan=trial',
+    actionLabel: null,
     order: 2,
     active: true,
     fit: 'cover',
@@ -59,6 +63,7 @@ const DEFAULT_HOME_BANNERS: HomeBannerConfig[] = [
     title: 'Adegas e conveniência',
     description: 'Vitrine pronta para segmentos com alto giro.',
     actionUrl: '/create?plan=trial',
+    actionLabel: null,
     order: 3,
     active: true,
     fit: 'contain',
@@ -69,6 +74,7 @@ const DEFAULT_HOME_BANNERS: HomeBannerConfig[] = [
     title: 'Divulgação multissetorial',
     description: 'Destaque sua operação dentro do hub.',
     actionUrl: '/create?plan=trial',
+    actionLabel: null,
     order: 4,
     active: true,
     fit: 'contain',
@@ -80,6 +86,7 @@ const DEFAULT_MARKETING_POPUP: MarketingPopupConfig = {
   title: 'Crie sua loja online',
   description: 'Integre pedidos, pagamentos e operação no Já no Caminho.',
   actionUrl: '/create?plan=trial',
+  actionLabel: null,
   active: true,
   fit: 'cover',
 };
@@ -153,6 +160,7 @@ const normalizeBanner = (input: unknown, index: number): HomeBannerConfig => {
     title: sanitizeOptionalText(record.title, 120),
     description: sanitizeOptionalText(record.description, 320),
     actionUrl: sanitizeActionUrl(record.actionUrl),
+    actionLabel: sanitizeOptionalText(record.actionLabel, 48),
     order: normalizeOrder(record.order, index + 1),
     active: Boolean(record.active),
     fit: sanitizeFit(record.fit, 'cover'),
@@ -171,6 +179,7 @@ const normalizeMarketingPopup = (input: unknown): MarketingPopupConfig => {
     title: sanitizeOptionalText(record.title, 120),
     description: sanitizeOptionalText(record.description, 320),
     actionUrl: sanitizeActionUrl(record.actionUrl),
+    actionLabel: sanitizeOptionalText(record.actionLabel, 48),
     active,
     fit: sanitizeFit(record.fit, 'cover'),
   };

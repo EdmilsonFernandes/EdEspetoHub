@@ -23,6 +23,7 @@ import {
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { SegmentPromoCarousel, PromoSlide } from '../components/common/SegmentPromoCarousel';
 import { useToast } from '../contexts/ToastContext';
+import { resolveActionLabel } from '../utils/actionLink';
 
 const MAX_HOME_BANNERS = 4;
 
@@ -88,6 +89,7 @@ const createEmptyBanner = (index: number): HomeBannerDraft => ({
   title: '',
   description: '',
   actionUrl: '',
+  actionLabel: '',
   order: index + 1,
   active: true,
   fit: 'cover',
@@ -103,6 +105,7 @@ const buildPreviewSlides = (config: HomeConfigPayload): PromoSlide[] =>
       image: resolveAssetUrl(banner.imageUrl) || '',
       imageAlt: banner.title || 'Banner da home',
       actionUrl: banner.actionUrl || '/create?plan=trial',
+      actionLabel: banner.actionLabel || '',
       fit: banner.fit || 'cover',
     }));
 
@@ -114,6 +117,7 @@ const sanitizeConfigBeforeSave = (config: HomeConfigPayload): HomeConfigPayload 
       title: String(banner.title || '').trim(),
       description: String(banner.description || '').trim(),
       actionUrl: String(banner.actionUrl || '').trim(),
+      actionLabel: String(banner.actionLabel || '').trim(),
       imageUrl: String(banner.imageUrl || '').trim(),
       imageFile: String(banner.imageFile || '').trim(),
       order: index + 1,
@@ -123,6 +127,7 @@ const sanitizeConfigBeforeSave = (config: HomeConfigPayload): HomeConfigPayload 
     title: String(config.marketingPopup.title || '').trim(),
     description: String(config.marketingPopup.description || '').trim(),
     actionUrl: String(config.marketingPopup.actionUrl || '').trim(),
+    actionLabel: String(config.marketingPopup.actionLabel || '').trim(),
     imageUrl: String(config.marketingPopup.imageUrl || '').trim(),
     imageFile: String(config.marketingPopup.imageFile || '').trim(),
   },
@@ -445,20 +450,25 @@ export function SuperAdminHomeConfig() {
                             <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">Descrição opcional</span>
                             <textarea value={banner.description} onChange={(event) => handleBannerChange(index, 'description', event.target.value)} className="min-h-[96px] w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#336886]" />
                           </label>
-                          <label className="block md:col-span-2">
-                            <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">Link ou ação opcional</span>
-                            <div className="relative">
-                              <LinkSimpleHorizontal size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                              <input value={banner.actionUrl} onChange={(event) => handleBannerChange(index, 'actionUrl', event.target.value)} placeholder="/create?plan=trial ou https://..." className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm font-semibold text-slate-800 outline-none focus:border-[#336886]" />
-                            </div>
-                          </label>
-                          <label className="block">
-                            <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">Ajuste da imagem</span>
-                            <select value={banner.fit} onChange={(event) => handleBannerChange(index, 'fit', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#336886]">
-                              <option value="cover">Preencher card</option>
-                              <option value="contain">Conter imagem</option>
-                            </select>
-                          </label>
+                  <label className="block md:col-span-2">
+                    <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">Link ou ação opcional</span>
+                    <div className="relative">
+                      <LinkSimpleHorizontal size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input value={banner.actionUrl} onChange={(event) => handleBannerChange(index, 'actionUrl', event.target.value)} placeholder="/create?plan=trial ou https://..." className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm font-semibold text-slate-800 outline-none focus:border-[#336886]" />
+                    </div>
+                  </label>
+                  <label className="block md:col-span-2">
+                    <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">Texto do CTA opcional</span>
+                    <input value={banner.actionLabel} onChange={(event) => handleBannerChange(index, 'actionLabel', event.target.value)} placeholder="Ex.: Saiba mais, Baixar app, Ver promoção" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#336886]" />
+                  </label>
+                  <label className="block">
+                    <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">Ajuste da imagem</span>
+                    <select value={banner.fit} onChange={(event) => handleBannerChange(index, 'fit', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#336886]">
+                      <option value="cover">Preencher card (sem distorcer)</option>
+                      <option value="contain">Conter imagem (mostrar tudo)</option>
+                    </select>
+                    <p className="mt-1 text-[11px] font-semibold text-slate-400">Preencher usa corte inteligente com qualidade preservada; conter mostra a arte inteira.</p>
+                  </label>
                           <label className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
                             <span className="text-sm font-black text-slate-800">Banner ativo</span>
                             <input type="checkbox" checked={banner.active} onChange={(event) => handleBannerChange(index, 'active', event.target.checked)} className="h-5 w-5 rounded border-slate-300 text-[#336886]" />
@@ -535,12 +545,17 @@ export function SuperAdminHomeConfig() {
                       <input value={config.marketingPopup.actionUrl} onChange={(event) => handlePopupChange('actionUrl', event.target.value)} placeholder="/create?plan=trial ou https://..." className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm font-semibold text-slate-800 outline-none focus:border-[#336886]" />
                     </div>
                   </label>
+                  <label className="block md:col-span-2">
+                    <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">Texto do CTA opcional</span>
+                    <input value={config.marketingPopup.actionLabel} onChange={(event) => handlePopupChange('actionLabel', event.target.value)} placeholder="Ex.: Baixar app, Saiba mais" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#336886]" />
+                  </label>
                   <label className="block">
                     <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">Ajuste da imagem</span>
                     <select value={config.marketingPopup.fit} onChange={(event) => handlePopupChange('fit', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#336886]">
-                      <option value="cover">Preencher card</option>
-                      <option value="contain">Conter imagem</option>
+                      <option value="cover">Preencher card (sem distorcer)</option>
+                      <option value="contain">Conter imagem (mostrar tudo)</option>
                     </select>
+                    <p className="mt-1 text-[11px] font-semibold text-slate-400">Preencher usa corte inteligente com qualidade preservada; conter mostra a arte inteira.</p>
                   </label>
                   <label className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
                     <span className="text-sm font-black text-slate-800">Popup ativo</span>
@@ -604,10 +619,17 @@ export function SuperAdminHomeConfig() {
                       <div className="aspect-[3/4] bg-slate-950">
                         <img src={resolveAssetUrl(config.marketingPopup.imageUrl) || ''} alt={config.marketingPopup.title || 'Popup de marketing'} className={`h-full w-full ${config.marketingPopup.fit === 'contain' ? 'object-contain bg-slate-900/5' : 'object-cover'}`} />
                       </div>
-                      {(config.marketingPopup.title || config.marketingPopup.description) ? (
+                      {(config.marketingPopup.title || config.marketingPopup.description || config.marketingPopup.actionUrl) ? (
                         <div className="border-t border-slate-100 px-4 py-3">
                           {config.marketingPopup.title ? <p className="text-sm font-black text-slate-900">{config.marketingPopup.title}</p> : null}
                           {config.marketingPopup.description ? <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{config.marketingPopup.description}</p> : null}
+                          {config.marketingPopup.actionUrl ? (
+                            <div className="mt-3 inline-flex max-w-full rounded-full bg-slate-900 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-white">
+                              <span className="truncate">
+                                {resolveActionLabel(config.marketingPopup.actionLabel, config.marketingPopup.actionUrl)}
+                              </span>
+                            </div>
+                          ) : null}
                         </div>
                       ) : null}
                     </div>
