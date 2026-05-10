@@ -260,6 +260,11 @@ export function LandingPage() {
     rose:    { bg: 'bg-rose-400/10',    icon: 'text-rose-400' },
     indigo:  { bg: 'bg-indigo-400/10',  icon: 'text-indigo-400' },
   };
+  const heroHighlights = [
+    { icon: ShieldCheck, title: '0% comissão por pedido', desc: 'Mensalidade fixa e previsível para a operação.' },
+    { icon: CurrencyDollar, title: 'Dinheiro direto na sua conta', desc: 'Pix, crédito e débito no fluxo do pedido.' },
+    { icon: Bell, title: 'Loja, cliente e entrega sincronizados', desc: 'Alertas e status em tempo real para cada etapa.' },
+  ];
 
   return (
     <LandingPageLayout>
@@ -267,10 +272,11 @@ export function LandingPage() {
       {/* ══════════════════════════════════════════════════════════════
           HERO
       ══════════════════════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-[linear-gradient(145deg,#020617_0%,#0f172a_55%,#020617_100%)]">
+      <section className="relative overflow-hidden bg-[linear-gradient(145deg,#020617_0%,#0f172a_52%,#020617_100%)]">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_10%,_rgba(47,157,247,0.18),_transparent_42%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,_rgba(16,185,129,0.12),_transparent_42%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(99,102,241,0.05),_transparent_60%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/14 to-transparent" />
 
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:py-28 lg:py-36">
           <div className="grid items-center gap-16 lg:grid-cols-[1.15fr_0.85fr]">
@@ -280,21 +286,23 @@ export function LandingPage() {
 
               {/* Eyebrow badge */}
               <div className="animate-in fade-in slide-in-from-top-3 duration-700">
-                <span className="inline-flex items-center gap-2 rounded-full border border-sky-400/25 bg-sky-400/5 px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.22em] text-sky-300 backdrop-blur-md">
+                <span className="inline-flex items-center gap-2 rounded-full border border-sky-400/24 bg-white/[0.04] px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.22em] text-sky-200 backdrop-blur-md shadow-[0_14px_30px_-20px_rgba(14,165,233,0.28)]">
                   <Rocket size={12} weight="duotone" className="animate-pulse" />
-                  0% comissão por pedido · Mensalidade fixa · Dinheiro direto na sua conta
+                  Plataforma premium para vender, operar e entregar
                 </span>
               </div>
 
               {/* Headline */}
               <div className="animate-in fade-in slide-in-from-top-5 duration-700 delay-100 space-y-5">
-                <h1 className="text-[2.6rem] font-black leading-[1.06] tracking-tight text-white sm:text-6xl xl:text-7xl">
+                <h1 className="mx-auto max-w-4xl text-[2.75rem] font-black leading-[1.03] tracking-[-0.045em] text-white sm:text-[4.25rem] lg:mx-0 lg:max-w-[48rem] xl:text-[5.85rem]">
                   Venda online sem pagar<br />
                   <span className="animate-text-gradient bg-gradient-to-r from-emerald-400 via-sky-400 to-emerald-400 bg-clip-text text-transparent">
                     comissão por pedido.
                   </span>
                 </h1>
-                <p className="mx-auto max-w-2xl text-base font-medium leading-relaxed text-slate-400 lg:mx-0 sm:text-xl">Cardápio online, pedidos ao vivo, entrega com código de confirmação e pagamento direto na sua conta — por uma mensalidade fixa, sem surpresas.</p>
+                <p className="mx-auto max-w-2xl text-base font-medium leading-relaxed text-slate-300 lg:mx-0 sm:text-[1.15rem] sm:leading-8">
+                  Cardápio online, pedidos ao vivo, entrega com código de confirmação e pagamento direto na sua conta, com uma operação clara do primeiro clique ao pós-entrega.
+                </p>
               </div>
 
               {/* CTAs */}
@@ -302,7 +310,7 @@ export function LandingPage() {
                 <button
                   type="button"
                   onClick={() => navigate('/create?plan=trial')}
-                  className="group inline-flex items-center justify-center gap-2.5 rounded-2xl bg-white px-8 py-4 text-base font-black text-slate-950 shadow-[0_20px_50px_-15px_rgba(255,255,255,0.22)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  className="group inline-flex items-center justify-center gap-2.5 rounded-[1.35rem] bg-[linear-gradient(180deg,#ffffff_0%,#f5f7fb_100%)] px-8 py-4 text-base font-black text-slate-950 shadow-[0_24px_54px_-18px_rgba(255,255,255,0.24)] ring-1 ring-white/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Criar minha loja grátis
                   <ArrowRight size={17} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
@@ -310,11 +318,26 @@ export function LandingPage() {
                 <a
                   href={ctaPrimaryHref}
                   rel="noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-base font-black text-white backdrop-blur-md transition-all hover:bg-white/10 active:scale-[0.98]"
+                  className="inline-flex items-center justify-center gap-2 rounded-[1.35rem] border border-white/12 bg-white/[0.05] px-8 py-4 text-base font-black text-white backdrop-blur-md transition-all hover:bg-white/[0.1] active:scale-[0.98]"
                 >
                   <EnvelopeSimple size={17} weight="duotone" className="text-sky-300" />
                   Fale por e-mail
                 </a>
+              </div>
+
+              <div className="animate-in fade-in duration-700 delay-300 grid gap-3 sm:grid-cols-3">
+                {heroHighlights.map(({ icon: Icon, title, desc }) => (
+                  <div
+                    key={title}
+                    className="rounded-[1.45rem] border border-white/10 bg-white/[0.05] px-4 py-4 text-left shadow-[0_22px_42px_-30px_rgba(2,6,23,0.8)] backdrop-blur-xl"
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06]">
+                      <Icon size={18} weight="duotone" className="text-sky-300" />
+                    </div>
+                    <p className="mt-3 text-sm font-black leading-tight text-white">{title}</p>
+                    <p className="mt-1 text-xs font-medium leading-5 text-slate-400">{desc}</p>
+                  </div>
+                ))}
               </div>
 
               {/* Subtle customer login */}
@@ -325,7 +348,7 @@ export function LandingPage() {
                     if (hasCustomerSession) { navigate('/cliente/conta'); return; }
                     setShowCustomerAuth(true);
                   }}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 transition-colors hover:text-slate-300"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 transition-colors hover:text-white"
                 >
                   <UserCircle size={14} weight="duotone" />
                   {hasCustomerSession ? 'Minha conta de cliente' : 'Já tenho conta de cliente'}
@@ -333,7 +356,7 @@ export function LandingPage() {
               </div>
 
               {/* Trust strip */}
-              <div className="animate-in fade-in duration-700 delay-300 flex flex-wrap justify-center gap-x-6 gap-y-2 opacity-55 lg:justify-start">
+              <div className="animate-in fade-in duration-700 delay-300 flex flex-wrap justify-center gap-x-6 gap-y-2 opacity-75 lg:justify-start">
                 {[
                   { icon: ShieldCheck, text: '0% comissão', color: 'text-emerald-400' },
                   { icon: CurrencyDollar, text: 'Dinheiro direto na sua conta', color: 'text-sky-400' },
@@ -351,7 +374,16 @@ export function LandingPage() {
             {/* ── Right: premium payment/product preview ── */}
             <div className="animate-in zoom-in-95 fade-in duration-700 delay-250 relative flex items-center justify-center">
               <div className="pointer-events-none absolute -inset-8 rounded-full bg-[#00bcff]/10 blur-[90px]" />
-              <div className="relative w-full max-w-xl rounded-[2.25rem] border border-white/10 bg-white/[0.07] p-3 shadow-2xl backdrop-blur-2xl">
+              <div className="relative w-full max-w-xl rounded-[2.5rem] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.04))] p-3.5 shadow-[0_40px_90px_-48px_rgba(2,6,23,0.95)] backdrop-blur-2xl">
+                <div className="mb-3 flex items-center justify-between rounded-[1.3rem] border border-white/10 bg-white/[0.05] px-4 py-3 text-left backdrop-blur-xl">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-200">Fluxo unificado</p>
+                    <p className="mt-1 text-sm font-black text-white">Pedidos, pagamentos e entrega no mesmo ambiente</p>
+                  </div>
+                  <span className="hidden rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-emerald-200 sm:inline-flex">
+                    Ao vivo
+                  </span>
+                </div>
                 <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950/92">
                   <div className="border-b border-white/[0.07] bg-white/[0.035] p-5">
                     <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
@@ -588,7 +620,7 @@ export function LandingPage() {
       {/* ══════════════════════════════════════════════════════════════
           COMO FUNCIONA
       ══════════════════════════════════════════════════════════════ */}
-      <section className="border-y border-slate-100 bg-white py-24 sm:py-32">
+      <section className="border-y border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbfd_100%)] py-24 sm:py-32">
         <div className="mx-auto max-w-5xl px-4">
 
           <div className="mb-16 text-center space-y-3">
@@ -637,8 +669,8 @@ export function LandingPage() {
                 stepColor: 'text-indigo-400',
               },
             ].map(({ step, icon: Icon, title, desc, ringColor, bgColor, iconColor, stepColor }) => (
-              <div key={step} className="relative flex flex-col items-center text-center gap-5">
-                <div className={`relative z-10 flex h-[88px] w-[88px] flex-col items-center justify-center gap-1 rounded-3xl ring-2 ${ringColor} ${bgColor} shadow-sm`}>
+              <div key={step} className="relative flex flex-col items-center gap-5 rounded-[1.8rem] border border-slate-200/85 bg-white px-5 py-6 text-center shadow-[0_24px_46px_-36px_rgba(51,104,134,0.22)]">
+                <div className={`relative z-10 flex h-[88px] w-[88px] flex-col items-center justify-center gap-1 rounded-3xl ring-2 ${ringColor} ${bgColor} shadow-[0_18px_30px_-22px_rgba(15,23,42,0.28)]`}>
                   <Icon size={30} weight="duotone" className={iconColor} />
                   <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${stepColor}`}>{step}</span>
                 </div>
@@ -746,13 +778,13 @@ export function LandingPage() {
             </p>
           </div>
 
-          <div className="grid gap-px overflow-hidden rounded-3xl border border-white/[0.06] bg-white/[0.04] sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-px overflow-hidden rounded-[2rem] border border-white/[0.08] bg-white/[0.04] sm:grid-cols-2 lg:grid-cols-4">
             {features.map(({ icon: Icon, title, desc, accent }) => {
               const colors = accentMap[accent] || accentMap['sky'];
               return (
                 <div
                   key={title}
-                  className="group flex flex-col gap-4 bg-slate-950 p-6 transition-colors hover:bg-white/[0.03]"
+                  className="group flex flex-col gap-4 bg-[linear-gradient(180deg,rgba(2,6,23,0.98),rgba(2,6,23,0.94))] p-6 transition-colors hover:bg-white/[0.03]"
                 >
                   <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${colors.bg} transition-transform group-hover:scale-110`}>
                     <Icon size={22} weight="duotone" className={colors.icon} />
@@ -953,7 +985,7 @@ export function LandingPage() {
             </div>
 
             {/* Coluna direita — CTA + QR code */}
-            <div className="rounded-[2rem] border border-slate-200/80 bg-white/90 p-6 shadow-[0_24px_52px_-30px_rgba(15,23,42,0.32)] backdrop-blur-xl sm:p-8">
+            <div className="rounded-[2.15rem] border border-slate-200/85 bg-white/92 p-6 shadow-[0_28px_58px_-32px_rgba(15,23,42,0.3)] backdrop-blur-xl sm:p-8">
               <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-emerald-700">
                 <ShieldCheck size={13} weight="duotone" />
                 Disponível na Google Play
@@ -1046,7 +1078,7 @@ export function LandingPage() {
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
         <div className="relative mx-auto max-w-7xl px-4">
-          <div className="rounded-[3rem] border border-white/10 bg-white/[0.025] p-8 text-center backdrop-blur-2xl sm:p-16 space-y-10">
+          <div className="rounded-[3rem] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.02))] p-8 text-center shadow-[0_36px_80px_-42px_rgba(2,6,23,0.9)] backdrop-blur-2xl sm:p-16 space-y-10">
 
             <div className="space-y-5">
               <p className="text-[11px] font-black uppercase tracking-[0.4em] text-emerald-400">Vamos escalar?</p>

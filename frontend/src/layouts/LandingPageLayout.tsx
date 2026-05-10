@@ -205,19 +205,20 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
       className="min-h-screen bg-[linear-gradient(180deg,#0a1426_0px,#0e1d36_148px,#f8fafc_148px),radial-gradient(circle_at_top,_rgba(47,157,247,0.14),_transparent_48%),radial-gradient(circle_at_bottom_right,_rgba(95,211,90,0.16),_transparent_45%)] dark:bg-slate-950"
       style={{ fontFamily: 'Inter, Geist, system-ui, -apple-system, Segoe UI, sans-serif' }}
     >
-      <header className="fixed left-1/2 top-5 z-50 w-[calc(100%-1rem)] max-w-7xl -translate-x-1/2 sm:top-5 sm:w-[calc(100%-2rem)]">
-        <div className="relative rounded-[100px] border border-white/10 bg-[rgba(13,25,48,0.6)] px-4 py-3 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] backdrop-blur-[12px] ring-1 ring-white/6 sm:px-6 lg:px-8">
-          <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.16),transparent)]" />
+      <header className="fixed left-1/2 top-4 z-50 w-[calc(100%-1rem)] max-w-7xl -translate-x-1/2 sm:top-5 sm:w-[calc(100%-2rem)]">
+        <div className="relative overflow-hidden rounded-[1.7rem] border border-white/12 bg-[linear-gradient(135deg,rgba(8,16,31,0.88)_0%,rgba(12,24,45,0.72)_55%,rgba(9,18,35,0.88)_100%)] px-4 py-3 shadow-[0_18px_42px_-24px_rgba(2,6,23,0.75)] backdrop-blur-[16px] ring-1 ring-white/8 sm:rounded-[999px] sm:px-6 lg:px-8">
+          <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent)]" />
+          <div className="pointer-events-none absolute inset-x-16 bottom-0 h-px bg-[linear-gradient(90deg,transparent,rgba(148,163,184,0.12),transparent)]" />
           <div className="pointer-events-none absolute right-24 top-2 h-12 w-24 rounded-full bg-[#84cc16]/12 blur-2xl" />
           <div className="pointer-events-none absolute left-28 top-2 h-10 w-20 rounded-full bg-sky-400/12 blur-2xl" />
           <div className="relative flex items-center justify-between gap-4">
-            <a href="https://www.janocaminho.com.br" className="group ml-1 flex min-w-0 items-center gap-3 rounded-full pr-2 transition-colors hover:bg-white/[0.03]">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/85 bg-white p-0.5 shadow-[0_16px_30px_-22px_rgba(255,255,255,0.5)] transition-transform group-hover:scale-[1.03]">
-                <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
+            <a href="https://www.janocaminho.com.br" className="group ml-0.5 flex min-w-0 items-center gap-3 rounded-full pr-2 transition-colors hover:bg-white/[0.03]">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[1rem] border border-white/80 bg-white p-0.5 shadow-[0_18px_30px_-22px_rgba(255,255,255,0.5)] transition-transform group-hover:scale-[1.03]">
+                <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-[0.82rem] object-cover" />
               </div>
               <div className="min-w-0 leading-tight">
                 <p className="truncate text-base font-black tracking-[-0.03em] text-white sm:text-lg">Já no Caminho</p>
-                <p className="mt-1 text-[10px] font-black uppercase tracking-[0.2em] text-sky-200/78">Plataforma SaaS</p>
+                <p className="mt-1 truncate text-[10px] font-black uppercase tracking-[0.18em] text-sky-200/78">Sistema para vender, operar e entregar</p>
               </div>
             </a>
 
@@ -225,7 +226,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               <nav className="flex items-center gap-2">
                 <button
                   onClick={goHome}
-                  className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium tracking-[-0.02em] text-slate-300 transition-all hover:text-white"
+                  className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold tracking-[-0.02em] text-slate-300 transition-all hover:bg-white/[0.05] hover:text-white"
                 >
                   <House size={16} weight="duotone" className="text-sky-300" />
                   Início
@@ -238,7 +239,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                   <button
                     type="button"
                     onClick={() => setSolutionsMenuOpen((prev) => !prev)}
-                    className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium tracking-[-0.02em] text-slate-300 transition-all hover:text-white"
+                    className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold tracking-[-0.02em] text-slate-300 transition-all hover:bg-white/[0.05] hover:text-white"
                   >
                     <Buildings size={16} weight="duotone" className="text-emerald-300" />
                     Soluções
@@ -293,7 +294,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 </div>
                 <button
                   onClick={() => window.open('https://play.google.com/store/apps/details?id=com.janocaminho.app', '_blank', 'noopener,noreferrer')}
-                  className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium tracking-[-0.02em] text-slate-300 transition-all hover:text-white"
+                  className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold tracking-[-0.02em] text-slate-300 transition-all hover:bg-white/[0.05] hover:text-white"
                 >
                   <GooglePlayLogo size={16} weight="fill" className="text-emerald-400" />
                   Google Play
@@ -304,20 +305,20 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={goToAccessPortal}
-                className="hidden md:inline-flex items-center rounded-full px-3 py-2.5 text-sm font-medium tracking-[-0.02em] text-slate-300 transition-all hover:text-[#84cc16]"
+                className="hidden md:inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-sm font-semibold tracking-[-0.02em] text-slate-200 transition-all hover:bg-white/[0.08] hover:text-white"
               >
                 Entrar
               </button>
               <button
                 onClick={() => navigate('/create?plan=trial')}
-                className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(180deg,#a8ea37_0%,#84cc16_100%)] px-5 py-2.5 text-sm font-black tracking-[-0.02em] text-[#07111f] shadow-[0_12px_24px_-14px_rgba(132,204,22,0.52)] transition-all hover:scale-[1.02] hover:shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_16px_32px_-14px_rgba(132,204,22,0.58),0_0_22px_rgba(132,204,22,0.28)] active:scale-[0.985] sm:px-6"
+                className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(180deg,#b7ef53_0%,#84cc16_100%)] px-5 py-2.5 text-sm font-black tracking-[-0.02em] text-[#07111f] shadow-[0_16px_28px_-16px_rgba(132,204,22,0.62)] ring-1 ring-white/10 transition-all hover:scale-[1.02] hover:shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_20px_36px_-16px_rgba(132,204,22,0.62),0_0_24px_rgba(132,204,22,0.28)] active:scale-[0.985] sm:px-6"
               >
                 Criar loja grátis
               </button>
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(true)}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white transition hover:bg-white/[0.08] xl:hidden"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white transition hover:bg-white/[0.1] xl:hidden"
               >
                 <List size={20} weight="bold" />
               </button>
@@ -345,8 +346,8 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
         >
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4 dark:border-slate-800">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white p-0.5 shadow-sm dark:border-slate-700 dark:bg-slate-100">
-                <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-[0.95rem] border border-slate-200 bg-white p-0.5 shadow-sm dark:border-slate-700 dark:bg-slate-100">
+                <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-[0.78rem] object-cover" />
               </div>
               <div>
                 <p className="text-sm font-black text-slate-900 dark:text-slate-100">Já no Caminho</p>
@@ -532,9 +533,9 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
           <section className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 animate-in fade-in slide-in-from-bottom-3 duration-700 delay-100 motion-reduce:animate-none">
             <div>
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-white p-0.5">
-                  <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
-                </div>
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-[0.95rem] border border-slate-700 bg-white p-0.5">
+                  <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-[0.78rem] object-cover" />
+              </div>
                 <div>
                   <p className="text-base font-black text-white">Já no Caminho</p>
                   <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-500">Gestão de pedidos</p>
