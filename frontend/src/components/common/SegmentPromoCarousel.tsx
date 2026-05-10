@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { openActionTarget, resolveActionTarget } from '../../utils/actionLink';
 
 export type PromoSlide = {
   id: string;
@@ -48,6 +50,7 @@ export function SegmentPromoCarousel({
   slides,
   defaultActionUrl = '/create?plan=trial',
 }: SegmentPromoCarouselProps) {
+  const navigate = useNavigate();
   const [activeIndex, setActiveIndex] = useState(0);
   const touchStartXRef = useRef<number | null>(null);
   const suppressClickRef = useRef(false);
@@ -55,7 +58,10 @@ export function SegmentPromoCarousel({
   const interactive = mode !== 'hub';
   const activeSlides = slides && slides.length ? slides : PROMO_SLIDES;
   const currentSlide = activeSlides[activeIndex] || activeSlides[0];
-  const currentHref = currentSlide?.actionUrl || defaultActionUrl;
+  const currentTarget = useMemo(
+    () => resolveActionTarget(currentSlide?.actionUrl, defaultActionUrl),
+    [currentSlide?.actionUrl, defaultActionUrl]
+  );
 
   useEffect(() => {
     if (activeSlides.length <= 1) return undefined;
@@ -166,14 +172,19 @@ export function SegmentPromoCarousel({
   if (!interactive) {
     return (
       <a
-        href={currentHref}
+        href={currentTarget.href}
+        target={currentTarget.external ? '_blank' : undefined}
+        rel={currentTarget.external ? 'noopener noreferrer' : undefined}
         aria-label={currentSlide.imageAlt || 'Abrir banner do Já no Caminho'}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onClick={(event) => {
           if (suppressClickRef.current) {
             event.preventDefault();
+            return;
           }
+          event.preventDefault();
+          void openActionTarget(currentTarget, navigate);
         }}
         className={`group relative block overflow-hidden rounded-[1.65rem] border border-white bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out active:scale-[0.985] ${className}`}
       >
@@ -184,14 +195,19 @@ export function SegmentPromoCarousel({
 
   return (
     <a
-      href={currentHref}
+      href={currentTarget.href}
+      target={currentTarget.external ? '_blank' : undefined}
+      rel={currentTarget.external ? 'noopener noreferrer' : undefined}
       aria-label={currentSlide.imageAlt || 'Abrir banner do Já no Caminho'}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onClick={(event) => {
         if (suppressClickRef.current) {
           event.preventDefault();
+          return;
         }
+        event.preventDefault();
+        void openActionTarget(currentTarget, navigate);
       }}
       className={`group relative block overflow-hidden rounded-[1.65rem] border border-white bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out active:scale-[0.985] ${className}`}
     >

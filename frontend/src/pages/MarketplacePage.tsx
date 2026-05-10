@@ -54,6 +54,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { clearAllCustomerSessions } from '../utils/customerSessionStorage';
 import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
 import { DEFAULT_HOME_CONFIG, homeConfigService } from '../services/homeConfigService';
+import { openActionTarget, resolveActionTarget } from '../utils/actionLink';
 
 type MarketplaceStore = {
   id?: string;
@@ -843,7 +844,10 @@ export function MarketplacePage() {
     [homeConfig.homeBanners]
   );
   const marketingPopupImageUrl = resolveAssetUrl(homeConfig.marketingPopup.imageUrl) || '';
-  const marketingPopupActionUrl = String(homeConfig.marketingPopup.actionUrl || '').trim() || '/create?plan=trial';
+  const marketingPopupActionTarget = useMemo(
+    () => resolveActionTarget(homeConfig.marketingPopup.actionUrl, '/create?plan=trial'),
+    [homeConfig.marketingPopup.actionUrl]
+  );
   const savedAddressLocation = useMemo(() => {
     if (preferredDiscoveryAddress?.lat == null || preferredDiscoveryAddress?.lng == null) return null;
     return {
@@ -2577,8 +2581,14 @@ export function MarketplacePage() {
               <X size={19} weight="bold" />
             </button>
             <a
-              href={marketingPopupActionUrl}
-              onClick={dismissStorePromoPopup}
+              href={marketingPopupActionTarget.href}
+              target={marketingPopupActionTarget.external ? '_blank' : undefined}
+              rel={marketingPopupActionTarget.external ? 'noopener noreferrer' : undefined}
+              onClick={(event) => {
+                event.preventDefault();
+                dismissStorePromoPopup();
+                void openActionTarget(marketingPopupActionTarget, navigate);
+              }}
               className="group block overflow-hidden rounded-[1.85rem] border border-white/80 bg-white shadow-[0_28px_70px_-32px_rgba(15,23,42,0.72)] transition-all duration-200 ease-out active:scale-[0.985]"
               aria-label={homeConfig.marketingPopup.title || 'Abrir popup de marketing do Já no Caminho'}
             >
