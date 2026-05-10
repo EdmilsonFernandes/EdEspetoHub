@@ -2200,6 +2200,11 @@ export function MarketplacePage() {
     : isCustomerLogged
       ? `${currentDayGreeting}, ${customerFirstName}`
       : `${currentDayGreeting} — descubra o que pedir hoje`;
+  const hubHeaderSupportLabel = selectedCondominium
+    ? 'Agenda ativa para sua rotina local.'
+    : isCustomerLogged
+      ? 'Seu hub para pedir rápido, acompanhar e explorar novidades.'
+      : 'Lojas, promoções e pedidos rápidos em um só lugar.';
   const canOpenMarketingPopup =
     homeConfig.marketingPopup.active &&
     Boolean(marketingPopupImageUrl) &&
@@ -2689,9 +2694,10 @@ export function MarketplacePage() {
       >
         <header className={`sticky top-0 z-[60] transition-all duration-300 ${isNativePlatform ? 'bg-[#EEF2F7]/96 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.22)] backdrop-blur-xl' : isHeaderElevated ? 'bg-[#EEF2F7]/92 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.35)] backdrop-blur-2xl' : 'bg-transparent'}`}>
           <div className={`mx-auto max-w-[1200px] px-4 ${isNativePlatform ? 'pb-2 pt-[max(0.55rem,calc(env(safe-area-inset-top)+0.1rem))]' : 'pb-3 pt-[max(0.85rem,calc(env(safe-area-inset-top)+0.2rem))]'}`}>
-            <div className={`${isNativePlatform ? 'space-y-2.5 rounded-[1.65rem] px-2.5 py-2.5' : 'space-y-3 rounded-[1.9rem] px-3 py-3'} relative overflow-hidden border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.95)_0%,rgba(241,247,246,0.9)_54%,rgba(255,255,255,0.92)_100%)] shadow-[0_22px_54px_-38px_rgba(15,23,42,0.46)] ring-1 ring-slate-200/55 backdrop-blur-2xl`}>
-            <div className="pointer-events-none absolute -left-12 -top-16 h-36 w-36 rounded-full bg-[#336886]/10 blur-3xl" />
-            <div className="pointer-events-none absolute -right-10 top-6 h-28 w-28 rounded-full bg-emerald-200/35 blur-3xl" />
+            <div className={`${isNativePlatform ? 'space-y-2.5 rounded-[1.75rem] px-2.5 py-2.5' : 'space-y-3.5 rounded-[2rem] px-3 py-3'} relative overflow-hidden border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.96)_0%,rgba(244,248,251,0.92)_48%,rgba(255,255,255,0.94)_100%)] shadow-[0_24px_58px_-38px_rgba(15,23,42,0.44)] ring-1 ring-slate-200/60 backdrop-blur-2xl`}>
+            <div className="pointer-events-none absolute -left-12 -top-16 h-36 w-36 rounded-full bg-[#336886]/12 blur-3xl" />
+            <div className="pointer-events-none absolute -right-10 top-6 h-28 w-28 rounded-full bg-emerald-200/30 blur-3xl" />
+            <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
             {/* Linha 1: Perfil e Logo */}
             <div className="relative flex items-center justify-between gap-2">
               <div className="flex min-w-0 flex-1 items-center gap-2.5">
@@ -2701,20 +2707,49 @@ export function MarketplacePage() {
                   hasNotification={!isCustomerLogged}
                   onClick={() => setProfileDrawerOpen(true)}
                 />
-                <div className="min-w-0 flex-1 rounded-[1.35rem] border border-white/75 bg-white/72 px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_14px_30px_-26px_rgba(15,23,42,0.34)] ring-1 ring-slate-950/5 backdrop-blur-sm">
-                  <div className="mb-0.5 flex items-center gap-1.5">
-                    <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-4 w-4 shrink-0 rounded-[0.4rem] object-cover shadow-[0_2px_6px_-2px_rgba(21,58,76,0.3)]" />
-                    <p className="truncate text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
-                      {hubHeaderEyebrow}
-                    </p>
+                <div className="min-w-0 flex-1 rounded-[1.45rem] border border-white/75 bg-white/78 px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_16px_34px_-28px_rgba(15,23,42,0.34)] ring-1 ring-slate-950/5 backdrop-blur-sm">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex flex-1 items-center gap-2.5">
+                      <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-[1rem] border border-slate-200/85 bg-white p-0.5 shadow-[0_14px_26px_-20px_rgba(15,23,42,0.26)]">
+                        <img
+                          src="/janocaminho.jpg"
+                          alt="Já no Caminho"
+                          loading="eager"
+                          fetchPriority="high"
+                          decoding="async"
+                          className="h-full w-full rounded-[0.85rem] object-cover"
+                        />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">
+                          Já no Caminho
+                        </p>
+                        <p className="mt-0.5 truncate text-[12px] font-extrabold text-slate-600">
+                          {hubHeaderEyebrow}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="hidden shrink-0 rounded-full border border-slate-200 bg-slate-50/90 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-500 shadow-sm sm:inline-flex">
+                      Hub
+                    </span>
                   </div>
                   <button
                     type="button"
-                    className="inline-flex w-full min-w-0 items-center justify-between gap-2 text-left text-[14px] font-black text-slate-950 transition-colors duration-150 ease-out hover:text-[#336886] active:scale-[0.99]"
+                    className="mt-2.5 flex w-full min-w-0 items-start justify-between gap-2 rounded-[1.15rem] border border-slate-200/85 bg-[linear-gradient(135deg,rgba(248,250,252,0.96),rgba(255,255,255,0.98))] px-3 py-2.5 text-left transition-all duration-150 ease-out hover:border-[#336886]/18 hover:shadow-[0_16px_30px_-24px_rgba(51,104,134,0.25)] active:scale-[0.99]"
                     onClick={() => setQuickFilter((prev) => (prev === 'nearby' ? 'all' : 'nearby'))}
                   >
-                    <span className="truncate">{displayLocationLabel}</span>
-                    <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[#336886]">
+                    <span className="min-w-0">
+                      <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                        Onde pedir
+                      </span>
+                      <span className="mt-1 block truncate text-[14px] font-black text-slate-950">
+                        {displayLocationLabel}
+                      </span>
+                      <span className="mt-1 block truncate text-[11px] font-semibold text-slate-500">
+                        {hubHeaderSupportLabel}
+                      </span>
+                    </span>
+                    <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#336886]/8 text-[#336886]">
                       <CaretDown size={13} weight="bold" />
                     </span>
                   </button>
@@ -2724,7 +2759,7 @@ export function MarketplacePage() {
               <button
                 type="button"
                 onClick={handleHubNotificationClick}
-                className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] border border-[#336886]/18 bg-[#153A4C] text-white shadow-[0_14px_26px_-18px_rgba(21,58,76,0.55)] ring-1 ring-[#336886]/10 backdrop-blur-sm transition-all duration-150 ease-out hover:bg-[#1e4d62] active:scale-95"
+                className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.2rem] border border-[#336886]/18 bg-[linear-gradient(160deg,#153A4C,#244f66)] text-white shadow-[0_16px_30px_-18px_rgba(21,58,76,0.52)] ring-1 ring-[#336886]/10 backdrop-blur-sm transition-all duration-150 ease-out hover:brightness-[1.04] active:scale-95"
                 aria-label={hubNotificationCount > 0 ? `${hubNotificationCount} notificação de pedido` : 'Abrir notificações'}
                 title={hubNotificationCount > 0 ? 'Pedidos em andamento' : 'Notificações'}
               >
@@ -2743,7 +2778,7 @@ export function MarketplacePage() {
             {/* Linha 2: Busca Premium */}
             <div className="relative z-20">
               <div
-                className={`group relative isolate flex items-center gap-3 overflow-hidden border border-slate-200/80 bg-white px-3.5 transition-[border-color,box-shadow] duration-200 ease-out hover:border-slate-300 focus-within:border-[#336886]/25 focus-within:shadow-[0_18px_40px_-24px_rgba(51,104,134,0.28)] focus-within:ring-2 focus-within:ring-[#336886]/10 ${isNativePlatform ? 'min-h-[50px] rounded-[1.35rem] shadow-[0_14px_30px_-24px_rgba(15,23,42,0.25)]' : 'min-h-[54px] rounded-[1.55rem] shadow-[0_16px_34px_-26px_rgba(15,23,42,0.28)]'}`}
+                className={`group relative isolate flex items-center gap-3 overflow-hidden border border-slate-200/85 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(249,250,251,0.96))] px-3.5 transition-[border-color,box-shadow] duration-200 ease-out hover:border-slate-300 focus-within:border-[#336886]/25 focus-within:shadow-[0_18px_40px_-24px_rgba(51,104,134,0.28)] focus-within:ring-2 focus-within:ring-[#336886]/10 ${isNativePlatform ? 'min-h-[50px] rounded-[1.4rem] shadow-[0_16px_30px_-24px_rgba(15,23,42,0.24)]' : 'min-h-[54px] rounded-[1.62rem] shadow-[0_18px_36px_-28px_rgba(15,23,42,0.26)]'}`}
                 onClick={(e) => {
                   if ((e.target as HTMLElement).closest('button')) return;
                   searchInputRef.current?.focus();
@@ -2797,6 +2832,10 @@ export function MarketplacePage() {
 
             {/* Linha 3: Filtros Minimalistas (Pílulas) */}
             <div className={`relative -mx-0.5 ${isNativePlatform ? 'py-0.5' : 'py-1'}`}>
+              <div className="mb-2 flex items-center justify-between px-1">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Atalhos rápidos</p>
+                <p className="text-[10px] font-semibold text-slate-500">Filtre em um toque</p>
+              </div>
               <div className="flex gap-2 overflow-x-auto no-scrollbar scrollbar-hide px-0.5">
               {(['free_shipping', 'nearby', 'open_now', 'favorites'] as const).map((filter) => {
                 const label =
@@ -2834,7 +2873,7 @@ export function MarketplacePage() {
                         }, 120);
                       }
                     }}
-                    className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border ${isNativePlatform ? 'px-3 py-1.5' : 'px-3.5 py-1.5'} text-[12px] transition-all duration-200 ease-out active:scale-[0.97] shadow-[0_6px_16px_-10px_rgba(15,23,42,0.18)] ${active ? `font-black ${activeStyle}` : `font-bold ${inactiveStyle}`}`}
+                    className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border ${isNativePlatform ? 'px-3 py-1.5' : 'px-3.5 py-1.5'} text-[12px] transition-all duration-200 ease-out active:scale-[0.97] shadow-[0_8px_18px_-12px_rgba(15,23,42,0.16)] ${active ? `font-black ${activeStyle}` : `font-bold ${inactiveStyle}`}`}
                   >
                     <Icon size={13} weight={active ? 'fill' : 'duotone'} />
                     {label}
@@ -2951,19 +2990,28 @@ export function MarketplacePage() {
           {/* Carrossel de Banners - Esconde na busca para focar no resultado */}
           {debouncedQuery.length < 2 && !selectedCondominium && homePromoSlides.length > 0 && (
             <div className="animate-in fade-in slide-in-from-top-4 duration-500" style={{ animationDelay: '80ms' }}>
-              <section className="relative overflow-hidden rounded-[2.15rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.92)_0%,rgba(248,250,252,0.86)_100%)] p-2.5 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.38)] ring-1 ring-slate-200/60 backdrop-blur-xl">
-                <div className="pointer-events-none absolute -left-10 -top-12 h-32 w-32 rounded-full bg-[#336886]/10 blur-3xl" />
-                <div className="pointer-events-none absolute -right-8 bottom-0 h-28 w-28 rounded-full bg-emerald-200/35 blur-3xl" />
-                <div className="relative mb-2 flex items-center justify-between px-2">
+              <section className="relative overflow-hidden rounded-[2.25rem] border border-white/85 bg-[linear-gradient(180deg,rgba(255,255,255,0.94)_0%,rgba(247,250,252,0.9)_100%)] p-3 shadow-[0_26px_60px_-38px_rgba(15,23,42,0.38)] ring-1 ring-slate-200/65 backdrop-blur-xl">
+                <div className="pointer-events-none absolute -left-10 -top-12 h-32 w-32 rounded-full bg-[#336886]/12 blur-3xl" />
+                <div className="pointer-events-none absolute -right-8 bottom-0 h-28 w-28 rounded-full bg-emerald-200/30 blur-3xl" />
+                <div className="relative mb-3 flex items-center justify-between px-2">
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">Destaques</p>
-                    <p className="mt-0.5 text-xs font-semibold text-slate-500">Novidades e oportunidades para começar melhor.</p>
+                    <p className="mt-0.5 text-xs font-semibold text-slate-500">Novidades e oportunidades para começar com mais clareza.</p>
                   </div>
-                  <span className="hidden rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 shadow-sm sm:inline-flex">
+                  <span className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/88 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 shadow-sm sm:inline-flex">
+                    <span className="inline-flex h-6 w-6 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white p-0.5">
+                      <img
+                        src="/janocaminho.jpg"
+                        alt="Já no Caminho"
+                        loading="lazy"
+                        decoding="async"
+                        className="h-full w-full rounded-full object-cover"
+                      />
+                    </span>
                     Hub
                   </span>
                 </div>
-                <SegmentPromoCarousel mode="hub" slides={homePromoSlides} className="mx-0 shadow-[0_18px_42px_-28px_rgba(15,23,42,0.45)]" />
+                <SegmentPromoCarousel mode="hub" slides={homePromoSlides} className="mx-0 shadow-[0_20px_44px_-28px_rgba(15,23,42,0.4)]" />
               </section>
             </div>
           )}

@@ -141,7 +141,7 @@ export function SegmentPromoCarousel({
                   src={slide.image}
                   alt=""
                   aria-hidden="true"
-                  className="absolute inset-0 h-full w-full scale-110 object-cover object-center opacity-28 blur-xl"
+                  className="absolute inset-0 h-full w-full scale-110 object-cover object-center opacity-32 blur-xl"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-slate-950/10 via-transparent to-slate-950/10" />
               </>
@@ -150,23 +150,22 @@ export function SegmentPromoCarousel({
               src={slide.image}
               alt={slide.imageAlt}
               loading="lazy"
-              className={`relative z-[1] h-full w-full object-center ${slide.fit === 'cover' ? 'object-cover' : 'object-contain'}`}
+              className={`relative z-[1] h-full w-full object-center transition-transform duration-700 ${index === activeIndex ? 'scale-100' : 'scale-[1.02]'} ${slide.fit === 'cover' ? 'object-cover' : 'object-contain'}`}
             />
-            {slide.id !== 'mercado-pago' && (
-              <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-slate-950/28 via-transparent to-transparent" />
-            )}
+            <div className="pointer-events-none absolute inset-0 z-[2] bg-[linear-gradient(180deg,rgba(15,23,42,0.02)_0%,rgba(15,23,42,0)_45%,rgba(15,23,42,0.18)_100%)]" />
           </div>
         ))}
+        <div className="pointer-events-none absolute inset-[1px] rounded-[1.55rem] border border-white/18" />
       </div>
 
       {hasConfiguredAction && currentActionLabel ? (
-        <div className="pointer-events-none absolute bottom-2 right-2 z-[3] inline-flex max-w-[72%] rounded-full border border-white/70 bg-white/92 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-slate-900 shadow-[0_10px_22px_-14px_rgba(15,23,42,0.5)] backdrop-blur-md sm:bottom-3 sm:right-3 sm:max-w-[58%] sm:px-3 sm:py-1.5 sm:text-[10px]">
-          <span className="truncate">{currentActionLabel} →</span>
+        <div className="pointer-events-none absolute bottom-2 right-2 z-[3] inline-flex max-w-[74%] rounded-full border border-white/16 bg-slate-950/76 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-white shadow-[0_12px_24px_-14px_rgba(15,23,42,0.7)] backdrop-blur-md sm:bottom-3 sm:right-3 sm:max-w-[58%] sm:px-3 sm:py-1.5 sm:text-[10px]">
+          <span className="truncate">{currentActionLabel}</span>
         </div>
       ) : null}
 
       <div className="absolute inset-x-0 bottom-0 flex justify-center pb-1.5 sm:pb-2">
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-slate-950/20 px-2 py-0.5 backdrop-blur-md">
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-white/18 bg-slate-950/34 px-2 py-0.5 backdrop-blur-md">
           {activeSlides.map((slide, index) => (
             <button
               type="button"
@@ -177,7 +176,7 @@ export function SegmentPromoCarousel({
                 goToSlide(index);
               }}
               className={`rounded-full transition-all ${
-                index === activeIndex ? 'h-1.5 w-5 bg-white' : 'h-1.5 w-1.5 bg-white/65'
+                index === activeIndex ? 'h-1.5 w-5 bg-white' : 'h-1.5 w-1.5 bg-white/55'
               }`}
             ></button>
           ))}
@@ -207,7 +206,7 @@ export function SegmentPromoCarousel({
           event.preventDefault();
           void openActionTarget(currentTarget, navigate);
         }}
-        className={`group relative block overflow-hidden rounded-[1.65rem] border border-white bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out active:scale-[0.985] ${className}`}
+        className={`group relative block overflow-hidden rounded-[1.72rem] border border-white/90 bg-white shadow-[0_12px_28px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/50 transition-all duration-200 ease-out active:scale-[0.985] ${className}`}
       >
         {content}
       </a>
@@ -234,7 +233,7 @@ export function SegmentPromoCarousel({
         event.preventDefault();
         void openActionTarget(currentTarget, navigate);
       }}
-      className={`group relative block overflow-hidden rounded-[1.65rem] border border-white bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out active:scale-[0.985] ${className}`}
+      className={`group relative block overflow-hidden rounded-[1.72rem] border border-white/90 bg-white shadow-[0_12px_28px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/50 transition-all duration-200 ease-out active:scale-[0.985] ${className}`}
     >
       {content}
     </a>
