@@ -3697,6 +3697,15 @@ export function MarketplacePage() {
                       {/* Content */}
                       <div className="px-3.5 pb-3.5 pt-[1.65rem]">
                         <h3 className={`truncate text-[14.5px] font-black leading-tight ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>
+                          {/* Adicionando o ponto de status */}
+                          {!isCondominiumScope && ( // Exibir ponto de status apenas se não estiver em modo condomínio
+                            <span
+                              className={`inline-block w-2 h-2 rounded-full mr-1 ${store.isOpen ? 'bg-green-500' : 'bg-red-500'}`}
+                              style={{
+                                boxShadow: store.isOpen ? '0 0 6px 1px rgba(34, 197, 94, 0.4)' : '0 0 6px 1px rgba(239, 68, 68, 0.4)',
+                              }}
+                            />
+                          )}
                           {store.name}
                         </h3>
                         <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[10.5px] font-medium text-slate-500">
@@ -3715,27 +3724,39 @@ export function MarketplacePage() {
                             </>
                           )}
                         </div>
+                        {/* SEÇÃO REESTRUTURADA DE BADGES */}
+                        {store.isOpen && (
+                          <div className="mt-2.5 flex flex-col gap-1.5">
+                            {/* Selo Primário */}
+                            {primaryBadge && (
+                              <span
+                                key={`${store.id}-${primaryBadge.key}`}
+                                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] ${primaryBadge.className} ${primaryBadge.key === 'open_now' ? 'animate-pulse' : ''}`}
+                              >
+                                {primaryBadge.icon ? (
+                                  <primaryBadge.icon size={11} weight="duotone" className={primaryBadge.iconClassName || 'text-sky-700'} />
+                                ) : null}
+                                {primaryBadge.label}
+                              </span>
+                            )}
+                            {/* Selo Secundário (se existir) */}
+                            {secondaryBadge && (
+                              <span
+                                key={`${store.id}-${secondaryBadge.key}`}
+                                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[9px] font-semibold ${secondaryBadge.className.replace('border-emerald-100 bg-emerald-50 text-emerald-700', 'border-emerald-200 bg-emerald-50/80 text-emerald-700').replace('border-slate-800/85 bg-[linear-gradient(135deg,#0f172a_0%,#1e293b_100%)] text-white ring-1 ring-white/10', 'border-slate-700/85 bg-[linear-gradient(135deg,#1f2a3c_0%,#2e3a4c_100%)] text-white ring-1 ring-white/15')} ${secondaryBadge.key === 'favorite_hint' ? 'animate-bounce' : ''}`}
+                              >
+                                {secondaryBadge.icon ? (
+                                  <secondaryBadge.icon size={9} weight="fill" className={secondaryBadge.iconClassName || 'text-sky-700'} />
+                                ) : null}
+                                {secondaryBadge.label}
+                              </span>
+                            )}
+                          </div>
+                        )}
                         {!store.isOpen && (
                           <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-[9.5px] font-bold text-slate-500">
                             {store.nextOpeningLabel || 'Sem horário cadastrado'}
                           </p>
-                        )}
-                        {store.isOpen && (primaryBadge || secondaryBadge) && (
-                          <div className="mt-2.5 flex flex-wrap gap-1.5">
-                            {[primaryBadge, secondaryBadge].filter(Boolean).map((badge) => {
-                              if (!badge) return null;
-                              const BadgeIcon = badge.icon;
-                              return (
-                                <span
-                                  key={`${store.id}-${badge.key}`}
-                                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] ${badge.className}`}
-                                >
-                                  <BadgeIcon size={9} weight="fill" className={badge.iconClassName || ''} />
-                                  {badge.label}
-                                </span>
-                              );
-                            })}
-                          </div>
                         )}
                       </div>
                     </Link>
