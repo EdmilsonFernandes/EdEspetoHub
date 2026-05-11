@@ -3721,7 +3721,7 @@ export function MarketplacePage() {
                           {!isCondominiumScope && (
                             <>
                               <span className="text-slate-200">·</span>
-                              <span>{distanceLoading && activeLocation && distanceByStore[store.id] == null ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)}</span>
+                              <span>{distanceLoading && activeLocation && distanceByStore[store.id] == null ? '...' : `A ${formatDistance(distanceByStore[store.id] ?? store.distanceKm)}`}</span>
                             </>
                           )}
                         </div>
