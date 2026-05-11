@@ -25,6 +25,16 @@ flowchart TD
 - **Lojista**: solicita participação em chalés/pousadas onde realmente entrega pela aba `Admin > Destinos`.
 - **Cliente/turista**: navega por `/destinos`, escolhe cidade, hospedagem e loja/serviço.
 
+## Quem cadastra os serviços
+
+Serviço é qualquer item de curadoria do destino que não precisa ser uma loja com cardápio dentro do app: passeio, massagem, restaurante para visitar, atrativo, experiência noturna, guia local ou loja turística.
+
+- **SuperAdmin cadastra diretamente** quando a plataforma está montando a vitrine inicial da cidade.
+- **Prestador solicita pelo formulário público** em `/destinos/cadastrar`, escolhendo o tipo de parceiro como serviço/prestador. Depois da aprovação, o pedido vira um serviço publicado no destino.
+- **Lojista da plataforma pode aparecer de duas formas**: como loja vinculada a um chalé/pousada para delivery, ou como serviço/listing editorial quando fizer sentido aparecer como lugar para visitar.
+
+Quando o visitante toca em `Pedir informações`, o WhatsApp abre com uma mensagem contextual informando a cidade/destino e o serviço escolhido.
+
 ## Cadastro de cidades e chalés
 
 1. Acesse `/superadmin/destinations`.

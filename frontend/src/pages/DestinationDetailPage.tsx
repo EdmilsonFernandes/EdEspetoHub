@@ -5,6 +5,7 @@ import { ArrowRight, Bed, Buildings, Compass, ForkKnife, MapPinLine, Mountains, 
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
+import { buildDestinationInquiryMessage, buildWhatsAppUrl } from '../utils/destinationWhatsApp';
 
 const asset = (item: any, variant: 'logo' | 'banner' | 'image' = 'banner') => {
   const source =
@@ -85,6 +86,13 @@ export function DestinationDetailPage() {
                 <p className="mt-5 max-w-2xl text-base font-semibold leading-relaxed text-white/72">
                   {destination.heroSubtitle || destination.description || 'Hospedagens, lojas e experiências cadastradas neste destino.'}
                 </p>
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {['Curadoria Já no Caminho', 'Hospedagens aprovadas', 'Serviços locais'].map((label) => (
+                    <span key={label} className="rounded-full border border-white/12 bg-white/10 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.14em] text-white/82 backdrop-blur">
+                      {label}
+                    </span>
+                  ))}
+                </div>
               </div>
               <div className="overflow-hidden rounded-[2rem] border border-white/12 bg-white/10 p-3 shadow-[0_28px_80px_-38px_rgba(0,0,0,0.65)] backdrop-blur">
                 <div className="relative h-64 overflow-hidden rounded-[1.45rem] bg-slate-900">
@@ -163,8 +171,19 @@ export function DestinationDetailPage() {
                 <Sparkle size={25} weight="duotone" className="text-amber-700" />
               </div>
               <div className="mt-4 space-y-3">
-                {listings.map((listing: any) => (
-                  <article key={listing.id} className="rounded-[1.35rem] border border-slate-100 bg-slate-50/70 p-3">
+                {listings.map((listing: any) => {
+                  const contactTarget = listing.whatsapp || listing.ctaUrl || '';
+                  const isExternalUrl = String(contactTarget || '').startsWith('http');
+                  const whatsappMessage = buildDestinationInquiryMessage({
+                    destinationName: destination.name,
+                    city: destination.city,
+                    state: destination.state,
+                    itemName: listing.title,
+                    itemType: categoryLabel(listing.category),
+                  });
+                  const contactHref = isExternalUrl ? contactTarget : buildWhatsAppUrl(contactTarget, whatsappMessage);
+                  return (
+                  <article key={listing.id} className="overflow-hidden rounded-[1.55rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.45)]">
                     <div className="flex gap-3">
                       <img src={asset(listing, 'image')} alt={listing.title} className="h-16 w-16 rounded-2xl object-cover" />
                       <div className="min-w-0 flex-1">
@@ -174,15 +193,15 @@ export function DestinationDetailPage() {
                       </div>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {listing.whatsapp || listing.ctaUrl ? (
+                      {contactHref ? (
                         <a
-                          href={String(listing.ctaUrl || listing.whatsapp || '').startsWith('http') ? listing.ctaUrl : `https://wa.me/${String(listing.ctaUrl || listing.whatsapp || '').replace(/\D/g, '')}`}
+                          href={contactHref}
                           target="_blank"
                           rel="noreferrer"
                           className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-3 py-1.5 text-[11px] font-black text-white"
                         >
                           <WhatsappLogo size={13} weight="fill" />
-                          Contato
+                          Pedir informações
                         </a>
                       ) : null}
                       {listing.address ? (
@@ -193,7 +212,8 @@ export function DestinationDetailPage() {
                       ) : null}
                     </div>
                   </article>
-                ))}
+                  );
+                })}
                 {listings.length === 0 ? (
                   <p className="rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-500">
                     Nenhum serviço aprovado ainda.

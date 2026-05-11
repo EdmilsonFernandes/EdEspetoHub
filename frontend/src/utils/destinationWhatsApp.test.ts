@@ -1,0 +1,46 @@
+import { describe, expect, it } from 'vitest';
+import {
+  buildDestinationInquiryMessage,
+  buildWhatsAppUrl,
+  normalizeWhatsAppPhone,
+  prettifyDestinationLabel,
+} from './destinationWhatsApp';
+
+describe('destinationWhatsApp', () => {
+  it('normalizes Brazilian phone numbers for WhatsApp', () => {
+    expect(normalizeWhatsAppPhone('(12) 99700-0000')).toBe('5512997000000');
+    expect(normalizeWhatsAppPhone('+55 12 99700-0000')).toBe('5512997000000');
+    expect(normalizeWhatsAppPhone('')).toBe('');
+  });
+
+  it('builds WhatsApp URLs with an encoded contextual message', () => {
+    const url = buildWhatsAppUrl('12997000000', 'Ola! Quero saber mais.');
+
+    expect(url).toBe('https://wa.me/5512997000000?text=Ola!%20Quero%20saber%20mais.');
+  });
+
+  it('builds native WhatsApp URLs when requested', () => {
+    const url = buildWhatsAppUrl('12997000000', 'Pedido pelo app', true);
+
+    expect(url).toBe('whatsapp://send?phone=5512997000000&text=Pedido%20pelo%20app');
+  });
+
+  it('creates a message with destination, place and selected service context', () => {
+    const message = buildDestinationInquiryMessage({
+      destinationName: 'Sao Bento Sapucai',
+      city: 'Sao Bento Sapucai',
+      state: 'SP',
+      itemName: 'Massagem relaxante',
+      itemType: 'massagem',
+      placeName: 'Chale Vista da Pedra',
+    });
+
+    expect(message).toContain('Encontrei Massagem relaxante pelo J\u00e1 no Caminho');
+    expect(message).toContain('Estou visitando Sao Bento Sapucai - SP enquanto estou vendo op\u00e7\u00f5es para Chale Vista da Pedra.');
+    expect(message).toContain('Gostaria de saber mais sobre massagem');
+  });
+
+  it('prettifies slugs used as fallback labels', () => {
+    expect(prettifyDestinationLabel('sao-bento_sapucai')).toBe('Sao Bento Sapucai');
+  });
+});

@@ -44,12 +44,13 @@ const normalizeWhatsApp = (value) => {
   return digits.startsWith("55") ? digits : `55${digits}`;
 };
 
-const openWhatsAppContact = (value, event) => {
+const openWhatsAppContact = (value, event, message = "") => {
   const phone = normalizeWhatsApp(value);
   if (!phone) return;
+  const encodedMessage = message ? encodeURIComponent(message) : "";
 
-  const nativeUrl = `whatsapp://send?phone=${phone}`;
-  const webUrl = `https://wa.me/${phone}`;
+  const nativeUrl = encodedMessage ? `whatsapp://send?phone=${phone}&text=${encodedMessage}` : `whatsapp://send?phone=${phone}`;
+  const webUrl = encodedMessage ? `https://wa.me/${phone}?text=${encodedMessage}` : `https://wa.me/${phone}`;
 
   if (event) {
     event.preventDefault();
@@ -116,6 +117,7 @@ const Header = ({
   segment,
   instagramHandle,
   whatsappNumber,
+  whatsappMessage,
   onOpenQueue,
   onOpenAdmin,
   onLogout,
@@ -452,10 +454,10 @@ const Header = ({
                   )}
                   {normalizeWhatsApp(whatsappNumber) && (
                     <a
-                      href={`https://wa.me/${normalizeWhatsApp(whatsappNumber)}`}
+                      href={whatsappMessage ? `https://wa.me/${normalizeWhatsApp(whatsappNumber)}?text=${encodeURIComponent(whatsappMessage)}` : `https://wa.me/${normalizeWhatsApp(whatsappNumber)}`}
                       target="_blank"
                       rel="noreferrer"
-                      onClick={(event) => openWhatsAppContact(whatsappNumber, event)}
+                      onClick={(event) => openWhatsAppContact(whatsappNumber, event, whatsappMessage)}
                       className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-600 hover:bg-emerald-100 transition"
                     >
                       <img src="/whatspp.jpg" alt="WhatsApp" className="h-3.5 w-3.5 rounded-full" />
@@ -543,6 +545,7 @@ export const MenuView = ({
   segment,
   instagramHandle,
   whatsappNumber,
+  whatsappMessage = "",
   promoMessage,
   storeAddress,
   storeCoords,
@@ -1065,6 +1068,7 @@ export const MenuView = ({
           segment={segment}
           instagramHandle={instagramHandle}
           whatsappNumber={whatsappNumber}
+          whatsappMessage={whatsappMessage}
           onOpenQueue={onOpenQueue}
           onOpenAdmin={onOpenAdmin}
           onLogout={onLogout}
@@ -1737,10 +1741,10 @@ export const MenuView = ({
                   <div className="mt-4 space-y-3">
                     {normalizeWhatsApp(whatsappNumber) ? (
                       <a
-                        href={`https://wa.me/${normalizeWhatsApp(whatsappNumber)}`}
+                        href={whatsappMessage ? `https://wa.me/${normalizeWhatsApp(whatsappNumber)}?text=${encodeURIComponent(whatsappMessage)}` : `https://wa.me/${normalizeWhatsApp(whatsappNumber)}`}
                         target="_blank"
                         rel="noreferrer"
-                        onClick={(event) => openWhatsAppContact(whatsappNumber, event)}
+                        onClick={(event) => openWhatsAppContact(whatsappNumber, event, whatsappMessage)}
                         className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm"
                       >
                         <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">

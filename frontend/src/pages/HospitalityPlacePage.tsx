@@ -6,6 +6,7 @@ import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatCurrency } from '../utils/format';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
+import { buildDestinationInquiryMessage, buildWhatsAppUrl } from '../utils/destinationWhatsApp';
 
 const imageFor = (item: any) =>
   resolveAssetUrl(item?.bannerUrl || item?.imageUrl || item?.logoUrl || item?.store?.settings?.bannerUrl || item?.store?.settings?.logoUrl || '') ||
@@ -74,9 +75,20 @@ export function HospitalityPlacePage() {
                   </span>
                 ) : null}
                 {place.whatsapp ? (
-                  <a href={`https://wa.me/${String(place.whatsapp).replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-3 py-1.5 text-xs font-black text-white">
+                  <a
+                    href={buildWhatsAppUrl(place.whatsapp, buildDestinationInquiryMessage({
+                      destinationName: destination.name,
+                      city: destination.city,
+                      state: destination.state,
+                      itemName: place.name,
+                      itemType: 'hospedagem',
+                    }))}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-3 py-1.5 text-xs font-black text-white"
+                  >
                     <WhatsappLogo size={14} weight="fill" />
-                    WhatsApp
+                    Falar sobre a hospedagem
                   </a>
                 ) : null}
               </div>
@@ -107,7 +119,7 @@ export function HospitalityPlacePage() {
                 return (
                   <Link
                     key={`${entry.id}-${store.id}`}
-                    to={`/${store.slug}?destino=${encodeURIComponent(destination.slug || destinationSlug)}&hospedagem=${encodeURIComponent(place.slug || placeSlug)}`}
+                    to={`/${store.slug}?destino=${encodeURIComponent(destination.slug || destinationSlug)}&destino_nome=${encodeURIComponent(destination.name || destination.city || destinationSlug)}&hospedagem=${encodeURIComponent(place.slug || placeSlug)}&hospedagem_nome=${encodeURIComponent(place.name || placeSlug)}`}
                     className="group overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_18px_48px_-36px_rgba(15,23,42,0.45)] transition hover:-translate-y-1"
                   >
                     <div className="relative h-40 overflow-hidden bg-slate-100">
@@ -149,18 +161,43 @@ export function HospitalityPlacePage() {
                 <Sparkle size={25} weight="duotone" className="text-amber-700" />
               </div>
               <div className="mt-4 space-y-3">
-                {listings.map((listing: any) => (
+                {listings.map((listing: any) => {
+                  const contactTarget = listing.whatsapp || listing.ctaUrl || '';
+                  const isExternalUrl = String(contactTarget || '').startsWith('http');
+                  const contactHref = isExternalUrl
+                    ? contactTarget
+                    : buildWhatsAppUrl(contactTarget, buildDestinationInquiryMessage({
+                        destinationName: destination.name,
+                        city: destination.city,
+                        state: destination.state,
+                        itemName: listing.title,
+                        itemType: String(listing.category || 'serviço').replace('_', ' '),
+                        placeName: place.name,
+                      }));
+                  return (
                   <article key={listing.id} className="rounded-[1.35rem] border border-slate-100 bg-slate-50/70 p-3">
                     <div className="flex gap-3">
                       <img src={imageFor(listing)} alt={listing.title} className="h-14 w-14 rounded-2xl object-cover" />
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[#336886]">{String(listing.category || 'SERVICO').replace('_', ' ')}</p>
                         <h3 className="mt-0.5 text-sm font-black text-slate-950">{listing.title}</h3>
                         <p className="mt-1 line-clamp-2 text-xs font-semibold text-slate-500">{listing.description || listing.address || 'Serviço cadastrado.'}</p>
                       </div>
                     </div>
+                    {contactHref ? (
+                      <a
+                        href={contactHref}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-3 inline-flex items-center gap-1 rounded-full bg-emerald-600 px-3 py-1.5 text-[11px] font-black text-white"
+                      >
+                        <WhatsappLogo size={13} weight="fill" />
+                        Pedir informações
+                      </a>
+                    ) : null}
                   </article>
-                ))}
+                  );
+                })}
                 {listings.length === 0 ? <p className="text-sm font-bold text-slate-500">Sem serviços aprovados ainda.</p> : null}
               </div>
             </div>

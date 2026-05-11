@@ -47,6 +47,7 @@ import { clearAllCustomerSessions } from '../utils/customerSessionStorage';
 import { ADMIN_SESSION_EVENT, nativeBiometricService } from '../services/nativeBiometricService';
 import { navigateBackOrFallback } from '../utils/navigation';
 import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
+import { buildDestinationInquiryMessage, prettifyDestinationLabel } from '../utils/destinationWhatsApp';
 
 const WEEKDAY_LABELS = [ 'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado' ];
 const PUBLIC_ORDER_ALERT_TTL_MS = 3 * 60 * 60 * 1000;
@@ -469,6 +470,22 @@ export function StorePage() {
     if (typeof window === 'undefined') return '';
     return String(new URLSearchParams(window.location.search).get('condominio') || '').trim();
   }, [storeSlug]);
+  const destinationContextFromQuery = useMemo(() => {
+    const params = new URLSearchParams(location.search || '');
+    const destinationName = String(params.get('destino_nome') || prettifyDestinationLabel(params.get('destino')) || '').trim();
+    const placeName = String(params.get('hospedagem_nome') || prettifyDestinationLabel(params.get('hospedagem')) || '').trim();
+    return { destinationName, placeName };
+  }, [location.search]);
+  const destinationStoreWhatsAppMessage = useMemo(() => {
+    if (!destinationContextFromQuery.destinationName && !destinationContextFromQuery.placeName) return '';
+    return buildDestinationInquiryMessage({
+      destinationName: destinationContextFromQuery.destinationName,
+      itemName: storeName || branding?.brandName || 'esta loja',
+      itemType: 'loja/restaurante',
+      placeName: destinationContextFromQuery.placeName,
+      storeName: storeName || branding?.brandName || '',
+    });
+  }, [branding?.brandName, destinationContextFromQuery.destinationName, destinationContextFromQuery.placeName, storeName]);
   const resolvedWhatsApp = useMemo(() => {
     const raw = storePhone || WHATSAPP_NUMBER;
     const digits = (raw || '').toString().replace(/\D/g, '');
@@ -3408,7 +3425,7 @@ export function StorePage() {
                     type="button"
                     onClick={() => {
                       const phone = String(storePhone || '').replace(/\D/g, '');
-                      openWhatsAppUrl(phone);
+                      openWhatsAppUrl(phone, destinationStoreWhatsAppMessage);
                     }}
                     className="px-6 py-3 rounded-lg bg-green-600 text-white font-semibold hover:opacity-90 transition-all"
                   >
@@ -3651,6 +3668,7 @@ export function StorePage() {
               isAuthenticated={Boolean(user?.token)}
               isOpenNow={storeOpenNow}
               whatsappNumber={storePhone}
+              whatsappMessage={destinationStoreWhatsAppMessage}
               promoMessage={promoMessage}
               todayHoursLabel={todayHoursLabel}
               storeAddress={storeAddress}
