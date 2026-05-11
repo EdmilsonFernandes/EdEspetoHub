@@ -48,6 +48,8 @@ describe('destinationHub utils', () => {
     expect(nearby.recommended).toBe(true);
     expect(nearby.reason).toBe('within_delivery_radius');
     expect(nearby.distanceKm).toBeLessThan(5);
+    expect(nearby.distanceMode).toBe('estimated_route');
+    expect(nearby.straightDistanceKm).toBeLessThan(5);
 
     const outsideRegion = buildDestinationStoreMatchMeta(
       { city: 'São Bento do Sapucaí', state: 'SP', lat: -22.6867, lng: -45.7319, deliveryRadiusKm: 20 },
@@ -65,10 +67,34 @@ describe('destinationHub utils', () => {
     expect(sameState.recommended).toBe(true);
     expect(sameState.sameState).toBe(true);
     expect(sameState.distanceKm).toBeGreaterThan(30);
+    expect(sameState.distanceMode).toBe('estimated_route');
+    expect(sameState.straightDistanceKm).toBeLessThan(sameState.distanceKm as number);
     expect(sameState.reason).toBe('nearby_destination');
 
     const noContext = buildDestinationVisitorMatchMeta(null, { city: 'Gonçalves', state: 'MG' });
     expect(noContext.recommended).toBe(false);
     expect(noContext.reason).toBe('missing_location');
+  });
+
+  it('uses regional route estimates instead of aerial distance for Mantiqueira destinations', () => {
+    const addressInSjcSouthZone = { city: 'São José dos Campos', state: 'SP', lat: -23.2398493, lng: -45.9027298 };
+
+    const saoFranciscoXavier = buildDestinationVisitorMatchMeta(
+      addressInSjcSouthZone,
+      { city: 'São Francisco Xavier', state: 'SP', lat: -22.9113824, lng: -45.9583198 }
+    );
+    expect(saoFranciscoXavier.straightDistanceKm).toBeGreaterThan(35);
+    expect(saoFranciscoXavier.straightDistanceKm).toBeLessThan(40);
+    expect(saoFranciscoXavier.distanceKm).toBeGreaterThanOrEqual(70);
+    expect(saoFranciscoXavier.distanceMode).toBe('estimated_route');
+
+    const saoBento = buildDestinationVisitorMatchMeta(
+      addressInSjcSouthZone,
+      { city: 'São Bento do Sapucaí', state: 'SP', lat: -22.6837, lng: -45.7287 }
+    );
+    expect(saoBento.straightDistanceKm).toBeGreaterThan(60);
+    expect(saoBento.straightDistanceKm).toBeLessThan(70);
+    expect(saoBento.distanceKm).toBeGreaterThanOrEqual(95);
+    expect(saoBento.distanceMode).toBe('estimated_route');
   });
 });

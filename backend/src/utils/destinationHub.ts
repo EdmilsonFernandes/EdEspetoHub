@@ -87,6 +87,45 @@ const distanceKmBetween = (fromLat: number, fromLng: number, toLat: number, toLn
   return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
+const estimateDestinationRouteDistanceKm = (straightDistanceKm: number) => {
+  if (!Number.isFinite(straightDistanceKm)) return null;
+  if (straightDistanceKm < 0.05) return 0;
+
+  // Tourist destinations in Serra/Mantiqueira regions are not well represented by aerial distance.
+  // The factor is intentionally higher for regional trips where roads follow valleys and mountain access.
+  const routeFactor =
+    straightDistanceKm <= 5 ? 1.25 :
+    straightDistanceKm <= 15 ? 1.35 :
+    straightDistanceKm <= 45 ? Math.min(2.05, 1.52 + 20 / (straightDistanceKm + 10)) :
+    straightDistanceKm <= 90 ? Math.min(1.72, 1.28 + 20 / (straightDistanceKm + 10)) :
+    straightDistanceKm <= 180 ? 1.28 :
+    1.18;
+
+  return Number((straightDistanceKm * routeFactor).toFixed(1));
+};
+
+const buildDestinationDistanceMeta = (
+  originLat: number | null,
+  originLng: number | null,
+  destinationLat: number | null,
+  destinationLng: number | null
+) => {
+  if (originLat === null || originLng === null || destinationLat === null || destinationLng === null) {
+    return {
+      distanceKm: null,
+      straightDistanceKm: null,
+      distanceMode: null,
+    };
+  }
+
+  const straightDistanceKm = Number(distanceKmBetween(originLat, originLng, destinationLat, destinationLng).toFixed(1));
+  return {
+    distanceKm: estimateDestinationRouteDistanceKm(straightDistanceKm),
+    straightDistanceKm,
+    distanceMode: 'estimated_route',
+  };
+};
+
 export const buildDestinationStoreMatchMeta = (storeSettings: any, destination: any) => {
   const storeCity = normalizeLocationText(storeSettings?.city);
   const storeState = String(storeSettings?.state || '').trim().toUpperCase();
@@ -98,10 +137,8 @@ export const buildDestinationStoreMatchMeta = (storeSettings: any, destination: 
   const storeLng = toFiniteNumber(storeSettings?.lng);
   const destinationLat = toFiniteNumber(destination?.lat);
   const destinationLng = toFiniteNumber(destination?.lng);
-  const distanceKm =
-    storeLat !== null && storeLng !== null && destinationLat !== null && destinationLng !== null
-      ? Number(distanceKmBetween(storeLat, storeLng, destinationLat, destinationLng).toFixed(1))
-      : null;
+  const distanceMeta = buildDestinationDistanceMeta(storeLat, storeLng, destinationLat, destinationLng);
+  const distanceKm = distanceMeta.distanceKm;
   const deliveryRadiusKm = toFiniteNumber(storeSettings?.deliveryRadiusKm);
   const smartRadiusKm = Math.max(deliveryRadiusKm || 0, 25);
   const withinDeliveryRadius = distanceKm !== null ? distanceKm <= smartRadiusKm : null;
@@ -124,6 +161,8 @@ export const buildDestinationStoreMatchMeta = (storeSettings: any, destination: 
     sameCity,
     sameState,
     distanceKm,
+    straightDistanceKm: distanceMeta.straightDistanceKm,
+    distanceMode: distanceMeta.distanceMode,
     deliveryRadiusKm,
     rank,
   };
@@ -143,10 +182,8 @@ export const buildDestinationVisitorMatchMeta = (
   const visitorLng = toFiniteNumber(location?.lng);
   const destinationLat = toFiniteNumber(destination?.lat);
   const destinationLng = toFiniteNumber(destination?.lng);
-  const distanceKm =
-    visitorLat !== null && visitorLng !== null && destinationLat !== null && destinationLng !== null
-      ? Number(distanceKmBetween(visitorLat, visitorLng, destinationLat, destinationLng).toFixed(1))
-      : null;
+  const distanceMeta = buildDestinationDistanceMeta(visitorLat, visitorLng, destinationLat, destinationLng);
+  const distanceKm = distanceMeta.distanceKm;
   const nearby = distanceKm !== null && distanceKm <= 120;
   const hasLocation = Boolean(visitorCity || visitorState || (visitorLat !== null && visitorLng !== null));
   const recommended = sameCity || nearby || sameState;
@@ -169,6 +206,8 @@ export const buildDestinationVisitorMatchMeta = (
     sameCity,
     sameState,
     distanceKm,
+    straightDistanceKm: distanceMeta.straightDistanceKm,
+    distanceMode: distanceMeta.distanceMode,
     rank,
   };
 };
