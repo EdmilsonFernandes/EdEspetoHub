@@ -3211,32 +3211,33 @@ export function MarketplacePage() {
                       key={`${item.storeSlug}-${item.id}`}
                       to={featuredStorePath}
                       onClick={() => stageFeaturedProductCheckout(item)}
-                      className="group min-w-[154px] snap-start overflow-hidden rounded-[1.3rem] border border-white/90 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.072)] ring-1 ring-slate-100/70 transition-all duration-200 ease-out hover:scale-[1.012] hover:shadow-[0_14px_28px_rgba(15,23,42,0.1)] active:scale-[0.97]"
+                      className="group min-w-[165px] snap-start overflow-hidden rounded-[1.8rem] border border-white bg-white shadow-[0_16px_40px_-16px_rgba(15,23,42,0.12)] ring-1 ring-slate-100/80 transition-all duration-300 ease-out hover:scale-[1.03] hover:shadow-[0_20px_48px_-12px_rgba(15,23,42,0.18)] active:scale-[0.96]"
                     >
-                      <div className="relative h-[76px] overflow-hidden bg-slate-100">
+                      <div className="relative h-[100px] overflow-hidden">
                         <img
                           src={item.imageUrl}
                           alt={item.name}
                           loading={index < 2 ? 'eager' : 'lazy'}
                           fetchPriority={index < 2 ? 'high' : 'auto'}
                           decoding="async"
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                         />
-                        <div className="absolute left-2.5 top-2.5">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+                        <div className="absolute left-3 top-3">
                           {item.sponsored ? (
-                            <span className="flex items-center gap-1 rounded-full border border-white/70 bg-amber-300/95 px-2 py-0.5 text-[7px] font-black uppercase tracking-wider text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md">
+                            <span className="flex items-center gap-1 rounded-full border border-white/60 bg-amber-400/95 px-2.5 py-1 text-[8px] font-black uppercase tracking-wider text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md">
                               <Star size={10} weight="fill" /> Promo
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 rounded-full border border-white/70 bg-white/94 px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.16em] text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md ring-1 ring-black/5">
-                              <Sparkle size={8} weight="fill" className="text-[#336886]" />
+                            <span className="inline-flex items-center gap-1 rounded-full border border-white/60 bg-white/95 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md ring-1 ring-black/5">
+                              <Sparkle size={9} weight="fill" className="text-[#336886]" />
                               Seleção
                             </span>
                           )}
                         </div>
                       </div>
 
-                      <div className="bg-white p-2.5">
+                      <div className="p-3.5">
                         <div className="flex items-start justify-between gap-2">
                           <p className="line-clamp-2 text-[11px] font-black leading-4 tracking-tight text-slate-950">{item.name}</p>
                           <span className="shrink-0 rounded-full bg-[#336886]/10 px-1.5 py-0.5 text-[9px] font-black text-[#336886]">
