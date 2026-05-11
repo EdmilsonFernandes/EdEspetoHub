@@ -107,6 +107,12 @@ npm --prefix backend run seed:destination:sao-bento
 
 Esse seed cria/atualiza o destino, hospedagens e serviços sem criar parceria oficial nem vínculo com lojas.
 
+Em produção, depois de subir a nova imagem da API, rode dentro do container:
+
+```bash
+docker exec janocaminho-backend npm run seed:destination:sao-bento:dist
+```
+
 ## Motoboy: KYC (plataforma) + vínculo (loja)
 
 O cadastro do motoboy tem **duas camadas**:

@@ -124,6 +124,12 @@ Existe um seed operacional para carregar uma primeira amostra real de São Bento
 npm --prefix backend run seed:destination:sao-bento
 ```
 
+Depois do deploy da API em produção, execute a versão compilada dentro do container:
+
+```bash
+docker exec janocaminho-backend npm run seed:destination:sao-bento:dist
+```
+
 O seed cria/atualiza o destino `sao-bento-do-sapucai`, banners editoriais, chalés/pousadas e listings de atrações, passeios, restaurantes e serviços. Ele não cria vínculo com lojas e não comunica parceria oficial. Os registros entram como curadoria inicial da plataforma; fotos, tarifas, regras, horários e confirmação de parceria devem ser revisados depois pelo SuperAdmin ou pelo responsável via formulário público.
 
 O script é idempotente para hospedagens pelo par `destination_id + slug`. Para listings e banners, ele remove e recria apenas os títulos presentes no próprio seed, evitando duplicação quando rodar mais de uma vez.
