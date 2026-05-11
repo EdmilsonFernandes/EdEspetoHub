@@ -29,8 +29,14 @@ const superAdminRequest = async (path: string, options: any = {}) => {
 };
 
 export const destinationService = {
-  async listPublic() {
-    const response = await apiClient.rawGet('/public/destinations', {
+  async listPublic(params?: { lat?: number | string | null; lng?: number | string | null; city?: string | null; state?: string | null }) {
+    const search = new URLSearchParams();
+    if (params?.lat !== null && params?.lat !== undefined && String(params.lat).trim()) search.set('lat', String(params.lat));
+    if (params?.lng !== null && params?.lng !== undefined && String(params.lng).trim()) search.set('lng', String(params.lng));
+    if (params?.city) search.set('city', String(params.city).trim());
+    if (params?.state) search.set('state', String(params.state).trim().toUpperCase());
+    const suffix = search.toString() ? `?${search.toString()}` : '';
+    const response = await apiClient.rawGet(`/public/destinations${suffix}`, {
       cache: 'no-store',
       headers: { 'Cache-Control': 'no-cache' },
       authMode: 'none',
@@ -89,6 +95,10 @@ export const destinationService = {
 
   adminCreateListing(payload: any) {
     return superAdminRequest('/admin/destination-listings', { method: 'POST', body: payload });
+  },
+
+  adminUpdateListing(listingId: string, payload: any) {
+    return superAdminRequest(`/admin/destination-listings/${encodeURIComponent(listingId)}`, { method: 'PATCH', body: payload });
   },
 
   adminLinkStore(placeId: string, payload: any) {

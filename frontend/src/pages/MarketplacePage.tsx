@@ -167,6 +167,18 @@ const resolveDestinationAssetUrl = (
   return appendAssetCacheKey(resolved, `${slug}-destination`);
 };
 
+const formatDestinationRegionLine = (destination: HubDestination) =>
+  [destination.city, destination.state].filter(Boolean).join(' - ');
+
+const formatDestinationMatchLabel = (destination: HubDestination) => {
+  const match = destination.destinationMatch;
+  const distance = Number(match?.distanceKm);
+  if (Number.isFinite(distance)) return `${distance < 10 ? distance.toFixed(1) : distance.toFixed(0)} km de você`;
+  if (match?.reason === 'same_city') return 'Na sua cidade';
+  if (match?.reason === 'same_state') return 'Mesma UF';
+  return formatDestinationRegionLine(destination);
+};
+
 const parseOptionalNumber = (value: unknown): number | null => {
   if (value === null || value === undefined) return null;
   if (typeof value === 'number') return Number.isFinite(value) ? value : null;
@@ -439,6 +451,13 @@ type HubDestination = {
   bannerUrl?: string | null;
   placesCount?: number;
   listingsCount?: number;
+  destinationMatch?: {
+    recommended?: boolean;
+    reason?: string;
+    distanceKm?: number | null;
+    sameCity?: boolean;
+    sameState?: boolean;
+  } | null;
 };
 
 type CondominiumEventSummary = {
@@ -899,6 +918,15 @@ export function MarketplacePage() {
       : null) ||
     userRegion;
   const activeLocationLabel = preferredDiscoveryAddress?.label || locationLabel;
+  const destinationListHref = useMemo(() => {
+    const search = new URLSearchParams();
+    if (activeLocation?.lat != null) search.set('lat', String(activeLocation.lat));
+    if (activeLocation?.lng != null) search.set('lng', String(activeLocation.lng));
+    if (activeRegion?.city) search.set('city', activeRegion.city);
+    if (activeRegion?.state) search.set('state', activeRegion.state);
+    const suffix = search.toString();
+    return suffix ? `/destinos?${suffix}` : '/destinos';
+  }, [activeLocation?.lat, activeLocation?.lng, activeRegion?.city, activeRegion?.state]);
   const isShowingAllStores = hubScopeOverride === 'all_stores';
 
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
@@ -1390,7 +1418,12 @@ export function MarketplacePage() {
   useEffect(() => {
     let active = true;
     destinationService
-      .listPublic()
+      .listPublic({
+        lat: activeLocation?.lat ?? null,
+        lng: activeLocation?.lng ?? null,
+        city: activeRegion?.city || null,
+        state: activeRegion?.state || null,
+      })
       .then((payload) => {
         if (!active) return;
         setDestinations(Array.isArray(payload) ? payload : []);
@@ -1401,7 +1434,7 @@ export function MarketplacePage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [activeLocation?.lat, activeLocation?.lng, activeRegion?.city, activeRegion?.state]);
 
   useEffect(() => {
     const slug = String(selectedCondominiumSlug || '').trim();
@@ -3021,7 +3054,7 @@ export function MarketplacePage() {
                   </p>
                   <h2 className="mt-1 line-clamp-1 text-base font-black tracking-[-0.03em] text-slate-950">Chalés, pousadas e experiências locais</h2>
                 </div>
-                <Link to="/destinos" className="shrink-0 rounded-full bg-[#153A4C] px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-white">
+                <Link to={destinationListHref} className="shrink-0 rounded-full bg-[#153A4C] px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-white">
                   Ver todos
                 </Link>
               </div>
@@ -3037,7 +3070,7 @@ export function MarketplacePage() {
                     </div>
                     <div className="min-w-0">
                       <p className="line-clamp-1 text-sm font-black text-slate-950">{destination.name}</p>
-                      <p className="line-clamp-1 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">{[destination.city, destination.state].filter(Boolean).join(' - ')}</p>
+                      <p className="line-clamp-1 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">{formatDestinationMatchLabel(destination)}</p>
                       <p className="mt-0.5 inline-flex items-center gap-1 text-[10px] font-black text-[#153A4C]">
                         {destination.placesCount || 0} hospedagens
                         <Compass size={10} weight="bold" />

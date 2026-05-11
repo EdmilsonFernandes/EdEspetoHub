@@ -3,6 +3,8 @@ import { AppError } from '../errors/AppError';
 import { DestinationRepository } from '../repositories/DestinationRepository';
 import {
   buildDestinationStoreMatchMeta,
+  buildDestinationVisitorMatchMeta,
+  DestinationLocationContext,
   normalizeDestinationListingCategory,
   normalizeDestinationPartnerType,
   normalizeDestinationSlug,
@@ -21,7 +23,7 @@ export class DestinationService {
   private orderReviewService = new OrderReviewService();
   private log = logger.child({ scope: 'DestinationService' });
 
-  async listPublicDestinations() {
+  async listPublicDestinations(location?: DestinationLocationContext) {
     const destinations = await this.repository.listActiveDestinations();
     const counts = await Promise.all(
       destinations.map(async (destination) => {
@@ -39,12 +41,34 @@ export class DestinationService {
       })
     );
 
-    return counts.map((item) => ({
-      ...this.toPublicDestination(item.destination),
-      placesCount: item.placesCount,
-      listingsCount: item.listingsCount,
-      banners: item.banners.map((banner) => this.toPublicBanner(banner)),
-    }));
+    return counts
+      .map((item) => ({
+        ...this.toPublicDestination(item.destination),
+        placesCount: item.placesCount,
+        listingsCount: item.listingsCount,
+        banners: item.banners.map((banner) => this.toPublicBanner(banner)),
+        destinationMatch: buildDestinationVisitorMatchMeta(location, item.destination),
+      }))
+      .sort((left: any, right: any) => {
+        const hasLocation = Boolean(
+          location?.city ||
+          location?.state ||
+          (location?.lat !== null && location?.lat !== undefined && String(location.lat).trim()) ||
+          (location?.lng !== null && location?.lng !== undefined && String(location.lng).trim())
+        );
+        if (hasLocation) {
+          const rankDiff = Number(left.destinationMatch?.rank ?? 9) - Number(right.destinationMatch?.rank ?? 9);
+          if (rankDiff !== 0) return rankDiff;
+          const leftDistance = left.destinationMatch?.distanceKm;
+          const rightDistance = right.destinationMatch?.distanceKm;
+          if (leftDistance != null && rightDistance != null && leftDistance !== rightDistance) {
+            return Number(leftDistance) - Number(rightDistance);
+          }
+        }
+        const sortDiff = Number(left.sortOrder || 0) - Number(right.sortOrder || 0);
+        if (sortDiff !== 0) return sortDiff;
+        return String(left.name || '').localeCompare(String(right.name || ''), 'pt-BR');
+      });
   }
 
   async getPublicDestinationBySlug(slug: string) {
@@ -287,12 +311,14 @@ export class DestinationService {
     const title = String(payload?.title || current?.title || '').trim();
     if (!title) throw new AppError('DEST-009', 400);
     const imageUrl = await saveBase64Image(payload?.imageFile, `destination-listing-${normalizeDestinationSlug(title)}`, 'destinations');
-    const placeId = toOptionalText(payload?.hospitalityPlaceId) || current?.hospitalityPlaceId || null;
+    const hasPlaceInput = Object.prototype.hasOwnProperty.call(payload || {}, 'hospitalityPlaceId');
+    const placeId = hasPlaceInput ? toOptionalText(payload?.hospitalityPlaceId) : current?.hospitalityPlaceId || null;
     if (placeId) {
       const place = await this.repository.findPlaceById(placeId);
       if (!place || place.destinationId !== destination.id) throw new AppError('DEST-002', 404);
     }
-    const storeId = toOptionalText(payload?.storeId) || current?.storeId || null;
+    const hasStoreInput = Object.prototype.hasOwnProperty.call(payload || {}, 'storeId');
+    const storeId = hasStoreInput ? toOptionalText(payload?.storeId) : current?.storeId || null;
     if (storeId && !(await this.repository.findStoreById(storeId))) throw new AppError('STORE-001', 404);
     const saved = await this.repository.saveListing({
       ...(current || {}),

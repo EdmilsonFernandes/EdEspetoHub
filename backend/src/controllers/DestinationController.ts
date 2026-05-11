@@ -7,7 +7,12 @@ const destinationService = new DestinationService();
 export class DestinationController {
   static async listPublic(req: Request, res: Response) {
     try {
-      const payload = await destinationService.listPublicDestinations();
+      const payload = await destinationService.listPublicDestinations({
+        lat: req.query?.lat != null ? String(req.query.lat) : null,
+        lng: req.query?.lng != null ? String(req.query.lng) : null,
+        city: req.query?.city != null ? String(req.query.city) : null,
+        state: req.query?.state != null ? String(req.query.state) : null,
+      });
       return res.json(payload);
     } catch (error: any) {
       return respondWithError(req, res, error, 400);

@@ -16,6 +16,13 @@ export type DestinationPartnerType = (typeof DESTINATION_PARTNER_TYPES)[number];
 export type HospitalityPlaceType = (typeof HOSPITALITY_PLACE_TYPES)[number];
 export type DestinationListingCategory = (typeof DESTINATION_LISTING_CATEGORIES)[number];
 
+export type DestinationLocationContext = {
+  city?: string | null;
+  state?: string | null;
+  lat?: number | string | null;
+  lng?: number | string | null;
+};
+
 const normalizeToken = (value?: string | null) =>
   String(value || '')
     .trim()
@@ -118,6 +125,50 @@ export const buildDestinationStoreMatchMeta = (storeSettings: any, destination: 
     sameState,
     distanceKm,
     deliveryRadiusKm,
+    rank,
+  };
+};
+
+export const buildDestinationVisitorMatchMeta = (
+  location: DestinationLocationContext | null | undefined,
+  destination: any
+) => {
+  const visitorCity = normalizeLocationText(location?.city);
+  const visitorState = String(location?.state || '').trim().toUpperCase();
+  const destinationCity = normalizeLocationText(destination?.city);
+  const destinationState = String(destination?.state || '').trim().toUpperCase();
+  const sameCity = Boolean(visitorCity && destinationCity && visitorCity === destinationCity && (!visitorState || !destinationState || visitorState === destinationState));
+  const sameState = Boolean(visitorState && destinationState && visitorState === destinationState);
+  const visitorLat = toFiniteNumber(location?.lat);
+  const visitorLng = toFiniteNumber(location?.lng);
+  const destinationLat = toFiniteNumber(destination?.lat);
+  const destinationLng = toFiniteNumber(destination?.lng);
+  const distanceKm =
+    visitorLat !== null && visitorLng !== null && destinationLat !== null && destinationLng !== null
+      ? Number(distanceKmBetween(visitorLat, visitorLng, destinationLat, destinationLng).toFixed(1))
+      : null;
+  const nearby = distanceKm !== null && distanceKm <= 120;
+  const hasLocation = Boolean(visitorCity || visitorState || (visitorLat !== null && visitorLng !== null));
+  const recommended = sameCity || nearby || sameState;
+  const reason = sameCity
+    ? 'same_city'
+    : nearby
+      ? 'nearby_destination'
+      : sameState
+        ? 'same_state'
+        : distanceKm !== null
+          ? 'distance_available'
+          : hasLocation
+            ? 'outside_region'
+            : 'missing_location';
+  const rank = sameCity ? 0 : nearby ? 1 : sameState ? 2 : distanceKm !== null ? 3 : hasLocation ? 4 : 5;
+
+  return {
+    recommended,
+    reason,
+    sameCity,
+    sameState,
+    distanceKm,
     rank,
   };
 };

@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bed, Buildings, CheckCircle, Compass, MapTrifold, Plus, Sparkle, Storefront, WarningCircle } from '@phosphor-icons/react';
+import { Bed, Buildings, CheckCircle, Compass, Eye, EyeSlash, MapTrifold, PencilSimple, Plus, Sparkle, Storefront, WarningCircle } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
@@ -19,6 +19,7 @@ const emptyDestination = {
   bannerUrl: '',
   lat: '',
   lng: '',
+  active: true,
   sortOrder: 0,
 };
 
@@ -39,6 +40,8 @@ const emptyPlace = {
   lat: '',
   lng: '',
   deliveryInstructions: '',
+  active: true,
+  sortOrder: 0,
 };
 
 const emptyListing = {
@@ -54,6 +57,9 @@ const emptyListing = {
   imageUrl: '',
   ctaType: 'WHATSAPP',
   ctaUrl: '',
+  active: true,
+  featured: false,
+  sortOrder: 0,
 };
 
 const emptyStoreLink = {
@@ -79,13 +85,35 @@ const requestTone = (status?: string) => {
   return 'bg-amber-50 text-amber-700 border-amber-100';
 };
 
+const normalizeSearch = (value: any) =>
+  String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+const statusPill = (active: any) =>
+  active === false
+    ? 'border-slate-200 bg-slate-100 text-slate-600'
+    : 'border-emerald-100 bg-emerald-50 text-emerald-700';
+
+const activeLabel = (active: any) => (active === false ? 'Inativo' : 'Ativo');
+
+const toFormValue = (value: any) => (value === null || value === undefined ? '' : value);
+
+const toBool = (value: any) => value === true || String(value).toLowerCase() === 'true';
+
 export function SuperAdminDestinations() {
   const [data, setData] = useState<any>({ destinations: [], places: [], listings: [], partnerRequests: [], storeRequests: [], stores: [] });
   const [destinationForm, setDestinationForm] = useState(emptyDestination);
   const [placeForm, setPlaceForm] = useState(emptyPlace);
   const [listingForm, setListingForm] = useState(emptyListing);
   const [storeLinkForm, setStoreLinkForm] = useState(emptyStoreLink);
+  const [editingDestinationId, setEditingDestinationId] = useState('');
+  const [editingPlaceId, setEditingPlaceId] = useState('');
+  const [editingListingId, setEditingListingId] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'active' | 'all' | 'inactive'>('active');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -128,17 +156,126 @@ export function SuperAdminDestinations() {
     };
   }, [data]);
 
+  const groupedDestinations = useMemo(() => {
+    const normalizedQuery = normalizeSearch(search);
+    const places = data.places || [];
+    const listings = data.listings || [];
+    const groups = new Map<string, any>();
+
+    (data.destinations || []).forEach((destination: any) => {
+      const destinationPlaces = places.filter((place: any) => place.destinationId === destination.id);
+      const destinationListings = listings.filter((listing: any) => listing.destinationId === destination.id);
+      const searchable = normalizeSearch([
+        destination.name,
+        destination.city,
+        destination.state,
+        destination.description,
+        ...destinationPlaces.flatMap((place: any) => [place.name, place.address]),
+        ...destinationListings.map((listing: any) => listing.title),
+      ].filter(Boolean).join(' '));
+      if (normalizedQuery && !searchable.includes(normalizedQuery)) return;
+      if (statusFilter === 'active' && destination.active === false) return;
+      if (statusFilter === 'inactive' && destination.active !== false) return;
+
+      const state = String(destination.state || 'UF').toUpperCase();
+      const city = String(destination.city || destination.name || 'Sem cidade').trim();
+      const key = `${state}|${city}`;
+      if (!groups.has(key)) {
+        groups.set(key, {
+          key,
+          state,
+          city,
+          destinations: [],
+          placesCount: 0,
+          listingsCount: 0,
+          inactiveCount: 0,
+        });
+      }
+      const group = groups.get(key);
+      group.destinations.push({ ...destination, places: destinationPlaces, listings: destinationListings });
+      group.placesCount += destinationPlaces.length;
+      group.listingsCount += destinationListings.length;
+      if (destination.active === false) group.inactiveCount += 1;
+    });
+
+    return Array.from(groups.values()).sort((left: any, right: any) => {
+      const stateDiff = String(left.state).localeCompare(String(right.state), 'pt-BR');
+      if (stateDiff !== 0) return stateDiff;
+      return String(left.city).localeCompare(String(right.city), 'pt-BR');
+    });
+  }, [data.destinations, data.places, data.listings, search, statusFilter]);
+
   const updateDestination = (key: string, value: any) => setDestinationForm((current) => ({ ...current, [key]: value }));
   const updatePlace = (key: string, value: any) => setPlaceForm((current) => ({ ...current, [key]: value }));
   const updateListing = (key: string, value: any) => setListingForm((current) => ({ ...current, [key]: value }));
   const updateStoreLink = (key: string, value: any) => setStoreLinkForm((current) => ({ ...current, [key]: value }));
+
+  const startDestinationEdit = (destination: any) => {
+    setEditingDestinationId(destination.id);
+    setDestinationForm({
+      ...emptyDestination,
+      ...Object.fromEntries(Object.entries(destination).map(([key, value]) => [key, toFormValue(value)])),
+      state: String(destination.state || 'SP').toUpperCase().slice(0, 2),
+      active: destination.active !== false,
+      sortOrder: Number(destination.sortOrder || 0),
+    });
+    setActiveTab('cadastro');
+  };
+
+  const startPlaceEdit = (place: any) => {
+    setEditingPlaceId(place.id);
+    setPlaceForm({
+      ...emptyPlace,
+      ...Object.fromEntries(Object.entries(place).map(([key, value]) => [key, toFormValue(value)])),
+      destinationId: place.destinationId || place.destination?.id || '',
+      state: String(place.state || place.destination?.state || '').toUpperCase().slice(0, 2),
+      active: place.active !== false,
+      sortOrder: Number(place.sortOrder || 0),
+    });
+    setActiveTab('cadastro');
+  };
+
+  const startListingEdit = (listing: any) => {
+    setEditingListingId(listing.id);
+    setListingForm({
+      ...emptyListing,
+      ...Object.fromEntries(Object.entries(listing).map(([key, value]) => [key, toFormValue(value)])),
+      destinationId: listing.destinationId || listing.destination?.id || '',
+      hospitalityPlaceId: listing.hospitalityPlaceId || '',
+      active: listing.active !== false,
+      featured: listing.featured === true,
+      sortOrder: Number(listing.sortOrder || 0),
+    });
+    setActiveTab('cadastro');
+  };
+
+  const cancelDestinationEdit = () => {
+    setEditingDestinationId('');
+    setDestinationForm(emptyDestination);
+  };
+
+  const cancelPlaceEdit = () => {
+    setEditingPlaceId('');
+    setPlaceForm((current) => ({ ...emptyPlace, destinationId: current.destinationId }));
+  };
+
+  const cancelListingEdit = () => {
+    setEditingListingId('');
+    setListingForm((current) => ({ ...emptyListing, destinationId: current.destinationId }));
+  };
 
   const saveDestination = async (event: any) => {
     event.preventDefault();
     setSaving(true);
     setError('');
     try {
-      await destinationService.adminCreateDestination(destinationForm);
+      const payload = { ...destinationForm, active: toBool(destinationForm.active) };
+      if (editingDestinationId) {
+        await destinationService.adminUpdateDestination(editingDestinationId, payload);
+      } else {
+        await destinationService.adminCreateDestination(payload);
+      }
+      setEditingDestinationId('');
       setDestinationForm(emptyDestination);
       await load();
     } catch (err: any) {
@@ -153,7 +290,13 @@ export function SuperAdminDestinations() {
     setSaving(true);
     setError('');
     try {
-      await destinationService.adminCreateHospitalityPlace(placeForm);
+      const payload = { ...placeForm, active: toBool(placeForm.active) };
+      if (editingPlaceId) {
+        await destinationService.adminUpdateHospitalityPlace(editingPlaceId, payload);
+      } else {
+        await destinationService.adminCreateHospitalityPlace(payload);
+      }
+      setEditingPlaceId('');
       setPlaceForm((current) => ({ ...emptyPlace, destinationId: current.destinationId }));
       await load();
     } catch (err: any) {
@@ -168,7 +311,13 @@ export function SuperAdminDestinations() {
     setSaving(true);
     setError('');
     try {
-      await destinationService.adminCreateListing(listingForm);
+      const payload = { ...listingForm, active: toBool(listingForm.active), featured: toBool(listingForm.featured) };
+      if (editingListingId) {
+        await destinationService.adminUpdateListing(editingListingId, payload);
+      } else {
+        await destinationService.adminCreateListing(payload);
+      }
+      setEditingListingId('');
       setListingForm((current) => ({ ...emptyListing, destinationId: current.destinationId }));
       await load();
     } catch (err: any) {
@@ -219,6 +368,45 @@ export function SuperAdminDestinations() {
     }
   };
 
+  const toggleDestinationActive = async (destination: any) => {
+    setSaving(true);
+    setError('');
+    try {
+      await destinationService.adminUpdateDestination(destination.id, { ...destination, active: destination.active === false });
+      await load();
+    } catch (err: any) {
+      setError(err?.message || 'Não foi possível atualizar destino.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const togglePlaceActive = async (place: any) => {
+    setSaving(true);
+    setError('');
+    try {
+      await destinationService.adminUpdateHospitalityPlace(place.id, { ...place, destinationId: place.destinationId || place.destination?.id, active: place.active === false });
+      await load();
+    } catch (err: any) {
+      setError(err?.message || 'Não foi possível atualizar hospedagem.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleListingActive = async (listing: any) => {
+    setSaving(true);
+    setError('');
+    try {
+      await destinationService.adminUpdateListing(listing.id, { ...listing, active: listing.active === false });
+      await load();
+    } catch (err: any) {
+      setError(err?.message || 'Não foi possível atualizar serviço.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const tabs = [
     { id: 'dashboard', label: 'Resumo', icon: Compass },
     { id: 'cadastro', label: 'Cadastro', icon: Plus },
@@ -264,35 +452,141 @@ export function SuperAdminDestinations() {
         {loading ? <p className="text-sm font-semibold text-slate-500">Carregando destinos...</p> : null}
 
         {activeTab === 'dashboard' ? (
-          <div className="grid gap-4 md:grid-cols-4">
-            {[
-              { label: 'Destinos', value: metrics.destinations, icon: MapTrifold },
-              { label: 'Hospedagens', value: metrics.places, icon: Bed },
-              { label: 'Serviços', value: metrics.listings, icon: Sparkle },
-              { label: 'Pendências', value: metrics.pending, icon: WarningCircle },
-            ].map((item) => {
-              const Icon = item.icon;
-              return (
-                <div key={item.label} className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
-                  <Icon size={24} weight="duotone" className="text-[#336886]" />
-                  <p className="mt-4 text-3xl font-black text-slate-950">{item.value}</p>
-                  <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">{item.label}</p>
-                </div>
-              );
-            })}
-            <div className="md:col-span-4 grid gap-4 lg:grid-cols-2">
-              {(data.destinations || []).map((destination: any) => (
-                <article key={destination.id} className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm">
-                  <div className="flex gap-4 p-4">
-                    <img src={imageFor(destination)} alt={destination.name} className="h-20 w-20 rounded-2xl object-cover" />
+          <div className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-4">
+              {[
+                { label: 'Destinos', value: metrics.destinations, icon: MapTrifold },
+                { label: 'Hospedagens', value: metrics.places, icon: Bed },
+                { label: 'Serviços', value: metrics.listings, icon: Sparkle },
+                { label: 'Pendências', value: metrics.pending, icon: WarningCircle },
+              ].map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div key={item.label} className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
+                    <Icon size={24} weight="duotone" className="text-[#336886]" />
+                    <p className="mt-4 text-3xl font-black text-slate-950">{item.value}</p>
+                    <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">{item.label}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="grid gap-3 rounded-[1.5rem] border border-slate-200 bg-white p-3 shadow-sm lg:grid-cols-[1fr_auto] lg:items-center">
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Buscar por UF, cidade, chalé, pousada ou serviço"
+                className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]"
+              />
+              <div className="flex rounded-2xl bg-slate-100 p-1">
+                {[
+                  { id: 'active', label: 'Ativos' },
+                  { id: 'all', label: 'Todos' },
+                  { id: 'inactive', label: 'Inativos' },
+                ].map((item) => {
+                  const active = statusFilter === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setStatusFilter(item.id as any)}
+                      className={`rounded-xl px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] transition ${active ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+                    >
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {groupedDestinations.map((group: any) => (
+                <section key={group.key} className="overflow-hidden rounded-[1.85rem] border border-slate-200 bg-white shadow-sm">
+                  <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50/80 p-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
-                      <h3 className="text-lg font-black text-slate-950">{destination.name}</h3>
-                      <p className="text-xs font-bold text-slate-500">{destination.city} - {destination.state}</p>
-                      <p className="mt-2 line-clamp-2 text-sm font-semibold text-slate-600">{destination.description}</p>
+                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">{group.state}</p>
+                      <h2 className="mt-1 text-xl font-black text-slate-950">{group.city}</h2>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-slate-700 ring-1 ring-slate-200">{group.destinations.length} destino(s)</span>
+                      <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-slate-700 ring-1 ring-slate-200">{group.placesCount} hospedagem(ns)</span>
+                      <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-slate-700 ring-1 ring-slate-200">{group.listingsCount} serviço(s)</span>
                     </div>
                   </div>
-                </article>
+
+                  <div className="grid gap-4 p-4 xl:grid-cols-2">
+                    {group.destinations.map((destination: any) => (
+                      <article key={destination.id} className="rounded-[1.5rem] border border-slate-200 bg-white p-4">
+                        <div className="flex gap-4">
+                          <img src={imageFor(destination)} alt={destination.name} className="h-20 w-20 rounded-2xl object-cover" />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h3 className="text-lg font-black text-slate-950">{destination.name}</h3>
+                              <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${statusPill(destination.active)}`}>
+                                {activeLabel(destination.active)}
+                              </span>
+                            </div>
+                            <p className="text-xs font-bold text-slate-500">{[destination.city, destination.state].filter(Boolean).join(' - ') || 'Sem cidade/UF'}</p>
+                            <p className="mt-2 line-clamp-2 text-sm font-semibold text-slate-600">{destination.description || destination.heroSubtitle || 'Sem descrição pública.'}</p>
+                          </div>
+                        </div>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <button type="button" onClick={() => startDestinationEdit(destination)} className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-700">
+                            <PencilSimple size={13} weight="bold" />
+                            Editar destino
+                          </button>
+                          <Link to={`/destinos/${destination.slug}`} className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-700">
+                            <Eye size={13} weight="bold" />
+                            Ver público
+                          </Link>
+                          <button type="button" disabled={saving} onClick={() => toggleDestinationActive(destination)} className="inline-flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1.5 text-xs font-black text-white disabled:opacity-50">
+                            {destination.active === false ? <Eye size={13} weight="bold" /> : <EyeSlash size={13} weight="bold" />}
+                            {destination.active === false ? 'Ativar' : 'Desativar'}
+                          </button>
+                        </div>
+
+                        <div className="mt-4 grid gap-3">
+                          {(destination.places || []).slice(0, 4).map((place: any) => (
+                            <div key={place.id} className="rounded-2xl border border-slate-100 bg-slate-50/80 px-3 py-3">
+                              <div className="flex items-start justify-between gap-3">
+                                <div>
+                                  <p className="text-sm font-black text-slate-950">{place.name}</p>
+                                  <p className="text-xs font-semibold text-slate-500">{place.address || place.description || 'Hospedagem sem endereço'}</p>
+                                </div>
+                                <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(place.active)}`}>{activeLabel(place.active)}</span>
+                              </div>
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                <button type="button" onClick={() => startPlaceEdit(place)} className="text-xs font-black text-[#336886]">Editar hospedagem</button>
+                                <button type="button" disabled={saving} onClick={() => togglePlaceActive(place)} className="text-xs font-black text-slate-500 disabled:opacity-50">{place.active === false ? 'Ativar' : 'Desativar'}</button>
+                              </div>
+                            </div>
+                          ))}
+                          {(destination.listings || []).slice(0, 4).map((listing: any) => (
+                            <div key={listing.id} className="rounded-2xl border border-amber-100 bg-amber-50/60 px-3 py-3">
+                              <div className="flex items-start justify-between gap-3">
+                                <div>
+                                  <p className="text-sm font-black text-slate-950">{listing.title}</p>
+                                  <p className="text-xs font-semibold text-slate-500">{String(listing.category || 'SERVICO').replace('_', ' ')}</p>
+                                </div>
+                                <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(listing.active)}`}>{activeLabel(listing.active)}</span>
+                              </div>
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                <button type="button" onClick={() => startListingEdit(listing)} className="text-xs font-black text-[#336886]">Editar serviço</button>
+                                <button type="button" disabled={saving} onClick={() => toggleListingActive(listing)} className="text-xs font-black text-slate-500 disabled:opacity-50">{listing.active === false ? 'Ativar' : 'Desativar'}</button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
               ))}
+              {!loading && groupedDestinations.length === 0 ? (
+                <p className="rounded-[1.5rem] border border-slate-200 bg-white px-4 py-5 text-sm font-bold text-slate-500">
+                  Nenhum destino encontrado neste filtro.
+                </p>
+              ) : null}
             </div>
           </div>
         ) : null}
@@ -300,7 +594,17 @@ export function SuperAdminDestinations() {
         {activeTab === 'cadastro' ? (
           <div className="grid gap-4 xl:grid-cols-2">
             <form onSubmit={saveDestination} className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-black">Cadastrar destino</h2>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-black">{editingDestinationId ? 'Editar destino' : 'Cadastrar destino'}</h2>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">Destino é a cidade/região turística que aparece para o cliente.</p>
+                </div>
+                {editingDestinationId ? (
+                  <button type="button" onClick={cancelDestinationEdit} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-black text-slate-600">
+                    Cancelar
+                  </button>
+                ) : null}
+              </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <input required value={destinationForm.name} onChange={(event) => updateDestination('name', event.target.value)} placeholder="Nome" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={destinationForm.slug} onChange={(event) => updateDestination('slug', event.target.value)} placeholder="Slug" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
@@ -312,13 +616,28 @@ export function SuperAdminDestinations() {
                 <input value={destinationForm.logoUrl} onChange={(event) => updateDestination('logoUrl', event.target.value)} placeholder="URL do logo/ícone do destino" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
                 <input value={destinationForm.lat} onChange={(event) => updateDestination('lat', event.target.value)} placeholder="Latitude" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={destinationForm.lng} onChange={(event) => updateDestination('lng', event.target.value)} placeholder="Longitude" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+                <input value={destinationForm.sortOrder} onChange={(event) => updateDestination('sortOrder', event.target.value)} placeholder="Ordem" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+                <select value={String(destinationForm.active !== false)} onChange={(event) => updateDestination('active', event.target.value === 'true')} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none">
+                  <option value="true">Ativo no público</option>
+                  <option value="false">Inativo/oculto</option>
+                </select>
                 <textarea value={destinationForm.description} onChange={(event) => updateDestination('description', event.target.value)} placeholder="Descrição" rows={3} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
               </div>
-              <button disabled={saving} className="mt-4 rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white disabled:opacity-50">Salvar destino</button>
+              <button disabled={saving} className="mt-4 rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white disabled:opacity-50">{editingDestinationId ? 'Atualizar destino' : 'Salvar destino'}</button>
             </form>
 
             <form onSubmit={savePlace} className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-black">Cadastrar chalé/pousada</h2>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-black">{editingPlaceId ? 'Editar chalé/pousada' : 'Cadastrar chalé/pousada'}</h2>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">Hospedagem recebe lojas delivery vinculadas pelo lojista ou SuperAdmin.</p>
+                </div>
+                {editingPlaceId ? (
+                  <button type="button" onClick={cancelPlaceEdit} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-black text-slate-600">
+                    Cancelar
+                  </button>
+                ) : null}
+              </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <select value={placeForm.destinationId} onChange={(event) => updatePlace('destinationId', event.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" required>
                   {(data.destinations || []).map((destination: any) => <option key={destination.id} value={destination.id}>{destination.name}</option>)}
@@ -342,17 +661,38 @@ export function SuperAdminDestinations() {
                 <input value={placeForm.instagramUrl} onChange={(event) => updatePlace('instagramUrl', event.target.value)} placeholder="Instagram" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={placeForm.lat} onChange={(event) => updatePlace('lat', event.target.value)} placeholder="Latitude" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={placeForm.lng} onChange={(event) => updatePlace('lng', event.target.value)} placeholder="Longitude" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+                <input value={placeForm.sortOrder} onChange={(event) => updatePlace('sortOrder', event.target.value)} placeholder="Ordem" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+                <select value={String(placeForm.active !== false)} onChange={(event) => updatePlace('active', event.target.value === 'true')} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none">
+                  <option value="true">Ativo no público</option>
+                  <option value="false">Inativo/oculto</option>
+                </select>
                 <textarea value={placeForm.description} onChange={(event) => updatePlace('description', event.target.value)} placeholder="Descrição pública da hospedagem" rows={3} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
                 <textarea value={placeForm.deliveryInstructions} onChange={(event) => updatePlace('deliveryInstructions', event.target.value)} placeholder="Instruções de entrega" rows={3} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
               </div>
-              <button disabled={saving} className="mt-4 rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white disabled:opacity-50">Salvar hospedagem</button>
+              <button disabled={saving} className="mt-4 rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white disabled:opacity-50">{editingPlaceId ? 'Atualizar hospedagem' : 'Salvar hospedagem'}</button>
             </form>
 
             <form onSubmit={saveListing} className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-black">Cadastrar serviço/atração</h2>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-black">{editingListingId ? 'Editar serviço/atração' : 'Cadastrar serviço/atração'}</h2>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">Serviço é curadoria local: passeio, massagem, restaurante, guia ou atrativo.</p>
+                </div>
+                {editingListingId ? (
+                  <button type="button" onClick={cancelListingEdit} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-black text-slate-600">
+                    Cancelar
+                  </button>
+                ) : null}
+              </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <select value={listingForm.destinationId} onChange={(event) => updateListing('destinationId', event.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" required>
                   {(data.destinations || []).map((destination: any) => <option key={destination.id} value={destination.id}>{destination.name}</option>)}
+                </select>
+                <select value={listingForm.hospitalityPlaceId} onChange={(event) => updateListing('hospitalityPlaceId', event.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2">
+                  <option value="">Serviço do destino inteiro</option>
+                  {(data.places || [])
+                    .filter((place: any) => !listingForm.destinationId || place.destinationId === listingForm.destinationId)
+                    .map((place: any) => <option key={place.id} value={place.id}>{place.name} · {place.destination?.name}</option>)}
                 </select>
                 <select value={listingForm.category} onChange={(event) => updateListing('category', event.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none">
                   <option value="PASSEIO">Passeio</option>
@@ -369,9 +709,14 @@ export function SuperAdminDestinations() {
                 <input value={listingForm.websiteUrl} onChange={(event) => updateListing('websiteUrl', event.target.value)} placeholder="Site" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={listingForm.instagramUrl} onChange={(event) => updateListing('instagramUrl', event.target.value)} placeholder="Instagram" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={listingForm.ctaUrl} onChange={(event) => updateListing('ctaUrl', event.target.value)} placeholder="Link de contato/CTA" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
+                <input value={listingForm.sortOrder} onChange={(event) => updateListing('sortOrder', event.target.value)} placeholder="Ordem" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+                <select value={String(listingForm.active !== false)} onChange={(event) => updateListing('active', event.target.value === 'true')} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none">
+                  <option value="true">Ativo no público</option>
+                  <option value="false">Inativo/oculto</option>
+                </select>
                 <textarea value={listingForm.description} onChange={(event) => updateListing('description', event.target.value)} placeholder="Descrição" rows={3} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
               </div>
-              <button disabled={saving} className="mt-4 rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white disabled:opacity-50">Salvar serviço</button>
+              <button disabled={saving} className="mt-4 rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white disabled:opacity-50">{editingListingId ? 'Atualizar serviço' : 'Salvar serviço'}</button>
             </form>
 
             <form onSubmit={linkStore} className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">

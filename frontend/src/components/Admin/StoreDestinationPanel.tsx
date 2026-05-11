@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Bed, CheckCircle, Clock, Compass, SignOut, WarningCircle } from '@phosphor-icons/react';
 import { ConfirmationModal } from '../common/ConfirmationModal';
 import { useToast } from '../../contexts/ToastContext';
@@ -26,6 +27,11 @@ const hasStoreRelation = (destination: any) =>
     const status = String(place.status || '').toLowerCase();
     return status === 'pending' || status === 'approved';
   });
+
+const isRegionalDestination = (destination: any) => {
+  const reason = String(destination?.destinationMatch?.reason || '');
+  return Boolean(destination?.destinationMatch?.recommended || reason === 'same_state' || hasStoreRelation(destination));
+};
 
 const destinationSearchText = (destination: any) =>
   normalizeSearch([
@@ -132,14 +138,15 @@ export function StoreDestinationPanel({ storeId }: Props) {
     }
   };
 
-  const recommendedCount = destinations.filter((destination) => destination?.destinationMatch?.recommended || hasStoreRelation(destination)).length;
-  const effectiveScope = recommendedCount > 0 ? scope : 'all';
+  const regionalCount = destinations.filter((destination) => isRegionalDestination(destination)).length;
+  const hasMissingLocationOnly = destinations.length > 0 && destinations.every((destination) => String(destination?.destinationMatch?.reason || '') === 'missing_store_location');
+  const effectiveScope = regionalCount > 0 ? scope : 'all';
   const normalizedQuery = normalizeSearch(query);
   const visibleDestinations = destinations.filter((destination) => {
     const matchesQuery = !normalizedQuery || destinationSearchText(destination).includes(normalizedQuery);
     if (!matchesQuery) return false;
     if (effectiveScope === 'all') return true;
-    return Boolean(destination?.destinationMatch?.recommended || hasStoreRelation(destination));
+    return isRegionalDestination(destination);
   });
 
   return (
@@ -165,7 +172,7 @@ export function StoreDestinationPanel({ storeId }: Props) {
         />
         <div className="flex rounded-2xl bg-slate-100 p-1">
           {[
-            { id: 'recommended', label: `Recomendados (${recommendedCount})` },
+            { id: 'recommended', label: `Da sua região (${regionalCount})` },
             { id: 'all', label: `Ver todos (${destinations.length})` },
           ].map((item) => {
             const active = effectiveScope === item.id;
@@ -181,9 +188,11 @@ export function StoreDestinationPanel({ storeId }: Props) {
             );
           })}
         </div>
-        {recommendedCount === 0 && !loading ? (
+        {regionalCount === 0 && !loading ? (
           <p className="text-xs font-semibold leading-relaxed text-amber-700 sm:col-span-2">
-            Ainda não consegui recomendar por região. Configure cidade/UF ou coordenadas da loja em Configurações para priorizar destinos locais automaticamente.
+            {hasMissingLocationOnly
+              ? 'Configure cidade/UF ou coordenadas da loja em Configurações para priorizar destinos locais automaticamente.'
+              : 'Nenhum destino próximo foi encontrado para a localização atual da loja. Use "Ver todos" apenas para exceções operacionais.'}
           </p>
         ) : null}
       </div>
@@ -207,6 +216,11 @@ export function StoreDestinationPanel({ storeId }: Props) {
               </div>
               </div>
               <div className="flex flex-wrap gap-2 sm:justify-end">
+                {destination.slug ? (
+                  <Link to={`/destinos/${destination.slug}`} className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600">
+                    Ver vitrine
+                  </Link>
+                ) : null}
                 <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${matchTone(destination.destinationMatch)}`}>
                   {matchCopy(destination.destinationMatch)}
                 </span>

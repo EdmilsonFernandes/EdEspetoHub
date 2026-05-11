@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight, Bed, Buildings, Compass, MapTrifold, Mountains, Sparkle } from '@phosphor-icons/react';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
@@ -13,16 +13,32 @@ const destinationImage = (destination: any, variant: 'logo' | 'banner' = 'banner
   return resolveAssetUrl(source || '') || getStoreAvatarUrl(destination?.slug, destination?.name);
 };
 
+const destinationLocationLabel = (destination: any) => {
+  const match = destination?.destinationMatch || {};
+  const distance = Number(match.distanceKm);
+  if (Number.isFinite(distance)) return `${distance < 10 ? distance.toFixed(1) : distance.toFixed(0)} km de você`;
+  if (match.reason === 'same_city') return 'Na sua cidade';
+  if (match.reason === 'same_state') return 'Mesma UF';
+  return [destination.city, destination.state].filter(Boolean).join(' - ');
+};
+
 export function DestinationsPage() {
+  const location = useLocation();
   const [destinations, setDestinations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     let active = true;
+    const params = new URLSearchParams(location.search || '');
     setLoading(true);
     destinationService
-      .listPublic()
+      .listPublic({
+        lat: params.get('lat'),
+        lng: params.get('lng'),
+        city: params.get('city'),
+        state: params.get('state'),
+      })
       .then((payload) => {
         if (!active) return;
         setDestinations(Array.isArray(payload) ? payload : []);
@@ -37,7 +53,7 @@ export function DestinationsPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [location.search]);
 
   const featured = useMemo(() => destinations.slice(0, 2), [destinations]);
 
@@ -84,7 +100,7 @@ export function DestinationsPage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
                     <div className="absolute bottom-3 left-3 right-3">
                       <p className="text-lg font-black text-white">{destination.name}</p>
-                      <p className="text-xs font-bold text-white/80">{destination.city} - {destination.state}</p>
+                      <p className="text-xs font-bold text-white/80">{destinationLocationLabel(destination)}</p>
                     </div>
                   </div>
                   <div className="mt-3 flex items-center justify-between gap-3">
@@ -126,7 +142,7 @@ export function DestinationsPage() {
               <div className="relative min-h-48 overflow-hidden bg-slate-100 sm:min-h-full">
                 <img src={destinationImage(destination)} alt={destination.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                 <div className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-[11px] font-black text-slate-700 shadow-sm">
-                  {destination.city} - {destination.state}
+                  {destinationLocationLabel(destination)}
                 </div>
               </div>
               <div className="flex flex-col justify-between gap-5 p-5">

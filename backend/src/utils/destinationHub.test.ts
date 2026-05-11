@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildDestinationStoreMatchMeta,
+  buildDestinationVisitorMatchMeta,
   normalizeDestinationListingCategory,
   normalizeDestinationPartnerType,
   normalizeDestinationSlug,
@@ -54,5 +55,20 @@ describe('destinationHub utils', () => {
     );
     expect(outsideRegion.recommended).toBe(false);
     expect(outsideRegion.reason).toBe('outside_region');
+  });
+
+  it('adds visitor region and distance metadata for public destinations', () => {
+    const sameState = buildDestinationVisitorMatchMeta(
+      { city: 'Taubaté', state: 'SP', lat: -23.0264, lng: -45.5553 },
+      { city: 'São Bento do Sapucaí', state: 'SP', lat: -22.6867, lng: -45.7319 }
+    );
+    expect(sameState.recommended).toBe(true);
+    expect(sameState.sameState).toBe(true);
+    expect(sameState.distanceKm).toBeGreaterThan(30);
+    expect(sameState.reason).toBe('nearby_destination');
+
+    const noContext = buildDestinationVisitorMatchMeta(null, { city: 'Gonçalves', state: 'MG' });
+    expect(noContext.recommended).toBe(false);
+    expect(noContext.reason).toBe('missing_location');
   });
 });

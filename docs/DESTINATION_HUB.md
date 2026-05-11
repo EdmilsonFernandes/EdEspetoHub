@@ -38,10 +38,11 @@ Quando o visitante toca em `Pedir informações`, o WhatsApp abre com uma mensag
 ## Cadastro de cidades e chalés
 
 1. Acesse `/superadmin/destinations`.
-2. Cadastre o destino com nome, slug, cidade, UF, descrição, título e banner.
-3. Cadastre chalés/pousadas no destino informando nome, tipo, endereço, WhatsApp, site/Instagram e instruções de entrega.
-4. Cadastre listings locais como passeio, massagem, restaurante para visitar, noite, atrativo, serviço ou loja.
-5. Ative apenas o que deve aparecer publicamente.
+2. Use o resumo agrupado por `UF > cidade` para localizar destinos existentes, editar, ativar/desativar e abrir a vitrine pública.
+3. Cadastre ou edite o destino com nome, slug, cidade, UF, descrição, título, banner, latitude e longitude.
+4. Cadastre ou edite chalés/pousadas no destino informando nome, tipo, endereço, WhatsApp, site/Instagram e instruções de entrega.
+5. Cadastre ou edite listings locais como passeio, massagem, restaurante para visitar, noite, atrativo, serviço ou loja.
+6. Desative o que não deve aparecer publicamente. Não use exclusão física para preservar histórico e vínculos.
 
 As cidades iniciais podem ser São Francisco Xavier e São Bento do Sapucaí, mas a estrutura é nacional. Cada nova cidade entra como um `travel_destination`, não como dado fixo no frontend.
 
@@ -97,11 +98,13 @@ O objetivo é evitar que uma loja de São Bento do Sapucaí veja o Brasil inteir
 
 - Se a cidade/UF da loja bater com o destino, o destino aparece como recomendado.
 - Se houver coordenadas da loja e do destino, o sistema calcula distância e recomenda quando estiver dentro do raio inteligente.
-- Se só a UF bater, o destino fica classificado como mesma UF, mas não é prioridade máxima.
+- Se só a UF bater, o destino entra como `Da sua região`, mas não tem prioridade maior do que mesma cidade ou distância curta.
 - Destinos fora da região continuam em `Ver todos`, porque pode existir operação manual ou exceção aprovada.
 - A plataforma continua sendo a trava final: a loja só aparece para turistas depois de aprovação.
 
 Para melhorar a recomendação, mantenha a loja com `cidade`, `UF`, `lat`, `lng` e `raio de entrega` preenchidos em Configurações.
+
+No público, `/public/destinations` aceita `lat`, `lng`, `city` e `state`. Quando esses parâmetros são enviados pelo app principal, a vitrine consegue mostrar distância do endereço do cliente até a cidade/destino e ordenar destinos locais antes dos demais.
 
 ## Amostra real sem ser proprietário do chalé
 

@@ -36,6 +36,8 @@ describe('Destination Hub', () => {
         slug: `destino-teste-${suffix}`,
         city: 'Gonçalves',
         state: 'MG',
+        lat: -22.6586,
+        lng: -45.8551,
         heroTitle: 'Experiência de teste',
       });
 
@@ -112,6 +114,17 @@ describe('Destination Hub', () => {
     expect(placePublicRes.body.hospitalityPlace.id).toBe(placeId);
     expect(placePublicRes.body.stores.some((entry: any) => entry.store?.slug === storeSlug)).toBe(true);
     expect(placePublicRes.body.listings.some((entry: any) => entry.title === listingRes.body.title)).toBe(true);
+
+    const publicListRes = await api
+      .get('/api/public/destinations')
+      .query({ city: 'Gonçalves', state: 'MG', lat: -22.6586, lng: -45.8551 });
+    expect(publicListRes.status).toBe(200);
+    const publicDestination = publicListRes.body.find((item: any) => item.id === destinationId);
+    expect(publicDestination?.destinationMatch).toEqual(expect.objectContaining({
+      recommended: true,
+      reason: expect.any(String),
+      distanceKm: expect.any(Number),
+    }));
   });
 
   it('accepts partner requests and converts approved hospitality into real records', async () => {
