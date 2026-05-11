@@ -2,11 +2,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { ArrowRight, Bed, ForkKnife, GlobeHemisphereWest, InstagramLogo, MagnifyingGlass, MapPinLine, Mountains, Sparkle, Storefront, WhatsappLogo } from '@phosphor-icons/react';
+import { ArrowRight, Bed, ForkKnife, GlobeHemisphereWest, MagnifyingGlass, MapPinLine, Mountains, Sparkle, Storefront, WhatsappLogo } from '@phosphor-icons/react';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
 import { buildDestinationInquiryMessage, buildWhatsAppUrl } from '../utils/destinationWhatsApp';
+import { openActionTarget } from '../utils/actionLink';
 
 const asset = (item: any, variant: 'logo' | 'banner' | 'image' = 'banner') => {
   const source =
@@ -74,6 +75,16 @@ const siteLabel = (url?: string | null) => {
   if (normalized.includes('airbnb')) return 'Airbnb';
   if (normalized.includes('booking')) return 'Booking';
   return 'Site';
+};
+
+const InstagramIcon = ({ className = 'h-3.5 w-3.5' }) => (
+  <img src="/insta.avif" alt="" className={`${className} rounded-full object-cover`} />
+);
+
+const openExternal = (url: string) => (event: any) => {
+  event.preventDefault();
+  event.stopPropagation();
+  void openActionTarget({ href: url, external: true });
 };
 
 const categoryToStoreSegment = (category?: string) => {
@@ -445,9 +456,9 @@ export function DestinationDetailPage() {
                 return (
                 <article
                   key={place.id}
-                  className="group overflow-hidden rounded-[1.45rem] border border-slate-200 bg-white shadow-[0_16px_38px_-32px_rgba(15,23,42,0.5)] transition hover:-translate-y-1"
+                  className="group overflow-hidden rounded-[1.6rem] border border-[#336886]/15 bg-[linear-gradient(180deg,#fffaf0_0%,#ffffff_52%,#edf7f2_100%)] shadow-[0_18px_46px_-34px_rgba(21,58,76,0.48)] transition hover:-translate-y-1"
                 >
-                  <Link to={`/destinos/${destination.slug}/chales/${place.slug}`} className="relative block h-32 overflow-hidden bg-slate-100">
+                  <Link to={`/destinos/${destination.slug}/chales/${place.slug}`} className="relative block h-36 overflow-hidden bg-slate-100">
                     {hasConfiguredAsset(place) ? (
                       <img src={asset(place)} alt={place.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                     ) : (
@@ -455,19 +466,31 @@ export function DestinationDetailPage() {
                         <Bed size={42} weight="duotone" className="text-[#153A4C]/42" />
                       </div>
                     )}
-                    <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-black text-slate-700">
+                    <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-950/42 to-transparent" />
+                    <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/92 px-2.5 py-1 text-[11px] font-black text-[#153A4C] shadow-sm">
+                      <Bed size={12} weight="duotone" />
                       {placeTypeLabel(place.type)}
                     </div>
                   </Link>
                   <div className="p-3.5">
-                    <Link to={`/destinos/${destination.slug}/chales/${place.slug}`} className="line-clamp-1 text-base font-black text-slate-950">
+                    <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-[#153A4C]/8 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#153A4C]">
+                      <Bed size={12} weight="duotone" />
+                      Hospedagem
+                    </div>
+                    <Link to={`/destinos/${destination.slug}/chales/${place.slug}`} className="line-clamp-1 text-lg font-black tracking-[-0.03em] text-slate-950">
                       {place.name}
                     </Link>
                     <p className="mt-1 line-clamp-2 text-sm font-semibold text-slate-500">{place.description || place.address || 'Hospedagem cadastrada.'}</p>
+                    {place.address ? (
+                      <p className="mt-2 inline-flex max-w-full items-center gap-1 rounded-full bg-white/78 px-2.5 py-1 text-[11px] font-black text-slate-600">
+                        <MapPinLine size={12} weight="duotone" className="shrink-0 text-[#336886]" />
+                        <span className="truncate">{place.address}</span>
+                      </p>
+                    ) : null}
                     <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-black text-emerald-700">
-                        <Storefront size={13} weight="duotone" />
-                        Atende hóspedes
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-black text-amber-800">
+                        <Sparkle size={13} weight="duotone" />
+                        Base da viagem
                       </span>
                       {place.whatsapp ? (
                         <a
@@ -481,18 +504,18 @@ export function DestinationDetailPage() {
                         </a>
                       ) : null}
                       {placeInstagramUrl ? (
-                        <a href={placeInstagramUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full bg-pink-50 px-2.5 py-1 text-[11px] font-black text-pink-700">
-                          <InstagramLogo size={12} weight="fill" />
+                        <a href={placeInstagramUrl} onClick={openExternal(placeInstagramUrl)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[11px] font-black text-slate-700 shadow-sm ring-1 ring-pink-100">
+                          <InstagramIcon className="h-3.5 w-3.5" />
                           Insta
                         </a>
                       ) : null}
                       {placeWebsiteUrl ? (
-                        <a href={placeWebsiteUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-black text-slate-700">
+                        <a href={placeWebsiteUrl} onClick={openExternal(placeWebsiteUrl)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-black text-slate-700">
                           <GlobeHemisphereWest size={12} weight="duotone" />
                           {siteLabel(place.websiteUrl)}
                         </a>
                       ) : null}
-                      <Link to={`/destinos/${destination.slug}/chales/${place.slug}`} className="ml-auto inline-flex items-center gap-1 text-xs font-black text-[#153A4C]">
+                      <Link to={`/destinos/${destination.slug}/chales/${place.slug}`} className="ml-auto inline-flex items-center gap-1 rounded-full bg-[#153A4C] px-3 py-1.5 text-xs font-black text-white">
                         Ver chalé
                         <ArrowRight size={14} weight="bold" />
                       </Link>
@@ -591,13 +614,13 @@ export function DestinationDetailPage() {
                         </a>
                       ) : null}
                       {listingInstagramUrl ? (
-                        <a href={listingInstagramUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-pink-100 bg-pink-50 px-3 py-1.5 text-[11px] font-black text-pink-700">
-                          <InstagramLogo size={13} weight="fill" />
+                        <a href={listingInstagramUrl} onClick={openExternal(listingInstagramUrl)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-pink-100 bg-white px-3 py-1.5 text-[11px] font-black text-slate-700">
+                          <InstagramIcon className="h-3.5 w-3.5" />
                           Instagram
                         </a>
                       ) : null}
                       {listingWebsiteUrl ? (
-                        <a href={listingWebsiteUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-black text-slate-700">
+                        <a href={listingWebsiteUrl} onClick={openExternal(listingWebsiteUrl)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-black text-slate-700">
                           <GlobeHemisphereWest size={13} weight="duotone" />
                           {siteLabel(listing.websiteUrl)}
                         </a>

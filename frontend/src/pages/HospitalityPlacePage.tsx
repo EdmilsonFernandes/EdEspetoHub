@@ -2,12 +2,13 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { ArrowRight, Bed, Clock, ForkKnife, GlobeHemisphereWest, HouseLine, InstagramLogo, MapPinLine, ShoppingBagOpen, Sparkle, Storefront, WhatsappLogo } from '@phosphor-icons/react';
+import { ArrowRight, Bed, Clock, ForkKnife, GlobeHemisphereWest, HouseLine, MapPinLine, ShoppingBagOpen, Sparkle, Storefront, WhatsappLogo } from '@phosphor-icons/react';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatCurrency } from '../utils/format';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
 import { buildDestinationInquiryMessage, buildWhatsAppUrl } from '../utils/destinationWhatsApp';
+import { openActionTarget } from '../utils/actionLink';
 
 const imageFor = (item: any) =>
   resolveAssetUrl(item?.bannerUrl || item?.imageUrl || item?.logoUrl || item?.store?.settings?.bannerUrl || item?.store?.settings?.logoUrl || '') ||
@@ -58,6 +59,16 @@ const siteLabel = (url?: string | null) => {
   if (normalized.includes('airbnb')) return 'Airbnb';
   if (normalized.includes('booking')) return 'Booking';
   return 'Site';
+};
+
+const InstagramIcon = ({ className = 'h-3.5 w-3.5' }) => (
+  <img src="/insta.avif" alt="" className={`${className} rounded-full object-cover`} />
+);
+
+const openExternal = (url: string) => (event: any) => {
+  event.preventDefault();
+  event.stopPropagation();
+  void openActionTarget({ href: url, external: true });
 };
 
 export function HospitalityPlacePage() {
@@ -160,14 +171,14 @@ export function HospitalityPlacePage() {
                       </a>
                     ) : null}
                     {placeWebsiteUrl ? (
-                      <a href={placeWebsiteUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 shadow-sm">
+                      <a href={placeWebsiteUrl} onClick={openExternal(placeWebsiteUrl)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 shadow-sm">
                         <HouseLine size={14} weight="duotone" />
                         {siteLabel(place.websiteUrl)}
                       </a>
                     ) : null}
                     {placeInstagramUrl ? (
-                      <a href={placeInstagramUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-pink-100 bg-pink-50 px-3 py-2 text-xs font-black text-pink-700 shadow-sm">
-                        <InstagramLogo size={14} weight="fill" />
+                      <a href={placeInstagramUrl} onClick={openExternal(placeInstagramUrl)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-pink-100 bg-white px-3 py-2 text-xs font-black text-slate-700 shadow-sm">
+                        <InstagramIcon className="h-4 w-4" />
                         Instagram
                       </a>
                     ) : null}
@@ -269,13 +280,13 @@ export function HospitalityPlacePage() {
                           </a>
                         ) : null}
                         {listing.instagramUrl ? (
-                          <a href={instagramUrl(listing.instagramUrl)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-pink-100 bg-pink-50 px-3 py-1.5 text-[11px] font-black text-pink-700">
-                            <InstagramLogo size={13} weight="fill" />
+                          <a href={instagramUrl(listing.instagramUrl)} onClick={openExternal(instagramUrl(listing.instagramUrl))} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-pink-100 bg-white px-3 py-1.5 text-[11px] font-black text-slate-700">
+                            <InstagramIcon className="h-3.5 w-3.5" />
                             Instagram
                           </a>
                         ) : null}
                         {listing.websiteUrl ? (
-                          <a href={externalUrl(listing.websiteUrl)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-black text-slate-700">
+                          <a href={externalUrl(listing.websiteUrl)} onClick={openExternal(externalUrl(listing.websiteUrl))} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-black text-slate-700">
                             <GlobeHemisphereWest size={13} weight="duotone" />
                             {siteLabel(listing.websiteUrl)}
                           </a>
@@ -334,13 +345,13 @@ export function HospitalityPlacePage() {
                         </a>
                       ) : null}
                       {listing.instagramUrl ? (
-                        <a href={instagramUrl(listing.instagramUrl)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full bg-pink-50 px-2.5 py-1 text-[10px] font-black text-pink-700">
-                          <InstagramLogo size={12} weight="fill" />
+                        <a href={instagramUrl(listing.instagramUrl)} onClick={openExternal(instagramUrl(listing.instagramUrl))} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[10px] font-black text-slate-700">
+                          <InstagramIcon className="h-3 w-3" />
                           Insta
                         </a>
                       ) : null}
                       {listing.websiteUrl ? (
-                        <a href={externalUrl(listing.websiteUrl)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[10px] font-black text-slate-700">
+                        <a href={externalUrl(listing.websiteUrl)} onClick={openExternal(externalUrl(listing.websiteUrl))} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[10px] font-black text-slate-700">
                           <GlobeHemisphereWest size={12} weight="duotone" />
                           {siteLabel(listing.websiteUrl)}
                         </a>
