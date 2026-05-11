@@ -3562,22 +3562,21 @@ export function MarketplacePage() {
                               {isCondominiumEventLive ? 'Ao vivo' : hasUpcomingCondominiumEvent ? 'Agendado' : 'Prévia'}
                             </span>
                             <button
-                              type="button"
-                              onClick={(event) => {
-                                event.preventDefault();
-                                event.stopPropagation();
-                                toggleFavoriteStore(store.slug);
-                              }}
-                              className={`absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full transition-all duration-200 ease-out active:scale-[0.86] ${
-                                favoriteStoreSlugs.includes(store.slug)
-                                  ? 'scale-[1.06] bg-rose-500 text-white shadow-[0_4px_18px_-4px_rgba(244,63,94,0.72)]'
-                                  : 'border border-white/20 bg-black/28 text-white backdrop-blur-md hover:bg-black/42'
-                              }`}
-                              aria-label={`Favoritar ${store.name}`}
+                             type="button"
+                             onClick={(event) => {
+                               event.preventDefault();
+                               event.stopPropagation();
+                               toggleFavoriteStore(store.slug);
+                             }}
+                             className={`absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.8] ${
+                               favoriteStoreSlugs.includes(store.slug)
+                                 ? 'scale-[1.06] bg-rose-500 text-white shadow-[0_4px_18px_-4px_rgba(244,63,94,0.72)]'
+                                 : 'border border-white/20 bg-black/28 text-white backdrop-blur-md hover:scale-[1.1] hover:bg-black/42'
+                             }`}
+                             aria-label={`Favoritar ${store.name}`}
                             >
-                              <Heart size={12} weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'} />
-                            </button>
-                          </div>
+                             <Heart size={12} weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'} className={favoriteStoreSlugs.includes(store.slug) ? 'animate-[pop_0.4s_ease-out]' : ''} />
+                            </button>                          </div>
                           {/* Logo fora do overflow-hidden — não é cortado */}
                           <img
                             src={store.logo}
