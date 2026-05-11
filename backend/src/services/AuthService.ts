@@ -45,7 +45,6 @@ import { StoreUserRepository } from '../repositories/StoreUserRepository';
 import { isAllowlistedEmail, isDisposableEmailDomain } from '../utils/emailRisk';
 import { CustomerSecurityService } from './CustomerSecurityService';
 import { AuditNotificationService } from './AuditNotificationService';
-import { DestinationListing } from '../entities/DestinationListing';
 /**
  * Provides AuthService functionality.
  *
@@ -329,10 +328,6 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     return hasUsefulData ? normalized : null;
   }
 
-  private isUuid(value?: string | null) {
-    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || '').trim());
-  }
-
   private resolveAcquisitionAttribution(input: any) {
     const base =
       input?.acquisitionAttribution && typeof input.acquisitionAttribution === 'object'
@@ -343,32 +338,6 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       base.destinationListingId = directListingId;
     }
     return this.sanitizeAttribution(base);
-  }
-
-  private async linkClaimedDestinationListing(manager: any, store: Store, acquisitionAttribution?: Record<string, unknown> | null) {
-    const listingId = String(acquisitionAttribution?.destinationListingId || '').trim();
-    if (!listingId || !this.isUuid(listingId)) return;
-
-    const listingRepo = manager.getRepository(DestinationListing);
-    const listing = await listingRepo.findOne({ where: { id: listingId } });
-    if (!listing || listing.active === false) return;
-    if (listing.storeId && listing.storeId !== store.id) {
-      this.log.warn('Destination listing claim ignored because listing is already linked', {
-        listingId,
-        existingStoreId: listing.storeId,
-        requestedStoreId: store.id,
-      });
-      return;
-    }
-
-    listing.storeId = store.id;
-    listing.ctaType = 'STORE';
-    listing.ctaUrl = store.slug;
-    await listingRepo.save(listing);
-    this.log.info('Destination listing linked to newly registered store', {
-      listingId,
-      storeId: store.id,
-    });
   }
 
   /**
@@ -725,7 +694,6 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
         open: false,
       });
       await storeRepo.save(store);
-      await this.linkClaimedDestinationListing(manager, store, acquisitionAttribution);
 
       let resolvedPlanId = input.planId;
       if (resolvedPlanId === 'test-plan-7days') {

@@ -1576,12 +1576,12 @@ export function CreateStore() {
                       {destinationClaim.storeName || 'Seu serviço'} em {destinationClaim.destinationName || destinationClaim.city || 'um destino turístico'}
                     </h2>
                     <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-600">
-                      Preenchi os dados públicos do card. Ao concluir o cadastro, esse serviço deixa de ser só informativo e passa a abrir sua loja real no Já no Caminho.
+                      Preenchi os dados públicos do card. Ao concluir o cadastro, a plataforma recebe sua solicitação e o card só vira loja no app depois de validação administrativa.
                     </p>
                   </div>
                 </div>
                 <span className="inline-flex shrink-0 items-center justify-center rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-emerald-700">
-                  Pré-cadastro identificado
+                  Validação obrigatória
                 </span>
               </div>
             </div>

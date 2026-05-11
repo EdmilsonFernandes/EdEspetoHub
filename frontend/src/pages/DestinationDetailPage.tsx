@@ -543,7 +543,7 @@ export function DestinationDetailPage() {
                           className="inline-flex items-center gap-1 rounded-full border border-[#153A4C]/15 bg-white px-3 py-1.5 text-[11px] font-black text-[#153A4C]"
                         >
                           <Storefront size={13} weight="duotone" />
-                          Sou responsável
+                          Ativar pedidos
                         </Link>
                       ) : null}
                       {listing.address ? (

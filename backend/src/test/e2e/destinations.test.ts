@@ -172,7 +172,7 @@ describe('Destination Hub', () => {
     ).toBe(true);
   });
 
-  it('links a claimed destination listing to the store created from it', async () => {
+  it('keeps a claimed destination listing pending until admin validation', async () => {
     const suffix = Date.now();
     const destinationRes = await api
       .post('/api/admin/destinations')
@@ -222,14 +222,11 @@ describe('Destination Hub', () => {
     const claimedListing = publicRes.body.listings.find((listing: any) => listing.id === listingRes.body.id);
 
     expect(claimedListing).toEqual(expect.objectContaining({
-      storeId: claimedStore.body.store.id,
-      ctaType: 'STORE',
-      ctaUrl: claimedStore.body.store.slug,
+      storeId: null,
+      ctaType: 'WHATSAPP',
+      ctaUrl: '5512999999999',
     }));
-    expect(claimedListing.store).toEqual(expect.objectContaining({
-      id: claimedStore.body.store.id,
-      slug: claimedStore.body.store.slug,
-      name: listingRes.body.title,
-    }));
+    expect(claimedListing.store).toBeNull();
+    expect(claimedStore.body.store.id).toBeTruthy();
   });
 });
