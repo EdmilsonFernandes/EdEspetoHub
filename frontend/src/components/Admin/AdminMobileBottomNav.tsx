@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Buildings, ChartBar, ChefHat, CurrencyDollar, ImageSquare, Package, SignOut, UserCircle } from '@phosphor-icons/react';
+import { Buildings, ChartBar, ChefHat, Compass, CurrencyDollar, ImageSquare, Package, SignOut, UserCircle } from '@phosphor-icons/react';
 import { orderService } from '../../services/orderService';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -262,6 +262,13 @@ export function AdminMobileBottomNav() {
         onClick: () => navigate('/superadmin/condominiums'),
       },
       {
+        id: 'super-destinations',
+        label: 'Destinos',
+        icon: Compass,
+        active: path.startsWith('/superadmin/destinations'),
+        onClick: () => navigate('/superadmin/destinations'),
+      },
+      {
         id: 'super-home-config',
         label: 'Banners',
         icon: ImageSquare,
@@ -295,7 +302,7 @@ export function AdminMobileBottomNav() {
           transform: effectiveVisibility ? 'translateY(0)' : 'translateY(calc(100% - 4px))',
         }}
       >
-        <ul className={`pointer-events-auto mx-auto grid w-full max-w-md ${superItems.length === 3 ? 'grid-cols-3' : 'grid-cols-4'} gap-0.5 border-t border-slate-200/60 bg-white/95 px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)] shadow-[0_-8px_32px_-16px_rgba(15,23,42,0.18)] backdrop-blur-xl`}>
+        <ul className={`pointer-events-auto mx-auto grid w-full max-w-md ${superItems.length === 3 ? 'grid-cols-3' : superItems.length === 5 ? 'grid-cols-5' : 'grid-cols-4'} gap-0.5 border-t border-slate-200/60 bg-white/95 px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)] shadow-[0_-8px_32px_-16px_rgba(15,23,42,0.18)] backdrop-blur-xl`}>
           {superItems.map((item) => {
             const Icon = item.icon;
             const danger = item.tone === 'danger';

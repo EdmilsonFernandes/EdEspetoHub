@@ -1,12 +1,13 @@
 // @ts-nocheck
 import * as React from 'react';
-import { ChartBar, BookOpen, Buildings, CheckSquare, ClipboardText, Clock, CreditCard, Package, Gear, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree, PlugsConnected, CheckCircle, SealCheck } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, Buildings, CheckSquare, ClipboardText, Clock, Compass, CreditCard, Package, Gear, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree, PlugsConnected, CheckCircle, SealCheck } from '@phosphor-icons/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { BrandingSettings } from '../components/Admin/BrandingSettings';
 import { StoreCondominiumPanel } from '../components/Admin/StoreCondominiumPanel';
+import { StoreDestinationPanel } from '../components/Admin/StoreDestinationPanel';
 import DashboardView from '../components/Admin/DashboardView';
 import { GrillQueue } from '../components/Admin/GrillQueue';
 import { OpeningHoursCard } from '../components/Admin/OpeningHoursCard';
@@ -1700,7 +1701,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [deliveryBillingError, setDeliveryBillingError] = useState('');
   const [deliveryBillingLoading, setDeliveryBillingLoading] = useState(false);
   const [deliveryBillingActionLoading, setDeliveryBillingActionLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'avaliacoes' | 'produtos' | 'estoque' | 'config' | 'fila' | 'pagamentos' | 'gateway' | 'motoboys' | 'usuarios' | 'condominios'>(() => {
+  const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'avaliacoes' | 'produtos' | 'estoque' | 'config' | 'fila' | 'pagamentos' | 'gateway' | 'motoboys' | 'usuarios' | 'condominios' | 'destinos'>(() => {
     const requestedTabFromState = String((location.state as any)?.activeTab || '').trim();
     const requestedTabFromQuery = String(new URLSearchParams(location.search || '').get('tab') || '').trim();
     const requestedTabFromSession =
@@ -1809,6 +1810,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             { id: 'gateway', label: 'Pagamentos Online', icon: PlugsConnected },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
             { id: 'condominios', label: 'Condomínios', icon: Buildings },
+            { id: 'destinos', label: 'Destinos', icon: Compass },
             { id: 'usuarios', label: 'Usuários', icon: UsersThree, standalone: true },
             { id: 'config', label: 'Configurar loja', icon: Gear },
             { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
@@ -1836,6 +1838,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       fila: { title: 'Gestor de Pedidos', subtitle: 'Acompanhe pedidos em andamento e a fila da loja em tempo real.' },
       motoboys: { title: 'Entregadores', subtitle: 'Vínculos, documentos, solicitações e status de entrega.' },
       condominios: { title: 'Condomínios e feiras', subtitle: 'Solicite participação em condomínios e acompanhe aprovações da loja.' },
+      destinos: { title: 'Destinos turísticos', subtitle: 'Solicite vínculo com chalés e pousadas onde sua loja entrega.' },
       usuarios: { title: 'Usuários', subtitle: 'Cadastre e gerencie acessos de admin e operador da loja.' },
     }),
     []
@@ -1939,7 +1942,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
   useEffect(() => {
     if (!isOperatorUser) return;
-    const disallowed = new Set(['resumo', 'pedidos', 'pagamentos', 'gateway', 'avaliacoes', 'config', 'motoboys', 'usuarios', 'estoque', 'condominios']);
+    const disallowed = new Set(['resumo', 'pedidos', 'pagamentos', 'gateway', 'avaliacoes', 'config', 'motoboys', 'usuarios', 'estoque', 'condominios', 'destinos']);
     if (disallowed.has(activeTab)) {
       setActiveTab('fila');
     }
@@ -2070,7 +2073,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     const allowedTabs = new Set(
       isOperatorUser
         ? ['produtos', 'cardapio']
-        : ['resumo', 'avaliacoes', 'produtos', 'estoque', 'config', 'pagamentos', 'gateway', 'motoboys', 'condominios', 'usuarios']
+        : ['resumo', 'avaliacoes', 'produtos', 'estoque', 'config', 'pagamentos', 'gateway', 'motoboys', 'condominios', 'destinos', 'usuarios']
     );
     if (!allowedTabs.has(nextTab)) {
       navigate('/admin/dashboard', { replace: true, state: {} });
@@ -3654,6 +3657,17 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             className="premium-card-soft"
           >
             <StoreCondominiumPanel storeId={storeId} />
+          </FormSection>
+        )}
+
+        {activeTab === 'destinos' && (
+          <FormSection
+            title="Destinos turísticos"
+            subtitle="Solicite vínculo com chalés e pousadas onde sua loja entrega."
+            variant="default"
+            className="premium-card-soft"
+          >
+            <StoreDestinationPanel storeId={storeId} />
           </FormSection>
         )}
 

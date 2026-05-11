@@ -5,7 +5,7 @@ import { AdminHeader } from '../components/Admin/AdminHeader';
 import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Buildings, CaretDown, ChartBar, CheckSquare, ClipboardText, CreditCard, Gear, LockKey, Package, ShoppingCart, SignOut, Scooter, Star, UserCircle, X, UsersThree } from '@phosphor-icons/react';
+import { Buildings, CaretDown, ChartBar, CheckSquare, ClipboardText, Compass, CreditCard, Gear, LockKey, Package, ShoppingCart, SignOut, Scooter, Star, UserCircle, X, UsersThree } from '@phosphor-icons/react';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 import { ContextSideDrawer } from '../components/common/ContextSideDrawer';
@@ -87,6 +87,7 @@ export function AdminLayout({
             { id: 'gateway', label: 'Pagamentos Online', icon: CreditCard },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
             { id: 'condominios', label: 'Condomínios', icon: Buildings },
+            { id: 'destinos', label: 'Destinos', icon: Compass },
             { id: 'usuarios', label: 'Usuários', icon: UsersThree },
             { id: 'config', label: 'Configurações da Loja', icon: Gear },
             { id: 'avaliacoes', label: 'Avaliações', icon: Star },
@@ -119,7 +120,7 @@ export function AdminLayout({
     if (marketing.length) sections.push({ type: 'group', id: 'marketing', label: 'Visibilidade', children: marketing });
     const financeiro = ['pagamentos', 'gateway'].map(consume).filter(Boolean);
     if (financeiro.length) sections.push({ type: 'group', id: 'financeiro', label: 'Plano e Pagamentos', children: financeiro });
-    const gestao = ['motoboys', 'condominios', 'usuarios'].map(consume).filter(Boolean);
+    const gestao = ['motoboys', 'condominios', 'destinos', 'usuarios'].map(consume).filter(Boolean);
     if (gestao.length) sections.push({ type: 'group', id: 'gestao', label: 'Equipe e Operação', children: gestao });
     const sistema = consume('config');
     if (sistema) sections.push({ type: 'item', item: sistema });
@@ -323,6 +324,16 @@ export function AdminLayout({
           description: 'Gerencie feiras, vínculos e aprovações da operação.',
           icon: <Buildings size={22} weight="duotone" />,
           onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'condominios' } }),
+        }]
+      : []),
+    ...(!isOperatorUser
+      ? [{
+          section: 'Operação',
+          id: 'destinations',
+          label: 'Destinos',
+          description: 'Solicite presença em chalés e pousadas atendidos pela loja.',
+          icon: <Compass size={22} weight="duotone" />,
+          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'destinos' } }),
         }]
       : []),
     ...(canUseMotoboys && ['ADMIN', 'LOJISTA'].includes(userRole)

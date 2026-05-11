@@ -63,6 +63,13 @@ import { ZipCodeCache } from '../entities/ZipCodeCache';
 import { CustomerSecurityBlock } from '../entities/CustomerSecurityBlock';
 import { CustomerRiskEvent } from '../entities/CustomerRiskEvent';
 import { PaymentAuditLog } from '../entities/PaymentAuditLog';
+import { TravelDestination } from '../entities/TravelDestination';
+import { DestinationBanner } from '../entities/DestinationBanner';
+import { HospitalityPlace } from '../entities/HospitalityPlace';
+import { HospitalityPlaceStoreLink } from '../entities/HospitalityPlaceStoreLink';
+import { DestinationListing } from '../entities/DestinationListing';
+import { DestinationPartnerRequest } from '../entities/DestinationPartnerRequest';
+import { DestinationStoreRequest } from '../entities/DestinationStoreRequest';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -72,7 +79,7 @@ export const AppDataSource = new DataSource({
   password: env.database.password,
   database: env.database.database,
   synchronize: false,
-  entities: [ User, Store, StoreSettings, Product, Order, OrderShipment, OrderReview, OrderItem, OrderEtaEstimate, Motoboy, MotoboyStore, OrderDelivery, DeliveryEvent, MotoboyDocument, MotoboyStoreRequest, MotoboyAuditLog, DeliveryBillingCycle, DeliveryBillingCharge, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog, StoreLinkHit, StoreUser, InventoryMovement, CustomerAddress, FeaturedProductRequest, Condominium, StoreCondominium, CondominiumEvent, CondominiumEventStore, StoreCondominiumRequest, CondominiumUser, CondominiumAccessRequest, CustomerEmailOtp, StorePaymentAccount, MotoboyPaymentAccount, OrderPayment, ZipCodeCache, CustomerSecurityBlock, CustomerRiskEvent, PaymentAuditLog, PromoPush, Notification ],
+  entities: [ User, Store, StoreSettings, Product, Order, OrderShipment, OrderReview, OrderItem, OrderEtaEstimate, Motoboy, MotoboyStore, OrderDelivery, DeliveryEvent, MotoboyDocument, MotoboyStoreRequest, MotoboyAuditLog, DeliveryBillingCycle, DeliveryBillingCharge, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog, StoreLinkHit, StoreUser, InventoryMovement, CustomerAddress, FeaturedProductRequest, Condominium, StoreCondominium, CondominiumEvent, CondominiumEventStore, StoreCondominiumRequest, CondominiumUser, CondominiumAccessRequest, CustomerEmailOtp, StorePaymentAccount, MotoboyPaymentAccount, OrderPayment, ZipCodeCache, CustomerSecurityBlock, CustomerRiskEvent, PaymentAuditLog, TravelDestination, DestinationBanner, HospitalityPlace, HospitalityPlaceStoreLink, DestinationListing, DestinationPartnerRequest, DestinationStoreRequest, PromoPush, Notification ],
   migrations: [],
   logging: [ 'error' ],
   extra: {

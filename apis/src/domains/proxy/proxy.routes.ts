@@ -51,6 +51,10 @@ export function createProxyRoutes(): Router {
     r.get('/public/stores/slug/:slug/tables/status', forward);
     r.get('/public/condominiums', forward); r.post('/public/condominium-access-requests', forward);
     r.get('/public/condominiums/:slug', forward); r.get('/public/condominiums/:slug/stores', forward);
+    r.get('/public/destinations', forward); r.post('/public/destination-partner-requests', forward);
+    r.get('/public/destinations/:slug', forward);
+    r.get('/public/destinations/:slug/hospitality', forward);
+    r.get('/public/destinations/:slug/hospitality/:placeSlug', forward);
     r.post('/public/push/register', forward); r.post('/public/push/unregister', forward);
     // Address lookup (public)
     r.get('/addresses/lookup-zip-code/:cep', forward); r.get('/public/addresses/lookup-zip-code/:cep', forward);
@@ -118,6 +122,9 @@ export function createProxyRoutes(): Router {
     r.get('/stores/:storeId/condominiums', authRequired, forward);
     r.post('/stores/:storeId/condominium-requests', authRequired, forward);
     r.delete('/stores/:storeId/condominiums/:condominiumId', authRequired, forward);
+    r.get('/stores/:storeId/destinations', authRequired, forward);
+    r.post('/stores/:storeId/destination-requests', authRequired, forward);
+    r.delete('/stores/:storeId/destinations/:placeId', authRequired, forward);
     // Promo push (store)
     r.post('/stores/:storeId/promo-pushes', authRequired, forward);
     r.get('/stores/:storeId/promo-pushes', authRequired, forward);
@@ -211,6 +218,18 @@ export function createProxyRoutes(): Router {
     r.post('/admin/condominium-events/:eventId/stores', authRequired, forward);
     r.patch('/admin/condominium-requests/:requestId/review', authRequired, forward);
     r.patch('/admin/condominium-access-requests/:requestId/review', authRequired, forward);
+    r.get('/admin/destinations/manage', authRequired, forward);
+    r.post('/admin/destinations', authRequired, forward);
+    r.patch('/admin/destinations/:destinationId', authRequired, forward);
+    r.post('/admin/destination-banners', authRequired, forward);
+    r.patch('/admin/destination-banners/:bannerId', authRequired, forward);
+    r.post('/admin/hospitality-places', authRequired, forward);
+    r.patch('/admin/hospitality-places/:placeId', authRequired, forward);
+    r.post('/admin/destination-listings', authRequired, forward);
+    r.patch('/admin/destination-listings/:listingId', authRequired, forward);
+    r.post('/admin/hospitality-places/:placeId/stores', authRequired, forward);
+    r.patch('/admin/destination-partner-requests/:requestId/review', authRequired, forward);
+    r.patch('/admin/destination-store-requests/:requestId/review', authRequired, forward);
     r.get('/admin/motoboys/kyc/audit', authRequired, forward);
     r.get('/admin/motoboys/kyc/pending', authRequired, forward);
     r.get('/admin/motoboys/kyc/reviews', authRequired, forward);

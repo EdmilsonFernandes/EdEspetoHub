@@ -35,6 +35,7 @@ import { ShippingController } from '../controllers/ShippingController';
 import { CustomerAccountController } from '../controllers/CustomerAccountController';
 import { FeaturedProductController } from '../controllers/FeaturedProductController';
 import { CondominiumController } from '../controllers/CondominiumController';
+import { DestinationController } from '../controllers/DestinationController';
 import { StorePaymentAccountController } from '../controllers/StorePaymentAccountController';
 import { MotoboyPaymentAccountController } from '../controllers/MotoboyPaymentAccountController';
 import { MapsController } from '../controllers/MapsController';
@@ -143,6 +144,18 @@ routes.patch('/admin/condominiums/:condominiumId/stores/:storeId/settings', requ
 routes.post('/admin/condominium-events/:eventId/stores', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminAddStoreToEvent);
 routes.patch('/admin/condominium-requests/:requestId/review', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminReviewRequest);
 routes.patch('/admin/condominium-access-requests/:requestId/review', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminReviewAccessRequest);
+routes.get('/admin/destinations/manage', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminOverview);
+routes.post('/admin/destinations', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminCreateDestination);
+routes.patch('/admin/destinations/:destinationId', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminUpdateDestination);
+routes.post('/admin/destination-banners', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminCreateBanner);
+routes.patch('/admin/destination-banners/:bannerId', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminUpdateBanner);
+routes.post('/admin/hospitality-places', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminCreateHospitalityPlace);
+routes.patch('/admin/hospitality-places/:placeId', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminUpdateHospitalityPlace);
+routes.post('/admin/destination-listings', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminCreateListing);
+routes.patch('/admin/destination-listings/:listingId', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminUpdateListing);
+routes.post('/admin/hospitality-places/:placeId/stores', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminLinkStore);
+routes.patch('/admin/destination-partner-requests/:requestId/review', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminReviewPartnerRequest);
+routes.patch('/admin/destination-store-requests/:requestId/review', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminReviewStoreRequest);
 routes.post('/admin/payments/:paymentId/reprocess', requireAuth, requireRole('SUPER_ADMIN'), PaymentController.reprocess);
 routes.patch('/admin/stores/:storeId/suspend', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.suspendStore);
 routes.patch('/admin/stores/:storeId/reactivate', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.reactivateStore);
@@ -186,6 +199,11 @@ routes.get('/public/condominiums', CondominiumController.listPublic);
 routes.post('/public/condominium-access-requests', CondominiumController.createAccessRequest);
 routes.get('/public/condominiums/:slug', CondominiumController.getPublicBySlug);
 routes.get('/public/condominiums/:slug/stores', CondominiumController.listPublicStoresBySlug);
+routes.get('/public/destinations', DestinationController.listPublic);
+routes.post('/public/destination-partner-requests', DestinationController.createPartnerRequest);
+routes.get('/public/destinations/:slug', DestinationController.getPublicBySlug);
+routes.get('/public/destinations/:slug/hospitality', DestinationController.listPublicHospitality);
+routes.get('/public/destinations/:slug/hospitality/:placeSlug', DestinationController.getPublicHospitalityPlace);
 routes.get('/public/featured-products', FeaturedProductController.listPublic);
 routes.post('/public/stores/slug/:slug/track', StoreController.trackLink);
 routes.get('/stores/slug/:slug', StoreController.getBySlug);
@@ -223,6 +241,9 @@ routes.get('/stores/:storeId/featured-requests/:requestId/payment-audit', requir
 routes.get('/stores/:storeId/condominiums', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), CondominiumController.listStoreOptions);
 routes.post('/stores/:storeId/condominium-requests', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), CondominiumController.createStoreRequest);
 routes.delete('/stores/:storeId/condominiums/:condominiumId', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), CondominiumController.removeStoreCondominium);
+routes.get('/stores/:storeId/destinations', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), DestinationController.listStoreOptions);
+routes.post('/stores/:storeId/destination-requests', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), DestinationController.createStoreRequest);
+routes.delete('/stores/:storeId/destinations/:placeId', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), DestinationController.removeStoreDestination);
 
 // Products admin (cadastro não depende de assinatura)
 routes.post('/stores/:storeId/products', requireAuth, requireRole('ADMIN'), ProductController.create);

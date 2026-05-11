@@ -27,12 +27,15 @@ import {
   Buildings,
   CalendarBlank,
   Clock,
+  Compass,
   MapPinLine,
+  Mountains,
   UserCircle,
   Warning,
 } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { condominiumService } from '../services/condominiumService';
+import { destinationService } from '../services/destinationService';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import { customerAccountService } from '../services/customerAccountService';
@@ -153,6 +156,15 @@ const resolveCondominiumAssetUrl = (
   const fallback = getStoreAvatarUrl(slug, name);
   const resolved = resolveAssetUrl(preferredSource) || fallback;
   return appendAssetCacheKey(resolved, `${slug}-${variant}`);
+};
+
+const resolveDestinationAssetUrl = (
+  destination: { slug?: string | null; name?: string | null; logoUrl?: string | null; bannerUrl?: string | null } | null | undefined
+) => {
+  const slug = String(destination?.slug || 'destino').trim() || 'destino';
+  const name = String(destination?.name || 'Destino').trim() || 'Destino';
+  const resolved = resolveAssetUrl(destination?.bannerUrl || destination?.logoUrl || '') || getStoreAvatarUrl(slug, name);
+  return appendAssetCacheKey(resolved, `${slug}-destination`);
 };
 
 const parseOptionalNumber = (value: unknown): number | null => {
@@ -413,6 +425,20 @@ type HubCondominium = {
   bannerUrl?: string | null;
   active?: boolean;
   eventSummary?: CondominiumEventSummary | null;
+};
+
+type HubDestination = {
+  id?: string;
+  name?: string;
+  slug?: string;
+  city?: string | null;
+  state?: string | null;
+  description?: string | null;
+  heroSubtitle?: string | null;
+  logoUrl?: string | null;
+  bannerUrl?: string | null;
+  placesCount?: number;
+  listingsCount?: number;
 };
 
 type CondominiumEventSummary = {
@@ -705,6 +731,7 @@ export function MarketplacePage() {
   const [segmentFilter, setSegmentFilter] = useState('all');
   const [quickFilter, setQuickFilter] = useState<'all' | 'free_shipping' | 'nearby' | 'open_now' | 'favorites'>('all');
   const [condominiums, setCondominiums] = useState<HubCondominium[]>([]);
+  const [destinations, setDestinations] = useState<HubDestination[]>([]);
   const [selectedCondominiumSlug, setSelectedCondominiumSlug] = useState(() => readSelectedCondominiumSlug());
   const [condominiumStoreSlugs, setCondominiumStoreSlugs] = useState<string[]>([]);
   const [selectedCondominiumEvent, setSelectedCondominiumEvent] = useState<CondominiumEventSummary | null>(null);
@@ -1359,6 +1386,22 @@ export function MarketplacePage() {
       window.removeEventListener('focus', handleVisibilityRefresh);
     };
   }, [refreshPublicCondominiums]);
+
+  useEffect(() => {
+    let active = true;
+    destinationService
+      .listPublic()
+      .then((payload) => {
+        if (!active) return;
+        setDestinations(Array.isArray(payload) ? payload : []);
+      })
+      .catch(() => {
+        if (active) setDestinations([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     const slug = String(selectedCondominiumSlug || '').trim();
@@ -2966,6 +3009,53 @@ export function MarketplacePage() {
                 <SegmentPromoCarousel mode="hub" slides={homePromoSlides} className="mx-0 shadow-[0_18px_42px_-28px_rgba(15,23,42,0.45)]" />
               </section>
             </div>
+          )}
+
+          {debouncedQuery.length < 2 && !selectedCondominium && destinations.length > 0 && (
+            <section className="mb-6 overflow-hidden rounded-[2.15rem] border border-emerald-100/80 bg-[linear-gradient(135deg,#f8f1df_0%,#eef8f0_52%,#e7f0f7_100%)] p-4 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.35)]">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div>
+                  <p className="inline-flex items-center gap-1.5 rounded-full bg-slate-950 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white">
+                    <Mountains size={13} weight="duotone" />
+                    Novo
+                  </p>
+                  <h2 className="mt-2 text-xl font-black tracking-[-0.04em] text-slate-950">Destinos, chalés e pousadas</h2>
+                  <p className="mt-0.5 text-xs font-semibold text-slate-600">Escolha a cidade, veja hospedagens, serviços e lojas que entregam.</p>
+                </div>
+                <Link to="/destinos" className="hidden rounded-full bg-[#153A4C] px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-white sm:inline-flex">
+                  Ver todos
+                </Link>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {destinations.slice(0, 2).map((destination) => (
+                  <Link
+                    key={destination.id || destination.slug}
+                    to={`/destinos/${destination.slug}`}
+                    className="group overflow-hidden rounded-[1.6rem] border border-white/80 bg-white/82 p-3 shadow-[0_16px_34px_-28px_rgba(15,23,42,0.42)] transition active:scale-[0.99]"
+                  >
+                    <div className="flex gap-3">
+                      <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[1.2rem] bg-slate-100">
+                        <img src={resolveDestinationAssetUrl(destination)} alt={String(destination.name || 'Destino')} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="line-clamp-1 text-base font-black text-slate-950">{destination.name}</p>
+                        <p className="mt-0.5 text-[11px] font-bold text-slate-500">{[destination.city, destination.state].filter(Boolean).join(' - ')}</p>
+                        <p className="mt-2 line-clamp-2 text-xs font-semibold leading-relaxed text-slate-600">{destination.heroSubtitle || destination.description || 'Destino turístico cadastrado.'}</p>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          <span className="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-black text-emerald-700">
+                            {destination.placesCount || 0} hospedagens
+                          </span>
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[#153A4C] px-2 py-1 text-[10px] font-black text-white">
+                            Abrir
+                            <Compass size={11} weight="bold" />
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
           )}
 
           {debouncedQuery.length < 2 && condominiums.length > 0 && (

@@ -31,6 +31,7 @@ import {
   GitCommit,
   RocketLaunch,
   Cpu,
+  Compass,
 } from '@phosphor-icons/react';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { superAdminService } from '../services/superAdminService';
@@ -213,6 +214,11 @@ const SECTION_META: Record<string, { title: string; description: string; tone: s
     description: 'Aprovação e histórico de notificações pagas pelas lojas.',
     tone: 'from-[#153A4C] to-[#336886] text-white border-[#336886]',
   },
+  destinations: {
+    title: 'Destinos',
+    description: 'Cidades turísticas, chalés, pousadas e serviços locais.',
+    tone: 'from-[#153A4C] to-[#336886] text-white border-[#336886]',
+  },
 };
 
 const SUPER_ADMIN_SECTIONS = [
@@ -221,6 +227,7 @@ const SUPER_ADMIN_SECTIONS = [
   { id: 'stores',    label: 'Lojas',      icon: Storefront,        group: 'operacional' },
   { id: 'payments',  label: 'Pagamentos', icon: CurrencyDollar,    group: 'operacional' },
   { id: 'push',      label: 'Push',       icon: Megaphone,         group: 'plataforma'  },
+  { id: 'destinations', label: 'Destinos', icon: Compass,           group: 'plataforma'  },
   { id: 'kyc',       label: 'KYC',        icon: IdentificationCard,group: 'plataforma'  },
   { id: 'security',  label: 'Segurança',  icon: ShieldCheck,       group: 'plataforma'  },
   { id: 'logs',      label: 'Logs',       icon: GitCommit,         group: 'tecnico'     },
@@ -1242,6 +1249,14 @@ export function SuperAdmin() {
           </button>
           <button
             type="button"
+            onClick={() => { window.location.href = '/superadmin/destinations'; }}
+            className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/88 px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm transition hover:border-[#336886]/25 hover:text-[#336886] lg:inline-flex"
+          >
+            <Compass size={15} weight="duotone" />
+            Destinos
+          </button>
+          <button
+            type="button"
             onClick={() => setProfileMenuOpen((prev) => !prev)}
             className="flex items-center gap-2 rounded-full border border-slate-200 bg-white/92 px-2 py-1.5 shadow-sm transition hover:border-slate-300 hover:bg-white"
             aria-haspopup="menu"
@@ -1302,6 +1317,17 @@ export function SuperAdmin() {
                 type="button"
                 onClick={() => {
                   setProfileMenuOpen(false);
+                  window.location.href = '/superadmin/destinations';
+                }}
+                className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+              >
+                <Compass size={16} weight="duotone" />
+                Destinos turísticos
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setProfileMenuOpen(false);
                   loadOverview(token);
                 }}
                 className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
@@ -1329,7 +1355,13 @@ export function SuperAdmin() {
         <div className="sm:hidden">
           <select
             value={activeSection}
-            onChange={(event) => setActiveSection(event.target.value)}
+            onChange={(event) => {
+              if (event.target.value === 'destinations') {
+                window.location.href = '/superadmin/destinations';
+                return;
+              }
+              setActiveSection(event.target.value);
+            }}
             className="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-sm font-bold text-white outline-none"
           >
             {[
@@ -1361,7 +1393,13 @@ export function SuperAdmin() {
                     <button
                       key={id}
                       type="button"
-                      onClick={() => setActiveSection(id)}
+                      onClick={() => {
+                        if (id === 'destinations') {
+                          window.location.href = '/superadmin/destinations';
+                          return;
+                        }
+                        setActiveSection(id);
+                      }}
                       className={`inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-[12px] font-bold transition-all ${
                         isActive
                           ? 'bg-[#336886] text-white shadow-[0_4px_12px_-4px_rgba(51,104,134,0.6)]'

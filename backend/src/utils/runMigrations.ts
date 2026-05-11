@@ -2118,4 +2118,247 @@ export async function runMigrations() {
     ON users(username)
     WHERE username IS NOT NULL;
   `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS travel_destinations (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      name TEXT NOT NULL,
+      slug TEXT NOT NULL UNIQUE,
+      city TEXT,
+      state VARCHAR(2),
+      description TEXT,
+      hero_title TEXT,
+      hero_subtitle TEXT,
+      logo_url TEXT,
+      banner_url TEXT,
+      lat NUMERIC(10,7),
+      lng NUMERIC(10,7),
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      sort_order INT NOT NULL DEFAULT 0,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_travel_destinations_active_sort
+    ON travel_destinations(active, sort_order, name);
+  `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS destination_banners (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      destination_id UUID NOT NULL REFERENCES travel_destinations(id) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      subtitle TEXT,
+      image_url TEXT,
+      action_type TEXT,
+      action_target TEXT,
+      sort_order INT NOT NULL DEFAULT 0,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_destination_banners_destination_active
+    ON destination_banners(destination_id, active, sort_order);
+  `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS hospitality_places (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      destination_id UUID NOT NULL REFERENCES travel_destinations(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      slug TEXT NOT NULL,
+      type TEXT NOT NULL DEFAULT 'CHALE',
+      description TEXT,
+      address TEXT,
+      city TEXT,
+      state VARCHAR(2),
+      zip_code TEXT,
+      lat NUMERIC(10,7),
+      lng NUMERIC(10,7),
+      phone TEXT,
+      whatsapp TEXT,
+      instagram_url TEXT,
+      website_url TEXT,
+      logo_url TEXT,
+      banner_url TEXT,
+      amenities JSONB DEFAULT '[]'::jsonb,
+      delivery_instructions TEXT,
+      sort_order INT NOT NULL DEFAULT 0,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS uq_hospitality_places_destination_slug
+    ON hospitality_places(destination_id, slug);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_hospitality_places_destination_active
+    ON hospitality_places(destination_id, active, sort_order, name);
+  `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS hospitality_place_store_links (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      hospitality_place_id UUID NOT NULL REFERENCES hospitality_places(id) ON DELETE CASCADE,
+      store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+      delivery_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+      pickup_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+      delivery_fee NUMERIC(10,2),
+      estimated_minutes INT,
+      notes TEXT,
+      recommended BOOLEAN NOT NULL DEFAULT FALSE,
+      sort_order INT NOT NULL DEFAULT 0,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      CONSTRAINT uq_hospitality_place_store_links_place_store UNIQUE (hospitality_place_id, store_id)
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_hospitality_place_store_links_place_active
+    ON hospitality_place_store_links(hospitality_place_id, active, recommended, sort_order);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_hospitality_place_store_links_store
+    ON hospitality_place_store_links(store_id);
+  `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS destination_listings (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      destination_id UUID NOT NULL REFERENCES travel_destinations(id) ON DELETE CASCADE,
+      hospitality_place_id UUID REFERENCES hospitality_places(id) ON DELETE SET NULL,
+      store_id UUID REFERENCES stores(id) ON DELETE SET NULL,
+      category TEXT NOT NULL DEFAULT 'SERVICO',
+      title TEXT NOT NULL,
+      description TEXT,
+      image_url TEXT,
+      address TEXT,
+      lat NUMERIC(10,7),
+      lng NUMERIC(10,7),
+      phone TEXT,
+      whatsapp TEXT,
+      instagram_url TEXT,
+      website_url TEXT,
+      cta_type TEXT,
+      cta_url TEXT,
+      featured BOOLEAN NOT NULL DEFAULT FALSE,
+      sort_order INT NOT NULL DEFAULT 0,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_destination_listings_destination_active
+    ON destination_listings(destination_id, active, featured, sort_order);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_destination_listings_place
+    ON destination_listings(hospitality_place_id);
+  `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS destination_partner_requests (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      destination_id UUID NOT NULL REFERENCES travel_destinations(id) ON DELETE CASCADE,
+      partner_type TEXT NOT NULL DEFAULT 'HOSPITALITY',
+      place_type TEXT,
+      category TEXT,
+      name TEXT NOT NULL,
+      slug TEXT,
+      description TEXT,
+      address TEXT,
+      city TEXT,
+      state VARCHAR(2),
+      zip_code TEXT,
+      phone TEXT,
+      whatsapp TEXT,
+      instagram_url TEXT,
+      website_url TEXT,
+      logo_url TEXT,
+      banner_url TEXT,
+      image_url TEXT,
+      delivery_instructions TEXT,
+      responsible_name TEXT NOT NULL,
+      responsible_email TEXT NOT NULL,
+      responsible_phone TEXT,
+      message TEXT,
+      status TEXT NOT NULL DEFAULT 'pending',
+      review_note TEXT,
+      reviewed_by UUID,
+      reviewed_at TIMESTAMPTZ,
+      created_hospitality_place_id UUID REFERENCES hospitality_places(id) ON DELETE SET NULL,
+      created_listing_id UUID REFERENCES destination_listings(id) ON DELETE SET NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_destination_partner_requests_status_created
+    ON destination_partner_requests(status, created_at DESC);
+  `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS destination_store_requests (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+      hospitality_place_id UUID NOT NULL REFERENCES hospitality_places(id) ON DELETE CASCADE,
+      status TEXT NOT NULL DEFAULT 'pending',
+      message TEXT,
+      delivery_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+      pickup_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+      delivery_fee NUMERIC(10,2),
+      estimated_minutes INT,
+      review_note TEXT,
+      reviewed_by UUID,
+      reviewed_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      CONSTRAINT uq_destination_store_requests_store_place UNIQUE (store_id, hospitality_place_id)
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_destination_store_requests_store
+    ON destination_store_requests(store_id, status);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_destination_store_requests_place
+    ON destination_store_requests(hospitality_place_id, status);
+  `);
+  await AppDataSource.query(`
+    INSERT INTO travel_destinations (
+      name,
+      slug,
+      city,
+      state,
+      description,
+      hero_title,
+      hero_subtitle,
+      active,
+      sort_order
+    )
+    VALUES
+      (
+        'São Francisco Xavier',
+        'sao-francisco-xavier',
+        'São Francisco Xavier',
+        'SP',
+        'Destino de montanha no Vale do Paraíba para chalés, pousadas, gastronomia local e experiências ao ar livre.',
+        'Monte sua estadia em São Francisco Xavier',
+        'Chalés, delivery local, passeios e serviços próximos em uma experiência só.',
+        TRUE,
+        10
+      ),
+      (
+        'São Bento do Sapucaí',
+        'sao-bento-do-sapucai',
+        'São Bento do Sapucaí',
+        'SP',
+        'Destino turístico da Mantiqueira com hospedagens, restaurantes, trilhas, Pedra do Baú e serviços para viajantes.',
+        'Explore São Bento do Sapucaí',
+        'Hospedagem, gastronomia, passeios e conveniência conectados ao Já no Caminho.',
+        TRUE,
+        20
+      )
+    ON CONFLICT (slug) DO NOTHING;
+  `);
 }

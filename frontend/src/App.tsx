@@ -38,7 +38,12 @@ const AdminDemo = lazyPage(() => import('./pages/AdminDemo'), 'AdminDemo');
 const PaymentPage = lazyPage(() => import('./pages/PaymentPage'), 'PaymentPage');
 const SuperAdmin = lazyPage(() => import('./pages/SuperAdmin'), 'SuperAdmin');
 const SuperAdminCondominiums = lazyPage(() => import('./pages/SuperAdminCondominiums'), 'SuperAdminCondominiums');
+const SuperAdminDestinations = lazyPage(() => import('./pages/SuperAdminDestinations'), 'SuperAdminDestinations');
 const SuperAdminHomeConfig = lazyPage(() => import('./pages/SuperAdminHomeConfig'), 'SuperAdminHomeConfig');
+const DestinationsPage = lazyPage(() => import('./pages/DestinationsPage'), 'DestinationsPage');
+const DestinationDetailPage = lazyPage(() => import('./pages/DestinationDetailPage'), 'DestinationDetailPage');
+const DestinationPartnerRequestPage = lazyPage(() => import('./pages/DestinationPartnerRequestPage'), 'DestinationPartnerRequestPage');
+const HospitalityPlacePage = lazyPage(() => import('./pages/HospitalityPlacePage'), 'HospitalityPlacePage');
 const TermsOfUse = lazyPage(() => import('./pages/TermsOfUse'), 'TermsOfUse');
 const OrderTracking = lazyPage(loadOrderTrackingPage, 'OrderTracking');
 const AddressDistance = lazyPage(() => import('./pages/AddressDistance'), 'AddressDistance');
@@ -93,6 +98,10 @@ function App() {
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/hub" element={<MarketplacePage />} />
+              <Route path="/destinos" element={<DestinationsPage />} />
+              <Route path="/destinos/cadastrar" element={<DestinationPartnerRequestPage />} />
+              <Route path="/destinos/:destinationSlug" element={<DestinationDetailPage />} />
+              <Route path="/destinos/:destinationSlug/chales/:placeSlug" element={<HospitalityPlacePage />} />
               <Route path="/marketplace" element={<Navigate to="/hub" replace />} />
               <Route path="/descobrir" element={<Navigate to="/hub" replace />} />
               <Route path="/praca" element={<Navigate to="/hub" replace />} />
@@ -214,6 +223,14 @@ function App() {
                 element={
                   <AppErrorBoundary>
                     <SuperAdminCondominiums />
+                  </AppErrorBoundary>
+                }
+              />
+              <Route
+                path="/superadmin/destinations"
+                element={
+                  <AppErrorBoundary>
+                    <SuperAdminDestinations />
                   </AppErrorBoundary>
                 }
               />
