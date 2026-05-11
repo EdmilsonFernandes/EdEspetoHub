@@ -172,6 +172,19 @@ const formatLocalPhoneNumber = (value = '') => {
   return `${digits.slice(0, 5)}-${digits.slice(5)}`;
 };
 
+const normalizeClaimPhone = (value = '') => {
+  let digits = String(value || '').replace(/\D/g, '');
+  if (digits.startsWith('55') && digits.length > 11) {
+    digits = digits.slice(2);
+  }
+  return formatPhoneInput(digits);
+};
+
+const resolveClaimSegment = (value = '') => {
+  const normalized = String(value || '').trim().toLowerCase();
+  return STORE_SEGMENT_PRESETS[normalized] ? normalized : 'outros';
+};
+
 export function CreateStore() {
   const ATTRIBUTION_KEY = 'jnk_attribution_v1';
   const isNativePlatform = Capacitor.isNativePlatform();
@@ -180,6 +193,27 @@ export function CreateStore() {
   const planIdFromUrl = searchParams.get('planId');
   const planFromUrl = String(searchParams.get('plan') || '').toLowerCase();
   const billingFromUrl = String(searchParams.get('billing') || '').toLowerCase();
+  const destinationClaim = React.useMemo(() => {
+    if (String(searchParams.get('source') || '').trim() !== 'destination_listing_claim') return null;
+    const read = (key: string) => String(searchParams.get(key) || '').trim();
+    const destinationListingId = read('destinationListingId');
+    if (!destinationListingId) return null;
+    return {
+      source: 'destination_listing_claim',
+      destinationListingId,
+      destinationId: read('destinationId'),
+      destinationSlug: read('destinationSlug'),
+      destinationName: read('destinationName'),
+      listingTitle: read('listingTitle') || read('storeName'),
+      storeName: read('storeName') || read('listingTitle'),
+      description: read('description'),
+      address: read('address'),
+      city: read('city'),
+      state: read('state').toUpperCase(),
+      phone: read('phone'),
+      segment: resolveClaimSegment(read('segment')),
+    };
+  }, [searchParams]);
   const [storeError, setStoreError] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [isPreflightingOwner, setIsPreflightingOwner] = useState(false);
@@ -228,6 +262,7 @@ export function CreateStore() {
   const termsCheckboxRef = useRef<HTMLInputElement | null>(null);
   const logoObjectUrlRef = useRef('');
   const bannerObjectUrlRef = useRef('');
+  const destinationClaimAppliedRef = useRef('');
   const personalSectionRef = useRef<HTMLDivElement | null>(null);
   const addressSectionRef = useRef<HTMLDivElement | null>(null);
   const storeSectionRef = useRef<HTMLDivElement | null>(null);
@@ -427,6 +462,24 @@ export function CreateStore() {
   }, []);
 
   useEffect(() => {
+    if (!destinationClaim || destinationClaimAppliedRef.current === destinationClaim.destinationListingId) return;
+    destinationClaimAppliedRef.current = destinationClaim.destinationListingId;
+    setRegisterForm((prev) => ({
+      ...prev,
+      storeName: prev.storeName || destinationClaim.storeName,
+      storeDescription:
+        prev.storeDescription ||
+        destinationClaim.description ||
+        STORE_SEGMENT_PRESETS[destinationClaim.segment || 'outros']?.description ||
+        '',
+      city: prev.city || destinationClaim.city,
+      state: prev.state || destinationClaim.state,
+      phone: prev.phone || normalizeClaimPhone(destinationClaim.phone),
+      segment: prev.segment === 'outros' ? destinationClaim.segment : prev.segment,
+    }));
+  }, [destinationClaim]);
+
+  useEffect(() => {
     if (storeResendCooldown <= 0) return;
     const timer = window.setInterval(() => {
       setStoreResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
@@ -435,12 +488,13 @@ export function CreateStore() {
   }, [storeResendCooldown]);
 
   useEffect(() => {
+    if (destinationClaim) return;
     if (registerForm.storeDescription) return;
     setRegisterForm((prev) => ({
       ...prev,
       storeDescription: STORE_SEGMENT_PRESETS[prev.segment || 'outros']?.description || '',
     }));
-  }, [registerForm.storeDescription, registerForm.segment]);
+  }, [destinationClaim, registerForm.storeDescription, registerForm.segment]);
 
   const socialLinksMap = React.useMemo(
     () =>
@@ -719,6 +773,21 @@ export function CreateStore() {
       } catch {
         acquisitionAttribution = null;
       }
+      const destinationClaimAttribution = destinationClaim
+        ? {
+            source: 'destination_listing_claim',
+            destinationListingId: destinationClaim.destinationListingId,
+            destinationId: destinationClaim.destinationId || null,
+            destinationSlug: destinationClaim.destinationSlug || null,
+            destinationName: destinationClaim.destinationName || null,
+            listingTitle: destinationClaim.listingTitle || destinationClaim.storeName || null,
+            landingPath: `${window.location.pathname}${window.location.search}`,
+            ts: Date.now(),
+          }
+        : null;
+      const resolvedAcquisitionAttribution = (acquisitionAttribution || destinationClaimAttribution)
+        ? { ...(acquisitionAttribution || {}), ...(destinationClaimAttribution || {}) }
+        : null;
 
       const payload = {
         user: {
@@ -757,7 +826,8 @@ export function CreateStore() {
         paymentMethod,
         termsAccepted,
         lgpdAccepted,
-        acquisitionAttribution,
+        acquisitionAttribution: resolvedAcquisitionAttribution,
+        destinationListingId: destinationClaim?.destinationListingId || undefined,
       };
 
       const result = await storeService.create(payload);
@@ -1492,6 +1562,30 @@ export function CreateStore() {
             <h1 className="text-2xl sm:text-3xl font-black text-gray-900 leading-tight">Abra sua loja em minutos</h1>
             <p className="text-sm sm:text-base text-slate-600">Sem comissão por pedido · 7 dias grátis · Pronto para vender em minutos</p>
           </div>
+
+          {destinationClaim ? (
+            <div className="mb-6 overflow-hidden rounded-[1.7rem] border border-[#153A4C]/12 bg-[radial-gradient(circle_at_10%_0%,rgba(51,104,134,0.16),transparent_36%),linear-gradient(135deg,#ffffff,#f3f7f5)] p-4 shadow-[0_18px_45px_-34px_rgba(15,23,42,0.42)]">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#153A4C] text-white shadow-[0_18px_30px_-22px_rgba(21,58,76,0.75)]">
+                    <Storefront size={24} weight="duotone" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]">Ativar pedidos no destino</p>
+                    <h2 className="mt-1 text-lg font-black leading-tight text-slate-950">
+                      {destinationClaim.storeName || 'Seu serviço'} em {destinationClaim.destinationName || destinationClaim.city || 'um destino turístico'}
+                    </h2>
+                    <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-600">
+                      Preenchi os dados públicos do card. Ao concluir o cadastro, esse serviço deixa de ser só informativo e passa a abrir sua loja real no Já no Caminho.
+                    </p>
+                  </div>
+                </div>
+                <span className="inline-flex shrink-0 items-center justify-center rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-emerald-700">
+                  Pré-cadastro identificado
+                </span>
+              </div>
+            </div>
+          ) : null}
 
           <div className="sticky top-[72px] sm:top-[84px] z-20 mb-6 rounded-2xl border border-slate-200 bg-white/95 p-3 sm:p-4 backdrop-blur">
           <div className="mb-2 flex items-center justify-between gap-2">

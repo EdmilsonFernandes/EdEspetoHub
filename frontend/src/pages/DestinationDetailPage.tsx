@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { ArrowRight, Bed, Buildings, ForkKnife, MagnifyingGlass, MapPinLine, Mountains, Sparkle, WhatsappLogo } from '@phosphor-icons/react';
+import { ArrowRight, Bed, Buildings, ForkKnife, MagnifyingGlass, MapPinLine, Mountains, Sparkle, Storefront, WhatsappLogo } from '@phosphor-icons/react';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
@@ -37,6 +37,42 @@ const categoryLabel = (category?: string) => {
   if (key === 'ATRATIVO') return 'Atrativo';
   if (key === 'LOJA') return 'Loja';
   return 'Serviço';
+};
+
+const categoryToStoreSegment = (category?: string) => {
+  const key = String(category || '').toUpperCase();
+  if (key.includes('RESTAURANTE') || key === 'NOITE') return 'restaurante';
+  if (key === 'LOJA') return 'outros';
+  return 'outros';
+};
+
+const buildListingClaimUrl = (destination: any, listing: any) => {
+  const params = new URLSearchParams();
+  params.set('source', 'destination_listing_claim');
+  params.set('destinationListingId', String(listing?.id || ''));
+  if (destination?.id) params.set('destinationId', String(destination.id));
+  if (destination?.slug) params.set('destinationSlug', String(destination.slug));
+  if (destination?.name) params.set('destinationName', String(destination.name));
+  if (destination?.city) params.set('city', String(destination.city));
+  if (destination?.state) params.set('state', String(destination.state));
+  if (listing?.title) {
+    params.set('storeName', String(listing.title));
+    params.set('listingTitle', String(listing.title));
+  }
+  if (listing?.description) params.set('description', String(listing.description));
+  if (listing?.address) params.set('address', String(listing.address));
+  if (listing?.whatsapp || listing?.phone) params.set('phone', String(listing.whatsapp || listing.phone));
+  params.set('segment', categoryToStoreSegment(listing?.category));
+  return `/create?${params.toString()}`;
+};
+
+const resolveLinkedStoreSlug = (listing: any) => {
+  const directSlug = String(listing?.store?.slug || '').trim();
+  if (directSlug) return directSlug;
+  if (String(listing?.ctaType || '').toUpperCase() === 'STORE') {
+    return String(listing?.ctaUrl || '').trim().replace(/^\/?(store|janocaminho)\//, '');
+  }
+  return '';
 };
 
 const normalizeText = (value?: string | null) =>
@@ -439,7 +475,10 @@ export function DestinationDetailPage() {
               </div>
               <div className="mt-4 space-y-3">
                 {visibleListings.map((listing: any) => {
-                  const contactTarget = listing.whatsapp || listing.ctaUrl || '';
+                  const linkedStoreSlug = resolveLinkedStoreSlug(listing);
+                  const linkedStore = listing.store || null;
+                  const hasLinkedStore = Boolean(linkedStoreSlug);
+                  const contactTarget = hasLinkedStore ? listing.whatsapp || listing.phone || '' : listing.whatsapp || listing.ctaUrl || '';
                   const isExternalUrl = String(contactTarget || '').startsWith('http');
                   const whatsappMessage = buildDestinationInquiryMessage({
                     destinationName: destination.name,
@@ -449,6 +488,7 @@ export function DestinationDetailPage() {
                     itemType: categoryLabel(listing.category),
                   });
                   const contactHref = isExternalUrl ? contactTarget : buildWhatsAppUrl(contactTarget, whatsappMessage, isNativePlatform);
+                  const claimHref = buildListingClaimUrl(destination, listing);
                   return (
                   <article key={listing.id} className="overflow-hidden rounded-[1.35rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.45)]">
                     <div className="flex gap-3">
@@ -460,22 +500,51 @@ export function DestinationDetailPage() {
                         </div>
                       )}
                       <div className="min-w-0 flex-1">
-                        <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[#336886]">{categoryLabel(listing.category)}</p>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[#336886]">{categoryLabel(listing.category)}</p>
+                          {hasLinkedStore ? (
+                            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-emerald-700">Pedidos no app</span>
+                          ) : (
+                            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-amber-700">Contato direto</span>
+                          )}
+                        </div>
                         <h3 className="mt-0.5 line-clamp-1 text-sm font-black text-slate-950">{listing.title}</h3>
-                        <p className="mt-1 line-clamp-2 text-xs font-semibold text-slate-500">{listing.description || listing.address || 'Parceiro cadastrado.'}</p>
+                        <p className="mt-1 line-clamp-2 text-xs font-semibold text-slate-500">
+                          {hasLinkedStore
+                            ? linkedStore?.settings?.description || listing.description || listing.address || 'Loja ativa no Já no Caminho.'
+                            : listing.description || listing.address || 'Serviço local com atendimento direto.'}
+                        </p>
                       </div>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
+                      {hasLinkedStore ? (
+                        <Link
+                          to={`/store/${linkedStoreSlug}`}
+                          className="inline-flex items-center gap-1 rounded-full bg-[#153A4C] px-3 py-1.5 text-[11px] font-black text-white"
+                        >
+                          <Storefront size={13} weight="duotone" />
+                          Pedir pelo app
+                        </Link>
+                      ) : null}
                       {contactHref ? (
                         <a
                           href={contactHref}
                           target={isNativePlatform && !isExternalUrl ? undefined : '_blank'}
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-3 py-1.5 text-[11px] font-black text-white"
+                          className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-black ${hasLinkedStore ? 'border border-emerald-100 bg-white text-emerald-700' : 'bg-emerald-600 text-white'}`}
                         >
                           <WhatsappLogo size={13} weight="fill" />
-                          Pedir informações
+                          {hasLinkedStore ? 'WhatsApp' : 'Pedir informações'}
                         </a>
+                      ) : null}
+                      {!hasLinkedStore ? (
+                        <Link
+                          to={claimHref}
+                          className="inline-flex items-center gap-1 rounded-full border border-[#153A4C]/15 bg-white px-3 py-1.5 text-[11px] font-black text-[#153A4C]"
+                        >
+                          <Storefront size={13} weight="duotone" />
+                          Sou responsável
+                        </Link>
                       ) : null}
                       {listing.address ? (
                         <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[11px] font-black text-slate-600">

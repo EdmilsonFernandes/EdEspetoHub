@@ -171,4 +171,65 @@ describe('Destination Hub', () => {
       publicRes.body.hospitalityPlaces.some((place: any) => place.id === reviewRes.body.createdHospitalityPlaceId)
     ).toBe(true);
   });
+
+  it('links a claimed destination listing to the store created from it', async () => {
+    const suffix = Date.now();
+    const destinationRes = await api
+      .post('/api/admin/destinations')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        name: `Destino Claim ${suffix}`,
+        slug: `destino-claim-${suffix}`,
+        city: 'São Bento do Sapucaí',
+        state: 'SP',
+      });
+
+    expect(destinationRes.status).toBe(201);
+
+    const listingRes = await api
+      .post('/api/admin/destination-listings')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        destinationId: destinationRes.body.id,
+        title: `Restaurante Captado ${suffix}`,
+        category: 'RESTAURANTE_VISITAR',
+        whatsapp: '5512999999999',
+        ctaType: 'WHATSAPP',
+        ctaUrl: '5512999999999',
+      });
+
+    expect(listingRes.status).toBe(201);
+    expect(listingRes.body.storeId).toBeNull();
+
+    const claimedStore = await registerStore({
+      storeName: listingRes.body.title,
+      city: 'São Bento do Sapucaí',
+      state: 'SP',
+      acquisitionAttribution: {
+        source: 'destination_listing_claim',
+        destinationListingId: listingRes.body.id,
+        destinationId: destinationRes.body.id,
+        destinationSlug: destinationRes.body.slug,
+        destinationName: destinationRes.body.name,
+        listingTitle: listingRes.body.title,
+      },
+    });
+
+    expect(claimedStore.res.status).toBe(201);
+
+    const publicRes = await api.get(`/api/public/destinations/${destinationRes.body.slug}`);
+    expect(publicRes.status).toBe(200);
+    const claimedListing = publicRes.body.listings.find((listing: any) => listing.id === listingRes.body.id);
+
+    expect(claimedListing).toEqual(expect.objectContaining({
+      storeId: claimedStore.body.store.id,
+      ctaType: 'STORE',
+      ctaUrl: claimedStore.body.store.slug,
+    }));
+    expect(claimedListing.store).toEqual(expect.objectContaining({
+      id: claimedStore.body.store.id,
+      slug: claimedStore.body.store.slug,
+      name: listingRes.body.title,
+    }));
+  });
 });
