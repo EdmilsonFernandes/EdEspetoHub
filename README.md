@@ -99,6 +99,14 @@ Rotas principais:
 
 Para criar uma amostra real inicial, cadastre a cidade no SuperAdmin, depois adicione chalés/pousadas e listings de restaurantes, passeios, massagens e atrações usando informações públicas e descrição neutra. Se o proprietário ainda não confirmou parceria, não comunique como parceiro oficial; use como curadoria da plataforma até ele solicitar ou aprovar a presença.
 
+Para carregar a amostra inicial de São Bento do Sapucaí extraída do mapa turístico local, rode:
+
+```bash
+npm --prefix backend run seed:destination:sao-bento
+```
+
+Esse seed cria/atualiza o destino, hospedagens e serviços sem criar parceria oficial nem vínculo com lojas.
+
 ## Motoboy: KYC (plataforma) + vínculo (loja)
 
 O cadastro do motoboy tem **duas camadas**:
