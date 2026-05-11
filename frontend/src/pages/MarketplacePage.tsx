@@ -3493,7 +3493,7 @@ export function MarketplacePage() {
 
             {!loading && !error && filteredStores.length > 0 && (
               <div className={selectedCondominium ? 'grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4' : 'grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3'}>
-                {filteredStores.map((store) => {
+                {filteredStores.map((store, index) => {
                   const storePath = selectedCondominiumSlug
                     ? `/${store.slug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}`
                     : `/${store.slug}`;
@@ -3537,7 +3537,8 @@ export function MarketplacePage() {
                         key={store.id}
                         to={storePath}
                         state={storeNavigationState}
-                        className={`group overflow-hidden rounded-[1.45rem] border bg-white transition-all duration-200 ease-out active:scale-[0.985] ${
+                        style={{ animationDelay: `${index * 50}ms` }}
+                        className={`group overflow-hidden rounded-[1.45rem] border bg-white animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-backwards transition-all ease-out active:scale-[0.985] ${
                           store.isOpen
                             ? 'border-white shadow-[0_12px_30px_rgba(15,23,42,0.075)] md:hover:-translate-y-0.5 md:hover:shadow-[0_18px_38px_rgba(15,23,42,0.11)]'
                             : 'border-slate-200/80 bg-slate-50/90 shadow-[0_8px_20px_rgba(15,23,42,0.04)]'

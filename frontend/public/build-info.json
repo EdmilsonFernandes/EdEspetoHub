@@ -2,16 +2,34 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "49c8be5a",
-  "versionLabel": "v0.1.9.49c8be5a",
-  "versionInternal": "0.1.9+20260511.015444.49c8be5a",
-  "buildId": "0.1.9+20260511.015444.49c8be5a-20260511.015444-49c8be5a",
-  "builtAt": "2026-05-11T01:54:44.294Z",
-  "commitHash": "49c8be5a940ecd2587de1ec1dfc29ac40081fe4e",
-  "shortHash": "49c8be5a",
+  "versionDisplaySuffix": "665497e2",
+  "versionLabel": "v0.1.9.665497e2",
+  "versionInternal": "0.1.9+20260511.022404.665497e2",
+  "buildId": "0.1.9+20260511.022404.665497e2-20260511.022404-665497e2",
+  "builtAt": "2026-05-11T02:24:04.814Z",
+  "commitHash": "665497e27b96ce6af3e117e9639b285a98adacfd",
+  "shortHash": "665497e2",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "665497e27b96ce6af3e117e9639b285a98adacfd",
+      "shortHash": "665497e2",
+      "dateIso": "2026-05-10T23:04:40-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(ui): finalize and push premium marketplace UI improvements",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/665497e27b96ce6af3e117e9639b285a98adacfd"
+    },
+    {
+      "hash": "1bb5b57d1ba82fab2c2834402c107c3f21ed4011",
+      "shortHash": "1bb5b57d",
+      "dateIso": "2026-05-10T22:57:03-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(motoboy): add store-managed courier onboarding",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1bb5b57d1ba82fab2c2834402c107c3f21ed4011"
+    },
     {
       "hash": "49c8be5a940ecd2587de1ec1dfc29ac40081fe4e",
       "shortHash": "49c8be5a",
@@ -263,24 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(motoboy): simplify courier flow ux",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/55e5023f70445f7f1a433e058e0f090ce332d7d8"
-    },
-    {
-      "hash": "ad39e9e4c9556445006dcb33d0b6058b7789f286",
-      "shortHash": "ad39e9e4",
-      "dateIso": "2026-05-08T16:34:32-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(motoboy): improve queue card readability on mobile",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ad39e9e4c9556445006dcb33d0b6058b7789f286"
-    },
-    {
-      "hash": "795f797fb4dd992fc548aa2b7499fbf8713f9c64",
-      "shortHash": "795f797f",
-      "dateIso": "2026-05-08T16:30:33-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(tips): route courier tips to connected mercadopago",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/795f797fb4dd992fc548aa2b7499fbf8713f9c64"
     }
   ]
 }
