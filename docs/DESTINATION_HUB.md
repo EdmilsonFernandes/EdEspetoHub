@@ -35,6 +35,42 @@ flowchart TD
 
 As cidades iniciais podem ser São Francisco Xavier e São Bento do Sapucaí, mas a estrutura é nacional. Cada nova cidade entra como um `travel_destination`, não como dado fixo no frontend.
 
+## Como montar as duas primeiras cidades com aparência real
+
+Use a aba `Cadastro` em `/superadmin/destinations`.
+
+1. Em `Cadastrar destino`, preencha:
+   - `Nome`: São Francisco Xavier ou São Bento do Sapucaí.
+   - `Slug`: `sao-francisco-xavier` ou `sao-bento-do-sapucai`.
+   - `Cidade` e `UF`.
+   - `Título hero` e `Subtítulo hero` com texto turístico curto.
+   - `URL da foto/banner da cidade` com uma imagem horizontal.
+   - `Latitude` e `Longitude` para melhorar recomendação regional do lojista.
+2. Em `Cadastrar chalé/pousada`, selecione o destino e preencha:
+   - nome do chalé/pousada;
+   - tipo;
+   - endereço;
+   - foto/banner;
+   - WhatsApp, site ou Instagram quando houver;
+   - descrição pública;
+   - instruções de entrega, por exemplo "entregar na recepção" ou "confirmar chalé pelo WhatsApp".
+3. Em `Cadastrar serviço/atração`, selecione o destino e crie itens como:
+   - restaurantes para visitar;
+   - passeios;
+   - massagem;
+   - trilhas/atrativos;
+   - lugares para sair à noite.
+4. Em `Vincular loja a hospedagem`, conecte uma loja real ao chalé/pousada, com taxa de entrega e tempo estimado.
+
+Formato recomendado das imagens:
+
+- Cidade/destino: horizontal, aproximadamente `1600x900`.
+- Chalé/pousada: horizontal, aproximadamente `1400x900`.
+- Serviço/atração: quadrada ou horizontal, pelo menos `900px` de largura.
+- Use URLs `https://...` estáveis. Se a imagem for de terceiros, valide direito de uso ou use imagem própria/autorizada.
+
+Para uma amostra comercial sem parceria oficial, publique como curadoria local. Evite textos como "parceiro oficial", "entrega garantida pelo chalé" ou "convênio" até o responsável aceitar.
+
 ## Como o lojista solicita participação
 
 1. O lojista entra no painel da loja.

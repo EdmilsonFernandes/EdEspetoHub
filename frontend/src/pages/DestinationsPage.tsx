@@ -42,7 +42,7 @@ export function DestinationsPage() {
   const featured = useMemo(() => destinations.slice(0, 2), [destinations]);
 
   return (
-    <main className="min-h-screen bg-[#f4f1ea] text-slate-950">
+    <main className="min-h-screen bg-[#f4f1ea] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
       <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,#d7f4e8_0,#f4f1ea_36%,#efe5d1_100%)] px-4 pb-10 pt-[max(1.2rem,env(safe-area-inset-top))]">
         <div className="absolute -right-20 top-8 h-64 w-64 rounded-full bg-emerald-300/25 blur-3xl" />
         <div className="absolute -left-20 bottom-0 h-56 w-56 rounded-full bg-amber-300/25 blur-3xl" />

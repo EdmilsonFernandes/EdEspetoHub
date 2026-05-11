@@ -3012,45 +3012,36 @@ export function MarketplacePage() {
           )}
 
           {debouncedQuery.length < 2 && !selectedCondominium && destinations.length > 0 && (
-            <section className="mb-6 overflow-hidden rounded-[2.15rem] border border-emerald-100/80 bg-[linear-gradient(135deg,#f8f1df_0%,#eef8f0_52%,#e7f0f7_100%)] p-4 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.35)]">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <div>
-                  <p className="inline-flex items-center gap-1.5 rounded-full bg-slate-950 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white">
-                    <Mountains size={13} weight="duotone" />
-                    Novo
+            <section className="mb-5 overflow-hidden rounded-[1.7rem] border border-slate-200/80 bg-white/88 p-3 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.38)] ring-1 ring-white/70 backdrop-blur-xl">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="inline-flex items-center gap-1.5 rounded-full bg-[#153A4C]/8 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-[#153A4C]">
+                    <Mountains size={12} weight="duotone" />
+                    Destinos
                   </p>
-                  <h2 className="mt-2 text-xl font-black tracking-[-0.04em] text-slate-950">Destinos, chalés e pousadas</h2>
-                  <p className="mt-0.5 text-xs font-semibold text-slate-600">Escolha a cidade, veja hospedagens, serviços e lojas que entregam.</p>
+                  <h2 className="mt-1 line-clamp-1 text-base font-black tracking-[-0.03em] text-slate-950">Chalés, pousadas e experiências locais</h2>
                 </div>
-                <Link to="/destinos" className="hidden rounded-full bg-[#153A4C] px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-white sm:inline-flex">
+                <Link to="/destinos" className="shrink-0 rounded-full bg-[#153A4C] px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-white">
                   Ver todos
                 </Link>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {destinations.slice(0, 2).map((destination) => (
+              <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {destinations.slice(0, 8).map((destination) => (
                   <Link
                     key={destination.id || destination.slug}
                     to={`/destinos/${destination.slug}`}
-                    className="group overflow-hidden rounded-[1.6rem] border border-white/80 bg-white/82 p-3 shadow-[0_16px_34px_-28px_rgba(15,23,42,0.42)] transition active:scale-[0.99]"
+                    className="group flex min-w-[13.5rem] items-center gap-2 rounded-[1.25rem] border border-slate-100 bg-slate-50/80 p-2 transition active:scale-[0.99]"
                   >
-                    <div className="flex gap-3">
-                      <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[1.2rem] bg-slate-100">
-                        <img src={resolveDestinationAssetUrl(destination)} alt={String(destination.name || 'Destino')} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="line-clamp-1 text-base font-black text-slate-950">{destination.name}</p>
-                        <p className="mt-0.5 text-[11px] font-bold text-slate-500">{[destination.city, destination.state].filter(Boolean).join(' - ')}</p>
-                        <p className="mt-2 line-clamp-2 text-xs font-semibold leading-relaxed text-slate-600">{destination.heroSubtitle || destination.description || 'Destino turístico cadastrado.'}</p>
-                        <div className="mt-2 flex flex-wrap gap-1.5">
-                          <span className="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-black text-emerald-700">
-                            {destination.placesCount || 0} hospedagens
-                          </span>
-                          <span className="inline-flex items-center gap-1 rounded-full bg-[#153A4C] px-2 py-1 text-[10px] font-black text-white">
-                            Abrir
-                            <Compass size={11} weight="bold" />
-                          </span>
-                        </div>
-                      </div>
+                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
+                      <img src={resolveDestinationAssetUrl(destination)} alt={String(destination.name || 'Destino')} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="line-clamp-1 text-sm font-black text-slate-950">{destination.name}</p>
+                      <p className="line-clamp-1 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">{[destination.city, destination.state].filter(Boolean).join(' - ')}</p>
+                      <p className="mt-0.5 inline-flex items-center gap-1 text-[10px] font-black text-[#153A4C]">
+                        {destination.placesCount || 0} hospedagens
+                        <Compass size={10} weight="bold" />
+                      </p>
                     </div>
                   </Link>
                 ))}

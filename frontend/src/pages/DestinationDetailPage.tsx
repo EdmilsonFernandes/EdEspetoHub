@@ -60,7 +60,7 @@ export function DestinationDetailPage() {
   const heroBanner = useMemo(() => banners.find((banner: any) => banner.imageUrl) || null, [banners]);
 
   return (
-    <main className="min-h-screen bg-[#f6f2e9] text-slate-950">
+    <main className="min-h-screen bg-[#f6f2e9] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
       <section className="relative overflow-hidden px-4 pb-8 pt-[max(1rem,env(safe-area-inset-top))]">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(16,185,129,0.18),transparent_32%),linear-gradient(135deg,#17394b,#0f172a_64%,#332315)]" />
         <div className="relative mx-auto max-w-6xl">
@@ -102,7 +102,7 @@ export function DestinationDetailPage() {
       </section>
 
       {!loading && !error ? (
-        <section className="mx-auto grid max-w-6xl gap-8 px-4 py-8 lg:grid-cols-[1.2fr_0.8fr]">
+        <section className="mx-auto grid max-w-6xl gap-8 px-4 pb-10 pt-8 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="space-y-5">
             <div className="flex items-center justify-between gap-3">
               <div>

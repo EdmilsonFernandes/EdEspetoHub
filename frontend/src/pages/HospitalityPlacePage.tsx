@@ -43,7 +43,7 @@ export function HospitalityPlacePage() {
   const listings = Array.isArray(payload?.listings) ? payload.listings : [];
 
   return (
-    <main className="min-h-screen bg-[#f4f1ea] text-slate-950">
+    <main className="min-h-screen bg-[#f4f1ea] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
       <section className="relative overflow-hidden bg-slate-950 px-4 pb-10 pt-[max(1rem,env(safe-area-inset-top))] text-white">
         <div className="absolute inset-0 opacity-60">
           <img src={imageFor(place)} alt={place.name || 'Hospedagem'} className="h-full w-full object-cover" />
@@ -86,7 +86,7 @@ export function HospitalityPlacePage() {
       </section>
 
       {!loading && !error ? (
-        <section className="mx-auto grid max-w-6xl gap-8 px-4 py-8 lg:grid-cols-[1.25fr_0.75fr]">
+        <section className="mx-auto grid max-w-6xl gap-8 px-4 pb-10 pt-8 lg:grid-cols-[1.25fr_0.75fr]">
           <div>
             <div className="mb-5 flex items-center justify-between">
               <div>
