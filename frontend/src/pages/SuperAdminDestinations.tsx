@@ -1063,7 +1063,7 @@ export function SuperAdminDestinations() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-black">{editingListingId ? 'Editar serviço/atração' : 'Cadastrar serviço/atração'}</h2>
-                  <p className="mt-1 text-xs font-semibold text-slate-500">Serviço é curadoria local: passeio, massagem, restaurante, guia ou atrativo.</p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">Serviço é curadoria local. Se selecionar uma hospedagem, ele aparece dentro do chalé como atendimento por WhatsApp.</p>
                 </div>
                 {editingListingId ? (
                   <button type="button" onClick={cancelListingEdit} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-black text-slate-600">
@@ -1076,7 +1076,7 @@ export function SuperAdminDestinations() {
                   {(data.destinations || []).map((destination: any) => <option key={destination.id} value={destination.id}>{destination.name}</option>)}
                 </select>
                 <select value={listingForm.hospitalityPlaceId} onChange={(event) => updateListing('hospitalityPlaceId', event.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2">
-                  <option value="">Serviço do destino inteiro</option>
+                  <option value="">Aparece no destino inteiro</option>
                   {(data.places || [])
                     .filter((place: any) => !listingForm.destinationId || place.destinationId === listingForm.destinationId)
                     .map((place: any) => <option key={place.id} value={place.id}>{place.name} · {place.destination?.name}</option>)}
@@ -1092,7 +1092,7 @@ export function SuperAdminDestinations() {
                 <select value={listingForm.category} onChange={(event) => updateListing('category', event.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none">
                   <option value="PASSEIO">Passeio</option>
                   <option value="MASSAGEM">Massagem</option>
-                  <option value="RESTAURANTE_VISITAR">Restaurante visitar</option>
+                  <option value="RESTAURANTE_VISITAR">Restaurante / delivery local</option>
                   <option value="NOITE">Noite</option>
                   <option value="ATRATIVO">Atrativo</option>
                   <option value="SERVICO">Serviço</option>

@@ -45,35 +45,54 @@ export function HospitalityPlacePage() {
   const listings = Array.isArray(payload?.listings) ? payload.listings : [];
   const isNativePlatform = Capacitor.isNativePlatform();
   const destinationLocationLabel = [destination.city, destination.state].filter(Boolean).join(', ') || destination.name || 'Destino';
+  const placeListings = listings.filter((listing: any) => String(listing.hospitalityPlaceId || '') === String(place.id || ''));
+  const destinationListings = listings.filter((listing: any) => !listing.hospitalityPlaceId);
+  const hasPlaceDeliveryOptions = stores.length > 0 || placeListings.length > 0;
 
   return (
     <main className="min-h-screen bg-[#f4f1ea] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
-      <section className="relative overflow-hidden bg-slate-950 px-4 pb-10 pt-[max(1rem,env(safe-area-inset-top))] text-white">
-        <div className="absolute inset-0 opacity-60">
-          <img src={imageFor(place)} alt={place.name || 'Hospedagem'} className="h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-950/75 to-slate-950/45" />
-        </div>
+      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_12%_0%,rgba(51,104,134,0.16),transparent_34%),radial-gradient(circle_at_88%_8%,rgba(240,180,72,0.18),transparent_30%),linear-gradient(135deg,#f7f1e4,#eef6f1_58%,#eadfc8)] px-4 pb-10 pt-[max(1rem,env(safe-area-inset-top))]">
+        <div className="absolute -right-20 top-12 h-64 w-64 rounded-full bg-[#336886]/14 blur-3xl" />
+        <div className="absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-amber-300/18 blur-3xl" />
         <div className="relative mx-auto max-w-6xl">
-          <Link to={`/destinos/${destinationSlug}`} className="inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-white ring-1 ring-white/12">
+          <Link to={`/destinos/${destinationSlug}`} className="inline-flex items-center gap-2 rounded-full border border-[#153A4C]/10 bg-white/82 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-[#153A4C] shadow-sm backdrop-blur">
             <ArrowRight size={14} className="rotate-180" weight="bold" />
             Voltar ao destino
           </Link>
-          {loading ? <p className="mt-8 text-sm font-bold text-white/72">Carregando hospedagem...</p> : null}
+          {loading ? <p className="mt-8 text-sm font-bold text-slate-500">Carregando hospedagem...</p> : null}
           {error ? <p className="mt-8 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
           {!loading && !error ? (
-            <div className="mt-10 max-w-3xl">
-              <p className="inline-flex max-w-full items-center gap-2 rounded-full bg-emerald-400/16 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-emerald-100 ring-1 ring-emerald-200/15">
-                <Bed size={15} weight="duotone" />
-                <span>Hospedagem</span>
-              </p>
-              <h1 className="mt-5 text-[2.65rem] font-black leading-[0.94] tracking-[-0.055em] sm:text-6xl">{place.name}</h1>
-              <p className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-black text-white/82 ring-1 ring-white/10">
-                <MapPinLine size={15} weight="duotone" className="shrink-0 text-emerald-100" />
-                <span className="truncate">{destinationLocationLabel}</span>
-              </p>
-              <p className="mt-5 max-w-2xl text-base font-semibold leading-relaxed text-white/76">
-                {place.description || place.deliveryInstructions || 'Hospedagem cadastrada no Já no Caminho.'}
-              </p>
+            <div className="mt-7 grid gap-5 lg:grid-cols-[0.92fr_1.08fr] lg:items-end">
+              <div className="rounded-[2rem] border border-white/80 bg-white/88 p-5 shadow-[0_24px_70px_-46px_rgba(15,23,42,0.42)] backdrop-blur sm:p-6">
+                <p className="inline-flex max-w-full items-center gap-2 rounded-full bg-[#153A4C]/8 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-[#153A4C] ring-1 ring-[#153A4C]/10">
+                  <Bed size={15} weight="duotone" />
+                  <span>Hospedagem selecionada</span>
+                </p>
+                <h1 className="mt-5 text-[2.65rem] font-black leading-[0.94] tracking-[-0.055em] text-slate-950 sm:text-6xl">{place.name}</h1>
+                <p className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-700 shadow-sm">
+                  <MapPinLine size={15} weight="duotone" className="shrink-0 text-[#336886]" />
+                  <span className="truncate">{destinationLocationLabel}</span>
+                </p>
+                <p className="mt-5 max-w-2xl text-base font-semibold leading-relaxed text-slate-600">
+                  {place.description || place.deliveryInstructions || 'Hospedagem cadastrada no Já no Caminho.'}
+                </p>
+              </div>
+              <div className="overflow-hidden rounded-[2.25rem] border border-white/90 bg-white/88 p-2 shadow-[0_30px_90px_-46px_rgba(15,23,42,0.5)]">
+                <div className="relative h-[20rem] overflow-hidden rounded-[1.75rem] bg-slate-100">
+                  <img src={imageFor(place)} alt={place.name || 'Hospedagem'} className="h-full w-full object-cover" />
+                  <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-slate-950/48 via-slate-950/10 to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center gap-2">
+                    <span className="rounded-full bg-white/92 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm">
+                      {String(place.type || 'CHALE').replace('_', ' ')}
+                    </span>
+                    {hasPlaceDeliveryOptions ? (
+                      <span className="rounded-full bg-emerald-500 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-white shadow-sm">
+                        {stores.length + placeListings.length} atendimento(s)
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
             </div>
           ) : null}
         </div>
@@ -122,14 +141,17 @@ export function HospitalityPlacePage() {
           <div>
             <div className="mb-5 flex items-center justify-between">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Delivery no local</p>
-                <h2 className="mt-1 text-2xl font-black tracking-[-0.03em]">Lojas vinculadas</h2>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Atendem este chalé</p>
+                <h2 className="mt-1 text-2xl font-black tracking-[-0.03em]">Delivery e contatos confiáveis</h2>
+                <p className="mt-1 max-w-2xl text-sm font-semibold text-slate-500">
+                  Lojas online abrem pedido pelo app. Parceiros ainda não cadastrados aparecem com WhatsApp e mensagem pronta para este chalé.
+                </p>
               </div>
               <ShoppingBagOpen size={28} weight="duotone" className="text-[#336886]" />
             </div>
-            {stores.length === 0 ? (
+            {!hasPlaceDeliveryOptions ? (
               <div className="rounded-[1.5rem] border border-dashed border-slate-300 bg-white/70 p-5">
-                <p className="text-sm font-bold text-slate-600">Ainda não há lojas aprovadas para entrega neste local.</p>
+                <p className="text-sm font-bold text-slate-600">Ainda não há lojas ou contatos configurados para atendimento direto neste chalé.</p>
               </div>
             ) : null}
             <div className="grid gap-4 sm:grid-cols-2">
@@ -145,7 +167,7 @@ export function HospitalityPlacePage() {
                     <div className="relative h-40 overflow-hidden bg-slate-100">
                       <img src={imageFor(store)} alt={store.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                       <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-black text-slate-700">
-                        {store.settings?.segment || 'loja'}
+                        Pedido no app
                       </div>
                     </div>
                     <div className="p-4">
@@ -168,6 +190,50 @@ export function HospitalityPlacePage() {
                   </Link>
                 );
               })}
+              {placeListings.map((listing: any) => {
+                const contactTarget = listing.whatsapp || listing.ctaUrl || '';
+                const isExternalUrl = String(contactTarget || '').startsWith('http');
+                const contactHref = isExternalUrl
+                  ? contactTarget
+                  : buildWhatsAppUrl(contactTarget, buildDestinationInquiryMessage({
+                      destinationName: destination.name,
+                      city: destination.city,
+                      state: destination.state,
+                      itemName: listing.title,
+                      itemType: String(listing.category || 'serviço').replace('_', ' '),
+                      placeName: place.name,
+                    }), isNativePlatform);
+                return (
+                  <article key={listing.id} className="overflow-hidden rounded-[1.75rem] border border-emerald-100 bg-white shadow-[0_18px_48px_-36px_rgba(15,23,42,0.45)]">
+                    <div className="relative h-40 overflow-hidden bg-slate-100">
+                      <img src={imageFor(listing)} alt={listing.title} className="h-full w-full object-cover" />
+                      <div className="absolute left-3 top-3 rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-black text-white">
+                        Atende por WhatsApp
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="text-lg font-black text-slate-950">{listing.title}</h3>
+                      <p className="mt-1 line-clamp-2 text-sm font-semibold text-slate-500">{listing.description || listing.address || `Contato configurado para atender ${place.name}.`}</p>
+                      <div className="mt-4 flex flex-wrap items-center gap-2">
+                        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-black text-emerald-700">
+                          Entrega/atende este chalé
+                        </span>
+                        {contactHref ? (
+                          <a
+                            href={contactHref}
+                            target={isNativePlatform && !isExternalUrl ? undefined : '_blank'}
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-3 py-1.5 text-[11px] font-black text-white"
+                          >
+                            <WhatsappLogo size={13} weight="fill" />
+                            Chamar no WhatsApp
+                          </a>
+                        ) : null}
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </div>
 
@@ -176,12 +242,12 @@ export function HospitalityPlacePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">No entorno</p>
-                  <h2 className="mt-1 text-xl font-black">Serviços recomendados</h2>
+                  <h2 className="mt-1 text-xl font-black">Também na cidade</h2>
                 </div>
                 <Sparkle size={25} weight="duotone" className="text-amber-700" />
               </div>
               <div className="mt-4 space-y-3">
-                {listings.map((listing: any) => {
+                {destinationListings.map((listing: any) => {
                   const contactTarget = listing.whatsapp || listing.ctaUrl || '';
                   const isExternalUrl = String(contactTarget || '').startsWith('http');
                   const contactHref = isExternalUrl
@@ -218,7 +284,7 @@ export function HospitalityPlacePage() {
                   </article>
                   );
                 })}
-                {listings.length === 0 ? <p className="text-sm font-bold text-slate-500">Sem serviços aprovados ainda.</p> : null}
+                {destinationListings.length === 0 ? <p className="text-sm font-bold text-slate-500">Sem outros serviços aprovados na cidade ainda.</p> : null}
               </div>
             </div>
             {place.deliveryInstructions ? (
