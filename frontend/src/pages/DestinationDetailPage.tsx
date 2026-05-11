@@ -1,7 +1,8 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowRight, Bed, Buildings, Compass, ForkKnife, MapPinLine, Mountains, Sparkle, WhatsappLogo } from '@phosphor-icons/react';
+import { Capacitor } from '@capacitor/core';
+import { ArrowRight, Bed, Buildings, Compass, ForkKnife, MagnifyingGlass, MapPinLine, Mountains, Sparkle, WhatsappLogo } from '@phosphor-icons/react';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
@@ -28,11 +29,39 @@ const categoryLabel = (category?: string) => {
   return 'Serviço';
 };
 
+const normalizeText = (value?: string | null) =>
+  String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+
+const itemMatchesSearch = (item: any, query: string, extra: string[] = []) => {
+  const normalizedQuery = normalizeText(query);
+  if (!normalizedQuery) return true;
+  const haystack = [
+    item?.name,
+    item?.title,
+    item?.address,
+    item?.description,
+    item?.type,
+    categoryLabel(item?.category),
+    ...extra,
+  ].map(normalizeText).join(' ');
+  return haystack.includes(normalizedQuery);
+};
+
 export function DestinationDetailPage() {
   const { destinationSlug = '' } = useParams();
   const [payload, setPayload] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeCategory, setActiveCategory] = useState('TODOS');
+  const [placeLimit, setPlaceLimit] = useState(6);
+  const [listingLimit, setListingLimit] = useState(10);
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const isNativePlatform = Capacitor.isNativePlatform();
 
   useEffect(() => {
     let active = true;
@@ -59,6 +88,67 @@ export function DestinationDetailPage() {
   const listings = Array.isArray(payload?.listings) ? payload.listings : [];
   const banners = Array.isArray(payload?.banners) ? payload.banners : [];
   const heroBanner = useMemo(() => banners.find((banner: any) => banner.imageUrl) || null, [banners]);
+  const categoryOptions = useMemo(() => {
+    const unique = Array.from(new Set(listings.map((listing: any) => String(listing.category || 'SERVICO'))));
+    return unique.map((category: string) => ({ value: category, label: categoryLabel(category) }));
+  }, [listings]);
+  const filteredPlaces = useMemo(
+    () => places.filter((place: any) => itemMatchesSearch(place, searchTerm, [destination.name, destination.city])),
+    [places, searchTerm, destination.name, destination.city]
+  );
+  const filteredListings = useMemo(
+    () => listings.filter((listing: any) => {
+      const categoryMatches = activeCategory === 'TODOS' || String(listing.category || 'SERVICO') === activeCategory;
+      return categoryMatches && itemMatchesSearch(listing, searchTerm, [destination.name, destination.city]);
+    }),
+    [listings, activeCategory, searchTerm, destination.name, destination.city]
+  );
+  const visiblePlaces = filteredPlaces.slice(0, placeLimit);
+  const visibleListings = filteredListings.slice(0, listingLimit);
+  const showcaseSlides = useMemo(() => {
+    const bannerSlides = banners.map((banner: any) => ({
+      key: `banner-${banner.id}`,
+      title: banner.title || destination.name,
+      subtitle: banner.subtitle || destination.description,
+      item: banner,
+      kind: 'Cidade',
+    }));
+    const placeSlides = places.slice(0, 3).map((place: any) => ({
+      key: `place-${place.id}`,
+      title: place.name,
+      subtitle: place.address || place.description || 'Hospedagem em destaque para completar a viagem.',
+      item: place,
+      placeSlug: place.slug,
+      kind: String(place.type || 'Hospedagem').replace('_', ' '),
+    }));
+    return [...bannerSlides, ...placeSlides].length
+      ? [...bannerSlides, ...placeSlides]
+      : [{
+          key: 'destination',
+          title: destination.name,
+          subtitle: destination.description,
+          item: destination,
+          kind: 'Destino',
+        }];
+  }, [banners, places, destination]);
+  const currentSlide = showcaseSlides[carouselIndex % Math.max(showcaseSlides.length, 1)];
+
+  useEffect(() => {
+    setPlaceLimit(6);
+    setListingLimit(10);
+  }, [searchTerm, activeCategory, destinationSlug]);
+
+  useEffect(() => {
+    setCarouselIndex(0);
+  }, [destinationSlug, showcaseSlides.length]);
+
+  useEffect(() => {
+    if (showcaseSlides.length <= 1) return undefined;
+    const timer = window.setInterval(() => {
+      setCarouselIndex((current) => (current + 1) % showcaseSlides.length);
+    }, 4500);
+    return () => window.clearInterval(timer);
+  }, [showcaseSlides.length]);
 
   return (
     <main className="min-h-screen bg-[#f6f2e9] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
@@ -96,11 +186,32 @@ export function DestinationDetailPage() {
               </div>
               <div className="overflow-hidden rounded-[2rem] border border-white/12 bg-white/10 p-3 shadow-[0_28px_80px_-38px_rgba(0,0,0,0.65)] backdrop-blur">
                 <div className="relative h-64 overflow-hidden rounded-[1.45rem] bg-slate-900">
-                  <img src={asset(heroBanner || destination)} alt={destination.name} className="h-full w-full object-cover" />
+                  <img src={asset(currentSlide?.item || heroBanner || destination)} alt={currentSlide?.title || destination.name} className="h-full w-full object-cover transition duration-700" />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
+                  <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-800">
+                    {currentSlide?.kind || 'Destaque'}
+                  </div>
                   <div className="absolute bottom-4 left-4 right-4">
-                    <p className="text-lg font-black text-white">{heroBanner?.title || destination.name}</p>
-                    <p className="mt-1 text-sm font-semibold text-white/78">{heroBanner?.subtitle || destination.description}</p>
+                    <p className="text-lg font-black text-white">{currentSlide?.title || heroBanner?.title || destination.name}</p>
+                    <p className="mt-1 line-clamp-2 text-sm font-semibold text-white/78">{currentSlide?.subtitle || heroBanner?.subtitle || destination.description}</p>
+                    <div className="mt-3 flex items-center justify-between gap-3">
+                      <div className="flex gap-1.5">
+                        {showcaseSlides.slice(0, 6).map((slide: any, index: number) => (
+                          <button
+                            key={slide.key}
+                            type="button"
+                            aria-label={`Abrir destaque ${index + 1}`}
+                            onClick={() => setCarouselIndex(index)}
+                            className={`h-1.5 rounded-full transition-all ${index === carouselIndex % showcaseSlides.length ? 'w-7 bg-white' : 'w-2 bg-white/45'}`}
+                          />
+                        ))}
+                      </div>
+                      {currentSlide?.placeSlug ? (
+                        <Link to={`/destinos/${destination.slug}/chales/${currentSlide.placeSlug}`} className="rounded-full bg-white px-3 py-1.5 text-[11px] font-black text-slate-900">
+                          Ver hospedagem
+                        </Link>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -111,6 +222,53 @@ export function DestinationDetailPage() {
 
       {!loading && !error ? (
         <section className="mx-auto grid max-w-6xl gap-8 px-4 pb-10 pt-8 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="lg:col-span-2 rounded-[2rem] border border-white/80 bg-white/82 p-4 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.36)] backdrop-blur sm:p-5">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Encontrar rápido</p>
+                <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950">Busque hospedagem, restaurante, passeio ou serviço</h2>
+              </div>
+              <p className="text-xs font-bold text-slate-500">
+                {filteredPlaces.length} hospedagens · {filteredListings.length} serviços filtrados
+              </p>
+            </div>
+            <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
+              <label className="group flex min-h-[52px] items-center gap-3 rounded-[1.35rem] border border-slate-200 bg-white px-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.4)] focus-within:border-[#336886]/40 focus-within:ring-4 focus-within:ring-[#336886]/10">
+                <MagnifyingGlass size={18} weight="bold" className="text-slate-400" />
+                <input
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  placeholder="Ex: Pedra do Baú, pousada, pizza, escalada..."
+                  className="min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400"
+                />
+                {searchTerm ? (
+                  <button type="button" onClick={() => setSearchTerm('')} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-600">
+                    Limpar
+                  </button>
+                ) : null}
+              </label>
+              <div className="flex gap-2 overflow-x-auto pb-1 lg:max-w-[520px]">
+                <button
+                  type="button"
+                  onClick={() => setActiveCategory('TODOS')}
+                  className={`shrink-0 rounded-full px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] ${activeCategory === 'TODOS' ? 'bg-[#153A4C] text-white' : 'border border-slate-200 bg-white text-slate-600'}`}
+                >
+                  Todos
+                </button>
+                {categoryOptions.map((category: any) => (
+                  <button
+                    key={category.value}
+                    type="button"
+                    onClick={() => setActiveCategory(category.value)}
+                    className={`shrink-0 rounded-full px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] ${activeCategory === category.value ? 'bg-[#153A4C] text-white' : 'border border-slate-200 bg-white text-slate-600'}`}
+                  >
+                    {category.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-5">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -129,36 +287,72 @@ export function DestinationDetailPage() {
               </div>
             ) : null}
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              {places.map((place: any) => (
-                <Link
+            {places.length > 0 && filteredPlaces.length === 0 ? (
+              <div className="rounded-[1.5rem] border border-dashed border-slate-300 bg-white/70 p-5">
+                <p className="text-sm font-bold text-slate-600">Nenhuma hospedagem bateu com a busca atual.</p>
+              </div>
+            ) : null}
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              {visiblePlaces.map((place: any) => {
+                const whatsappMessage = buildDestinationInquiryMessage({
+                  destinationName: destination.name,
+                  city: destination.city,
+                  state: destination.state,
+                  itemName: place.name,
+                  itemType: 'hospedagem',
+                });
+                return (
+                <article
                   key={place.id}
-                  to={`/destinos/${destination.slug}/chales/${place.slug}`}
-                  className="group overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_18px_48px_-36px_rgba(15,23,42,0.45)] transition hover:-translate-y-1"
+                  className="group overflow-hidden rounded-[1.45rem] border border-slate-200 bg-white shadow-[0_16px_38px_-32px_rgba(15,23,42,0.5)] transition hover:-translate-y-1"
                 >
-                  <div className="relative h-44 overflow-hidden bg-slate-100">
+                  <Link to={`/destinos/${destination.slug}/chales/${place.slug}`} className="relative block h-32 overflow-hidden bg-slate-100">
                     <img src={asset(place)} alt={place.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                     <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-black text-slate-700">
                       {String(place.type || 'CHALE').replace('_', ' ')}
                     </div>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="text-lg font-black text-slate-950">{place.name}</h3>
+                  </Link>
+                  <div className="p-3.5">
+                    <Link to={`/destinos/${destination.slug}/chales/${place.slug}`} className="line-clamp-1 text-base font-black text-slate-950">
+                      {place.name}
+                    </Link>
                     <p className="mt-1 line-clamp-2 text-sm font-semibold text-slate-500">{place.description || place.address || 'Hospedagem cadastrada.'}</p>
-                    <div className="mt-4 flex items-center justify-between">
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
                       <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-black text-emerald-700">
                         <Buildings size={13} weight="duotone" />
                         {place.storeCount || 0} lojas
                       </span>
-                      <span className="inline-flex items-center gap-1 text-xs font-black text-[#153A4C]">
+                      {place.whatsapp ? (
+                        <a
+                          href={buildWhatsAppUrl(place.whatsapp, whatsappMessage, isNativePlatform)}
+                          target={isNativePlatform ? undefined : '_blank'}
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-black text-white"
+                        >
+                          <WhatsappLogo size={12} weight="fill" />
+                          Falar
+                        </a>
+                      ) : null}
+                      <Link to={`/destinos/${destination.slug}/chales/${place.slug}`} className="ml-auto inline-flex items-center gap-1 text-xs font-black text-[#153A4C]">
                         Abrir
                         <ArrowRight size={14} weight="bold" />
-                      </span>
+                      </Link>
                     </div>
                   </div>
-                </Link>
-              ))}
+                </article>
+                );
+              })}
             </div>
+            {filteredPlaces.length > visiblePlaces.length ? (
+              <button
+                type="button"
+                onClick={() => setPlaceLimit((current) => current + 6)}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 shadow-sm"
+              >
+                Ver mais hospedagens ({filteredPlaces.length - visiblePlaces.length})
+              </button>
+            ) : null}
           </div>
 
           <aside className="space-y-4">
@@ -171,7 +365,7 @@ export function DestinationDetailPage() {
                 <Sparkle size={25} weight="duotone" className="text-amber-700" />
               </div>
               <div className="mt-4 space-y-3">
-                {listings.map((listing: any) => {
+                {visibleListings.map((listing: any) => {
                   const contactTarget = listing.whatsapp || listing.ctaUrl || '';
                   const isExternalUrl = String(contactTarget || '').startsWith('http');
                   const whatsappMessage = buildDestinationInquiryMessage({
@@ -181,11 +375,11 @@ export function DestinationDetailPage() {
                     itemName: listing.title,
                     itemType: categoryLabel(listing.category),
                   });
-                  const contactHref = isExternalUrl ? contactTarget : buildWhatsAppUrl(contactTarget, whatsappMessage);
+                  const contactHref = isExternalUrl ? contactTarget : buildWhatsAppUrl(contactTarget, whatsappMessage, isNativePlatform);
                   return (
-                  <article key={listing.id} className="overflow-hidden rounded-[1.55rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.45)]">
+                  <article key={listing.id} className="overflow-hidden rounded-[1.35rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.45)]">
                     <div className="flex gap-3">
-                      <img src={asset(listing, 'image')} alt={listing.title} className="h-16 w-16 rounded-2xl object-cover" />
+                      <img src={asset(listing, 'image')} alt={listing.title} className="h-14 w-14 rounded-2xl object-cover" />
                       <div className="min-w-0 flex-1">
                         <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[#336886]">{categoryLabel(listing.category)}</p>
                         <h3 className="mt-0.5 line-clamp-1 text-sm font-black text-slate-950">{listing.title}</h3>
@@ -196,7 +390,7 @@ export function DestinationDetailPage() {
                       {contactHref ? (
                         <a
                           href={contactHref}
-                          target="_blank"
+                          target={isNativePlatform && !isExternalUrl ? undefined : '_blank'}
                           rel="noreferrer"
                           className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-3 py-1.5 text-[11px] font-black text-white"
                         >
@@ -218,6 +412,20 @@ export function DestinationDetailPage() {
                   <p className="rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-500">
                     Nenhum serviço aprovado ainda.
                   </p>
+                ) : null}
+                {listings.length > 0 && filteredListings.length === 0 ? (
+                  <p className="rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-500">
+                    Nenhum serviço bateu com a busca atual.
+                  </p>
+                ) : null}
+                {filteredListings.length > visibleListings.length ? (
+                  <button
+                    type="button"
+                    onClick={() => setListingLimit((current) => current + 10)}
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 shadow-sm"
+                  >
+                    Ver mais serviços ({filteredListings.length - visibleListings.length})
+                  </button>
                 ) : null}
               </div>
             </div>

@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
 import { ArrowRight, Bed, Clock, ForkKnife, MapPinLine, ShoppingBagOpen, Sparkle, WhatsappLogo } from '@phosphor-icons/react';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
@@ -42,6 +43,7 @@ export function HospitalityPlacePage() {
   const place = payload?.hospitalityPlace || {};
   const stores = Array.isArray(payload?.stores) ? payload.stores : [];
   const listings = Array.isArray(payload?.listings) ? payload.listings : [];
+  const isNativePlatform = Capacitor.isNativePlatform();
 
   return (
     <main className="min-h-screen bg-[#f4f1ea] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
@@ -82,8 +84,8 @@ export function HospitalityPlacePage() {
                       state: destination.state,
                       itemName: place.name,
                       itemType: 'hospedagem',
-                    }))}
-                    target="_blank"
+                    }), isNativePlatform)}
+                    target={isNativePlatform ? undefined : '_blank'}
                     rel="noreferrer"
                     className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-3 py-1.5 text-xs font-black text-white"
                   >
@@ -173,7 +175,7 @@ export function HospitalityPlacePage() {
                         itemName: listing.title,
                         itemType: String(listing.category || 'serviço').replace('_', ' '),
                         placeName: place.name,
-                      }));
+                      }), isNativePlatform);
                   return (
                   <article key={listing.id} className="rounded-[1.35rem] border border-slate-100 bg-slate-50/70 p-3">
                     <div className="flex gap-3">
@@ -187,7 +189,7 @@ export function HospitalityPlacePage() {
                     {contactHref ? (
                       <a
                         href={contactHref}
-                        target="_blank"
+                        target={isNativePlatform && !isExternalUrl ? undefined : '_blank'}
                         rel="noreferrer"
                         className="mt-3 inline-flex items-center gap-1 rounded-full bg-emerald-600 px-3 py-1.5 text-[11px] font-black text-white"
                       >

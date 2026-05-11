@@ -84,7 +84,7 @@ export function DestinationPartnerRequestPage() {
         </Link>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
-          <aside className="sticky top-4 overflow-hidden rounded-[2rem] bg-[#153A4C] p-6 text-white shadow-[0_24px_70px_-42px_rgba(21,58,76,0.8)]">
+          <aside className="overflow-hidden rounded-[2rem] bg-[#153A4C] p-5 text-white shadow-[0_24px_70px_-42px_rgba(21,58,76,0.8)] sm:p-6 lg:sticky lg:top-4">
             <p className="inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em]">
               <Handshake size={15} weight="duotone" />
               Cadastro real
@@ -107,7 +107,7 @@ export function DestinationPartnerRequestPage() {
             </div>
           </aside>
 
-          <form onSubmit={submit} className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.35)] sm:p-6">
+          <form onSubmit={submit} className="relative z-10 rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.35)] sm:p-6">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Solicitação</p>
