@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bed, Buildings, CheckCircle, Compass, Eye, EyeSlash, MapTrifold, PencilSimple, Plus, Sparkle, Storefront, WarningCircle } from '@phosphor-icons/react';
+import { Bed, Buildings, CaretDown, CaretUp, CheckCircle, Compass, Eye, EyeSlash, ImageSquare, LinkSimpleHorizontal, MapTrifold, PencilSimple, Plus, Sparkle, UploadSimple, WarningCircle } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
@@ -17,6 +17,8 @@ const emptyDestination = {
   heroSubtitle: '',
   logoUrl: '',
   bannerUrl: '',
+  logoFile: '',
+  bannerFile: '',
   lat: '',
   lng: '',
   active: true,
@@ -37,6 +39,8 @@ const emptyPlace = {
   instagramUrl: '',
   logoUrl: '',
   bannerUrl: '',
+  logoFile: '',
+  bannerFile: '',
   lat: '',
   lng: '',
   deliveryInstructions: '',
@@ -55,6 +59,7 @@ const emptyListing = {
   websiteUrl: '',
   instagramUrl: '',
   imageUrl: '',
+  imageFile: '',
   ctaType: 'WHATSAPP',
   ctaUrl: '',
   active: true,
@@ -98,9 +103,156 @@ const statusPill = (active: any) =>
 
 const activeLabel = (active: any) => (active === false ? 'Inativo' : 'Ativo');
 
+const actionButtonClass = (tone = 'neutral') => {
+  const tones: any = {
+    neutral: 'border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50',
+    primary: 'bg-[#153A4C] text-white shadow-[0_10px_24px_-18px_rgba(21,58,76,0.9)] hover:bg-[#1f4f67]',
+    success: 'bg-emerald-600 text-white shadow-[0_10px_24px_-18px_rgba(5,150,105,0.9)] hover:bg-emerald-700',
+    muted: 'border border-slate-200 bg-slate-100 text-slate-600 hover:bg-slate-200',
+    amber: 'bg-amber-500 text-slate-950 shadow-[0_10px_24px_-18px_rgba(245,158,11,0.9)] hover:bg-amber-400',
+  };
+  return `inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-50 ${tones[tone] || tones.neutral}`;
+};
+
 const toFormValue = (value: any) => (value === null || value === undefined ? '' : value);
 
 const toBool = (value: any) => value === true || String(value).toLowerCase() === 'true';
+
+const readFileAsDataUrl = (file: File) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error('file_read_error'));
+    reader.readAsDataURL(file);
+  });
+
+const compressImageFileToDataUrl = (file: File, maxEdge = 1600) =>
+  new Promise<string>((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      try {
+        const width = Number(image.width || 0);
+        const height = Number(image.height || 0);
+        if (!width || !height) throw new Error('invalid_image');
+
+        const ratio = Math.min(1, maxEdge / Math.max(width, height));
+        const targetWidth = Math.max(1, Math.round(width * ratio));
+        const targetHeight = Math.max(1, Math.round(height * ratio));
+
+        const canvas = document.createElement('canvas');
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('canvas_error');
+        ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
+
+        let quality = 0.86;
+        let dataUrl = canvas.toDataURL('image/jpeg', quality);
+        while (dataUrl.length > 1_200_000 && quality > 0.62) {
+          quality -= 0.06;
+          dataUrl = canvas.toDataURL('image/jpeg', quality);
+        }
+        resolve(dataUrl);
+      } catch (error) {
+        reject(error);
+      } finally {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('image_load_error'));
+    };
+    image.src = objectUrl;
+  });
+
+const prepareImageUpload = async (file: File, maxEdge = 1600) => {
+  if (!file.type.startsWith('image/')) throw new Error('invalid_file_type');
+  if (file.type === 'image/gif') return readFileAsDataUrl(file);
+  try {
+    return await compressImageFileToDataUrl(file, maxEdge);
+  } catch {
+    return readFileAsDataUrl(file);
+  }
+};
+
+const MediaUploadField = ({
+  label,
+  hint,
+  urlValue,
+  fileValue,
+  onUrlChange,
+  onFileChange,
+  onError,
+  maxEdge = 1600,
+}: any) => {
+  const previewUrl = fileValue || resolveAssetUrl(urlValue || '') || '';
+
+  const handleFile = async (event: any) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    try {
+      const dataUrl = await prepareImageUpload(file, maxEdge);
+      onFileChange(dataUrl);
+      onUrlChange('');
+    } catch {
+      onError?.('Não foi possível carregar a imagem selecionada.');
+    }
+  };
+
+  return (
+    <div className="sm:col-span-2 rounded-[1.35rem] border border-slate-200 bg-slate-50/80 p-3">
+      <div className="grid gap-3 sm:grid-cols-[112px_1fr]">
+        <div className="flex h-28 items-center justify-center overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200">
+          {previewUrl ? (
+            <img src={previewUrl} alt={label} className="h-full w-full object-cover" />
+          ) : (
+            <ImageSquare size={34} weight="duotone" className="text-slate-400" />
+          )}
+        </div>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <p className="text-sm font-black text-slate-950">{label}</p>
+              <p className="mt-0.5 text-[11px] font-semibold text-slate-500">{hint}</p>
+            </div>
+            {fileValue ? (
+              <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-emerald-700">
+                Upload pronto
+              </span>
+            ) : null}
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-[#153A4C] px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-white">
+              <UploadSimple size={14} weight="bold" />
+              Upload comprimido
+              <input type="file" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" className="hidden" onChange={handleFile} />
+            </label>
+            {(fileValue || urlValue) ? (
+              <button type="button" onClick={() => { onFileChange(''); onUrlChange(''); }} className="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-slate-600">
+                Limpar
+              </button>
+            ) : null}
+          </div>
+          <label className="mt-3 flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2">
+            <LinkSimpleHorizontal size={16} weight="bold" className="text-slate-400" />
+            <input
+              value={urlValue || ''}
+              onChange={(event) => {
+                onUrlChange(event.target.value);
+                if (event.target.value) onFileChange('');
+              }}
+              placeholder="Ou cole uma URL pública da imagem"
+              className="min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400"
+            />
+          </label>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export function SuperAdminDestinations() {
   const [data, setData] = useState<any>({ destinations: [], places: [], listings: [], partnerRequests: [], storeRequests: [], stores: [] });
@@ -113,7 +265,9 @@ export function SuperAdminDestinations() {
   const [editingListingId, setEditingListingId] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard');
   const [search, setSearch] = useState('');
+  const [stateFilter, setStateFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState<'active' | 'all' | 'inactive'>('active');
+  const [expandedDestinationIds, setExpandedDestinationIds] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -156,6 +310,20 @@ export function SuperAdminDestinations() {
     };
   }, [data]);
 
+  const stateOptions = useMemo(() => {
+    const counts = new Map<string, number>();
+    (data.destinations || []).forEach((destination: any) => {
+      const state = String(destination.state || 'UF').toUpperCase().slice(0, 2);
+      counts.set(state, (counts.get(state) || 0) + 1);
+    });
+    return [
+      { id: 'all', label: 'Todas UFs', count: (data.destinations || []).length },
+      ...Array.from(counts.entries())
+        .sort(([left], [right]) => left.localeCompare(right, 'pt-BR'))
+        .map(([state, count]) => ({ id: state, label: state, count })),
+    ];
+  }, [data.destinations]);
+
   const groupedDestinations = useMemo(() => {
     const normalizedQuery = normalizeSearch(search);
     const places = data.places || [];
@@ -177,8 +345,9 @@ export function SuperAdminDestinations() {
       if (statusFilter === 'active' && destination.active === false) return;
       if (statusFilter === 'inactive' && destination.active !== false) return;
 
-      const state = String(destination.state || 'UF').toUpperCase();
+      const state = String(destination.state || 'UF').toUpperCase().slice(0, 2);
       const city = String(destination.city || destination.name || 'Sem cidade').trim();
+      if (stateFilter !== 'all' && state !== stateFilter) return;
       const key = `${state}|${city}`;
       if (!groups.has(key)) {
         groups.set(key, {
@@ -203,12 +372,15 @@ export function SuperAdminDestinations() {
       if (stateDiff !== 0) return stateDiff;
       return String(left.city).localeCompare(String(right.city), 'pt-BR');
     });
-  }, [data.destinations, data.places, data.listings, search, statusFilter]);
+  }, [data.destinations, data.places, data.listings, search, statusFilter, stateFilter]);
 
   const updateDestination = (key: string, value: any) => setDestinationForm((current) => ({ ...current, [key]: value }));
   const updatePlace = (key: string, value: any) => setPlaceForm((current) => ({ ...current, [key]: value }));
   const updateListing = (key: string, value: any) => setListingForm((current) => ({ ...current, [key]: value }));
   const updateStoreLink = (key: string, value: any) => setStoreLinkForm((current) => ({ ...current, [key]: value }));
+  const toggleDestinationExpanded = (destinationId: string) => {
+    setExpandedDestinationIds((current) => ({ ...current, [destinationId]: !current[destinationId] }));
+  };
 
   const startDestinationEdit = (destination: any) => {
     setEditingDestinationId(destination.id);
@@ -499,6 +671,22 @@ export function SuperAdminDestinations() {
               </div>
             </div>
 
+            <div className="flex gap-2 overflow-x-auto rounded-[1.5rem] border border-slate-200 bg-white p-2 shadow-sm">
+              {stateOptions.map((option: any) => {
+                const active = stateFilter === option.id;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => setStateFilter(option.id)}
+                    className={`shrink-0 rounded-full px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] transition ${active ? 'bg-[#153A4C] text-white' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'}`}
+                  >
+                    {option.label} <span className="ml-1 opacity-70">{option.count}</span>
+                  </button>
+                );
+              })}
+            </div>
+
             <div className="space-y-4">
               {groupedDestinations.map((group: any) => (
                 <section key={group.key} className="overflow-hidden rounded-[1.85rem] border border-slate-200 bg-white shadow-sm">
@@ -515,70 +703,125 @@ export function SuperAdminDestinations() {
                   </div>
 
                   <div className="grid gap-4 p-4 xl:grid-cols-2">
-                    {group.destinations.map((destination: any) => (
-                      <article key={destination.id} className="rounded-[1.5rem] border border-slate-200 bg-white p-4">
-                        <div className="flex gap-4">
-                          <img src={imageFor(destination)} alt={destination.name} className="h-20 w-20 rounded-2xl object-cover" />
-                          <div className="min-w-0 flex-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <h3 className="text-lg font-black text-slate-950">{destination.name}</h3>
-                              <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${statusPill(destination.active)}`}>
-                                {activeLabel(destination.active)}
-                              </span>
-                            </div>
-                            <p className="text-xs font-bold text-slate-500">{[destination.city, destination.state].filter(Boolean).join(' - ') || 'Sem cidade/UF'}</p>
-                            <p className="mt-2 line-clamp-2 text-sm font-semibold text-slate-600">{destination.description || destination.heroSubtitle || 'Sem descrição pública.'}</p>
-                          </div>
-                        </div>
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          <button type="button" onClick={() => startDestinationEdit(destination)} className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-700">
-                            <PencilSimple size={13} weight="bold" />
-                            Editar destino
-                          </button>
-                          <Link to={`/destinos/${destination.slug}`} className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-700">
-                            <Eye size={13} weight="bold" />
-                            Ver público
-                          </Link>
-                          <button type="button" disabled={saving} onClick={() => toggleDestinationActive(destination)} className="inline-flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1.5 text-xs font-black text-white disabled:opacity-50">
-                            {destination.active === false ? <Eye size={13} weight="bold" /> : <EyeSlash size={13} weight="bold" />}
-                            {destination.active === false ? 'Ativar' : 'Desativar'}
-                          </button>
-                        </div>
+                    {group.destinations.map((destination: any) => {
+                      const destinationPlaces = destination.places || [];
+                      const destinationListings = destination.listings || [];
+                      const expanded = expandedDestinationIds[destination.id] === true;
+                      const visiblePlaces = expanded ? destinationPlaces : destinationPlaces.slice(0, 4);
+                      const visibleListings = expanded ? destinationListings : destinationListings.slice(0, 4);
+                      const hiddenItems = Math.max(destinationPlaces.length - visiblePlaces.length, 0) + Math.max(destinationListings.length - visibleListings.length, 0);
 
-                        <div className="mt-4 grid gap-3">
-                          {(destination.places || []).slice(0, 4).map((place: any) => (
-                            <div key={place.id} className="rounded-2xl border border-slate-100 bg-slate-50/80 px-3 py-3">
-                              <div className="flex items-start justify-between gap-3">
-                                <div>
-                                  <p className="text-sm font-black text-slate-950">{place.name}</p>
-                                  <p className="text-xs font-semibold text-slate-500">{place.address || place.description || 'Hospedagem sem endereço'}</p>
+                      return (
+                        <article key={destination.id} className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_18px_46px_-38px_rgba(15,23,42,0.45)]">
+                          <div className="bg-[linear-gradient(135deg,#ffffff,#f8fafc)] p-4">
+                            <div className="flex gap-4">
+                              <img src={imageFor(destination)} alt={destination.name} className="h-20 w-20 rounded-[1.25rem] object-cover ring-1 ring-slate-200" />
+                              <div className="min-w-0 flex-1">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <h3 className="text-lg font-black text-slate-950">{destination.name}</h3>
+                                  <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${statusPill(destination.active)}`}>
+                                    {activeLabel(destination.active)}
+                                  </span>
                                 </div>
-                                <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(place.active)}`}>{activeLabel(place.active)}</span>
-                              </div>
-                              <div className="mt-2 flex flex-wrap gap-2">
-                                <button type="button" onClick={() => startPlaceEdit(place)} className="text-xs font-black text-[#336886]">Editar hospedagem</button>
-                                <button type="button" disabled={saving} onClick={() => togglePlaceActive(place)} className="text-xs font-black text-slate-500 disabled:opacity-50">{place.active === false ? 'Ativar' : 'Desativar'}</button>
+                                <p className="text-xs font-bold text-slate-500">{[destination.city, destination.state].filter(Boolean).join(' - ') || 'Sem cidade/UF'}</p>
+                                <p className="mt-2 line-clamp-2 text-sm font-semibold text-slate-600">{destination.description || destination.heroSubtitle || 'Sem descrição pública.'}</p>
                               </div>
                             </div>
-                          ))}
-                          {(destination.listings || []).slice(0, 4).map((listing: any) => (
-                            <div key={listing.id} className="rounded-2xl border border-amber-100 bg-amber-50/60 px-3 py-3">
-                              <div className="flex items-start justify-between gap-3">
-                                <div>
-                                  <p className="text-sm font-black text-slate-950">{listing.title}</p>
-                                  <p className="text-xs font-semibold text-slate-500">{String(listing.category || 'SERVICO').replace('_', ' ')}</p>
-                                </div>
-                                <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(listing.active)}`}>{activeLabel(listing.active)}</span>
-                              </div>
-                              <div className="mt-2 flex flex-wrap gap-2">
-                                <button type="button" onClick={() => startListingEdit(listing)} className="text-xs font-black text-[#336886]">Editar serviço</button>
-                                <button type="button" disabled={saving} onClick={() => toggleListingActive(listing)} className="text-xs font-black text-slate-500 disabled:opacity-50">{listing.active === false ? 'Ativar' : 'Desativar'}</button>
-                              </div>
+                            <div className="mt-4 flex flex-wrap gap-2">
+                              <button type="button" onClick={() => startDestinationEdit(destination)} className={actionButtonClass('primary')}>
+                                <PencilSimple size={13} weight="bold" />
+                                Editar destino
+                              </button>
+                              <Link to={`/destinos/${destination.slug}`} className={actionButtonClass('neutral')}>
+                                <Eye size={13} weight="bold" />
+                                Ver público
+                              </Link>
+                              <button type="button" disabled={saving} onClick={() => toggleDestinationActive(destination)} className={actionButtonClass(destination.active === false ? 'success' : 'muted')}>
+                                {destination.active === false ? <Eye size={13} weight="bold" /> : <EyeSlash size={13} weight="bold" />}
+                                {destination.active === false ? 'Ativar' : 'Desativar'}
+                              </button>
                             </div>
-                          ))}
-                        </div>
-                      </article>
-                    ))}
+                          </div>
+
+                          <div className="grid gap-3 border-t border-slate-100 bg-slate-50/60 p-4 lg:grid-cols-2">
+                            <section className="rounded-[1.35rem] border border-slate-200 bg-white p-3">
+                              <div className="flex items-center justify-between gap-3">
+                                <div>
+                                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">Hospedagens</p>
+                                  <h4 className="text-sm font-black text-slate-950">{destinationPlaces.length} cadastrada(s)</h4>
+                                </div>
+                                <Bed size={22} weight="duotone" className="text-[#336886]" />
+                              </div>
+                              <div className={`mt-3 space-y-2 ${expanded ? 'max-h-[460px] overflow-y-auto pr-1' : ''}`}>
+                                {visiblePlaces.length ? visiblePlaces.map((place: any) => (
+                                  <div key={place.id} className="rounded-2xl border border-slate-100 bg-slate-50/80 px-3 py-3">
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div className="min-w-0">
+                                        <p className="line-clamp-1 text-sm font-black text-slate-950">{place.name}</p>
+                                        <p className="mt-0.5 line-clamp-2 text-xs font-semibold text-slate-500">{place.address || place.description || 'Hospedagem sem endereço'}</p>
+                                      </div>
+                                      <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(place.active)}`}>{activeLabel(place.active)}</span>
+                                    </div>
+                                    <div className="mt-3 flex flex-wrap gap-2">
+                                      <button type="button" onClick={() => startPlaceEdit(place)} className={actionButtonClass('neutral')}>
+                                        <PencilSimple size={13} weight="bold" />
+                                        Editar
+                                      </button>
+                                      <button type="button" disabled={saving} onClick={() => togglePlaceActive(place)} className={actionButtonClass(place.active === false ? 'success' : 'muted')}>
+                                        {place.active === false ? 'Ativar' : 'Desativar'}
+                                      </button>
+                                    </div>
+                                  </div>
+                                )) : (
+                                  <p className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-xs font-bold text-slate-500">Nenhuma hospedagem nesta cidade.</p>
+                                )}
+                              </div>
+                            </section>
+
+                            <section className="rounded-[1.35rem] border border-amber-100 bg-white p-3">
+                              <div className="flex items-center justify-between gap-3">
+                                <div>
+                                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-700">Serviços e lugares</p>
+                                  <h4 className="text-sm font-black text-slate-950">{destinationListings.length} cadastrado(s)</h4>
+                                </div>
+                                <Sparkle size={22} weight="duotone" className="text-amber-700" />
+                              </div>
+                              <div className={`mt-3 space-y-2 ${expanded ? 'max-h-[460px] overflow-y-auto pr-1' : ''}`}>
+                                {visibleListings.length ? visibleListings.map((listing: any) => (
+                                  <div key={listing.id} className="rounded-2xl border border-amber-100 bg-amber-50/60 px-3 py-3">
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div className="min-w-0">
+                                        <p className="line-clamp-1 text-sm font-black text-slate-950">{listing.title}</p>
+                                        <p className="mt-0.5 text-xs font-semibold text-slate-500">{String(listing.category || 'SERVICO').replace('_', ' ')}</p>
+                                      </div>
+                                      <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(listing.active)}`}>{activeLabel(listing.active)}</span>
+                                    </div>
+                                    <div className="mt-3 flex flex-wrap gap-2">
+                                      <button type="button" onClick={() => startListingEdit(listing)} className={actionButtonClass('neutral')}>
+                                        <PencilSimple size={13} weight="bold" />
+                                        Editar
+                                      </button>
+                                      <button type="button" disabled={saving} onClick={() => toggleListingActive(listing)} className={actionButtonClass(listing.active === false ? 'success' : 'muted')}>
+                                        {listing.active === false ? 'Ativar' : 'Desativar'}
+                                      </button>
+                                    </div>
+                                  </div>
+                                )) : (
+                                  <p className="rounded-2xl border border-dashed border-amber-200 bg-amber-50/60 px-3 py-4 text-xs font-bold text-slate-500">Nenhum serviço nesta cidade.</p>
+                                )}
+                              </div>
+                            </section>
+
+                            {(destinationPlaces.length > 4 || destinationListings.length > 4) ? (
+                              <button type="button" onClick={() => toggleDestinationExpanded(destination.id)} className="lg:col-span-2 inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm transition hover:bg-slate-50">
+                                {expanded ? <CaretUp size={15} weight="bold" /> : <CaretDown size={15} weight="bold" />}
+                                {expanded ? 'Mostrar menos' : `Mostrar todos os itens${hiddenItems ? ` (+${hiddenItems})` : ''}`}
+                              </button>
+                            ) : null}
+                          </div>
+                        </article>
+                      );
+                    })}
                   </div>
                 </section>
               ))}
@@ -612,8 +855,26 @@ export function SuperAdminDestinations() {
                 <input value={destinationForm.state} onChange={(event) => updateDestination('state', event.target.value.toUpperCase().slice(0, 2))} placeholder="UF" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={destinationForm.heroTitle} onChange={(event) => updateDestination('heroTitle', event.target.value)} placeholder="Título hero" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
                 <input value={destinationForm.heroSubtitle} onChange={(event) => updateDestination('heroSubtitle', event.target.value)} placeholder="Subtítulo hero" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
-                <input value={destinationForm.bannerUrl} onChange={(event) => updateDestination('bannerUrl', event.target.value)} placeholder="URL da foto/banner da cidade" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
-                <input value={destinationForm.logoUrl} onChange={(event) => updateDestination('logoUrl', event.target.value)} placeholder="URL do logo/ícone do destino" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
+                <MediaUploadField
+                  label="Foto/banner da cidade"
+                  hint="Upload comprimido para S3 ou URL manual. Use imagem horizontal."
+                  urlValue={destinationForm.bannerUrl}
+                  fileValue={destinationForm.bannerFile}
+                  onUrlChange={(value: string) => updateDestination('bannerUrl', value)}
+                  onFileChange={(value: string) => updateDestination('bannerFile', value)}
+                  onError={setError}
+                  maxEdge={1800}
+                />
+                <MediaUploadField
+                  label="Logo/ícone do destino"
+                  hint="Opcional. Ajuda na identidade visual da cidade."
+                  urlValue={destinationForm.logoUrl}
+                  fileValue={destinationForm.logoFile}
+                  onUrlChange={(value: string) => updateDestination('logoUrl', value)}
+                  onFileChange={(value: string) => updateDestination('logoFile', value)}
+                  onError={setError}
+                  maxEdge={900}
+                />
                 <input value={destinationForm.lat} onChange={(event) => updateDestination('lat', event.target.value)} placeholder="Latitude" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={destinationForm.lng} onChange={(event) => updateDestination('lng', event.target.value)} placeholder="Longitude" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={destinationForm.sortOrder} onChange={(event) => updateDestination('sortOrder', event.target.value)} placeholder="Ordem" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
@@ -654,8 +915,26 @@ export function SuperAdminDestinations() {
                 <input value={placeForm.city} onChange={(event) => updatePlace('city', event.target.value)} placeholder="Cidade" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={placeForm.state} onChange={(event) => updatePlace('state', event.target.value.toUpperCase().slice(0, 2))} placeholder="UF" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={placeForm.address} onChange={(event) => updatePlace('address', event.target.value)} placeholder="Endereço" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
-                <input value={placeForm.bannerUrl} onChange={(event) => updatePlace('bannerUrl', event.target.value)} placeholder="URL da foto/banner do chalé" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
-                <input value={placeForm.logoUrl} onChange={(event) => updatePlace('logoUrl', event.target.value)} placeholder="URL do logo/foto menor" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
+                <MediaUploadField
+                  label="Foto/banner do chalé ou pousada"
+                  hint="Upload comprimido para S3 ou URL manual. Essa é a foto principal do card."
+                  urlValue={placeForm.bannerUrl}
+                  fileValue={placeForm.bannerFile}
+                  onUrlChange={(value: string) => updatePlace('bannerUrl', value)}
+                  onFileChange={(value: string) => updatePlace('bannerFile', value)}
+                  onError={setError}
+                  maxEdge={1800}
+                />
+                <MediaUploadField
+                  label="Logo/foto menor da hospedagem"
+                  hint="Opcional. Use quando tiver marca ou foto complementar."
+                  urlValue={placeForm.logoUrl}
+                  fileValue={placeForm.logoFile}
+                  onUrlChange={(value: string) => updatePlace('logoUrl', value)}
+                  onFileChange={(value: string) => updatePlace('logoFile', value)}
+                  onError={setError}
+                  maxEdge={900}
+                />
                 <input value={placeForm.whatsapp} onChange={(event) => updatePlace('whatsapp', event.target.value)} placeholder="WhatsApp" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
                 <input value={placeForm.websiteUrl} onChange={(event) => updatePlace('websiteUrl', event.target.value)} placeholder="Site" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={placeForm.instagramUrl} onChange={(event) => updatePlace('instagramUrl', event.target.value)} placeholder="Instagram" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
@@ -703,7 +982,16 @@ export function SuperAdminDestinations() {
                   <option value="SERVICO">Serviço</option>
                 </select>
                 <input required value={listingForm.title} onChange={(event) => updateListing('title', event.target.value)} placeholder="Título" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
-                <input value={listingForm.imageUrl} onChange={(event) => updateListing('imageUrl', event.target.value)} placeholder="URL da foto do serviço/atração" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
+                <MediaUploadField
+                  label="Foto do serviço/atração"
+                  hint="Upload comprimido para S3 ou URL manual. Usada no card de experiências."
+                  urlValue={listingForm.imageUrl}
+                  fileValue={listingForm.imageFile}
+                  onUrlChange={(value: string) => updateListing('imageUrl', value)}
+                  onFileChange={(value: string) => updateListing('imageFile', value)}
+                  onError={setError}
+                  maxEdge={1400}
+                />
                 <input value={listingForm.address} onChange={(event) => updateListing('address', event.target.value)} placeholder="Endereço/local" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
                 <input value={listingForm.whatsapp} onChange={(event) => updateListing('whatsapp', event.target.value)} placeholder="WhatsApp" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
                 <input value={listingForm.websiteUrl} onChange={(event) => updateListing('websiteUrl', event.target.value)} placeholder="Site" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />

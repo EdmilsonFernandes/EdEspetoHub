@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { ArrowRight, Bed, Buildings, Compass, ForkKnife, MagnifyingGlass, MapPinLine, Mountains, Sparkle, WhatsappLogo } from '@phosphor-icons/react';
+import { ArrowRight, Bed, Buildings, ForkKnife, MagnifyingGlass, MapPinLine, Mountains, Sparkle, WhatsappLogo } from '@phosphor-icons/react';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
@@ -16,6 +16,16 @@ const asset = (item: any, variant: 'logo' | 'banner' | 'image' = 'banner') => {
         ? item?.imageUrl || item?.bannerUrl || item?.logoUrl
         : item?.bannerUrl || item?.imageUrl || item?.logoUrl;
   return resolveAssetUrl(source || '') || getStoreAvatarUrl(item?.slug || item?.id, item?.name || item?.title);
+};
+
+const hasConfiguredAsset = (item: any, variant: 'logo' | 'banner' | 'image' = 'banner') => {
+  const source =
+    variant === 'logo'
+      ? item?.logoUrl || item?.bannerUrl || item?.imageUrl
+      : variant === 'image'
+        ? item?.imageUrl || item?.bannerUrl || item?.logoUrl
+        : item?.bannerUrl || item?.imageUrl || item?.logoUrl;
+  return Boolean(resolveAssetUrl(source || ''));
 };
 
 const categoryLabel = (category?: string) => {
@@ -90,14 +100,27 @@ export function DestinationDetailPage() {
   const heroBanner = useMemo(() => banners.find((banner: any) => banner.imageUrl) || null, [banners]);
   const categoryOptions = useMemo(() => {
     const unique = Array.from(new Set(listings.map((listing: any) => String(listing.category || 'SERVICO'))));
-    return unique.map((category: string) => ({ value: category, label: categoryLabel(category) }));
+    return unique.map((category: string) => ({
+      value: category,
+      label: categoryLabel(category),
+      count: listings.filter((listing: any) => String(listing.category || 'SERVICO') === category).length,
+    }));
   }, [listings]);
+  const filterOptions = useMemo(() => [
+    { value: 'TODOS', label: 'Todos', count: places.length + listings.length },
+    { value: 'HOSPEDAGENS', label: 'Hospedagens', count: places.length },
+    ...categoryOptions,
+  ], [places.length, listings.length, categoryOptions]);
   const filteredPlaces = useMemo(
-    () => places.filter((place: any) => itemMatchesSearch(place, searchTerm, [destination.name, destination.city])),
-    [places, searchTerm, destination.name, destination.city]
+    () => {
+      if (!['TODOS', 'HOSPEDAGENS'].includes(activeCategory)) return [];
+      return places.filter((place: any) => itemMatchesSearch(place, searchTerm, [destination.name, destination.city]));
+    },
+    [places, activeCategory, searchTerm, destination.name, destination.city]
   );
   const filteredListings = useMemo(
     () => listings.filter((listing: any) => {
+      if (activeCategory === 'HOSPEDAGENS') return false;
       const categoryMatches = activeCategory === 'TODOS' || String(listing.category || 'SERVICO') === activeCategory;
       return categoryMatches && itemMatchesSearch(listing, searchTerm, [destination.name, destination.city]);
     }),
@@ -105,15 +128,18 @@ export function DestinationDetailPage() {
   );
   const visiblePlaces = filteredPlaces.slice(0, placeLimit);
   const visibleListings = filteredListings.slice(0, listingLimit);
+  const activeFilterLabel = filterOptions.find((option: any) => option.value === activeCategory)?.label || 'Todos';
+  const showPlacesSection = activeCategory === 'TODOS' || activeCategory === 'HOSPEDAGENS';
+  const showListingsSection = activeCategory !== 'HOSPEDAGENS';
   const showcaseSlides = useMemo(() => {
-    const bannerSlides = banners.map((banner: any) => ({
+    const bannerSlides = banners.filter((banner: any) => hasConfiguredAsset(banner)).map((banner: any) => ({
       key: `banner-${banner.id}`,
       title: banner.title || destination.name,
       subtitle: banner.subtitle || destination.description,
       item: banner,
       kind: 'Cidade',
     }));
-    const placeSlides = places.slice(0, 3).map((place: any) => ({
+    const placeSlides = places.filter((place: any) => hasConfiguredAsset(place)).slice(0, 3).map((place: any) => ({
       key: `place-${place.id}`,
       title: place.name,
       subtitle: place.address || place.description || 'Hospedagem em destaque para completar a viagem.',
@@ -168,7 +194,7 @@ export function DestinationDetailPage() {
               <div>
                 <p className="inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-100 ring-1 ring-white/10">
                   <Mountains size={15} weight="duotone" />
-                  {destination.city} - {destination.state}
+                  Destino selecionado · {destination.city} - {destination.state}
                 </p>
                 <h1 className="mt-5 max-w-3xl text-4xl font-black leading-[0.95] tracking-[-0.05em] text-white sm:text-6xl">
                   {destination.heroTitle || destination.name}
@@ -176,20 +202,24 @@ export function DestinationDetailPage() {
                 <p className="mt-5 max-w-2xl text-base font-semibold leading-relaxed text-white/72">
                   {destination.heroSubtitle || destination.description || 'Hospedagens, lojas e experiências cadastradas neste destino.'}
                 </p>
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {['Curadoria Já no Caminho', 'Hospedagens aprovadas', 'Serviços locais'].map((label) => (
-                    <span key={label} className="rounded-full border border-white/12 bg-white/10 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.14em] text-white/82 backdrop-blur">
-                      {label}
-                    </span>
-                  ))}
+                <div className="mt-5 flex flex-wrap gap-2 text-[11px] font-black uppercase tracking-[0.14em] text-white/78">
+                  <span className="rounded-full border border-white/12 bg-white/10 px-3 py-1.5 backdrop-blur">{places.length} hospedagens</span>
+                  <span className="rounded-full border border-white/12 bg-white/10 px-3 py-1.5 backdrop-blur">{listings.length} lugares e serviços</span>
+                  <span className="rounded-full border border-white/12 bg-white/10 px-3 py-1.5 backdrop-blur">{banners.length} destaques</span>
                 </div>
               </div>
               <div className="overflow-hidden rounded-[2rem] border border-white/12 bg-white/10 p-3 shadow-[0_28px_80px_-38px_rgba(0,0,0,0.65)] backdrop-blur">
                 <div className="relative h-64 overflow-hidden rounded-[1.45rem] bg-slate-900">
-                  <img src={asset(currentSlide?.item || heroBanner || destination)} alt={currentSlide?.title || destination.name} className="h-full w-full object-cover transition duration-700" />
+                  {hasConfiguredAsset(currentSlide?.item || heroBanner || destination) ? (
+                    <img src={asset(currentSlide?.item || heroBanner || destination)} alt={currentSlide?.title || destination.name} className="h-full w-full object-cover transition duration-700" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_25%_15%,rgba(16,185,129,0.35),transparent_34%),linear-gradient(135deg,#18384a,#0f172a_62%,#3b2f1c)]">
+                      <Mountains size={72} weight="duotone" className="text-white/40" />
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
                   <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-800">
-                    {currentSlide?.kind || 'Destaque'}
+                    {hasConfiguredAsset(currentSlide?.item) ? currentSlide?.kind || 'Destaque' : 'Destaque editorial'}
                   </div>
                   <div className="absolute bottom-4 left-4 right-4">
                     <p className="text-lg font-black text-white">{currentSlide?.title || heroBanner?.title || destination.name}</p>
@@ -229,7 +259,7 @@ export function DestinationDetailPage() {
                 <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950">Busque hospedagem, restaurante, passeio ou serviço</h2>
               </div>
               <p className="text-xs font-bold text-slate-500">
-                {filteredPlaces.length} hospedagens · {filteredListings.length} serviços filtrados
+                {activeFilterLabel}: {filteredPlaces.length + filteredListings.length} resultado(s)
               </p>
             </div>
             <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
@@ -247,28 +277,25 @@ export function DestinationDetailPage() {
                   </button>
                 ) : null}
               </label>
-              <div className="flex gap-2 overflow-x-auto pb-1 lg:max-w-[520px]">
-                <button
-                  type="button"
-                  onClick={() => setActiveCategory('TODOS')}
-                  className={`shrink-0 rounded-full px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] ${activeCategory === 'TODOS' ? 'bg-[#153A4C] text-white' : 'border border-slate-200 bg-white text-slate-600'}`}
-                >
-                  Todos
-                </button>
-                {categoryOptions.map((category: any) => (
+              <div className="flex gap-2 overflow-x-auto pb-1 lg:max-w-[620px]">
+                {filterOptions.map((category: any) => (
                   <button
                     key={category.value}
                     type="button"
-                    onClick={() => setActiveCategory(category.value)}
+                    onClick={() => {
+                      setActiveCategory(category.value);
+                      if (category.value === 'TODOS') setSearchTerm('');
+                    }}
                     className={`shrink-0 rounded-full px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] ${activeCategory === category.value ? 'bg-[#153A4C] text-white' : 'border border-slate-200 bg-white text-slate-600'}`}
                   >
-                    {category.label}
+                    {category.label} <span className="ml-1 opacity-70">{category.count}</span>
                   </button>
                 ))}
               </div>
             </div>
           </div>
 
+          {showPlacesSection ? (
           <div className="space-y-5">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -308,7 +335,13 @@ export function DestinationDetailPage() {
                   className="group overflow-hidden rounded-[1.45rem] border border-slate-200 bg-white shadow-[0_16px_38px_-32px_rgba(15,23,42,0.5)] transition hover:-translate-y-1"
                 >
                   <Link to={`/destinos/${destination.slug}/chales/${place.slug}`} className="relative block h-32 overflow-hidden bg-slate-100">
-                    <img src={asset(place)} alt={place.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                    {hasConfiguredAsset(place) ? (
+                      <img src={asset(place)} alt={place.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_25%_20%,rgba(51,104,134,0.22),transparent_36%),linear-gradient(135deg,#e9f1ef,#d9e7df)]">
+                        <Bed size={42} weight="duotone" className="text-[#153A4C]/42" />
+                      </div>
+                    )}
                     <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-black text-slate-700">
                       {String(place.type || 'CHALE').replace('_', ' ')}
                     </div>
@@ -354,8 +387,10 @@ export function DestinationDetailPage() {
               </button>
             ) : null}
           </div>
+          ) : null}
 
-          <aside className="space-y-4">
+          {showListingsSection ? (
+          <aside className={showPlacesSection ? 'space-y-4' : 'space-y-4 lg:col-span-2'}>
             <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_-36px_rgba(15,23,42,0.35)]">
               <div className="flex items-center justify-between gap-3">
                 <div>
@@ -379,7 +414,13 @@ export function DestinationDetailPage() {
                   return (
                   <article key={listing.id} className="overflow-hidden rounded-[1.35rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.45)]">
                     <div className="flex gap-3">
-                      <img src={asset(listing, 'image')} alt={listing.title} className="h-14 w-14 rounded-2xl object-cover" />
+                      {hasConfiguredAsset(listing, 'image') ? (
+                        <img src={asset(listing, 'image')} alt={listing.title} className="h-14 w-14 rounded-2xl object-cover" />
+                      ) : (
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-amber-50">
+                          <Sparkle size={23} weight="duotone" className="text-amber-700/70" />
+                        </div>
+                      )}
                       <div className="min-w-0 flex-1">
                         <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[#336886]">{categoryLabel(listing.category)}</p>
                         <h3 className="mt-0.5 line-clamp-1 text-sm font-black text-slate-950">{listing.title}</h3>
@@ -439,6 +480,20 @@ export function DestinationDetailPage() {
               <p className="mt-2 text-sm font-semibold text-white/72">Cadastre sua responsabilidade e aguarde aprovação da plataforma.</p>
             </Link>
           </aside>
+          ) : null}
+
+          {!showListingsSection ? (
+            <aside className="space-y-4">
+              <Link to="/destinos/cadastrar" className="block rounded-[2rem] border border-[#153A4C]/10 bg-[#153A4C] p-5 text-white shadow-[0_18px_50px_-34px_rgba(21,58,76,0.75)]">
+                <p className="inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em]">
+                  <ForkKnife size={14} weight="duotone" />
+                  Participar
+                </p>
+                <h3 className="mt-4 text-xl font-black tracking-[-0.03em]">Tem chalé, pousada ou serviço?</h3>
+                <p className="mt-2 text-sm font-semibold text-white/72">Cadastre sua responsabilidade e aguarde aprovação da plataforma.</p>
+              </Link>
+            </aside>
+          ) : null}
         </section>
       ) : null}
     </main>
