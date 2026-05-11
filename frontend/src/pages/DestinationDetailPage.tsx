@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { ArrowRight, Bed, Buildings, ForkKnife, MagnifyingGlass, MapPinLine, Mountains, Sparkle, Storefront, WhatsappLogo } from '@phosphor-icons/react';
+import { ArrowRight, Bed, ForkKnife, GlobeHemisphereWest, InstagramLogo, MagnifyingGlass, MapPinLine, Mountains, Sparkle, Storefront, WhatsappLogo } from '@phosphor-icons/react';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
@@ -37,6 +37,43 @@ const categoryLabel = (category?: string) => {
   if (key === 'ATRATIVO') return 'Atrativo';
   if (key === 'LOJA') return 'Loja';
   return 'Serviço';
+};
+
+const placeTypeLabel = (value?: string | null) => {
+  const key = String(value || '').toUpperCase();
+  if (key === 'CHALE') return 'Chalé';
+  if (key === 'POUSADA') return 'Pousada';
+  if (key === 'HOTEL') return 'Hotel';
+  if (key === 'CAMPING') return 'Camping';
+  if (key === 'CABANA') return 'Cabana';
+  if (key === 'CASA_TEMPORADA') return 'Casa de temporada';
+  return 'Hospedagem';
+};
+
+const externalUrl = (value?: string | null) => {
+  const url = String(value || '').trim();
+  if (!url) return '';
+  if (/^https?:\/\//i.test(url)) return url;
+  return `https://${url.replace(/^\/+/, '')}`;
+};
+
+const instagramUrl = (value?: string | null) => {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  if (/^https?:\/\//i.test(raw)) return raw;
+  const handle = raw
+    .replace(/^@/, '')
+    .replace(/^www\.instagram\.com\//i, '')
+    .replace(/^instagram\.com\//i, '')
+    .replace(/^\/+/, '');
+  return handle ? `https://instagram.com/${handle}` : '';
+};
+
+const siteLabel = (url?: string | null) => {
+  const normalized = String(url || '').toLowerCase();
+  if (normalized.includes('airbnb')) return 'Airbnb';
+  if (normalized.includes('booking')) return 'Booking';
+  return 'Site';
 };
 
 const categoryToStoreSegment = (category?: string) => {
@@ -188,7 +225,7 @@ export function DestinationDetailPage() {
       subtitle: place.address || place.description || 'Hospedagem em destaque para completar a viagem.',
       item: place,
       placeSlug: place.slug,
-      kind: String(place.type || 'Hospedagem').replace('_', ' '),
+      kind: placeTypeLabel(place.type),
     }));
     const listingSlides = listings.filter((listing: any) => hasConfiguredAsset(listing, 'image')).map((listing: any) => ({
       key: `listing-${listing.id}`,
@@ -209,16 +246,10 @@ export function DestinationDetailPage() {
   }, [banners, places, listings, destination]);
   const currentSlide = showcaseSlides[carouselIndex % Math.max(showcaseSlides.length, 1)];
   const destinationLocationLabel = [destination.city, destination.state].filter(Boolean).join(', ') || destination.name || 'Destino';
-  const destinationHeroImage = hasConfiguredAsset(destination) ? asset(destination) : '';
-  const configuredShowcaseCount =
-    (hasConfiguredAsset(destination) ? 1 : 0) +
-    banners.filter((banner: any) => hasConfiguredAsset(banner)).length +
-    places.filter((place: any) => hasConfiguredAsset(place)).length +
-    listings.filter((listing: any) => hasConfiguredAsset(listing, 'image')).length;
-  const heroStats = [
-    { label: 'Chalés', value: places.length },
-    { label: 'Serviços', value: listings.length },
-    { label: 'Fotos', value: configuredShowcaseCount },
+  const heroHighlights = [
+    'Hospedagens selecionadas',
+    'Comida e serviços locais',
+    'Passeios e dicas da cidade',
   ];
 
   useEffect(() => {
@@ -244,22 +275,28 @@ export function DestinationDetailPage() {
         <div className="absolute -right-20 top-8 h-64 w-64 rounded-full bg-[#336886]/16 blur-3xl" />
         <div className="absolute -left-16 bottom-4 h-56 w-56 rounded-full bg-amber-300/18 blur-3xl" />
         <div className="relative mx-auto max-w-6xl">
-          <Link to="/destinos" className="inline-flex items-center gap-2 rounded-full border border-[#153A4C]/10 bg-white/78 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-[#153A4C] shadow-sm backdrop-blur">
-            <ArrowRight size={14} className="rotate-180" weight="bold" />
-            Destinos
-          </Link>
+          <div className="flex items-center justify-between gap-3">
+            <Link to="/destinos" className="inline-flex items-center gap-2 rounded-full border border-[#153A4C]/10 bg-white/78 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-[#153A4C] shadow-sm backdrop-blur">
+              <ArrowRight size={14} className="rotate-180" weight="bold" />
+              Destinos
+            </Link>
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/82 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#153A4C] shadow-sm">
+              <img src="/janocaminho-logov1.svg" alt="Já no Caminho" className="h-6 w-6 rounded-full bg-white object-cover" />
+              Já no Caminho
+            </div>
+          </div>
 
           {loading ? <p className="mt-8 text-sm font-bold text-slate-500">Carregando destino...</p> : null}
           {error ? <p className="mt-8 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
 
           {!loading && !error ? (
-            <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_380px] lg:items-end">
+            <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_380px] lg:items-end">
               <div>
                 <p className="inline-flex max-w-full items-center gap-2 rounded-full bg-[#153A4C]/8 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-[#153A4C] ring-1 ring-[#153A4C]/10">
                   <Mountains size={15} weight="duotone" />
                   <span>Guia da cidade</span>
                 </p>
-                <h1 className="mt-5 max-w-3xl text-[2.65rem] font-black leading-[0.94] tracking-[-0.055em] text-slate-950 sm:text-6xl">
+                <h1 className="mt-4 max-w-3xl text-[2.35rem] font-black leading-[0.94] tracking-[-0.055em] text-slate-950 sm:text-6xl">
                   {destination.heroTitle || destination.name}
                 </h1>
                 <p className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full border border-slate-200 bg-white/78 px-3 py-1.5 text-xs font-black text-slate-700 shadow-sm">
@@ -269,17 +306,17 @@ export function DestinationDetailPage() {
                 <p className="mt-5 max-w-2xl text-base font-semibold leading-relaxed text-slate-600">
                   {destination.heroSubtitle || destination.description || 'Hospedagens, lojas e experiências cadastradas neste destino.'}
                 </p>
-                <div className="mt-5 grid max-w-[25rem] grid-cols-3 gap-2">
-                  {heroStats.map((stat) => (
-                    <div key={stat.label} className="rounded-[1.15rem] border border-white/80 bg-white/78 px-3 py-3 text-center shadow-[0_18px_42px_-32px_rgba(15,23,42,0.45)] backdrop-blur">
-                      <p className="text-xl font-black leading-none tracking-[-0.04em] text-[#153A4C]">{stat.value}</p>
-                      <p className="mt-1 truncate text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">{stat.label}</p>
-                    </div>
+                <div className="mt-5 flex max-w-2xl flex-wrap gap-2">
+                  {heroHighlights.map((label) => (
+                    <span key={label} className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/78 px-3 py-2 text-[11px] font-black text-[#153A4C] shadow-sm backdrop-blur">
+                      <Sparkle size={13} weight="duotone" />
+                      {label}
+                    </span>
                   ))}
                 </div>
               </div>
               <div className="overflow-hidden rounded-[2rem] border border-white/85 bg-white/86 p-3 shadow-[0_28px_80px_-42px_rgba(15,23,42,0.48)] backdrop-blur">
-                <div className="relative h-64 overflow-hidden rounded-[1.45rem] bg-slate-900">
+                <div className="relative h-52 overflow-hidden rounded-[1.45rem] bg-slate-900 sm:h-64">
                   {hasConfiguredAsset(currentSlide?.item || heroBanner || destination) ? (
                     <img src={asset(currentSlide?.item || heroBanner || destination)} alt={currentSlide?.title || destination.name} className="h-full w-full object-cover transition duration-700" />
                   ) : (
@@ -324,7 +361,7 @@ export function DestinationDetailPage() {
       </section>
 
       {!loading && !error ? (
-        <section className="mx-auto grid max-w-6xl gap-8 px-4 pb-10 pt-8 lg:grid-cols-[1.2fr_0.8fr]">
+        <section className="mx-auto grid max-w-6xl gap-8 px-4 pb-10 pt-5 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="lg:col-span-2 rounded-[2rem] border border-white/80 bg-white/82 p-4 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.36)] backdrop-blur sm:p-5">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
@@ -396,6 +433,8 @@ export function DestinationDetailPage() {
 
             <div className="grid gap-3 sm:grid-cols-2">
               {visiblePlaces.map((place: any) => {
+                const placeWebsiteUrl = externalUrl(place.websiteUrl);
+                const placeInstagramUrl = instagramUrl(place.instagramUrl);
                 const whatsappMessage = buildDestinationInquiryMessage({
                   destinationName: destination.name,
                   city: destination.city,
@@ -417,7 +456,7 @@ export function DestinationDetailPage() {
                       </div>
                     )}
                     <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-black text-slate-700">
-                      {String(place.type || 'CHALE').replace('_', ' ')}
+                      {placeTypeLabel(place.type)}
                     </div>
                   </Link>
                   <div className="p-3.5">
@@ -427,8 +466,8 @@ export function DestinationDetailPage() {
                     <p className="mt-1 line-clamp-2 text-sm font-semibold text-slate-500">{place.description || place.address || 'Hospedagem cadastrada.'}</p>
                     <div className="mt-3 flex flex-wrap items-center gap-2">
                       <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-black text-emerald-700">
-                        <Buildings size={13} weight="duotone" />
-                        {place.storeCount || 0} lojas
+                        <Storefront size={13} weight="duotone" />
+                        Atende hóspedes
                       </span>
                       {place.whatsapp ? (
                         <a
@@ -441,8 +480,20 @@ export function DestinationDetailPage() {
                           Falar
                         </a>
                       ) : null}
+                      {placeInstagramUrl ? (
+                        <a href={placeInstagramUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full bg-pink-50 px-2.5 py-1 text-[11px] font-black text-pink-700">
+                          <InstagramLogo size={12} weight="fill" />
+                          Insta
+                        </a>
+                      ) : null}
+                      {placeWebsiteUrl ? (
+                        <a href={placeWebsiteUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-black text-slate-700">
+                          <GlobeHemisphereWest size={12} weight="duotone" />
+                          {siteLabel(place.websiteUrl)}
+                        </a>
+                      ) : null}
                       <Link to={`/destinos/${destination.slug}/chales/${place.slug}`} className="ml-auto inline-flex items-center gap-1 text-xs font-black text-[#153A4C]">
-                        Abrir
+                        Ver chalé
                         <ArrowRight size={14} weight="bold" />
                       </Link>
                     </div>
@@ -489,6 +540,8 @@ export function DestinationDetailPage() {
                   });
                   const contactHref = isExternalUrl ? contactTarget : buildWhatsAppUrl(contactTarget, whatsappMessage, isNativePlatform);
                   const claimHref = buildListingClaimUrl(destination, listing);
+                  const listingWebsiteUrl = externalUrl(listing.websiteUrl);
+                  const listingInstagramUrl = instagramUrl(listing.instagramUrl);
                   return (
                   <article key={listing.id} className="overflow-hidden rounded-[1.35rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.45)]">
                     <div className="flex gap-3">
@@ -534,7 +587,19 @@ export function DestinationDetailPage() {
                           className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-black ${hasLinkedStore ? 'border border-emerald-100 bg-white text-emerald-700' : 'bg-emerald-600 text-white'}`}
                         >
                           <WhatsappLogo size={13} weight="fill" />
-                          {hasLinkedStore ? 'WhatsApp' : 'Pedir informações'}
+                          {hasLinkedStore ? 'WhatsApp' : 'Chamar no WhatsApp'}
+                        </a>
+                      ) : null}
+                      {listingInstagramUrl ? (
+                        <a href={listingInstagramUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-pink-100 bg-pink-50 px-3 py-1.5 text-[11px] font-black text-pink-700">
+                          <InstagramLogo size={13} weight="fill" />
+                          Instagram
+                        </a>
+                      ) : null}
+                      {listingWebsiteUrl ? (
+                        <a href={listingWebsiteUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-black text-slate-700">
+                          <GlobeHemisphereWest size={13} weight="duotone" />
+                          {siteLabel(listing.websiteUrl)}
                         </a>
                       ) : null}
                       {!hasLinkedStore ? (
@@ -543,7 +608,7 @@ export function DestinationDetailPage() {
                           className="inline-flex items-center gap-1 rounded-full border border-[#153A4C]/15 bg-white px-3 py-1.5 text-[11px] font-black text-[#153A4C]"
                         >
                           <Storefront size={13} weight="duotone" />
-                          Ativar pedidos
+                          Receber pedidos pelo app
                         </Link>
                       ) : null}
                       {listing.address ? (
