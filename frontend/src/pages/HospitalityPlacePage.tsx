@@ -44,6 +44,7 @@ export function HospitalityPlacePage() {
   const stores = Array.isArray(payload?.stores) ? payload.stores : [];
   const listings = Array.isArray(payload?.listings) ? payload.listings : [];
   const isNativePlatform = Capacitor.isNativePlatform();
+  const destinationLocationLabel = [destination.city, destination.state].filter(Boolean).join(', ') || destination.name || 'Destino';
 
   return (
     <main className="min-h-screen bg-[#f4f1ea] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
@@ -61,11 +62,15 @@ export function HospitalityPlacePage() {
           {error ? <p className="mt-8 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
           {!loading && !error ? (
             <div className="mt-10 max-w-3xl">
-              <p className="inline-flex items-center gap-2 rounded-full bg-emerald-400/16 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-100 ring-1 ring-emerald-200/15">
+              <p className="inline-flex max-w-full items-center gap-2 rounded-full bg-emerald-400/16 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-emerald-100 ring-1 ring-emerald-200/15">
                 <Bed size={15} weight="duotone" />
-                {destination.name}
+                <span>Hospedagem</span>
               </p>
-              <h1 className="mt-5 text-4xl font-black leading-[0.95] tracking-[-0.05em] sm:text-6xl">{place.name}</h1>
+              <h1 className="mt-5 text-[2.65rem] font-black leading-[0.94] tracking-[-0.055em] sm:text-6xl">{place.name}</h1>
+              <p className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-black text-white/82 ring-1 ring-white/10">
+                <MapPinLine size={15} weight="duotone" className="shrink-0 text-emerald-100" />
+                <span className="truncate">{destinationLocationLabel}</span>
+              </p>
               <p className="mt-5 max-w-2xl text-base font-semibold leading-relaxed text-white/76">
                 {place.description || place.deliveryInstructions || 'Hospedagem cadastrada no Já no Caminho.'}
               </p>

@@ -227,7 +227,7 @@ export function NativeAppNavigator() {
           }`}>
             <Buildings size={18} weight={isCondominium ? 'fill' : 'duotone'} />
           </span>
-          Condo
+          Agenda
         </button>
         <button
           type="button"

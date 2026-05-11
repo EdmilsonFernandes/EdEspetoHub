@@ -1720,7 +1720,7 @@ export function ClientOrders() {
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
               <Buildings size={18} weight="duotone" />
             </span>
-            <span>Condo</span>
+            <span>Agenda</span>
           </button>
           <button
             type="button"

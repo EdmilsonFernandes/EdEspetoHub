@@ -4325,7 +4325,7 @@ export function StorePage() {
                 }`}>
                   <Buildings size={18} weight={condominiumSlugFromQuery ? 'fill' : 'duotone'} />
                 </span>
-                Condo
+                Agenda
               </button>
 
               <button

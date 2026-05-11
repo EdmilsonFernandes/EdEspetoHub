@@ -146,7 +146,7 @@ export function DestinationDetailPage() {
       item: banner,
       kind: 'Cidade',
     }));
-    const placeSlides = places.filter((place: any) => hasConfiguredAsset(place)).slice(0, 3).map((place: any) => ({
+    const placeSlides = places.filter((place: any) => hasConfiguredAsset(place)).map((place: any) => ({
       key: `place-${place.id}`,
       title: place.name,
       subtitle: place.address || place.description || 'Hospedagem em destaque para completar a viagem.',
@@ -172,6 +172,18 @@ export function DestinationDetailPage() {
         }];
   }, [banners, places, listings, destination]);
   const currentSlide = showcaseSlides[carouselIndex % Math.max(showcaseSlides.length, 1)];
+  const destinationLocationLabel = [destination.city, destination.state].filter(Boolean).join(', ') || destination.name || 'Destino';
+  const destinationHeroImage = hasConfiguredAsset(destination) ? asset(destination) : '';
+  const configuredShowcaseCount =
+    (hasConfiguredAsset(destination) ? 1 : 0) +
+    banners.filter((banner: any) => hasConfiguredAsset(banner)).length +
+    places.filter((place: any) => hasConfiguredAsset(place)).length +
+    listings.filter((listing: any) => hasConfiguredAsset(listing, 'image')).length;
+  const heroStats = [
+    { label: 'Chalés', value: places.length },
+    { label: 'Serviços', value: listings.length },
+    { label: 'Fotos', value: configuredShowcaseCount },
+  ];
 
   useEffect(() => {
     setPlaceLimit(6);
@@ -193,7 +205,11 @@ export function DestinationDetailPage() {
   return (
     <main className="min-h-screen bg-[#f6f2e9] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
       <section className="relative overflow-hidden px-4 pb-8 pt-[max(1rem,env(safe-area-inset-top))]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(16,185,129,0.18),transparent_32%),linear-gradient(135deg,#17394b,#0f172a_64%,#332315)]" />
+        <div className="absolute inset-0 bg-[#0f172a]" />
+        {destinationHeroImage ? (
+          <img src={destinationHeroImage} alt={destination.name || destination.city || 'Destino'} className="absolute inset-0 h-full w-full object-cover opacity-45" />
+        ) : null}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(16,185,129,0.20),transparent_32%),linear-gradient(135deg,rgba(23,57,75,0.92),rgba(15,23,42,0.88)_64%,rgba(51,35,21,0.82))]" />
         <div className="relative mx-auto max-w-6xl">
           <Link to="/destinos" className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-white ring-1 ring-white/15">
             <ArrowRight size={14} className="rotate-180" weight="bold" />
@@ -206,20 +222,27 @@ export function DestinationDetailPage() {
           {!loading && !error ? (
             <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_380px] lg:items-end">
               <div>
-                <p className="inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-100 ring-1 ring-white/10">
+                <p className="inline-flex max-w-full items-center gap-2 rounded-full bg-white/12 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-emerald-100 ring-1 ring-white/10">
                   <Mountains size={15} weight="duotone" />
-                  Destino selecionado · {destination.city} - {destination.state}
+                  <span>Destino</span>
                 </p>
-                <h1 className="mt-5 max-w-3xl text-4xl font-black leading-[0.95] tracking-[-0.05em] text-white sm:text-6xl">
+                <h1 className="mt-5 max-w-3xl text-[2.65rem] font-black leading-[0.94] tracking-[-0.055em] text-white sm:text-6xl">
                   {destination.heroTitle || destination.name}
                 </h1>
+                <p className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-black text-white/82 ring-1 ring-white/10">
+                  <MapPinLine size={15} weight="duotone" className="shrink-0 text-emerald-100" />
+                  <span className="truncate">{destinationLocationLabel}</span>
+                </p>
                 <p className="mt-5 max-w-2xl text-base font-semibold leading-relaxed text-white/72">
                   {destination.heroSubtitle || destination.description || 'Hospedagens, lojas e experiências cadastradas neste destino.'}
                 </p>
-                <div className="mt-5 flex flex-wrap gap-2 text-[11px] font-black uppercase tracking-[0.14em] text-white/78">
-                  <span className="rounded-full border border-white/12 bg-white/10 px-3 py-1.5 backdrop-blur">{places.length} hospedagens</span>
-                  <span className="rounded-full border border-white/12 bg-white/10 px-3 py-1.5 backdrop-blur">{listings.length} lugares e serviços</span>
-                  <span className="rounded-full border border-white/12 bg-white/10 px-3 py-1.5 backdrop-blur">{banners.length} destaques</span>
+                <div className="mt-5 grid max-w-[25rem] grid-cols-3 gap-2 text-white">
+                  {heroStats.map((stat) => (
+                    <div key={stat.label} className="rounded-[1.15rem] border border-white/12 bg-white/10 px-3 py-3 text-center shadow-[0_18px_42px_-32px_rgba(0,0,0,0.65)] backdrop-blur">
+                      <p className="text-xl font-black leading-none tracking-[-0.04em]">{stat.value}</p>
+                      <p className="mt-1 truncate text-[10px] font-black uppercase tracking-[0.14em] text-white/68">{stat.label}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
               <div className="overflow-hidden rounded-[2rem] border border-white/12 bg-white/10 p-3 shadow-[0_28px_80px_-38px_rgba(0,0,0,0.65)] backdrop-blur">
@@ -303,9 +326,10 @@ export function DestinationDetailPage() {
                       setActiveCategory(category.value);
                       if (category.value === 'TODOS') setSearchTerm('');
                     }}
-                    className={`shrink-0 rounded-full px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] ${activeCategory === category.value ? 'bg-[#153A4C] text-white' : 'border border-slate-200 bg-white text-slate-600'}`}
+                    className={`inline-flex min-h-10 shrink-0 items-center gap-2 rounded-full px-3 py-2 text-[11px] font-black uppercase tracking-[0.08em] shadow-sm transition ${activeCategory === category.value ? 'bg-[#153A4C] text-white shadow-[0_16px_28px_-20px_rgba(21,58,76,0.72)]' : 'border border-slate-200 bg-white text-slate-600 hover:border-[#336886]/30 hover:text-[#153A4C]'}`}
                   >
-                    {category.label} <span className="ml-1 opacity-70">{category.count}</span>
+                    <span className="max-w-[7.25rem] truncate">{category.label}</span>
+                    <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${activeCategory === category.value ? 'bg-white/16 text-white/80' : 'bg-slate-100 text-slate-500'}`}>{category.count}</span>
                   </button>
                 ))}
               </div>
