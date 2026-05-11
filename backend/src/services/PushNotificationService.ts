@@ -799,6 +799,15 @@ export class PushNotificationService {
   }
 
   /**
+   * Dispatches operational/security alerts to store owner and active store users.
+   *
+   * @author Edmilson Lopes
+   */
+  async notifyStoreUsersSecurityAlert(storeId: string, payload: CustomerPushPayload) {
+    return this.dispatchStoreUsersPayload(storeId, payload, 'security_alert');
+  }
+
+  /**
    * Sends one payload to all active store-user tokens for a store.
    *
    * @author Edmilson Lopes
@@ -806,7 +815,7 @@ export class PushNotificationService {
   private async dispatchStoreUsersPayload(
     storeId: string,
     payload: CustomerPushPayload,
-    topic: 'new_online_order' | 'order_delivered'
+    topic: 'new_online_order' | 'order_delivered' | 'security_alert'
   ) {
     const normalizedStoreId = String(storeId || '').trim();
     if (!normalizedStoreId) return { ok: false, sent: 0, skipped: true };

@@ -19,6 +19,7 @@ import { isAllowlistedEmail, isDisposableEmailDomain } from '../utils/emailRisk'
 import { CustomerSecurityService } from './CustomerSecurityService';
 import { GeoLocationService } from './GeoLocationService';
 import { buildOrderTimelineJson } from '../utils/orderTimeline';
+import { AuditNotificationService } from './AuditNotificationService';
 
 type AddressInput = {
   label?: string;
@@ -44,6 +45,7 @@ export class CustomerAccountService {
   private zipCodeLookupService = new ZipCodeLookupService();
   private securityService = new CustomerSecurityService();
   private geoLocationService = new GeoLocationService();
+  private auditNotificationService = new AuditNotificationService();
   private log = logger.child({ scope: 'CustomerAccountService' });
     /**
    * Executes normalize email business logic.
@@ -1278,15 +1280,13 @@ async setDefaultAddress(userId: string, addressId: string) {
   }
 
   private async notifySignupAdmin(user: { fullName?: string | null; email: string }) {
-    const raw = env.email.notifyOnSignup || '';
-    const emails = raw.split(',').map((e: string) => e.trim()).filter(Boolean);
-    if (!emails.length) return;
-    await this.emailService.sendSignupNotification({
-      emails,
-      type: 'cliente',
-      ownerName: user.fullName || user.email,
-      ownerEmail: user.email,
-      createdAt: new Date(),
+    await this.auditNotificationService.notifyUserCreated({
+      accountType: 'cliente',
+      user: {
+        fullName: user.fullName || user.email,
+        email: user.email,
+        role: 'CUSTOMER',
+      },
     });
   }
 }

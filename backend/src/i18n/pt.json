@@ -85,6 +85,8 @@
   "MOTO-032": "Para moto, a categoria da CNH deve incluir a letra A.",
   "MOTO-033": "A chave PIX deve ser um CPF válido do entregador.",
   "MOTO-034": "A chave PIX precisa ser o mesmo CPF cadastrado no perfil do entregador.",
+  "MOTO-035": "O codigo de entrega foi bloqueado apos 3 tentativas.",
+  "MOTO-036": "O valor recebido nao pode ser menor que o total do pedido.",
   "REVIEW-003": "Este pedido não possui gorjeta para repasse.",
   "REVIEW-004": "A gorjeta ainda não foi paga pelo cliente.",
   "REVIEW-005": "Esta gorjeta já foi recebida diretamente pelo entregador."

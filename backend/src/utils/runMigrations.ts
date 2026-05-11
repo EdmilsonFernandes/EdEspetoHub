@@ -2097,6 +2097,17 @@ export async function runMigrations() {
     ALTER TABLE order_deliveries ADD COLUMN IF NOT EXISTS confirmation_code VARCHAR(4) DEFAULT NULL;
   `);
   await AppDataSource.query(`
+    ALTER TABLE order_deliveries ADD COLUMN IF NOT EXISTS confirmation_code_attempts INT NOT NULL DEFAULT 0;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE order_deliveries ADD COLUMN IF NOT EXISTS confirmation_code_blocked_at TIMESTAMPTZ;
+  `);
+  await AppDataSource.query(`
+    UPDATE order_deliveries
+    SET confirmation_code_attempts = COALESCE(confirmation_code_attempts, 0)
+    WHERE confirmation_code_attempts IS NULL;
+  `);
+  await AppDataSource.query(`
     ALTER TABLE users ADD COLUMN IF NOT EXISTS username TEXT;
   `);
   await AppDataSource.query(`

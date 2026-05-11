@@ -54,6 +54,7 @@ export function MotoboyCurrent() {
   const [showCodeModal, setShowCodeModal] = useState(false);
   const [deliveryCode, setDeliveryCode] = useState('');
   const [codeError, setCodeError] = useState('');
+  const [codeLocked, setCodeLocked] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -255,6 +256,7 @@ export function MotoboyCurrent() {
         setFinalizeAfterPayment(false);
         setDeliveryCode('');
         setCodeError('');
+        setCodeLocked(false);
         setShowCodeModal(true);
       }
       setFinalizeAfterPayment(false);
@@ -286,6 +288,7 @@ export function MotoboyCurrent() {
       }
       setDeliveryCode('');
       setCodeError('');
+      setCodeLocked(false);
       setShowCodeModal(true);
     } catch (error: any) {
       showToast(error?.message || 'Nao foi possivel abrir a confirmacao.', 'error');
@@ -311,6 +314,8 @@ export function MotoboyCurrent() {
         },
       });
     } catch (error: any) {
+      const blocked = Boolean(error?.details?.blocked) || String(error?.code || '') === 'MOTO-035';
+      setCodeLocked(blocked);
       setCodeError(error?.details?.message || error?.message || 'Codigo incorreto. Tente novamente.');
     }
   };
@@ -619,17 +624,19 @@ export function MotoboyCurrent() {
               maxLength={4}
               value={deliveryCode}
               onChange={(event) => {
+                if (codeLocked) return;
                 setDeliveryCode(event.target.value.replace(/\D/g, '').slice(0, 4));
                 setCodeError('');
               }}
               placeholder="0000"
-              className="mt-4 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-center text-2xl font-black tracking-[0.5em] text-slate-900 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              disabled={codeLocked}
+              className="mt-4 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-center text-2xl font-black tracking-[0.5em] text-slate-900 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-100 disabled:cursor-not-allowed disabled:opacity-60"
               autoFocus
             />
             {codeError ? <p className="mt-2 text-center text-xs font-semibold text-rose-600">{codeError}</p> : null}
             <div className="mt-5 flex gap-2">
               <button type="button" onClick={() => setShowCodeModal(false)} className="flex-1 rounded-2xl border border-slate-200 bg-white py-3 text-sm font-bold text-slate-700 active:scale-95">Cancelar</button>
-              <button type="button" onClick={confirmDeliveryWithCode} disabled={deliveryCode.length < 4} className="flex-1 rounded-2xl bg-indigo-600 py-3 text-sm font-bold text-white disabled:opacity-50 active:scale-95">Confirmar</button>
+              <button type="button" onClick={confirmDeliveryWithCode} disabled={codeLocked || deliveryCode.length < 4} className="flex-1 rounded-2xl bg-indigo-600 py-3 text-sm font-bold text-white disabled:opacity-50 active:scale-95">{codeLocked ? 'Bloqueado' : 'Confirmar'}</button>
             </div>
           </div>
         </div>

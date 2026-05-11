@@ -774,4 +774,43 @@ private renderTemplate(template: string, vars: Record<string, string>) {
     `;
     await this.send({ to: payload.email, subject, text, html });
   }
+
+  async sendStoreDeliveryCodeLockAlert(payload: {
+    to: string;
+    storeName: string;
+    orderId: string;
+    customerName?: string | null;
+    motoboyName?: string | null;
+    attempts: number;
+  }) {
+    const adminUrl = `${env.appUrl.replace(/\/$/, '')}/admin/queue`;
+    const orderDisplayId = `#${String(payload.orderId || '').slice(0, 8)}`;
+    const subject = `Alerta de seguranca na entrega - ${payload.storeName}`;
+    const text = [
+      `A entrega ${orderDisplayId} foi bloqueada apos ${payload.attempts} tentativas invalidas do codigo de confirmacao.`,
+      `Loja: ${payload.storeName}`,
+      `Cliente: ${payload.customerName || '-'}`,
+      `Entregador: ${payload.motoboyName || '-'}`,
+      '',
+      'Oriente o entregador a entrar em contato com a loja antes de concluir o pedido.',
+      `Painel: ${adminUrl}`,
+    ].join('\n');
+    const html = `
+      <div style="font-family: Arial, sans-serif; background: #f8fafc; padding: 24px;">
+        <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 22px;">
+          <p style="margin: 0 0 8px; color: #b91c1c; font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;">Seguranca da entrega</p>
+          <h2 style="margin: 0 0 12px; color: #0f172a;">Codigo bloqueado apos ${payload.attempts} tentativas</h2>
+          <p style="margin: 0 0 16px; color: #475569; line-height: 1.6;">A entrega <strong>${orderDisplayId}</strong> precisa de atencao manual antes da conclusao.</p>
+          <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 14px; padding: 16px; color: #0f172a; line-height: 1.8;">
+            <div><strong>Loja:</strong> ${payload.storeName}</div>
+            <div><strong>Cliente:</strong> ${payload.customerName || '-'}</div>
+            <div><strong>Entregador:</strong> ${payload.motoboyName || '-'}</div>
+            <div><strong>Tentativas:</strong> ${payload.attempts}</div>
+          </div>
+          <a href="${adminUrl}" style="display: inline-block; margin-top: 18px; padding: 12px 18px; background: #b91c1c; color: #ffffff; text-decoration: none; border-radius: 12px; font-weight: 700;">Abrir fila da loja</a>
+        </div>
+      </div>
+    `;
+    await this.send({ to: payload.to, subject, text, html });
+  }
 }

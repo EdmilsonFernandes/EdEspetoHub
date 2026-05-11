@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { formatCurrency } from '../../utils/format';
 
 type Props = {
@@ -27,6 +27,11 @@ export function ConfirmPaymentModal({
   const isCash = normalizedMethod === 'cash' || normalizedMethod === 'dinheiro';
   const isPix = normalizedMethod === 'pix';
 
+  useEffect(() => {
+    if (!isOpen) return;
+    setCashValue('');
+  }, [defaultCashTendered, isOpen]);
+
   if (!isOpen) return null;
 
   const totalValue = Number(amount || 0);
@@ -37,6 +42,24 @@ export function ConfirmPaymentModal({
   const informedCash = defaultCashTendered !== undefined && defaultCashTendered !== null ? Number(defaultCashTendered) : null;
   const changeDue =
     informedCash !== null && Number.isFinite(informedCash) && informedCash > totalValue ? informedCash - totalValue : 0;
+  const hasTypedCash = cashValue.trim().length > 0;
+  const typedCashValue = Number(cashValue.trim().replace(',', '.'));
+  const hasValidTypedCash = hasTypedCash && Number.isFinite(typedCashValue);
+  const effectiveCashValue = !isCash
+    ? null
+    : hasTypedCash
+      ? (hasValidTypedCash ? typedCashValue : null)
+      : informedCash !== null && Number.isFinite(informedCash)
+        ? informedCash
+        : null;
+  const effectiveChange = effectiveCashValue !== null ? effectiveCashValue - totalValue : null;
+  const cashConfirmDisabled =
+    isCash &&
+    (
+      effectiveCashValue === null ||
+      !Number.isFinite(Number(effectiveCashValue)) ||
+      Number(effectiveCashValue) < totalValue
+    );
 
   const copyText = async (text: string) => {
     try {
@@ -59,13 +82,8 @@ export function ConfirmPaymentModal({
 
   const handleConfirm = () => {
     if (isCash) {
-      const raw = cashValue.trim();
-      if (!raw && informedCash !== null && Number.isFinite(informedCash)) {
-        onConfirm(informedCash);
-        return;
-      }
-      const parsed = Number(raw.replace(',', '.'));
-      onConfirm(Number.isFinite(parsed as number) ? (parsed as number) : null);
+      if (cashConfirmDisabled) return;
+      onConfirm(effectiveCashValue);
       return;
     }
     onConfirm(null);
@@ -166,13 +184,34 @@ export function ConfirmPaymentModal({
               placeholder="0,00"
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-primary"
             />
-            {(() => {
-              const parsed = Number(cashValue.trim().replace(",", "."));
-              if (!cashValue.trim() || !Number.isFinite(parsed)) return null;
-              if (parsed < totalValue) return <p className="text-[11px] font-semibold text-rose-600 mt-1">⚠️ Valor menor que o total do pedido ({formatCurrency(totalValue)})</p>;
-              if (parsed > totalValue) return <p className="text-[11px] font-semibold text-emerald-700 mt-1">Troco: {formatCurrency(parsed - totalValue)}</p>;
-              return <p className="text-[11px] font-semibold text-emerald-700 mt-1">✓ Valor exato</p>;
-            })()}
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-[11px] text-slate-700">
+              <p className="font-extrabold uppercase tracking-[0.18em] text-slate-500">Calculo em tempo real</p>
+              {effectiveCashValue !== null ? (
+                <>
+                  <p className="mt-2 font-semibold">
+                    Troco = Valor Recebido - Valor do Pedido
+                  </p>
+                  <p className="mt-1 font-black text-slate-900">
+                    {formatCurrency(effectiveCashValue)} - {formatCurrency(totalValue)} = {formatCurrency(effectiveChange || 0)}
+                  </p>
+                  {Number(effectiveCashValue) < totalValue ? (
+                    <p className="mt-2 font-semibold text-rose-600">
+                      Valor insuficiente. Informe um valor igual ou maior que {formatCurrency(totalValue)}.
+                    </p>
+                  ) : Number(effectiveCashValue) > totalValue ? (
+                    <p className="mt-2 font-semibold text-emerald-700">
+                      Troco devido: {formatCurrency(effectiveChange || 0)}
+                    </p>
+                  ) : (
+                    <p className="mt-2 font-semibold text-emerald-700">Valor exato recebido.</p>
+                  )}
+                </>
+              ) : hasTypedCash ? (
+                <p className="mt-2 font-semibold text-rose-600">Informe um valor valido em dinheiro.</p>
+              ) : (
+                <p className="mt-2 text-slate-500">Preencha o valor recebido para validar o troco antes de confirmar.</p>
+              )}
+            </div>
             {informedCash !== null && Number.isFinite(informedCash) && (
               <p className="text-[11px] text-slate-500">
                 Dica: pode deixar vazio e só confirmar para usar o valor informado pelo cliente.
@@ -192,7 +231,8 @@ export function ConfirmPaymentModal({
           <button
             type="button"
             onClick={handleConfirm}
-            className="btn-press flex-1 rounded-xl bg-[linear-gradient(120deg,#16a34a,#059669)] px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(5,150,105,0.6)]"
+            disabled={Boolean(cashConfirmDisabled)}
+            className="btn-press flex-1 rounded-xl bg-[linear-gradient(120deg,#16a34a,#059669)] px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(5,150,105,0.6)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             Confirmar
           </button>

@@ -44,6 +44,7 @@ import { resolvePlanFeatures, resolvePlanTier } from '../config/planFeatures';
 import { StoreUserRepository } from '../repositories/StoreUserRepository';
 import { isAllowlistedEmail, isDisposableEmailDomain } from '../utils/emailRisk';
 import { CustomerSecurityService } from './CustomerSecurityService';
+import { AuditNotificationService } from './AuditNotificationService';
 /**
  * Provides AuthService functionality.
  *
@@ -62,6 +63,7 @@ export class AuthService
   private settingsService = new SettingsService();
   private storeUserRepository = new StoreUserRepository();
   private securityService = new CustomerSecurityService();
+  private auditNotificationService = new AuditNotificationService();
 
     /**
    * Executes normalize phone business logic.
@@ -1413,34 +1415,36 @@ async changePassword(userId: string, currentPassword: string, newPassword: strin
    * @date 2025-12-17
    */
   private async notifySignup(user: User, store: Store, acquisitionAttribution?: Record<string, unknown> | null) {
-    const raw = env.email.notifyOnSignup || '';
-    const emails = raw
-      .split(',')
-      .map((entry) => entry.trim())
-      .filter(Boolean);
-    if (!emails.length) return;
-    await this.emailService.sendSignupNotification({
-      emails,
-      type: 'lojista',
-      storeName: store.name,
-      ownerName: user.fullName,
-      ownerEmail: user.email,
-      slug: store.slug,
-      createdAt: new Date(),
-      acquisitionAttribution: acquisitionAttribution || null,
+    await this.auditNotificationService.notifyUserCreated({
+      accountType: 'lojista',
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone,
+        role: user.userRole,
+      },
+      store: {
+        id: store.id,
+        name: store.name,
+        slug: store.slug,
+      },
+      metadata: acquisitionAttribution || null,
     });
   }
 
   private async notifySignupAdmin({ type, user }: { type: 'lojista' | 'motoboy' | 'cliente'; user: User }) {
-    const raw = env.email.notifyOnSignup || '';
-    const emails = raw.split(',').map((e) => e.trim()).filter(Boolean);
-    if (!emails.length) return;
-    await this.emailService.sendSignupNotification({
-      emails,
-      type,
-      ownerName: user.fullName || user.email,
-      ownerEmail: user.email,
-      createdAt: new Date(),
+    const accountType = type === 'lojista' ? 'lojista' : type === 'cliente' ? 'cliente' : 'motoboy';
+    await this.auditNotificationService.notifyUserCreated({
+      accountType,
+      user: {
+        id: user.id,
+        fullName: user.fullName || user.email,
+        email: user.email,
+        phone: user.phone,
+        username: user.username || null,
+        role: user.userRole,
+      },
     });
   }
 

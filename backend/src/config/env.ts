@@ -128,6 +128,7 @@ export const env = {
     smtpPass: process.env.SMTP_PASS || '',
     smtpSecure: process.env.SMTP_SECURE === 'true',
     notifyOnSignup: process.env.NOTIFY_ON_SIGNUP_EMAILS || '',
+    auditInbox: process.env.AUDIT_NOTIFICATION_EMAIL || 'edmls2008@gmail.com',
   },
   database: {
     host: process.env.PGHOST || 'localhost',

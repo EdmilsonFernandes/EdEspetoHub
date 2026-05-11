@@ -33,6 +33,7 @@ import { StorePaymentAccountService } from './StorePaymentAccountService';
 import { MotoboyPaymentAccountService } from './MotoboyPaymentAccountService';
 import { PaymentAuditService } from './PaymentAuditService';
 import { PAYMENT_AUDIT_ENTITY, PAYMENT_AUDIT_FLOW, PAYMENT_AUDIT_STAGE } from '../utils/paymentAudit';
+import { AuditNotificationService } from './AuditNotificationService';
 /**
  * Provides PaymentService functionality.
  *
@@ -50,6 +51,7 @@ export class PaymentService {
   private accountService = new StorePaymentAccountService();
   private motoboyPaymentAccountService = new MotoboyPaymentAccountService();
   private paymentAuditService = new PaymentAuditService();
+  private auditNotificationService = new AuditNotificationService();
   private log = logger.child({ scope: 'PaymentService' });
   /**
    * Normalizes QR payload to Data URL format for consistent client rendering.
@@ -123,6 +125,72 @@ private resolvePlanChargeAmount(plan: Plan) {
    */
   private async sendActivationEmail(email: string, slug: string) {
     await this.emailService.sendActivationEmail(email, slug);
+  }
+
+  private async notifySubscriptionCreated(payment: Payment, data: {
+    user: User;
+    store: Store;
+    subscription: Subscription;
+    plan: Plan;
+  }) {
+    await this.auditNotificationService.notifySubscriptionEvent({
+      stage: 'created',
+      user: {
+        id: data.user.id,
+        fullName: data.user.fullName,
+        email: data.user.email,
+        phone: data.user.phone,
+        role: data.user.userRole,
+      },
+      store: {
+        id: data.store.id,
+        name: data.store.name,
+        slug: data.store.slug,
+      },
+      subscription: {
+        paymentId: payment.id,
+        subscriptionId: data.subscription.id,
+        planName: data.plan.displayName || data.plan.name,
+        status: payment.status,
+        paymentMethod: payment.method,
+        provider: payment.provider,
+        amount: Number(payment.amount || 0),
+      },
+      metadata: {
+        paymentLink: payment.paymentLink || null,
+        providerId: payment.providerId || null,
+      },
+    });
+  }
+
+  private async notifySubscriptionConfirmed(payment: Payment) {
+    await this.auditNotificationService.notifySubscriptionEvent({
+      stage: 'confirmed',
+      user: {
+        id: payment.user?.id,
+        fullName: payment.user?.fullName,
+        email: payment.user?.email,
+        phone: payment.user?.phone,
+        role: payment.user?.userRole,
+      },
+      store: {
+        id: payment.store?.id,
+        name: payment.store?.name,
+        slug: payment.store?.slug,
+      },
+      subscription: {
+        paymentId: payment.id,
+        subscriptionId: payment.subscription?.id,
+        planName: payment.subscription?.plan?.displayName || payment.subscription?.plan?.name || null,
+        status: payment.subscription?.status || payment.status,
+        paymentMethod: payment.method,
+        provider: payment.provider,
+        amount: Number(payment.amount || 0),
+      },
+      metadata: {
+        providerId: payment.providerId || null,
+      },
+    });
   }
 
 
@@ -222,6 +290,7 @@ private resolvePlanChargeAmount(plan: Plan) {
         }
 
         await paymentRepo.save(payment);
+        await this.notifySubscriptionCreated(payment, data);
         return payment;
       } catch (error) {
         this.log.warn('Mercado Pago failed, using fallback', { error });
@@ -237,6 +306,7 @@ private resolvePlanChargeAmount(plan: Plan) {
       await paymentRepo.save(payment);
     }
 
+    await this.notifySubscriptionCreated(payment, data);
     return payment;
   }
 
@@ -291,6 +361,7 @@ private resolvePlanChargeAmount(plan: Plan) {
       await manager.save(store);
       await manager.save(payment);
       await this.sendActivationEmail(payment.user.email, store.slug);
+      await this.notifySubscriptionConfirmed(payment);
       this.log.info('Payment confirmed', {
         paymentId,
         storeId: store.id,

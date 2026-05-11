@@ -24,6 +24,8 @@ import { DeliveryBillingService } from './DeliveryBillingService';
 import { deliveryService } from './DeliveryService';
 import { appendOrderTimelineEntry } from '../utils/orderTimeline';
 import { User } from '../entities/User';
+import { EmailService } from './EmailService';
+import { PushNotificationService } from './PushNotificationService';
 /**
  * Provides MotoboyOrderService functionality.
  *
@@ -35,6 +37,8 @@ export class MotoboyOrderService {
   private orderDeliveryRepository = new OrderDeliveryRepository();
   private motoboyStoreRepository = new MotoboyStoreRepository();
   private deliveryBillingService = new DeliveryBillingService();
+  private emailService = new EmailService();
+  private pushService = new PushNotificationService();
   private tz = process.env.APP_TZ || 'America/Sao_Paulo';
   private log = logger.child({ scope: 'MotoboyOrderService' });
 
@@ -45,6 +49,71 @@ export class MotoboyOrderService {
    */
 private isDeliveryOrder(order: Order) {
     return order.type === 'delivery';
+  }
+
+  private isCashPaymentMethod(value?: string | null) {
+    const normalized = String(value || '').trim().toLowerCase();
+    return normalized === 'cash' || normalized === 'dinheiro';
+  }
+
+  private formatCurrency(value?: number | null) {
+    const amount = Number(value || 0);
+    return amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+
+  private formatOrderDisplayId(orderId: string) {
+    return `#${String(orderId || '').slice(0, 8)}`;
+  }
+
+  private async notifyStoreDeliveryCodeBlocked(order: Order, motoboy: Motoboy, attempts: number) {
+    const storeId = String(order?.store?.id || '').trim();
+    const storeName = String(order?.store?.name || 'Loja').trim();
+    const ownerEmail = String(order?.store?.owner?.email || '').trim().toLowerCase();
+    const contactEmail = String(order?.store?.settings?.contactEmail || '').trim().toLowerCase();
+    const recipients = Array.from(new Set([ownerEmail, contactEmail].filter(Boolean)));
+    const orderDisplayId = this.formatOrderDisplayId(order.id);
+    const motoboyName = String(motoboy?.user?.fullName || '').trim() || 'Entregador';
+    const customerName = String(order?.customerName || '').trim() || 'Cliente';
+
+    await Promise.all(
+      recipients.map((recipient) =>
+        this.emailService.sendStoreDeliveryCodeLockAlert({
+          to: recipient,
+          storeName,
+          orderId: order.id,
+          customerName,
+          motoboyName,
+          attempts,
+        })
+      )
+    ).catch((error) => {
+      this.log.warn('Store email alert failed after delivery code lock', {
+        storeId,
+        orderId: order.id,
+        error,
+      });
+    });
+
+    if (storeId) {
+      await this.pushService
+        .notifyStoreUsersSecurityAlert(storeId, {
+          title: 'CODIGO BLOQUEADO',
+          body: `${motoboyName} bloqueou a entrega ${orderDisplayId} apos ${attempts} tentativas invalidas.`,
+          data: {
+            url: 'https://janocaminho.com.br/admin/queue',
+            orderId: String(order.id),
+            notificationType: 'delivery_code_locked',
+            motoboyId: String(motoboy.id || ''),
+          },
+        })
+        .catch((error) => {
+          this.log.warn('Store push alert failed after delivery code lock', {
+            storeId,
+            orderId: order.id,
+            error,
+          });
+        });
+    }
   }
 
   /**
@@ -278,10 +347,23 @@ async startOrder(orderId: string, motoboy: Motoboy) {
     if (!order) throw new AppError('ORDER-001', 404);
     if (!this.isDeliveryOrder(order)) throw new AppError('MOTO-010', 400);
 
-    if (order.paymentMethod?.toLowerCase() === 'cash' || order.paymentMethod?.toLowerCase() === 'dinheiro') {
-      if (cashTendered !== undefined && cashTendered !== null) {
-        order.cashTendered = Number(cashTendered);
+    if (this.isCashPaymentMethod(order.paymentMethod)) {
+      const fallbackTendered = order.cashTendered !== undefined && order.cashTendered !== null
+        ? Number(order.cashTendered)
+        : null;
+      const effectiveCashTendered = cashTendered !== undefined && cashTendered !== null
+        ? Number(cashTendered)
+        : fallbackTendered;
+      const orderTotal = Number(order.total || 0);
+
+      if (!Number.isFinite(effectiveCashTendered) || Number(effectiveCashTendered) < orderTotal) {
+        throw new AppError('MOTO-036', 400, {
+          message: `Informe um valor recebido igual ou maior que o total do pedido (${this.formatCurrency(orderTotal)}).`,
+          orderTotal,
+        });
       }
+
+      order.cashTendered = Number(effectiveCashTendered);
     }
 
     order.paymentStatus = 'PAID';
@@ -302,9 +384,45 @@ async startOrder(orderId: string, motoboy: Motoboy) {
    */
   async markDelivered(orderId: string, motoboy: Motoboy, code?: string) {
     // Validate confirmation code if one was generated
-    const delivery = await AppDataSource.getRepository(OrderDelivery).findOne({ where: { orderId } as any });
-    if (delivery?.confirmationCode && String(delivery.confirmationCode) !== String(code || "").trim()) {
-      throw new AppError("DELIV-CODE", 400, { message: "Código de confirmação incorreto." });
+    const deliveryRepo = AppDataSource.getRepository(OrderDelivery);
+    const delivery = await deliveryRepo.findOne({ where: { orderId } as any });
+    if (delivery?.confirmationCodeBlockedAt) {
+      throw new AppError('MOTO-035', 423, {
+        blocked: true,
+        attempts: Number(delivery.confirmationCodeAttempts || 3),
+        message: 'Codigo bloqueado apos 3 tentativas. Contate a loja para concluir a entrega.',
+      });
+    }
+    if (delivery?.confirmationCode && String(delivery.confirmationCode) !== String(code || '').trim()) {
+      const nextAttempts = Number(delivery.confirmationCodeAttempts || 0) + 1;
+      const shouldBlock = nextAttempts >= 3;
+      const blockedAt = shouldBlock ? new Date() : null;
+
+      await deliveryRepo.update(
+        { orderId } as any,
+        {
+          confirmationCodeAttempts: nextAttempts,
+          confirmationCodeBlockedAt: blockedAt,
+        }
+      );
+
+      if (shouldBlock) {
+        const order = await this.orderRepository.findById(orderId);
+        if (order) {
+          await this.notifyStoreDeliveryCodeBlocked(order, motoboy, nextAttempts);
+        }
+        throw new AppError('MOTO-035', 423, {
+          blocked: true,
+          attempts: nextAttempts,
+          message: 'Codigo bloqueado apos 3 tentativas. Contate a loja para concluir a entrega.',
+        });
+      }
+
+      throw new AppError('DELIV-CODE', 400, {
+        attempts: nextAttempts,
+        remainingAttempts: Math.max(0, 3 - nextAttempts),
+        message: `Codigo de confirmacao incorreto. Restam ${Math.max(0, 3 - nextAttempts)} tentativa(s).`,
+      });
     }
     const result = await deliveryService.complete(orderId, motoboy);
     if (result?.order) {
@@ -317,6 +435,15 @@ async startOrder(orderId: string, motoboy: Motoboy) {
           motoboyId: motoboy.id,
           error,
         });
+      }
+      if (delivery?.confirmationCode) {
+        await deliveryRepo.update(
+          { orderId } as any,
+          {
+            confirmationCodeAttempts: 0,
+            confirmationCodeBlockedAt: null,
+          }
+        );
       }
       // Auto-finish when delivery was confirmed with code (no need for separate customer confirmation)
       if (delivery?.confirmationCode && code) {

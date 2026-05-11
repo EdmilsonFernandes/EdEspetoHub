@@ -68,6 +68,12 @@ export class OrderDelivery {
   @Column({ name: "confirmation_code", type: "varchar", length: 4, nullable: true })
   confirmationCode?: string | null;
 
+  @Column({ name: 'confirmation_code_attempts', type: 'int', default: 0 })
+  confirmationCodeAttempts!: number;
+
+  @Column({ name: 'confirmation_code_blocked_at', type: 'timestamptz', nullable: true })
+  confirmationCodeBlockedAt?: Date | null;
+
   @Column({ name: 'canceled_at', type: 'timestamptz', nullable: true })
   canceledAt?: Date | null;
 

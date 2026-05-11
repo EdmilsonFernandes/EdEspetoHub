@@ -85,6 +85,8 @@
   "MOTO-032": "For motorcycles, CNH category must include the letter A.",
   "MOTO-033": "PIX key must be a valid CPF from the courier.",
   "MOTO-034": "PIX key must match the courier CPF registered in the profile.",
+  "MOTO-035": "Delivery code was locked after 3 attempts.",
+  "MOTO-036": "Received cash amount cannot be lower than the order total.",
   "REVIEW-003": "This order has no tip available for payout.",
   "REVIEW-004": "The tip has not been paid by the customer yet.",
   "REVIEW-005": "This tip was already received directly by the courier."

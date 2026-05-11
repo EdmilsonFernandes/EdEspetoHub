@@ -31,6 +31,7 @@ import { faceVerifyService } from './FaceVerifyService';
 import { PlatformAdmin } from '../entities/PlatformAdmin';
 import { In } from 'typeorm';
 import { normalizeDocument, validateDocument } from '../utils/documents';
+import { AuditNotificationService } from './AuditNotificationService';
 /**
  * Provides MotoboyService functionality.
  *
@@ -43,6 +44,7 @@ export class MotoboyService {
   private storeRepository = new StoreRepository();
   private userRepository = new UserRepository();
   private emailService = new EmailService();
+  private auditNotificationService = new AuditNotificationService();
 
     /**
    * Normalizes vehicle plate input to canonical alphanumeric format.
@@ -904,6 +906,28 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
     } catch {
       credentialsEmailSent = false;
     }
+
+    await this.auditNotificationService.notifyUserCreated({
+      accountType: 'motoboy_loja',
+      user: {
+        id: created.user.id,
+        fullName: created.user.fullName,
+        email: created.user.email,
+        phone: created.user.phone,
+        username: created.user.username || null,
+        role: created.user.userRole,
+      },
+      store: {
+        id: store.id,
+        name: store.name,
+        slug: store.slug || null,
+      },
+      metadata: {
+        createdByUserId,
+        motoboyId: created.motoboy?.id || null,
+        credentialsEmailSent,
+      },
+    });
 
     return {
       createdAccount: true,
