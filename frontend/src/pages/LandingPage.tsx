@@ -878,6 +878,79 @@ export function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════════
+          HUB DE DESTINOS
+      ══════════════════════════════════════════════════════════════ */}
+      <section className="relative overflow-hidden bg-[linear-gradient(135deg,#153A4C_0%,#1f5f78_48%,#f8fafc_48%,#ffffff_100%)] py-14 sm:py-20">
+        <div className="pointer-events-none absolute left-0 top-0 h-56 w-56 rounded-full bg-sky-300/20 blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-emerald-300/20 blur-3xl" />
+        <div className="relative mx-auto grid max-w-7xl gap-6 px-4 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+          <div className="rounded-[2rem] border border-white/14 bg-white/10 p-6 text-white shadow-[0_24px_70px_-44px_rgba(2,6,23,0.75)] backdrop-blur-xl sm:p-8">
+            <p className="inline-flex items-center gap-2 rounded-full border border-white/16 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-sky-100">
+              <MapPin size={13} weight="duotone" />
+              Marketplace turístico local
+            </p>
+            <h3 className="mt-5 text-3xl font-black leading-tight tracking-[-0.04em] sm:text-5xl">
+              Destinos, chalés e lojas conectados por cidade.
+            </h3>
+            <p className="mt-4 max-w-xl text-sm font-medium leading-7 text-sky-50/82 sm:text-base">
+              O cliente escolhe o destino, vê chalés e pousadas da região, encontra lojas que entregam naquela hospedagem e ainda descobre passeios, massagens, restaurantes e lugares para visitar.
+            </p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <button
+                type="button"
+                onClick={() => navigate('/destinos')}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-black text-[#153A4C] shadow-[0_16px_34px_-20px_rgba(255,255,255,0.5)] transition-all hover:scale-[1.01] active:scale-[0.98]"
+              >
+                Ver destinos
+                <ArrowRight size={15} weight="bold" />
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/destinos/cadastrar')}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/18 bg-white/10 px-5 py-3 text-sm font-black text-white backdrop-blur-xl transition-all hover:bg-white/15 active:scale-[0.98]"
+              >
+                Cadastrar chalé ou serviço
+                <Handshake size={15} weight="duotone" />
+              </button>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            {[
+              {
+                icon: MapPin,
+                title: 'Cidade como porta de entrada',
+                desc: 'São Bento, São Francisco Xavier ou qualquer novo destino ganha página própria, banners e vitrine local.',
+              },
+              {
+                icon: Buildings,
+                title: 'Chalés e pousadas aprovados',
+                desc: 'A plataforma cadastra ou aprova parceiros antes de eles aparecerem para turistas.',
+              },
+              {
+                icon: Storefront,
+                title: 'Loja solicita vínculo',
+                desc: 'O lojista pede para atender hospedagens da região e só aparece após aprovação.',
+              },
+              {
+                icon: CheckCircle,
+                title: 'Sem mostrar o Brasil inteiro',
+                desc: 'O painel prioriza destinos pela cidade, UF e distância da loja, mantendo busca manual para exceções.',
+              },
+            ].map(({ icon: Icon, title, desc }) => (
+              <article key={title} className="rounded-[1.6rem] border border-slate-200/80 bg-white/92 p-5 shadow-[0_20px_46px_-34px_rgba(15,23,42,0.38)] backdrop-blur-xl">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#153A4C]/8 text-[#153A4C]">
+                  <Icon size={21} weight="duotone" />
+                </div>
+                <h4 className="mt-4 text-base font-black leading-tight text-slate-950">{title}</h4>
+                <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{desc}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════
           INFRAESTRUTURA
       ══════════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden bg-slate-950 py-24 sm:py-32">

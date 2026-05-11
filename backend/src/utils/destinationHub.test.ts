@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildDestinationStoreMatchMeta,
   normalizeDestinationListingCategory,
   normalizeDestinationPartnerType,
   normalizeDestinationSlug,
@@ -28,5 +29,30 @@ describe('destinationHub utils', () => {
     expect(toNullableNumber('abc')).toBeNull();
     expect(toOptionalText('  Vale  ')).toBe('Vale');
     expect(toOptionalText('   ')).toBeNull();
+  });
+
+  it('recommends destination options by store city and distance', () => {
+    const sameCity = buildDestinationStoreMatchMeta(
+      { city: 'São Bento do Sapucaí', state: 'SP' },
+      { city: 'Sao Bento do Sapucai', state: 'SP' }
+    );
+    expect(sameCity.recommended).toBe(true);
+    expect(sameCity.reason).toBe('same_city');
+    expect(sameCity.rank).toBe(0);
+
+    const nearby = buildDestinationStoreMatchMeta(
+      { lat: -22.6867, lng: -45.7319, deliveryRadiusKm: 30 },
+      { lat: -22.6833, lng: -45.7289 }
+    );
+    expect(nearby.recommended).toBe(true);
+    expect(nearby.reason).toBe('within_delivery_radius');
+    expect(nearby.distanceKm).toBeLessThan(5);
+
+    const outsideRegion = buildDestinationStoreMatchMeta(
+      { city: 'São Bento do Sapucaí', state: 'SP', lat: -22.6867, lng: -45.7319, deliveryRadiusKm: 20 },
+      { city: 'Rio de Janeiro', state: 'RJ', lat: -22.9068, lng: -43.1729 }
+    );
+    expect(outsideRegion.recommended).toBe(false);
+    expect(outsideRegion.reason).toBe('outside_region');
   });
 });

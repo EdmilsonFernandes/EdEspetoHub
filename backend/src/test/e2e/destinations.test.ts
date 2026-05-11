@@ -77,6 +77,10 @@ describe('Destination Hub', () => {
 
     expect(optionsBefore.status).toBe(200);
     const createdDestination = optionsBefore.body.find((item: any) => item.id === destinationId);
+    expect(createdDestination?.destinationMatch).toEqual(expect.objectContaining({
+      recommended: expect.any(Boolean),
+      reason: expect.any(String),
+    }));
     expect(createdDestination?.hospitalityPlaces?.[0]?.status).toBe('available');
 
     const requestRes = await api

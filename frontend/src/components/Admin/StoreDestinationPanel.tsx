@@ -15,6 +15,42 @@ const statusCopy: Record<string, { label: string; tone: string }> = {
   cancelled: { label: 'Cancelado', tone: 'bg-slate-100 text-slate-600' },
 };
 
+const normalizeSearch = (value: any) =>
+  String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+const hasStoreRelation = (destination: any) =>
+  (destination.hospitalityPlaces || []).some((place: any) => {
+    const status = String(place.status || '').toLowerCase();
+    return status === 'pending' || status === 'approved';
+  });
+
+const destinationSearchText = (destination: any) =>
+  normalizeSearch([
+    destination.name,
+    destination.city,
+    destination.state,
+    ...(destination.hospitalityPlaces || []).flatMap((place: any) => [place.name, place.address, place.description]),
+  ].filter(Boolean).join(' '));
+
+const matchCopy = (match: any) => {
+  const reason = String(match?.reason || '');
+  if (reason === 'same_city') return 'Cidade da loja';
+  if (reason === 'within_delivery_radius') return 'Dentro do raio';
+  if (reason === 'same_state') return 'Mesma UF';
+  if (reason === 'missing_store_location') return 'Configure cidade da loja';
+  return 'Outro destino';
+};
+
+const matchTone = (match: any) => {
+  if (match?.recommended) return 'border-emerald-200 bg-emerald-50 text-emerald-800';
+  if (String(match?.reason || '') === 'same_state') return 'border-sky-200 bg-sky-50 text-sky-800';
+  if (String(match?.reason || '') === 'missing_store_location') return 'border-amber-200 bg-amber-50 text-amber-800';
+  return 'border-slate-200 bg-slate-100 text-slate-600';
+};
+
 type Props = {
   storeId?: string;
 };
@@ -27,6 +63,8 @@ export function StoreDestinationPanel({ storeId }: Props) {
   const [savingId, setSavingId] = useState('');
   const [error, setError] = useState('');
   const [confirmModal, setConfirmModal] = useState<null | { placeId: string; title: string; description: string; confirmLabel: string }>(null);
+  const [scope, setScope] = useState<'recommended' | 'all'>('recommended');
+  const [query, setQuery] = useState('');
 
   const load = async () => {
     if (!storeId) return;
@@ -94,6 +132,16 @@ export function StoreDestinationPanel({ storeId }: Props) {
     }
   };
 
+  const recommendedCount = destinations.filter((destination) => destination?.destinationMatch?.recommended || hasStoreRelation(destination)).length;
+  const effectiveScope = recommendedCount > 0 ? scope : 'all';
+  const normalizedQuery = normalizeSearch(query);
+  const visibleDestinations = destinations.filter((destination) => {
+    const matchesQuery = !normalizedQuery || destinationSearchText(destination).includes(normalizedQuery);
+    if (!matchesQuery) return false;
+    if (effectiveScope === 'all') return true;
+    return Boolean(destination?.destinationMatch?.recommended || hasStoreRelation(destination));
+  });
+
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-sky-100 bg-sky-50/70 px-4 py-3">
@@ -102,19 +150,52 @@ export function StoreDestinationPanel({ storeId }: Props) {
           <div>
             <p className="text-sm font-black text-slate-900">Solicitações para destinos e chalés</p>
             <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-600">
-              Escolha hospedagens onde sua loja entrega. A plataforma aprova o vínculo antes da loja aparecer para turistas.
+              Escolha hospedagens onde sua loja entrega. Por padrão aparecem destinos recomendados pela cidade, UF ou distância da loja; use "ver todos" só para exceções operacionais.
             </p>
           </div>
         </div>
+      </div>
+
+      <div className="grid gap-3 rounded-[1.35rem] border border-slate-200 bg-white p-3 shadow-sm sm:grid-cols-[1fr_auto] sm:items-center">
+        <input
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Buscar por cidade, chalé, pousada ou endereço"
+          className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]"
+        />
+        <div className="flex rounded-2xl bg-slate-100 p-1">
+          {[
+            { id: 'recommended', label: `Recomendados (${recommendedCount})` },
+            { id: 'all', label: `Ver todos (${destinations.length})` },
+          ].map((item) => {
+            const active = effectiveScope === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setScope(item.id as any)}
+                className={`rounded-xl px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] transition ${active ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+              >
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+        {recommendedCount === 0 && !loading ? (
+          <p className="text-xs font-semibold leading-relaxed text-amber-700 sm:col-span-2">
+            Ainda não consegui recomendar por região. Configure cidade/UF ou coordenadas da loja em Configurações para priorizar destinos locais automaticamente.
+          </p>
+        ) : null}
       </div>
 
       {error ? <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
       {loading ? <p className="text-sm font-semibold text-slate-500">Carregando destinos...</p> : null}
 
       <div className="space-y-5">
-        {destinations.map((destination: any) => (
+        {visibleDestinations.map((destination: any) => (
           <section key={destination.id} className="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
               <img
                 src={resolveAssetUrl(destination.bannerUrl || destination.logoUrl || '') || getStoreAvatarUrl(destination.slug, destination.name)}
                 alt={destination.name}
@@ -123,6 +204,17 @@ export function StoreDestinationPanel({ storeId }: Props) {
               <div>
                 <h3 className="text-lg font-black text-slate-950">{destination.name}</h3>
                 <p className="text-xs font-bold text-slate-500">{destination.city} - {destination.state}</p>
+              </div>
+              </div>
+              <div className="flex flex-wrap gap-2 sm:justify-end">
+                <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${matchTone(destination.destinationMatch)}`}>
+                  {matchCopy(destination.destinationMatch)}
+                </span>
+                {destination.destinationMatch?.distanceKm != null ? (
+                  <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">
+                    {Number(destination.destinationMatch.distanceKm).toFixed(0)} km
+                  </span>
+                ) : null}
               </div>
             </div>
             <div className="mt-4 grid gap-3">
@@ -217,6 +309,11 @@ export function StoreDestinationPanel({ storeId }: Props) {
             </div>
           </section>
         ))}
+        {!loading && visibleDestinations.length === 0 ? (
+          <p className="rounded-2xl border border-slate-200 bg-white px-4 py-5 text-sm font-bold text-slate-500">
+            Nenhum destino encontrado neste filtro. Use "Ver todos" ou ajuste a busca.
+          </p>
+        ) : null}
       </div>
 
       <ConfirmationModal

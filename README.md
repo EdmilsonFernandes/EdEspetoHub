@@ -2,7 +2,7 @@
 
 Aplicação web para pedidos e gestão de lojas/restaurantes (cardápio, checkout, fila e pagamentos), com módulo de entrega via motoboy.
 
-O projeto traz quatro experiências principais:
+O projeto traz sete experiências principais:
 
 - **Loja do cliente**: montagem e edição do pedido, info da loja no mobile (sheet), WhatsApp e link de acompanhamento (publico com persistencia via `localStorage`).
 - **Painel interno (Admin/Churrasqueiro)**: dashboard com métricas, CRUD de produtos, fila do churrasqueiro (atualização a cada 5s), pagamentos e histórico.
@@ -11,10 +11,13 @@ O projeto traz quatro experiências principais:
   - Numero exibido usa prefixo do slug (3 letras) + 8 primeiros chars do ID.
 - **Promoções**: produto pode ter preço promocional ativo; vitrine, carrinho, fila e acompanhamento exibem valor original riscado + promocional.
 - **Entregador (Motoboy)**: fila de entregas, entrega atual, histórico, ganhos e confirmação de pagamento no final da entrega.
+- **Hub de condomínios**: vitrines por condomínio/evento, com lojas participantes e fluxo de pedido preservado.
+- **Hub de destinos turísticos**: cidades, chalés, pousadas, serviços locais e lojas que atendem hospedagens específicas.
 
 ## Guia do usuario
 
 - Guia funcional web: `/guia`
+- Documentação do Hub de destinos/chalés: `docs/DESTINATION_HUB.md`
 
 ## Estrutura de pastas
 
@@ -59,6 +62,42 @@ flowchart LR
   A --> M[Maps service]
   A --> W[Face worker (Python)]
 ```
+
+## Hub de destinos turísticos
+
+O Hub de destinos é uma camada local por cidade para chalés, pousadas, serviços e lojas que entregam em hospedagens específicas.
+
+Fluxo público:
+
+```mermaid
+flowchart TD
+  C[Cliente] --> D[Escolhe destino/cidade]
+  D --> H[Seleciona chalé ou pousada]
+  H --> L[Vê lojas que entregam ali]
+  D --> S[Vê passeios, restaurantes e serviços locais]
+  L --> P[Pedido no fluxo normal da loja]
+```
+
+Responsabilidades:
+
+- **Plataforma/SuperAdmin**: cadastra destinos, banners, chalés/pousadas, serviços locais e aprova solicitações.
+- **Chalé/pousada/prestador**: solicita cadastro em `/destinos/cadastrar`; após aprovação vira registro real.
+- **Lojista**: entra em `Admin > Destinos`, escolhe hospedagens que realmente atende, informa taxa/tempo e solicita vínculo.
+- **Cliente/turista**: acessa `/destinos`, escolhe cidade e consome lojas/serviços daquele contexto.
+
+Inteligência regional:
+
+- O painel do lojista prioriza destinos pela cidade, UF e distância da loja quando `store_settings.city`, `state`, `lat`, `lng` e `delivery_radius_km` existem.
+- Destinos recomendados aparecem primeiro; destinos fora da região ficam disponíveis em "Ver todos" para exceções revisadas pela plataforma.
+- A loja só aparece em um chalé/pousada depois da aprovação da plataforma, mesmo que ela solicite o vínculo.
+
+Rotas principais:
+
+- Público: `/destinos`, `/destinos/cadastrar`, `/destinos/:slug`, `/destinos/:slug/chales/:placeSlug`.
+- SuperAdmin: `/superadmin/destinations`.
+- Lojista: `/admin/dashboard` na aba `Destinos`.
+
+Para criar uma amostra real inicial, cadastre a cidade no SuperAdmin, depois adicione chalés/pousadas e listings de restaurantes, passeios, massagens e atrações usando informações públicas e descrição neutra. Se o proprietário ainda não confirmou parceria, não comunique como parceiro oficial; use como curadoria da plataforma até ele solicitar ou aprovar a presença.
 
 ## Motoboy: KYC (plataforma) + vínculo (loja)
 

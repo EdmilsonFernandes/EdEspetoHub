@@ -2,6 +2,7 @@ import { resolvePlanFeatures } from '../config/planFeatures';
 import { AppError } from '../errors/AppError';
 import { DestinationRepository } from '../repositories/DestinationRepository';
 import {
+  buildDestinationStoreMatchMeta,
   normalizeDestinationListingCategory,
   normalizeDestinationPartnerType,
   normalizeDestinationSlug,
@@ -431,21 +432,33 @@ export class DestinationService {
     const linkByPlace = new Map(linkPairs.filter(Boolean).map((link: any) => [String(link.hospitalityPlaceId), link]));
     const requestByPlace = new Map(storeRequests.map((request: any) => [String(request.hospitalityPlaceId), request]));
 
-    return destinations.map((destination) => ({
-      ...this.toPublicDestination(destination),
-      hospitalityPlaces: (placesByDestination.get(destination.id) || []).map((place) => {
-        const link = linkByPlace.get(place.id) || null;
-        const request = requestByPlace.get(place.id) || null;
-        const requestStatus = String(request?.status || '').toLowerCase();
-        const status = link?.active ? 'approved' : requestStatus || 'available';
+    return destinations
+      .map((destination) => {
+        const destinationMatch = buildDestinationStoreMatchMeta(store.settings, destination);
         return {
-          ...this.toPublicPlace(place),
-          status,
-          link: link ? this.toPublicStoreLink(link) : null,
-          request: request ? this.toPublicStoreRequest(request) : null,
+          ...this.toPublicDestination(destination),
+          destinationMatch,
+          hospitalityPlaces: (placesByDestination.get(destination.id) || []).map((place) => {
+            const link = linkByPlace.get(place.id) || null;
+            const request = requestByPlace.get(place.id) || null;
+            const requestStatus = String(request?.status || '').toLowerCase();
+            const status = link?.active ? 'approved' : requestStatus || 'available';
+            return {
+              ...this.toPublicPlace(place),
+              status,
+              link: link ? this.toPublicStoreLink(link) : null,
+              request: request ? this.toPublicStoreRequest(request) : null,
+            };
+          }),
         };
-      }),
-    }));
+      })
+      .sort((left: any, right: any) => {
+        const rankDiff = Number(left.destinationMatch?.rank ?? 9) - Number(right.destinationMatch?.rank ?? 9);
+        if (rankDiff !== 0) return rankDiff;
+        const sortDiff = Number(left.sortOrder || 0) - Number(right.sortOrder || 0);
+        if (sortDiff !== 0) return sortDiff;
+        return String(left.name || '').localeCompare(String(right.name || ''), 'pt-BR');
+      });
   }
 
   async createStoreDestinationRequest(storeId: string, payload: any) {

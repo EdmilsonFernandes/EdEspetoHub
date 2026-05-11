@@ -58,3 +58,66 @@ export const toOptionalText = (value: unknown): string | null => {
   const normalized = String(value).trim();
   return normalized || null;
 };
+
+const normalizeLocationText = (value?: string | null) =>
+  normalizeDestinationSlug(value || '');
+
+const toFiniteNumber = (value: unknown): number | null => {
+  const parsed = toNullableNumber(value);
+  return parsed === null ? null : parsed;
+};
+
+const distanceKmBetween = (fromLat: number, fromLng: number, toLat: number, toLng: number) => {
+  const earthRadiusKm = 6371;
+  const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
+  const deltaLat = toRadians(toLat - fromLat);
+  const deltaLng = toRadians(toLng - fromLng);
+  const a =
+    Math.sin(deltaLat / 2) ** 2 +
+    Math.cos(toRadians(fromLat)) *
+      Math.cos(toRadians(toLat)) *
+      Math.sin(deltaLng / 2) ** 2;
+  return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+export const buildDestinationStoreMatchMeta = (storeSettings: any, destination: any) => {
+  const storeCity = normalizeLocationText(storeSettings?.city);
+  const storeState = String(storeSettings?.state || '').trim().toUpperCase();
+  const destinationCity = normalizeLocationText(destination?.city);
+  const destinationState = String(destination?.state || '').trim().toUpperCase();
+  const sameCity = Boolean(storeCity && destinationCity && storeCity === destinationCity && (!storeState || !destinationState || storeState === destinationState));
+  const sameState = Boolean(storeState && destinationState && storeState === destinationState);
+  const storeLat = toFiniteNumber(storeSettings?.lat);
+  const storeLng = toFiniteNumber(storeSettings?.lng);
+  const destinationLat = toFiniteNumber(destination?.lat);
+  const destinationLng = toFiniteNumber(destination?.lng);
+  const distanceKm =
+    storeLat !== null && storeLng !== null && destinationLat !== null && destinationLng !== null
+      ? Number(distanceKmBetween(storeLat, storeLng, destinationLat, destinationLng).toFixed(1))
+      : null;
+  const deliveryRadiusKm = toFiniteNumber(storeSettings?.deliveryRadiusKm);
+  const smartRadiusKm = Math.max(deliveryRadiusKm || 0, 25);
+  const withinDeliveryRadius = distanceKm !== null ? distanceKm <= smartRadiusKm : null;
+  const hasStoreLocation = Boolean(storeCity || storeState || (storeLat !== null && storeLng !== null));
+  const recommended = sameCity || withinDeliveryRadius === true;
+  const reason = sameCity
+    ? 'same_city'
+    : withinDeliveryRadius
+      ? 'within_delivery_radius'
+      : sameState
+        ? 'same_state'
+        : hasStoreLocation
+          ? 'outside_region'
+          : 'missing_store_location';
+  const rank = sameCity ? 0 : withinDeliveryRadius ? 1 : sameState ? 2 : hasStoreLocation ? 4 : 3;
+
+  return {
+    recommended,
+    reason,
+    sameCity,
+    sameState,
+    distanceKm,
+    deliveryRadiusKm,
+    rank,
+  };
+};
