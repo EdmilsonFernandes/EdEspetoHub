@@ -79,6 +79,7 @@ logs/
 backend/uploads/products/
 
 mobile/cmdline-tools.zip
+mobile/.gradle-home/
 
 # service account keys
 backend/keys/

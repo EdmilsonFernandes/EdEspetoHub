@@ -51,6 +51,7 @@ const emptyPlace = {
 const emptyListing = {
   destinationId: '',
   hospitalityPlaceId: '',
+  storeId: '',
   title: '',
   category: 'SERVICO',
   description: '',
@@ -435,6 +436,7 @@ export function SuperAdminDestinations() {
       ...Object.fromEntries(Object.entries(listing).map(([key, value]) => [key, toFormValue(value)])),
       destinationId: listing.destinationId || listing.destination?.id || '',
       hospitalityPlaceId: listing.hospitalityPlaceId || '',
+      storeId: listing.storeId || listing.store?.id || '',
       active: listing.active !== false,
       featured: listing.featured === true,
       sortOrder: Number(listing.sortOrder || 0),
@@ -847,6 +849,11 @@ export function SuperAdminDestinations() {
                                           <div className="min-w-0">
                                             <p className="line-clamp-1 text-sm font-black text-slate-950">{listing.title}</p>
                                             <p className="mt-0.5 text-xs font-semibold text-slate-500">{String(listing.category || 'SERVICO').replace('_', ' ')}</p>
+                                            {listing.store ? (
+                                              <p className="mt-1 line-clamp-1 text-[11px] font-black text-emerald-700">Loja vinculada: {listing.store.name}</p>
+                                            ) : (
+                                              <p className="mt-1 line-clamp-1 text-[11px] font-black text-amber-700">Aguardando validação de loja</p>
+                                            )}
                                           </div>
                                           <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(listing.active)}`}>{activeLabel(listing.active)}</span>
                                         </div>
@@ -1073,6 +1080,14 @@ export function SuperAdminDestinations() {
                   {(data.places || [])
                     .filter((place: any) => !listingForm.destinationId || place.destinationId === listingForm.destinationId)
                     .map((place: any) => <option key={place.id} value={place.id}>{place.name} · {place.destination?.name}</option>)}
+                </select>
+                <select value={listingForm.storeId} onChange={(event) => updateListing('storeId', event.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2">
+                  <option value="">Sem loja vinculada / aguardando validação</option>
+                  {(data.stores || []).map((store: any) => (
+                    <option key={store.id} value={store.id}>
+                      {store.name}{store.settings?.city ? ` · ${store.settings.city}` : ''}
+                    </option>
+                  ))}
                 </select>
                 <select value={listingForm.category} onChange={(event) => updateListing('category', event.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none">
                   <option value="PASSEIO">Passeio</option>

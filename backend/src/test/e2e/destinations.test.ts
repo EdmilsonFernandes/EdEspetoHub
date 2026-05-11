@@ -172,7 +172,7 @@ describe('Destination Hub', () => {
     ).toBe(true);
   });
 
-  it('keeps a claimed destination listing pending until admin validation', async () => {
+  it('keeps a claimed destination listing pending until admin validation links the store', async () => {
     const suffix = Date.now();
     const destinationRes = await api
       .post('/api/admin/destinations')
@@ -228,5 +228,29 @@ describe('Destination Hub', () => {
     }));
     expect(claimedListing.store).toBeNull();
     expect(claimedStore.body.store.id).toBeTruthy();
+
+    const validationRes = await api
+      .patch(`/api/admin/destination-listings/${listingRes.body.id}`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ storeId: claimedStore.body.store.id });
+
+    expect(validationRes.status).toBe(200);
+    expect(validationRes.body.storeId).toBe(claimedStore.body.store.id);
+    expect(validationRes.body.store).toEqual(expect.objectContaining({
+      id: claimedStore.body.store.id,
+      slug: claimedStore.body.store.slug,
+    }));
+
+    const validatedPublicRes = await api.get(`/api/public/destinations/${destinationRes.body.slug}`);
+    expect(validatedPublicRes.status).toBe(200);
+    const validatedListing = validatedPublicRes.body.listings.find((listing: any) => listing.id === listingRes.body.id);
+    expect(validatedListing).toEqual(expect.objectContaining({
+      storeId: claimedStore.body.store.id,
+    }));
+    expect(validatedListing.store).toEqual(expect.objectContaining({
+      id: claimedStore.body.store.id,
+      slug: claimedStore.body.store.slug,
+      name: listingRes.body.title,
+    }));
   });
 });

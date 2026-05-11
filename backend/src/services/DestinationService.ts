@@ -321,7 +321,7 @@ export class DestinationService {
     const storeId = hasStoreInput ? toOptionalText(payload?.storeId) : current?.storeId || null;
     if (storeId && !(await this.repository.findStoreById(storeId))) throw new AppError('STORE-001', 404);
     const saved = await this.repository.saveListing({
-      ...(current || {}),
+      id: current?.id,
       destinationId: destination.id,
       hospitalityPlaceId: placeId,
       storeId,
@@ -338,11 +338,12 @@ export class DestinationService {
       websiteUrl: payload?.websiteUrl !== undefined ? toOptionalText(payload.websiteUrl) : current?.websiteUrl ?? null,
       ctaType: payload?.ctaType !== undefined ? toOptionalText(payload.ctaType) : current?.ctaType ?? null,
       ctaUrl: payload?.ctaUrl !== undefined ? toOptionalText(payload.ctaUrl) : current?.ctaUrl ?? null,
-      featured: payload?.featured === true,
-      active: payload?.active !== false,
+      featured: payload?.featured !== undefined ? payload.featured === true : current?.featured === true,
+      active: payload?.active !== undefined ? payload.active !== false : current?.active !== false,
       sortOrder: Number(payload?.sortOrder ?? current?.sortOrder ?? 0) || 0,
     });
-    return this.toPublicListing({ ...saved, destination });
+    const hydrated = await this.repository.findListingById(saved.id);
+    return this.toPublicListing({ ...(hydrated || saved), destination: hydrated?.destination || destination });
   }
 
   async adminLinkStore(placeId: string, payload: any) {
