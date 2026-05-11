@@ -205,11 +205,11 @@ export function DestinationDetailPage() {
   return (
     <main className="min-h-screen bg-[#f6f2e9] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
       <section className="relative overflow-hidden px-4 pb-8 pt-[max(1rem,env(safe-area-inset-top))]">
-        <div className="absolute inset-0 bg-[#0f172a]" />
+        <div className="absolute inset-0 bg-[#153A4C]" />
         {destinationHeroImage ? (
-          <img src={destinationHeroImage} alt={destination.name || destination.city || 'Destino'} className="absolute inset-0 h-full w-full object-cover opacity-45" />
+          <img src={destinationHeroImage} alt={destination.name || destination.city || 'Destino'} className="absolute inset-0 h-full w-full object-cover opacity-35" />
         ) : null}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(16,185,129,0.20),transparent_32%),linear-gradient(135deg,rgba(23,57,75,0.92),rgba(15,23,42,0.88)_64%,rgba(51,35,21,0.82))]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(216,245,231,0.22),transparent_32%),radial-gradient(circle_at_85%_18%,rgba(250,204,21,0.14),transparent_26%),linear-gradient(135deg,rgba(21,58,76,0.93),rgba(51,104,134,0.82)_56%,rgba(72,52,30,0.78))]" />
         <div className="relative mx-auto max-w-6xl">
           <Link to="/destinos" className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-white ring-1 ring-white/15">
             <ArrowRight size={14} className="rotate-180" weight="bold" />
@@ -245,7 +245,7 @@ export function DestinationDetailPage() {
                   ))}
                 </div>
               </div>
-              <div className="overflow-hidden rounded-[2rem] border border-white/12 bg-white/10 p-3 shadow-[0_28px_80px_-38px_rgba(0,0,0,0.65)] backdrop-blur">
+              <div className="overflow-hidden rounded-[2rem] border border-white/16 bg-white/14 p-3 shadow-[0_28px_80px_-38px_rgba(0,0,0,0.65)] backdrop-blur">
                 <div className="relative h-64 overflow-hidden rounded-[1.45rem] bg-slate-900">
                   {hasConfiguredAsset(currentSlide?.item || heroBanner || destination) ? (
                     <img src={asset(currentSlide?.item || heroBanner || destination)} alt={currentSlide?.title || destination.name} className="h-full w-full object-cover transition duration-700" />
@@ -254,11 +254,11 @@ export function DestinationDetailPage() {
                       <Mountains size={72} weight="duotone" className="text-white/40" />
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.16),rgba(15,23,42,0.10)_34%,rgba(10,20,25,0.86))]" />
                   <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-800">
                     {hasConfiguredAsset(currentSlide?.item) ? currentSlide?.kind || 'Destaque' : 'Destaque editorial'}
                   </div>
-                  <div className="absolute bottom-4 left-4 right-4">
+                  <div className="absolute bottom-4 left-4 right-4 rounded-[1.35rem] border border-white/16 bg-slate-950/64 p-3 shadow-[0_18px_36px_-24px_rgba(0,0,0,0.85)] backdrop-blur-md">
                     <p className="text-lg font-black text-white">{currentSlide?.title || heroBanner?.title || destination.name}</p>
                     <p className="mt-1 line-clamp-2 text-sm font-semibold text-white/78">{currentSlide?.subtitle || heroBanner?.subtitle || destination.description}</p>
                     <div className="mt-3 flex items-center justify-between gap-3">

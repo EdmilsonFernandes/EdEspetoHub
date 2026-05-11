@@ -55,7 +55,7 @@ export function DestinationsPage() {
     };
   }, [location.search]);
 
-  const featured = useMemo(() => destinations.slice(0, 2), [destinations]);
+  const featured = useMemo(() => destinations.length > 3 ? destinations.slice(0, 2) : [], [destinations]);
 
   return (
     <main className="min-h-screen bg-[#f4f1ea] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
@@ -88,34 +88,66 @@ export function DestinationsPage() {
                 </a>
               </div>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {featured.map((destination) => (
-                <Link
-                  key={destination.id}
-                  to={`/destinos/${destination.slug}`}
-                  className="group overflow-hidden rounded-[2rem] border border-white/80 bg-white/78 p-3 shadow-[0_24px_60px_-34px_rgba(15,23,42,0.45)] backdrop-blur transition hover:-translate-y-1"
-                >
-                  <div className="relative h-44 overflow-hidden rounded-[1.5rem] bg-slate-200">
-                    <img src={destinationImage(destination)} alt={destination.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
-                    <div className="absolute bottom-3 left-3 right-3">
-                      <p className="text-lg font-black text-white">{destination.name}</p>
-                      <p className="text-xs font-bold text-white/80">{destinationLocationLabel(destination)}</p>
+            {featured.length > 0 ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {featured.map((destination) => (
+                  <Link
+                    key={destination.id}
+                    to={`/destinos/${destination.slug}`}
+                    className="group overflow-hidden rounded-[2rem] border border-white/80 bg-white/78 p-3 shadow-[0_24px_60px_-34px_rgba(15,23,42,0.45)] backdrop-blur transition hover:-translate-y-1"
+                  >
+                    <div className="relative h-44 overflow-hidden rounded-[1.5rem] bg-slate-200">
+                      <img src={destinationImage(destination)} alt={destination.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.10),rgba(15,23,42,0.18)_38%,rgba(15,23,42,0.82))]" />
+                      <div className="absolute bottom-3 left-3 right-3 rounded-[1.15rem] border border-white/14 bg-slate-950/58 px-3 py-2.5 shadow-[0_16px_28px_-22px_rgba(0,0,0,0.75)] backdrop-blur-md">
+                        <p className="text-lg font-black text-white">{destination.name}</p>
+                        <p className="text-xs font-bold text-white/82">{destinationLocationLabel(destination)}</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between gap-3">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-black text-emerald-700">
-                      <Bed size={13} weight="duotone" />
-                      {destination.placesCount || 0} hospedagens
-                    </span>
-                    <span className="inline-flex items-center gap-1 text-xs font-black text-[#153A4C]">
-                      Abrir
-                      <ArrowRight size={14} weight="bold" />
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                    <div className="mt-3 flex items-center justify-between gap-3">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-black text-emerald-700">
+                        <Bed size={13} weight="duotone" />
+                        {destination.placesCount || 0} hospedagens
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-xs font-black text-[#153A4C]">
+                        Abrir
+                        <ArrowRight size={14} weight="bold" />
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-[2rem] border border-white/80 bg-white/78 p-5 shadow-[0_24px_60px_-34px_rgba(15,23,42,0.45)] backdrop-blur">
+                <p className="inline-flex items-center gap-2 rounded-full bg-[#153A4C]/8 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-[#153A4C]">
+                  <Compass size={14} weight="duotone" />
+                  Curadoria local
+                </p>
+                <h2 className="mt-4 text-2xl font-black leading-tight tracking-[-0.04em] text-slate-950">
+                  Primeiro escolha a cidade. Depois veja hospedagens, lojas e experiências.
+                </h2>
+                <div className="mt-5 grid gap-3">
+                  {[
+                    { icon: Mountains, title: 'Cidade', text: 'São Bento, São Francisco Xavier e próximos destinos entram aqui.' },
+                    { icon: Bed, title: 'Hospedagem', text: 'Chalés e pousadas ficam agrupados dentro da cidade certa.' },
+                    { icon: Sparkle, title: 'Serviços', text: 'Passeios, massagens, restaurantes e lugares para visitar aparecem no detalhe.' },
+                  ].map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <div key={item.title} className="flex gap-3 rounded-[1.35rem] border border-slate-200/80 bg-white/82 p-3">
+                        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-[#153A4C]/8 text-[#153A4C]">
+                          <Icon size={20} weight="duotone" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-black text-slate-950">{item.title}</p>
+                          <p className="mt-0.5 text-xs font-semibold leading-relaxed text-slate-500">{item.text}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -124,7 +156,8 @@ export function DestinationsPage() {
         <div className="mb-5 flex items-end justify-between gap-4">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Cidades cadastradas</p>
-            <h2 className="mt-1 text-2xl font-black tracking-[-0.03em] text-slate-950">Explore por destino</h2>
+            <h2 className="mt-1 text-2xl font-black tracking-[-0.03em] text-slate-950">Escolha uma cidade</h2>
+            <p className="mt-1 max-w-xl text-sm font-semibold text-slate-500">A lista abaixo é a navegação principal dos destinos. O detalhe da cidade concentra chalés, pousadas, serviços e lugares.</p>
           </div>
           <MapTrifold size={28} weight="duotone" className="text-[#336886]" />
         </div>
