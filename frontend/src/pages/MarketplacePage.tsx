@@ -2633,20 +2633,20 @@ export function MarketplacePage() {
                   decoding="async"
                   className={`absolute inset-0 h-full w-full ${homeConfig.marketingPopup.fit === 'contain' ? 'object-contain bg-slate-900/5' : 'object-cover'}`}
                 />
-                <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/35 to-transparent opacity-80 transition-opacity duration-200 group-active:opacity-100" />
+                <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/20 to-transparent opacity-80 transition-opacity duration-200 group-active:opacity-100" />
               </div>
               {(homeConfig.marketingPopup.title || homeConfig.marketingPopup.description || homeConfig.marketingPopup.actionUrl) ? (
-                <div className="border-t border-slate-100 px-4 py-3">
+                <div className="border-t border-slate-100 px-5 py-4">
                   {homeConfig.marketingPopup.title ? (
-                    <p className="text-sm font-black text-slate-900">{homeConfig.marketingPopup.title}</p>
+                    <p className="tracking-tight text-base font-black text-slate-950">{homeConfig.marketingPopup.title}</p>
                   ) : null}
                   {homeConfig.marketingPopup.description ? (
-                    <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">
+                    <p className="mt-1.5 text-sm font-medium leading-relaxed text-slate-600">
                       {homeConfig.marketingPopup.description}
                     </p>
                   ) : null}
                   {homeConfig.marketingPopup.actionUrl ? (
-                    <div className="mt-3 inline-flex max-w-full rounded-full bg-slate-900 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-[0_10px_24px_-16px_rgba(15,23,42,0.45)]">
+                    <div className="mt-4 inline-flex max-w-full rounded-full bg-slate-950 px-5 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-white shadow-[0_12px_20px_-8px_rgba(15,23,42,0.3)] transition-colors duration-300 hover:bg-slate-800">
                       <span className="truncate">{marketingPopupActionLabel}</span>
                     </div>
                   ) : null}
