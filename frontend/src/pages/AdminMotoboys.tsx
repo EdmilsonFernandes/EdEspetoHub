@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Car, Camera, CheckCircle, IdentificationCard, WarningCircle, Clock, UsersThree, LinkSimpleHorizontal, MagnifyingGlass, FunnelSimple } from '@phosphor-icons/react';
+import { Car, Camera, CheckCircle, CopySimple, IdentificationCard, WarningCircle, Clock, UsersThree, LinkSimpleHorizontal, MagnifyingGlass, FunnelSimple, UserPlus } from '@phosphor-icons/react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { motoboyAdminService } from '../services/motoboyAdminService';
@@ -47,6 +47,17 @@ export function AdminMotoboys() {
   const [tipPayoutsLoading, setTipPayoutsLoading] = useState(false);
   const [expandedPayoutMotoboyId, setExpandedPayoutMotoboyId] = useState<string | null>(null);
   const [openPixRows, setOpenPixRows] = useState<Record<string, boolean>>({});
+  const [createForm, setCreateForm] = useState({
+    fullName: '',
+    phone: '',
+    email: '',
+    username: '',
+    password: '',
+    confirmPassword: '',
+  });
+  const [creatingMotoboy, setCreatingMotoboy] = useState(false);
+  const [createdMotoboyAccess, setCreatedMotoboyAccess] = useState<any | null>(null);
+  const [createWarning, setCreateWarning] = useState('');
   const [payoutModal, setPayoutModal] = useState<{
     open: boolean;
     row: any | null;
@@ -223,8 +234,9 @@ export function AdminMotoboys() {
       ? base.filter((link) => {
           const name = String(link?.motoboyUser?.fullName || '').toLowerCase();
           const email = String(link?.motoboyUser?.email || '').toLowerCase();
+          const username = String(link?.motoboyUser?.username || '').toLowerCase();
           const phone = String(link?.motoboyUser?.phone || '').toLowerCase();
-          return name.includes(q) || email.includes(q) || phone.includes(q);
+          return name.includes(q) || email.includes(q) || username.includes(q) || phone.includes(q);
         })
       : base;
 
@@ -337,7 +349,14 @@ export function AdminMotoboys() {
     setLoading(true);
     try {
       const data = await motoboyAdminService.list(storeId);
-      setMotoboys(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? data : [];
+      setMotoboys(list);
+      for (const link of list.slice(0, 12)) {
+        const id = String(link?.motoboyId || '').trim();
+        if (!id || documentsByMotoboy[id]) continue;
+        // eslint-disable-next-line no-await-in-loop
+        await loadDocuments(id);
+      }
     } catch (error: any) {
       showToast(error?.message || 'Não foi possível carregar entregadores.', 'error');
     } finally {
@@ -565,6 +584,59 @@ export function AdminMotoboys() {
       loadMotoboys();
     } catch (error: any) {
       showToast(error?.message || 'Não foi possível remover o vínculo.', 'error');
+    }
+  };
+
+  const createStoreManagedMotoboy = async () => {
+    if (!storeId || creatingMotoboy) return;
+    const fullName = String(createForm.fullName || '').trim();
+    const phone = String(createForm.phone || '').trim();
+    const email = String(createForm.email || '').trim().toLowerCase();
+    const username = String(createForm.username || '').trim().toLowerCase();
+    const password = String(createForm.password || '');
+    const confirmPassword = String(createForm.confirmPassword || '');
+
+    if (!fullName || !phone || !email || !username || !password || !confirmPassword) {
+      showToast('Preencha nome, telefone, e-mail, usuário e senha temporária.', 'error');
+      return;
+    }
+    if (password.length < 6) {
+      showToast('A senha temporária precisa ter pelo menos 6 caracteres.', 'error');
+      return;
+    }
+    if (password !== confirmPassword) {
+      showToast('A confirmação da senha temporária não confere.', 'error');
+      return;
+    }
+
+    setCreatingMotoboy(true);
+    setCreateWarning('');
+    try {
+      const created = await motoboyAdminService.create(storeId, {
+        fullName,
+        phone,
+        email,
+        username,
+        password,
+      });
+      setCreatedMotoboyAccess(created || null);
+      if (!created?.credentialsEmailSent) {
+        setCreateWarning('Conta criada, mas o e-mail com as credenciais não foi enviado. Entregue os dados manualmente ao entregador.');
+      }
+      setCreateForm({
+        fullName: '',
+        phone: '',
+        email: '',
+        username: '',
+        password: '',
+        confirmPassword: '',
+      });
+      showToast('Motoboy próprio criado com sucesso.', 'success');
+      await loadMotoboys();
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível criar o motoboy próprio da loja.', 'error');
+    } finally {
+      setCreatingMotoboy(false);
     }
   };
 
@@ -859,6 +931,121 @@ export function AdminMotoboys() {
           </div>
         </FormSection>
       )}
+
+      <FormSection
+        title="Motoboy próprio da loja"
+        subtitle="Crie o acesso inicial do entregador sem mexer no fluxo atual de cadastro independente."
+        variant="success"
+      >
+        <div className="grid gap-4 lg:grid-cols-[1.3fr_0.9fr]">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-4 shadow-[0_18px_42px_-30px_rgba(15,23,42,0.24)]">
+            <div className="flex items-start gap-3">
+              <div className="h-11 w-11 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-100">
+                <UserPlus size={20} weight="duotone" />
+              </div>
+              <div>
+                <p className="text-sm font-black text-slate-900">Conta criada pela loja</p>
+                <p className="text-xs text-slate-500">O entregador já fica vinculado à loja e entra com usuário ou e-mail.</p>
+              </div>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2">
+              <input
+                value={createForm.fullName}
+                onChange={(event) => setCreateForm((prev) => ({ ...prev, fullName: event.target.value }))}
+                placeholder="Nome completo"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-brand-primary focus:bg-white"
+              />
+              <input
+                value={createForm.phone}
+                onChange={(event) => setCreateForm((prev) => ({ ...prev, phone: event.target.value }))}
+                placeholder="Telefone"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-brand-primary focus:bg-white"
+              />
+              <input
+                value={createForm.email}
+                onChange={(event) => setCreateForm((prev) => ({ ...prev, email: event.target.value }))}
+                placeholder="E-mail"
+                autoCapitalize="none"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-brand-primary focus:bg-white"
+              />
+              <input
+                value={createForm.username}
+                onChange={(event) => setCreateForm((prev) => ({ ...prev, username: event.target.value }))}
+                placeholder="Usuário"
+                autoCapitalize="none"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-brand-primary focus:bg-white"
+              />
+              <input
+                type="password"
+                value={createForm.password}
+                onChange={(event) => setCreateForm((prev) => ({ ...prev, password: event.target.value }))}
+                placeholder="Senha temporária"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-brand-primary focus:bg-white"
+              />
+              <input
+                type="password"
+                value={createForm.confirmPassword}
+                onChange={(event) => setCreateForm((prev) => ({ ...prev, confirmPassword: event.target.value }))}
+                placeholder="Confirmar senha temporária"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-brand-primary focus:bg-white"
+              />
+            </div>
+
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
+              O vínculo já nasce ativo, mas o entregador só deve operar quando o KYC estiver aprovado.
+            </div>
+
+            <button
+              type="button"
+              onClick={createStoreManagedMotoboy}
+              disabled={creatingMotoboy}
+              className="btn-press w-full sm:w-auto rounded-2xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-3 text-sm font-black text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {creatingMotoboy ? 'Criando acesso...' : 'Criar motoboy próprio'}
+            </button>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+            <p className="text-sm font-black text-slate-900">Resumo do acesso</p>
+            {createdMotoboyAccess ? (
+              <div className="space-y-3">
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-900">
+                  Conta criada e vínculo aplicado à loja.
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 space-y-1">
+                  <div><strong>Nome:</strong> {createdMotoboyAccess?.user?.fullName || '-'}</div>
+                  <div><strong>E-mail:</strong> {createdMotoboyAccess?.user?.email || '-'}</div>
+                  <div><strong>Usuário:</strong> {createdMotoboyAccess?.user?.username || '-'}</div>
+                  <div><strong>Senha temporária:</strong> {createdMotoboyAccess?.temporaryPassword || '-'}</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => copyText(
+                    [
+                      `Usuário: ${createdMotoboyAccess?.user?.username || '-'}`,
+                      `E-mail: ${createdMotoboyAccess?.user?.email || '-'}`,
+                      `Senha temporária: ${createdMotoboyAccess?.temporaryPassword || '-'}`,
+                    ].join('\n'),
+                    'Credenciais copiadas.'
+                  )}
+                  className="btn-press w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 inline-flex items-center justify-center gap-2"
+                >
+                  <CopySimple size={18} weight="duotone" />
+                  Copiar credenciais
+                </button>
+              </div>
+            ) : (
+              <p className="text-xs text-slate-500">Depois da criação, as credenciais temporárias aparecem aqui para conferência rápida.</p>
+            )}
+            {createWarning ? (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
+                {createWarning}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </FormSection>
 
       <FormSection
         title="Repasse de gorjetas"
@@ -1665,7 +1852,7 @@ export function AdminMotoboys() {
                 <input
                   value={motoboyQuery}
                   onChange={(e) => setMotoboyQuery(e.target.value)}
-                  placeholder="Buscar por nome, email ou telefone..."
+                  placeholder="Buscar por nome, email, usuário ou telefone..."
                   className="w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary"
                 />
               </div>
@@ -1782,6 +1969,9 @@ export function AdminMotoboys() {
                       {link.motoboyUser?.fullName || 'Entregador'}
                     </p>
                     <p className="text-xs text-slate-500 break-all">{link.motoboyUser?.email || '-'}</p>
+                    {link.motoboyUser?.username ? (
+                      <p className="text-[11px] font-semibold text-slate-600 break-all">Usuário: {link.motoboyUser.username}</p>
+                    ) : null}
                     {link.motoboyUser?.phone && (
                       <p className="text-xs text-slate-500 break-all">{link.motoboyUser.phone}</p>
                     )}
@@ -1815,6 +2005,11 @@ export function AdminMotoboys() {
                         Vínculo inativo
                       </span>
                     )}
+                    {link.motoboyUser?.mustChangePassword ? (
+                      <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800">
+                        Senha temporária
+                      </span>
+                    ) : null}
                   </div>
                 </div>
                 <div className="text-xs text-slate-500 flex flex-wrap gap-2">
@@ -1825,6 +2020,16 @@ export function AdminMotoboys() {
                     </span>
                   ) : null}
                 </div>
+                {Array.isArray(documentsByMotoboy[link.motoboyId]) ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    {kycPill(documentsByMotoboy[link.motoboyId] || [])}
+                  </div>
+                ) : null}
+                {link.active && String(link.motoboyStatus || '').toUpperCase() !== 'ACTIVE' ? (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                    O vínculo está ativo, mas a operação só libera quando o cadastro e o KYC forem aprovados.
+                  </div>
+                ) : null}
                 {motoboyReviewMap[link.motoboyId] ? (
                   <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 flex flex-wrap items-center gap-2">
                     <span className="font-extrabold">
@@ -1882,6 +2087,24 @@ export function AdminMotoboys() {
                       Reativar vínculo
                     </button>
                   )}
+                  {link.active && String(link.motoboyStatus || '').toUpperCase() !== 'ACTIVE' && kycSummary(documentsByMotoboy[link.motoboyId] || []).ok ? (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!storeId) return;
+                        try {
+                          await motoboyAdminService.approve(storeId, link.motoboyId);
+                          showToast('Operação liberada para o entregador.', 'success');
+                          await loadMotoboys();
+                        } catch (error: any) {
+                          showToast(error?.message || 'Não foi possível liberar a operação.', 'error');
+                        }
+                      }}
+                      className="btn-press w-full sm:w-auto px-3 py-2 rounded-xl border border-emerald-200 bg-emerald-50 text-xs font-extrabold text-emerald-800"
+                    >
+                      Liberar operação
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     onClick={() => handleUnlink(link.motoboyId)}

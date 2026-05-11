@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { api, loginAdmin, registerMotoboy, registerStore, verifyEmailDirectly } from '../helpers';
+import { api, loginAdmin, registerMotoboy, registerStore, seedApprovedMotoboyDocuments, verifyEmailDirectly } from '../helpers';
 
 const ALWAYS_OPEN_HOURS = Array.from({ length: 7 }, (_, day) => ({
   day,
@@ -138,6 +138,8 @@ describe('Fluxo E2E completo — loja, cliente e entregador', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .send({});
       expect(linkMotoboy.status).toBe(200);
+
+      await seedApprovedMotoboyDocuments(motoboyId);
 
       const approveMotoboy = await api
         .post(`/api/stores/${storeId}/motoboys/${motoboyId}/approve`)

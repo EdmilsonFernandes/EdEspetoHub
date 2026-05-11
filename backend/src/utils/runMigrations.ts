@@ -2096,4 +2096,15 @@ export async function runMigrations() {
   await AppDataSource.query(`
     ALTER TABLE order_deliveries ADD COLUMN IF NOT EXISTS confirmation_code VARCHAR(4) DEFAULT NULL;
   `);
+  await AppDataSource.query(`
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS username TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS must_change_password BOOLEAN NOT NULL DEFAULT FALSE;
+  `);
+  await AppDataSource.query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username_unique
+    ON users(username)
+    WHERE username IS NOT NULL;
+  `);
 }

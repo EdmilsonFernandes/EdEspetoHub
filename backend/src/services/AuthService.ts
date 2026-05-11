@@ -74,6 +74,17 @@ private normalizePhone(value?: string | null) {
     return String(value || '').replace(/\D/g, '');
   }
 
+  /**
+   * Normalizes username/login alias to a lower-case stable identifier.
+   *
+   * @author Edmilson Lopes
+   */
+  private normalizeUsername(value?: string | null) {
+    return String(value || '')
+      .trim()
+      .toLowerCase();
+  }
+
     /**
    * Executes compare password with legacy business logic.
    *
@@ -104,6 +115,24 @@ private async comparePasswordWithLegacy(rawPassword: string, user?: User | null)
     user.password = await bcrypt.hash(rawPassword, 10);
     await this.userRepository.save(user);
     return true;
+  }
+
+  /**
+   * Builds a safe session payload from user data.
+   *
+   * @author Edmilson Lopes
+   */
+  private sanitizeSessionUser(user: User, roleOverride?: string) {
+    return {
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      username: user.username || null,
+      phone: user.phone,
+      address: user.address,
+      role: roleOverride || user.userRole || 'STORE_OWNER',
+      mustChangePassword: Boolean((user as any).mustChangePassword),
+    };
   }
 
     /**
@@ -723,12 +752,15 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
-  async login(email: string, password: string)
+  async login(identifier: string, password: string)
   {
-    const user = await this.userRepository.findByEmail(email);
+    const normalizedIdentifier = this.normalizeUsername(identifier);
+    if (!normalizedIdentifier) throw new AppError('AUTH-004', 401);
+
+    const user = await this.userRepository.findByLoginIdentifier(normalizedIdentifier);
     if (!user) throw new AppError('AUTH-004', 401);
 
-    const valid = await bcrypt.compare(password, user.password);
+    const valid = await this.comparePasswordWithLegacy(password, user);
     if (!valid) throw new AppError('AUTH-004', 401);
     if (!user.emailVerified) {
       throw new AppError('AUTH-005', 401, {
@@ -741,15 +773,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
 
     const firstStore = user.stores?.[ 0 ];
     const token = this.generateToken(user.id, firstStore?.id);
-
-    const sanitizedUser = {
-      id: user.id,
-      fullName: user.fullName,
-      email: user.email,
-      phone: user.phone,
-      address: user.address,
-      role: user.userRole || 'STORE_OWNER',
-    };
+    const sanitizedUser = this.sanitizeSessionUser(user);
 
     const sanitizedStore = firstStore
       ? {
@@ -786,6 +810,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       user: sanitizedUser,
       store: sanitizedStore,
       token,
+      mustChangePassword: sanitizedUser.mustChangePassword,
       subscription: currentSubscription
         ? {
             id: currentSubscription.id,
@@ -900,14 +925,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       { expiresIn: '7d' }
     );
 
-    const sanitizedOwner = {
-      id: loginUser.id,
-      fullName: loginUser.fullName,
-      email: loginUser.email,
-      phone: loginUser.phone,
-      address: loginUser.address,
-      role: loginRole,
-    };
+    const sanitizedOwner = this.sanitizeSessionUser(loginUser, loginRole);
 
     const sanitizedStore = {
       id: store.id,
@@ -934,6 +952,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       token,
       user: sanitizedOwner,
       store: sanitizedStore,
+      mustChangePassword: sanitizedOwner.mustChangePassword,
       subscription: currentSubscription
         ? {
             id: currentSubscription.id,
@@ -1068,6 +1087,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     if (reset.expiresAt.getTime() < Date.now()) throw new AppError('AUTH-007', 400);
 
     reset.user.password = await bcrypt.hash(newPassword, 10);
+    reset.user.mustChangePassword = false;
     reset.usedAt = new Date();
 
     await AppDataSource.transaction(async (manager) => {
@@ -1092,10 +1112,11 @@ async changePassword(userId: string, currentPassword: string, newPassword: strin
     const user = await this.userRepository.findById(normalizedUserId);
     if (!user) throw new AppError('AUTH-004', 401);
 
-    const matches = await bcrypt.compare(currentPassword, user.password);
+    const matches = await this.comparePasswordWithLegacy(currentPassword, user);
     if (!matches) throw new AppError('AUTH-004', 401);
 
     user.password = await bcrypt.hash(newPassword, 10);
+    user.mustChangePassword = false;
     await this.userRepository.save(user as any);
     return { code: 'AUTH-S005' };
   }

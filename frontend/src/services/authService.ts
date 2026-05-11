@@ -1,9 +1,10 @@
 import { apiClient } from "../config/apiClient";
 
 export const authService = {
-    async login(email: string, password: string) {
+    async login(identifier: string, password: string) {
+        const normalizedIdentifier = String(identifier || "").trim();
         const response = await apiClient.post("/auth/login", {
-            email,
+            email: normalizedIdentifier,
             password,
         });
         return response;
@@ -50,10 +51,12 @@ export const authService = {
         });
         return response;
     },
-    async changePassword(currentPassword: string, newPassword: string) {
+    async changePassword(currentPassword: string, newPassword: string, options?: { authMode?: 'admin' | 'motoboy' }) {
         const response = await apiClient.post("/auth/change-password", {
             currentPassword,
             newPassword,
+        }, {
+            authMode: options?.authMode || 'admin',
         });
         return response;
     },

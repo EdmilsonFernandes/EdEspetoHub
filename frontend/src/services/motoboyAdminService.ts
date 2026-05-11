@@ -4,7 +4,14 @@ export const motoboyAdminService = {
   async list(storeId: string) {
     return apiClient.get(`/stores/${storeId}/motoboys`);
   },
-  async create(storeId: string, payload: { userId?: string; email?: string }) {
+  async create(storeId: string, payload: {
+    userId?: string;
+    email?: string;
+    fullName?: string;
+    phone?: string;
+    username?: string;
+    password?: string;
+  }) {
     return apiClient.post(`/stores/${storeId}/motoboys`, payload);
   },
   async link(storeId: string, motoboyId: string) {

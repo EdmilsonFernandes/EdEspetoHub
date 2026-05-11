@@ -1,12 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { House, IdentificationCard, ListChecks, Motorcycle, SignOut, Truck, Wallet } from '@phosphor-icons/react';
+import { authService } from '../services/authService';
 import { motoboyService } from '../services/motoboyService';
 import { nativeBiometricService } from '../services/nativeBiometricService';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 import { ContextSideDrawer } from '../components/common/ContextSideDrawer';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
+import { useToast } from '../contexts/ToastContext';
 
 const MOTOBOY_QUEUE_BADGE_EVENT = 'jnc:motoboy-queue-badge';
 
@@ -22,10 +24,19 @@ type Tab = {
 export function MotoboyLayout() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [installPrompt, setInstallPrompt] = useState<any | null>(null);
   const [showInstall, setShowInstall] = useState(false);
   const [queueBadge, setQueueBadge] = useState(false);
   const [accountDrawerOpen, setAccountDrawerOpen] = useState(false);
+  const [sessionRefreshKey, setSessionRefreshKey] = useState(0);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+    submitting: false,
+    error: '',
+  });
 
   const motoboySession = useMemo(() => {
     try {
@@ -34,12 +45,13 @@ export function MotoboyLayout() {
     } catch {
       return null;
     }
-  }, [pathname, accountDrawerOpen]);
+  }, [pathname, accountDrawerOpen, sessionRefreshKey]);
 
   const motoboyUser = motoboySession?.user || null;
   const motoboyName = String(motoboyUser?.fullName || motoboyUser?.name || 'Entregador').trim();
   const motoboyEmail = String(motoboyUser?.email || '').trim();
   const motoboyImage = resolveAssetUrl(String(motoboyUser?.profileImageUrl || '')) || '';
+  const requiresPasswordChange = Boolean(motoboyUser?.mustChangePassword);
 
   const tabs: Tab[] = [
     {
@@ -151,6 +163,57 @@ export function MotoboyLayout() {
     navigate('/hub', { replace: true });
   };
 
+  const handleForcedPasswordChange = async () => {
+    if (passwordForm.submitting) return;
+    const currentPassword = String(passwordForm.currentPassword || '');
+    const newPassword = String(passwordForm.newPassword || '');
+    const confirmPassword = String(passwordForm.confirmPassword || '');
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordForm((prev) => ({ ...prev, error: 'Preencha todos os campos.' }));
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPasswordForm((prev) => ({ ...prev, error: 'A nova senha precisa ter pelo menos 6 caracteres.' }));
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordForm((prev) => ({ ...prev, error: 'A confirmação da nova senha não confere.' }));
+      return;
+    }
+
+    setPasswordForm((prev) => ({ ...prev, submitting: true, error: '' }));
+    try {
+      await authService.changePassword(currentPassword, newPassword, { authMode: 'motoboy' });
+      const updatedSession = motoboySession
+        ? {
+            ...motoboySession,
+            user: {
+              ...motoboySession.user,
+              mustChangePassword: false,
+            },
+          }
+        : motoboySession;
+      localStorage.setItem('motoboySession', JSON.stringify(updatedSession));
+      nativeBiometricService.syncMotoboySession(updatedSession);
+      setPasswordForm({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+        submitting: false,
+        error: '',
+      });
+      setSessionRefreshKey((prev) => prev + 1);
+      showToast('Senha atualizada com sucesso.', 'success');
+    } catch (error: any) {
+      setPasswordForm((prev) => ({
+        ...prev,
+        submitting: false,
+        error: error?.message || 'Não foi possível atualizar sua senha agora.',
+      }));
+    }
+  };
+
   const accountActions = [
     {
       id: 'home',
@@ -206,6 +269,62 @@ export function MotoboyLayout() {
   return (
     <div className="min-h-screen motoboy-bg pb-28">
       <Outlet />
+
+      {requiresPasswordChange && (
+        <div className="fixed inset-0 z-[90] bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
+          <div className="w-full max-w-md rounded-[28px] border border-slate-200 bg-white shadow-[0_28px_80px_-40px_rgba(15,23,42,0.55)] p-6 space-y-4">
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-amber-700">Primeiro acesso</p>
+              <h2 className="mt-1 text-xl font-black text-slate-900">Troque sua senha temporária</h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Antes de operar, confirme sua senha temporária e defina uma nova senha para sua conta.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <input
+                type="password"
+                autoComplete="current-password"
+                value={passwordForm.currentPassword}
+                onChange={(event) => setPasswordForm((prev) => ({ ...prev, currentPassword: event.target.value, error: '' }))}
+                placeholder="Senha temporária"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white"
+              />
+              <input
+                type="password"
+                autoComplete="new-password"
+                value={passwordForm.newPassword}
+                onChange={(event) => setPasswordForm((prev) => ({ ...prev, newPassword: event.target.value, error: '' }))}
+                placeholder="Nova senha"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white"
+              />
+              <input
+                type="password"
+                autoComplete="new-password"
+                value={passwordForm.confirmPassword}
+                onChange={(event) => setPasswordForm((prev) => ({ ...prev, confirmPassword: event.target.value, error: '' }))}
+                placeholder="Confirmar nova senha"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white"
+              />
+            </div>
+
+            {passwordForm.error ? (
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+                {passwordForm.error}
+              </div>
+            ) : null}
+
+            <button
+              type="button"
+              onClick={handleForcedPasswordChange}
+              disabled={passwordForm.submitting}
+              className="btn-press w-full rounded-2xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-3 text-sm font-black text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {passwordForm.submitting ? 'Salvando...' : 'Salvar nova senha'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {showInstall && installPrompt && (
         <div

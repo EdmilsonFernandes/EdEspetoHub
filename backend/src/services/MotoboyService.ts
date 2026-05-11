@@ -11,12 +11,15 @@
  * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
+import bcrypt from 'bcryptjs';
 import { AppError } from '../errors/AppError';
 import { Motoboy } from '../entities/Motoboy';
+import { MotoboyStore } from '../entities/MotoboyStore';
 import { MotoboyRepository } from '../repositories/MotoboyRepository';
 import { MotoboyStoreRepository } from '../repositories/MotoboyStoreRepository';
 import { MotoboyDocument } from '../entities/MotoboyDocument';
 import { MotoboyStoreRequest } from '../entities/MotoboyStoreRequest';
+import { User } from '../entities/User';
 import { saveBase64Image } from '../utils/imageStorage';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { UserRepository } from '../repositories/UserRepository';
@@ -50,6 +53,59 @@ private normalizePlate(value?: string | null) {
     return String(value || '')
       .toUpperCase()
       .replace(/[^A-Z0-9]/g, '');
+  }
+
+  /**
+   * Normalizes phone for uniqueness checks.
+   *
+   * @author Edmilson Lopes
+   */
+  private normalizePhone(value?: string | null) {
+    return String(value || '').replace(/\D/g, '');
+  }
+
+  /**
+   * Normalizes login alias for courier access.
+   *
+   * @author Edmilson Lopes
+   */
+  private normalizeUsername(value?: string | null) {
+    return String(value || '')
+      .trim()
+      .toLowerCase();
+  }
+
+  /**
+   * Validates supported username pattern.
+   *
+   * @author Edmilson Lopes
+   */
+  private isValidUsername(value?: string | null) {
+    const normalized = this.normalizeUsername(value);
+    return /^[a-z0-9._-]{3,30}$/.test(normalized);
+  }
+
+  /**
+   * Prevents duplicate phone usage across user accounts.
+   *
+   * @author Edmilson Lopes
+   */
+  private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
+    const digits = this.normalizePhone(phone);
+    if (!digits) return;
+
+    const rows = await manager.query(
+      `
+      SELECT id
+      FROM users
+      WHERE regexp_replace(COALESCE(phone, ''), '\\D', '', 'g') = $1
+      LIMIT 1
+      `,
+      [ digits ]
+    );
+    if (Array.isArray(rows) && rows.length > 0) {
+      throw new AppError('AUTH-016', 409);
+    }
   }
 
     /**
@@ -696,15 +752,16 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
-  async createProfile(storeId: string, createdByUserId: string, payload: { userId?: string; email?: string }) {
-    const store = await this.storeRepository.findByIdWithOwner(storeId);
-    if (!store) throw new AppError('STORE-001', 404);
-    if (store.owner?.id !== createdByUserId) throw new AppError('AUTH-003', 403);
-
+  private async createProfileForExistingUser(
+    storeId: string,
+    createdByUserId: string,
+    payload: { userId?: string; email?: string }
+  ) {
     const { userId, email } = payload || {};
     if (!userId && !email) throw new AppError('MOTO-003', 400);
 
-    const user = userId ? await this.userRepository.findById(userId) : await this.userRepository.findByEmail(email || '');
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+    const user = userId ? await this.userRepository.findById(userId) : await this.userRepository.findByEmail(normalizedEmail);
     if (!user) throw new AppError('USER-001', 404);
 
     let motoboy = await this.motoboyRepository.findByUserId(user.id);
@@ -722,9 +779,173 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
       motoboyId: motoboy.id,
       action: 'MOTOBOY_PROFILE_CREATED',
       performedByUserId: createdByUserId,
-      metadata: { userId: motoboy.userId },
+      metadata: { userId: motoboy.userId, createdAccount: false },
     });
     return motoboy;
+  }
+
+  /**
+   * Creates a store-managed courier account + operational profile + active link.
+   *
+   * @author Edmilson Lopes
+   */
+  private async createStoreManagedCourier(
+    store: any,
+    createdByUserId: string,
+    payload: {
+      fullName?: string;
+      email?: string;
+      phone?: string;
+      username?: string;
+      password?: string;
+    }
+  ) {
+    const fullName = String(payload?.fullName || '').trim();
+    const email = String(payload?.email || '').trim().toLowerCase();
+    const phone = String(payload?.phone || '').trim();
+    const username = this.normalizeUsername(payload?.username);
+    const temporaryPassword = String(payload?.password || '').trim();
+
+    if (!fullName || !email || !phone || !username || !temporaryPassword) {
+      throw new AppError('GEN-002', 400);
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw new AppError('AUTH-006', 400);
+    }
+    if (!this.isValidUsername(username)) {
+      throw new AppError('AUTH-026', 400);
+    }
+    if (temporaryPassword.length < 6) {
+      throw new AppError('AUTH-008', 400);
+    }
+
+    const normalizedPhone = this.normalizePhone(phone);
+    if (normalizedPhone.length < 10) {
+      throw new AppError('AUTH-017', 400);
+    }
+
+    const created = await AppDataSource.transaction(async (manager) => {
+      const userRepo = manager.getRepository(User);
+      const motoboyRepo = manager.getRepository(Motoboy);
+      const linkRepo = manager.getRepository(MotoboyStore);
+
+      const existingEmail = await userRepo.findOne({ where: { email } });
+      if (existingEmail) throw new AppError('AUTH-011', 409);
+
+      const existingUsername = await userRepo.findOne({ where: { username } });
+      if (existingUsername) throw new AppError('AUTH-025', 409);
+
+      await this.ensurePhoneIsAvailable(manager, phone);
+
+      const passwordHash = await bcrypt.hash(temporaryPassword, 10);
+      const user = userRepo.create({
+        fullName,
+        email,
+        username,
+        password: passwordHash,
+        phone,
+        userRole: 'MOTOBOY',
+        emailVerified: true,
+        mustChangePassword: true,
+      } as User);
+      const savedUser = await userRepo.save(user);
+
+      const motoboy = motoboyRepo.create({
+        userId: savedUser.id,
+        status: 'PENDING_VERIFICATION',
+        createdByUserId,
+      } as Motoboy);
+      const savedMotoboy = await motoboyRepo.save(motoboy);
+
+      const link = linkRepo.create({
+        motoboyId: savedMotoboy.id,
+        storeId: store.id,
+        active: true,
+      } as MotoboyStore);
+      const savedLink = await linkRepo.save(link);
+
+      return {
+        user: savedUser,
+        motoboy: await motoboyRepo.findOne({ where: { id: savedMotoboy.id }, relations: [ 'user' ] }),
+        link: savedLink,
+      };
+    });
+
+    await this.logAudit({
+      storeId: store.id,
+      motoboyId: created.motoboy?.id,
+      action: 'MOTOBOY_STORE_ACCOUNT_CREATED',
+      performedByUserId: createdByUserId,
+      metadata: {
+        userId: created.user.id,
+        username: created.user.username || null,
+      },
+    });
+    await this.logAudit({
+      storeId: store.id,
+      motoboyId: created.motoboy?.id,
+      action: 'MOTOBOY_LINK_CREATED',
+      performedByUserId: createdByUserId,
+      metadata: {
+        via: 'STORE_MANAGED_ACCOUNT',
+      },
+    });
+
+    let credentialsEmailSent = false;
+    try {
+      await this.emailService.sendMotoboyStoreAccessCredentials({
+        email,
+        fullName,
+        storeName: String(store?.name || 'sua loja'),
+        username,
+        temporaryPassword,
+      });
+      credentialsEmailSent = true;
+    } catch {
+      credentialsEmailSent = false;
+    }
+
+    return {
+      createdAccount: true,
+      credentialsEmailSent,
+      temporaryPassword,
+      user: {
+        id: created.user.id,
+        fullName: created.user.fullName,
+        email: created.user.email,
+        username: created.user.username || null,
+        phone: created.user.phone || null,
+        mustChangePassword: Boolean((created.user as any).mustChangePassword),
+      },
+      motoboy: created.motoboy,
+      link: created.link,
+    };
+  }
+
+  async createProfile(
+    storeId: string,
+    createdByUserId: string,
+    payload: {
+      userId?: string;
+      email?: string;
+      fullName?: string;
+      phone?: string;
+      username?: string;
+      password?: string;
+    }
+  ) {
+    const store = await this.storeRepository.findByIdWithOwner(storeId);
+    if (!store) throw new AppError('STORE-001', 404);
+    if (store.owner?.id !== createdByUserId) throw new AppError('AUTH-003', 403);
+
+    const wantsManagedAccount = [ payload?.fullName, payload?.phone, payload?.username, payload?.password ]
+      .some((value) => String(value || '').trim().length > 0);
+
+    if (wantsManagedAccount) {
+      return this.createStoreManagedCourier(store, createdByUserId, payload);
+    }
+
+    return this.createProfileForExistingUser(storeId, createdByUserId, payload);
   }
 
   /**
@@ -826,6 +1047,11 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
 
     const motoboy = await this.motoboyRepository.findById(motoboyId);
     if (!motoboy) throw new AppError('MOTO-005', 404);
+    const link = await this.motoboyStoreRepository.findActiveLink(motoboyId, storeId);
+    if (!link) throw new AppError('MOTO-004', 404);
+
+    await this.ensureMotoboyKycApproved(motoboy);
+
     motoboy.status = 'ACTIVE';
     motoboy.approvedByUserId = userId;
     motoboy.approvedAt = new Date();

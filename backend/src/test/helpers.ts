@@ -57,6 +57,12 @@ export async function loginAdmin(email: string, password: string) {
   return { res, token: res.body?.token, store: res.body?.store, user: res.body?.user };
 }
 
+/** Login as motoboy using email or username */
+export async function loginMotoboy(identifier: string, password: string) {
+  const res = await api.post('/api/auth/login').send({ email: identifier, password });
+  return { res, token: res.body?.token, motoboy: res.body?.motoboy, user: res.body?.user };
+}
+
 /** Register a motoboy and return response */
 export async function registerMotoboy(overrides: Record<string, unknown> = {}) {
   const email = testEmail('motoboy');
@@ -131,6 +137,25 @@ export async function verifyEmailDirectly(email: string) {
   await qr.connect();
   try {
     await qr.query(`UPDATE users SET email_verified = true WHERE email = $1`, [email]);
+  } finally {
+    await qr.release();
+  }
+}
+
+/** Seed globally approved KYC documents for a motoboy */
+export async function seedApprovedMotoboyDocuments(motoboyId: string, docTypes: string[] = ['CNH', 'SELFIE']) {
+  const qr = AppDataSource.createQueryRunner();
+  await qr.connect();
+  try {
+    for (const docType of docTypes) {
+      await qr.query(
+        `
+        INSERT INTO motoboy_documents (id, motoboy_id, doc_type, file_key, status, uploaded_at)
+        VALUES (gen_random_uuid(), $1, $2, $3, 'APPROVED', NOW())
+        `,
+        [motoboyId, docType, `tests/${motoboyId}/${String(docType).toLowerCase()}.jpg`]
+      );
+    }
   } finally {
     await qr.release();
   }

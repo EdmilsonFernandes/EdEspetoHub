@@ -243,8 +243,10 @@ export class MotoboyController {
                 id: link.motoboy.user.id,
                 fullName: link.motoboy.user.fullName,
                 email: link.motoboy.user.email,
+                username: link.motoboy.user.username || null,
                 phone: link.motoboy.user.phone,
                 profileImageUrl: link.motoboy.user.profileImageUrl || null,
+                mustChangePassword: Boolean((link.motoboy.user as any).mustChangePassword),
               }
             : null,
           motoboyProfile: link.motoboy
@@ -522,6 +524,10 @@ export class MotoboyController {
       const motoboy = await motoboyService.createProfile(req.params.storeId, req.auth?.sub || '', {
         userId: req.body?.userId,
         email: req.body?.email,
+        fullName: req.body?.fullName,
+        phone: req.body?.phone,
+        username: req.body?.username,
+        password: req.body?.password,
       });
       return res.status(201).json(motoboy);
     } catch (error: any) {

@@ -177,6 +177,10 @@ export function MotoboyLogin() {
         // no-op: login must continue even if client cleanup fails
       }
       const sessionData = { token: session.token, user: session.user, store: session.store };
+      if (Boolean(session?.user?.mustChangePassword)) {
+        finishMotoboyLogin(sessionData);
+        return;
+      }
       nativeBiometricService.syncMotoboySession(sessionData);
       if (nativeBiometricService.shouldOfferMotoboyEnrollment(sessionData)) {
         setPendingBiometricSession(sessionData);

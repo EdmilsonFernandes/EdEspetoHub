@@ -75,9 +75,21 @@ findByLoginIdentifier(identifier: string) {
       .leftJoinAndSelect('user.stores', 'store')
       .leftJoinAndSelect('store.settings', 'storeSettings')
       .where('LOWER(user.email) = :identifier', { identifier: normalized })
+      .orWhere('LOWER(COALESCE(user.username, \'\')) = :identifier', { identifier: normalized })
       .orWhere('LOWER(user.fullName) = :identifier', { identifier: normalized })
       .orderBy('user.createdAt', 'DESC')
       .getOne();
+  }
+
+  /**
+   * Handles find by username.
+   *
+   * @author Edmilson Lopes
+   */
+  findByUsername(username: string) {
+    const normalized = String(username || '').trim().toLowerCase();
+    if (!normalized) return Promise.resolve(null);
+    return this.repository.findOne({ where: { username: normalized }, relations: ['stores', 'stores.settings'] });
   }
 
   /**

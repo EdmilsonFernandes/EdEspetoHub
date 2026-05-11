@@ -31,6 +31,9 @@ export class User {
   @Column({ unique: true })
   email!: string;
 
+  @Column({ type: 'text', nullable: true, unique: true })
+  username?: string | null;
+
   @Column({ name: 'email_verified', default: false })
   emailVerified!: boolean;
 
@@ -54,6 +57,9 @@ export class User {
 
   @Column({ name: 'is_active', default: true })
   isActive!: boolean;
+
+  @Column({ name: 'must_change_password', default: false })
+  mustChangePassword!: boolean;
 
   @Column({ name: 'terms_accepted_at', type: 'timestamptz', nullable: true })
   termsAcceptedAt?: Date;

@@ -736,4 +736,42 @@ private renderTemplate(template: string, vars: Record<string, string>) {
     `;
     await this.send({ to: payload.email, subject, text, html });
   }
+
+  async sendMotoboyStoreAccessCredentials(payload: {
+    email: string;
+    fullName: string;
+    storeName: string;
+    username: string;
+    temporaryPassword: string;
+  }) {
+    const loginUrl = `${env.appUrl.replace(/\/$/, '')}/motoboy/login`;
+    const subject = `Acesso liberado - ${payload.storeName}`;
+    const text = [
+      `Olá, ${payload.fullName}.`,
+      '',
+      `A loja ${payload.storeName} criou seu acesso de entregador no Já no Caminho.`,
+      '',
+      `Login: ${loginUrl}`,
+      `Usuário: ${payload.username}`,
+      `Senha temporária: ${payload.temporaryPassword}`,
+      '',
+      'No primeiro acesso, troque sua senha.',
+    ].join('\n');
+    const html = `
+      <div style="font-family: Arial, sans-serif; background: #f8fafc; padding: 24px;">
+        <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 22px;">
+          <p style="margin: 0 0 8px; color: #336886; font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;">Acesso do entregador</p>
+          <h2 style="margin: 0 0 12px; color: #0f172a;">Conta criada pela loja</h2>
+          <p style="margin: 0 0 16px; color: #475569; line-height: 1.6;">Olá, ${payload.fullName}. A loja <strong>${payload.storeName}</strong> criou seu acesso de entregador.</p>
+          <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; color: #0f172a; line-height: 1.8;">
+            <div><strong>Usuário:</strong> ${payload.username}</div>
+            <div><strong>Senha temporária:</strong> ${payload.temporaryPassword}</div>
+          </div>
+          <a href="${loginUrl}" style="display: inline-block; margin-top: 18px; padding: 12px 18px; background: #153A4C; color: #ffffff; text-decoration: none; border-radius: 12px; font-weight: 700;">Entrar como entregador</a>
+          <p style="margin: 16px 0 0; color: #64748b; font-size: 12px;">No primeiro acesso, troque sua senha.</p>
+        </div>
+      </div>
+    `;
+    await this.send({ to: payload.email, subject, text, html });
+  }
 }
