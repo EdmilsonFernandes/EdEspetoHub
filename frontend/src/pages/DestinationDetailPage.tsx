@@ -204,48 +204,45 @@ export function DestinationDetailPage() {
 
   return (
     <main className="min-h-screen bg-[#f6f2e9] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
-      <section className="relative overflow-hidden px-4 pb-8 pt-[max(1rem,env(safe-area-inset-top))]">
-        <div className="absolute inset-0 bg-[#153A4C]" />
-        {destinationHeroImage ? (
-          <img src={destinationHeroImage} alt={destination.name || destination.city || 'Destino'} className="absolute inset-0 h-full w-full object-cover opacity-35" />
-        ) : null}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(216,245,231,0.22),transparent_32%),radial-gradient(circle_at_85%_18%,rgba(250,204,21,0.14),transparent_26%),linear-gradient(135deg,rgba(21,58,76,0.93),rgba(51,104,134,0.82)_56%,rgba(72,52,30,0.78))]" />
+      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_18%_0%,rgba(51,104,134,0.18),transparent_34%),radial-gradient(circle_at_86%_16%,rgba(216,245,231,0.65),transparent_30%),linear-gradient(135deg,#f6f2e9,#eef5f1_56%,#eadfc8)] px-4 pb-8 pt-[max(1rem,env(safe-area-inset-top))]">
+        <div className="absolute -right-20 top-8 h-64 w-64 rounded-full bg-[#336886]/16 blur-3xl" />
+        <div className="absolute -left-16 bottom-4 h-56 w-56 rounded-full bg-amber-300/18 blur-3xl" />
         <div className="relative mx-auto max-w-6xl">
-          <Link to="/destinos" className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-white ring-1 ring-white/15">
+          <Link to="/destinos" className="inline-flex items-center gap-2 rounded-full border border-[#153A4C]/10 bg-white/78 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-[#153A4C] shadow-sm backdrop-blur">
             <ArrowRight size={14} className="rotate-180" weight="bold" />
             Destinos
           </Link>
 
-          {loading ? <p className="mt-8 text-sm font-bold text-white/70">Carregando destino...</p> : null}
+          {loading ? <p className="mt-8 text-sm font-bold text-slate-500">Carregando destino...</p> : null}
           {error ? <p className="mt-8 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
 
           {!loading && !error ? (
             <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_380px] lg:items-end">
               <div>
-                <p className="inline-flex max-w-full items-center gap-2 rounded-full bg-white/12 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-emerald-100 ring-1 ring-white/10">
+                <p className="inline-flex max-w-full items-center gap-2 rounded-full bg-[#153A4C]/8 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-[#153A4C] ring-1 ring-[#153A4C]/10">
                   <Mountains size={15} weight="duotone" />
-                  <span>Destino</span>
+                  <span>Guia da cidade</span>
                 </p>
-                <h1 className="mt-5 max-w-3xl text-[2.65rem] font-black leading-[0.94] tracking-[-0.055em] text-white sm:text-6xl">
+                <h1 className="mt-5 max-w-3xl text-[2.65rem] font-black leading-[0.94] tracking-[-0.055em] text-slate-950 sm:text-6xl">
                   {destination.heroTitle || destination.name}
                 </h1>
-                <p className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-black text-white/82 ring-1 ring-white/10">
-                  <MapPinLine size={15} weight="duotone" className="shrink-0 text-emerald-100" />
+                <p className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full border border-slate-200 bg-white/78 px-3 py-1.5 text-xs font-black text-slate-700 shadow-sm">
+                  <MapPinLine size={15} weight="duotone" className="shrink-0 text-[#336886]" />
                   <span className="truncate">{destinationLocationLabel}</span>
                 </p>
-                <p className="mt-5 max-w-2xl text-base font-semibold leading-relaxed text-white/72">
+                <p className="mt-5 max-w-2xl text-base font-semibold leading-relaxed text-slate-600">
                   {destination.heroSubtitle || destination.description || 'Hospedagens, lojas e experiências cadastradas neste destino.'}
                 </p>
-                <div className="mt-5 grid max-w-[25rem] grid-cols-3 gap-2 text-white">
+                <div className="mt-5 grid max-w-[25rem] grid-cols-3 gap-2">
                   {heroStats.map((stat) => (
-                    <div key={stat.label} className="rounded-[1.15rem] border border-white/12 bg-white/10 px-3 py-3 text-center shadow-[0_18px_42px_-32px_rgba(0,0,0,0.65)] backdrop-blur">
-                      <p className="text-xl font-black leading-none tracking-[-0.04em]">{stat.value}</p>
-                      <p className="mt-1 truncate text-[10px] font-black uppercase tracking-[0.14em] text-white/68">{stat.label}</p>
+                    <div key={stat.label} className="rounded-[1.15rem] border border-white/80 bg-white/78 px-3 py-3 text-center shadow-[0_18px_42px_-32px_rgba(15,23,42,0.45)] backdrop-blur">
+                      <p className="text-xl font-black leading-none tracking-[-0.04em] text-[#153A4C]">{stat.value}</p>
+                      <p className="mt-1 truncate text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">{stat.label}</p>
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="overflow-hidden rounded-[2rem] border border-white/16 bg-white/14 p-3 shadow-[0_28px_80px_-38px_rgba(0,0,0,0.65)] backdrop-blur">
+              <div className="overflow-hidden rounded-[2rem] border border-white/85 bg-white/86 p-3 shadow-[0_28px_80px_-42px_rgba(15,23,42,0.48)] backdrop-blur">
                 <div className="relative h-64 overflow-hidden rounded-[1.45rem] bg-slate-900">
                   {hasConfiguredAsset(currentSlide?.item || heroBanner || destination) ? (
                     <img src={asset(currentSlide?.item || heroBanner || destination)} alt={currentSlide?.title || destination.name} className="h-full w-full object-cover transition duration-700" />
@@ -254,34 +251,34 @@ export function DestinationDetailPage() {
                       <Mountains size={72} weight="duotone" className="text-white/40" />
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.16),rgba(15,23,42,0.10)_34%,rgba(10,20,25,0.86))]" />
-                  <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-800">
-                    {hasConfiguredAsset(currentSlide?.item) ? currentSlide?.kind || 'Destaque' : 'Destaque editorial'}
+                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(21,58,76,0.02),rgba(21,58,76,0.08))]" />
+                  <div className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-black text-slate-700 shadow-sm">
+                    {(carouselIndex % showcaseSlides.length) + 1}/{showcaseSlides.length}
                   </div>
-                  <div className="absolute bottom-4 left-4 right-4 rounded-[1.35rem] border border-white/16 bg-slate-950/64 p-3 shadow-[0_18px_36px_-24px_rgba(0,0,0,0.85)] backdrop-blur-md">
-                    <p className="text-lg font-black text-white">{currentSlide?.title || heroBanner?.title || destination.name}</p>
-                    <p className="mt-1 line-clamp-2 text-sm font-semibold text-white/78">{currentSlide?.subtitle || heroBanner?.subtitle || destination.description}</p>
-                    <div className="mt-3 flex items-center justify-between gap-3">
-                      <div className="flex gap-1.5">
-                        {showcaseSlides.slice(0, 6).map((slide: any, index: number) => (
-                          <button
-                            key={slide.key}
-                            type="button"
-                            aria-label={`Abrir destaque ${index + 1}`}
-                            onClick={() => setCarouselIndex(index)}
-                            className={`h-1.5 rounded-full transition-all ${index === carouselIndex % showcaseSlides.length ? 'w-7 bg-white' : 'w-2 bg-white/45'}`}
-                          />
-                        ))}
-                      </div>
-                      <span className="rounded-full bg-white/12 px-2.5 py-1 text-[10px] font-black text-white/78">
-                        {(carouselIndex % showcaseSlides.length) + 1}/{showcaseSlides.length}
-                      </span>
-                      {currentSlide?.placeSlug ? (
-                        <Link to={`/destinos/${destination.slug}/chales/${currentSlide.placeSlug}`} className="rounded-full bg-white px-3 py-1.5 text-[11px] font-black text-slate-900">
-                          Ver hospedagem
-                        </Link>
-                      ) : null}
+                </div>
+                <div className="px-1 pb-1 pt-4">
+                  <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#336886]">
+                    {hasConfiguredAsset(currentSlide?.item) ? currentSlide?.kind || 'Destaque' : 'Destaque da cidade'}
+                  </p>
+                  <p className="mt-1 text-xl font-black tracking-[-0.04em] text-slate-950">{currentSlide?.title || heroBanner?.title || destination.name}</p>
+                  <p className="mt-1 line-clamp-2 text-sm font-semibold leading-relaxed text-slate-500">{currentSlide?.subtitle || heroBanner?.subtitle || destination.description}</p>
+                  <div className="mt-4 flex items-center justify-between gap-3">
+                    <div className="flex gap-1.5">
+                      {showcaseSlides.slice(0, 6).map((slide: any, index: number) => (
+                        <button
+                          key={slide.key}
+                          type="button"
+                          aria-label={`Abrir destaque ${index + 1}`}
+                          onClick={() => setCarouselIndex(index)}
+                          className={`h-1.5 rounded-full transition-all ${index === carouselIndex % showcaseSlides.length ? 'w-7 bg-[#153A4C]' : 'w-2 bg-[#153A4C]/22'}`}
+                        />
+                      ))}
                     </div>
+                    {currentSlide?.placeSlug ? (
+                      <Link to={`/destinos/${destination.slug}/chales/${currentSlide.placeSlug}`} className="rounded-full bg-[#153A4C] px-3 py-1.5 text-[11px] font-black text-white">
+                        Ver hospedagem
+                      </Link>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -295,8 +292,8 @@ export function DestinationDetailPage() {
           <div className="lg:col-span-2 rounded-[2rem] border border-white/80 bg-white/82 p-4 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.36)] backdrop-blur sm:p-5">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Encontrar rápido</p>
-                <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950">Busque hospedagem, restaurante, passeio ou serviço</h2>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Encontre no destino</p>
+                <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950">Busque chalés, sabores, passeios e serviços locais</h2>
               </div>
               <p className="text-xs font-bold text-slate-500">
                 {activeFilterLabel}: {filteredPlaces.length + filteredListings.length} resultado(s)
@@ -436,7 +433,7 @@ export function DestinationDetailPage() {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">Experiências</p>
-                  <h2 className="mt-1 text-xl font-black">Serviços e lugares</h2>
+                  <h2 className="mt-1 text-xl font-black">Experiências locais</h2>
                 </div>
                 <Sparkle size={25} weight="duotone" className="text-amber-700" />
               </div>
@@ -518,7 +515,7 @@ export function DestinationDetailPage() {
                 Participar
               </p>
               <h3 className="mt-4 text-xl font-black tracking-[-0.03em]">Tem chalé, pousada ou serviço?</h3>
-              <p className="mt-2 text-sm font-semibold text-white/72">Cadastre sua responsabilidade e aguarde aprovação da plataforma.</p>
+              <p className="mt-2 text-sm font-semibold text-white/72">Cadastre seu espaço ou serviço e aguarde a aprovação da plataforma.</p>
             </Link>
           </aside>
           ) : null}
@@ -531,7 +528,7 @@ export function DestinationDetailPage() {
                   Participar
                 </p>
                 <h3 className="mt-4 text-xl font-black tracking-[-0.03em]">Tem chalé, pousada ou serviço?</h3>
-                <p className="mt-2 text-sm font-semibold text-white/72">Cadastre sua responsabilidade e aguarde aprovação da plataforma.</p>
+                <p className="mt-2 text-sm font-semibold text-white/72">Cadastre seu espaço ou serviço e aguarde a aprovação da plataforma.</p>
               </Link>
             </aside>
           ) : null}

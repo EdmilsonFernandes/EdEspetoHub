@@ -71,10 +71,10 @@ export function DestinationsPage() {
             <div>
               <p className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-white">
                 <Mountains size={15} weight="duotone" />
-                Destinos Já no Caminho
+                Seu próximo refúgio
               </p>
               <h1 className="mt-5 max-w-3xl text-4xl font-black leading-[0.95] tracking-[-0.05em] text-slate-950 sm:text-6xl">
-                Escolha a cidade, o chalé e o que fazer perto.
+                Descubra cidades, chalés e experiências para aproveitar sem pressa.
               </h1>
               <p className="mt-5 max-w-2xl text-base font-semibold leading-relaxed text-slate-600 sm:text-lg">
                 Uma vitrine real para chalés, pousadas, lojas que entregam, passeios, massagens e lugares para visitar.
@@ -118,33 +118,36 @@ export function DestinationsPage() {
                 ))}
               </div>
             ) : (
-              <div className="rounded-[2rem] border border-white/80 bg-white/78 p-5 shadow-[0_24px_60px_-34px_rgba(15,23,42,0.45)] backdrop-blur">
-                <p className="inline-flex items-center gap-2 rounded-full bg-[#153A4C]/8 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-[#153A4C]">
-                  <Compass size={14} weight="duotone" />
-                  Curadoria local
-                </p>
-                <h2 className="mt-4 text-2xl font-black leading-tight tracking-[-0.04em] text-slate-950">
-                  Primeiro escolha a cidade. Depois veja hospedagens, lojas e experiências.
-                </h2>
-                <div className="mt-5 grid gap-3">
-                  {[
-                    { icon: Mountains, title: 'Cidade', text: 'São Bento, São Francisco Xavier e próximos destinos entram aqui.' },
-                    { icon: Bed, title: 'Hospedagem', text: 'Chalés e pousadas ficam agrupados dentro da cidade certa.' },
-                    { icon: Sparkle, title: 'Serviços', text: 'Passeios, massagens, restaurantes e lugares para visitar aparecem no detalhe.' },
-                  ].map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <div key={item.title} className="flex gap-3 rounded-[1.35rem] border border-slate-200/80 bg-white/82 p-3">
-                        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-[#153A4C]/8 text-[#153A4C]">
-                          <Icon size={20} weight="duotone" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-black text-slate-950">{item.title}</p>
-                          <p className="mt-0.5 text-xs font-semibold leading-relaxed text-slate-500">{item.text}</p>
-                        </div>
+              <div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/78 p-5 shadow-[0_24px_60px_-34px_rgba(15,23,42,0.45)] backdrop-blur">
+                <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[#336886]/12 blur-2xl" />
+                <div className="absolute -bottom-12 left-8 h-32 w-32 rounded-full bg-amber-300/20 blur-2xl" />
+                <div className="relative">
+                  <p className="inline-flex items-center gap-2 rounded-full bg-[#153A4C]/8 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-[#153A4C]">
+                    <Mountains size={14} weight="duotone" />
+                    Mantiqueira no app
+                  </p>
+                  <h2 className="mt-4 text-2xl font-black leading-tight tracking-[-0.04em] text-slate-950">
+                    Encontre onde ficar, comer e aproveitar a cidade.
+                  </h2>
+                  <p className="mt-3 text-sm font-semibold leading-relaxed text-slate-600">
+                    Escolha um destino e veja chalés, pousadas, restaurantes, passeios e serviços por perto.
+                  </p>
+                  <div className="mt-5 grid grid-cols-3 gap-2">
+                    {[
+                      { value: destinations.length, label: 'cidades' },
+                      { value: destinations.reduce((sum, item) => sum + Number(item.placesCount || 0), 0), label: 'hospedagens' },
+                      { value: destinations.reduce((sum, item) => sum + Number(item.listingsCount || 0), 0), label: 'experiências' },
+                    ].map((stat) => (
+                      <div key={stat.label} className="rounded-[1.15rem] border border-slate-200/80 bg-white/86 px-3 py-3 text-center shadow-[0_14px_32px_-28px_rgba(15,23,42,0.42)]">
+                        <p className="text-xl font-black tracking-[-0.04em] text-[#153A4C]">{stat.value}</p>
+                        <p className="mt-1 truncate text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">{stat.label}</p>
                       </div>
-                    );
-                  })}
+                    ))}
+                  </div>
+                  <a href="#destinos" className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#153A4C] px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-white shadow-[0_16px_32px_-22px_rgba(21,58,76,0.8)]">
+                    Escolher cidade
+                    <ArrowRight size={14} weight="bold" />
+                  </a>
                 </div>
               </div>
             )}
@@ -155,9 +158,9 @@ export function DestinationsPage() {
       <section id="destinos" className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
         <div className="mb-5 flex items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Cidades cadastradas</p>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Destinos disponíveis</p>
             <h2 className="mt-1 text-2xl font-black tracking-[-0.03em] text-slate-950">Escolha uma cidade</h2>
-            <p className="mt-1 max-w-xl text-sm font-semibold text-slate-500">A lista abaixo é a navegação principal dos destinos. O detalhe da cidade concentra chalés, pousadas, serviços e lugares.</p>
+            <p className="mt-1 max-w-xl text-sm font-semibold text-slate-500">Veja as opções da região e abra a cidade para montar seu roteiro.</p>
           </div>
           <MapTrifold size={28} weight="duotone" className="text-[#336886]" />
         </div>
@@ -182,7 +185,7 @@ export function DestinationsPage() {
                 <div>
                   <h3 className="text-2xl font-black tracking-[-0.04em] text-slate-950">{destination.name}</h3>
                   <p className="mt-2 line-clamp-3 text-sm font-semibold leading-relaxed text-slate-600">
-                    {destination.description || destination.heroSubtitle || 'Destino cadastrado no Já no Caminho.'}
+                    {destination.description || destination.heroSubtitle || 'Um destino pronto para receber sua próxima viagem.'}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -195,7 +198,7 @@ export function DestinationsPage() {
                     {destination.listingsCount || 0} serviços
                   </span>
                   <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-[#153A4C] px-3 py-1.5 text-xs font-black text-white">
-                    Ver destino
+                    Explorar cidade
                     <Compass size={14} weight="bold" />
                   </span>
                 </div>
