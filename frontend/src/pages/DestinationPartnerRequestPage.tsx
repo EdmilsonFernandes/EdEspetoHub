@@ -1,8 +1,9 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Bed, CheckCircle, Compass, Handshake, Sparkle } from '@phosphor-icons/react';
+import { ArrowRight, Bed, CheckCircle, Compass, Handshake, ImageSquare, LinkSimpleHorizontal, Sparkle, UploadSimple } from '@phosphor-icons/react';
 import { destinationService } from '../services/destinationService';
+import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 const initialForm = {
   destinationId: '',
@@ -17,11 +18,132 @@ const initialForm = {
   whatsapp: '',
   instagramUrl: '',
   websiteUrl: '',
+  logoUrl: '',
+  bannerUrl: '',
+  imageUrl: '',
+  logoFile: '',
+  bannerFile: '',
+  imageFile: '',
   deliveryInstructions: '',
   responsibleName: '',
   responsibleEmail: '',
   responsiblePhone: '',
   message: '',
+};
+
+const readFileAsDataUrl = (file: File) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error('file_read_error'));
+    reader.readAsDataURL(file);
+  });
+
+const compressImageFileToDataUrl = (file: File, maxEdge = 1600) =>
+  new Promise<string>((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      try {
+        const width = Number(image.width || 0);
+        const height = Number(image.height || 0);
+        if (!width || !height) throw new Error('invalid_image');
+        const ratio = Math.min(1, maxEdge / Math.max(width, height));
+        const targetWidth = Math.max(1, Math.round(width * ratio));
+        const targetHeight = Math.max(1, Math.round(height * ratio));
+        const canvas = document.createElement('canvas');
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('canvas_error');
+        ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
+        let quality = 0.86;
+        let dataUrl = canvas.toDataURL('image/jpeg', quality);
+        while (dataUrl.length > 1_200_000 && quality > 0.62) {
+          quality -= 0.06;
+          dataUrl = canvas.toDataURL('image/jpeg', quality);
+        }
+        resolve(dataUrl);
+      } catch (error) {
+        reject(error);
+      } finally {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('image_load_error'));
+    };
+    image.src = objectUrl;
+  });
+
+const prepareImageUpload = async (file: File, maxEdge = 1600) => {
+  if (!file.type.startsWith('image/')) throw new Error('invalid_file_type');
+  if (file.type === 'image/gif') return readFileAsDataUrl(file);
+  try {
+    return await compressImageFileToDataUrl(file, maxEdge);
+  } catch {
+    return readFileAsDataUrl(file);
+  }
+};
+
+const MediaUploadField = ({ label, hint, urlValue, fileValue, onUrlChange, onFileChange, onError, maxEdge = 1600 }: any) => {
+  const previewUrl = fileValue || resolveAssetUrl(urlValue || '') || '';
+
+  const handleFile = async (event: any) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    try {
+      const dataUrl = await prepareImageUpload(file, maxEdge);
+      onFileChange(dataUrl);
+      onUrlChange('');
+    } catch {
+      onError?.('Não foi possível carregar a imagem selecionada.');
+    }
+  };
+
+  return (
+    <div className="sm:col-span-2 rounded-[1.35rem] border border-slate-200 bg-slate-50/80 p-3">
+      <div className="grid gap-3 sm:grid-cols-[112px_1fr]">
+        <div className="flex h-28 items-center justify-center overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200">
+          {previewUrl ? (
+            <img src={previewUrl} alt={label} className="h-full w-full object-cover" />
+          ) : (
+            <ImageSquare size={34} weight="duotone" className="text-slate-400" />
+          )}
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-black text-slate-950">{label}</p>
+          <p className="mt-0.5 text-[11px] font-semibold text-slate-500">{hint}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-[#153A4C] px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-white">
+              <UploadSimple size={14} weight="bold" />
+              Upload comprimido
+              <input type="file" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" className="hidden" onChange={handleFile} />
+            </label>
+            {(fileValue || urlValue) ? (
+              <button type="button" onClick={() => { onFileChange(''); onUrlChange(''); }} className="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-slate-600">
+                Limpar
+              </button>
+            ) : null}
+          </div>
+          <label className="mt-3 flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2">
+            <LinkSimpleHorizontal size={16} weight="bold" className="text-slate-400" />
+            <input
+              value={urlValue || ''}
+              onChange={(event) => {
+                onUrlChange(event.target.value);
+                if (event.target.value) onFileChange('');
+              }}
+              placeholder="Ou cole uma URL pública da imagem"
+              className="min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400"
+            />
+          </label>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export function DestinationPartnerRequestPage() {
@@ -54,6 +176,16 @@ export function DestinationPartnerRequestPage() {
   }, []);
 
   const update = (key: string, value: any) => setForm((current) => ({ ...current, [key]: value }));
+  const updatePartnerType = (value: string) => setForm((current) => ({
+    ...current,
+    partnerType: value,
+    logoUrl: '',
+    bannerUrl: '',
+    imageUrl: '',
+    logoFile: '',
+    bannerFile: '',
+    imageFile: '',
+  }));
 
   const submit = async (event: any) => {
     event.preventDefault();
@@ -76,7 +208,7 @@ export function DestinationPartnerRequestPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#f4f1ea] px-4 py-[max(1rem,env(safe-area-inset-top))] text-slate-950">
+    <main className="min-h-screen bg-[#f4f1ea] px-4 pb-[calc(var(--jnk-native-nav-height,0px)+2rem)] pt-[max(1rem,env(safe-area-inset-top))] text-slate-950">
       <div className="mx-auto max-w-5xl">
         <Link to="/destinos" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-slate-600">
           <ArrowRight size={14} className="rotate-180" weight="bold" />
@@ -137,7 +269,7 @@ export function DestinationPartnerRequestPage() {
 
               <label>
                 <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Tipo de parceiro</span>
-                <select value={form.partnerType} onChange={(event) => update('partnerType', event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]">
+                <select value={form.partnerType} onChange={(event) => updatePartnerType(event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]">
                   <option value="HOSPITALITY">Chalé ou pousada</option>
                   <option value="SERVICE_PROVIDER">Serviço turístico</option>
                 </select>
@@ -178,8 +310,41 @@ export function DestinationPartnerRequestPage() {
               <input value={form.websiteUrl} onChange={(event) => update('websiteUrl', event.target.value)} placeholder="Site" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
 
               {form.partnerType === 'HOSPITALITY' ? (
-                <textarea value={form.deliveryInstructions} onChange={(event) => update('deliveryInstructions', event.target.value)} placeholder="Instruções para entrega no local" rows={3} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
-              ) : null}
+                <>
+                  <MediaUploadField
+                    label="Foto/banner da hospedagem"
+                    hint="Imagem principal que aparece no card do chalé ou pousada."
+                    urlValue={form.bannerUrl}
+                    fileValue={form.bannerFile}
+                    onUrlChange={(value: string) => update('bannerUrl', value)}
+                    onFileChange={(value: string) => update('bannerFile', value)}
+                    onError={setError}
+                    maxEdge={1800}
+                  />
+                  <MediaUploadField
+                    label="Logo ou foto complementar"
+                    hint="Opcional. Ajuda a identificar sua hospedagem na curadoria."
+                    urlValue={form.logoUrl}
+                    fileValue={form.logoFile}
+                    onUrlChange={(value: string) => update('logoUrl', value)}
+                    onFileChange={(value: string) => update('logoFile', value)}
+                    onError={setError}
+                    maxEdge={900}
+                  />
+                  <textarea value={form.deliveryInstructions} onChange={(event) => update('deliveryInstructions', event.target.value)} placeholder="Instruções para entrega no local" rows={3} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
+                </>
+              ) : (
+                <MediaUploadField
+                  label="Foto do serviço ou lugar"
+                  hint="Imagem usada no card público de experiências e serviços locais."
+                  urlValue={form.imageUrl}
+                  fileValue={form.imageFile}
+                  onUrlChange={(value: string) => update('imageUrl', value)}
+                  onFileChange={(value: string) => update('imageFile', value)}
+                  onError={setError}
+                  maxEdge={1400}
+                />
+              )}
 
               <div className="sm:col-span-2 mt-2 border-t border-slate-100 pt-4">
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Responsável pelo cadastro</p>

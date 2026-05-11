@@ -132,6 +132,13 @@ export function DestinationDetailPage() {
   const showPlacesSection = activeCategory === 'TODOS' || activeCategory === 'HOSPEDAGENS';
   const showListingsSection = activeCategory !== 'HOSPEDAGENS';
   const showcaseSlides = useMemo(() => {
+    const destinationSlides = hasConfiguredAsset(destination) ? [{
+      key: `destination-${destination.id || destination.slug}`,
+      title: destination.heroTitle || destination.name,
+      subtitle: destination.heroSubtitle || destination.description,
+      item: destination,
+      kind: 'Cidade',
+    }] : [];
     const bannerSlides = banners.filter((banner: any) => hasConfiguredAsset(banner)).map((banner: any) => ({
       key: `banner-${banner.id}`,
       title: banner.title || destination.name,
@@ -147,8 +154,15 @@ export function DestinationDetailPage() {
       placeSlug: place.slug,
       kind: String(place.type || 'Hospedagem').replace('_', ' '),
     }));
-    return [...bannerSlides, ...placeSlides].length
-      ? [...bannerSlides, ...placeSlides]
+    const listingSlides = listings.filter((listing: any) => hasConfiguredAsset(listing, 'image')).map((listing: any) => ({
+      key: `listing-${listing.id}`,
+      title: listing.title,
+      subtitle: listing.address || listing.description || 'Experiência local cadastrada neste destino.',
+      item: listing,
+      kind: categoryLabel(listing.category),
+    }));
+    return [...destinationSlides, ...bannerSlides, ...placeSlides, ...listingSlides].length
+      ? [...destinationSlides, ...bannerSlides, ...placeSlides, ...listingSlides]
       : [{
           key: 'destination',
           title: destination.name,
@@ -156,7 +170,7 @@ export function DestinationDetailPage() {
           item: destination,
           kind: 'Destino',
         }];
-  }, [banners, places, destination]);
+  }, [banners, places, listings, destination]);
   const currentSlide = showcaseSlides[carouselIndex % Math.max(showcaseSlides.length, 1)];
 
   useEffect(() => {
@@ -236,6 +250,9 @@ export function DestinationDetailPage() {
                           />
                         ))}
                       </div>
+                      <span className="rounded-full bg-white/12 px-2.5 py-1 text-[10px] font-black text-white/78">
+                        {(carouselIndex % showcaseSlides.length) + 1}/{showcaseSlides.length}
+                      </span>
                       {currentSlide?.placeSlug ? (
                         <Link to={`/destinos/${destination.slug}/chales/${currentSlide.placeSlug}`} className="rounded-full bg-white px-3 py-1.5 text-[11px] font-black text-slate-900">
                           Ver hospedagem

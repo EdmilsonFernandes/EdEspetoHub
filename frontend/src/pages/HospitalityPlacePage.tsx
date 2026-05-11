@@ -69,35 +69,48 @@ export function HospitalityPlacePage() {
               <p className="mt-5 max-w-2xl text-base font-semibold leading-relaxed text-white/76">
                 {place.description || place.deliveryInstructions || 'Hospedagem cadastrada no Já no Caminho.'}
               </p>
-              <div className="mt-6 flex flex-wrap gap-2">
-                {place.address ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/12 px-3 py-1.5 text-xs font-black text-white">
-                    <MapPinLine size={14} weight="duotone" />
-                    {place.address}
-                  </span>
-                ) : null}
-                {place.whatsapp ? (
-                  <a
-                    href={buildWhatsAppUrl(place.whatsapp, buildDestinationInquiryMessage({
-                      destinationName: destination.name,
-                      city: destination.city,
-                      state: destination.state,
-                      itemName: place.name,
-                      itemType: 'hospedagem',
-                    }), isNativePlatform)}
-                    target={isNativePlatform ? undefined : '_blank'}
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-3 py-1.5 text-xs font-black text-white"
-                  >
-                    <WhatsappLogo size={14} weight="fill" />
-                    Falar sobre a hospedagem
-                  </a>
-                ) : null}
-              </div>
             </div>
           ) : null}
         </div>
       </section>
+
+      {!loading && !error ? (
+        <section className="relative z-10 mx-auto -mt-7 max-w-6xl px-4">
+          <div className="flex flex-col gap-3 rounded-[1.75rem] border border-slate-200 bg-white/95 p-4 shadow-[0_18px_50px_-34px_rgba(15,23,42,0.45)] backdrop-blur md:flex-row md:items-center md:justify-between">
+            <div className="min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Local da hospedagem</p>
+              <p className="mt-1 line-clamp-2 text-sm font-black text-slate-800">
+                {place.address || [place.city, place.state].filter(Boolean).join(' - ') || 'Endereço não informado'}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {place.address ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-2 text-xs font-black text-slate-700">
+                  <MapPinLine size={14} weight="duotone" />
+                  Ver endereço
+                </span>
+              ) : null}
+              {place.whatsapp ? (
+                <a
+                  href={buildWhatsAppUrl(place.whatsapp, buildDestinationInquiryMessage({
+                    destinationName: destination.name,
+                    city: destination.city,
+                    state: destination.state,
+                    itemName: place.name,
+                    itemType: 'hospedagem',
+                  }), isNativePlatform)}
+                  target={isNativePlatform ? undefined : '_blank'}
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-3 py-2 text-xs font-black text-white"
+                >
+                  <WhatsappLogo size={14} weight="fill" />
+                  Falar sobre a hospedagem
+                </a>
+              ) : null}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {!loading && !error ? (
         <section className="mx-auto grid max-w-6xl gap-8 px-4 pb-10 pt-8 lg:grid-cols-[1.25fr_0.75fr]">

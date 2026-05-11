@@ -82,6 +82,10 @@ const imageFor = (item: any) =>
   resolveAssetUrl(item?.bannerUrl || item?.logoUrl || item?.imageUrl || '') ||
   getStoreAvatarUrl(item?.slug || item?.id, item?.name || item?.title);
 
+const logoFor = (item: any) =>
+  resolveAssetUrl(item?.logoUrl || item?.bannerUrl || item?.imageUrl || '') ||
+  getStoreAvatarUrl(item?.slug || item?.id, item?.name || item?.title);
+
 const requestTone = (status?: string) => {
   const normalized = String(status || 'pending').toLowerCase();
   if (normalized === 'approved') return 'bg-emerald-50 text-emerald-700 border-emerald-100';
@@ -264,6 +268,7 @@ export function SuperAdminDestinations() {
   const [editingPlaceId, setEditingPlaceId] = useState('');
   const [editingListingId, setEditingListingId] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [cadastroMode, setCadastroMode] = useState<'destination' | 'place' | 'listing' | 'storeLink'>('destination');
   const [search, setSearch] = useState('');
   const [stateFilter, setStateFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState<'active' | 'all' | 'inactive'>('active');
@@ -384,6 +389,9 @@ export function SuperAdminDestinations() {
 
   const startDestinationEdit = (destination: any) => {
     setEditingDestinationId(destination.id);
+    setEditingPlaceId('');
+    setEditingListingId('');
+    setCadastroMode('destination');
     setDestinationForm({
       ...emptyDestination,
       ...Object.fromEntries(Object.entries(destination).map(([key, value]) => [key, toFormValue(value)])),
@@ -392,10 +400,14 @@ export function SuperAdminDestinations() {
       sortOrder: Number(destination.sortOrder || 0),
     });
     setActiveTab('cadastro');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const startPlaceEdit = (place: any) => {
+    setEditingDestinationId('');
     setEditingPlaceId(place.id);
+    setEditingListingId('');
+    setCadastroMode('place');
     setPlaceForm({
       ...emptyPlace,
       ...Object.fromEntries(Object.entries(place).map(([key, value]) => [key, toFormValue(value)])),
@@ -405,10 +417,14 @@ export function SuperAdminDestinations() {
       sortOrder: Number(place.sortOrder || 0),
     });
     setActiveTab('cadastro');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const startListingEdit = (listing: any) => {
+    setEditingDestinationId('');
+    setEditingPlaceId('');
     setEditingListingId(listing.id);
+    setCadastroMode('listing');
     setListingForm({
       ...emptyListing,
       ...Object.fromEntries(Object.entries(listing).map(([key, value]) => [key, toFormValue(value)])),
@@ -419,21 +435,32 @@ export function SuperAdminDestinations() {
       sortOrder: Number(listing.sortOrder || 0),
     });
     setActiveTab('cadastro');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const cancelDestinationEdit = () => {
     setEditingDestinationId('');
     setDestinationForm(emptyDestination);
+    setActiveTab('dashboard');
   };
 
   const cancelPlaceEdit = () => {
     setEditingPlaceId('');
     setPlaceForm((current) => ({ ...emptyPlace, destinationId: current.destinationId }));
+    setActiveTab('dashboard');
   };
 
   const cancelListingEdit = () => {
     setEditingListingId('');
     setListingForm((current) => ({ ...emptyListing, destinationId: current.destinationId }));
+    setActiveTab('dashboard');
+  };
+
+  const returnToDashboardFromCadastro = () => {
+    if (editingDestinationId) return cancelDestinationEdit();
+    if (editingPlaceId) return cancelPlaceEdit();
+    if (editingListingId) return cancelListingEdit();
+    setActiveTab('dashboard');
   };
 
   const saveDestination = async (event: any) => {
@@ -441,6 +468,7 @@ export function SuperAdminDestinations() {
     setSaving(true);
     setError('');
     try {
+      const wasEditing = Boolean(editingDestinationId);
       const payload = { ...destinationForm, active: toBool(destinationForm.active) };
       if (editingDestinationId) {
         await destinationService.adminUpdateDestination(editingDestinationId, payload);
@@ -450,6 +478,7 @@ export function SuperAdminDestinations() {
       setEditingDestinationId('');
       setDestinationForm(emptyDestination);
       await load();
+      if (wasEditing) setActiveTab('dashboard');
     } catch (err: any) {
       setError(err?.message || 'Não foi possível salvar destino.');
     } finally {
@@ -462,6 +491,7 @@ export function SuperAdminDestinations() {
     setSaving(true);
     setError('');
     try {
+      const wasEditing = Boolean(editingPlaceId);
       const payload = { ...placeForm, active: toBool(placeForm.active) };
       if (editingPlaceId) {
         await destinationService.adminUpdateHospitalityPlace(editingPlaceId, payload);
@@ -471,6 +501,7 @@ export function SuperAdminDestinations() {
       setEditingPlaceId('');
       setPlaceForm((current) => ({ ...emptyPlace, destinationId: current.destinationId }));
       await load();
+      if (wasEditing) setActiveTab('dashboard');
     } catch (err: any) {
       setError(err?.message || 'Não foi possível salvar hospedagem.');
     } finally {
@@ -483,6 +514,7 @@ export function SuperAdminDestinations() {
     setSaving(true);
     setError('');
     try {
+      const wasEditing = Boolean(editingListingId);
       const payload = { ...listingForm, active: toBool(listingForm.active), featured: toBool(listingForm.featured) };
       if (editingListingId) {
         await destinationService.adminUpdateListing(editingListingId, payload);
@@ -492,6 +524,7 @@ export function SuperAdminDestinations() {
       setEditingListingId('');
       setListingForm((current) => ({ ...emptyListing, destinationId: current.destinationId }));
       await load();
+      if (wasEditing) setActiveTab('dashboard');
     } catch (err: any) {
       setError(err?.message || 'Não foi possível salvar serviço.');
     } finally {
@@ -583,6 +616,14 @@ export function SuperAdminDestinations() {
     { id: 'dashboard', label: 'Resumo', icon: Compass },
     { id: 'cadastro', label: 'Cadastro', icon: Plus },
     { id: 'requests', label: 'Solicitações', icon: WarningCircle, badge: metrics.pending },
+  ];
+  const editingCadastroMode = editingDestinationId ? 'destination' : editingPlaceId ? 'place' : editingListingId ? 'listing' : '';
+  const activeCadastroMode = editingCadastroMode || cadastroMode;
+  const cadastroModeOptions = [
+    { id: 'destination', label: 'Cidade', description: 'Destino turístico e banner principal.', icon: MapTrifold },
+    { id: 'place', label: 'Chalé/Pousada', description: 'Hospedagem com logo, banner e instruções.', icon: Bed },
+    { id: 'listing', label: 'Serviço/Lugar', description: 'Passeio, atrativo, restaurante ou serviço local.', icon: Sparkle },
+    { id: 'storeLink', label: 'Vínculo loja', description: 'Loja que entrega em uma hospedagem.', icon: Buildings },
   ];
 
   return (
@@ -755,12 +796,17 @@ export function SuperAdminDestinations() {
                               <div className={`mt-3 space-y-2 ${expanded ? 'max-h-[460px] overflow-y-auto pr-1' : ''}`}>
                                 {visiblePlaces.length ? visiblePlaces.map((place: any) => (
                                   <div key={place.id} className="rounded-2xl border border-slate-100 bg-slate-50/80 px-3 py-3">
-                                    <div className="flex items-start justify-between gap-3">
-                                      <div className="min-w-0">
-                                        <p className="line-clamp-1 text-sm font-black text-slate-950">{place.name}</p>
-                                        <p className="mt-0.5 line-clamp-2 text-xs font-semibold text-slate-500">{place.address || place.description || 'Hospedagem sem endereço'}</p>
+                                    <div className="flex items-start gap-3">
+                                      <img src={logoFor(place)} alt={place.name} className="h-14 w-14 shrink-0 rounded-2xl object-cover ring-1 ring-slate-200" />
+                                      <div className="min-w-0 flex-1">
+                                        <div className="flex items-start justify-between gap-3">
+                                          <div className="min-w-0">
+                                            <p className="line-clamp-1 text-sm font-black text-slate-950">{place.name}</p>
+                                            <p className="mt-0.5 line-clamp-2 text-xs font-semibold text-slate-500">{place.address || place.description || 'Hospedagem sem endereço'}</p>
+                                          </div>
+                                          <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(place.active)}`}>{activeLabel(place.active)}</span>
+                                        </div>
                                       </div>
-                                      <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(place.active)}`}>{activeLabel(place.active)}</span>
                                     </div>
                                     <div className="mt-3 flex flex-wrap gap-2">
                                       <button type="button" onClick={() => startPlaceEdit(place)} className={actionButtonClass('neutral')}>
@@ -789,12 +835,17 @@ export function SuperAdminDestinations() {
                               <div className={`mt-3 space-y-2 ${expanded ? 'max-h-[460px] overflow-y-auto pr-1' : ''}`}>
                                 {visibleListings.length ? visibleListings.map((listing: any) => (
                                   <div key={listing.id} className="rounded-2xl border border-amber-100 bg-amber-50/60 px-3 py-3">
-                                    <div className="flex items-start justify-between gap-3">
-                                      <div className="min-w-0">
-                                        <p className="line-clamp-1 text-sm font-black text-slate-950">{listing.title}</p>
-                                        <p className="mt-0.5 text-xs font-semibold text-slate-500">{String(listing.category || 'SERVICO').replace('_', ' ')}</p>
+                                    <div className="flex items-start gap-3">
+                                      <img src={imageFor(listing)} alt={listing.title} className="h-14 w-14 shrink-0 rounded-2xl object-cover ring-1 ring-amber-100" />
+                                      <div className="min-w-0 flex-1">
+                                        <div className="flex items-start justify-between gap-3">
+                                          <div className="min-w-0">
+                                            <p className="line-clamp-1 text-sm font-black text-slate-950">{listing.title}</p>
+                                            <p className="mt-0.5 text-xs font-semibold text-slate-500">{String(listing.category || 'SERVICO').replace('_', ' ')}</p>
+                                          </div>
+                                          <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(listing.active)}`}>{activeLabel(listing.active)}</span>
+                                        </div>
                                       </div>
-                                      <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(listing.active)}`}>{activeLabel(listing.active)}</span>
                                     </div>
                                     <div className="mt-3 flex flex-wrap gap-2">
                                       <button type="button" onClick={() => startListingEdit(listing)} className={actionButtonClass('neutral')}>
@@ -835,8 +886,49 @@ export function SuperAdminDestinations() {
         ) : null}
 
         {activeTab === 'cadastro' ? (
-          <div className="grid gap-4 xl:grid-cols-2">
-            <form onSubmit={saveDestination} className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="space-y-4">
+            <div className="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">{editingCadastroMode ? 'Edição focada' : 'Cadastro guiado'}</p>
+                  <h2 className="mt-1 text-xl font-black text-slate-950">
+                    {editingCadastroMode ? 'Mostrando só o formulário do item selecionado' : 'Escolha o que você quer cadastrar'}
+                  </h2>
+                  <p className="mt-1 text-sm font-semibold text-slate-500">
+                    {editingCadastroMode ? 'Ao salvar ou cancelar, você volta para o resumo com a lista completa.' : 'Cidade, hospedagem, serviço e vínculo ficam separados para não misturar responsabilidades.'}
+                  </p>
+                </div>
+                {editingCadastroMode ? (
+                  <button type="button" onClick={returnToDashboardFromCadastro} className={actionButtonClass('neutral')}>
+                    Voltar ao resumo
+                  </button>
+                ) : null}
+              </div>
+              <div className="mt-4 grid gap-2 md:grid-cols-4">
+                {cadastroModeOptions.map((option: any) => {
+                  const Icon = option.icon;
+                  const active = activeCadastroMode === option.id;
+                  const disabled = Boolean(editingCadastroMode) && !active;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      disabled={disabled}
+                      onClick={() => setCadastroMode(option.id)}
+                      className={`rounded-[1.25rem] border p-3 text-left transition disabled:cursor-not-allowed disabled:opacity-40 ${active ? 'border-[#153A4C] bg-[#153A4C] text-white shadow-[0_18px_36px_-28px_rgba(21,58,76,0.9)]' : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-white'}`}
+                    >
+                      <Icon size={22} weight="duotone" />
+                      <p className="mt-2 text-sm font-black">{option.label}</p>
+                      <p className={`mt-1 text-[11px] font-semibold ${active ? 'text-white/70' : 'text-slate-500'}`}>{option.description}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="grid gap-4">
+              {activeCadastroMode === 'destination' ? (
+            <form onSubmit={saveDestination} className="max-w-4xl rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-black">{editingDestinationId ? 'Editar destino' : 'Cadastrar destino'}</h2>
@@ -886,8 +978,10 @@ export function SuperAdminDestinations() {
               </div>
               <button disabled={saving} className="mt-4 rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white disabled:opacity-50">{editingDestinationId ? 'Atualizar destino' : 'Salvar destino'}</button>
             </form>
+              ) : null}
 
-            <form onSubmit={savePlace} className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+              {activeCadastroMode === 'place' ? (
+            <form onSubmit={savePlace} className="max-w-4xl rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-black">{editingPlaceId ? 'Editar chalé/pousada' : 'Cadastrar chalé/pousada'}</h2>
@@ -950,8 +1044,10 @@ export function SuperAdminDestinations() {
               </div>
               <button disabled={saving} className="mt-4 rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white disabled:opacity-50">{editingPlaceId ? 'Atualizar hospedagem' : 'Salvar hospedagem'}</button>
             </form>
+              ) : null}
 
-            <form onSubmit={saveListing} className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+              {activeCadastroMode === 'listing' ? (
+            <form onSubmit={saveListing} className="max-w-4xl rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-black">{editingListingId ? 'Editar serviço/atração' : 'Cadastrar serviço/atração'}</h2>
@@ -1006,8 +1102,10 @@ export function SuperAdminDestinations() {
               </div>
               <button disabled={saving} className="mt-4 rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white disabled:opacity-50">{editingListingId ? 'Atualizar serviço' : 'Salvar serviço'}</button>
             </form>
+              ) : null}
 
-            <form onSubmit={linkStore} className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+              {activeCadastroMode === 'storeLink' ? (
+            <form onSubmit={linkStore} className="max-w-3xl rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
               <h2 className="text-lg font-black">Vincular loja a hospedagem</h2>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <select value={storeLinkForm.placeId} onChange={(event) => updateStoreLink('placeId', event.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" required>
@@ -1022,6 +1120,8 @@ export function SuperAdminDestinations() {
               </div>
               <button disabled={saving} className="mt-4 rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white disabled:opacity-50">Vincular loja</button>
             </form>
+              ) : null}
+            </div>
           </div>
         ) : null}
 
