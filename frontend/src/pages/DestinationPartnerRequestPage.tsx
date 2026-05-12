@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Bed, CheckCircle, Compass, Handshake, ImageSquare, LinkSimpleHorizontal, Sparkle, UploadSimple } from '@phosphor-icons/react';
 import { destinationService } from '../services/destinationService';
@@ -9,6 +9,8 @@ import { canUseNativeImagePicker, pickNativeImageAsDataUrl } from '../utils/nati
 
 const initialForm = {
   destinationId: '',
+  destinationCity: '',
+  destinationState: '',
   partnerType: 'HOSPITALITY',
   placeType: 'CHALE',
   category: 'SERVICO',
@@ -193,6 +195,8 @@ const MediaUploadField = ({ label, hint, urlValue, fileValue, onUrlChange, onFil
 export function DestinationPartnerRequestPage() {
   const [destinations, setDestinations] = useState<any[]>([]);
   const [form, setForm] = useState(initialForm);
+  const [destinationMode, setDestinationMode] = useState<'existing' | 'new'>('existing');
+  const [selectedDestinationState, setSelectedDestinationState] = useState('');
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -207,8 +211,18 @@ export function DestinationPartnerRequestPage() {
       .then((payload) => {
         if (!active) return;
         const rows = Array.isArray(payload) ? payload : [];
+        const firstDestination = rows[0] || null;
         setDestinations(rows);
-        setForm((current) => ({ ...current, destinationId: current.destinationId || rows[0]?.id || '' }));
+        setSelectedDestinationState((current) => current || String(firstDestination?.state || '').toUpperCase().slice(0, 2));
+        if (!rows.length) setDestinationMode('new');
+        setForm((current) => ({
+          ...current,
+          destinationId: current.destinationId || firstDestination?.id || '',
+          destinationCity: current.destinationCity || firstDestination?.city || firstDestination?.name || '',
+          destinationState: current.destinationState || String(firstDestination?.state || '').toUpperCase().slice(0, 2),
+          city: current.city || firstDestination?.city || firstDestination?.name || '',
+          state: current.state || String(firstDestination?.state || '').toUpperCase().slice(0, 2),
+        }));
       })
       .catch((err) => {
         if (active) setError(err?.message || 'Não foi possível carregar destinos.');
@@ -256,6 +270,46 @@ export function DestinationPartnerRequestPage() {
   }, [form.zipCode]);
 
   const update = (key: string, value: any) => setForm((current) => ({ ...current, [key]: value }));
+
+  const stateOptions = useMemo(() => {
+    return Array.from(new Set(destinations.map((destination: any) => String(destination.state || '').toUpperCase().slice(0, 2)).filter(Boolean)))
+      .sort((left, right) => left.localeCompare(right, 'pt-BR'));
+  }, [destinations]);
+
+  const filteredDestinations = useMemo(() => {
+    if (!selectedDestinationState) return destinations;
+    return destinations.filter((destination: any) => String(destination.state || '').toUpperCase().slice(0, 2) === selectedDestinationState);
+  }, [destinations, selectedDestinationState]);
+
+  const selectedDestination = useMemo(() => {
+    return destinations.find((destination: any) => String(destination.id) === String(form.destinationId)) || null;
+  }, [destinations, form.destinationId]);
+
+  const updateDestinationFromExisting = (destination: any) => {
+    const city = String(destination?.city || destination?.name || '').trim();
+    const state = String(destination?.state || '').toUpperCase().slice(0, 2);
+    setForm((current) => ({
+      ...current,
+      destinationId: destination?.id || '',
+      destinationCity: city,
+      destinationState: state,
+      city,
+      state,
+    }));
+  };
+
+  const handleDestinationStateChange = (state: string) => {
+    const normalizedState = String(state || '').toUpperCase().slice(0, 2);
+    setSelectedDestinationState(normalizedState);
+    const nextDestination = destinations.find((destination: any) => String(destination.state || '').toUpperCase().slice(0, 2) === normalizedState);
+    updateDestinationFromExisting(nextDestination || null);
+  };
+
+  const handleDestinationChange = (destinationId: string) => {
+    const destination = destinations.find((item: any) => String(item.id) === String(destinationId));
+    updateDestinationFromExisting(destination || null);
+  };
+
   const updatePartnerType = (value: string) => setForm((current) => ({
     ...current,
     partnerType: value,
@@ -273,19 +327,42 @@ export function DestinationPartnerRequestPage() {
     setError('');
     setSuccess(null);
     try {
-      const payload = await destinationService.createPartnerRequest(form);
+      const isNewDestination = destinationMode === 'new';
+      const destinationCity = String(isNewDestination ? form.destinationCity : selectedDestination?.city || selectedDestination?.name || form.destinationCity).trim();
+      const destinationState = String(isNewDestination ? form.destinationState : selectedDestination?.state || form.destinationState).toUpperCase().slice(0, 2);
+      if (!destinationCity || !destinationState || (!isNewDestination && !form.destinationId)) {
+        throw new Error('Escolha a cidade do destino ou solicite uma nova cidade.');
+      }
+
+      const payload = await destinationService.createPartnerRequest({
+        ...form,
+        destinationId: isNewDestination ? '' : form.destinationId,
+        destinationCity,
+        destinationState,
+        city: form.city || destinationCity,
+        state: form.state || destinationState,
+      });
       setSuccess(payload);
       setForm((current) => ({
         ...initialForm,
-        destinationId: current.destinationId,
+        destinationId: isNewDestination ? '' : current.destinationId,
+        destinationCity: isNewDestination ? '' : destinationCity,
+        destinationState: isNewDestination ? '' : destinationState,
+        city: isNewDestination ? '' : destinationCity,
+        state: isNewDestination ? '' : destinationState,
         partnerType: current.partnerType,
       }));
+      if (isNewDestination && destinations.length) setDestinationMode('existing');
     } catch (err: any) {
       setError(err?.message || 'Não foi possível enviar cadastro.');
     } finally {
       setSaving(false);
     }
   };
+
+  const canSubmitDestination = destinationMode === 'new'
+    ? Boolean(String(form.destinationCity || '').trim() && String(form.destinationState || '').trim())
+    : Boolean(form.destinationId);
 
   return (
     <main className="min-h-screen bg-[#f4f1ea] px-4 pb-[calc(var(--jnk-native-nav-height,0px)+2rem)] pt-[max(1rem,env(safe-area-inset-top))] text-slate-950">
@@ -338,14 +415,62 @@ export function DestinationPartnerRequestPage() {
             {loading ? <p className="mt-4 text-sm font-semibold text-slate-500">Carregando destinos...</p> : null}
 
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <label className="sm:col-span-2">
-                <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Destino</span>
-                <select value={form.destinationId} onChange={(event) => update('destinationId', event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" required>
-                  {destinations.map((destination) => (
-                    <option key={destination.id} value={destination.id}>{destination.name}</option>
-                  ))}
-                </select>
-              </label>
+              <div className="sm:col-span-2 rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-3">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Cidade do destino</span>
+                    <p className="mt-1 text-sm font-bold text-slate-800">Destino aqui é a cidade turística onde o parceiro quer aparecer.</p>
+                  </div>
+                  <div className="flex rounded-full bg-white p-1 ring-1 ring-slate-200">
+                    <button type="button" onClick={() => setDestinationMode('existing')} className={`rounded-full px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.1em] ${destinationMode === 'existing' ? 'bg-[#153A4C] text-white' : 'text-slate-500'}`}>
+                      Cidade aberta
+                    </button>
+                    <button type="button" onClick={() => setDestinationMode('new')} className={`rounded-full px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.1em] ${destinationMode === 'new' ? 'bg-[#153A4C] text-white' : 'text-slate-500'}`}>
+                      Nova cidade
+                    </button>
+                  </div>
+                </div>
+
+                {destinationMode === 'existing' ? (
+                  <div className="mt-3 grid gap-3 sm:grid-cols-[120px_1fr]">
+                    <label>
+                      <span className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">UF</span>
+                      <select value={selectedDestinationState} onChange={(event) => handleDestinationStateChange(event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]">
+                        {stateOptions.map((state) => (
+                          <option key={state} value={state}>{state}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      <span className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Cidade</span>
+                      <select value={form.destinationId} onChange={(event) => handleDestinationChange(event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" required>
+                        {filteredDestinations.map((destination) => (
+                          <option key={destination.id} value={destination.id}>{destination.city || destination.name}</option>
+                        ))}
+                      </select>
+                    </label>
+                    {filteredDestinations.length === 0 ? (
+                      <p className="sm:col-span-2 rounded-2xl border border-dashed border-slate-300 bg-white px-3 py-3 text-xs font-bold text-slate-500">
+                        Ainda não temos cidade aberta nesta UF. Use “Nova cidade” para enviar para análise.
+                      </p>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="mt-3 grid gap-3 sm:grid-cols-[120px_1fr]">
+                    <label>
+                      <span className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">UF</span>
+                      <input value={form.destinationState} onChange={(event) => update('destinationState', event.target.value.toUpperCase().slice(0, 2))} placeholder="UF" className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
+                    </label>
+                    <label>
+                      <span className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Cidade turística</span>
+                      <input value={form.destinationCity} onChange={(event) => update('destinationCity', event.target.value)} placeholder="Ex: Gonçalves" className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
+                    </label>
+                    <p className="sm:col-span-2 rounded-2xl bg-amber-50 px-3 py-3 text-xs font-bold leading-relaxed text-amber-800">
+                      A cidade entra como destino em análise. O SuperAdmin revisa, completa fotos/textos e ativa quando estiver pronta.
+                    </p>
+                  </div>
+                )}
+              </div>
 
               <label>
                 <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Tipo de parceiro</span>
@@ -390,8 +515,10 @@ export function DestinationPartnerRequestPage() {
                 </div>
                 <input value={form.address} onChange={(event) => update('address', event.target.value)} placeholder="Endereço" autoComplete="address-line1" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
               </div>
-              <input value={form.city} onChange={(event) => update('city', event.target.value)} placeholder="Cidade" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
-              <input value={form.state} onChange={(event) => update('state', event.target.value.toUpperCase().slice(0, 2))} placeholder="UF" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
+              <p className="sm:col-span-2 rounded-2xl bg-[#edf5fa] px-3 py-3 text-xs font-bold leading-relaxed text-[#153A4C]">
+                Cidade do cadastro: {destinationMode === 'new' ? (form.destinationCity || 'nova cidade') : (selectedDestination?.city || selectedDestination?.name || 'cidade selecionada')}{' '}
+                {destinationMode === 'new' ? form.destinationState : selectedDestination?.state ? `- ${selectedDestination.state}` : ''}.
+              </p>
               <input value={form.whatsapp} onChange={(event) => update('whatsapp', formatPhoneBr(event.target.value))} placeholder="WhatsApp público" inputMode="tel" autoComplete="tel" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
               <input value={form.instagramUrl} onChange={(event) => update('instagramUrl', event.target.value)} placeholder="Instagram" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
               <input value={form.websiteUrl} onChange={(event) => update('websiteUrl', event.target.value)} placeholder="Site, Airbnb, Booking ou cardápio" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
@@ -442,7 +569,7 @@ export function DestinationPartnerRequestPage() {
               <textarea value={form.message} onChange={(event) => update('message', event.target.value)} placeholder="Mensagem para análise da plataforma" rows={3} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
             </div>
 
-            <button type="submit" disabled={saving || !form.destinationId} className="mt-5 w-full rounded-2xl bg-[#153A4C] px-5 py-3 text-sm font-black text-white shadow-[0_16px_32px_-22px_rgba(21,58,76,0.8)] disabled:opacity-50">
+            <button type="submit" disabled={saving || !canSubmitDestination} className="mt-5 w-full rounded-2xl bg-[#153A4C] px-5 py-3 text-sm font-black text-white shadow-[0_16px_32px_-22px_rgba(21,58,76,0.8)] disabled:opacity-50">
               {saving ? 'Enviando...' : 'Enviar para aprovação'}
             </button>
           </form>

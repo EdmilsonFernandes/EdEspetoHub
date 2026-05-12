@@ -136,11 +136,9 @@ export class DestinationService {
   }
 
   async createPartnerRequest(payload: any) {
-    const destinationId = String(payload?.destinationId || '').trim();
-    const destination = destinationId
-      ? await this.repository.findDestinationById(destinationId)
-      : await this.repository.findDestinationBySlug(normalizeDestinationSlug(payload?.destinationSlug || ''));
-    if (!destination || destination.active === false) throw new AppError('DEST-001', 404);
+    const destinationResolution = await this.resolvePartnerRequestDestination(payload);
+    const destination = destinationResolution.destination;
+    if (!destination || (!destinationResolution.allowInactive && destination.active === false)) throw new AppError('DEST-001', 404);
 
     const partnerType = normalizeDestinationPartnerType(payload?.partnerType);
     const name = String(payload?.name || '').trim();
@@ -592,6 +590,72 @@ export class DestinationService {
     let slug = base;
     let counter = 1;
     while (await this.repository.findPlaceSlugConflict(destinationId, slug, excludeId)) {
+      slug = `${base}-${counter++}`;
+    }
+    return slug;
+  }
+
+  private async resolvePartnerRequestDestination(payload: any): Promise<{ destination: any | null; allowInactive: boolean }> {
+    const destinationId = String(payload?.destinationId || '').trim();
+    if (destinationId) {
+      return {
+        destination: await this.repository.findDestinationById(destinationId),
+        allowInactive: false,
+      };
+    }
+
+    const destinationSlug = normalizeDestinationSlug(payload?.destinationSlug || '');
+    if (destinationSlug) {
+      return {
+        destination: await this.repository.findDestinationBySlug(destinationSlug, false),
+        allowInactive: false,
+      };
+    }
+
+    const requestedCity = toOptionalText(
+      payload?.destinationCity ||
+      payload?.requestedDestinationCity ||
+      payload?.requestedDestinationName
+    );
+    const requestedState = toOptionalText(payload?.destinationState || payload?.requestedDestinationState)?.toUpperCase().slice(0, 2) || null;
+    if (!requestedCity || !requestedState) return { destination: null, allowInactive: false };
+
+    const existingDestination = (await this.repository.listAllDestinations()).find((destination: any) => {
+      const sameCity = normalizeDestinationSlug(destination?.city || destination?.name) === normalizeDestinationSlug(requestedCity);
+      const sameState = String(destination?.state || '').toUpperCase().slice(0, 2) === requestedState;
+      return sameCity && sameState;
+    });
+    if (existingDestination) {
+      return {
+        destination: existingDestination,
+        allowInactive: true,
+      };
+    }
+
+    const slug = await this.resolveDestinationSlug(normalizeDestinationSlug(`${requestedCity}-${requestedState}`) || normalizeDestinationSlug(requestedCity));
+    const createdDestination = await this.repository.saveDestination({
+      name: requestedCity,
+      slug,
+      city: requestedCity,
+      state: requestedState,
+      description: 'Destino solicitado por cadastro de parceiro. Revisar curadoria antes de ativar.',
+      heroTitle: requestedCity,
+      heroSubtitle: 'Destino em análise pelo Já no Caminho.',
+      active: false,
+      sortOrder: 9999,
+    });
+
+    return {
+      destination: createdDestination,
+      allowInactive: true,
+    };
+  }
+
+  private async resolveDestinationSlug(requestedSlug: string) {
+    const base = requestedSlug || 'destino';
+    let slug = base;
+    let counter = 1;
+    while (await this.repository.findDestinationBySlug(slug, false)) {
       slug = `${base}-${counter++}`;
     }
     return slug;

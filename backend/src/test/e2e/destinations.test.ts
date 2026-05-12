@@ -172,6 +172,33 @@ describe('Destination Hub', () => {
     ).toBe(true);
   });
 
+  it('accepts partner requests for a city that is not public yet', async () => {
+    const suffix = Date.now();
+    const requestRes = await api.post('/api/public/destination-partner-requests').send({
+      destinationCity: `Cidade Nova ${suffix}`,
+      destinationState: 'MG',
+      partnerType: 'SERVICE_PROVIDER',
+      category: 'PASSEIO',
+      name: `Experiência Nova ${suffix}`,
+      responsibleName: 'Responsável Nova Cidade',
+      responsibleEmail: testEmail('destino-nova-cidade'),
+      responsiblePhone: '11999999999',
+      whatsapp: '11999999999',
+    });
+
+    expect(requestRes.status).toBe(201);
+    expect(requestRes.body.status).toBe('pending');
+    expect(requestRes.body.destination).toEqual(expect.objectContaining({
+      city: `Cidade Nova ${suffix}`,
+      state: 'MG',
+      active: false,
+    }));
+
+    const publicListRes = await api.get('/api/public/destinations');
+    expect(publicListRes.status).toBe(200);
+    expect(publicListRes.body.some((destination: any) => destination.id === requestRes.body.destinationId)).toBe(false);
+  });
+
   it('keeps a claimed destination listing pending until admin validation links the store', async () => {
     const suffix = Date.now();
     const destinationRes = await api
