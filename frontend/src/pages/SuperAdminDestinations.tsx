@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Bed, Buildings, CaretDown, CaretUp, CheckCircle, Compass, Eye, EyeSlash, ImageSquare, LinkSimpleHorizontal, MapTrifold, PencilSimple, Plus, Sparkle, UploadSimple, WarningCircle } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { destinationService } from '../services/destinationService';
+import { addressLookupService } from '../services/addressLookupService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
 
@@ -31,6 +32,7 @@ const emptyPlace = {
   slug: '',
   type: 'CHALE',
   description: '',
+  zipCode: '',
   address: '',
   city: '',
   state: '',
@@ -86,6 +88,20 @@ const imageFor = (item: any) =>
 const logoFor = (item: any) =>
   resolveAssetUrl(item?.logoUrl || item?.bannerUrl || item?.imageUrl || '') ||
   getStoreAvatarUrl(item?.slug || item?.id, item?.name || item?.title);
+
+const formatCepBr = (value: string) => {
+  const digits = String(value || '').replace(/\D/g, '').slice(0, 8);
+  if (digits.length <= 5) return digits;
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+};
+
+const formatPhoneBr = (value: string) => {
+  const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+};
 
 const requestTone = (status?: string) => {
   const normalized = String(status || 'pending').toLowerCase();
@@ -232,10 +248,10 @@ const MediaUploadField = ({
           <div className="mt-3 flex flex-wrap gap-2">
             <label className="relative inline-flex cursor-pointer items-center gap-2 overflow-hidden rounded-full bg-[#153A4C] px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-white">
               <UploadSimple size={14} weight="bold" />
-              Upload comprimido
+              Escolher foto
               <input
                 type="file"
-                accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                accept="image/*"
                 className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
                 onChange={handleFile}
               />
@@ -282,6 +298,8 @@ export function SuperAdminDestinations() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [placeZipLookupLoading, setPlaceZipLookupLoading] = useState(false);
+  const [placeZipLookupError, setPlaceZipLookupError] = useState('');
 
   const load = async () => {
     if (!localStorage.getItem('superAdminToken')) {
@@ -309,6 +327,40 @@ export function SuperAdminDestinations() {
   useEffect(() => {
     load();
   }, []);
+
+  useEffect(() => {
+    const cleanedCep = String(placeForm.zipCode || '').replace(/\D/g, '');
+    if (cleanedCep.length !== 8) {
+      setPlaceZipLookupError('');
+      return;
+    }
+
+    let active = true;
+    const timer = window.setTimeout(async () => {
+      setPlaceZipLookupLoading(true);
+      setPlaceZipLookupError('');
+      try {
+        const addressData = await addressLookupService.lookupZipCode(cleanedCep);
+        if (!active || !addressData) return;
+        setPlaceForm((current) => ({
+          ...current,
+          zipCode: formatCepBr(cleanedCep),
+          address: String(addressData?.street || current.address || ''),
+          city: String(addressData?.city || current.city || ''),
+          state: String(addressData?.state || current.state || '').toUpperCase().slice(0, 2),
+        }));
+      } catch {
+        if (active) setPlaceZipLookupError('CEP não encontrado. Preencha manualmente.');
+      } finally {
+        if (active) setPlaceZipLookupLoading(false);
+      }
+    }, 450);
+
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [placeForm.zipCode]);
 
   const metrics = useMemo(() => {
     const pendingPartner = (data.partnerRequests || []).filter((request: any) => String(request.status || 'pending') === 'pending').length;
@@ -418,6 +470,7 @@ export function SuperAdminDestinations() {
       ...emptyPlace,
       ...Object.fromEntries(Object.entries(place).map(([key, value]) => [key, toFormValue(value)])),
       destinationId: place.destinationId || place.destination?.id || '',
+      zipCode: formatCepBr(place.zipCode || ''),
       state: String(place.state || place.destination?.state || '').toUpperCase().slice(0, 2),
       active: place.active !== false,
       sortOrder: Number(place.sortOrder || 0),
@@ -961,7 +1014,7 @@ export function SuperAdminDestinations() {
                 <input value={destinationForm.heroSubtitle} onChange={(event) => updateDestination('heroSubtitle', event.target.value)} placeholder="Subtítulo hero" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
                 <MediaUploadField
                   label="Foto/banner da cidade"
-                  hint="Upload comprimido para S3 ou URL manual. Use imagem horizontal."
+                  hint="Escolha uma imagem horizontal ou cole uma URL pública."
                   urlValue={destinationForm.bannerUrl}
                   fileValue={destinationForm.bannerFile}
                   onUrlChange={(value: string) => updateDestination('bannerUrl', value)}
@@ -1020,10 +1073,17 @@ export function SuperAdminDestinations() {
                 </select>
                 <input value={placeForm.city} onChange={(event) => updatePlace('city', event.target.value)} placeholder="Cidade" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={placeForm.state} onChange={(event) => updatePlace('state', event.target.value.toUpperCase().slice(0, 2))} placeholder="UF" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
-                <input value={placeForm.address} onChange={(event) => updatePlace('address', event.target.value)} placeholder="Endereço" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
+                <div className="sm:col-span-2 grid gap-3 sm:grid-cols-[160px_1fr]">
+                  <div>
+                    <input value={placeForm.zipCode} onChange={(event) => updatePlace('zipCode', formatCepBr(event.target.value))} placeholder="CEP" inputMode="numeric" autoComplete="postal-code" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+                    {placeZipLookupLoading ? <p className="mt-1 px-1 text-[11px] font-bold text-[#336886]">Buscando endereço...</p> : null}
+                    {placeZipLookupError ? <p className="mt-1 px-1 text-[11px] font-bold text-rose-600">{placeZipLookupError}</p> : null}
+                  </div>
+                  <input value={placeForm.address} onChange={(event) => updatePlace('address', event.target.value)} placeholder="Endereço" autoComplete="address-line1" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+                </div>
                 <MediaUploadField
                   label="Foto/banner do chalé ou pousada"
-                  hint="Upload comprimido para S3 ou URL manual. Essa é a foto principal do card."
+                  hint="Escolha a foto principal do card ou cole uma URL pública."
                   urlValue={placeForm.bannerUrl}
                   fileValue={placeForm.bannerFile}
                   onUrlChange={(value: string) => updatePlace('bannerUrl', value)}
@@ -1041,7 +1101,7 @@ export function SuperAdminDestinations() {
                   onError={setError}
                   maxEdge={900}
                 />
-                <input value={placeForm.whatsapp} onChange={(event) => updatePlace('whatsapp', event.target.value)} placeholder="WhatsApp" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
+                <input value={placeForm.whatsapp} onChange={(event) => updatePlace('whatsapp', formatPhoneBr(event.target.value))} placeholder="WhatsApp" inputMode="tel" autoComplete="tel" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
                 <input value={placeForm.websiteUrl} onChange={(event) => updatePlace('websiteUrl', event.target.value)} placeholder="Site / Airbnb / Booking" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={placeForm.instagramUrl} onChange={(event) => updatePlace('instagramUrl', event.target.value)} placeholder="Instagram" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={placeForm.lat} onChange={(event) => updatePlace('lat', event.target.value)} placeholder="Latitude" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
@@ -1100,7 +1160,7 @@ export function SuperAdminDestinations() {
                 <input required value={listingForm.title} onChange={(event) => updateListing('title', event.target.value)} placeholder="Título" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <MediaUploadField
                   label="Foto do serviço/atração"
-                  hint="Upload comprimido para S3 ou URL manual. Usada no card de experiências."
+                  hint="Escolha a foto do card ou cole uma URL pública."
                   urlValue={listingForm.imageUrl}
                   fileValue={listingForm.imageFile}
                   onUrlChange={(value: string) => updateListing('imageUrl', value)}
@@ -1109,7 +1169,7 @@ export function SuperAdminDestinations() {
                   maxEdge={1400}
                 />
                 <input value={listingForm.address} onChange={(event) => updateListing('address', event.target.value)} placeholder="Endereço/local" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
-                <input value={listingForm.whatsapp} onChange={(event) => updateListing('whatsapp', event.target.value)} placeholder="WhatsApp" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
+                <input value={listingForm.whatsapp} onChange={(event) => updateListing('whatsapp', formatPhoneBr(event.target.value))} placeholder="WhatsApp" inputMode="tel" autoComplete="tel" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
                 <input value={listingForm.websiteUrl} onChange={(event) => updateListing('websiteUrl', event.target.value)} placeholder="Site / cardápio / link externo" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={listingForm.instagramUrl} onChange={(event) => updateListing('instagramUrl', event.target.value)} placeholder="Instagram" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={listingForm.ctaUrl} onChange={(event) => updateListing('ctaUrl', event.target.value)} placeholder="Link de contato/CTA" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />

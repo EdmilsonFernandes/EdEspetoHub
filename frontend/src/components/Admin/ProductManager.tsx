@@ -305,11 +305,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   const pendingDeleteTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const formRef = useRef<HTMLDivElement | null>(null);
   const createNameInputRef = useRef<HTMLInputElement | null>(null);
-  const createCameraInputRef = useRef<HTMLInputElement | null>(null);
-  const createFileInputRef = useRef<HTMLInputElement | null>(null);
   const bulkFileInputRef = useRef<HTMLInputElement | null>(null);
-  const inlineCameraInputRef = useRef<HTMLInputElement | null>(null);
-  const inlineFileInputRef = useRef<HTMLInputElement | null>(null);
   const [editing, setEditing] = useState(null);
   const [inlineEditId, setInlineEditId] = useState<string | null>(null);
   const [mobileEditOpen, setMobileEditOpen] = useState(false);
@@ -1517,36 +1513,33 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
           <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
             <label className="text-sm font-medium text-gray-700">Imagem do Produto</label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => createCameraInputRef.current?.click()}
-                className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white shadow-sm hover:bg-slate-800 transition-all"
-              >
-                Tirar Foto
-              </button>
-              <button
-                type="button"
-                onClick={() => createFileInputRef.current?.click()}
-                className="px-4 py-2.5 rounded-xl text-sm font-semibold border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-all"
-              >
-                Selecionar Arquivo
-              </button>
-              <input
-                ref={createCameraInputRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                onChange={(e) => handleUpload(e.target.files?.[0])}
-                className="hidden"
-              />
-              <input
-                ref={createFileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleUpload(e.target.files?.[0])}
-                className="hidden"
-              />
+              <label className="relative inline-flex cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-slate-800">
+                Tirar foto
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={(e) => {
+                    void handleUpload(e.target.files?.[0]);
+                    e.currentTarget.value = '';
+                  }}
+                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                />
+              </label>
+              <label className="relative inline-flex cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50">
+                Galeria
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    void handleUpload(e.target.files?.[0]);
+                    e.currentTarget.value = '';
+                  }}
+                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                />
+              </label>
             </div>
+            <p className="text-xs font-medium text-slate-500">No celular, escolha câmera ou galeria direto pelo botão.</p>
             <div className="relative h-[200px] w-[200px] rounded-xl overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center">
               {imagePreview ? (
                 <img
@@ -2378,36 +2371,33 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               <div className="rounded-2xl border border-slate-200 bg-white p-3.5">
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Imagem</label>
                 <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => inlineCameraInputRef.current?.click()}
-                    className="px-3 py-2.5 rounded-xl text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition"
-                  >
-                    Tirar Foto
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => inlineFileInputRef.current?.click()}
-                    className="px-3 py-2.5 rounded-xl text-xs font-semibold border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition"
-                  >
-                    Selecionar Arquivo
-                  </button>
-                  <input
-                    ref={inlineCameraInputRef}
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    onChange={(e) => handleInlineUpload(e.target.files?.[0])}
-                    className="hidden"
-                  />
-                  <input
-                    ref={inlineFileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleInlineUpload(e.target.files?.[0])}
-                    className="hidden"
-                  />
+                  <label className="relative inline-flex cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-slate-900 px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800">
+                    Tirar foto
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={(e) => {
+                        void handleInlineUpload(e.target.files?.[0]);
+                        e.currentTarget.value = '';
+                      }}
+                      className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                    />
+                  </label>
+                  <label className="relative inline-flex cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50">
+                    Galeria
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        void handleInlineUpload(e.target.files?.[0]);
+                        e.currentTarget.value = '';
+                      }}
+                      className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                    />
+                  </label>
                 </div>
+                <p className="mt-2 text-[11px] font-medium text-slate-500">No celular, use câmera ou galeria.</p>
                 <div className="mt-3 relative h-[200px] w-[200px] rounded-xl border border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center">
                   {inlineImagePreview || inlineForm.imageUrl ? (
                     <img

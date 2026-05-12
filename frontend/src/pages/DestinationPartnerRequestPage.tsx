@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Bed, CheckCircle, Compass, Handshake, ImageSquare, LinkSimpleHorizontal, Sparkle, UploadSimple } from '@phosphor-icons/react';
 import { destinationService } from '../services/destinationService';
+import { addressLookupService } from '../services/addressLookupService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 const initialForm = {
@@ -12,6 +13,7 @@ const initialForm = {
   category: 'SERVICO',
   name: '',
   description: '',
+  zipCode: '',
   address: '',
   city: '',
   state: '',
@@ -29,6 +31,20 @@ const initialForm = {
   responsibleEmail: '',
   responsiblePhone: '',
   message: '',
+};
+
+const formatCepBr = (value: string) => {
+  const digits = String(value || '').replace(/\D/g, '').slice(0, 8);
+  if (digits.length <= 5) return digits;
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+};
+
+const formatPhoneBr = (value: string) => {
+  const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 };
 
 const readFileAsDataUrl = (file: File) =>
@@ -119,10 +135,10 @@ const MediaUploadField = ({ label, hint, urlValue, fileValue, onUrlChange, onFil
           <div className="mt-3 flex flex-wrap gap-2">
             <label className="relative inline-flex cursor-pointer items-center gap-2 overflow-hidden rounded-full bg-[#153A4C] px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-white">
               <UploadSimple size={14} weight="bold" />
-              Upload comprimido
+              Escolher foto
               <input
                 type="file"
-                accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                accept="image/*"
                 className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
                 onChange={handleFile}
               />
@@ -158,6 +174,8 @@ export function DestinationPartnerRequestPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState<any>(null);
+  const [zipLookupLoading, setZipLookupLoading] = useState(false);
+  const [zipLookupError, setZipLookupError] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -179,6 +197,40 @@ export function DestinationPartnerRequestPage() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    const cleanedCep = String(form.zipCode || '').replace(/\D/g, '');
+    if (cleanedCep.length !== 8) {
+      setZipLookupError('');
+      return;
+    }
+
+    let active = true;
+    const timer = window.setTimeout(async () => {
+      setZipLookupLoading(true);
+      setZipLookupError('');
+      try {
+        const addressData = await addressLookupService.lookupZipCode(cleanedCep);
+        if (!active || !addressData) return;
+        setForm((current) => ({
+          ...current,
+          zipCode: formatCepBr(cleanedCep),
+          address: String(addressData?.street || current.address || ''),
+          city: String(addressData?.city || current.city || ''),
+          state: String(addressData?.state || current.state || '').toUpperCase().slice(0, 2),
+        }));
+      } catch {
+        if (active) setZipLookupError('Não encontramos esse CEP. Preencha o endereço manualmente.');
+      } finally {
+        if (active) setZipLookupLoading(false);
+      }
+    }, 450);
+
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [form.zipCode]);
 
   const update = (key: string, value: any) => setForm((current) => ({ ...current, [key]: value }));
   const updatePartnerType = (value: string) => setForm((current) => ({
@@ -307,12 +359,19 @@ export function DestinationPartnerRequestPage() {
 
               <input required value={form.name} onChange={(event) => update('name', event.target.value)} placeholder="Nome do chalé, pousada ou serviço" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
               <textarea value={form.description} onChange={(event) => update('description', event.target.value)} placeholder="Descrição pública" rows={3} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
-              <input value={form.address} onChange={(event) => update('address', event.target.value)} placeholder="Endereço" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
+              <div className="sm:col-span-2 grid gap-3 sm:grid-cols-[160px_1fr]">
+                <div>
+                  <input value={form.zipCode} onChange={(event) => update('zipCode', formatCepBr(event.target.value))} placeholder="CEP" inputMode="numeric" autoComplete="postal-code" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
+                  {zipLookupLoading ? <p className="mt-1 px-1 text-[11px] font-bold text-[#336886]">Buscando endereço...</p> : null}
+                  {zipLookupError ? <p className="mt-1 px-1 text-[11px] font-bold text-rose-600">{zipLookupError}</p> : null}
+                </div>
+                <input value={form.address} onChange={(event) => update('address', event.target.value)} placeholder="Endereço" autoComplete="address-line1" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
+              </div>
               <input value={form.city} onChange={(event) => update('city', event.target.value)} placeholder="Cidade" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
               <input value={form.state} onChange={(event) => update('state', event.target.value.toUpperCase().slice(0, 2))} placeholder="UF" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
-              <input value={form.whatsapp} onChange={(event) => update('whatsapp', event.target.value)} placeholder="WhatsApp público" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
+              <input value={form.whatsapp} onChange={(event) => update('whatsapp', formatPhoneBr(event.target.value))} placeholder="WhatsApp público" inputMode="tel" autoComplete="tel" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
               <input value={form.instagramUrl} onChange={(event) => update('instagramUrl', event.target.value)} placeholder="Instagram" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
-              <input value={form.websiteUrl} onChange={(event) => update('websiteUrl', event.target.value)} placeholder="Site" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
+              <input value={form.websiteUrl} onChange={(event) => update('websiteUrl', event.target.value)} placeholder="Site, Airbnb, Booking ou cardápio" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
 
               {form.partnerType === 'HOSPITALITY' ? (
                 <>
@@ -356,7 +415,7 @@ export function DestinationPartnerRequestPage() {
               </div>
               <input required value={form.responsibleName} onChange={(event) => update('responsibleName', event.target.value)} placeholder="Nome do responsável" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
               <input required type="email" value={form.responsibleEmail} onChange={(event) => update('responsibleEmail', event.target.value)} placeholder="E-mail do responsável" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
-              <input required value={form.responsiblePhone} onChange={(event) => update('responsiblePhone', event.target.value)} placeholder="WhatsApp do responsável" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
+              <input required value={form.responsiblePhone} onChange={(event) => update('responsiblePhone', formatPhoneBr(event.target.value))} placeholder="WhatsApp do responsável" inputMode="tel" autoComplete="tel" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
               <textarea value={form.message} onChange={(event) => update('message', event.target.value)} placeholder="Mensagem para análise da plataforma" rows={3} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
             </div>
 
