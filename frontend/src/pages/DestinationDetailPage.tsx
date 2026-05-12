@@ -249,11 +249,6 @@ export function DestinationDetailPage() {
   }, [banners, destination]);
   const currentSlide = showcaseSlides[carouselIndex % Math.max(showcaseSlides.length, 1)];
   const destinationLocationLabel = [destination.city, destination.state].filter(Boolean).join(', ') || destination.name || 'Destino';
-  const heroHighlights = [
-    'Hospedagens selecionadas',
-    'Comida e serviços locais',
-    'Passeios e dicas da cidade',
-  ];
 
   useEffect(() => {
     setPlaceLimit(6);
@@ -275,7 +270,7 @@ export function DestinationDetailPage() {
 
   return (
     <main className="min-h-screen bg-[#f6f2e9] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
-      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_18%_0%,rgba(51,104,134,0.18),transparent_34%),radial-gradient(circle_at_86%_16%,rgba(216,245,231,0.65),transparent_30%),linear-gradient(135deg,#f6f2e9,#eef5f1_56%,#eadfc8)] px-4 pb-8 pt-[max(1rem,env(safe-area-inset-top))]">
+      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_18%_0%,rgba(51,104,134,0.16),transparent_34%),radial-gradient(circle_at_86%_16%,rgba(216,245,231,0.55),transparent_30%),linear-gradient(135deg,#f6f2e9,#eef5f1_56%,#eadfc8)] px-4 pb-4 pt-[max(0.85rem,env(safe-area-inset-top))]">
         <div className="absolute -right-20 top-8 h-64 w-64 rounded-full bg-[#336886]/16 blur-3xl" />
         <div className="absolute -left-16 bottom-4 h-56 w-56 rounded-full bg-amber-300/18 blur-3xl" />
         <div className="relative mx-auto max-w-6xl">
@@ -294,43 +289,35 @@ export function DestinationDetailPage() {
           {error ? <p className="mt-8 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
 
           {!loading && !error ? (
-            <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_380px] lg:items-end">
+            <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_270px] lg:items-end">
               <div>
-                <p className="inline-flex max-w-full items-center gap-2 rounded-full bg-[#153A4C]/8 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-[#153A4C] ring-1 ring-[#153A4C]/10">
+                <p className="inline-flex max-w-full items-center gap-2 rounded-full bg-[#153A4C]/8 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-[#153A4C] ring-1 ring-[#153A4C]/10">
                   <Mountains size={15} weight="duotone" />
                   <span>Guia da cidade</span>
                 </p>
-                <h1 className="mt-4 max-w-3xl text-[2.35rem] font-black leading-[0.94] tracking-[-0.055em] text-slate-950 sm:text-6xl">
+                <h1 className="mt-3 max-w-3xl text-3xl font-black leading-[0.96] tracking-[-0.055em] text-slate-950 sm:text-5xl">
                   {destination.heroTitle || destination.name}
                 </h1>
                 <p className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full border border-slate-200 bg-white/78 px-3 py-1.5 text-xs font-black text-slate-700 shadow-sm">
                   <MapPinLine size={15} weight="duotone" className="shrink-0 text-[#336886]" />
                   <span className="truncate">{destinationLocationLabel}</span>
                 </p>
-                <p className="mt-5 max-w-2xl text-base font-semibold leading-relaxed text-slate-600">
+                <p className="mt-3 line-clamp-2 max-w-2xl text-sm font-semibold leading-relaxed text-slate-600 sm:text-base">
                   {destination.heroSubtitle || destination.description || 'Hospedagens, lojas e experiências cadastradas neste destino.'}
                 </p>
-                <div className="mt-5 flex max-w-2xl flex-wrap gap-2">
-                  {heroHighlights.map((label) => (
-                    <span key={label} className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/78 px-3 py-2 text-[11px] font-black text-[#153A4C] shadow-sm backdrop-blur">
-                      <Sparkle size={13} weight="duotone" />
-                      {label}
-                    </span>
-                  ))}
-                </div>
-                <div className="mt-5 flex flex-wrap gap-2">
-                  <a href="#hospedagens" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#153A4C] px-4 py-2 text-sm font-black text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.9)]">
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/78 px-3 py-1.5 text-[11px] font-black text-[#153A4C] shadow-sm backdrop-blur">
                     <Bed size={17} weight="duotone" />
-                    Ver hospedagens
-                  </a>
-                  <a href="#servicos-cidade" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#153A4C]/12 bg-white/82 px-4 py-2 text-sm font-black text-[#153A4C] shadow-sm backdrop-blur">
+                    {places.length} hospedagens
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/78 px-3 py-1.5 text-[11px] font-black text-[#153A4C] shadow-sm backdrop-blur">
                     <ForkKnife size={17} weight="duotone" />
-                    Comer e pedir
-                  </a>
+                    {listings.length} serviços
+                  </span>
                 </div>
               </div>
-              <div className="overflow-hidden rounded-[2rem] border border-white/85 bg-white/86 p-3 shadow-[0_28px_80px_-42px_rgba(15,23,42,0.48)] backdrop-blur">
-                <div className="relative h-60 overflow-hidden rounded-[1.45rem] bg-slate-900 sm:h-72 lg:h-64">
+              <div className="overflow-hidden rounded-[1.5rem] border border-white/85 bg-white/86 p-2 shadow-[0_22px_58px_-42px_rgba(15,23,42,0.48)] backdrop-blur">
+                <div className="relative h-32 overflow-hidden rounded-[1.15rem] bg-slate-900 sm:h-40 lg:h-36">
                   {hasConfiguredAsset(currentSlide?.item || heroBanner || destination) ? (
                     <img src={asset(currentSlide?.item || heroBanner || destination)} alt={currentSlide?.title || destination.name} className="h-full w-full object-cover transition duration-700" />
                   ) : (
@@ -343,27 +330,18 @@ export function DestinationDetailPage() {
                     {(carouselIndex % showcaseSlides.length) + 1}/{showcaseSlides.length}
                   </div>
                 </div>
-                <div className="px-1 pb-1 pt-4">
-                  <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#336886]">
-                    {hasConfiguredAsset(currentSlide?.item) ? currentSlide?.kind || 'Destaque' : 'Destaque da cidade'}
-                  </p>
-                  <p className="mt-1 text-xl font-black tracking-[-0.04em] text-slate-950">{currentSlide?.title || heroBanner?.title || destination.name}</p>
-                  <p className="mt-1 line-clamp-2 text-sm font-semibold leading-relaxed text-slate-500">{currentSlide?.subtitle || heroBanner?.subtitle || destination.description}</p>
-                  <div className="mt-4 flex items-center justify-between gap-3">
-                    <div className="flex gap-1.5">
-                      {showcaseSlides.slice(0, 6).map((slide: any, index: number) => (
-                        <button
-                          key={slide.key}
-                          type="button"
-                          aria-label={`Abrir destaque ${index + 1}`}
-                          onClick={() => setCarouselIndex(index)}
-                          className={`h-1.5 rounded-full transition-all ${index === carouselIndex % showcaseSlides.length ? 'w-7 bg-[#153A4C]' : 'w-2 bg-[#153A4C]/22'}`}
-                        />
-                      ))}
-                    </div>
-                    <span className="rounded-full bg-[#153A4C]/8 px-3 py-1.5 text-[11px] font-black text-[#153A4C]">
-                      Fotos da cidade
-                    </span>
+                <div className="flex items-center justify-between gap-3 px-1 pb-1 pt-2">
+                  <span className="truncate text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">Fotos da cidade</span>
+                  <div className="flex shrink-0 gap-1.5">
+                    {showcaseSlides.slice(0, 6).map((slide: any, index: number) => (
+                      <button
+                        key={slide.key}
+                        type="button"
+                        aria-label={`Abrir destaque ${index + 1}`}
+                        onClick={() => setCarouselIndex(index)}
+                        className={`h-1.5 rounded-full transition-all ${index === carouselIndex % showcaseSlides.length ? 'w-7 bg-[#153A4C]' : 'w-2 bg-[#153A4C]/22'}`}
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
@@ -373,18 +351,18 @@ export function DestinationDetailPage() {
       </section>
 
       {!loading && !error ? (
-        <section className="mx-auto grid max-w-6xl gap-8 px-4 pb-10 pt-5 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="relative z-10 rounded-[2rem] border border-white/80 bg-white/90 p-4 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.36)] backdrop-blur lg:col-span-2 sm:p-5">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <section className="mx-auto grid max-w-6xl gap-6 px-4 pb-10 pt-3 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="relative z-10 rounded-[1.5rem] border border-white/80 bg-white/92 p-3 shadow-[0_16px_42px_-36px_rgba(15,23,42,0.36)] backdrop-blur lg:col-span-2 sm:p-4">
+            <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Escolha o que procurar</p>
-                <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950">Hospedagem, comida, passeios e serviços da cidade</h2>
+                <h2 className="mt-1 text-lg font-black tracking-[-0.03em] text-slate-950">Buscar em {destination.name}</h2>
               </div>
               <p className="text-xs font-bold text-slate-500">
                 {activeFilterLabel}: {filteredPlaces.length + filteredListings.length} resultado(s)
               </p>
             </div>
-            <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div className="mt-3 grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
               <label className="group flex min-h-[52px] items-center gap-3 rounded-[1.35rem] border border-slate-200 bg-white px-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.4)] focus-within:border-[#336886]/40 focus-within:ring-4 focus-within:ring-[#336886]/10">
                 <MagnifyingGlass size={18} weight="bold" className="text-slate-400" />
                 <input
