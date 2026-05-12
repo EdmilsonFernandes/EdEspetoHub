@@ -88,7 +88,7 @@ const InstagramIcon = ({ className = 'h-3.5 w-3.5' }) => (
   <img src="/insta.avif" alt="" className={`${className} rounded-full object-cover`} />
 );
 
-const SmartCardImage = ({ src, alt, logoSrc = '', logoAlt = '', fit = 'cover', className = '', children }: any) => (
+const SmartCardImage = ({ src, alt, fit = 'cover', className = '', children }: any) => (
   <div className={`relative overflow-hidden bg-slate-100 ${className}`}>
     {fit === 'contain' ? (
       <>
@@ -103,11 +103,6 @@ const SmartCardImage = ({ src, alt, logoSrc = '', logoAlt = '', fit = 'cover', c
       alt={alt}
       className={`relative h-full w-full object-center transition duration-500 group-hover:scale-[1.035] ${fit === 'contain' ? 'object-contain p-2.5' : 'object-cover'}`}
     />
-    {logoSrc && logoSrc !== src ? (
-      <span className="absolute bottom-2 left-2 flex h-9 w-9 items-center justify-center overflow-hidden rounded-[0.85rem] border border-white/90 bg-white/95 p-1.5 shadow-[0_10px_22px_-14px_rgba(15,23,42,0.5)]">
-        <img src={logoSrc} alt={logoAlt || alt} className="h-full w-full object-contain object-center" loading="lazy" />
-      </span>
-    ) : null}
     {children}
   </div>
 );
@@ -410,8 +405,6 @@ export function HospitalityPlacePage() {
                     <SmartCardImage
                       src={coverImageFor(store)}
                       alt={store.name}
-                      logoSrc={logoFor(store)}
-                      logoAlt={store.name}
                       fit={hasCoverImage(store) ? 'cover' : 'contain'}
                       className="aspect-square self-start rounded-[1.1rem]"
                     >
@@ -459,8 +452,6 @@ export function HospitalityPlacePage() {
                     <SmartCardImage
                       src={coverImageFor(listing)}
                       alt={listing.title}
-                      logoSrc={logoFor(listing)}
-                      logoAlt={listing.title}
                       fit={hasCoverImage(listing) ? 'cover' : 'contain'}
                       className="aspect-square self-start rounded-[1.1rem]"
                     >
