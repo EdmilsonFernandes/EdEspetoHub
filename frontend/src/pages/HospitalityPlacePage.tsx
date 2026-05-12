@@ -2,12 +2,12 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { ArrowRight, ArrowUpRight, Bed, Clock, ForkKnife, GlobeHemisphereWest, HouseLine, MapPinLine, ShoppingBagOpen, Sparkle, Storefront, WhatsappLogo } from '@phosphor-icons/react';
+import { ArrowRight, ArrowUpRight, Bed, Clock, ForkKnife, GlobeHemisphereWest, HouseLine, MapPinLine, PhoneCall, ShoppingBagOpen, Sparkle, Storefront, WhatsappLogo } from '@phosphor-icons/react';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatCurrency } from '../utils/format';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
-import { buildDestinationInquiryMessage, buildWhatsAppUrl } from '../utils/destinationWhatsApp';
+import { buildDestinationInquiryMessage, buildPhoneCallUrl, buildWhatsAppUrl } from '../utils/destinationWhatsApp';
 import { openActionTarget } from '../utils/actionLink';
 
 const imageFor = (item: any) =>
@@ -65,10 +65,55 @@ const InstagramIcon = ({ className = 'h-3.5 w-3.5' }) => (
   <img src="/insta.avif" alt="" className={`${className} rounded-full object-cover`} />
 );
 
+const SmartCardImage = ({ src, alt, className = '', children }: any) => (
+  <div className={`relative overflow-hidden bg-slate-100 ${className}`}>
+    <img src={src} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-28 blur-lg" />
+    <div className="absolute inset-0 bg-white/35" />
+    <img src={src} alt={alt} className="relative h-full w-full object-contain p-1.5 transition duration-500 group-hover:scale-[1.03]" />
+    {children}
+  </div>
+);
+
+const ExpandableText = ({ value, fallback, className = '', collapsedClassName = 'line-clamp-3', threshold = 150 }: any) => {
+  const [expanded, setExpanded] = useState(false);
+  const text = String(value || fallback || '').trim();
+  const canExpand = text.length > threshold;
+  if (!text) return null;
+
+  return (
+    <div>
+      <p className={`${className} ${canExpand && !expanded ? collapsedClassName : ''}`}>{text}</p>
+      {canExpand ? (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            setExpanded((current) => !current);
+          }}
+          className="mt-1 text-[11px] font-bold text-[#336886]"
+        >
+          {expanded ? 'Mostrar menos' : 'Ler descrição completa'}
+        </button>
+      ) : null}
+    </div>
+  );
+};
+
 const openExternal = (url: string) => (event: any) => {
   event.preventDefault();
   event.stopPropagation();
   void openActionTarget({ href: url, external: true });
+};
+
+const buildPhoneContactAction = ({ phone, message, isNativePlatform }: any) => {
+  const whatsappHref = buildWhatsAppUrl(phone, message, isNativePlatform);
+  if (whatsappHref) return { href: whatsappHref, label: 'WhatsApp', kind: 'whatsapp', external: false, native: isNativePlatform };
+
+  const phoneHref = buildPhoneCallUrl(phone);
+  if (phoneHref) return { href: phoneHref, label: 'Ligar', kind: 'phone', external: false, native: false };
+
+  return null;
 };
 
 const buildListingAction = ({ listing, destination, place, isNativePlatform }: any) => {
@@ -80,14 +125,14 @@ const buildListingAction = ({ listing, destination, place, isNativePlatform }: a
     itemType: String(listing.category || 'serviço').replace('_', ' '),
     placeName: place.name,
   });
-  const whatsappHref = buildWhatsAppUrl(listing.whatsapp, message, isNativePlatform);
-  if (whatsappHref) return { href: whatsappHref, label: 'WhatsApp', kind: 'whatsapp', external: false, native: isNativePlatform };
+  const phoneAction = buildPhoneContactAction({ phone: listing.whatsapp, message, isNativePlatform });
+  if (phoneAction) return phoneAction;
 
   const ctaUrl = String(listing.ctaUrl || '').trim();
   if (ctaUrl) {
     if (/^https?:\/\//i.test(ctaUrl)) return { href: ctaUrl, label: 'Abrir', kind: 'site', external: true };
-    const ctaWhatsappHref = buildWhatsAppUrl(ctaUrl, message, isNativePlatform);
-    if (ctaWhatsappHref) return { href: ctaWhatsappHref, label: 'WhatsApp', kind: 'whatsapp', external: false, native: isNativePlatform };
+    const ctaPhoneAction = buildPhoneContactAction({ phone: ctaUrl, message, isNativePlatform });
+    if (ctaPhoneAction) return ctaPhoneAction;
     return { href: externalUrl(ctaUrl), label: 'Abrir', kind: 'site', external: true };
   }
 
@@ -166,10 +211,19 @@ export function HospitalityPlacePage() {
   const serviceFilterOptions = [
     { id: 'all', label: 'Todos', count: deliveryOptionCount, icon: ShoppingBagOpen },
     { id: 'app', label: 'Pedido no app', count: stores.length, icon: Storefront },
-    { id: 'direct', label: 'WhatsApp direto', count: placeListings.length, icon: WhatsappLogo },
+    { id: 'direct', label: 'Contato direto', count: placeListings.length, icon: PhoneCall },
   ];
   const placeWebsiteUrl = externalUrl(place.websiteUrl);
   const placeInstagramUrl = instagramUrl(place.instagramUrl);
+  const placeContactMessage = buildDestinationInquiryMessage({
+    destinationName: destination.name,
+    city: destination.city,
+    state: destination.state,
+    itemName: place.name,
+    itemType: 'hospedagem',
+  });
+  const placeWhatsAppUrl = buildWhatsAppUrl(place.whatsapp, placeContactMessage, isNativePlatform);
+  const placePhoneUrl = placeWhatsAppUrl ? '' : buildPhoneCallUrl(place.whatsapp);
 
   return (
     <main className="min-h-screen bg-[#f4f1ea] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
@@ -211,25 +265,29 @@ export function HospitalityPlacePage() {
                     <MapPinLine size={15} weight="duotone" className="shrink-0 text-[#336886]" />
                     <span className="truncate">{place.address || destinationLocationLabel}</span>
                   </p>
-                  <p className="mt-3 line-clamp-3 text-sm font-semibold leading-relaxed text-slate-600 sm:text-base">
-                    {place.description || place.deliveryInstructions || 'Hospedagem cadastrada no Já no Caminho.'}
-                  </p>
+                  <ExpandableText
+                    value={place.description || place.deliveryInstructions}
+                    fallback="Hospedagem cadastrada no Já no Caminho."
+                    className="mt-3 text-sm font-semibold leading-relaxed text-slate-600 sm:text-base"
+                    collapsedClassName="line-clamp-4"
+                    threshold={210}
+                  />
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {place.whatsapp ? (
+                    {placeWhatsAppUrl ? (
                       <a
-                        href={buildWhatsAppUrl(place.whatsapp, buildDestinationInquiryMessage({
-                          destinationName: destination.name,
-                          city: destination.city,
-                          state: destination.state,
-                          itemName: place.name,
-                          itemType: 'hospedagem',
-                        }), isNativePlatform)}
+                        href={placeWhatsAppUrl}
                         target={isNativePlatform ? undefined : '_blank'}
                         rel="noreferrer"
                         className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-3 py-2 text-xs font-bold text-white shadow-sm"
                       >
                         <WhatsappLogo size={14} weight="fill" />
                         WhatsApp
+                      </a>
+                    ) : null}
+                    {placePhoneUrl ? (
+                      <a href={placePhoneUrl} className="inline-flex items-center gap-1 rounded-full bg-[#153A4C] px-3 py-2 text-xs font-bold text-white shadow-sm">
+                        <PhoneCall size={14} weight="duotone" />
+                        Ligar
                       </a>
                     ) : null}
                     {placeWebsiteUrl ? (
@@ -309,21 +367,20 @@ export function HospitalityPlacePage() {
                   <Link
                     key={`${entry.id}-${store.id}`}
                     to={`/${store.slug}?destino=${encodeURIComponent(destination.slug || destinationSlug)}&destino_nome=${encodeURIComponent(destination.name || destination.city || destinationSlug)}&hospedagem=${encodeURIComponent(place.slug || placeSlug)}&hospedagem_nome=${encodeURIComponent(place.name || placeSlug)}`}
-                    className="group grid grid-cols-[6.25rem_1fr] overflow-hidden rounded-[1.45rem] border border-slate-200/80 bg-white p-2 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.48)] transition hover:-translate-y-1 hover:border-[#336886]/30"
+                    className="group grid grid-cols-[6.75rem_1fr] overflow-hidden rounded-[1.45rem] border border-slate-200/80 bg-white p-2 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.48)] transition hover:-translate-y-1 hover:border-[#336886]/30"
                   >
-                    <div className="relative min-h-[7.25rem] overflow-hidden rounded-[1.1rem] bg-slate-100">
-                      <img src={imageFor(store)} alt={store.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                    <SmartCardImage src={imageFor(store)} alt={store.name} className="min-h-[8rem] rounded-[1.1rem]">
                       <div className="absolute left-2 top-2 rounded-full bg-white/92 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-[#153A4C] shadow-sm ring-1 ring-white/80 backdrop-blur">
                         App
                       </div>
-                    </div>
+                    </SmartCardImage>
                     <div className="min-w-0 p-2.5">
                       <p className="inline-flex items-center gap-1 rounded-full bg-[#edf5fa] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#336886]">
                         <Storefront size={12} weight="duotone" />
                         Pedido pelo app
                       </p>
-                      <h3 className="mt-0.5 line-clamp-1 text-base font-bold text-slate-950">{store.name}</h3>
-                      <p className="mt-1 line-clamp-2 text-sm font-medium text-slate-500">{store.settings?.description || 'Pedido online para esta hospedagem.'}</p>
+                      <h3 className="mt-0.5 line-clamp-2 text-base font-bold leading-snug text-slate-950">{store.name}</h3>
+                      <p className="mt-1 line-clamp-4 text-sm font-medium leading-relaxed text-slate-500">{store.settings?.description || 'Pedido online para esta hospedagem.'}</p>
                       <div className="mt-3 flex flex-wrap gap-2">
                         {link.deliveryEnabled ? (
                           <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-100">
@@ -352,23 +409,33 @@ export function HospitalityPlacePage() {
                     tabIndex={action?.href ? 0 : undefined}
                     onClick={() => openListingActionTarget(action)}
                     onKeyDown={handleListingCardKeyDown(action)}
-                    className={`group grid grid-cols-[6.25rem_1fr] overflow-hidden rounded-[1.45rem] border border-slate-200/80 bg-white p-2 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.48)] transition ${action?.href ? 'cursor-pointer hover:-translate-y-1 hover:border-amber-300/70' : ''}`}
+                    className={`group grid grid-cols-[6.75rem_1fr] overflow-hidden rounded-[1.45rem] border border-slate-200/80 bg-white p-2 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.48)] transition ${action?.href ? 'cursor-pointer hover:-translate-y-1 hover:border-amber-300/70' : ''}`}
                   >
-                    <div className="relative min-h-[7.25rem] overflow-hidden rounded-[1.1rem] bg-slate-100">
-                      <img src={imageFor(listing)} alt={listing.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                    <SmartCardImage src={imageFor(listing)} alt={listing.title} className="min-h-[8rem] rounded-[1.1rem]">
                       {action?.kind === 'whatsapp' ? (
                         <div className="absolute left-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/92 text-emerald-600 shadow-sm ring-1 ring-white/80 backdrop-blur">
                           <WhatsappLogo size={13} weight="fill" />
                         </div>
                       ) : null}
-                    </div>
+                      {action?.kind === 'phone' ? (
+                        <div className="absolute left-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/92 text-[#153A4C] shadow-sm ring-1 ring-white/80 backdrop-blur">
+                          <PhoneCall size={13} weight="duotone" />
+                        </div>
+                      ) : null}
+                    </SmartCardImage>
                     <div className="min-w-0 p-2.5">
                       <p className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-800">
                         <ForkKnife size={12} weight="duotone" />
                         {categoryLabel(listing.category)}
                       </p>
-                      <h3 className="mt-0.5 line-clamp-1 text-base font-bold text-slate-950">{listing.title}</h3>
-                      <p className="mt-1 line-clamp-2 text-sm font-medium text-slate-500">{listing.description || listing.address || `Atendimento para hóspedes em ${place.name}.`}</p>
+                      <h3 className="mt-0.5 line-clamp-2 text-base font-bold leading-snug text-slate-950">{listing.title}</h3>
+                      <ExpandableText
+                        value={listing.description || listing.address}
+                        fallback={`Atendimento para hóspedes em ${place.name}.`}
+                        className="mt-1 text-sm font-medium leading-relaxed text-slate-500"
+                        collapsedClassName="line-clamp-4"
+                        threshold={150}
+                      />
                       <div className="mt-3 flex items-center justify-between gap-2">
                         <span className="truncate text-[11px] font-semibold text-slate-400">
                           {listing.address || (action?.label ? `Toque para abrir ${action.label}` : 'Contato em análise')}
@@ -386,7 +453,7 @@ export function HospitalityPlacePage() {
                           ) : null}
                           {action?.href ? (
                             <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#153A4C] text-white shadow-sm">
-                              {action.kind === 'whatsapp' ? <WhatsappLogo size={13} weight="fill" /> : <ArrowUpRight size={13} weight="bold" />}
+                              {action.kind === 'whatsapp' ? <WhatsappLogo size={13} weight="fill" /> : action.kind === 'phone' ? <PhoneCall size={13} weight="duotone" /> : <ArrowUpRight size={13} weight="bold" />}
                             </span>
                           ) : null}
                         </div>
@@ -422,15 +489,21 @@ export function HospitalityPlacePage() {
                     className={`rounded-[1.15rem] border border-slate-100 bg-slate-50/70 p-2.5 transition ${action?.href ? 'cursor-pointer hover:border-[#336886]/20 hover:bg-white' : ''}`}
                   >
                     <div className="flex gap-3">
-                      <img src={imageFor(listing)} alt={listing.title} className="h-12 w-12 rounded-[1rem] object-cover" />
+                      <SmartCardImage src={imageFor(listing)} alt={listing.title} className="h-12 w-12 shrink-0 rounded-[1rem]" />
                       <div className="min-w-0 flex-1">
                         <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#336886]">{categoryLabel(listing.category)}</p>
-                        <h3 className="mt-0.5 text-sm font-bold text-slate-950">{listing.title}</h3>
-                        <p className="mt-0.5 line-clamp-1 text-xs font-medium text-slate-500">{listing.description || listing.address || 'Dica da cidade.'}</p>
+                        <h3 className="mt-0.5 line-clamp-2 text-sm font-bold leading-snug text-slate-950">{listing.title}</h3>
+                        <ExpandableText
+                          value={listing.description || listing.address}
+                          fallback="Dica da cidade."
+                          className="mt-0.5 text-xs font-medium leading-relaxed text-slate-500"
+                          collapsedClassName="line-clamp-3"
+                          threshold={105}
+                        />
                       </div>
                       {action?.href ? (
                         <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-[#153A4C] ring-1 ring-slate-200">
-                          {action.kind === 'whatsapp' ? <WhatsappLogo size={13} weight="fill" className="text-emerald-600" /> : <ArrowUpRight size={13} weight="bold" />}
+                          {action.kind === 'whatsapp' ? <WhatsappLogo size={13} weight="fill" className="text-emerald-600" /> : action.kind === 'phone' ? <PhoneCall size={13} weight="duotone" /> : <ArrowUpRight size={13} weight="bold" />}
                         </span>
                       ) : null}
                     </div>

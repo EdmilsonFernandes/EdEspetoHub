@@ -2,11 +2,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { ArrowRight, Bed, ForkKnife, GlobeHemisphereWest, MagnifyingGlass, MapPinLine, Mountains, Sparkle, Storefront, WhatsappLogo } from '@phosphor-icons/react';
+import { ArrowRight, Bed, ForkKnife, GlobeHemisphereWest, MagnifyingGlass, MapPinLine, Mountains, PhoneCall, Sparkle, Storefront, WhatsappLogo } from '@phosphor-icons/react';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
-import { buildDestinationInquiryMessage, buildWhatsAppUrl } from '../utils/destinationWhatsApp';
+import { buildDestinationInquiryMessage, buildPhoneCallUrl, buildWhatsAppUrl } from '../utils/destinationWhatsApp';
 import { openActionTarget } from '../utils/actionLink';
 
 const asset = (item: any, variant: 'logo' | 'banner' | 'image' = 'banner') => {
@@ -453,6 +453,8 @@ export function DestinationDetailPage() {
                   itemName: place.name,
                   itemType: 'hospedagem',
                 });
+                const placeWhatsAppHref = buildWhatsAppUrl(place.whatsapp, whatsappMessage, isNativePlatform);
+                const placePhoneHref = placeWhatsAppHref ? '' : buildPhoneCallUrl(place.whatsapp);
                 return (
                 <article
                   key={place.id}
@@ -492,15 +494,21 @@ export function DestinationDetailPage() {
                         <Sparkle size={13} weight="duotone" />
                         Base da viagem
                       </span>
-                      {place.whatsapp ? (
+                      {placeWhatsAppHref ? (
                         <a
-                          href={buildWhatsAppUrl(place.whatsapp, whatsappMessage, isNativePlatform)}
+                          href={placeWhatsAppHref}
                           target={isNativePlatform ? undefined : '_blank'}
                           rel="noreferrer"
                           className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-black text-white"
                         >
                           <WhatsappLogo size={12} weight="fill" />
                           Falar
+                        </a>
+                      ) : null}
+                      {placePhoneHref ? (
+                        <a href={placePhoneHref} className="inline-flex items-center gap-1 rounded-full bg-[#153A4C] px-2.5 py-1 text-[11px] font-black text-white">
+                          <PhoneCall size={12} weight="duotone" />
+                          Ligar
                         </a>
                       ) : null}
                       {placeInstagramUrl ? (
@@ -561,7 +569,10 @@ export function DestinationDetailPage() {
                     itemName: listing.title,
                     itemType: categoryLabel(listing.category),
                   });
-                  const contactHref = isExternalUrl ? contactTarget : buildWhatsAppUrl(contactTarget, whatsappMessage, isNativePlatform);
+                  const whatsappContactHref = isExternalUrl ? '' : buildWhatsAppUrl(contactTarget, whatsappMessage, isNativePlatform);
+                  const phoneContactHref = !isExternalUrl && !whatsappContactHref ? buildPhoneCallUrl(contactTarget) : '';
+                  const contactHref = isExternalUrl ? contactTarget : whatsappContactHref || phoneContactHref;
+                  const contactKind = isExternalUrl ? 'site' : whatsappContactHref ? 'whatsapp' : phoneContactHref ? 'phone' : '';
                   const claimHref = buildListingClaimUrl(destination, listing);
                   const listingWebsiteUrl = externalUrl(listing.websiteUrl);
                   const listingInstagramUrl = instagramUrl(listing.instagramUrl);
@@ -605,12 +616,12 @@ export function DestinationDetailPage() {
                       {contactHref ? (
                         <a
                           href={contactHref}
-                          target={isNativePlatform && !isExternalUrl ? undefined : '_blank'}
+                          target={isNativePlatform && contactKind === 'whatsapp' ? undefined : contactKind === 'phone' ? undefined : '_blank'}
                           rel="noreferrer"
-                          className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-black ${hasLinkedStore ? 'border border-emerald-100 bg-white text-emerald-700' : 'bg-emerald-600 text-white'}`}
+                          className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-black ${contactKind === 'phone' ? 'bg-[#153A4C] text-white' : contactKind === 'site' ? 'border border-slate-200 bg-white text-slate-700' : hasLinkedStore ? 'border border-emerald-100 bg-white text-emerald-700' : 'bg-emerald-600 text-white'}`}
                         >
-                          <WhatsappLogo size={13} weight="fill" />
-                          {hasLinkedStore ? 'WhatsApp' : 'Chamar no WhatsApp'}
+                          {contactKind === 'phone' ? <PhoneCall size={13} weight="duotone" /> : contactKind === 'site' ? <GlobeHemisphereWest size={13} weight="duotone" /> : <WhatsappLogo size={13} weight="fill" />}
+                          {contactKind === 'phone' ? 'Ligar' : contactKind === 'site' ? 'Abrir contato' : hasLinkedStore ? 'WhatsApp' : 'Chamar no WhatsApp'}
                         </a>
                       ) : null}
                       {listingInstagramUrl ? (

@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildPhoneCallUrl,
   buildDestinationInquiryMessage,
   buildWhatsAppUrl,
+  normalizeBrazilianContactPhone,
   normalizeWhatsAppPhone,
   prettifyDestinationLabel,
 } from './destinationWhatsApp';
@@ -10,7 +12,14 @@ describe('destinationWhatsApp', () => {
   it('normalizes Brazilian phone numbers for WhatsApp', () => {
     expect(normalizeWhatsAppPhone('(12) 99700-0000')).toBe('5512997000000');
     expect(normalizeWhatsAppPhone('+55 12 99700-0000')).toBe('5512997000000');
+    expect(normalizeWhatsAppPhone('(12) 3300-0000')).toBe('');
     expect(normalizeWhatsAppPhone('')).toBe('');
+  });
+
+  it('keeps a phone fallback for non-mobile contact numbers', () => {
+    expect(normalizeBrazilianContactPhone('(12) 3300-0000')).toBe('551233000000');
+    expect(buildPhoneCallUrl('(12) 3300-0000')).toBe('tel:+551233000000');
+    expect(buildWhatsAppUrl('(12) 3300-0000', 'Oi')).toBe('');
   });
 
   it('builds WhatsApp URLs with an encoded contextual message', () => {
