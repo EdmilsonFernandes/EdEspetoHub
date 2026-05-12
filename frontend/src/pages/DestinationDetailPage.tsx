@@ -203,11 +203,17 @@ export function DestinationDetailPage() {
     [places, activeCategory, searchTerm, destination.name, destination.city]
   );
   const filteredListings = useMemo(
-    () => listings.filter((listing: any) => {
-      if (activeCategory === 'HOSPEDAGENS') return false;
-      const categoryMatches = activeCategory === 'TODOS' || String(listing.category || 'SERVICO') === activeCategory;
-      return categoryMatches && itemMatchesSearch(listing, searchTerm, [destination.name, destination.city]);
-    }),
+    () => listings
+      .filter((listing: any) => {
+        if (activeCategory === 'HOSPEDAGENS') return false;
+        const categoryMatches = activeCategory === 'TODOS' || String(listing.category || 'SERVICO') === activeCategory;
+        return categoryMatches && itemMatchesSearch(listing, searchTerm, [destination.name, destination.city]);
+      })
+      .sort((left: any, right: any) => {
+        const officialDiff = Number(Boolean(resolveLinkedStoreSlug(right))) - Number(Boolean(resolveLinkedStoreSlug(left)));
+        if (officialDiff !== 0) return officialDiff;
+        return String(left.title || '').localeCompare(String(right.title || ''), 'pt-BR');
+      }),
     [listings, activeCategory, searchTerm, destination.name, destination.city]
   );
   const visiblePlaces = filteredPlaces.slice(0, placeLimit);
@@ -230,23 +236,9 @@ export function DestinationDetailPage() {
       item: banner,
       kind: 'Cidade',
     }));
-    const placeSlides = places.filter((place: any) => hasConfiguredAsset(place)).map((place: any) => ({
-      key: `place-${place.id}`,
-      title: place.name,
-      subtitle: place.address || place.description || 'Hospedagem em destaque para completar a viagem.',
-      item: place,
-      placeSlug: place.slug,
-      kind: placeTypeLabel(place.type),
-    }));
-    const listingSlides = listings.filter((listing: any) => hasConfiguredAsset(listing, 'image')).map((listing: any) => ({
-      key: `listing-${listing.id}`,
-      title: listing.title,
-      subtitle: listing.address || listing.description || 'Experiência local cadastrada neste destino.',
-      item: listing,
-      kind: categoryLabel(listing.category),
-    }));
-    return [...destinationSlides, ...bannerSlides, ...placeSlides, ...listingSlides].length
-      ? [...destinationSlides, ...bannerSlides, ...placeSlides, ...listingSlides]
+    const citySlides = [...destinationSlides, ...bannerSlides];
+    return citySlides.length
+      ? citySlides
       : [{
           key: 'destination',
           title: destination.name,
@@ -254,7 +246,7 @@ export function DestinationDetailPage() {
           item: destination,
           kind: 'Destino',
         }];
-  }, [banners, places, listings, destination]);
+  }, [banners, destination]);
   const currentSlide = showcaseSlides[carouselIndex % Math.max(showcaseSlides.length, 1)];
   const destinationLocationLabel = [destination.city, destination.state].filter(Boolean).join(', ') || destination.name || 'Destino';
   const heroHighlights = [
@@ -274,6 +266,7 @@ export function DestinationDetailPage() {
 
   useEffect(() => {
     if (showcaseSlides.length <= 1) return undefined;
+    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return undefined;
     const timer = window.setInterval(() => {
       setCarouselIndex((current) => (current + 1) % showcaseSlides.length);
     }, 4500);
@@ -325,9 +318,19 @@ export function DestinationDetailPage() {
                     </span>
                   ))}
                 </div>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <a href="#hospedagens" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#153A4C] px-4 py-2 text-sm font-black text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.9)]">
+                    <Bed size={17} weight="duotone" />
+                    Ver hospedagens
+                  </a>
+                  <a href="#servicos-cidade" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#153A4C]/12 bg-white/82 px-4 py-2 text-sm font-black text-[#153A4C] shadow-sm backdrop-blur">
+                    <ForkKnife size={17} weight="duotone" />
+                    Comer e pedir
+                  </a>
+                </div>
               </div>
               <div className="overflow-hidden rounded-[2rem] border border-white/85 bg-white/86 p-3 shadow-[0_28px_80px_-42px_rgba(15,23,42,0.48)] backdrop-blur">
-                <div className="relative h-52 overflow-hidden rounded-[1.45rem] bg-slate-900 sm:h-64">
+                <div className="relative h-60 overflow-hidden rounded-[1.45rem] bg-slate-900 sm:h-72 lg:h-64">
                   {hasConfiguredAsset(currentSlide?.item || heroBanner || destination) ? (
                     <img src={asset(currentSlide?.item || heroBanner || destination)} alt={currentSlide?.title || destination.name} className="h-full w-full object-cover transition duration-700" />
                   ) : (
@@ -358,11 +361,9 @@ export function DestinationDetailPage() {
                         />
                       ))}
                     </div>
-                    {currentSlide?.placeSlug ? (
-                      <Link to={`/destinos/${destination.slug}/chales/${currentSlide.placeSlug}`} className="rounded-full bg-[#153A4C] px-3 py-1.5 text-[11px] font-black text-white">
-                        Ver hospedagem
-                      </Link>
-                    ) : null}
+                    <span className="rounded-full bg-[#153A4C]/8 px-3 py-1.5 text-[11px] font-black text-[#153A4C]">
+                      Fotos da cidade
+                    </span>
                   </div>
                 </div>
               </div>
@@ -373,11 +374,11 @@ export function DestinationDetailPage() {
 
       {!loading && !error ? (
         <section className="mx-auto grid max-w-6xl gap-8 px-4 pb-10 pt-5 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="lg:col-span-2 rounded-[2rem] border border-white/80 bg-white/82 p-4 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.36)] backdrop-blur sm:p-5">
+          <div className="relative z-10 rounded-[2rem] border border-white/80 bg-white/90 p-4 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.36)] backdrop-blur lg:col-span-2 sm:p-5">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Encontre no destino</p>
-                <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950">Busque chalés, sabores, passeios e serviços locais</h2>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Escolha o que procurar</p>
+                <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950">Hospedagem, comida, passeios e serviços da cidade</h2>
               </div>
               <p className="text-xs font-bold text-slate-500">
                 {activeFilterLabel}: {filteredPlaces.length + filteredListings.length} resultado(s)
@@ -418,11 +419,14 @@ export function DestinationDetailPage() {
           </div>
 
           {showPlacesSection ? (
-          <div className="space-y-5">
+          <div id="hospedagens" className="scroll-mt-28 space-y-5">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Hospedagens</p>
-                <h2 className="mt-1 text-2xl font-black tracking-[-0.03em]">Chalés e pousadas</h2>
+                <h2 className="mt-1 text-2xl font-black tracking-[-0.03em]">Onde você está hospedado?</h2>
+                <p className="mt-1 max-w-xl text-sm font-semibold leading-relaxed text-slate-500">
+                  Primeiro escolha o chalé ou pousada. Depois mostramos quem entrega, atende ou resolve algo perto dali.
+                </p>
               </div>
               <Bed size={28} weight="duotone" className="text-[#336886]" />
             </div>
@@ -442,7 +446,7 @@ export function DestinationDetailPage() {
               </div>
             ) : null}
 
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0">
               {visiblePlaces.map((place: any) => {
                 const placeWebsiteUrl = externalUrl(place.websiteUrl);
                 const placeInstagramUrl = instagramUrl(place.instagramUrl);
@@ -455,12 +459,14 @@ export function DestinationDetailPage() {
                 });
                 const placeWhatsAppHref = buildWhatsAppUrl(place.whatsapp, whatsappMessage, isNativePlatform);
                 const placePhoneHref = placeWhatsAppHref ? '' : buildPhoneCallUrl(place.whatsapp);
+                const placeServiceCount = Number(place.storeCount || place.featuredStores?.length || 0);
+                const placeServiceLabel = placeServiceCount === 1 ? '1 lugar atende aqui' : `${placeServiceCount} lugares atendem aqui`;
                 return (
                 <article
                   key={place.id}
-                  className="group overflow-hidden rounded-[1.6rem] border border-[#336886]/15 bg-[linear-gradient(180deg,#fffaf0_0%,#ffffff_52%,#edf7f2_100%)] shadow-[0_18px_46px_-34px_rgba(21,58,76,0.48)] transition hover:-translate-y-1"
+                  className="group min-w-[84vw] snap-start overflow-hidden rounded-[1.8rem] border border-[#336886]/15 bg-[linear-gradient(180deg,#fffaf0_0%,#ffffff_52%,#edf7f2_100%)] shadow-[0_18px_46px_-34px_rgba(21,58,76,0.48)] transition hover:-translate-y-1 sm:min-w-0"
                 >
-                  <Link to={`/destinos/${destination.slug}/chales/${place.slug}`} className="relative block h-36 overflow-hidden bg-slate-100">
+                  <Link to={`/destinos/${destination.slug}/chales/${place.slug}`} className="relative block h-44 overflow-hidden bg-slate-100 sm:h-40">
                     {hasConfiguredAsset(place) ? (
                       <img src={asset(place)} alt={place.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                     ) : (
@@ -473,6 +479,11 @@ export function DestinationDetailPage() {
                       <Bed size={12} weight="duotone" />
                       {placeTypeLabel(place.type)}
                     </div>
+                    {placeServiceCount > 0 ? (
+                      <div className="absolute right-3 top-3 rounded-full bg-[#153A4C]/92 px-2.5 py-1 text-[10px] font-black text-white shadow-sm">
+                        {placeServiceLabel}
+                      </div>
+                    ) : null}
                   </Link>
                   <div className="p-3.5">
                     <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-[#153A4C]/8 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#153A4C]">
@@ -546,12 +557,15 @@ export function DestinationDetailPage() {
           ) : null}
 
           {showListingsSection ? (
-          <aside className={showPlacesSection ? 'space-y-4' : 'space-y-4 lg:col-span-2'}>
+          <aside id="servicos-cidade" className={showPlacesSection ? 'scroll-mt-28 space-y-4' : 'scroll-mt-28 space-y-4 lg:col-span-2'}>
             <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_-36px_rgba(15,23,42,0.35)]">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">Experiências</p>
-                  <h2 className="mt-1 text-xl font-black">Experiências locais</h2>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">Cidade</p>
+                  <h2 className="mt-1 text-xl font-black">Comer, comprar e fazer</h2>
+                  <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-500">
+                    Lojas oficiais ganham pedido pelo app. Os demais aparecem como contato direto até ativarem o cardápio online.
+                  </p>
                 </div>
                 <Sparkle size={25} weight="duotone" className="text-amber-700" />
               </div>
@@ -590,7 +604,7 @@ export function DestinationDetailPage() {
                         <div className="flex flex-wrap items-center gap-1.5">
                           <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[#336886]">{categoryLabel(listing.category)}</p>
                           {hasLinkedStore ? (
-                            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-emerald-700">Pedidos no app</span>
+                            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-emerald-700">Loja oficial</span>
                           ) : (
                             <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-amber-700">Contato direto</span>
                           )}
@@ -607,10 +621,10 @@ export function DestinationDetailPage() {
                       {hasLinkedStore ? (
                         <Link
                           to={`/store/${linkedStoreSlug}`}
-                          className="inline-flex items-center gap-1 rounded-full bg-[#153A4C] px-3 py-1.5 text-[11px] font-black text-white"
+                          className="inline-flex min-h-9 items-center gap-1 rounded-full bg-[#153A4C] px-3 py-1.5 text-xs font-black text-white"
                         >
                           <Storefront size={13} weight="duotone" />
-                          Pedir pelo app
+                          Ver cardápio
                         </Link>
                       ) : null}
                       {contactHref ? (
@@ -618,7 +632,7 @@ export function DestinationDetailPage() {
                           href={contactHref}
                           target={isNativePlatform && contactKind === 'whatsapp' ? undefined : contactKind === 'phone' ? undefined : '_blank'}
                           rel="noreferrer"
-                          className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-black ${contactKind === 'phone' ? 'bg-[#153A4C] text-white' : contactKind === 'site' ? 'border border-slate-200 bg-white text-slate-700' : hasLinkedStore ? 'border border-emerald-100 bg-white text-emerald-700' : 'bg-emerald-600 text-white'}`}
+                          className={`inline-flex min-h-9 items-center gap-1 rounded-full px-3 py-1.5 text-xs font-black ${contactKind === 'phone' ? 'bg-[#153A4C] text-white' : contactKind === 'site' ? 'border border-slate-200 bg-white text-slate-700' : hasLinkedStore ? 'border border-emerald-100 bg-white text-emerald-700' : 'bg-emerald-600 text-white'}`}
                         >
                           {contactKind === 'phone' ? <PhoneCall size={13} weight="duotone" /> : contactKind === 'site' ? <GlobeHemisphereWest size={13} weight="duotone" /> : <WhatsappLogo size={13} weight="fill" />}
                           {contactKind === 'phone' ? 'Ligar' : contactKind === 'site' ? 'Abrir contato' : hasLinkedStore ? 'WhatsApp' : 'Chamar no WhatsApp'}
@@ -636,15 +650,6 @@ export function DestinationDetailPage() {
                           {siteLabel(listing.websiteUrl)}
                         </a>
                       ) : null}
-                      {!hasLinkedStore ? (
-                        <Link
-                          to={claimHref}
-                          className="inline-flex items-center gap-1 rounded-full border border-[#153A4C]/15 bg-white px-3 py-1.5 text-[11px] font-black text-[#153A4C]"
-                        >
-                          <Storefront size={13} weight="duotone" />
-                          Receber pedidos pelo app
-                        </Link>
-                      ) : null}
                       {listing.address ? (
                         <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[11px] font-black text-slate-600">
                           <MapPinLine size={13} weight="duotone" />
@@ -652,6 +657,23 @@ export function DestinationDetailPage() {
                         </span>
                       ) : null}
                     </div>
+                    {!hasLinkedStore ? (
+                      <Link
+                        to={claimHref}
+                        className="mt-3 flex items-center gap-3 rounded-[1.1rem] border border-[#153A4C]/10 bg-[#edf5fa] p-3 text-[#153A4C] transition hover:bg-[#e4f0f7]"
+                      >
+                        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#153A4C] shadow-sm">
+                          <Storefront size={17} weight="duotone" />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-xs font-black">É seu negócio?</span>
+                          <span className="block text-[11px] font-semibold leading-snug text-[#153A4C]/72">Ative cardápio, pagamento e pedidos online para hóspedes.</span>
+                        </span>
+                        <span className="shrink-0 rounded-full bg-[#153A4C] px-3 py-1.5 text-[11px] font-black text-white">
+                          Virar loja oficial
+                        </span>
+                      </Link>
+                    ) : null}
                   </article>
                   );
                 })}
@@ -683,7 +705,7 @@ export function DestinationDetailPage() {
                 Participar
               </p>
               <h3 className="mt-4 text-xl font-black tracking-[-0.03em]">Tem chalé, pousada ou serviço?</h3>
-              <p className="mt-2 text-sm font-semibold text-white/72">Cadastre seu espaço ou serviço e aguarde a aprovação da plataforma.</p>
+              <p className="mt-2 text-sm font-semibold text-white/72">Apareça para turistas da cidade e receba pedidos de hóspedes pelo app ou contato direto.</p>
             </Link>
           </aside>
           ) : null}
@@ -696,7 +718,7 @@ export function DestinationDetailPage() {
                   Participar
                 </p>
                 <h3 className="mt-4 text-xl font-black tracking-[-0.03em]">Tem chalé, pousada ou serviço?</h3>
-                <p className="mt-2 text-sm font-semibold text-white/72">Cadastre seu espaço ou serviço e aguarde a aprovação da plataforma.</p>
+                <p className="mt-2 text-sm font-semibold text-white/72">Apareça para turistas da cidade e receba pedidos de hóspedes pelo app ou contato direto.</p>
               </Link>
             </aside>
           ) : null}
