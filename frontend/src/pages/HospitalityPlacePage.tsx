@@ -193,39 +193,30 @@ export function HospitalityPlacePage() {
       {!loading && !error ? (
         <section className="mx-auto grid max-w-6xl gap-5 px-4 pb-10 pt-3 lg:grid-cols-[1.35fr_0.65fr]">
           <div className="space-y-4">
-            <div className="relative overflow-hidden rounded-[2rem] border border-[#153A4C]/10 bg-[linear-gradient(135deg,#fff7e6_0%,#ffffff_48%,#eaf6f1_100%)] p-4 shadow-[0_20px_60px_-42px_rgba(21,58,76,0.55)]">
-              <div className="absolute -right-12 -top-16 h-36 w-36 rounded-full bg-amber-300/22 blur-3xl" />
-              <div className="absolute -bottom-20 left-16 h-40 w-40 rounded-full bg-[#336886]/14 blur-3xl" />
-              <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center">
-                <div className="flex min-w-0 items-center gap-3 rounded-[1.35rem] bg-white/78 p-3 ring-1 ring-white/80">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#153A4C] text-white">
-                    <Bed size={22} weight="duotone" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">Hospedagem escolhida</p>
-                    <p className="truncate text-sm font-black text-slate-950">{place.name}</p>
-                  </div>
-                </div>
-                <div className="hidden h-px flex-1 bg-gradient-to-r from-[#153A4C]/20 via-amber-400/60 to-emerald-500/30 sm:block" />
-                <div className="flex min-w-0 items-center gap-3 rounded-[1.35rem] bg-[#153A4C] p-3 text-white shadow-[0_18px_38px_-28px_rgba(21,58,76,0.8)]">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/14">
-                    <ShoppingBagOpen size={22} weight="duotone" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/62">Chega até aqui</p>
-                    <p className="truncate text-sm font-black">Comida, mercado e serviços</p>
-                  </div>
-                </div>
-              </div>
-              <div className="relative mt-4 flex items-end justify-between gap-3">
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Atendem este chalé</p>
-                  <h2 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950">Peça sem sair da hospedagem</h2>
+            <div className="relative overflow-hidden rounded-[1.6rem] border border-amber-100 bg-white/86 p-4 shadow-[0_16px_44px_-36px_rgba(15,23,42,0.42)] backdrop-blur">
+              <div className="absolute -right-14 -top-16 h-36 w-36 rounded-full bg-amber-300/18 blur-3xl" />
+              <div className="relative flex items-start gap-3">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-800 ring-1 ring-amber-100">
+                  <ShoppingBagOpen size={24} weight="duotone" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Atendem este chalé</p>
+                  <h2 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950">Comida e serviços que chegam aqui</h2>
                   <p className="mt-1 max-w-2xl text-sm font-semibold leading-relaxed text-slate-600">
-                    Se for loja oficial, o pedido abre no app. Se for contato local, o WhatsApp já sai com {place.name} na mensagem.
+                    Opções vinculadas a {place.name}, separando pedido no app de contato rápido por WhatsApp.
                   </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-black text-emerald-700">
+                      <Storefront size={13} weight="duotone" />
+                      Pedido no app
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[11px] font-black text-slate-700 ring-1 ring-slate-200">
+                      <WhatsappLogo size={13} weight="fill" className="text-emerald-600" />
+                      WhatsApp direto
+                    </span>
+                  </div>
                 </div>
-                <Sparkle size={25} weight="duotone" className="hidden shrink-0 text-amber-700 sm:block" />
+                <Sparkle size={23} weight="duotone" className="hidden shrink-0 text-amber-700 sm:block" />
               </div>
             </div>
             {!hasPlaceDeliveryOptions ? (
