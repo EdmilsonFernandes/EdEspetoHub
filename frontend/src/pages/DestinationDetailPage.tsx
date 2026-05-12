@@ -446,8 +446,7 @@ export function DestinationDetailPage() {
               </div>
             ) : null}
 
-            <div className="w-full max-w-full overflow-x-hidden">
-              <div className="flex w-full snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain pb-2 touch-pan-x sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0">
+            <div className="grid gap-3 sm:grid-cols-2">
               {visiblePlaces.map((place: any) => {
                 const placeWebsiteUrl = externalUrl(place.websiteUrl);
                 const placeInstagramUrl = instagramUrl(place.instagramUrl);
@@ -465,7 +464,7 @@ export function DestinationDetailPage() {
                 return (
                 <article
                   key={place.id}
-                  className="group w-[min(84vw,24rem)] max-w-full flex-none snap-start overflow-hidden rounded-[1.8rem] border border-[#336886]/15 bg-[linear-gradient(180deg,#fffaf0_0%,#ffffff_52%,#edf7f2_100%)] shadow-[0_18px_46px_-34px_rgba(21,58,76,0.48)] transition hover:-translate-y-1 sm:w-auto sm:flex-auto"
+                  className="group overflow-hidden rounded-[1.8rem] border border-[#336886]/15 bg-[linear-gradient(180deg,#fffaf0_0%,#ffffff_52%,#edf7f2_100%)] shadow-[0_18px_46px_-34px_rgba(21,58,76,0.48)] transition hover:-translate-y-1"
                 >
                   <Link to={`/destinos/${destination.slug}/chales/${place.slug}`} className="relative block h-44 overflow-hidden bg-slate-100 sm:h-40">
                     {hasConfiguredAsset(place) ? (
@@ -544,7 +543,6 @@ export function DestinationDetailPage() {
                 </article>
                 );
               })}
-              </div>
             </div>
             {filteredPlaces.length > visiblePlaces.length ? (
               <button
