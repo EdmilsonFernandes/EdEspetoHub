@@ -10,9 +10,32 @@ import { getStoreAvatarUrl } from '../utils/storeAvatar';
 import { buildDestinationInquiryMessage, buildPhoneCallUrl, buildWhatsAppUrl } from '../utils/destinationWhatsApp';
 import { openActionTarget } from '../utils/actionLink';
 
-const imageFor = (item: any) =>
-  resolveAssetUrl(item?.bannerUrl || item?.imageUrl || item?.logoUrl || item?.store?.settings?.bannerUrl || item?.store?.settings?.logoUrl || '') ||
+const fallbackAvatarFor = (item: any) =>
   getStoreAvatarUrl(item?.slug || item?.store?.slug || item?.id, item?.name || item?.title || item?.store?.name);
+
+const logoFor = (item: any) =>
+  resolveAssetUrl(item?.logoUrl || item?.settings?.logoUrl || item?.store?.settings?.logoUrl || '') ||
+  fallbackAvatarFor(item);
+
+const hasCoverImage = (item: any) =>
+  Boolean(resolveAssetUrl(item?.bannerUrl || item?.imageUrl || item?.settings?.bannerUrl || item?.store?.settings?.bannerUrl || ''));
+
+const imageFor = (item: any) =>
+  resolveAssetUrl(
+    item?.bannerUrl ||
+      item?.imageUrl ||
+      item?.settings?.bannerUrl ||
+      item?.store?.settings?.bannerUrl ||
+      item?.logoUrl ||
+      item?.settings?.logoUrl ||
+      item?.store?.settings?.logoUrl ||
+      ''
+  ) ||
+  fallbackAvatarFor(item);
+
+const coverImageFor = (item: any) =>
+  resolveAssetUrl(item?.bannerUrl || item?.imageUrl || item?.settings?.bannerUrl || item?.store?.settings?.bannerUrl || '') ||
+  logoFor(item);
 
 const externalUrl = (value?: string | null) => {
   const url = String(value || '').trim();
@@ -65,11 +88,26 @@ const InstagramIcon = ({ className = 'h-3.5 w-3.5' }) => (
   <img src="/insta.avif" alt="" className={`${className} rounded-full object-cover`} />
 );
 
-const SmartCardImage = ({ src, alt, className = '', children }: any) => (
+const SmartCardImage = ({ src, alt, logoSrc = '', logoAlt = '', fit = 'cover', className = '', children }: any) => (
   <div className={`relative overflow-hidden bg-slate-100 ${className}`}>
-    <img src={src} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-28 blur-lg" />
-    <div className="absolute inset-0 bg-white/35" />
-    <img src={src} alt={alt} className="relative h-full w-full object-contain p-1.5 transition duration-500 group-hover:scale-[1.03]" />
+    {fit === 'contain' ? (
+      <>
+        <img src={src} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full scale-110 object-cover object-center opacity-24 blur-lg" />
+        <div className="absolute inset-0 bg-white/70" />
+      </>
+    ) : (
+      <div className="absolute inset-0 bg-slate-900/5" />
+    )}
+    <img
+      src={src}
+      alt={alt}
+      className={`relative h-full w-full object-center transition duration-500 group-hover:scale-[1.035] ${fit === 'contain' ? 'object-contain p-2.5' : 'object-cover'}`}
+    />
+    {logoSrc && logoSrc !== src ? (
+      <span className="absolute bottom-2 left-2 flex h-9 w-9 items-center justify-center overflow-hidden rounded-[0.85rem] border border-white/90 bg-white/95 p-1.5 shadow-[0_10px_22px_-14px_rgba(15,23,42,0.5)]">
+        <img src={logoSrc} alt={logoAlt || alt} className="h-full w-full object-contain object-center" loading="lazy" />
+      </span>
+    ) : null}
     {children}
   </div>
 );
@@ -367,9 +405,16 @@ export function HospitalityPlacePage() {
                   <Link
                     key={`${entry.id}-${store.id}`}
                     to={`/${store.slug}?destino=${encodeURIComponent(destination.slug || destinationSlug)}&destino_nome=${encodeURIComponent(destination.name || destination.city || destinationSlug)}&hospedagem=${encodeURIComponent(place.slug || placeSlug)}&hospedagem_nome=${encodeURIComponent(place.name || placeSlug)}`}
-                    className="group grid grid-cols-[6.75rem_1fr] overflow-hidden rounded-[1.45rem] border border-slate-200/80 bg-white p-2 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.48)] transition hover:-translate-y-1 hover:border-[#336886]/30"
+                    className="group grid grid-cols-[6.75rem_1fr] items-start overflow-hidden rounded-[1.45rem] border border-slate-200/80 bg-white p-2 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.48)] transition hover:-translate-y-1 hover:border-[#336886]/30 sm:grid-cols-[7.25rem_1fr]"
                   >
-                    <SmartCardImage src={imageFor(store)} alt={store.name} className="min-h-[8rem] rounded-[1.1rem]">
+                    <SmartCardImage
+                      src={coverImageFor(store)}
+                      alt={store.name}
+                      logoSrc={logoFor(store)}
+                      logoAlt={store.name}
+                      fit={hasCoverImage(store) ? 'cover' : 'contain'}
+                      className="aspect-square self-start rounded-[1.1rem]"
+                    >
                       <div className="absolute left-2 top-2 rounded-full bg-white/92 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-[#153A4C] shadow-sm ring-1 ring-white/80 backdrop-blur">
                         App
                       </div>
@@ -409,9 +454,16 @@ export function HospitalityPlacePage() {
                     tabIndex={action?.href ? 0 : undefined}
                     onClick={() => openListingActionTarget(action)}
                     onKeyDown={handleListingCardKeyDown(action)}
-                    className={`group grid grid-cols-[6.75rem_1fr] overflow-hidden rounded-[1.45rem] border border-slate-200/80 bg-white p-2 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.48)] transition ${action?.href ? 'cursor-pointer hover:-translate-y-1 hover:border-amber-300/70' : ''}`}
+                    className={`group grid grid-cols-[6.75rem_1fr] items-start overflow-hidden rounded-[1.45rem] border border-slate-200/80 bg-white p-2 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.48)] transition sm:grid-cols-[7.25rem_1fr] ${action?.href ? 'cursor-pointer hover:-translate-y-1 hover:border-amber-300/70' : ''}`}
                   >
-                    <SmartCardImage src={imageFor(listing)} alt={listing.title} className="min-h-[8rem] rounded-[1.1rem]">
+                    <SmartCardImage
+                      src={coverImageFor(listing)}
+                      alt={listing.title}
+                      logoSrc={logoFor(listing)}
+                      logoAlt={listing.title}
+                      fit={hasCoverImage(listing) ? 'cover' : 'contain'}
+                      className="aspect-square self-start rounded-[1.1rem]"
+                    >
                       {action?.kind === 'whatsapp' ? (
                         <div className="absolute left-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/92 text-emerald-600 shadow-sm ring-1 ring-white/80 backdrop-blur">
                           <WhatsappLogo size={13} weight="fill" />
@@ -489,7 +541,12 @@ export function HospitalityPlacePage() {
                     className={`rounded-[1.15rem] border border-slate-100 bg-slate-50/70 p-2.5 transition ${action?.href ? 'cursor-pointer hover:border-[#336886]/20 hover:bg-white' : ''}`}
                   >
                     <div className="flex gap-3">
-                      <SmartCardImage src={imageFor(listing)} alt={listing.title} className="h-12 w-12 shrink-0 rounded-[1rem]" />
+                      <SmartCardImage
+                        src={coverImageFor(listing)}
+                        alt={listing.title}
+                        fit={hasCoverImage(listing) ? 'cover' : 'contain'}
+                        className="h-12 w-12 shrink-0 rounded-[1rem]"
+                      />
                       <div className="min-w-0 flex-1">
                         <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#336886]">{categoryLabel(listing.category)}</p>
                         <h3 className="mt-0.5 line-clamp-2 text-sm font-bold leading-snug text-slate-950">{listing.title}</h3>
