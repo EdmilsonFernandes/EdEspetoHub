@@ -191,21 +191,49 @@ export function HospitalityPlacePage() {
       </section>
 
       {!loading && !error ? (
-        <section className="mx-auto grid max-w-6xl gap-5 px-4 pb-10 pt-5 lg:grid-cols-[1.35fr_0.65fr]">
-          <div>
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Atendem este chalé</p>
-                <h2 className="mt-1 text-2xl font-black tracking-[-0.03em]">Comida e serviços no chalé</h2>
+        <section className="mx-auto grid max-w-6xl gap-5 px-4 pb-10 pt-3 lg:grid-cols-[1.35fr_0.65fr]">
+          <div className="space-y-4">
+            <div className="relative overflow-hidden rounded-[2rem] border border-[#153A4C]/10 bg-[linear-gradient(135deg,#fff7e6_0%,#ffffff_48%,#eaf6f1_100%)] p-4 shadow-[0_20px_60px_-42px_rgba(21,58,76,0.55)]">
+              <div className="absolute -right-12 -top-16 h-36 w-36 rounded-full bg-amber-300/22 blur-3xl" />
+              <div className="absolute -bottom-20 left-16 h-40 w-40 rounded-full bg-[#336886]/14 blur-3xl" />
+              <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="flex min-w-0 items-center gap-3 rounded-[1.35rem] bg-white/78 p-3 ring-1 ring-white/80">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#153A4C] text-white">
+                    <Bed size={22} weight="duotone" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">Hospedagem escolhida</p>
+                    <p className="truncate text-sm font-black text-slate-950">{place.name}</p>
+                  </div>
+                </div>
+                <div className="hidden h-px flex-1 bg-gradient-to-r from-[#153A4C]/20 via-amber-400/60 to-emerald-500/30 sm:block" />
+                <div className="flex min-w-0 items-center gap-3 rounded-[1.35rem] bg-[#153A4C] p-3 text-white shadow-[0_18px_38px_-28px_rgba(21,58,76,0.8)]">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/14">
+                    <ShoppingBagOpen size={22} weight="duotone" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/62">Chega até aqui</p>
+                    <p className="truncate text-sm font-black">Comida, mercado e serviços</p>
+                  </div>
+                </div>
               </div>
-              <ShoppingBagOpen size={28} weight="duotone" className="text-[#336886]" />
+              <div className="relative mt-4 flex items-end justify-between gap-3">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Atendem este chalé</p>
+                  <h2 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950">Peça sem sair da hospedagem</h2>
+                  <p className="mt-1 max-w-2xl text-sm font-semibold leading-relaxed text-slate-600">
+                    Se for loja oficial, o pedido abre no app. Se for contato local, o WhatsApp já sai com {place.name} na mensagem.
+                  </p>
+                </div>
+                <Sparkle size={25} weight="duotone" className="hidden shrink-0 text-amber-700 sm:block" />
+              </div>
             </div>
             {!hasPlaceDeliveryOptions ? (
               <div className="rounded-[1.5rem] border border-dashed border-slate-300 bg-white/70 p-5">
                 <p className="text-sm font-bold text-slate-600">Ainda não há lojas ou contatos configurados para atendimento direto neste chalé.</p>
               </div>
             ) : null}
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-3 xl:grid-cols-2">
               {stores.map((entry: any) => {
                 const store = entry.store || {};
                 const link = entry || {};
@@ -213,21 +241,24 @@ export function HospitalityPlacePage() {
                   <Link
                     key={`${entry.id}-${store.id}`}
                     to={`/${store.slug}?destino=${encodeURIComponent(destination.slug || destinationSlug)}&destino_nome=${encodeURIComponent(destination.name || destination.city || destinationSlug)}&hospedagem=${encodeURIComponent(place.slug || placeSlug)}&hospedagem_nome=${encodeURIComponent(place.name || placeSlug)}`}
-                    className="group overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_18px_48px_-36px_rgba(15,23,42,0.45)] transition hover:-translate-y-1"
+                    className="group grid grid-cols-[6.25rem_1fr] overflow-hidden rounded-[1.45rem] border border-emerald-100 bg-[linear-gradient(135deg,#ffffff_0%,#ecfdf5_100%)] p-2 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.48)] transition hover:-translate-y-1"
                   >
-                    <div className="relative h-32 overflow-hidden bg-slate-100 sm:h-40">
+                    <div className="relative min-h-[7.25rem] overflow-hidden rounded-[1.1rem] bg-slate-100">
                       <img src={imageFor(store)} alt={store.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-                      <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-black text-slate-700">
-                        <Storefront size={12} weight="duotone" className="mr-1 inline" />
-                        No app
+                      <div className="absolute left-2 top-2 rounded-full bg-[#153A4C] px-2 py-1 text-[10px] font-black text-white shadow-sm">
+                        App
                       </div>
                     </div>
-                    <div className="p-3.5">
+                    <div className="min-w-0 p-2.5">
+                      <p className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700">
+                        <Storefront size={12} weight="duotone" />
+                        Pedido pelo app
+                      </p>
                       <h3 className="line-clamp-1 text-base font-black text-slate-950">{store.name}</h3>
                       <p className="mt-1 line-clamp-2 text-sm font-semibold text-slate-500">{store.settings?.description || 'Pedido online para esta hospedagem.'}</p>
                       <div className="mt-3 flex flex-wrap gap-2">
                         {link.deliveryEnabled ? (
-                          <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-black text-emerald-700">
+                          <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-black text-emerald-700 ring-1 ring-emerald-100">
                             Entrega {link.deliveryFee != null ? formatCurrency(link.deliveryFee) : ''}
                           </span>
                         ) : null}
@@ -256,15 +287,18 @@ export function HospitalityPlacePage() {
                       placeName: place.name,
                     }), isNativePlatform);
                 return (
-                  <article key={listing.id} className="overflow-hidden rounded-[1.75rem] border border-emerald-100 bg-white shadow-[0_18px_48px_-36px_rgba(15,23,42,0.45)]">
-                    <div className="relative h-32 overflow-hidden bg-slate-100 sm:h-40">
+                  <article key={listing.id} className="grid grid-cols-[6.25rem_1fr] overflow-hidden rounded-[1.45rem] border border-amber-100 bg-[linear-gradient(135deg,#ffffff_0%,#fffbeb_100%)] p-2 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.48)]">
+                    <div className="relative min-h-[7.25rem] overflow-hidden rounded-[1.1rem] bg-slate-100">
                       <img src={imageFor(listing)} alt={listing.title} className="h-full w-full object-cover" />
-                      <div className="absolute left-3 top-3 rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-black text-white">
+                      <div className="absolute left-2 top-2 rounded-full bg-emerald-600 px-2 py-1 text-[10px] font-black text-white shadow-sm">
                         WhatsApp
                       </div>
                     </div>
-                    <div className="p-3.5">
-                      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">{categoryLabel(listing.category)}</p>
+                    <div className="min-w-0 p-2.5">
+                      <p className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-amber-800">
+                        <ForkKnife size={12} weight="duotone" />
+                        {categoryLabel(listing.category)}
+                      </p>
                       <h3 className="mt-0.5 line-clamp-1 text-base font-black text-slate-950">{listing.title}</h3>
                       <p className="mt-1 line-clamp-2 text-sm font-semibold text-slate-500">{listing.description || listing.address || `Atendimento para hóspedes em ${place.name}.`}</p>
                       <div className="mt-3 flex flex-wrap items-center gap-2">
