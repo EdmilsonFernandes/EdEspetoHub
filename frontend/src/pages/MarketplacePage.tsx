@@ -3268,9 +3268,6 @@ export function MarketplacePage() {
                               ) : null}
                             </div>
                             <h2 className="mt-1 line-clamp-1 text-base font-black tracking-[-0.03em] text-slate-950">Condomínios com agenda local</h2>
-                            <p className="mt-0.5 line-clamp-1 text-[11px] font-semibold text-slate-500">
-                              Feiras, retirada e lojas participantes no app.
-                            </p>
                           </div>
                           <button
                             type="button"
@@ -3292,57 +3289,37 @@ export function MarketplacePage() {
                             const region = [condominium.city, condominium.state].map((item) => String(item || '').trim()).filter(Boolean).join(' - ');
                             const timeLabel = formatCondominiumPickerEventTime(event) || formatCondominiumEventTime(event);
                             const statusLabel = eventState === 'live' ? 'Ao vivo' : eventState === 'upcoming' ? 'Em breve' : 'Agenda';
-                            const statusClass = eventState === 'live'
-                              ? 'bg-emerald-500 text-white'
-                              : eventState === 'upcoming'
-                                ? 'bg-[#153A4C] text-white'
-                                : 'bg-white/92 text-slate-600';
+                            const agendaLine = eventState === 'live'
+                              ? 'Feira aberta agora'
+                              : timeLabel || (eventState === 'upcoming' ? 'Agenda confirmada' : 'Agenda em confirmação');
 
                             return (
                               <button
                                 key={slug}
                                 type="button"
                                 onClick={() => handleCondominiumSelection(slug, name, event)}
-                                className="group min-w-[15.75rem] max-w-[17.5rem] flex-1 overflow-hidden rounded-[1.35rem] border border-slate-100 bg-slate-50/85 p-2 text-left transition hover:border-[#153A4C]/18 hover:bg-white active:scale-[0.99]"
+                                className="group flex min-w-[13.5rem] items-center gap-2 rounded-[1.25rem] border border-slate-100 bg-slate-50/80 p-2 text-left transition hover:border-[#153A4C]/18 hover:bg-white active:scale-[0.99]"
                               >
-                                <div className="relative h-24 overflow-hidden rounded-[1.1rem] bg-slate-100">
+                                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
                                   <img
-                                    src={bannerUrl}
-                                    alt=""
-                                    aria-hidden
+                                    src={logoUrl || bannerUrl}
+                                    alt={name}
                                     loading="lazy"
                                     decoding="async"
-                                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                                    className="h-full w-full object-contain p-1.5 transition duration-500 group-hover:scale-105"
+                                    onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }}
                                   />
-                                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.08)_0%,rgba(15,23,42,0.14)_100%)]" />
-                                  <span className={`absolute left-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-1 text-[8px] font-black uppercase tracking-[0.09em] shadow-[0_10px_20px_-14px_rgba(15,23,42,0.45)] ${statusClass}`}>
-                                    {eventState === 'live' ? <span className="h-1.5 w-1.5 rounded-full bg-white" /> : null}
-                                    {statusLabel}
-                                  </span>
-                                  <span className="absolute bottom-2 left-2 flex h-10 w-10 items-center justify-center overflow-hidden rounded-[0.95rem] border border-white/90 bg-white/95 p-1.5 shadow-[0_12px_22px_-16px_rgba(15,23,42,0.46)]">
-                                    <img
-                                      src={logoUrl}
-                                      alt={name}
-                                      loading="lazy"
-                                      decoding="async"
-                                      className="h-full w-full object-contain"
-                                      onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }}
-                                    />
-                                  </span>
+                                  {eventState === 'live' ? (
+                                    <span className="absolute bottom-1.5 right-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500 shadow-[0_6px_12px_-6px_rgba(16,185,129,0.8)]" />
+                                  ) : null}
                                 </div>
-                                <div className="mt-2 min-w-0">
-                                  <div className="flex items-start justify-between gap-2">
-                                    <div className="min-w-0">
-                                      <p className="line-clamp-1 text-sm font-black text-slate-950">{name}</p>
-                                      <p className="mt-0.5 line-clamp-1 text-[10px] font-bold uppercase tracking-[0.09em] text-slate-500">
-                                        {region || 'Operação local'}
-                                      </p>
-                                    </div>
-                                    <CaretRight size={13} weight="bold" className="mt-0.5 shrink-0 text-[#153A4C] transition-transform group-hover:translate-x-0.5" />
-                                  </div>
-                                  <p className="mt-2 inline-flex max-w-full items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[10px] font-black text-[#153A4C] ring-1 ring-slate-200/75">
-                                    <Clock size={10} weight="fill" />
-                                    <span className="truncate">{timeLabel || (eventState === 'live' ? 'Feira aberta agora' : 'Agenda em confirmação')}</span>
+                                <div className="min-w-0 flex-1">
+                                  <p className="line-clamp-1 text-sm font-black text-slate-950">{name}</p>
+                                  <p className="line-clamp-1 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">{region || 'Operação local'}</p>
+                                  <p className="mt-0.5 inline-flex max-w-full items-center gap-1 text-[10px] font-black text-[#153A4C]">
+                                    {eventState === 'live' ? <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" /> : <Clock size={10} weight="bold" className="shrink-0" />}
+                                    <span className="truncate">{statusLabel} · {agendaLine}</span>
+                                    <CaretRight size={10} weight="bold" className="shrink-0" />
                                   </p>
                                 </div>
                               </button>
