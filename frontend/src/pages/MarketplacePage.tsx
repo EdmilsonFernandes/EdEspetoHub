@@ -1913,8 +1913,22 @@ export function MarketplacePage() {
   const selectedCondominiumBannerUrl = selectedCondominium
     ? resolveCondominiumAssetUrl(selectedCondominium, 'banner')
     : '';
-  const condominiumPreviewLogos = useMemo(() => {
-    return condominiums.slice(0, 3).map((condominium) => resolveCondominiumAssetUrl(condominium, 'logo'));
+  const homeCondominiumHighlights = useMemo(() => {
+    const stateRank = (condominium: HubCondominium) => {
+      const state = String(condominium.eventSummary?.state || '').trim().toLowerCase();
+      if (state === 'live') return 0;
+      if (state === 'upcoming') return 1;
+      return 2;
+    };
+
+    return [...condominiums]
+      .filter((condominium) => String(condominium?.slug || '').trim())
+      .sort((a, b) => {
+        const rankDelta = stateRank(a) - stateRank(b);
+        if (rankDelta !== 0) return rankDelta;
+        return String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR');
+      })
+      .slice(0, 2);
   }, [condominiums]);
 
   const filteredCondominiums = useMemo(() => {
@@ -2472,6 +2486,56 @@ export function MarketplacePage() {
     setCondominiumSearch('');
     resetMarketplaceFilters();
   }, [resetMarketplaceFilters]);
+
+  const openCondominiumPicker = useCallback((filter: 'all' | 'live' | 'upcoming' | 'none' = 'all') => {
+    setCondoPickerFilter(filter);
+    setCondominiumPickerOpen(true);
+  }, []);
+
+  const handleCondominiumSelection = useCallback((slugValue: string, nameValue: string, event?: CondominiumEventSummary | null) => {
+    const slug = String(slugValue || '').trim();
+    if (!slug) return;
+
+    const name = String(nameValue || 'Condomínio').trim() || 'Condomínio';
+    const eventState = String(event?.state || '').trim().toLowerCase();
+    const hasActiveAgenda = eventState === 'live' || eventState === 'upcoming';
+    if (!hasActiveAgenda) {
+      setCondominiumAvailabilityModal({
+        name,
+        nextLabel: formatCondominiumPickerEventTime(event) || 'A confirmar',
+      });
+      return;
+    }
+
+    const agendaBannerUrl = resolveAssetUrl(event?.bannerUrl || '') || '';
+    if (agendaBannerUrl) {
+      setCondominiumPromoModal({
+        slug,
+        name,
+        timeLabel:
+          formatCondominiumPickerEventTime(event) ||
+          formatCondominiumEventTime(event) ||
+          (eventState === 'live' ? 'Feira aberta agora' : 'Agenda confirmada'),
+        eventTitle: event?.title || 'Feira do condomínio',
+        bannerTitle: event?.bannerTitle || null,
+        bannerDescription: event?.bannerDescription || null,
+        bannerUrl: agendaBannerUrl,
+      });
+      return;
+    }
+
+    if (eventState !== 'live') {
+      setCondominiumAvailabilityModal({
+        name,
+        nextLabel: formatCondominiumPickerEventTime(event) || 'A confirmar',
+      });
+      return;
+    }
+
+    setCondominiumPickerOpen(false);
+    setCondominiumSearch('');
+    setSelectedCondominiumSlug(slug);
+  }, []);
 
   const handleHomeHubNavigation = useCallback(() => {
     clearCondominiumSelection();
@@ -3181,62 +3245,114 @@ export function MarketplacePage() {
                   </div>
                 </div>
               ) : (
-                <>
+                <section className="overflow-hidden rounded-[1.7rem] border border-slate-200/80 bg-white/88 p-3 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.38)] ring-1 ring-white/70 backdrop-blur-xl">
                   {(() => {
                     const liveCount = condominiums.filter(c => c.eventSummary?.state === 'live').length;
                     return (
-                      <button
-                        type="button"
-                        onClick={() => setCondominiumPickerOpen(true)}
-                        className="group relative flex w-full items-center gap-4 overflow-hidden rounded-[1.6rem] border border-[#336886]/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(239,247,255,0.92)_100%)] p-4 text-left shadow-[0_4px_24px_-8px_rgba(51,104,134,0.14)] transition-all duration-200 hover:border-[#336886]/22 hover:shadow-[0_8px_28px_-8px_rgba(51,104,134,0.2)] active:scale-[0.99]"
-                      >
-                        <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-[#336886]/6 blur-2xl" />
-
-                        {/* Logo cluster */}
-                        <div className="relative shrink-0 flex h-14 w-14 items-center justify-center rounded-[1.1rem] bg-[#336886]/10 text-[#336886] ring-1 ring-[#336886]/10">
-                          {condominiumPreviewLogos.length > 0 ? (
-                            <div className="flex -space-x-3">
-                              {condominiumPreviewLogos.map((logo, index) => (
-                                <img
-                                  key={`${logo}-${index}`}
-                                  src={logo}
-                                  alt="Condomínio"
-                                  className="h-8 w-8 rounded-full border-2 border-white bg-white object-contain p-0.5 shadow-sm"
-                                />
-                              ))}
-                            </div>
-                          ) : (
-                            <Buildings size={22} weight="duotone" />
-                          )}
-                        </div>
-
-                        {/* Texto */}
-                        <div className="min-w-0 flex-1">
-                          {liveCount > 0 ? (
-                            <div className="mb-1 flex items-center gap-2">
-                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[8px] font-black uppercase tracking-wide text-white">
-                                <span className="relative flex h-1.5 w-1.5">
-                                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
-                                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
+                      <>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="inline-flex items-center gap-1.5 rounded-full bg-[#153A4C]/8 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-[#153A4C]">
+                                <CalendarBlank size={12} weight="duotone" />
+                                Feiras e eventos
+                              </p>
+                              {liveCount > 0 ? (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-white shadow-[0_10px_18px_-12px_rgba(16,185,129,0.6)]">
+                                  <span className="relative flex h-1.5 w-1.5">
+                                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
+                                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
+                                  </span>
+                                  {liveCount} ao vivo
                                 </span>
-                                {liveCount} ao vivo
-                              </span>
+                              ) : null}
                             </div>
-                          ) : null}
-                          <p className="truncate text-[15px] font-black text-slate-900 leading-snug">Feiras e eventos perto de você</p>
-                          <p className="mt-0.5 truncate text-[11px] font-medium text-slate-400">
-                            {condominiums.length} {condominiums.length === 1 ? 'local disponível' : 'locais disponíveis'}
-                          </p>
+                            <h2 className="mt-1 line-clamp-1 text-base font-black tracking-[-0.03em] text-slate-950">Condomínios com agenda local</h2>
+                            <p className="mt-0.5 line-clamp-1 text-[11px] font-semibold text-slate-500">
+                              Feiras, retirada e lojas participantes no app.
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => openCondominiumPicker('all')}
+                            className="shrink-0 rounded-full bg-[#153A4C] px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-white transition active:scale-95"
+                          >
+                            Ver todos
+                          </button>
                         </div>
 
-                        {/* Seta */}
-                        <span className="shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#336886]/10 text-[#336886] transition-all duration-200 group-hover:bg-[#336886] group-hover:text-white">
-                          <CaretRight size={14} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
-                        </span>
-                      </button>
+                        <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                          {homeCondominiumHighlights.map((condominium) => {
+                            const slug = String(condominium.slug || '').trim();
+                            const name = String(condominium.name || 'Condomínio').trim() || 'Condomínio';
+                            const event = condominium.eventSummary || null;
+                            const eventState = String(event?.state || '').trim().toLowerCase();
+                            const logoUrl = resolveCondominiumAssetUrl(condominium, 'logo');
+                            const bannerUrl = resolveCondominiumAssetUrl(condominium, 'banner') || logoUrl;
+                            const region = [condominium.city, condominium.state].map((item) => String(item || '').trim()).filter(Boolean).join(' - ');
+                            const timeLabel = formatCondominiumPickerEventTime(event) || formatCondominiumEventTime(event);
+                            const statusLabel = eventState === 'live' ? 'Ao vivo' : eventState === 'upcoming' ? 'Em breve' : 'Agenda';
+                            const statusClass = eventState === 'live'
+                              ? 'bg-emerald-500 text-white'
+                              : eventState === 'upcoming'
+                                ? 'bg-[#153A4C] text-white'
+                                : 'bg-white/92 text-slate-600';
+
+                            return (
+                              <button
+                                key={slug}
+                                type="button"
+                                onClick={() => handleCondominiumSelection(slug, name, event)}
+                                className="group min-w-[15.75rem] max-w-[17.5rem] flex-1 overflow-hidden rounded-[1.35rem] border border-slate-100 bg-slate-50/85 p-2 text-left transition hover:border-[#153A4C]/18 hover:bg-white active:scale-[0.99]"
+                              >
+                                <div className="relative h-24 overflow-hidden rounded-[1.1rem] bg-slate-100">
+                                  <img
+                                    src={bannerUrl}
+                                    alt=""
+                                    aria-hidden
+                                    loading="lazy"
+                                    decoding="async"
+                                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                                  />
+                                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.08)_0%,rgba(15,23,42,0.14)_100%)]" />
+                                  <span className={`absolute left-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-1 text-[8px] font-black uppercase tracking-[0.09em] shadow-[0_10px_20px_-14px_rgba(15,23,42,0.45)] ${statusClass}`}>
+                                    {eventState === 'live' ? <span className="h-1.5 w-1.5 rounded-full bg-white" /> : null}
+                                    {statusLabel}
+                                  </span>
+                                  <span className="absolute bottom-2 left-2 flex h-10 w-10 items-center justify-center overflow-hidden rounded-[0.95rem] border border-white/90 bg-white/95 p-1.5 shadow-[0_12px_22px_-16px_rgba(15,23,42,0.46)]">
+                                    <img
+                                      src={logoUrl}
+                                      alt={name}
+                                      loading="lazy"
+                                      decoding="async"
+                                      className="h-full w-full object-contain"
+                                      onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }}
+                                    />
+                                  </span>
+                                </div>
+                                <div className="mt-2 min-w-0">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="min-w-0">
+                                      <p className="line-clamp-1 text-sm font-black text-slate-950">{name}</p>
+                                      <p className="mt-0.5 line-clamp-1 text-[10px] font-bold uppercase tracking-[0.09em] text-slate-500">
+                                        {region || 'Operação local'}
+                                      </p>
+                                    </div>
+                                    <CaretRight size={13} weight="bold" className="mt-0.5 shrink-0 text-[#153A4C] transition-transform group-hover:translate-x-0.5" />
+                                  </div>
+                                  <p className="mt-2 inline-flex max-w-full items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[10px] font-black text-[#153A4C] ring-1 ring-slate-200/75">
+                                    <Clock size={10} weight="fill" />
+                                    <span className="truncate">{timeLabel || (eventState === 'live' ? 'Feira aberta agora' : 'Agenda em confirmação')}</span>
+                                  </p>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </>
                     );
                   })()}
-                </>
+                </section>
               )}
             </section>
             </>
@@ -4168,41 +4284,7 @@ export function MarketplacePage() {
                   : [];
 
                 const handleClick = (slug: string, name: string, event: typeof filteredCondominiums[0]['event']) => {
-                  const eventState = String(event?.state || '').trim().toLowerCase();
-                  const hasActiveAgenda = eventState === 'live' || eventState === 'upcoming';
-                  if (!hasActiveAgenda) {
-                    setCondominiumAvailabilityModal({
-                      name: name || 'Condomínio',
-                      nextLabel: formatCondominiumPickerEventTime(event) || 'A confirmar',
-                    });
-                    return;
-                  }
-                  const agendaBannerUrl = resolveAssetUrl(event?.bannerUrl || '') || '';
-                  if (agendaBannerUrl) {
-                    setCondominiumPromoModal({
-                      slug,
-                      name: name || 'Condomínio',
-                      timeLabel:
-                        formatCondominiumPickerEventTime(event) ||
-                        formatCondominiumEventTime(event) ||
-                        (eventState === 'live' ? 'Feira aberta agora' : 'Agenda confirmada'),
-                      eventTitle: event?.title || 'Feira do condomínio',
-                      bannerTitle: event?.bannerTitle || null,
-                      bannerDescription: event?.bannerDescription || null,
-                      bannerUrl: agendaBannerUrl,
-                    });
-                    return;
-                  }
-                  if (eventState !== 'live') {
-                    setCondominiumAvailabilityModal({
-                      name: name || 'Condomínio',
-                      nextLabel: formatCondominiumPickerEventTime(event) || 'A confirmar',
-                    });
-                    return;
-                  }
-                  setCondominiumPickerOpen(false);
-                  setCondominiumSearch('');
-                  setSelectedCondominiumSlug(slug);
+                  handleCondominiumSelection(slug, name, event);
                 };
 
                 const hasResults = live.length > 0 || upcoming.length > 0 || none.length > 0;
