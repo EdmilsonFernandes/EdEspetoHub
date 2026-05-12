@@ -73,6 +73,18 @@ export class HospitalityPlace {
   bannerUrl?: string | null;
 
   @Column({
+    name: 'banner_urls',
+    type: 'jsonb',
+    nullable: true,
+    default: () => "'[]'::jsonb",
+    transformer: {
+      to: (value?: string[] | null) => (Array.isArray(value) ? value : []),
+      from: (value: string[] | null) => (Array.isArray(value) ? value : []),
+    },
+  })
+  bannerUrls?: string[];
+
+  @Column({
     type: 'jsonb',
     nullable: true,
     default: () => "'[]'::jsonb",

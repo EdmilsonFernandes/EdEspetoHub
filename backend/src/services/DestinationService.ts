@@ -12,6 +12,12 @@ import {
   toNullableNumber,
   toOptionalText,
 } from '../utils/destinationHub';
+import {
+  MAX_HOSPITALITY_BANNER_IMAGES,
+  mergeHospitalityBannerSlots,
+  normalizeHospitalityBannerSlots,
+  normalizeHospitalityBannerUrls,
+} from '../utils/hospitalityMedia';
 import { saveBase64Image } from '../utils/imageStorage';
 import { logger } from '../utils/logger';
 import { OrderReviewService } from './OrderReviewService';
@@ -275,6 +281,19 @@ export class DestinationService {
     const slug = await this.resolvePlaceSlug(destination.id, normalizeDestinationSlug(payload?.slug || current?.slug || name), current?.id);
     const logoUrl = await saveBase64Image(payload?.logoFile, `hospitality-logo-${slug}`, 'destinations');
     const bannerUrl = await saveBase64Image(payload?.bannerFile, `hospitality-banner-${slug}`, 'destinations');
+    const hasBannerUrlInput = Object.prototype.hasOwnProperty.call(payload || {}, 'bannerUrl');
+    const hasBannerGalleryInput =
+      Object.prototype.hasOwnProperty.call(payload || {}, 'bannerUrls') ||
+      Object.prototype.hasOwnProperty.call(payload || {}, 'bannerFiles');
+    const uploadedBannerSlots = await this.saveHospitalityBannerImages(payload?.bannerFiles, slug);
+    const submittedBannerSlots = mergeHospitalityBannerSlots(payload?.bannerUrls, uploadedBannerSlots);
+    const requestedBannerUrls = hasBannerGalleryInput
+      ? normalizeHospitalityBannerUrls(submittedBannerSlots)
+      : normalizeHospitalityBannerUrls(current?.bannerUrls);
+    const resolvedBannerUrl = bannerUrl || (hasBannerUrlInput ? toOptionalText(payload?.bannerUrl) : (current?.bannerUrl ?? null));
+    const bannerUrls = hasBannerGalleryInput
+      ? normalizeHospitalityBannerUrls(resolvedBannerUrl, requestedBannerUrls)
+      : normalizeHospitalityBannerUrls(resolvedBannerUrl, current?.bannerUrls);
     const saved = await this.repository.savePlace({
       ...(current || {}),
       destinationId: destination.id,
@@ -293,7 +312,8 @@ export class DestinationService {
       instagramUrl: payload?.instagramUrl !== undefined ? toOptionalText(payload.instagramUrl) : current?.instagramUrl ?? null,
       websiteUrl: payload?.websiteUrl !== undefined ? toOptionalText(payload.websiteUrl) : current?.websiteUrl ?? null,
       logoUrl: logoUrl || toOptionalText(payload?.logoUrl) || current?.logoUrl || null,
-      bannerUrl: bannerUrl || toOptionalText(payload?.bannerUrl) || current?.bannerUrl || null,
+      bannerUrl: resolvedBannerUrl || bannerUrls[0] || null,
+      bannerUrls,
       amenities: Array.isArray(payload?.amenities) ? payload.amenities.map((item: any) => String(item || '').trim()).filter(Boolean) : current?.amenities || [],
       deliveryInstructions: payload?.deliveryInstructions !== undefined ? toOptionalText(payload.deliveryInstructions) : current?.deliveryInstructions ?? null,
       active: payload?.active !== false,
@@ -577,6 +597,18 @@ export class DestinationService {
     return slug;
   }
 
+  private async saveHospitalityBannerImages(files: unknown, slug: string) {
+    const slots = normalizeHospitalityBannerSlots(files);
+    const uploaded = normalizeHospitalityBannerSlots([]);
+    for (let index = 0; index < Math.min(slots.length, MAX_HOSPITALITY_BANNER_IMAGES); index += 1) {
+      const imageFile = slots[index];
+      if (!imageFile) continue;
+      const imageUrl = await saveBase64Image(imageFile, `hospitality-banner-${slug}-${index + 1}`, 'destinations');
+      if (imageUrl) uploaded[index] = imageUrl;
+    }
+    return uploaded;
+  }
+
   private normalizeReviewStatus(value: unknown) {
     const status = String(value || '').trim().toLowerCase();
     if ([ 'approved', 'rejected', 'cancelled', 'pending' ].includes(status)) return status;
@@ -636,6 +668,7 @@ export class DestinationService {
       websiteUrl: place.websiteUrl || null,
       logoUrl: place.logoUrl || null,
       bannerUrl: place.bannerUrl || null,
+      bannerUrls: normalizeHospitalityBannerUrls(place.bannerUrls, place.bannerUrl),
       amenities: Array.isArray(place.amenities) ? place.amenities : [],
       deliveryInstructions: place.deliveryInstructions || null,
       active: place.active !== false,

@@ -2181,6 +2181,7 @@ export async function runMigrations() {
       website_url TEXT,
       logo_url TEXT,
       banner_url TEXT,
+      banner_urls JSONB DEFAULT '[]'::jsonb,
       amenities JSONB DEFAULT '[]'::jsonb,
       delivery_instructions TEXT,
       sort_order INT NOT NULL DEFAULT 0,
@@ -2188,6 +2189,15 @@ export async function runMigrations() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE hospitality_places
+    ADD COLUMN IF NOT EXISTS banner_urls JSONB DEFAULT '[]'::jsonb;
+  `);
+  await AppDataSource.query(`
+    UPDATE hospitality_places
+    SET banner_urls = '[]'::jsonb
+    WHERE banner_urls IS NULL OR jsonb_typeof(banner_urls) <> 'array';
   `);
   await AppDataSource.query(`
     CREATE UNIQUE INDEX IF NOT EXISTS uq_hospitality_places_destination_slug

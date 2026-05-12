@@ -42,13 +42,22 @@ const emptyPlace = {
   instagramUrl: '',
   logoUrl: '',
   bannerUrl: '',
+  bannerUrls: ['', '', '', ''],
   logoFile: '',
   bannerFile: '',
+  bannerFiles: ['', '', '', ''],
   lat: '',
   lng: '',
   deliveryInstructions: '',
   active: true,
   sortOrder: 0,
+};
+
+const PLACE_BANNER_SLOTS = 4;
+
+const normalizePlaceBannerSlots = (value: any) => {
+  const slots = Array.isArray(value) ? value : [];
+  return Array.from({ length: PLACE_BANNER_SLOTS }, (_, index) => String(slots[index] || '').trim());
 };
 
 const emptyListing = {
@@ -545,6 +554,38 @@ export function SuperAdminDestinations() {
   const updateListing = (key: string, value: any) => setListingForm((current) => ({ ...current, [key]: value }));
   const updateStoreLink = (key: string, value: any) => setStoreLinkForm((current) => ({ ...current, [key]: value }));
 
+  const updatePlaceBannerUrl = (index: number, value: string) => {
+    setPlaceForm((current) => {
+      const bannerUrls = normalizePlaceBannerSlots(current.bannerUrls);
+      const bannerFiles = normalizePlaceBannerSlots(current.bannerFiles);
+      bannerUrls[index] = value;
+      if (value) bannerFiles[index] = '';
+      return {
+        ...current,
+        bannerUrls,
+        bannerFiles,
+        bannerUrl: bannerUrls[0] || '',
+        bannerFile: '',
+      };
+    });
+  };
+
+  const updatePlaceBannerFile = (index: number, value: string) => {
+    setPlaceForm((current) => {
+      const bannerUrls = normalizePlaceBannerSlots(current.bannerUrls);
+      const bannerFiles = normalizePlaceBannerSlots(current.bannerFiles);
+      bannerFiles[index] = value;
+      if (value) bannerUrls[index] = '';
+      return {
+        ...current,
+        bannerUrls,
+        bannerFiles,
+        bannerUrl: bannerUrls[0] || '',
+        bannerFile: '',
+      };
+    });
+  };
+
   const startDestinationEdit = (destination: any) => {
     setEditingDestinationId(destination.id);
     setEditingPlaceId('');
@@ -572,6 +613,10 @@ export function SuperAdminDestinations() {
       destinationId: place.destinationId || place.destination?.id || '',
       zipCode: formatCepBr(place.zipCode || ''),
       state: String(place.state || place.destination?.state || '').toUpperCase().slice(0, 2),
+      bannerUrl: place.bannerUrl || place.bannerUrls?.[0] || '',
+      bannerUrls: normalizePlaceBannerSlots(place.bannerUrls?.length ? place.bannerUrls : [place.bannerUrl]),
+      bannerFiles: normalizePlaceBannerSlots([]),
+      bannerFile: '',
       active: place.active !== false,
       sortOrder: Number(place.sortOrder || 0),
     });
@@ -1011,7 +1056,9 @@ export function SuperAdminDestinations() {
                                 <Bed size={22} weight="duotone" className="text-[#336886]" />
                               </div>
                               <div className={`mt-3 grid gap-3 ${contentFilter === 'places' ? 'md:grid-cols-2 2xl:grid-cols-3' : ''}`}>
-                                {destinationPlaces.length ? destinationPlaces.map((place: any) => (
+                                {destinationPlaces.length ? destinationPlaces.map((place: any) => {
+                                  const placeBannerCount = (Array.isArray(place.bannerUrls) ? place.bannerUrls.filter(Boolean).length : 0) || (place.bannerUrl ? 1 : 0);
+                                  return (
                                   <div key={place.id} className="rounded-2xl border border-slate-100 bg-slate-50/80 px-3 py-3">
                                     <div className="flex items-start gap-3">
                                       <img src={logoFor(place)} alt={place.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover ring-1 ring-slate-200" />
@@ -1020,6 +1067,9 @@ export function SuperAdminDestinations() {
                                           <div className="min-w-0">
                                             <p className="break-words text-sm font-black leading-snug text-slate-950">{place.name}</p>
                                             <p className="mt-0.5 line-clamp-2 text-xs font-semibold text-slate-500">{place.address || place.description || 'Hospedagem sem endereço'}</p>
+                                            {placeBannerCount ? (
+                                              <p className="mt-1 text-[11px] font-black text-[#336886]">{placeBannerCount} banner(s) no carrossel</p>
+                                            ) : null}
                                           </div>
                                           <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(place.active)}`}>{activeLabel(place.active)}</span>
                                         </div>
@@ -1035,7 +1085,8 @@ export function SuperAdminDestinations() {
                                       </button>
                                     </div>
                                   </div>
-                                )) : (
+                                  );
+                                }) : (
                                   <p className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-xs font-bold text-slate-500">Nenhuma hospedagem nesta cidade.</p>
                                 )}
                               </div>
@@ -1235,16 +1286,36 @@ export function SuperAdminDestinations() {
                   </div>
                   <input value={placeForm.address} onChange={(event) => updatePlace('address', event.target.value)} placeholder="Endereço" autoComplete="address-line1" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 </div>
-                <MediaUploadField
-                  label="Foto/banner do chalé ou pousada"
-                  hint="Escolha a foto principal do card ou cole uma URL pública."
-                  urlValue={placeForm.bannerUrl}
-                  fileValue={placeForm.bannerFile}
-                  onUrlChange={(value: string) => updatePlace('bannerUrl', value)}
-                  onFileChange={(value: string) => updatePlace('bannerFile', value)}
-                  onError={setError}
-                  maxEdge={1800}
-                />
+                <div className="sm:col-span-2 rounded-[1.5rem] border border-slate-200 bg-white p-3">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-black text-slate-950">Banners do chalé ou pousada</p>
+                      <p className="mt-0.5 text-[11px] font-semibold text-slate-500">Cadastre até 4 fotos para o carrossel público. A primeira vira o destaque principal.</p>
+                    </div>
+                    <span className="rounded-full bg-[#edf5fa] px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]">
+                      até 4 imagens
+                    </span>
+                  </div>
+                  <div className="mt-3 grid gap-3">
+                    {Array.from({ length: PLACE_BANNER_SLOTS }, (_, index) => {
+                      const bannerUrls = normalizePlaceBannerSlots(placeForm.bannerUrls);
+                      const bannerFiles = normalizePlaceBannerSlots(placeForm.bannerFiles);
+                      return (
+                        <MediaUploadField
+                          key={`place-banner-${index}`}
+                          label={`Banner ${index + 1}${index === 0 ? ' · principal' : ''}`}
+                          hint={index === 0 ? 'Imagem principal do topo e dos cards.' : 'Imagem complementar para propaganda no carrossel.'}
+                          urlValue={bannerUrls[index]}
+                          fileValue={bannerFiles[index]}
+                          onUrlChange={(value: string) => updatePlaceBannerUrl(index, value)}
+                          onFileChange={(value: string) => updatePlaceBannerFile(index, value)}
+                          onError={setError}
+                          maxEdge={1800}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
                 <MediaUploadField
                   label="Logo/foto menor da hospedagem"
                   hint="Opcional. Use quando tiver marca ou foto complementar."

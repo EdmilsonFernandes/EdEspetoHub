@@ -22,6 +22,7 @@ const hasCoverImage = (item: any) =>
 const imageFor = (item: any) =>
   resolveAssetUrl(
     item?.bannerUrl ||
+      item?.bannerUrls?.[0] ||
       item?.imageUrl ||
       item?.settings?.bannerUrl ||
       item?.store?.settings?.bannerUrl ||
@@ -36,6 +37,19 @@ const coverImageFor = (item: any) =>
   resolveAssetUrl(item?.bannerUrl || item?.imageUrl || item?.settings?.bannerUrl || item?.store?.settings?.bannerUrl || '');
 
 const cardMediaFor = (item: any) => coverImageFor(item) || logoFor(item);
+
+const galleryImagesFor = (item: any) => {
+  const urls = [
+    ...(Array.isArray(item?.bannerUrls) ? item.bannerUrls : []),
+    item?.bannerUrl,
+    item?.imageUrl,
+    item?.logoUrl,
+  ]
+    .map((value) => resolveAssetUrl(value || ''))
+    .filter(Boolean);
+  const uniqueUrls = Array.from(new Set(urls));
+  return uniqueUrls.length ? uniqueUrls : [imageFor(item)];
+};
 
 const externalUrl = (value?: string | null) => {
   const url = String(value || '').trim();
@@ -205,6 +219,7 @@ export function HospitalityPlacePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [serviceFilter, setServiceFilter] = useState<'all' | 'app' | 'direct'>('all');
+  const [bannerIndex, setBannerIndex] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -257,6 +272,20 @@ export function HospitalityPlacePage() {
   });
   const placeWhatsAppUrl = buildWhatsAppUrl(place.whatsapp, placeContactMessage, isNativePlatform);
   const placePhoneUrl = placeWhatsAppUrl ? '' : buildPhoneCallUrl(place.whatsapp);
+  const placeBannerImages = galleryImagesFor(place);
+  const selectedPlaceBanner = placeBannerImages[bannerIndex % placeBannerImages.length] || imageFor(place);
+
+  useEffect(() => {
+    setBannerIndex(0);
+  }, [destinationSlug, placeSlug]);
+
+  useEffect(() => {
+    if (placeBannerImages.length < 2) return undefined;
+    const timer = window.setInterval(() => {
+      setBannerIndex((current) => (current + 1) % placeBannerImages.length);
+    }, 4500);
+    return () => window.clearInterval(timer);
+  }, [place.id, placeBannerImages.length]);
 
   return (
     <main className="min-h-screen bg-[#f4f1ea] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
@@ -280,8 +309,29 @@ export function HospitalityPlacePage() {
             <div className="mt-4 overflow-hidden rounded-[1.75rem] border border-white/85 bg-white/90 p-2 shadow-[0_24px_70px_-48px_rgba(15,23,42,0.44)] backdrop-blur">
               <div className="grid gap-0 lg:grid-cols-[0.95fr_1.05fr] lg:items-stretch">
                 <div className="relative h-44 overflow-hidden rounded-[1.25rem] bg-slate-100 sm:h-64 lg:h-full">
-                  <img src={imageFor(place)} alt={place.name || 'Hospedagem'} className="h-full w-full object-cover" />
+                  <img key={selectedPlaceBanner} src={selectedPlaceBanner} alt={place.name || 'Hospedagem'} className="h-full w-full object-cover transition duration-700" />
                   <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/42 via-slate-950/8 to-transparent" />
+                  {placeBannerImages.length > 1 ? (
+                    <>
+                      <div className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-slate-700 shadow-sm ring-1 ring-white/80 backdrop-blur">
+                        {bannerIndex % placeBannerImages.length + 1}/{placeBannerImages.length}
+                      </div>
+                      <div className="absolute bottom-4 right-4 flex gap-1.5">
+                        {placeBannerImages.map((url, index) => {
+                          const active = index === bannerIndex % placeBannerImages.length;
+                          return (
+                            <button
+                              key={url}
+                              type="button"
+                              aria-label={`Ver banner ${index + 1}`}
+                              onClick={() => setBannerIndex(index)}
+                              className={`h-2 rounded-full transition ${active ? 'w-6 bg-white shadow-sm' : 'w-2 bg-white/55 hover:bg-white/80'}`}
+                            />
+                          );
+                        })}
+                      </div>
+                    </>
+                  ) : null}
                   <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center gap-2">
                     <span className="rounded-full bg-white/92 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-700 shadow-sm">
                       {placeTypeLabel(place.type)}
