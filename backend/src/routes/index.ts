@@ -145,6 +145,9 @@ routes.post('/admin/condominium-events/:eventId/stores', requireAuth, requireRol
 routes.patch('/admin/condominium-requests/:requestId/review', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminReviewRequest);
 routes.patch('/admin/condominium-access-requests/:requestId/review', requireAuth, requireRole('SUPER_ADMIN'), CondominiumController.adminReviewAccessRequest);
 routes.get('/admin/destinations/manage', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminOverview);
+routes.get('/admin/destinations/manage/summary', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminCatalogSummary);
+routes.get('/admin/destinations/:destinationId/places', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminListDestinationPlaces);
+routes.get('/admin/destinations/:destinationId/listings', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminListDestinationListings);
 routes.post('/admin/destinations', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminCreateDestination);
 routes.patch('/admin/destinations/:destinationId', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminUpdateDestination);
 routes.post('/admin/destination-banners', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminCreateBanner);

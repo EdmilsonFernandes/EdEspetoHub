@@ -186,11 +186,12 @@ export class DestinationService {
     return this.toPublicPartnerRequest({ ...saved, destination });
   }
 
-  async adminOverview() {
+  async adminOverview(query: any = {}) {
+    const lite = query?.lite === true || String(query?.lite || '').toLowerCase() === 'true';
     const [destinations, places, listings, partnerRequests, storeRequests, stores] = await Promise.all([
       this.repository.listAllDestinations(),
       this.repository.listAllPlaces(),
-      this.repository.listAllListings(),
+      lite ? Promise.resolve([]) : this.repository.listAllListings(),
       this.repository.listPartnerRequests(),
       this.repository.listStoreRequests(),
       this.repository.listAllStoresForAdmin(),
@@ -215,6 +216,117 @@ export class DestinationService {
       partnerRequests: partnerRequests.map((request) => this.toPublicPartnerRequest(request)),
       storeRequests: storeRequests.map((request) => this.toPublicStoreRequest(request)),
       stores: stores.map((store: any) => this.toPublicStoreSummary(store)),
+    };
+  }
+
+  async adminCatalogSummary(query: any = {}) {
+    const page = this.toPaginationNumber(query?.page, 1, 1, 9999);
+    const pageSize = this.toPaginationNumber(query?.pageSize, 12, 5, 50);
+    const status = this.normalizeAdminStatus(query?.status);
+    const state = String(query?.state || 'all').trim().toUpperCase();
+    const contentType = this.normalizeAdminContentType(query?.contentType || query?.content);
+    const listingCategory = String(query?.listingCategory || query?.category || 'all').trim().toUpperCase() || 'ALL';
+    const search = String(query?.search || '').trim();
+
+    const [metrics, stateRows, categoryRows, destinationPage] = await Promise.all([
+      this.repository.getAdminDashboardMetrics(),
+      this.repository.listAdminDestinationStates(),
+      this.repository.listAdminListingCategories(status),
+      this.repository.listAdminDestinationsPage({
+        page,
+        pageSize,
+        search,
+        state,
+        status,
+        contentType,
+        listingCategory,
+      }),
+    ]);
+    const [destinations, total] = destinationPage;
+    const destinationIds = destinations.map((destination: any) => destination.id);
+    const [placesCounts, listingsCounts] = await Promise.all([
+      this.repository.countPlacesByDestinationIds(destinationIds, status),
+      this.repository.countListingsByDestinationIds(destinationIds, status, listingCategory),
+    ]);
+
+    return {
+      metrics,
+      states: [
+        { id: 'all', label: 'Todas UFs', count: metrics.destinations },
+        ...stateRows.map((row: any) => ({
+          id: String(row.state || 'UF').toUpperCase().slice(0, 2),
+          label: String(row.state || 'UF').toUpperCase().slice(0, 2),
+          count: Number(row.count || 0),
+        })),
+      ],
+      categories: [
+        { id: 'all', label: 'Todas categorias', count: categoryRows.reduce((total: number, row: any) => total + Number(row.count || 0), 0) },
+        ...categoryRows.map((row: any) => {
+          const category = String(row.category || 'SERVICO').toUpperCase();
+          return {
+            id: category,
+            label: category,
+            count: Number(row.count || 0),
+          };
+        }),
+      ],
+      destinations: destinations.map((destination: any) => ({
+        ...this.toPublicDestination(destination),
+        placesCount: placesCounts.get(destination.id) || 0,
+        listingsCount: listingsCounts.get(destination.id) || 0,
+      })),
+      pagination: this.toPaginationMeta(page, pageSize, total),
+      filters: { search, state, status, contentType, listingCategory },
+    };
+  }
+
+  async adminListDestinationPlaces(destinationId: string, query: any = {}) {
+    const destination = await this.repository.findDestinationById(destinationId);
+    if (!destination) throw new AppError('DEST-001', 404);
+    const page = this.toPaginationNumber(query?.page, 1, 1, 9999);
+    const pageSize = this.toPaginationNumber(query?.pageSize, 10, 5, 50);
+    const status = this.normalizeAdminStatus(query?.status);
+    const search = String(query?.search || '').trim();
+    const [places, total] = await this.repository.listAdminPlacesPage(destinationId, { page, pageSize, search, status });
+    const links = await this.repository.listStoreLinksByPlaceIds(places.map((place: any) => place.id), false);
+    const linksByPlace = links.reduce((acc, link: any) => {
+      const placeId = String(link.hospitalityPlaceId || '');
+      if (!acc.has(placeId)) acc.set(placeId, []);
+      acc.get(placeId)?.push(link);
+      return acc;
+    }, new Map<string, any[]>());
+    return {
+      destination: this.toPublicDestination(destination),
+      items: places.map((place: any) => ({
+        ...this.toPublicPlace(place),
+        destination: place.destination ? this.toPublicDestination(place.destination) : this.toPublicDestination(destination),
+        storeLinks: (linksByPlace.get(place.id) || []).map((link) => this.toPublicStoreLink(link)),
+      })),
+      pagination: this.toPaginationMeta(page, pageSize, total),
+      filters: { search, status },
+    };
+  }
+
+  async adminListDestinationListings(destinationId: string, query: any = {}) {
+    const destination = await this.repository.findDestinationById(destinationId);
+    if (!destination) throw new AppError('DEST-001', 404);
+    const page = this.toPaginationNumber(query?.page, 1, 1, 9999);
+    const pageSize = this.toPaginationNumber(query?.pageSize, 10, 5, 50);
+    const status = this.normalizeAdminStatus(query?.status);
+    const search = String(query?.search || '').trim();
+    const listingCategory = String(query?.listingCategory || query?.category || 'all').trim().toUpperCase() || 'ALL';
+    const [listings, total] = await this.repository.listAdminListingsPage(destinationId, {
+      page,
+      pageSize,
+      search,
+      status,
+      listingCategory,
+    });
+    return {
+      destination: this.toPublicDestination(destination),
+      items: listings.map((listing) => this.toPublicListing(listing)),
+      pagination: this.toPaginationMeta(page, pageSize, total),
+      filters: { search, status, listingCategory },
     };
   }
 
@@ -542,6 +654,36 @@ export class DestinationService {
     }
     await this.repository.deactivateStoreLink(placeId, storeId);
     return { ok: true };
+  }
+
+  private toPaginationNumber(value: any, fallback: number, min: number, max: number) {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) return fallback;
+    return Math.min(max, Math.max(min, Math.floor(parsed)));
+  }
+
+  private toPaginationMeta(page: number, pageSize: number, total: number) {
+    const totalPages = Math.max(1, Math.ceil(Number(total || 0) / pageSize));
+    return {
+      page,
+      pageSize,
+      total: Number(total || 0),
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrevious: page > 1,
+    };
+  }
+
+  private normalizeAdminStatus(value: any) {
+    const normalized = String(value || 'active').toLowerCase();
+    if ([ 'active', 'inactive', 'all' ].includes(normalized)) return normalized;
+    return 'active';
+  }
+
+  private normalizeAdminContentType(value: any) {
+    const normalized = String(value || 'all').toLowerCase();
+    if ([ 'all', 'destinations', 'places', 'listings' ].includes(normalized)) return normalized;
+    return 'all';
   }
 
   private async resolvePublicStoreLinks(links: any[]) {

@@ -43,6 +43,142 @@ export class DestinationRepository {
     });
   }
 
+  async getAdminDashboardMetrics() {
+    const [destinations, places, listings, pendingPartnerRequests, pendingStoreRequests] = await Promise.all([
+      this.destinationRepository.count(),
+      this.placeRepository.count(),
+      this.listingRepository.count(),
+      this.partnerRequestRepository.count({ where: { status: 'pending' } }),
+      this.storeRequestRepository.count({ where: { status: 'pending' } }),
+    ]);
+    return {
+      destinations,
+      places,
+      listings,
+      pending: pendingPartnerRequests + pendingStoreRequests,
+    };
+  }
+
+  async listAdminDestinationStates() {
+    return this.destinationRepository
+      .createQueryBuilder('destination')
+      .select("UPPER(SUBSTRING(COALESCE(destination.state, 'UF'), 1, 2))", 'state')
+      .addSelect('COUNT(destination.id)', 'count')
+      .groupBy("UPPER(SUBSTRING(COALESCE(destination.state, 'UF'), 1, 2))")
+      .orderBy('state', 'ASC')
+      .getRawMany();
+  }
+
+  async listAdminListingCategories(status?: string) {
+    const qb = this.listingRepository
+      .createQueryBuilder('listing')
+      .select("UPPER(COALESCE(listing.category, 'SERVICO'))", 'category')
+      .addSelect('COUNT(listing.id)', 'count')
+      .groupBy("UPPER(COALESCE(listing.category, 'SERVICO'))")
+      .orderBy('category', 'ASC');
+    this.applyActiveFilter(qb, 'listing', status);
+    return qb.getRawMany();
+  }
+
+  async listAdminDestinationsPage(filters: {
+    page: number;
+    pageSize: number;
+    search?: string;
+    state?: string;
+    status?: string;
+    contentType?: string;
+    listingCategory?: string;
+  }) {
+    const qb = this.destinationRepository.createQueryBuilder('destination');
+    this.applyDestinationAdminFilters(qb, filters);
+    qb
+      .orderBy('destination.state', 'ASC')
+      .addOrderBy('destination.city', 'ASC')
+      .addOrderBy('destination.sortOrder', 'ASC')
+      .addOrderBy('destination.name', 'ASC')
+      .skip((filters.page - 1) * filters.pageSize)
+      .take(filters.pageSize);
+    return qb.getManyAndCount();
+  }
+
+  async countPlacesByDestinationIds(destinationIds: string[], status?: string) {
+    if (!destinationIds.length) return new Map<string, number>();
+    const qb = this.placeRepository
+      .createQueryBuilder('place')
+      .select('place.destination_id', 'destinationId')
+      .addSelect('COUNT(place.id)', 'count')
+      .where('place.destination_id IN (:...destinationIds)', { destinationIds })
+      .groupBy('place.destination_id');
+    this.applyActiveFilter(qb, 'place', status);
+    const rows = await qb.getRawMany();
+    return new Map(rows.map((row: any) => [String(row.destinationId), Number(row.count || 0)]));
+  }
+
+  async countListingsByDestinationIds(destinationIds: string[], status?: string, listingCategory?: string) {
+    if (!destinationIds.length) return new Map<string, number>();
+    const qb = this.listingRepository
+      .createQueryBuilder('listing')
+      .select('listing.destination_id', 'destinationId')
+      .addSelect('COUNT(listing.id)', 'count')
+      .where('listing.destination_id IN (:...destinationIds)', { destinationIds })
+      .groupBy('listing.destination_id');
+    this.applyActiveFilter(qb, 'listing', status);
+    if (listingCategory && listingCategory !== 'all') {
+      qb.andWhere('UPPER(listing.category) = :listingCategory', { listingCategory: String(listingCategory).toUpperCase() });
+    }
+    const rows = await qb.getRawMany();
+    return new Map(rows.map((row: any) => [String(row.destinationId), Number(row.count || 0)]));
+  }
+
+  async listAdminPlacesPage(destinationId: string, filters: { page: number; pageSize: number; search?: string; status?: string }) {
+    const qb = this.placeRepository
+      .createQueryBuilder('place')
+      .leftJoinAndSelect('place.destination', 'destination')
+      .where('place.destination_id = :destinationId', { destinationId });
+    this.applyActiveFilter(qb, 'place', filters.status);
+    const search = String(filters.search || '').trim().toLowerCase();
+    if (search) {
+      qb.andWhere(
+        `LOWER(CONCAT_WS(' ', place.name, place.type, place.address, place.city, place.state, place.whatsapp, place.description)) LIKE :search`,
+        { search: `%${search}%` }
+      );
+    }
+    qb
+      .orderBy('place.sortOrder', 'ASC')
+      .addOrderBy('place.name', 'ASC')
+      .skip((filters.page - 1) * filters.pageSize)
+      .take(filters.pageSize);
+    return qb.getManyAndCount();
+  }
+
+  async listAdminListingsPage(destinationId: string, filters: { page: number; pageSize: number; search?: string; status?: string; listingCategory?: string }) {
+    const qb = this.listingRepository
+      .createQueryBuilder('listing')
+      .leftJoinAndSelect('listing.destination', 'destination')
+      .leftJoinAndSelect('listing.hospitalityPlace', 'hospitalityPlace')
+      .leftJoinAndSelect('listing.store', 'store')
+      .leftJoinAndSelect('store.settings', 'settings')
+      .where('listing.destination_id = :destinationId', { destinationId });
+    this.applyActiveFilter(qb, 'listing', filters.status);
+    if (filters.listingCategory && filters.listingCategory !== 'all') {
+      qb.andWhere('UPPER(listing.category) = :listingCategory', { listingCategory: String(filters.listingCategory).toUpperCase() });
+    }
+    const search = String(filters.search || '').trim().toLowerCase();
+    if (search) {
+      qb.andWhere(
+        `LOWER(CONCAT_WS(' ', listing.title, listing.category, listing.address, listing.whatsapp, listing.description, store.name, hospitalityPlace.name)) LIKE :search`,
+        { search: `%${search}%` }
+      );
+    }
+    qb
+      .orderBy('listing.featured', 'DESC')
+      .addOrderBy('listing.sortOrder', 'ASC')
+      .addOrderBy('listing.title', 'ASC')
+      .skip((filters.page - 1) * filters.pageSize)
+      .take(filters.pageSize);
+    return qb.getManyAndCount();
+  }
+
   findDestinationById(id: string) {
     return this.destinationRepository.findOne({ where: { id } });
   }
@@ -294,5 +430,78 @@ export class DestinationRepository {
       .leftJoinAndSelect('store.settings', 'settings')
       .orderBy('store.name', 'ASC')
       .getMany();
+  }
+
+  private applyDestinationAdminFilters(qb: any, filters: { search?: string; state?: string; status?: string; contentType?: string; listingCategory?: string }) {
+    this.applyActiveFilter(qb, 'destination', filters.status);
+    const requestedState = String(filters.state || 'all').trim();
+    const state = requestedState.toLowerCase() === 'all' ? '' : requestedState.toUpperCase().slice(0, 2);
+    if (state) {
+      qb.andWhere('UPPER(SUBSTRING(COALESCE(destination.state, :fallbackState), 1, 2)) = :state', {
+        fallbackState: 'UF',
+        state,
+      });
+    }
+
+    const search = String(filters.search || '').trim().toLowerCase();
+    const contentType = String(filters.contentType || 'all').toLowerCase();
+    const listingCategory = String(filters.listingCategory || 'all').toUpperCase();
+    const searchParam = `%${search}%`;
+
+    if (contentType === 'places') {
+      qb.andWhere(this.adminPlaceExistsSql(Boolean(search), filters.status), { search: searchParam });
+      return;
+    }
+    if (contentType === 'listings') {
+      qb.andWhere(this.adminListingExistsSql(Boolean(search), listingCategory !== 'ALL', filters.status), {
+        search: searchParam,
+        listingCategory,
+      });
+      return;
+    }
+
+    if (!search) return;
+    qb.andWhere(
+      `(
+        LOWER(CONCAT_WS(' ', destination.name, destination.city, destination.state, destination.description, destination.hero_title, destination.hero_subtitle)) LIKE :search
+        OR ${this.adminPlaceExistsSql(true, filters.status)}
+        OR ${this.adminListingExistsSql(true, listingCategory !== 'ALL', filters.status)}
+      )`,
+      { search: searchParam, listingCategory }
+    );
+  }
+
+  private applyActiveFilter(qb: any, alias: string, status?: string) {
+    const normalized = String(status || 'active').toLowerCase();
+    if (normalized === 'inactive') qb.andWhere(`${alias}.active = false`);
+    if (normalized === 'active') qb.andWhere(`${alias}.active = true`);
+  }
+
+  private adminPlaceExistsSql(withSearch: boolean, status?: string) {
+    return `EXISTS (
+      SELECT 1 FROM hospitality_places place_filter
+      WHERE place_filter.destination_id = destination.id
+      ${this.activeExistsSql('place_filter', status)}
+      ${withSearch ? "AND LOWER(CONCAT_WS(' ', place_filter.name, place_filter.type, place_filter.address, place_filter.city, place_filter.state, place_filter.whatsapp, place_filter.description)) LIKE :search" : ''}
+    )`;
+  }
+
+  private adminListingExistsSql(withSearch: boolean, withCategory: boolean, status?: string) {
+    return `EXISTS (
+      SELECT 1 FROM destination_listings listing_filter
+      LEFT JOIN stores store_filter ON store_filter.id = listing_filter.store_id
+      LEFT JOIN hospitality_places hospitality_filter ON hospitality_filter.id = listing_filter.hospitality_place_id
+      WHERE listing_filter.destination_id = destination.id
+      ${this.activeExistsSql('listing_filter', status)}
+      ${withCategory ? 'AND UPPER(listing_filter.category) = :listingCategory' : ''}
+      ${withSearch ? "AND LOWER(CONCAT_WS(' ', listing_filter.title, listing_filter.category, listing_filter.address, listing_filter.whatsapp, listing_filter.description, store_filter.name, hospitality_filter.name)) LIKE :search" : ''}
+    )`;
+  }
+
+  private activeExistsSql(alias: string, status?: string) {
+    const normalized = String(status || 'active').toLowerCase();
+    if (normalized === 'inactive') return `AND ${alias}.active = false`;
+    if (normalized === 'active') return `AND ${alias}.active = true`;
+    return '';
   }
 }

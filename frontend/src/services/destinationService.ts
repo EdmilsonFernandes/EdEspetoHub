@@ -69,8 +69,38 @@ export const destinationService = {
     return apiClient.post('/public/destination-partner-requests', payload, { authMode: 'none' });
   },
 
-  adminOverview() {
-    return superAdminRequest('/admin/destinations/manage');
+  adminOverview(params?: any) {
+    const search = new URLSearchParams();
+    if (params?.lite !== undefined) search.set('lite', String(params.lite));
+    const suffix = search.toString() ? `?${search.toString()}` : '';
+    return superAdminRequest(`/admin/destinations/manage${suffix}`);
+  },
+
+  adminCatalogSummary(params?: any) {
+    const search = new URLSearchParams();
+    Object.entries(params || {}).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && String(value).trim()) search.set(key, String(value));
+    });
+    const suffix = search.toString() ? `?${search.toString()}` : '';
+    return superAdminRequest(`/admin/destinations/manage/summary${suffix}`);
+  },
+
+  adminDestinationPlaces(destinationId: string, params?: any) {
+    const search = new URLSearchParams();
+    Object.entries(params || {}).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && String(value).trim()) search.set(key, String(value));
+    });
+    const suffix = search.toString() ? `?${search.toString()}` : '';
+    return superAdminRequest(`/admin/destinations/${encodeURIComponent(destinationId)}/places${suffix}`);
+  },
+
+  adminDestinationListings(destinationId: string, params?: any) {
+    const search = new URLSearchParams();
+    Object.entries(params || {}).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && String(value).trim()) search.set(key, String(value));
+    });
+    const suffix = search.toString() ? `?${search.toString()}` : '';
+    return superAdminRequest(`/admin/destinations/${encodeURIComponent(destinationId)}/listings${suffix}`);
   },
 
   adminCreateDestination(payload: any) {

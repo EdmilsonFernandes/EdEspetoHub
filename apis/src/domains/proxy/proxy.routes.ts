@@ -219,6 +219,9 @@ export function createProxyRoutes(): Router {
     r.patch('/admin/condominium-requests/:requestId/review', authRequired, forward);
     r.patch('/admin/condominium-access-requests/:requestId/review', authRequired, forward);
     r.get('/admin/destinations/manage', authRequired, forward);
+    r.get('/admin/destinations/manage/summary', authRequired, forward);
+    r.get('/admin/destinations/:destinationId/places', authRequired, forward);
+    r.get('/admin/destinations/:destinationId/listings', authRequired, forward);
     r.post('/admin/destinations', authRequired, forward);
     r.patch('/admin/destinations/:destinationId', authRequired, forward);
     r.post('/admin/destination-banners', authRequired, forward);

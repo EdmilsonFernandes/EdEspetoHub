@@ -73,6 +73,46 @@ describe('Destination Hub', () => {
     expect(listingRes.status).toBe(201);
     expect(listingRes.body.category).toBe('PASSEIO');
 
+    const summaryRes = await api
+      .get('/api/admin/destinations/manage/summary')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .query({
+        page: 1,
+        pageSize: 5,
+        search: `Destino Teste ${suffix}`,
+        state: 'MG',
+        status: 'active',
+        contentType: 'all',
+        listingCategory: 'PASSEIO',
+      });
+
+    expect(summaryRes.status).toBe(200);
+    expect(summaryRes.body.pagination).toEqual(expect.objectContaining({
+      page: 1,
+      pageSize: 5,
+      total: expect.any(Number),
+    }));
+    expect(summaryRes.body.destinations.some((item: any) => item.id === destinationId)).toBe(true);
+    expect(summaryRes.body.categories.some((item: any) => item.id === 'PASSEIO')).toBe(true);
+
+    const adminPlacesRes = await api
+      .get(`/api/admin/destinations/${destinationId}/places`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .query({ page: 1, pageSize: 5, search: 'Chalé', status: 'active' });
+
+    expect(adminPlacesRes.status, JSON.stringify(adminPlacesRes.body)).toBe(200);
+    expect(adminPlacesRes.body.items.some((item: any) => item.id === placeId)).toBe(true);
+    expect(adminPlacesRes.body.pagination.total).toBeGreaterThanOrEqual(1);
+
+    const adminListingsRes = await api
+      .get(`/api/admin/destinations/${destinationId}/listings`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .query({ page: 1, pageSize: 5, search: 'Passeio', status: 'active', listingCategory: 'PASSEIO' });
+
+    expect(adminListingsRes.status, JSON.stringify(adminListingsRes.body)).toBe(200);
+    expect(adminListingsRes.body.items.some((item: any) => item.id === listingRes.body.id)).toBe(true);
+    expect(adminListingsRes.body.pagination.total).toBeGreaterThanOrEqual(1);
+
     const optionsBefore = await api
       .get(`/api/stores/${storeId}/destinations`)
       .set('Authorization', `Bearer ${adminToken}`);

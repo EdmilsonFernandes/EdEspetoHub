@@ -60,7 +60,34 @@ export class DestinationController {
 
   static async adminOverview(req: Request, res: Response) {
     try {
-      const payload = await destinationService.adminOverview();
+      const payload = await destinationService.adminOverview(req.query || {});
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async adminCatalogSummary(req: Request, res: Response) {
+    try {
+      const payload = await destinationService.adminCatalogSummary(req.query || {});
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async adminListDestinationPlaces(req: Request, res: Response) {
+    try {
+      const payload = await destinationService.adminListDestinationPlaces(String(req.params.destinationId || ''), req.query || {});
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async adminListDestinationListings(req: Request, res: Response) {
+    try {
+      const payload = await destinationService.adminListDestinationListings(String(req.params.destinationId || ''), req.query || {});
       return res.json(payload);
     } catch (error: any) {
       return respondWithError(req, res, error, 400);

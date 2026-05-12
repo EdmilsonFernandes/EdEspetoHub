@@ -91,6 +91,23 @@ const emptyStoreLink = {
   recommended: false,
 };
 
+const emptyPagination = {
+  page: 1,
+  pageSize: 12,
+  total: 0,
+  totalPages: 1,
+  hasNext: false,
+  hasPrevious: false,
+};
+
+const emptyCatalog = {
+  metrics: { destinations: 0, places: 0, listings: 0, pending: 0 },
+  states: [{ id: 'all', label: 'Todas UFs', count: 0 }],
+  categories: [{ id: 'all', label: 'Todas categorias', count: 0 }],
+  destinations: [],
+  pagination: emptyPagination,
+};
+
 const imageFor = (item: any) =>
   resolveAssetUrl(item?.bannerUrl || item?.logoUrl || item?.imageUrl || '') ||
   getStoreAvatarUrl(item?.slug || item?.id, item?.name || item?.title);
@@ -121,24 +138,12 @@ const requestTone = (status?: string) => {
   return 'bg-amber-50 text-amber-700 border-amber-100';
 };
 
-const normalizeSearch = (value: any) =>
-  String(value || '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
-
 const statusPill = (active: any) =>
   active === false
     ? 'border-slate-200 bg-slate-100 text-slate-600'
     : 'border-emerald-100 bg-emerald-50 text-emerald-700';
 
 const activeLabel = (active: any) => (active === false ? 'Inativo' : 'Ativo');
-
-const matchesStatus = (item: any, filter: 'active' | 'all' | 'inactive') => {
-  if (filter === 'all') return true;
-  if (filter === 'inactive') return item?.active === false;
-  return item?.active !== false;
-};
 
 const labelForListingCategory = (value: any) => {
   const normalized = String(value || 'SERVICO').toUpperCase();
@@ -333,6 +338,16 @@ const MediaUploadField = ({
 
 export function SuperAdminDestinations() {
   const [data, setData] = useState<any>({ destinations: [], places: [], listings: [], partnerRequests: [], storeRequests: [], stores: [] });
+  const [catalog, setCatalog] = useState<any>(emptyCatalog);
+  const [catalogPage, setCatalogPage] = useState(1);
+  const [catalogLoading, setCatalogLoading] = useState(false);
+  const [selectedDestinationId, setSelectedDestinationId] = useState('');
+  const [detailSearch, setDetailSearch] = useState('');
+  const [placesPage, setPlacesPage] = useState(1);
+  const [listingsPage, setListingsPage] = useState(1);
+  const [placesResult, setPlacesResult] = useState<any>({ items: [], pagination: { ...emptyPagination, pageSize: 10 } });
+  const [listingsResult, setListingsResult] = useState<any>({ items: [], pagination: { ...emptyPagination, pageSize: 10 } });
+  const [detailLoading, setDetailLoading] = useState(false);
   const [destinationForm, setDestinationForm] = useState(emptyDestination);
   const [placeForm, setPlaceForm] = useState(emptyPlace);
   const [listingForm, setListingForm] = useState(emptyListing);
@@ -361,7 +376,7 @@ export function SuperAdminDestinations() {
     setLoading(true);
     setError('');
     try {
-      const payload = await destinationService.adminOverview();
+      const payload = await destinationService.adminOverview({ lite: true });
       setData(payload || {});
       const firstDestination = payload?.destinations?.[0]?.id || '';
       const firstPlace = payload?.places?.[0]?.id || '';
@@ -376,9 +391,94 @@ export function SuperAdminDestinations() {
     }
   };
 
+  const loadCatalog = async (page = catalogPage) => {
+    if (!localStorage.getItem('superAdminToken')) return;
+    setCatalogLoading(true);
+    try {
+      const payload = await destinationService.adminCatalogSummary({
+        page,
+        pageSize: 12,
+        search,
+        state: stateFilter,
+        status: statusFilter,
+        contentType: contentFilter,
+        listingCategory: listingCategoryFilter,
+      });
+      const nextCatalog = payload || emptyCatalog;
+      setCatalog(nextCatalog);
+      setCatalogPage(nextCatalog.pagination?.page || page);
+      setSelectedDestinationId((current) => {
+        const rows = nextCatalog.destinations || [];
+        if (rows.some((destination: any) => String(destination.id) === String(current))) return current;
+        return rows[0]?.id || '';
+      });
+    } catch (err: any) {
+      setError(err?.message || 'Não foi possível carregar catálogo paginado.');
+    } finally {
+      setCatalogLoading(false);
+    }
+  };
+
+  const loadDestinationDetails = async (destinationId = selectedDestinationId, nextPlacesPage = placesPage, nextListingsPage = listingsPage) => {
+    if (!destinationId) {
+      setPlacesResult({ items: [], pagination: { ...emptyPagination, pageSize: 10 } });
+      setListingsResult({ items: [], pagination: { ...emptyPagination, pageSize: 10 } });
+      return;
+    }
+    setDetailLoading(true);
+    try {
+      const [placesPayload, listingsPayload] = await Promise.all([
+        destinationService.adminDestinationPlaces(destinationId, {
+          page: nextPlacesPage,
+          pageSize: 10,
+          search: detailSearch,
+          status: statusFilter,
+        }),
+        destinationService.adminDestinationListings(destinationId, {
+          page: nextListingsPage,
+          pageSize: 10,
+          search: detailSearch,
+          status: statusFilter,
+          listingCategory: listingCategoryFilter,
+        }),
+      ]);
+      setPlacesResult(placesPayload || { items: [], pagination: { ...emptyPagination, pageSize: 10 } });
+      setListingsResult(listingsPayload || { items: [], pagination: { ...emptyPagination, pageSize: 10 } });
+    } catch (err: any) {
+      setError(err?.message || 'Não foi possível carregar detalhes da cidade.');
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const refreshAdminData = async (destinationId = selectedDestinationId) => {
+    await Promise.all([
+      load(),
+      loadCatalog(catalogPage),
+      destinationId ? loadDestinationDetails(destinationId, placesPage, listingsPage) : Promise.resolve(),
+    ]);
+  };
+
   useEffect(() => {
     load();
   }, []);
+
+  useEffect(() => {
+    setCatalogPage(1);
+  }, [search, stateFilter, statusFilter, contentFilter, listingCategoryFilter]);
+
+  useEffect(() => {
+    loadCatalog(catalogPage);
+  }, [catalogPage, search, stateFilter, statusFilter, contentFilter, listingCategoryFilter]);
+
+  useEffect(() => {
+    setPlacesPage(1);
+    setListingsPage(1);
+  }, [selectedDestinationId, detailSearch, statusFilter, listingCategoryFilter]);
+
+  useEffect(() => {
+    loadDestinationDetails(selectedDestinationId, placesPage, listingsPage);
+  }, [selectedDestinationId, placesPage, listingsPage, detailSearch, statusFilter, listingCategoryFilter]);
 
   useEffect(() => {
     const cleanedCep = String(placeForm.zipCode || '').replace(/\D/g, '');
@@ -415,6 +515,7 @@ export function SuperAdminDestinations() {
   }, [placeForm.zipCode]);
 
   const metrics = useMemo(() => {
+    if (catalog?.metrics) return catalog.metrics;
     const pendingPartner = (data.partnerRequests || []).filter((request: any) => String(request.status || 'pending') === 'pending').length;
     const pendingStores = (data.storeRequests || []).filter((request: any) => String(request.status || 'pending') === 'pending').length;
     return {
@@ -423,9 +524,10 @@ export function SuperAdminDestinations() {
       listings: (data.listings || []).length,
       pending: pendingPartner + pendingStores,
     };
-  }, [data]);
+  }, [catalog?.metrics, data]);
 
   const stateOptions = useMemo(() => {
+    if (Array.isArray(catalog?.states) && catalog.states.length) return catalog.states;
     const counts = new Map<string, number>();
     (data.destinations || []).forEach((destination: any) => {
       const state = String(destination.state || 'UF').toUpperCase().slice(0, 2);
@@ -437,7 +539,7 @@ export function SuperAdminDestinations() {
         .sort(([left], [right]) => left.localeCompare(right, 'pt-BR'))
         .map(([state, count]) => ({ id: state, label: state, count })),
     ];
-  }, [data.destinations]);
+  }, [catalog?.states, data.destinations]);
 
   const contentFilterOptions = useMemo(() => [
     { id: 'all', label: 'Tudo', count: metrics.destinations + metrics.places + metrics.listings, icon: Compass },
@@ -447,107 +549,14 @@ export function SuperAdminDestinations() {
   ], [metrics]);
 
   const listingCategoryOptions = useMemo(() => {
-    const counts = new Map<string, number>();
-    (data.listings || []).forEach((listing: any) => {
-      const category = String(listing.category || 'SERVICO').toUpperCase();
-      counts.set(category, (counts.get(category) || 0) + 1);
-    });
-    return [
-      { id: 'all', label: 'Todas categorias', count: (data.listings || []).length },
-      ...Array.from(counts.entries())
-        .sort(([left], [right]) => labelForListingCategory(left).localeCompare(labelForListingCategory(right), 'pt-BR'))
-        .map(([category, count]) => ({ id: category, label: labelForListingCategory(category), count })),
-    ];
-  }, [data.listings]);
-
-  const groupedDestinations = useMemo(() => {
-    const normalizedQuery = normalizeSearch(search);
-    const places = data.places || [];
-    const listings = data.listings || [];
-    const groups = new Map<string, any>();
-
-    (data.destinations || []).forEach((destination: any) => {
-      const destinationPlaces = places.filter((place: any) => place.destinationId === destination.id && matchesStatus(place, statusFilter));
-      const destinationListings = listings
-        .filter((listing: any) => listing.destinationId === destination.id && matchesStatus(listing, statusFilter))
-        .filter((listing: any) => listingCategoryFilter === 'all' || String(listing.category || 'SERVICO').toUpperCase() === listingCategoryFilter);
-      const destinationText = normalizeSearch([
-        destination.name,
-        destination.city,
-        destination.state,
-        destination.description,
-      ].filter(Boolean).join(' '));
-      const matchingPlaces = normalizedQuery
-        ? destinationPlaces.filter((place: any) => normalizeSearch([
-          place.name,
-          place.type,
-          place.address,
-          place.city,
-          place.state,
-          place.whatsapp,
-          place.description,
-        ].filter(Boolean).join(' ')).includes(normalizedQuery))
-        : destinationPlaces;
-      const matchingListings = normalizedQuery
-        ? destinationListings.filter((listing: any) => normalizeSearch([
-          listing.title,
-          listing.category,
-          listing.address,
-          listing.whatsapp,
-          listing.description,
-          listing.store?.name,
-          listing.hospitalityPlace?.name,
-        ].filter(Boolean).join(' ')).includes(normalizedQuery))
-        : destinationListings;
-      const destinationMatchesQuery = !normalizedQuery || destinationText.includes(normalizedQuery);
-      const destinationPassesStatus = matchesStatus(destination, statusFilter);
-      const placesToShow = destinationMatchesQuery ? destinationPlaces : matchingPlaces;
-      const listingsToShow = destinationMatchesQuery ? destinationListings : matchingListings;
-
-      if (normalizedQuery && !destinationMatchesQuery && !matchingPlaces.length && !matchingListings.length) return;
-
-      const includeDestination =
-        contentFilter === 'destinations'
-          ? destinationPassesStatus && destinationMatchesQuery
-          : contentFilter === 'places'
-            ? placesToShow.length > 0
-            : contentFilter === 'listings'
-              ? listingsToShow.length > 0
-              : destinationPassesStatus || placesToShow.length > 0 || listingsToShow.length > 0;
-      if (!includeDestination) return;
-
-      const state = String(destination.state || 'UF').toUpperCase().slice(0, 2);
-      const city = String(destination.city || destination.name || 'Sem cidade').trim();
-      if (stateFilter !== 'all' && state !== stateFilter) return;
-      const key = `${state}|${city}`;
-      if (!groups.has(key)) {
-        groups.set(key, {
-          key,
-          state,
-          city,
-          destinations: [],
-          placesCount: 0,
-          listingsCount: 0,
-          inactiveCount: 0,
-        });
-      }
-      const group = groups.get(key);
-      group.destinations.push({
-        ...destination,
-        places: contentFilter === 'listings' || contentFilter === 'destinations' ? [] : placesToShow,
-        listings: contentFilter === 'places' || contentFilter === 'destinations' ? [] : listingsToShow,
-      });
-      group.placesCount += contentFilter === 'listings' || contentFilter === 'destinations' ? 0 : placesToShow.length;
-      group.listingsCount += contentFilter === 'places' || contentFilter === 'destinations' ? 0 : listingsToShow.length;
-      if (destination.active === false) group.inactiveCount += 1;
-    });
-
-    return Array.from(groups.values()).sort((left: any, right: any) => {
-      const stateDiff = String(left.state).localeCompare(String(right.state), 'pt-BR');
-      if (stateDiff !== 0) return stateDiff;
-      return String(left.city).localeCompare(String(right.city), 'pt-BR');
-    });
-  }, [contentFilter, data.destinations, data.places, data.listings, listingCategoryFilter, search, statusFilter, stateFilter]);
+    if (Array.isArray(catalog?.categories) && catalog.categories.length) {
+      return catalog.categories.map((option: any) => ({
+        ...option,
+        label: option.id === 'all' ? 'Todas categorias' : labelForListingCategory(option.id),
+      }));
+    }
+    return [{ id: 'all', label: 'Todas categorias', count: metrics.listings }];
+  }, [catalog?.categories, metrics.listings]);
 
   const updateDestination = (key: string, value: any) => setDestinationForm((current) => ({ ...current, [key]: value }));
   const updatePlace = (key: string, value: any) => setPlaceForm((current) => ({ ...current, [key]: value }));
@@ -682,7 +691,7 @@ export function SuperAdminDestinations() {
       }
       setEditingDestinationId('');
       setDestinationForm(emptyDestination);
-      await load();
+      await refreshAdminData(editingDestinationId || selectedDestinationId);
       if (wasEditing) setActiveTab('dashboard');
     } catch (err: any) {
       setError(err?.message || 'Não foi possível salvar destino.');
@@ -705,7 +714,7 @@ export function SuperAdminDestinations() {
       }
       setEditingPlaceId('');
       setPlaceForm((current) => ({ ...emptyPlace, destinationId: current.destinationId }));
-      await load();
+      await refreshAdminData(payload.destinationId || selectedDestinationId);
       if (wasEditing) setActiveTab('dashboard');
     } catch (err: any) {
       setError(err?.message || 'Não foi possível salvar hospedagem.');
@@ -728,7 +737,7 @@ export function SuperAdminDestinations() {
       }
       setEditingListingId('');
       setListingForm((current) => ({ ...emptyListing, destinationId: current.destinationId }));
-      await load();
+      await refreshAdminData(payload.destinationId || selectedDestinationId);
       if (wasEditing) setActiveTab('dashboard');
     } catch (err: any) {
       setError(err?.message || 'Não foi possível salvar serviço.');
@@ -744,7 +753,7 @@ export function SuperAdminDestinations() {
     try {
       await destinationService.adminLinkStore(storeLinkForm.placeId, storeLinkForm);
       setStoreLinkForm((current) => ({ ...emptyStoreLink, placeId: current.placeId, storeId: current.storeId }));
-      await load();
+      await refreshAdminData(selectedDestinationId);
     } catch (err: any) {
       setError(err?.message || 'Não foi possível vincular loja.');
     } finally {
@@ -757,7 +766,7 @@ export function SuperAdminDestinations() {
     setError('');
     try {
       await destinationService.adminReviewPartnerRequest(requestId, { status });
-      await load();
+      await refreshAdminData(selectedDestinationId);
     } catch (err: any) {
       setError(err?.message || 'Não foi possível revisar solicitação.');
     } finally {
@@ -770,7 +779,7 @@ export function SuperAdminDestinations() {
     setError('');
     try {
       await destinationService.adminReviewStoreRequest(requestId, { status });
-      await load();
+      await refreshAdminData(selectedDestinationId);
     } catch (err: any) {
       setError(err?.message || 'Não foi possível revisar solicitação da loja.');
     } finally {
@@ -783,7 +792,7 @@ export function SuperAdminDestinations() {
     setError('');
     try {
       await destinationService.adminUpdateDestination(destination.id, { ...destination, active: destination.active === false });
-      await load();
+      await refreshAdminData(destination.id);
     } catch (err: any) {
       setError(err?.message || 'Não foi possível atualizar destino.');
     } finally {
@@ -796,7 +805,7 @@ export function SuperAdminDestinations() {
     setError('');
     try {
       await destinationService.adminUpdateHospitalityPlace(place.id, { ...place, destinationId: place.destinationId || place.destination?.id, active: place.active === false });
-      await load();
+      await refreshAdminData(place.destinationId || place.destination?.id || selectedDestinationId);
     } catch (err: any) {
       setError(err?.message || 'Não foi possível atualizar hospedagem.');
     } finally {
@@ -809,7 +818,7 @@ export function SuperAdminDestinations() {
     setError('');
     try {
       await destinationService.adminUpdateListing(listing.id, { ...listing, active: listing.active === false });
-      await load();
+      await refreshAdminData(listing.destinationId || listing.destination?.id || selectedDestinationId);
     } catch (err: any) {
       setError(err?.message || 'Não foi possível atualizar serviço.');
     } finally {
@@ -830,6 +839,23 @@ export function SuperAdminDestinations() {
     { id: 'listing', label: 'Serviço/Lugar', description: 'Passeio, atrativo, restaurante ou serviço local.', icon: Sparkle },
     { id: 'storeLink', label: 'Vínculo loja', description: 'Loja que entrega em uma hospedagem.', icon: Buildings },
   ];
+  const selectedDestination = (catalog.destinations || []).find((destination: any) => String(destination.id) === String(selectedDestinationId)) || null;
+  const pageButtonClass = 'rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-700 disabled:cursor-not-allowed disabled:opacity-40';
+  const renderPagination = (pagination: any, onPageChange: (page: number) => void, label = 'itens') => (
+    <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
+      <p className="text-xs font-bold text-slate-500">
+        {pagination?.total || 0} {label} · página {pagination?.page || 1} de {pagination?.totalPages || 1}
+      </p>
+      <div className="flex gap-2">
+        <button type="button" disabled={!pagination?.hasPrevious} onClick={() => onPageChange(Math.max(1, Number(pagination?.page || 1) - 1))} className={pageButtonClass}>
+          Anterior
+        </button>
+        <button type="button" disabled={!pagination?.hasNext} onClick={() => onPageChange(Number(pagination?.page || 1) + 1)} className={pageButtonClass}>
+          Próxima
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <AdminLayout contextLabel="Destinos" showHeader={false}>
@@ -990,167 +1016,207 @@ export function SuperAdminDestinations() {
               })}
             </div>
 
-            <div className="space-y-4">
-              {groupedDestinations.map((group: any) => (
-                <section key={group.key} className="overflow-hidden rounded-[1.85rem] border border-slate-200 bg-white shadow-sm">
-                  <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50/80 p-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">{group.state}</p>
-                      <h2 className="mt-1 text-xl font-black text-slate-950">{group.city}</h2>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-slate-700 ring-1 ring-slate-200">{group.destinations.length} destino(s)</span>
-                      <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-slate-700 ring-1 ring-slate-200">{group.placesCount} hospedagem(ns)</span>
-                      <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-slate-700 ring-1 ring-slate-200">{group.listingsCount} serviço(s)</span>
-                    </div>
+            <div className="grid gap-4 xl:grid-cols-[360px_1fr]">
+              <section className="rounded-[1.75rem] border border-slate-200 bg-white p-3 shadow-sm">
+                <div className="flex items-center justify-between gap-3 px-1 py-2">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Cidades</p>
+                    <h2 className="text-lg font-black text-slate-950">Catálogo paginado</h2>
                   </div>
-
-                  <div className="grid gap-4 p-4">
-                    {group.destinations.map((destination: any) => {
-                      const destinationPlaces = destination.places || [];
-                      const destinationListings = destination.listings || [];
-                      const showPlacesSection = contentFilter !== 'listings' && contentFilter !== 'destinations';
-                      const showListingsSection = contentFilter !== 'places' && contentFilter !== 'destinations';
-
-                      return (
-                        <article key={destination.id} className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_18px_46px_-38px_rgba(15,23,42,0.45)]">
-                          <div className="bg-[linear-gradient(135deg,#ffffff,#f8fafc)] p-4">
-                            <div className="flex flex-col gap-4 md:flex-row">
-                              <img src={imageFor(destination)} alt={destination.name} className="h-28 w-full rounded-[1.35rem] object-cover ring-1 ring-slate-200 md:h-24 md:w-32" />
-                              <div className="min-w-0 flex-1">
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <h3 className="break-words text-xl font-black leading-tight text-slate-950">{destination.name}</h3>
-                                  <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${statusPill(destination.active)}`}>
-                                    {activeLabel(destination.active)}
-                                  </span>
-                                </div>
-                                <p className="text-xs font-bold text-slate-500">{[destination.city, destination.state].filter(Boolean).join(' - ') || 'Sem cidade/UF'}</p>
-                                <p className="mt-2 line-clamp-2 text-sm font-semibold text-slate-600">{destination.description || destination.heroSubtitle || 'Sem descrição pública.'}</p>
-                              </div>
+                  {catalogLoading ? <span className="rounded-full bg-[#edf5fa] px-2.5 py-1 text-[10px] font-black text-[#336886]">Atualizando</span> : null}
+                </div>
+                <div className="mt-2 space-y-2">
+                  {(catalog.destinations || []).map((destination: any) => {
+                    const active = String(selectedDestinationId) === String(destination.id);
+                    return (
+                      <button
+                        key={destination.id}
+                        type="button"
+                        onClick={() => setSelectedDestinationId(destination.id)}
+                        className={`w-full rounded-[1.25rem] border p-3 text-left transition ${active ? 'border-[#153A4C] bg-[#153A4C] text-white shadow-[0_16px_36px_-28px_rgba(21,58,76,0.9)]' : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-white'}`}
+                      >
+                        <div className="flex gap-3">
+                          <img src={imageFor(destination)} alt={destination.name} className="h-14 w-14 shrink-0 rounded-2xl object-cover ring-1 ring-white/50" />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="truncate text-sm font-black">{destination.name}</p>
+                              <span className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${active ? 'bg-white/14 text-white' : destination.active === false ? 'bg-slate-200 text-slate-600' : 'bg-emerald-50 text-emerald-700'}`}>
+                                {activeLabel(destination.active)}
+                              </span>
                             </div>
-                            <div className="mt-4 flex flex-wrap gap-2">
-                              <button type="button" onClick={() => startDestinationEdit(destination)} className={actionButtonClass('primary')}>
-                                <PencilSimple size={13} weight="bold" />
-                                Editar destino
-                              </button>
-                              <Link to={`/destinos/${destination.slug}`} className={actionButtonClass('neutral')}>
-                                <Eye size={13} weight="bold" />
-                                Ver público
-                              </Link>
-                              <button type="button" disabled={saving} onClick={() => toggleDestinationActive(destination)} className={actionButtonClass(destination.active === false ? 'success' : 'muted')}>
-                                {destination.active === false ? <Eye size={13} weight="bold" /> : <EyeSlash size={13} weight="bold" />}
-                                {destination.active === false ? 'Ativar' : 'Desativar'}
-                              </button>
+                            <p className={`mt-0.5 text-[11px] font-bold ${active ? 'text-white/68' : 'text-slate-500'}`}>{[destination.city, destination.state].filter(Boolean).join(' - ') || 'Sem cidade/UF'}</p>
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${active ? 'bg-white/12 text-white/80' : 'bg-white text-slate-600 ring-1 ring-slate-200'}`}>{destination.placesCount || 0} hosp.</span>
+                              <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${active ? 'bg-white/12 text-white/80' : 'bg-white text-slate-600 ring-1 ring-slate-200'}`}>{destination.listingsCount || 0} serv.</span>
                             </div>
                           </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                  {!catalogLoading && !(catalog.destinations || []).length ? (
+                    <p className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-sm font-bold text-slate-500">
+                      Nenhuma cidade encontrada neste filtro.
+                    </p>
+                  ) : null}
+                </div>
+                <div className="mt-3">
+                  {renderPagination(catalog.pagination, setCatalogPage, 'cidades')}
+                </div>
+              </section>
 
-                          {(showPlacesSection || showListingsSection) ? (
-                          <div className="grid gap-3 border-t border-slate-100 bg-slate-50/60 p-4 lg:grid-cols-2">
-                            {showPlacesSection ? (
-                            <section className={`rounded-[1.35rem] border border-slate-200 bg-white p-3 ${contentFilter === 'places' ? 'lg:col-span-2' : ''}`}>
-                              <div className="flex items-center justify-between gap-3">
-                                <div>
-                                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">Hospedagens</p>
-                                  <h4 className="text-sm font-black text-slate-950">{destinationPlaces.length} cadastrada(s)</h4>
-                                </div>
-                                <Bed size={22} weight="duotone" className="text-[#336886]" />
-                              </div>
-                              <div className={`mt-3 grid gap-3 ${contentFilter === 'places' ? 'md:grid-cols-2 2xl:grid-cols-3' : ''}`}>
-                                {destinationPlaces.length ? destinationPlaces.map((place: any) => {
-                                  const placeBannerCount = (Array.isArray(place.bannerUrls) ? place.bannerUrls.filter(Boolean).length : 0) || (place.bannerUrl ? 1 : 0);
-                                  return (
-                                  <div key={place.id} className="rounded-2xl border border-slate-100 bg-slate-50/80 px-3 py-3">
-                                    <div className="flex items-start gap-3">
-                                      <img src={logoFor(place)} alt={place.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover ring-1 ring-slate-200" />
-                                      <div className="min-w-0 flex-1">
-                                        <div className="flex items-start justify-between gap-3">
-                                          <div className="min-w-0">
-                                            <p className="break-words text-sm font-black leading-snug text-slate-950">{place.name}</p>
-                                            <p className="mt-0.5 line-clamp-2 text-xs font-semibold text-slate-500">{place.address || place.description || 'Hospedagem sem endereço'}</p>
-                                            {placeBannerCount ? (
-                                              <p className="mt-1 text-[11px] font-black text-[#336886]">{placeBannerCount} banner(s) no carrossel</p>
-                                            ) : null}
-                                          </div>
-                                          <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(place.active)}`}>{activeLabel(place.active)}</span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div className="mt-3 flex flex-wrap gap-2">
-                                      <button type="button" onClick={() => startPlaceEdit(place)} className={actionButtonClass('neutral')}>
-                                        <PencilSimple size={13} weight="bold" />
-                                        Editar
-                                      </button>
-                                      <button type="button" disabled={saving} onClick={() => togglePlaceActive(place)} className={actionButtonClass(place.active === false ? 'success' : 'muted')}>
-                                        {place.active === false ? 'Ativar' : 'Desativar'}
-                                      </button>
-                                    </div>
-                                  </div>
-                                  );
-                                }) : (
-                                  <p className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-xs font-bold text-slate-500">Nenhuma hospedagem nesta cidade.</p>
-                                )}
-                              </div>
-                            </section>
-                            ) : null}
-
-                            {showListingsSection ? (
-                            <section className={`rounded-[1.35rem] border border-amber-100 bg-white p-3 ${contentFilter === 'listings' ? 'lg:col-span-2' : ''}`}>
-                              <div className="flex items-center justify-between gap-3">
-                                <div>
-                                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-700">Serviços e lugares</p>
-                                  <h4 className="text-sm font-black text-slate-950">{destinationListings.length} cadastrado(s)</h4>
-                                </div>
-                                <Sparkle size={22} weight="duotone" className="text-amber-700" />
-                              </div>
-                              <div className={`mt-3 grid gap-3 ${contentFilter === 'listings' ? 'md:grid-cols-2 2xl:grid-cols-3' : ''}`}>
-                                {destinationListings.length ? destinationListings.map((listing: any) => (
-                                  <div key={listing.id} className="rounded-2xl border border-amber-100 bg-amber-50/60 px-3 py-3">
-                                    <div className="flex items-start gap-3">
-                                      <img src={imageFor(listing)} alt={listing.title} className="h-16 w-16 shrink-0 rounded-2xl object-cover ring-1 ring-amber-100" />
-                                      <div className="min-w-0 flex-1">
-                                        <div className="flex items-start justify-between gap-3">
-                                          <div className="min-w-0">
-                                            <p className="break-words text-sm font-black leading-snug text-slate-950">{listing.title}</p>
-                                            <p className="mt-0.5 text-xs font-semibold text-slate-500">{labelForListingCategory(listing.category)}</p>
-                                            {listing.store ? (
-                                              <p className="mt-1 line-clamp-2 text-[11px] font-black text-emerald-700">Loja vinculada: {listing.store.name}</p>
-                                            ) : (
-                                              <p className="mt-1 line-clamp-2 text-[11px] font-black text-amber-700">Aguardando validação de loja</p>
-                                            )}
-                                          </div>
-                                          <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(listing.active)}`}>{activeLabel(listing.active)}</span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div className="mt-3 flex flex-wrap gap-2">
-                                      <button type="button" onClick={() => startListingEdit(listing)} className={actionButtonClass('neutral')}>
-                                        <PencilSimple size={13} weight="bold" />
-                                        Editar
-                                      </button>
-                                      <button type="button" disabled={saving} onClick={() => toggleListingActive(listing)} className={actionButtonClass(listing.active === false ? 'success' : 'muted')}>
-                                        {listing.active === false ? 'Ativar' : 'Desativar'}
-                                      </button>
-                                    </div>
-                                  </div>
-                                )) : (
-                                  <p className="rounded-2xl border border-dashed border-amber-200 bg-amber-50/60 px-3 py-4 text-xs font-bold text-slate-500">Nenhum serviço nesta cidade.</p>
-                                )}
-                              </div>
-                            </section>
-                            ) : null}
+              <section className="min-w-0 rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
+                {!selectedDestination ? (
+                  <div className="rounded-[1.5rem] border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center">
+                    <MapTrifold size={32} weight="duotone" className="mx-auto text-[#336886]" />
+                    <p className="mt-3 text-sm font-black text-slate-700">Selecione uma cidade para gerenciar hospedagens e serviços.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <article className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-[linear-gradient(135deg,#ffffff,#f8fafc)]">
+                      <div className="grid gap-4 p-4 md:grid-cols-[170px_1fr]">
+                        <img src={imageFor(selectedDestination)} alt={selectedDestination.name} className="h-36 w-full rounded-[1.25rem] object-cover ring-1 ring-slate-200 md:h-full" />
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="break-words text-2xl font-black leading-tight text-slate-950">{selectedDestination.name}</h3>
+                            <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${statusPill(selectedDestination.active)}`}>
+                              {activeLabel(selectedDestination.active)}
+                            </span>
                           </div>
+                          <p className="text-xs font-bold text-slate-500">{[selectedDestination.city, selectedDestination.state].filter(Boolean).join(' - ') || 'Sem cidade/UF'}</p>
+                          <p className="mt-2 line-clamp-3 text-sm font-semibold text-slate-600">{selectedDestination.description || selectedDestination.heroSubtitle || 'Sem descrição pública.'}</p>
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            <button type="button" onClick={() => startDestinationEdit(selectedDestination)} className={actionButtonClass('primary')}>
+                              <PencilSimple size={13} weight="bold" />
+                              Editar destino
+                            </button>
+                            <Link to={`/destinos/${selectedDestination.slug}`} className={actionButtonClass('neutral')}>
+                              <Eye size={13} weight="bold" />
+                              Ver público
+                            </Link>
+                            <button type="button" disabled={saving} onClick={() => toggleDestinationActive(selectedDestination)} className={actionButtonClass(selectedDestination.active === false ? 'success' : 'muted')}>
+                              {selectedDestination.active === false ? <Eye size={13} weight="bold" /> : <EyeSlash size={13} weight="bold" />}
+                              {selectedDestination.active === false ? 'Ativar' : 'Desativar'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+
+                    <div className="grid gap-3 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-3 md:grid-cols-[1fr_auto] md:items-center">
+                      <div className="relative">
+                        <MagnifyingGlass size={17} weight="bold" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          value={detailSearch}
+                          onChange={(event) => setDetailSearch(event.target.value)}
+                          placeholder="Buscar dentro desta cidade: chalé, serviço, WhatsApp, endereço..."
+                          className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm font-bold outline-none focus:border-[#336886]"
+                        />
+                      </div>
+                      <button type="button" onClick={() => loadDestinationDetails(selectedDestinationId, placesPage, listingsPage)} className={actionButtonClass('neutral')}>
+                        Atualizar detalhe
+                      </button>
+                    </div>
+
+                    {detailLoading ? <p className="rounded-2xl bg-[#edf5fa] px-4 py-3 text-sm font-bold text-[#336886]">Carregando detalhes da cidade...</p> : null}
+
+                    {contentFilter !== 'listings' && contentFilter !== 'destinations' ? (
+                      <section className="rounded-[1.5rem] border border-slate-200 bg-white p-4">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div>
+                            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">Hospedagens</p>
+                            <h4 className="text-lg font-black text-slate-950">Chalés e pousadas da cidade</h4>
+                          </div>
+                          <Bed size={24} weight="duotone" className="text-[#336886]" />
+                        </div>
+                        <div className="mt-3 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
+                          {(placesResult.items || []).map((place: any) => {
+                            const placeBannerCount = (Array.isArray(place.bannerUrls) ? place.bannerUrls.filter(Boolean).length : 0) || (place.bannerUrl ? 1 : 0);
+                            return (
+                              <div key={place.id} className="rounded-2xl border border-slate-100 bg-slate-50/80 px-3 py-3">
+                                <div className="flex items-start gap-3">
+                                  <img src={logoFor(place)} alt={place.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover ring-1 ring-slate-200" />
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div className="min-w-0">
+                                        <p className="break-words text-sm font-black leading-snug text-slate-950">{place.name}</p>
+                                        <p className="mt-0.5 line-clamp-2 text-xs font-semibold text-slate-500">{place.address || place.description || 'Hospedagem sem endereço'}</p>
+                                        {placeBannerCount ? <p className="mt-1 text-[11px] font-black text-[#336886]">{placeBannerCount} banner(s) no carrossel</p> : null}
+                                      </div>
+                                      <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(place.active)}`}>{activeLabel(place.active)}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                  <button type="button" onClick={() => startPlaceEdit(place)} className={actionButtonClass('neutral')}>
+                                    <PencilSimple size={13} weight="bold" />
+                                    Editar
+                                  </button>
+                                  <button type="button" disabled={saving} onClick={() => togglePlaceActive(place)} className={actionButtonClass(place.active === false ? 'success' : 'muted')}>
+                                    {place.active === false ? 'Ativar' : 'Desativar'}
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                          {!detailLoading && !(placesResult.items || []).length ? (
+                            <p className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-xs font-bold text-slate-500">Nenhuma hospedagem encontrada nesta busca.</p>
                           ) : null}
-                        </article>
-                      );
-                    })}
+                        </div>
+                        <div className="mt-3">{renderPagination(placesResult.pagination, setPlacesPage, 'hospedagens')}</div>
+                      </section>
+                    ) : null}
+
+                    {contentFilter !== 'places' && contentFilter !== 'destinations' ? (
+                      <section className="rounded-[1.5rem] border border-amber-100 bg-white p-4">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div>
+                            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-700">Serviços e lugares</p>
+                            <h4 className="text-lg font-black text-slate-950">Curadoria local e pré-lojas</h4>
+                          </div>
+                          <Sparkle size={24} weight="duotone" className="text-amber-700" />
+                        </div>
+                        <div className="mt-3 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
+                          {(listingsResult.items || []).map((listing: any) => (
+                            <div key={listing.id} className="rounded-2xl border border-amber-100 bg-amber-50/60 px-3 py-3">
+                              <div className="flex items-start gap-3">
+                                <img src={imageFor(listing)} alt={listing.title} className="h-16 w-16 shrink-0 rounded-2xl object-cover ring-1 ring-amber-100" />
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                      <p className="break-words text-sm font-black leading-snug text-slate-950">{listing.title}</p>
+                                      <p className="mt-0.5 text-xs font-semibold text-slate-500">{labelForListingCategory(listing.category)}</p>
+                                      {listing.store ? (
+                                        <p className="mt-1 line-clamp-2 text-[11px] font-black text-emerald-700">Loja vinculada: {listing.store.name}</p>
+                                      ) : (
+                                        <p className="mt-1 line-clamp-2 text-[11px] font-black text-amber-700">Aguardando validação de loja</p>
+                                      )}
+                                    </div>
+                                    <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(listing.active)}`}>{activeLabel(listing.active)}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                <button type="button" onClick={() => startListingEdit(listing)} className={actionButtonClass('neutral')}>
+                                  <PencilSimple size={13} weight="bold" />
+                                  Editar
+                                </button>
+                                <button type="button" disabled={saving} onClick={() => toggleListingActive(listing)} className={actionButtonClass(listing.active === false ? 'success' : 'muted')}>
+                                  {listing.active === false ? 'Ativar' : 'Desativar'}
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                          {!detailLoading && !(listingsResult.items || []).length ? (
+                            <p className="rounded-2xl border border-dashed border-amber-200 bg-amber-50/60 px-3 py-4 text-xs font-bold text-slate-500">Nenhum serviço encontrado nesta busca.</p>
+                          ) : null}
+                        </div>
+                        <div className="mt-3">{renderPagination(listingsResult.pagination, setListingsPage, 'serviços')}</div>
+                      </section>
+                    ) : null}
                   </div>
-                </section>
-              ))}
-              {!loading && groupedDestinations.length === 0 ? (
-                <p className="rounded-[1.5rem] border border-slate-200 bg-white px-4 py-5 text-sm font-bold text-slate-500">
-                  Nenhum destino encontrado neste filtro.
-                </p>
-              ) : null}
+                )}
+              </section>
             </div>
           </div>
         ) : null}
