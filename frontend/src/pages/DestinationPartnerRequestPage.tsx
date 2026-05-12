@@ -5,6 +5,7 @@ import { ArrowRight, Bed, CheckCircle, Compass, Handshake, ImageSquare, LinkSimp
 import { destinationService } from '../services/destinationService';
 import { addressLookupService } from '../services/addressLookupService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { canUseNativeImagePicker, pickNativeImageAsDataUrl } from '../utils/nativeImagePicker';
 
 const initialForm = {
   destinationId: '',
@@ -105,6 +106,7 @@ const prepareImageUpload = async (file: File, maxEdge = 1600) => {
 
 const MediaUploadField = ({ label, hint, urlValue, fileValue, onUrlChange, onFileChange, onError, maxEdge = 1600 }: any) => {
   const previewUrl = fileValue || resolveAssetUrl(urlValue || '') || '';
+  const canUseNativePicker = canUseNativeImagePicker();
 
   const handleFile = async (event: any) => {
     const file = event.target.files?.[0];
@@ -116,6 +118,20 @@ const MediaUploadField = ({ label, hint, urlValue, fileValue, onUrlChange, onFil
       onUrlChange('');
     } catch {
       onError?.('Não foi possível carregar a imagem selecionada.');
+    }
+  };
+
+  const handleNativePicker = async () => {
+    try {
+      const dataUrl = await pickNativeImageAsDataUrl({
+        quality: maxEdge > 1600 ? 78 : 82,
+        promptLabelHeader: label,
+      });
+      if (!dataUrl) return;
+      onFileChange(dataUrl);
+      onUrlChange('');
+    } catch {
+      onError?.('Não foi possível abrir a câmera ou galeria agora.');
     }
   };
 
@@ -133,16 +149,23 @@ const MediaUploadField = ({ label, hint, urlValue, fileValue, onUrlChange, onFil
           <p className="text-sm font-black text-slate-950">{label}</p>
           <p className="mt-0.5 text-[11px] font-semibold text-slate-500">{hint}</p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <label className="relative inline-flex cursor-pointer items-center gap-2 overflow-hidden rounded-full bg-[#153A4C] px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-white">
-              <UploadSimple size={14} weight="bold" />
-              Escolher foto
-              <input
-                type="file"
-                accept="image/*"
-                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                onChange={handleFile}
-              />
-            </label>
+            {canUseNativePicker ? (
+              <button type="button" onClick={handleNativePicker} className="inline-flex items-center gap-2 rounded-full bg-[#153A4C] px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-white">
+                <UploadSimple size={14} weight="bold" />
+                Tirar ou escolher foto
+              </button>
+            ) : (
+              <label className="relative inline-flex cursor-pointer items-center gap-2 overflow-hidden rounded-full bg-[#153A4C] px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-white">
+                <UploadSimple size={14} weight="bold" />
+                Escolher foto
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/*"
+                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                  onChange={handleFile}
+                />
+              </label>
+            )}
             {(fileValue || urlValue) ? (
               <button type="button" onClick={() => { onFileChange(''); onUrlChange(''); }} className="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-slate-600">
                 Limpar

@@ -18,6 +18,7 @@ import { formatCurrency } from '../../utils/format';
 import { useToast } from '../../contexts/ToastContext';
 import { normalizeProductModifiers } from '../../utils/productModifiers';
 import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
+import { canUseNativeImagePicker, pickNativeImageAsDataUrl } from '../../utils/nativeImagePicker';
 import {
   buildBulkImportTemplate,
   parseBulkProductsInput,
@@ -302,6 +303,7 @@ const compressImageFileToDataUrl = (file: File, maxEdge = 1280) =>
 
 export const ProductManager = ({ products, onProductsChange, storeSegment = 'outros' }) => {
   const { showToast } = useToast();
+  const canUseNativeProductImagePicker = canUseNativeImagePicker();
   const pendingDeleteTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const formRef = useRef<HTMLDivElement | null>(null);
   const createNameInputRef = useRef<HTMLInputElement | null>(null);
@@ -919,6 +921,26 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     }
   };
 
+  const handleUploadDataUrl = (dataUrl: string) => {
+    if (!dataUrl) return;
+    if (imagePreview?.startsWith('blob:')) URL.revokeObjectURL(imagePreview);
+    setImagePreview(dataUrl);
+    setFormData((prev) => ({ ...prev, imageFile: dataUrl, imageUrl: '' }));
+  };
+
+  const handleNativeProductImage = async () => {
+    try {
+      const dataUrl = await pickNativeImageAsDataUrl({
+        quality: 80,
+        promptLabelHeader: 'Imagem do produto',
+      });
+      if (dataUrl) handleUploadDataUrl(dataUrl);
+    } catch (error) {
+      console.error('Falha ao abrir câmera/galeria do produto', error);
+      showToast('Não foi possível abrir câmera ou galeria agora.', 'error');
+    }
+  };
+
   const handleInlineUpload = async (file) => {
     if (!file) {
       setInlineImageFile('');
@@ -943,6 +965,27 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
       } catch {
         showToast('Não foi possível processar a imagem.', 'error');
       }
+    }
+  };
+
+  const handleInlineUploadDataUrl = (dataUrl: string) => {
+    if (!dataUrl) return;
+    if (inlineImagePreview?.startsWith('blob:')) URL.revokeObjectURL(inlineImagePreview);
+    setInlineImagePreview(dataUrl);
+    setInlineImageFile(dataUrl);
+    setInlineForm((prev) => ({ ...prev, imageUrl: '' }));
+  };
+
+  const handleNativeInlineProductImage = async () => {
+    try {
+      const dataUrl = await pickNativeImageAsDataUrl({
+        quality: 80,
+        promptLabelHeader: 'Imagem do produto',
+      });
+      if (dataUrl) handleInlineUploadDataUrl(dataUrl);
+    } catch (error) {
+      console.error('Falha ao abrir câmera/galeria na edição do produto', error);
+      showToast('Não foi possível abrir câmera ou galeria agora.', 'error');
     }
   };
 
@@ -1512,34 +1555,44 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
 
           <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
             <label className="text-sm font-medium text-gray-700">Imagem do Produto</label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <label className="relative inline-flex cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-slate-800">
-                Tirar foto
-                <input
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  onChange={(e) => {
-                    void handleUpload(e.target.files?.[0]);
-                    e.currentTarget.value = '';
-                  }}
-                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                />
-              </label>
-              <label className="relative inline-flex cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50">
-                Galeria
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    void handleUpload(e.target.files?.[0]);
-                    e.currentTarget.value = '';
-                  }}
-                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                />
-              </label>
-            </div>
-            <p className="text-xs font-medium text-slate-500">No celular, escolha câmera ou galeria direto pelo botão.</p>
+            {canUseNativeProductImagePicker ? (
+              <button
+                type="button"
+                onClick={handleNativeProductImage}
+                className="inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-slate-800"
+              >
+                Tirar foto ou escolher da galeria
+              </button>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <label className="relative inline-flex cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-slate-800">
+                  Tirar foto
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/*"
+                    capture="environment"
+                    onChange={(e) => {
+                      void handleUpload(e.target.files?.[0]);
+                      e.currentTarget.value = '';
+                    }}
+                    className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                  />
+                </label>
+                <label className="relative inline-flex cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50">
+                  Galeria
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/*"
+                    onChange={(e) => {
+                      void handleUpload(e.target.files?.[0]);
+                      e.currentTarget.value = '';
+                    }}
+                    className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                  />
+                </label>
+              </div>
+            )}
+            <p className="text-xs font-medium text-slate-500">No app, o botão abre a câmera e a galeria como na foto de perfil.</p>
             <div className="relative h-[200px] w-[200px] rounded-xl overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center">
               {imagePreview ? (
                 <img
@@ -2370,34 +2423,44 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               </div>
               <div className="rounded-2xl border border-slate-200 bg-white p-3.5">
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Imagem</label>
-                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <label className="relative inline-flex cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-slate-900 px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800">
-                    Tirar foto
-                    <input
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      onChange={(e) => {
-                        void handleInlineUpload(e.target.files?.[0]);
-                        e.currentTarget.value = '';
-                      }}
-                      className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                    />
-                  </label>
-                  <label className="relative inline-flex cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50">
-                    Galeria
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        void handleInlineUpload(e.target.files?.[0]);
-                        e.currentTarget.value = '';
-                      }}
-                      className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                    />
-                  </label>
-                </div>
-                <p className="mt-2 text-[11px] font-medium text-slate-500">No celular, use câmera ou galeria.</p>
+                {canUseNativeProductImagePicker ? (
+                  <button
+                    type="button"
+                    onClick={handleNativeInlineProductImage}
+                    className="mt-2 inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800"
+                  >
+                    Tirar foto ou escolher da galeria
+                  </button>
+                ) : (
+                  <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <label className="relative inline-flex cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-slate-900 px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800">
+                      Tirar foto
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/*"
+                        capture="environment"
+                        onChange={(e) => {
+                          void handleInlineUpload(e.target.files?.[0]);
+                          e.currentTarget.value = '';
+                        }}
+                        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                      />
+                    </label>
+                    <label className="relative inline-flex cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50">
+                      Galeria
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/*"
+                        onChange={(e) => {
+                          void handleInlineUpload(e.target.files?.[0]);
+                          e.currentTarget.value = '';
+                        }}
+                        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                      />
+                    </label>
+                  </div>
+                )}
+                <p className="mt-2 text-[11px] font-medium text-slate-500">No app, abre a câmera e a galeria como na foto de perfil.</p>
                 <div className="mt-3 relative h-[200px] w-[200px] rounded-xl border border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center">
                   {inlineImagePreview || inlineForm.imageUrl ? (
                     <img
