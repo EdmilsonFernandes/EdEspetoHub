@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bed, Buildings, CaretDown, CaretUp, CheckCircle, Compass, Eye, EyeSlash, ImageSquare, LinkSimpleHorizontal, MapTrifold, PencilSimple, Plus, Sparkle, UploadSimple, WarningCircle } from '@phosphor-icons/react';
+import { Bed, Buildings, CheckCircle, Compass, Eye, EyeSlash, ImageSquare, LinkSimpleHorizontal, MagnifyingGlass, MapTrifold, PencilSimple, Plus, Sparkle, UploadSimple, WarningCircle } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { destinationService } from '../services/destinationService';
 import { addressLookupService } from '../services/addressLookupService';
@@ -124,6 +124,25 @@ const statusPill = (active: any) =>
     : 'border-emerald-100 bg-emerald-50 text-emerald-700';
 
 const activeLabel = (active: any) => (active === false ? 'Inativo' : 'Ativo');
+
+const matchesStatus = (item: any, filter: 'active' | 'all' | 'inactive') => {
+  if (filter === 'all') return true;
+  if (filter === 'inactive') return item?.active === false;
+  return item?.active !== false;
+};
+
+const labelForListingCategory = (value: any) => {
+  const normalized = String(value || 'SERVICO').toUpperCase();
+  const labels: any = {
+    PASSEIO: 'Passeio',
+    MASSAGEM: 'Massagem',
+    RESTAURANTE_VISITAR: 'Restaurante',
+    NOITE: 'Noite',
+    ATRATIVO: 'Atrativo',
+    SERVICO: 'Serviço',
+  };
+  return labels[normalized] || normalized.replace(/_/g, ' ');
+};
 
 const actionButtonClass = (tone = 'neutral') => {
   const tones: any = {
@@ -317,7 +336,8 @@ export function SuperAdminDestinations() {
   const [search, setSearch] = useState('');
   const [stateFilter, setStateFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState<'active' | 'all' | 'inactive'>('active');
-  const [expandedDestinationIds, setExpandedDestinationIds] = useState<Record<string, boolean>>({});
+  const [contentFilter, setContentFilter] = useState<'all' | 'destinations' | 'places' | 'listings'>('all');
+  const [listingCategoryFilter, setListingCategoryFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -410,6 +430,27 @@ export function SuperAdminDestinations() {
     ];
   }, [data.destinations]);
 
+  const contentFilterOptions = useMemo(() => [
+    { id: 'all', label: 'Tudo', count: metrics.destinations + metrics.places + metrics.listings, icon: Compass },
+    { id: 'destinations', label: 'Cidades', count: metrics.destinations, icon: MapTrifold },
+    { id: 'places', label: 'Hospedagens', count: metrics.places, icon: Bed },
+    { id: 'listings', label: 'Serviços e lugares', count: metrics.listings, icon: Sparkle },
+  ], [metrics]);
+
+  const listingCategoryOptions = useMemo(() => {
+    const counts = new Map<string, number>();
+    (data.listings || []).forEach((listing: any) => {
+      const category = String(listing.category || 'SERVICO').toUpperCase();
+      counts.set(category, (counts.get(category) || 0) + 1);
+    });
+    return [
+      { id: 'all', label: 'Todas categorias', count: (data.listings || []).length },
+      ...Array.from(counts.entries())
+        .sort(([left], [right]) => labelForListingCategory(left).localeCompare(labelForListingCategory(right), 'pt-BR'))
+        .map(([category, count]) => ({ id: category, label: labelForListingCategory(category), count })),
+    ];
+  }, [data.listings]);
+
   const groupedDestinations = useMemo(() => {
     const normalizedQuery = normalizeSearch(search);
     const places = data.places || [];
@@ -417,19 +458,54 @@ export function SuperAdminDestinations() {
     const groups = new Map<string, any>();
 
     (data.destinations || []).forEach((destination: any) => {
-      const destinationPlaces = places.filter((place: any) => place.destinationId === destination.id);
-      const destinationListings = listings.filter((listing: any) => listing.destinationId === destination.id);
-      const searchable = normalizeSearch([
+      const destinationPlaces = places.filter((place: any) => place.destinationId === destination.id && matchesStatus(place, statusFilter));
+      const destinationListings = listings
+        .filter((listing: any) => listing.destinationId === destination.id && matchesStatus(listing, statusFilter))
+        .filter((listing: any) => listingCategoryFilter === 'all' || String(listing.category || 'SERVICO').toUpperCase() === listingCategoryFilter);
+      const destinationText = normalizeSearch([
         destination.name,
         destination.city,
         destination.state,
         destination.description,
-        ...destinationPlaces.flatMap((place: any) => [place.name, place.address]),
-        ...destinationListings.map((listing: any) => listing.title),
       ].filter(Boolean).join(' '));
-      if (normalizedQuery && !searchable.includes(normalizedQuery)) return;
-      if (statusFilter === 'active' && destination.active === false) return;
-      if (statusFilter === 'inactive' && destination.active !== false) return;
+      const matchingPlaces = normalizedQuery
+        ? destinationPlaces.filter((place: any) => normalizeSearch([
+          place.name,
+          place.type,
+          place.address,
+          place.city,
+          place.state,
+          place.whatsapp,
+          place.description,
+        ].filter(Boolean).join(' ')).includes(normalizedQuery))
+        : destinationPlaces;
+      const matchingListings = normalizedQuery
+        ? destinationListings.filter((listing: any) => normalizeSearch([
+          listing.title,
+          listing.category,
+          listing.address,
+          listing.whatsapp,
+          listing.description,
+          listing.store?.name,
+          listing.hospitalityPlace?.name,
+        ].filter(Boolean).join(' ')).includes(normalizedQuery))
+        : destinationListings;
+      const destinationMatchesQuery = !normalizedQuery || destinationText.includes(normalizedQuery);
+      const destinationPassesStatus = matchesStatus(destination, statusFilter);
+      const placesToShow = destinationMatchesQuery ? destinationPlaces : matchingPlaces;
+      const listingsToShow = destinationMatchesQuery ? destinationListings : matchingListings;
+
+      if (normalizedQuery && !destinationMatchesQuery && !matchingPlaces.length && !matchingListings.length) return;
+
+      const includeDestination =
+        contentFilter === 'destinations'
+          ? destinationPassesStatus && destinationMatchesQuery
+          : contentFilter === 'places'
+            ? placesToShow.length > 0
+            : contentFilter === 'listings'
+              ? listingsToShow.length > 0
+              : destinationPassesStatus || placesToShow.length > 0 || listingsToShow.length > 0;
+      if (!includeDestination) return;
 
       const state = String(destination.state || 'UF').toUpperCase().slice(0, 2);
       const city = String(destination.city || destination.name || 'Sem cidade').trim();
@@ -447,9 +523,13 @@ export function SuperAdminDestinations() {
         });
       }
       const group = groups.get(key);
-      group.destinations.push({ ...destination, places: destinationPlaces, listings: destinationListings });
-      group.placesCount += destinationPlaces.length;
-      group.listingsCount += destinationListings.length;
+      group.destinations.push({
+        ...destination,
+        places: contentFilter === 'listings' || contentFilter === 'destinations' ? [] : placesToShow,
+        listings: contentFilter === 'places' || contentFilter === 'destinations' ? [] : listingsToShow,
+      });
+      group.placesCount += contentFilter === 'listings' || contentFilter === 'destinations' ? 0 : placesToShow.length;
+      group.listingsCount += contentFilter === 'places' || contentFilter === 'destinations' ? 0 : listingsToShow.length;
       if (destination.active === false) group.inactiveCount += 1;
     });
 
@@ -458,15 +538,12 @@ export function SuperAdminDestinations() {
       if (stateDiff !== 0) return stateDiff;
       return String(left.city).localeCompare(String(right.city), 'pt-BR');
     });
-  }, [data.destinations, data.places, data.listings, search, statusFilter, stateFilter]);
+  }, [contentFilter, data.destinations, data.places, data.listings, listingCategoryFilter, search, statusFilter, stateFilter]);
 
   const updateDestination = (key: string, value: any) => setDestinationForm((current) => ({ ...current, [key]: value }));
   const updatePlace = (key: string, value: any) => setPlaceForm((current) => ({ ...current, [key]: value }));
   const updateListing = (key: string, value: any) => setListingForm((current) => ({ ...current, [key]: value }));
   const updateStoreLink = (key: string, value: any) => setStoreLinkForm((current) => ({ ...current, [key]: value }));
-  const toggleDestinationExpanded = (destinationId: string) => {
-    setExpandedDestinationIds((current) => ({ ...current, [destinationId]: !current[destinationId] }));
-  };
 
   const startDestinationEdit = (destination: any) => {
     setEditingDestinationId(destination.id);
@@ -767,13 +844,25 @@ export function SuperAdminDestinations() {
               })}
             </div>
 
-            <div className="grid gap-3 rounded-[1.5rem] border border-slate-200 bg-white p-3 shadow-sm lg:grid-cols-[1fr_auto] lg:items-center">
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Buscar por UF, cidade, chalé, pousada ou serviço"
-                className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]"
-              />
+            <div className="grid gap-3 rounded-[1.5rem] border border-slate-200 bg-white p-3 shadow-sm xl:grid-cols-[1fr_auto] xl:items-center">
+              <div className="relative">
+                <MagnifyingGlass size={18} weight="bold" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Digite cidade, hospedagem, serviço, endereço, WhatsApp ou loja"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-20 text-sm font-bold outline-none focus:border-[#336886]"
+                />
+                {search ? (
+                  <button
+                    type="button"
+                    onClick={() => setSearch('')}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-xl bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500 ring-1 ring-slate-200"
+                  >
+                    Limpar
+                  </button>
+                ) : null}
+              </div>
               <div className="flex rounded-2xl bg-slate-100 p-1">
                 {[
                   { id: 'active', label: 'Ativos' },
@@ -793,6 +882,51 @@ export function SuperAdminDestinations() {
                   );
                 })}
               </div>
+            </div>
+
+            <div className="grid gap-3 rounded-[1.5rem] border border-slate-200 bg-white p-2 shadow-sm">
+              <div className="flex gap-2 overflow-x-auto">
+                {contentFilterOptions.map((option: any) => {
+                  const Icon = option.icon;
+                  const active = contentFilter === option.id;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => {
+                        setContentFilter(option.id);
+                        if (option.id !== 'listings') setListingCategoryFilter('all');
+                      }}
+                      className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-3.5 py-2.5 text-[11px] font-black uppercase tracking-[0.12em] transition ${active ? 'bg-[#153A4C] text-white shadow-sm' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'}`}
+                    >
+                      <Icon size={15} weight={active ? 'fill' : 'duotone'} />
+                      {option.label}
+                      <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${active ? 'bg-white/16 text-white' : 'bg-white text-slate-500 ring-1 ring-slate-200'}`}>{option.count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {(contentFilter === 'all' || contentFilter === 'listings') ? (
+                <div className="flex gap-2 overflow-x-auto border-t border-slate-100 pt-2">
+                  {listingCategoryOptions.map((option: any) => {
+                    const active = listingCategoryFilter === option.id;
+                    return (
+                      <button
+                        key={option.id}
+                        type="button"
+                        onClick={() => {
+                          setListingCategoryFilter(option.id);
+                          if (option.id !== 'all') setContentFilter('listings');
+                        }}
+                        className={`shrink-0 rounded-full px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] transition ${active ? 'bg-amber-400 text-slate-950' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'}`}
+                      >
+                        {option.label} <span className="ml-1 opacity-70">{option.count}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
             </div>
 
             <div className="flex gap-2 overflow-x-auto rounded-[1.5rem] border border-slate-200 bg-white p-2 shadow-sm">
@@ -826,23 +960,21 @@ export function SuperAdminDestinations() {
                     </div>
                   </div>
 
-                  <div className="grid gap-4 p-4 xl:grid-cols-2">
+                  <div className="grid gap-4 p-4">
                     {group.destinations.map((destination: any) => {
                       const destinationPlaces = destination.places || [];
                       const destinationListings = destination.listings || [];
-                      const expanded = expandedDestinationIds[destination.id] === true;
-                      const visiblePlaces = expanded ? destinationPlaces : destinationPlaces.slice(0, 4);
-                      const visibleListings = expanded ? destinationListings : destinationListings.slice(0, 4);
-                      const hiddenItems = Math.max(destinationPlaces.length - visiblePlaces.length, 0) + Math.max(destinationListings.length - visibleListings.length, 0);
+                      const showPlacesSection = contentFilter !== 'listings' && contentFilter !== 'destinations';
+                      const showListingsSection = contentFilter !== 'places' && contentFilter !== 'destinations';
 
                       return (
                         <article key={destination.id} className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_18px_46px_-38px_rgba(15,23,42,0.45)]">
                           <div className="bg-[linear-gradient(135deg,#ffffff,#f8fafc)] p-4">
-                            <div className="flex gap-4">
-                              <img src={imageFor(destination)} alt={destination.name} className="h-20 w-20 rounded-[1.25rem] object-cover ring-1 ring-slate-200" />
+                            <div className="flex flex-col gap-4 md:flex-row">
+                              <img src={imageFor(destination)} alt={destination.name} className="h-28 w-full rounded-[1.35rem] object-cover ring-1 ring-slate-200 md:h-24 md:w-32" />
                               <div className="min-w-0 flex-1">
                                 <div className="flex flex-wrap items-center gap-2">
-                                  <h3 className="text-lg font-black text-slate-950">{destination.name}</h3>
+                                  <h3 className="break-words text-xl font-black leading-tight text-slate-950">{destination.name}</h3>
                                   <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${statusPill(destination.active)}`}>
                                     {activeLabel(destination.active)}
                                   </span>
@@ -867,8 +999,10 @@ export function SuperAdminDestinations() {
                             </div>
                           </div>
 
+                          {(showPlacesSection || showListingsSection) ? (
                           <div className="grid gap-3 border-t border-slate-100 bg-slate-50/60 p-4 lg:grid-cols-2">
-                            <section className="rounded-[1.35rem] border border-slate-200 bg-white p-3">
+                            {showPlacesSection ? (
+                            <section className={`rounded-[1.35rem] border border-slate-200 bg-white p-3 ${contentFilter === 'places' ? 'lg:col-span-2' : ''}`}>
                               <div className="flex items-center justify-between gap-3">
                                 <div>
                                   <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">Hospedagens</p>
@@ -876,15 +1010,15 @@ export function SuperAdminDestinations() {
                                 </div>
                                 <Bed size={22} weight="duotone" className="text-[#336886]" />
                               </div>
-                              <div className={`mt-3 space-y-2 ${expanded ? 'max-h-[460px] overflow-y-auto pr-1' : ''}`}>
-                                {visiblePlaces.length ? visiblePlaces.map((place: any) => (
+                              <div className={`mt-3 grid gap-3 ${contentFilter === 'places' ? 'md:grid-cols-2 2xl:grid-cols-3' : ''}`}>
+                                {destinationPlaces.length ? destinationPlaces.map((place: any) => (
                                   <div key={place.id} className="rounded-2xl border border-slate-100 bg-slate-50/80 px-3 py-3">
                                     <div className="flex items-start gap-3">
-                                      <img src={logoFor(place)} alt={place.name} className="h-14 w-14 shrink-0 rounded-2xl object-cover ring-1 ring-slate-200" />
+                                      <img src={logoFor(place)} alt={place.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover ring-1 ring-slate-200" />
                                       <div className="min-w-0 flex-1">
                                         <div className="flex items-start justify-between gap-3">
                                           <div className="min-w-0">
-                                            <p className="line-clamp-1 text-sm font-black text-slate-950">{place.name}</p>
+                                            <p className="break-words text-sm font-black leading-snug text-slate-950">{place.name}</p>
                                             <p className="mt-0.5 line-clamp-2 text-xs font-semibold text-slate-500">{place.address || place.description || 'Hospedagem sem endereço'}</p>
                                           </div>
                                           <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(place.active)}`}>{activeLabel(place.active)}</span>
@@ -906,8 +1040,10 @@ export function SuperAdminDestinations() {
                                 )}
                               </div>
                             </section>
+                            ) : null}
 
-                            <section className="rounded-[1.35rem] border border-amber-100 bg-white p-3">
+                            {showListingsSection ? (
+                            <section className={`rounded-[1.35rem] border border-amber-100 bg-white p-3 ${contentFilter === 'listings' ? 'lg:col-span-2' : ''}`}>
                               <div className="flex items-center justify-between gap-3">
                                 <div>
                                   <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-700">Serviços e lugares</p>
@@ -915,20 +1051,20 @@ export function SuperAdminDestinations() {
                                 </div>
                                 <Sparkle size={22} weight="duotone" className="text-amber-700" />
                               </div>
-                              <div className={`mt-3 space-y-2 ${expanded ? 'max-h-[460px] overflow-y-auto pr-1' : ''}`}>
-                                {visibleListings.length ? visibleListings.map((listing: any) => (
+                              <div className={`mt-3 grid gap-3 ${contentFilter === 'listings' ? 'md:grid-cols-2 2xl:grid-cols-3' : ''}`}>
+                                {destinationListings.length ? destinationListings.map((listing: any) => (
                                   <div key={listing.id} className="rounded-2xl border border-amber-100 bg-amber-50/60 px-3 py-3">
                                     <div className="flex items-start gap-3">
-                                      <img src={imageFor(listing)} alt={listing.title} className="h-14 w-14 shrink-0 rounded-2xl object-cover ring-1 ring-amber-100" />
+                                      <img src={imageFor(listing)} alt={listing.title} className="h-16 w-16 shrink-0 rounded-2xl object-cover ring-1 ring-amber-100" />
                                       <div className="min-w-0 flex-1">
                                         <div className="flex items-start justify-between gap-3">
                                           <div className="min-w-0">
-                                            <p className="line-clamp-1 text-sm font-black text-slate-950">{listing.title}</p>
-                                            <p className="mt-0.5 text-xs font-semibold text-slate-500">{String(listing.category || 'SERVICO').replace('_', ' ')}</p>
+                                            <p className="break-words text-sm font-black leading-snug text-slate-950">{listing.title}</p>
+                                            <p className="mt-0.5 text-xs font-semibold text-slate-500">{labelForListingCategory(listing.category)}</p>
                                             {listing.store ? (
-                                              <p className="mt-1 line-clamp-1 text-[11px] font-black text-emerald-700">Loja vinculada: {listing.store.name}</p>
+                                              <p className="mt-1 line-clamp-2 text-[11px] font-black text-emerald-700">Loja vinculada: {listing.store.name}</p>
                                             ) : (
-                                              <p className="mt-1 line-clamp-1 text-[11px] font-black text-amber-700">Aguardando validação de loja</p>
+                                              <p className="mt-1 line-clamp-2 text-[11px] font-black text-amber-700">Aguardando validação de loja</p>
                                             )}
                                           </div>
                                           <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(listing.active)}`}>{activeLabel(listing.active)}</span>
@@ -950,14 +1086,9 @@ export function SuperAdminDestinations() {
                                 )}
                               </div>
                             </section>
-
-                            {(destinationPlaces.length > 4 || destinationListings.length > 4) ? (
-                              <button type="button" onClick={() => toggleDestinationExpanded(destination.id)} className="lg:col-span-2 inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm transition hover:bg-slate-50">
-                                {expanded ? <CaretUp size={15} weight="bold" /> : <CaretDown size={15} weight="bold" />}
-                                {expanded ? 'Mostrar menos' : `Mostrar todos os itens${hiddenItems ? ` (+${hiddenItems})` : ''}`}
-                              </button>
                             ) : null}
                           </div>
+                          ) : null}
                         </article>
                       );
                     })}
