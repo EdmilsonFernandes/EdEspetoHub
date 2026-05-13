@@ -217,6 +217,72 @@ describe('Destination Hub', () => {
     }));
   });
 
+  it('keeps inactive destinations visible in admin catalog for reactivation', async () => {
+    const suffix = Date.now();
+    const destinationRes = await api
+      .post('/api/admin/destinations')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        name: `Destino Inativo ${suffix}`,
+        slug: `destino-inativo-${suffix}`,
+        city: 'São Bento do Sapucaí',
+        state: 'SP',
+      });
+
+    expect(destinationRes.status).toBe(201);
+
+    const listingRes = await api
+      .post('/api/admin/destination-listings')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        destinationId: destinationRes.body.id,
+        title: `Restaurante Ativo ${suffix}`,
+        category: 'RESTAURANTE_VISITAR',
+        active: true,
+      });
+
+    expect(listingRes.status).toBe(201);
+
+    const deactivateRes = await api
+      .patch(`/api/admin/destinations/${destinationRes.body.id}`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        ...destinationRes.body,
+        active: false,
+      });
+
+    expect(deactivateRes.status).toBe(200);
+    expect(deactivateRes.body.active).toBe(false);
+
+    const inactiveAllRes = await api
+      .get('/api/admin/destinations/manage/summary')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .query({
+        page: 1,
+        pageSize: 10,
+        search: `Destino Inativo ${suffix}`,
+        status: 'inactive',
+        contentType: 'all',
+      });
+
+    expect(inactiveAllRes.status, JSON.stringify(inactiveAllRes.body)).toBe(200);
+    expect(inactiveAllRes.body.destinations.some((item: any) => item.id === destinationRes.body.id)).toBe(true);
+
+    const inactiveListingsRes = await api
+      .get('/api/admin/destinations/manage/summary')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .query({
+        page: 1,
+        pageSize: 10,
+        search: `Destino Inativo ${suffix}`,
+        status: 'inactive',
+        contentType: 'listings',
+      });
+
+    expect(inactiveListingsRes.status, JSON.stringify(inactiveListingsRes.body)).toBe(200);
+    expect(inactiveListingsRes.body.destinations.some((item: any) => item.id === destinationRes.body.id)).toBe(true);
+  });
+
   it('accepts partner requests and converts approved hospitality into real records', async () => {
     const suffix = Date.now();
     const destinationRes = await api

@@ -435,7 +435,6 @@ export class DestinationRepository {
   }
 
   private applyDestinationAdminFilters(qb: any, filters: { search?: string; state?: string; status?: string; contentType?: string; listingCategory?: string }) {
-    this.applyActiveFilter(qb, 'destination', filters.status);
     const requestedState = String(filters.state || 'all').trim();
     const state = requestedState.toLowerCase() === 'all' ? '' : requestedState.toUpperCase().slice(0, 2);
     if (state) {
@@ -449,20 +448,65 @@ export class DestinationRepository {
     const contentType = String(filters.contentType || 'all').toLowerCase();
     const listingCategory = String(filters.listingCategory || 'all').toUpperCase();
     const searchParam = `%${search}%`;
+    const destinationStatusSql = this.activeConditionSql('destination', filters.status);
+    const inactiveCatalog = String(filters.status || 'active').toLowerCase() === 'inactive';
 
     if (contentType === 'places') {
-      qb.andWhere(this.adminPlaceExistsSql(Boolean(search), filters.status), { search: searchParam });
+      const placeExistsSql = this.adminPlaceExistsSql(Boolean(search), filters.status);
+      if (inactiveCatalog && destinationStatusSql) {
+        qb.andWhere(`(${destinationStatusSql} OR ${placeExistsSql})`, { search: searchParam });
+      } else {
+        if (destinationStatusSql) qb.andWhere(destinationStatusSql);
+        qb.andWhere(placeExistsSql, { search: searchParam });
+      }
       return;
     }
     if (contentType === 'listings') {
-      qb.andWhere(this.adminListingExistsSql(Boolean(search), listingCategory !== 'ALL', filters.status), {
-        search: searchParam,
-        listingCategory,
-      });
+      const listingExistsSql = this.adminListingExistsSql(Boolean(search), listingCategory !== 'ALL', filters.status);
+      if (inactiveCatalog && destinationStatusSql) {
+        qb.andWhere(`(${destinationStatusSql} OR ${listingExistsSql})`, {
+          search: searchParam,
+          listingCategory,
+        });
+      } else {
+        if (destinationStatusSql) qb.andWhere(destinationStatusSql);
+        qb.andWhere(listingExistsSql, {
+          search: searchParam,
+          listingCategory,
+        });
+      }
       return;
     }
 
-    if (!search) return;
+    if (!search) {
+      if (inactiveCatalog && destinationStatusSql) {
+        qb.andWhere(
+          `(
+            ${destinationStatusSql}
+            OR ${this.adminPlaceExistsSql(false, filters.status)}
+            OR ${this.adminListingExistsSql(false, listingCategory !== 'ALL', filters.status)}
+          )`,
+          { listingCategory }
+        );
+      } else if (destinationStatusSql) {
+        qb.andWhere(destinationStatusSql);
+      }
+      return;
+    }
+
+    if (inactiveCatalog && destinationStatusSql) {
+      qb.andWhere(
+        `(
+          (${destinationStatusSql} AND LOWER(CONCAT_WS(' ', destination.name, destination.city, destination.state, destination.description, destination.hero_title, destination.hero_subtitle)) LIKE :search)
+          OR ${this.adminPlaceExistsSql(true, filters.status)}
+          OR ${this.adminListingExistsSql(true, listingCategory !== 'ALL', filters.status)}
+        )`,
+        { search: searchParam, listingCategory }
+      );
+      return;
+    }
+
+    if (destinationStatusSql) qb.andWhere(destinationStatusSql);
     qb.andWhere(
       `(
         LOWER(CONCAT_WS(' ', destination.name, destination.city, destination.state, destination.description, destination.hero_title, destination.hero_subtitle)) LIKE :search
@@ -474,9 +518,15 @@ export class DestinationRepository {
   }
 
   private applyActiveFilter(qb: any, alias: string, status?: string) {
+    const condition = this.activeConditionSql(alias, status);
+    if (condition) qb.andWhere(condition);
+  }
+
+  private activeConditionSql(alias: string, status?: string) {
     const normalized = String(status || 'active').toLowerCase();
-    if (normalized === 'inactive') qb.andWhere(`${alias}.active = false`);
-    if (normalized === 'active') qb.andWhere(`${alias}.active = true`);
+    if (normalized === 'inactive') return `${alias}.active = false`;
+    if (normalized === 'active') return `${alias}.active = true`;
+    return '';
   }
 
   private adminPlaceExistsSql(withSearch: boolean, status?: string) {

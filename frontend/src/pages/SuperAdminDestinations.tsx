@@ -314,11 +314,11 @@ const MediaUploadField = ({
   };
 
   return (
-    <div className="sm:col-span-2 rounded-[1.35rem] border border-slate-200 bg-slate-50/80 p-3">
+    <div className="min-w-0 max-w-full overflow-hidden rounded-[1.35rem] border border-slate-200 bg-slate-50/80 p-3 sm:col-span-2">
       <div className={`grid gap-3 ${isWidePreview ? '' : 'sm:grid-cols-[112px_1fr]'}`}>
-        <div className={`flex items-center justify-center overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200 ${isWidePreview ? 'aspect-video w-full' : 'h-28'}`}>
+        <div className={`flex min-w-0 max-w-full items-center justify-center overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200 ${isWidePreview ? 'aspect-video w-full' : 'h-28'}`}>
           {previewUrl ? (
-            <img src={previewUrl} alt={label} className="h-full w-full object-cover" />
+            <img src={previewUrl} alt={label} className="h-full w-full max-w-full object-cover" />
           ) : (
             <ImageSquare size={34} weight="duotone" className="text-slate-400" />
           )}
@@ -337,14 +337,14 @@ const MediaUploadField = ({
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
             {canUseNativePicker ? (
-              <button type="button" onClick={handleNativePicker} className="inline-flex items-center gap-2 rounded-full bg-[#153A4C] px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-white">
+              <button type="button" onClick={handleNativePicker} className="inline-flex max-w-full items-center gap-2 rounded-full bg-[#153A4C] px-3 py-2 text-left text-[11px] font-black uppercase leading-tight tracking-[0.1em] text-white">
                 <UploadSimple size={14} weight="bold" />
-                Tirar ou escolher foto
+                <span className="min-w-0">Tirar ou escolher foto</span>
               </button>
             ) : (
-              <label className="relative inline-flex cursor-pointer items-center gap-2 overflow-hidden rounded-full bg-[#153A4C] px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-white">
+              <label className="relative inline-flex max-w-full cursor-pointer items-center gap-2 overflow-hidden rounded-full bg-[#153A4C] px-3 py-2 text-left text-[11px] font-black uppercase leading-tight tracking-[0.1em] text-white">
                 <UploadSimple size={14} weight="bold" />
-                Escolher foto
+                <span className="min-w-0">Escolher foto</span>
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/*"
@@ -354,12 +354,12 @@ const MediaUploadField = ({
               </label>
             )}
             {(fileValue || urlValue) ? (
-              <button type="button" onClick={() => { onFileChange(''); onUrlChange(''); }} className="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-slate-600">
+              <button type="button" onClick={() => { onFileChange(''); onUrlChange(''); }} className="max-w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-left text-[11px] font-black uppercase leading-tight tracking-[0.1em] text-slate-600">
                 Limpar
               </button>
             ) : null}
           </div>
-          <label className="mt-3 flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2">
+          <label className="mt-3 flex min-w-0 max-w-full items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2">
             <LinkSimpleHorizontal size={16} weight="bold" className="text-slate-400" />
             <input
               value={urlValue || ''}
@@ -1393,7 +1393,7 @@ export function SuperAdminDestinations() {
 
             <div className="grid gap-4">
               {activeCadastroMode === 'destination' ? (
-            <form onSubmit={saveDestination} className="max-w-4xl rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+            <form onSubmit={saveDestination} className="w-full max-w-4xl min-w-0 overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-black">{editingDestinationId ? 'Editar destino' : 'Cadastrar destino'}</h2>
@@ -1492,7 +1492,7 @@ export function SuperAdminDestinations() {
               ) : null}
 
               {activeCadastroMode === 'place' ? (
-            <form onSubmit={savePlace} className="max-w-4xl rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+            <form onSubmit={savePlace} className="w-full max-w-4xl min-w-0 overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-black">{editingPlaceId ? 'Editar chalé/pousada' : 'Cadastrar chalé/pousada'}</h2>
@@ -1585,7 +1585,7 @@ export function SuperAdminDestinations() {
               ) : null}
 
               {activeCadastroMode === 'listing' ? (
-            <form onSubmit={saveListing} className="max-w-4xl rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+            <form onSubmit={saveListing} className="w-full max-w-4xl min-w-0 overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-black">{editingListingId ? 'Editar serviço/atração' : 'Cadastrar serviço/atração'}</h2>
@@ -1651,7 +1651,7 @@ export function SuperAdminDestinations() {
               ) : null}
 
               {activeCadastroMode === 'storeLink' ? (
-            <form onSubmit={linkStore} className="max-w-3xl rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+            <form onSubmit={linkStore} className="w-full max-w-3xl min-w-0 overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
               <h2 className="text-lg font-black">Vincular loja a hospedagem</h2>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <select value={storeLinkForm.placeId} onChange={(event) => updateStoreLink('placeId', event.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" required>
