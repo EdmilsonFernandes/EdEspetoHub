@@ -1116,104 +1116,107 @@ export function SuperAdminDestinations() {
                       <button type="button" onClick={() => loadDestinationDetails(selectedDestinationId, placesPage, listingsPage)} className={actionButtonClass('neutral')}>
                         Atualizar detalhe
                       </button>
+                      {contentFilter !== 'all' || listingCategoryFilter !== 'all' ? (
+                        <p className="md:col-span-2 text-xs font-bold text-slate-500">
+                          Os filtros superiores organizam a lista de cidades. O detalhe abaixo sempre mostra hospedagens e serviços da cidade selecionada.
+                        </p>
+                      ) : null}
                     </div>
 
                     {detailLoading ? <p className="rounded-2xl bg-[#edf5fa] px-4 py-3 text-sm font-bold text-[#336886]">Carregando detalhes da cidade...</p> : null}
 
-                    {contentFilter !== 'listings' && contentFilter !== 'destinations' ? (
-                      <section className="rounded-[1.5rem] border border-slate-200 bg-white p-4">
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                          <div>
-                            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">Hospedagens</p>
-                            <h4 className="text-lg font-black text-slate-950">Chalés e pousadas da cidade</h4>
-                          </div>
-                          <Bed size={24} weight="duotone" className="text-[#336886]" />
+                    <section className="rounded-[1.5rem] border border-slate-200 bg-white p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">Hospedagens</p>
+                          <h4 className="text-lg font-black text-slate-950">Chalés e pousadas da cidade</h4>
+                          <p className="mt-0.5 text-xs font-bold text-slate-500">{placesResult.pagination?.total || 0} hospedagem(ns) nesta cidade</p>
                         </div>
-                        <div className="mt-3 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
-                          {(placesResult.items || []).map((place: any) => {
-                            const placeBannerCount = (Array.isArray(place.bannerUrls) ? place.bannerUrls.filter(Boolean).length : 0) || (place.bannerUrl ? 1 : 0);
-                            return (
-                              <div key={place.id} className="rounded-2xl border border-slate-100 bg-slate-50/80 px-3 py-3">
-                                <div className="flex items-start gap-3">
-                                  <img src={logoFor(place)} alt={place.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover ring-1 ring-slate-200" />
-                                  <div className="min-w-0 flex-1">
-                                    <div className="flex items-start justify-between gap-3">
-                                      <div className="min-w-0">
-                                        <p className="break-words text-sm font-black leading-snug text-slate-950">{place.name}</p>
-                                        <p className="mt-0.5 line-clamp-2 text-xs font-semibold text-slate-500">{place.address || place.description || 'Hospedagem sem endereço'}</p>
-                                        {placeBannerCount ? <p className="mt-1 text-[11px] font-black text-[#336886]">{placeBannerCount} banner(s) no carrossel</p> : null}
-                                      </div>
-                                      <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(place.active)}`}>{activeLabel(place.active)}</span>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="mt-3 flex flex-wrap gap-2">
-                                  <button type="button" onClick={() => startPlaceEdit(place)} className={actionButtonClass('neutral')}>
-                                    <PencilSimple size={13} weight="bold" />
-                                    Editar
-                                  </button>
-                                  <button type="button" disabled={saving} onClick={() => togglePlaceActive(place)} className={actionButtonClass(place.active === false ? 'success' : 'muted')}>
-                                    {place.active === false ? 'Ativar' : 'Desativar'}
-                                  </button>
-                                </div>
-                              </div>
-                            );
-                          })}
-                          {!detailLoading && !(placesResult.items || []).length ? (
-                            <p className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-xs font-bold text-slate-500">Nenhuma hospedagem encontrada nesta busca.</p>
-                          ) : null}
-                        </div>
-                        <div className="mt-3">{renderPagination(placesResult.pagination, setPlacesPage, 'hospedagens')}</div>
-                      </section>
-                    ) : null}
-
-                    {contentFilter !== 'places' && contentFilter !== 'destinations' ? (
-                      <section className="rounded-[1.5rem] border border-amber-100 bg-white p-4">
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                          <div>
-                            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-700">Serviços e lugares</p>
-                            <h4 className="text-lg font-black text-slate-950">Curadoria local e pré-lojas</h4>
-                          </div>
-                          <Sparkle size={24} weight="duotone" className="text-amber-700" />
-                        </div>
-                        <div className="mt-3 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
-                          {(listingsResult.items || []).map((listing: any) => (
-                            <div key={listing.id} className="rounded-2xl border border-amber-100 bg-amber-50/60 px-3 py-3">
+                        <Bed size={24} weight="duotone" className="text-[#336886]" />
+                      </div>
+                      <div className="mt-3 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
+                        {(placesResult.items || []).map((place: any) => {
+                          const placeBannerCount = (Array.isArray(place.bannerUrls) ? place.bannerUrls.filter(Boolean).length : 0) || (place.bannerUrl ? 1 : 0);
+                          return (
+                            <div key={place.id} className="rounded-2xl border border-slate-100 bg-slate-50/80 px-3 py-3">
                               <div className="flex items-start gap-3">
-                                <img src={imageFor(listing)} alt={listing.title} className="h-16 w-16 shrink-0 rounded-2xl object-cover ring-1 ring-amber-100" />
+                                <img src={logoFor(place)} alt={place.name} className="h-16 w-16 shrink-0 rounded-2xl object-cover ring-1 ring-slate-200" />
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0">
-                                      <p className="break-words text-sm font-black leading-snug text-slate-950">{listing.title}</p>
-                                      <p className="mt-0.5 text-xs font-semibold text-slate-500">{labelForListingCategory(listing.category)}</p>
-                                      {listing.store ? (
-                                        <p className="mt-1 line-clamp-2 text-[11px] font-black text-emerald-700">Loja vinculada: {listing.store.name}</p>
-                                      ) : (
-                                        <p className="mt-1 line-clamp-2 text-[11px] font-black text-amber-700">Aguardando validação de loja</p>
-                                      )}
+                                      <p className="break-words text-sm font-black leading-snug text-slate-950">{place.name}</p>
+                                      <p className="mt-0.5 line-clamp-2 text-xs font-semibold text-slate-500">{place.address || place.description || 'Hospedagem sem endereço'}</p>
+                                      {placeBannerCount ? <p className="mt-1 text-[11px] font-black text-[#336886]">{placeBannerCount} banner(s) no carrossel</p> : null}
                                     </div>
-                                    <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(listing.active)}`}>{activeLabel(listing.active)}</span>
+                                    <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(place.active)}`}>{activeLabel(place.active)}</span>
                                   </div>
                                 </div>
                               </div>
                               <div className="mt-3 flex flex-wrap gap-2">
-                                <button type="button" onClick={() => startListingEdit(listing)} className={actionButtonClass('neutral')}>
+                                <button type="button" onClick={() => startPlaceEdit(place)} className={actionButtonClass('neutral')}>
                                   <PencilSimple size={13} weight="bold" />
                                   Editar
                                 </button>
-                                <button type="button" disabled={saving} onClick={() => toggleListingActive(listing)} className={actionButtonClass(listing.active === false ? 'success' : 'muted')}>
-                                  {listing.active === false ? 'Ativar' : 'Desativar'}
+                                <button type="button" disabled={saving} onClick={() => togglePlaceActive(place)} className={actionButtonClass(place.active === false ? 'success' : 'muted')}>
+                                  {place.active === false ? 'Ativar' : 'Desativar'}
                                 </button>
                               </div>
                             </div>
-                          ))}
-                          {!detailLoading && !(listingsResult.items || []).length ? (
-                            <p className="rounded-2xl border border-dashed border-amber-200 bg-amber-50/60 px-3 py-4 text-xs font-bold text-slate-500">Nenhum serviço encontrado nesta busca.</p>
-                          ) : null}
+                          );
+                        })}
+                        {!detailLoading && !(placesResult.items || []).length ? (
+                          <p className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-xs font-bold text-slate-500">Nenhuma hospedagem encontrada nesta busca.</p>
+                        ) : null}
+                      </div>
+                      <div className="mt-3">{renderPagination(placesResult.pagination, setPlacesPage, 'hospedagens')}</div>
+                    </section>
+
+                    <section className="rounded-[1.5rem] border border-amber-100 bg-white p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-700">Serviços e lugares</p>
+                          <h4 className="text-lg font-black text-slate-950">Curadoria local e pré-lojas</h4>
+                          <p className="mt-0.5 text-xs font-bold text-slate-500">{listingsResult.pagination?.total || 0} serviço(s) nesta cidade</p>
                         </div>
-                        <div className="mt-3">{renderPagination(listingsResult.pagination, setListingsPage, 'serviços')}</div>
-                      </section>
-                    ) : null}
+                        <Sparkle size={24} weight="duotone" className="text-amber-700" />
+                      </div>
+                      <div className="mt-3 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
+                        {(listingsResult.items || []).map((listing: any) => (
+                          <div key={listing.id} className="rounded-2xl border border-amber-100 bg-amber-50/60 px-3 py-3">
+                            <div className="flex items-start gap-3">
+                              <img src={imageFor(listing)} alt={listing.title} className="h-16 w-16 shrink-0 rounded-2xl object-cover ring-1 ring-amber-100" />
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <p className="break-words text-sm font-black leading-snug text-slate-950">{listing.title}</p>
+                                    <p className="mt-0.5 text-xs font-semibold text-slate-500">{labelForListingCategory(listing.category)}</p>
+                                    {listing.store ? (
+                                      <p className="mt-1 line-clamp-2 text-[11px] font-black text-emerald-700">Loja vinculada: {listing.store.name}</p>
+                                    ) : (
+                                      <p className="mt-1 line-clamp-2 text-[11px] font-black text-amber-700">Aguardando validação de loja</p>
+                                    )}
+                                  </div>
+                                  <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(listing.active)}`}>{activeLabel(listing.active)}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <button type="button" onClick={() => startListingEdit(listing)} className={actionButtonClass('neutral')}>
+                                <PencilSimple size={13} weight="bold" />
+                                Editar
+                              </button>
+                              <button type="button" disabled={saving} onClick={() => toggleListingActive(listing)} className={actionButtonClass(listing.active === false ? 'success' : 'muted')}>
+                                {listing.active === false ? 'Ativar' : 'Desativar'}
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                        {!detailLoading && !(listingsResult.items || []).length ? (
+                          <p className="rounded-2xl border border-dashed border-amber-200 bg-amber-50/60 px-3 py-4 text-xs font-bold text-slate-500">Nenhum serviço encontrado nesta busca.</p>
+                        ) : null}
+                      </div>
+                      <div className="mt-3">{renderPagination(listingsResult.pagination, setListingsPage, 'serviços')}</div>
+                    </section>
                   </div>
                 )}
               </section>
