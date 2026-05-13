@@ -9,7 +9,7 @@ import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
 import { canUseNativeImagePicker, pickNativeImageAsDataUrl } from '../utils/nativeImagePicker';
 import {
-  buildHospitalityPlacePlayStoreQrUrl,
+  buildHospitalityPlaceSmartQrUrl,
   buildHospitalityPlacePosterFileName,
   escapePosterHtml,
 } from '../utils/destinationQrPoster';
@@ -965,7 +965,12 @@ export function SuperAdminDestinations() {
       (catalog.destinations || []).find((item: any) => String(item.id) === String(place?.destinationId));
     const placeName = String(place?.name || 'Hospedagem').trim();
     const destinationName = String(destination?.name || destination?.city || place?.city || 'Destino turístico').trim();
-    const targetUrl = buildHospitalityPlacePlayStoreQrUrl();
+    const targetUrl = buildHospitalityPlaceSmartQrUrl({
+      destinationSlug: destination?.slug || place?.destination?.slug || '',
+      destinationName,
+      placeSlug: place?.slug || '',
+      placeName,
+    });
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=720x720&margin=12&data=${encodeURIComponent(targetUrl)}`;
     const logoUrl = resolveAssetUrl(place?.logoUrl || '');
     const coverUrl = resolveAssetUrl(
@@ -1394,8 +1399,8 @@ export function SuperAdminDestinations() {
                       <strong>Google Play</strong>
                     </span>
                   </div>
-                  <p>Android: escaneie para baixar na Google Play.</p>
-                  <p class="ios-note">iPhone: acesse também pelo Safari em <strong>janocaminho.com.br</strong>. App iOS em breve.</p>
+                  <p>Android: abre a Google Play para baixar o app.</p>
+                  <p class="ios-note">iPhone: abre o hub no Safari em <strong>janocaminho.com.br/hub</strong>. App iOS em breve.</p>
                 </aside>
               </section>
               <footer class="footer">

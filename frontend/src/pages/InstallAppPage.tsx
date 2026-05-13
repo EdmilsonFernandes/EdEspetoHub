@@ -1,10 +1,12 @@
+import { useEffect } from 'react';
 import { AppleLogo, ArrowSquareOut, GooglePlayLogo } from '@phosphor-icons/react';
 import { LandingPageLayout } from '../layouts/LandingPageLayout';
-import { JNC_GOOGLE_PLAY_URL } from '../utils/destinationQrPoster';
+import { JNC_GOOGLE_PLAY_URL, JNC_IOS_HUB_URL, resolveHospitalityQrRedirectUrl } from '../utils/destinationQrPoster';
 
 export function InstallAppPage() {
   const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
   const isHospitalityQr = params.get('origem') === 'qr-chale';
+  const isAutoRedirect = params.get('redirect') === 'auto';
   const placeName = params.get('nome') || '';
   const destinationName = params.get('cidade') || '';
   const nextPath = params.get('next') || '';
@@ -15,6 +17,12 @@ export function InstallAppPage() {
   const subtitle = isHospitalityQr
     ? 'Baixe o app para ver restaurantes que atendem o chalé, serviços locais e lugares próximos para visitar.'
     : 'Android: baixe pela Google Play. iPhone: adicione ao Safari como app.';
+
+  useEffect(() => {
+    if (!isAutoRedirect || typeof window === 'undefined') return;
+    const redirectUrl = resolveHospitalityQrRedirectUrl(window.navigator.userAgent);
+    if (redirectUrl) window.location.replace(redirectUrl);
+  }, [isAutoRedirect]);
 
   return (
     <LandingPageLayout>
@@ -83,12 +91,12 @@ export function InstallAppPage() {
                 </div>
               </div>
               <ol className="mt-4 space-y-2 text-sm text-slate-100 list-decimal list-inside">
-                <li>Abra <strong className="text-white">janocaminho.com.br</strong> no Safari.</li>
+                <li>Abra <strong className="text-white">janocaminho.com.br/hub</strong> no Safari.</li>
                 <li>Toque em <strong className="text-white">Compartilhar</strong> (ícone de caixa com seta).</li>
                 <li>Selecione <strong className="text-white">Adicionar à Tela de Início</strong>.</li>
               </ol>
               <a
-                href="https://janocaminho.com.br/"
+                href={JNC_IOS_HUB_URL}
                 className="mt-5 inline-flex items-center gap-2 rounded-xl border border-slate-300/30 bg-white/10 px-4 py-2.5 text-sm font-bold text-slate-100 hover:bg-white/15 transition"
               >
                 <AppleLogo size={18} weight="duotone" />

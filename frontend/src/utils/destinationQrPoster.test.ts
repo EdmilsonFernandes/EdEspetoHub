@@ -4,8 +4,11 @@ import {
   buildHospitalityPlacePlayStoreQrUrl,
   buildHospitalityPlacePosterFileName,
   buildHospitalityPlacePublicPath,
+  buildHospitalityPlaceSmartQrUrl,
+  JNC_IOS_HUB_URL,
   JNC_GOOGLE_PLAY_URL,
   escapePosterHtml,
+  resolveHospitalityQrRedirectUrl,
 } from './destinationQrPoster';
 
 describe('destinationQrPoster', () => {
@@ -38,10 +41,37 @@ describe('destinationQrPoster', () => {
     expect(buildHospitalityPlacePublicPath({ destinationSlug: 'destino' })).toBe('');
   });
 
-  it('uses Google Play as the direct QR target for printed hospitality posters', () => {
+  it('keeps Google Play as the Android redirect target', () => {
     expect(buildHospitalityPlacePlayStoreQrUrl()).toBe(JNC_GOOGLE_PLAY_URL);
     expect(buildHospitalityPlacePlayStoreQrUrl()).toContain('play.google.com/store/apps/details');
     expect(buildHospitalityPlacePlayStoreQrUrl()).toContain('id=com.janocaminho.app');
+  });
+
+  it('builds a smart QR URL that can redirect by device', () => {
+    const url = buildHospitalityPlaceSmartQrUrl(
+      {
+        destinationSlug: 'sao-bento-sapucai',
+        destinationName: 'São Bento do Sapucaí',
+        placeSlug: 'amere-chales',
+        placeName: 'Amerê Chalés',
+      },
+      'https://janocaminho.com.br/'
+    );
+    const parsed = new URL(url);
+
+    expect(parsed.origin).toBe('https://janocaminho.com.br');
+    expect(parsed.pathname).toBe('/instalar');
+    expect(parsed.searchParams.get('origem')).toBe('qr-chale');
+    expect(parsed.searchParams.get('redirect')).toBe('auto');
+    expect(parsed.searchParams.get('next')).toBe('/destinos/sao-bento-sapucai/chales/amere-chales');
+  });
+
+  it('resolves the QR redirect target for Android and iPhone', () => {
+    expect(resolveHospitalityQrRedirectUrl('Mozilla/5.0 (Linux; Android 14; Pixel)')).toBe(JNC_GOOGLE_PLAY_URL);
+    expect(resolveHospitalityQrRedirectUrl('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)')).toBe(
+      JNC_IOS_HUB_URL
+    );
+    expect(resolveHospitalityQrRedirectUrl('Mozilla/5.0 (Windows NT 10.0; Win64; x64)')).toBe('');
   });
 
   it('escapes poster html and creates a safe file name', () => {
