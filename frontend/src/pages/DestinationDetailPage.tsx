@@ -281,7 +281,7 @@ export function DestinationDetailPage() {
   }, [showcaseSlides.length]);
 
   return (
-    <main className="min-h-screen bg-[#f6f2e9] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
+    <main className="min-h-screen overflow-x-hidden bg-[#f6f2e9] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
       <section className="relative overflow-hidden bg-[radial-gradient(circle_at_18%_0%,rgba(51,104,134,0.16),transparent_34%),radial-gradient(circle_at_86%_16%,rgba(216,245,231,0.55),transparent_30%),linear-gradient(135deg,#f6f2e9,#eef5f1_56%,#eadfc8)] px-4 pb-4 pt-[max(0.85rem,env(safe-area-inset-top))]">
         <div className="absolute -right-20 top-8 h-64 w-64 rounded-full bg-[#336886]/16 blur-3xl" />
         <div className="absolute -left-16 bottom-4 h-56 w-56 rounded-full bg-amber-300/18 blur-3xl" />
@@ -388,10 +388,10 @@ export function DestinationDetailPage() {
       </section>
 
       {!loading && !error ? (
-        <section className="mx-auto grid max-w-6xl gap-6 px-4 pb-10 pt-3 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="relative z-10 rounded-[1.5rem] border border-white/80 bg-white/92 p-3 shadow-[0_16px_42px_-36px_rgba(15,23,42,0.36)] backdrop-blur lg:col-span-2 sm:p-4">
+        <section className="mx-auto grid w-full min-w-0 max-w-6xl gap-6 px-4 pb-10 pt-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+          <div className="relative z-10 min-w-0 max-w-full overflow-hidden rounded-[1.5rem] border border-white/80 bg-white/92 p-3 shadow-[0_16px_42px_-36px_rgba(15,23,42,0.36)] backdrop-blur lg:col-span-2 sm:p-4">
             <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Escolha o que procurar</p>
                 <h2 className="mt-1 text-lg font-black tracking-[-0.03em] text-slate-950">Buscar em {destination.name}</h2>
               </div>
@@ -399,8 +399,8 @@ export function DestinationDetailPage() {
                 {activeFilterLabel}: {filteredPlaces.length + filteredListings.length} resultado(s)
               </p>
             </div>
-            <div className="mt-3 grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
-              <label className="group flex min-h-[52px] items-center gap-3 rounded-[1.35rem] border border-slate-200 bg-white px-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.4)] focus-within:border-[#336886]/40 focus-within:ring-4 focus-within:ring-[#336886]/10">
+            <div className="mt-3 grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+              <label className="group flex min-h-[52px] min-w-0 max-w-full items-center gap-3 rounded-[1.35rem] border border-slate-200 bg-white px-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.4)] focus-within:border-[#336886]/40 focus-within:ring-4 focus-within:ring-[#336886]/10">
                 <MagnifyingGlass size={18} weight="bold" className="text-slate-400" />
                 <input
                   value={searchTerm}
@@ -414,7 +414,7 @@ export function DestinationDetailPage() {
                   </button>
                 ) : null}
               </label>
-              <div className="flex gap-2 overflow-x-auto pb-1 lg:max-w-[620px]">
+              <div className="flex min-w-0 max-w-full gap-2 overflow-x-auto pb-1 lg:max-w-[620px]">
                 {filterOptions.map((category: any) => (
                   <button
                     key={category.value}
@@ -434,16 +434,16 @@ export function DestinationDetailPage() {
           </div>
 
           {showPlacesSection ? (
-          <div id="hospedagens" className="scroll-mt-28 space-y-5">
+          <div id="hospedagens" className="min-w-0 max-w-full scroll-mt-28 space-y-5">
             <div className="flex items-center justify-between gap-3">
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Hospedagens</p>
                 <h2 className="mt-1 text-2xl font-black tracking-[-0.03em]">Onde você está hospedado?</h2>
                 <p className="mt-1 max-w-xl text-sm font-semibold leading-relaxed text-slate-500">
                   Primeiro escolha o chalé ou pousada. Depois mostramos quem entrega, atende ou resolve algo perto dali.
                 </p>
               </div>
-              <Bed size={28} weight="duotone" className="text-[#336886]" />
+              <Bed size={28} weight="duotone" className="shrink-0 text-[#336886]" />
             </div>
 
             {places.length === 0 ? (
@@ -461,7 +461,7 @@ export function DestinationDetailPage() {
               </div>
             ) : null}
 
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid min-w-0 gap-3 sm:grid-cols-2">
               {visiblePlaces.map((place: any) => {
                 const placeWebsiteUrl = externalUrl(place.websiteUrl);
                 const placeInstagramUrl = instagramUrl(place.instagramUrl);
@@ -479,7 +479,7 @@ export function DestinationDetailPage() {
                 return (
                 <article
                   key={place.id}
-                  className="group overflow-hidden rounded-[1.8rem] border border-[#336886]/15 bg-[linear-gradient(180deg,#fffaf0_0%,#ffffff_52%,#edf7f2_100%)] shadow-[0_18px_46px_-34px_rgba(21,58,76,0.48)] transition hover:-translate-y-1"
+                  className="group min-w-0 max-w-full overflow-hidden rounded-[1.8rem] border border-[#336886]/15 bg-[linear-gradient(180deg,#fffaf0_0%,#ffffff_52%,#edf7f2_100%)] shadow-[0_18px_46px_-34px_rgba(21,58,76,0.48)] transition hover:-translate-y-1"
                 >
                   <Link to={`/destinos/${destination.slug}/chales/${place.slug}`} className="relative block h-44 overflow-hidden bg-slate-100 sm:h-40">
                     {hasConfiguredAsset(place) ? (
@@ -572,10 +572,10 @@ export function DestinationDetailPage() {
           ) : null}
 
           {showListingsSection ? (
-          <aside id="servicos-cidade" className={showPlacesSection ? 'scroll-mt-28 space-y-4' : 'scroll-mt-28 space-y-4 lg:col-span-2'}>
-            <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_-36px_rgba(15,23,42,0.35)]">
+          <aside id="servicos-cidade" className={showPlacesSection ? 'min-w-0 max-w-full scroll-mt-28 space-y-4' : 'min-w-0 max-w-full scroll-mt-28 space-y-4 lg:col-span-2'}>
+            <div className="min-w-0 max-w-full overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-4 shadow-[0_18px_50px_-36px_rgba(15,23,42,0.35)] sm:p-5">
               <div className="flex items-center justify-between gap-3">
-                <div>
+                <div className="min-w-0">
                   <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">Cidade</p>
                   <h2 className="mt-1 text-xl font-black">Comer, comprar e fazer</h2>
                   <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-500">
@@ -584,7 +584,7 @@ export function DestinationDetailPage() {
                 </div>
                 <Sparkle size={25} weight="duotone" className="text-amber-700" />
               </div>
-              <div className="mt-4 space-y-3">
+              <div className="mt-4 min-w-0 space-y-3">
                 {visibleListings.map((listing: any) => {
                   const linkedStoreSlug = resolveLinkedStoreSlug(listing);
                   const linkedStore = listing.store || null;
@@ -596,7 +596,7 @@ export function DestinationDetailPage() {
                   const imageUrl = imageIsConfigured ? asset(listing, 'image') : '';
                   const cardBody = (
                     <>
-                      <div className="flex gap-3">
+                      <div className="flex min-w-0 max-w-full gap-3">
                         {imageIsConfigured ? (
                           <img src={imageUrl} alt={listing.title} className="h-16 w-16 shrink-0 rounded-[1.15rem] object-cover" />
                         ) : (
@@ -635,7 +635,7 @@ export function DestinationDetailPage() {
                       <Link
                         key={listing.id}
                         to={`/store/${linkedStoreSlug}`}
-                        className="group block overflow-hidden rounded-[1.35rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_14px_34px_-30px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:border-[#336886]/24"
+                        className="group block min-w-0 max-w-full overflow-hidden rounded-[1.35rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_14px_34px_-30px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:border-[#336886]/24"
                       >
                         {cardBody}
                       </Link>
@@ -644,7 +644,7 @@ export function DestinationDetailPage() {
                         key={listing.id}
                         type="button"
                         onClick={() => setSelectedListing(listing)}
-                        className="group block w-full overflow-hidden rounded-[1.35rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_14px_34px_-30px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:border-amber-300/70 active:scale-[0.99]"
+                        className="group block w-full min-w-0 max-w-full overflow-hidden rounded-[1.35rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_14px_34px_-30px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:border-amber-300/70 active:scale-[0.99]"
                       >
                         {cardBody}
                       </button>
