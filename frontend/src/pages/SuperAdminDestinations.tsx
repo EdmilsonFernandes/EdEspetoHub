@@ -1144,7 +1144,7 @@ export function SuperAdminDestinations() {
               max-width: 610px;
               margin: 0;
               font-size: 48px;
-              line-height: 0.96;
+              line-height: 1.03;
               letter-spacing: -0.055em;
             }
             .subtitle {
@@ -1186,7 +1186,14 @@ export function SuperAdminDestinations() {
               font-weight: 950;
             }
             .benefit strong { display: block; font-size: 15px; }
-            .benefit span { display: block; margin-top: 3px; font-size: 12px; line-height: 1.35; color: #64748b; font-weight: 650; }
+            .benefit span {
+              display: block;
+              margin-top: 5px;
+              font-size: 12.5px;
+              line-height: 1.42;
+              color: #334155;
+              font-weight: 720;
+            }
             .qr-card {
               align-self: start;
               border-radius: 28px;
@@ -1218,10 +1225,51 @@ export function SuperAdminDestinations() {
             }
             .qr-card p {
               margin: 0;
-              color: rgba(255,255,255,0.76);
+              color: rgba(255,255,255,0.86);
               font-size: 12px;
               line-height: 1.4;
-              font-weight: 650;
+              font-weight: 750;
+            }
+            .play-badge {
+              display: inline-flex;
+              align-items: center;
+              gap: 9px;
+              margin: 15px auto 12px;
+              border: 1px solid rgba(255,255,255,0.14);
+              border-radius: 12px;
+              background: #050505;
+              padding: 8px 13px;
+              color: #fff;
+              text-align: left;
+              box-shadow: 0 12px 25px rgba(0,0,0,0.22);
+            }
+            .play-badge svg {
+              width: 25px;
+              height: 25px;
+              flex: 0 0 auto;
+            }
+            .play-badge small {
+              display: block;
+              font-size: 7px;
+              line-height: 1;
+              letter-spacing: 0.08em;
+              text-transform: uppercase;
+              color: rgba(255,255,255,0.82);
+              font-weight: 800;
+            }
+            .play-badge strong {
+              display: block;
+              margin-top: 2px;
+              font-size: 16px;
+              line-height: 1;
+              font-weight: 850;
+            }
+            .ios-note {
+              margin-top: 10px !important;
+              border-top: 1px solid rgba(255,255,255,0.14);
+              padding-top: 10px;
+              color: rgba(255,255,255,0.9) !important;
+              font-size: 11.5px !important;
             }
             .footer {
               display: flex;
@@ -1231,10 +1279,10 @@ export function SuperAdminDestinations() {
               margin: 0 34px 34px;
               border-radius: 22px;
               background: #fff7ed;
-              padding: 16px 18px;
+              padding: 21px 22px;
               color: #7c2d12;
-              font-size: 12px;
-              font-weight: 800;
+              font-size: 13px;
+              font-weight: 850;
             }
             .footer code {
               color: #153A4C;
@@ -1328,12 +1376,31 @@ export function SuperAdminDestinations() {
                     <img src="${safeQrUrl}" alt="QR Code para instalar o app Já no Caminho" />
                   </div>
                   <h2>Aponte a câmera e instale o app</h2>
-                  <p>O QR abre direto a Google Play para instalar o app Já no Caminho.</p>
+                  <div class="play-badge" aria-label="Disponível no Google Play">
+                    <svg viewBox="0 0 48 48" role="img" aria-hidden="true">
+                      <defs>
+                        <linearGradient id="playBlue" x1="0" x2="1" y1="0" y2="1">
+                          <stop offset="0" stop-color="#00A0FF" />
+                          <stop offset="1" stop-color="#00D1FF" />
+                        </linearGradient>
+                      </defs>
+                      <path fill="url(#playBlue)" d="M8 6.4v35.2c0 1.7 1.8 2.8 3.3 1.9L29.5 24 11.3 4.5C9.8 3.6 8 4.7 8 6.4Z" />
+                      <path fill="#00F076" d="m29.5 24 5.3-5.7L11.3 4.5 29.5 24Z" />
+                      <path fill="#FFEA00" d="m29.5 24-18.2 19.5 23.5-13.8L29.5 24Z" />
+                      <path fill="#FF3D00" d="m34.8 18.3-5.3 5.7 5.3 5.7 5.1-3c2.1-1.2 2.1-4.2 0-5.4l-5.1-3Z" />
+                    </svg>
+                    <span>
+                      <small>Disponível no</small>
+                      <strong>Google Play</strong>
+                    </span>
+                  </div>
+                  <p>Android: escaneie para baixar na Google Play.</p>
+                  <p class="ios-note">iPhone: acesse também pelo Safari em <strong>janocaminho.com.br</strong>. App iOS em breve.</p>
                 </aside>
               </section>
               <footer class="footer">
                 <span>Depois de instalar: abra <strong>Destinos</strong> e escolha <strong>${safePlaceName}</strong>.</span>
-                <code>Google Play · Já no Caminho</code>
+                <code>Android: Google Play · iPhone: Safari</code>
               </footer>
             </article>
           </main>
