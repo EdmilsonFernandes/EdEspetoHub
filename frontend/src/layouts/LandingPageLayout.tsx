@@ -206,7 +206,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
       style={{ fontFamily: 'Inter, Geist, system-ui, -apple-system, Segoe UI, sans-serif' }}
     >
       <header className="fixed left-1/2 top-4 z-50 w-[calc(100%-1rem)] max-w-7xl -translate-x-1/2 sm:top-5 sm:w-[calc(100%-2rem)]">
-        <div className="relative overflow-hidden rounded-[1.7rem] border border-white/12 bg-[linear-gradient(135deg,rgba(8,16,31,0.88)_0%,rgba(12,24,45,0.72)_55%,rgba(9,18,35,0.88)_100%)] px-4 py-3 shadow-[0_18px_42px_-24px_rgba(2,6,23,0.75)] backdrop-blur-[16px] ring-1 ring-white/8 sm:rounded-[999px] sm:px-6 lg:px-8">
+        <div className="relative overflow-visible rounded-[1.7rem] border border-white/12 bg-[linear-gradient(135deg,rgba(8,16,31,0.88)_0%,rgba(12,24,45,0.72)_55%,rgba(9,18,35,0.88)_100%)] px-4 py-3 shadow-[0_18px_42px_-24px_rgba(2,6,23,0.75)] backdrop-blur-[16px] ring-1 ring-white/8 sm:rounded-[999px] sm:px-6 lg:px-8">
           <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent)]" />
           <div className="pointer-events-none absolute inset-x-16 bottom-0 h-px bg-[linear-gradient(90deg,transparent,rgba(148,163,184,0.12),transparent)]" />
           <div className="pointer-events-none absolute right-24 top-2 h-12 w-24 rounded-full bg-[#84cc16]/12 blur-2xl" />
@@ -246,48 +246,50 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                     <CaretDown size={14} weight="bold" className={`transition-transform ${solutionsMenuOpen ? 'rotate-180 text-white' : ''}`} />
                   </button>
                   {solutionsMenuOpen ? (
-                    <div className="absolute left-1/2 top-[calc(100%+0.9rem)] w-[24rem] -translate-x-1/2 rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(10,16,29,0.98)_0%,rgba(7,12,24,0.98)_100%)] p-2.5 shadow-[0_32px_70px_-32px_rgba(2,6,23,0.92)] backdrop-blur-xl">
-                      <div className="border-b border-white/6 px-3.5 pb-3 pt-1">
-                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Plataforma</p>
-                        <p className="mt-1 text-sm font-semibold text-white">Entradas organizadas para operação, expansão e aquisição.</p>
-                      </div>
-                      <div className="mt-2 space-y-1">
-                        {solutionsLinks.map((item) => (
+                    <div className="absolute left-1/2 top-full z-[90] w-[24rem] -translate-x-1/2 pt-3">
+                      <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(10,16,29,0.98)_0%,rgba(7,12,24,0.98)_100%)] p-2.5 shadow-[0_32px_70px_-32px_rgba(2,6,23,0.92)] backdrop-blur-xl">
+                        <div className="border-b border-white/6 px-3.5 pb-3 pt-1">
+                          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Plataforma</p>
+                          <p className="mt-1 text-sm font-semibold text-white">Entradas organizadas para operação, expansão e aquisição.</p>
+                        </div>
+                        <div className="mt-2 space-y-1">
+                          {solutionsLinks.map((item) => (
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => {
+                                setSolutionsMenuOpen(false);
+                                item.onClick();
+                              }}
+                              className="flex w-full items-start gap-3 rounded-[1rem] px-3.5 py-3 text-left transition hover:bg-white/[0.05]"
+                            >
+                              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/8 bg-white/[0.04]">
+                                <span className="h-2.5 w-2.5 rounded-full bg-[#84cc16] shadow-[0_0_18px_rgba(132,204,22,0.55)]" />
+                              </span>
+                              <span className="min-w-0">
+                                <span className="block text-sm font-semibold tracking-[-0.02em] text-white">{item.label}</span>
+                                <span className="mt-1 block text-xs font-medium leading-5 text-slate-400">{item.helper}</span>
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                        <div className="mt-2 border-t border-white/6 px-3.5 pb-2 pt-3">
+                          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Condomínio</p>
+                          <p className="mt-2 text-xs font-medium leading-5 text-slate-400">
+                            Responsaveis ja cadastrados entram pelo botao <span className="font-black text-white">Entrar</span>. Novos condominios comecam pela solicitacao.
+                          </p>
                           <button
-                            key={item.id}
                             type="button"
                             onClick={() => {
                               setSolutionsMenuOpen(false);
-                              item.onClick();
+                              goToCondominiumRequest();
                             }}
-                            className="flex w-full items-start gap-3 rounded-[1rem] px-3.5 py-3 text-left transition hover:bg-white/[0.05]"
+                            className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-[0.95rem] border border-emerald-400/18 bg-emerald-400/10 px-3 py-2.5 text-xs font-black text-emerald-200 transition hover:bg-emerald-400/16"
                           >
-                            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/8 bg-white/[0.04]">
-                              <span className="h-2.5 w-2.5 rounded-full bg-[#84cc16] shadow-[0_0_18px_rgba(132,204,22,0.55)]" />
-                            </span>
-                            <span className="min-w-0">
-                              <span className="block text-sm font-semibold tracking-[-0.02em] text-white">{item.label}</span>
-                              <span className="mt-1 block text-xs font-medium leading-5 text-slate-400">{item.helper}</span>
-                            </span>
+                            <Buildings size={14} weight="duotone" />
+                            Solicitar acesso
                           </button>
-                        ))}
-                      </div>
-                      <div className="mt-2 border-t border-white/6 px-3.5 pb-2 pt-3">
-                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Condomínio</p>
-                        <p className="mt-2 text-xs font-medium leading-5 text-slate-400">
-                          Responsaveis ja cadastrados entram pelo botao <span className="font-black text-white">Entrar</span>. Novos condominios comecam pela solicitacao.
-                        </p>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSolutionsMenuOpen(false);
-                            goToCondominiumRequest();
-                          }}
-                          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-[0.95rem] border border-emerald-400/18 bg-emerald-400/10 px-3 py-2.5 text-xs font-black text-emerald-200 transition hover:bg-emerald-400/16"
-                        >
-                          <Buildings size={14} weight="duotone" />
-                          Solicitar acesso
-                        </button>
+                        </div>
                       </div>
                     </div>
                   ) : null}
@@ -405,7 +407,10 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                   <button
                     key={item.id}
                     type="button"
-                    onClick={item.onClick}
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      item.onClick();
+                    }}
                     className="flex w-full items-start justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
                   >
                     <span className="min-w-0">
