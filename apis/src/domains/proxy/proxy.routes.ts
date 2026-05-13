@@ -222,6 +222,7 @@ export function createProxyRoutes(): Router {
     r.get('/admin/destinations/manage/summary', authRequired, forward);
     r.get('/admin/destinations/:destinationId/places', authRequired, forward);
     r.get('/admin/destinations/:destinationId/listings', authRequired, forward);
+    r.get('/admin/destinations/:destinationId/banners', authRequired, forward);
     r.post('/admin/destinations', authRequired, forward);
     r.patch('/admin/destinations/:destinationId', authRequired, forward);
     r.post('/admin/destination-banners', authRequired, forward);

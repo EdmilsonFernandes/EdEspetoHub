@@ -94,6 +94,15 @@ export class DestinationController {
     }
   }
 
+  static async adminListDestinationBanners(req: Request, res: Response) {
+    try {
+      const payload = await destinationService.adminListDestinationBanners(String(req.params.destinationId || ''));
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
   static async adminCreateDestination(req: Request, res: Response) {
     try {
       const payload = await destinationService.adminSaveDestination(req.body || {});

@@ -44,6 +44,47 @@ describe('Destination Hub', () => {
     expect(destinationRes.status).toBe(201);
     const destinationId = destinationRes.body.id;
 
+    const firstBannerRes = await api
+      .post('/api/admin/destination-banners')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        destinationId,
+        title: 'Vista principal',
+        subtitle: 'Foto de capa da cidade',
+        imageUrl: 'https://example.com/destino-capa.jpg',
+        actionType: 'EXTERNAL_URL',
+        actionTarget: 'https://example.com/roteiro',
+        sortOrder: 0,
+      });
+
+    expect(firstBannerRes.status, JSON.stringify(firstBannerRes.body)).toBe(201);
+    expect(firstBannerRes.body.actionTarget).toBe('https://example.com/roteiro');
+
+    const secondBannerRes = await api
+      .post('/api/admin/destination-banners')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        destinationId,
+        title: 'Mirante',
+        imageUrl: 'https://example.com/destino-mirante.jpg',
+        sortOrder: 1,
+      });
+
+    expect(secondBannerRes.status, JSON.stringify(secondBannerRes.body)).toBe(201);
+
+    const adminBannersRes = await api
+      .get(`/api/admin/destinations/${destinationId}/banners`)
+      .set('Authorization', `Bearer ${platformToken}`);
+
+    expect(adminBannersRes.status, JSON.stringify(adminBannersRes.body)).toBe(200);
+    expect(adminBannersRes.body.items).toHaveLength(2);
+    expect(adminBannersRes.body.items[0]).toEqual(expect.objectContaining({
+      id: firstBannerRes.body.id,
+      imageUrl: 'https://example.com/destino-capa.jpg',
+      actionTarget: 'https://example.com/roteiro',
+      sortOrder: 0,
+    }));
+
     const placeRes = await api
       .post('/api/admin/hospitality-places')
       .set('Authorization', `Bearer ${platformToken}`)
@@ -154,6 +195,15 @@ describe('Destination Hub', () => {
     expect(placePublicRes.body.hospitalityPlace.id).toBe(placeId);
     expect(placePublicRes.body.stores.some((entry: any) => entry.store?.slug === storeSlug)).toBe(true);
     expect(placePublicRes.body.listings.some((entry: any) => entry.title === listingRes.body.title)).toBe(true);
+
+    const publicDestinationRes = await api.get(`/api/public/destinations/${destinationRes.body.slug}`);
+    expect(publicDestinationRes.status).toBe(200);
+    expect(publicDestinationRes.body.banners).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        imageUrl: 'https://example.com/destino-capa.jpg',
+        actionTarget: 'https://example.com/roteiro',
+      }),
+    ]));
 
     const publicListRes = await api
       .get('/api/public/destinations')

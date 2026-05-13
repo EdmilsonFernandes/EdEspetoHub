@@ -103,6 +103,10 @@ export const destinationService = {
     return superAdminRequest(`/admin/destinations/${encodeURIComponent(destinationId)}/listings${suffix}`);
   },
 
+  adminDestinationBanners(destinationId: string) {
+    return superAdminRequest(`/admin/destinations/${encodeURIComponent(destinationId)}/banners`);
+  },
+
   adminCreateDestination(payload: any) {
     return superAdminRequest('/admin/destinations', { method: 'POST', body: payload });
   },
@@ -113,6 +117,10 @@ export const destinationService = {
 
   adminCreateBanner(payload: any) {
     return superAdminRequest('/admin/destination-banners', { method: 'POST', body: payload });
+  },
+
+  adminUpdateBanner(bannerId: string, payload: any) {
+    return superAdminRequest(`/admin/destination-banners/${encodeURIComponent(bannerId)}`, { method: 'PATCH', body: payload });
   },
 
   adminCreateHospitalityPlace(payload: any) {

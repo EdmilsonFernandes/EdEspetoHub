@@ -9,7 +9,45 @@ import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
 import { canUseNativeImagePicker, pickNativeImageAsDataUrl } from '../utils/nativeImagePicker';
 
-const emptyDestination = {
+const DESTINATION_GALLERY_SLOTS = 4;
+
+const emptyDestinationGallerySlot = {
+  id: '',
+  title: '',
+  subtitle: '',
+  imageUrl: '',
+  imageFile: '',
+  actionTarget: '',
+  active: true,
+  sortOrder: 0,
+};
+
+const createEmptyDestinationGallerySlots = () =>
+  Array.from({ length: DESTINATION_GALLERY_SLOTS }, (_, index) => ({
+    ...emptyDestinationGallerySlot,
+    sortOrder: index,
+  }));
+
+const normalizeDestinationGallerySlots = (value: any, fallbackName = 'Destino') => {
+  const slots = Array.isArray(value) ? [...value] : [];
+  slots.sort((left: any, right: any) => Number(left?.sortOrder ?? 0) - Number(right?.sortOrder ?? 0));
+  return Array.from({ length: DESTINATION_GALLERY_SLOTS }, (_, index) => {
+    const slot = slots[index] || {};
+    return {
+      ...emptyDestinationGallerySlot,
+      id: String(slot.id || ''),
+      title: String(slot.title || (slot.imageUrl || slot.imageFile ? `Foto ${index + 1} de ${fallbackName}` : '')),
+      subtitle: String(slot.subtitle || ''),
+      imageUrl: String(slot.imageUrl || slot.bannerUrl || ''),
+      imageFile: String(slot.imageFile || ''),
+      actionTarget: String(slot.actionTarget || ''),
+      active: slot.active !== false,
+      sortOrder: index,
+    };
+  });
+};
+
+const createEmptyDestinationForm = () => ({
   name: '',
   slug: '',
   city: '',
@@ -25,7 +63,8 @@ const emptyDestination = {
   lng: '',
   active: true,
   sortOrder: 0,
-};
+  gallery: createEmptyDestinationGallerySlots(),
+});
 
 const emptyPlace = {
   destinationId: '',
@@ -241,9 +280,11 @@ const MediaUploadField = ({
   onFileChange,
   onError,
   maxEdge = 1600,
+  previewMode = 'square',
 }: any) => {
   const previewUrl = fileValue || resolveAssetUrl(urlValue || '') || '';
   const canUseNativePicker = canUseNativeImagePicker();
+  const isWidePreview = previewMode === 'wide';
 
   const handleFile = async (event: any) => {
     const file = event.target.files?.[0];
@@ -274,8 +315,8 @@ const MediaUploadField = ({
 
   return (
     <div className="sm:col-span-2 rounded-[1.35rem] border border-slate-200 bg-slate-50/80 p-3">
-      <div className="grid gap-3 sm:grid-cols-[112px_1fr]">
-        <div className="flex h-28 items-center justify-center overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200">
+      <div className={`grid gap-3 ${isWidePreview ? '' : 'sm:grid-cols-[112px_1fr]'}`}>
+        <div className={`flex items-center justify-center overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200 ${isWidePreview ? 'aspect-video w-full' : 'h-28'}`}>
           {previewUrl ? (
             <img src={previewUrl} alt={label} className="h-full w-full object-cover" />
           ) : (
@@ -347,8 +388,9 @@ export function SuperAdminDestinations() {
   const [listingsPage, setListingsPage] = useState(1);
   const [placesResult, setPlacesResult] = useState<any>({ items: [], pagination: { ...emptyPagination, pageSize: 10 } });
   const [listingsResult, setListingsResult] = useState<any>({ items: [], pagination: { ...emptyPagination, pageSize: 10 } });
+  const [destinationBannersResult, setDestinationBannersResult] = useState<any>({ items: [] });
   const [detailLoading, setDetailLoading] = useState(false);
-  const [destinationForm, setDestinationForm] = useState(emptyDestination);
+  const [destinationForm, setDestinationForm] = useState(createEmptyDestinationForm());
   const [placeForm, setPlaceForm] = useState(emptyPlace);
   const [listingForm, setListingForm] = useState(emptyListing);
   const [storeLinkForm, setStoreLinkForm] = useState(emptyStoreLink);
@@ -423,11 +465,12 @@ export function SuperAdminDestinations() {
     if (!destinationId) {
       setPlacesResult({ items: [], pagination: { ...emptyPagination, pageSize: 10 } });
       setListingsResult({ items: [], pagination: { ...emptyPagination, pageSize: 10 } });
+      setDestinationBannersResult({ items: [] });
       return;
     }
     setDetailLoading(true);
     try {
-      const [placesPayload, listingsPayload] = await Promise.all([
+      const [placesPayload, listingsPayload, bannersPayload] = await Promise.all([
         destinationService.adminDestinationPlaces(destinationId, {
           page: nextPlacesPage,
           pageSize: 10,
@@ -441,9 +484,11 @@ export function SuperAdminDestinations() {
           status: statusFilter,
           listingCategory: listingCategoryFilter,
         }),
+        destinationService.adminDestinationBanners(destinationId),
       ]);
       setPlacesResult(placesPayload || { items: [], pagination: { ...emptyPagination, pageSize: 10 } });
       setListingsResult(listingsPayload || { items: [], pagination: { ...emptyPagination, pageSize: 10 } });
+      setDestinationBannersResult(bannersPayload || { items: [] });
     } catch (err: any) {
       setError(err?.message || 'Não foi possível carregar detalhes da cidade.');
     } finally {
@@ -563,6 +608,20 @@ export function SuperAdminDestinations() {
   const updateListing = (key: string, value: any) => setListingForm((current) => ({ ...current, [key]: value }));
   const updateStoreLink = (key: string, value: any) => setStoreLinkForm((current) => ({ ...current, [key]: value }));
 
+  const updateDestinationGallerySlot = (index: number, patch: any) => {
+    setDestinationForm((current: any) => {
+      const gallery = normalizeDestinationGallerySlots(current.gallery, current.name || 'Destino');
+      gallery[index] = { ...gallery[index], ...patch, sortOrder: index };
+      const firstSlot = gallery[0] || {};
+      return {
+        ...current,
+        gallery,
+        bannerUrl: firstSlot.imageUrl || '',
+        bannerFile: firstSlot.imageFile || '',
+      };
+    });
+  };
+
   const updatePlaceBannerUrl = (index: number, value: string) => {
     setPlaceForm((current) => {
       const bannerUrls = normalizePlaceBannerSlots(current.bannerUrls);
@@ -595,15 +654,42 @@ export function SuperAdminDestinations() {
     });
   };
 
-  const startDestinationEdit = (destination: any) => {
+  const startDestinationEdit = async (destination: any) => {
+    let loadedBanners = String(destinationBannersResult?.destination?.id || '') === String(destination.id)
+      ? destinationBannersResult.items
+      : destination.banners;
+    if ((!Array.isArray(loadedBanners) || !loadedBanners.length) && destination?.id) {
+      try {
+        const bannersPayload = await destinationService.adminDestinationBanners(destination.id);
+        loadedBanners = bannersPayload?.items || [];
+        setDestinationBannersResult(bannersPayload || { items: [] });
+      } catch {
+        loadedBanners = [];
+      }
+    }
+    const gallerySource = Array.isArray(loadedBanners) && loadedBanners.length
+      ? loadedBanners
+      : destination.bannerUrl
+        ? [{
+            title: destination.heroTitle || destination.name,
+            subtitle: destination.heroSubtitle || '',
+            imageUrl: destination.bannerUrl,
+            actionTarget: '',
+            active: true,
+            sortOrder: 0,
+          }]
+        : [];
     setEditingDestinationId(destination.id);
     setEditingPlaceId('');
     setEditingListingId('');
     setCadastroMode('destination');
     setDestinationForm({
-      ...emptyDestination,
+      ...createEmptyDestinationForm(),
       ...Object.fromEntries(Object.entries(destination).map(([key, value]) => [key, toFormValue(value)])),
       state: String(destination.state || 'SP').toUpperCase().slice(0, 2),
+      logoFile: '',
+      bannerFile: '',
+      gallery: normalizeDestinationGallerySlots(gallerySource, destination.name || 'Destino'),
       active: destination.active !== false,
       sortOrder: Number(destination.sortOrder || 0),
     });
@@ -654,7 +740,7 @@ export function SuperAdminDestinations() {
 
   const cancelDestinationEdit = () => {
     setEditingDestinationId('');
-    setDestinationForm(emptyDestination);
+    setDestinationForm(createEmptyDestinationForm());
     setActiveTab('dashboard');
   };
 
@@ -677,21 +763,61 @@ export function SuperAdminDestinations() {
     setActiveTab('dashboard');
   };
 
+  const syncDestinationGallery = async (destination: any, rawSlots: any[]) => {
+    const destinationId = destination?.id || editingDestinationId;
+    if (!destinationId) return;
+    const slots = normalizeDestinationGallerySlots(rawSlots, destination?.name || destinationForm.name || 'Destino');
+    await Promise.all(slots.map((slot: any, index: number) => {
+      const hasImage = Boolean(String(slot.imageUrl || slot.imageFile || '').trim());
+      if (!slot.id && !hasImage) return Promise.resolve(null);
+      const payload = {
+        destinationId,
+        title: slot.title || `Foto ${index + 1} de ${destination?.name || destinationForm.name || 'destino'}`,
+        subtitle: slot.subtitle || '',
+        imageUrl: slot.imageUrl || '',
+        imageFile: slot.imageFile || '',
+        actionType: slot.actionTarget ? 'EXTERNAL_URL' : '',
+        actionTarget: slot.actionTarget || '',
+        sortOrder: index,
+        active: hasImage && slot.active !== false,
+      };
+      return slot.id
+        ? destinationService.adminUpdateBanner(slot.id, payload)
+        : destinationService.adminCreateBanner(payload);
+    }));
+  };
+
   const saveDestination = async (event: any) => {
     event.preventDefault();
     setSaving(true);
     setError('');
     try {
       const wasEditing = Boolean(editingDestinationId);
-      const payload = { ...destinationForm, active: toBool(destinationForm.active) };
+      const gallerySlots = normalizeDestinationGallerySlots(destinationForm.gallery, destinationForm.name || 'Destino');
+      const coverSlot = gallerySlots.find((slot: any) => String(slot.imageUrl || slot.imageFile || '').trim()) || gallerySlots[0] || {};
+      const { gallery, ...destinationFields } = destinationForm as any;
+      const payload = {
+        ...destinationFields,
+        bannerUrl: coverSlot.imageUrl || '',
+        bannerFile: coverSlot.imageFile || '',
+        active: toBool(destinationForm.active),
+      };
+      let savedDestination: any = null;
       if (editingDestinationId) {
-        await destinationService.adminUpdateDestination(editingDestinationId, payload);
+        savedDestination = await destinationService.adminUpdateDestination(editingDestinationId, payload);
       } else {
-        await destinationService.adminCreateDestination(payload);
+        savedDestination = await destinationService.adminCreateDestination(payload);
       }
+      const syncedSlots = gallerySlots.map((slot: any) =>
+        slot.imageFile && savedDestination?.bannerUrl && slot.sortOrder === coverSlot.sortOrder
+          ? { ...slot, imageFile: '', imageUrl: savedDestination.bannerUrl }
+          : slot
+      );
+      await syncDestinationGallery(savedDestination, syncedSlots);
       setEditingDestinationId('');
-      setDestinationForm(emptyDestination);
-      await refreshAdminData(editingDestinationId || selectedDestinationId);
+      setDestinationForm(createEmptyDestinationForm());
+      setSelectedDestinationId(savedDestination?.id || editingDestinationId || selectedDestinationId);
+      await refreshAdminData(savedDestination?.id || editingDestinationId || selectedDestinationId);
       if (wasEditing) setActiveTab('dashboard');
     } catch (err: any) {
       setError(err?.message || 'Não foi possível salvar destino.');
@@ -1286,16 +1412,62 @@ export function SuperAdminDestinations() {
                 <input value={destinationForm.state} onChange={(event) => updateDestination('state', event.target.value.toUpperCase().slice(0, 2))} placeholder="UF" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={destinationForm.heroTitle} onChange={(event) => updateDestination('heroTitle', event.target.value)} placeholder="Título hero" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
                 <input value={destinationForm.heroSubtitle} onChange={(event) => updateDestination('heroSubtitle', event.target.value)} placeholder="Subtítulo hero" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
-                <MediaUploadField
-                  label="Foto/banner da cidade"
-                  hint="Escolha uma imagem horizontal ou cole uma URL pública."
-                  urlValue={destinationForm.bannerUrl}
-                  fileValue={destinationForm.bannerFile}
-                  onUrlChange={(value: string) => updateDestination('bannerUrl', value)}
-                  onFileChange={(value: string) => updateDestination('bannerFile', value)}
-                  onError={setError}
-                  maxEdge={1800}
-                />
+                <div className="sm:col-span-2 rounded-[1.5rem] border border-[#336886]/15 bg-[linear-gradient(180deg,#f8fbfa,#ffffff)] p-3">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-black text-slate-950">Fotos da cidade</p>
+                      <p className="mt-0.5 text-[11px] font-semibold text-slate-500">Até 4 imagens para a vitrine pública. A primeira foto preenchida vira a capa do destino.</p>
+                    </div>
+                    <span className="rounded-full bg-[#edf5fa] px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]">
+                      vitrine 16:9
+                    </span>
+                  </div>
+                  <div className="mt-3 grid gap-3 md:grid-cols-2">
+                    {normalizeDestinationGallerySlots(destinationForm.gallery, destinationForm.name || 'Destino').map((slot: any, index: number) => (
+                      <div key={`destination-gallery-${index}`} className="rounded-[1.35rem] border border-slate-200 bg-white p-3 shadow-sm">
+                        <MediaUploadField
+                          label={`Foto ${index + 1}${index === 0 ? ' · capa sugerida' : ''}`}
+                          hint={index === 0 ? 'Boa para paisagem horizontal da cidade.' : 'Use para atrativos, vista ou campanha local.'}
+                          urlValue={slot.imageUrl}
+                          fileValue={slot.imageFile}
+                          onUrlChange={(value: string) => updateDestinationGallerySlot(index, {
+                            imageUrl: value,
+                            ...(value ? { imageFile: '', active: true } : {}),
+                          })}
+                          onFileChange={(value: string) => updateDestinationGallerySlot(index, {
+                            imageFile: value,
+                            ...(value ? { imageUrl: '', active: true } : {}),
+                          })}
+                          onError={setError}
+                          maxEdge={1800}
+                          previewMode="wide"
+                        />
+                        <div className="mt-3 grid gap-2">
+                          <input
+                            value={slot.title}
+                            onChange={(event) => updateDestinationGallerySlot(index, { title: event.target.value })}
+                            placeholder="Legenda curta opcional"
+                            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-bold outline-none"
+                          />
+                          <input
+                            value={slot.actionTarget}
+                            onChange={(event) => updateDestinationGallerySlot(index, { actionTarget: event.target.value })}
+                            placeholder="Link ao clicar na foto (opcional)"
+                            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-bold outline-none"
+                          />
+                          <select
+                            value={String(slot.active !== false)}
+                            onChange={(event) => updateDestinationGallerySlot(index, { active: event.target.value === 'true' })}
+                            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-bold outline-none"
+                          >
+                            <option value="true">Mostrar no carrossel</option>
+                            <option value="false">Ocultar esta foto</option>
+                          </select>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
                 <MediaUploadField
                   label="Logo/ícone do destino"
                   hint="Opcional. Ajuda na identidade visual da cidade."

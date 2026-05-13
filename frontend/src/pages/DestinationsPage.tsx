@@ -7,9 +7,10 @@ import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
 
 const destinationImage = (destination: any, variant: 'logo' | 'banner' = 'banner') => {
+  const firstBanner = (Array.isArray(destination?.banners) ? destination.banners : []).find((banner: any) => banner?.imageUrl);
   const source = variant === 'logo'
-    ? destination?.logoUrl || destination?.bannerUrl
-    : destination?.bannerUrl || destination?.logoUrl;
+    ? destination?.logoUrl || firstBanner?.imageUrl || destination?.bannerUrl
+    : firstBanner?.imageUrl || destination?.bannerUrl || destination?.logoUrl;
   return resolveAssetUrl(source || '') || getStoreAvatarUrl(destination?.slug, destination?.name);
 };
 
@@ -93,7 +94,7 @@ export function DestinationsPage() {
           <div className="flex items-center justify-between gap-3">
             <Link to="/hub" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/75 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-slate-600 shadow-sm backdrop-blur">
               <ArrowRight size={14} className="rotate-180" weight="bold" />
-              Hub
+              Voltar
             </Link>
             <Link to="/destinos/cadastrar" className="rounded-full border border-[#153A4C]/12 bg-white/78 px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-[#153A4C] shadow-sm backdrop-blur">
               Cadastrar parceiro

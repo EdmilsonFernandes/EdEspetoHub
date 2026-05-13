@@ -181,7 +181,6 @@ export function DestinationDetailPage() {
   const places = Array.isArray(payload?.hospitalityPlaces) ? payload.hospitalityPlaces : [];
   const listings = Array.isArray(payload?.listings) ? payload.listings : [];
   const banners = Array.isArray(payload?.banners) ? payload.banners : [];
-  const heroBanner = useMemo(() => banners.find((banner: any) => banner.imageUrl) || null, [banners]);
   const categoryOptions = useMemo(() => {
     const unique = Array.from(new Set(listings.map((listing: any) => String(listing.category || 'SERVICO'))));
     return unique.map((category: string) => ({
@@ -222,21 +221,23 @@ export function DestinationDetailPage() {
   const showPlacesSection = activeCategory === 'TODOS' || activeCategory === 'HOSPEDAGENS';
   const showListingsSection = activeCategory !== 'HOSPEDAGENS';
   const showcaseSlides = useMemo(() => {
-    const destinationSlides = hasConfiguredAsset(destination) ? [{
-      key: `destination-${destination.id || destination.slug}`,
-      title: destination.heroTitle || destination.name,
-      subtitle: destination.heroSubtitle || destination.description,
-      item: destination,
-      kind: 'Cidade',
-    }] : [];
     const bannerSlides = banners.filter((banner: any) => hasConfiguredAsset(banner)).map((banner: any) => ({
       key: `banner-${banner.id}`,
       title: banner.title || destination.name,
       subtitle: banner.subtitle || destination.description,
       item: banner,
+      actionTarget: banner.actionTarget,
       kind: 'Cidade',
     }));
-    const citySlides = [...destinationSlides, ...bannerSlides];
+    const fallbackSlides = hasConfiguredAsset(destination) ? [{
+      key: `destination-${destination.id || destination.slug}`,
+      title: destination.heroTitle || destination.name,
+      subtitle: destination.heroSubtitle || destination.description,
+      item: destination,
+      actionTarget: '',
+      kind: 'Cidade',
+    }] : [];
+    const citySlides = (bannerSlides.length ? bannerSlides : fallbackSlides).slice(0, 4);
     return citySlides.length
       ? citySlides
       : [{
@@ -244,10 +245,13 @@ export function DestinationDetailPage() {
           title: destination.name,
           subtitle: destination.description,
           item: destination,
+          actionTarget: '',
           kind: 'Destino',
         }];
   }, [banners, destination]);
-  const currentSlide = showcaseSlides[carouselIndex % Math.max(showcaseSlides.length, 1)];
+  const activeShowcaseIndex = carouselIndex % Math.max(showcaseSlides.length, 1);
+  const currentSlide = showcaseSlides[activeShowcaseIndex];
+  const currentSlideTarget = externalUrl(currentSlide?.actionTarget);
   const destinationLocationLabel = [destination.city, destination.state].filter(Boolean).join(', ') || destination.name || 'Destino';
 
   useEffect(() => {
@@ -289,8 +293,8 @@ export function DestinationDetailPage() {
           {error ? <p className="mt-8 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
 
           {!loading && !error ? (
-            <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_270px] lg:items-end">
-              <div>
+            <div className="mt-4 grid gap-5 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
+              <div className="min-w-0">
                 <p className="inline-flex max-w-full items-center gap-2 rounded-full bg-[#153A4C]/8 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-[#153A4C] ring-1 ring-[#153A4C]/10">
                   <Mountains size={15} weight="duotone" />
                   <span>Guia da cidade</span>
@@ -302,7 +306,7 @@ export function DestinationDetailPage() {
                   <MapPinLine size={15} weight="duotone" className="shrink-0 text-[#336886]" />
                   <span className="truncate">{destinationLocationLabel}</span>
                 </p>
-                <p className="mt-3 line-clamp-2 max-w-2xl text-sm font-semibold leading-relaxed text-slate-600 sm:text-base">
+                <p className="mt-3 line-clamp-3 max-w-2xl text-sm font-semibold leading-relaxed text-slate-600 sm:text-base">
                   {destination.heroSubtitle || destination.description || 'Hospedagens, lojas e experiências cadastradas neste destino.'}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -316,31 +320,51 @@ export function DestinationDetailPage() {
                   </span>
                 </div>
               </div>
-              <div className="overflow-hidden rounded-[1.5rem] border border-white/85 bg-white/86 p-2 shadow-[0_22px_58px_-42px_rgba(15,23,42,0.48)] backdrop-blur">
-                <div className="relative h-32 overflow-hidden rounded-[1.15rem] bg-slate-900 sm:h-40 lg:h-36">
-                  {hasConfiguredAsset(currentSlide?.item || heroBanner || destination) ? (
-                    <img src={asset(currentSlide?.item || heroBanner || destination)} alt={currentSlide?.title || destination.name} className="h-full w-full object-cover transition duration-700" />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_25%_15%,rgba(16,185,129,0.35),transparent_34%),linear-gradient(135deg,#18384a,#0f172a_62%,#3b2f1c)]">
-                      <Mountains size={72} weight="duotone" className="text-white/40" />
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(21,58,76,0.02),rgba(21,58,76,0.08))]" />
-                  <div className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-black text-slate-700 shadow-sm">
-                    {(carouselIndex % showcaseSlides.length) + 1}/{showcaseSlides.length}
+              <div className="overflow-hidden rounded-[2rem] border border-white/85 bg-white/88 p-2 shadow-[0_28px_70px_-46px_rgba(15,23,42,0.55)] backdrop-blur">
+                <button
+                  type="button"
+                  disabled={!currentSlideTarget}
+                  onClick={() => currentSlideTarget && void openActionTarget({ href: currentSlideTarget, external: true })}
+                  className="group relative block w-full overflow-hidden rounded-[1.55rem] bg-slate-900 text-left disabled:cursor-default"
+                  aria-label={currentSlideTarget ? `Abrir ${currentSlide?.title || destination.name}` : currentSlide?.title || destination.name}
+                >
+                  <div className="aspect-[16/9] min-h-[13rem] sm:min-h-[18rem] lg:min-h-[20rem]">
+                    {hasConfiguredAsset(currentSlide?.item || destination) ? (
+                      <img src={asset(currentSlide?.item || destination)} alt={currentSlide?.title || destination.name} className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_25%_15%,rgba(16,185,129,0.35),transparent_34%),linear-gradient(135deg,#18384a,#0f172a_62%,#3b2f1c)]">
+                        <Mountains size={84} weight="duotone" className="text-white/40" />
+                      </div>
+                    )}
                   </div>
-                </div>
+                  <div className="absolute right-4 top-4 rounded-full bg-white/92 px-3 py-1 text-[10px] font-black text-slate-700 shadow-sm">
+                    {activeShowcaseIndex + 1}/{showcaseSlides.length}
+                  </div>
+                  {currentSlideTarget ? (
+                    <div className="absolute bottom-4 right-4 rounded-full bg-[#153A4C] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-sm">
+                      Abrir
+                    </div>
+                  ) : null}
+                </button>
                 <div className="flex items-center justify-between gap-3 px-1 pb-1 pt-2">
                   <span className="truncate text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">Fotos da cidade</span>
-                  <div className="flex shrink-0 gap-1.5">
-                    {showcaseSlides.slice(0, 6).map((slide: any, index: number) => (
+                  <div className="flex min-w-0 flex-1 justify-end gap-2 overflow-x-auto pb-1">
+                    {showcaseSlides.map((slide: any, index: number) => (
                       <button
                         key={slide.key}
                         type="button"
-                        aria-label={`Abrir destaque ${index + 1}`}
+                        aria-label={`Abrir foto ${index + 1}`}
                         onClick={() => setCarouselIndex(index)}
-                        className={`h-1.5 rounded-full transition-all ${index === carouselIndex % showcaseSlides.length ? 'w-7 bg-[#153A4C]' : 'w-2 bg-[#153A4C]/22'}`}
-                      />
+                        className={`h-12 w-16 overflow-hidden rounded-xl ring-2 transition sm:h-14 sm:w-20 ${index === activeShowcaseIndex ? 'ring-[#153A4C]' : 'ring-transparent opacity-70 hover:opacity-100'}`}
+                      >
+                        {hasConfiguredAsset(slide.item) ? (
+                          <img src={asset(slide.item)} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <span className="flex h-full w-full items-center justify-center bg-[#153A4C]/10">
+                            <Mountains size={20} weight="duotone" className="text-[#153A4C]" />
+                          </span>
+                        )}
+                      </button>
                     ))}
                   </div>
                 </div>

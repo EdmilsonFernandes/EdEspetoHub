@@ -330,6 +330,16 @@ export class DestinationService {
     };
   }
 
+  async adminListDestinationBanners(destinationId: string) {
+    const destination = await this.repository.findDestinationById(destinationId);
+    if (!destination) throw new AppError('DEST-001', 404);
+    const banners = await this.repository.listBannersByDestinationId(destination.id, false);
+    return {
+      destination: this.toPublicDestination(destination),
+      items: banners.map((banner) => this.toPublicBanner(banner)),
+    };
+  }
+
   async adminSaveDestination(payload: any, destinationId?: string) {
     const current = destinationId ? await this.repository.findDestinationById(destinationId) : null;
     if (destinationId && !current) throw new AppError('DEST-001', 404);
@@ -338,6 +348,8 @@ export class DestinationService {
     const slug = normalizeDestinationSlug(payload?.slug || current?.slug || name);
     const logoUrl = await saveBase64Image(payload?.logoFile, `destination-logo-${slug}`, 'destinations');
     const bannerUrl = await saveBase64Image(payload?.bannerFile, `destination-banner-${slug}`, 'destinations');
+    const hasLogoUrlInput = Object.prototype.hasOwnProperty.call(payload || {}, 'logoUrl');
+    const hasBannerUrlInput = Object.prototype.hasOwnProperty.call(payload || {}, 'bannerUrl');
     const saved = await this.repository.saveDestination({
       ...(current || {}),
       name,
@@ -347,8 +359,8 @@ export class DestinationService {
       description: payload?.description !== undefined ? toOptionalText(payload.description) : current?.description ?? null,
       heroTitle: payload?.heroTitle !== undefined ? toOptionalText(payload.heroTitle) : current?.heroTitle ?? null,
       heroSubtitle: payload?.heroSubtitle !== undefined ? toOptionalText(payload.heroSubtitle) : current?.heroSubtitle ?? null,
-      logoUrl: logoUrl || toOptionalText(payload?.logoUrl) || current?.logoUrl || null,
-      bannerUrl: bannerUrl || toOptionalText(payload?.bannerUrl) || current?.bannerUrl || null,
+      logoUrl: logoUrl || (hasLogoUrlInput ? toOptionalText(payload?.logoUrl) : (current?.logoUrl ?? null)),
+      bannerUrl: bannerUrl || (hasBannerUrlInput ? toOptionalText(payload?.bannerUrl) : (current?.bannerUrl ?? null)),
       lat: payload?.lat !== undefined ? toNullableNumber(payload.lat) : current?.lat ?? null,
       lng: payload?.lng !== undefined ? toNullableNumber(payload.lng) : current?.lng ?? null,
       active: payload?.active !== false,
@@ -366,12 +378,13 @@ export class DestinationService {
     const title = String(payload?.title || current?.title || '').trim();
     if (!title) throw new AppError('DEST-006', 400);
     const imageUrl = await saveBase64Image(payload?.imageFile, `destination-banner-card-${destination.slug}-${Date.now()}`, 'destinations');
+    const hasImageUrlInput = Object.prototype.hasOwnProperty.call(payload || {}, 'imageUrl');
     const saved = await this.repository.saveBanner({
       ...(current || {}),
       destinationId,
       title,
       subtitle: payload?.subtitle !== undefined ? toOptionalText(payload.subtitle) : current?.subtitle ?? null,
-      imageUrl: imageUrl || toOptionalText(payload?.imageUrl) || current?.imageUrl || null,
+      imageUrl: imageUrl || (hasImageUrlInput ? toOptionalText(payload?.imageUrl) : (current?.imageUrl ?? null)),
       actionType: payload?.actionType !== undefined ? toOptionalText(payload.actionType) : current?.actionType ?? null,
       actionTarget: payload?.actionTarget !== undefined ? toOptionalText(payload.actionTarget) : current?.actionTarget ?? null,
       sortOrder: Number(payload?.sortOrder ?? current?.sortOrder ?? 0) || 0,
