@@ -131,7 +131,7 @@ export function PreStoreDetailSheet({
             <button
               type="button"
               onClick={onClose}
-              className="absolute right-3 top-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/92 text-slate-700 shadow-sm ring-1 ring-white/70 backdrop-blur"
+              className="absolute right-3 top-3 z-30 inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-950/82 text-white shadow-[0_12px_32px_-14px_rgba(0,0,0,0.75)] ring-2 ring-white/80 backdrop-blur-md transition hover:bg-slate-950 active:scale-95"
               aria-label="Fechar"
             >
               <X size={18} weight="bold" />
