@@ -1,13 +1,18 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bed, Buildings, CheckCircle, Compass, Eye, EyeSlash, ImageSquare, LinkSimpleHorizontal, MagnifyingGlass, MapTrifold, PencilSimple, Plus, Sparkle, UploadSimple, WarningCircle } from '@phosphor-icons/react';
+import { Bed, Buildings, CheckCircle, Compass, Eye, EyeSlash, ImageSquare, LinkSimpleHorizontal, MagnifyingGlass, MapTrifold, PencilSimple, Plus, QrCode, Sparkle, UploadSimple, WarningCircle } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { destinationService } from '../services/destinationService';
 import { addressLookupService } from '../services/addressLookupService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
 import { canUseNativeImagePicker, pickNativeImageAsDataUrl } from '../utils/nativeImagePicker';
+import {
+  buildHospitalityPlaceInstallUrl,
+  buildHospitalityPlacePosterFileName,
+  escapePosterHtml,
+} from '../utils/destinationQrPoster';
 
 const DESTINATION_GALLERY_SLOTS = 4;
 
@@ -952,6 +957,419 @@ export function SuperAdminDestinations() {
     }
   };
 
+  const handleGeneratePlaceQrPoster = (place: any) => {
+    if (typeof window === 'undefined') return;
+
+    const destination = selectedDestination ||
+      place?.destination ||
+      (catalog.destinations || []).find((item: any) => String(item.id) === String(place?.destinationId));
+    const placeName = String(place?.name || 'Hospedagem').trim();
+    const destinationName = String(destination?.name || destination?.city || place?.city || 'Destino turístico').trim();
+    const targetUrl = buildHospitalityPlaceInstallUrl({
+      destinationSlug: destination?.slug || place?.destination?.slug || '',
+      destinationName,
+      placeSlug: place?.slug || '',
+      placeName,
+    });
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=720x720&margin=12&data=${encodeURIComponent(targetUrl)}`;
+    const logoUrl = resolveAssetUrl(place?.logoUrl || '');
+    const coverUrl = resolveAssetUrl(
+      (Array.isArray(place?.bannerUrls) ? place.bannerUrls.find(Boolean) : '') ||
+        place?.bannerUrl ||
+        destination?.bannerUrl ||
+        place?.logoUrl ||
+        ''
+    );
+    const initials = placeName
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part.charAt(0))
+      .join('')
+      .toUpperCase() || 'JC';
+    const safePlaceName = escapePosterHtml(placeName);
+    const safeDestinationName = escapePosterHtml(destinationName);
+    const safeTargetUrl = escapePosterHtml(targetUrl);
+    const safeQrUrl = escapePosterHtml(qrUrl);
+    const safeLogoUrl = escapePosterHtml(logoUrl || '');
+    const safeCoverUrl = escapePosterHtml(coverUrl || '');
+    const safeInitials = escapePosterHtml(initials);
+    const fileName = buildHospitalityPlacePosterFileName(placeName);
+
+    const printWindow = window.open('', '_blank', 'width=780,height=980');
+    if (!printWindow) {
+      setError('Não foi possível abrir o material. Libere pop-ups para gerar o QR do chalé.');
+      return;
+    }
+
+    printWindow.document.write(`
+      <!doctype html>
+      <html lang="pt-BR">
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>${escapePosterHtml(fileName.replace(/\.html$/i, ''))}</title>
+          <style>
+            @page { size: A4; margin: 0; }
+            * { box-sizing: border-box; }
+            body {
+              margin: 0;
+              font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+              background: #eaf0f3;
+              color: #0f172a;
+            }
+            .screen-toolbar {
+              position: sticky;
+              top: 0;
+              z-index: 20;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 14px;
+              padding: 14px 18px;
+              border-bottom: 1px solid #dbe5eb;
+              background: rgba(255,255,255,0.94);
+              backdrop-filter: blur(14px);
+            }
+            .screen-toolbar strong { display: block; font-size: 13px; }
+            .screen-toolbar span { display: block; margin-top: 2px; font-size: 11px; color: #64748b; }
+            .screen-toolbar__actions { display: flex; flex-wrap: wrap; gap: 10px; }
+            .screen-toolbar button {
+              border: 0;
+              border-radius: 999px;
+              padding: 11px 16px;
+              font-size: 12px;
+              font-weight: 900;
+              cursor: pointer;
+              color: #fff;
+              background: #153A4C;
+            }
+            .screen-toolbar button.secondary {
+              color: #334155;
+              background: #fff;
+              box-shadow: inset 0 0 0 1px #cbd5e1;
+            }
+            .page {
+              width: 794px;
+              max-width: calc(100% - 24px);
+              min-height: 1123px;
+              margin: 22px auto;
+              padding: 28px;
+              border-radius: 34px;
+              background:
+                radial-gradient(circle at 12% 8%, rgba(236, 169, 53, 0.18), transparent 30%),
+                linear-gradient(180deg, #ffffff 0%, #f7fafc 100%);
+              box-shadow: 0 28px 80px rgba(15, 23, 42, 0.16);
+            }
+            .poster {
+              min-height: 1067px;
+              overflow: hidden;
+              border: 1px solid #dbe5eb;
+              border-radius: 30px;
+              background: #ffffff;
+            }
+            .hero {
+              position: relative;
+              min-height: 350px;
+              overflow: hidden;
+              color: #fff;
+              background: linear-gradient(135deg, #153A4C, #0f172a);
+            }
+            .hero-cover {
+              position: absolute;
+              inset: 0;
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              filter: saturate(1.02);
+            }
+            .hero-shade {
+              position: absolute;
+              inset: 0;
+              background: linear-gradient(90deg, rgba(7, 18, 28, 0.88), rgba(7, 18, 28, 0.52) 58%, rgba(7, 18, 28, 0.24));
+            }
+            .hero-content {
+              position: relative;
+              z-index: 2;
+              display: grid;
+              min-height: 350px;
+              align-content: end;
+              gap: 22px;
+              padding: 34px;
+            }
+            .brand-row {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 16px;
+            }
+            .brand {
+              display: inline-flex;
+              align-items: center;
+              gap: 10px;
+              border-radius: 999px;
+              background: rgba(255,255,255,0.13);
+              padding: 8px 13px;
+              font-size: 11px;
+              font-weight: 950;
+              letter-spacing: 0.16em;
+              text-transform: uppercase;
+            }
+            .brand img { width: 28px; height: 28px; border-radius: 9px; background: #fff; }
+            .place-logo {
+              width: 84px;
+              height: 84px;
+              border-radius: 24px;
+              object-fit: cover;
+              background: #fff;
+              border: 3px solid rgba(255,255,255,0.9);
+              box-shadow: 0 18px 40px rgba(0,0,0,0.22);
+            }
+            .place-initials {
+              display: grid;
+              place-items: center;
+              width: 84px;
+              height: 84px;
+              border-radius: 24px;
+              background: #fff;
+              color: #153A4C;
+              font-size: 24px;
+              font-weight: 950;
+              border: 3px solid rgba(255,255,255,0.9);
+            }
+            .eyebrow {
+              margin: 0 0 10px;
+              font-size: 12px;
+              font-weight: 950;
+              letter-spacing: 0.18em;
+              text-transform: uppercase;
+              color: rgba(255,255,255,0.76);
+            }
+            h1 {
+              max-width: 610px;
+              margin: 0;
+              font-size: 48px;
+              line-height: 0.96;
+              letter-spacing: -0.055em;
+            }
+            .subtitle {
+              max-width: 620px;
+              margin: 14px 0 0;
+              font-size: 19px;
+              line-height: 1.38;
+              font-weight: 650;
+              color: rgba(255,255,255,0.86);
+            }
+            .body {
+              display: grid;
+              grid-template-columns: 1.05fr 0.95fr;
+              gap: 26px;
+              padding: 34px;
+            }
+            .benefits {
+              display: grid;
+              gap: 14px;
+            }
+            .benefit {
+              display: flex;
+              gap: 13px;
+              align-items: flex-start;
+              border: 1px solid #e2e8f0;
+              border-radius: 20px;
+              background: #f8fafc;
+              padding: 16px;
+            }
+            .benefit-icon {
+              display: grid;
+              place-items: center;
+              width: 34px;
+              height: 34px;
+              flex: 0 0 34px;
+              border-radius: 13px;
+              background: #e9f4f8;
+              color: #153A4C;
+              font-weight: 950;
+            }
+            .benefit strong { display: block; font-size: 15px; }
+            .benefit span { display: block; margin-top: 3px; font-size: 12px; line-height: 1.35; color: #64748b; font-weight: 650; }
+            .qr-card {
+              align-self: start;
+              border-radius: 28px;
+              background: linear-gradient(180deg, #153A4C, #0f172a);
+              padding: 22px;
+              color: #fff;
+              text-align: center;
+              box-shadow: 0 24px 55px rgba(21,58,76,0.28);
+            }
+            .qr-box {
+              margin: 0 auto;
+              width: 256px;
+              max-width: 100%;
+              border-radius: 24px;
+              background: #fff;
+              padding: 14px;
+            }
+            .qr-box img {
+              display: block;
+              width: 100%;
+              aspect-ratio: 1;
+              object-fit: contain;
+            }
+            .qr-card h2 {
+              margin: 17px 0 5px;
+              font-size: 22px;
+              line-height: 1.05;
+              letter-spacing: -0.035em;
+            }
+            .qr-card p {
+              margin: 0;
+              color: rgba(255,255,255,0.76);
+              font-size: 12px;
+              line-height: 1.4;
+              font-weight: 650;
+            }
+            .footer {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 16px;
+              margin: 0 34px 34px;
+              border-radius: 22px;
+              background: #fff7ed;
+              padding: 16px 18px;
+              color: #7c2d12;
+              font-size: 12px;
+              font-weight: 800;
+            }
+            .footer code {
+              color: #153A4C;
+              font-family: inherit;
+              font-weight: 950;
+            }
+            @media screen and (max-width: 760px) {
+              .screen-toolbar { align-items: stretch; flex-direction: column; }
+              .screen-toolbar__actions { width: 100%; }
+              .screen-toolbar button { flex: 1 1 0; }
+              .page { padding: 12px; border-radius: 24px; }
+              .body { grid-template-columns: 1fr; padding: 22px; }
+              h1 { font-size: 36px; }
+              .hero-content { padding: 24px; }
+              .footer { margin: 0 22px 22px; flex-direction: column; align-items: flex-start; }
+            }
+            @media print {
+              body { background: #fff; }
+              .screen-toolbar { display: none !important; }
+              .page {
+                width: 210mm;
+                max-width: none;
+                min-height: 297mm;
+                margin: 0;
+                padding: 7mm;
+                border-radius: 0;
+                box-shadow: none;
+                background: #fff;
+              }
+              .poster { min-height: 283mm; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="screen-toolbar">
+            <div>
+              <strong>Material pronto para ${safePlaceName}</strong>
+              <span>Use "Imprimir / salvar PDF" para gerar o arquivo ou mandar para impressão.</span>
+            </div>
+            <div class="screen-toolbar__actions">
+              <button type="button" class="secondary" onclick="window.handleClosePoster()">Fechar</button>
+              <button type="button" onclick="window.handlePrintPoster()">Imprimir / salvar PDF</button>
+            </div>
+          </div>
+          <main class="page">
+            <article class="poster">
+              <section class="hero">
+                ${safeCoverUrl ? `<img class="hero-cover" src="${safeCoverUrl}" alt="${safePlaceName}" />` : ''}
+                <div class="hero-shade"></div>
+                <div class="hero-content">
+                  <div class="brand-row">
+                    <div class="brand">
+                      <img src="/icons/pwa-192x192.png" alt="" />
+                      Já no Caminho
+                    </div>
+                    ${safeLogoUrl ? `<img class="place-logo" src="${safeLogoUrl}" alt="Logo ${safePlaceName}" />` : `<div class="place-initials">${safeInitials}</div>`}
+                  </div>
+                  <div>
+                    <p class="eyebrow">Guia local para hóspedes</p>
+                    <h1>Está hospedado no ${safePlaceName}?</h1>
+                    <p class="subtitle">Baixe o app e veja quem entrega aqui, serviços locais e lugares próximos para visitar em ${safeDestinationName}.</p>
+                  </div>
+                </div>
+              </section>
+              <section class="body">
+                <div class="benefits">
+                  <div class="benefit">
+                    <div class="benefit-icon">1</div>
+                    <div>
+                      <strong>Comida e delivery para o chalé</strong>
+                      <span>Restaurantes, mercados e serviços que atendem esta hospedagem pelo app ou WhatsApp.</span>
+                    </div>
+                  </div>
+                  <div class="benefit">
+                    <div class="benefit-icon">2</div>
+                    <div>
+                      <strong>Passeios e turismo por perto</strong>
+                      <span>Atrações, experiências, cafés e lugares para visitar durante a viagem.</span>
+                    </div>
+                  </div>
+                  <div class="benefit">
+                    <div class="benefit-icon">3</div>
+                    <div>
+                      <strong>Tudo organizado por cidade</strong>
+                      <span>Abra Destinos no app, escolha a cidade e toque no chalé para ver a curadoria certa.</span>
+                    </div>
+                  </div>
+                </div>
+                <aside class="qr-card">
+                  <div class="qr-box">
+                    <img src="${safeQrUrl}" alt="QR Code para instalar o app Já no Caminho" />
+                  </div>
+                  <h2>Aponte a câmera e instale o app</h2>
+                  <p>O QR abre a página oficial do Já no Caminho com o botão da Google Play.</p>
+                </aside>
+              </section>
+              <footer class="footer">
+                <span>Depois de instalar: abra <strong>Destinos</strong> e escolha <strong>${safePlaceName}</strong>.</span>
+                <code>janocaminho.com.br/instalar</code>
+              </footer>
+            </article>
+          </main>
+          <script>
+            window.handlePrintPoster = () => {
+              window.focus();
+              window.print();
+            };
+            window.handleClosePoster = () => {
+              if (window.opener && !window.opener.closed) {
+                window.close();
+                return;
+              }
+              if (window.history.length > 1) {
+                window.history.back();
+                return;
+              }
+              window.location.replace("https://janocaminho.com.br");
+            };
+            window.onload = () => {
+              window.focus();
+              window.setTimeout(() => window.handlePrintPoster(), 300);
+            };
+          </script>
+          <!-- QR target: ${safeTargetUrl} -->
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   const tabs = [
     { id: 'dashboard', label: 'Resumo', icon: Compass },
     { id: 'cadastro', label: 'Cadastro', icon: Plus },
@@ -1282,6 +1700,10 @@ export function SuperAdminDestinations() {
                                 <button type="button" onClick={() => startPlaceEdit(place)} className={actionButtonClass('neutral')}>
                                   <PencilSimple size={13} weight="bold" />
                                   Editar
+                                </button>
+                                <button type="button" onClick={() => handleGeneratePlaceQrPoster(place)} className={actionButtonClass('amber')}>
+                                  <QrCode size={13} weight="bold" />
+                                  QR/PDF
                                 </button>
                                 <button type="button" disabled={saving} onClick={() => togglePlaceActive(place)} className={actionButtonClass(place.active === false ? 'success' : 'muted')}>
                                   {place.active === false ? 'Ativar' : 'Desativar'}

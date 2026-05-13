@@ -1,19 +1,44 @@
 import { AppleLogo, ArrowSquareOut, GooglePlayLogo } from '@phosphor-icons/react';
 import { LandingPageLayout } from '../layouts/LandingPageLayout';
-
-const GOOGLE_PLAY_URL = 'https://play.google.com/store/apps/details?id=com.janocaminho.app';
+import { JNC_GOOGLE_PLAY_URL } from '../utils/destinationQrPoster';
 
 export function InstallAppPage() {
+  const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+  const isHospitalityQr = params.get('origem') === 'qr-chale';
+  const placeName = params.get('nome') || '';
+  const destinationName = params.get('cidade') || '';
+  const nextPath = params.get('next') || '';
+  const safeNextPath = nextPath.startsWith('/destinos/') ? nextPath : '';
+  const title = isHospitalityQr && placeName
+    ? `Está hospedado no ${placeName}?`
+    : 'Já no Caminho no seu celular';
+  const subtitle = isHospitalityQr
+    ? 'Baixe o app para ver restaurantes que atendem o chalé, serviços locais e lugares próximos para visitar.'
+    : 'Android: baixe pela Google Play. iPhone: adicione ao Safari como app.';
+
   return (
     <LandingPageLayout>
       <section className="bg-[linear-gradient(145deg,#050b16_0%,#0f172a_50%,#111827_100%)] py-16 sm:py-20">
         <div className="max-w-5xl mx-auto px-4">
           <div className="text-center mb-8 sm:mb-10">
             <p className="text-xs uppercase tracking-[0.28em] text-sky-200 font-semibold">Instale o app</p>
-            <h1 className="mt-2 text-3xl sm:text-4xl font-black text-white">Já no Caminho no seu celular</h1>
+            <h1 className="mt-2 text-3xl sm:text-4xl font-black text-white">{title}</h1>
             <p className="mt-3 text-sm sm:text-base text-slate-200">
-              Android: baixe pela Google Play. iPhone: adicione ao Safari como app.
+              {subtitle}
             </p>
+            {isHospitalityQr ? (
+              <div className="mx-auto mt-5 max-w-2xl rounded-2xl border border-amber-300/25 bg-amber-300/10 px-4 py-3 text-sm font-semibold text-amber-50">
+                {destinationName ? <span className="block">Destino: {destinationName}</span> : null}
+                <span className="block">
+                  Depois de instalar, abra <strong>Destinos</strong> no app e escolha esta hospedagem para ver comida, serviços e passeios.
+                </span>
+                {safeNextPath ? (
+                  <a href={safeNextPath} className="mt-2 inline-flex text-xs font-black uppercase tracking-[0.14em] text-amber-200 underline underline-offset-4">
+                    Ver este chalé no navegador
+                  </a>
+                ) : null}
+              </div>
+            ) : null}
           </div>
 
           <div className="grid gap-4 sm:gap-5 md:grid-cols-2">
@@ -32,7 +57,7 @@ export function InstallAppPage() {
                 Baixe o app oficial pelo canal seguro da Google Play Store.
               </p>
               <a
-                href={GOOGLE_PLAY_URL}
+                href={JNC_GOOGLE_PLAY_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#01875f] px-5 py-3 text-sm font-black text-white shadow-[0_12px_28px_-10px_rgba(1,135,95,0.7)] hover:bg-[#017a56] transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -84,4 +109,3 @@ export function InstallAppPage() {
     </LandingPageLayout>
   );
 }
-
