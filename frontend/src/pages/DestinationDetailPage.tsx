@@ -3,11 +3,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { ArrowRight, Bed, ForkKnife, GlobeHemisphereWest, MagnifyingGlass, MapPinLine, Mountains, PhoneCall, Sparkle, Storefront, WhatsappLogo } from '@phosphor-icons/react';
+import { PreStoreCardSkeleton, PreStoreDetailSheet } from '../components/Destinations/PreStoreDetailSheet';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
 import { buildDestinationInquiryMessage, buildPhoneCallUrl, buildWhatsAppUrl } from '../utils/destinationWhatsApp';
 import { openActionTarget } from '../utils/actionLink';
+import { buildListingClaimUrl } from '../utils/destinationListingClaim';
 
 const asset = (item: any, variant: 'logo' | 'banner' | 'image' = 'banner') => {
   const source =
@@ -87,33 +89,6 @@ const openExternal = (url: string) => (event: any) => {
   void openActionTarget({ href: url, external: true });
 };
 
-const categoryToStoreSegment = (category?: string) => {
-  const key = String(category || '').toUpperCase();
-  if (key.includes('RESTAURANTE') || key === 'NOITE') return 'restaurante';
-  if (key === 'LOJA') return 'outros';
-  return 'outros';
-};
-
-const buildListingClaimUrl = (destination: any, listing: any) => {
-  const params = new URLSearchParams();
-  params.set('source', 'destination_listing_claim');
-  params.set('destinationListingId', String(listing?.id || ''));
-  if (destination?.id) params.set('destinationId', String(destination.id));
-  if (destination?.slug) params.set('destinationSlug', String(destination.slug));
-  if (destination?.name) params.set('destinationName', String(destination.name));
-  if (destination?.city) params.set('city', String(destination.city));
-  if (destination?.state) params.set('state', String(destination.state));
-  if (listing?.title) {
-    params.set('storeName', String(listing.title));
-    params.set('listingTitle', String(listing.title));
-  }
-  if (listing?.description) params.set('description', String(listing.description));
-  if (listing?.address) params.set('address', String(listing.address));
-  if (listing?.whatsapp || listing?.phone) params.set('phone', String(listing.whatsapp || listing.phone));
-  params.set('segment', categoryToStoreSegment(listing?.category));
-  return `/create?${params.toString()}`;
-};
-
 const resolveLinkedStoreSlug = (listing: any) => {
   const directSlug = String(listing?.store?.slug || '').trim();
   if (directSlug) return directSlug;
@@ -145,6 +120,33 @@ const itemMatchesSearch = (item: any, query: string, extra: string[] = []) => {
   return haystack.includes(normalizedQuery);
 };
 
+const buildDestinationListingAction = ({ listing, destination, isNativePlatform }: any) => {
+  const ctaUrl = String(listing?.ctaUrl || '').trim();
+  const rawContact = listing?.whatsapp || listing?.phone || (/^https?:\/\//i.test(ctaUrl) ? '' : ctaUrl);
+  const message = buildDestinationInquiryMessage({
+    destinationName: destination.name,
+    city: destination.city,
+    state: destination.state,
+    itemName: listing.title,
+    itemType: categoryLabel(listing.category),
+  });
+  const whatsappHref = buildWhatsAppUrl(rawContact, message, isNativePlatform);
+  if (whatsappHref) return { href: whatsappHref, label: 'WhatsApp', kind: 'whatsapp', external: false, native: isNativePlatform };
+
+  const phoneHref = buildPhoneCallUrl(rawContact);
+  if (phoneHref) return { href: phoneHref, label: 'Ligar', kind: 'phone', external: false, native: false };
+
+  if (/^https?:\/\//i.test(ctaUrl)) return { href: ctaUrl, label: 'Abrir contato', kind: 'site', external: true };
+
+  const websiteHref = externalUrl(listing.websiteUrl);
+  if (websiteHref) return { href: websiteHref, label: siteLabel(listing.websiteUrl), kind: 'site', external: true };
+
+  const instagramHref = instagramUrl(listing.instagramUrl);
+  if (instagramHref) return { href: instagramHref, label: 'Instagram', kind: 'instagram', external: true };
+
+  return null;
+};
+
 export function DestinationDetailPage() {
   const { destinationSlug = '' } = useParams();
   const [payload, setPayload] = useState<any>(null);
@@ -155,6 +157,7 @@ export function DestinationDetailPage() {
   const [placeLimit, setPlaceLimit] = useState(6);
   const [listingLimit, setListingLimit] = useState(10);
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [selectedListing, setSelectedListing] = useState<any>(null);
   const isNativePlatform = Capacitor.isNativePlatform();
 
   useEffect(() => {
@@ -253,6 +256,10 @@ export function DestinationDetailPage() {
   const currentSlide = showcaseSlides[activeShowcaseIndex];
   const currentSlideTarget = externalUrl(currentSlide?.actionTarget);
   const destinationLocationLabel = [destination.city, destination.state].filter(Boolean).join(', ') || destination.name || 'Destino';
+  const selectedListingImageConfigured = hasConfiguredAsset(selectedListing, 'image');
+  const selectedListingWebsiteUrl = externalUrl(selectedListing?.websiteUrl);
+  const selectedListingInstagramUrl = instagramUrl(selectedListing?.instagramUrl);
+  const selectedListingAction = selectedListing ? buildDestinationListingAction({ listing: selectedListing, destination, isNativePlatform }) : null;
 
   useEffect(() => {
     setPlaceLimit(6);
@@ -261,6 +268,7 @@ export function DestinationDetailPage() {
 
   useEffect(() => {
     setCarouselIndex(0);
+    setSelectedListing(null);
   }, [destinationSlug, showcaseSlides.length]);
 
   useEffect(() => {
@@ -289,7 +297,12 @@ export function DestinationDetailPage() {
             </div>
           </div>
 
-          {loading ? <p className="mt-8 text-sm font-bold text-slate-500">Carregando destino...</p> : null}
+          {loading ? (
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <PreStoreCardSkeleton />
+              <PreStoreCardSkeleton />
+            </div>
+          ) : null}
           {error ? <p className="mt-8 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
 
           {!loading && !error ? (
@@ -576,107 +589,66 @@ export function DestinationDetailPage() {
                   const linkedStoreSlug = resolveLinkedStoreSlug(listing);
                   const linkedStore = listing.store || null;
                   const hasLinkedStore = Boolean(linkedStoreSlug);
-                  const contactTarget = hasLinkedStore ? listing.whatsapp || listing.phone || '' : listing.whatsapp || listing.ctaUrl || '';
-                  const isExternalUrl = String(contactTarget || '').startsWith('http');
-                  const whatsappMessage = buildDestinationInquiryMessage({
-                    destinationName: destination.name,
-                    city: destination.city,
-                    state: destination.state,
-                    itemName: listing.title,
-                    itemType: categoryLabel(listing.category),
-                  });
-                  const whatsappContactHref = isExternalUrl ? '' : buildWhatsAppUrl(contactTarget, whatsappMessage, isNativePlatform);
-                  const phoneContactHref = !isExternalUrl && !whatsappContactHref ? buildPhoneCallUrl(contactTarget) : '';
-                  const contactHref = isExternalUrl ? contactTarget : whatsappContactHref || phoneContactHref;
-                  const contactKind = isExternalUrl ? 'site' : whatsappContactHref ? 'whatsapp' : phoneContactHref ? 'phone' : '';
-                  const claimHref = buildListingClaimUrl(destination, listing);
-                  const listingWebsiteUrl = externalUrl(listing.websiteUrl);
-                  const listingInstagramUrl = instagramUrl(listing.instagramUrl);
-                  return (
-                  <article key={listing.id} className="overflow-hidden rounded-[1.35rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.45)]">
-                    <div className="flex gap-3">
-                      {hasConfiguredAsset(listing, 'image') ? (
-                        <img src={asset(listing, 'image')} alt={listing.title} className="h-14 w-14 rounded-2xl object-cover" />
-                      ) : (
-                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-amber-50">
-                          <Sparkle size={23} weight="duotone" className="text-amber-700/70" />
+                  const description = hasLinkedStore
+                    ? linkedStore?.settings?.description || listing.description || listing.address || 'Loja ativa no Já no Caminho.'
+                    : listing.description || listing.address || 'Toque para ver contato, endereço e opção de virar loja oficial.';
+                  const imageIsConfigured = hasConfiguredAsset(listing, 'image');
+                  const imageUrl = imageIsConfigured ? asset(listing, 'image') : '';
+                  const cardBody = (
+                    <>
+                      <div className="flex gap-3">
+                        {imageIsConfigured ? (
+                          <img src={imageUrl} alt={listing.title} className="h-16 w-16 shrink-0 rounded-[1.15rem] object-cover" />
+                        ) : (
+                          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.15rem] bg-amber-50">
+                            <Sparkle size={23} weight="duotone" className="text-amber-700/70" />
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="rounded-full bg-[#edf5fa] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]">{categoryLabel(listing.category)}</span>
+                            {hasLinkedStore ? (
+                              <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700">Loja oficial</span>
+                            ) : (
+                              <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-amber-800">Pré-loja</span>
+                            )}
+                          </div>
+                          <h3 className="mt-1 line-clamp-1 text-base font-extrabold tracking-[-0.02em] text-slate-950">{listing.title}</h3>
+                          <p className="mt-1 line-clamp-2 text-sm font-medium leading-relaxed text-slate-500">{description}</p>
                         </div>
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[#336886]">{categoryLabel(listing.category)}</p>
-                          {hasLinkedStore ? (
-                            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-emerald-700">Loja oficial</span>
-                          ) : (
-                            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-amber-700">Contato direto</span>
-                          )}
-                        </div>
-                        <h3 className="mt-0.5 line-clamp-1 text-sm font-black text-slate-950">{listing.title}</h3>
-                        <p className="mt-1 line-clamp-2 text-xs font-semibold text-slate-500">
-                          {hasLinkedStore
-                            ? linkedStore?.settings?.description || listing.description || listing.address || 'Loja ativa no Já no Caminho.'
-                            : listing.description || listing.address || 'Serviço local com atendimento direto.'}
-                        </p>
+                        <span className={`mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${hasLinkedStore ? 'bg-[#153A4C] text-white' : 'bg-white text-[#153A4C] ring-1 ring-slate-200'} transition group-hover:translate-x-0.5`}>
+                          {hasLinkedStore ? <Storefront size={15} weight="duotone" /> : <ArrowRight size={15} weight="bold" />}
+                        </span>
                       </div>
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {hasLinkedStore ? (
-                        <Link
-                          to={`/store/${linkedStoreSlug}`}
-                          className="inline-flex min-h-9 items-center gap-1 rounded-full bg-[#153A4C] px-3 py-1.5 text-xs font-black text-white"
-                        >
-                          <Storefront size={13} weight="duotone" />
-                          Ver cardápio
-                        </Link>
-                      ) : null}
-                      {contactHref ? (
-                        <a
-                          href={contactHref}
-                          target={isNativePlatform && contactKind === 'whatsapp' ? undefined : contactKind === 'phone' ? undefined : '_blank'}
-                          rel="noreferrer"
-                          className={`inline-flex min-h-9 items-center gap-1 rounded-full px-3 py-1.5 text-xs font-black ${contactKind === 'phone' ? 'bg-[#153A4C] text-white' : contactKind === 'site' ? 'border border-slate-200 bg-white text-slate-700' : hasLinkedStore ? 'border border-emerald-100 bg-white text-emerald-700' : 'bg-emerald-600 text-white'}`}
-                        >
-                          {contactKind === 'phone' ? <PhoneCall size={13} weight="duotone" /> : contactKind === 'site' ? <GlobeHemisphereWest size={13} weight="duotone" /> : <WhatsappLogo size={13} weight="fill" />}
-                          {contactKind === 'phone' ? 'Ligar' : contactKind === 'site' ? 'Abrir contato' : hasLinkedStore ? 'WhatsApp' : 'Chamar no WhatsApp'}
-                        </a>
-                      ) : null}
-                      {listingInstagramUrl ? (
-                        <a href={listingInstagramUrl} onClick={openExternal(listingInstagramUrl)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-pink-100 bg-white px-3 py-1.5 text-[11px] font-black text-slate-700">
-                          <InstagramIcon className="h-3.5 w-3.5" />
-                          Instagram
-                        </a>
-                      ) : null}
-                      {listingWebsiteUrl ? (
-                        <a href={listingWebsiteUrl} onClick={openExternal(listingWebsiteUrl)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-black text-slate-700">
-                          <GlobeHemisphereWest size={13} weight="duotone" />
-                          {siteLabel(listing.websiteUrl)}
-                        </a>
-                      ) : null}
-                      {listing.address ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[11px] font-black text-slate-600">
-                          <MapPinLine size={13} weight="duotone" />
-                          Local
+                      <div className="mt-3 flex items-center justify-between gap-3 border-t border-slate-100 pt-3">
+                        <span className="min-w-0 truncate text-[11px] font-semibold text-slate-400">
+                          {listing.address || (hasLinkedStore ? 'Pedido online pelo app' : 'Detalhes e contatos no toque')}
                         </span>
-                      ) : null}
-                    </div>
-                    {!hasLinkedStore ? (
+                        <span className="shrink-0 text-[11px] font-black text-[#336886]">
+                          {hasLinkedStore ? 'Ver cardápio' : 'Ver detalhes'}
+                        </span>
+                      </div>
+                    </>
+                  );
+                  return (
+                    hasLinkedStore ? (
                       <Link
-                        to={claimHref}
-                        className="mt-3 flex items-center gap-3 rounded-[1.1rem] border border-[#153A4C]/10 bg-[#edf5fa] p-3 text-[#153A4C] transition hover:bg-[#e4f0f7]"
+                        key={listing.id}
+                        to={`/store/${linkedStoreSlug}`}
+                        className="group block overflow-hidden rounded-[1.35rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_14px_34px_-30px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:border-[#336886]/24"
                       >
-                        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#153A4C] shadow-sm">
-                          <Storefront size={17} weight="duotone" />
-                        </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block text-xs font-black">É seu negócio?</span>
-                          <span className="block text-[11px] font-semibold leading-snug text-[#153A4C]/72">Ative cardápio, pagamento e pedidos online para hóspedes.</span>
-                        </span>
-                        <span className="shrink-0 rounded-full bg-[#153A4C] px-3 py-1.5 text-[11px] font-black text-white">
-                          Virar loja oficial
-                        </span>
+                        {cardBody}
                       </Link>
-                    ) : null}
-                  </article>
+                    ) : (
+                      <button
+                        key={listing.id}
+                        type="button"
+                        onClick={() => setSelectedListing(listing)}
+                        className="group block w-full overflow-hidden rounded-[1.35rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_14px_34px_-30px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:border-amber-300/70 active:scale-[0.99]"
+                      >
+                        {cardBody}
+                      </button>
+                    )
                   );
                 })}
                 {listings.length === 0 ? (
@@ -726,6 +698,21 @@ export function DestinationDetailPage() {
           ) : null}
         </section>
       ) : null}
+      <PreStoreDetailSheet
+        open={Boolean(selectedListing)}
+        onClose={() => setSelectedListing(null)}
+        listing={selectedListing}
+        destination={destination}
+        categoryLabel={categoryLabel(selectedListing?.category)}
+        imageUrl={selectedListingImageConfigured ? asset(selectedListing, 'image') : ''}
+        hasImage={selectedListingImageConfigured}
+        claimHref={selectedListing ? buildListingClaimUrl(destination, selectedListing) : ''}
+        primaryAction={selectedListingAction}
+        instagramUrl={selectedListingInstagramUrl}
+        websiteUrl={selectedListingWebsiteUrl}
+        websiteLabel={siteLabel(selectedListing?.websiteUrl)}
+        address={selectedListing?.address}
+      />
     </main>
   );
 }

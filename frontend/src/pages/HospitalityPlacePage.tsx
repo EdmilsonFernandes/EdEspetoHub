@@ -3,12 +3,14 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { ArrowRight, ArrowUpRight, Bed, Clock, ForkKnife, GlobeHemisphereWest, HouseLine, MapPinLine, PhoneCall, ShoppingBagOpen, Sparkle, Storefront, WhatsappLogo } from '@phosphor-icons/react';
+import { PreStoreCardSkeleton, PreStoreDetailSheet } from '../components/Destinations/PreStoreDetailSheet';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatCurrency } from '../utils/format';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
 import { buildDestinationInquiryMessage, buildPhoneCallUrl, buildWhatsAppUrl } from '../utils/destinationWhatsApp';
 import { openActionTarget } from '../utils/actionLink';
+import { buildListingClaimUrl } from '../utils/destinationListingClaim';
 
 const fallbackAvatarFor = (item: any) =>
   getStoreAvatarUrl(item?.slug || item?.store?.slug || item?.id, item?.name || item?.title || item?.store?.name);
@@ -192,25 +194,10 @@ const buildListingAction = ({ listing, destination, place, isNativePlatform }: a
   return null;
 };
 
-const openListingActionTarget = (action: any) => {
-  if (!action?.href) return;
-  if (action.external) {
-    void openActionTarget({ href: action.href, external: true });
-    return;
-  }
-  if (action.kind === 'whatsapp' && !action.native) {
-    const opened = window.open(action.href, '_blank', 'noopener,noreferrer');
-    if (!opened) window.location.assign(action.href);
-    return;
-  }
-  window.location.assign(action.href);
-};
-
-const handleListingCardKeyDown = (action: any) => (event: any) => {
-  if (!action?.href) return;
+const handleListingCardKeyDown = (listing: any, setSelectedListing: any) => (event: any) => {
   if (event.key !== 'Enter' && event.key !== ' ') return;
   event.preventDefault();
-  openListingActionTarget(action);
+  setSelectedListing(listing);
 };
 
 export function HospitalityPlacePage() {
@@ -220,6 +207,7 @@ export function HospitalityPlacePage() {
   const [error, setError] = useState('');
   const [serviceFilter, setServiceFilter] = useState<'all' | 'app' | 'direct'>('all');
   const [bannerIndex, setBannerIndex] = useState(0);
+  const [selectedListing, setSelectedListing] = useState<any>(null);
 
   useEffect(() => {
     let active = true;
@@ -274,9 +262,15 @@ export function HospitalityPlacePage() {
   const placePhoneUrl = placeWhatsAppUrl ? '' : buildPhoneCallUrl(place.whatsapp);
   const placeBannerImages = galleryImagesFor(place);
   const selectedPlaceBanner = placeBannerImages[bannerIndex % placeBannerImages.length] || imageFor(place);
+  const selectedListingAction = selectedListing ? buildListingAction({ listing: selectedListing, destination, place, isNativePlatform }) : null;
+  const selectedListingInstagramUrl = instagramUrl(selectedListing?.instagramUrl);
+  const selectedListingWebsiteUrl = externalUrl(selectedListing?.websiteUrl);
+  const selectedListingMediaUrl = selectedListing ? cardMediaFor(selectedListing) : '';
+  const selectedListingHasImage = Boolean(selectedListingMediaUrl);
 
   useEffect(() => {
     setBannerIndex(0);
+    setSelectedListing(null);
   }, [destinationSlug, placeSlug]);
 
   useEffect(() => {
@@ -303,7 +297,12 @@ export function HospitalityPlacePage() {
               Já no Caminho
             </div>
           </div>
-          {loading ? <p className="mt-8 text-sm font-bold text-slate-500">Carregando hospedagem...</p> : null}
+          {loading ? (
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <PreStoreCardSkeleton />
+              <PreStoreCardSkeleton />
+            </div>
+          ) : null}
           {error ? <p className="mt-8 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
           {!loading && !error ? (
             <div className="mt-4 overflow-hidden rounded-[1.75rem] border border-white/85 bg-white/90 p-2 shadow-[0_24px_70px_-48px_rgba(15,23,42,0.44)] backdrop-blur">
@@ -490,18 +489,15 @@ export function HospitalityPlacePage() {
                 );
               })}
               {visiblePlaceListings.map((listing: any) => {
-                const action = buildListingAction({ listing, destination, place, isNativePlatform });
-                const listingInstagramUrl = instagramUrl(listing.instagramUrl);
-                const listingWebsiteUrl = externalUrl(listing.websiteUrl);
                 const mediaUrl = cardMediaFor(listing);
                 return (
                   <article
                     key={listing.id}
-                    role={action?.href ? 'link' : undefined}
-                    tabIndex={action?.href ? 0 : undefined}
-                    onClick={() => openListingActionTarget(action)}
-                    onKeyDown={handleListingCardKeyDown(action)}
-                    className={`group overflow-hidden rounded-[1.45rem] border border-slate-200/80 bg-white p-2 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.48)] transition ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'} ${action?.href ? 'cursor-pointer hover:-translate-y-1 hover:border-amber-300/70' : ''}`}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSelectedListing(listing)}
+                    onKeyDown={handleListingCardKeyDown(listing, setSelectedListing)}
+                    className={`group cursor-pointer overflow-hidden rounded-[1.45rem] border border-slate-200/80 bg-white p-2 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.48)] transition hover:-translate-y-1 hover:border-amber-300/70 active:scale-[0.99] ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
                   >
                     {mediaUrl ? (
                       <SmartCardImage
@@ -509,18 +505,7 @@ export function HospitalityPlacePage() {
                         alt={listing.title}
                         fit={hasCoverImage(listing) ? 'cover' : 'contain'}
                         className="aspect-square self-start rounded-[1.1rem]"
-                      >
-                        {action?.kind === 'whatsapp' ? (
-                          <div className="absolute left-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/92 text-emerald-600 shadow-sm ring-1 ring-white/80 backdrop-blur">
-                            <WhatsappLogo size={13} weight="fill" />
-                          </div>
-                        ) : null}
-                        {action?.kind === 'phone' ? (
-                          <div className="absolute left-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/92 text-[#153A4C] shadow-sm ring-1 ring-white/80 backdrop-blur">
-                            <PhoneCall size={13} weight="duotone" />
-                          </div>
-                        ) : null}
-                      </SmartCardImage>
+                      />
                     ) : null}
                     <div className={`min-w-0 ${mediaUrl ? 'p-2.5' : 'p-3'}`}>
                       <p className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-800">
@@ -537,25 +522,11 @@ export function HospitalityPlacePage() {
                       />
                       <div className="mt-3 flex items-center justify-between gap-2">
                         <span className="truncate text-[11px] font-semibold text-slate-400">
-                          {listing.address || (action?.label ? `Toque para abrir ${action.label}` : 'Contato em análise')}
+                          {listing.address || 'Toque para ver detalhes e contatos'}
                         </span>
-                        <div className="flex shrink-0 items-center gap-1.5">
-                          {listingInstagramUrl ? (
-                            <button type="button" onClick={(event) => { event.stopPropagation(); void openActionTarget({ href: listingInstagramUrl, external: true }); }} className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-50 text-slate-500 ring-1 ring-slate-200">
-                              <InstagramIcon className="h-3.5 w-3.5" />
-                            </button>
-                          ) : null}
-                          {listingWebsiteUrl ? (
-                            <button type="button" onClick={(event) => { event.stopPropagation(); void openActionTarget({ href: listingWebsiteUrl, external: true }); }} className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-50 text-slate-500 ring-1 ring-slate-200">
-                              <GlobeHemisphereWest size={13} weight="duotone" />
-                            </button>
-                          ) : null}
-                          {action?.href ? (
-                            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#153A4C] text-white shadow-sm">
-                              {action.kind === 'whatsapp' ? <WhatsappLogo size={13} weight="fill" /> : action.kind === 'phone' ? <PhoneCall size={13} weight="duotone" /> : <ArrowUpRight size={13} weight="bold" />}
-                            </span>
-                          ) : null}
-                        </div>
+                        <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#153A4C] text-white shadow-sm transition group-hover:translate-x-0.5">
+                          <ArrowUpRight size={13} weight="bold" />
+                        </span>
                       </div>
                     </div>
                   </article>
@@ -575,18 +546,15 @@ export function HospitalityPlacePage() {
               </div>
               <div className="mt-3 space-y-2.5">
                 {destinationListings.map((listing: any) => {
-                  const action = buildListingAction({ listing, destination, place, isNativePlatform });
-                  const listingInstagramUrl = instagramUrl(listing.instagramUrl);
-                  const listingWebsiteUrl = externalUrl(listing.websiteUrl);
                   const mediaUrl = cardMediaFor(listing);
                   return (
                   <article
                     key={listing.id}
-                    role={action?.href ? 'link' : undefined}
-                    tabIndex={action?.href ? 0 : undefined}
-                    onClick={() => openListingActionTarget(action)}
-                    onKeyDown={handleListingCardKeyDown(action)}
-                    className={`rounded-[1.15rem] border border-slate-100 bg-slate-50/70 p-2.5 transition ${action?.href ? 'cursor-pointer hover:border-[#336886]/20 hover:bg-white' : ''}`}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSelectedListing(listing)}
+                    onKeyDown={handleListingCardKeyDown(listing, setSelectedListing)}
+                    className="cursor-pointer rounded-[1.15rem] border border-slate-100 bg-slate-50/70 p-2.5 transition hover:border-[#336886]/20 hover:bg-white"
                   >
                     <div className="flex gap-3">
                       {mediaUrl ? (
@@ -608,26 +576,10 @@ export function HospitalityPlacePage() {
                           threshold={105}
                         />
                       </div>
-                      {action?.href ? (
-                        <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-[#153A4C] ring-1 ring-slate-200">
-                          {action.kind === 'whatsapp' ? <WhatsappLogo size={13} weight="fill" className="text-emerald-600" /> : action.kind === 'phone' ? <PhoneCall size={13} weight="duotone" /> : <ArrowUpRight size={13} weight="bold" />}
-                        </span>
-                      ) : null}
+                      <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-[#153A4C] ring-1 ring-slate-200">
+                        <ArrowUpRight size={13} weight="bold" />
+                      </span>
                     </div>
-                    {(listingInstagramUrl || listingWebsiteUrl) ? (
-                      <div className="mt-2 flex justify-end gap-1.5">
-                        {listingInstagramUrl ? (
-                          <button type="button" onClick={(event) => { event.stopPropagation(); void openActionTarget({ href: listingInstagramUrl, external: true }); }} className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-slate-500 ring-1 ring-slate-200">
-                            <InstagramIcon className="h-3 w-3" />
-                          </button>
-                        ) : null}
-                        {listingWebsiteUrl ? (
-                          <button type="button" onClick={(event) => { event.stopPropagation(); void openActionTarget({ href: listingWebsiteUrl, external: true }); }} className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-slate-500 ring-1 ring-slate-200">
-                            <GlobeHemisphereWest size={12} weight="duotone" />
-                          </button>
-                        ) : null}
-                      </div>
-                    ) : null}
                   </article>
                   );
                 })}
@@ -648,6 +600,22 @@ export function HospitalityPlacePage() {
           </aside>
         </section>
       ) : null}
+      <PreStoreDetailSheet
+        open={Boolean(selectedListing)}
+        onClose={() => setSelectedListing(null)}
+        listing={selectedListing}
+        destination={destination}
+        placeName={selectedListing?.hospitalityPlaceId ? place.name : ''}
+        categoryLabel={categoryLabel(selectedListing?.category)}
+        imageUrl={selectedListingMediaUrl}
+        hasImage={selectedListingHasImage}
+        claimHref={selectedListing ? buildListingClaimUrl(destination, selectedListing) : ''}
+        primaryAction={selectedListingAction}
+        instagramUrl={selectedListingInstagramUrl}
+        websiteUrl={selectedListingWebsiteUrl}
+        websiteLabel={siteLabel(selectedListing?.websiteUrl)}
+        address={selectedListing?.address}
+      />
     </main>
   );
 }
