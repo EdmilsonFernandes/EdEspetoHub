@@ -47,6 +47,7 @@ export const buildHospitalityPlaceInstallUrl = (input: HospitalityQrPosterInput,
   return `${base}/instalar?${params.toString()}`;
 };
 
+export const buildHospitalityPlacePlayStoreQrUrl = () => JNC_GOOGLE_PLAY_URL;
+
 export const buildHospitalityPlacePosterFileName = (placeName?: string | null) =>
   `qr-app-${sanitizePosterFileSegment(placeName, 'hospedagem')}.html`;
-

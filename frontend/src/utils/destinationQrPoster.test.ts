@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildHospitalityPlaceInstallUrl,
+  buildHospitalityPlacePlayStoreQrUrl,
   buildHospitalityPlacePosterFileName,
   buildHospitalityPlacePublicPath,
+  JNC_GOOGLE_PLAY_URL,
   escapePosterHtml,
 } from './destinationQrPoster';
 
@@ -36,9 +38,14 @@ describe('destinationQrPoster', () => {
     expect(buildHospitalityPlacePublicPath({ destinationSlug: 'destino' })).toBe('');
   });
 
+  it('uses Google Play as the direct QR target for printed hospitality posters', () => {
+    expect(buildHospitalityPlacePlayStoreQrUrl()).toBe(JNC_GOOGLE_PLAY_URL);
+    expect(buildHospitalityPlacePlayStoreQrUrl()).toContain('play.google.com/store/apps/details');
+    expect(buildHospitalityPlacePlayStoreQrUrl()).toContain('id=com.janocaminho.app');
+  });
+
   it('escapes poster html and creates a safe file name', () => {
     expect(escapePosterHtml('<Amerê & Chalés>')).toBe('&lt;Amerê &amp; Chalés&gt;');
     expect(buildHospitalityPlacePosterFileName('Amerê Chalés!')).toBe('qr-app-amere-chales.html');
   });
 });
-

@@ -9,7 +9,7 @@ import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
 import { canUseNativeImagePicker, pickNativeImageAsDataUrl } from '../utils/nativeImagePicker';
 import {
-  buildHospitalityPlaceInstallUrl,
+  buildHospitalityPlacePlayStoreQrUrl,
   buildHospitalityPlacePosterFileName,
   escapePosterHtml,
 } from '../utils/destinationQrPoster';
@@ -965,12 +965,7 @@ export function SuperAdminDestinations() {
       (catalog.destinations || []).find((item: any) => String(item.id) === String(place?.destinationId));
     const placeName = String(place?.name || 'Hospedagem').trim();
     const destinationName = String(destination?.name || destination?.city || place?.city || 'Destino turístico').trim();
-    const targetUrl = buildHospitalityPlaceInstallUrl({
-      destinationSlug: destination?.slug || place?.destination?.slug || '',
-      destinationName,
-      placeSlug: place?.slug || '',
-      placeName,
-    });
+    const targetUrl = buildHospitalityPlacePlayStoreQrUrl();
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=720x720&margin=12&data=${encodeURIComponent(targetUrl)}`;
     const logoUrl = resolveAssetUrl(place?.logoUrl || '');
     const coverUrl = resolveAssetUrl(
@@ -1333,12 +1328,12 @@ export function SuperAdminDestinations() {
                     <img src="${safeQrUrl}" alt="QR Code para instalar o app Já no Caminho" />
                   </div>
                   <h2>Aponte a câmera e instale o app</h2>
-                  <p>O QR abre a página oficial do Já no Caminho com o botão da Google Play.</p>
+                  <p>O QR abre direto a Google Play para instalar o app Já no Caminho.</p>
                 </aside>
               </section>
               <footer class="footer">
                 <span>Depois de instalar: abra <strong>Destinos</strong> e escolha <strong>${safePlaceName}</strong>.</span>
-                <code>janocaminho.com.br/instalar</code>
+                <code>Google Play · Já no Caminho</code>
               </footer>
             </article>
           </main>
