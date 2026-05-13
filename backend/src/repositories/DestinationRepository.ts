@@ -123,8 +123,9 @@ export class DestinationRepository {
       .where('listing.destination_id IN (:...destinationIds)', { destinationIds })
       .groupBy('listing.destination_id');
     this.applyActiveFilter(qb, 'listing', status);
-    if (listingCategory && listingCategory !== 'all') {
-      qb.andWhere('UPPER(listing.category) = :listingCategory', { listingCategory: String(listingCategory).toUpperCase() });
+    const normalizedListingCategory = String(listingCategory || 'all').trim().toUpperCase();
+    if (normalizedListingCategory && normalizedListingCategory !== 'ALL') {
+      qb.andWhere('UPPER(listing.category) = :listingCategory', { listingCategory: normalizedListingCategory });
     }
     const rows = await qb.getRawMany();
     return new Map(rows.map((row: any) => [String(row.destinationId), Number(row.count || 0)]));
@@ -160,8 +161,9 @@ export class DestinationRepository {
       .leftJoinAndSelect('store.settings', 'settings')
       .where('listing.destination_id = :destinationId', { destinationId });
     this.applyActiveFilter(qb, 'listing', filters.status);
-    if (filters.listingCategory && filters.listingCategory !== 'all') {
-      qb.andWhere('UPPER(listing.category) = :listingCategory', { listingCategory: String(filters.listingCategory).toUpperCase() });
+    const normalizedListingCategory = String(filters.listingCategory || 'all').trim().toUpperCase();
+    if (normalizedListingCategory && normalizedListingCategory !== 'ALL') {
+      qb.andWhere('UPPER(listing.category) = :listingCategory', { listingCategory: normalizedListingCategory });
     }
     const search = String(filters.search || '').trim().toLowerCase();
     if (search) {
