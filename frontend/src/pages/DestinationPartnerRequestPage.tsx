@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Bed, CheckCircle, Compass, Handshake, ImageSquare, LinkSimpleHorizontal, Sparkle, UploadSimple } from '@phosphor-icons/react';
+import { Bed, CheckCircle, Compass, Handshake, ImageSquare, LinkSimpleHorizontal, Sparkle, UploadSimple } from '@phosphor-icons/react';
+import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { destinationService } from '../services/destinationService';
 import { addressLookupService } from '../services/addressLookupService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
@@ -365,15 +365,10 @@ export function DestinationPartnerRequestPage() {
     : Boolean(form.destinationId);
 
   return (
-    <main className="min-h-screen bg-[#f4f1ea] px-4 pb-[calc(var(--jnk-native-nav-height,0px)+2rem)] pt-[max(1rem,env(safe-area-inset-top))] text-slate-950">
-      <div className="mx-auto max-w-5xl">
-        <Link to="/destinos" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-slate-600">
-          <ArrowRight size={14} className="rotate-180" weight="bold" />
-          Destinos
-        </Link>
-
-        <div className="mt-6 grid gap-6 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
-          <aside className="overflow-hidden rounded-[2rem] bg-[#153A4C] p-5 text-white shadow-[0_24px_70px_-42px_rgba(21,58,76,0.8)] sm:p-6 lg:sticky lg:top-4">
+    <PublicDestinationShell active="register" backTo="/destinos" backLabel="Destinos" contextLabel="Cadastro de parceiro" ctaTo="/destinos" ctaLabel="Ver destinos">
+      <div className="mx-auto max-w-5xl px-4 py-5 sm:py-6">
+        <div className="grid gap-6 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
+          <aside className="overflow-hidden rounded-[2rem] bg-[#153A4C] p-5 text-white shadow-[0_24px_70px_-42px_rgba(21,58,76,0.8)] sm:p-6 lg:sticky lg:top-28">
             <p className="inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em]">
               <Handshake size={15} weight="duotone" />
               Cadastro real
@@ -575,6 +570,6 @@ export function DestinationPartnerRequestPage() {
           </form>
         </div>
       </div>
-    </main>
+    </PublicDestinationShell>
   );
 }

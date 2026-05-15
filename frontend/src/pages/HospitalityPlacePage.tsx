@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { ArrowRight, ArrowUpRight, Bed, Clock, ForkKnife, GlobeHemisphereWest, HouseLine, MapPinLine, PhoneCall, ShoppingBagOpen, Sparkle, Storefront, WhatsappLogo } from '@phosphor-icons/react';
+import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { PreStoreCardSkeleton, PreStoreDetailSheet } from '../components/Destinations/PreStoreDetailSheet';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
@@ -282,21 +283,11 @@ export function HospitalityPlacePage() {
   }, [place.id, placeBannerImages.length]);
 
   return (
-    <main className="min-h-screen bg-[#f4f1ea] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
-      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_12%_0%,rgba(51,104,134,0.16),transparent_34%),radial-gradient(circle_at_88%_8%,rgba(240,180,72,0.18),transparent_30%),linear-gradient(135deg,#f7f1e4,#eef6f1_58%,#eadfc8)] px-4 pb-5 pt-[max(0.85rem,env(safe-area-inset-top))]">
+    <PublicDestinationShell active="place" backTo={`/destinos/${destinationSlug}`} backLabel="Cidade" contextLabel={place.name || 'Hospedagem'}>
+      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_12%_0%,rgba(51,104,134,0.16),transparent_34%),radial-gradient(circle_at_88%_8%,rgba(240,180,72,0.18),transparent_30%),linear-gradient(135deg,#f7f1e4,#eef6f1_58%,#eadfc8)] px-4 pb-5 pt-5">
         <div className="absolute -right-20 top-12 h-64 w-64 rounded-full bg-[#336886]/14 blur-3xl" />
         <div className="absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-amber-300/18 blur-3xl" />
         <div className="relative mx-auto max-w-6xl">
-          <div className="flex items-center justify-between gap-3">
-            <Link to={`/destinos/${destinationSlug}`} className="inline-flex items-center gap-2 rounded-full border border-[#153A4C]/10 bg-white/82 px-2.5 py-2 text-xs font-bold text-[#153A4C] shadow-sm backdrop-blur">
-              <ArrowRight size={14} className="rotate-180" weight="bold" />
-              Cidade
-            </Link>
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/82 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#153A4C] shadow-sm">
-              <img src="/janocaminho-logov1.svg" alt="Já no Caminho" className="h-6 w-6 rounded-full bg-white object-cover" />
-              Já no Caminho
-            </div>
-          </div>
           {loading ? (
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               <PreStoreCardSkeleton />
@@ -616,6 +607,6 @@ export function HospitalityPlacePage() {
         websiteLabel={siteLabel(selectedListing?.websiteUrl)}
         address={selectedListing?.address}
       />
-    </main>
+    </PublicDestinationShell>
   );
 }

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { ArrowRight, Bed, ForkKnife, GlobeHemisphereWest, MagnifyingGlass, MapPinLine, Mountains, PhoneCall, Sparkle, Storefront, WhatsappLogo } from '@phosphor-icons/react';
+import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { PreStoreCardSkeleton, PreStoreDetailSheet } from '../components/Destinations/PreStoreDetailSheet';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
@@ -281,22 +282,11 @@ export function DestinationDetailPage() {
   }, [showcaseSlides.length]);
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#f6f2e9] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
-      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_18%_0%,rgba(51,104,134,0.16),transparent_34%),radial-gradient(circle_at_86%_16%,rgba(216,245,231,0.55),transparent_30%),linear-gradient(135deg,#f6f2e9,#eef5f1_56%,#eadfc8)] px-4 pb-4 pt-[max(0.85rem,env(safe-area-inset-top))]">
+    <PublicDestinationShell active="city" backTo="/destinos" backLabel="Destinos" contextLabel={destination.name || 'Cidade turística'}>
+      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_18%_0%,rgba(51,104,134,0.16),transparent_34%),radial-gradient(circle_at_86%_16%,rgba(216,245,231,0.55),transparent_30%),linear-gradient(135deg,#f6f2e9,#eef5f1_56%,#eadfc8)] px-4 pb-4 pt-5">
         <div className="absolute -right-20 top-8 h-64 w-64 rounded-full bg-[#336886]/16 blur-3xl" />
         <div className="absolute -left-16 bottom-4 h-56 w-56 rounded-full bg-amber-300/18 blur-3xl" />
         <div className="relative mx-auto max-w-6xl">
-          <div className="flex items-center justify-between gap-3">
-            <Link to="/destinos" className="inline-flex items-center gap-2 rounded-full border border-[#153A4C]/10 bg-white/78 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-[#153A4C] shadow-sm backdrop-blur">
-              <ArrowRight size={14} className="rotate-180" weight="bold" />
-              Destinos
-            </Link>
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/82 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#153A4C] shadow-sm">
-              <img src="/janocaminho-logov1.svg" alt="Já no Caminho" className="h-6 w-6 rounded-full bg-white object-cover" />
-              Já no Caminho
-            </div>
-          </div>
-
           {loading ? (
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               <PreStoreCardSkeleton />
@@ -713,6 +703,6 @@ export function DestinationDetailPage() {
         websiteLabel={siteLabel(selectedListing?.websiteUrl)}
         address={selectedListing?.address}
       />
-    </main>
+    </PublicDestinationShell>
   );
 }

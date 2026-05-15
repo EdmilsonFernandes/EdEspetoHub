@@ -1,7 +1,8 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowRight, Bed, Buildings, Compass, MagnifyingGlass, MapTrifold, Mountains, Sparkle } from '@phosphor-icons/react';
+import { Buildings, Compass, MagnifyingGlass, MapTrifold, Mountains, Sparkle } from '@phosphor-icons/react';
+import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
@@ -86,22 +87,12 @@ export function DestinationsPage() {
   }, [destinations, searchTerm]);
 
   return (
-    <main className="min-h-screen bg-[#f4f1ea] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
-      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,#d7f4e8_0,#f4f1ea_38%,#efe5d1_100%)] px-4 pb-5 pt-[max(1rem,env(safe-area-inset-top))]">
+    <PublicDestinationShell active="destinations" backTo="/hub" backLabel="Hub" contextLabel="Destinos turísticos">
+      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,#d7f4e8_0,#f4f1ea_38%,#efe5d1_100%)] px-4 pb-5 pt-5">
         <div className="absolute -right-20 top-8 h-64 w-64 rounded-full bg-emerald-300/25 blur-3xl" />
         <div className="absolute -left-20 bottom-0 h-56 w-56 rounded-full bg-amber-300/25 blur-3xl" />
         <div className="relative mx-auto max-w-6xl">
-          <div className="flex items-center justify-between gap-3">
-            <Link to="/hub" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/75 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-slate-600 shadow-sm backdrop-blur">
-              <ArrowRight size={14} className="rotate-180" weight="bold" />
-              Voltar
-            </Link>
-            <Link to="/destinos/cadastrar" className="rounded-full border border-[#153A4C]/12 bg-white/78 px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-[#153A4C] shadow-sm backdrop-blur">
-              Cadastrar parceiro
-            </Link>
-          </div>
-
-          <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
             <div className="min-w-0">
               <p className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-white">
                 <Mountains size={14} weight="duotone" />
@@ -206,6 +197,6 @@ export function DestinationsPage() {
           </p>
         ) : null}
       </section>
-    </main>
+    </PublicDestinationShell>
   );
 }
