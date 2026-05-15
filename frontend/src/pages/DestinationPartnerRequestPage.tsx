@@ -4,6 +4,7 @@ import { Bed, CheckCircle, Compass, Handshake, ImageSquare, LinkSimpleHorizontal
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { destinationService } from '../services/destinationService';
 import { addressLookupService } from '../services/addressLookupService';
+import { BRAZIL_STATES, loadBrazilCitiesByState, normalizeLocationName } from '../utils/brazilLocations';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { canUseNativeImagePicker, pickNativeImageAsDataUrl } from '../utils/nativeImagePicker';
 
@@ -203,6 +204,9 @@ export function DestinationPartnerRequestPage() {
   const [success, setSuccess] = useState<any>(null);
   const [zipLookupLoading, setZipLookupLoading] = useState(false);
   const [zipLookupError, setZipLookupError] = useState('');
+  const [newDestinationCities, setNewDestinationCities] = useState<string[]>([]);
+  const [newDestinationCitiesLoading, setNewDestinationCitiesLoading] = useState(false);
+  const [newDestinationCityError, setNewDestinationCityError] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -269,6 +273,36 @@ export function DestinationPartnerRequestPage() {
     };
   }, [form.zipCode]);
 
+  useEffect(() => {
+    if (destinationMode !== 'new') return;
+    const uf = String(form.destinationState || '').toUpperCase().slice(0, 2);
+    if (!uf || uf.length !== 2) {
+      setNewDestinationCities([]);
+      setNewDestinationCityError('');
+      return;
+    }
+
+    let active = true;
+    setNewDestinationCitiesLoading(true);
+    setNewDestinationCityError('');
+    loadBrazilCitiesByState(uf)
+      .then((cities) => {
+        if (active) setNewDestinationCities(cities);
+      })
+      .catch(() => {
+        if (!active) return;
+        setNewDestinationCities([]);
+        setNewDestinationCityError('Não conseguimos carregar a lista de cidades agora. Você ainda pode digitar manualmente.');
+      })
+      .finally(() => {
+        if (active) setNewDestinationCitiesLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [destinationMode, form.destinationState]);
+
   const update = (key: string, value: any) => setForm((current) => ({ ...current, [key]: value }));
 
   const stateOptions = useMemo(() => {
@@ -281,9 +315,32 @@ export function DestinationPartnerRequestPage() {
     return destinations.filter((destination: any) => String(destination.state || '').toUpperCase().slice(0, 2) === selectedDestinationState);
   }, [destinations, selectedDestinationState]);
 
+  const availableNewDestinationCities = useMemo(() => {
+    const uf = String(form.destinationState || '').toUpperCase().slice(0, 2);
+    const openedCities = new Set(
+      destinations
+        .filter((destination: any) => String(destination.state || '').toUpperCase().slice(0, 2) === uf)
+        .flatMap((destination: any) => [destination.city, destination.name])
+        .map(normalizeLocationName)
+        .filter(Boolean)
+    );
+    return newDestinationCities.filter((city) => !openedCities.has(normalizeLocationName(city)));
+  }, [destinations, form.destinationState, newDestinationCities]);
+
   const selectedDestination = useMemo(() => {
     return destinations.find((destination: any) => String(destination.id) === String(form.destinationId)) || null;
   }, [destinations, form.destinationId]);
+
+  const existingDestinationForNewCity = useMemo(() => {
+    const uf = String(form.destinationState || '').toUpperCase().slice(0, 2);
+    const city = normalizeLocationName(form.destinationCity);
+    if (!uf || !city) return null;
+    return destinations.find((destination: any) => {
+      const sameState = String(destination.state || '').toUpperCase().slice(0, 2) === uf;
+      const destinationCity = normalizeLocationName(destination.city || destination.name);
+      return sameState && destinationCity === city;
+    }) || null;
+  }, [destinations, form.destinationCity, form.destinationState]);
 
   const updateDestinationFromExisting = (destination: any) => {
     const city = String(destination?.city || destination?.name || '').trim();
@@ -310,6 +367,32 @@ export function DestinationPartnerRequestPage() {
     updateDestinationFromExisting(destination || null);
   };
 
+  const handleNewDestinationStateChange = (state: string) => {
+    const normalizedState = String(state || '').toUpperCase().slice(0, 2);
+    setForm((current) => ({
+      ...current,
+      destinationState: normalizedState,
+      destinationCity: '',
+      state: normalizedState,
+      city: '',
+    }));
+  };
+
+  const handleNewDestinationCityChange = (city: string) => {
+    setForm((current) => ({
+      ...current,
+      destinationCity: city,
+      city: current.city && normalizeLocationName(current.city) !== normalizeLocationName(current.destinationCity) ? current.city : city,
+    }));
+  };
+
+  const useExistingDestinationForNewCity = () => {
+    if (!existingDestinationForNewCity) return;
+    setDestinationMode('existing');
+    setSelectedDestinationState(String(existingDestinationForNewCity.state || '').toUpperCase().slice(0, 2));
+    updateDestinationFromExisting(existingDestinationForNewCity);
+  };
+
   const updatePartnerType = (value: string) => setForm((current) => ({
     ...current,
     partnerType: value,
@@ -332,6 +415,9 @@ export function DestinationPartnerRequestPage() {
       const destinationState = String(isNewDestination ? form.destinationState : selectedDestination?.state || form.destinationState).toUpperCase().slice(0, 2);
       if (!destinationCity || !destinationState || (!isNewDestination && !form.destinationId)) {
         throw new Error('Escolha a cidade do destino ou solicite uma nova cidade.');
+      }
+      if (isNewDestination && existingDestinationForNewCity) {
+        throw new Error('Essa cidade já está aberta no Já no Caminho. Use a opção "Cidade aberta" para cadastrar seu parceiro nela.');
       }
 
       const payload = await destinationService.createPartnerRequest({
@@ -361,7 +447,7 @@ export function DestinationPartnerRequestPage() {
   };
 
   const canSubmitDestination = destinationMode === 'new'
-    ? Boolean(String(form.destinationCity || '').trim() && String(form.destinationState || '').trim())
+    ? Boolean(String(form.destinationCity || '').trim() && String(form.destinationState || '').trim() && !existingDestinationForNewCity)
     : Boolean(form.destinationId);
 
   return (
@@ -404,7 +490,7 @@ export function DestinationPartnerRequestPage() {
             {success ? (
               <div className="mt-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700">
                 <CheckCircle size={18} weight="fill" className="mr-1 inline" />
-                Solicitação enviada. Status: {success.status || 'pending'}.
+                Recebemos sua solicitação. O time Já no Caminho vai revisar e entrar em contato quando estiver tudo certo.
               </div>
             ) : null}
             {loading ? <p className="mt-4 text-sm font-semibold text-slate-500">Carregando destinos...</p> : null}
@@ -446,7 +532,7 @@ export function DestinationPartnerRequestPage() {
                     </label>
                     {filteredDestinations.length === 0 ? (
                       <p className="sm:col-span-2 rounded-2xl border border-dashed border-slate-300 bg-white px-3 py-3 text-xs font-bold text-slate-500">
-                        Ainda não temos cidade aberta nesta UF. Use “Nova cidade” para enviar para análise.
+                        Ainda não temos cidade aberta nesta UF. Use “Nova cidade” para sugerir ao time Já no Caminho.
                       </p>
                     ) : null}
                   </div>
@@ -454,15 +540,52 @@ export function DestinationPartnerRequestPage() {
                   <div className="mt-3 grid gap-3 sm:grid-cols-[120px_1fr]">
                     <label>
                       <span className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">UF</span>
-                      <input value={form.destinationState} onChange={(event) => update('destinationState', event.target.value.toUpperCase().slice(0, 2))} placeholder="UF" className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
+                      <select value={form.destinationState} onChange={(event) => handleNewDestinationStateChange(event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]">
+                        <option value="">Selecione</option>
+                        {BRAZIL_STATES.map((state) => (
+                          <option key={state.value} value={state.value}>{state.value} · {state.label}</option>
+                        ))}
+                      </select>
                     </label>
                     <label>
                       <span className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Cidade turística</span>
-                      <input value={form.destinationCity} onChange={(event) => update('destinationCity', event.target.value)} placeholder="Ex: Gonçalves" className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
+                      <input
+                        value={form.destinationCity}
+                        onChange={(event) => handleNewDestinationCityChange(event.target.value)}
+                        list={form.destinationState ? `new-destination-cities-${form.destinationState}` : undefined}
+                        placeholder={newDestinationCitiesLoading ? 'Carregando cidades...' : 'Digite ou selecione a cidade'}
+                        className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]"
+                      />
+                      {form.destinationState && availableNewDestinationCities.length > 0 ? (
+                        <datalist id={`new-destination-cities-${form.destinationState}`}>
+                          {availableNewDestinationCities.map((city) => (
+                            <option key={city} value={city} />
+                          ))}
+                        </datalist>
+                      ) : null}
                     </label>
-                    <p className="sm:col-span-2 rounded-2xl bg-amber-50 px-3 py-3 text-xs font-bold leading-relaxed text-amber-800">
-                      A cidade entra como destino em análise. O SuperAdmin revisa, completa fotos/textos e ativa quando estiver pronta.
-                    </p>
+                    {newDestinationCitiesLoading ? (
+                      <p className="sm:col-span-2 rounded-2xl bg-white px-3 py-3 text-xs font-bold text-slate-500">
+                        Carregando cidades oficiais desta UF...
+                      </p>
+                    ) : null}
+                    {newDestinationCityError ? (
+                      <p className="sm:col-span-2 rounded-2xl bg-amber-50 px-3 py-3 text-xs font-bold leading-relaxed text-amber-800">
+                        {newDestinationCityError}
+                      </p>
+                    ) : null}
+                    {existingDestinationForNewCity ? (
+                      <div className="sm:col-span-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-xs font-bold leading-relaxed text-emerald-800">
+                        <p>Essa cidade já está disponível no Já no Caminho. Use o destino existente para evitar cadastro duplicado.</p>
+                        <button type="button" onClick={useExistingDestinationForNewCity} className="mt-2 rounded-full bg-emerald-700 px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-white">
+                          Usar cidade aberta
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="sm:col-span-2 rounded-2xl bg-amber-50 px-3 py-3 text-xs font-bold leading-relaxed text-amber-800">
+                        Essa cidade ainda não está aberta no app. O time Já no Caminho vai revisar, melhorar fotos e textos e avisar quando o destino estiver pronto para aparecer aos hóspedes.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
@@ -561,7 +684,7 @@ export function DestinationPartnerRequestPage() {
               <input required value={form.responsibleName} onChange={(event) => update('responsibleName', event.target.value)} placeholder="Nome do responsável" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
               <input required type="email" value={form.responsibleEmail} onChange={(event) => update('responsibleEmail', event.target.value)} placeholder="E-mail do responsável" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
               <input required value={form.responsiblePhone} onChange={(event) => update('responsiblePhone', formatPhoneBr(event.target.value))} placeholder="WhatsApp do responsável" inputMode="tel" autoComplete="tel" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
-              <textarea value={form.message} onChange={(event) => update('message', event.target.value)} placeholder="Mensagem para análise da plataforma" rows={3} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
+              <textarea value={form.message} onChange={(event) => update('message', event.target.value)} placeholder="Mensagem para o time Já no Caminho" rows={3} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
             </div>
 
             <button type="submit" disabled={saving || !canSubmitDestination} className="mt-5 w-full rounded-2xl bg-[#153A4C] px-5 py-3 text-sm font-black text-white shadow-[0_16px_32px_-22px_rgba(21,58,76,0.8)] disabled:opacity-50">

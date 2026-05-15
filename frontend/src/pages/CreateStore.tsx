@@ -11,6 +11,7 @@ import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, reso
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { formatPhoneInput } from '../utils/format';
 import { normalizePixCode } from '../utils/pixPayload';
+import { BRAZIL_STATES, loadBrazilCitiesByState } from '../utils/brazilLocations';
 import { FormSection } from '../components/common/FormSection';
 import { Buildings, CheckCircle, CopySimple, CreditCard, EnvelopeSimple, GlobeHemisphereWest, MapPinLine, RocketLaunch, Storefront, UserCircle, WarningCircle } from '@phosphor-icons/react';
 
@@ -25,38 +26,6 @@ const BRAZIL_DDDS = [
   '81', '82', '83', '84', '85', '86', '87', '88', '89',
   '91', '92', '93', '94', '95', '96', '97', '98', '99',
 ];
-
-const BRAZIL_STATES = [
-  { value: 'AC', label: 'Acre' },
-  { value: 'AL', label: 'Alagoas' },
-  { value: 'AP', label: 'Amapá' },
-  { value: 'AM', label: 'Amazonas' },
-  { value: 'BA', label: 'Bahia' },
-  { value: 'CE', label: 'Ceará' },
-  { value: 'DF', label: 'Distrito Federal' },
-  { value: 'ES', label: 'Espírito Santo' },
-  { value: 'GO', label: 'Goiás' },
-  { value: 'MA', label: 'Maranhão' },
-  { value: 'MT', label: 'Mato Grosso' },
-  { value: 'MS', label: 'Mato Grosso do Sul' },
-  { value: 'MG', label: 'Minas Gerais' },
-  { value: 'PA', label: 'Pará' },
-  { value: 'PB', label: 'Paraíba' },
-  { value: 'PR', label: 'Paraná' },
-  { value: 'PE', label: 'Pernambuco' },
-  { value: 'PI', label: 'Piauí' },
-  { value: 'RJ', label: 'Rio de Janeiro' },
-  { value: 'RN', label: 'Rio Grande do Norte' },
-  { value: 'RS', label: 'Rio Grande do Sul' },
-  { value: 'RO', label: 'Rondônia' },
-  { value: 'RR', label: 'Roraima' },
-  { value: 'SC', label: 'Santa Catarina' },
-  { value: 'SP', label: 'São Paulo' },
-  { value: 'SE', label: 'Sergipe' },
-  { value: 'TO', label: 'Tocantins' },
-];
-
-const cityCacheKey = (uf: string) => `ibge:cities:${String(uf || '').toUpperCase()}`;
 
 const STORE_SEGMENTS = [
   { value: 'restaurante', label: 'Restaurante' },
@@ -593,27 +562,8 @@ export function CreateStore() {
     setIsLoadingCities(true);
     setCityLookupError('');
     try {
-      const cacheKey = cityCacheKey(uf);
-      const cached = localStorage.getItem(cacheKey);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length) {
-          setCityOptions(parsed);
-          setIsLoadingCities(false);
-          return;
-        }
-      }
-      const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`);
-      if (!response.ok) throw new Error('Falha ao carregar cidades.');
-      const data = await response.json();
-      const cities = Array.isArray(data)
-        ? data
-            .map((entry: any) => String(entry?.nome || '').trim())
-            .filter(Boolean)
-            .sort((a: string, b: string) => a.localeCompare(b, 'pt-BR'))
-        : [];
+      const cities = await loadBrazilCitiesByState(uf);
       setCityOptions(cities);
-      localStorage.setItem(cacheKey, JSON.stringify(cities));
     } catch (error) {
       console.error('Falha ao carregar cidades por UF', error);
       setCityOptions([]);
