@@ -149,10 +149,18 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
 
   const goToAccessPortal = () => navigate('/entrar');
   const goToCondominiumRequest = () => navigate('/condominio/solicitar');
+  const goToHospitalitySolution = () => {
+    if (location.pathname === '/' && typeof document !== 'undefined') {
+      document.getElementById('solucao-hospedagens')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    navigate('/#solucao-hospedagens');
+  };
 
   const solutionsLinks = [
     { id: 'marketplace', label: 'Hub', helper: 'Cliente, lojista e entregador no mesmo fluxo', onClick: () => navigate('/hub') },
     { id: 'condominiums', label: 'Condomínios', helper: 'Área para condomínios, feiras e operação local', onClick: goToCondominiumRequest },
+    { id: 'hospitality', label: 'Chalés e pousadas', helper: 'QR para hóspedes encontrarem delivery, serviços e turismo local', onClick: goToHospitalitySolution },
     { id: 'guide', label: 'Guia', helper: 'Fluxos, recursos e visão operacional da plataforma', onClick: () => navigate('/guia') },
     { id: 'architecture', label: 'Arquitetura', helper: 'Base técnica, produto e evolução da solução', onClick: () => navigate('/arquitetura') },
   ];

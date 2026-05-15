@@ -86,12 +86,20 @@ export function LandingPage() {
   useEffect(() => {
     document.title = 'Já no Caminho | Sistema premium para vender, operar e entregar';
     const description =
-      'Plataforma premium para lojistas: cardápio online, pedidos em tempo real, produção, entregas, pagamentos online e hub de vendas.';
+      'Plataforma premium para lojistas e destinos: cardápio online, pedidos em tempo real, entregas, pagamentos, condomínios, chalés, pousadas e hub de vendas.';
     upsertMeta('description', description, 'name');
     upsertMeta('og:title', 'Já no Caminho | Sistema premium para vender, operar e entregar', 'property');
     upsertMeta('og:description', description, 'property');
     upsertMeta('og:image', 'https://www.janocaminho.com.br/janocaminho.jpg', 'property');
     upsertMeta('og:type', 'website', 'property');
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || window.location.hash !== '#solucao-hospedagens') return;
+    const timer = window.setTimeout(() => {
+      document.getElementById('solucao-hospedagens')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 120);
+    return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -210,6 +218,7 @@ export function LandingPage() {
     { icon: MapPin,        title: 'Rastreamento',            desc: 'Clientes acompanham o pedido do preparo até a porta.', accent: 'rose' },
     { icon: ShieldCheck,   title: 'Código de confirmação',  desc: 'Entrega validada com código de 4 dígitos. O cliente confirma o recebimento — sem contestação.', accent: 'emerald' },
     { icon: Buildings,     title: 'Hub de condomínios',      desc: 'Vitrine própria em feiras e condomínios. Retirada ou entrega.', accent: 'indigo' },
+    { icon: QrCode,        title: 'QR para chalés e pousadas', desc: 'Hóspedes escaneiam e encontram delivery, serviços, passeios e lugares próximos.', accent: 'emerald' },
     { icon: Desktop,       title: 'Multi-dispositivo',       desc: 'Admin no PC, app mobile para o time, PWA instalável.', accent: 'sky' },
     { icon: Bell,          title: 'Notificações push',       desc: 'Lojista, entregador e cliente recebem o alerta certo em cada etapa do pedido.', accent: 'amber' },
     { icon: UsersThree,    title: 'Multi-usuário',           desc: 'Admin, operador e lojista com acessos distintos.', accent: 'violet' },
@@ -878,23 +887,31 @@ export function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════════
-          HUB DE DESTINOS
+          HOSPEDAGENS E TURISMO
       ══════════════════════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-[linear-gradient(135deg,#153A4C_0%,#1f5f78_48%,#f8fafc_48%,#ffffff_100%)] py-14 sm:py-20">
+      <section id="solucao-hospedagens" className="relative scroll-mt-28 overflow-hidden bg-[linear-gradient(135deg,#102f3d_0%,#174f67_44%,#f8fafc_44%,#ffffff_100%)] py-14 sm:py-20">
         <div className="pointer-events-none absolute left-0 top-0 h-56 w-56 rounded-full bg-sky-300/20 blur-3xl" />
         <div className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-emerald-300/20 blur-3xl" />
         <div className="relative mx-auto grid max-w-7xl gap-6 px-4 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
           <div className="rounded-[2rem] border border-white/14 bg-white/10 p-6 text-white shadow-[0_24px_70px_-44px_rgba(2,6,23,0.75)] backdrop-blur-xl sm:p-8">
             <p className="inline-flex items-center gap-2 rounded-full border border-white/16 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-sky-100">
               <MapPin size={13} weight="duotone" />
-              Marketplace turístico local
+              Solução para hospedagens e turismo
             </p>
             <h3 className="mt-5 text-3xl font-black leading-tight tracking-[-0.04em] sm:text-5xl">
-              Destinos, chalés e lojas conectados por cidade.
+              Transforme seu chalé em um guia local inteligente.
             </h3>
             <p className="mt-4 max-w-xl text-sm font-medium leading-7 text-sky-50/82 sm:text-base">
-              O cliente escolhe o destino, vê chalés e pousadas da região, encontra lojas que entregam naquela hospedagem e ainda descobre passeios, massagens, restaurantes e lugares para visitar.
+              O hóspede aponta a câmera para um QR no quarto ou na recepção, abre o Já no Caminho e encontra quem entrega na hospedagem, serviços próximos, passeios e lugares para conhecer na cidade.
             </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              {['QR personalizado', 'Delivery no chalé', 'Passeios próximos', 'Android e iPhone'].map((item) => (
+                <span key={item} className="inline-flex items-center gap-1.5 rounded-full border border-white/16 bg-white/12 px-3 py-1.5 text-[11px] font-black text-white/92">
+                  <CheckCircle size={12} weight="fill" className="text-emerald-200" />
+                  {item}
+                </span>
+              ))}
+            </div>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <button
                 type="button"
@@ -909,7 +926,7 @@ export function LandingPage() {
                 onClick={() => navigate('/destinos/cadastrar')}
                 className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/18 bg-white/10 px-5 py-3 text-sm font-black text-white backdrop-blur-xl transition-all hover:bg-white/15 active:scale-[0.98]"
               >
-                Cadastrar chalé ou serviço
+                Cadastrar hospedagem ou serviço
                 <Handshake size={15} weight="duotone" />
               </button>
             </div>
@@ -918,24 +935,24 @@ export function LandingPage() {
           <div className="grid gap-3 sm:grid-cols-2">
             {[
               {
-                icon: MapPin,
-                title: 'Cidade como porta de entrada',
-                desc: 'São Bento, São Francisco Xavier ou qualquer novo destino ganha página própria, banners e vitrine local.',
+                icon: QrCode,
+                title: 'QR Code no quarto ou recepção',
+                desc: 'Material com logo da hospedagem leva o hóspede para instalar ou abrir o app e explorar o entorno.',
               },
               {
-                icon: Buildings,
-                title: 'Chalés e pousadas aprovados',
-                desc: 'A plataforma cadastra ou aprova parceiros antes de eles aparecerem para turistas.',
+                icon: MapPin,
+                title: 'Cidade como vitrine',
+                desc: 'Cada destino ganha página própria com fotos, hospedagens, experiências, restaurantes e serviços locais.',
               },
               {
                 icon: Storefront,
-                title: 'Loja solicita vínculo',
-                desc: 'O lojista pede para atender hospedagens da região e só aparece após aprovação.',
+                title: 'Comida e serviços que chegam aqui',
+                desc: 'Pré-lojas e lojas oficiais mostram ao hóspede quem atende aquela hospedagem antes da parceria completa.',
               },
               {
                 icon: CheckCircle,
-                title: 'Sem mostrar o Brasil inteiro',
-                desc: 'O painel prioriza destinos pela cidade, UF e distância da loja, mantendo busca manual para exceções.',
+                title: 'Conversão para loja oficial',
+                desc: 'O comerciante começa com WhatsApp e pode virar loja oficial para receber pedidos, pagamentos e push no app.',
               },
             ].map(({ icon: Icon, title, desc }) => (
               <article key={title} className="rounded-[1.6rem] border border-slate-200/80 bg-white/92 p-5 shadow-[0_20px_46px_-34px_rgba(15,23,42,0.38)] backdrop-blur-xl">
