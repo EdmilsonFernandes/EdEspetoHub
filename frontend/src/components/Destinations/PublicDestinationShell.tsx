@@ -29,7 +29,7 @@ export function PublicDestinationShell({
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#f4f1ea] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
-      <header className="sticky top-0 z-[60] border-b border-white/10 bg-[linear-gradient(135deg,rgba(7,17,31,0.98)_0%,rgba(12,35,53,0.96)_54%,rgba(7,17,31,0.98)_100%)] text-white shadow-[0_18px_44px_-30px_rgba(2,6,23,0.92)] backdrop-blur-xl">
+      <header className="sticky top-0 z-[60] hidden border-b border-white/10 bg-[linear-gradient(135deg,rgba(7,17,31,0.98)_0%,rgba(12,35,53,0.96)_54%,rgba(7,17,31,0.98)_100%)] text-white shadow-[0_18px_44px_-30px_rgba(2,6,23,0.92)] backdrop-blur-xl sm:block">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent)]" />
         <div className="pointer-events-none absolute right-10 top-2 h-14 w-28 rounded-full bg-[#84cc16]/12 blur-2xl" />
         <div className="pointer-events-none absolute left-20 top-0 h-14 w-28 rounded-full bg-sky-400/12 blur-2xl" />
@@ -77,18 +77,9 @@ export function PublicDestinationShell({
                 className="inline-flex items-center gap-1.5 rounded-full bg-[linear-gradient(180deg,#b7ef53_0%,#84cc16_100%)] px-3.5 py-2 text-xs font-black text-[#07111f] shadow-[0_16px_28px_-18px_rgba(132,204,22,0.62)] transition hover:scale-[1.01] active:scale-[0.98]"
               >
                 <Plus size={13} weight="bold" />
-                <span className="hidden sm:inline">{ctaLabel}</span>
-                <span className="sm:hidden">Participar</span>
+                {ctaLabel}
               </Link>
             </div>
-          </div>
-
-          <div className="mt-2 flex min-w-0 items-center gap-2 overflow-hidden rounded-full border border-white/8 bg-white/[0.04] px-2 py-1.5 sm:hidden">
-            <Link to={backTo} className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/[0.08] px-2.5 py-1.5 text-[11px] font-black text-slate-100">
-              <ArrowRight size={12} className="rotate-180" weight="bold" />
-              {backLabel}
-            </Link>
-            <span className="truncate text-[11px] font-black uppercase tracking-[0.12em] text-sky-100/82">{contextLabel}</span>
           </div>
 
           <div className="mt-2 hidden items-center justify-between gap-3 rounded-full border border-white/8 bg-white/[0.035] px-2 py-1.5 sm:flex">

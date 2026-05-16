@@ -292,7 +292,7 @@ export function DestinationPartnerRequestPage() {
       .catch(() => {
         if (!active) return;
         setNewDestinationCities([]);
-        setNewDestinationCityError('Não conseguimos carregar a lista de cidades agora. Você ainda pode digitar manualmente.');
+        setNewDestinationCityError('Não conseguimos carregar a lista de cidades agora. Tente selecionar a UF novamente em alguns instantes.');
       })
       .finally(() => {
         if (active) setNewDestinationCitiesLoading(false);
@@ -549,20 +549,25 @@ export function DestinationPartnerRequestPage() {
                     </label>
                     <label>
                       <span className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Cidade turística</span>
-                      <input
+                      <select
                         value={form.destinationCity}
                         onChange={(event) => handleNewDestinationCityChange(event.target.value)}
-                        list={form.destinationState ? `new-destination-cities-${form.destinationState}` : undefined}
-                        placeholder={newDestinationCitiesLoading ? 'Carregando cidades...' : 'Digite ou selecione a cidade'}
+                        disabled={!form.destinationState || newDestinationCitiesLoading || availableNewDestinationCities.length === 0}
                         className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]"
-                      />
-                      {form.destinationState && availableNewDestinationCities.length > 0 ? (
-                        <datalist id={`new-destination-cities-${form.destinationState}`}>
-                          {availableNewDestinationCities.map((city) => (
-                            <option key={city} value={city} />
-                          ))}
-                        </datalist>
-                      ) : null}
+                      >
+                        <option value="">
+                          {!form.destinationState
+                            ? 'Selecione a UF primeiro'
+                            : newDestinationCitiesLoading
+                              ? 'Carregando cidades...'
+                              : availableNewDestinationCities.length
+                                ? 'Selecione a cidade'
+                                : 'Nenhuma cidade disponível nesta UF'}
+                        </option>
+                        {availableNewDestinationCities.map((city) => (
+                          <option key={city} value={city}>{city}</option>
+                        ))}
+                      </select>
                     </label>
                     {newDestinationCitiesLoading ? (
                       <p className="sm:col-span-2 rounded-2xl bg-white px-3 py-3 text-xs font-bold text-slate-500">
