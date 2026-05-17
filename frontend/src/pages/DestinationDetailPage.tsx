@@ -157,7 +157,6 @@ export function DestinationDetailPage() {
   const [activeCategory, setActiveCategory] = useState('TODOS');
   const [placeLimit, setPlaceLimit] = useState(6);
   const [listingLimit, setListingLimit] = useState(10);
-  const [carouselIndex, setCarouselIndex] = useState(0);
   const [selectedListing, setSelectedListing] = useState<any>(null);
   const isNativePlatform = Capacitor.isNativePlatform();
 
@@ -233,7 +232,7 @@ export function DestinationDetailPage() {
       actionTarget: banner.actionTarget,
       kind: 'Cidade',
     }));
-    const fallbackSlides = hasConfiguredAsset(destination) ? [{
+    const fallbackSlides = !bannerSlides.length && hasConfiguredAsset(destination) ? [{
       key: `destination-${destination.id || destination.slug}`,
       title: destination.heroTitle || destination.name,
       subtitle: destination.heroSubtitle || destination.description,
@@ -241,21 +240,8 @@ export function DestinationDetailPage() {
       actionTarget: '',
       kind: 'Cidade',
     }] : [];
-    const citySlides = (bannerSlides.length ? bannerSlides : fallbackSlides).slice(0, 4);
-    return citySlides.length
-      ? citySlides
-      : [{
-          key: 'destination',
-          title: destination.name,
-          subtitle: destination.description,
-          item: destination,
-          actionTarget: '',
-          kind: 'Destino',
-        }];
+    return [...bannerSlides, ...fallbackSlides].slice(0, 4);
   }, [banners, destination]);
-  const activeShowcaseIndex = carouselIndex % Math.max(showcaseSlides.length, 1);
-  const currentSlide = showcaseSlides[activeShowcaseIndex];
-  const currentSlideTarget = externalUrl(currentSlide?.actionTarget);
   const destinationLocationLabel = [destination.city, destination.state].filter(Boolean).join(', ') || destination.name || 'Destino';
   const selectedListingImageConfigured = hasConfiguredAsset(selectedListing, 'image');
   const selectedListingWebsiteUrl = externalUrl(selectedListing?.websiteUrl);
@@ -268,18 +254,8 @@ export function DestinationDetailPage() {
   }, [searchTerm, activeCategory, destinationSlug]);
 
   useEffect(() => {
-    setCarouselIndex(0);
     setSelectedListing(null);
-  }, [destinationSlug, showcaseSlides.length]);
-
-  useEffect(() => {
-    if (showcaseSlides.length <= 1) return undefined;
-    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return undefined;
-    const timer = window.setInterval(() => {
-      setCarouselIndex((current) => (current + 1) % showcaseSlides.length);
-    }, 4500);
-    return () => window.clearInterval(timer);
-  }, [showcaseSlides.length]);
+  }, [destinationSlug]);
 
   return (
     <PublicDestinationShell active="city" backTo="/destinos" backLabel="Destinos" contextLabel={destination.name || 'Cidade turística'}>
@@ -296,39 +272,22 @@ export function DestinationDetailPage() {
           {error ? <p className="mt-8 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
 
           {!loading && !error ? (
-            <>
-            <div className="mb-3 rounded-[1.35rem] border border-white/80 bg-white/82 p-3 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.38)] backdrop-blur sm:hidden">
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Explorando agora</p>
-              <div className="mt-1 flex min-w-0 items-center justify-between gap-3">
+            <div className="rounded-[1.5rem] border border-white/80 bg-white/82 p-3 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.38)] backdrop-blur sm:p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div className="min-w-0">
-                  <h1 className="truncate text-xl font-black tracking-[-0.04em] text-slate-950">{destination.name}</h1>
-                  <p className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs font-bold text-slate-500">
-                    <MapPinLine size={13} weight="duotone" className="shrink-0 text-[#336886]" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Explorando agora</p>
+                  <h1 className="mt-1 truncate text-xl font-black tracking-[-0.04em] text-slate-950 sm:text-4xl">
+                    {destination.name}
+                  </h1>
+                  <p className="mt-1 flex min-w-0 items-center gap-1.5 text-xs font-bold text-slate-500 sm:text-sm">
+                    <MapPinLine size={14} weight="duotone" className="shrink-0 text-[#336886]" />
                     <span className="truncate">{destinationLocationLabel}</span>
                   </p>
+                  <p className="mt-2 hidden max-w-3xl text-sm font-semibold leading-relaxed text-slate-600 sm:line-clamp-2">
+                    {destination.heroSubtitle || destination.description || 'Hospedagens, lojas e experiências cadastradas neste destino.'}
+                  </p>
                 </div>
-                <span className="shrink-0 rounded-full bg-[#153A4C] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-white">
-                  Cidade
-                </span>
-              </div>
-            </div>
-            <div className="grid gap-5 sm:mt-4 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
-              <div className="hidden min-w-0 sm:block">
-                <p className="inline-flex max-w-full items-center gap-2 rounded-full bg-[#153A4C]/8 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-[#153A4C] ring-1 ring-[#153A4C]/10">
-                  <Mountains size={15} weight="duotone" />
-                  <span>Guia da cidade</span>
-                </p>
-                <h1 className="mt-3 max-w-3xl text-3xl font-black leading-[0.96] tracking-[-0.055em] text-slate-950 sm:text-5xl">
-                  {destination.heroTitle || destination.name}
-                </h1>
-                <p className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full border border-slate-200 bg-white/78 px-3 py-1.5 text-xs font-black text-slate-700 shadow-sm">
-                  <MapPinLine size={15} weight="duotone" className="shrink-0 text-[#336886]" />
-                  <span className="truncate">{destinationLocationLabel}</span>
-                </p>
-                <p className="mt-3 line-clamp-3 max-w-2xl text-sm font-semibold leading-relaxed text-slate-600 sm:text-base">
-                  {destination.heroSubtitle || destination.description || 'Hospedagens, lojas e experiências cadastradas neste destino.'}
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:min-w-[18rem]">
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/78 px-3 py-1.5 text-[11px] font-black text-[#153A4C] shadow-sm backdrop-blur">
                     <Bed size={17} weight="duotone" />
                     {places.length} hospedagens
@@ -339,57 +298,7 @@ export function DestinationDetailPage() {
                   </span>
                 </div>
               </div>
-              <div className="overflow-hidden rounded-[2rem] border border-white/85 bg-white/88 p-2 shadow-[0_28px_70px_-46px_rgba(15,23,42,0.55)] backdrop-blur">
-                <button
-                  type="button"
-                  disabled={!currentSlideTarget}
-                  onClick={() => currentSlideTarget && void openActionTarget({ href: currentSlideTarget, external: true })}
-                  className="group relative block w-full overflow-hidden rounded-[1.55rem] bg-slate-900 text-left disabled:cursor-default"
-                  aria-label={currentSlideTarget ? `Abrir ${currentSlide?.title || destination.name}` : currentSlide?.title || destination.name}
-                >
-                  <div className="h-44 sm:aspect-[16/9] sm:h-auto sm:min-h-[18rem] lg:min-h-[20rem]">
-                    {hasConfiguredAsset(currentSlide?.item || destination) ? (
-                      <img src={asset(currentSlide?.item || destination)} alt={currentSlide?.title || destination.name} className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]" />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_25%_15%,rgba(16,185,129,0.35),transparent_34%),linear-gradient(135deg,#18384a,#0f172a_62%,#3b2f1c)]">
-                        <Mountains size={84} weight="duotone" className="text-white/40" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="absolute right-4 top-4 rounded-full bg-white/92 px-3 py-1 text-[10px] font-black text-slate-700 shadow-sm">
-                    {activeShowcaseIndex + 1}/{showcaseSlides.length}
-                  </div>
-                  {currentSlideTarget ? (
-                    <div className="absolute bottom-4 right-4 rounded-full bg-[#153A4C] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-sm">
-                      Abrir
-                    </div>
-                  ) : null}
-                </button>
-                <div className="flex items-center justify-between gap-3 px-1 pb-1 pt-2">
-                  <span className="truncate text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">Fotos da cidade</span>
-                  <div className="flex min-w-0 flex-1 justify-end gap-2 overflow-x-auto pb-1">
-                    {showcaseSlides.map((slide: any, index: number) => (
-                      <button
-                        key={slide.key}
-                        type="button"
-                        aria-label={`Abrir foto ${index + 1}`}
-                        onClick={() => setCarouselIndex(index)}
-                        className={`h-12 w-16 overflow-hidden rounded-xl ring-2 transition sm:h-14 sm:w-20 ${index === activeShowcaseIndex ? 'ring-[#153A4C]' : 'ring-transparent opacity-70 hover:opacity-100'}`}
-                      >
-                        {hasConfiguredAsset(slide.item) ? (
-                          <img src={asset(slide.item)} alt="" className="h-full w-full object-cover" />
-                        ) : (
-                          <span className="flex h-full w-full items-center justify-center bg-[#153A4C]/10">
-                            <Mountains size={20} weight="duotone" className="text-[#153A4C]" />
-                          </span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
             </div>
-            </>
           ) : null}
         </div>
       </section>
@@ -705,6 +614,61 @@ export function DestinationDetailPage() {
           ) : null}
         </section>
       ) : null}
+
+      {!loading && !error && showcaseSlides.length > 0 ? (
+        <section className="mx-auto max-w-6xl px-4 pb-10">
+          <div className="rounded-[2rem] border border-slate-200 bg-white/82 p-4 shadow-[0_18px_48px_-38px_rgba(15,23,42,0.35)] sm:p-5">
+            <div className="flex items-end justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Conheça a cidade</p>
+                <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950">Fotos e destaques de {destination.name}</h2>
+              </div>
+              <Mountains size={26} weight="duotone" className="shrink-0 text-[#336886]" />
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {showcaseSlides.map((slide: any, index: number) => {
+                const target = externalUrl(slide.actionTarget);
+                const title = slide.title || destination.name;
+                const cardClass = 'group relative overflow-hidden rounded-[1.35rem] bg-slate-100 text-left shadow-[0_16px_36px_-30px_rgba(15,23,42,0.45)] ring-1 ring-slate-200 transition hover:-translate-y-0.5';
+                const content = (
+                  <>
+                    <div className="aspect-[4/3] w-full overflow-hidden">
+                      {hasConfiguredAsset(slide.item) ? (
+                        <img src={asset(slide.item)} alt={title} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]" />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,#e9f1ef,#d9e7df)]">
+                          <Mountains size={32} weight="duotone" className="text-[#153A4C]/42" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/70 to-transparent p-3">
+                      <p className="line-clamp-1 text-xs font-black text-white">{title}</p>
+                      {target ? <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white/76">Abrir destaque</p> : null}
+                    </div>
+                  </>
+                );
+
+                return target ? (
+                  <button
+                    key={slide.key || index}
+                    type="button"
+                    onClick={() => void openActionTarget({ href: target, external: true })}
+                    className={cardClass}
+                    aria-label={`Abrir ${title}`}
+                  >
+                    {content}
+                  </button>
+                ) : (
+                  <article key={slide.key || index} className={cardClass}>
+                    {content}
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       <PreStoreDetailSheet
         open={Boolean(selectedListing)}
         onClose={() => setSelectedListing(null)}
