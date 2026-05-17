@@ -2731,13 +2731,13 @@ export function MarketplacePage() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[radial-gradient(ellipse_at_top_right,rgba(51,104,134,0.16),transparent_38%),radial-gradient(ellipse_at_bottom_left,rgba(21,58,76,0.08),transparent_40%),linear-gradient(180deg,#EEF2F7_0%,#F4F8FB_50%,#EEF2F7_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
+    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[radial-gradient(ellipse_at_top_right,rgba(51,104,134,0.055),transparent_40%),radial-gradient(ellipse_at_bottom_left,rgba(21,58,76,0.035),transparent_42%),linear-gradient(180deg,#F7FAFC_0%,#F3F7FA_48%,#EEF3F7_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
       {/* Elemento Decorativo de Fundo (Premium Look) */}
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-[70] h-[env(safe-area-inset-top)] bg-[#153A4C]" />
-      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[320px] bg-gradient-to-b from-[#336886]/8 via-white/30 to-transparent" />
-      <div className="fixed left-[-8%] top-[10%] h-[28%] w-[38%] rounded-full bg-[#336886]/6 blur-[130px] pointer-events-none -z-10" />
-      <div className="fixed top-[-10%] right-[-10%] h-[44%] w-[52%] bg-[#153A4C]/18 blur-[110px] rounded-full pointer-events-none -z-10" />
-      <div className="fixed bottom-[5%] right-[5%] h-[22%] w-[28%] bg-[#336886]/8 blur-[100px] rounded-full pointer-events-none -z-10" />
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-[70] h-[env(safe-area-inset-top)] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,250,252,0.74))] backdrop-blur-xl" />
+      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[320px] bg-gradient-to-b from-white/80 via-slate-50/35 to-transparent" />
+      <div className="fixed left-[-8%] top-[10%] h-[28%] w-[38%] rounded-full bg-white/45 blur-[130px] pointer-events-none -z-10" />
+      <div className="fixed top-[-10%] right-[-10%] h-[44%] w-[52%] bg-slate-200/35 blur-[110px] rounded-full pointer-events-none -z-10" />
+      <div className="fixed bottom-[5%] right-[5%] h-[22%] w-[28%] bg-white/35 blur-[100px] pointer-events-none -z-10" />
 
       <div
         className={`pointer-events-none fixed left-1/2 z-[120] -translate-x-1/2 rounded-full border border-slate-200 bg-white/95 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm transition-all duration-200 ${
