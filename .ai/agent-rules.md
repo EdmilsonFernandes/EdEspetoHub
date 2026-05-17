@@ -114,6 +114,7 @@ Backend API (chamanoespeto-api :4000)
 - Toda tela nova fora de fluxo modal deve ter navegação explícita de voltar, visível principalmente no mobile, sem depender apenas de gesto do sistema.
 - Em telas mobile/native, considerar `env(safe-area-inset-top)` e `env(safe-area-inset-bottom)` para não brigar com status bar ou menu inferior.
 - Não criar componentes com aparência isolada do restante do app; se faltar padrão, criar um shell/componente compartilhado antes de duplicar UI.
+- Para subtelas navegáveis do app do cliente/destinos, reutilizar `frontend/src/components/common/AppGlassHeader.tsx` como cabeçalho com voltar, safe area e identidade visual padrão.
 
 ### Onde implementar algo novo
 

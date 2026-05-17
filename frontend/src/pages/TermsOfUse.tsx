@@ -1,5 +1,5 @@
-import { ArrowLeft } from '@phosphor-icons/react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { AppGlassHeader } from '../components/common/AppGlassHeader';
 
 const LAST_UPDATE = '22 de abril de 2026';
 
@@ -21,27 +21,15 @@ export function TermsOfUse() {
   const fromHub = new URLSearchParams(location.search || '').get('from') === 'hub';
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-[env(safe-area-inset-bottom)]">
-      <header
-        className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200/60 bg-white/95 px-4 py-3.5 backdrop-blur-xl"
-        style={{ paddingTop: 'env(safe-area-inset-top)' }}
-      >
-          <button
-            onClick={() => navigate(fromHub ? '/hub' : -1 as any)}
-            className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-all active:scale-95"
-            aria-label="Voltar"
-          >
-            <ArrowLeft size={18} weight="bold" />
-          </button>
-          <div className="flex flex-col items-center gap-0.5">
-            <div className="flex items-center gap-1.5">
-              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-5 w-5 rounded-[0.45rem] object-cover shadow-sm" />
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Legal</p>
-            </div>
-            <h1 className="text-[15px] font-black text-slate-900">Termos e Privacidade</h1>
-          </div>
-          <div className="w-9" />
-      </header>
+    <div className="min-h-screen bg-slate-50 pb-[env(safe-area-inset-bottom)] pt-[calc(env(safe-area-inset-top)+4.35rem)]">
+      <AppGlassHeader
+        title="Termos de Praticidade"
+        eyebrow="Legal"
+        subtitle="Uso, privacidade e segurança"
+        backTo={fromHub ? '/hub' : '/cliente/conta?section=settings'}
+        onBack={() => navigate(fromHub ? '/hub' : '/cliente/conta?section=settings')}
+        maxWidthClassName="max-w-3xl"
+      />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-6">
 

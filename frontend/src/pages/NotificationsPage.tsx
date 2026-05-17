@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, BellRinging, Check, Trash } from '@phosphor-icons/react';
-import { navigateBackOrFallback } from '../utils/navigation';
+import { BellRinging, Check, Trash } from '@phosphor-icons/react';
 import { apiClient } from '../config/apiClient';
+import { AppGlassHeader } from '../components/common/AppGlassHeader';
 
 type Notification = { id: string; title: string; body: string; url?: string | null; imageUrl?: string | null; read: boolean; createdAt: string };
 
@@ -88,26 +88,17 @@ export function NotificationsPage() {
   const groups = groupByDate(notifications);
 
   return (
-    <main className="min-h-screen bg-[#EEF2F7] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] pt-[env(safe-area-inset-top)]">
+    <main className="min-h-screen bg-[#EEF2F7] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] pt-[calc(env(safe-area-inset-top)+4.35rem)]">
       <div className="pointer-events-none fixed top-[-10%] right-[-8%] h-[38%] w-[46%] rounded-full bg-[#153A4C]/13 blur-[120px] -z-10" />
       <div className="pointer-events-none fixed bottom-[8%] left-[-5%] h-[26%] w-[34%] rounded-full bg-[#336886]/7 blur-[100px] -z-10" />
 
       <div className="mx-auto max-w-2xl">
-        <header className="sticky top-0 z-20 border-b border-slate-200/60 bg-white/90 backdrop-blur-xl">
-          <div className="flex items-center justify-between px-4 py-3.5">
-            <button onClick={() => navigateBackOrFallback(navigate, '/hub')} className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-all active:scale-95">
-              <ArrowLeft size={18} weight="bold" />
-            </button>
-            <div className="flex flex-col items-center gap-0.5">
-              <div className="flex items-center gap-1.5">
-                <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-5 w-5 rounded-[0.45rem] object-cover shadow-sm" />
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Central</p>
-              </div>
-              <h1 className="text-[15px] font-black text-slate-900">Notificações</h1>
-            </div>
-            <div className="w-9" />
-          </div>
-        </header>
+        <AppGlassHeader
+          title="Notificações"
+          eyebrow="Central"
+          subtitle={unread > 0 ? `${unread} não lida${unread > 1 ? 's' : ''}` : 'Todas lidas'}
+          backTo="/hub"
+        />
 
         <div className="px-4 pt-4">
           {notifications.length > 0 && (

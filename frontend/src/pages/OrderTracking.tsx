@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, ArrowClockwise, Bicycle, CheckCircle, Clock, CircleNotch, CopySimple, MapPin, Package, Phone, SealCheck, Star, User, WhatsappLogo } from '@phosphor-icons/react';
+import { ArrowClockwise, Bicycle, CheckCircle, Clock, CircleNotch, CopySimple, MapPin, Package, Phone, SealCheck, Star, User, WhatsappLogo } from '@phosphor-icons/react';
 import { Capacitor } from '@capacitor/core';
 import { customerAccountService } from '../services/customerAccountService';
 import { orderService } from '../services/orderService';
@@ -15,6 +15,7 @@ import { RouteMapView } from '../components/RouteMapView';
 import { formatSelectedModifiers } from '../utils/productModifiers';
 import { getOrderItemLineTotal, getOrderItemOriginalLineTotal, getOrderItemQuantity } from '../utils/orderItems';
 import { usePollingPaymentStatus } from '../hooks/usePollingPaymentStatus';
+import { AppGlassHeader } from '../components/common/AppGlassHeader';
 
 const statusLabels: Record<string, string> = {
   awaiting_payment: 'Aguardando pagamento',
@@ -1416,57 +1417,46 @@ export function OrderTracking() {
   const [itemsExpanded, setItemsExpanded] = useState(itemsToRender.length <= 3);
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#f4f8fb_0%,#ebf2f7_100%)] pt-[env(safe-area-inset-top)]">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#f4f8fb_0%,#ebf2f7_100%)] pt-[calc(env(safe-area-inset-top)+4.55rem)]">
       <div className="pointer-events-none fixed top-[-12%] right-[-8%] h-[42%] w-[50%] rounded-full bg-[#336886]/14 blur-[120px] -z-10" />
       <div className="pointer-events-none fixed bottom-[10%] left-[-6%] h-[28%] w-[36%] rounded-full bg-sky-300/16 blur-[100px] -z-10" />
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
-      <header className="sticky top-0 z-50 border-b border-[#d5e3ec]/90 bg-[rgba(244,248,251,0.94)] backdrop-blur-xl shadow-[0_12px_30px_-24px_rgba(51,104,134,0.18)]">
-        {/* Barra de progresso dinâmica do pedido */}
-        <div className="h-[2.5px] w-full bg-[#dce9f1]/80 overflow-hidden">
-          <div
-            className="h-full transition-all duration-700 ease-out"
-            style={{ width: `${progress}%`, background: isCancelled ? '#f43f5e' : 'linear-gradient(90deg,#336886,#009ee3)' }}
-          />
-        </div>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-3 py-3">
-            <button onClick={handleBack} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-[#c9dbe7]/80 bg-white/90 text-stone-700 shadow-[0_12px_24px_-22px_rgba(51,104,134,0.25)] transition-all active:scale-95">
-              <ArrowLeft size={18} weight="bold" />
-            </button>
-            <button onClick={handleBack} className="flex min-w-0 items-center gap-2 text-left">
-              <div className="h-8 w-8 shrink-0 overflow-hidden rounded-xl border border-[#c9dbe7]/80 bg-white shadow-[0_12px_24px_-22px_rgba(51,104,134,0.22)]">
-                <img src={storeLogo} alt={storeName} className="h-full w-full object-cover" />
-              </div>
-              <div className="min-w-0 leading-tight">
-                <p className="truncate text-[13px] font-black text-stone-950">{storeName}</p>
-                <p className="flex items-center gap-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-[#336886]">
-                  <img src="/janocaminho.jpg" alt="" className="h-[9px] w-[9px] rounded-[0.2rem] object-cover" />
-                  Já no Caminho
-                </p>
-              </div>
-            </button>
-            <button
-              type="button"
-              onClick={async () => {
-                const url = `${window.location.origin}/pedido/${orderId}`;
-                try {
-                  if (navigator.share) {
-                    await navigator.share({ title: `Pedido — ${storeName}`, url });
-                  } else {
-                    await navigator.clipboard.writeText(url);
-                    setLinkCopied(true);
-                    window.setTimeout(() => setLinkCopied(false), 2200);
-                  }
-                } catch { /* usuário cancelou share */ }
-              }}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-[#c9dbe7]/80 bg-white/90 text-stone-700 shadow-[0_12px_24px_-22px_rgba(51,104,134,0.25)] transition-all active:scale-95"
-              title="Compartilhar pedido"
-            >
-              {linkCopied ? <CheckCircle size={16} weight="fill" className="text-emerald-600" /> : <CopySimple size={16} weight="bold" />}
-            </button>
+      <AppGlassHeader
+        title="Detalhes do Pedido"
+        eyebrow={storeName}
+        subtitle={`Pedido #${orderDisplayId}`}
+        onBack={handleBack}
+        maxWidthClassName="max-w-5xl"
+        topSlot={(
+          <div className="h-[2.5px] w-full overflow-hidden bg-[#dce9f1]/80">
+            <div
+              className="h-full transition-all duration-700 ease-out"
+              style={{ width: `${progress}%`, background: isCancelled ? '#f43f5e' : 'linear-gradient(90deg,#336886,#009ee3)' }}
+            />
           </div>
-        </div>
-      </header>
+        )}
+        right={(
+          <button
+            type="button"
+            onClick={async () => {
+              const url = `${window.location.origin}/pedido/${orderId}`;
+              try {
+                if (navigator.share) {
+                  await navigator.share({ title: `Pedido — ${storeName}`, url });
+                } else {
+                  await navigator.clipboard.writeText(url);
+                  setLinkCopied(true);
+                  window.setTimeout(() => setLinkCopied(false), 2200);
+                }
+              } catch { /* usuário cancelou share */ }
+            }}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-[#c9dbe7]/80 bg-white/90 text-stone-700 shadow-[0_12px_24px_-22px_rgba(51,104,134,0.25)] transition-all active:scale-95"
+            title="Compartilhar pedido"
+          >
+            {linkCopied ? <CheckCircle size={16} weight="fill" className="text-emerald-600" /> : <CopySimple size={16} weight="bold" />}
+          </button>
+        )}
+      />
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pb-32 sm:pb-10 sm:py-6">
         <div>

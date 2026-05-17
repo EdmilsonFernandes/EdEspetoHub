@@ -34,8 +34,8 @@ import { formatCurrency, formatOrderDisplayId, formatReadableDateTime, formatTim
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getPaymentProviderMeta } from '../utils/paymentAssets';
 import { formatSelectedModifiers } from '../utils/productModifiers';
-import { navigateBackOrFallback } from '../utils/navigation';
 import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
+import { AppGlassHeader } from '../components/common/AppGlassHeader';
 
 const TERMINAL_STATUSES = [ 'DELIVERED', 'CANCELLED', 'FINISHED', 'REJECTED', 'DONE' ];
 const ACTIVE_REFRESH_MS = 10_000;
@@ -1452,38 +1452,18 @@ export function ClientOrders() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#EEF2F7] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] pt-[env(safe-area-inset-top)]">
+    <main className="min-h-screen bg-[#EEF2F7] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] pt-[calc(env(safe-area-inset-top)+7.35rem)]">
       <div className="pointer-events-none fixed top-[-10%] right-[-8%] h-[38%] w-[46%] rounded-full bg-[#153A4C]/13 blur-[120px] -z-10" />
       <div className="pointer-events-none fixed bottom-[8%] left-[-5%] h-[26%] w-[34%] rounded-full bg-[#336886]/7 blur-[100px] -z-10" />
       <div className="mx-auto max-w-2xl">
-        <header className="sticky top-0 z-20 border-b border-slate-200/60 bg-white/90 backdrop-blur-xl">
-          <div className="flex items-center justify-between px-4 py-3.5">
-            <button
-              onClick={() => navigateBackOrFallback(navigate, '/hub?profile=1')}
-              className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-all active:scale-95"
-            >
-              <ArrowLeft size={18} weight="bold" />
-            </button>
-            <div className="flex flex-col items-center gap-0.5">
-              <div className="flex items-center gap-1.5">
-                <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-5 w-5 rounded-[0.45rem] object-cover shadow-sm" />
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Histórico</p>
-              </div>
-              <h1 className="text-[15px] font-black text-slate-900">Meus pedidos</h1>
-              {activeOrders.length > 0 && (
-                <span className="mt-0.5 inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  </span>
-                  {activeOrders.length} em andamento
-                </span>
-              )}
-            </div>
-            <div className="w-9" />
-          </div>
-
-          <div className="flex gap-2 overflow-x-auto px-4 pb-3 no-scrollbar">
+        <AppGlassHeader
+          title="Meus Pedidos"
+          eyebrow="Histórico"
+          subtitle={activeOrders.length > 0 ? `${activeOrders.length} em andamento` : 'Acompanhe seus pedidos'}
+          backTo="/hub"
+          onBack={() => navigate('/hub')}
+        >
+          <div className="flex gap-2 overflow-x-auto pb-0.5 no-scrollbar">
             {orderFilters.map((filter) => {
               const isSelected = statusFilter === filter.key;
               return (
@@ -1504,7 +1484,7 @@ export function ClientOrders() {
               );
             })}
           </div>
-        </header>
+        </AppGlassHeader>
 
         <div className="px-4 py-4">
           {error ? (

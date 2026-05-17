@@ -2,7 +2,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
-  ArrowLeft, 
   SignOut, 
   MapPinLine, 
   Plus, 
@@ -27,7 +26,7 @@ import { App as CapacitorApp } from '@capacitor/app';
 import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { nativeBiometricService } from '../services/nativeBiometricService';
-import { navigateBackOrFallback } from '../utils/navigation';
+import { AppGlassHeader } from '../components/common/AppGlassHeader';
 
 // Componente Switch Simples
 function Switch({ checked, onChange, disabled }: { checked: boolean; onChange: () => void; disabled?: boolean }) {
@@ -573,33 +572,26 @@ export function ClientAccount() {
   }
 
   return (
-    <main className="min-h-screen bg-[#EEF2F7] pb-12 pt-[env(safe-area-inset-top)]">
+    <main className="min-h-screen bg-[#EEF2F7] pb-12 pt-[calc(env(safe-area-inset-top)+4.35rem)]">
       <div className="pointer-events-none fixed top-[-12%] right-[-8%] h-[40%] w-[48%] rounded-full bg-[#153A4C]/12 blur-[120px] -z-10" />
       <div className="pointer-events-none fixed bottom-[5%] left-[-6%] h-[24%] w-[32%] rounded-full bg-[#336886]/7 blur-[100px] -z-10" />
       <div className="mx-auto max-w-2xl">
-        {/* Header Fixo Premium */}
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200/60 bg-white/95 px-4 py-3.5 backdrop-blur-xl">
-          <button
-            onClick={() => navigateBackOrFallback(navigate, '/hub?profile=1')}
-            className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-all active:scale-95"
-          >
-            <ArrowLeft size={18} weight="bold" />
-          </button>
-          <div className="flex flex-col items-center gap-0.5">
-            <div className="flex items-center gap-1.5">
-              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-5 w-5 rounded-[0.45rem] object-cover shadow-sm" />
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">{settingsOnly ? 'Configurações' : 'Minha conta'}</p>
-            </div>
-            <h1 className="text-[15px] font-black text-slate-900">{settingsOnly ? 'Preferências' : 'Perfil e dados'}</h1>
-          </div>
-          <button
-            onClick={logout}
-            className="flex h-9 w-9 items-center justify-center rounded-2xl bg-rose-50 text-rose-500 transition-all active:scale-95"
-            title="Sair"
-          >
-            <SignOut size={17} weight="duotone" />
-          </button>
-        </header>
+        <AppGlassHeader
+          title={settingsOnly ? 'Configurações' : 'Minha Conta'}
+          eyebrow={settingsOnly ? 'Preferências' : 'Área do cliente'}
+          subtitle={settingsOnly ? 'Privacidade, segurança e preferências' : 'Perfil, pedidos e endereços'}
+          backTo={settingsOnly ? '/cliente/conta' : '/hub'}
+          onBack={() => navigate(settingsOnly ? '/cliente/conta' : '/hub')}
+          right={(
+            <button
+              onClick={logout}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-rose-100 bg-rose-50/95 text-rose-500 shadow-sm transition-all active:scale-95"
+              title="Sair"
+            >
+              <SignOut size={17} weight="duotone" />
+            </button>
+          )}
+        />
 
         <div className="px-4 py-6 space-y-6">
           {!settingsOnly && (

@@ -2,7 +2,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  ArrowLeft,
   MapPinLine,
   Plus,
   Trash,
@@ -20,7 +19,7 @@ import { customerAccountService } from '../services/customerAccountService';
 import { addressLookupService } from '../services/addressLookupService';
 import { useToast } from '../contexts/ToastContext';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
-import { navigateBackOrFallback } from '../utils/navigation';
+import { AppGlassHeader } from '../components/common/AppGlassHeader';
 
 const CUSTOMER_ADDRESS_UPDATED_EVENT = 'jnc:customer-addresses-updated';
 
@@ -273,23 +272,18 @@ export function AddressDistance() {
   };
 
   const defaultAddress = addresses.find((address: any) => address?.isDefault) || addresses[0] || null;
+  const activeAddressTitle = defaultAddress ? buildAddressTitle(defaultAddress) : '';
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.08),_transparent_32%),linear-gradient(180deg,#f8fbff_0%,#f8fafc_40%,#f8fafc_100%)] pb-16 pt-[env(safe-area-inset-top)]">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.08),_transparent_32%),linear-gradient(180deg,#f8fbff_0%,#f8fafc_40%,#f8fafc_100%)] pb-16 pt-[calc(env(safe-area-inset-top)+4.35rem)]">
       <div className="mx-auto max-w-2xl">
-        <header className="sticky top-0 z-20 flex items-center gap-4 border-b border-slate-200/70 bg-white/85 px-4 py-4 backdrop-blur-xl">
-          <button
-            onClick={() => navigateBackOrFallback(navigate, '/hub?profile=1')}
-            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-all active:scale-90"
-          >
-            <ArrowLeft size={20} weight="bold" />
-          </button>
-          <div className="min-w-0">
-            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">Área do cliente</p>
-            <h1 className="text-lg font-black leading-tight text-slate-900">Meus Endereços</h1>
-            <p className="text-[11px] font-medium text-slate-500">Edite, escolha o principal e mantenha o checkout alinhado.</p>
-          </div>
-        </header>
+        <AppGlassHeader
+          title="Meus Endereços"
+          eyebrow="Área do cliente"
+          subtitle={activeAddressTitle || 'Escolha o endereço principal'}
+          backTo="/cliente/conta"
+          onBack={() => navigate('/cliente/conta')}
+        />
 
         <div className="space-y-4 p-4">
           <section className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white px-5 py-5 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.3)]">
@@ -304,10 +298,10 @@ export function AddressDistance() {
                     {addresses.length} {addresses.length === 1 ? 'endereço salvo' : 'endereços salvos'}
                   </span>
                 </div>
-                <h2 className="mt-1 text-lg font-black text-slate-900">Seu principal precisa aparecer bem aqui</h2>
+                <h2 className="mt-1 text-lg font-black text-slate-900">Endereço ativo</h2>
                 <p className="mt-1 text-sm text-slate-500">
                   {defaultAddress
-                    ? `${defaultAddress.label || 'Endereço principal'} • ${buildAddressTitle(defaultAddress)}`
+                    ? `${defaultAddress.label || 'Endereço principal'} • ${activeAddressTitle}`
                     : 'Cadastre um endereço principal para acelerar pedidos com entrega.'}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
