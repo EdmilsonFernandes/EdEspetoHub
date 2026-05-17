@@ -308,8 +308,8 @@ export function DestinationDetailPage() {
           <div className="relative z-10 min-w-0 max-w-full overflow-hidden rounded-[1.5rem] border border-white/80 bg-white/92 p-3 shadow-[0_16px_42px_-36px_rgba(15,23,42,0.36)] backdrop-blur lg:col-span-2 sm:p-4">
             <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Escolha o que procurar</p>
-                <h2 className="mt-1 text-lg font-black tracking-[-0.03em] text-slate-950">Buscar em {destination.name}</h2>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Explore</p>
+                <h2 className="mt-1 text-lg font-black tracking-[-0.03em] text-slate-950">O que você procura?</h2>
               </div>
               <p className="text-xs font-bold text-slate-500">
                 {activeFilterLabel}: {filteredPlaces.length + filteredListings.length} resultado(s)
@@ -321,7 +321,7 @@ export function DestinationDetailPage() {
                 <input
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
-                  placeholder="Ex: Pedra do Baú, pousada, pizza, escalada..."
+                  placeholder="Buscar hospedagem, comida, passeio ou serviço"
                   className="min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400"
                 />
                 {searchTerm ? (

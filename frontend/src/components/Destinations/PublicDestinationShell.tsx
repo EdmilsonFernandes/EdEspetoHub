@@ -28,8 +28,8 @@ export function PublicDestinationShell({
   ];
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#f4f1ea] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
-      <header className="sticky top-0 z-[60] hidden border-b border-white/10 bg-[linear-gradient(135deg,rgba(7,17,31,0.98)_0%,rgba(12,35,53,0.96)_54%,rgba(7,17,31,0.98)_100%)] text-white shadow-[0_18px_44px_-30px_rgba(2,6,23,0.92)] backdrop-blur-xl sm:block">
+    <main className="min-h-screen overflow-x-hidden bg-[#f4f1ea] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] pt-[env(safe-area-inset-top)] text-slate-950 sm:pt-0">
+      <header className="sticky top-0 z-[60] hidden border-b border-white/10 bg-[linear-gradient(135deg,rgba(7,17,31,0.98)_0%,rgba(12,35,53,0.96)_54%,rgba(7,17,31,0.98)_100%)] text-white shadow-[0_18px_44px_-30px_rgba(2,6,23,0.92)] backdrop-blur-xl sm:block sm:pt-[env(safe-area-inset-top)]">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent)]" />
         <div className="pointer-events-none absolute right-10 top-2 h-14 w-28 rounded-full bg-[#84cc16]/12 blur-2xl" />
         <div className="pointer-events-none absolute left-20 top-0 h-14 w-28 rounded-full bg-sky-400/12 blur-2xl" />
