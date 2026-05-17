@@ -2842,11 +2842,11 @@ export function MarketplacePage() {
           hasEntered ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}
       >
-        <header className={`sticky top-0 z-[60] border-b border-white/55 transition-all duration-300 ${isNativePlatform ? 'bg-[linear-gradient(180deg,rgba(234,245,250,0.84)_0%,rgba(255,255,255,0.62)_100%)] shadow-[0_14px_30px_-24px_rgba(21,58,76,0.24)] backdrop-blur-2xl' : isHeaderElevated ? 'bg-[linear-gradient(180deg,rgba(234,245,250,0.78)_0%,rgba(255,255,255,0.58)_100%)] shadow-[0_18px_42px_-34px_rgba(21,58,76,0.32)] backdrop-blur-2xl' : 'bg-[linear-gradient(180deg,rgba(234,245,250,0.46)_0%,rgba(255,255,255,0.12)_100%)] backdrop-blur-xl'}`}>
+        <header className={`sticky top-0 z-[60] border-b border-white/65 transition-all duration-300 ${isNativePlatform ? 'bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(248,250,252,0.68)_100%)] shadow-[0_14px_30px_-24px_rgba(21,58,76,0.20)] backdrop-blur-2xl' : isHeaderElevated ? 'bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(248,250,252,0.62)_100%)] shadow-[0_18px_42px_-34px_rgba(21,58,76,0.28)] backdrop-blur-2xl' : 'bg-[linear-gradient(180deg,rgba(255,255,255,0.46)_0%,rgba(255,255,255,0.10)_100%)] backdrop-blur-xl'}`}>
           <div className={`mx-auto max-w-[1200px] px-4 ${isNativePlatform ? 'pb-2 pt-[max(0.55rem,calc(env(safe-area-inset-top)+0.1rem))]' : 'pb-3 pt-[max(0.85rem,calc(env(safe-area-inset-top)+0.2rem))]'}`}>
-            <div className={`${isNativePlatform ? 'space-y-2.5 rounded-[1.65rem] px-2.5 py-2.5' : 'space-y-3 rounded-[1.9rem] px-3 py-3'} relative overflow-hidden border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.82)_0%,rgba(238,247,250,0.64)_54%,rgba(255,255,255,0.72)_100%)] shadow-[0_22px_54px_-38px_rgba(21,58,76,0.34)] ring-1 ring-slate-200/45 backdrop-blur-2xl`}>
-            <div className="pointer-events-none absolute -left-12 -top-16 h-36 w-36 rounded-full bg-[#336886]/10 blur-3xl" />
-            <div className="pointer-events-none absolute -right-10 top-6 h-28 w-28 rounded-full bg-emerald-200/35 blur-3xl" />
+            <div className={`${isNativePlatform ? 'space-y-2.5 rounded-[1.65rem] px-2.5 py-2.5' : 'space-y-3 rounded-[1.9rem] px-3 py-3'} relative overflow-hidden border border-white/88 bg-[linear-gradient(145deg,rgba(255,255,255,0.90)_0%,rgba(248,250,252,0.76)_56%,rgba(255,255,255,0.82)_100%)] shadow-[0_22px_54px_-38px_rgba(21,58,76,0.26)] ring-1 ring-slate-200/50 backdrop-blur-2xl`}>
+            <div className="pointer-events-none absolute -left-12 -top-16 h-36 w-36 rounded-full bg-[#153A4C]/[0.06] blur-3xl" />
+            <div className="pointer-events-none absolute -right-10 top-6 h-28 w-28 rounded-full bg-slate-200/40 blur-3xl" />
             {/* Linha 1: Perfil e Logo */}
             <div className="relative flex items-center justify-between gap-2">
               <div className="flex min-w-0 flex-1 items-center gap-2.5">
