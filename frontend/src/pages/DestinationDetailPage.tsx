@@ -365,7 +365,7 @@ export function DestinationDetailPage() {
             {places.length === 0 ? (
               <div className="rounded-[1.5rem] border border-dashed border-slate-300 bg-white/70 p-5">
                 <p className="text-sm font-bold text-slate-600">Nenhuma hospedagem aprovada ainda neste destino.</p>
-                <Link to="/destinos/cadastrar" className="mt-3 inline-flex rounded-full bg-[#153A4C] px-4 py-2 text-xs font-black text-white">
+                <Link to="/destinos/cadastrar#dados-parceiro" className="mt-3 inline-flex rounded-full bg-[#153A4C] px-4 py-2 text-xs font-black text-white">
                   Cadastrar chalé ou pousada
                 </Link>
               </div>
@@ -589,7 +589,7 @@ export function DestinationDetailPage() {
               </div>
             </div>
 
-            <Link to="/destinos/cadastrar" className="block rounded-[2rem] border border-[#153A4C]/10 bg-[#153A4C] p-5 text-white shadow-[0_18px_50px_-34px_rgba(21,58,76,0.75)]">
+            <Link to="/destinos/cadastrar#dados-parceiro" className="block rounded-[2rem] border border-[#153A4C]/10 bg-[#153A4C] p-5 text-white shadow-[0_18px_50px_-34px_rgba(21,58,76,0.75)]">
               <p className="inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em]">
                 <ForkKnife size={14} weight="duotone" />
                 Participar
@@ -602,7 +602,7 @@ export function DestinationDetailPage() {
 
           {!showListingsSection ? (
             <aside className="space-y-4">
-              <Link to="/destinos/cadastrar" className="block rounded-[2rem] border border-[#153A4C]/10 bg-[#153A4C] p-5 text-white shadow-[0_18px_50px_-34px_rgba(21,58,76,0.75)]">
+              <Link to="/destinos/cadastrar#dados-parceiro" className="block rounded-[2rem] border border-[#153A4C]/10 bg-[#153A4C] p-5 text-white shadow-[0_18px_50px_-34px_rgba(21,58,76,0.75)]">
                 <p className="inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em]">
                   <ForkKnife size={14} weight="duotone" />
                   Participar

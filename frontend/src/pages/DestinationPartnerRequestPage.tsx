@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Bed, CheckCircle, Compass, Handshake, ImageSquare, LinkSimpleHorizontal, Sparkle, UploadSimple } from '@phosphor-icons/react';
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { destinationService } from '../services/destinationService';
@@ -194,6 +194,9 @@ const MediaUploadField = ({ label, hint, urlValue, fileValue, onUrlChange, onFil
 };
 
 export function DestinationPartnerRequestPage() {
+  const formStartRef = useRef<HTMLFormElement | null>(null);
+  const firstPartnerControlRef = useRef<HTMLSelectElement | null>(null);
+  const initialFocusAppliedRef = useRef(false);
   const [destinations, setDestinations] = useState<any[]>([]);
   const [form, setForm] = useState(initialForm);
   const [destinationMode, setDestinationMode] = useState<'existing' | 'new'>('existing');
@@ -238,6 +241,23 @@ export function DestinationPartnerRequestPage() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (loading || initialFocusAppliedRef.current) return;
+    initialFocusAppliedRef.current = true;
+    const timer = window.setTimeout(() => {
+      const isCompactViewport = typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 900px)').matches;
+      const shouldFocusForm =
+        window.location.hash === '#dados-parceiro' ||
+        new URLSearchParams(window.location.search || '').get('focus') === 'partner' ||
+        isCompactViewport;
+      if (!shouldFocusForm) return;
+      formStartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.setTimeout(() => firstPartnerControlRef.current?.focus({ preventScroll: true }), 260);
+    }, 160);
+
+    return () => window.clearTimeout(timer);
+  }, [loading]);
 
   useEffect(() => {
     const cleanedCep = String(form.zipCode || '').replace(/\D/g, '');
@@ -477,7 +497,7 @@ export function DestinationPartnerRequestPage() {
             </div>
           </aside>
 
-          <form onSubmit={submit} className="relative z-10 rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.35)] sm:p-6">
+          <form id="dados-parceiro" ref={formStartRef} onSubmit={submit} className="relative z-10 scroll-mt-[calc(env(safe-area-inset-top)+5rem)] rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.35)] sm:p-6">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Solicitação</p>
@@ -516,7 +536,7 @@ export function DestinationPartnerRequestPage() {
                   <div className="mt-3 grid gap-3 sm:grid-cols-[120px_1fr]">
                     <label>
                       <span className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">UF</span>
-                      <select value={selectedDestinationState} onChange={(event) => handleDestinationStateChange(event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]">
+                      <select ref={firstPartnerControlRef} value={selectedDestinationState} onChange={(event) => handleDestinationStateChange(event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]">
                         {stateOptions.map((state) => (
                           <option key={state} value={state}>{state}</option>
                         ))}
@@ -540,7 +560,7 @@ export function DestinationPartnerRequestPage() {
                   <div className="mt-3 grid gap-3 sm:grid-cols-[120px_1fr]">
                     <label>
                       <span className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">UF</span>
-                      <select value={form.destinationState} onChange={(event) => handleNewDestinationStateChange(event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]">
+                      <select ref={firstPartnerControlRef} value={form.destinationState} onChange={(event) => handleNewDestinationStateChange(event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]">
                         <option value="">Selecione</option>
                         {BRAZIL_STATES.map((state) => (
                           <option key={state.value} value={state.value}>{state.value} · {state.label}</option>

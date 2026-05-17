@@ -19,13 +19,13 @@ export function PublicDestinationShell({
   contextLabel = 'Destinos',
   backTo = '/hub',
   backLabel = 'Voltar',
-  ctaTo = '/destinos/cadastrar',
+  ctaTo = '/destinos/cadastrar#dados-parceiro',
   ctaLabel = 'Cadastrar parceiro',
 }: PublicDestinationShellProps) {
   const navItems = [
     { id: 'home', label: 'Início', to: '/', icon: House },
     { id: 'destinations', label: 'Destinos', to: '/destinos', icon: Compass },
-    { id: 'register', label: 'Participar', to: '/destinos/cadastrar', icon: Plus },
+    { id: 'register', label: 'Participar', to: '/destinos/cadastrar#dados-parceiro', icon: Plus },
   ];
 
   return (

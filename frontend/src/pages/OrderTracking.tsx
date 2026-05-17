@@ -1424,6 +1424,8 @@ export function OrderTracking() {
       <AppGlassHeader
         title="Detalhes do Pedido"
         eyebrow={storeName}
+        eyebrowLogoSrc={storeLogo}
+        eyebrowLogoAlt={storeName}
         subtitle={`Pedido #${orderDisplayId}`}
         onBack={handleBack}
         maxWidthClassName="max-w-5xl"

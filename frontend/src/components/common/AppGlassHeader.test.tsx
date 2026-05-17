@@ -32,4 +32,14 @@ describe('AppGlassHeader', () => {
 
     expect(onBack).toHaveBeenCalledTimes(1);
   });
+
+  it('can render a contextual logo in the eyebrow', () => {
+    render(
+      <MemoryRouter>
+        <AppGlassHeader title="Detalhes do Pedido" eyebrow="Loja Teste" eyebrowLogoSrc="/loja.png" eyebrowLogoAlt="Logo da loja" />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByAltText('Logo da loja')).toHaveAttribute('src', '/loja.png');
+  });
 });

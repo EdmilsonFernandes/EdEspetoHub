@@ -88,30 +88,30 @@ export function DestinationsPage() {
 
   return (
     <PublicDestinationShell active="destinations" backTo="/hub" backLabel="Voltar" contextLabel="Destinos turísticos">
-      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,#d7f4e8_0,#f4f1ea_38%,#efe5d1_100%)] px-4 pb-5 pt-5">
+      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,#d7f4e8_0,#f4f1ea_38%,#efe5d1_100%)] px-4 pb-4 pt-4">
         <div className="absolute -right-20 top-8 h-64 w-64 rounded-full bg-emerald-300/25 blur-3xl" />
         <div className="absolute -left-20 bottom-0 h-56 w-56 rounded-full bg-amber-300/25 blur-3xl" />
         <div className="relative mx-auto max-w-6xl">
-          <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-end">
             <div className="min-w-0">
               <p className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-white">
                 <Mountains size={14} weight="duotone" />
                 Destinos turísticos
               </p>
-              <h1 className="mt-3 max-w-3xl text-3xl font-black leading-[0.98] tracking-[-0.05em] text-slate-950 sm:text-5xl">
-                Escolha uma cidade e veja o que tem por perto.
+              <h1 className="mt-2 max-w-3xl text-2xl font-black leading-[1.02] tracking-[-0.05em] text-slate-950 sm:text-4xl">
+                Escolha uma cidade turística e veja o que explorar.
               </h1>
-              <p className="mt-3 max-w-2xl text-sm font-semibold leading-relaxed text-slate-600 sm:text-base">
+              <p className="mt-2 max-w-2xl text-sm font-semibold leading-relaxed text-slate-600 sm:text-base">
                 Chalés, pousadas, comida, passeios e serviços locais em um guia direto para sua viagem.
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-2 rounded-[1.5rem] border border-white/80 bg-white/76 p-2 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.42)] backdrop-blur lg:min-w-[22rem]">
+            <div className="grid grid-cols-3 gap-2 rounded-[1.35rem] border border-white/80 bg-white/76 p-2 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.42)] backdrop-blur lg:min-w-[20rem]">
               {[
                 { value: stats.cities, label: 'cidades' },
                 { value: stats.places, label: 'hospedagens' },
                 { value: stats.listings, label: 'serviços' },
               ].map((stat) => (
-                <div key={stat.label} className="rounded-[1.1rem] bg-white/86 px-3 py-3 text-center ring-1 ring-slate-200/70">
+                <div key={stat.label} className="rounded-[1rem] bg-white/86 px-3 py-2.5 text-center ring-1 ring-slate-200/70">
                   <p className="text-xl font-black tracking-[-0.04em] text-[#153A4C]">{stat.value}</p>
                   <p className="mt-1 truncate text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">{stat.label}</p>
                 </div>
@@ -119,7 +119,7 @@ export function DestinationsPage() {
             </div>
           </div>
 
-          <div className="mt-5 rounded-[1.5rem] border border-white/80 bg-white/86 p-2 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.42)] backdrop-blur">
+          <div className="mt-4 rounded-[1.5rem] border border-white/80 bg-white/86 p-2 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.42)] backdrop-blur">
             <label className="flex min-h-[3.25rem] items-center gap-3 rounded-[1.15rem] bg-slate-50 px-4 ring-1 ring-slate-200 focus-within:ring-[#336886]/30">
               <MagnifyingGlass size={18} weight="bold" className="shrink-0 text-slate-400" />
               <input
@@ -158,9 +158,9 @@ export function DestinationsPage() {
             <Link
               key={destination.id}
               to={`/destinos/${destination.slug}`}
-              className="group grid overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_18px_48px_-34px_rgba(15,23,42,0.35)] transition hover:-translate-y-1 sm:min-h-[13.75rem] sm:grid-cols-[170px_minmax(0,1fr)]"
+              className="group grid overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_18px_48px_-34px_rgba(15,23,42,0.35)] transition hover:-translate-y-1 sm:min-h-[12.5rem] sm:grid-cols-[154px_minmax(0,1fr)]"
             >
-              <div className="relative h-40 overflow-hidden bg-slate-100 sm:h-full sm:min-h-[13.75rem]">
+              <div className="relative h-36 overflow-hidden bg-slate-100 sm:h-full sm:min-h-[12.5rem]">
                 <img src={destinationImage(destination)} alt={destination.name} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                 <div className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-[11px] font-black text-slate-700 shadow-sm">
                   {destinationLocationLabel(destination)}

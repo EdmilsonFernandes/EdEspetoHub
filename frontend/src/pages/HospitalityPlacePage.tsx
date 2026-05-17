@@ -583,7 +583,7 @@ export function HospitalityPlacePage() {
                 <p className="mt-2 text-sm font-bold leading-relaxed text-slate-700">{place.deliveryInstructions}</p>
               </div>
             ) : null}
-            <Link to="/destinos/cadastrar" className="block rounded-[1.5rem] bg-[#153A4C] p-4 text-white">
+            <Link to="/destinos/cadastrar#dados-parceiro" className="block rounded-[1.5rem] bg-[#153A4C] p-4 text-white">
               <ForkKnife size={22} weight="duotone" />
               <h3 className="mt-3 text-lg font-bold">Quer aparecer neste chalé?</h3>
               <p className="mt-1 text-sm font-semibold text-white/72">Cadastre sua loja ou serviço para atender hóspedes pelo app ou WhatsApp.</p>

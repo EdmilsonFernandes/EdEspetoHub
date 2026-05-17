@@ -49,6 +49,7 @@ import { ProfileDrawer } from '../components/Marketplace/ProfileDrawer';
 import { CondominiumStatusModal } from '../components/Marketplace/CondominiumStatusModal';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { SegmentPromoCarousel } from '../components/common/SegmentPromoCarousel';
+import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { APP_BUILD_INFO } from '../generated/buildInfo';
 import { nativeBiometricService } from '../services/nativeBiometricService';
 import { useAuth } from '../contexts/AuthContext';
@@ -2841,9 +2842,9 @@ export function MarketplacePage() {
           hasEntered ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}
       >
-        <header className={`sticky top-0 z-[60] transition-all duration-300 ${isNativePlatform ? 'bg-[#EEF2F7]/96 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.22)] backdrop-blur-xl' : isHeaderElevated ? 'bg-[#EEF2F7]/92 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.35)] backdrop-blur-2xl' : 'bg-transparent'}`}>
+        <header className={`sticky top-0 z-[60] border-b border-white/55 transition-all duration-300 ${isNativePlatform ? 'bg-[linear-gradient(180deg,rgba(234,245,250,0.84)_0%,rgba(255,255,255,0.62)_100%)] shadow-[0_14px_30px_-24px_rgba(21,58,76,0.24)] backdrop-blur-2xl' : isHeaderElevated ? 'bg-[linear-gradient(180deg,rgba(234,245,250,0.78)_0%,rgba(255,255,255,0.58)_100%)] shadow-[0_18px_42px_-34px_rgba(21,58,76,0.32)] backdrop-blur-2xl' : 'bg-[linear-gradient(180deg,rgba(234,245,250,0.46)_0%,rgba(255,255,255,0.12)_100%)] backdrop-blur-xl'}`}>
           <div className={`mx-auto max-w-[1200px] px-4 ${isNativePlatform ? 'pb-2 pt-[max(0.55rem,calc(env(safe-area-inset-top)+0.1rem))]' : 'pb-3 pt-[max(0.85rem,calc(env(safe-area-inset-top)+0.2rem))]'}`}>
-            <div className={`${isNativePlatform ? 'space-y-2.5 rounded-[1.65rem] px-2.5 py-2.5' : 'space-y-3 rounded-[1.9rem] px-3 py-3'} relative overflow-hidden border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.95)_0%,rgba(241,247,246,0.9)_54%,rgba(255,255,255,0.92)_100%)] shadow-[0_22px_54px_-38px_rgba(15,23,42,0.46)] ring-1 ring-slate-200/55 backdrop-blur-2xl`}>
+            <div className={`${isNativePlatform ? 'space-y-2.5 rounded-[1.65rem] px-2.5 py-2.5' : 'space-y-3 rounded-[1.9rem] px-3 py-3'} relative overflow-hidden border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.82)_0%,rgba(238,247,250,0.64)_54%,rgba(255,255,255,0.72)_100%)] shadow-[0_22px_54px_-38px_rgba(21,58,76,0.34)] ring-1 ring-slate-200/45 backdrop-blur-2xl`}>
             <div className="pointer-events-none absolute -left-12 -top-16 h-36 w-36 rounded-full bg-[#336886]/10 blur-3xl" />
             <div className="pointer-events-none absolute -right-10 top-6 h-28 w-28 rounded-full bg-emerald-200/35 blur-3xl" />
             {/* Linha 1: Perfil e Logo */}
@@ -2878,7 +2879,7 @@ export function MarketplacePage() {
               <button
                 type="button"
                 onClick={handleHubNotificationClick}
-                className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] border border-[#336886]/18 bg-[#153A4C] text-white shadow-[0_14px_26px_-18px_rgba(21,58,76,0.55)] ring-1 ring-[#336886]/10 backdrop-blur-sm transition-all duration-150 ease-out hover:bg-[#1e4d62] active:scale-95"
+                className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] border border-white/80 bg-white/76 text-[#153A4C] shadow-[0_14px_26px_-20px_rgba(21,58,76,0.38)] ring-1 ring-[#d7e7ef]/75 backdrop-blur-xl transition-all duration-150 ease-out hover:bg-white active:scale-95"
                 aria-label={hubNotificationCount > 0 ? `${hubNotificationCount} notificação de pedido` : 'Abrir notificações'}
                 title={hubNotificationCount > 0 ? 'Pedidos em andamento' : 'Notificações'}
               >
@@ -3179,7 +3180,7 @@ export function MarketplacePage() {
                     <Mountains size={12} weight="duotone" />
                     Destinos
                   </p>
-                  <h2 className="mt-1 line-clamp-1 text-base font-black tracking-[-0.03em] text-slate-950">Escapadas perto de você</h2>
+                  <h2 className="mt-1 line-clamp-1 text-base font-black tracking-[-0.03em] text-slate-950">Cidades para explorar</h2>
                 </div>
                 <Link to={destinationListHref} className="shrink-0 rounded-full bg-[#153A4C] px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-white">
                   Ver todos
@@ -4216,32 +4217,23 @@ export function MarketplacePage() {
 
       {condominiumPickerOpen && (
         <div className="fixed inset-0 z-[220] overflow-x-hidden overflow-y-auto overscroll-x-none bg-[radial-gradient(circle_at_top,rgba(51,104,134,0.10),transparent_26%),linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)] text-slate-950">
-            <div className="mx-auto min-h-screen w-full max-w-[640px] overflow-x-hidden pb-28">
-            <div className="relative overflow-x-hidden px-4 pb-4 pt-[max(env(safe-area-inset-top),0.6rem)]">
-              <div className="pointer-events-none absolute -right-12 -top-10 h-56 w-56 rounded-full bg-[#336886]/12 blur-3xl" />
-
-              <div className="relative mb-4 flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => { setCondominiumPickerOpen(false); setCondominiumSearch(''); setCondoPickerFilter('all'); }}
-                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/70 bg-white/80 text-slate-700 shadow-[0_18px_36px_-22px_rgba(15,23,42,0.35)] backdrop-blur-xl transition-colors hover:bg-white active:scale-95"
-                  aria-label="Voltar"
-                >
-                  <CaretRight size={16} weight="bold" className="rotate-180" />
-                </button>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Condomínios</p>
-                  <h1 className="mt-1 truncate text-[1.08rem] font-black leading-tight tracking-[-0.03em] text-slate-950 sm:text-[1.18rem]">
-                    Escolha a feira do seu condomínio
-                  </h1>
-                </div>
-                <div className="shrink-0 min-w-[5.25rem] rounded-[1.25rem] border border-[#bfd6e4]/80 bg-white/82 px-3 py-2 text-center shadow-[0_16px_30px_-22px_rgba(51,104,134,0.28)] backdrop-blur-md">
-                  <p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#336886]">Ao vivo</p>
-                  <p className="mt-1 text-lg font-black leading-none text-slate-950">
-                    {condominiumPickerCounts.live}
-                  </p>
-                </div>
+          <AppGlassHeader
+            title="Agenda"
+            eyebrow="Condomínios"
+            subtitle="Feiras e eventos disponíveis"
+            onBack={() => { setCondominiumPickerOpen(false); setCondominiumSearch(''); setCondoPickerFilter('all'); }}
+            className="!z-[240]"
+            maxWidthClassName="max-w-[640px]"
+            right={(
+              <div className="rounded-full border border-[#bfd6e4]/80 bg-white/78 px-3 py-1.5 text-center shadow-[0_14px_26px_-22px_rgba(51,104,134,0.32)] backdrop-blur-xl">
+                <p className="text-[8px] font-black uppercase tracking-[0.1em] text-[#336886]">Ao vivo</p>
+                <p className="text-sm font-black leading-none text-slate-950">{condominiumPickerCounts.live}</p>
               </div>
+            )}
+          />
+          <div className="mx-auto min-h-screen w-full max-w-[640px] overflow-x-hidden pb-28 pt-[calc(env(safe-area-inset-top)+4.65rem)]">
+            <div className="relative overflow-x-hidden px-4 pb-4 pt-3">
+              <div className="pointer-events-none absolute -right-12 -top-10 h-56 w-56 rounded-full bg-[#336886]/12 blur-3xl" />
 
               <div className="relative rounded-[2rem] border border-slate-200/80 bg-white px-4 py-5 shadow-[0_24px_52px_-36px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/55">
                 <div className="relative mb-4 flex items-start justify-between gap-3">
