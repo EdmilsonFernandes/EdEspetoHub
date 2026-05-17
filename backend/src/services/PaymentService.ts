@@ -34,6 +34,7 @@ import { MotoboyPaymentAccountService } from './MotoboyPaymentAccountService';
 import { PaymentAuditService } from './PaymentAuditService';
 import { PAYMENT_AUDIT_ENTITY, PAYMENT_AUDIT_FLOW, PAYMENT_AUDIT_STAGE } from '../utils/paymentAudit';
 import { AuditNotificationService } from './AuditNotificationService';
+import { isMercadoPagoApprovedStatus, isMercadoPagoFailedStatus, isMercadoPagoPendingStatus } from '../utils/mercadoPagoStatus';
 /**
  * Provides PaymentService functionality.
  *
@@ -469,9 +470,9 @@ private resolvePlanChargeAmount(plan: Plan) {
       if (paymentId.startsWith('delivery_cycle:')) {
         const cycleId = paymentId.replace('delivery_cycle:', '');
         await auditByReference(PAYMENT_AUDIT_FLOW.DELIVERY_CYCLE, PAYMENT_AUDIT_ENTITY.DELIVERY_BILLING_CYCLE, cycleId);
-        if (mpPayment.status === 'approved') {
+        if (isMercadoPagoApprovedStatus(mpPayment.status)) {
           await this.deliveryBillingService.markPaidFromWebhook(cycleId, mpPayment);
-        } else {
+        } else if (isMercadoPagoFailedStatus(mpPayment.status)) {
           await this.deliveryBillingService.markFailedFromWebhook(cycleId, mpPayment);
         }
         return { status: mpPayment.status };
@@ -497,19 +498,21 @@ private resolvePlanChargeAmount(plan: Plan) {
       if (paymentId.startsWith('featured_request:')) {
         const requestId = paymentId.replace('featured_request:', '');
         await auditByReference(PAYMENT_AUDIT_FLOW.FEATURED_REQUEST, PAYMENT_AUDIT_ENTITY.FEATURED_REQUEST, requestId);
-        if (mpPayment.status === 'approved') {
+        if (isMercadoPagoApprovedStatus(mpPayment.status)) {
           await this.featuredProductService.markPaidFromWebhook(requestId, mpPayment);
-        } else {
+        } else if (isMercadoPagoFailedStatus(mpPayment.status)) {
           await this.featuredProductService.markFailedFromWebhook(requestId, mpPayment);
+        } else if (isMercadoPagoPendingStatus(mpPayment.status)) {
+          await this.featuredProductService.markPendingFromProvider(requestId, mpPayment);
         }
         return { status: mpPayment.status };
       }
       if (paymentId.startsWith('order_payment:')) {
         const orderPaymentId = paymentId.replace('order_payment:', '');
         await auditByReference(PAYMENT_AUDIT_FLOW.ORDER, PAYMENT_AUDIT_ENTITY.ORDER_PAYMENT, orderPaymentId);
-        if (mpPayment.status === 'approved') {
+        if (isMercadoPagoApprovedStatus(mpPayment.status)) {
           await this.orderPaymentService.markPaidFromWebhook(orderPaymentId, mpPayment);
-        } else {
+        } else if (isMercadoPagoFailedStatus(mpPayment.status)) {
           await this.orderPaymentService.markFailedFromWebhook(orderPaymentId, mpPayment);
         }
         return { status: mpPayment.status };

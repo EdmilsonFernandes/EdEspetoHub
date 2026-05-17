@@ -9,6 +9,7 @@ import { AppError } from '../errors/AppError';
 import { MercadoPagoService } from './MercadoPagoService';
 import { PaymentAuditService } from './PaymentAuditService';
 import { PAYMENT_AUDIT_ENTITY, PAYMENT_AUDIT_FLOW, PAYMENT_AUDIT_STAGE } from '../utils/paymentAudit';
+import { isMercadoPagoApprovedStatus, isMercadoPagoFailedStatus, isMercadoPagoPendingStatus } from '../utils/mercadoPagoStatus';
 
 const normalizeStatus = (value?: string) => String(value || '').trim().toUpperCase();
 const DURATION_OPTIONS = {
@@ -344,10 +345,12 @@ export class FeaturedProductService {
         eventStage: PAYMENT_AUDIT_STAGE.MANUAL_REFRESH,
       });
       const mpStatus = String(mpPayment?.status || '').trim().toLowerCase();
-      if (mpStatus === 'approved') {
+      if (isMercadoPagoApprovedStatus(mpStatus)) {
         await this.markPaidFromWebhook(requestId, mpPayment);
-      } else if ([ 'rejected', 'cancelled', 'charged_back', 'refunded', 'failed' ].includes(mpStatus)) {
+      } else if (isMercadoPagoFailedStatus(mpStatus)) {
         await this.markFailedFromWebhook(requestId, mpPayment);
+      } else if (isMercadoPagoPendingStatus(mpStatus)) {
+        await this.markPendingFromProvider(requestId, mpPayment);
       }
     } catch {
       // Keep current state and return latest row.
@@ -443,6 +446,48 @@ export class FeaturedProductService {
         localFeaturedStatus: 'PAYMENT_FAILED',
       },
       success: false,
+    });
+  }
+
+  async markPendingFromProvider(requestId: string, mpPayment?: any) {
+    const row = await this.repo.findOne({ where: { id: requestId }, relations: [ 'store' ] });
+    if (!row) return;
+    if (String(row.paymentStatus || '').toUpperCase() === 'PAID') return;
+
+    const previousPaymentStatus = String(row.paymentStatus || '').toUpperCase();
+    const previousFeaturedStatus = String(row.status || '').toUpperCase();
+    const shouldRepair =
+      previousPaymentStatus === 'FAILED' ||
+      previousFeaturedStatus === 'PAYMENT_FAILED';
+
+    row.paymentStatus = 'PENDING';
+    if (previousFeaturedStatus === 'PAYMENT_FAILED') {
+      row.status = 'PENDING_PAYMENT';
+    }
+    row.paymentProvider = 'MERCADO_PAGO';
+    if (mpPayment?.id) row.paymentProviderId = String(mpPayment.id);
+
+    const saved = await this.repo.save(row);
+    if (!shouldRepair) return;
+
+    await this.paymentAuditService.record({
+      provider: 'MERCADO_PAGO',
+      flowType: PAYMENT_AUDIT_FLOW.FEATURED_REQUEST,
+      eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
+      entityType: PAYMENT_AUDIT_ENTITY.FEATURED_REQUEST,
+      entityId: saved.id,
+      storeId: String((saved as any).store?.id || ''),
+      externalReference: `featured_request:${saved.id}`,
+      providerPaymentId: mpPayment?.id ? String(mpPayment.id) : saved.paymentProviderId || null,
+      providerStatus: mpPayment?.status || 'pending',
+      providerStatusDetail: mpPayment?.status_detail || null,
+      responsePayload: {
+        localPaymentStatus: 'PENDING',
+        localFeaturedStatus: saved.status,
+        repairedFromPaymentStatus: previousPaymentStatus || null,
+        repairedFromFeaturedStatus: previousFeaturedStatus || null,
+      },
+      success: true,
     });
   }
 
