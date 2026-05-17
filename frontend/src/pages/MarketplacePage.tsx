@@ -27,7 +27,6 @@ import {
   Buildings,
   CalendarBlank,
   Clock,
-  Compass,
   MapPinLine,
   Mountains,
   UserCircle,
@@ -1913,6 +1912,11 @@ export function MarketplacePage() {
   const selectedCondominiumBannerUrl = selectedCondominium
     ? resolveCondominiumAssetUrl(selectedCondominium, 'banner')
     : '';
+  const homeDestinationHighlights = useMemo(() => {
+    return destinations
+      .filter((destination) => String(destination?.slug || '').trim())
+      .slice(0, 6);
+  }, [destinations]);
   const homeCondominiumHighlights = useMemo(() => {
     const stateRank = (condominium: HubCondominium) => {
       const state = String(condominium.eventSummary?.state || '').trim().toLowerCase();
@@ -2492,6 +2496,16 @@ export function MarketplacePage() {
     setCondominiumPickerOpen(true);
   }, []);
 
+  const scrollStoresIntoView = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    window.setTimeout(() => {
+      const el = storesSectionRef.current;
+      if (!el) return;
+      const y = el.getBoundingClientRect().top + window.scrollY - 168;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    }, 90);
+  }, []);
+
   const handleCondominiumSelection = useCallback((slugValue: string, nameValue: string, event?: CondominiumEventSummary | null) => {
     const slug = String(slugValue || '').trim();
     if (!slug) return;
@@ -2718,7 +2732,7 @@ export function MarketplacePage() {
   return (
     <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[radial-gradient(ellipse_at_top_right,rgba(51,104,134,0.16),transparent_38%),radial-gradient(ellipse_at_bottom_left,rgba(21,58,76,0.08),transparent_40%),linear-gradient(180deg,#EEF2F7_0%,#F4F8FB_50%,#EEF2F7_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
       {/* Elemento Decorativo de Fundo (Premium Look) */}
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-[55] h-[max(env(safe-area-inset-top),0.75rem)] bg-[#EEF2F7]" />
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-[70] h-[env(safe-area-inset-top)] bg-[#153A4C]" />
       <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[320px] bg-gradient-to-b from-[#336886]/8 via-white/30 to-transparent" />
       <div className="fixed left-[-8%] top-[10%] h-[28%] w-[38%] rounded-full bg-[#336886]/6 blur-[130px] pointer-events-none -z-10" />
       <div className="fixed top-[-10%] right-[-10%] h-[44%] w-[52%] bg-[#153A4C]/18 blur-[110px] rounded-full pointer-events-none -z-10" />
@@ -3088,6 +3102,55 @@ export function MarketplacePage() {
             </div>
           )}
 
+          {debouncedQuery.length < 2 && !selectedCondominium && (homeDestinationHighlights.length > 0 || condominiums.length > 0 || scopedEnrichedStores.length > 0) && (
+            <section className="-mx-0.5 overflow-hidden">
+              <div className="flex gap-2 overflow-x-auto pb-1 px-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetMarketplaceFilters();
+                    scrollStoresIntoView();
+                  }}
+                  className="inline-flex h-10 shrink-0 items-center gap-2 rounded-full bg-[#153A4C] px-3.5 text-xs font-black text-white shadow-[0_14px_28px_-18px_rgba(21,58,76,0.5)] transition active:scale-95"
+                >
+                  <ForkKnife size={15} weight="fill" />
+                  Pedir agora
+                </button>
+                {homeDestinationHighlights.length > 0 ? (
+                  <Link
+                    to={destinationListHref}
+                    className="inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-[#153A4C]/10 bg-white/88 px-3.5 text-xs font-black text-[#153A4C] shadow-[0_12px_24px_-20px_rgba(15,23,42,0.22)] transition active:scale-95"
+                  >
+                    <Mountains size={15} weight="duotone" />
+                    Destinos
+                  </Link>
+                ) : null}
+                {condominiums.length > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => openCondominiumPicker('all')}
+                    className="inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-[#153A4C]/10 bg-white/88 px-3.5 text-xs font-black text-[#153A4C] shadow-[0_12px_24px_-20px_rgba(15,23,42,0.22)] transition active:scale-95"
+                  >
+                    <CalendarBlank size={15} weight="duotone" />
+                    Feiras
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQuickFilter('nearby');
+                    setSegmentFilter('all');
+                    scrollStoresIntoView();
+                  }}
+                  className="inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-sky-100 bg-sky-50/80 px-3.5 text-xs font-black text-sky-700 shadow-[0_12px_24px_-20px_rgba(14,165,233,0.22)] transition active:scale-95"
+                >
+                  <MapPinLine size={15} weight="duotone" />
+                  Perto de mim
+                </button>
+              </div>
+            </section>
+          )}
+
           {/* Carrossel de Banners - Esconde na busca para focar no resultado */}
           {debouncedQuery.length < 2 && !selectedCondominium && homePromoSlides.length > 0 && (
             <div className="animate-in fade-in slide-in-from-top-4 duration-500" style={{ animationDelay: '80ms' }}>
@@ -3100,7 +3163,7 @@ export function MarketplacePage() {
                     <p className="mt-0.5 text-xs font-semibold text-slate-500">Novidades e oportunidades para começar melhor.</p>
                   </div>
                   <span className="hidden rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 shadow-sm sm:inline-flex">
-                    Hub
+                    Início
                   </span>
                 </div>
                 <SegmentPromoCarousel mode="hub" slides={homePromoSlides} className="mx-0 shadow-[0_18px_42px_-28px_rgba(15,23,42,0.45)]" />
@@ -3108,40 +3171,50 @@ export function MarketplacePage() {
             </div>
           )}
 
-          {debouncedQuery.length < 2 && !selectedCondominium && destinations.length > 0 && (
-            <section className="mb-5 overflow-hidden rounded-[1.7rem] border border-slate-200/80 bg-white/88 p-3 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.38)] ring-1 ring-white/70 backdrop-blur-xl">
+          {debouncedQuery.length < 2 && !selectedCondominium && homeDestinationHighlights.length > 0 && (
+            <section className="mb-5 overflow-hidden rounded-[1.85rem] border border-slate-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.94)_0%,rgba(248,250,252,0.9)_100%)] p-3 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.38)] ring-1 ring-white/70 backdrop-blur-xl">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="inline-flex items-center gap-1.5 rounded-full bg-[#153A4C]/8 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-[#153A4C]">
                     <Mountains size={12} weight="duotone" />
                     Destinos
                   </p>
-                  <h2 className="mt-1 line-clamp-1 text-base font-black tracking-[-0.03em] text-slate-950">Chalés, pousadas e experiências locais</h2>
+                  <h2 className="mt-1 line-clamp-1 text-base font-black tracking-[-0.03em] text-slate-950">Escapadas perto de você</h2>
                 </div>
                 <Link to={destinationListHref} className="shrink-0 rounded-full bg-[#153A4C] px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-white">
                   Ver todos
                 </Link>
               </div>
-              <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {destinations.slice(0, 8).map((destination) => (
-                  <Link
-                    key={destination.id || destination.slug}
-                    to={`/destinos/${destination.slug}`}
-                    className="group flex min-w-[13.5rem] items-center gap-2 rounded-[1.25rem] border border-slate-100 bg-slate-50/80 p-2 transition active:scale-[0.99]"
-                  >
-                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
-                      <img src={resolveDestinationAssetUrl(destination)} alt={String(destination.name || 'Destino')} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="line-clamp-1 text-sm font-black text-slate-950">{destination.name}</p>
-                      <p className="line-clamp-1 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">{formatDestinationMatchLabel(destination)}</p>
-                      <p className="mt-0.5 inline-flex items-center gap-1 text-[10px] font-black text-[#153A4C]">
-                        {destination.placesCount || 0} hospedagens
-                        <Compass size={10} weight="bold" />
-                      </p>
-                    </div>
-                  </Link>
-                ))}
+              <div className="mt-3 flex gap-2.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {homeDestinationHighlights.map((destination, index) => {
+                  const placesCount = Number(destination.placesCount || 0);
+                  const listingsCount = Number(destination.listingsCount || 0);
+                  const countLabel = placesCount > 0
+                    ? `${placesCount} hospedagem${placesCount === 1 ? '' : 's'}`
+                    : listingsCount > 0
+                      ? (listingsCount === 1 ? '1 local' : `${listingsCount} locais`)
+                      : 'Curadoria local';
+                  return (
+                    <Link
+                      key={destination.id || destination.slug}
+                      to={`/destinos/${destination.slug}`}
+                      className={`group flex shrink-0 flex-col overflow-hidden rounded-[1.35rem] border border-white/80 bg-white text-left shadow-[0_16px_34px_-28px_rgba(15,23,42,0.45)] ring-1 ring-slate-200/70 transition hover:-translate-y-0.5 hover:shadow-[0_22px_44px_-30px_rgba(15,23,42,0.5)] active:scale-[0.99] ${index === 0 ? 'w-[16.5rem]' : 'w-[14.25rem]'}`}
+                    >
+                      <div className={`relative overflow-hidden bg-slate-100 ${index === 0 ? 'h-20' : 'h-16'}`}>
+                        <img src={resolveDestinationAssetUrl(destination)} alt={String(destination.name || 'Destino')} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+                        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.02)_0%,rgba(15,23,42,0.22)_100%)]" />
+                      </div>
+                      <div className="min-w-0 p-2.5">
+                        <p className="line-clamp-1 text-sm font-black tracking-[-0.02em] text-slate-950">{destination.name}</p>
+                        <p className="mt-0.5 line-clamp-1 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">{formatDestinationMatchLabel(destination)}</p>
+                        <p className="mt-1 inline-flex max-w-full items-center gap-1 rounded-full bg-[#153A4C]/7 px-2 py-1 text-[10px] font-black text-[#153A4C]">
+                          <Sparkle size={10} weight="fill" />
+                          <span className="truncate">{countLabel}</span>
+                        </p>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             </section>
           )}
@@ -3245,7 +3318,7 @@ export function MarketplacePage() {
                   </div>
                 </div>
               ) : (
-                <section className="overflow-hidden rounded-[1.7rem] border border-slate-200/80 bg-white/88 p-3 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.38)] ring-1 ring-white/70 backdrop-blur-xl">
+                <section className="overflow-hidden rounded-[1.7rem] border border-slate-200/80 bg-white/88 p-3 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.34)] ring-1 ring-white/70 backdrop-blur-xl">
                   {(() => {
                     const liveCount = condominiums.filter(c => c.eventSummary?.state === 'live').length;
                     return (
@@ -3267,7 +3340,7 @@ export function MarketplacePage() {
                                 </span>
                               ) : null}
                             </div>
-                            <h2 className="mt-1 line-clamp-1 text-base font-black tracking-[-0.03em] text-slate-950">Condomínios com agenda local</h2>
+                            <h2 className="mt-1 line-clamp-1 text-base font-black tracking-[-0.03em] text-slate-950">Agenda em condomínios</h2>
                           </div>
                           <button
                             type="button"
@@ -3298,29 +3371,43 @@ export function MarketplacePage() {
                                 key={slug}
                                 type="button"
                                 onClick={() => handleCondominiumSelection(slug, name, event)}
-                                className="group flex min-w-[13.5rem] items-center gap-2 rounded-[1.25rem] border border-slate-100 bg-slate-50/80 p-2 text-left transition hover:border-[#153A4C]/18 hover:bg-white active:scale-[0.99]"
+                                className="group relative min-w-[16.25rem] overflow-hidden rounded-[1.35rem] border border-slate-100 bg-[linear-gradient(135deg,rgba(248,250,252,0.96)_0%,rgba(255,255,255,0.98)_58%,rgba(240,249,255,0.82)_100%)] p-3 text-left shadow-[0_14px_30px_-26px_rgba(15,23,42,0.32)] transition hover:border-[#153A4C]/18 hover:bg-white active:scale-[0.99]"
                               >
-                                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
-                                  <img
-                                    src={logoUrl || bannerUrl}
-                                    alt={name}
-                                    loading="lazy"
-                                    decoding="async"
-                                    className="h-full w-full object-contain p-1.5 transition duration-500 group-hover:scale-105"
-                                    onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }}
-                                  />
-                                  {eventState === 'live' ? (
-                                    <span className="absolute bottom-1.5 right-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500 shadow-[0_6px_12px_-6px_rgba(16,185,129,0.8)]" />
-                                  ) : null}
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                  <p className="line-clamp-1 text-sm font-black text-slate-950">{name}</p>
-                                  <p className="line-clamp-1 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">{region || 'Operação local'}</p>
-                                  <p className="mt-0.5 inline-flex max-w-full items-center gap-1 text-[10px] font-black text-[#153A4C]">
-                                    {eventState === 'live' ? <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" /> : <Clock size={10} weight="bold" className="shrink-0" />}
-                                    <span className="truncate">{statusLabel} · {agendaLine}</span>
-                                    <CaretRight size={10} weight="bold" className="shrink-0" />
-                                  </p>
+                                <div className="pointer-events-none absolute -right-5 -top-6 h-16 w-16 rounded-full bg-[#336886]/10 blur-2xl transition group-hover:bg-[#336886]/16" />
+                                <div className="relative flex items-start gap-2.5">
+                                  <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-[1rem] bg-white shadow-sm ring-1 ring-slate-100">
+                                    <img
+                                      src={logoUrl || bannerUrl}
+                                      alt={name}
+                                      loading="lazy"
+                                      decoding="async"
+                                      className="h-full w-full object-contain p-1.5 transition duration-500 group-hover:scale-105"
+                                      onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }}
+                                    />
+                                    {eventState === 'live' ? (
+                                      <span className="absolute bottom-1 right-1 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500 shadow-[0_6px_12px_-6px_rgba(16,185,129,0.8)]" />
+                                    ) : null}
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.1em] ${
+                                        eventState === 'live'
+                                          ? 'bg-emerald-500 text-white'
+                                          : eventState === 'upcoming'
+                                            ? 'bg-sky-100 text-sky-700'
+                                            : 'bg-slate-100 text-slate-600'
+                                      }`}>
+                                        {statusLabel}
+                                      </span>
+                                      <span className="min-w-0 truncate text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">{region || 'Operação local'}</span>
+                                    </div>
+                                    <p className="mt-1 line-clamp-1 text-sm font-black text-slate-950">{name}</p>
+                                    <p className="mt-0.5 inline-flex max-w-full items-center gap-1 text-[10px] font-black text-[#153A4C]">
+                                      {eventState === 'live' ? <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" /> : <Clock size={10} weight="bold" className="shrink-0" />}
+                                      <span className="truncate">{agendaLine}</span>
+                                      <CaretRight size={10} weight="bold" className="shrink-0" />
+                                    </p>
+                                  </div>
                                 </div>
                               </button>
                             );

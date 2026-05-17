@@ -107,6 +107,14 @@ Backend API (chamanoespeto-api :4000)
 - **APIs BFF (`apis/`)**: camada intermediária. Recebe todas as chamadas do frontend. Pode ter lógica própria (processors via bus) ou fazer proxy transparente pro backend. Toda rota nova que o frontend precisar deve ser registrada aqui.
 - **Backend (`backend/`)**: motor de dados. TypeORM, migrations, jobs, webhooks, uploads. O BFF consome ele via HTTP interno (`http://api:4000/api`).
 
+### Padrão UX/UI para novas telas
+
+- Antes de criar qualquer tela nova no frontend, localizar e reutilizar o shell/template existente mais próximo do fluxo.
+- Toda tela nova navegável deve manter a identidade visual do app: paleta, raio de borda, tipografia, espaçamento, ícones e padrão de botões já usados no módulo.
+- Toda tela nova fora de fluxo modal deve ter navegação explícita de voltar, visível principalmente no mobile, sem depender apenas de gesto do sistema.
+- Em telas mobile/native, considerar `env(safe-area-inset-top)` e `env(safe-area-inset-bottom)` para não brigar com status bar ou menu inferior.
+- Não criar componentes com aparência isolada do restante do app; se faltar padrão, criar um shell/componente compartilhado antes de duplicar UI.
+
 ### Onde implementar algo novo
 
 - **Nova rota que o frontend consome**: registrar no BFF (`apis/src/domains/proxy/proxy.routes.ts` se for proxy, ou criar controller+processor se tiver lógica própria).

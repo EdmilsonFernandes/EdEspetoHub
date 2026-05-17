@@ -283,7 +283,7 @@ export function HospitalityPlacePage() {
   }, [place.id, placeBannerImages.length]);
 
   return (
-    <PublicDestinationShell active="place" backTo={`/destinos/${destinationSlug}`} backLabel="Cidade" contextLabel={place.name || 'Hospedagem'}>
+    <PublicDestinationShell active="place" backTo={`/destinos/${destinationSlug}`} backLabel="Voltar" contextLabel={place.name || 'Hospedagem'}>
       <section className="relative overflow-hidden bg-[radial-gradient(circle_at_12%_0%,rgba(51,104,134,0.16),transparent_34%),radial-gradient(circle_at_88%_8%,rgba(240,180,72,0.18),transparent_30%),linear-gradient(135deg,#f7f1e4,#eef6f1_58%,#eadfc8)] px-4 pb-5 pt-5">
         <div className="absolute -right-20 top-12 h-64 w-64 rounded-full bg-[#336886]/14 blur-3xl" />
         <div className="absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-amber-300/18 blur-3xl" />

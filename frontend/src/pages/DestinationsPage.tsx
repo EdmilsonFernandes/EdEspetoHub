@@ -87,7 +87,7 @@ export function DestinationsPage() {
   }, [destinations, searchTerm]);
 
   return (
-    <PublicDestinationShell active="destinations" backTo="/hub" backLabel="Hub" contextLabel="Destinos turísticos">
+    <PublicDestinationShell active="destinations" backTo="/hub" backLabel="Voltar" contextLabel="Destinos turísticos">
       <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,#d7f4e8_0,#f4f1ea_38%,#efe5d1_100%)] px-4 pb-5 pt-5">
         <div className="absolute -right-20 top-8 h-64 w-64 rounded-full bg-emerald-300/25 blur-3xl" />
         <div className="absolute -left-20 bottom-0 h-56 w-56 rounded-full bg-amber-300/25 blur-3xl" />

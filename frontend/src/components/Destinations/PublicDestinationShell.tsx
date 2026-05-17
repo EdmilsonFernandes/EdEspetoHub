@@ -28,7 +28,7 @@ export function PublicDestinationShell({
   ];
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#f4f1ea] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] pt-[env(safe-area-inset-top)] text-slate-950 sm:pt-0">
+    <main className="min-h-screen overflow-x-hidden bg-[#f4f1ea] pb-[calc(var(--jnk-native-nav-height,0px)+1.5rem)] text-slate-950">
       <header className="sticky top-0 z-[60] hidden border-b border-white/10 bg-[linear-gradient(135deg,rgba(7,17,31,0.98)_0%,rgba(12,35,53,0.96)_54%,rgba(7,17,31,0.98)_100%)] text-white shadow-[0_18px_44px_-30px_rgba(2,6,23,0.92)] backdrop-blur-xl sm:block sm:pt-[env(safe-area-inset-top)]">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent)]" />
         <div className="pointer-events-none absolute right-10 top-2 h-14 w-28 rounded-full bg-[#84cc16]/12 blur-2xl" />
@@ -95,6 +95,29 @@ export function PublicDestinationShell({
               Ambiente oficial
             </span>
           </div>
+        </div>
+      </header>
+
+      <header className="sticky top-0 z-[65] border-b border-white/10 bg-[linear-gradient(135deg,#07111f_0%,#153A4C_58%,#0f2533_100%)] pt-[env(safe-area-inset-top)] text-white shadow-[0_18px_34px_-28px_rgba(2,6,23,0.9)] sm:hidden">
+        <div className="flex min-h-[3.35rem] items-center justify-between gap-2 px-3">
+          <Link
+            to={backTo}
+            className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.08] px-3 text-xs font-black uppercase tracking-[0.1em] text-white shadow-[0_14px_26px_-20px_rgba(2,6,23,0.75)] active:scale-95"
+          >
+            <ArrowRight size={13} className="rotate-180" weight="bold" />
+            {backLabel}
+          </Link>
+          <div className="min-w-0 flex-1 text-center">
+            <p className="truncate text-[10px] font-black uppercase tracking-[0.18em] text-sky-100/80">{active === 'destinations' ? 'Já no Caminho' : 'Destinos'}</p>
+            <p className="truncate text-sm font-black tracking-[-0.03em]">{contextLabel}</p>
+          </div>
+          <Link
+            to="/hub"
+            className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[1rem] border border-white/75 bg-white p-0.5 shadow-[0_14px_26px_-20px_rgba(255,255,255,0.55)] active:scale-95"
+            aria-label="Abrir início"
+          >
+            <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-[0.78rem] object-cover" />
+          </Link>
         </div>
       </header>
 

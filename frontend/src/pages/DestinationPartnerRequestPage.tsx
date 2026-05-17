@@ -451,7 +451,7 @@ export function DestinationPartnerRequestPage() {
     : Boolean(form.destinationId);
 
   return (
-    <PublicDestinationShell active="register" backTo="/destinos" backLabel="Destinos" contextLabel="Cadastro de parceiro" ctaTo="/destinos" ctaLabel="Ver destinos">
+    <PublicDestinationShell active="register" backTo="/destinos" backLabel="Voltar" contextLabel="Cadastro de parceiro" ctaTo="/destinos" ctaLabel="Ver destinos">
       <div className="mx-auto max-w-5xl px-4 py-5 sm:py-6">
         <div className="grid gap-6 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
           <aside className="overflow-hidden rounded-[2rem] bg-[#153A4C] p-5 text-white shadow-[0_24px_70px_-42px_rgba(21,58,76,0.8)] sm:p-6 lg:sticky lg:top-28">

@@ -258,7 +258,7 @@ export function DestinationDetailPage() {
   }, [destinationSlug]);
 
   return (
-    <PublicDestinationShell active="city" backTo="/destinos" backLabel="Destinos" contextLabel={destination.name || 'Cidade turística'}>
+    <PublicDestinationShell active="city" backTo="/destinos" backLabel="Voltar" contextLabel={destination.name || 'Cidade turística'}>
       <section className="relative overflow-hidden bg-[radial-gradient(circle_at_18%_0%,rgba(51,104,134,0.16),transparent_34%),radial-gradient(circle_at_86%_16%,rgba(216,245,231,0.55),transparent_30%),linear-gradient(135deg,#f6f2e9,#eef5f1_56%,#eadfc8)] px-4 pb-3 pt-3 sm:pb-4 sm:pt-5">
         <div className="absolute -right-20 top-8 h-64 w-64 rounded-full bg-[#336886]/16 blur-3xl" />
         <div className="absolute -left-16 bottom-4 h-56 w-56 rounded-full bg-amber-300/18 blur-3xl" />
