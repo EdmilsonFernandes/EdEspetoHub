@@ -15,6 +15,13 @@ import { PaymentAuditPanel } from '../components/Admin/PaymentAuditPanel';
 import { PaymentTechnicalModal } from '../components/Admin/PaymentTechnicalModal';
 import { promoPushService } from '../services/promoPushService';
 import { BellRinging, PaperPlaneTilt } from '@phosphor-icons/react';
+import {
+  getFeaturedPaymentRemainingMs,
+  getFeaturedPaymentStatusLabel,
+  isFeaturedPaymentFailed,
+  isFeaturedPaymentPaid,
+  shouldPollFeaturedPayment,
+} from '../utils/featuredPaymentStatus';
 
 type DurationUnit = 'DAY' | 'WEEK' | 'MONTH';
 
@@ -54,13 +61,6 @@ const statusLabel = (status: string) => {
   if (value === 'CANCELLED') return 'Cancelado';
   if (value === 'EXPIRED') return 'Encerrado';
   return value || 'Pendente';
-};
-
-const paymentStatusLabel = (value: string) => {
-  const status = String(value || '').toUpperCase();
-  if (status === 'PAID') return 'Pago';
-  if (status === 'FAILED') return 'Falhou';
-  return 'Pendente';
 };
 
 const paymentMethodLabel = (value: string) => {
@@ -139,6 +139,7 @@ export function AdminHighlights() {
   const [paymentTechnicalOpen, setPaymentTechnicalOpen] = useState(false);
   const [paymentCountdownMs, setPaymentCountdownMs] = useState(0);
   const paidToastShownRef = useRef<Set<string>>(new Set());
+  const paymentExpiryNoticeShownRef = useRef<Set<string>>(new Set());
   const [form, setForm] = useState({
     productId: '',
     durationUnit: 'DAY' as DurationUnit,
@@ -224,15 +225,12 @@ export function AdminHighlights() {
   };
 
   const openPayment = (request: any) => {
-    const _status = String(request?.status || '').toUpperCase();
     setSelectedRequest(request);
     setSelectedPaymentAudit(null);
     setPaymentOpen(true);
-    const paymentStatus = String(request?.paymentStatus || '').toUpperCase();
-    const status = String(request?.status || '').toUpperCase();
-    const terminalStatus = status === 'CANCELLED' || status === 'EXPIRED' || status === 'REJECTED';
-    const shouldStartCountdown = paymentStatus !== 'PAID' && paymentStatus !== 'FAILED' && paymentStatus !== 'PAYMENT_FAILED' && !terminalStatus;
-    setPaymentCountdownMs(shouldStartCountdown ? 5 * 60 * 1000 : 0);
+    const remainingMs = getFeaturedPaymentRemainingMs(request?.paymentExpiresAt);
+    const shouldStartCountdown = shouldPollFeaturedPayment(request) && remainingMs > 0;
+    setPaymentCountdownMs(shouldStartCountdown ? remainingMs : 0);
     if (shouldStartCountdown && request?.id) {
       window.setTimeout(() => {
         void refreshPaymentStatusByRequest(String(request.id), true);
@@ -294,6 +292,15 @@ export function AdminHighlights() {
     const previous = requests.find((entry) => String(entry?.id || '') === requestId) || selectedRequest;
     try {
       const updated = await featuredService.refreshPaymentByStore(requestId, storeId);
+      const updatedId = String(updated?.id || '').trim();
+      const suppressSilentFailure =
+        silent &&
+        isFeaturedPaymentFailed(updated?.paymentStatus) &&
+        getFeaturedPaymentRemainingMs(updated?.paymentExpiresAt) > 0;
+      if (suppressSilentFailure) {
+        if (updatedId) await loadPaymentAudit(updatedId, true);
+        return;
+      }
       setRequests((prev) =>
         (Array.isArray(prev) ? prev : []).map((entry) =>
           String(entry?.id || '') === String(updated?.id || '') ? updated : entry
@@ -333,7 +340,7 @@ export function AdminHighlights() {
       provider: selectedRequest?.paymentProvider || 'MERCADO_PAGO',
       paymentMethod: selectedRequest?.paymentMethod || null,
       paymentStatus: selectedRequest?.paymentStatus || null,
-      paymentStatusLabel: paymentStatusLabel(selectedRequest?.paymentStatus),
+      paymentStatusLabel: getFeaturedPaymentStatusLabel(selectedRequest?.paymentStatus),
       amount: selectedRequest?.priceAmount != null ? Number(selectedRequest.priceAmount) : null,
       providerPaymentId: selectedRequest?.paymentProviderId || null,
       expiresAt: selectedRequest?.paymentExpiresAt || null,
@@ -345,10 +352,7 @@ export function AdminHighlights() {
 
   useEffect(() => {
     if (!paymentOpen || !selectedRequest?.id) return;
-    const paymentStatus = String(selectedRequest?.paymentStatus || '').toUpperCase();
-    const status = String(selectedRequest?.status || '').toUpperCase();
-    const terminalStatus = status === 'CANCELLED' || status === 'EXPIRED' || status === 'REJECTED';
-    const shouldPoll = !terminalStatus && paymentStatus !== 'PAID' && paymentStatus !== 'FAILED' && paymentStatus !== 'PAYMENT_FAILED' && paymentCountdownMs > 0;
+    const shouldPoll = shouldPollFeaturedPayment(selectedRequest) && paymentCountdownMs > 0;
     if (!shouldPoll) return;
     const first = window.setTimeout(() => {
       void refreshSelectedPaymentStatus(true);
@@ -364,8 +368,7 @@ export function AdminHighlights() {
 
   useEffect(() => {
     if (!paymentOpen || !selectedRequest?.id) return;
-    const paymentStatus = String(selectedRequest?.paymentStatus || '').toUpperCase();
-    if (paymentStatus === 'PAID') return;
+    if (isFeaturedPaymentPaid(selectedRequest?.paymentStatus)) return;
     if (paymentCountdownMs <= 0) return;
     const timer = window.setInterval(() => {
       setPaymentCountdownMs((prev) => Math.max(0, prev - 1000));
@@ -375,12 +378,13 @@ export function AdminHighlights() {
 
   useEffect(() => {
     if (!paymentOpen || !selectedRequest?.id) return;
-    const paymentStatus = String(selectedRequest?.paymentStatus || '').toUpperCase();
-    if (paymentStatus === 'PAID') return;
-    if (paymentStatus === 'FAILED' || paymentStatus === 'PAYMENT_FAILED') return;
+    if (isFeaturedPaymentPaid(selectedRequest?.paymentStatus)) return;
+    if (isFeaturedPaymentFailed(selectedRequest?.paymentStatus)) return;
     if (paymentCountdownMs > 0) return;
-    showToast('Tempo de tentativa expirado. Reabra o pagamento para tentar novamente.', 'warning');
-    closePayment();
+    const requestId = String(selectedRequest.id || '');
+    if (paymentExpiryNoticeShownRef.current.has(requestId)) return;
+    paymentExpiryNoticeShownRef.current.add(requestId);
+    showToast('Atualização automática pausada. Se você já pagou, toque em Atualizar status.', 'warning');
   }, [paymentOpen, selectedRequest?.id, selectedRequest?.paymentStatus, paymentCountdownMs]);
 
   // Removido: useEffect que fechava modal automaticamente ao PAID causava piscar
@@ -556,7 +560,7 @@ export function AdminHighlights() {
                               Criado em {formatDateTime(request?.createdAt)} • {DURATION_META[String(request?.durationUnit || 'DAY').toUpperCase() as DurationUnit]?.label || `${Number(request?.durationDays || 1)} dia(s)`}
                             </p>
                             <p className="text-xs text-slate-600 mt-1">
-                              Pagamento: <strong>{paymentStatusLabel(request?.paymentStatus)}</strong>
+                              Pagamento: <strong>{getFeaturedPaymentStatusLabel(request?.paymentStatus)}</strong>
                               {` • Método: ${paymentMethodLabel(request?.paymentMethod)}`}
                               {request?.priceAmount != null ? ` • ${formatCurrency(Number(request.priceAmount || 0))}` : ''}
                             </p>
@@ -831,12 +835,12 @@ export function AdminHighlights() {
 
       {paymentOpen && selectedRequest && (
         <div className="fixed inset-0 z-[320] bg-slate-950/55 backdrop-blur-[1px] flex items-end sm:items-center justify-center p-3">
-          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-2xl">
+          <div className="max-h-[calc(100dvh_-_1.5rem_-_env(safe-area-inset-top)_-_env(safe-area-inset-bottom))] w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl border border-slate-200 bg-white p-4 shadow-2xl sm:p-5">
             <div className="mb-3">
               <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Pagamento do destaque</p>
               <h3 className="text-lg font-black text-slate-900">{selectedRequest?.product?.name || 'Produto'}</h3>
               <p className="text-xs text-slate-600 mt-1">
-                Status: <strong>{paymentStatusLabel(selectedRequest?.paymentStatus)}</strong>
+                Status: <strong>{getFeaturedPaymentStatusLabel(selectedRequest?.paymentStatus)}</strong>
                 {selectedRequest?.paymentExpiresAt ? ` • expira em ${formatDateTime(selectedRequest.paymentExpiresAt)}` : ''}
               </p>
               {String(selectedRequest?.paymentStatus || '').toUpperCase() !== 'PAID' && paymentCountdownMs > 0 && (
@@ -848,14 +852,16 @@ export function AdminHighlights() {
 
             {selectedRequest?.paymentQrCodeBase64 && (
               <div className="rounded-2xl border border-slate-200 bg-white p-3 flex justify-center">
-                <img src={selectedRequest.paymentQrCodeBase64} alt="QR Code PIX" className="h-48 w-48 object-contain" />
+                <img src={selectedRequest.paymentQrCodeBase64} alt="QR Code PIX" className="h-44 w-44 object-contain sm:h-48 sm:w-48" />
               </div>
             )}
 
             {selectedRequest?.paymentQrCodeText && (
               <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">PIX copia e cola</p>
-                <p className="mt-1 break-all text-xs text-slate-700">{String(selectedRequest.paymentQrCodeText || '')}</p>
+                <p className="mt-1 max-h-24 overflow-y-auto break-all rounded-lg bg-white/70 p-2 text-xs leading-relaxed text-slate-700">
+                  {String(selectedRequest.paymentQrCodeText || '')}
+                </p>
                 <button
                   type="button"
                   onClick={() => copyText(String(selectedRequest.paymentQrCodeText || ''), 'Código PIX copiado.')}
@@ -881,6 +887,7 @@ export function AdminHighlights() {
               <PaymentAuditPanel
                 summary={currentPaymentAuditSummary}
                 events={selectedPaymentAudit?.events || []}
+                showEvents={false}
                 showTechnicalButton={canViewTechnical}
                 technicalLoading={paymentAuditLoading}
                 onTechnicalClick={async () => {
@@ -890,20 +897,20 @@ export function AdminHighlights() {
               />
             </div>
 
-            <div className="mt-3 flex justify-end gap-2">
+            <div className="mt-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 onClick={async () => {
                   await refreshSelectedPaymentStatus(false);
                 }}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
+                className="inline-flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 sm:w-auto"
               >
                 Atualizar status
               </button>
               <button
                 type="button"
                 onClick={closePayment}
-                className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white"
+                className="inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white sm:w-auto"
               >
                 Fechar
               </button>

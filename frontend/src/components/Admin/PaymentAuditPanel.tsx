@@ -33,6 +33,7 @@ export function PaymentAuditPanel({
   title = 'Informações de pagamento',
   summary,
   events = [],
+  showEvents = true,
   showTechnicalButton = false,
   technicalLoading = false,
   onTechnicalClick,
@@ -117,7 +118,7 @@ export function PaymentAuditPanel({
         </div>
       )}
 
-      {Array.isArray(events) && events.length > 0 && (
+      {showEvents && Array.isArray(events) && events.length > 0 && (
         <div className="mt-3 space-y-2">
           {events.slice(0, 3).map((event: any) => (
             <div
