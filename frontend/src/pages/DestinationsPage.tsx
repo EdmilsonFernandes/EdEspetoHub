@@ -158,10 +158,10 @@ export function DestinationsPage() {
             <Link
               key={destination.id}
               to={`/destinos/${destination.slug}`}
-              className="group grid overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_18px_48px_-34px_rgba(15,23,42,0.35)] transition hover:-translate-y-1 sm:grid-cols-[170px_1fr]"
+              className="group grid overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_18px_48px_-34px_rgba(15,23,42,0.35)] transition hover:-translate-y-1 sm:min-h-[13.75rem] sm:grid-cols-[170px_minmax(0,1fr)]"
             >
-              <div className="relative min-h-40 overflow-hidden bg-slate-100 sm:min-h-full">
-                <img src={destinationImage(destination)} alt={destination.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+              <div className="relative h-40 overflow-hidden bg-slate-100 sm:h-full sm:min-h-[13.75rem]">
+                <img src={destinationImage(destination)} alt={destination.name} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                 <div className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-[11px] font-black text-slate-700 shadow-sm">
                   {destinationLocationLabel(destination)}
                 </div>

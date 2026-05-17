@@ -283,7 +283,7 @@ export function DestinationDetailPage() {
 
   return (
     <PublicDestinationShell active="city" backTo="/destinos" backLabel="Destinos" contextLabel={destination.name || 'Cidade turística'}>
-      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_18%_0%,rgba(51,104,134,0.16),transparent_34%),radial-gradient(circle_at_86%_16%,rgba(216,245,231,0.55),transparent_30%),linear-gradient(135deg,#f6f2e9,#eef5f1_56%,#eadfc8)] px-4 pb-4 pt-5">
+      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_18%_0%,rgba(51,104,134,0.16),transparent_34%),radial-gradient(circle_at_86%_16%,rgba(216,245,231,0.55),transparent_30%),linear-gradient(135deg,#f6f2e9,#eef5f1_56%,#eadfc8)] px-4 pb-3 pt-3 sm:pb-4 sm:pt-5">
         <div className="absolute -right-20 top-8 h-64 w-64 rounded-full bg-[#336886]/16 blur-3xl" />
         <div className="absolute -left-16 bottom-4 h-56 w-56 rounded-full bg-amber-300/18 blur-3xl" />
         <div className="relative mx-auto max-w-6xl">
@@ -296,8 +296,24 @@ export function DestinationDetailPage() {
           {error ? <p className="mt-8 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
 
           {!loading && !error ? (
-            <div className="mt-4 grid gap-5 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
-              <div className="min-w-0">
+            <>
+            <div className="mb-3 rounded-[1.35rem] border border-white/80 bg-white/82 p-3 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.38)] backdrop-blur sm:hidden">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Explorando agora</p>
+              <div className="mt-1 flex min-w-0 items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <h1 className="truncate text-xl font-black tracking-[-0.04em] text-slate-950">{destination.name}</h1>
+                  <p className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs font-bold text-slate-500">
+                    <MapPinLine size={13} weight="duotone" className="shrink-0 text-[#336886]" />
+                    <span className="truncate">{destinationLocationLabel}</span>
+                  </p>
+                </div>
+                <span className="shrink-0 rounded-full bg-[#153A4C] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-white">
+                  Cidade
+                </span>
+              </div>
+            </div>
+            <div className="grid gap-5 sm:mt-4 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
+              <div className="hidden min-w-0 sm:block">
                 <p className="inline-flex max-w-full items-center gap-2 rounded-full bg-[#153A4C]/8 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-[#153A4C] ring-1 ring-[#153A4C]/10">
                   <Mountains size={15} weight="duotone" />
                   <span>Guia da cidade</span>
@@ -331,7 +347,7 @@ export function DestinationDetailPage() {
                   className="group relative block w-full overflow-hidden rounded-[1.55rem] bg-slate-900 text-left disabled:cursor-default"
                   aria-label={currentSlideTarget ? `Abrir ${currentSlide?.title || destination.name}` : currentSlide?.title || destination.name}
                 >
-                  <div className="aspect-[16/9] min-h-[13rem] sm:min-h-[18rem] lg:min-h-[20rem]">
+                  <div className="h-44 sm:aspect-[16/9] sm:h-auto sm:min-h-[18rem] lg:min-h-[20rem]">
                     {hasConfiguredAsset(currentSlide?.item || destination) ? (
                       <img src={asset(currentSlide?.item || destination)} alt={currentSlide?.title || destination.name} className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]" />
                     ) : (
@@ -373,6 +389,7 @@ export function DestinationDetailPage() {
                 </div>
               </div>
             </div>
+            </>
           ) : null}
         </div>
       </section>

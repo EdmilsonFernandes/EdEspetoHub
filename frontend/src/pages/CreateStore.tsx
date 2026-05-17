@@ -449,6 +449,17 @@ export function CreateStore() {
   }, [destinationClaim]);
 
   useEffect(() => {
+    if (!destinationClaim?.destinationListingId) return;
+
+    setCurrentStep(1);
+    window.setTimeout(() => {
+      personalSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const firstField = document.querySelector('[data-create-field="fullName"]') as HTMLElement | null;
+      firstField?.focus?.({ preventScroll: true });
+    }, 180);
+  }, [destinationClaim?.destinationListingId]);
+
+  useEffect(() => {
     if (storeResendCooldown <= 0) return;
     const timer = window.setInterval(() => {
       setStoreResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
