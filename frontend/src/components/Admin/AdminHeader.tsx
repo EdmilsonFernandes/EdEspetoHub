@@ -592,7 +592,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
                 className="w-full inline-flex items-center gap-2 rounded-md px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors"
               >
                 <ShieldCheck size={14} />
-                MFA e dispositivos
+                Segurança da conta
               </button>
               <button
                 type="button"

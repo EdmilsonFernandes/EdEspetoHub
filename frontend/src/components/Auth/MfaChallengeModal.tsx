@@ -46,7 +46,7 @@ export function MfaChallengeModal({ open, challenge, loading, error, onCancel, o
             type="button"
             onClick={onCancel}
             className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-slate-500 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.7)] transition hover:text-slate-800"
-            aria-label="Fechar MFA"
+            aria-label="Fechar verificacao em duas etapas"
           >
             <X size={18} weight="bold" />
           </button>
@@ -58,7 +58,7 @@ export function MfaChallengeModal({ open, challenge, loading, error, onCancel, o
               <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#336886]">Seguranca da conta</p>
               <h2 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-900">Confirme sua identidade</h2>
               <p className="mt-2 text-sm font-semibold leading-relaxed text-slate-500">
-                Abra Authy, Google Authenticator ou Microsoft Authenticator e digite o codigo de 6 digitos.
+                Abra seu app autenticador e digite o codigo de 6 digitos.
               </p>
             </div>
           </div>
@@ -76,7 +76,7 @@ export function MfaChallengeModal({ open, challenge, loading, error, onCancel, o
           ) : null}
 
           <label className="block space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Codigo MFA</span>
+            <span className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Codigo do app autenticador</span>
             <input
               ref={inputRef}
               value={code}
@@ -99,7 +99,7 @@ export function MfaChallengeModal({ open, challenge, loading, error, onCancel, o
                 className="mt-1 h-4 w-4 rounded border-slate-300 text-[#336886] focus:ring-[#336886]"
               />
               <span className="text-sm font-semibold leading-relaxed text-slate-600">
-                Confiar neste aparelho por {challenge.trustedDeviceExpirationDays || 30} dias. Depois do primeiro MFA, a biometria local pode liberar este dispositivo.
+                Confiar neste aparelho por {challenge.trustedDeviceExpirationDays || 30} dias. Depois da primeira verificacao, a biometria local pode liberar este dispositivo.
               </span>
             </label>
           ) : null}

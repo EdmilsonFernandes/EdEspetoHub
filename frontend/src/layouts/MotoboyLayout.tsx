@@ -261,7 +261,7 @@ export function MotoboyLayout() {
       id: 'security',
       section: 'Conta',
       label: 'Segurança da conta',
-      description: 'MFA, Authenticator e dispositivos confiáveis.',
+      description: 'Verificação em duas etapas e aparelhos confiáveis.',
       icon: <ShieldCheck size={22} weight="duotone" />,
       onClick: () => {
         setAccountDrawerOpen(false);

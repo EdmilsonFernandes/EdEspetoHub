@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "43d72817",
-  "versionLabel": "v0.1.9.43d72817",
-  "versionInternal": "0.1.9+20260518.153045.43d72817",
-  "buildId": "0.1.9+20260518.153045.43d72817-20260518.153045-43d72817",
-  "builtAt": "2026-05-18T15:30:45.867Z",
-  "commitHash": "43d728175e14874b0d7931e1fe4fa7c916d07918",
-  "shortHash": "43d72817",
+  "versionDisplaySuffix": "7200a94f",
+  "versionLabel": "v0.1.9.7200a94f",
+  "versionInternal": "0.1.9+20260518.162656.7200a94f",
+  "buildId": "0.1.9+20260518.162656.7200a94f-20260518.162656-7200a94f",
+  "builtAt": "2026-05-18T16:26:56.721Z",
+  "commitHash": "7200a94f1c528c9ea44861702ef651e25c329e1e",
+  "shortHash": "7200a94f",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "7200a94f1c528c9ea44861702ef651e25c329e1e",
+      "shortHash": "7200a94f",
+      "dateIso": "2026-05-18T12:37:00-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Refine marketplace home spacing",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7200a94f1c528c9ea44861702ef651e25c329e1e"
+    },
     {
       "hash": "43d728175e14874b0d7931e1fe4fa7c916d07918",
       "shortHash": "43d72817",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Improve pre-store close button contrast",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a74bd3279ab8264f254859ddc5d778c0105e037a"
-    },
-    {
-      "hash": "e5250634a17c90709ce3fc51b6c1ed17342194d5",
-      "shortHash": "e5250634",
-      "dateIso": "2026-05-13T11:39:56-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix destination mobile overflow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e5250634a17c90709ce3fc51b6c1ed17342194d5"
     }
   ]
 }

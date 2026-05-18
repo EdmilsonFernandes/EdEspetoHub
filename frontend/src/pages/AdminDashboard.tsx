@@ -3075,7 +3075,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     {
       id: 'security',
       title: 'Segurança da conta',
-      description: 'MFA, Authenticator, biometria e dispositivos confiáveis.',
+      description: 'Verificação em duas etapas, biometria e aparelhos confiáveis.',
       icon: SealCheck,
       badge: 'Gerenciar',
       tone: 'neutral',

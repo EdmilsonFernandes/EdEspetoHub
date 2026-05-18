@@ -852,9 +852,9 @@ export function ClientAccount() {
                     <ShieldCheck size={18} weight="duotone" className="text-[#336886]" />
                   </span>
                   <div className="min-w-0">
-                    <p className="text-[12px] font-black uppercase tracking-[0.14em] text-slate-800">MFA e dispositivos</p>
+                    <p className="text-[12px] font-black uppercase tracking-[0.14em] text-slate-800">Segurança da conta</p>
                     <p className="mt-0.5 text-[10px] font-bold leading-tight text-slate-500">
-                      Proteja a conta com Authenticator e gerencie aparelhos confiáveis.
+                      Verificação em duas etapas e aparelhos confiáveis.
                     </p>
                   </div>
                 </div>

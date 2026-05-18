@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { DeviceMobile, LockKey, QrCode, ShieldCheck, Trash, X } from '@phosphor-icons/react';
+import { Copy, DeviceMobile, LockKey, QrCode, ShieldCheck, Trash, WarningCircle, X } from '@phosphor-icons/react';
 import { authService } from '../../services/authService';
 import { forgetTrustedMfaDevice } from '../../utils/mfaDevice';
 
@@ -9,12 +9,17 @@ type Props = {
   onClose: () => void;
 };
 
+type PanelMode = 'overview' | 'setup' | 'disable';
+
 export function AccountMfaPanel({ open, authMode = 'admin', onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<any | null>(null);
   const [devices, setDevices] = useState<any[]>([]);
   const [setup, setSetup] = useState<any | null>(null);
-  const [code, setCode] = useState('');
+  const [setupCode, setSetupCode] = useState('');
+  const [disableCode, setDisableCode] = useState('');
+  const [mode, setMode] = useState<PanelMode>('overview');
+  const [copiedSecret, setCopiedSecret] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
@@ -37,6 +42,12 @@ export function AccountMfaPanel({ open, authMode = 'admin', onClose }: Props) {
   };
 
   useEffect(() => {
+    if (!open) return;
+    setMode('overview');
+    setSetup(null);
+    setSetupCode('');
+    setDisableCode('');
+    setCopiedSecret(false);
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, authMode]);
@@ -47,25 +58,31 @@ export function AccountMfaPanel({ open, authMode = 'admin', onClose }: Props) {
     setLoading(true);
     setError('');
     setMessage('');
+    setSetupCode('');
+    setDisableCode('');
+    setCopiedSecret(false);
     try {
       setSetup(await authService.startMfaSetup({ authMode }));
+      setMode('setup');
     } catch (err: any) {
-      setError(err?.message || 'Nao foi possivel iniciar o MFA.');
+      setError(err?.message || 'Nao foi possivel iniciar a verificacao em duas etapas.');
     } finally {
       setLoading(false);
     }
   };
 
   const confirmSetup = async () => {
-    if (code.replace(/\D/g, '').length !== 6) return;
+    const cleanCode = setupCode.replace(/\D/g, '');
+    if (cleanCode.length !== 6) return;
     setLoading(true);
     setError('');
     try {
-      const nextStatus = await authService.confirmMfaSetup(code, { authMode });
+      const nextStatus = await authService.confirmMfaSetup(cleanCode, { authMode });
       setStatus(nextStatus);
       setSetup(null);
-      setCode('');
-      setMessage('MFA ativado com sucesso.');
+      setSetupCode('');
+      setMode('overview');
+      setMessage('Verificacao em duas etapas ativada com sucesso.');
       await load();
     } catch (err: any) {
       setError(err?.message || 'Codigo invalido.');
@@ -75,20 +92,46 @@ export function AccountMfaPanel({ open, authMode = 'admin', onClose }: Props) {
   };
 
   const disable = async () => {
-    if (code.replace(/\D/g, '').length !== 6) return;
+    const cleanCode = disableCode.replace(/\D/g, '');
+    if (cleanCode.length !== 6) return;
     setLoading(true);
     setError('');
     try {
-      const nextStatus = await authService.disableMfa(code, { authMode });
+      const nextStatus = await authService.disableMfa(cleanCode, { authMode });
       setStatus(nextStatus);
-      setCode('');
-      setMessage('MFA desativado para esta conta.');
+      setDisableCode('');
+      setMode('overview');
+      setMessage('Verificacao em duas etapas desativada para esta conta.');
       forgetTrustedMfaDevice();
       await load();
     } catch (err: any) {
       setError(err?.message || 'Codigo invalido.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const copySecret = async () => {
+    if (!setup?.secret) return;
+    setError('');
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(setup.secret);
+      } else {
+        const input = document.createElement('textarea');
+        input.value = setup.secret;
+        input.setAttribute('readonly', 'true');
+        input.style.position = 'fixed';
+        input.style.left = '-9999px';
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+      }
+      setCopiedSecret(true);
+      setMessage('Chave copiada. Cole no seu app autenticador se nao conseguir escanear o QR Code.');
+    } catch {
+      setError('Nao foi possivel copiar a chave. Toque e segure para copiar manualmente.');
     }
   };
 
@@ -106,19 +149,32 @@ export function AccountMfaPanel({ open, authMode = 'admin', onClose }: Props) {
     }
   };
 
+  const featureDisabled = status?.featureEnabled === false;
+  const isEnabled = Boolean(status?.enabled);
+  const isRequired = Boolean(status?.required);
+  const statusLabel = featureDisabled ? 'Indisponivel' : isEnabled ? 'Ativado' : 'Desativado';
+  const statusTone = isEnabled
+    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+    : featureDisabled
+      ? 'border-slate-200 bg-slate-100 text-slate-500'
+      : 'border-amber-200 bg-amber-50 text-amber-700';
+
   return (
     <div className="fixed inset-0 z-[1300] flex items-end justify-center bg-slate-950/45 px-3 py-3 backdrop-blur-sm sm:items-center">
       <div className="max-h-[92vh] w-full max-w-[560px] overflow-hidden rounded-[2rem] border border-white/50 bg-white shadow-[0_32px_90px_-30px_rgba(15,23,42,0.75)]">
         <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-slate-100 bg-white/92 px-5 py-4 backdrop-blur-xl">
           <div className="flex items-start gap-3">
-            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[#153A4C] text-white">
-              <ShieldCheck size={26} weight="duotone" />
+            <div className="relative h-14 w-14 shrink-0">
+              <img src="/janocaminho.jpg" alt="Ja no Caminho" className="h-14 w-14 rounded-2xl object-cover shadow-[0_18px_38px_-26px_rgba(15,23,42,0.9)] ring-1 ring-white" />
+              <span className="absolute -bottom-1 -right-1 grid h-6 w-6 place-items-center rounded-full bg-[#153A4C] text-white ring-2 ring-white">
+                <ShieldCheck size={14} weight="duotone" />
+              </span>
             </div>
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#336886]">Seguranca</p>
-              <h2 className="text-xl font-black tracking-[-0.03em] text-slate-900">MFA e dispositivos</h2>
+              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#336886]">Ja no Caminho</p>
+              <h2 className="text-xl font-black tracking-[-0.03em] text-slate-900">Seguranca da conta</h2>
               <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">
-                Use Authy, Google Authenticator ou Microsoft Authenticator.
+                Proteja seu login com Authy, Google Authenticator ou Microsoft Authenticator.
               </p>
             </div>
           </div>
@@ -131,83 +187,175 @@ export function AccountMfaPanel({ open, authMode = 'admin', onClose }: Props) {
           {error ? <div className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</div> : null}
           {message ? <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700">{message}</div> : null}
 
-          <div className="rounded-3xl border border-slate-100 bg-slate-50/80 p-4">
-            <div className="flex items-center justify-between gap-3">
+          <div className="overflow-hidden rounded-3xl border border-slate-100 bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.12),transparent_36%),linear-gradient(135deg,#ffffff,#f8fafc)] p-4 shadow-[0_24px_56px_-42px_rgba(15,23,42,0.5)]">
+            <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-sm font-black text-slate-900">Autenticador TOTP</p>
-                <p className="mt-1 text-xs font-semibold text-slate-500">
-                  Status: {status?.enabled ? 'ativo' : status?.featureEnabled ? 'desativado' : 'indisponivel por configuracao'}
+                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#336886]">Verificacao em duas etapas</p>
+                <p className="mt-1 text-lg font-black tracking-[-0.03em] text-slate-950">
+                  {isEnabled ? 'Protecao ativa' : featureDisabled ? 'Protecao indisponivel' : 'Protecao desativada'}
+                </p>
+                <p className="mt-1 max-w-[390px] text-xs font-semibold leading-relaxed text-slate-500">
+                  {isEnabled
+                    ? 'Ao entrar em um aparelho novo, o sistema vai pedir um codigo de 6 digitos do seu app autenticador.'
+                    : featureDisabled
+                      ? 'A equipe Ja no Caminho ainda nao liberou esta protecao para sua conta.'
+                      : isRequired
+                        ? 'Esta protecao e obrigatoria para sua conta. Ative agora para manter seu acesso seguro.'
+                        : 'Ative quando quiser uma camada extra de seguranca no login.'}
                 </p>
               </div>
-              <span className={`rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] ${status?.enabled ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'}`}>
-                {status?.enabled ? 'Ativo' : 'Off'}
+              <span className={`shrink-0 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] ${statusTone}`}>
+                {statusLabel}
               </span>
             </div>
 
-            {!status?.enabled ? (
+            {!isEnabled ? (
               <button
                 type="button"
                 onClick={startSetup}
-                disabled={loading || status?.featureEnabled === false}
+                disabled={loading || featureDisabled}
                 className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white disabled:opacity-50"
               >
                 <QrCode size={18} weight="duotone" />
-                Ativar MFA
+                Ativar agora
               </button>
             ) : (
-              <div className="mt-4 space-y-3">
-                <input
-                  value={code}
-                  onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
-                  inputMode="numeric"
-                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-center text-xl font-black tracking-[0.28em] outline-none focus:border-[#336886] focus:ring-4 focus:ring-[#336886]/10"
-                  placeholder="000000"
-                />
-                <button
-                  type="button"
-                  onClick={disable}
-                  disabled={loading || code.length !== 6}
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-black text-rose-700 disabled:opacity-50"
-                >
-                  <LockKey size={18} weight="duotone" />
-                  Desativar com codigo
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('disable');
+                  setDisableCode('');
+                  setError('');
+                  setMessage('');
+                }}
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-100 bg-white px-4 py-3 text-sm font-black text-rose-700 shadow-sm transition active:scale-[0.99]"
+              >
+                <LockKey size={18} weight="duotone" />
+                Desativar protecao
+              </button>
             )}
           </div>
 
-          {setup ? (
+          {mode === 'setup' && setup ? (
             <div className="rounded-3xl border border-[#336886]/12 bg-white p-4 shadow-[0_24px_50px_-34px_rgba(15,23,42,0.55)]">
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#336886]">Ativacao</p>
+                  <h3 className="text-lg font-black tracking-[-0.03em] text-slate-950">Conecte seu app autenticador</h3>
+                  <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">
+                    Escaneie o QR Code ou copie a chave manual. Depois informe o codigo de 6 digitos gerado no app.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('overview');
+                    setSetup(null);
+                    setSetupCode('');
+                  }}
+                  className="rounded-full bg-slate-100 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500"
+                >
+                  Cancelar
+                </button>
+              </div>
               <div className="grid gap-4 sm:grid-cols-[160px_1fr]">
                 <div className="rounded-3xl bg-white p-3 shadow-inner ring-1 ring-slate-100">
-                  <img src={setup.qrCodeDataUrl} alt="QR Code MFA" className="h-full w-full rounded-2xl object-contain" />
+                  <img src={setup.qrCodeDataUrl} alt="QR Code para ativar a seguranca da conta" className="h-full w-full rounded-2xl object-contain" />
                 </div>
                 <div className="space-y-3">
-                  <div>
-                    <p className="text-sm font-black text-slate-900">Escaneie o QR Code</p>
-                    <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">
-                      Depois digite o codigo de 6 digitos para confirmar a ativacao.
-                    </p>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    {['Escanear', 'Salvar chave', 'Confirmar'].map((step, index) => (
+                      <div key={step} className="rounded-2xl bg-slate-50 px-2 py-2">
+                        <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]">{index + 1}</p>
+                        <p className="text-[10px] font-black text-slate-600">{step}</p>
+                      </div>
+                    ))}
                   </div>
-                  <div className="rounded-2xl bg-slate-50 px-3 py-2 text-xs font-black text-slate-600 break-all">
-                    {setup.secret}
+                  <div className="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-3">
+                    <div className="mb-2 flex items-center justify-between gap-2">
+                      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Chave manual</p>
+                      <button
+                        type="button"
+                        onClick={copySecret}
+                        className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] shadow-sm"
+                      >
+                        <Copy size={13} weight="duotone" />
+                        {copiedSecret ? 'Copiada' : 'Copiar'}
+                      </button>
+                    </div>
+                    <p className="break-all text-xs font-black leading-relaxed text-slate-700">{setup.secret}</p>
                   </div>
-                  <input
-                    value={code}
-                    onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
-                    inputMode="numeric"
-                    className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-center text-xl font-black tracking-[0.28em] outline-none focus:border-[#336886] focus:ring-4 focus:ring-[#336886]/10"
-                    placeholder="000000"
-                  />
+                  <label className="block space-y-2">
+                    <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Codigo de 6 digitos</span>
+                    <input
+                      value={setupCode}
+                      onChange={(event) => setSetupCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      autoComplete="one-time-code"
+                      aria-label="Codigo de ativacao do app autenticador"
+                      className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-center text-xl font-black tracking-[0.28em] outline-none focus:border-[#336886] focus:ring-4 focus:ring-[#336886]/10"
+                      placeholder="000000"
+                    />
+                  </label>
                   <button
                     type="button"
                     onClick={confirmSetup}
-                    disabled={loading || code.length !== 6}
+                    disabled={loading || setupCode.length !== 6}
                     className="w-full rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white disabled:opacity-50"
                   >
-                    Confirmar MFA
+                    Ativar protecao
                   </button>
                 </div>
+              </div>
+            </div>
+          ) : null}
+
+          {mode === 'disable' && isEnabled ? (
+            <div className="rounded-3xl border border-rose-100 bg-rose-50/70 p-4">
+              <div className="flex items-start gap-3">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-rose-600 shadow-sm">
+                  <WarningCircle size={22} weight="duotone" />
+                </span>
+                <div>
+                  <p className="text-sm font-black text-rose-900">Confirmar desativacao</p>
+                  <p className="mt-1 text-xs font-semibold leading-relaxed text-rose-700/80">
+                    Para sua seguranca, digite o codigo de 6 digitos do seu app autenticador antes de desligar esta protecao.
+                  </p>
+                </div>
+              </div>
+              <label className="mt-4 block space-y-2">
+                <span className="text-[11px] font-black uppercase tracking-[0.14em] text-rose-800">Codigo do app autenticador</span>
+                <input
+                  value={disableCode}
+                  onChange={(event) => setDisableCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  autoComplete="one-time-code"
+                  aria-label="Codigo do app autenticador para desativar"
+                  className="w-full rounded-2xl border border-rose-100 bg-white px-4 py-3 text-center text-xl font-black tracking-[0.28em] text-slate-950 outline-none focus:border-rose-300 focus:ring-4 focus:ring-rose-100"
+                  placeholder="000000"
+                />
+              </label>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('overview');
+                    setDisableCode('');
+                  }}
+                  className="rounded-2xl bg-white px-4 py-3 text-sm font-black text-slate-600 shadow-sm"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={disable}
+                  disabled={loading || disableCode.length !== 6}
+                  className="rounded-2xl bg-rose-600 px-4 py-3 text-sm font-black text-white shadow-[0_18px_36px_-26px_rgba(225,29,72,0.85)] disabled:opacity-50"
+                >
+                  Desativar
+                </button>
               </div>
             </div>
           ) : null}
@@ -215,7 +363,12 @@ export function AccountMfaPanel({ open, authMode = 'admin', onClose }: Props) {
           <div className="rounded-3xl border border-slate-100 bg-white p-4">
             <div className="mb-3 flex items-center gap-2">
               <DeviceMobile size={18} weight="duotone" className="text-[#336886]" />
-              <p className="text-sm font-black text-slate-900">Dispositivos confiaveis</p>
+              <div>
+                <p className="text-sm font-black text-slate-900">Aparelhos confiaveis</p>
+                <p className="text-[11px] font-semibold text-slate-500">
+                  Depois de validar o codigo uma vez, este aparelho pode entrar com biometria local.
+                </p>
+              </div>
             </div>
             {devices.length ? (
               <div className="space-y-2">
@@ -240,7 +393,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', onClose }: Props) {
               </div>
             ) : (
               <p className="rounded-2xl bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-500">
-                Nenhum dispositivo confiavel cadastrado.
+                Nenhum aparelho confiavel cadastrado.
               </p>
             )}
           </div>
